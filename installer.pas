@@ -58,12 +58,22 @@ end;
 
 function Tinstaller.Getfpc: Boolean;
 begin
-  //todo
+  if FUpdater.UpdateFPC=true then
+  begin
+    //todo: make/install
+  end;
+  //todo: error handling
+  result:=true;
 end;
 
 function Tinstaller.Getlazarus: Boolean;
 begin
-  //todo
+  if FUpdater.UpdateLazarus=true then
+  begin
+    //todo: make
+  end;
+  //todo: error handling
+  result:=true;
 end;
 
 constructor Tinstaller.Create;
