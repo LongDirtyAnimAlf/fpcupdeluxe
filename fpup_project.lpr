@@ -20,7 +20,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  installer, consolelistener;
+  installer, consolelistener, svnclient;
 
 //{$R *.res}
 var

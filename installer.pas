@@ -17,15 +17,16 @@ type
 
   TInstaller = class(TObject)
   private
-    fUpdater: TUpdater;
+    FUpdater: TUpdater;
+    function GetFPCDirectory: string;
+    function GetLazarusDirectory: string;
+    procedure SetFPCDirectory(Directory: string);
+    procedure SetLazarusDirectory(Directory: string);
   public
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
-    property FPCDirectory: string read fUpdater.FPCDirectory write FUpdater.FPCDirectory;
-    property LazarusDirectory: string read FUpdater.LazarusDirectory write FUpdater.LazarusDirectory;
-
-
-
+    property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
+    property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -34,6 +35,26 @@ implementation
 uses consolelistener;
 
 { TInstaller }
+
+function Tinstaller.Getfpcdirectory: String;
+begin
+  result:=FUpdater.FPCDirectory;
+end;
+
+function Tinstaller.Getlazarusdirectory: String;
+begin
+  result:=FUpdater.LazarusDirectory;
+end;
+
+procedure Tinstaller.Setfpcdirectory(Directory: String);
+begin
+  FUpdater.FPCDirectory:=Directory;
+end;
+
+procedure Tinstaller.Setlazarusdirectory(Directory: String);
+begin
+  FUpdater.LazarusDirectory:=Directory;
+end;
 
 function Tinstaller.Getfpc: Boolean;
 begin
@@ -47,7 +68,7 @@ end;
 
 constructor Tinstaller.Create;
 begin
-  FUPdater:=TUpdater.Create;
+  FUpdater:=TUpdater.Create;
 end;
 
 destructor Tinstaller.Destroy;

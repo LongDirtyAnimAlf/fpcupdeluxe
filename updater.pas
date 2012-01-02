@@ -21,14 +21,14 @@ type
     function UpdateFPC: boolean;
     { Checks out or updates Lazarus source }
     function UpdateLazarus: boolean;
-    property FPCDirectory: string;
-    property LazarusDirectory: string;
+    property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
+    property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
     constructor Create;
     destructor Destroy; override;
   end;
 implementation
 
-uses svncommand;
+uses svnclient;
 
 
 { TUpdater }
