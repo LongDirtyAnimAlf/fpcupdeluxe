@@ -69,7 +69,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="4">
       <Unit0>
         <Filename Value="fpup_project.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -86,15 +86,10 @@
         <UnitName Value="installer"/>
       </Unit2>
       <Unit3>
-        <Filename Value="consolelistener.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="consolelistener"/>
-      </Unit3>
-      <Unit4>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="svnclient"/>
-      </Unit4>
+      </Unit3>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

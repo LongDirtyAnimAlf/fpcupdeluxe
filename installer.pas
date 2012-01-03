@@ -18,7 +18,7 @@ type
   TInstaller = class(TObject)
   private
     FUpdater: TUpdater;
-    function GetFPCDirectory: string;
+    function GetFpcDirectory: string;
     function GetLazarusDirectory: string;
     procedure SetFPCDirectory(Directory: string);
     procedure SetLazarusDirectory(Directory: string);
@@ -32,16 +32,15 @@ type
   end;
 
 implementation
-uses consolelistener;
 
 { TInstaller }
 
-function Tinstaller.Getfpcdirectory: String;
+function Tinstaller.GetFpcDirectory: String;
 begin
   result:=FUpdater.FPCDirectory;
 end;
 
-function Tinstaller.Getlazarusdirectory: String;
+function Tinstaller.GetLazarusDirectory: String;
 begin
   result:=FUpdater.LazarusDirectory;
 end;
@@ -57,23 +56,45 @@ begin
 end;
 
 function Tinstaller.Getfpc: Boolean;
+var
+  OperationSucceeded: boolean;
 begin
   if FUpdater.UpdateFPC=true then
   begin
-    //todo: make/install
+    OperationSucceeded:=true;
+    //todo: check for bootstrap fpc compiler
+    // Make (compile)
+    // todo: remove hardcoded make
+    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe', '--directory='+FPCDirectory + ' UPXPROG=echo COPYTREE=echo all', []);
+    // Install
+    // todo: check where to install
+    // todo: specify ppcxx compiler
+    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe', '--directory='+FPCDirectory + ' UPXPROG=echo COPYTREE=echo install', []);
+    // todo: create fpc.cfg
   end;
   //todo: error handling
   result:=true;
 end;
 
 function Tinstaller.Getlazarus: Boolean;
+var
+  OperationSucceeded: boolean;
 begin
-  if FUpdater.UpdateLazarus=true then
+  OperationSucceeded:=true;
+  // Download Lazarus source:
+  if OperationSucceeded=true then OperationSucceeded:=FUpdater.UpdateLazarus;
+  // Make (compile)
+    // todo: remove hardcoded make
+  // todo: specify ppcxx compiler
+  if OperationSucceeded then
   begin
-    //todo: make
+    if (SysUtils.ExecuteProcess(
+      'C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe',
+      '--directory='+LazarusDirectory+ ' UPXPROG=echo COPYTREE=echo all',
+      []))<>0 then OperationSucceeded:=false;
   end;
-  //todo: error handling
-  result:=true;
+  //todo: setup primary config path, dir etc.
+  Result:=OperationSucceeded;
 end;
 
 constructor Tinstaller.Create;

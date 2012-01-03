@@ -21,7 +21,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Classes,
-  installer, consolelistener, svnclient;
+  installer, svnclient;
 
 //{$R *.res}
 var
