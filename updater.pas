@@ -36,16 +36,7 @@ begin
   FSVNClient.LocalRepository:=FPCDirectory;
   //todo: hardcoded FPC repository for now
   FSVNClient.Repository:='http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
-  if FSVNClient.LocalRepositoryExists = false then
-  begin
-    // Checkout (first download)
-    FSVNClient.Checkout;
-  end
-  else
-  begin
-    // Update
-    FSVNClient.Update;
-  end;
+  FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
   result:=true;
 end;
@@ -54,17 +45,8 @@ function Tupdater.Updatelazarus: Boolean;
 begin
   FSVNClient.LocalRepository:=LazarusDirectory;
   //todo: hardcoded Lazarus repository for now
-  FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus';
-  if FSVNClient.LocalRepositoryExists = false then
-  begin
-    // Checkout (first download)
-    FSVNClient.Checkout;
-  end
-  else
-  begin
-    // Update
-    FSVNClient.Update;
-  end;
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/trunk';
+  FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
   result:=true;
 end;
