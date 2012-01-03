@@ -14,6 +14,7 @@ Read out at end to show user what happened
 
 Options startup: unattended: assume update if possible, if not, install
 Do not set path, create shortcuts/batch files to start, with --primary-config-path
+Add something like fpcup.config in the settings dir so we know for which fpc/laz combo this dir is used
 }
 uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
@@ -33,7 +34,8 @@ begin
     FInstaller:=TInstaller.Create;
     FInstaller.FPCDirectory:='d:\cop\fpctest';
     FInstaller.LazarusDirectory:='d:\cop\lazarustest';
-
+    FInstaller.GetFPC;
+    FInstaller.GetLazarus;
   finally
     FInstaller.Free;
   end;
