@@ -49,6 +49,7 @@ begin
   FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
   result:=true;
+  writeln('debug: lazarus checkout/update complete');sleep(100);
 end;
 
 constructor Tupdater.Create;

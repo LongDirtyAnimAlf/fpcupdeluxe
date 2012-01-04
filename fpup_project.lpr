@@ -33,8 +33,10 @@ begin
   try
     FInstaller:=TInstaller.Create;
     FInstaller.FPCDirectory:='c:\development\fpc';
-    FInstaller.LazarusDirectory:='d:\development\lazarus';
+    FInstaller.LazarusDirectory:='c:\development\lazarus';
+    writeln('debug: getting and compiling fpc:');
     FInstaller.GetFPC;
+    writeln('debug: getting and compiling lazarus:');
     FInstaller.GetLazarus;
   finally
     FInstaller.Free;
