@@ -65,12 +65,34 @@ begin
     //todo: check for bootstrap fpc compiler
     // Make (compile)
     // todo: remove hardcoded make
-    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe', '--directory='+FPCDirectory + ' UPXPROG=echo COPYTREE=echo all', []);
+    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe',
+      '--directory='+FPCDirectory +
+      ' UPXPROG=echo COPYTREE=echo'+
+      ' all', []);
     // Install
     // todo: check where to install
-    // todo: specify ppcxx compiler
-    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe', '--directory='+FPCDirectory + ' UPXPROG=echo COPYTREE=echo install', []);
-    // todo: create fpc.cfg
+    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
+      '--directory='+FPCDirectory + ' PREFIX='+FPCDIRECTORY+
+      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc38t.exe'+
+      ' UPXPROG=echo COPYTREE=echo'+
+      'install', []);
+    // Make crosscompiler for Windows X64:
+    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
+      '--directory='+FPCDirectory +
+      ' UPXPROG=echo COPYTREE=echo'+
+      ' OS_TARGET=win64 CPU_TARGET=x86_64'+
+      ' all', []);
+    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
+      '--directory='+FPCDirectory + ' PREFIX='+FPCDIRECTORY+
+      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc38t.exe'+
+      ' UPXPROG=echo COPYTREE=echo'+
+      ' OS_TARGET=win64 CPU_TARGET=x86_64'+
+      'install', []);
+    // Create fpc.cfg
+    //todo: replace -o path with bin path for resulting compiler; we'll need it for compilation/make above, anyway
+    SysUtils.ExecuteProcess(FPCDirectory+DirectorySeparator+'utils'+DirectorySeparator+'fpcmkcfg',
+    ' -d basepath="'+FPCDirectory+'"'+
+    ' -o "'+FPCDirectory+DirectorySeparator+'bin'+DirectorySeparator+'i386-win32'+DirectorySeparator+'fpc.cfg"', []);
   end;
   //todo: error handling
   result:=true;
@@ -84,13 +106,15 @@ begin
   // Download Lazarus source:
   if OperationSucceeded=true then OperationSucceeded:=FUpdater.UpdateLazarus;
   // Make (compile)
-    // todo: remove hardcoded make
-  // todo: specify ppcxx compiler
+  // todo: remove hardcoded make, ppc compiler
   if OperationSucceeded then
   begin
     if (SysUtils.ExecuteProcess(
       'C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe',
-      '--directory='+LazarusDirectory+ ' UPXPROG=echo COPYTREE=echo all',
+      '--directory='+LazarusDirectory+
+      ' UPXPROG=echo COPYTREE=echo' +
+      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc38t.exe'+
+      ' all',
       []))<>0 then OperationSucceeded:=false;
   end;
   //todo: setup primary config path, dir etc.
