@@ -32,8 +32,8 @@ begin
   // Later on, we might separate it out for Lazarus and FPC
   try
     FInstaller:=TInstaller.Create;
-    FInstaller.FPCDirectory:='d:\cop\fpctest';
-    FInstaller.LazarusDirectory:='d:\cop\lazarustest';
+    FInstaller.FPCDirectory:='c:\development\fpc';
+    FInstaller.LazarusDirectory:='d:\development\lazarus';
     FInstaller.GetFPC;
     FInstaller.GetLazarus;
   finally
