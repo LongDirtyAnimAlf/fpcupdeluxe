@@ -17,6 +17,8 @@ type
 
   TInstaller = class(TObject)
   private
+    FBootstrapCompiler: String;
+    FCompiler: String;
     FUpdater: TUpdater;
     function GetFpcDirectory: string;
     function GetLazarusDirectory: string;
@@ -25,6 +27,8 @@ type
   public
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
+    property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler; //Compiler used to compile compiler sources
+    property Compiler: string read FCompiler; //Full path to FPC compiler that is installed
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
     constructor Create;
@@ -34,6 +38,7 @@ type
 implementation
 
 { TInstaller }
+
 
 function Tinstaller.GetFpcDirectory: String;
 begin
@@ -55,6 +60,8 @@ begin
   FUpdater.LazarusDirectory:=Directory;
 end;
 
+
+
 function Tinstaller.Getfpc: Boolean;
 var
   OperationSucceeded: boolean;
@@ -73,24 +80,25 @@ begin
     // todo: check where to install
     SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
       '--directory='+FPCDirectory + ' PREFIX='+FPCDIRECTORY+
-      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc38t.exe'+
+      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc386'+
       ' UPXPROG=echo COPYTREE=echo'+
-      'install', []);
+      ' install', []);
     // Make crosscompiler for Windows X64:
     SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
       '--directory='+FPCDirectory +
       ' UPXPROG=echo COPYTREE=echo'+
       ' OS_TARGET=win64 CPU_TARGET=x86_64'+
       ' all', []);
+    // Install crosscompiler
     SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
       '--directory='+FPCDirectory + ' PREFIX='+FPCDIRECTORY+
-      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc38t.exe'+
+      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc386'+
       ' UPXPROG=echo COPYTREE=echo'+
       ' OS_TARGET=win64 CPU_TARGET=x86_64'+
-      'install', []);
+      ' install', []);
     // Create fpc.cfg
     //todo: replace -o path with bin path for resulting compiler; we'll need it for compilation/make above, anyway
-    SysUtils.ExecuteProcess(FPCDirectory+DirectorySeparator+'utils'+DirectorySeparator+'fpcmkcfg',
+    SysUtils.ExecuteProcess(FPCDirectory+DirectorySeparator+'bin'+DirectorySeparator+'i386-win32'+DirectorySeparator+'fpcmkcfg',
     ' -d basepath="'+FPCDirectory+'"'+
     ' -o "'+FPCDirectory+DirectorySeparator+'bin'+DirectorySeparator+'i386-win32'+DirectorySeparator+'fpc.cfg"', []);
   end;
@@ -98,7 +106,7 @@ begin
   result:=true;
 end;
 
-function Tinstaller.Getlazarus: Boolean;
+function Tinstaller.GetLazarus: Boolean;
 var
   OperationSucceeded: boolean;
 begin
@@ -109,12 +117,13 @@ begin
   // todo: remove hardcoded make, ppc compiler
   if OperationSucceeded then
   begin
+    // Make clean, all
     if (SysUtils.ExecuteProcess(
       'C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe',
       '--directory='+LazarusDirectory+
       ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC='+FPCDirectory+DirectorySeparator+'compiler'+DirectorySeparator+'ppc38t.exe'+
-      ' all',
+      ' FPC='+FPCDirectory+DirectorySeparator+'bin'+DirectorySeparator+'i386-win32'+DirectorySeparator+'fpc'+
+      ' clean all',
       []))<>0 then OperationSucceeded:=false;
   end;
   //todo: setup primary config path, dir etc.
@@ -123,6 +132,8 @@ end;
 
 constructor Tinstaller.Create;
 begin
+  FBootstrapCompiler:='';
+  FCompiler:='';
   FUpdater:=TUpdater.Create;
 end;
 
