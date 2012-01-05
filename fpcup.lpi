@@ -26,9 +26,6 @@
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="fpcup"/>
-          </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
           </SearchPaths>
@@ -71,9 +68,9 @@
     </RequiredPackages>
     <Units Count="4">
       <Unit0>
-        <Filename Value="fpup_project.lpr"/>
+        <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpup_project"/>
+        <UnitName Value="fpcup"/>
       </Unit0>
       <Unit1>
         <Filename Value="updater.pas"/>
@@ -95,9 +92,6 @@
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
-    <Target>
-      <Filename Value="fpcup"/>
-    </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
     </SearchPaths>
