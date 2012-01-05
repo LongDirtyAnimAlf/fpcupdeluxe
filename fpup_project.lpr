@@ -29,11 +29,14 @@ var
 begin
   writeln('begin');
   // Let's start simple: checkout, update, make for FPC+Lazarus.
-  // Later on, we might separate it out for Lazarus and FPC
   try
+    // Adjust these directories to taste/your situation.
     FInstaller:=TInstaller.Create;
+    FInstaller.BootstrapCompiler := 'c:\lazarus\fpc\2.5.1\bin\i386-win32\ppc386.exe';
     FInstaller.FPCDirectory:='c:\development\fpc';
     FInstaller.LazarusDirectory:='c:\development\lazarus';
+    FInstaller.Make:='C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe';
+    //todo: check for executables (right version as well), get them if required; should be class called by installer
     writeln('debug: getting and compiling fpc:');
     FInstaller.GetFPC;
     writeln('debug: getting and compiling lazarus:');

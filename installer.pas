@@ -20,6 +20,7 @@ type
   private
     FBootstrapCompiler: string;
     FCompiler: string;
+    FMake: string;
     FUpdater: TUpdater;
     function GetFpcDirectory: string;
     function GetLazarusDirectory: string;
@@ -34,6 +35,7 @@ type
     //Full path to FPC compiler that is installed
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
+    property Make: string read FMake write FMake;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -77,16 +79,28 @@ begin
   end;
   if OperationSucceeded then
   begin
+    // Make clean using bootstrap compiler
+    // Note no error on failure, might be recoverable
+    Params:= ' FPC='+FBootstrapCompiler+
+      ' --directory=' + FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' clean';
+    writeln('debug: running make clean for fpc, params:');
+    writeln(Params);
+    //todo: check for bootstrap fpc compiler
+    // Make (compile)
+    SysUtils.ExecuteProcess(FMake, params, []);
+  end;
+
+  if OperationSucceeded then
+  begin
     // Make (clean & all) using bootstrap compiler
     Params:= ' FPC='+FBootstrapCompiler+
-      ' --directory=' + FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' clean all';
+      ' --directory=' + FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
     writeln('debug: running make for fpc, params:');
     writeln(Params);
     //todo: check for bootstrap fpc compiler
     // Make (compile)
-    // todo: remove hardcoded make
     if
-    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe', params, [])
+    SysUtils.ExecuteProcess(FMake, params, [])
     <>0
     then
     OperationSucceeded:=false;
@@ -101,7 +115,7 @@ begin
     writeln('debug: running make install for fpc, params:');
     writeln(Params);
     if
-    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',Params, [])
+    SysUtils.ExecuteProcess(FMake,Params, [])
     <>0
     then
     OperationSucceeded:=false;
@@ -112,7 +126,7 @@ begin
     // so we compile for i386 as the last item, hopefully fpc.cfg will
     // default to i386 then.
     if
-    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
+    SysUtils.ExecuteProcess(FMake,
       ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' + DirectorySeparator + 'ppc386' +
       '--directory=' + FPCDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' all', [])
@@ -124,7 +138,7 @@ begin
   begin
     // Install crosscompiler
     if
-    SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make',
+    SysUtils.ExecuteProcess(FMake,
       '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
       ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' + DirectorySeparator + 'ppc386' +
       ' UPXPROG=echo COPYTREE=echo' + ' OS_TARGET=win64 CPU_TARGET=x86_64' +
@@ -169,7 +183,7 @@ begin
   // todo: remove hardcoded make, ppc compiler
   if OperationSucceeded then
   begin
-    // Make clean
+    // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
     //todo: fix for linux
     // Note: you apparently can't pass FPC in the FPC= statement.
     Params:='--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
@@ -177,9 +191,8 @@ begin
       'i386-win32' + DirectorySeparator + 'ppc386.exe' + ' clean';
     writeln('debug: lazarus params:');
     writeln(Params);sleep(100);
-    if (SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe',
-      Params, [])) <> 0 then
-      OperationSucceeded := False;
+    (SysUtils.ExecuteProcess(FMake,
+      Params, []));
   end;
   if OperationSucceeded then
   begin
@@ -189,7 +202,7 @@ begin
       'i386-win32' + DirectorySeparator + 'ppc386.exe' + ' all';
     writeln('debug: lazarus params:');
     writeln(Params);sleep(100);
-    if (SysUtils.ExecuteProcess('C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe',
+    if (SysUtils.ExecuteProcess(FMake,
       Params, [])) <> 0 then
       OperationSucceeded := False;
   end;
@@ -212,8 +225,9 @@ end;
 
 constructor Tinstaller.Create;
 begin
-  FBootstrapCompiler := 'c:\lazarus\fpc\2.5.1\bin\i386-win32\ppc386.exe';
+  FBootstrapCompiler := '';
   FCompiler := '';
+  FMake:='';
   FUpdater := TUpdater.Create;
 end;
 
