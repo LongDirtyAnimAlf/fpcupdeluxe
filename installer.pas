@@ -49,6 +49,7 @@ type
   private
     FBootstrapCompiler: string;
     FCompiler: string;
+    FLazarusPrimaryConfigPath: string;
     FMake: string;
     FUpdater: TUpdater;
     function GetFpcDirectory: string;
@@ -67,6 +68,7 @@ type
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
+    property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath; //The directory where the configuration for this Lazarus instance must be stored.
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl; //SVN URL for Lazarus
     property Make: string read FMake write FMake;
     constructor Create;
@@ -279,7 +281,7 @@ begin
     // Build data desktop, nice example of building with lazbuild
     Executable:=LazarusDirectory+DirectorySeparator+'lazbuild';
     Params:=
-    '--pcp=C:\Users\Reinier\AppData\Local\lazarusdev\'+
+    '--pcp='+FLazarusPrimaryConfigPath+
     ' '+LazarusDirectory+DirectorySeparator+'tools'+DirectorySeparator+'lazdatadesktop'+DirectorySeparator+'lazdatadesktop.lpr';
     debugln('Lazarus: compiling data desktop:');
     debugln(Executable + ' ' + Params);
@@ -296,6 +298,7 @@ constructor Tinstaller.Create;
 begin
   FBootstrapCompiler := '';
   FCompiler := '';
+  FLazarusPrimaryConfigPath:='';
   FMake:='';
   FUpdater := TUpdater.Create;
 end;

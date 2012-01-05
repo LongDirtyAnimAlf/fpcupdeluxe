@@ -49,10 +49,14 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,
   installer,
-  svnclient;
+  svnclient
+  {$IFDEF WINDOWS}
+  , shlobj
+  {$ENDIF WINDOWS};
 
 //{$R *.res}
 var
+  AppDataPath: Array[0..MaxPathLen] of Char; //Allocate memory
   FInstaller: TInstaller;
 begin
   writeln('begin');
@@ -69,8 +73,15 @@ begin
     //Use fixes 2.6, not default set by updater (trunk/2.7.1) as Lazarus doesn't work with 2.7.1
     FInstaller.LazarusDirectory := 'c:\development\lazarus';
     //Directory where Lazarus installation will end up
-    FInstaller.LazarusURL := 'http://svn2.freepascal.org/svn/lazarus/trunk';
-    //svn2 instead of svn
+    {$IFDEF Windows}
+    AppDataPath:='';
+    SHGetSpecialFolderPath(0,AppDataPath,CSIDL_LOCAL_APPDATA,false);
+    FInstaller.LazarusPrimaryConfigPath:=AppDataPath+DirectorySeparator+'lazarusdev';
+    {$ELSE}
+    writeln('todo: fix Lazarus primary config path, somewhere in ~ I guess.');
+    FInstaller.LazarusPrimaryConfigPath:='/tmp'; //error!
+    {$ENDIF}
+    FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk'; //svn2 seems to lag behind a lot.
     FInstaller.Make := 'C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe';
     //Existing make needed to compile FPC. Easiest to use an already installed snapshot/version
     //todo: check for executables (right version as well), get them if required; should be class called by installer
