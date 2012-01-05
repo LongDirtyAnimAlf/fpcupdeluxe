@@ -12,17 +12,19 @@ type
 
   TUpdater = class(TObject)
   private
+    FFPCURL: string;
+    FLazarusURL: string;
     FSVNClient: TSVNClient;
     //function IsSVNInstalled: boolean;
     FFPCDirectory: string;
     FLazarusDirectory: string;
   public
-    { Checks out or updates FPC source }
-    function UpdateFPC: boolean;
-    { Checks out or updates Lazarus source }
-    function UpdateLazarus: boolean;
     property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
+    property FPCURL: string read FFPCURL write FFPCURL; //URL for FPC SVN
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
+    property LazarusURL: string read FLazarusURL write FLazarusURL; //URL for Lazarus SVN
+    function UpdateFPC: boolean; // Checks out or updates FPC source
+    function UpdateLazarus: boolean; //Checks out or updates Lazarus source
     constructor Create;
     destructor Destroy; override;
   end;
@@ -37,7 +39,7 @@ begin
   //todo: hardcoded FPC repository for now
   //use svn2, apparently faster than the svn server ;)
   //todo: rebase later on so users can send patches?
-  FSVNClient.Repository:='http://svn2.freepascal.org/svn/fpc/branches/fixes_2_6';
+  FSVNClient.Repository:=FPCURL;
   FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
   result:=true;
@@ -48,7 +50,7 @@ begin
   FSVNClient.LocalRepository:=LazarusDirectory;
   //todo: hardcoded Lazarus repository for now
   //use svn2, apparently faster than the svn server ;)
-  FSVNClient.Repository:='http://svn2.freepascal.org/svn/lazarus/trunk';
+  FSVNClient.Repository:=FLazarusURL;
   FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
   result:=true;
@@ -58,6 +60,8 @@ end;
 constructor Tupdater.Create;
 begin
   FSVNClient:=TSVNClient.Create;
+  FFPCURL:='http://svn.freepascal.org/svn/fpc/trunk'; //Default: latest (trunk)
+  FLazarusURL:='http://svn.freepascal.org/svn/lazarus/trunk'; //Default: latest (trunk)
 end;
 
 destructor Tupdater.Destroy;
