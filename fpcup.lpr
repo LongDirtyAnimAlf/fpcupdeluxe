@@ -55,7 +55,11 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
 var
   FInstaller: TInstaller;
 begin
-  writeln('begin');
+  writeln('FCPUp FreePascal/Lazarus downloader/installer started.');
+  writeln('This program will download the FPC and Lazarus sources');
+  writeln('from the source Subversion/SVN repositories,');
+  writeln('compile, and install.');
+  writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
   // Let's start simple: checkout, update, make for FPC+Lazarus.
   try
     // Adjust these directories to taste/your situation.
@@ -68,9 +72,10 @@ begin
     FInstaller.FPCURL := 'http://svn2.freepascal.org/svn/fpc/branches/fixes_2_6';
     //Use fixes 2.6, not default set by updater (trunk/2.7.1) as Lazarus doesn't work with 2.7.1
     FInstaller.LazarusDirectory := 'c:\development\lazarus';
-    FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk'; //svn2 seems to lag behind a lot.
-    FInstaller.Make := 'C:\Lazarus\fpc\2.5.1\bin\i386-win32\make.exe';
-    //Existing make needed to compile FPC. Easiest to use an already installed snapshot/version
+    FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
+    //svn2 seems to lag behind a lot.
+    FInstaller.MakePath := 'C:\development\binutils\';
+    //Existing make needed to compile FPC. Will be downloaded if doesn't exit
     //todo: check for executables (right version as well), get them if required; should be class called by installer
     installer.debugln('getting and compiling fpc:');
     FInstaller.GetFPC;

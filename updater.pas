@@ -31,6 +31,7 @@
 }
 
 unit updater;
+
 { Gets/updats FPC and Lazarus sources }
 {$mode objfpc}{$H+}
 
@@ -38,6 +39,7 @@ interface
 
 uses
   Classes, SysUtils, svnclient;
+
 type
 
   { TUpdater }
@@ -50,50 +52,65 @@ type
     //function IsSVNInstalled: boolean;
     FFPCDirectory: string;
     FLazarusDirectory: string;
+    function GetSVNExecutable: string;
+    procedure SetSVNExecutable(AValue: string);
   public
     property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
     property FPCURL: string read FFPCURL write FFPCURL; //URL for FPC SVN
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
     property LazarusURL: string read FLazarusURL write FLazarusURL; //URL for Lazarus SVN
+    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable; //Which SVN executable to use
     function UpdateFPC: boolean; // Checks out or updates FPC source
     function UpdateLazarus: boolean; //Checks out or updates Lazarus source
     constructor Create;
     destructor Destroy; override;
   end;
+
 implementation
 
 
 { TUpdater }
 
-function Tupdater.Updatefpc: Boolean;
+procedure TUpdater.SetSVNExecutable(AValue: string);
 begin
-  FSVNClient.LocalRepository:=FPCDirectory;
+  FSVNClient.SVNExecutable:=AValue;
+end;
+
+function TUpdater.GetSVNExecutable: string;
+begin
+  result:=FSVNClient.SVNExecutable;
+end;
+
+function Tupdater.Updatefpc: boolean;
+begin
+  FSVNClient.LocalRepository := FPCDirectory;
   //todo: hardcoded FPC repository for now
   //use svn2, apparently faster than the svn server ;)
   //todo: rebase later on so users can send patches?
-  FSVNClient.Repository:=FPCURL;
+  FSVNClient.Repository := FPCURL;
   FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
-  result:=true;
+  Result := True;
 end;
 
-function Tupdater.Updatelazarus: Boolean;
+function Tupdater.Updatelazarus: boolean;
 begin
-  FSVNClient.LocalRepository:=LazarusDirectory;
+  FSVNClient.LocalRepository := LazarusDirectory;
   //todo: hardcoded Lazarus repository for now
   //use svn2, apparently faster than the svn server ;)
-  FSVNClient.Repository:=FLazarusURL;
+  FSVNClient.Repository := FLazarusURL;
   FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
-  result:=true;
-  writeln('debug: lazarus checkout/update complete');sleep(100);
+  Result := True;
+  writeln('debug: lazarus checkout/update complete');
+  sleep(100);
 end;
 
 constructor Tupdater.Create;
 begin
-  FSVNClient:=TSVNClient.Create;
-  FFPCURL:='http://svn.freepascal.org/svn/fpc/trunk'; //Default: latest (trunk)
-  FLazarusURL:='http://svn.freepascal.org/svn/lazarus/trunk'; //Default: latest (trunk)
+  FSVNClient := TSVNClient.Create;
+  FFPCURL := 'http://svn.freepascal.org/svn/fpc/trunk'; //Default: latest (trunk)
+  FLazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk'; //Default: latest (trunk)
 end;
 
 destructor Tupdater.Destroy;

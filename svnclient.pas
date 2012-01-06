@@ -46,8 +46,9 @@ type
 
   TSVNClient = class(TObject)
   private
-    Flocalrepository: string;
+    FLocalRepository: string;
     FRepositoryURL: string;
+    FReturnCode: integer;
     FSVNExecutable: string;
     procedure FindSVNExecutable;
   public
@@ -60,16 +61,18 @@ type
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
     procedure Update; //Performs an SVN update (pull)
     function ExecuteSvnCommand(const Command: string; Output: TStream): integer;
-    //Executes a free form SVN command.
-    function ExecuteSvnCommand(const Command: string; var Output: TStringList): integer;
-    //Executes a free form SVN command.
+    //Executes a free form SVN command; returns SVN client exit code
+    function ExecuteSVNCommand(const Command: string; var Output: TStringList): integer;
+    //Executes a free form SVN command; returns SVN client exit code
     function ExecuteSvnCommand(const Command: string): integer;
-    //Executes a free form SVN command.
+    //Executes a free form SVN command; returns SVN client exit code
     function LocalRepositoryExists: boolean;
     property LocalRepository: string read FLocalRepository write FLocalRepository;
     //Local directory that has an SVN repository/checkout
     property Repository: string read FRepositoryURL write FRepositoryURL;
-    property SVNExecutable: string read FSVNExecutable;
+    property ReturnCode: integer read FReturnCode;
+    //Exit code returned by last SVN client command. Useful for troubleshooting
+    property SVNExecutable: string read FSVNExecutable write FSVNExecutable;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -102,16 +105,30 @@ begin
 end;
 
 procedure Tsvnclient.Checkout;
+const
+  MaxRetries = 3;
+var
+  Command: string;
+  RetryAttempt: integer;
 begin
-  ExecuteSVNCommand('checkout --revision HEAD ' + Repository + ' ' + LocalRepository);
+  Command:='checkout --revision HEAD ' + Repository + ' ' + LocalRepository;
+  ExecuteSVNCommand(Command);
+  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+  RetryAttempt := 1;
+  while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+  begin
+    Sleep(500); //Give everybody a chance to relax ;)
+    ExecuteSVNCommand(Command); //attempt again
+    RetryAttempt := RetryAttempt + 1;
+  end;
 end;
 
 procedure Tsvnclient.CheckOutOrUpdate;
+
 begin
   if LocalRepositoryExists = False then
   begin
     // Checkout (first download)
-    //todo: if checkout fails, try another, up to x times as there can be mtu problems etc.
     //writeln('debug: doing checkout of ' + Repository + ' to ' + LocalRepository + '.');
     Checkout;
   end
@@ -134,8 +151,22 @@ begin
 end;
 
 procedure Tsvnclient.Update;
+const
+  MaxRetries = 3;
+var
+  Command: string;
+  RetryAttempt: integer;
 begin
-  ExecuteSVNCommand('update ' + LocalRepository);
+  Command:='update ' + LocalRepository;
+  ExecuteSVNCommand(Command);
+  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+  RetryAttempt := 1;
+  while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+  begin
+    Sleep(500); //Give everybody a chance to relax ;)
+    ExecuteSVNCommand(Command); //attempt again
+    RetryAttempt := RetryAttempt + 1;
+  end;
 end;
 
 function TSVNClient.ExecuteSvnCommand(const Command: string; Output: TStream): integer;
@@ -167,6 +198,7 @@ var
   end;
 
 begin
+  FReturnCode := 255; //Reset to failure
   if FSvnExecutable = '' then
     FindSvnExecutable;
 
@@ -182,13 +214,14 @@ begin
         Sleep(100);
     end;
     ReadOutput;
-    Result := SvnProcess.ExitStatus;
+    FReturnCode := SvnProcess.ExitStatus;
+    Result := FReturnCode;
   finally
     SvnProcess.Free;
   end;
 end;
 
-function TSVNClient.Executesvncommand(const Command: string;
+function TSVNClient.ExecuteSVNCommand(const Command: string;
   var Output: TStringList): integer;
 var
   OutputStream: TMemoryStream;
@@ -228,7 +261,7 @@ begin
   Output := TStringList.Create;
   try
     Result := False;
-    if (ExecuteSvnCommand('info ' + FLocalRepository, Output) = 0) then
+    if (ExecuteSVNCommand('info ' + FLocalRepository, Output) = 0) then
       Result := False;
     if Pos('Path', Output.Text) > 0 then
       Result := True;
@@ -244,6 +277,9 @@ constructor Tsvnclient.Create;
 begin
   FindSVNExecutable;
   FLocalRepository := '';
+  FRepositoryURL := '';
+  FReturnCode := 0;
+  FSVNExecutable := '';
 end;
 
 destructor Tsvnclient.Destroy;

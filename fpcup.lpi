@@ -28,7 +28,16 @@
           <PathDelim Value="\"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synapse"/>
           </SearchPaths>
+          <Conditionals Value="DEBUG:=1"/>
+          <BuildMacros>
+            <Count Value="1"/>
+            <Item1>
+              <Identifier Value="DebugMode"/>
+              <Description Value="Lets code output debug info"/>
+            </Item1>
+          </BuildMacros>
           <CodeGeneration>
             <Checks>
               <IOChecks Value="True"/>
@@ -66,7 +75,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -87,6 +96,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="svnclient"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="synapse\httpsend.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="httpsend"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -94,6 +108,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="synapse"/>
     </SearchPaths>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
