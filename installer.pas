@@ -319,28 +319,40 @@ function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
 begin
-  OperationSucceeded := False;
+  OperationSucceeded := true;
   // Check for binutils directory, make and unzip executables.
   // Download if needed; will download unzip - needed for SVN download
   FUnzip := FMakePath + 'unzip' + FExecutableExtension;
-  if (DirectoryExists(FMakePath) = False) or
-    (FileExists(FMakePath + 'make' + FExecutableExtension) = False) or
-    (FileExists(FUnzip) = False) then
+  if OperationSucceeded then
   begin
-    debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
-    OperationSucceeded := DownloadBinUtils;
+    if (DirectoryExists(FMakePath) = False) or
+      (FileExists(FMakePath + 'make' + FExecutableExtension) = False) or
+      (FileExists(FUnzip) = False) then
+    begin
+      debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
+      OperationSucceeded := DownloadBinUtils;
+    end;
   end;
 
   //Check for SVN, download if needed
-  if (FileExists(FUpdater.SVNExecutable) = False) and (OperationSucceeded) then
+  if OperationSucceeded then
   begin
-    OperationSucceeded := DownloadSVN;
+    if (FileExists(FUpdater.SVNExecutable) = False) and (OperationSucceeded) then
+    begin
+      debugln('SVN not found in '+FUpdater.SVNExecutable+', downloading');
+      OperationSucceeded := DownloadSVN;
+    end;
   end;
 
+
   //Check for bootstrap compiler, download if needed
-  if (FileExists(BootstrapCompiler) = False) and (OperationSucceeded) then
+  if OperationSucceeded then
   begin
-    OperationSucceeded := DownloadBootstrapCompiler;
+    if (FileExists(BootstrapCompiler) = False) and (OperationSucceeded) then
+    begin
+      debugln('Bootstrap compiler not found, downloading');
+      OperationSucceeded := DownloadBootstrapCompiler;
+    end;
   end;
 
   Result := OperationSucceeded;
@@ -398,7 +410,7 @@ begin
   FMake := FMakePath + 'make' + FExecutableExtension;
 end;
 
-function Tinstaller.Getfpc: boolean;
+function Tinstaller.GetFPC: boolean;
 var
   Executable: string;
   OperationSucceeded: boolean;
@@ -414,7 +426,7 @@ begin
   begin
     // MakePath clean using bootstrap compiler
     // Note no error on failure, might be recoverable
-    Executable := FMakePath;
+    Executable := FMake;
     Params := ' FPC=' + FBootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' clean';
     debugln('Running make clean for fpc:');
@@ -427,7 +439,7 @@ begin
   if OperationSucceeded then
   begin
     // MakePath (clean & all) using bootstrap compiler
-    Executable := FMakePath;
+    Executable := FMake;
     Params := ' FPC=' + FBootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
     debugln('debug: running make for fpc:');
@@ -441,7 +453,7 @@ begin
   begin
     // Install using newly compiled compiler
     // todo: check where to install
-    Executable := FMakePath;
+    Executable := FMake;
     Params := ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
       DirectorySeparator + 'ppc386' + ' --directory=' + FPCDirectory +
       ' PREFIX=' + FPCDIRECTORY + ' UPXPROG=echo COPYTREE=echo' + ' install';
@@ -450,27 +462,10 @@ begin
     if SysUtils.ExecuteProcess(Executable, Params, []) <> 0 then
       OperationSucceeded := False;
   end;
-  { //don't know if this is needed
-  if OperationSucceeded then
-  begin
-    // Make crosscompiler for Windows X64
-    Executable:=FMake;
-    Params:=' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' + DirectorySeparator + 'ppc386' +
-      '--directory=' + FPCDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' all'
-    debugln('Running MakePath crosscompile:');
-    debugln(Executable + ' ' + Params);
-    if
-    SysUtils.ExecuteProcess(Executable,Params, [])
-    <>0
-    then
-    OperationSucceeded:=false;
-  end;
-  }
   if OperationSucceeded then
   begin
     // Install crosscompiler
-    Executable := FMakePath;
+    Executable := FMake;
     debugln('Running Make crossinstall:');
     debugln(Executable + ' ' + Params);
     Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
@@ -521,7 +516,7 @@ begin
     // MakePath clean; failure here might be recoverable, so no fiddling with OperationSucceeded
     //todo: fix for linux
     // Note: you apparently can't pass FPC in the FPC= statement.
-    Executable := FMakePath;
+    Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
       'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' clean';
@@ -533,7 +528,7 @@ begin
   if OperationSucceeded then
   begin
     // MakePath all
-    Executable := FMakePath;
+    Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
       'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' all';

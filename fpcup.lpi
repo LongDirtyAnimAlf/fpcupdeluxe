@@ -21,8 +21,8 @@
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="2">
-      <Item1 Name="Release" Default="True"/>
-      <Item2 Name="Debug">
+      <Item1 Name="Debug" Default="True"/>
+      <Item2 Name="Release">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -31,23 +31,27 @@
             <OtherUnitFiles Value="synapse"/>
           </SearchPaths>
           <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
             <Checks>
               <IOChecks Value="True"/>
               <RangeChecks Value="True"/>
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
-              <UseHeaptrc Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
             </Debugging>
+            <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CompilerMessages>
               <UseMsgFile Value="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
           </Other>
         </CompilerOptions>
@@ -104,27 +108,23 @@
       <OtherUnitFiles Value="synapse"/>
     </SearchPaths>
     <CodeGeneration>
-      <SmartLinkUnit Value="True"/>
       <Checks>
         <IOChecks Value="True"/>
         <RangeChecks Value="True"/>
         <OverflowChecks Value="True"/>
         <StackChecks Value="True"/>
       </Checks>
-      <Optimizations>
-        <OptimizationLevel Value="2"/>
-      </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
-        <UseExternalDbgSyms Value="True"/>
+        <UseHeaptrc Value="True"/>
       </Debugging>
-      <LinkSmart Value="True"/>
     </Linking>
     <Other>
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
+      <CustomOptions Value="-dDEBUG"/>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
   </CompilerOptions>

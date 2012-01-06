@@ -41,7 +41,7 @@ uses
   FileUtil {Requires LCL};
 
 type
-
+  ESVNClientError = class(Exception);
   { TSVNClient }
 
   TSVNClient = class(TObject)
@@ -51,6 +51,8 @@ type
     FReturnCode: integer;
     FSVNExecutable: string;
     procedure FindSVNExecutable;
+    function GetSVNExecutable: string;
+    procedure SetSVNExecutable(AValue: string);
   public
     procedure CheckOut;
     //Performs an SVN checkout (initial download), HEAD (latest revision) only for speed
@@ -72,7 +74,7 @@ type
     property Repository: string read FRepositoryURL write FRepositoryURL;
     property ReturnCode: integer read FReturnCode;
     //Exit code returned by last SVN client command. Useful for troubleshooting
-    property SVNExecutable: string read FSVNExecutable write FSVNExecutable;
+    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -86,9 +88,15 @@ procedure TSVNClient.FindSvnExecutable;
 begin
   //todo: add current directory for windows
   if FileExists(FSvnExecutable) then
+  begin
     exit;
+  end;
 {$IFDEF windows}
-  FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
+  // Some popular locations
+  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') + '\Subversion\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\SlikSvn\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') + '\SlikSvn\bin\svn.exe';
 {$ENDIF}
 
   if not FileExists(FSvnExecutable) then
@@ -100,8 +108,11 @@ begin
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := ('.\svn'); //current directory
 {$ENDIF}
-  if not FileExists(FSvnExecutable) then
-    raise Exception.Create('No SVN executable found');
+end;
+
+function TSVNClient.GetSVNExecutable: string;
+begin
+  result:=FSVNExecutable;
 end;
 
 procedure Tsvnclient.Checkout;
@@ -148,6 +159,15 @@ end;
 procedure Tsvnclient.Revert;
 begin
   ExecuteSVNCommand('revert --recursive ' + LocalRepository);
+end;
+
+procedure TSVNClient.SetSVNExecutable(AValue: string);
+begin
+  if FSVNExecutable<>AValue then
+  begin
+    FSVNExecutable:=AValue;
+    FindSVNExecutable; //Make sure it actually exists
+  end;
 end;
 
 procedure Tsvnclient.Update;
@@ -199,8 +219,11 @@ var
 
 begin
   FReturnCode := 255; //Reset to failure
-  if FSvnExecutable = '' then
+  // Look for SVN if necessary; error if needed:
+  if not FileExists(FSVNExecutable) then;
     FindSvnExecutable;
+  if not FileExists(FSvnExecutable) then
+    raise ESVNClientError.Create('No SVN executable found');
 
   SvnProcess := TProcess.Create(nil);
   try
@@ -275,11 +298,11 @@ end;
 
 constructor Tsvnclient.Create;
 begin
-  FindSVNExecutable;
   FLocalRepository := '';
   FRepositoryURL := '';
   FReturnCode := 0;
   FSVNExecutable := '';
+  FindSvnExecutable;
 end;
 
 destructor Tsvnclient.Destroy;
