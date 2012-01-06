@@ -59,7 +59,8 @@ type
     property FPCURL: string read FFPCURL write FFPCURL; //URL for FPC SVN
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
     property LazarusURL: string read FLazarusURL write FLazarusURL; //URL for Lazarus SVN
-    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable; //Which SVN executable to use
+    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
+    //Which SVN executable to use
     function UpdateFPC: boolean; // Checks out or updates FPC source
     function UpdateLazarus: boolean; //Checks out or updates Lazarus source
     constructor Create;
@@ -73,12 +74,12 @@ implementation
 
 procedure TUpdater.SetSVNExecutable(AValue: string);
 begin
-  FSVNClient.SVNExecutable:=AValue;
+  FSVNClient.SVNExecutable := AValue;
 end;
 
 function TUpdater.GetSVNExecutable: string;
 begin
-  result:=FSVNClient.SVNExecutable;
+  Result := FSVNClient.SVNExecutable;
 end;
 
 function Tupdater.Updatefpc: boolean;

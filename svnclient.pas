@@ -111,7 +111,7 @@ var
   Command: string;
   RetryAttempt: integer;
 begin
-  Command:='checkout --revision HEAD ' + Repository + ' ' + LocalRepository;
+  Command := 'checkout --revision HEAD ' + Repository + ' ' + LocalRepository;
   ExecuteSVNCommand(Command);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -157,7 +157,7 @@ var
   Command: string;
   RetryAttempt: integer;
 begin
-  Command:='update ' + LocalRepository;
+  Command := 'update ' + LocalRepository;
   ExecuteSVNCommand(Command);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;

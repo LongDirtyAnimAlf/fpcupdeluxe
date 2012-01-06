@@ -21,7 +21,7 @@
       <StringTable ProductVersion=""/>
     </VersionInfo>
     <BuildModes Count="2">
-      <Item1 Name="Production" Default="True"/>
+      <Item1 Name="Release" Default="True"/>
       <Item2 Name="Debug">
         <CompilerOptions>
           <Version Value="11"/>
@@ -30,14 +30,6 @@
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synapse"/>
           </SearchPaths>
-          <Conditionals Value="DEBUG:=1"/>
-          <BuildMacros>
-            <Count Value="1"/>
-            <Item1>
-              <Identifier Value="DebugMode"/>
-              <Description Value="Lets code output debug info"/>
-            </Item1>
-          </BuildMacros>
           <CodeGeneration>
             <Checks>
               <IOChecks Value="True"/>
@@ -55,6 +47,7 @@
             <CompilerMessages>
               <UseMsgFile Value="True"/>
             </CompilerMessages>
+            <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
           </Other>
         </CompilerOptions>

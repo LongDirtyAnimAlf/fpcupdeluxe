@@ -48,6 +48,7 @@ type
   TInstaller = class(TObject)
   private
     FBootstrapCompiler: string;
+    FBootstrapCompilerURL: string;
     FCompiler: string;
     FExecutableExtension: string;
     FLazarusPrimaryConfigPath: string;
@@ -59,7 +60,8 @@ type
     function DownloadBootstrapCompiler: boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
-    function CheckAndGetNeededExecutables: boolean; //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
+    function CheckAndGetNeededExecutables: boolean;
+    //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
     function GetFPCUrl: string;
     function GetLazarusDirectory: string;
@@ -74,7 +76,10 @@ type
     property Compiler: string read FCompiler;
     //Full path to FPC compiler that is installed by this program
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
-    //Compiler used to compile compiler sources
+    //Compiler used to compile compiler sources. If file doesn't exist, it will be created
+    property BootstrapCompilerURL: string read FBootstrapCompilerURL
+      write FBootstrapCompilerURL;
+    //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
     function GetFPC: boolean; //Get/update FPC
@@ -85,7 +90,8 @@ type
     //The directory where the configuration for this Lazarus instance must be stored.
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
     //SVN URL for Lazarus
-    property MakePath: string read GetMakePath write SetMakePath; //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
+    property MakePath: string read GetMakePath write SetMakePath;
+    //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     constructor Create;
     destructor Destroy; override;
   end;
@@ -98,84 +104,189 @@ implementation
 uses
   httpsend, strutils
 {$IFDEF WINDOWS}
-  ,shlobj;
+  , shlobj;
+
 {$ENDIF WINDOWS}
 
 procedure debugln(Message: string);
 begin
-  {$DEFINE DEBUG} //how can I switch this depending on build mode?
+  {DEBUG conditional symbol is defined using
+  Project Options/Other/Custom Options using -dDEBUG
+  }
   {$IFDEF DEBUG}
   writeln('Debug: ' + Message);
-  sleep(200); //allow output to be written
+  sleep(200); //hopefully allow output to be written without interfering with other output
   {$ENDIF DEBUG}
 end;
 
 { TInstaller }
 
 function TInstaller.DownloadBinUtils: boolean;
+const
+  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
+  //Parent directory of files. Needs trailing backslash.
+var
+  CopyFiles: TStringList;
+  Counter: integer;
 begin
   ForceDirectories(MakePath);
-  //todo
+  Result := False;
+  CopyFiles := TStringList.Create;
+  try
+    CopyFiles.Add('GoRC.exe');
+    CopyFiles.Add('ar.exe');
+    CopyFiles.Add('as.exe');
+    CopyFiles.Add('bin2obj.exe');
+    CopyFiles.Add('cmp.exe');
+    CopyFiles.Add('cp.exe');
+    CopyFiles.Add('cpp.exe');
+    CopyFiles.Add('cygiconv-2.dll');
+    CopyFiles.Add('cygncurses-8.dll');
+    CopyFiles.Add('cygwin1.dll');
+    CopyFiles.Add('diff.exe');
+    CopyFiles.Add('dlltool.exe');
+    CopyFiles.Add('fp32.ico');
+    CopyFiles.Add('gcc.exe');
+    CopyFiles.Add('gdate.exe');
+    //GDB.exe apparently can also be found here:
+    //http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
+    //for Windows x64:
+    //http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/
+    CopyFiles.Add('gdb.exe');
+    CopyFiles.Add('gecho.exe');
+    CopyFiles.Add('ginstall.exe');
+    CopyFiles.Add('ginstall.exe.manifest');
+    CopyFiles.Add('gmkdir.exe');
+    CopyFiles.Add('grep.exe');
+    CopyFiles.Add('ld.exe');
+    CopyFiles.Add('libexpat-1.dll');
+    CopyFiles.Add('make.exe');
+    CopyFiles.Add('mv.exe');
+    CopyFiles.Add('objdump.exe');
+    CopyFiles.Add('patch.exe');
+    CopyFiles.Add('patch.exe.manifest');
+    CopyFiles.Add('pwd.exe');
+    CopyFiles.Add('rm.exe');
+    CopyFiles.Add('strip.exe');
+    CopyFiles.Add('unzip.exe');
+    CopyFiles.Add('upx.exe');
+    CopyFiles.Add('windres.exe');
+    CopyFiles.Add('windres.h');
+    CopyFiles.Add('zip.exe');
+    for Counter := 0 to CopyFiles.Count - 1 do
+    begin
+      debugln('Downloading: ' + CopyFiles[Counter] + ' into ' + MakePath);
+      try
+        DownloadHTTP(SourceUrl + CopyFiles[Counter], MakePath + CopyFiles[Counter]);
+      except
+        on E: Exception do
+        begin
+          Result := False;
+          debugln('Error downloading: ' + E.Message);
+          exit; //out of function.
+        end;
+      end;
+    end;
+  finally
+    CopyFiles.Free;
+  end;
 end;
 
 function TInstaller.DownloadBootstrapCompiler: boolean;
+  // Should be done after we have unzip executable in FMakePath
+var
+  BootstrapZip: string;
+  CompilerName: string;
+  OperationSucceeded: boolean;
+  Params: string;
 begin
- //todo, somewhere in temp
+  BootstrapZip := BootstrapCompiler + '.zip';
+  OperationSucceeded := DownloadHTTP(FBootstrapCompilerURL, BootstrapZip);
+  if OperationSucceeded then
+  begin
+    //Extract zip into makedir, overwriting without prompting
+    Params := '-o "' + BootstrapZip + '" -d "' + MakePath + '"';
+    if SysUtils.ExecuteProcess(FUnzip, Params, []) <> 0 then
+      OperationSucceeded := False;
+  end;
+  // Rename to bootstrap.exe
+    {$IFDEF Windows}
+  Compilername := 'ppc386.exe';
+    {$ENDIF Windows}
+    {$IFDEF Linux}
+  //check if this is the right one - 32vs64 bit!?!?
+  Compilername := 'ppc386';
+    {$ENDIF Linux}
+    {$IFDEF Darwin}
+  //check if this is the right one - 32vs64 bit!?!?
+  Compilername := 'ppc386';
+    {$ENDIF Darwin}
+  if OperationSucceeded = True then
+    renamefile(MakePath + CompilerName, MakePath + 'bootstrap' + FExecutableExtension);
+  if OperationSucceeded = True then
+    SysUtils.DeleteFile(BootstrapZip);
+  //todo chmod ug+x for Linux/OSX?!!
+  Result := OperationSucceeded;
 end;
 
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
-// Download file. If ncessary deal with SourceForge redirection, thanks to
-// Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
+  // Download file. If ncessary deal with SourceForge redirection, thanks to
+  // Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
 const
-  SourceForgeProjectPart='//sourceforge.net/projects/';
-  SourceForgeFilesPart='/files/';
+  SourceForgeProjectPart = '//sourceforge.net/projects/';
+  SourceForgeFilesPart = '/files/';
 var
   Buffer: TMemoryStream;
-  i,j:integer;
+  i, j: integer;
   HTTPSender: THTTPSend;
   SourceForgeProject: string;
 begin
-  result:=false;
+  Result := False;
   // Detect SourceForge download
-  i:=Pos(SourceForgeProjectPart, URL);
-  j:=Pos(SourceForgeFilesPart, URL);
+  i := Pos(SourceForgeProjectPart, URL);
+  j := Pos(SourceForgeFilesPart, URL);
 
   // Rewrite URL if needed for Sourceforge download redirection
-  if (i>0) and (j>0) then
-    begin
-      SourceForgeProject:=Copy(URL,i+Length(SourceForgeProjectPart),j);
-      debugln('project is *'+SourceForgeProject+'*');
-      try
-        HTTPSender:=THTTPSend.Create;
-        while not Result do
-         begin
-           HTTPSender.HTTPMethod('GET', URL);
-           case HTTPSender.Resultcode of
-             301,302,307 : for i:=0 to HTTPSender.Headers.Count-1 do
-                           if (Pos('Location: ',HTTPSender.Headers.Strings[i])>0) or
-                              (Pos('location: ',HTTPSender.Headers.Strings[i])>0) then
-                           begin
-                             j:=Pos('use_mirror=',HTTPSender.Headers.Strings[i]);
-                             if j>0 then
-                               URL:='http://'+
-                                 RightStr(HTTPSender.Headers.Strings[i],
-                                 length(HTTPSender.Headers.Strings[i])-j-10)+
-                                 '.dl.sourceforge.net/project/'+SourceForgeProject+'/'+'DiReCtory'+'FiLeNAMe'
-                             else
-                               URl:=StringReplace(HTTPSender.Headers.Strings[i],'Location: ','',[]);
-                             HTTPSender.Clear;//httpsend
-                             break;
-                           end;
-             100..200 : Result:=true; //No changes necessary
-             500:raise Exception.Create('No internet connection available');//Internal Server Error ('+aURL+')');
-             else raise Exception.Create('Download failed with error code '+inttostr(HTTPSender.ResultCode)+' ('+HTTPSender.ResultString+')');
-           end;//case
-         end;//while
-        debugln('resulting url after sf redir: *'+URL+'*');
-      finally
-        HTTPSender.Free;
-      end;
+  if (i > 0) and (j > 0) then
+  begin
+    SourceForgeProject := Copy(URL, i + Length(SourceForgeProjectPart), j);
+    debugln('project is *' + SourceForgeProject + '*');
+    try
+      HTTPSender := THTTPSend.Create;
+      while not Result do
+      begin
+        HTTPSender.HTTPMethod('GET', URL);
+        case HTTPSender.Resultcode of
+          301, 302, 307: for i := 0 to HTTPSender.Headers.Count - 1 do
+              if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
+                (Pos('location: ', HTTPSender.Headers.Strings[i]) > 0) then
+              begin
+                j := Pos('use_mirror=', HTTPSender.Headers.Strings[i]);
+                if j > 0 then
+                  URL :=
+                    'http://' + RightStr(HTTPSender.Headers.Strings[i],
+                    length(HTTPSender.Headers.Strings[i]) - j - 10) +
+                    '.dl.sourceforge.net/project/' +
+                    SourceForgeProject + '/' + 'DiReCtory' + 'FiLeNAMe'
+                else
+                  URl :=
+                    StringReplace(HTTPSender.Headers.Strings[i], 'Location: ', '', []);
+                HTTPSender.Clear;//httpsend
+                break;
+              end;
+          100..200: Result := True; //No changes necessary
+          500: raise Exception.Create('No internet connection available');
+            //Internal Server Error ('+aURL+')');
+          else
+            raise Exception.Create('Download failed with error code ' + IntToStr(
+              HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
+        end;//case
+      end;//while
+      debugln('resulting url after sf redir: *' + URL + '*');
+    finally
+      HTTPSender.Free;
     end;
+  end;
 
   try
     Buffer := TMemoryStream.Create;
@@ -183,9 +294,10 @@ begin
       raise Exception.Create('Cannot load document from remote server');
     //Application.ProcessMessages;
     Buffer.Position := 0;
-    if Buffer.Size=0 then raise Exception.Create('Downloaded document is empty.');
+    if Buffer.Size = 0 then
+      raise Exception.Create('Downloaded document is empty.');
     Buffer.SaveToFile(TargetFile);
-    result:=true;
+    Result := True;
   finally
     FreeAndNil(Buffer);
   end;
@@ -194,39 +306,44 @@ end;
 function TInstaller.DownloadSVN: boolean;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but useful when downloading FPC/Lazarus from... SVN ;)
-  result:=DownloadHTTP('http://sourceforge.net/projects/win32svn/files/latest/download?source=files', MakePath);
-  FUpdater.SVNExecutable:=MakePath+'svn'+FExecutableExtension;
+  // This won't work, we'd get an .msi:
+  // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
+  Result := DownloadHTTP('http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
+    , MakePath);
+  //todo: extract entire stuff with unzip somewhere. makedir actually is not a good idea; also we get a subdir svn-win32-1.7.2/bin
+  //
+  FUpdater.SVNExecutable := MakePath + 'svn' + FExecutableExtension;
 end;
 
 function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
 begin
-  OperationSucceeded:=false;
+  OperationSucceeded := False;
   // Check for binutils directory, make and unzip executables.
   // Download if needed; will download unzip - needed for SVN download
-  FUnzip:=FMakePath+'unzip'+FExecutableExtension;
-  if (DirectoryExists(FMakePath)=false) or
-  (FileExists(FMakePath+'make'+FExecutableExtension)=false) or
-  (FileExists(FUnzip)=false) then
+  FUnzip := FMakePath + 'unzip' + FExecutableExtension;
+  if (DirectoryExists(FMakePath) = False) or
+    (FileExists(FMakePath + 'make' + FExecutableExtension) = False) or
+    (FileExists(FUnzip) = False) then
   begin
     debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
-    OperationSucceeded:=DownloadBinUtils;
+    OperationSucceeded := DownloadBinUtils;
   end;
 
   //Check for SVN, download if needed
-  if (FileExists(FUpdater.SVNExecutable)=false) and (OperationSucceeded) then
+  if (FileExists(FUpdater.SVNExecutable) = False) and (OperationSucceeded) then
   begin
-    OperationSucceeded:=DownloadSVN;
+    OperationSucceeded := DownloadSVN;
   end;
 
   //Check for bootstrap compiler, download if needed
-  if (FileExists(BootstrapCompiler)=false) and (OperationSucceeded) then
+  if (FileExists(BootstrapCompiler) = False) and (OperationSucceeded) then
   begin
-    OperationSucceeded:=DownloadBootstrapCompiler;
+    OperationSucceeded := DownloadBootstrapCompiler;
   end;
 
-  result:= OperationSucceeded;
+  Result := OperationSucceeded;
 end;
 
 function Tinstaller.GetFpcDirectory: string;
@@ -251,7 +368,7 @@ end;
 
 function TInstaller.GetMakePath: string;
 begin
-  result:=FMakePath;
+  Result := FMakePath;
 end;
 
 procedure Tinstaller.SetFPCDirectory(Directory: string);
@@ -277,8 +394,8 @@ end;
 procedure TInstaller.SetMakePath(AValue: string);
 begin
   // Make sure there's a trailing delimiter
-  FMakePath:=IncludeTrailingPathDelimiter(AValue);
-  FMake:=FMakePath+'make'+FExecutableExtension;
+  FMakePath := IncludeTrailingPathDelimiter(AValue);
+  FMake := FMakePath + 'make' + FExecutableExtension;
 end;
 
 function Tinstaller.Getfpc: boolean;
@@ -287,7 +404,8 @@ var
   OperationSucceeded: boolean;
   Params: string;
 begin
-  OperationSucceeded:=CheckAndGetNeededExecutables; //MakePath sure we have the proper tools.
+  OperationSucceeded := CheckAndGetNeededExecutables;
+  //MakePath sure we have the proper tools.
   if FUpdater.UpdateFPC = False then
   begin
     OperationSucceeded := False;
@@ -387,7 +505,8 @@ var
   OperationSucceeded: boolean;
   Params: string;
 begin
-  OperationSucceeded:=CheckAndGetNeededExecutables; //MakePath sure we have the proper tools.
+  OperationSucceeded := CheckAndGetNeededExecutables;
+  //MakePath sure we have the proper tools.
   // Download Lazarus source:
   if OperationSucceeded = True then
     OperationSucceeded := FUpdater.UpdateLazarus;
@@ -405,7 +524,7 @@ begin
     Executable := FMakePath;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + 'ppc386'+FExecutableExtension + ' clean';
+      'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' clean';
     debugln('Lazarus: running make clean:');
     debugln(Executable + ' ' + Params);
     (SysUtils.ExecuteProcess(Executable,
@@ -417,7 +536,7 @@ begin
     Executable := FMakePath;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + 'ppc386'+FExecutableExtension + ' all';
+      'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' all';
     debugln('Lazarus: running make all:');
     debugln(Executable + ' ' + Params);
     if (SysUtils.ExecuteProcess(Executable, Params, [])) <> 0 then
@@ -445,16 +564,36 @@ constructor Tinstaller.Create;
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
 begin
-  FBootstrapCompiler := '';
+  // We'll set the bootstrap compiler to a file in the temp dir.
+  // This won't exist so the CheckAndGetNeededExecutables code will download it for us.
+  // User can specify an existing compiler later on, if she wants to.
+  FBootstrapCompiler := GetTempFileName + FExecutableExtension;
+
+  //We don't want to download from FTP, but it's useful to record it here so we can update the URLs below
+  //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
+  {$IFDEF Windows}
+  FBootstrapCompilerURL :=
+    'http://sunet.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.2/i386-win32-ppc386.zip';
+  {$ENDIF Windows}
+  {$IFDEF Linux}
+  //check if this is the right one
+  FBootstrapCompilerURL :=
+    'http://kent.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.4/i386-linux-ppc386.bz2';
+  {$ENDIF Linux}
+  {$IFDEF Darwin}
+  FBootstrapCompilerURL :=
+    'http://freefr.dl.sourceforge.net/project/freepascal/Bootstrap/2.6.0/universal-darwin-ppcuniversal.tar.bz2';
+  {$ENDIF Darwin}
+
   FCompiler := '';
   {$IFDEF WINDOWS}
-  FExecutableExtension:='.exe';
+  FExecutableExtension := '.exe';
   {$ELSE}
-  FExecutableExtension:='';
+  FExecutableExtension := '';
   {$ENDIF WINDOWS}
   FLazarusPrimaryConfigPath := '';
   FUpdater := TUpdater.Create;
-  FUnzip:='';
+  FUnzip := '';
   //Directory where Lazarus installation will end up
   //todo: create if it doesn't exist
   {$IFDEF Windows}
