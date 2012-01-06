@@ -78,10 +78,17 @@ type
 
 implementation
 
+{$IFDEF WINDOWS}
+uses
+  shlobj;
+{$ENDIF WINDOWS}
+
 procedure debugln(Message: string);
 begin
+  {$IFDEF DEBUG}
   writeln('Debug: '+Message);
   sleep(200); //allow output to be written
+  {$ENDIF DEBUG}
 end;
 
 { TInstaller }
@@ -295,12 +302,28 @@ begin
 end;
 
 constructor Tinstaller.Create;
+var
+  AppDataPath: Array[0..MaxPathLen] of Char; //Allocate memory
 begin
   FBootstrapCompiler := '';
   FCompiler := '';
   FLazarusPrimaryConfigPath:='';
   FMake:='';
   FUpdater := TUpdater.Create;
+  //Directory where Lazarus installation will end up
+  //todo: create if it doesn't exist
+  {$IFDEF Windows}
+  AppDataPath:='';
+  SHGetSpecialFolderPath(0,AppDataPath,CSIDL_LOCAL_APPDATA,false);
+  LazarusPrimaryConfigPath:=AppDataPath+DirectorySeparator+'lazarusdev';
+  {$ELSE}
+  writeln('todo: fix Lazarus primary config path, somewhere in ~ I guess.');
+  LazarusPrimaryConfigPath:='/tmp'; //error!???
+  {$ENDIF}
+  if DirectoryExists(LazarusPrimaryConfigPath)=false then
+  begin
+     CreateDir(LazarusPrimaryConfigPath);
+  end;
 end;
 
 destructor Tinstaller.Destroy;
