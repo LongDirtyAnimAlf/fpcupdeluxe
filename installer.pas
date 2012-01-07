@@ -54,6 +54,7 @@ type
     FLazarusPrimaryConfigPath: string;
     FMake: string;
     FMakePath: string;
+    FSVNDirectory: string; //Unpack SVN files in this directory
     FUpdater: TUpdater;
     FUnzip: string; //Location of unzip executable
     function DownloadBinUtils: boolean;
@@ -67,6 +68,9 @@ type
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
     function GetMakePath: string;
+    function Run(Executable, Params: string): longint;
+    function RunOutput(Executable, Params: string; var Output: TStringList): longint;
+    function RunOutput(Executable, Params: string; var Output: String): longint;
     procedure SetFPCDirectory(Directory: string);
     procedure SetFPCUrl(AValue: string);
     procedure SetLazarusDirectory(Directory: string);
@@ -102,7 +106,7 @@ procedure debugln(Message: string);
 implementation
 
 uses
-  httpsend, strutils
+  httpsend, strutils, process
 {$IFDEF WINDOWS}
   , shlobj;
 
@@ -308,31 +312,48 @@ begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but useful when downloading FPC/Lazarus from... SVN ;)
   // This won't work, we'd get an .msi:
   // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
+  result:=false;
+  if FSVNDirectory='' then FSVNDirectory:='c:\development\svn';
+  ForceDirectories(FSVNDirectory);
   Result := DownloadHTTP('http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
     , MakePath);
-  //todo: extract entire stuff with unzip somewhere. makedir actually is not a good idea; also we get a subdir svn-win32-1.7.2/bin
-  //
+  debugln('todo: svn: extract entire archive with unzip somewhere. makedir actually is not a good idea; also we get a subdir svn-win32-1.7.2/bin');
   FUpdater.SVNExecutable := MakePath + 'svn' + FExecutableExtension;
+  result:=true;
 end;
 
 function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
+  Output: string;
 begin
   OperationSucceeded := true;
-  // Check for binutils directory, make and unzip executables.
-  // Download if needed; will download unzip - needed for SVN download
   FUnzip := FMakePath + 'unzip' + FExecutableExtension;
   if OperationSucceeded then
   begin
+    // Check for binutils directory, make and unzip executables.
+    // Download if needed; will download unzip - needed for SVN download
     if (DirectoryExists(FMakePath) = False) or
-      (FileExists(FMakePath + 'make' + FExecutableExtension) = False) or
+      (FileExists(FMake) = False) or
       (FileExists(FUnzip) = False) then
     begin
       debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
+
+  if OperationSucceeded then
+  begin
+    // Check for proper make executable
+    try
+      Output:='';
+      RunOutput(FMake, '-v', Output);
+      if Ansipos('GNU Make', Output)=0 then raise Exception.Create('Found make executable but it is not GNU Make.');
+    except
+      // ignore errors, this is only an extra check
+    end;
+  end;
+
 
   //Check for SVN, download if needed
   if OperationSucceeded then
@@ -345,9 +366,21 @@ begin
   end;
 
 
-  //Check for bootstrap compiler, download if needed
   if OperationSucceeded then
   begin
+    // Check for proper FPC compiler
+    try
+      Output:='';
+      RunOutput(BootstrapCompiler, '-h', Output); // Show help without waiting
+      if Ansipos('Free Pascal Compiler', Output)=0 then raise Exception.Create('Found FPC executable but it is not a Free Pascal compiler.');
+    except
+      // ignore errors, this is only an extra check
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Check for bootstrap compiler, download if needed
     if (FileExists(BootstrapCompiler) = False) and (OperationSucceeded) then
     begin
       debugln('Bootstrap compiler not found, downloading');
@@ -381,6 +414,74 @@ end;
 function TInstaller.GetMakePath: string;
 begin
   Result := FMakePath;
+end;
+
+function TInstaller.Run(Executable, Params: string): longint;
+begin
+  debugln('Calling ' + Executable + ' ' + Params);
+  result:=SysUtils.ExecuteProcess(Executable, Params, [])
+end;
+
+function TInstaller.RunOutput(Executable, Params: string; var Output: TStringList): longint;
+var
+  SpawnedProcess: TProcess;
+  OutputStream: TMemoryStream;
+
+  function ReadOutput: boolean;
+    // returns true if output was actually read
+  const
+    BufSize = 4096;
+  var
+    Buffer: array[0..BufSize - 1] of byte;
+    ReadBytes: integer;
+  begin
+    Result := False;
+    while SpawnedProcess.Output.NumBytesAvailable > 0 do
+    begin
+      ReadBytes := SpawnedProcess.Output.Read(Buffer, BufSize);
+      OutputStream.Write(Buffer, ReadBytes);
+      Result := True;
+    end;
+  end;
+
+begin
+  result := 255; //Preset to failure
+  OutputStream:=TMemoryStream.Create;
+  SpawnedProcess := TProcess.Create(nil);
+  try
+    // We can't use .executable and .parameters as we're passing multiple parameters which
+    // would have to be parsed
+    SpawnedProcess.CommandLine := Executable + ' ' + Params;
+    SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
+    SpawnedProcess.ShowWindow := swoHIDE;
+    SpawnedProcess.Execute;
+    while SpawnedProcess.Running do
+    begin
+      if not ReadOutput then
+        Sleep(100);
+    end;
+    ReadOutput;
+    OutputStream.Position := 0;
+    Output.LoadFromStream(OutputStream);
+    Result := SpawnedProcess.ExitStatus;
+  finally
+    OutputStream.Free;
+    SpawnedProcess.Free;
+  end;
+end;
+
+function TInstaller.RunOutput(Executable, Params: string; var Output: String
+  ): longint;
+var
+  OutputStringList: TStringList;
+begin
+  try
+    OutputStringList:=TStringList.Create;
+    RunOutput(Executable, Params, OutputStringList);
+    Output:=OutputStringList.Text;
+  finally
+    OutputStringList.Free;
+  end;
 end;
 
 procedure Tinstaller.SetFPCDirectory(Directory: string);
@@ -417,36 +518,31 @@ var
   Params: string;
 begin
   OperationSucceeded := CheckAndGetNeededExecutables;
-  //MakePath sure we have the proper tools.
+  //Make sure we have the proper tools.
   if FUpdater.UpdateFPC = False then
   begin
     OperationSucceeded := False;
   end;
   if OperationSucceeded then
   begin
-    // MakePath clean using bootstrap compiler
+    // Make clean using bootstrap compiler
     // Note no error on failure, might be recoverable
     Executable := FMake;
     Params := ' FPC=' + FBootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' clean';
     debugln('Running make clean for fpc:');
-    debugln(Executable + ' ' + Params);
-    //todo: check for bootstrap fpc compiler
-    // MakePath (compile)
-    SysUtils.ExecuteProcess(Executable, params, []);
+    Run(Executable, params);
   end;
 
   if OperationSucceeded then
   begin
-    // MakePath (clean & all) using bootstrap compiler
+    // Make (clean & all) using bootstrap compiler
     Executable := FMake;
     Params := ' FPC=' + FBootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
     debugln('debug: running make for fpc:');
     debugln(Executable + ' ' + Params);
-    //todo: check for bootstrap fpc compiler
-    // MakePath (compile)
-    if SysUtils.ExecuteProcess(Executable, params, []) <> 0 then
+    if Run(Executable, params) <> 0 then
       OperationSucceeded := False;
   end;
   if OperationSucceeded then
@@ -458,8 +554,7 @@ begin
       DirectorySeparator + 'ppc386' + ' --directory=' + FPCDirectory +
       ' PREFIX=' + FPCDIRECTORY + ' UPXPROG=echo COPYTREE=echo' + ' install';
     debugln('debug: running make install for fpc:');
-    debugln(Executable + ' ' + Params);
-    if SysUtils.ExecuteProcess(Executable, Params, []) <> 0 then
+    if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
   end;
   if OperationSucceeded then
@@ -472,7 +567,7 @@ begin
       ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
       DirectorySeparator + 'ppc386' + ' UPXPROG=echo COPYTREE=echo' +
       ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' crossinstall';
-    if SysUtils.ExecuteProcess(Executable, Params, []) <> 0 then
+    if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
   end;
   if OperationSucceeded then
@@ -487,8 +582,7 @@ begin
       FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
       'i386-win32' + DirectorySeparator + 'fpc.cfg"';
     debugln('Debug: Running fpcmkcfg: ');
-    debugln(Executable + ' ' + Params);
-    if SysUtils.ExecuteProcess(Executable, Params, []) <> 0 then
+    if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
   end;
   Result := OperationSucceeded;
@@ -500,20 +594,28 @@ var
   OperationSucceeded: boolean;
   Params: string;
 begin
+  //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
-  //MakePath sure we have the proper tools.
+
   // Download Lazarus source:
   if OperationSucceeded = True then
     OperationSucceeded := FUpdater.UpdateLazarus;
   if OperationSucceeded then
-    debugln('debug: lazarus ok')
+    debugln('Got Lazarus sources ok')
   else
-    debugln('debug: lazarus not ok');
-  // MakePath (compile)
+    debugln('Did not get Lazarus sources');
+
+  // Make sure primary config path exists
+  if DirectoryExists(LazarusPrimaryConfigPath) = False then
+  begin
+    ForceDirectories(LazarusPrimaryConfigPath);
+  end;
+
+  // Make (compile)
   // todo: remove hardcoded MakePath, ppc compiler
   if OperationSucceeded then
   begin
-    // MakePath clean; failure here might be recoverable, so no fiddling with OperationSucceeded
+    // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
     //todo: fix for linux
     // Note: you apparently can't pass FPC in the FPC= statement.
     Executable := FMake;
@@ -521,9 +623,7 @@ begin
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
       'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' clean';
     debugln('Lazarus: running make clean:');
-    debugln(Executable + ' ' + Params);
-    (SysUtils.ExecuteProcess(Executable,
-      Params, []));
+    Run(Executable, Params);
   end;
   if OperationSucceeded then
   begin
@@ -533,8 +633,7 @@ begin
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
       'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' all';
     debugln('Lazarus: running make all:');
-    debugln(Executable + ' ' + Params);
-    if (SysUtils.ExecuteProcess(Executable, Params, [])) <> 0 then
+    if (Run(Executable, Params)) <> 0 then
       OperationSucceeded := False;
   end;
   if OperationSucceeded then
@@ -546,12 +645,11 @@ begin
       DirectorySeparator + 'tools' + DirectorySeparator + 'lazdatadesktop' +
       DirectorySeparator + 'lazdatadesktop.lpr';
     debugln('Lazarus: compiling data desktop:');
-    debugln(Executable + ' ' + Params);
-    if (SysUtils.ExecuteProcess(Executable, Params, [])) <> 0 then
+    if (Run(Executable, Params)) <> 0 then
       OperationSucceeded := False;
   end;
-  //todo: setup primary config path, dir etc.
-  //todo: MakePath shortcut on desktop, maybe start menu
+  debugln('todo: setup primary config path, dir etc.');
+  debugln('todo: make shortcut on desktop, maybe start menu');
   Result := OperationSucceeded;
 end;
 
@@ -587,10 +685,10 @@ begin
   FExecutableExtension := '';
   {$ENDIF WINDOWS}
   FLazarusPrimaryConfigPath := '';
+  FSVNDirectory:='';
   FUpdater := TUpdater.Create;
   FUnzip := '';
-  //Directory where Lazarus installation will end up
-  //todo: create if it doesn't exist
+  //Directory where Lazarus installation config will end up (primary config path)
   {$IFDEF Windows}
   AppDataPath := '';
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
@@ -599,10 +697,6 @@ begin
   writeln('todo: fix Lazarus primary config path, somewhere in ~ I guess.');
   LazarusPrimaryConfigPath := '/tmp'; //error!???
   {$ENDIF}
-  if DirectoryExists(LazarusPrimaryConfigPath) = False then
-  begin
-    CreateDir(LazarusPrimaryConfigPath);
-  end;
   SetMakePath('');
 end;
 

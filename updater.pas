@@ -85,9 +85,6 @@ end;
 function Tupdater.Updatefpc: boolean;
 begin
   FSVNClient.LocalRepository := FPCDirectory;
-  //todo: hardcoded FPC repository for now
-  //use svn2, apparently faster than the svn server ;)
-  //todo: rebase later on so users can send patches?
   FSVNClient.Repository := FPCURL;
   FSVNClient.CheckOutOrUpdate;
   //todo: check for/handle errors
@@ -97,11 +94,8 @@ end;
 function Tupdater.Updatelazarus: boolean;
 begin
   FSVNClient.LocalRepository := LazarusDirectory;
-  //todo: hardcoded Lazarus repository for now
-  //use svn2, apparently faster than the svn server ;)
   FSVNClient.Repository := FLazarusURL;
   FSVNClient.CheckOutOrUpdate;
-  //todo: check for/handle errors
   Result := True;
   writeln('debug: lazarus checkout/update complete');
   sleep(100);

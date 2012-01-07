@@ -86,13 +86,19 @@ implementation
 { TSVNClient }
 procedure TSVNClient.FindSvnExecutable;
 begin
-  //todo: add current directory for windows
   if FileExists(FSvnExecutable) then
   begin
     exit;
   end;
+
+  if FSVNExecutable='' then
+  begin
+    //todo: check what happens if svn exe is in path but not specified here?
+    // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
+  end;
+
 {$IFDEF windows}
-  // Some popular locations
+  // Some popular locations for SlikSVN and Subversion
   if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
   if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') + '\Subversion\bin\svn.exe';
   if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\SlikSvn\bin\svn.exe';
@@ -105,9 +111,9 @@ begin
 {$IFDEF windows}
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn'); //executable directory
+{$ENDIF}
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := ('.\svn'); //current directory
-{$ENDIF}
 end;
 
 function TSVNClient.GetSVNExecutable: string;
@@ -137,6 +143,8 @@ end;
 procedure Tsvnclient.CheckOutOrUpdate;
 
 begin
+  //todo: for this and update, indicate whether there actually were any updates.
+  //maybe with an oldrevision and newrevision property? something else? the svn log?
   if LocalRepositoryExists = False then
   begin
     // Checkout (first download)
@@ -210,15 +218,8 @@ var
     end;
   end;
 
-  function GetOutput: string;
-  begin
-    SetLength(Result, Output.Size);
-    Output.Seek(0, soBeginning);
-    Output.Read(Result[1], Length(Result));
-  end;
-
 begin
-  FReturnCode := 255; //Reset to failure
+  FReturnCode := 255; //Preset to failure
   // Look for SVN if necessary; error if needed:
   if not FileExists(FSVNExecutable) then;
     FindSvnExecutable;
@@ -254,12 +255,6 @@ begin
     Result := ExecuteSvnCommand(Command, OutputStream);
     OutputStream.Position := 0;
     Output.LoadFromStream(OutputStream); //load output
-    {
-    writeln('debug: svn command: ' + command + ' gives this output:');
-    writeln('debug: *** begin');
-    writeln(Output.Text);
-    writeln('debug: *** end');
-    }
   finally
     OutputStream.Free;
   end;
