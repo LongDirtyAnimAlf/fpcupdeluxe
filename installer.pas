@@ -62,6 +62,7 @@ type
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
     function CheckAndGetNeededExecutables: boolean;
+    function FindSVNSubDirs(): boolean;
     function GetBootstrapCompiler: string;
     //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
@@ -328,7 +329,6 @@ function TInstaller.DownloadSVN: boolean;
 var
   OperationSucceeded: boolean;
   SVNZip: string;
-  SVNFiles: TStringList;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
   // This won't work, we'd get an .msi:
@@ -336,12 +336,6 @@ begin
   // We don't want msi/Windows installer - this way we can hopefully support Windows 2000
   OperationSucceeded:=true;
   Result := False;
-  {$IFDEF Windows}
-  if FSVNDirectory = '' then
-    FSVNDirectory := 'c:\development\svn\';
-  {$ELSE}
-  raise Exception.Create('todo: Fix this code'); //probably somewhere in /home??
-  {$ENDIF}
   ForceDirectories(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName+'.zip';
   OperationSucceeded := DownloadHTTP(
@@ -349,30 +343,15 @@ begin
     , SVNZip);
   if OperationSucceeded then
   begin
+    // Extract, overwrite
     // apparently can't specify "s with -d option!??!
-    if Run(FUnzip, '"' + SVNZip + '" -d ' + FSVNDirectory)<>0 then OperationSucceeded:=false;
+    if Run(FUnzip, '-o "' + SVNZip + '" -d ' + FSVNDirectory)<>0 then OperationSucceeded:=false;
   end;
 
   if OperationSucceeded then
   begin
-    //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
-    SVNFiles:=FindAllFiles(FSVNDirectory, 'svn' + FExecutableExtension, True);
-    try
-      if SVNFiles.Count > 0 then
-      begin
-        // Just get first result.
-        FUpdater.SVNExecutable := SVNFiles.Strings[0];
-        sysutils.deletefile(SVNZip);//Get rid of temp zip
-        OperationSucceeded:=true;
-      end
-      else
-      begin
-        debugln('Could not find svn executable in or under ' + FSVNDirectory);
-        OperationSucceeded := False;
-      end;
-    finally
-      SVNFiles.Free;
-    end;
+    OperationSucceeded:=FindSVNSubDirs;
+    if OperationSucceeded then sysutils.deletefile(SVNZip); //Get rid of temp zip if success.
   end;
   Result:=OperationSucceeded;
 end;
@@ -413,8 +392,18 @@ begin
   //Check for SVN, download if needed
   if OperationSucceeded then
   begin
+    // Make sure we have a sensible default.
+    // Set it here so multiple calls to CheckExes will not redownload SVN all the time
+    {$IFDEF Windows}
+    if FSVNDirectory = '' then
+      FSVNDirectory := 'c:\development\svn\';
+    {$ELSE}
+    raise Exception.Create('todo: Fix this code'); //probably somewhere in /home??
+    {$ENDIF}
+    FindSVNSubDirs; //Find svn in or below FSVNDirectory.
     if not FileExists(FUpdater.SVNExecutable) then
     begin
+      // Actually could be in SVN dir
       debugln('SVN not found in ' + FUpdater.SVNExecutable + ', downloading');
       OperationSucceeded := DownloadSVN;
     end;
@@ -440,6 +429,31 @@ begin
   end;
 
   Result := OperationSucceeded;
+end;
+
+function TInstaller.FindSVNSubDirs(): boolean;
+var
+  SVNFiles: TStringList;
+  OperationSucceeded: boolean;
+begin
+  //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
+  SVNFiles:=FindAllFiles(FSVNDirectory, 'svn' + FExecutableExtension, True);
+  try
+    if SVNFiles.Count > 0 then
+    begin
+      // Just get first result.
+      FUpdater.SVNExecutable := SVNFiles.Strings[0];
+      OperationSucceeded:=true;
+    end
+    else
+    begin
+      debugln('Could not find svn executable in or under ' + FSVNDirectory);
+      OperationSucceeded := False;
+    end;
+  finally
+    SVNFiles.Free;
+  end;
+  Result:=OperationSucceeded;
 end;
 
 function TInstaller.GetBootstrapCompiler: string;
