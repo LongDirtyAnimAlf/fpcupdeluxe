@@ -70,7 +70,7 @@ type
     function GetMakePath: string;
     function Run(Executable, Params: string): longint;
     function RunOutput(Executable, Params: string; var Output: TStringList): longint;
-    function RunOutput(Executable, Params: string; var Output: String): longint;
+    function RunOutput(Executable, Params: string; var Output: string): longint;
     procedure SetFPCDirectory(Directory: string);
     procedure SetFPCUrl(AValue: string);
     procedure SetLazarusDirectory(Directory: string);
@@ -106,7 +106,7 @@ procedure debugln(Message: string);
 implementation
 
 uses
-  httpsend, strutils, process,FileUtil {Requires LCL}
+  httpsend, strutils, process, FileUtil {Requires LCL}
 {$IFDEF WINDOWS}
   , shlobj;
 
@@ -282,8 +282,8 @@ begin
           500: raise Exception.Create('No internet connection available');
             //Internal Server Error ('+aURL+')');
           else
-            raise Exception.Create('Download failed with error code ' + IntToStr(
-              HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
+            raise Exception.Create('Download failed with error code ' +
+              IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
         end;//case
       end;//while
       debugln('resulting url after sf redir: *' + URL + '*');
@@ -309,28 +309,30 @@ end;
 
 function TInstaller.DownloadSVN: boolean;
 var
-  SVNZip:string;
+  SVNZip: string;
   SVNFiles: TStringList;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
   // This won't work, we'd get an .msi:
   // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
   // We don't want msi/Windows installer - this way we can hopefully support Windows 2000
-  result:=false;
+  Result := False;
   {$IFDEF Windows}
-  if FSVNDirectory='' then FSVNDirectory:='c:\development\svn';
+  if FSVNDirectory = '' then
+    FSVNDirectory := 'c:\development\svn';
   {$ELSE}
-  raise exception.create('todo: Fix this code'); //probably somewhere in /home??
+  raise Exception.Create('todo: Fix this code'); //probably somewhere in /home??
   {$ENDIF}
   ForceDirectories(FSVNDirectory);
-  SVNZip:=FSVNDirectory+'svn.zip';
-  Result := DownloadHTTP('http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
+  SVNZip := FSVNDirectory + 'svn.zip';
+  Result := DownloadHTTP(
+    'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
     , SVNZip);
-  Run(FUnzip,'"'+SVNZip+'" -d "'+FSVNDirectory+'"');
+  Run(FUnzip, '"' + SVNZip + '" -d "' + FSVNDirectory + '"');
   //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
-  FindAllFiles(FSVNDirectory, 'svn'+FExecutableExtension,true);
+  FindAllFiles(FSVNDirectory, 'svn' + FExecutableExtension, True);
   try
-    if SVNFiles.Count>0 then
+    if SVNFiles.Count > 0 then
     begin
       // Just get first result.
       FUpdater.SVNExecutable := SVNFiles.Strings[0];
@@ -338,7 +340,7 @@ begin
     else
     begin
       debugln('Could not find svn executable in or under ' + FSVNDirectory);
-      result:=false;
+      Result := False;
     end;
   finally
     SVNFiles.Free;
@@ -350,14 +352,13 @@ var
   OperationSucceeded: boolean;
   Output: string;
 begin
-  OperationSucceeded := true;
+  OperationSucceeded := True;
   FUnzip := FMakePath + 'unzip' + FExecutableExtension;
   if OperationSucceeded then
   begin
     // Check for binutils directory, make and unzip executables.
     // Download if needed; will download unzip - needed for SVN download
-    if (DirectoryExists(FMakePath) = False) or
-      (FileExists(FMake) = False) or
+    if (DirectoryExists(FMakePath) = False) or (FileExists(FMake) = False) or
       (FileExists(FUnzip) = False) then
     begin
       debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
@@ -369,9 +370,10 @@ begin
   begin
     // Check for proper make executable
     try
-      Output:='';
+      Output := '';
       RunOutput(FMake, '-v', Output);
-      if Ansipos('GNU Make', Output)=0 then raise Exception.Create('Found make executable but it is not GNU Make.');
+      if Ansipos('GNU Make', Output) = 0 then
+        raise Exception.Create('Found make executable but it is not GNU Make.');
     except
       // ignore errors, this is only an extra check
     end;
@@ -383,7 +385,7 @@ begin
   begin
     if (FileExists(FUpdater.SVNExecutable) = False) and (OperationSucceeded) then
     begin
-      debugln('SVN not found in '+FUpdater.SVNExecutable+', downloading');
+      debugln('SVN not found in ' + FUpdater.SVNExecutable + ', downloading');
       OperationSucceeded := DownloadSVN;
     end;
   end;
@@ -393,9 +395,11 @@ begin
   begin
     // Check for proper FPC compiler
     try
-      Output:='';
+      Output := '';
       RunOutput(BootstrapCompiler, '-h', Output); // Show help without waiting
-      if Ansipos('Free Pascal Compiler', Output)=0 then raise Exception.Create('Found FPC executable but it is not a Free Pascal compiler.');
+      if Ansipos('Free Pascal Compiler', Output) = 0 then
+        raise Exception.Create(
+          'Found FPC executable but it is not a Free Pascal compiler.');
     except
       // ignore errors, this is only an extra check
     end;
@@ -442,10 +446,11 @@ end;
 function TInstaller.Run(Executable, Params: string): longint;
 begin
   debugln('Calling ' + Executable + ' ' + Params);
-  result:=SysUtils.ExecuteProcess(Executable, Params, [])
+  Result := SysUtils.ExecuteProcess(Executable, Params, []);
 end;
 
-function TInstaller.RunOutput(Executable, Params: string; var Output: TStringList): longint;
+function TInstaller.RunOutput(Executable, Params: string;
+  var Output: TStringList): longint;
 var
   SpawnedProcess: TProcess;
   OutputStream: TMemoryStream;
@@ -468,8 +473,8 @@ var
   end;
 
 begin
-  result := 255; //Preset to failure
-  OutputStream:=TMemoryStream.Create;
+  Result := 255; //Preset to failure
+  OutputStream := TMemoryStream.Create;
   SpawnedProcess := TProcess.Create(nil);
   try
     // We can't use .executable and .parameters as we're passing multiple parameters which
@@ -493,15 +498,14 @@ begin
   end;
 end;
 
-function TInstaller.RunOutput(Executable, Params: string; var Output: String
-  ): longint;
+function TInstaller.RunOutput(Executable, Params: string; var Output: string): longint;
 var
   OutputStringList: TStringList;
 begin
   try
-    OutputStringList:=TStringList.Create;
+    OutputStringList := TStringList.Create;
     RunOutput(Executable, Params, OutputStringList);
-    Output:=OutputStringList.Text;
+    Output := OutputStringList.Text;
   finally
     OutputStringList.Free;
   end;
@@ -598,13 +602,13 @@ begin
   begin
     // Create fpc.cfg if needed
     //todo: replace fpc.cfg location with correct bin path for resulting compiler (differs per platform); we'll need it for compilation/make above, anyway
-    FPCCfg:= FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
+    FPCCfg := FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
       'i386-win32' + DirectorySeparator + 'fpc.cfg';
-    if FileExists(FPCCg) = false then
+    if FileExists(FPCCfg) = False then
     begin
       Executable := FPCDirectory + DirectorySeparator + 'bin' +
         DirectorySeparator + 'i386-win32' + DirectorySeparator + 'fpcmkcfg';
-      Params := ' -d basepath="' + FPCDirectory + '"' + ' -o "'+FPCCfg +'"';
+      Params := ' -d basepath="' + FPCDirectory + '"' + ' -o "' + FPCCfg + '"';
       debugln('Debug: Running fpcmkcfg: ');
       if Run(Executable, Params) <> 0 then
         OperationSucceeded := False;
@@ -712,7 +716,7 @@ begin
   FExecutableExtension := '';
   {$ENDIF WINDOWS}
   FLazarusPrimaryConfigPath := '';
-  FSVNDirectory:='';
+  FSVNDirectory := '';
   FUpdater := TUpdater.Create;
   FUnzip := '';
   //Directory where Lazarus installation config will end up (primary config path)

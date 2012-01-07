@@ -91,7 +91,7 @@ begin
     exit;
   end;
 
-  if FSVNExecutable='' then
+  if FSVNExecutable = '' then
   begin
     //todo: check what happens if svn exe is in path but not specified here?
     // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
@@ -99,10 +99,16 @@ begin
 
 {$IFDEF windows}
   // Some popular locations for SlikSVN and Subversion
-  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
-  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') + '\Subversion\bin\svn.exe';
-  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\SlikSvn\bin\svn.exe';
-  if not FileExists(FSvnExecutable) then FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') + '\SlikSvn\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
+      '\Subversion\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\SlikSvn\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
+      '\SlikSvn\bin\svn.exe';
 {$ENDIF}
 
   if not FileExists(FSvnExecutable) then
@@ -118,7 +124,7 @@ end;
 
 function TSVNClient.GetSVNExecutable: string;
 begin
-  result:=FSVNExecutable;
+  Result := FSVNExecutable;
 end;
 
 procedure Tsvnclient.Checkout;
@@ -171,9 +177,9 @@ end;
 
 procedure TSVNClient.SetSVNExecutable(AValue: string);
 begin
-  if FSVNExecutable<>AValue then
+  if FSVNExecutable <> AValue then
   begin
-    FSVNExecutable:=AValue;
+    FSVNExecutable := AValue;
     FindSVNExecutable; //Make sure it actually exists
   end;
 end;
@@ -222,7 +228,7 @@ begin
   FReturnCode := 255; //Preset to failure
   // Look for SVN if necessary; error if needed:
   if not FileExists(FSVNExecutable) then;
-    FindSvnExecutable;
+  FindSvnExecutable;
   if not FileExists(FSvnExecutable) then
     raise ESVNClientError.Create('No SVN executable found');
 
