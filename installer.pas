@@ -51,6 +51,7 @@ type
     FBootstrapCompilerURL: string;
     FCompilerName: string;
     FExecutableExtension: string;
+    FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
     FLazarusPrimaryConfigPath: string;
     FMake: string;
     FMakePath: string;
@@ -583,6 +584,7 @@ end;
 
 function Tinstaller.GetFPC: boolean;
 var
+  BinPath: string;
   Executable: string;
   FPCCfg: string;
   OperationSucceeded: boolean;
@@ -599,7 +601,7 @@ begin
     // Make clean using bootstrap compiler
     // Note no error on failure, might be recoverable
     Executable := FMake;
-    Params := ' FPC=' + FBootstrapCompilerDirectory + ' --directory=' +
+    Params := ' FPC=' + BootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' clean';
     debugln('Running make clean for fpc:');
     Run(Executable, params);
@@ -609,7 +611,7 @@ begin
   begin
     // Make (clean & all) using bootstrap compiler
     Executable := FMake;
-    Params := ' FPC=' + FBootstrapCompilerDirectory + ' --directory=' +
+    Params := ' FPC=' + BootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
     debugln('Running make for FPC:');
     debugln(Executable + ' ' + Params);
@@ -621,21 +623,24 @@ begin
     // Install using newly compiled compiler
     Executable := FMake;
     Params := ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
-      DirectorySeparator + 'ppc386' + ' --directory=' + FPCDirectory +
+      DirectorySeparator + CompilerName + ' --directory=' + FPCDirectory +
       ' PREFIX=' + FPCDIRECTORY + ' UPXPROG=echo COPYTREE=echo' + ' install';
     debugln('Running make install for FPC:');
     if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
   end;
+
+  // Let everyone know of our shiny new compiler:
+  if OperationSucceeded then FInstalledCompiler:=FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
+    'i386-win32' + DirectorySeparator + CompilerName;
+
   if OperationSucceeded then
   begin
-    // Install crosscompiler
+    // Install crosscompiler - todo: only for Windows!?!?
     Executable := FMake;
     debugln('Running Make crossinstall:');
-    debugln(Executable + ' ' + Params);
     Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
-      ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
-      DirectorySeparator + 'ppc386' + ' UPXPROG=echo COPYTREE=echo' +
+      ' FPC='+ FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
       ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' crossinstall';
     if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
@@ -644,13 +649,11 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
-    //todo: replace fpc.cfg location with correct bin path for resulting compiler (differs per platform); we'll need it for compilation/make above, anyway
-    FPCCfg := FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + 'fpc.cfg';
+    BinPath:=ExtractFilePath(FInstalledCompiler);
+    FPCCfg := BinPath + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
-      Executable := FPCDirectory + DirectorySeparator + 'bin' +
-        DirectorySeparator + 'i386-win32' + DirectorySeparator + 'fpcmkcfg';
+      Executable := BinPath + 'fpcmkcfg';
       Params := ' -d basepath="' + FPCDirectory + '"' + ' -o "' + FPCCfg + '"';
       debugln('Debug: Running fpcmkcfg: ');
       if Run(Executable, Params) <> 0 then
@@ -673,6 +676,11 @@ begin
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
 
+  // If we haven't installed FPC, this won't be set
+  // todo: fix FPC for linux/other platforms
+  if FInstalledCompiler='' then FInstalledCompiler:=FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
+      'i386-win32' + DirectorySeparator + CompilerName;
+
   // Download Lazarus source:
   if OperationSucceeded = True then
     OperationSucceeded := FUpdater.UpdateLazarus;
@@ -687,30 +695,28 @@ begin
     ForceDirectories(LazarusPrimaryConfigPath);
   end;
 
-  // Make (compile)
   if OperationSucceeded then
   begin
     // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
-    // todo: fix FPC argument for linux/other platforms
     // Note: you apparently can't pass FPC in the FPC= statement, you need to pass a PPC executable.
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' clean';
+      ' FPC='+ FInstalledCompiler + ' clean';
     debugln('Lazarus: running make clean:');
     Run(Executable, Params);
   end;
+
   if OperationSucceeded then
   begin
-    // MakePath all
+    // Make all
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + 'ppc386' + FExecutableExtension + ' all';
+      ' FPC='+ FInstalledCompiler + ' all';
     debugln('Lazarus: running make all:');
     if (Run(Executable, Params)) <> 0 then
       OperationSucceeded := False;
   end;
+
   if OperationSucceeded then
   begin
     // Build data desktop, nice example of building with lazbuild
@@ -770,6 +776,7 @@ begin
   {$ELSE}
   FExecutableExtension := '';
   {$ENDIF WINDOWS}
+  FInstalledCompiler:='';
   FLazarusPrimaryConfigPath := '';
   FSVNDirectory := '';
   FUpdater := TUpdater.Create;
