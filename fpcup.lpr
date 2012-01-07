@@ -76,7 +76,6 @@ begin
     //svn2 seems to lag behind a lot.
     FInstaller.MakePath := 'C:\development\binutils\';
     //Existing make needed to compile FPC. Will be downloaded if doesn't exit
-    //todo: check for executables (right version as well), get them if required; should be class called by installer
     installer.debugln('getting and compiling fpc:');
     FInstaller.GetFPC;
     installer.debugln('getting and compiling lazarus:');

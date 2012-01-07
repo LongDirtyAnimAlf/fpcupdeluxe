@@ -106,7 +106,7 @@ procedure debugln(Message: string);
 implementation
 
 uses
-  httpsend, strutils, process
+  httpsend, strutils, process,FileUtil {Requires LCL}
 {$IFDEF WINDOWS}
   , shlobj;
 
@@ -308,18 +308,41 @@ begin
 end;
 
 function TInstaller.DownloadSVN: boolean;
+var
+  SVNZip:string;
+  SVNFiles: TStringList;
 begin
-  // Download SVN in make path. Not required for making FPC/Lazarus, but useful when downloading FPC/Lazarus from... SVN ;)
+  // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
   // This won't work, we'd get an .msi:
   // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
+  // We don't want msi/Windows installer - this way we can hopefully support Windows 2000
   result:=false;
+  {$IFDEF Windows}
   if FSVNDirectory='' then FSVNDirectory:='c:\development\svn';
+  {$ELSE}
+  raise exception.create('todo: Fix this code'); //probably somewhere in /home??
+  {$ENDIF}
   ForceDirectories(FSVNDirectory);
+  SVNZip:=FSVNDirectory+'svn.zip';
   Result := DownloadHTTP('http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
-    , MakePath);
-  debugln('todo: svn: extract entire archive with unzip somewhere. makedir actually is not a good idea; also we get a subdir svn-win32-1.7.2/bin');
-  FUpdater.SVNExecutable := MakePath + 'svn' + FExecutableExtension;
-  result:=true;
+    , SVNZip);
+  Run(FUnzip,'"'+SVNZip+'" -d "'+FSVNDirectory+'"');
+  //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
+  FindAllFiles(FSVNDirectory, 'svn'+FExecutableExtension,true);
+  try
+    if SVNFiles.Count>0 then
+    begin
+      // Just get first result.
+      FUpdater.SVNExecutable := SVNFiles.Strings[0];
+    end
+    else
+    begin
+      debugln('Could not find svn executable in or under ' + FSVNDirectory);
+      result:=false;
+    end;
+  finally
+    SVNFiles.Free;
+  end;
 end;
 
 function TInstaller.CheckAndGetNeededExecutables: boolean;
@@ -514,6 +537,7 @@ end;
 function Tinstaller.GetFPC: boolean;
 var
   Executable: string;
+  FPCCfg: string;
   OperationSucceeded: boolean;
   Params: string;
 begin
@@ -540,7 +564,7 @@ begin
     Executable := FMake;
     Params := ' FPC=' + FBootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
-    debugln('debug: running make for fpc:');
+    debugln('Running make for FPC:');
     debugln(Executable + ' ' + Params);
     if Run(Executable, params) <> 0 then
       OperationSucceeded := False;
@@ -548,12 +572,11 @@ begin
   if OperationSucceeded then
   begin
     // Install using newly compiled compiler
-    // todo: check where to install
     Executable := FMake;
     Params := ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
       DirectorySeparator + 'ppc386' + ' --directory=' + FPCDirectory +
       ' PREFIX=' + FPCDIRECTORY + ' UPXPROG=echo COPYTREE=echo' + ' install';
-    debugln('debug: running make install for fpc:');
+    debugln('Running make install for FPC:');
     if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
   end;
@@ -570,20 +593,26 @@ begin
     if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
   end;
+
   if OperationSucceeded then
   begin
-    // Create fpc.cfg
-    //todo: replace -o path with bin path for resulting compiler; we'll need it for compilation/make above, anyway
-    //todo: only generate when it doesn't exist yet
-    //todo: seems to generate 64 bit config!??!
-    Executable := FPCDirectory + DirectorySeparator + 'bin' +
-      DirectorySeparator + 'i386-win32' + DirectorySeparator + 'fpcmkcfg';
-    Params := ' -d basepath="' + FPCDirectory + '"' + ' -o "' +
-      FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + 'fpc.cfg"';
-    debugln('Debug: Running fpcmkcfg: ');
-    if Run(Executable, Params) <> 0 then
-      OperationSucceeded := False;
+    // Create fpc.cfg if needed
+    //todo: replace fpc.cfg location with correct bin path for resulting compiler (differs per platform); we'll need it for compilation/make above, anyway
+    FPCCfg:= FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
+      'i386-win32' + DirectorySeparator + 'fpc.cfg';
+    if FileExists(FPCCg) = false then
+    begin
+      Executable := FPCDirectory + DirectorySeparator + 'bin' +
+        DirectorySeparator + 'i386-win32' + DirectorySeparator + 'fpcmkcfg';
+      Params := ' -d basepath="' + FPCDirectory + '"' + ' -o "'+FPCCfg +'"';
+      debugln('Debug: Running fpcmkcfg: ');
+      if Run(Executable, Params) <> 0 then
+        OperationSucceeded := False;
+    end
+    else
+    begin
+      debugln('fpc.cfg already exists; leaving it alone.');
+    end;
   end;
   Result := OperationSucceeded;
 end;
@@ -612,12 +641,11 @@ begin
   end;
 
   // Make (compile)
-  // todo: remove hardcoded MakePath, ppc compiler
   if OperationSucceeded then
   begin
     // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
-    //todo: fix for linux
-    // Note: you apparently can't pass FPC in the FPC= statement.
+    // todo: fix FPC argument for linux/other platforms
+    // Note: you apparently can't pass FPC in the FPC= statement, you need to pass a PPC executable.
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
@@ -648,7 +676,6 @@ begin
     if (Run(Executable, Params)) <> 0 then
       OperationSucceeded := False;
   end;
-  debugln('todo: setup primary config path, dir etc.');
   debugln('todo: make shortcut on desktop, maybe start menu');
   Result := OperationSucceeded;
 end;
@@ -660,7 +687,7 @@ begin
   // We'll set the bootstrap compiler to a file in the temp dir.
   // This won't exist so the CheckAndGetNeededExecutables code will download it for us.
   // User can specify an existing compiler later on, if she wants to.
-  FBootstrapCompiler := GetTempFileName + FExecutableExtension;
+  FBootstrapCompiler := SysUtils.GetTempFileName + FExecutableExtension;
 
   //We don't want to download from FTP, but it's useful to record it here so we can update the URLs below
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
