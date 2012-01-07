@@ -64,8 +64,8 @@ begin
   try
     // Adjust these directories to taste/your situation.
     FInstaller := TInstaller.Create;
-    FInstaller.BootstrapCompiler := 'c:\lazarus\fpc\2.5.1\bin\i386-win32\ppc386.exe';
-    //Existing compiler that can compile FPC sources. Should be FPC 2.4.4, other versions might work
+    FInstaller.BootstrapCompilerDirectory := 'c:\lazarus\fpc\2.5.1\bin\i386-win32\';
+    //Has existing compiler that can compile FPC sources. Should be FPC 2.4.4, other versions might work
     FInstaller.FPCDirectory := 'c:\development\fpc';
     //Directory where FPC installation will end up
     { Using svn2; later on rebase or something for patches?}
