@@ -83,7 +83,8 @@ type
     property CompilerName: string read FCompilerName;
     //Full path to FPC compiler that is installed by this program
     property BootstrapCompiler: string read GetBootstrapCompiler;
-    property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
+    property BootstrapCompilerDirectory: string
+      read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerURL: string read FBootstrapCompilerURL
       write FBootstrapCompilerURL;
@@ -199,7 +200,7 @@ begin
   finally
     CopyFiles.Free;
   end;
-  result:=true;
+  Result := True;
 end;
 
 function TInstaller.DownloadBootstrapCompiler: boolean;
@@ -211,8 +212,8 @@ var
   ZipDir: string;
 begin
   ForceDirectories(BootstrapCompilerDirectory);
-  BootstrapZip := Sysutils.GetTempFileName + '.zip';
-  ZipDir:=ExtractFilePath(BootstrapZip);
+  BootstrapZip := SysUtils.GetTempFileName + '.zip';
+  ZipDir := ExtractFilePath(BootstrapZip);
   OperationSucceeded := DownloadHTTP(FBootstrapCompilerURL, BootstrapZip);
   if OperationSucceeded then
   begin
@@ -226,14 +227,14 @@ begin
     end
     else
     begin
-      OperationSucceeded := true; // Spelling it out can't hurt sometimes
+      OperationSucceeded := True; // Spelling it out can't hurt sometimes
     end;
   end;
   // Move compiler to proper directory
   if OperationSucceeded = True then
   begin
-    debugln('Going to rename/move ' + ZipDir+CompilerName + ' to ' + BootstrapCompiler);
-    renamefile(ZipDir+CompilerName, BootstrapCompiler);
+    debugln('Going to rename/move ' + ZipDir + CompilerName + ' to ' + BootstrapCompiler);
+    renamefile(ZipDir + CompilerName, BootstrapCompiler);
   end;
   if OperationSucceeded = True then
     SysUtils.DeleteFile(BootstrapZip);
@@ -247,7 +248,7 @@ function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
 const
   SourceForgeProjectPart = '//sourceforge.net/projects/';
   SourceForgeFilesPart = '/files/';
-  MaxRetries= 3;
+  MaxRetries = 3;
 var
   Buffer: TMemoryStream;
   HTTPGetResult: boolean;
@@ -307,15 +308,16 @@ begin
     Buffer := TMemoryStream.Create;
     debugln('Going to call httpgetbinary for url: ' + URL);
     RetryAttempt := 1;
-    HTTPGetResult:=false;
-    while ((HTTPGetResult=false) and (RetryAttempt < MaxRetries)) do
+    HTTPGetResult := False;
+    while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
     begin
-      HTTPGetResult:=HttpGetBinary(URL, Buffer);
+      HTTPGetResult := HttpGetBinary(URL, Buffer);
       //Application.ProcessMessages;
-      Sleep(100*RetryAttempt);
+      Sleep(100 * RetryAttempt);
       RetryAttempt := RetryAttempt + 1;
     end;
-    if HTTPGetResult=false then raise Exception.Create('Cannot load document from remote server');
+    if HTTPGetResult = False then
+      raise Exception.Create('Cannot load document from remote server');
     Buffer.Position := 0;
     if Buffer.Size = 0 then
       raise Exception.Create('Downloaded document is empty.');
@@ -335,10 +337,10 @@ begin
   // This won't work, we'd get an .msi:
   // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
   // We don't want msi/Windows installer - this way we can hopefully support Windows 2000
-  OperationSucceeded:=true;
+  OperationSucceeded := True;
   Result := False;
   ForceDirectories(FSVNDirectory);
-  SVNZip := SysUtils.GetTempFileName+'.zip';
+  SVNZip := SysUtils.GetTempFileName + '.zip';
   OperationSucceeded := DownloadHTTP(
     'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
     , SVNZip);
@@ -346,15 +348,17 @@ begin
   begin
     // Extract, overwrite
     // apparently can't specify "s with -d option!??!
-    if Run(FUnzip, '-o "' + SVNZip + '" -d ' + FSVNDirectory)<>0 then OperationSucceeded:=false;
+    if Run(FUnzip, '-o "' + SVNZip + '" -d ' + FSVNDirectory) <> 0 then
+      OperationSucceeded := False;
   end;
 
   if OperationSucceeded then
   begin
-    OperationSucceeded:=FindSVNSubDirs;
-    if OperationSucceeded then sysutils.deletefile(SVNZip); //Get rid of temp zip if success.
+    OperationSucceeded := FindSVNSubDirs;
+    if OperationSucceeded then
+      SysUtils.deletefile(SVNZip); //Get rid of temp zip if success.
   end;
-  Result:=OperationSucceeded;
+  Result := OperationSucceeded;
 end;
 
 function TInstaller.CheckAndGetNeededExecutables: boolean;
@@ -419,11 +423,11 @@ begin
       RunOutput(BootstrapCompiler, '-h', Output); // Show help without waiting
       if Ansipos('Free Pascal Compiler', Output) = 0 then
       begin
-        OperationSucceeded:=false;
+        OperationSucceeded := False;
         debugln('Found FPC executable but it is not a Free Pascal compiler. Trying to overwrite it.');
       end;
     except
-      OperationSucceeded:=false;
+      OperationSucceeded := False;
     end;
     debugln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
     OperationSucceeded := DownloadBootstrapCompiler;
@@ -438,13 +442,13 @@ var
   OperationSucceeded: boolean;
 begin
   //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
-  SVNFiles:=FindAllFiles(FSVNDirectory, 'svn' + FExecutableExtension, True);
+  SVNFiles := FindAllFiles(FSVNDirectory, 'svn' + FExecutableExtension, True);
   try
     if SVNFiles.Count > 0 then
     begin
       // Just get first result.
       FUpdater.SVNExecutable := SVNFiles.Strings[0];
-      OperationSucceeded:=true;
+      OperationSucceeded := True;
     end
     else
     begin
@@ -454,12 +458,12 @@ begin
   finally
     SVNFiles.Free;
   end;
-  Result:=OperationSucceeded;
+  Result := OperationSucceeded;
 end;
 
 function TInstaller.GetBootstrapCompiler: string;
 begin
-  result:=BootstrapCompilerDirectory+CompilerName;
+  Result := BootstrapCompilerDirectory + CompilerName;
 end;
 
 function Tinstaller.GetFpcDirectory: string;
@@ -631,8 +635,9 @@ begin
   end;
 
   // Let everyone know of our shiny new compiler:
-  if OperationSucceeded then FInstalledCompiler:=FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-    'i386-win32' + DirectorySeparator + CompilerName;
+  if OperationSucceeded then
+    FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
+      DirectorySeparator + 'i386-win32' + DirectorySeparator + CompilerName;
 
   if OperationSucceeded then
   begin
@@ -640,7 +645,7 @@ begin
     Executable := FMake;
     debugln('Running Make crossinstall:');
     Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
-      ' FPC='+ FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
+      ' FPC=' + FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
       ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' crossinstall';
     if Run(Executable, Params) <> 0 then
       OperationSucceeded := False;
@@ -649,7 +654,7 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
-    BinPath:=ExtractFilePath(FInstalledCompiler);
+    BinPath := ExtractFilePath(FInstalledCompiler);
     FPCCfg := BinPath + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
@@ -678,8 +683,9 @@ begin
 
   // If we haven't installed FPC, this won't be set
   // todo: fix FPC for linux/other platforms
-  if FInstalledCompiler='' then FInstalledCompiler:=FPCDirectory + DirectorySeparator + 'bin' + DirectorySeparator +
-      'i386-win32' + DirectorySeparator + CompilerName;
+  if FInstalledCompiler = '' then
+    FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
+      DirectorySeparator + 'i386-win32' + DirectorySeparator + CompilerName;
 
   // Download Lazarus source:
   if OperationSucceeded = True then
@@ -701,7 +707,7 @@ begin
     // Note: you apparently can't pass FPC in the FPC= statement, you need to pass a PPC executable.
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC='+ FInstalledCompiler + ' clean';
+      ' FPC=' + FInstalledCompiler + ' clean';
     debugln('Lazarus: running make clean:');
     Run(Executable, Params);
   end;
@@ -711,7 +717,7 @@ begin
     // Make all
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC='+ FInstalledCompiler + ' all';
+      ' FPC=' + FInstalledCompiler + ' all';
     debugln('Lazarus: running make all:');
     if (Run(Executable, Params)) <> 0 then
       OperationSucceeded := False;
@@ -776,7 +782,7 @@ begin
   {$ELSE}
   FExecutableExtension := '';
   {$ENDIF WINDOWS}
-  FInstalledCompiler:='';
+  FInstalledCompiler := '';
   FLazarusPrimaryConfigPath := '';
   FSVNDirectory := '';
   FUpdater := TUpdater.Create;
