@@ -81,7 +81,27 @@ begin
     if FInstaller.GetFPC then
     begin
       installer.debugln('getting and compiling lazarus:');
-      FInstaller.GetLazarus;
+      if FInstaller.GetLazarus=false then
+      begin
+        writeln('Lazarus retrieval/compilation failed.');
+        writeln('Please check program output for details. Possible troubleshooting steps:');
+        writeln('- make sure there''s a valid SVN executable in your path.');
+        {$IFNDEF Windows}
+        writeln('- make sure the GNU binutils are installed');
+        {$ENDIF}
+        writeln('You might want to try removing all local changes in your SVN repository with:');
+        writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.LazarusDirectory);
+      end;
+    end
+    else
+    begin
+      writeln('FPC retrieval/compilation failed.');
+      writeln('Please check program output for details. Possible troubleshooting steps:');
+      writeln('- make sure there''s a valid SVN executable in your path.');
+      {$IFNDEF Windows}
+      writeln('- make sure the GNU binutils are installed');
+      {$ENDIF}
+      writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.FPCDirectory);
     end;
   finally
     FInstaller.Free;

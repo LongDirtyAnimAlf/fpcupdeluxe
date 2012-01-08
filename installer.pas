@@ -53,12 +53,18 @@ type
     FExecutableExtension: string;
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
+    FInstalledCrossCompiler: string; //Path to an optional cross compiler that we installed (also used for Lazarus)
     FLazarusPrimaryConfigPath: string;
     FMake: string;
+    {$IFDEF WINDOWS}
     FMakePath: string;
+    {$ENDIF}
+    //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FUpdater: TUpdater;
+    {$IFDEF WINDOWS}
     FUnzip: string; //Location of unzip executable
+    {$ENDIF}
     function DownloadBinUtils: boolean;
     function DownloadBootstrapCompiler: boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
@@ -114,9 +120,9 @@ implementation
 uses
   httpsend, strutils, process, FileUtil {Requires LCL}
 {$IFDEF WINDOWS}
-  , shlobj;
-
+  , shlobj
 {$ENDIF WINDOWS}
+  ;
 
 procedure debugln(Message: string);
 begin
@@ -132,6 +138,7 @@ end;
 { TInstaller }
 
 function TInstaller.DownloadBinUtils: boolean;
+// Download binutils. For now, only makes sense on Windows...
 const
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
   //Parent directory of files. Needs trailing backslash.
@@ -376,8 +383,13 @@ begin
     if (DirectoryExists(FMakePath) = False) or (FileExists(FMake) = False) or
       (FileExists(FUnzip) = False) then
     begin
+      {$IFDEF Windows}
       debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
       OperationSucceeded := DownloadBinUtils;
+      {$ELSE}
+      debugln('Error: Make path ' + FMakePath + ' doesn''t have binutils. Please install using your package manager.');
+      OperationSucceeded:=false;
+      {$ENDIF Windows}
     end;
   end;
 
@@ -518,7 +530,7 @@ end;
 function TInstaller.Run(Executable, Params: string): longint;
 begin
   debugln('Calling ' + Executable + ' ' + Params);
-  Result := SysUtils.ExecuteProcess(Executable, Params, []);
+  Result := SysUtils.ExecuteProcess(Executable, Params, [ExecInheritsHandles]);
 end;
 
 function TInstaller.RunOutput(Executable, Params: string;
@@ -619,12 +631,10 @@ var
   Params: string;
 begin
   //Todo: linking fails with as on bare metal win2k system?!?! Test on xp
-  OperationSucceeded := CheckAndGetNeededExecutables;
+  OperationSucceeded:=CheckAndGetNeededExecutables;
+
   //Make sure we have the proper tools.
-  if FUpdater.UpdateFPC = False then
-  begin
-    OperationSucceeded := False;
-  end;
+  if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC;
 
   if OperationSucceeded then
   begin
@@ -644,7 +654,6 @@ begin
     Params := ' FPC=' + BootstrapCompiler + ' --directory=' +
       FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
     debugln('Running make for FPC:');
-    debugln(Executable + ' ' + Params);
     if Run(Executable, params) <> 0 then
       OperationSucceeded := False;
   end;
@@ -667,14 +676,35 @@ begin
 
   if OperationSucceeded then
   begin
-    // Install crosscompiler - todo: only for Windows!?!?
+    // Make crosscompiler using new compiler- todo: only for Windows!?!?
+    // Note: consider this as an optional item, so don't fail the function if this breaks.
     Executable := FMake;
-    debugln('Running Make crossinstall:');
+    debugln('Running Make all (crosscompiler):');
     Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
       ' FPC=' + FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
-      ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' crossinstall';
-    if Run(Executable, Params) <> 0 then
-      OperationSucceeded := False;
+      ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' all';
+    if Run(Executable, Params) = 0 then
+    begin
+      // Install crosscompiler using new compiler - todo: only for Windows!?!?
+      // make all and make crossinstall perhaps equivalent to
+      // make all install CROSSCOMPILE=1??? todo: find out
+      Executable := FMake;
+      debugln('Running Make crossinstall:');
+      Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
+        ' FPC=' + FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
+        ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' crossinstall';
+      // Note: consider this as an optional item, so don't fail the function if this breaks.
+      if Run(Executable, Params)=0 then
+      begin
+        // Let everyone know of our shiny new crosscompiler:
+        FInstalledCrossCompiler := FPCDirectory + DirectorySeparator + 'bin' +
+          DirectorySeparator + FFPCPlatform + DirectorySeparator + 'ppcrossx64.exe';
+      end
+      else
+      begin
+        debugln('Problem compiling/installing crosscompiler. Continuing regardless.');
+      end;
+    end;
   end;
 
   if OperationSucceeded then
@@ -736,7 +766,23 @@ begin
 
   if OperationSucceeded then
   begin
-    // Make all
+    // LCL 64 bit crosscompiler.
+    //todo: windows only
+    if FInstalledCrossCompiler<>'' then
+    begin
+      Executable := FMake;
+      Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
+        ' FPC=' + FInstalledCrossCompiler +
+        ' LCL_PLATFORM=win32 OS_TARGET=win64 CPU_TARGET=x86_64' + ' lcl';
+      debugln('Lazarus: running make lcl crosscompiler:');
+      // Note: consider this optional; don't fail the function if this fails.
+      if Run(Executable, Params)<> 0 then debugln('Problem compiling 64 bit LCL; continuing regardless.');
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Make all (should include lcl)
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FInstalledCompiler + ' all';
