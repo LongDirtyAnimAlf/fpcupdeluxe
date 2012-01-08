@@ -1,33 +1,30 @@
 { Installer unit for FPCUp
-  Copyright (C) 2012 Reinier Olislagers
+Copyright (C) 2012 Reinier Olislagers
 
-  Based on svncommand unit
-  Copyright (C) 2007 Vincent Snijders vincents@freepascal.org,
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version with the following modification:
 
-  This library is free software; you can redistribute it and/or modify it
-  under the terms of the GNU Library General Public License as published by
-  the Free Software Foundation; either version 2 of the License, or (at your
-  option) any later version with the following modification:
+As a special exception, the copyright holders of this library give you
+permission to link this library with independent modules to produce an
+executable, regardless of the license terms of these independent modules,and
+to copy and distribute the resulting executable under terms of your choice,
+provided that you also meet, for each linked independent module, the terms
+and conditions of the license of that module. An independent module is a
+module which is not derived from or based on this library. If you modify
+this library, you may extend this exception to your version of the library,
+but you are not obligated to do so. If you do not wish to do so, delete this
+exception statement from your version.
 
-  As a special exception, the copyright holders of this library give you
-  permission to link this library with independent modules to produce an
-  executable, regardless of the license terms of these independent modules,and
-  to copy and distribute the resulting executable under terms of your choice,
-  provided that you also meet, for each linked independent module, the terms
-  and conditions of the license of that module. An independent module is a
-  module which is not derived from or based on this library. If you modify
-  this library, you may extend this exception to your version of the library,
-  but you are not obligated to do so. If you do not wish to do so, delete this
-  exception statement from your version.
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
+for more details.
 
-  This program is distributed in the hope that it will be useful, but WITHOUT
-  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
-  for more details.
-
-  You should have received a copy of the GNU Library General Public License
-  along with this library; if not, write to the Free Software Foundation,
-  Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+You should have received a copy of the GNU Library General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 unit installer;
 
@@ -62,9 +59,7 @@ type
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FUpdater: TUpdater;
-    {$IFDEF WINDOWS}
-    FUnzip: string; //Location of unzip executable
-    {$ENDIF}
+    FExtractor: string; //Location or name of executable used to decompress source arhives
     function DownloadBinUtils: boolean;
     function DownloadBootstrapCompiler: boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
@@ -118,7 +113,7 @@ procedure debugln(Message: string);
 implementation
 
 uses
-  httpsend, strutils, process, FileUtil {Requires LCL}
+  httpsend {for downloading}, strutils, process, FileUtil {Requires LCL}
 {$IFDEF WINDOWS}
   , shlobj
 {$ENDIF WINDOWS}
@@ -225,12 +220,21 @@ begin
   OperationSucceeded := DownloadHTTP(FBootstrapCompilerURL, BootstrapZip);
   if OperationSucceeded then
   begin
+    {$IFDEF WINDOWS}
     //Extract zip, overwriting without prompting
-    //Note: apparently we can't call unzip.exe -d with "s
+    //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
     Params := '-o "' + BootstrapZip + '" -d ' + ZipDir;
-    if Run(FUnzip, Params) <> 0 then
+    {$ENDIF WINDOWS}
+    {$IFDEF LINUX}
+    // Decompress, keep original, force overwrite, quiet
+    Params := '-dkfq "' + BootstrapZip+'"'; //todo add compiler name (directly extracts)
+    {$ENDIF LINUX}
+    {$IFDEF DARWIN}
+    Params := '-dkfq "' + BootstrapZip+'"'; //todo add compiler name (directly extracts)
+    {$ENDIF DARWIN}
+    if Run(FExtractor, Params) <> 0 then
     begin
-      debugln('FunZip returned non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+      debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
       OperationSucceeded := False;
     end
     else
@@ -356,7 +360,7 @@ begin
   begin
     // Extract, overwrite
     // apparently can't specify "s with -d option!??!
-    if Run(FUnzip, '-o "' + SVNZip + '" -d ' + FSVNDirectory) <> 0 then
+    if Run(FExtractor, '-o "' + SVNZip + '" -d ' + FSVNDirectory) <> 0 then
       OperationSucceeded := False;
   end;
 
@@ -375,13 +379,24 @@ var
   Output: string;
 begin
   OperationSucceeded := True;
-  FUnzip := FMakePath + 'unzip' + FExecutableExtension;
+  {$IFDEF WINDOWS}
+  // Need to do it here so we can pick up make path.
+  FExtractor := FMakePath + 'unzip' + FExecutableExtension;
+  {$ENDIF WINDOWS}
+  {$IFDEF LINUX}
+  FExtractor:='bzip2'; //Used for extracting FPC bootstrap compiler archive
+  {$ENDIF LINUX}
+  {$IFDEF DARWIN}
+  FExtractor:='bzip2'; //Used for extracting FPC bootstrap compiler archive
+  {$ENDIF DARIN}
+
+  {$IFDEF WINDOWS}
   if OperationSucceeded then
   begin
     // Check for binutils directory, make and unzip executables.
     // Download if needed; will download unzip - needed for SVN download
     if (DirectoryExists(FMakePath) = False) or (FileExists(FMake) = False) or
-      (FileExists(FUnzip) = False) then
+      (FileExists(FExtractor) = False) then
     begin
       {$IFDEF Windows}
       debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
@@ -392,6 +407,7 @@ begin
       {$ENDIF Windows}
     end;
   end;
+  {$ENDIF WINDOWS}
 
   if OperationSucceeded then
   begin
@@ -406,37 +422,48 @@ begin
     end;
   end;
 
-
-  //Check for SVN, download if needed
   if OperationSucceeded then
   begin
     // Try to look for SVn
-    if FSVNDirectory = '' then
+    if FUpdater.FindSVNExecutable='' then
     begin
-      try
-        // If this returns results, we know we've got the proper SVN exe.
-        FSVNDirectory:=ExtractFilePath(FUpdater.FindSVNExecutable);
-      except
-        //ignore errors as we're only looking
+      {$IFDEF Windows}
+      // Make sure we have a sensible default.
+      // Set it here so multiple calls to CheckExes will not redownload SVN all the time
+      if FSVNDirectory='' then FSVNDirectory := 'c:\development\svn\';
+      {$ENDIF WINDOWS}
+      FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
+      {$IFDEF Windows}
+      // If it still can't be found, download it
+      if FUpdater.SVNExecutable='' then OperationSucceeded := DownloadSVN;
+      {$ELSE}
+      if FUpdater.SVNExecutable='' then
+      begin
+        debugln('Error: could not find SVN executable. Please make sure it is installed.');
+        OperationSucceeded:=false;
       end;
+      {$ENDIF}
     end;
-    // Make sure we have a sensible default.
-    // Set it here so multiple calls to CheckExes will not redownload SVN all the time
-    {$IFDEF Windows}
-    if FSVNDirectory='' then
-    begin
-      FSVNDirectory := 'c:\development\svn\';
-      FindSVNSubDirs; //Find svn in or below FSVNDirectory.
-    end;
-    {$ELSE}
-    raise Exception.Create('todo: Fix this code'); //probably somewhere in /home??
-    {$ENDIF}
+  end;
 
-    if not FileExists(FUpdater.SVNExecutable) then
-    begin
-      // Actually could be in SVN dir
-      debugln('SVN not found in ' + FUpdater.SVNExecutable + ', downloading');
-      OperationSucceeded := DownloadSVN;
+  if OperationSucceeded then
+  begin
+    // Check for valid unzip/gunzip executable
+    try
+      Output := '';
+      if RunOutput(FExtractor, '--version', Output)=0 then
+      begin
+        debugln('Found valid extractor:' + FExtractor);
+        OperationSucceeded := true;
+      end
+      else
+      begin
+        //valid unzip/gunzip/whatever
+        debugln('Error: did not find valid extractor:' + FExtractor);
+        OperationSucceeded:=false;
+      end;
+    except
+      OperationSucceeded := False;
     end;
   end;
 
@@ -522,15 +549,21 @@ begin
   Result := FUpdater.LazarusURL;
 end;
 
+
 function TInstaller.GetMakePath: string;
 begin
+  {$IFDEF WINDOWS}
   Result := FMakePath;
+  {$ELSE}
+  Result := ''; //dummy value, done for compatibility
+  {$ENDIF WINDOWS}
 end;
+
 
 function TInstaller.Run(Executable, Params: string): longint;
 begin
   debugln('Calling ' + Executable + ' ' + Params);
-  Result := SysUtils.ExecuteProcess(Executable, Params, [ExecInheritsHandles]);
+  Result := SysUtils.ExecuteProcess(Executable, Params, []);
 end;
 
 function TInstaller.RunOutput(Executable, Params: string;
@@ -615,12 +648,18 @@ begin
   FUpdater.LazarusURL := AValue;
 end;
 
+
 procedure TInstaller.SetMakePath(AValue: string);
 begin
+  {$IFDEF WINDOWS}
   // Make sure there's a trailing delimiter
   FMakePath := IncludeTrailingPathDelimiter(AValue);
   FMake := FMakePath + 'make' + FExecutableExtension;
+  {$ELSE}
+  //stub for compatibility
+  {$ENDIF WINDOWS}
 end;
+
 
 function Tinstaller.GetFPC: boolean;
 var
@@ -808,6 +847,8 @@ begin
 end;
 
 constructor Tinstaller.Create;
+const
+  DefaultPCPSubdir='lazarusdev';
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
 begin
@@ -852,15 +893,14 @@ begin
   FLazarusPrimaryConfigPath := '';
   FSVNDirectory := '';
   FUpdater := TUpdater.Create;
-  FUnzip := '';
+  FExtractor := '';
   //Directory where Lazarus installation config will end up (primary config path)
   {$IFDEF Windows}
   AppDataPath := '';
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
-  LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + 'lazarusdev';
+  LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + DefaultPCPSubdir;
   {$ELSE}
-  writeln('todo: fix Lazarus primary config path, somewhere in ~ I guess.');
-  LazarusPrimaryConfigPath := '/tmp'; //error!???
+  LazarusPrimaryConfigPath:=GetAppConfigDir(false)+DefaultPCPSubdir;
   {$ENDIF}
   SetMakePath('');
 end;

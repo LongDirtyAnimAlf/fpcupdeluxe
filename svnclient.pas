@@ -57,7 +57,7 @@ type
     //Performs an SVN checkout (initial download), HEAD (latest revision) only for speed
     procedure CheckOutOrUpdate;
     //Pulls SVN checkout if local repository doesn't exist, else does an update
-    function FindSVNExecutable: string; //Search for installed SVN executable
+    function FindSVNExecutable: string; //Search for installed SVN executable (might return just a filename if in the OS path)
     procedure Log(var Log: TStringList); //Shows commit log for local directory
     procedure Revert;
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
@@ -86,6 +86,8 @@ implementation
 
 { TSVNClient }
 function TSVNClient.FindSvnExecutable: string;
+const
+  SVNName='svn';
 begin
   result:=FSVNExecutable;
   if FileExists(FSvnExecutable) then
@@ -97,6 +99,17 @@ begin
   begin
     //todo: check what happens if svn exe is in path but not specified here?
     // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
+    try
+      if SysUtils.ExecuteProcess(SVNName, '--version', [])=0 then
+      begin
+        //Found a working SVN in path
+        FSVNExecutable:=SVNName;
+        exit;
+      end;
+    except
+      //Apparently SVN exe not found in path or some other error.
+    end;
+
   end;
 
 {$IFDEF windows}
@@ -123,8 +136,8 @@ begin
 
   if not FileExists(FSvnExecutable) then
   begin
-    if FileExists('.\svn.exe') then FSVNExecutable:='.\svn.exe';
-    if FileExists('.\svn') then FSVNExecutable:='.\svn';
+    if FileExists('svn.exe') then FSVNExecutable:='svn.exe';
+    if FileExists('svn') then FSVNExecutable:='svn';
   end;
 
   if not FileExists(FSVNExecutable) then FSVNExecutable:=''; //Make sure we don't call an arbitrary executable
