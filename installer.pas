@@ -51,11 +51,12 @@ type
     FBootstrapCompilerURL: string;
     FCompilerName: string;
     FExecutableExtension: string;
+    FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
     FLazarusPrimaryConfigPath: string;
     FMake: string;
     FMakePath: string;
-    FSVNDirectory: string; //Unpack SVN files in this directory
+    FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FUpdater: TUpdater;
     FUnzip: string; //Location of unzip executable
     function DownloadBinUtils: boolean;
@@ -397,15 +398,28 @@ begin
   //Check for SVN, download if needed
   if OperationSucceeded then
   begin
+    // Try to look for SVn
+    if FSVNDirectory = '' then
+    begin
+      try
+        // If this returns results, we know we've got the proper SVN exe.
+        FSVNDirectory:=ExtractFilePath(FUpdater.FindSVNExecutable);
+      except
+        //ignore errors as we're only looking
+      end;
+    end;
     // Make sure we have a sensible default.
     // Set it here so multiple calls to CheckExes will not redownload SVN all the time
     {$IFDEF Windows}
-    if FSVNDirectory = '' then
+    if FSVNDirectory='' then
+    begin
       FSVNDirectory := 'c:\development\svn\';
+      FindSVNSubDirs; //Find svn in or below FSVNDirectory.
+    end;
     {$ELSE}
     raise Exception.Create('todo: Fix this code'); //probably somewhere in /home??
     {$ENDIF}
-    FindSVNSubDirs; //Find svn in or below FSVNDirectory.
+
     if not FileExists(FUpdater.SVNExecutable) then
     begin
       // Actually could be in SVN dir
@@ -425,18 +439,28 @@ begin
       begin
         OperationSucceeded := False;
         debugln('Found FPC executable but it is not a Free Pascal compiler. Trying to overwrite it.');
+      end
+      else
+      begin
+        //valid FPC compiler
+        debugln('Found valid FPC bootstrap compiler.');
+        OperationSucceeded:=true;
       end;
     except
       OperationSucceeded := False;
     end;
-    debugln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
-    OperationSucceeded := DownloadBootstrapCompiler;
+    if OperationSucceeded=false then
+    begin
+      debugln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
+      OperationSucceeded := DownloadBootstrapCompiler;
+    end;
   end;
 
   Result := OperationSucceeded;
 end;
 
 function TInstaller.FindSVNSubDirs(): boolean;
+// Looks through SVN directory and sets updater's SVNExecutable
 var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
@@ -594,12 +618,14 @@ var
   OperationSucceeded: boolean;
   Params: string;
 begin
+  //Todo: linking fails with as on bare metal win2k system?!?! Test on xp
   OperationSucceeded := CheckAndGetNeededExecutables;
   //Make sure we have the proper tools.
   if FUpdater.UpdateFPC = False then
   begin
     OperationSucceeded := False;
   end;
+
   if OperationSucceeded then
   begin
     // Make clean using bootstrap compiler
@@ -637,7 +663,7 @@ begin
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
-      DirectorySeparator + 'i386-win32' + DirectorySeparator + CompilerName;
+      DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
 
   if OperationSucceeded then
   begin
@@ -685,15 +711,11 @@ begin
   // todo: fix FPC for linux/other platforms
   if FInstalledCompiler = '' then
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
-      DirectorySeparator + 'i386-win32' + DirectorySeparator + CompilerName;
+      DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
 
   // Download Lazarus source:
   if OperationSucceeded = True then
     OperationSucceeded := FUpdater.UpdateLazarus;
-  if OperationSucceeded then
-    debugln('Got Lazarus sources ok')
-  else
-    debugln('Did not get Lazarus sources');
 
   // Make sure primary config path exists
   if DirectoryExists(LazarusPrimaryConfigPath) = False then
@@ -746,35 +768,33 @@ begin
   // We'll set the bootstrap compiler to a file in the temp dir.
   // This won't exist so the CheckAndGetNeededExecutables code will download it for us.
   // User can specify an existing compiler later on, if she wants to.
-  FBootstrapCompilerDirectory := SysUtils.GetTempFileName + FExecutableExtension;
+  FBootstrapCompilerDirectory := SysUtils.GetTempDir;
 
+  //Bootstrap compiler:
   //We don't want to download from FTP, but it's useful to record it here so we can update the URLs below
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
+
   {$IFDEF Windows}
   FBootstrapCompilerURL :=
     'http://sunet.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.2/i386-win32-ppc386.zip';
+  FCompilername := 'ppc386.exe';
+  FFPCPlatform:='i386-win32';
   {$ENDIF Windows}
   {$IFDEF Linux}
   //check if this is the right one
   FBootstrapCompilerURL :=
     'http://kent.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.4/i386-linux-ppc386.bz2';
+  //check if this is the right one - 32vs64 bit!?!?
+  FCompilername := 'ppc386';
+  FFPCPlatform:='i386-linux';
   {$ENDIF Linux}
   {$IFDEF Darwin}
   FBootstrapCompilerURL :=
     'http://freefr.dl.sourceforge.net/project/freepascal/Bootstrap/2.6.0/universal-darwin-ppcuniversal.tar.bz2';
-  {$ENDIF Darwin}
-
-  //Used for identifying bootstrap compiler etc.
-  {$IFDEF Windows}
-  FCompilername := 'ppc386.exe';
-  {$ENDIF Windows}
-  {$IFDEF Linux}
   //check if this is the right one - 32vs64 bit!?!?
   FCompilername := 'ppc386';
-  {$ENDIF Linux}
-  {$IFDEF Darwin}
-  //check if this is the right one - 32vs64 bit!?!?
-  FCompilername := 'ppc386';
+  //check this:
+  FFPCPlatform:='x64-OSX';
   {$ENDIF Darwin}
 
   {$IFDEF WINDOWS}

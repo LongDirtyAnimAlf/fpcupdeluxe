@@ -64,22 +64,25 @@ begin
   try
     // Adjust these directories to taste/your situation.
     FInstaller := TInstaller.Create;
-    FInstaller.BootstrapCompilerDirectory := 'c:\lazarus\fpc\2.5.1\bin\i386-win32\';
+    FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
     //Has existing compiler that can compile FPC sources. Should be FPC 2.4.4, other versions might work
     FInstaller.FPCDirectory := 'c:\development\fpc';
     //Directory where FPC installation will end up
-    { Using svn2; later on rebase or something for patches?}
-    FInstaller.FPCURL := 'http://svn2.freepascal.org/svn/fpc/branches/fixes_2_6';
+    FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
     //Use fixes 2.6, not default set by updater (trunk/2.7.1) as Lazarus doesn't work with 2.7.1
     FInstaller.LazarusDirectory := 'c:\development\lazarus';
     FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
     //svn2 seems to lag behind a lot.
     FInstaller.MakePath := 'C:\development\binutils\';
     //Existing make needed to compile FPC. Will be downloaded if doesn't exit
+
+    // Get/update/compile (if needed) FPC; only compile Lazarus if succeeded.
     installer.debugln('getting and compiling fpc:');
-    FInstaller.GetFPC;
-    installer.debugln('getting and compiling lazarus:');
-    FInstaller.GetLazarus;
+    if FInstaller.GetFPC then
+    begin
+      installer.debugln('getting and compiling lazarus:');
+      FInstaller.GetLazarus;
+    end;
   finally
     FInstaller.Free;
   end;

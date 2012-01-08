@@ -47,20 +47,22 @@ type
   TUpdater = class(TObject)
   private
     FFPCURL: string;
-    FLazarusURL: string;
-    FSVNClient: TSVNClient;
-    //function IsSVNInstalled: boolean;
     FFPCDirectory: string;
     FLazarusDirectory: string;
+    FLazarusURL: string;
+    FSVNClient: TSVNClient;
+    FUpdated: boolean;
     function GetSVNExecutable: string;
     procedure SetSVNExecutable(AValue: string);
   public
+    function FindSVNExecutable: string; //Search for installed SVN executable
     property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
     property FPCURL: string read FFPCURL write FFPCURL; //URL for FPC SVN
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
     property LazarusURL: string read FLazarusURL write FLazarusURL; //URL for Lazarus SVN
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     //Which SVN executable to use
+    property Updated: boolean read FUpdated; // Shows whether new files where downloaded/checked out/updated
     function UpdateFPC: boolean; // Checks out or updates FPC source
     function UpdateLazarus: boolean; //Checks out or updates Lazarus source
     constructor Create;
@@ -77,28 +79,40 @@ begin
   FSVNClient.SVNExecutable := AValue;
 end;
 
+function TUpdater.FindSVNExecutable: string;
+begin
+  Result:=FSVNClient.FindSVNExecutable;
+end;
+
 function TUpdater.GetSVNExecutable: string;
 begin
   Result := FSVNClient.SVNExecutable;
 end;
 
 function Tupdater.Updatefpc: boolean;
+var
+  StartRevision: integer;
 begin
+  StartRevision:=-1;
   FSVNClient.LocalRepository := FPCDirectory;
   FSVNClient.Repository := FPCURL;
+  StartRevision:=FSVNClient.LocalRevision;
   FSVNClient.CheckOutOrUpdate;
-  //todo: check for/handle errors
+  if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
 end;
 
 function Tupdater.Updatelazarus: boolean;
+var
+  StartRevision: integer;
 begin
+  StartRevision:=-1;
   FSVNClient.LocalRepository := LazarusDirectory;
   FSVNClient.Repository := FLazarusURL;
+  StartRevision:=FSVNClient.LocalRevision;
   FSVNClient.CheckOutOrUpdate;
+  if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
-  writeln('debug: lazarus checkout/update complete');
-  sleep(100);
 end;
 
 constructor Tupdater.Create;
@@ -106,6 +120,7 @@ begin
   FSVNClient := TSVNClient.Create;
   FFPCURL := 'http://svn.freepascal.org/svn/fpc/trunk'; //Default: latest (trunk)
   FLazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk'; //Default: latest (trunk)
+  FUpdated:=false;
 end;
 
 destructor Tupdater.Destroy;
