@@ -66,6 +66,7 @@ begin
     FInstaller := TInstaller.Create;
     FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
     //Has existing compiler that can compile FPC sources. Should be FPC 2.4.4, other versions might work
+    //todo: fix for linux!?!?
     FInstaller.FPCDirectory := 'c:\development\fpc';
     //Directory where FPC installation will end up
     FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';

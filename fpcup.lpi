@@ -72,7 +72,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="6">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -98,6 +98,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="httpsend"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="bunzip2.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="bunzip2"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

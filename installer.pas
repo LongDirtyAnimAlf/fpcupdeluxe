@@ -113,12 +113,12 @@ procedure debugln(Message: string);
 implementation
 
 uses
-  httpsend {for downloading}, strutils, process, FileUtil {Requires LCL}
+  httpsend {for downloading}, strutils, process, FileUtil {Requires LCL}, bunzip2
 {$IFDEF WINDOWS}
   , shlobj
 {$ENDIF WINDOWS}
   ;
-
+//todo: add objects
 procedure debugln(Message: string);
 begin
   {DEBUG conditional symbol is defined using
@@ -131,7 +131,6 @@ begin
 end;
 
 { TInstaller }
-
 function TInstaller.DownloadBinUtils: boolean;
 // Download binutils. For now, only makes sense on Windows...
 const
@@ -213,6 +212,7 @@ var
   OperationSucceeded: boolean;
   Params: string;
   ZipDir: string;
+  Log: string;
 begin
   ForceDirectories(BootstrapCompilerDirectory);
   BootstrapZip := SysUtils.GetTempFileName + '.zip';
@@ -224,14 +224,6 @@ begin
     //Extract zip, overwriting without prompting
     //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
     Params := '-o "' + BootstrapZip + '" -d ' + ZipDir;
-    {$ENDIF WINDOWS}
-    {$IFDEF LINUX}
-    // Decompress, keep original, force overwrite, quiet
-    Params := '-dkfq "' + BootstrapZip+'"'; //todo add compiler name (directly extracts)
-    {$ENDIF LINUX}
-    {$IFDEF DARWIN}
-    Params := '-dkfq "' + BootstrapZip+'"'; //todo add compiler name (directly extracts)
-    {$ENDIF DARWIN}
     if Run(FExtractor, Params) <> 0 then
     begin
       debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
@@ -241,16 +233,29 @@ begin
     begin
       OperationSucceeded := True; // Spelling it out can't hurt sometimes
     end;
-  end;
-  // Move compiler to proper directory
-  if OperationSucceeded = True then
-  begin
-    debugln('Going to rename/move ' + ZipDir + CompilerName + ' to ' + BootstrapCompiler);
-    renamefile(ZipDir + CompilerName, BootstrapCompiler);
+    // Move compiler to proper directory
+    if OperationSucceeded = True then
+    begin
+      debugln('Going to rename/move ' + ZipDir + CompilerName + ' to ' + BootstrapCompiler);
+      renamefile(ZipDir + CompilerName, BootstrapCompiler);
+    end;
+    {$ENDIF WINDOWS}
+    {$IFDEF LINUX}
+    //bunzip2 would need -dfq params
+    Log:='';
+    OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
+    //todo chmod ug+x for Linux/OSX?!!
+    if Log<>'' then writeln(Log); //output debug output
+    {$ENDIF LINUX}
+    {$IFDEF DARWIN}
+    Log:='';
+    OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
+    //todo chmod ug+x for Linux/OSX?!!
+    if Log<>'' then writeln(Log); //output debug output
+    {$ENDIF DARWIN}
   end;
   if OperationSucceeded = True then
     SysUtils.DeleteFile(BootstrapZip);
-  //todo chmod ug+x for Linux/OSX?!!
   Result := OperationSucceeded;
 end;
 
@@ -453,13 +458,13 @@ begin
       Output := '';
       if RunOutput(FExtractor, '--version', Output)=0 then
       begin
-        debugln('Found valid extractor:' + FExtractor);
+        debugln('Found valid extractor: ' + FExtractor);
         OperationSucceeded := true;
       end
       else
       begin
         //valid unzip/gunzip/whatever
-        debugln('Error: did not find valid extractor:' + FExtractor);
+        debugln('Error: did not find valid extractor: ' + FExtractor);
         OperationSucceeded:=false;
       end;
     except
@@ -821,11 +826,22 @@ begin
 
   if OperationSucceeded then
   begin
-    // Make all (should include lcl)
+    // Make all (should include lcl & ide)
     Executable := FMake;
     Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
       ' FPC=' + FInstalledCompiler + ' all';
     debugln('Lazarus: running make all:');
+    if (Run(Executable, Params)) <> 0 then
+      OperationSucceeded := False;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Make bigide: ide with additional packages as specified by user (in primary config path?)
+    Executable := FMake;
+    Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
+      ' FPC=' + FInstalledCompiler + ' bigide';
+    debugln('Lazarus: running make bigide:');
     if (Run(Executable, Params)) <> 0 then
       OperationSucceeded := False;
   end;
