@@ -440,7 +440,11 @@ begin
       FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
       {$IFDEF Windows}
       // If it still can't be found, download it
-      if FUpdater.SVNExecutable='' then OperationSucceeded := DownloadSVN;
+      if FUpdater.SVNExecutable='' then
+      begin
+        debugln('Going to download SVN');
+        OperationSucceeded := DownloadSVN;
+      end;
       {$ELSE}
       if FUpdater.SVNExecutable='' then
       begin
@@ -478,19 +482,29 @@ begin
     // Check for proper FPC bootstrap compiler
     try
       Output := '';
-      RunOutput(BootstrapCompiler, '-h', Output); // Show help without waiting
-      if Ansipos('Free Pascal Compiler', Output) = 0 then
+      // Show help without waiting
+      if RunOutput(BootstrapCompiler, '-h', Output)=0 then
       begin
-        OperationSucceeded := False;
-        debugln('Found FPC executable but it is not a Free Pascal compiler. Trying to overwrite it.');
+        if Ansipos('Free Pascal Compiler', Output) = 0 then
+        begin
+          OperationSucceeded := False;
+          debugln('Found FPC executable but it is not a Free Pascal compiler. Trying to overwrite it.');
+        end
+        else
+        begin
+          //valid FPC compiler
+          debugln('Found valid FPC bootstrap compiler.');
+          OperationSucceeded:=true;
+        end;
       end
       else
       begin
-        //valid FPC compiler
-        debugln('Found valid FPC bootstrap compiler.');
-        OperationSucceeded:=true;
+        //Error running bootstrapcompiler
+        debugln('Error trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
+        OperationSucceeded:=false;
       end;
     except
+      debugln('Exception trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
       OperationSucceeded := False;
     end;
     if OperationSucceeded=false then
@@ -626,7 +640,7 @@ var
 begin
   try
     OutputStringList := TStringList.Create;
-    RunOutput(Executable, Params, OutputStringList);
+    Result:=RunOutput(Executable, Params, OutputStringList);
     Output := OutputStringList.Text;
   finally
     OutputStringList.Free;
