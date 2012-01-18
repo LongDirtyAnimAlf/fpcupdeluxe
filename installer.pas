@@ -382,6 +382,7 @@ function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
   Output: string;
+  ResultCode: longint;
 begin
   OperationSucceeded := True;
   {$IFDEF WINDOWS}
@@ -419,7 +420,8 @@ begin
     // Check for proper make executable
     try
       Output := '';
-      RunOutput(FMake, '-v', Output);
+      ResultCode:=RunOutput(FMake, '-v', Output);
+      //todo: verify if we really should ignore errors here
       if Ansipos('GNU Make', Output) = 0 then
         raise Exception.Create('Found make executable but it is not GNU Make.');
     except
@@ -429,7 +431,7 @@ begin
 
   if OperationSucceeded then
   begin
-    // Try to look for SVn
+    // Try to look for SVN
     if FUpdater.FindSVNExecutable='' then
     begin
       {$IFDEF Windows}
@@ -458,17 +460,21 @@ begin
   if OperationSucceeded then
   begin
     // Check for valid unzip/gunzip executable
+    // todo: might refactor this to separate function;
+    // look for 'Info-Zip' when using zip, question: should we look for anything in gunzip?
     try
       Output := '';
-      if RunOutput(FExtractor, '--version', Output)=0 then
+      // See unzip.h for return codes.
+      ResultCode:=RunOutput(FExtractor, '-v', Output);
+      if ResultCode=0 then
       begin
         debugln('Found valid extractor: ' + FExtractor);
         OperationSucceeded := true;
       end
       else
       begin
-        //valid unzip/gunzip/whatever
-        debugln('Error: did not find valid extractor: ' + FExtractor);
+        //invalid unzip/gunzip/whatever
+        debugln('Error: did not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
         OperationSucceeded:=false;
       end;
     except
@@ -483,7 +489,8 @@ begin
     try
       Output := '';
       // Show help without waiting
-      if RunOutput(BootstrapCompiler, '-h', Output)=0 then
+      ResultCode:=RunOutput(BootstrapCompiler, '-h', Output);
+      if ResultCode=0 then
       begin
         if Ansipos('Free Pascal Compiler', Output) = 0 then
         begin
@@ -500,7 +507,7 @@ begin
       else
       begin
         //Error running bootstrapcompiler
-        debugln('Error trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
+        debugln('Error trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output+'; resultcode: '+IntToStr(ResultCode));
         OperationSucceeded:=false;
       end;
     except
