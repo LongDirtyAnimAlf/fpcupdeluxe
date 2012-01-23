@@ -54,23 +54,40 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
 //{$R *.res} //Keep it simple, no resources
 var
   FInstaller: TInstaller;
+  UseTrunkFPC: boolean=false;
 begin
   writeln('FCPUp FreePascal/Lazarus downloader/installer started.');
   writeln('This program will download the FPC and Lazarus sources');
   writeln('from the source Subversion/SVN repositories,');
   writeln('compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
-  // Let's start simple: checkout, update, make for FPC+Lazarus.
+  if (Pos('FPC27', ParamStr(1))>0) or (Pos('FPCTRUNK', ParamStr(1))>0) then
+  begin
+    UseTrunkFPC:=true;
+    writeln('');
+    writeln('Selected FPC trunk version. FPC 2.7 not recommended for Lazarus right now due to Unicode development.');
+  end;
+
   try
     // Adjust these directories to taste/your situation.
     FInstaller := TInstaller.Create;
     FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
-    //Has existing compiler that can compile FPC sources. Should be FPC 2.4.4, other versions might work
+    //Has existing compiler that can compile FPC sources. Should be FPC 2.6, other versions might work
     //todo: fix for linux!?!?
-    FInstaller.FPCDirectory := 'c:\development\fpc';
-    //Directory where FPC installation will end up
-    FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
-    //Use fixes 2.6, not default set by updater (trunk/2.7.1) as Lazarus doesn't work with 2.7.1
+    if UseTrunkFPC then
+    begin
+      // FPC source
+      FInstaller.FPCURL := 'http://svn.freepascal.org/svn/trunk';
+      //Directory where FPC installation will end up:
+      FInstaller.FPCDirectory := 'c:\development\fpc27';
+    end
+    else
+    begin
+      //By default, use fixes 2.6, not default set by updater (trunk/2.7.1) as Lazarus doesn't work with 2.7.1
+      FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
+      FInstaller.FPCDirectory := 'c:\development\fpc';
+    end;
+
     FInstaller.LazarusDirectory := 'c:\development\lazarus';
     FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
     //svn2 seems to lag behind a lot.
