@@ -262,6 +262,7 @@ end;
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
   // Download file. If ncessary deal with SourceForge redirection, thanks to
   // Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
+  // todo: check sourceforge redirection code: does it actually work?
 const
   SourceForgeProjectPart = '//sourceforge.net/projects/';
   SourceForgeFilesPart = '/files/';
@@ -585,11 +586,17 @@ begin
   {$ENDIF WINDOWS}
 end;
 
-
 function TInstaller.Run(Executable, Params: string): longint;
+var
+  OutputStringList: TStringList;
 begin
   debugln('Calling ' + Executable + ' ' + Params);
-  Result := SysUtils.ExecuteProcess(Executable, Params, []);
+  OutputStringList := TStringList.Create;
+  try
+    Result:=RunOutput(Executable, Params, OutputStringList);
+  finally
+    OutputStringList.Free;
+  end;
 end;
 
 function TInstaller.RunOutput(Executable, Params: string;
@@ -645,8 +652,8 @@ function TInstaller.RunOutput(Executable, Params: string; var Output: string): l
 var
   OutputStringList: TStringList;
 begin
+  OutputStringList := TStringList.Create;
   try
-    OutputStringList := TStringList.Create;
     Result:=RunOutput(Executable, Params, OutputStringList);
     Output := OutputStringList.Text;
   finally
@@ -897,7 +904,6 @@ begin
   //Bootstrap compiler:
   //We don't want to download from FTP, but it's useful to record it here so we can update the URLs below
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
-
   {$IFDEF Windows}
   FBootstrapCompilerURL :=
     'http://sunet.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.2/i386-win32-ppc386.zip';
@@ -905,18 +911,22 @@ begin
   FFPCPlatform:='i386-win32';
   {$ENDIF Windows}
   {$IFDEF Linux}
-  //check if this is the right one
   FBootstrapCompilerURL :=
-    'http://kent.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.4/i386-linux-ppc386.bz2';
-  //check if this is the right one - 32vs64 bit!?!?
+    'ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
+  //todo: check if this is the right one - 32vs64 bit!?!?
   FCompilername := 'ppc386';
   FFPCPlatform:='i386-linux';
+  {todo: Linux x64:
+  FBootstrapCompilerURL :=
+  'ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
+  FCompilername := 'x86_64-linux-ppcx64';
+  FFPCPlatform:='x64-linux';
+  }
   {$ENDIF Linux}
   {$IFDEF Darwin}
   FBootstrapCompilerURL :=
-    'http://freefr.dl.sourceforge.net/project/freepascal/Bootstrap/2.6.0/universal-darwin-ppcuniversal.tar.bz2';
-  //check if this is the right one - 32vs64 bit!?!?
-  FCompilername := 'ppc386';
+    'ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
+  FCompilername := 'ppcuniversal';
   //check this:
   FFPCPlatform:='x64-OSX';
   {$ENDIF Darwin}
