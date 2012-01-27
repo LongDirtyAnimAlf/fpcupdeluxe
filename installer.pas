@@ -45,7 +45,7 @@ type
   TInstaller = class(TObject)
   private
     FBootstrapCompilerDirectory: string;
-    FBootstrapCompilerURL: string;
+    FBootstrapCompilerFTP: string;
     FCompilerName: string;
     FExecutableExtension: string;
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
@@ -62,6 +62,7 @@ type
     FExtractor: string; //Location or name of executable used to decompress source arhives
     function DownloadBinUtils: boolean;
     function DownloadBootstrapCompiler: boolean;
+    function DownloadFTP(Host, Source, TargetFile: string): boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
     function CheckAndGetNeededExecutables: boolean;
@@ -88,8 +89,8 @@ type
     property BootstrapCompilerDirectory: string
       read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
-    property BootstrapCompilerURL: string read FBootstrapCompilerURL
-      write FBootstrapCompilerURL;
+    property BootstrapCompilerFTP: string read FBootstrapCompilerFTP
+      write FBootstrapCompilerFTP;
     //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
@@ -113,7 +114,9 @@ procedure debugln(Message: string);
 implementation
 
 uses
-  httpsend {for downloading}, strutils, process, FileUtil {Requires LCL}, bunzip2
+  httpsend {for downloading from http},
+  ftpsend {for downloading from ftp},
+  strutils, process, FileUtil {Requires LCL}, bunzip2
 {$IFDEF WINDOWS}
   , shlobj
 {$ENDIF WINDOWS}
@@ -222,15 +225,17 @@ begin
   ForceDirectories(BootstrapCompilerDirectory);
   BootstrapZip := SysUtils.GetTempFileName + '.zip';
   ZipDir := ExtractFilePath(BootstrapZip);
-  OperationSucceeded := DownloadHTTP(FBootstrapCompilerURL, BootstrapZip);
+  OperationSucceeded := DownloadHTTP(FBootstrapCompilerFTP, BootstrapZip);
   if OperationSucceeded then
   begin
     {$IFDEF WINDOWS}
     //Extract zip, overwriting without prompting
     Params:=TStringList.Create;
     try
-      Params.Add('-o "' + BootstrapZip + '"');
-      Params.Add('-d ' + ZipDir); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
+      Params.Add('-o'); //overwrite existing files
+      Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
+      Params.Add(ZipDir);
+      Params.Add('"'+BootstrapZip+'"'); // zip/archive file
       if Run(FExtractor, Params) <> 0 then
       begin
         debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
@@ -267,6 +272,11 @@ begin
   if OperationSucceeded = True then
     SysUtils.DeleteFile(BootstrapZip);
   Result := OperationSucceeded;
+end;
+
+function TInstaller.DownloadFTP(Host, Source, TargetFile: string): boolean;
+begin
+  Result:=FtpGetFile(Host, '21', Source, TargetFile, 'anonymous', 'fpc@example.com');
 end;
 
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
@@ -360,6 +370,7 @@ function TInstaller.DownloadSVN: boolean;
 var
   OperationSucceeded: boolean;
   Params: TStringList;
+  ResultCode: longint;
   SVNZip: string;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
@@ -367,7 +378,6 @@ begin
   // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
   // We don't want msi/Windows installer - this way we can hopefully support Windows 2000
   OperationSucceeded := True;
-  Result := False;
   ForceDirectories(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   OperationSucceeded := DownloadHTTP(
@@ -379,10 +389,16 @@ begin
     // apparently can't specify "s with -d option!??!
     Params:=TStringList.Create;
     try
-      Params.Add('-o "' + SVNZip + '"');
-      Params.Add(' -d ' + FSVNDirectory); //todo: check what happens when we've got spaces
-      if Run(FExtractor, Params) <> 0 then
+      Params.Add('-o'); //overwrite existing files
+      Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
+      Params.Add(FSVNDirectory);
+      Params.Add('"'+SVNZip+'"'); // zip/archive file
+      ResultCode:=Run(FExtractor, Params);
+      if ResultCode<> 0 then
+      begin
         OperationSucceeded := False;
+        debugln('resultcode: ' + IntToStr(ResultCode));
+      end;
     finally
       Params.Free;
     end;
@@ -872,8 +888,10 @@ begin
       Executable := BinPath + 'fpcmkcfg';
       Params:=TStringList.Create;
       try
-        Params.Add('-d basepath="'+FPCDirectory+'"');
-        Params.Add('-o "' + FPCCfg + '"');
+        Params.Add('-d');
+        Params.Add('basepath="'+FPCDirectory+'"');
+        Params.Add('-o');
+        Params.Add('"' + FPCCfg + '"');
         debugln('Debug: Running fpcmkcfg: ');
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
@@ -1032,10 +1050,9 @@ begin
   FBootstrapCompilerDirectory := SysUtils.GetTempDir;
 
   //Bootstrap compiler:
-  //We don't want to download from FTP, but it's useful to record it here so we can update the URLs below
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
   {$IFDEF Windows}
-  FBootstrapCompilerURL :=
+  FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
   FCompilername := 'ppc386.exe';
   FFPCPlatform:='i386-win32';
