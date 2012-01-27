@@ -88,6 +88,8 @@ implementation
 function TSVNClient.FindSvnExecutable: string;
 const
   SVNName='svn';
+var
+  ExeResult: longint;
 begin
   result:=FSVNExecutable;
   if FileExists(FSvnExecutable) then
@@ -100,7 +102,13 @@ begin
     //todo: check what happens if svn exe is in path but not specified here?
     // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
     try
-      if SysUtils.ExecuteProcess(SVNName, '--version', [])=0 then
+      {$IFDEF WINDOWS}
+      ExeResult:=SysUtils.ExecuteProcess(SVNName, '--version', []);
+      {$ENDIF WINDOWS}
+      {$IFDEF UNIX}
+      ExeResult:=SysUtils.ExecuteProcess(SVNName, '--version');
+      {$ENDIF UNIX}
+      if ExeResult=0 then
       begin
         //Found a working SVN in path
         FSVNExecutable:=SVNName;
