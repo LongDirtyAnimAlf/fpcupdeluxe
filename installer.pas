@@ -73,9 +73,9 @@ type
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
     function GetMakePath: string;
-    function Run(Executable, Params: string): longint;
-    function RunOutput(Executable, Params: string; var Output: TStringList): longint;
-    function RunOutput(Executable, Params: string; var Output: string): longint;
+    function Run(Executable: string; const Params: TStringList): longint;
+    function RunOutput(Executable: string; const Params: TStringList; var Output: TStringList): longint;
+    function RunOutput(Executable: string; const Params: TStringList; var Output: string): longint;
     procedure SetFPCDirectory(Directory: string);
     procedure SetFPCUrl(AValue: string);
     procedure SetLazarusDirectory(Directory: string);
@@ -134,7 +134,12 @@ end;
 function TInstaller.DownloadBinUtils: boolean;
 // Download binutils. For now, only makes sense on Windows...
 const
+  {These would be the latest:
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
+  These might work but are development, too (might end up in 2.6.2):
+  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
+  but let's use a stable version:}
+  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
   //Parent directory of files. Needs trailing backslash.
 var
   CopyFiles: TStringList;
@@ -210,7 +215,7 @@ function TInstaller.DownloadBootstrapCompiler: boolean;
 var
   BootstrapZip: string;
   OperationSucceeded: boolean;
-  Params: string;
+  Params: TStringList;
   ZipDir: string;
   Log: string;
 begin
@@ -222,16 +227,21 @@ begin
   begin
     {$IFDEF WINDOWS}
     //Extract zip, overwriting without prompting
-    //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
-    Params := '-o "' + BootstrapZip + '" -d ' + ZipDir;
-    if Run(FExtractor, Params) <> 0 then
-    begin
-      debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
-      OperationSucceeded := False;
-    end
-    else
-    begin
-      OperationSucceeded := True; // Spelling it out can't hurt sometimes
+    Params:=TStringList.Create;
+    try
+      Params.Add('-o "' + BootstrapZip + '"');
+      Params.Add('-d ' + ZipDir); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
+      if Run(FExtractor, Params) <> 0 then
+      begin
+        debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      end;
+    finally
+      Params.Free;
     end;
     // Move compiler to proper directory
     if OperationSucceeded = True then
@@ -349,6 +359,7 @@ end;
 function TInstaller.DownloadSVN: boolean;
 var
   OperationSucceeded: boolean;
+  Params: TStringList;
   SVNZip: string;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
@@ -366,8 +377,15 @@ begin
   begin
     // Extract, overwrite
     // apparently can't specify "s with -d option!??!
-    if Run(FExtractor, '-o "' + SVNZip + '" -d ' + FSVNDirectory) <> 0 then
-      OperationSucceeded := False;
+    Params:=TStringList.Create;
+    try
+      Params.Add('-o "' + SVNZip + '"');
+      Params.Add(' -d ' + FSVNDirectory); //todo: check what happens when we've got spaces
+      if Run(FExtractor, Params) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
   end;
 
   if OperationSucceeded then
@@ -383,6 +401,7 @@ function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
   Output: string;
+  Params: TStringList;
   ResultCode: longint;
 begin
   OperationSucceeded := True;
@@ -421,7 +440,14 @@ begin
     // Check for proper make executable
     try
       Output := '';
-      ResultCode:=RunOutput(FMake, '-v', Output);
+      Params:=TStringList.Create;
+      Params.Add('-v');
+      try
+        ResultCode:=RunOutput(FMake, Params, Output);
+      finally
+        Params.Free;
+      end;
+
       //todo: verify if we really should ignore errors here
       if Ansipos('GNU Make', Output) = 0 then
         raise Exception.Create('Found make executable but it is not GNU Make.');
@@ -466,7 +492,14 @@ begin
     try
       Output := '';
       // See unzip.h for return codes.
-      ResultCode:=RunOutput(FExtractor, '-v', Output);
+      Params:=TStringList.Create;
+      try
+        Params.Add('-v');
+        ResultCode:=RunOutput(FExtractor, Params, Output);
+      finally
+        Params.Free;
+      end;
+
       if ResultCode=0 then
       begin
         debugln('Found valid extractor: ' + FExtractor);
@@ -490,7 +523,14 @@ begin
     try
       Output := '';
       // Show help without waiting
-      ResultCode:=RunOutput(BootstrapCompiler, '-h', Output);
+      Params:=TStringList.Create;
+      try
+        Params.Add('-h');
+        ResultCode:=RunOutput(BootstrapCompiler, Params, Output);
+      finally
+        Params.Free;
+      end;
+
       if ResultCode=0 then
       begin
         if Ansipos('Free Pascal Compiler', Output) = 0 then
@@ -586,11 +626,11 @@ begin
   {$ENDIF WINDOWS}
 end;
 
-function TInstaller.Run(Executable, Params: string): longint;
+function TInstaller.Run(Executable: string; const Params: TStringList): longint;
 var
   OutputStringList: TStringList;
 begin
-  debugln('Calling ' + Executable + ' ' + Params);
+  debugln('Calling ' + Executable + ' ' + Params.Text);
   OutputStringList := TStringList.Create;
   try
     Result:=RunOutput(Executable, Params, OutputStringList);
@@ -599,7 +639,7 @@ begin
   end;
 end;
 
-function TInstaller.RunOutput(Executable, Params: string;
+function TInstaller.RunOutput(Executable: string; const Params: TStringList;
   var Output: TStringList): longint;
 var
   SpawnedProcess: TProcess;
@@ -627,9 +667,8 @@ begin
   OutputStream := TMemoryStream.Create;
   SpawnedProcess := TProcess.Create(nil);
   try
-    // We can't use .executable and .parameters as we're passing multiple parameters which
-    // would have to be parsed
-    SpawnedProcess.CommandLine := Executable + ' ' + Params;
+    SpawnedProcess.Executable:=Executable;
+    SpawnedProcess.Parameters:=Params;
     SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
     SpawnedProcess.ShowWindow := swoHIDE;
     SpawnedProcess.Execute;
@@ -648,7 +687,7 @@ begin
   end;
 end;
 
-function TInstaller.RunOutput(Executable, Params: string; var Output: string): longint;
+function TInstaller.RunOutput(Executable: string; const Params: TStringList; var Output: string): longint;
 var
   OutputStringList: TStringList;
 begin
@@ -700,7 +739,7 @@ var
   Executable: string;
   FPCCfg: string;
   OperationSucceeded: boolean;
-  Params: string;
+  Params: TstringList;
 begin
   //Todo: linking fails with as on bare metal win2k system?!?! Test on xp
   OperationSucceeded:=CheckAndGetNeededExecutables;
@@ -713,32 +752,58 @@ begin
     // Make clean using bootstrap compiler
     // Note no error on failure, might be recoverable
     Executable := FMake;
-    Params := ' FPC=' + BootstrapCompiler + ' --directory=' +
-      FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' clean';
-    debugln('Running make clean for fpc:');
-    Run(Executable, params);
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="' + BootstrapCompiler+'"');
+      Params.Add('--directory="'+ FPCDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('clean');
+      debugln('Running make clean for fpc:');
+      Run(Executable, params);
+    finally
+      Params.Free;
+    end;
   end;
 
   if OperationSucceeded then
   begin
-    // Make (clean & all) using bootstrap compiler
+    // Make all using bootstrap compiler
     Executable := FMake;
-    Params := ' FPC=' + BootstrapCompiler + ' --directory=' +
-      FPCDirectory + ' UPXPROG=echo COPYTREE=echo' + ' all';
-    debugln('Running make for FPC:');
-    if Run(Executable, params) <> 0 then
-      OperationSucceeded := False;
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="' + BootstrapCompiler+'"');
+      Params.Add('--directory="'+ FPCDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('all');
+      debugln('Running make for FPC:');
+      if Run(Executable, params) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
   end;
+
   if OperationSucceeded then
   begin
     // Install using newly compiled compiler
     Executable := FMake;
-    Params := ' FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
-      DirectorySeparator + CompilerName + ' --directory=' + FPCDirectory +
-      ' PREFIX=' + FPCDIRECTORY + ' UPXPROG=echo COPYTREE=echo' + ' install';
-    debugln('Running make install for FPC:');
-    if Run(Executable, Params) <> 0 then
-      OperationSucceeded := False;
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="' + FPCDirectory + DirectorySeparator + 'compiler' +
+        DirectorySeparator + CompilerName+'"');
+      Params.Add('--directory="'+ FPCDirectory+'"');
+      Params.Add('PREFIX="'+FPCDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('install');
+      debugln('Running make install for FPC:');
+      if Run(Executable, Params) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
   end;
 
   // Let everyone know of our shiny new compiler:
@@ -752,33 +817,51 @@ begin
     // Note: consider this as an optional item, so don't fail the function if this breaks.
     Executable := FMake;
     debugln('Running Make all (crosscompiler):');
-    Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
-      ' FPC=' + FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
-      ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' all';
-    if Run(Executable, Params) = 0 then
-    begin
-      // Install crosscompiler using new compiler - todo: only for Windows!?!?
-      // make all and make crossinstall perhaps equivalent to
-      // make all install CROSSCOMPILE=1??? todo: find out
-      Executable := FMake;
-      debugln('Running Make crossinstall:');
-      Params := '--directory=' + FPCDirectory + ' PREFIX=' + FPCDIRECTORY +
-        ' FPC=' + FInstalledCompiler + ' UPXPROG=echo COPYTREE=echo' +
-        ' OS_TARGET=win64 CPU_TARGET=x86_64' + ' crossinstall';
-      // Note: consider this as an optional item, so don't fail the function if this breaks.
-      if Run(Executable, Params)=0 then
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('--directory="'+ FPCDirectory+'"');
+      Params.Add('PREFIX="'+FPCDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('OS_TARGET=win64');
+      Params.Add('CPU_TARGET=x86_64');
+      Params.Add('all');
+      if Run(Executable, Params) = 0 then
       begin
-        // Let everyone know of our shiny new crosscompiler:
-        FInstalledCrossCompiler := FPCDirectory + DirectorySeparator + 'bin' +
-          DirectorySeparator + FFPCPlatform + DirectorySeparator + 'ppcrossx64.exe';
-      end
-      else
-      begin
-        debugln('Problem compiling/installing crosscompiler. Continuing regardless.');
+        // Install crosscompiler using new compiler - todo: only for Windows!?!?
+        // make all and make crossinstall perhaps equivalent to
+        // make all install CROSSCOMPILE=1??? todo: find out
+        Executable := FMake;
+        debugln('Running Make crossinstall:');
+        // Params already assigned
+        Params.Clear;
+        Params.Add('FPC="'+FInstalledCompiler+'"');
+        Params.Add('--directory="'+ FPCDirectory+'"');
+        Params.Add('PREFIX="'+FPCDirectory+'"');
+        Params.Add('UPXPROG=echo'); //Don't use UPX
+        Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        Params.Add('OS_TARGET=win64');
+        Params.Add('CPU_TARGET=x86_64');
+        Params.Add('crossinstall');
+        // Note: consider this as an optional item, so don't fail the function if this breaks.
+        if Run(Executable, Params)=0 then
+        begin
+          // Let everyone know of our shiny new crosscompiler:
+          FInstalledCrossCompiler := FPCDirectory + DirectorySeparator + 'bin' +
+            DirectorySeparator + FFPCPlatform + DirectorySeparator + 'ppcrossx64.exe';
+        end
+        else
+        begin
+          debugln('Problem compiling/installing crosscompiler. Continuing regardless.');
+        end;
       end;
+    finally
+      Params.Free;
     end;
   end;
 
+  //todo: after fpcmkcfg create a config file for fpkpkg or something
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
@@ -787,10 +870,16 @@ begin
     if FileExists(FPCCfg) = False then
     begin
       Executable := BinPath + 'fpcmkcfg';
-      Params := ' -d basepath="' + FPCDirectory + '"' + ' -o "' + FPCCfg + '"';
-      debugln('Debug: Running fpcmkcfg: ');
-      if Run(Executable, Params) <> 0 then
-        OperationSucceeded := False;
+      Params:=TStringList.Create;
+      try
+        Params.Add('-d basepath="'+FPCDirectory+'"');
+        Params.Add('-o "' + FPCCfg + '"');
+        debugln('Debug: Running fpcmkcfg: ');
+        if Run(Executable, Params) <> 0 then
+          OperationSucceeded := False;
+      finally
+        Params.Free;
+      end;
     end
     else
     begin
@@ -804,7 +893,7 @@ function Tinstaller.GetLazarus: boolean;
 var
   Executable: string;
   OperationSucceeded: boolean;
-  Params: string;
+  Params: TStringList;
 begin
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
@@ -830,10 +919,18 @@ begin
     // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
     // Note: you apparently can't pass FPC in the FPC= statement, you need to pass a PPC executable.
     Executable := FMake;
-    Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC=' + FInstalledCompiler + ' clean';
-    debugln('Lazarus: running make clean:');
-    Run(Executable, Params);
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('--directory="'+LazarusDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('clean');
+      debugln('Lazarus: running make clean:');
+      Run(Executable, Params);
+    finally
+      Params.Free;
+    end;
   end;
 
   if OperationSucceeded then
@@ -843,12 +940,22 @@ begin
     if FInstalledCrossCompiler<>'' then
     begin
       Executable := FMake;
-      Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-        ' FPC=' + FInstalledCrossCompiler +
-        ' LCL_PLATFORM=win32 OS_TARGET=win64 CPU_TARGET=x86_64' + ' lcl';
-      debugln('Lazarus: running make lcl crosscompiler:');
-      // Note: consider this optional; don't fail the function if this fails.
-      if Run(Executable, Params)<> 0 then debugln('Problem compiling 64 bit LCL; continuing regardless.');
+      Params:=TStringList.Create;
+      try
+        Params.Add('FPC="'+FInstalledCrossCompiler+'"');
+        Params.Add('--directory="'+LazarusDirectory+'"');
+        Params.Add('UPXPROG=echo'); //Don't use UPX
+        Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        Params.Add('LCL_PLATFORM=win32');
+        Params.Add('OS_TARGET=win64');
+        Params.Add('CPU_TARGET=x86_64');
+        Params.Add('lcl');
+        debugln('Lazarus: running make lcl crosscompiler:');
+        // Note: consider this optional; don't fail the function if this fails.
+        if Run(Executable, Params)<> 0 then debugln('Problem compiling 64 bit LCL; continuing regardless.');
+      finally
+        Params.Free;
+      end;
     end;
   end;
 
@@ -856,35 +963,58 @@ begin
   begin
     // Make all (should include lcl & ide)
     Executable := FMake;
-    Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC=' + FInstalledCompiler + ' all';
-    debugln('Lazarus: running make all:');
-    if (Run(Executable, Params)) <> 0 then
-      OperationSucceeded := False;
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('--directory="'+LazarusDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('all');
+      debugln('Lazarus: running make all:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
   end;
 
   if OperationSucceeded then
   begin
     // Make bigide: ide with additional packages as specified by user (in primary config path?)
     Executable := FMake;
-    Params := '--directory=' + LazarusDirectory + ' UPXPROG=echo COPYTREE=echo' +
-      ' FPC=' + FInstalledCompiler + ' bigide';
-    debugln('Lazarus: running make bigide:');
-    if (Run(Executable, Params)) <> 0 then
-      OperationSucceeded := False;
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('--directory="'+LazarusDirectory+'"');
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('bigide');
+      debugln('Lazarus: running make bigide:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
   end;
 
   if OperationSucceeded then
   begin
     // Build data desktop, nice example of building with lazbuild
     Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
-    Params :=
-      '--pcp=' + FLazarusPrimaryConfigPath + ' ' + LazarusDirectory +
-      DirectorySeparator + 'tools' + DirectorySeparator + 'lazdatadesktop' +
-      DirectorySeparator + 'lazdatadesktop.lpr';
-    debugln('Lazarus: compiling data desktop:');
-    if (Run(Executable, Params)) <> 0 then
-      OperationSucceeded := False;
+
+    Params:=TStringList.Create;
+    try
+      Params.Add('--pcp="'+FLazarusPrimaryConfigPath+'"');
+      Params.Add('"'+LazarusDirectory+DirectorySeparator+
+        'tools'+DirectorySeparator+
+        'lazdatadesktop'+DirectorySeparator+
+        'lazdatadesktop.lpr"');
+      debugln('Lazarus: compiling data desktop:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
   end;
   debugln('todo: make shortcut on desktop, maybe start menu');
   Result := OperationSucceeded;
@@ -906,26 +1036,26 @@ begin
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
   {$IFDEF Windows}
   FBootstrapCompilerURL :=
-    'http://sunet.dl.sourceforge.net/project/freepascal/Bootstrap/2.4.2/i386-win32-ppc386.zip';
+    'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
   FCompilername := 'ppc386.exe';
   FFPCPlatform:='i386-win32';
   {$ENDIF Windows}
   {$IFDEF Linux}
   FBootstrapCompilerURL :=
-    'ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
+    'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
   //todo: check if this is the right one - 32vs64 bit!?!?
   FCompilername := 'ppc386';
   FFPCPlatform:='i386-linux';
   {todo: Linux x64:
   FBootstrapCompilerURL :=
-  'ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
+  'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
   FCompilername := 'x86_64-linux-ppcx64';
   FFPCPlatform:='x64-linux';
   }
   {$ENDIF Linux}
   {$IFDEF Darwin}
   FBootstrapCompilerURL :=
-    'ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
+    'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
   FCompilername := 'ppcuniversal';
   //check this:
   FFPCPlatform:='x64-OSX';
