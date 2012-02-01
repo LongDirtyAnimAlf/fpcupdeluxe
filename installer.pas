@@ -47,10 +47,12 @@ type
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string;
+    FDesktopShortcutName: string;
     FExecutableExtension: string;
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
     FInstalledCrossCompiler: string; //Path to an optional cross compiler that we installed (also used for Lazarus)
+    FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string;
     FMake: string;
     {$IFDEF WINDOWS}
@@ -60,9 +62,10 @@ type
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FUpdater: TUpdater;
     FExtractor: string; //Location or name of executable used to decompress source arhives
+    procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
     function DownloadBinUtils: boolean;
     function DownloadBootstrapCompiler: boolean;
-    function DownloadFTP(Host, Source, TargetFile: string): boolean;
+    function DownloadFTP(URL, TargetFile: string): boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
     function CheckAndGetNeededExecutables: boolean;
@@ -83,6 +86,7 @@ type
     procedure SetLazarusUrl(AValue: string);
     procedure SetMakePath(AValue: string);
   public
+    property DesktopShortCutName: string read FDesktopShortcutName write FDesktopShortcutName; //Name of the shortcut to Lazarus. If empty, no shortcut is generated.
     property CompilerName: string read FCompilerName;
     //Full path to FPC compiler that is installed by this program
     property BootstrapCompiler: string read GetBootstrapCompiler;
@@ -118,7 +122,8 @@ uses
   ftpsend {for downloading from ftp},
   strutils, process, FileUtil {Requires LCL}, bunzip2
 {$IFDEF WINDOWS}
-  , shlobj
+  //Mostly for shortcut code
+  ,windows, shlobj {for special folders}, ActiveX, ComObj
 {$ENDIF WINDOWS}
   ;
 //todo: add objects
@@ -131,6 +136,35 @@ begin
   writeln('Debug: ' + Message);
   sleep(200); //hopefully allow output to be written without interfering with other output
   {$ENDIF DEBUG}
+end;
+
+
+procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+var
+  IObject: IUnknown;
+  ISLink: IShellLink;
+  IPFile: IPersistFile;
+  PIDL: PItemIDList;
+  InFolder: array[0..MAX_PATH] of Char;
+  TargetName: String;
+  LinkName: WideString;
+begin
+  { Creates an instance of IShellLink }
+  IObject := CreateComObject(CLSID_ShellLink);
+  ISLink := IObject as IShellLink;
+  IPFile := IObject as IPersistFile;
+
+  ISLink.SetPath(pChar(Target));
+  ISLink.SetArguments(pChar(TargetArguments));
+  ISLink.SetWorkingDirectory(pChar(ExtractFilePath(Target)));
+
+  { Get the desktop location }
+  SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, PIDL);
+  SHGetPathFromIDList(PIDL, InFolder);
+  LinkName := InFolder + PathDelim + ShortcutName+'.lnk';
+
+  { Create the link }
+  IPFile.Save(PWChar(LinkName), false);
 end;
 
 { TInstaller }
@@ -225,7 +259,7 @@ begin
   ForceDirectories(BootstrapCompilerDirectory);
   BootstrapZip := SysUtils.GetTempFileName + '.zip';
   ZipDir := ExtractFilePath(BootstrapZip);
-  OperationSucceeded := DownloadHTTP(FBootstrapCompilerFTP, BootstrapZip);
+  OperationSucceeded := DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
   if OperationSucceeded then
   begin
     {$IFDEF WINDOWS}
@@ -274,9 +308,29 @@ begin
   Result := OperationSucceeded;
 end;
 
-function TInstaller.DownloadFTP(Host, Source, TargetFile: string): boolean;
+function TInstaller.DownloadFTP(URL, TargetFile: string): boolean;
+const
+  FTPPort=21;
+  FTPScheme='ftp://'; //URI scheme name for FTP URLs
+var
+  Host: string;
+  Port: integer;
+  Source: string;
+  FoundPos: integer;
 begin
-  Result:=FtpGetFile(Host, '21', Source, TargetFile, 'anonymous', 'fpc@example.com');
+  if LeftStr(URL, length(FTPScheme))=FTPScheme then URL:=Copy(URL, length(FTPScheme)+1, length(URL));
+  FoundPos:=pos('/', URL);
+  Host:=LeftStr(URL, FoundPos-1);
+  Source:=Copy(URL, FoundPos+1, Length(URL));
+  //Check for port numbers
+  FoundPos:=pos(':', Host);
+  Port:=21;
+  if FoundPos>0 then
+  begin
+    Host:=LeftStr(Host, FoundPos-1);
+    Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
+  end;
+  Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
 end;
 
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
@@ -990,7 +1044,14 @@ begin
       Params.Add('all');
       debugln('Lazarus: running make all:');
       if (Run(Executable, Params)) <> 0 then
+      begin
         OperationSucceeded := False;
+        FInstalledLazarus:= '//\\error//\\'; //todo: check if this really is an invalid filename. it should be.
+      end
+      else
+      begin
+        FInstalledLazarus:=LazarusDirectory+DirectorySeparator+'lazarus'+FExecutableExtension;
+      end;
     finally
       Params.Free;
     end;
@@ -1019,7 +1080,6 @@ begin
   begin
     // Build data desktop, nice example of building with lazbuild
     Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
-
     Params:=TStringList.Create;
     try
       Params.Add('--pcp="'+FLazarusPrimaryConfigPath+'"');
@@ -1034,7 +1094,36 @@ begin
       Params.Free;
     end;
   end;
-  debugln('todo: make shortcut on desktop, maybe start menu');
+
+  if OperationSucceeded then
+  begin
+    // Build Lazarus Doceditor
+    Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
+    Params:=TStringList.Create;
+    try
+      Params.Add('--pcp="'+FLazarusPrimaryConfigPath+'"');
+      Params.Add('"'+LazarusDirectory+DirectorySeparator+
+        'doceditor'+DirectorySeparator+
+        'lazde.lpr"');
+      debugln('Lazarus: compiling doc editor:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  if DesktopShortCutName<>EmptyStr then
+  begin
+    debugln('Lazarus: creating desktop shortcut:');
+    try
+      //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+      //todo: perhaps check for existing shortcut
+      CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',DesktopShortcutName);
+    finally
+      //Ignore problems creating shortcut
+    end;
+  end;
   Result := OperationSucceeded;
 end;
 
@@ -1062,6 +1151,7 @@ begin
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
   //todo: check if this is the right one - 32vs64 bit!?!?
   FCompilername := 'ppc386';
+  FDesktopShortcutName;='Lazarus (dev version)';
   FFPCPlatform:='i386-linux';
   {todo: Linux x64:
   FBootstrapCompilerURL :=
@@ -1090,6 +1180,7 @@ begin
   FExtractor := '';
   //Directory where Lazarus installation config will end up (primary config path)
   {$IFDEF Windows}
+  // Somewhere in local appdata special folder
   AppDataPath := '';
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
   LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + DefaultPCPSubdir;

@@ -73,6 +73,7 @@ begin
     FInstaller := TInstaller.Create;
     FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
     //Has existing compiler that can compile FPC sources. Should be FPC 2.6, other versions might work
+    FInstaller.DesktopShortCutName:='Lazarus (trunk)';
     //todo: fix for linux!?!?
     if UseTrunkFPC then
     begin
