@@ -44,6 +44,7 @@ type
   { TInstaller }
   TInstaller = class(TObject)
   private
+    FBinutilsNoBackslash: string; //Same as FMakePath except without trailing \ or /. Needed for make CROSSBINDIR
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string;
@@ -702,7 +703,8 @@ function TInstaller.Run(Executable: string; const Params: TStringList): longint;
 var
   OutputStringList: TStringList;
 begin
-  debugln('Calling ' + Executable + ' ' + Params.Text);
+  debugln('Calling:');
+  debugln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
   OutputStringList := TStringList.Create;
   try
     Result:=RunOutput(Executable, Params, OutputStringList);
@@ -736,44 +738,38 @@ var
 
 begin
   Result := 255; //Preset to failure
-  if FileExists(Executable) then
-  begin
-    OutputStream := TMemoryStream.Create;
-    SpawnedProcess := TProcess.Create(nil);
+  OutputStream := TMemoryStream.Create;
+  SpawnedProcess := TProcess.Create(nil);
+  try
     try
-      try
-        SpawnedProcess.Executable:=Executable;
-        SpawnedProcess.Parameters:=Params;
-        SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
-        SpawnedProcess.ShowWindow := swoHIDE;
-        SpawnedProcess.Execute;
-        while SpawnedProcess.Running do
-        begin
-          if not ReadOutput then
-            Sleep(100);
-        end;
-        ReadOutput;
-        OutputStream.Position := 0;
-        Output.LoadFromStream(OutputStream);
-        Result := SpawnedProcess.ExitStatus;
-      except
-        on E: Exception do
-        begin
-          //Something went wrong. We need to pass on what and markt this as a failure
-          debugln('Exception calling '+Executable);
-          debugln('Details: '+E.ClassName+'/'+E.Message);
-          Result:=254; //fairly random but still an error, and distinct from earlier code
-        end;
+      SpawnedProcess.Executable:=Executable;
+      SpawnedProcess.Parameters:=Params;
+      SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
+      SpawnedProcess.ShowWindow := swoHIDE;
+      SpawnedProcess.Execute;
+      while SpawnedProcess.Running do
+      begin
+        if not ReadOutput then
+          Sleep(100);
       end;
-    finally
-      OutputStream.Free;
-      SpawnedProcess.Free;
+      ReadOutput;
+      OutputStream.Position := 0;
+      Output.LoadFromStream(OutputStream);
+      Result := SpawnedProcess.ExitStatus;
+    except
+      on E: Exception do
+      begin
+        //todo: check file not found handling. We don't want to do an explicit file exists
+        //as this complicates with paths, current dirs, .exe extensions etc.
+        //Something went wrong. We need to pass on what and markt this as a failure
+        debugln('Exception calling '+Executable);
+        debugln('Details: '+E.ClassName+'/'+E.Message);
+        Result:=254; //fairly random but still an error, and distinct from earlier code
+      end;
     end;
-  end
-  else
-  begin
-    debugln('File not found calling '+Executable);
-    Result:=253; //fairly random but still an error, and distinct from earlier code
+  finally
+    OutputStream.Free;
+    SpawnedProcess.Free;
   end;
 end;
 
@@ -816,6 +812,7 @@ begin
   {$IFDEF WINDOWS}
   // Make sure there's a trailing delimiter
   FMakePath := IncludeTrailingPathDelimiter(AValue);
+  FBinutilsNoBackslash:=ExcludeTrailingPathDelimiter(FMakePath); //We need a stripped version for crossbindir
   FMake := FMakePath + 'make' + FExecutableExtension;
   {$ELSE}
   //stub for compatibility
@@ -825,16 +822,16 @@ end;
 
 function Tinstaller.GetFPC: boolean;
 var
-  BinPath: string;
+  BinPath: string; //Path where installed compiler ends up
   Executable: string;
   FPCCfg: string;
   OperationSucceeded: boolean;
   Params: TstringList;
 begin
-  //Todo: linking fails with as on bare metal win2k system?!?! Test on xp
+  //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
-  //Make sure we have the proper tools.
+  debugln('Checking out/updating FPC sources...');
   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC;
 
   if OperationSucceeded then
@@ -845,6 +842,8 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="' + BootstrapCompiler+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
+      //Alternative to CROSSBINDIR would be OPT=-FD+fbinutilsno.....
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -863,6 +862,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="' + BootstrapCompiler+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -883,8 +883,9 @@ begin
     try
       Params.Add('FPC="' + FPCDirectory + DirectorySeparator + 'compiler' +
         DirectorySeparator + CompilerName+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+ FPCDirectory+'"');
-      Params.Add('PREFIX="'+FPCDirectory+'"');
+      Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('install');
@@ -910,8 +911,9 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
       Params.Add('--directory="'+ FPCDirectory+'"');
-      Params.Add('PREFIX="'+FPCDirectory+'"');
+      Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('OS_TARGET=win64');
@@ -927,8 +929,9 @@ begin
         // Params already assigned
         Params.Clear;
         Params.Add('FPC="'+FInstalledCompiler+'"');
+        Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
         Params.Add('--directory="'+ FPCDirectory+'"');
-        Params.Add('PREFIX="'+FPCDirectory+'"');
+        Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
         Params.Add('OS_TARGET=win64');
@@ -955,6 +958,7 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
+    //todo: investigate if we can/need to add binutils path here
     BinPath := ExtractFilePath(FInstalledCompiler);
     FPCCfg := BinPath + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
@@ -998,7 +1002,10 @@ begin
 
   // Download Lazarus source:
   if OperationSucceeded = True then
+  begin
+    debugln('Checking out/updating Lazarus sources...');
     OperationSucceeded := FUpdater.UpdateLazarus;
+  end;
 
   // Make sure primary config path exists
   if DirectoryExists(LazarusPrimaryConfigPath) = False then
@@ -1014,6 +1021,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1035,6 +1043,7 @@ begin
       Params:=TStringList.Create;
       try
         Params.Add('FPC="'+FInstalledCrossCompiler+'"');
+        Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
         Params.Add('--directory="'+LazarusDirectory+'"');
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1058,6 +1067,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1077,6 +1087,8 @@ begin
     end;
   end;
 
+  //todo: somewhere, set proper FPC and binutils paths in pcp dir options
+
   if OperationSucceeded then
   begin
     // Make bigide: ide with additional packages as specified by user (in primary config path?)
@@ -1084,6 +1096,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
+      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
