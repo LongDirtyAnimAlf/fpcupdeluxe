@@ -47,59 +47,148 @@ Add something like fpcup.config in the settings dir so we know for which fpc/laz
 }
 uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
-  Classes,
+  Classes,Forms, Interfaces {these 2 for application options},
   installer,
   svnclient;
 
 //{$R *.res} //Keep it simple, no resources
+procedure WriteHelp;
+begin
+  writeln('fpcup');
+  writeln('A FPC/Lazarus downloader/updater/installer');
+  writeln('Open source freeware (modified LGPL/BSD), see:');
+  writeln('https://bitbucket.org/reiniero/fpcup');
+  writeln('');
+  writeln('fpcup --<options>)');
+  writeln('Options are not required; they include:');
+  writeln(' help                  Show this text');
+  writeln(' binutilsdir=<dir>     Directory where make, patch etc ');
+  writeln('                       (the binutils) are located. If make does not');
+  writeln('                       exist, binutils will be downloaded there.');
+  writeln('                       Default c:\development\binutils\');
+  writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
+  writeln('                       sources. Specify location with this option; if no');
+  writeln('                       compiler found here, FPCUp will download one there.');
+  writeln('                       Default: c:\development\fpcbootstrap\');
+  writeln(' fpcdir=<dir>          Target FPC dir, default c:\development\fpc\');
+  writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
+  writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+  writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
+  writeln(' lazlinkname=<name>    Name of the desktop shortcut to the Lazarus install.');
+  writeln('                       If empty specified, no shortcut will be produced.');
+  writeln('                       Default: Lazarus (trunk)');
+  writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
+  writeln('                       trunk (newest version):');
+  writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
+  writeln('');
+end;
+
+procedure CheckOptions(FInstaller: TInstaller);
+const
+  BinutilsDir='binutilsdir';
+  FPCBootstrapDir='fpcbootstrapdir';
+  FPCDir='fpcdir';
+  FPCURL='fpcURL';
+  Help='help';
+  LazDir='lazdir';
+  LazLinkName='lazlinkname';
+  LazURL='lazURL';
+var
+  ErrorMessage: string;
+begin
+// Default values
+  FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
+  FInstaller.DesktopShortCutName:='Lazarus (trunk)';
+  FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
+  FInstaller.FPCDirectory := 'c:\development\fpc';
+  FInstaller.LazarusDirectory := 'c:\development\lazarus';
+  FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
+  //svn2 seems to lag behind a lot.
+  FInstaller.MakePath := 'C:\development\binutils\';
+
+  ErrorMessage := Application.CheckOptions(
+    'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
+    Help+' '+LazDir+': '+
+    LazLinkName+': '+LazURL);
+  if Length(ErrorMessage) > 0 then
+  begin
+    writeln('Error: wrong command line options given:');
+    writeln(ErrorMessage);
+    WriteHelp;
+    FInstaller.Free;
+    halt(13); //Quit with error resultcode
+  end;
+
+  if Application.HasOption(BinutilsDir) then
+  begin
+    FInstaller.MakePath:=Application.GetOptionValue(BinutilsDir)
+  end;
+
+  if Application.HasOption(FPCBootstrapDir) then
+  begin
+    FInstaller.BootstrapCompilerDirectory:=Application.GetOptionValue(FPCBootstrapDir)
+  end;
+
+  if Application.HasOption(FPCDir) then
+  begin
+    FInstaller.FPCDirectory:=Application.GetOptionValue(FPCDir)
+  end;
+
+  if Application.HasOption(FPCURL) then
+  begin
+    FInstaller.FPCURL:=Application.GetOptionValue(FPCURL)
+  end;
+
+  if Application.HasOption('h', Help) then
+  begin
+    writehelp;
+    FInstaller.Free;
+    halt(0); //quit without error
+  end;
+
+  if Application.HasOption(LazDir) then
+  begin
+    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazDir)
+  end;
+
+  if Application.HasOption(LazLinkName) then
+  begin
+    FInstaller.DesktopShortCutName:=Application.GetOptionValue(LazLinkName)
+  end;
+
+  if Application.HasOption(LazURL) then
+  begin
+    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL)
+  end;
+  Installer.debugln('Options:');
+  Installer.debugln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
+  Installer.debugln('Shortcut name:         '+FInstaller.DesktopShortCutName);
+  Installer.debugln('FPC URL:               '+FInstaller.FPCURL);
+  Installer.debugln('FPC directory:         '+FInstaller.FPCDirectory);
+  Installer.debugln('Lazarus directory:     '+FInstaller.LazarusDirectory);
+  Installer.debugln('Lazarus URL:           '+FInstaller.LazarusURL);
+  Installer.debugln('Make/binutils path:    '+FInstaller.MakePath);
+end;
+
 var
   FInstaller: TInstaller;
-  UseTrunkFPC: boolean=false;
 begin
   writeln('FCPUp FreePascal/Lazarus downloader/installer started.');
   writeln('This program will download the FPC and Lazarus sources');
   writeln('from the source Subversion/SVN repositories,');
   writeln('compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
-  if (Pos('FPC27', ParamStr(1))>0) or (Pos('FPCTRUNK', ParamStr(1))>0) then
-  begin
-    UseTrunkFPC:=true;
-    writeln('');
-    writeln('Selected FPC trunk version. FPC 2.7 not recommended for Lazarus right now due to Unicode development.');
-  end;
 
   try
     // Adjust these directories to taste/your situation.
     FInstaller := TInstaller.Create;
-    FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
-    //Has existing compiler that can compile FPC sources. Should be FPC 2.6, other versions might work
-    FInstaller.DesktopShortCutName:='Lazarus (trunk)';
-    //todo: fix for linux!?!?
-    if UseTrunkFPC then
-    begin
-      // FPC source
-      FInstaller.FPCURL := 'http://svn.freepascal.org/svn/trunk';
-      //Directory where FPC installation will end up:
-      FInstaller.FPCDirectory := 'c:\development\fpc27';
-    end
-    else
-    begin
-      //By default, use fixes 2.6, not default set by updater (trunk/2.7.1) as Lazarus doesn't work with 2.7.1
-      FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
-      FInstaller.FPCDirectory := 'c:\development\fpc';
-    end;
-
-    FInstaller.LazarusDirectory := 'c:\development\lazarus';
-    FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
-    //svn2 seems to lag behind a lot.
-    FInstaller.MakePath := 'C:\development\binutils\';
-    //Existing make needed to compile FPC. Will be downloaded if doesn't exit
+    CheckOptions(FInstaller); //Process command line arguments
 
     // Get/update/compile (if needed) FPC; only compile Lazarus if succeeded.
-    installer.debugln('getting and compiling fpc:');
+    writeln('Getting and compiling fpc:');
     if FInstaller.GetFPC then
     begin
-      installer.debugln('getting and compiling lazarus:');
+      writeln('Getting and compiling lazarus:');
       if FInstaller.GetLazarus=false then
       begin
         writeln('Lazarus retrieval/compilation failed.');
@@ -125,6 +214,6 @@ begin
   finally
     FInstaller.Free;
   end;
-  writeln('end');
+  writeln('FPCUp finished.');
 end.
 
