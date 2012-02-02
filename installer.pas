@@ -146,7 +146,6 @@ var
   IPFile: IPersistFile;
   PIDL: PItemIDList;
   InFolder: array[0..MAX_PATH] of Char;
-  TargetName: String;
   LinkName: WideString;
 begin
   { Creates an instance of IShellLink }
@@ -254,7 +253,6 @@ var
   OperationSucceeded: boolean;
   Params: TStringList;
   ZipDir: string;
-  Log: string;
 begin
   ForceDirectories(BootstrapCompilerDirectory);
   BootstrapZip := SysUtils.GetTempFileName + '.zip';
@@ -324,7 +322,7 @@ begin
   Source:=Copy(URL, FoundPos+1, Length(URL));
   //Check for port numbers
   FoundPos:=pos(':', Host);
-  Port:=21;
+  Port:=FTPPort;
   if FoundPos>0 then
   begin
     Host:=LeftStr(Host, FoundPos-1);
@@ -590,11 +588,12 @@ begin
   if OperationSucceeded then
   begin
     // Check for proper FPC bootstrap compiler
+    debugln('Checking for FPC bootstrap compiler...');
     try
       Output := '';
-      // Show help without waiting
       Params:=TStringList.Create;
       try
+        // Show help without waiting:
         Params.Add('-h');
         ResultCode:=RunOutput(BootstrapCompiler, Params, Output);
       finally
@@ -606,7 +605,7 @@ begin
         if Ansipos('Free Pascal Compiler', Output) = 0 then
         begin
           OperationSucceeded := False;
-          debugln('Found FPC executable but it is not a Free Pascal compiler. Trying to overwrite it.');
+          debugln('Found FPC executable but it is not a Free Pascal compiler. Going to overwrite it.');
         end
         else
         begin
@@ -622,8 +621,12 @@ begin
         OperationSucceeded:=false;
       end;
     except
-      debugln('Exception trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
-      OperationSucceeded := False;
+      on E: Exception do
+      begin
+        debugln('Exception trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
+        debugln(E.ClassName+'/'+E.Message);
+        OperationSucceeded := False;
+      end;
     end;
     if OperationSucceeded=false then
     begin
@@ -631,7 +634,6 @@ begin
       OperationSucceeded := DownloadBootstrapCompiler;
     end;
   end;
-
   Result := OperationSucceeded;
 end;
 
@@ -734,26 +736,44 @@ var
 
 begin
   Result := 255; //Preset to failure
-  OutputStream := TMemoryStream.Create;
-  SpawnedProcess := TProcess.Create(nil);
-  try
-    SpawnedProcess.Executable:=Executable;
-    SpawnedProcess.Parameters:=Params;
-    SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
-    SpawnedProcess.ShowWindow := swoHIDE;
-    SpawnedProcess.Execute;
-    while SpawnedProcess.Running do
-    begin
-      if not ReadOutput then
-        Sleep(100);
+  if FileExists(Executable) then
+  begin
+    OutputStream := TMemoryStream.Create;
+    SpawnedProcess := TProcess.Create(nil);
+    try
+      try
+        SpawnedProcess.Executable:=Executable;
+        SpawnedProcess.Parameters:=Params;
+        SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
+        SpawnedProcess.ShowWindow := swoHIDE;
+        SpawnedProcess.Execute;
+        while SpawnedProcess.Running do
+        begin
+          if not ReadOutput then
+            Sleep(100);
+        end;
+        ReadOutput;
+        OutputStream.Position := 0;
+        Output.LoadFromStream(OutputStream);
+        Result := SpawnedProcess.ExitStatus;
+      except
+        on E: Exception do
+        begin
+          //Something went wrong. We need to pass on what and markt this as a failure
+          debugln('Exception calling '+Executable);
+          debugln('Details: '+E.ClassName+'/'+E.Message);
+          Result:=254; //fairly random but still an error, and distinct from earlier code
+        end;
+      end;
+    finally
+      OutputStream.Free;
+      SpawnedProcess.Free;
     end;
-    ReadOutput;
-    OutputStream.Position := 0;
-    Output.LoadFromStream(OutputStream);
-    Result := SpawnedProcess.ExitStatus;
-  finally
-    OutputStream.Free;
-    SpawnedProcess.Free;
+  end
+  else
+  begin
+    debugln('File not found calling '+Executable);
+    Result:=253; //fairly random but still an error, and distinct from earlier code
   end;
 end;
 
