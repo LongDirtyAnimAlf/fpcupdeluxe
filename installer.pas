@@ -355,6 +355,7 @@ var
   SourceForgeProject: string;
 begin
   Result := False;
+  // Todo: test this functionality
   // Detect SourceForge download
   i := Pos(SourceForgeProjectPart, URL);
   j := Pos(SourceForgeFilesPart, URL);
@@ -910,8 +911,14 @@ begin
 
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
+  begin
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
+  end
+  else
+  begin
+    FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
+  end;
 
   if OperationSucceeded then
   begin
@@ -921,6 +928,9 @@ begin
       begin
         FileUtil.CopyFile(FBinutilsDir+FBinUtils[FileCounter], ExtractFilePath(FInstalledCompiler)+FBinUtils[FileCounter]);
       end;
+      // Also, we can change the make/binutils path to our new environment
+      // Will modify fmake as well.
+      MakePath:=ExtractFilePath(FInstalledCompiler);
     except
       on E: Exception do
       begin
