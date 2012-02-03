@@ -113,7 +113,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
     Help+' '+LazDir+': '+
-    LazLinkName+': '+LazURL);
+    LazLinkName+': '+LazURL+':');
   if Length(ErrorMessage) > 0 then
   begin
     writeln('Error: wrong command line options given:');
