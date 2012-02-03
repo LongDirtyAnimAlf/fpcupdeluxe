@@ -442,12 +442,13 @@ begin
 
   {Alternative 2: use
   http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip
-  with subdirs bin and licenses. No further subdirs}
+  with subdirs bin and licenses. No further subdirs
+  However, doesn't work on Windows 2K...}
   OperationSucceeded := True;
   ForceDirectories(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   OperationSucceeded := DownloadHTTP(
-    'http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip'
+    'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
     , SVNZip);
   if OperationSucceeded then
   begin
