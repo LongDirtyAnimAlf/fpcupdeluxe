@@ -160,14 +160,16 @@ begin
   begin
     FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL)
   end;
-  Installer.debugln('Options:');
-  Installer.debugln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
-  Installer.debugln('Shortcut name:         '+FInstaller.DesktopShortCutName);
-  Installer.debugln('FPC URL:               '+FInstaller.FPCURL);
-  Installer.debugln('FPC directory:         '+FInstaller.FPCDirectory);
-  Installer.debugln('Lazarus directory:     '+FInstaller.LazarusDirectory);
-  Installer.debugln('Lazarus URL:           '+FInstaller.LazarusURL);
-  Installer.debugln('Make/binutils path:    '+FInstaller.MakePath);
+  writeln('');
+  writeln('Options:');
+  writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
+  writeln('Shortcut name:          '+FInstaller.DesktopShortCutName);
+  writeln('FPC URL:                '+FInstaller.FPCURL);
+  writeln('FPC directory:          '+FInstaller.FPCDirectory);
+  writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
+  writeln('Lazarus URL:            '+FInstaller.LazarusURL);
+  writeln('Make/binutils path:     '+FInstaller.MakePath);
+  writeln('');
 end;
 
 var

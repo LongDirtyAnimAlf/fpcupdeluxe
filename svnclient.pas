@@ -57,7 +57,8 @@ type
     //Performs an SVN checkout (initial download), HEAD (latest revision) only for speed
     procedure CheckOutOrUpdate;
     //Pulls SVN checkout if local repository doesn't exist, else does an update
-    function FindSVNExecutable: string; //Search for installed SVN executable (might return just a filename if in the OS path)
+    function FindSVNExecutable: string;
+    //Search for installed SVN executable (might return just a filename if in the OS path)
     procedure Log(var Log: TStringList); //Shows commit log for local directory
     procedure Revert;
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
@@ -87,11 +88,11 @@ implementation
 { TSVNClient }
 function TSVNClient.FindSvnExecutable: string;
 const
-  SVNName='svn';
+  SVNName = 'svn';
 var
   ExeResult: longint;
 begin
-  result:=FSVNExecutable;
+  Result := FSVNExecutable;
   if FileExists(FSvnExecutable) then
   begin
     exit;
@@ -103,15 +104,15 @@ begin
     // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
     try
       {$IFDEF WINDOWS}
-      ExeResult:=SysUtils.ExecuteProcess(SVNName, '--version', []);
+      ExeResult := SysUtils.ExecuteProcess(SVNName, '--version', []);
       {$ENDIF WINDOWS}
       {$IFDEF UNIX}
-      ExeResult:=SysUtils.ExecuteProcess(SVNName, '--version');
+      ExeResult := SysUtils.ExecuteProcess(SVNName, '--version');
       {$ENDIF UNIX}
-      if ExeResult=0 then
+      if ExeResult = 0 then
       begin
         //Found a working SVN in path
-        FSVNExecutable:=SVNName;
+        FSVNExecutable := SVNName;
         exit;
       end;
     except
@@ -144,12 +145,15 @@ begin
 
   if not FileExists(FSvnExecutable) then
   begin
-    if FileExists('svn.exe') then FSVNExecutable:='svn.exe';
-    if FileExists('svn') then FSVNExecutable:='svn';
+    if FileExists('svn.exe') then
+      FSVNExecutable := 'svn.exe';
+    if FileExists('svn') then
+      FSVNExecutable := 'svn';
   end;
 
-  if not FileExists(FSVNExecutable) then FSVNExecutable:=''; //Make sure we don't call an arbitrary executable
-  result:=FSVNExecutable;
+  if not FileExists(FSVNExecutable) then
+    FSVNExecutable := ''; //Make sure we don't call an arbitrary executable
+  Result := FSVNExecutable;
 end;
 
 function TSVNClient.GetSVNExecutable: string;
@@ -222,7 +226,7 @@ var
   RetryAttempt: integer;
   StartRevision: integer;
 begin
-  StartRevision:=LocalRevision;
+  StartRevision := LocalRevision;
   Command := 'update ' + LocalRepository;
   ExecuteSVNCommand(Command);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
@@ -260,7 +264,7 @@ begin
   FReturnCode := 255; //Preset to failure
   // Look for SVN if necessary; error if needed:
   if not FileExists(FSVNExecutable) then;
-    FindSvnExecutable;
+  FindSvnExecutable;
   if not FileExists(FSvnExecutable) then
     raise ESVNClientError.Create('No SVN executable found');
 
@@ -330,7 +334,7 @@ end;
 
 function TSVNClient.LocalRevision: integer;
 const
-  RevLength=Length('Revision: ');
+  RevLength = Length('Revision: ');
 var
   Output: TStringList;
   Revision: string;
@@ -338,11 +342,11 @@ begin
   Output := TStringList.Create;
   try
     if (ExecuteSVNCommand('info ' + FLocalRepository, Output) = 0) then
-      result:=-1;
+      Result := -1;
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision: "
-    Revision:=Output.Text;
-    result:=StrToIntDef(trim(copy(Revision,pos('Revision: ',Revision)+9,6)), -1);
+    Revision := Output.Text;
+    Result := StrToIntDef(trim(copy(Revision, pos('Revision: ', Revision) + 9, 6)), -1);
   finally
     Output.Free;
   end;
@@ -362,7 +366,4 @@ destructor Tsvnclient.Destroy;
 begin
   inherited Destroy;
 end;
-
-
 end.
-
