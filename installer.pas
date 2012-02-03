@@ -44,7 +44,7 @@ type
   { TInstaller }
   TInstaller = class(TObject)
   private
-    FBinutilsNoBackslash: string; //Same as FMakePath except without trailing \ or /. Needed for make CROSSBINDIR
+    FBinUtils: TStringlist; //binutils such as make.exe, as.exe, needed for compilation
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string;
@@ -57,12 +57,14 @@ type
     FLazarusPrimaryConfigPath: string;
     FMake: string;
     {$IFDEF WINDOWS}
-    FMakePath: string;
+    FBinutilsDir: string;
+    FBinutilsDirNoBackslash: string; //Location of binutils without trailing delimiter
     {$ENDIF}
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FUpdater: TUpdater;
     FExtractor: string; //Location or name of executable used to decompress source arhives
+    procedure CreateBinutilsList;
     procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
     function DownloadBinUtils: boolean;
     function DownloadBootstrapCompiler: boolean;
@@ -91,6 +93,7 @@ type
     property CompilerName: string read FCompilerName;
     //Full path to FPC compiler that is installed by this program
     property BootstrapCompiler: string read GetBootstrapCompiler;
+    //Full path to FPC compiler used to compile the downloaded FPC compiler sources
     property BootstrapCompilerDirectory: string
       read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
@@ -167,6 +170,55 @@ begin
   IPFile.Save(PWChar(LinkName), false);
 end;
 
+procedure TInstaller.CreateBinutilsList;
+// Windows-centric for now; doubt if it
+// can be used in Unixy systems anyway
+begin
+  // We need FExecutableExtension to be defined first.
+  FBinUtils:=TStringList.Create;
+  FBinUtils.Add('GoRC'+FExecutableExtension);
+  FBinUtils.Add('ar'+FExecutableExtension);
+  FBinUtils.Add('as'+FExecutableExtension);
+  FBinUtils.Add('bin2obj'+FExecutableExtension);
+  FBinUtils.Add('cmp'+FExecutableExtension);
+  FBinUtils.Add('cp'+FExecutableExtension);
+  FBinUtils.Add('cpp.exe');
+  FBinUtils.Add('cygiconv-2.dll');
+  FBinUtils.Add('cygncurses-8.dll');
+  FBinUtils.Add('cygwin1.dll');
+  FBinUtils.Add('diff'+FExecutableExtension);
+  FBinUtils.Add('dlltool'+FExecutableExtension);
+  FBinUtils.Add('fp32.ico');
+  FBinUtils.Add('gcc'+FExecutableExtension);
+  FBinUtils.Add('gdate'+FExecutableExtension);
+  //GDB.exe apparently can also be found here:
+  //http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
+  //for Windows x64:
+  //http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/
+  FBinUtils.Add('gdb'+FExecutableExtension);
+  FBinUtils.Add('gecho'+FExecutableExtension);
+  FBinUtils.Add('ginstall'+FExecutableExtension);
+  FBinUtils.Add('ginstall.exe.manifest');
+  FBinUtils.Add('gmkdir'+FExecutableExtension);
+  FBinUtils.Add('grep'+FExecutableExtension);
+  FBinUtils.Add('ld'+FExecutableExtension);
+  FBinUtils.Add('libexpat-1.dll');
+  FBinUtils.Add('make'+FExecutableExtension);
+  FBinUtils.Add('mv'+FExecutableExtension);
+  FBinUtils.Add('objdump'+FExecutableExtension);
+  FBinUtils.Add('patch'+FExecutableExtension);
+  FBinUtils.Add('patch.exe.manifest');
+  FBinUtils.Add('pwd'+FExecutableExtension);
+  FBinUtils.Add('rm'+FExecutableExtension);
+  FBinUtils.Add('strip'+FExecutableExtension);
+  FBinUtils.Add('unzip'+FExecutableExtension);
+  //We might just use gecho for that but that would probably confuse people:
+  FBinUtils.Add('upx'+FExecutableExtension);
+  FBinUtils.Add('windres'+FExecutableExtension);
+  FBinUtils.Add('windres'+FExecutableExtension);
+  FBinUtils.Add('zip'+FExecutableExtension);
+end;
+
 { TInstaller }
 function TInstaller.DownloadBinUtils: boolean;
 // Download binutils. For now, only makes sense on Windows...
@@ -179,70 +231,24 @@ const
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
   //Parent directory of files. Needs trailing backslash.
 var
-  CopyFiles: TStringList;
   Counter: integer;
 begin
   ForceDirectories(MakePath);
   Result := False;
-  CopyFiles := TStringList.Create;
   //todo: check downloading for linux/osx etc
-  try
-    CopyFiles.Add('GoRC.exe');
-    CopyFiles.Add('ar.exe');
-    CopyFiles.Add('as.exe');
-    CopyFiles.Add('bin2obj.exe');
-    CopyFiles.Add('cmp.exe');
-    CopyFiles.Add('cp.exe');
-    CopyFiles.Add('cpp.exe');
-    CopyFiles.Add('cygiconv-2.dll');
-    CopyFiles.Add('cygncurses-8.dll');
-    CopyFiles.Add('cygwin1.dll');
-    CopyFiles.Add('diff.exe');
-    CopyFiles.Add('dlltool.exe');
-    CopyFiles.Add('fp32.ico');
-    CopyFiles.Add('gcc.exe');
-    CopyFiles.Add('gdate.exe');
-    //GDB.exe apparently can also be found here:
-    //http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
-    //for Windows x64:
-    //http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/
-    CopyFiles.Add('gdb.exe');
-    CopyFiles.Add('gecho.exe');
-    CopyFiles.Add('ginstall.exe');
-    CopyFiles.Add('ginstall.exe.manifest');
-    CopyFiles.Add('gmkdir.exe');
-    CopyFiles.Add('grep.exe');
-    CopyFiles.Add('ld.exe');
-    CopyFiles.Add('libexpat-1.dll');
-    CopyFiles.Add('make.exe');
-    CopyFiles.Add('mv.exe');
-    CopyFiles.Add('objdump.exe');
-    CopyFiles.Add('patch.exe');
-    CopyFiles.Add('patch.exe.manifest');
-    CopyFiles.Add('pwd.exe');
-    CopyFiles.Add('rm.exe');
-    CopyFiles.Add('strip.exe');
-    CopyFiles.Add('unzip.exe');
-    CopyFiles.Add('upx.exe');
-    CopyFiles.Add('windres.exe');
-    CopyFiles.Add('windres.h');
-    CopyFiles.Add('zip.exe');
-    for Counter := 0 to CopyFiles.Count - 1 do
-    begin
-      debugln('Downloading: ' + CopyFiles[Counter] + ' into ' + MakePath);
-      try
-        DownloadHTTP(SourceUrl + CopyFiles[Counter], MakePath + CopyFiles[Counter]);
-      except
-        on E: Exception do
-        begin
-          Result := False;
-          debugln('Error downloading: ' + E.Message);
-          exit; //out of function.
-        end;
+  for Counter := 0 to FBinUtils.Count - 1 do
+  begin
+    debugln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakePath);
+    try
+      DownloadHTTP(SourceUrl + FBinUtils[Counter], MakePath + FBinUtils[Counter]);
+    except
+      on E: Exception do
+      begin
+        Result := False;
+        debugln('Error downloading: ' + E.Message);
+        exit; //out of function.
       end;
     end;
-  finally
-    CopyFiles.Free;
   end;
   Result := True;
 end;
@@ -476,7 +482,7 @@ begin
   OperationSucceeded := True;
   {$IFDEF WINDOWS}
   // Need to do it here so we can pick up make path.
-  FExtractor := FMakePath + 'unzip' + FExecutableExtension;
+  FExtractor := FBinutilsDir + 'unzip' + FExecutableExtension;
   {$ENDIF WINDOWS}
   {$IFDEF LINUX}
   FExtractor:='bzip2'; //Used for extracting FPC bootstrap compiler archive
@@ -490,11 +496,11 @@ begin
   begin
     // Check for binutils directory, make and unzip executables.
     // Download if needed; will download unzip - needed for SVN download
-    if (DirectoryExists(FMakePath) = False) or (FileExists(FMake) = False) or
+    if (DirectoryExists(FBinutilsDir) = False) or (FileExists(FMake) = False) or
       (FileExists(FExtractor) = False) then
     begin
       {$IFDEF Windows}
-      debugln('Make path ' + FMakePath + ' doesn''t have binutils. Going to download');
+      debugln('Make path ' + FBinutilsDir + ' doesn''t have binutils. Going to download');
       OperationSucceeded := DownloadBinUtils;
       {$ELSE}
       debugln('Error: Make path ' + FMakePath + ' doesn''t have binutils. Please install using your package manager.');
@@ -693,7 +699,7 @@ end;
 function TInstaller.GetMakePath: string;
 begin
   {$IFDEF WINDOWS}
-  Result := FMakePath;
+  Result := FBinutilsDir;
   {$ELSE}
   Result := ''; //dummy value, done for compatibility
   {$ENDIF WINDOWS}
@@ -811,9 +817,9 @@ procedure TInstaller.SetMakePath(AValue: string);
 begin
   {$IFDEF WINDOWS}
   // Make sure there's a trailing delimiter
-  FMakePath := IncludeTrailingPathDelimiter(AValue);
-  FBinutilsNoBackslash:=ExcludeTrailingPathDelimiter(FMakePath); //We need a stripped version for crossbindir
-  FMake := FMakePath + 'make' + FExecutableExtension;
+  FBinutilsDir := IncludeTrailingPathDelimiter(AValue);
+  FBinutilsDirNoBackslash:=ExcludeTrailingPathDelimiter(FBinutilsDir); //We need a stripped version for crossbindir
+  FMake := FBinutilsDir + 'make' + FExecutableExtension;
   {$ELSE}
   //stub for compatibility
   {$ENDIF WINDOWS}
@@ -842,7 +848,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="' + BootstrapCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
       //Alternative to CROSSBINDIR would be OPT=-FD+fbinutilsno.....
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -862,7 +868,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="' + BootstrapCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -883,7 +889,7 @@ begin
     try
       Params.Add('FPC="' + FPCDirectory + DirectorySeparator + 'compiler' +
         DirectorySeparator + CompilerName+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -911,7 +917,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -929,7 +935,7 @@ begin
         // Params already assigned
         Params.Clear;
         Params.Add('FPC="'+FInstalledCompiler+'"');
-        Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
         Params.Add('--directory="'+ FPCDirectory+'"');
         Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
         Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -1021,7 +1027,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1043,7 +1049,7 @@ begin
       Params:=TStringList.Create;
       try
         Params.Add('FPC="'+FInstalledCrossCompiler+'"');
-        Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
         Params.Add('--directory="'+LazarusDirectory+'"');
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1067,7 +1073,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1096,7 +1102,7 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsNoBackslash+'"'); //Show make where to find the binutils
+      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1206,6 +1212,9 @@ begin
   {$ELSE}
   FExecutableExtension := '';
   {$ENDIF WINDOWS}
+  // Binutils needed for compilation
+  CreateBinutilsList;
+
   FInstalledCompiler := '';
   FLazarusPrimaryConfigPath := '';
   FSVNDirectory := '';
@@ -1226,6 +1235,7 @@ end;
 destructor Tinstaller.Destroy;
 begin
   FUpdater.Free;
+  FBinUtils.Free;
   inherited Destroy;
 end;
 

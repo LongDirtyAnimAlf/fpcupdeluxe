@@ -65,7 +65,11 @@ begin
   writeln(' binutilsdir=<dir>     Directory where make, patch etc ');
   writeln('                       (the binutils) are located. If make does not');
   writeln('                       exist, binutils will be downloaded there.');
-  writeln('                       Default c:\development\binutils\');
+  writeln('                       Default (Windows) c:\development\fpcbootstrap\');
+  writeln('                       Default (others): none, not used');
+  writeln('                       Note: on Windows, the binutils are copied');
+  writeln('                       to the FPC directory for use by FPC. This');
+  writeln('                       gives a more standard FPC environment.');
   writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
@@ -104,7 +108,7 @@ begin
   FInstaller.LazarusDirectory := 'c:\development\lazarus';
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
   //svn2 seems to lag behind a lot.
-  FInstaller.MakePath := 'C:\development\binutils\';
+  FInstaller.MakePath := 'C:\development\fpcbootstrap\';
 
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
