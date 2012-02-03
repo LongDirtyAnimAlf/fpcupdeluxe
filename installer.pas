@@ -245,7 +245,7 @@ begin
       on E: Exception do
       begin
         Result := False;
-        debugln('Error downloading: ' + E.Message);
+        debugln('Error downloading binutils: ' + E.Message);
         exit; //out of function.
       end;
     end;
@@ -433,14 +433,21 @@ var
   SVNZip: string;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
-  // This won't work, we'd get an .msi:
-  // http://sourceforge.net/projects/win32svn/files/latest/download?source=files
-  // We don't want msi/Windows installer - this way we can hopefully support Windows 2000
+  { Alternative 1: sourceforge packaged
+  This won't work, we'd get an .msi:
+  http://sourceforge.net/projects/win32svn/files/latest/download?source=files
+  We don't want msi/Windows installer - this way we can hopefully support Windows 2000, so use:
+  http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip
+  }
+
+  {Alternative 2: use
+  http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip
+  with subdirs bin and licenses. No further subdirs}
   OperationSucceeded := True;
   ForceDirectories(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   OperationSucceeded := DownloadHTTP(
-    'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
+    'http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip'
     , SVNZip);
   if OperationSucceeded then
   begin
@@ -499,16 +506,12 @@ begin
     if (DirectoryExists(FBinutilsDir) = False) or (FileExists(FMake) = False) or
       (FileExists(FExtractor) = False) then
     begin
-      {$IFDEF Windows}
       debugln('Make path ' + FBinutilsDir + ' doesn''t have binutils. Going to download');
       OperationSucceeded := DownloadBinUtils;
-      {$ELSE}
-      debugln('Error: Make path ' + FMakePath + ' doesn''t have binutils. Please install using your package manager.');
-      OperationSucceeded:=false;
-      {$ENDIF Windows}
     end;
   end;
   {$ENDIF WINDOWS}
+
 
   if OperationSucceeded then
   begin
@@ -830,6 +833,7 @@ function Tinstaller.GetFPC: boolean;
 var
   BinPath: string; //Path where installed compiler ends up
   Executable: string;
+  FileCounter:integer;
   FPCCfg: string;
   OperationSucceeded: boolean;
   Params: TstringList;
@@ -849,7 +853,7 @@ begin
     try
       Params.Add('FPC="' + BootstrapCompiler+'"');
       Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
-      //Alternative to CROSSBINDIR would be OPT=-FD+fbinutilsno.....
+      //Alternative to CROSSBINDIR would be OPT=-FD+FBinutilsDirNoBackslash
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -910,6 +914,23 @@ begin
 
   if OperationSucceeded then
   begin
+    //Copy over binutils to new compiler bin directory
+    try
+      for FileCounter:=0 to FBinUtils.Count-1 do
+      begin
+        FileUtil.CopyFile(FBinutilsDir+FBinUtils[FileCounter], ExtractFilePath(FInstalledCompiler)+FBinUtils[FileCounter]);
+      end;
+    except
+      on E: Exception do
+      begin
+        debugln('Error copying binutils: '+E.Message);
+        OperationSucceeded:=false;
+      end;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
     // Make crosscompiler using new compiler- todo: only for Windows!?!?
     // Note: consider this as an optional item, so don't fail the function if this breaks.
     Executable := FMake;
@@ -917,7 +938,8 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+      //Should not be needed as we already copied binutils to fpc compiler dir
+      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
       Params.Add('--directory="'+ FPCDirectory+'"');
       Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -935,7 +957,8 @@ begin
         // Params already assigned
         Params.Clear;
         Params.Add('FPC="'+FInstalledCompiler+'"');
-        Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        //Should not be needed as we already copied binutils to fpc compiler dir
+        //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
         Params.Add('--directory="'+ FPCDirectory+'"');
         Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
         Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -992,6 +1015,10 @@ begin
 end;
 
 function Tinstaller.GetLazarus: boolean;
+// Note: getlazarus depends on properly installed FPC
+// Properly installed in this case means: the way
+// GetFPC would install it ;)
+// Assumed: binutils in fpc dir or in path
 var
   Executable: string;
   OperationSucceeded: boolean;
@@ -1027,7 +1054,8 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
+      //Should not be needed as we already copied binutils to fpc compiler dir
+      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1049,7 +1077,8 @@ begin
       Params:=TStringList.Create;
       try
         Params.Add('FPC="'+FInstalledCrossCompiler+'"');
-        Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        //Should not be needed as we already copied binutils to fpc compiler dir
+        //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
         Params.Add('--directory="'+LazarusDirectory+'"');
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1073,7 +1102,8 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
+      //Should not be needed as we already copied binutils to fpc compiler dir
+      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1102,7 +1132,8 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC="'+FInstalledCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
+      //Should not be needed as we already copied binutils to fpc compiler dir
+      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
       Params.Add('--directory="'+LazarusDirectory+'"');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
