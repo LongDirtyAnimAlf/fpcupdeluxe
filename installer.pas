@@ -131,7 +131,7 @@ uses
 {$ENDIF WINDOWS}
   ,updatelazconfig
   ;
-//todo: add objects
+
 procedure debugln(Message: string);
 begin
   {DEBUG conditional symbol is defined using
@@ -1033,6 +1033,7 @@ function Tinstaller.GetLazarus: boolean;
 // Assumed: binutils in fpc dir or in path
 var
   Executable: string;
+  LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
   Params: TStringList;
 begin
@@ -1124,7 +1125,7 @@ begin
       if (Run(Executable, Params)) <> 0 then
       begin
         OperationSucceeded := False;
-        FInstalledLazarus:= '//\\error//\\'; //todo: check if this really is an invalid filename. it should be.
+        FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
       end
       else
       begin
@@ -1135,7 +1136,34 @@ begin
     end;
   end;
 
-  //todo: somewhere, set proper FPC and binutils paths in pcp dir options
+  if OperationSucceeded then
+  begin
+    // Set up a minimal config so we can use LazBuild
+    LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
+    try
+      try
+        LazarusConfig.CompilerFilename:=FInstalledCompiler;
+        LazarusConfig.LazarusDirectory:=LazarusDirectory;
+        {$IFDEF WINDOWS}
+        LazarusConfig.DebuggerFilename:=FBinutilsDir+'gdb'+FExecutableExtension;
+        LazarusConfig.MakeFilename:=FBinutilsDir+'make'+FExecutableExtension;
+        {$ENDIF WINDOWS}
+        {$IFDEF UNIX}
+        LazarusConfig.DebuggerFilename:='gdb'+FExecutableExtension; //assume in path
+        LazarusConfig.MakeFilename:='make'+FExecutableExtension; //assume in path
+        {$ENDIF UNIX}
+        LazarusConfig.FPCSourceDirectory:=FPCDirectory;
+      except
+        on E: Exception do
+        begin
+          OperationSucceeded:=false;
+          debugln('Error setting Lazarus config: '+E.ClassName+'/'+E.Message);
+        end;
+      end;
+    finally
+      LazarusConfig.Free;
+    end;
+  end;
 
   if OperationSucceeded then
   begin

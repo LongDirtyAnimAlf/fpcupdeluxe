@@ -38,25 +38,7 @@ uses
   Classes, SysUtils, laz2_xmlcfg;
 type
 { Creates or updates Lazarus config in primary config path given.}
-//see http://wiki.lazarus.freepascal.org/Extending_the_IDE#Load.2FSave_settings
-//see my email to list on config options
-//lazarus tools/win dir has an environmentoptions.xml which we might use?
-{seems useful:
-<LazarusDirectory Value="%LazDir%">
-</LazarusDirectory>
-<CompilerFilename Value="%FpcBinDir%\fpc.exe">
-</CompilerFilename>
-<FPCSourceDirectory Value="$(LazarusDir)fpc\$(FPCVer)\source">
-</FPCSourceDirectory>
-<MakeFilename Value="%FpcBinDir%\make.exe">
-</MakeFilename>
-<TestBuildDirectory Value="%Temp%">
-</TestBuildDirectory>
-<Debugger Class="TGDBMIDebugger"/>
-<DebuggerFilename Value="%LazDir%\mingw\bin\gdb.exe">
-</DebuggerFilename>
-}
-//todo: check out build-cross.bat in win dir for lazarus for crosscompiling setup instructions
+
 
 { TUpdateLazConfig }
 
@@ -66,46 +48,74 @@ private
   FCompilerFilename: string;
   FDebuggerFilename: string;
   FFPCSourceDirectory: string;
+  FIsNewFile: boolean;
   FLazarusDirectory: string;
   FMakeFilename: string;
-  FPrimaryConfigPath: string;
+  FConfigFile: string;
   FTestBuildDirectory: string;
 public
-  {New compiler filename. May include macros, except FPCVer. If empty, use current/default value}
+  {New compiler filename. May include macros, except FPCVer. If empty, use current/default value:}
   property CompilerFilename: string read FCompilerFilename write FCompilerFilename;
-  {New debugger filename. May include macros. If empty, use current/default value}
+  {Config file being created/updated:}
+  property ConfigFile: string read FConfigFile;
+  {New debugger filename. May include macros. If empty, use current/default value:}
   property DebuggerFilename: string read FDebuggerFilename write FDebuggerFilename;
-  {New FPC source directory. May include macros. If empty, use current/default value}
+  {New FPC source directory. May include macros. If empty, use current/default value:}
   property FPCSourceDirectory: string read FFPCSourceDirectory write FFPCSourceDirectory;
-  {New Lazarus directory. May NOT include macros. If empty, use current/default value}
+  {New Lazarus directory. May NOT include macros. If empty, use current/default value:}
   property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
-  {New make filename. May include macros. If empty, use current/default value}
+  {New make filename. May include macros. If empty, use current/default value:}
   property MakeFilename: string read FMakeFilename write FMakeFilename;
-  {Path where Lazarus config should be created or updated}
-  property PrimaryConfigPath: string read FPrimaryConfigPath;
-  {New test build directory (directory for testing build options). May include macros. If empty, use current/default value}
+  {Is this a new config file or an existing one?}
+  property New: boolean read FIsNewFile;
+  {New test build directory (directory for testing build options). May include macros. If empty, use current/default value:}
   property TestBuildDirectory: string read FTestBuildDirectory write FTestBuildDirectory;
-  {Create object; specify path (primary config path) where options should be created or updated}
+  {Create object; specify path (primary config path) where options should be created or updated:}
   constructor Create(ConfigPath: string);
   destructor Destroy; override;
 end;
 implementation
+uses FileUtil;
 
 { TUpdateLazConfig }
 const
   ConfigFile='environmentoptions.xml';
+  VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
 
 constructor TUpdateLazConfig.Create(ConfigPath: string);
 begin
-  FPrimaryConfigPath:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFile;
-  FConfig:=TXMLConfig.Create(FPrimaryConfigPath);
+  FConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFile;
+  // Assume any file that exists is also valid... might be improved by checking
+  // for correct values.
+  if FileExistsUTF8(FConfigFile) then FIsNewFile:=false else FIsNewFile:=true;
+  FConfig:=TXMLConfig.Create(FConfigFile);
 end;
 
 destructor TUpdateLazConfig.Destroy;
 begin
   //todo: create settings with defaults if new file.
-  //todo: add Debugger Class TGDBMIDebugger
-  //todo: add Version Value 106
+  if New then
+  begin
+    // Set up some sensible defaults
+    FConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewConfig);
+    FConfig.SetValue('EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
+    FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', 'gdb'); //assume in path
+    {$IFDEF WINDOWS}
+    FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '%FpcBinDir%\fpc.exe');
+    FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '$(LazarusDir)fpc\$(FPCVer)\source');
+    FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', 'c:\lazarus');
+    FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', '%FpcBinDir%\make.exe');
+    FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '%Temp%');
+    {$ENDIF WINDOWS}
+    {$IFDEF UNIX}
+    FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '/usr/bin/fpc');
+    FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '/usr/share/fpcsrc/$(FPCVer)/fpc/');
+    FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', '/usr/share/lazarus');
+    FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', 'make'); //assume in path
+    FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '/tmp');
+    {$ENDIF UNIX}
+    //todo: check more architectures
+  end;
   if CompilerFileName<>Emptystr then FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', CompilerFileName);
   if DebuggerFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', DebuggerFilename);
   if FPCSourceDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', FPCSourceDirectory);

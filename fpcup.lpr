@@ -45,6 +45,9 @@ Options startup: unattended: assume update if possible, if not, install
 Do not set path, create shortcuts/batch files to start, with --primary-config-path
 Add something like fpcup.config in the settings dir so we know for which fpc/laz combo this dir is used
 }
+
+//todo: check out build-cross.bat in win dir for lazarus for crosscompiling setup instructions
+
 uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,Forms, Interfaces {these 2 for application options},
