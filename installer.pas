@@ -913,6 +913,7 @@ begin
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
   begin
+    FCompilerName:='fpc'+FExecutableExtension; //Switch from e.g. ppc386.exe to fpc.exe
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
   end
@@ -1040,11 +1041,17 @@ begin
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
 
+
   // If we haven't installed FPC, this won't be set
   // todo: fix FPC for linux/other platforms
   if FInstalledCompiler = '' then
+  begin
+    //Assume we've got a working compiler. This will link through to the
+    //platform-specific compiler:
+    FCompilerName:='fpc'+FExecutableExtension;
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
+  end;
 
   // Download Lazarus source:
   if OperationSucceeded = True then
