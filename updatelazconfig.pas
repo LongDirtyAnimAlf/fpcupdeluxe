@@ -35,18 +35,88 @@ unit updatelazconfig;
 interface
 
 uses
-  Classes, SysUtils, environmentopts;
+  Classes, SysUtils, laz2_xmlcfg;
 type
 { Creates or updates Lazarus config in primary config path given.}
+//see http://wiki.lazarus.freepascal.org/Extending_the_IDE#Load.2FSave_settings
+//see my email to list on config options
+//lazarus tools/win dir has an environmentoptions.xml which we might use?
+{seems useful:
+<LazarusDirectory Value="%LazDir%">
+</LazarusDirectory>
+<CompilerFilename Value="%FpcBinDir%\fpc.exe">
+</CompilerFilename>
+<FPCSourceDirectory Value="$(LazarusDir)fpc\$(FPCVer)\source">
+</FPCSourceDirectory>
+<MakeFilename Value="%FpcBinDir%\make.exe">
+</MakeFilename>
+<TestBuildDirectory Value="%Temp%">
+</TestBuildDirectory>
+<Debugger Class="TGDBMIDebugger"/>
+<DebuggerFilename Value="%LazDir%\mingw\bin\gdb.exe">
+</DebuggerFilename>
+}
+//todo: check out build-cross.bat in win dir for lazarus for crosscompiling setup instructions
+
+{ TUpdateLazConfig }
+
 TUpdateLazConfig = class(TObject)
 private
-
+  FConfig: TXMLConfig;
+  FCompilerFilename: string;
+  FDebuggerFilename: string;
+  FFPCSourceDirectory: string;
+  FLazarusDirectory: string;
+  FMakeFilename: string;
+  FPrimaryConfigPath: string;
+  FTestBuildDirectory: string;
 public
-
-  constructor Create;
+  {New compiler filename. May include macros, except FPCVer. If empty, use current/default value}
+  property CompilerFilename: string read FCompilerFilename write FCompilerFilename;
+  {New debugger filename. May include macros. If empty, use current/default value}
+  property DebuggerFilename: string read FDebuggerFilename write FDebuggerFilename;
+  {New FPC source directory. May include macros. If empty, use current/default value}
+  property FPCSourceDirectory: string read FFPCSourceDirectory write FFPCSourceDirectory;
+  {New Lazarus directory. May NOT include macros. If empty, use current/default value}
+  property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
+  {New make filename. May include macros. If empty, use current/default value}
+  property MakeFilename: string read FMakeFilename write FMakeFilename;
+  {Path where Lazarus config should be created or updated}
+  property PrimaryConfigPath: string read FPrimaryConfigPath;
+  {New test build directory (directory for testing build options). May include macros. If empty, use current/default value}
+  property TestBuildDirectory: string read FTestBuildDirectory write FTestBuildDirectory;
+  {Create object; specify path (primary config path) where options should be created or updated}
+  constructor Create(ConfigPath: string);
   destructor Destroy; override;
 end;
 implementation
+
+{ TUpdateLazConfig }
+const
+  ConfigFile='environmentoptions.xml';
+
+constructor TUpdateLazConfig.Create(ConfigPath: string);
+begin
+  FPrimaryConfigPath:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFile;
+  FConfig:=TXMLConfig.Create(FPrimaryConfigPath);
+end;
+
+destructor TUpdateLazConfig.Destroy;
+begin
+  //todo: create settings with defaults if new file.
+  //todo: add Debugger Class TGDBMIDebugger
+  //todo: add Version Value 106
+  if CompilerFileName<>Emptystr then FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', CompilerFileName);
+  if DebuggerFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', DebuggerFilename);
+  if FPCSourceDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', FPCSourceDirectory);
+  if LazarusDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', LazarusDirectory);
+  if MakeFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', MakeFilename);
+  if TestBuildDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', TestBuildDirectory);
+  FConfig.Flush; //write out newly created or updated file
+  FConfig.Free;
+  inherited Destroy;
+end;
+
 
 end.
 

@@ -120,7 +120,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="synapse;C:\Development\lazarus\ide\;C:\Development\lazarus\components\codetools\;C:\Development\lazarus\ideintf\"/>
+      <OtherUnitFiles Value="synapse;C:\Development\lazarus\components\lazutils\"/>
     </SearchPaths>
     <CodeGeneration>
       <Checks>
