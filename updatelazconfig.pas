@@ -70,7 +70,7 @@ public
   property New: boolean read FIsNewFile;
   {New test build directory (directory for testing build options). May include macros. If empty, use current/default value:}
   property TestBuildDirectory: string read FTestBuildDirectory write FTestBuildDirectory;
-  {Create object; specify path (primary config path) where options should be created or updated:}
+  {Create object; specify path (primary config path) where option files should be created or updated:}
   constructor Create(ConfigPath: string);
   destructor Destroy; override;
 end;
@@ -79,12 +79,12 @@ uses FileUtil;
 
 { TUpdateLazConfig }
 const
-  ConfigFile='environmentoptions.xml';
+  ConfigFileName='environmentoptions.xml';
   VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
 
 constructor TUpdateLazConfig.Create(ConfigPath: string);
 begin
-  FConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFile;
+  FConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFileName;
   // Assume any file that exists is also valid... might be improved by checking
   // for correct values.
   if FileExistsUTF8(FConfigFile) then FIsNewFile:=false else FIsNewFile:=true;
