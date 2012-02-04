@@ -129,6 +129,7 @@ uses
   //Mostly for shortcut code
   ,windows, shlobj {for special folders}, ActiveX, ComObj
 {$ENDIF WINDOWS}
+  ,updatelazconfig
   ;
 //todo: add objects
 procedure debugln(Message: string);

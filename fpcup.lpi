@@ -72,7 +72,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="8">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -103,6 +103,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="bunzip2"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="updatelazconfig.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="updatelazconfig"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="C:\Development\lazarus\ide\environmentopts.pp"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="EnvironmentOpts"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -110,7 +120,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="synapse"/>
+      <OtherUnitFiles Value="synapse;C:\Development\lazarus\ide\;C:\Development\lazarus\components\codetools\;C:\Development\lazarus\ideintf\"/>
     </SearchPaths>
     <CodeGeneration>
       <Checks>
