@@ -712,6 +712,10 @@ begin
 end;
 
 function TInstaller.Run(Executable: string; const Params: TStringList): longint;
+{ Runs executable without showing output, unless:
+1. something went wrong (result code<>0) and
+2. DEBUG is set
+}
 var
   OutputStringList: TStringList;
 begin
@@ -720,6 +724,11 @@ begin
   OutputStringList := TStringList.Create;
   try
     Result:=RunOutput(Executable, Params, OutputStringList);
+    if result<>0 then
+    begin
+      debugln('Command returned non-zero resultcode: '+IntToStr(result)+'. Output:');
+      debugln(OutputStringList.Text);
+    end;
   finally
     OutputStringList.Free;
   end;
@@ -1155,6 +1164,7 @@ begin
         LazarusConfig.MakeFilename:=FBinutilsDir+'make'+FExecutableExtension;
         {$ENDIF WINDOWS}
         {$IFDEF UNIX}
+        //todo: fix this for more variants?!?
         LazarusConfig.DebuggerFilename:='gdb'+FExecutableExtension; //assume in path
         LazarusConfig.MakeFilename:='make'+FExecutableExtension; //assume in path
         {$ENDIF UNIX}
