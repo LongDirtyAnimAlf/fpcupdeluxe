@@ -1000,7 +1000,6 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
-    //todo: investigate if we can/need to add binutils path here
     BinPath := ExtractFilePath(FInstalledCompiler);
     FPCCfg := BinPath + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
@@ -1159,6 +1158,8 @@ begin
         LazarusConfig.DebuggerFilename:='gdb'+FExecutableExtension; //assume in path
         LazarusConfig.MakeFilename:='make'+FExecutableExtension; //assume in path
         {$ENDIF UNIX}
+        // Source dir in stock Lazarus on windows is something like
+        // $(LazarusDir)fpc\$(FPCVer)\source\
         LazarusConfig.FPCSourceDirectory:=FPCDirectory;
       except
         on E: Exception do

@@ -72,7 +72,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="8">
+    <Units Count="7">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -108,11 +108,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="updatelazconfig"/>
       </Unit6>
-      <Unit7>
-        <Filename Value="C:\Development\lazarus\ide\environmentopts.pp"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="EnvironmentOpts"/>
-      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
