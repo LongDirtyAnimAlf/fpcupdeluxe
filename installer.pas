@@ -272,10 +272,11 @@ begin
     //Extract zip, overwriting without prompting
     Params:=TStringList.Create;
     try
+      //Don't call params with quotes
       Params.Add('-o'); //overwrite existing files
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(ZipDir);
-      Params.Add('"'+BootstrapZip+'"'); // zip/archive file
+      Params.Add(BootstrapZip); // zip/archive file
       if Run(FExtractor, Params) <> 0 then
       begin
         debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
@@ -458,10 +459,11 @@ begin
     // apparently can't specify "s with -d option!??!
     Params:=TStringList.Create;
     try
+      //Don't call params with quotes
       Params.Add('-o'); //overwrite existing files
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(FSVNDirectory);
-      Params.Add('"'+SVNZip+'"'); // zip/archive file
+      Params.Add(SVNZip); // zip/archive file
       ResultCode:=Run(FExtractor, Params);
       if ResultCode<> 0 then
       begin
@@ -726,7 +728,7 @@ begin
     Result:=RunOutput(Executable, Params, OutputStringList);
     if result<>0 then
     begin
-      debugln('Command returned non-zero resultcode: '+IntToStr(result)+'. Output:');
+      debugln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
       debugln(OutputStringList.Text);
     end;
   finally
@@ -863,10 +865,11 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="' + BootstrapCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
+      //Don't call params with quotes
+      Params.Add('FPC=' + BootstrapCompiler+'');
+      Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
       //Alternative to CROSSBINDIR would be OPT=-FD+FBinutilsDirNoBackslash
-      Params.Add('--directory="'+ FPCDirectory+'"');
+      Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('clean');
@@ -883,9 +886,10 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="' + BootstrapCompiler+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
-      Params.Add('--directory="'+ FPCDirectory+'"');
+      //Don't call params with quotes
+      Params.Add('FPC=' + BootstrapCompiler+'');
+      Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('all');
@@ -903,11 +907,12 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="' + FPCDirectory + DirectorySeparator + 'compiler' +
-        DirectorySeparator + CompilerName+'"');
-      Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
-      Params.Add('--directory="'+ FPCDirectory+'"');
-      Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
+      //Don't call params with quotes
+      Params.Add('FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
+        DirectorySeparator + CompilerName+'');
+      Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      Params.Add('--directory='+ FPCDirectory+'');
+      Params.Add('INSTALL_PREFIX='+FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('install');
@@ -959,11 +964,12 @@ begin
     debugln('Running Make all (crosscompiler):');
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="'+FInstalledCompiler+'"');
+      //Don't call parameters with quotes
+      Params.Add('FPC='+FInstalledCompiler+'');
       //Should not be needed as we already copied binutils to fpc compiler dir
-      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
-      Params.Add('--directory="'+ FPCDirectory+'"');
-      Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
+      //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+      Params.Add('--directory='+ FPCDirectory+'');
+      Params.Add('INSTALL_PREFIX='+FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('OS_TARGET=win64');
@@ -978,11 +984,11 @@ begin
         debugln('Running Make crossinstall:');
         // Params already assigned
         Params.Clear;
-        Params.Add('FPC="'+FInstalledCompiler+'"');
+        Params.Add('FPC='+FInstalledCompiler+'');
         //Should not be needed as we already copied binutils to fpc compiler dir
-        //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
-        Params.Add('--directory="'+ FPCDirectory+'"');
-        Params.Add('INSTALL_PREFIX="'+FPCDirectory+'"');
+        //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        Params.Add('--directory='+ FPCDirectory+'');
+        Params.Add('INSTALL_PREFIX='+FPCDirectory+'');
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
         Params.Add('OS_TARGET=win64');
@@ -1017,9 +1023,9 @@ begin
       Params:=TStringList.Create;
       try
         Params.Add('-d');
-        Params.Add('basepath="'+FPCDirectory+'"');
+        Params.Add('basepath='+FPCDirectory+'');
         Params.Add('-o');
-        Params.Add('"' + FPCCfg + '"');
+        Params.Add('' + FPCCfg + '');
         debugln('Debug: Running fpcmkcfg: ');
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
@@ -1081,10 +1087,11 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="'+FInstalledCompiler+'"');
+      //Don't call params with quotes
+      Params.Add('FPC='+FInstalledCompiler+'');
       //Should not be needed as we already copied binutils to fpc compiler dir
-      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
-      Params.Add('--directory="'+LazarusDirectory+'"');
+      //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      Params.Add('--directory='+LazarusDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('clean');
@@ -1104,10 +1111,11 @@ begin
       Executable := FMake;
       Params:=TStringList.Create;
       try
-        Params.Add('FPC="'+FInstalledCrossCompiler+'"');
+        //Don't call params with quotes
+        Params.Add('FPC='+FInstalledCrossCompiler+'');
         //Should not be needed as we already copied binutils to fpc compiler dir
-        //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
-        Params.Add('--directory="'+LazarusDirectory+'"');
+        //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        Params.Add('--directory='+LazarusDirectory+'');
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
         Params.Add('LCL_PLATFORM=win32');
@@ -1129,10 +1137,11 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="'+FInstalledCompiler+'"');
+      //Don't call params with quotes
+      Params.Add('FPC='+FInstalledCompiler+'');
       //Should not be needed as we already copied binutils to fpc compiler dir
-      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
-      Params.Add('--directory="'+LazarusDirectory+'"');
+      //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      Params.Add('--directory='+LazarusDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('all');
@@ -1189,10 +1198,11 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC="'+FInstalledCompiler+'"');
+      //Don't call params with quotes
+      Params.Add('FPC='+FInstalledCompiler+'');
       //Should not be needed as we already copied binutils to fpc compiler dir
-      //Params.Add('CROSSBINDIR="'+FBinutilsDirNoBackslash+'"'); //Show make where to find the binutils
-      Params.Add('--directory="'+LazarusDirectory+'"');
+      //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      Params.Add('--directory='+LazarusDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('bigide');
@@ -1210,11 +1220,12 @@ begin
     Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
     Params:=TStringList.Create;
     try
-      Params.Add('--pcp="'+FLazarusPrimaryConfigPath+'"');
-      Params.Add('"'+LazarusDirectory+DirectorySeparator+
+      //Do NOT pass quotes in params
+      Params.Add('--pcp='+FLazarusPrimaryConfigPath+'');
+      Params.Add(''+LazarusDirectory+DirectorySeparator+
         'tools'+DirectorySeparator+
         'lazdatadesktop'+DirectorySeparator+
-        'lazdatadesktop.lpr"');
+        'lazdatadesktop.lpr');
       debugln('Lazarus: compiling data desktop:');
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
@@ -1229,10 +1240,11 @@ begin
     Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
     Params:=TStringList.Create;
     try
-      Params.Add('--pcp="'+FLazarusPrimaryConfigPath+'"');
-      Params.Add('"'+LazarusDirectory+DirectorySeparator+
+      //Do NOT pass quotes in params
+      Params.Add('--pcp='+FLazarusPrimaryConfigPath+'');
+      Params.Add(''+LazarusDirectory+DirectorySeparator+
         'doceditor'+DirectorySeparator+
-        'lazde.lpr"');
+        'lazde.lpr');
       debugln('Lazarus: compiling doc editor:');
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
@@ -1241,17 +1253,22 @@ begin
     end;
   end;
 
-  if DesktopShortCutName<>EmptyStr then
+  if OperationSucceeded then
   begin
-    debugln('Lazarus: creating desktop shortcut:');
-    try
-      //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-      //todo: perhaps check for existing shortcut
-      CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',DesktopShortcutName);
-    finally
-      //Ignore problems creating shortcut
+    if DesktopShortCutName<>EmptyStr then
+    begin
+      debugln('Lazarus: creating desktop shortcut:');
+      try
+        //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+        //todo: perhaps check for existing shortcut
+        //DO pass quotes here (it's not TProcess.Params)
+        CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',DesktopShortcutName);
+      finally
+        //Ignore problems creating shortcut
+      end;
     end;
   end;
+
   Result := OperationSucceeded;
 end;
 
