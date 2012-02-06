@@ -67,10 +67,13 @@
         <FormatVersion Value="1"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LCL"/>
+        <PackageName Value="LazUtils"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LCL"/>
+      </Item2>
     </RequiredPackages>
     <Units Count="7">
       <Unit0>
@@ -115,7 +118,7 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="synapse;C:\Development\lazarus\components\lazutils\"/>
+      <OtherUnitFiles Value="synapse"/>
     </SearchPaths>
     <CodeGeneration>
       <Checks>

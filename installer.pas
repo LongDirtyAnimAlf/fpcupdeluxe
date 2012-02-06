@@ -47,7 +47,7 @@ type
     FBinUtils: TStringlist; //binutils such as make.exe, as.exe, needed for compilation
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
-    FCompilerName: string;
+    FCompilerName: string; //Platform specific compiler name (e.g. ppc386.exe for Windows)
     FDesktopShortcutName: string;
     FExecutableExtension: string;
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
@@ -927,7 +927,6 @@ begin
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
   begin
-    FCompilerName:='fpc'+FExecutableExtension; //Switch from e.g. ppc386.exe to fpc.exe
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
   end
@@ -1062,7 +1061,6 @@ begin
   begin
     //Assume we've got a working compiler. This will link through to the
     //platform-specific compiler:
-    FCompilerName:='fpc'+FExecutableExtension;
     FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
   end;
@@ -1166,7 +1164,10 @@ begin
     LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
     try
       try
-        LazarusConfig.CompilerFilename:=FInstalledCompiler;
+        // FInstalledCompiler will be something like c:\bla\ppc386.exe, e.g.
+        // the platform specific compiler. In order to be able to cross compile
+        // we'd rather use fpc
+        LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
         LazarusConfig.LazarusDirectory:=LazarusDirectory;
         {$IFDEF WINDOWS}
         LazarusConfig.DebuggerFilename:=FBinutilsDir+'gdb'+FExecutableExtension;
