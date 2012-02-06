@@ -104,14 +104,23 @@ var
   ErrorMessage: string;
 begin
 // Default values
-  FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
+
   FInstaller.DesktopShortCutName:='Lazarus (trunk)';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
-  FInstaller.FPCDirectory := 'c:\development\fpc';
-  FInstaller.LazarusDirectory := 'c:\development\lazarus';
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
   //svn2 seems to lag behind a lot.
+  {$IFDEF WINDOWS}
+  FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
+  FInstaller.FPCDirectory := 'c:\development\fpc';
+  FInstaller.LazarusDirectory := 'c:\development\lazarus';
   FInstaller.MakePath := 'C:\development\fpcbootstrap\';
+  {$ENDIF}
+  {$IFNDEF WINDOWS}
+  FInstaller.BootstrapCompilerDirectory := '~/fpcbootstrap';
+  FInstaller.FPCDirectory := '~/fpc';
+  FInstaller.LazarusDirectory := '~/lazarus';
+  FInstaller.Makepath:='';
+  {$ENDIF WINDOWS}
 
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
@@ -129,6 +138,11 @@ begin
   if Application.HasOption(BinutilsDir) then
   begin
     FInstaller.MakePath:=Application.GetOptionValue(BinutilsDir)
+    {$IFNDEF WINDOWS}
+    writeln('The '+BinutilsDir+' parameter is not necessary or supported on this system.');
+    writeln('The parameter will be ignored.');
+    FInstaller.Makepath:='';
+    {$ENDIF WINDOWS}
   end;
 
   if Application.HasOption(FPCBootstrapDir) then

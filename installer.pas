@@ -171,12 +171,12 @@ begin
   IPFile.Save(PWChar(LinkName), false);
 end;
 {$ENDIF WINDOWS}
+
 {$IFDEF UNIX}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
   debugln('todo: implement createdesktopshortcut.');
 end;
-
 {$ENDIF UNIX}
 
 procedure TInstaller.CreateBinutilsList;
@@ -1239,7 +1239,7 @@ begin
     Params:=TStringList.Create;
     try
       //Do NOT pass quotes in params
-      Params.Add('--pcp='+FLazarusPrimaryConfigPath+'');
+      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       Params.Add(''+LazarusDirectory+DirectorySeparator+
         'tools'+DirectorySeparator+
         'lazdatadesktop'+DirectorySeparator+
@@ -1259,7 +1259,7 @@ begin
     Params:=TStringList.Create;
     try
       //Do NOT pass quotes in params
-      Params.Add('--pcp='+FLazarusPrimaryConfigPath+'');
+      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       Params.Add(''+LazarusDirectory+DirectorySeparator+
         'doceditor'+DirectorySeparator+
         'lazde.lpr');
@@ -1292,7 +1292,7 @@ end;
 
 constructor Tinstaller.Create;
 const
-  DefaultPCPSubdir='lazarusdev';
+  DefaultPCPSubdir='lazdevsettings'; //Caution: shouldn't be the same name as Lazarus dir itself.
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
 begin
@@ -1364,4 +1364,4 @@ begin
 end;
 
 end.
-
+
