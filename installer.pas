@@ -272,10 +272,20 @@ var
   Params: TStringList;
   ZipDir: string;
 begin
-  ForceDirectories(BootstrapCompilerDirectory);
+  OperationSucceeded:=true;
+  if OperationSucceeded then
+  begin
+    OperationSucceeded:=ForceDirectories(BootstrapCompilerDirectory);
+  end;
+  debugln('todo: debug: bootstrap compiler dir: '+bootstrapcompilerdirectory+' result: '+BoolToStr(Operationsucceeded));
+
   BootstrapZip := SysUtils.GetTempFileName;
   ZipDir := ExtractFilePath(BootstrapZip);
-  OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
+  if OperationSucceeded then
+  begin
+    OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
+  end;
+
   if OperationSucceeded then
   begin
     {$IFDEF WINDOWS}
@@ -309,7 +319,7 @@ begin
     {$IFDEF LINUX}
     //bunzip2 would need -dfq params
     Log:='';
-    debugln('todo: debug: going to decompress ' +bootstrapzip+' to ' + bootstrapcompiler);
+    debugln('todo: debug: going to decompress ' +bootstrapzip+' to ' + BootstrapCompiler);
     OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
     //todo chmod ug+x for Linux/OSX?!!
     if Log<>'' then writeln(Log); //output debug output
@@ -1376,4 +1386,4 @@ begin
 end;
 
 end.
-
+
