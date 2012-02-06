@@ -118,10 +118,9 @@ begin
     except
       //Apparently SVN exe not found in path or some other error.
     end;
-
   end;
 
-{$IFDEF windows}
+{$IFDEF WINDOWS}
   // Some popular locations for SlikSVN and Subversion
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
@@ -133,18 +132,20 @@ begin
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
       '\SlikSvn\bin\svn.exe';
-{$ENDIF}
+{$ENDIF WINDOWS}
 
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := FindDefaultExecutablePath('svn');
 
-{$IFDEF windows}
+{$IFDEF WINDOWS}
   if not FileExists(FSvnExecutable) then
-    FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn'); //executable directory
-{$ENDIF}
+    FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn'); //directory where current executable is
+{$ENDIF WINDOWS}
 
   if not FileExists(FSvnExecutable) then
   begin
+    //current path.
+    //todo: check if this is safe (e.g. compromised svn etc)
     if FileExists('svn.exe') then
       FSVNExecutable := 'svn.exe';
     if FileExists('svn') then
@@ -263,8 +264,7 @@ var
 begin
   FReturnCode := 255; //Preset to failure
   // Look for SVN if necessary; error if needed:
-  if not FileExists(FSVNExecutable) then;
-  FindSvnExecutable;
+  if not FileExists(FSVNExecutable) then FindSvnExecutable;
   if not FileExists(FSvnExecutable) then
     raise ESVNClientError.Create('No SVN executable found');
 
@@ -359,7 +359,7 @@ begin
   FRepositoryURL := '';
   FReturnCode := 0;
   FSVNExecutable := '';
-  FindSvnExecutable;
+  FindSvnExecutable; //Do this so the SVNExecutable property is valid.
 end;
 
 destructor Tsvnclient.Destroy;

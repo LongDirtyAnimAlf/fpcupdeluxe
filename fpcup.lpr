@@ -137,7 +137,7 @@ begin
 
   if Application.HasOption(BinutilsDir) then
   begin
-    FInstaller.MakePath:=Application.GetOptionValue(BinutilsDir)
+    FInstaller.MakePath:=Application.GetOptionValue(BinutilsDir);
     {$IFNDEF WINDOWS}
     writeln('The '+BinutilsDir+' parameter is not necessary or supported on this system.');
     writeln('The parameter will be ignored.');
@@ -189,7 +189,9 @@ begin
   writeln('FPC directory:          '+FInstaller.FPCDirectory);
   writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
   writeln('Lazarus URL:            '+FInstaller.LazarusURL);
+  {$IFDEF WINDOWS}
   writeln('Make/binutils path:     '+FInstaller.MakePath);
+  {$ENDIF WINDOWS}
   writeln('');
 end;
 
@@ -239,4 +241,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
