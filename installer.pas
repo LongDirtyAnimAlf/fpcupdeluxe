@@ -276,11 +276,12 @@ begin
   if OperationSucceeded then
   begin
     OperationSucceeded:=ForceDirectories(BootstrapCompilerDirectory);
+    debugln('todo: debug: forcedirectories bootstrap compiler dir: '+bootstrapcompilerdirectory+' result: '+BoolToStr(Operationsucceeded));
   end;
-  debugln('todo: debug: bootstrap compiler dir: '+bootstrapcompilerdirectory+' result: '+BoolToStr(Operationsucceeded));
 
   BootstrapZip := SysUtils.GetTempFileName;
   ZipDir := ExtractFilePath(BootstrapZip);
+  debugln('todo: debug: bootstrapzip '+bootstrapzip+' zipdir: '+zipdir);
   if OperationSucceeded then
   begin
     OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
@@ -837,12 +838,12 @@ end;
 
 procedure TInstaller.SetBootstrapCompilerDirectory(AValue: string);
 begin
-  FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(AValue);
+  FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(ExpandFileName(AValue));
 end;
 
 procedure Tinstaller.SetFPCDirectory(Directory: string);
 begin
-  FUpdater.FPCDirectory := IncludeTrailingPathDelimiter(Directory);
+  FUpdater.FPCDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
 procedure TInstaller.SetFPCUrl(AValue: string);
@@ -852,7 +853,7 @@ end;
 
 procedure Tinstaller.SetLazarusDirectory(Directory: string);
 begin
-  FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(Directory);
+  FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
 procedure TInstaller.SetLazarusUrl(AValue: string);
@@ -1386,4 +1387,4 @@ begin
 end;
 
 end.
-
+
