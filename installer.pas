@@ -580,13 +580,16 @@ begin
   begin
     // Check for valid unzip/gunzip executable
     // todo: might refactor this to separate function;
-    // look for 'Info-Zip' when using zip, question: should we look for anything in gunzip?
     try
       Output := '';
       // See unzip.h for return codes.
       Params:=TStringList.Create;
       try
-        Params.Add('-v');
+        if AnsiPos('unzip', lowercase(FExtractor))=1 then Params.Add('-v');
+        if AnsiPos('bzip2', lowercase(FExtractor))=1 then Params.Add('--version');
+        if AnsiPos('bunzip2', lowercase(FExtractor))=1 then Params.Add('--version');
+        if AnsiPos('gzip', lowercase(FExtractor))=1 then Params.Add('--version');
+        if AnsiPos('gunzip', lowercase(FExtractor))=1 then Params.Add('--version');
         ResultCode:=RunOutput(FExtractor, Params, Output);
       finally
         Params.Free;
@@ -843,11 +846,11 @@ procedure TInstaller.SetMakePath(AValue: string);
 begin
   {$IFDEF WINDOWS}
   // Make sure there's a trailing delimiter
-  FBinutilsDir := IncludeTrailingPathDelimiter(AValue);
+  FBinutilsDir:=IncludeTrailingPathDelimiter(AValue);
   FBinutilsDirNoBackslash:=ExcludeTrailingPathDelimiter(FBinutilsDir); //We need a stripped version for crossbindir
-  FMake := FBinutilsDir + 'make' + FExecutableExtension;
+  FMake:=FBinutilsDir+'make'+FExecutableExtension;
   {$ELSE}
-  //stub for compatibility
+  FMake:='make'; //assume in path
   {$ENDIF WINDOWS}
 end;
 
@@ -1364,4 +1367,4 @@ begin
 end;
 
 end.
-
+
