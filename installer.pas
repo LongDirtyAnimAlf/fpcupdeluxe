@@ -273,9 +273,9 @@ var
   ZipDir: string;
 begin
   ForceDirectories(BootstrapCompilerDirectory);
-  BootstrapZip := SysUtils.GetTempFileName + '.zip';
+  BootstrapZip := SysUtils.GetTempFileName;
   ZipDir := ExtractFilePath(BootstrapZip);
-  OperationSucceeded := DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
+  OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
   if OperationSucceeded then
   begin
     {$IFDEF WINDOWS}
@@ -309,6 +309,7 @@ begin
     {$IFDEF LINUX}
     //bunzip2 would need -dfq params
     Log:='';
+    debugln('todo: debug: going to decompress ' +bootstrapzip+' to ' + bootstrapcompiler);
     OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
     //todo chmod ug+x for Linux/OSX?!!
     if Log<>'' then writeln(Log); //output debug output
@@ -316,6 +317,7 @@ begin
     {$IFDEF DARWIN}
     Log:='';
     OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
+    //todo: untar it as well!
     //todo chmod ug+x for Linux/OSX?!!
     if Log<>'' then writeln(Log); //output debug output
     {$ENDIF DARWIN}
@@ -604,7 +606,7 @@ begin
       else
       begin
         //invalid unzip/gunzip/whatever
-        debugln('Error: did not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
+        debugln('Error: could not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
         OperationSucceeded:=false;
       end;
     except
@@ -656,6 +658,7 @@ begin
         OperationSucceeded := False;
       end;
     end;
+    // Still within bootstrap compiler test...
     if OperationSucceeded=false then
     begin
       debugln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
@@ -1373,4 +1376,4 @@ begin
 end;
 
 end.
-
+
