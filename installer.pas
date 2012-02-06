@@ -83,6 +83,7 @@ type
     function Run(Executable: string; const Params: TStringList): longint;
     function RunOutput(Executable: string; const Params: TStringList; var Output: TStringList): longint;
     function RunOutput(Executable: string; const Params: TStringList; var Output: string): longint;
+    procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetFPCDirectory(Directory: string);
     procedure SetFPCUrl(AValue: string);
     procedure SetLazarusDirectory(Directory: string);
@@ -95,7 +96,7 @@ type
     property BootstrapCompiler: string read GetBootstrapCompiler;
     //Full path to FPC compiler used to compile the downloaded FPC compiler sources
     property BootstrapCompilerDirectory: string
-      read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
+      read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerFTP: string read FBootstrapCompilerFTP
       write FBootstrapCompilerFTP;
@@ -821,9 +822,14 @@ begin
   end;
 end;
 
+procedure TInstaller.SetBootstrapCompilerDirectory(AValue: string);
+begin
+  FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(AValue);
+end;
+
 procedure Tinstaller.SetFPCDirectory(Directory: string);
 begin
-  FUpdater.FPCDirectory := Directory;
+  FUpdater.FPCDirectory := IncludeTrailingPathDelimiter(Directory);
 end;
 
 procedure TInstaller.SetFPCUrl(AValue: string);
@@ -833,7 +839,7 @@ end;
 
 procedure Tinstaller.SetLazarusDirectory(Directory: string);
 begin
-  FUpdater.LazarusDirectory := Directory;
+  FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(Directory);
 end;
 
 procedure TInstaller.SetLazarusUrl(AValue: string);
