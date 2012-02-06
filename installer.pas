@@ -143,7 +143,7 @@ begin
   {$ENDIF DEBUG}
 end;
 
-
+{$IFDEF WINDOWS}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 var
   IObject: IUnknown;
@@ -170,6 +170,14 @@ begin
   { Create the link }
   IPFile.Save(PWChar(LinkName), false);
 end;
+{$ENDIF WINDOWS}
+{$IFDEF UNIX}
+procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+begin
+  debugln('todo: implement createdesktopshortcut.');
+end;
+
+{$ENDIF UNIX}
 
 procedure TInstaller.CreateBinutilsList;
 // Windows-centric for now; doubt if it
@@ -258,6 +266,7 @@ function TInstaller.DownloadBootstrapCompiler: boolean;
   // Should be done after we have unzip executable in FMakePath
 var
   BootstrapZip: string;
+  Log: string;
   OperationSucceeded: boolean;
   Params: TStringList;
   ZipDir: string;
@@ -867,7 +876,9 @@ begin
     try
       //Don't call params with quotes
       Params.Add('FPC=' + BootstrapCompiler+'');
+      {$IFDEF WINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
+      {$ENDIF WINDOWS}
       //Alternative to CROSSBINDIR would be OPT=-FD+FBinutilsDirNoBackslash
       Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -888,7 +899,9 @@ begin
     try
       //Don't call params with quotes
       Params.Add('FPC=' + BootstrapCompiler+'');
+      {$IFDEF WINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      {$ENDIF WINDOWS}
       Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -910,7 +923,9 @@ begin
       //Don't call params with quotes
       Params.Add('FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
         DirectorySeparator + CompilerName+'');
+      {$IFDEF WINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      {$ENDIF WINDOWS}
       Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('INSTALL_PREFIX='+FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -935,6 +950,7 @@ begin
     FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
   end;
 
+  {$IFDEF WINDOWS}
   if OperationSucceeded then
   begin
     //Copy over binutils to new compiler bin directory
@@ -954,6 +970,7 @@ begin
       end;
     end;
   end;
+  {$ENDIF WINDOWS}
 
   if OperationSucceeded then
   begin
@@ -1293,21 +1310,21 @@ begin
   FFPCPlatform:='i386-win32';
   {$ENDIF Windows}
   {$IFDEF Linux}
-  FBootstrapCompilerURL :=
+  FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
   //todo: check if this is the right one - 32vs64 bit!?!?
+  {todo: Linux x86:
   FCompilername := 'ppc386';
-  FDesktopShortcutName;='Lazarus (dev version)';
+  FDesktopShortcutName:='Lazarus (dev version)';
   FFPCPlatform:='i386-linux';
-  {todo: Linux x64:
-  FBootstrapCompilerURL :=
+  }
+  FBootstrapCompilerFTP :=
   'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
   FCompilername := 'x86_64-linux-ppcx64';
   FFPCPlatform:='x64-linux';
-  }
   {$ENDIF Linux}
   {$IFDEF Darwin}
-  FBootstrapCompilerURL :=
+  FBootstrapCompilerFTP:=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
   FCompilername := 'ppcuniversal';
   //check this:
@@ -1347,4 +1364,4 @@ begin
 end;
 
 end.
-
+
