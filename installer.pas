@@ -515,15 +515,17 @@ var
   ResultCode: longint;
 begin
   OperationSucceeded := True;
+  // The extractors used depend on the bootstrap compiler URL/file we download
+  // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
   {$IFDEF WINDOWS}
   // Need to do it here so we can pick up make path.
   FExtractor := FBinutilsDir + 'unzip' + FExecutableExtension;
   {$ENDIF WINDOWS}
   {$IFDEF LINUX}
-  FExtractor:='bzip2'; //Used for extracting FPC bootstrap compiler archive
+  FExtractor:=''; //We can use internal extractor
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
-  FExtractor:='bzip2'; //Used for extracting FPC bootstrap compiler archive
+  FExtractor:='tar'; //We can use internal extractor for bzip2 but need to untar it, too
   {$ENDIF DARIN}
 
   {$IFDEF WINDOWS}
@@ -593,35 +595,39 @@ begin
   if OperationSucceeded then
   begin
     // Check for valid unzip/gunzip executable
-    // todo: might refactor this to separate function;
-    try
-      Output := '';
-      // See unzip.h for return codes.
-      Params:=TStringList.Create;
+    if FExtractor<>EmptyStr then
+    begin
       try
-        if AnsiPos('unzip', lowercase(FExtractor))=1 then Params.Add('-v');
-        if AnsiPos('bzip2', lowercase(FExtractor))=1 then Params.Add('--version');
-        if AnsiPos('bunzip2', lowercase(FExtractor))=1 then Params.Add('--version');
-        if AnsiPos('gzip', lowercase(FExtractor))=1 then Params.Add('--version');
-        if AnsiPos('gunzip', lowercase(FExtractor))=1 then Params.Add('--version');
-        ResultCode:=RunOutput(FExtractor, Params, Output);
-      finally
-        Params.Free;
-      end;
+        Output := '';
+        // See unzip.h for return codes.
+        Params:=TStringList.Create;
+        try
+          // Possibly redundant as we now use internal bunzip2 code, but can't hurt
+          if AnsiPos('unzip', lowercase(FExtractor))=1 then Params.Add('-v');
+          if AnsiPos('bzip2', lowercase(FExtractor))=1 then Params.Add('--version');
+          if AnsiPos('bunzip2', lowercase(FExtractor))=1 then Params.Add('--version');
+          if AnsiPos('gzip', lowercase(FExtractor))=1 then Params.Add('--version');
+          if AnsiPos('gunzip', lowercase(FExtractor))=1 then Params.Add('--version');
+          if AnsiPos('tar', lowercase(FExtractor))=1 then Params.Add('--version');
+          ResultCode:=RunOutput(FExtractor, Params, Output);
+        finally
+          Params.Free;
+        end;
 
-      if ResultCode=0 then
-      begin
-        debugln('Found valid extractor: ' + FExtractor);
-        OperationSucceeded := true;
-      end
-      else
-      begin
-        //invalid unzip/gunzip/whatever
-        debugln('Error: could not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
-        OperationSucceeded:=false;
+        if ResultCode=0 then
+        begin
+          debugln('Found valid extractor: ' + FExtractor);
+          OperationSucceeded := true;
+        end
+        else
+        begin
+          //invalid unzip/gunzip/whatever
+          debugln('Error: could not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
+          OperationSucceeded:=false;
+        end;
+      except
+        OperationSucceeded := False;
       end;
-    except
-      OperationSucceeded := False;
     end;
   end;
 
