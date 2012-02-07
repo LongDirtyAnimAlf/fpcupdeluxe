@@ -56,7 +56,7 @@ type
     FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string;
     FMake: string;
-    {$IFDEF WINDOWS}
+    {$IFDEF MSWINDOWS}
     FBinutilsDir: string;
     FBinutilsDirNoBackslash: string; //Location of binutils without trailing delimiter
     {$ENDIF}
@@ -127,10 +127,10 @@ uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   strutils, process, FileUtil {Requires LCL}, bunzip2
-{$IFDEF WINDOWS}
+{$IFDEF MSWINDOWS}
   //Mostly for shortcut code
   ,windows, shlobj {for special folders}, ActiveX, ComObj
-{$ENDIF WINDOWS}
+{$ENDIF MSWINDOWS}
 {$IFDEF UNIX}
   ,baseunix
 {$ENDIF UNIX}
@@ -148,7 +148,7 @@ begin
   {$ENDIF DEBUG}
 end;
 
-{$IFDEF WINDOWS}
+{$IFDEF MSWINDOWS}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 var
   IObject: IUnknown;
@@ -178,7 +178,7 @@ begin
   { Create the link }
   IPFile.Save(PWChar(LinkName), false);
 end;
-{$ENDIF WINDOWS}
+{$ENDIF MSWINDOWS}
 
 {$IFDEF UNIX}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
@@ -193,9 +193,9 @@ var
   ScriptText: TStringList;
   ScriptFile: string;
 begin
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   debugln('todo: write me (CreateHomeStartLink)!');
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   ScriptText:=TStringList.Create;
   try
@@ -320,7 +320,7 @@ begin
 
   if OperationSucceeded then
   begin
-    {$IFDEF WINDOWS}
+    {$IFDEF MSWINDOWS}
     //Extract zip, overwriting without prompting
     Params:=TStringList.Create;
     try
@@ -347,7 +347,7 @@ begin
       debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
       renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
     end;
-    {$ENDIF WINDOWS}
+    {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     if OperationSucceeded then
     begin
@@ -573,10 +573,10 @@ begin
   OperationSucceeded := True;
   // The extractors used depend on the bootstrap compiler URL/file we download
   // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   // Need to do it here so we can pick up make path.
   FExtractor := FBinutilsDir + 'unzip' + FExecutableExtension;
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
   FExtractor:=''; //We can use internal extractor
   {$ENDIF LINUX}
@@ -584,7 +584,7 @@ begin
   FExtractor:='tar'; //We can use internal extractor for bzip2 but need to untar it, too
   {$ENDIF DARIN}
 
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin
     // Check for binutils directory, make and unzip executables.
@@ -596,7 +596,7 @@ begin
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 
 
   if OperationSucceeded then
@@ -625,13 +625,13 @@ begin
     // Try to look for SVN
     if FUpdater.FindSVNExecutable='' then
     begin
-      {$IFDEF Windows}
+      {$IFDEF MSWINDOWS}
       // Make sure we have a sensible default.
       // Set it here so multiple calls to CheckExes will not redownload SVN all the time
       if FSVNDirectory='' then FSVNDirectory := 'c:\development\svn\';
-      {$ENDIF WINDOWS}
+      {$ENDIF MSWINDOWS}
       FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
-      {$IFDEF Windows}
+      {$IFDEF MSWINDOWS}
       // If it still can't be found, download it
       if FUpdater.SVNExecutable='' then
       begin
@@ -795,11 +795,11 @@ end;
 
 function TInstaller.GetMakePath: string;
 begin
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   Result := FBinutilsDir;
   {$ELSE}
   Result := ''; //dummy value, done for compatibility
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 end;
 
 function TInstaller.Run(Executable: string; const Params: TStringList): longint;
@@ -926,14 +926,14 @@ end;
 
 procedure TInstaller.SetMakePath(AValue: string);
 begin
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   // Make sure there's a trailing delimiter
   FBinutilsDir:=IncludeTrailingPathDelimiter(AValue);
   FBinutilsDirNoBackslash:=ExcludeTrailingPathDelimiter(FBinutilsDir); //We need a stripped version for crossbindir
   FMake:=FBinutilsDir+'make'+FExecutableExtension;
   {$ELSE}
   FMake:='make'; //assume in path
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 end;
 
 
@@ -961,9 +961,9 @@ begin
     try
       //Don't call params with quotes
       Params.Add('FPC=' + BootstrapCompiler+'');
-      {$IFDEF WINDOWS}
+      {$IFDEF MSWINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils. NOTE: CROSSBINDIR REQUIRES path NOT to end with trailing delimiter!
-      {$ENDIF WINDOWS}
+      {$ENDIF MSWINDOWS}
       //Alternative to CROSSBINDIR would be OPT=-FD+FBinutilsDirNoBackslash
       Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -984,9 +984,9 @@ begin
     try
       //Don't call params with quotes
       Params.Add('FPC=' + BootstrapCompiler+'');
-      {$IFDEF WINDOWS}
+      {$IFDEF MSWINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
-      {$ENDIF WINDOWS}
+      {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1007,9 +1007,9 @@ begin
     try
       //Don't call params with quotes
       Params.Add('FPC=' + BootstrapCompiler+'');
-      {$IFDEF WINDOWS}
+      {$IFDEF MSWINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
-      {$ENDIF WINDOWS}
+      {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ FPCDirectory+'');
       Params.Add('INSTALL_PREFIX='+FPCDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -1027,14 +1027,14 @@ begin
   if OperationSucceeded then
   begin
     // This differs between Windows and Linux.
-    {$IFDEF WINDOWS}
+    {$IFDEF MSWINDOWS}
     // This will give something like ppc386.exe. We use this in case
     // we need to pass PP=bla when running make.
     // We mangle this later when dealing with Lazarus config, as we require
     // fpc.exe there.
     FInstalledCompiler := FPCDirectory + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
-    {$ENDIF WINDOWS}
+    {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
     FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+'fpc';
     {$ENDIF UNIX}
@@ -1044,7 +1044,7 @@ begin
     FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
   end;
 
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin
     //Copy over binutils to new compiler bin directory
@@ -1064,9 +1064,9 @@ begin
       end;
     end;
   end;
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin
     // Make crosscompiler using new compiler- todo: check out what cross compilers we can install on Linux/OSX
@@ -1121,7 +1121,7 @@ begin
       Params.Free;
     end;
   end;
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
   if OperationSucceeded then
@@ -1214,7 +1214,7 @@ begin
     end;
   end;
 
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   //todo: find out what crosscompilers we can install on linux/osx
   if OperationSucceeded then
   begin
@@ -1243,7 +1243,7 @@ begin
       end;
     end;
   end;
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 
   if OperationSucceeded then
   begin
@@ -1285,10 +1285,10 @@ begin
         // we'd rather use fpc
         LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
         LazarusConfig.LazarusDirectory:=LazarusDirectory;
-        {$IFDEF WINDOWS}
+        {$IFDEF MSWINDOWS}
         LazarusConfig.DebuggerFilename:=FBinutilsDir+'gdb'+FExecutableExtension;
         LazarusConfig.MakeFilename:=FBinutilsDir+'make'+FExecutableExtension;
-        {$ENDIF WINDOWS}
+        {$ENDIF MSWINDOWS}
         {$IFDEF UNIX}
         //todo: fix this for more variants?!?
         LazarusConfig.DebuggerFilename:='gdb'+FExecutableExtension; //assume in path
@@ -1373,7 +1373,7 @@ begin
   if OperationSucceeded then
   begin
     // For Windows, a desktop shortcut. For Unixy systems, a script in ~
-    {$IFDEF WINDOWS}
+    {$IFDEF MSWINDOWS}
     if ShortCutName<>EmptyStr then
     begin
       debugln('Lazarus: creating desktop shortcut:');
@@ -1386,7 +1386,7 @@ begin
         //Ignore problems creating shortcut
       end;
     end;
-    {$ENDIF WINDOWS}
+    {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
     if ShortCutName<>EmptyStr then
     begin
@@ -1407,9 +1407,9 @@ end;
 
 constructor Tinstaller.Create;
 const
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   DefaultPCPSubdir='.lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
   {$ENDIF UNIX}
@@ -1423,13 +1423,17 @@ begin
 
   //Bootstrap compiler:
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
-  {$IFDEF Windows}
+  {$IFDEF MSWINDOWS}
+
+  //todo: find out if system is running 64 bit.... failing that
+  //{$IFDEF WIN64}/WIN32
   FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
   FCompilername := 'ppc386.exe';
   FFPCPlatform:='i386-win32';
-  {$ENDIF Windows}
+  {$ENDIF MSWINDOWS}
   {$IFDEF Linux}
+  //find out if running 32 bit linux ({$IFDEF CPU386} maybe - but that may still run on 64 bit system)
   FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
   //todo: check if this is the right one - 32vs64 bit!?!?
@@ -1444,6 +1448,7 @@ begin
   FFPCPlatform:='x86_64';
   {$ENDIF Linux}
   {$IFDEF Darwin}
+  //OSX. todo: find out powerpc/intel??? or not relevant?
   FBootstrapCompilerFTP:=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
   FCompilername := 'ppcuniversal';
@@ -1451,11 +1456,11 @@ begin
   FFPCPlatform:='x64-OSX';
   {$ENDIF Darwin}
 
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   FExecutableExtension := '.exe';
   {$ELSE}
   FExecutableExtension := '';
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
   // Binutils needed for compilation
   CreateBinutilsList;
 
@@ -1465,7 +1470,7 @@ begin
   FUpdater := TUpdater.Create;
   FExtractor := '';
   //Directory where Lazarus installation config will end up (primary config path)
-  {$IFDEF Windows}
+  {$IFDEF MSWINDOWS}
   // Somewhere in local appdata special folder
   AppDataPath := '';
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
@@ -1474,7 +1479,7 @@ begin
   //todo: fix this on Unix; it gets ~/.config/fpcup/.lazarusdev or something
   todo fix this
   LazarusPrimaryConfigPath:=GetAppConfigDir(false)+DefaultPCPSubdir;
-  {$ENDIF}
+  {$ENDIF MSWINDOWS}
   SetMakePath('');
 end;
 

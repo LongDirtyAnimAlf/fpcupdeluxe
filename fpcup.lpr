@@ -111,18 +111,18 @@ begin
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
   //svn2 seems to lag behind a lot.
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
   FInstaller.FPCDirectory := 'c:\development\fpc';
   FInstaller.LazarusDirectory := 'c:\development\lazarus';
   FInstaller.MakePath := 'C:\development\fpcbootstrap\';
-  {$ENDIF}
-  {$IFNDEF WINDOWS}
+  {$ENDIF MSWINDOWS}
+  {$IFNDEF MSWINDOWS}
   FInstaller.BootstrapCompilerDirectory := '~/fpcbootstrap';
   FInstaller.FPCDirectory := '~/fpc';
   FInstaller.LazarusDirectory := '~/lazarus';
   FInstaller.Makepath:='';
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
 
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
@@ -140,11 +140,11 @@ begin
   if Application.HasOption(BinutilsDir) then
   begin
     FInstaller.MakePath:=Application.GetOptionValue(BinutilsDir);
-    {$IFNDEF WINDOWS}
+    {$IFNDEF MSWINDOWS}
     writeln('The '+BinutilsDir+' parameter is not necessary or supported on this system.');
     writeln('The parameter will be ignored.');
     FInstaller.Makepath:='';
-    {$ENDIF WINDOWS}
+    {$ENDIF MSWINDOWS}
   end;
 
   if Application.HasOption(FPCBootstrapDir) then
@@ -191,9 +191,9 @@ begin
   writeln('FPC directory:          '+FInstaller.FPCDirectory);
   writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
   writeln('Lazarus URL:            '+FInstaller.LazarusURL);
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   writeln('Make/binutils path:     '+FInstaller.MakePath);
-  {$ENDIF WINDOWS}
+  {$ENDIF MSWINDOWS}
   writeln('');
 end;
 
@@ -221,9 +221,9 @@ begin
         writeln('Lazarus retrieval/compilation failed.');
         writeln('Please check program output for details. Possible troubleshooting steps:');
         writeln('- make sure there''s a valid SVN executable in your path.');
-        {$IFNDEF Windows}
+        {$IFNDEF MSWINDOWS}
         writeln('- make sure the GNU binutils are installed');
-        {$ENDIF}
+        {$ENDIF MSWINDOWS}
         writeln('You might want to try removing all local changes in your SVN repository with:');
         writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.LazarusDirectory);
       end;
@@ -233,9 +233,9 @@ begin
       writeln('FPC retrieval/compilation failed.');
       writeln('Please check program output for details. Possible troubleshooting steps:');
       writeln('- make sure there''s a valid SVN executable in your path.');
-      {$IFNDEF Windows}
+      {$IFNDEF MSWINDOWS}
       writeln('- make sure the GNU binutils are installed');
-      {$ENDIF}
+      {$ENDIF MSWINDOWS}
       writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.FPCDirectory);
     end;
   finally

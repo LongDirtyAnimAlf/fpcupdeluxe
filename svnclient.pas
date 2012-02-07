@@ -103,9 +103,9 @@ begin
     //todo: check what happens if svn exe is in path but not specified here?
     // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
     try
-      {$IFDEF WINDOWS}
+      {$IFDEF MSWINDOWS}
       ExeResult := SysUtils.ExecuteProcess(SVNName, '--version', []);
-      {$ENDIF WINDOWS}
+      {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       ExeResult := SysUtils.ExecuteProcess(SVNName, '--version');
       {$ENDIF UNIX}
@@ -120,7 +120,7 @@ begin
     end;
   end;
 
-{$IFDEF WINDOWS}
+{$IFDEF MSWINDOWS}
   // Some popular locations for SlikSVN and Subversion
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
@@ -132,15 +132,15 @@ begin
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
       '\SlikSvn\bin\svn.exe';
-{$ENDIF WINDOWS}
+{$ENDIF MSWINDOWS}
 
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := FindDefaultExecutablePath('svn');
 
-{$IFDEF WINDOWS}
+{$IFDEF MSWINDOWS}
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn'); //directory where current executable is
-{$ENDIF WINDOWS}
+{$ENDIF MSWINDOWS}
 
   if not FileExists(FSvnExecutable) then
   begin

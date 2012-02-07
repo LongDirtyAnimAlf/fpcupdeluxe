@@ -100,13 +100,13 @@ begin
       FConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewConfig);
       FConfig.SetValue('EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
       FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', 'gdb'); //assume in path
-      {$IFDEF WINDOWS}
+      {$IFDEF MSWINDOWS}
       FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '%FpcBinDir%\fpc.exe');
       FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '$(LazarusDir)fpc\$(FPCVer)\source');
       FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', 'c:\lazarus');
       FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', '%FpcBinDir%\make.exe');
       FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '%Temp%');
-      {$ENDIF WINDOWS}
+      {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '/usr/bin/fpc');
       FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '/usr/share/fpcsrc/$(FPCVer)/fpc/');
