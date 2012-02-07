@@ -1456,7 +1456,7 @@ begin
   FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
   FCompilername := 'i386-linux-ppc386-1';
-  FFPCPlatform:='x86'; //todo check this
+  FFPCPlatform:='i386-linux';
   {$ELSE} // Assume x64 (could also be PowerPC, ARM I suppose)
   FBootstrapCompilerFTP :=
   'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
@@ -1507,4 +1507,4 @@ begin
 end;
 
 end.
-
+

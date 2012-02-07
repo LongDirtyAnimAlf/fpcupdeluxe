@@ -24,6 +24,8 @@ var
 begin
   Status := False;
   result:=false;
+  if (fileexists(SourceFile)) then
+  begin
   try
     infile.init(SourceFile, stopenread, 4096);
     outfile.init(TargetFile, stcreate, 4096);
@@ -55,9 +57,15 @@ begin
       ErrorLog:='bunzip2: error decompressing '+SourceFile+'. Details:'+E.ClassName+'/'+E.Message;
       result:=false;
     end;
+    end;
+  end
+  else
+  begin
+    ErrorLog:='bunzip2: could not find input file: '+SourceFile;
+    result:=false;
   end;
 end;
 
 
 end.
-
+
