@@ -20,9 +20,15 @@
     <VersionInfo>
       <StringTable ProductVersion=""/>
     </VersionInfo>
+    <MacroValues Count="1">
+      <Macro1 Name="LCLWidgetType" Value="nogui"/>
+    </MacroValues>
     <BuildModes Count="2">
       <Item1 Name="Debug" Default="True"/>
       <Item2 Name="Release">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -135,6 +141,9 @@
       </Debugging>
     </Linking>
     <Other>
+      <Verbosity>
+        <ShowCond Value="True"/>
+      </Verbosity>
       <CompilerMessages>
         <UseMsgFile Value="True"/>
       </CompilerMessages>

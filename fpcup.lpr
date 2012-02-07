@@ -50,7 +50,7 @@ Add something like fpcup.config in the settings dir so we know for which fpc/laz
 
 uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
-  Classes,Forms, Interfaces {these 2 for application options},
+  Classes,Forms,Interfaces {these 2 for application options},
   installer,
   svnclient, updatelazconfig;
 
