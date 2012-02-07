@@ -85,6 +85,7 @@ type
     function RunOutput(Executable: string; const Params: TStringList; var Output: TStringList): longint;
     function RunOutput(Executable: string; const Params: TStringList; var Output: string): longint;
     procedure SetBootstrapCompilerDirectory(AValue: string);
+    procedure SetCompilerToInstalledCompiler;
     procedure SetFPCDirectory(Directory: string);
     procedure SetFPCUrl(AValue: string);
     procedure SetLazarusDirectory(Directory: string);
@@ -278,7 +279,6 @@ var
 begin
   ForceDirectories(MakePath);
   Result := False;
-  //todo: check downloading for linux/osx etc
   for Counter := 0 to FBinUtils.Count - 1 do
   begin
     debugln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakePath);
@@ -436,7 +436,6 @@ var
   SourceForgeProject: string;
 begin
   Result := False;
-  // Todo: test this functionality
   // Detect SourceForge download
   i := Pos(SourceForgeProjectPart, URL);
   j := Pos(SourceForgeFilesPart, URL);
@@ -612,9 +611,11 @@ begin
         Params.Free;
       end;
 
-      //todo: verify if we really should ignore errors here
       if Ansipos('GNU Make', Output) = 0 then
-        raise Exception.Create('Found make executable but it is not GNU Make.');
+      begin
+        debugln('Found make executable but it is not GNU Make.');
+        OperationSucceeded:=false;
+      end;
     except
       // ignore errors, this is only an extra check
     end;
@@ -802,6 +803,23 @@ begin
   {$ENDIF MSWINDOWS}
 end;
 
+procedure TInstaller.SetCompilerToInstalledCompiler;
+begin
+  FInstalledCompiler:='//**#$$ Fix your ifdefs in the code.';
+  // This differs between Windows and Linux.
+  {$IFDEF MSWINDOWS}
+  // This will give something like ppc386.exe. We use this in case
+  // we need to pass PP=bla when running make.
+  // We mangle this later when dealing with Lazarus config, as we require
+  // fpc.exe there.
+  FInstalledCompiler := FPCDirectory + 'bin' +
+    DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+'fpc';
+  {$ENDIF UNIX}
+end;
+
 function TInstaller.Run(Executable: string; const Params: TStringList): longint;
 { Runs executable without showing output, unless:
 1. something went wrong (result code<>0) and
@@ -871,9 +889,10 @@ begin
     except
       on E: Exception do
       begin
-        //todo: check file not found handling. We don't want to do an explicit file exists
-        //as this complicates with paths, current dirs, .exe extensions etc.
-        //Something went wrong. We need to pass on what and markt this as a failure
+        {We don't want to do an explicit file exists
+        as this complicates with paths, current dirs, .exe extensions etc.}
+
+        //Something went wrong. We need to pass on what and mark this as a failure
         debugln('Exception calling '+Executable);
         debugln('Details: '+E.ClassName+'/'+E.Message);
         Result:=254; //fairly random but still an error, and distinct from earlier code
@@ -1026,18 +1045,7 @@ begin
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
   begin
-    // This differs between Windows and Linux.
-    {$IFDEF MSWINDOWS}
-    // This will give something like ppc386.exe. We use this in case
-    // we need to pass PP=bla when running make.
-    // We mangle this later when dealing with Lazarus config, as we require
-    // fpc.exe there.
-    FInstalledCompiler := FPCDirectory + 'bin' +
-      DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
-    {$ENDIF MSWINDOWS}
-    {$IFDEF UNIX}
-    FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+'fpc';
-    {$ENDIF UNIX}
+    SetCompilerToInstalledCompiler;
   end
   else
   begin
@@ -1169,13 +1177,11 @@ begin
 
 
   // If we haven't installed FPC, this won't be set
-  // todo: fix FPC for linux/other platforms
   if FInstalledCompiler = '' then
   begin
     //Assume we've got a working compiler. This will link through to the
-    //platform-specific compiler:
-    FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
-      DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
+    //platform-specific compiler
+    SetCompilerToInstalledCompiler;
   end;
 
   // Download Lazarus source:
@@ -1280,7 +1286,7 @@ begin
     LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
     try
       try
-        // FInstalledCompiler will be something like c:\bla\ppc386.exe, e.g.
+        // FInstalledCompiler will be often something like c:\bla\ppc386.exe, e.g.
         // the platform specific compiler. In order to be able to cross compile
         // we'd rather use fpc
         LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
@@ -1379,7 +1385,6 @@ begin
       debugln('Lazarus: creating desktop shortcut:');
       try
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-        //todo: perhaps check for existing shortcut
         //DO pass quotes here (it's not TProcess.Params)
         CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortCutName);
       finally
@@ -1424,28 +1429,27 @@ begin
   //Bootstrap compiler:
   //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
   {$IFDEF MSWINDOWS}
-
-  //todo: find out if system is running 64 bit.... failing that
-  //{$IFDEF WIN64}/WIN32
+  // On Windows, we can always compile 32 bit with a 64 bit cross compiler, regardless
+  // of actual architecture (x86 or x64)
   FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
   FCompilername := 'ppc386.exe';
   FFPCPlatform:='i386-win32';
   {$ENDIF MSWINDOWS}
   {$IFDEF Linux}
-  //find out if running 32 bit linux ({$IFDEF CPU386} maybe - but that may still run on 64 bit system)
+  //If compiled for x86 32 bit, install 32 bit as well.
+  //If compiled for x64, install x64 only.//todo: cross compiler!?!
+  {$IFDEF CPU386}
   FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
-  //todo: check if this is the right one - 32vs64 bit!?!?
-  {todo: Linux x86:
-  FCompilername := 'ppc386';
-  FDesktopShortcutName:='Lazarus (dev version)';
-  FFPCPlatform:='i386-linux';
-  }
+  FCompilername := 'i386-linux-ppc386-1';
+  FFPCPlatform:='x86'; //todo check this
+  {$ELSE} // Assume x64 (could also be PowerPC, ARM I suppose)
   FBootstrapCompilerFTP :=
   'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
   FCompilername := 'x86_64-linux-ppcx64';
   FFPCPlatform:='x86_64';
+  {$ENDIF CPU386}
   {$ENDIF Linux}
   {$IFDEF Darwin}
   //OSX. todo: find out powerpc/intel??? or not relevant?
