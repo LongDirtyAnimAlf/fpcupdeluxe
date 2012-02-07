@@ -130,6 +130,9 @@ uses
   //Mostly for shortcut code
   ,windows, shlobj {for special folders}, ActiveX, ComObj
 {$ENDIF WINDOWS}
+{$IFDEF UNIX}
+  ,baseunix
+{$ENDIF UNIX}
   ,updatelazconfig
   ;
 
@@ -266,25 +269,23 @@ end;
 function TInstaller.DownloadBootstrapCompiler: boolean;
   // Should be done after we have unzip executable in FMakePath
 var
-  BootstrapZip: string;
+  BootstrapArchive: string;
   Log: string;
   OperationSucceeded: boolean;
   Params: TStringList;
-  ZipDir: string;
+  ArchiveDir: string;
 begin
   OperationSucceeded:=true;
   if OperationSucceeded then
   begin
     OperationSucceeded:=ForceDirectories(BootstrapCompilerDirectory);
-    debugln('todo: debug: forcedirectories bootstrap compiler dir: '+bootstrapcompilerdirectory+' result: '+BoolToStr(Operationsucceeded));
   end;
 
-  BootstrapZip := SysUtils.GetTempFileName;
-  ZipDir := ExtractFilePath(BootstrapZip);
-  debugln('todo: debug: bootstrapzip '+bootstrapzip+' zipdir: '+zipdir);
+  BootstrapArchive := SysUtils.GetTempFileName;
+  ArchiveDir := ExtractFilePath(BootstrapArchive);
   if OperationSucceeded then
   begin
-    OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapZip);
+    OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapArchive);
   end;
 
   if OperationSucceeded then
@@ -296,8 +297,8 @@ begin
       //Don't call params with quotes
       Params.Add('-o'); //overwrite existing files
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
-      Params.Add(ZipDir);
-      Params.Add(BootstrapZip); // zip/archive file
+      Params.Add(ArchiveDir);
+      Params.Add(BootstrapArchive); // zip/archive file
       if Run(FExtractor, Params) <> 0 then
       begin
         debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
@@ -313,28 +314,53 @@ begin
     // Move compiler to proper directory
     if OperationSucceeded = True then
     begin
-      debugln('Going to rename/move ' + ZipDir + CompilerName + ' to ' + BootstrapCompiler);
-      renamefile(ZipDir + CompilerName, BootstrapCompiler);
+      debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
+      renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
     end;
     {$ENDIF WINDOWS}
     {$IFDEF LINUX}
-    //bunzip2 would need -dfq params
-    Log:='';
-    debugln('todo: debug: going to decompress ' +bootstrapzip+' to ' + BootstrapCompiler);
-    OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
-    //todo chmod ug+x for Linux/OSX?!!
-    if Log<>'' then writeln(Log); //output debug output
+    if OperationSucceeded then
+    begin
+      //Use internal bunzip2; reminder: external bunzip2 would need -dfq params
+      Log:='';
+      //Internal Bunzip2 returns false even when it works?!?! So ignore it.
+      Bunzip2.Decompress(BootstrapArchive, BootstrapCompiler, Log);
+      if Log<>'' then debugln(Log); //output debug output
+      Log:=EmptyStr;
+    end;
+    if OperationSucceeded then
+    begin
+      //Make executable
+      OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
+      if OperationSucceeded=false then debugln('todo debug: chmod failed for '+BootstrapCompiler);
+    end;
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
-    Log:='';
-    OperationSucceeded:=Bunzip2.Decompress(BootstrapZip, BootstrapCompiler, Log);
+    if OperationSucceeded then
+    begin
+      //Use internal bunzip2; reminder: external bunzip2 would need -dfq params
+      Log:='';
+      //Internal Bunzip2 returns false even when it works?!?! So ignore it.
+      Bunzip2.Decompress(BootstrapArchive, BootstrapCompiler, Log);
+      if Log<>'' then debugln(Log); //output debug output
+      Log:=EmptyStr;
+    end;
     //todo: untar it as well!
-    //todo chmod ug+x for Linux/OSX?!!
-    if Log<>'' then writeln(Log); //output debug output
+    if OperationSucceeded then
+    begin
+      //Make executable
+      OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
+    end;
     {$ENDIF DARWIN}
   end;
   if OperationSucceeded = True then
-    SysUtils.DeleteFile(BootstrapZip);
+  begin
+    SysUtils.DeleteFile(BootstrapArchive);
+  end
+  else
+  begin
+    debugln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive);
+  end;
   Result := OperationSucceeded;
 end;
 
@@ -1121,7 +1147,8 @@ begin
   // Make sure primary config path exists
   if DirectoryExists(LazarusPrimaryConfigPath) = False then
   begin
-    ForceDirectories(LazarusPrimaryConfigPath);
+    OperationSucceeded:=ForceDirectories(LazarusPrimaryConfigPath);
+    debugln('Created Lazarus primary config directory: '+LazarusPrimaryConfigPath);
   end;
 
   if OperationSucceeded then
@@ -1321,7 +1348,12 @@ end;
 
 constructor Tinstaller.Create;
 const
-  DefaultPCPSubdir='lazdevsettings'; //Caution: shouldn't be the same name as Lazarus dir itself.
+  {$IFDEF WINDOWS}
+  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
+  {$ENDIF WINDOWS}
+  {$IFDEF UNIX}
+  DefaultPCPSubdir='.lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
+  {$ENDIF UNIX}
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
 begin
@@ -1393,4 +1425,4 @@ begin
 end;
 
 end.
-
+
