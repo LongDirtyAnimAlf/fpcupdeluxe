@@ -1471,6 +1471,8 @@ begin
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
   LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + DefaultPCPSubdir;
   {$ELSE}
+  //todo: fix this on Unix; it gets ~/.config/fpcup/.lazarusdev or something
+  todo fix this
   LazarusPrimaryConfigPath:=GetAppConfigDir(false)+DefaultPCPSubdir;
   {$ENDIF}
   SetMakePath('');
