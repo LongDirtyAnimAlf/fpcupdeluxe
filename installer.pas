@@ -1064,9 +1064,10 @@ begin
   end;
   {$ENDIF WINDOWS}
 
+  {$IFDEF WINDOWS}
   if OperationSucceeded then
   begin
-    // Make crosscompiler using new compiler- todo: only for Windows!?!?
+    // Make crosscompiler using new compiler- todo: check out what cross compilers we can install on Linux/OSX
     // Note: consider this as an optional item, so don't fail the function if this breaks.
     Executable := FMake;
     debugln('Running Make all (crosscompiler):');
@@ -1118,6 +1119,7 @@ begin
       Params.Free;
     end;
   end;
+  {$ENDIF WINDOWS}
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
   if OperationSucceeded then
@@ -1210,10 +1212,11 @@ begin
     end;
   end;
 
+  {$IFDEF WINDOWS}
+  //todo: find out what crosscompilers we can install on linux/osx
   if OperationSucceeded then
   begin
     // LCL 64 bit crosscompiler.
-    //todo: windows only
     if FInstalledCrossCompiler<>'' then
     begin
       Executable := FMake;
@@ -1238,6 +1241,7 @@ begin
       end;
     end;
   end;
+  {$ENDIF WINDOWS}
 
   if OperationSucceeded then
   begin
@@ -1478,4 +1482,4 @@ begin
 end;
 
 end.
-
+
