@@ -976,8 +976,7 @@ begin
     Params:=TStringList.Create;
     try
       //Don't call params with quotes
-      Params.Add('FPC=' + FPCDirectory + DirectorySeparator + 'compiler' +
-        DirectorySeparator + CompilerName+'');
+      Params.Add('FPC=' + BootstrapCompiler+'');
       {$IFDEF WINDOWS}
       Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
       {$ENDIF WINDOWS}
@@ -1349,10 +1348,10 @@ end;
 constructor Tinstaller.Create;
 const
   {$IFDEF WINDOWS}
-  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
+  DefaultPCPSubdir='lazarausdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
   {$ENDIF WINDOWS}
   {$IFDEF UNIX}
-  DefaultPCPSubdir='.lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
+  DefaultPCPSubdir='.lazarausdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
   {$ENDIF UNIX}
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
