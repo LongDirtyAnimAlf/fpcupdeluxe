@@ -48,8 +48,8 @@ type
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string; //Platform specific compiler name (e.g. ppc386.exe for Windows)
-    FShortcutName: string;
-    FExecutableExtension: string;
+    FShortcutName: string; //Name for shortcut/shell script pointing to newly installed Lazarus
+    FExecutableExtension: string; //.exe on Windows
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
     FInstalledCrossCompiler: string; //Path to an optional cross compiler that we installed (also used for Lazarus)
@@ -996,8 +996,18 @@ begin
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
   begin
-    FInstalledCompiler := FPCDirectory + DirectorySeparator + 'bin' +
+    // This differs between Windows and Linux.
+    {$IFDEF WINDOWS}
+    // This will give something like ppc386.exe. We use this in case
+    // we need to pass PP=bla when running make.
+    // We mangle this later when dealing with Lazarus config, as we require
+    // fpc.exe there.
+    FInstalledCompiler := FPCDirectory + 'bin' +
       DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
+    {$ENDIF WINDOWS}
+    {$IFDEF UNIX}
+    FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+'fpc';
+    {$ENDIF UNIX}
   end
   else
   begin
@@ -1223,7 +1233,7 @@ begin
       end
       else
       begin
-        FInstalledLazarus:=LazarusDirectory+DirectorySeparator+'lazarus'+FExecutableExtension;
+        FInstalledLazarus:=LazarusDirectory+'lazarus'+FExecutableExtension;
       end;
     finally
       Params.Free;
@@ -1295,7 +1305,7 @@ begin
     try
       //Do NOT pass quotes in params
       Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(''+LazarusDirectory+DirectorySeparator+
+      Params.Add(''+LazarusDirectory+
         'tools'+DirectorySeparator+
         'lazdatadesktop'+DirectorySeparator+
         'lazdatadesktop.lpr');
@@ -1315,7 +1325,7 @@ begin
     try
       //Do NOT pass quotes in params
       Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(''+LazarusDirectory+DirectorySeparator+
+      Params.Add(''+LazarusDirectory+
         'doceditor'+DirectorySeparator+
         'lazde.lpr');
       debugln('Lazarus: compiling doc editor:');
@@ -1397,7 +1407,7 @@ begin
   FBootstrapCompilerFTP :=
   'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
   FCompilername := 'x86_64-linux-ppcx64';
-  FFPCPlatform:='x64-linux';
+  FFPCPlatform:='x86_64';
   {$ENDIF Linux}
   {$IFDEF Darwin}
   FBootstrapCompilerFTP:=
