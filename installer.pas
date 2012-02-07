@@ -91,6 +91,9 @@ type
     procedure SetLazarusDirectory(Directory: string);
     procedure SetLazarusUrl(AValue: string);
     procedure SetMakePath(AValue: string);
+    {$IFDEF UNIX}
+    function XdgConfigHome: String;
+    {$ENDIF UNIX}
   public
     property ShortCutName: string read FShortcutName write FShortcutName; //Name of the shortcut to Lazarus. If empty, no shortcut is generated.
     property CompilerName: string read FCompilerName;
@@ -148,6 +151,21 @@ begin
   sleep(200); //hopefully allow output to be written without interfering with other output
   {$ENDIF DEBUG}
 end;
+
+{$IFDEF UNIX}
+//Adapted from sysutils; Unix/Linux only
+Function TInstaller.XdgConfigHome: String;
+{ Follows base-dir spec,
+  see [http://freedesktop.org/Standards/basedir-spec].
+  Always ends with PathDelim. }
+begin
+  Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
+  if (Result='') then
+    Result:=IncludeTrailingPathDelimiter(ExpandFileNameUTF8('~'))+'.config'+DirectorySeparator
+  else
+    Result:=IncludeTrailingPathDelimiter(Result);
+end;
+{$ENDIF UNIX}
 
 {$IFDEF MSWINDOWS}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
@@ -1475,21 +1493,8 @@ begin
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
   LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + DefaultPCPSubdir;
   {$ELSE}
-  //todo: fix this on Unix; GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
-  {
-  { Follows base-dir spec,
-    see [http://freedesktop.org/Standards/basedir-spec].
-    Always ends with PathDelim. }
-  Function XdgConfigHome : String;
-  begin
-    Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
-    if (Result='') then
-      Result:=GetHomeDir + '.config/'
-    else
-      Result:=IncludeTrailingPathDelimiter(Result);
-  end;
-  }
-  LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(SysUtils.XdgConfigHome)+DefaultPCPSubdir;
+  //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+  LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
   {$ENDIF MSWINDOWS}
   SetMakePath('');
 end;
