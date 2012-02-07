@@ -327,6 +327,7 @@ begin
   if OperationSucceeded then
   begin
     OperationSucceeded:=ForceDirectories(BootstrapCompilerDirectory);
+    if OperationSucceeded=false then debugln('DownloadBootstrapCompiler error: could not create directory '+BootstrapCompilerDirectory);
   end;
 
   BootstrapArchive := SysUtils.GetTempFileName;
@@ -373,14 +374,14 @@ begin
       Log:='';
       //Internal Bunzip2 returns false even when it works?!?! So ignore it.
       Bunzip2.Decompress(BootstrapArchive, BootstrapCompiler, Log);
-      if Log<>'' then debugln(Log); //output debug output
+      if Log<>'' then debugln('DownloadBootstrapCompiler: bunzip2 log:'+Log); //output debug output
       Log:=EmptyStr;
     end;
     if OperationSucceeded then
     begin
       //Make executable
       OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
-      if OperationSucceeded=false then debugln('todo debug: chmod failed for '+BootstrapCompiler);
+      if OperationSucceeded=false then debugln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
     end;
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
@@ -390,10 +391,10 @@ begin
       Log:='';
       //Internal Bunzip2 returns false even when it works?!?! So ignore it.
       Bunzip2.Decompress(BootstrapArchive, BootstrapCompiler, Log);
-      if Log<>'' then debugln(Log); //output debug output
+      if Log<>'' then debugln('DownloadBootstrapCompiler: bunzip2 log:'+Log); //output debug output
       Log:=EmptyStr;
     end;
-    //todo: untar it as well!
+    todo: untar it as well!
     if OperationSucceeded then
     begin
       //Make executable
@@ -426,7 +427,7 @@ begin
   FoundPos:=pos('/', URL);
   Host:=LeftStr(URL, FoundPos-1);
   Source:=Copy(URL, FoundPos+1, Length(URL));
-  //Check for port numbers
+  //Check for port numbers:
   FoundPos:=pos(':', Host);
   Port:=FTPPort;
   if FoundPos>0 then
@@ -435,6 +436,7 @@ begin
     Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
   end;
   Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
+  if result=false then debugln('DownloadFTP: error downloading '+URL+'. Details: host:'+Host+'; port: '+Inttostr(Port)+'; remote path:'+Source);
 end;
 
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
@@ -1507,4 +1509,4 @@ begin
 end;
 
 end.
-
+

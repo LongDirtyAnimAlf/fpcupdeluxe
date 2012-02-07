@@ -24,6 +24,11 @@ var
 begin
   Status := False;
   result:=false;
+  if (FileExists(TargetFile)) then
+  begin
+    //Just get rid of it
+    SysUtils.DeleteFile(TargetFile);
+  end;
   if (fileexists(SourceFile)) then
   begin
   try
@@ -41,8 +46,10 @@ begin
     else
     begin
       repeat
+        // Try to read entire buffer...
         readsize := BufferSize;
         decoder.Read(a, readsize);
+        // ... write out whatever part we could read
         Dec(readsize, decoder.short);
         outfile.Write(a, readsize);
       until decoder.status <> 0;
