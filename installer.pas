@@ -1412,12 +1412,7 @@ end;
 
 constructor Tinstaller.Create;
 const
-  {$IFDEF MSWINDOWS}
   DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
-  {$ENDIF MSWINDOWS}
-  {$IFDEF UNIX}
-  DefaultPCPSubdir='.lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
-  {$ENDIF UNIX}
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
 begin
@@ -1480,9 +1475,21 @@ begin
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
   LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + DefaultPCPSubdir;
   {$ELSE}
-  //todo: fix this on Unix; it gets ~/.config/fpcup/.lazarusdev or something
-  todo fix this
-  LazarusPrimaryConfigPath:=GetAppConfigDir(false)+DefaultPCPSubdir;
+  //todo: fix this on Unix; GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+  {
+  { Follows base-dir spec,
+    see [http://freedesktop.org/Standards/basedir-spec].
+    Always ends with PathDelim. }
+  Function XdgConfigHome : String;
+  begin
+    Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
+    if (Result='') then
+      Result:=GetHomeDir + '.config/'
+    else
+      Result:=IncludeTrailingPathDelimiter(Result);
+  end;
+  }
+  LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(SysUtils.XdgConfigHome)+DefaultPCPSubdir;
   {$ENDIF MSWINDOWS}
   SetMakePath('');
 end;
