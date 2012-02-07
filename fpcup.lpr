@@ -81,7 +81,9 @@ begin
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
-  writeln(' lazlinkname=<name>    Name of the desktop shortcut to the Lazarus install.');
+  writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
+  writeln('                       On Windows: a desktop shortcut.');
+  writeln('                       On other systems: a shell file in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
   writeln('                       Default: Lazarus (trunk)');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
@@ -105,7 +107,7 @@ var
 begin
 // Default values
 
-  FInstaller.DesktopShortCutName:='Lazarus (trunk)';
+  FInstaller.ShortCutName:='Lazarus (trunk)';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
   //svn2 seems to lag behind a lot.
@@ -174,7 +176,7 @@ begin
 
   if Application.HasOption(LazLinkName) then
   begin
-    FInstaller.DesktopShortCutName:=Application.GetOptionValue(LazLinkName)
+    FInstaller.ShortCutName:=Application.GetOptionValue(LazLinkName)
   end;
 
   if Application.HasOption(LazURL) then
@@ -184,7 +186,7 @@ begin
   writeln('');
   writeln('Options:');
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
-  writeln('Shortcut name:          '+FInstaller.DesktopShortCutName);
+  writeln('Shortcut name:          '+FInstaller.ShortCutName);
   writeln('FPC URL:                '+FInstaller.FPCURL);
   writeln('FPC directory:          '+FInstaller.FPCDirectory);
   writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
@@ -241,4 +243,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+

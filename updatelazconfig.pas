@@ -93,38 +93,41 @@ end;
 
 destructor TUpdateLazConfig.Destroy;
 begin
-  //todo: create settings with defaults if new file.
-  if New then
-  begin
-    // Set up some sensible defaults
-    FConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewConfig);
-    FConfig.SetValue('EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
-    FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', 'gdb'); //assume in path
-    {$IFDEF WINDOWS}
-    FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '%FpcBinDir%\fpc.exe');
-    FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '$(LazarusDir)fpc\$(FPCVer)\source');
-    FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', 'c:\lazarus');
-    FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', '%FpcBinDir%\make.exe');
-    FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '%Temp%');
-    {$ENDIF WINDOWS}
-    {$IFDEF UNIX}
-    FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '/usr/bin/fpc');
-    FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '/usr/share/fpcsrc/$(FPCVer)/fpc/');
-    FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', '/usr/share/lazarus');
-    FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', 'make'); //assume in path
-    FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '/tmp');
-    {$ENDIF UNIX}
-    //todo: check more architectures
+  try
+    if New then
+    begin
+      // Set up some sensible defaults
+      FConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewConfig);
+      FConfig.SetValue('EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
+      FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', 'gdb'); //assume in path
+      {$IFDEF WINDOWS}
+      FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '%FpcBinDir%\fpc.exe');
+      FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '$(LazarusDir)fpc\$(FPCVer)\source');
+      FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', 'c:\lazarus');
+      FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', '%FpcBinDir%\make.exe');
+      FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '%Temp%');
+      {$ENDIF WINDOWS}
+      {$IFDEF UNIX}
+      FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '/usr/bin/fpc');
+      FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '/usr/share/fpcsrc/$(FPCVer)/fpc/');
+      FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', '/usr/share/lazarus');
+      FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', 'make'); //assume in path
+      FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '/tmp');
+      {$ENDIF UNIX}
+      //todo: check more architectures
+    end;
+    if CompilerFileName<>Emptystr then FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', CompilerFileName);
+    if DebuggerFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', DebuggerFilename);
+    if FPCSourceDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', FPCSourceDirectory);
+    if LazarusDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', LazarusDirectory);
+    if MakeFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', MakeFilename);
+    if TestBuildDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', TestBuildDirectory);
+    FConfig.Flush; //write out newly created or updated file
+  finally
+    // Regardless of what happens, try to prevent memory leaks.
+    FConfig.Free;
+    inherited Destroy;
   end;
-  if CompilerFileName<>Emptystr then FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', CompilerFileName);
-  if DebuggerFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', DebuggerFilename);
-  if FPCSourceDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', FPCSourceDirectory);
-  if LazarusDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', LazarusDirectory);
-  if MakeFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', MakeFilename);
-  if TestBuildDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', TestBuildDirectory);
-  FConfig.Flush; //write out newly created or updated file
-  FConfig.Free;
-  inherited Destroy;
 end;
 
 

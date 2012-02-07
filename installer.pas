@@ -48,7 +48,7 @@ type
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string; //Platform specific compiler name (e.g. ppc386.exe for Windows)
-    FDesktopShortcutName: string;
+    FShortcutName: string;
     FExecutableExtension: string;
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
@@ -90,7 +90,7 @@ type
     procedure SetLazarusUrl(AValue: string);
     procedure SetMakePath(AValue: string);
   public
-    property DesktopShortCutName: string read FDesktopShortcutName write FDesktopShortcutName; //Name of the shortcut to Lazarus. If empty, no shortcut is generated.
+    property ShortCutName: string read FShortcutName write FShortcutName; //Name of the shortcut to Lazarus. If empty, no shortcut is generated.
     property CompilerName: string read FCompilerName;
     //Full path to FPC compiler that is installed by this program
     property BootstrapCompiler: string read GetBootstrapCompiler;
@@ -1328,18 +1328,34 @@ begin
 
   if OperationSucceeded then
   begin
-    if DesktopShortCutName<>EmptyStr then
+    // For Windows, a desktop shortcut. For Unixy systems, a script in ~
+    {$IFDEF WINDOWS}
+    if ShortCutName<>EmptyStr then
     begin
       debugln('Lazarus: creating desktop shortcut:');
       try
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //todo: perhaps check for existing shortcut
         //DO pass quotes here (it's not TProcess.Params)
-        CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',DesktopShortcutName);
+        CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortCutName);
       finally
         //Ignore problems creating shortcut
       end;
     end;
+    {$ENDIF WINDOWS}
+    {$IFDEF UNIX}
+    if ShortCutName<>EmptyStr then
+    begin
+      debugln('Lazarus: creating shortcut in your home directory');
+      try
+        //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+        //DO pass quotes here (it's not TProcess.Params)
+        CreateHomeStartLink(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortcutName);
+      finally
+        //Ignore problems creating shortcut
+      end;
+    end;
+    {$ENDIF UNIX}
   end;
 
   Result := OperationSucceeded;
@@ -1424,4 +1440,4 @@ begin
 end;
 
 end.
-
+
