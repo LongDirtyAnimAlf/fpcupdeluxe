@@ -49,7 +49,7 @@ begin
         // Try to read entire buffer...
         readsize := BufferSize;
         decoder.Read(a, readsize);
-        // ... write out whatever part we could read
+        // ... if only part could be read, subtract how much we're short...
         Dec(readsize, decoder.short);
         outfile.Write(a, readsize);
       until decoder.status <> 0;
@@ -75,4 +75,4 @@ end;
 
 
 end.
-
+
