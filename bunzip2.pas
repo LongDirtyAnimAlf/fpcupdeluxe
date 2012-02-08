@@ -22,57 +22,69 @@ var
   readsize: cardinal;
   Status: boolean;
 begin
-  Status := False;
-  result:=false;
+  Status := True;
   if (FileExists(TargetFile)) then
   begin
     //Just get rid of it
-    SysUtils.DeleteFile(TargetFile);
-  end;
-  if (fileexists(SourceFile)) then
-  begin
-  try
-    infile.init(SourceFile, stopenread, 4096);
-    outfile.init(TargetFile, stcreate, 4096);
-    decoder.init(@infile);
-    if decoder.status <> stok then
+    if SysUtils.DeleteFile(TargetFile) then
     begin
-      ErrorLog := ErrorLog + LineEnding +
-        ('Error initializing bunzip: decoder status: ' + IntToStr(decoder.status) +
-        '; decoder error info:' + IntToStr(decoder.errorinfo));
-      status:=False;
-      result:=false;
+      ErrorLog := ErrorLog + LineEnding + 'Target file ' +
+        TargetFile + ' already existed. Deleted it.';
     end
     else
     begin
-      repeat
-        // Try to read entire buffer...
-        readsize := BufferSize;
-        decoder.Read(a, readsize);
-        // ... if only part could be read, subtract how much we're short...
-        Dec(readsize, decoder.short);
-        outfile.Write(a, readsize);
-      until decoder.status <> 0;
+      status := False;
+      //If we can't delete it, bunzip2 probably won't be able to overwrite it.
     end;
-    decoder.done;
-    infile.done;
-    outfile.done;
-    result:=true;
-  except
-    on E: Exception do
-    begin
-      ErrorLog:='bunzip2: error decompressing '+SourceFile+'. Details:'+E.ClassName+'/'+E.Message;
-      result:=false;
-    end;
-    end;
-  end
-  else
-  begin
-    ErrorLog:='bunzip2: could not find input file: '+SourceFile;
-    result:=false;
   end;
+
+  if (fileexists(SourceFile)=false) then
+  begin
+    ErrorLog := 'bunzip2: could not find input file: ' + SourceFile;
+    status := False;
+  end;
+
+  if status = True then
+  begin
+    try
+      infile.init(SourceFile, stopenread, BufferSize);
+      //size was hardcoded 4096 in original code
+      outfile.init(TargetFile, stcreate, BufferSize);
+      //size was hardcoded 4096 in original code
+      decoder.init(@infile);
+      if decoder.status <> stok then
+      begin
+        ErrorLog := ErrorLog + LineEnding +
+          'Error initializing bunzip: decoder status: ' + IntToStr(decoder.status) +
+          '; decoder error info:' + IntToStr(decoder.errorinfo);
+        status := False;
+      end
+      else
+      begin
+        repeat
+          // Try to read entire buffer...
+          readsize := BufferSize;
+          decoder.Read(a, readsize);
+          // ... if only part could be read, subtract how much we're short...
+          Dec(readsize, decoder.short);
+          outfile.Write(a, readsize);
+        until decoder.status <> 0;
+      end;
+      // got rid of status check in original code as that sometimes failed while
+      // decompression went ok
+      decoder.done;
+      infile.done;
+      outfile.done;
+      status := True;
+    except
+      on E: Exception do
+      begin
+        ErrorLog := 'bunzip2: error decompressing ' + SourceFile + '. Details:' +
+          E.ClassName + '/' + E.Message;
+        status := False;
+      end;
+    end;
+  end;
+  Result := status;
 end;
-
-
 end.
-
