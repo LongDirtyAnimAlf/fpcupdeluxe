@@ -199,6 +199,20 @@ end;
 
 var
   FInstaller: TInstaller;
+
+procedure ShowErrorHints;
+begin
+  writeln('Please check program output for details. Possible troubleshooting steps:');
+  writeln('- make sure there''s a valid SVN executable in your path.');
+  {$IFNDEF MSWINDOWS}
+  writeln('- make sure the GNU binutils (make etc), windres, subversion client  are installed');
+  writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion';);
+  //todo: how to get windres => mingw32-binutils?
+  {$ENDIF MSWINDOWS}
+  writeln('You might want to try removing all local changes in your SVN repository with:');
+  writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.LazarusDirectory);
+end;
+
 begin
   writeln('FCPUp FreePascal/Lazarus downloader/installer started.');
   writeln('This program will download the FPC and Lazarus sources');
@@ -219,24 +233,12 @@ begin
       if FInstaller.GetLazarus=false then
       begin
         writeln('Lazarus retrieval/compilation failed.');
-        writeln('Please check program output for details. Possible troubleshooting steps:');
-        writeln('- make sure there''s a valid SVN executable in your path.');
-        {$IFNDEF MSWINDOWS}
-        writeln('- make sure the GNU binutils are installed');
-        {$ENDIF MSWINDOWS}
-        writeln('You might want to try removing all local changes in your SVN repository with:');
-        writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.LazarusDirectory);
-      end;
+        ShowErrorHints;
     end
     else
     begin
       writeln('FPC retrieval/compilation failed.');
-      writeln('Please check program output for details. Possible troubleshooting steps:');
-      writeln('- make sure there''s a valid SVN executable in your path.');
-      {$IFNDEF MSWINDOWS}
-      writeln('- make sure the GNU binutils are installed');
-      {$ENDIF MSWINDOWS}
-      writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.FPCDirectory);
+      ShowErrorHints;
     end;
   finally
     FInstaller.Free;
