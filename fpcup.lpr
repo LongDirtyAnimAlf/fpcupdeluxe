@@ -115,7 +115,7 @@ begin
   FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
   FInstaller.FPCDirectory := 'c:\development\fpc';
   FInstaller.LazarusDirectory := 'c:\development\lazarus';
-  FInstaller.MakePath := 'C:\development\fpcbootstrap\';
+  FInstaller.MakeDirectory := 'C:\development\fpcbootstrap\';
   {$ENDIF MSWINDOWS}
   {$IFNDEF MSWINDOWS}
   FInstaller.BootstrapCompilerDirectory := '~/fpcbootstrap';
@@ -139,7 +139,7 @@ begin
 
   if Application.HasOption(BinutilsDir) then
   begin
-    FInstaller.MakePath:=Application.GetOptionValue(BinutilsDir);
+    FInstaller.MakeDirectory:=Application.GetOptionValue(BinutilsDir);
     {$IFNDEF MSWINDOWS}
     writeln('The '+BinutilsDir+' parameter is not necessary or supported on this system.');
     writeln('The parameter will be ignored.');
@@ -192,7 +192,7 @@ begin
   writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
   writeln('Lazarus URL:            '+FInstaller.LazarusURL);
   {$IFDEF MSWINDOWS}
-  writeln('Make/binutils path:     '+FInstaller.MakePath);
+  writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('');
 end;
