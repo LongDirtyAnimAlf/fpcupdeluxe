@@ -4,14 +4,14 @@ unit bunzip2;
 
 interface
 
-function Decompress(SourceFile, TargetFile: string; var ErrorLog: string): boolean;
+function Decompress(SourceFile, TargetFile: string; out ErrorLog: string): boolean;
 
 implementation
 
 uses
   SysUtils, objects, bzip2;
 
-function Decompress(SourceFile, TargetFile: string; var ErrorLog: string): boolean;
+function Decompress(SourceFile, TargetFile: string; out ErrorLog: string): boolean;
   // Adapted from pasbzip.pas
 const
   BufferSize = 4096;
