@@ -197,10 +197,7 @@ begin
   writeln('');
 end;
 
-var
-  FInstaller: TInstaller;
-
-procedure ShowErrorHints;
+procedure ShowErrorHints(SVNSourceDirectory: string);
 begin
   writeln('Please check program output for details. Possible troubleshooting steps:');
   writeln('- make sure there''s a valid SVN executable in your path.');
@@ -210,8 +207,11 @@ begin
   //todo: how to get windres => mingw32-binutils?
   {$ENDIF MSWINDOWS}
   writeln('You might want to try removing all local changes in your SVN repository with:');
-  writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + FInstaller.LazarusDirectory);
+  writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + SVNSourceDirectory);
 end;
+
+var
+  FInstaller: TInstaller;
 
 begin
   writeln('FCPUp FreePascal/Lazarus downloader/installer started.');
@@ -233,12 +233,13 @@ begin
       if FInstaller.GetLazarus=false then
       begin
         writeln('Lazarus retrieval/compilation failed.');
-        ShowErrorHints;
+        ShowErrorHints(FInstaller.LazarusDirectory);
+      end;
     end
     else
     begin
       writeln('FPC retrieval/compilation failed.');
-      ShowErrorHints;
+      ShowErrorHints(FInstaller.FPCDirectory);
     end;
   finally
     FInstaller.Free;

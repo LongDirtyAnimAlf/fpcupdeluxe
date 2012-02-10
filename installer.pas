@@ -129,7 +129,7 @@ implementation
 uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
-  strutils, process, FileUtil {Requires LCL}, bunzip2
+  strutils, process, FileUtil {Requires LCL}
 {$IFDEF MSWINDOWS}
   //Mostly for shortcut code
   ,windows, shlobj {for special folders}, ActiveX, ComObj

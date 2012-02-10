@@ -10,6 +10,8 @@ implementation
 
 uses
   SysUtils, objects, bzip2;
+{Note: this unit uses the bzip2 unit that uses the old objects.
+It should really be rewritten to take advantage of the bzip2stream unit that uses classes.}
 
 function Decompress(SourceFile, TargetFile: string; out ErrorLog: string): boolean;
   // Adapted from pasbzip.pas
