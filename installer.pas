@@ -145,10 +145,10 @@ begin
   {DEBUG conditional symbol is defined using
   Project Options/Other/Custom Options using -dDEBUG
   }
-  {$IFDEF DEBUG}
-  writeln('Debug: ' + Message);
+  //$IFDEF DEBUG //ignore for now
+  writeln('Info: ' + Message); //we misuse this for info output
   sleep(200); //hopefully allow output to be written without interfering with other output
-  {$ENDIF DEBUG}
+  //$ENDIF DEBUG
 end;
 
 {$IFDEF UNIX}
@@ -1550,4 +1550,4 @@ begin
 end;
 
 end.
-
+
