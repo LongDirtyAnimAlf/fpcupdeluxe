@@ -316,11 +316,12 @@ end;
 function TInstaller.DownloadBootstrapCompiler: boolean;
   // Should be done after we have unzip executable in FMakePath
 var
+  ArchiveDir: string;
   BootstrapArchive: string;
+  ExtractedCompiler: string;
   Log: string;
   OperationSucceeded: boolean;
   Params: TStringList;
-  ArchiveDir: string;
 begin
   OperationSucceeded:=true;
   if OperationSucceeded then
@@ -374,7 +375,6 @@ begin
       Params.Add('-d');
       Params.Add('-f');
       Params.Add('-q');
-      Params.Add(ArchiveDir);
       Params.Add(BootstrapArchive); // zip/archive file
       if Run(FExtractor, Params) <> 0 then
       begin
@@ -383,17 +383,18 @@ begin
       end
       else
       begin
+        ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
         OperationSucceeded := True; // Spelling it out can't hurt sometimes
       end;
     finally
       Params.Free;
     end;
-    // Move compiler to proper directory
+    // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
-      //todo check/fix this, bz2 has no concept of filenames
-      debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
-      renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
+      debugln('Going to rename/move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
+      sysutils.DeleteFile(BootstrapCompiler); //ignore errors
+      renamefile(ExtractedCompiler, BootstrapCompiler);
     end;
     if OperationSucceeded then
     begin
@@ -425,12 +426,12 @@ begin
       Params.Free;
     end;
     todo: untar stuff //todo: untar stuff
-    // Move compiler to proper directory
+    // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
       //todo check/fix this, bz2 has no concept of filenames
       debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
-      renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
+      renamefile(BootstrapArchive+'.out', BootstrapCompiler);
     end;
     if OperationSucceeded then
     begin
@@ -717,7 +718,7 @@ begin
         // See unzip.h for return codes.
         Params:=TStringList.Create;
         try
-          // Possibly redundant as we now use internal bunzip2 code, but can't hurt
+          // Possibly redundant if using internal bunzip2 code, but can't hurt
           if AnsiPos('unzip', lowercase(FExtractor))=1 then Params.Add('-v');
           if AnsiPos('bzip2', lowercase(FExtractor))=1 then Params.Add('--version');
           if AnsiPos('bunzip2', lowercase(FExtractor))=1 then Params.Add('--version');
