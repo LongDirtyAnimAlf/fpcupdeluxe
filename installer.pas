@@ -201,7 +201,7 @@ end;
 {$IFDEF UNIX}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
-  debugln('todo: implement createdesktopshortcut.');
+  debugln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname);
 end;
 {$ENDIF UNIX}
 
@@ -367,14 +367,33 @@ begin
     end;
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
-    if OperationSucceeded then
+    //Extract bz2, overwriting without prompting
+    Params:=TStringList.Create;
+    try
+      //Don't call params with quotes
+      Params.Add('-d');
+      Params.Add('-f');
+      Params.Add('-q');
+      Params.Add(ArchiveDir);
+      Params.Add(BootstrapArchive); // zip/archive file
+      if Run(FExtractor, Params) <> 0 then
+      begin
+        debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      end;
+    finally
+      Params.Free;
+    end;
+    // Move compiler to proper directory
+    if OperationSucceeded = True then
     begin
-      //Use internal bunzip2; reminder: external bunzip2 would need -dfq params
-      Log:='';
-      //Internal Bunzip2 returns false even when it works?!?! So ignore it.
-      Bunzip2.Decompress(BootstrapArchive, BootstrapCompiler, Log);
-      if Log<>'' then debugln('DownloadBootstrapCompiler: bunzip2 log:'+Log); //output debug output
-      Log:=EmptyStr;
+      //todo check/fix this, bz2 has no concept of filenames
+      debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
+      renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
     end;
     if OperationSucceeded then
     begin
@@ -384,20 +403,40 @@ begin
     end;
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
-    if OperationSucceeded then
-    begin
-      //Use internal bunzip2; reminder: external bunzip2 would need -dfq params
-      Log:='';
-      //Internal Bunzip2 returns false even when it works?!?! So ignore it.
-      Bunzip2.Decompress(BootstrapArchive, BootstrapCompiler, Log);
-      if Log<>'' then debugln('DownloadBootstrapCompiler: bunzip2 log:'+Log); //output debug output
-      Log:=EmptyStr;
+    //Extract bz2, overwriting without prompting
+    Params:=TStringList.Create;
+    try
+      //Don't call params with quotes
+      Params.Add('-d');
+      Params.Add('-f');
+      Params.Add('-q');
+      Params.Add(ArchiveDir);
+      Params.Add(BootstrapArchive); // zip/archive file
+      if Run(FExtractor, Params) <> 0 then
+      begin
+        debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      end;
+    finally
+      Params.Free;
     end;
-    todo: untar it as well!
+    todo: untar stuff //todo: untar stuff
+    // Move compiler to proper directory
+    if OperationSucceeded = True then
+    begin
+      //todo check/fix this, bz2 has no concept of filenames
+      debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
+      renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
+    end;
     if OperationSucceeded then
     begin
       //Make executable
       OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
+      if OperationSucceeded=false then debugln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
     end;
     {$ENDIF DARWIN}
   end;
@@ -596,10 +635,10 @@ begin
   FExtractor := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + FExecutableExtension;
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
-  FExtractor:=''; //We can use internal extractor
+  FExtractor:='bunzip2';
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
-  FExtractor:='tar'; //We can use internal extractor for bzip2 but need to untar it, too
+  FExtractor:='bunzip2';
   {$ENDIF DARIN}
 
   {$IFDEF MSWINDOWS}
@@ -1441,7 +1480,6 @@ begin
   FBootstrapCompilerDirectory := SysUtils.GetTempDir;
 
   //Bootstrap compiler:
-  //BootstrapURL='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/i386-win32-ppc386.zip';
   {$IFDEF MSWINDOWS}
   // On Windows, we can always compile 32 bit with a 64 bit cross compiler, regardless
   // of actual architecture (x86 or x64)
@@ -1508,4 +1546,4 @@ begin
 end;
 
 end.
-
+

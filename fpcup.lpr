@@ -121,7 +121,7 @@ begin
   FInstaller.BootstrapCompilerDirectory := '~/fpcbootstrap';
   FInstaller.FPCDirectory := '~/fpc';
   FInstaller.LazarusDirectory := '~/lazarus';
-  FInstaller.Makepath:='';
+  FInstaller.MakeDirectory:='';
   {$ENDIF MSWINDOWS}
 
   ErrorMessage := Application.CheckOptions(
@@ -143,7 +143,7 @@ begin
     {$IFNDEF MSWINDOWS}
     writeln('The '+BinutilsDir+' parameter is not necessary or supported on this system.');
     writeln('The parameter will be ignored.');
-    FInstaller.Makepath:='';
+    FInstaller.MakeDirectory:='';
     {$ENDIF MSWINDOWS}
   end;
 
@@ -203,7 +203,7 @@ begin
   writeln('- make sure there''s a valid SVN executable in your path.');
   {$IFNDEF MSWINDOWS}
   writeln('- make sure the GNU binutils (make etc), windres, subversion client  are installed');
-  writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion';);
+  writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion');
   //todo: how to get windres => mingw32-binutils?
   {$ENDIF MSWINDOWS}
   writeln('You might want to try removing all local changes in your SVN repository with:');
@@ -246,4 +246,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
