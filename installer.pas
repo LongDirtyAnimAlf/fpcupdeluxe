@@ -394,7 +394,9 @@ begin
     begin
       debugln('Going to rename/move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
       sysutils.DeleteFile(BootstrapCompiler); //ignore errors
-      renamefile(ExtractedCompiler, BootstrapCompiler);
+      // We might be moving files across partitions so we cannot use renamefile
+      OperationSucceeded:=FileUtil.CopyFile(ExtractedCompiler, BootstrapCompiler);
+      sysutils.DeleteFile(ExtractedCompiler);
     end;
     if OperationSucceeded then
     begin
@@ -404,6 +406,7 @@ begin
     end;
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
+    todo: copy over newest linux code //todo: copy over newest linux code
     //Extract bz2, overwriting without prompting
     Params:=TStringList.Create;
     try
