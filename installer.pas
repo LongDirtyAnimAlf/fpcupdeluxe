@@ -1094,8 +1094,10 @@ var
   Executable: string;
   FileCounter:integer;
   FPCCfg: string;
+  FPCScript: string;
   OperationSucceeded: boolean;
   Params: TstringList;
+  Script: text;
 begin
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
@@ -1157,13 +1159,16 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
       Params.Add('FPC=' + BootstrapCompiler+'');
       {$IFDEF MSWINDOWS}
       Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
       {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+      {$IFDEF UNIX}
+      // Install units below FPCDirectory instead of <somewhere>/lib/fpc/$fpcversion/units/$fpctarget
+      Params.Add('INSTALL_UNITDIR='+IncludeTrailingPathDelimiter(FPCDirectory)+'units'+DirectorySeparator+ExcludeTrailingPathDelimiter(FFPCPlatform));
+      {$ENDIF UNIX}
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('install');
@@ -1291,6 +1296,38 @@ begin
       infoln('fpc.cfg already exists; leaving it alone.');
     end;
   end;
+
+  {$IFDEF UNIX}
+  if OperationSucceeded then
+  begin
+    // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+    // We don't really care if this fails, so don't change OperationSucceeded
+    BinPath := ExtractFilePath(FInstalledCompiler);
+    FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
+    if FileExists(FPCScript) = False then
+    begin
+      AssignFile(Script,FPCScript);
+      Rewrite(Script);
+      writeln(Script,'#!/bin/sh');
+      writeln(Script,'# This script starts the fpc compiler installed by fpcup');
+      writeln(Script,'# and ignores any system-wide fpc.cfg files');
+      write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
+      {$IFDEF CPU386}
+      write(Script,'ppc386');
+      {$ELSE} // Assume x64 (could also be PowerPC, ARM I suppose)
+      write(Script,'ppcx64');
+      {$ENDIF CPU386}
+      writeln(Script,' -n @',IncludeTrailingPathDelimiter(BinPath),'fpc.cfg $*');
+      CloseFile(Script);
+      FPChmod(FPCScript,&700);
+      infoln('Created launcher script for fpc:'+FPCScript);
+    end
+    else
+    begin
+      infoln('fpc.sh launcher script already exists ('+FPCScript+'); leaving it alone.');
+    end;
+  end;
+  {$ENDIF UNIX}
   Result := OperationSucceeded;
 end;
 
