@@ -1430,7 +1430,7 @@ begin
         {$ENDIF MSWINDOWS}
         {$IFDEF UNIX}
         //todo: fix this for more variants?!?
-        LazarusConfig.DebuggerFilename:=which(GDB); //assume in path
+        LazarusConfig.DebuggerFilename:=which('gdb'); //assume in path
         LazarusConfig.MakeFilename:='make'+FExecutableExtension; //assume in path
         {$ENDIF UNIX}
         // Source dir in stock Lazarus on windows is something like
