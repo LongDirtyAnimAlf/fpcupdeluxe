@@ -73,7 +73,6 @@ begin
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
-  writeln(' fpcOPT=options        options passed on to the fpc make as OPT=options.');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
   writeln('                       On Windows: a desktop shortcut.');
   writeln('                       On other systems: a shell file in your home directory.');
@@ -82,7 +81,6 @@ begin
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
-  writeln(' lazOPT=options        options passed on to the lazarus make as OPT=options.');
   writeln(' primary-config-path=<path>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
@@ -99,12 +97,10 @@ const
   FPCBootstrapDir='fpcbootstrapdir';
   FPCDir='fpcdir';
   FPCURL='fpcURL';
-  FPCOPT='fpcOPT';
   Help='help';
   LazDir='lazdir';
   LazLinkName='lazlinkname';
   LazURL='lazURL';
-  LazOPT='lazOPT';
   PrimaryConfigPath='primary-config-path';
 var
   ErrorMessage: string;
@@ -113,11 +109,9 @@ begin
 
   FInstaller.ShortCutName:='Lazarus (trunk)';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
-  FInstaller.FPCOPT:='';
   FInstaller.LazarusPrimaryConfigPath:=''; //Let installer figure out default value
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
   //svn2 seems to lag behind a lot, so don't use that.
-  FInstaller.LazarusOPT:='';
   {$IFDEF MSWINDOWS}
   FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
   FInstaller.FPCDirectory := 'c:\development\fpc';
@@ -132,8 +126,8 @@ begin
   {$ENDIF MSWINDOWS}
 
   ErrorMessage := Application.CheckOptions(
-    'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
-    Help+' '+LazDir+': '+LazOPT+': '+
+    'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
+    Help+' '+LazDir+': '+
     LazLinkName+': '+LazURL+':'+PrimaryConfigPath+':');
   if Length(ErrorMessage) > 0 then
   begin
@@ -164,11 +158,6 @@ begin
     FInstaller.FPCDirectory:=Application.GetOptionValue(FPCDir);
   end;
 
-  if Application.HasOption(FPCOPT) then
-  begin
-    FInstaller.FPCOPT:=Application.GetOptionValue(FPCOPT)
-  end;
-
   if Application.HasOption(FPCURL) then
   begin
     FInstaller.FPCURL:=Application.GetOptionValue(FPCURL);
@@ -191,11 +180,6 @@ begin
     FInstaller.ShortCutName:=Application.GetOptionValue(LazLinkName);
   end;
 
-  if Application.HasOption(LazOPT) then
-  begin
-    FInstaller.LazarusOPT:=Application.GetOptionValue(LazOPT)
-  end;
-
   if Application.HasOption(LazURL) then
   begin
     FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL);
@@ -215,13 +199,11 @@ begin
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
   writeln('Shortcut name:          '+FInstaller.ShortCutName);
   writeln('FPC URL:                '+FInstaller.FPCURL);
-  writeln('FPC options:            '+FInstaller.FPCOPT);
   writeln('FPC directory:          '+FInstaller.FPCDirectory);
   writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
   writeln('Lazarus primary config path:');
   writeln('(Lazarus settings path) '+FInstaller.LazarusPrimaryConfigPath);
   writeln('Lazarus URL:            '+FInstaller.LazarusURL);
-  writeln('Lazarus options:        '+FInstaller.LazarusOPT);
   {$IFDEF MSWINDOWS}
   writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
   {$ENDIF MSWINDOWS}
@@ -277,4 +259,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+

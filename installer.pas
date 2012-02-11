@@ -49,8 +49,6 @@ type
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string; //Platform specific compiler name (e.g. ppc386.exe for Windows)
-    FFPCOPT: string;
-    FLazarusOPT: string;
     FShortcutName: string; //Name for shortcut/shell script pointing to newly installed Lazarus
     FExecutableExtension: string; //.exe on Windows
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
@@ -92,10 +90,8 @@ type
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetCompilerToInstalledCompiler;
     procedure SetFPCDirectory(Directory: string);
-    procedure SetFPCOPT(AValue: string);
     procedure SetFPCUrl(AValue: string);
     procedure SetLazarusDirectory(Directory: string);
-    procedure SetLazarusOPT(AValue: string);
     procedure SetLazarusUrl(AValue: string);
     procedure SetMakePath(AValue: string);
     {$IFDEF UNIX}
@@ -115,7 +111,6 @@ type
     //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
-    property FPCOPT: string read FFPCOPT write SetFPCOPT;
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
@@ -124,7 +119,6 @@ type
     //The directory where the configuration for this Lazarus instance must be stored.
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
     //SVN URL for Lazarus
-    property LazarusOPT:string read FLazarusOPT write SetLazarusOPT;
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     constructor Create;
@@ -907,7 +901,6 @@ begin
     else
     begin
       result:=Output;
-      while ord(result[length(result)])<$20 do delete(result,length(result),1); //remove trailing LF
     end;
   finally
     Params.Free;
@@ -1068,12 +1061,6 @@ begin
   FUpdater.FPCDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
-procedure TInstaller.SetFPCOPT(AValue: string);
-begin
-  if FFPCOPT=AValue then Exit;
-  FFPCOPT:=AValue;
-end;
-
 procedure TInstaller.SetFPCUrl(AValue: string);
 begin
   FUpdater.FPCURL := AValue;
@@ -1084,11 +1071,6 @@ begin
   FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
-procedure TInstaller.SetLazarusOPT(AValue: string);
-begin
-  if FLazarusOPT=AValue then Exit;
-  FLazarusOPT:=AValue;
-  end;
 procedure TInstaller.SetLazarusPrimaryConfigPath(AValue: string);
 const
   DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
@@ -1141,7 +1123,7 @@ var
   FPCScript: string;
   OperationSucceeded: boolean;
   Params: TstringList;
-  Script:text;
+  Script: text;
 begin
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
@@ -1188,8 +1170,6 @@ begin
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      if FFPCOPT<>'' then
-        Params.Add('OPT='+FFPCOPT);
       Params.Add('all');
       infoln('Running make for FPC:');
       if Run(Executable, params) <> 0 then
@@ -1277,8 +1257,6 @@ begin
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('OS_TARGET=win64');
       Params.Add('CPU_TARGET=x86_64');
-      if FFPCOPT<>'' then
-        Params.Add('OPT='+FFPCOPT);
       Params.Add('all');
       if Run(Executable, Params) = 0 then
       begin
@@ -1385,7 +1363,7 @@ function Tinstaller.GetLazarus: boolean;
 // GetFPC would install it ;)
 // Assumed: binutils in fpc dir or in path
 var
-  Executable,s: string;
+  Executable: string;
   LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
   Params: TStringList;
@@ -1482,8 +1460,6 @@ begin
       Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      if LazarusOPT<>'' then
-        Params.Add('OPT='+LazarusOPT);
       Params.Add('all');
       infoln('Lazarus: running make all:');
       if (Run(Executable, Params)) <> 0 then
@@ -1509,11 +1485,7 @@ begin
         // FInstalledCompiler will be often something like c:\bla\ppc386.exe, e.g.
         // the platform specific compiler. In order to be able to cross compile
         // we'd rather use fpc
-        {$IFDEF UNIX}
-        LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc.sh';
-        {$ELSE}
         LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
-        {$ENDIF UNIX}
         LazarusConfig.LazarusDirectory:=LazarusDirectory;
         {$IFDEF MSWINDOWS}
         LazarusConfig.DebuggerFilename:=FMakeDir+'gdb'+FExecutableExtension;
@@ -1522,7 +1494,7 @@ begin
         {$IFDEF UNIX}
         //todo: fix this for more variants?!?
         LazarusConfig.DebuggerFilename:=which('gdb'); //assume in path
-        LazarusConfig.MakeFilename:=which('make'); //assume in path
+        LazarusConfig.MakeFilename:='make'+FExecutableExtension; //assume in path
         {$ENDIF UNIX}
         // Source dir in stock Lazarus on windows is something like
         // $(LazarusDir)fpc\$(FPCVer)\source\
@@ -1697,4 +1669,4 @@ begin
 end;
 
 end.
-
+
