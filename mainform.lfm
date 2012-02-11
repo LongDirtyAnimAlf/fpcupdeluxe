@@ -1,0 +1,70 @@
+object Form1: TForm1
+  Left = 287
+  Height = 570
+  Top = 161
+  Width = 740
+  Caption = 'fpcup GUI'
+  ClientHeight = 570
+  ClientWidth = 740
+  LCLVersion = '0.9.31'
+  object FPC: TGroupBox
+    Left = 16
+    Height = 160
+    Top = 48
+    Width = 560
+    Caption = 'FPC'
+    ClientHeight = 142
+    ClientWidth = 556
+    TabOrder = 0
+    object FPCDirectory: TDirectoryEdit
+      Left = 102
+      Height = 23
+      Top = 48
+      Width = 80
+      ShowHidden = False
+      ButtonWidth = 23
+      NumGlyphs = 0
+      MaxLength = 0
+      TabOrder = 0
+    end
+    object Label1: TLabel
+      Left = 16
+      Height = 16
+      Top = 48
+      Width = 72
+      Caption = 'FPC directory'
+      ParentColor = False
+    end
+    object Label2: TLabel
+      Left = 14
+      Height = 16
+      Top = 18
+      Width = 46
+      Caption = 'FPC URL'
+      ParentColor = False
+    end
+    object FPCURL: TEdit
+      Left = 102
+      Height = 23
+      Top = 8
+      Width = 80
+      TabOrder = 1
+      Text = 'Edit1'
+    end
+  end
+  object UpdateButton: TButton
+    Left = 616
+    Height = 25
+    Top = 248
+    Width = 75
+    Caption = 'Update'
+    TabOrder = 1
+  end
+  object TabControl1: TTabControl
+    Left = 72
+    Height = 150
+    Top = 288
+    Width = 200
+    TabOrder = 2
+  end
+end

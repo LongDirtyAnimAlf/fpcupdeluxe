@@ -415,7 +415,7 @@ begin
       //todo: test if this works
       Params.Add('-x');
       Params.Add('-v');
-      Params.Add('-z');
+      Params.Add('-j');
       Params.Add('-f');
       Params.Add(ArchiveDir);
       Params.Add(BootstrapArchive); // zip/archive file
@@ -1599,4 +1599,4 @@ begin
 end;
 
 end.
-
+
