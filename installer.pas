@@ -79,6 +79,7 @@ type
     //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
     function GetFPCUrl: string;
+    function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
     function GetMakePath: string;
@@ -884,6 +885,27 @@ begin
   Result := BootstrapCompilerDirectory + CompilerName;
 end;
 
+function TInstaller.Which(Executable: string): string;
+var
+  Params: TStringList;
+  Output: string;
+begin
+  Params:=TStringList.Create;
+  try
+    Params.Add(Executable);
+    if RunOutput('which', Params, Output)=0 then
+    begin
+      result:=''; //command failed
+    end
+    else
+    begin
+      result:=Output;
+    end;
+  finally
+    Params.Free;
+  end;
+end;
+
 function Tinstaller.GetFpcDirectory: string;
 begin
   Result := FUpdater.FPCDirectory;
@@ -1408,7 +1430,7 @@ begin
         {$ENDIF MSWINDOWS}
         {$IFDEF UNIX}
         //todo: fix this for more variants?!?
-        LazarusConfig.DebuggerFilename:='gdb'+FExecutableExtension; //assume in path
+        LazarusConfig.DebuggerFilename:=which(GDB); //assume in path
         LazarusConfig.MakeFilename:='make'+FExecutableExtension; //assume in path
         {$ENDIF UNIX}
         // Source dir in stock Lazarus on windows is something like

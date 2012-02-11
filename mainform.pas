@@ -13,7 +13,9 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    TabControl1: TTabControl;
+    OutputTabs: TPageControl;
+    OutputTab: TTabSheet;
+    CommandTab: TTabSheet;
     UpdateButton: TButton;
     FPCDirectory: TDirectoryEdit;
     Label2: TLabel;
@@ -30,6 +32,7 @@ var
   Form1: TForm1;
 
 implementation
+uses installer;
 
 {$R *.lfm}
 

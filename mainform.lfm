@@ -60,11 +60,19 @@ object Form1: TForm1
     Caption = 'Update'
     TabOrder = 1
   end
-  object TabControl1: TTabControl
-    Left = 72
-    Height = 150
-    Top = 288
-    Width = 200
+  object OutputTabs: TPageControl
+    Left = 24
+    Height = 200
+    Top = 344
+    Width = 667
+    ActivePage = CommandTab
+    TabIndex = 0
     TabOrder = 2
+    object CommandTab: TTabSheet
+      Caption = 'Command'
+    end
+    object OutputTab: TTabSheet
+      Caption = 'Output'
+    end
   end
 end
