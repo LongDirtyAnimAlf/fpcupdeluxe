@@ -81,11 +81,18 @@ begin
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
+  writeln(' primary-config-path=<path>');
+  writeln('                       Analogous to Lazarus primary-config-path parameter.');
+  writeln('                       Determines where fpcup will create or use as primary');
+  writeln('                       configuration path for the Lazarus it installs/updates.');
+  writeln('                       Default: empty; then a OS dependent configuration');
+  writeln('                       directory is used.');
   writeln('');
 end;
 
 procedure CheckOptions(FInstaller: TInstaller);
 const
+  //Parameter names:
   BinutilsDir='binutilsdir';
   FPCBootstrapDir='fpcbootstrapdir';
   FPCDir='fpcdir';
@@ -94,6 +101,7 @@ const
   LazDir='lazdir';
   LazLinkName='lazlinkname';
   LazURL='lazURL';
+  PrimaryConfigPath='primary-config-path';
 var
   ErrorMessage: string;
 begin
@@ -101,8 +109,9 @@ begin
 
   FInstaller.ShortCutName:='Lazarus (trunk)';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
+  FInstaller.LazarusPrimaryConfigPath:=''; //Let installer figure out default value
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
-  //svn2 seems to lag behind a lot.
+  //svn2 seems to lag behind a lot, so don't use that.
   {$IFDEF MSWINDOWS}
   FInstaller.BootstrapCompilerDirectory := 'c:\development\fpcbootstrap\';
   FInstaller.FPCDirectory := 'c:\development\fpc';
@@ -119,7 +128,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+
     Help+' '+LazDir+': '+
-    LazLinkName+': '+LazURL+':');
+    LazLinkName+': '+LazURL+':'+PrimaryConfigPath+':');
   if Length(ErrorMessage) > 0 then
   begin
     writeln('Error: wrong command line options given:');
@@ -141,17 +150,17 @@ begin
 
   if Application.HasOption(FPCBootstrapDir) then
   begin
-    FInstaller.BootstrapCompilerDirectory:=Application.GetOptionValue(FPCBootstrapDir)
+    FInstaller.BootstrapCompilerDirectory:=Application.GetOptionValue(FPCBootstrapDir);
   end;
 
   if Application.HasOption(FPCDir) then
   begin
-    FInstaller.FPCDirectory:=Application.GetOptionValue(FPCDir)
+    FInstaller.FPCDirectory:=Application.GetOptionValue(FPCDir);
   end;
 
   if Application.HasOption(FPCURL) then
   begin
-    FInstaller.FPCURL:=Application.GetOptionValue(FPCURL)
+    FInstaller.FPCURL:=Application.GetOptionValue(FPCURL);
   end;
 
   if Application.HasOption('h', Help) then
@@ -163,18 +172,28 @@ begin
 
   if Application.HasOption(LazDir) then
   begin
-    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazDir)
+    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazDir);
   end;
 
   if Application.HasOption(LazLinkName) then
   begin
-    FInstaller.ShortCutName:=Application.GetOptionValue(LazLinkName)
+    FInstaller.ShortCutName:=Application.GetOptionValue(LazLinkName);
   end;
 
   if Application.HasOption(LazURL) then
   begin
-    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL)
+    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL);
   end;
+
+  if Application.HasOption(PrimaryConfigPath) then
+  begin
+    // Only change if there's actually a valid value
+    if (Application.GetOptionValue(PrimaryConfigPath)<>'') then
+    begin
+      FInstaller.LazarusPrimaryConfigPath:=Application.GetOptionValue(PrimaryConfigPath);
+    end;
+  end;
+
   writeln('');
   writeln('Options:');
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
@@ -182,6 +201,8 @@ begin
   writeln('FPC URL:                '+FInstaller.FPCURL);
   writeln('FPC directory:          '+FInstaller.FPCDirectory);
   writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
+  writeln('Lazarus primary config path:');
+  writeln('(Lazarus settings path) '+FInstaller.LazarusPrimaryConfigPath);
   writeln('Lazarus URL:            '+FInstaller.LazarusURL);
   {$IFDEF MSWINDOWS}
   writeln('Make/binutils path:     '+FInstaller.MakeDirectory);

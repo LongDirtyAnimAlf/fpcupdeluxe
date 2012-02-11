@@ -79,6 +79,7 @@ type
     //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
     function GetFPCUrl: string;
+    procedure SetLazarusPrimaryConfigPath(AValue: string);
     function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
@@ -114,7 +115,7 @@ type
     function GetLazarus: boolean; //Get/update Lazarus
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string
-      read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
+      read FLazarusPrimaryConfigPath write SetLazarusPrimaryConfigPath;
     //The directory where the configuration for this Lazarus instance must be stored.
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
     //SVN URL for Lazarus
@@ -1070,6 +1071,31 @@ begin
   FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
+procedure TInstaller.SetLazarusPrimaryConfigPath(AValue: string);
+const
+  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
+var
+  AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
+begin
+  //Directory where Lazarus installation config will end up (primary config path)
+  if AValue=EmptyStr then
+  begin
+    {$IFDEF MSWINDOWS}
+    // Somewhere in local appdata special folder
+    AppDataPath := '';
+    SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
+    FLazarusPrimaryConfigPath := IncludeTrailingPathDelimiter(AppDataPath)+DefaultPCPSubdir;
+    {$ELSE}
+    //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+    LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+    {$ENDIF MSWINDOWS}
+  end
+  else
+  begin
+    FLazarusPrimaryConfigPath:=AValue;
+  end;
+end;
+
 procedure TInstaller.SetLazarusUrl(AValue: string);
 begin
   FUpdater.LazarusURL := AValue;
@@ -1581,10 +1607,6 @@ begin
 end;
 
 constructor Tinstaller.Create;
-const
-  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
-var
-  AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
 begin
   // We'll set the bootstrap compiler to a file in the temp dir.
   // This won't exist so the CheckAndGetNeededExecutables code will download it for us.
@@ -1633,20 +1655,9 @@ begin
   CreateBinutilsList;
 
   FInstalledCompiler := '';
-  FLazarusPrimaryConfigPath := '';
   FSVNDirectory := '';
   FUpdater := TUpdater.Create;
-
-  //Directory where Lazarus installation config will end up (primary config path)
-  {$IFDEF MSWINDOWS}
-  // Somewhere in local appdata special folder
-  AppDataPath := '';
-  SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
-  LazarusPrimaryConfigPath := AppDataPath + DirectorySeparator + DefaultPCPSubdir;
-  {$ELSE}
-  //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
-  LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
-  {$ENDIF MSWINDOWS}
+  SetLazarusPrimaryConfigPath(''); //Let property set up platform-dependent default
   SetMakePath('');
 end;
 
