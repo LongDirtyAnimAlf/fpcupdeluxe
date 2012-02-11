@@ -203,7 +203,7 @@ end;
 {$IFDEF UNIX}
 procedure TInstaller.CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
-  debugln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname);
+  infoln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname);
 end;
 {$ENDIF UNIX}
 
@@ -380,7 +380,7 @@ begin
       Params.Add(BootstrapArchive); // zip/archive file
       if Run(FBunzip2, Params) <> 0 then
       begin
-        debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+        infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
       end
       else
@@ -394,7 +394,7 @@ begin
     // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
-      debugln('Going to rename/move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
+      infoln('Going to rename/move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
       sysutils.DeleteFile(BootstrapCompiler); //ignore errors
       // We might be moving files across partitions so we cannot use renamefile
       OperationSucceeded:=FileUtil.CopyFile(ExtractedCompiler, BootstrapCompiler);
@@ -404,7 +404,7 @@ begin
     begin
       //Make executable
       OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
-      if OperationSucceeded=false then debugln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
+      if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
     end;
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
@@ -421,7 +421,7 @@ begin
       Params.Add(BootstrapArchive); // zip/archive file
       if Run(FTar, Params) <> 0 then
       begin
-        debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+        infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
       end
       else
@@ -437,7 +437,7 @@ begin
       //todo check/fix this, should move an entire directory
       Params:=TStringList.Create;
       try
-        debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
+        infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
         Params.Add('ppcuniversalorwhatever');
         Params.Add('another one');
         for Counter:=0 to Params.Count-1 do
@@ -720,7 +720,7 @@ begin
       {$ELSE}
       if FUpdater.SVNExecutable='' then
       begin
-        debugln('Error: could not find SVN executable. Please make sure it is installed.');
+        infoln('Error: could not find SVN executable. Please make sure it is installed.');
         OperationSucceeded:=false;
       end;
       {$ENDIF}
@@ -1506,7 +1506,7 @@ begin
     {$IFDEF UNIX}
     if ShortCutName<>EmptyStr then
     begin
-      debugln('Lazarus: creating shortcut in your home directory');
+      infoln('Lazarus: creating shortcut in your home directory');
       try
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //DO pass quotes here (it's not TProcess.Params)
@@ -1599,4 +1599,4 @@ begin
 end;
 
 end.
-
+
