@@ -1284,7 +1284,7 @@ begin
     // Make crosscompiler using new compiler- todo: check out what cross compilers we can install on Linux/OSX
     // Note: consider this as an optional item, so don't fail the function if this breaks.
     Executable := FMake;
-    infoln('Running Make all (crosscompiler):');
+    infoln('Running Make all (FPC crosscompiler):');
     Params:=TStringList.Create;
     try
       //Don't call parameters with quotes
@@ -1306,7 +1306,7 @@ begin
         // make all and make crossinstall perhaps equivalent to
         // make all install CROSSCOMPILE=1??? todo: find out
         Executable := FMake;
-        infoln('Running Make crossinstall:');
+        infoln('Running Make crossinstall for FPC:');
         // Params already assigned
         Params.Clear;
         Params.Add('FPC='+FInstalledCompiler+'');
@@ -1630,7 +1630,9 @@ begin
       try
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //DO pass quotes here (it's not TProcess.Params)
+        // To installed lazarus
         CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortCutName);
+        // To fpcup itself, with all options as passed when invoking it:
         CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
       finally
         //Ignore problems creating shortcut
@@ -1719,4 +1721,4 @@ begin
 end;
 
 end.
-
+

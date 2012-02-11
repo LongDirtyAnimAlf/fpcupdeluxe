@@ -74,27 +74,27 @@ begin
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln(' fpcOPT=options        options passed on to the fpc make as OPT=options.');
+  writeln(' fpcuplinkname=<name>  Name of the shortcut to the fpcup script.');
+  writeln('                       On Windows: a desktop shortcut.');
+  writeln('                       On other systems: a shell script in your home directory.');
+  writeln('                       If not specified, no shortcut will be produced.');
+  writeln('                       If empty specified, the shortcut will be ');
+  writeln('                       Fpcup_update.');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
   writeln('                       On Windows: a desktop shortcut.');
-  writeln('                       On other systems: a shell file in your home directory.');
+  writeln('                       On other systems: a shell script in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
-  writeln('                       Default: Lazarus (trunk)');
+  writeln('                       Default: Lazarus_trunk');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
   writeln(' lazOPT=options        options passed on to the lazarus make as OPT=options.');
-  writeln(' primary-config-path=<path>');
+  writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
   writeln('                       directory is used.');
-  writeln(' fpcuplinkname=<name>  Name of the shortcut to the fpcup script.');
-  writeln('                       On Windows: a desktop shortcut.');
-  writeln('                       On other systems: a shell file in your home directory.');
-  writeln('                       If not specified, no shortcut will be produced.');
-  writeln('                       If empty specified, the shortcut will be ');
-  writeln('                       lazlinkname(Update).');
   writeln('');
 end;
 
@@ -118,9 +118,8 @@ var
   i:integer;
   alloptions,fpcuplink:string;
 begin
-// Default values
-
-  FInstaller.ShortCutName:='Lazarus (trunk)';
+  // Default values
+  FInstaller.ShortCutName:='Lazarus_trunk';
   //don't initialise ShortCutNameFpcup !!!
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
   FInstaller.FPCOPT:='';
@@ -185,6 +184,20 @@ begin
     alloptions:=alloptions+'--'+FPCOPT+'="'+FInstaller.FPCOPT+'" ';
   end;
 
+  fpcuplink:='';
+  if Application.HasOption(FpcupLinkName) then
+  begin
+    fpcuplink:=Application.GetOptionValue(FpcupLinkName);
+    alloptions:=alloptions+'--'+FpcupLinkName+'="'+fpcuplink+'" ';
+    FInstaller.AllOptions:=alloptions;
+    if fpcuplink='' then
+      if FInstaller.ShortCutName='' then
+        fpcuplink:='fpcup_update'
+      else
+        fpcuplink:=FInstaller.ShortCutName+'_update';
+    FInstaller.ShortCutNameFpcup:=fpcuplink;
+  end;
+
   if Application.HasOption(FPCURL) then
   begin
     FInstaller.FPCURL:=Application.GetOptionValue(FPCURL);
@@ -232,24 +245,10 @@ begin
     alloptions:=alloptions+'--'+PrimaryConfigPath+'="'+Application.GetOptionValue(PrimaryConfigPath)+'" ';
   end;
 
-  fpcuplink:='';
-  if Application.HasOption(FpcupLinkName) then
-  begin
-    fpcuplink:=Application.GetOptionValue(FpcupLinkName);
-    alloptions:=alloptions+'--'+FpcupLinkName+'="'+fpcuplink+'" ';
-    FInstaller.AllOptions:=alloptions;
-    if fpcuplink='' then
-      if FInstaller.ShortCutName='' then
-        fpcuplink:='fpcup'
-      else
-        fpcuplink:=FInstaller.ShortCutName+'(Update)';
-    FInstaller.ShortCutNameFpcup:=fpcuplink;
-  end;
-
   writeln('');
   writeln('Options:');
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
-  writeln('Shortcut name:          '+FInstaller.ShortCutName);
+  writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
   if fpcuplink<>'' then
     writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
   writeln('FPC URL:                '+FInstaller.FPCURL);
@@ -316,4 +315,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
