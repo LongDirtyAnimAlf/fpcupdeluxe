@@ -45,6 +45,7 @@ type
   TInstaller = class(TObject)
   private
     FBinUtils: TStringlist; //binutils such as make.exe, as.exe, needed for compilation
+    FBunzip2: string; //Location or name of bunzip2 executable
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerFTP: string;
     FCompilerName: string; //Platform specific compiler name (e.g. ppc386.exe for Windows)
@@ -61,8 +62,9 @@ type
     {$ENDIF}
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
+    FTar: string; //Location or name of tar executable
     FUpdater: TUpdater;
-    FExtractor: string; //Location or name of executable used to decompress source arhives
+    FUnzip: string; //Location or name of unzip executable
     procedure CreateBinutilsList;
     procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
     procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
@@ -318,6 +320,7 @@ function TInstaller.DownloadBootstrapCompiler: boolean;
 var
   ArchiveDir: string;
   BootstrapArchive: string;
+  Counter: integer;
   ExtractedCompiler: string;
   Log: string;
   OperationSucceeded: boolean;
@@ -348,7 +351,7 @@ begin
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(ArchiveDir);
       Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FExtractor, Params) <> 0 then
+      if Run(FUnzip, Params) <> 0 then
       begin
         infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -371,12 +374,11 @@ begin
     //Extract bz2, overwriting without prompting
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
       Params.Add('-d');
       Params.Add('-f');
       Params.Add('-q');
       Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FExtractor, Params) <> 0 then
+      if Run(FBunzip2, Params) <> 0 then
       begin
         debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -407,16 +409,17 @@ begin
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
     todo: copy over newest linux code //todo: copy over newest linux code
-    //Extract bz2, overwriting without prompting
+    //Extract .tar.bz2, overwriting without prompting
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
-      Params.Add('-d');
+      //todo: test if this works
+      Params.Add('-x');
+      Params.Add('-v');
+      Params.Add('-z');
       Params.Add('-f');
-      Params.Add('-q');
       Params.Add(ArchiveDir);
       Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FExtractor, Params) <> 0 then
+      if Run(FTar, Params) <> 0 then
       begin
         debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -428,13 +431,22 @@ begin
     finally
       Params.Free;
     end;
-    todo: untar stuff //todo: untar stuff
     // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
-      //todo check/fix this, bz2 has no concept of filenames
-      debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
-      renamefile(BootstrapArchive+'.out', BootstrapCompiler);
+      //todo check/fix this, should move an entire directory
+      Params:=TStringList.Create;
+      try
+        debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
+        Params.Add('ppcuniversalorwhatever');
+        Params.Add('another one');
+        for Counter:=0 to Params.Count-1 do
+        begin
+          renamefile(BootstrapArchive+Params[Counter], ExtractFilePath(BootstrapCompiler)+Params[Counter]);
+        end;
+      finally
+        Params.Free;
+      end;
     end;
     if OperationSucceeded then
     begin
@@ -596,15 +608,13 @@ begin
   if OperationSucceeded then
   begin
     // Extract, overwrite
-    // apparently can't specify "s with -d option!??!
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
       Params.Add('-o'); //overwrite existing files
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(FSVNDirectory);
       Params.Add(SVNZip); // zip/archive file
-      ResultCode:=Run(FExtractor, Params);
+      ResultCode:=Run(FUnzip, Params);
       if ResultCode<> 0 then
       begin
         OperationSucceeded := False;
@@ -636,13 +646,19 @@ begin
   // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
   {$IFDEF MSWINDOWS}
   // Need to do it here so we can pick up make path.
-  FExtractor := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + FExecutableExtension;
+  FBunzip2:=EmptyStr;
+  FTar:=EmptyStr;
+  FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + FExecutableExtension;
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
-  FExtractor:='bunzip2';
+  FBunzip2:='bunzip2';
+  FTar:='tar';
+  FUnzip:=EmptyStr;
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
-  FExtractor:='bunzip2';
+  FBunzip2:='bunzip2';
+  FTar:='tar';
+  FUnzip:=EmptyStr;
   {$ENDIF DARIN}
 
   {$IFDEF MSWINDOWS}
@@ -651,7 +667,7 @@ begin
     // Check for binutils directory, make and unzip executables.
     // Download if needed; will download unzip - needed for SVN download
     if (DirectoryExists(FMakeDir) = False) or (FileExists(FMake) = False) or
-      (FileExists(FExtractor) = False) then
+      (FileExists(FUnzip) = False) then
     begin
       infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download');
       OperationSucceeded := DownloadBinUtils;
@@ -711,37 +727,70 @@ begin
     end;
   end;
 
+
   if OperationSucceeded then
   begin
-    // Check for valid unzip/gunzip executable
-    if FExtractor<>EmptyStr then
+    // Check for valid unzip/gunzip/tar executable
+    {$IFDEF MSWINDOWS}
+    if FUnzip<>EmptyStr then
+    {$ENDIF MSWINDOWS}
+    {$IFDEF LINUX}
+    if FBunzip2<>EmptyStr then
+    {$ENDIF LINUX}
+    {$IFDEF DARWIN}
+    if FTar<>EmptyStr then
+    {$ENDIF DARWIN}
     begin
       try
         Output := '';
         // See unzip.h for return codes.
         Params:=TStringList.Create;
         try
-          // Possibly redundant if using internal bunzip2 code, but can't hurt
-          if AnsiPos('unzip', lowercase(FExtractor))=1 then Params.Add('-v');
-          if AnsiPos('bzip2', lowercase(FExtractor))=1 then Params.Add('--version');
-          if AnsiPos('bunzip2', lowercase(FExtractor))=1 then Params.Add('--version');
-          if AnsiPos('gzip', lowercase(FExtractor))=1 then Params.Add('--version');
-          if AnsiPos('gunzip', lowercase(FExtractor))=1 then Params.Add('--version');
-          if AnsiPos('tar', lowercase(FExtractor))=1 then Params.Add('--version');
-          ResultCode:=RunOutput(FExtractor, Params, Output);
+          // This roundabout way at least avoids messing with ifdefs
+          // note that we will test for the last program found
+          // but on Unixy systems that probably does not matter
+          Output:=EmptyStr;
+          if FUnzip<>EmptyStr then
+          begin
+            Params.Clear;
+            Params.Add('-v');
+            Output:=FUnzip;
+          end;
+          if FTar<>EmptyStr then
+          begin
+            Params.Clear;
+            Params.Add('--version');
+            Output:=FTar;
+          end;
+          if FBunzip2<>EmptyStr then
+          begin
+            Params.Clear;
+            Params.Add('--version');
+            Output:=FBUnzip2;
+          end;
+          if Output=EmptyStr then
+          begin
+            OperationSucceeded:=false;
+            ResultCode:=-1;
+            infoln('No valid unzip/bunzip2/tar executable names/locations set up in program code. Please fix program.');
+          end
+          else
+          begin
+            ResultCode:=Run(Output, Params)
+          end;
         finally
           Params.Free;
         end;
 
         if ResultCode=0 then
         begin
-          infoln('Found valid extractor: ' + FExtractor);
+          infoln('Found valid extractor: ' + Output);
           OperationSucceeded := true;
         end
         else
         begin
           //invalid unzip/gunzip/whatever
-          infoln('Error: could not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
+          infoln('Error: could not find valid extractor: ' + Output + ' (result code was: '+IntToStr(ResultCode)+')');
           OperationSucceeded:=false;
         end;
       except
@@ -1528,7 +1577,7 @@ begin
   FLazarusPrimaryConfigPath := '';
   FSVNDirectory := '';
   FUpdater := TUpdater.Create;
-  FExtractor := '';
+
   //Directory where Lazarus installation config will end up (primary config path)
   {$IFDEF MSWINDOWS}
   // Somewhere in local appdata special folder
