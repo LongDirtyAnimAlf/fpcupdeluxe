@@ -121,7 +121,7 @@ type
     destructor Destroy; override;
   end;
 
-procedure debugln(Message: string);
+procedure infoln(Message: string);
 //Uses writeln for now, and waits a bit afterwards so output is hopefully not garbled
 
 implementation
@@ -140,7 +140,7 @@ uses
   ,updatelazconfig
   ;
 
-procedure debugln(Message: string);
+procedure infoln(Message: string);
 begin
   {DEBUG conditional symbol is defined using
   Project Options/Other/Custom Options using -dDEBUG
@@ -212,7 +212,7 @@ var
   ScriptFile: string;
 begin
   {$IFDEF MSWINDOWS}
-  debugln('todo: write me (CreateHomeStartLink)!');
+  infoln('todo: write me (CreateHomeStartLink)!');
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   ScriptText:=TStringList.Create;
@@ -298,14 +298,14 @@ begin
   Result := False;
   for Counter := 0 to FBinUtils.Count - 1 do
   begin
-    debugln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakeDirectory);
+    infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakeDirectory);
     try
       DownloadHTTP(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter]);
     except
       on E: Exception do
       begin
         Result := False;
-        debugln('Error downloading binutils: ' + E.Message);
+        infoln('Error downloading binutils: ' + E.Message);
         exit; //out of function.
       end;
     end;
@@ -327,7 +327,7 @@ begin
   if OperationSucceeded then
   begin
     OperationSucceeded:=ForceDirectories(BootstrapCompilerDirectory);
-    if OperationSucceeded=false then debugln('DownloadBootstrapCompiler error: could not create directory '+BootstrapCompilerDirectory);
+    if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+BootstrapCompilerDirectory);
   end;
 
   BootstrapArchive := SysUtils.GetTempFileName;
@@ -350,7 +350,7 @@ begin
       Params.Add(BootstrapArchive); // zip/archive file
       if Run(FExtractor, Params) <> 0 then
       begin
-        debugln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+        infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
       end
       else
@@ -363,7 +363,7 @@ begin
     // Move compiler to proper directory
     if OperationSucceeded = True then
     begin
-      debugln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
+      infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
       renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
     end;
     {$ENDIF MSWINDOWS}
@@ -450,7 +450,7 @@ begin
   end
   else
   begin
-    debugln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive);
+    infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive);
   end;
   Result := OperationSucceeded;
 end;
@@ -478,7 +478,7 @@ begin
     Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
   end;
   Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
-  if result=false then debugln('DownloadFTP: error downloading '+URL+'. Details: host:'+Host+'; port: '+Inttostr(Port)+'; remote path:'+Source);
+  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host:'+Host+'; port: '+Inttostr(Port)+'; remote path:'+Source);
 end;
 
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
@@ -506,7 +506,7 @@ begin
   if (i > 0) and (j > 0) then
   begin
     SourceForgeProject := Copy(URL, i + Length(SourceForgeProjectPart), j);
-    debugln('project is *' + SourceForgeProject + '*');
+    infoln('project is *' + SourceForgeProject + '*');
     try
       HTTPSender := THTTPSend.Create;
       while not Result do
@@ -538,7 +538,7 @@ begin
               IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
         end;//case
       end;//while
-      debugln('resulting url after sf redir: *' + URL + '*');
+      infoln('resulting url after sf redir: *' + URL + '*');
     finally
       HTTPSender.Free;
     end;
@@ -546,7 +546,7 @@ begin
 
   try
     Buffer := TMemoryStream.Create;
-    debugln('Going to call httpgetbinary for url: ' + URL);
+    infoln('Going to call httpgetbinary for url: ' + URL);
     RetryAttempt := 1;
     HTTPGetResult := False;
     while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
@@ -608,7 +608,7 @@ begin
       if ResultCode<> 0 then
       begin
         OperationSucceeded := False;
-        debugln('resultcode: ' + IntToStr(ResultCode));
+        infoln('resultcode: ' + IntToStr(ResultCode));
       end;
     finally
       Params.Free;
@@ -653,7 +653,7 @@ begin
     if (DirectoryExists(FMakeDir) = False) or (FileExists(FMake) = False) or
       (FileExists(FExtractor) = False) then
     begin
-      debugln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download');
+      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download');
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
@@ -675,7 +675,7 @@ begin
 
       if Ansipos('GNU Make', Output) = 0 then
       begin
-        debugln('Found make executable but it is not GNU Make.');
+        infoln('Found make executable but it is not GNU Make.');
         OperationSucceeded:=false;
       end;
     except
@@ -698,7 +698,7 @@ begin
       // If it still can't be found, download it
       if FUpdater.SVNExecutable='' then
       begin
-        debugln('Going to download SVN');
+        infoln('Going to download SVN');
         OperationSucceeded := DownloadSVN;
       end;
       {$ELSE}
@@ -735,13 +735,13 @@ begin
 
         if ResultCode=0 then
         begin
-          debugln('Found valid extractor: ' + FExtractor);
+          infoln('Found valid extractor: ' + FExtractor);
           OperationSucceeded := true;
         end
         else
         begin
           //invalid unzip/gunzip/whatever
-          debugln('Error: could not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
+          infoln('Error: could not find valid extractor: ' + FExtractor + ' (result code was: '+IntToStr(ResultCode)+')');
           OperationSucceeded:=false;
         end;
       except
@@ -754,7 +754,7 @@ begin
   if OperationSucceeded then
   begin
     // Check for proper FPC bootstrap compiler
-    debugln('Checking for FPC bootstrap compiler...');
+    infoln('Checking for FPC bootstrap compiler...');
     try
       Output := '';
       Params:=TStringList.Create;
@@ -771,33 +771,33 @@ begin
         if Ansipos('Free Pascal Compiler', Output) = 0 then
         begin
           OperationSucceeded := False;
-          debugln('Found FPC executable but it is not a Free Pascal compiler. Going to overwrite it.');
+          infoln('Found FPC executable but it is not a Free Pascal compiler. Going to overwrite it.');
         end
         else
         begin
           //valid FPC compiler
-          debugln('Found valid FPC bootstrap compiler.');
+          infoln('Found valid FPC bootstrap compiler.');
           OperationSucceeded:=true;
         end;
       end
       else
       begin
         //Error running bootstrapcompiler
-        debugln('Error trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output+'; resultcode: '+IntToStr(ResultCode));
+        infoln('Error trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output+'; resultcode: '+IntToStr(ResultCode));
         OperationSucceeded:=false;
       end;
     except
       on E: Exception do
       begin
-        debugln('Exception trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
-        debugln(E.ClassName+'/'+E.Message);
+        infoln('Exception trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
+        infoln(E.ClassName+'/'+E.Message);
         OperationSucceeded := False;
       end;
     end;
     // Still within bootstrap compiler test...
     if OperationSucceeded=false then
     begin
-      debugln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
+      infoln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
       OperationSucceeded := DownloadBootstrapCompiler;
     end;
   end;
@@ -821,7 +821,7 @@ begin
     end
     else
     begin
-      debugln('Could not find svn executable in or under ' + FSVNDirectory);
+      infoln('Could not find svn executable in or under ' + FSVNDirectory);
       OperationSucceeded := False;
     end;
   finally
@@ -890,15 +890,15 @@ function TInstaller.Run(Executable: string; const Params: TStringList): longint;
 var
   OutputStringList: TStringList;
 begin
-  debugln('Calling:');
-  debugln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
+  infoln('Calling:');
+  infoln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
   OutputStringList := TStringList.Create;
   try
     Result:=RunOutput(Executable, Params, OutputStringList);
     if result<>0 then
     begin
-      debugln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
-      debugln(OutputStringList.Text);
+      infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
+      infoln(OutputStringList.Text);
     end;
   finally
     OutputStringList.Free;
@@ -955,8 +955,8 @@ begin
         as this complicates with paths, current dirs, .exe extensions etc.}
 
         //Something went wrong. We need to pass on what and mark this as a failure
-        debugln('Exception calling '+Executable);
-        debugln('Details: '+E.ClassName+'/'+E.Message);
+        infoln('Exception calling '+Executable);
+        infoln('Details: '+E.ClassName+'/'+E.Message);
         Result:=254; //fairly random but still an error, and distinct from earlier code
       end;
     end;
@@ -1029,7 +1029,7 @@ begin
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
-  debugln('Checking out/updating FPC sources...');
+  infoln('Checking out/updating FPC sources...');
   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC;
 
   if OperationSucceeded then
@@ -1050,7 +1050,7 @@ begin
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('clean');
-      debugln('Running make clean for fpc:');
+      infoln('Running make clean for fpc:');
       Run(Executable, params);
     finally
       Params.Free;
@@ -1072,7 +1072,7 @@ begin
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('all');
-      debugln('Running make for FPC:');
+      infoln('Running make for FPC:');
       if Run(Executable, params) <> 0 then
         OperationSucceeded := False;
     finally
@@ -1096,7 +1096,7 @@ begin
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('install');
-      debugln('Running make install for FPC:');
+      infoln('Running make install for FPC:');
       if Run(Executable, Params) <> 0 then
         OperationSucceeded := False;
     finally
@@ -1129,7 +1129,7 @@ begin
     except
       on E: Exception do
       begin
-        debugln('Error copying binutils: '+E.Message);
+        infoln('Error copying binutils: '+E.Message);
         OperationSucceeded:=false;
       end;
     end;
@@ -1142,7 +1142,7 @@ begin
     // Make crosscompiler using new compiler- todo: check out what cross compilers we can install on Linux/OSX
     // Note: consider this as an optional item, so don't fail the function if this breaks.
     Executable := FMake;
-    debugln('Running Make all (crosscompiler):');
+    infoln('Running Make all (crosscompiler):');
     Params:=TStringList.Create;
     try
       //Don't call parameters with quotes
@@ -1162,7 +1162,7 @@ begin
         // make all and make crossinstall perhaps equivalent to
         // make all install CROSSCOMPILE=1??? todo: find out
         Executable := FMake;
-        debugln('Running Make crossinstall:');
+        infoln('Running Make crossinstall:');
         // Params already assigned
         Params.Clear;
         Params.Add('FPC='+FInstalledCompiler+'');
@@ -1184,7 +1184,7 @@ begin
         end
         else
         begin
-          debugln('Problem compiling/installing crosscompiler. Continuing regardless.');
+          infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
         end;
       end;
     finally
@@ -1208,7 +1208,7 @@ begin
         Params.Add('basepath='+ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('-o');
         Params.Add('' + FPCCfg + '');
-        debugln('Debug: Running fpcmkcfg: ');
+        infoln('Debug: Running fpcmkcfg: ');
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
       finally
@@ -1217,7 +1217,7 @@ begin
     end
     else
     begin
-      debugln('fpc.cfg already exists; leaving it alone.');
+      infoln('fpc.cfg already exists; leaving it alone.');
     end;
   end;
   Result := OperationSucceeded;
@@ -1248,7 +1248,7 @@ begin
   // Download Lazarus source:
   if OperationSucceeded = True then
   begin
-    debugln('Checking out/updating Lazarus sources...');
+    infoln('Checking out/updating Lazarus sources...');
     OperationSucceeded := FUpdater.UpdateLazarus;
   end;
 
@@ -1256,7 +1256,7 @@ begin
   if DirectoryExists(LazarusPrimaryConfigPath) = False then
   begin
     OperationSucceeded:=ForceDirectories(LazarusPrimaryConfigPath);
-    debugln('Created Lazarus primary config directory: '+LazarusPrimaryConfigPath);
+    infoln('Created Lazarus primary config directory: '+LazarusPrimaryConfigPath);
   end;
 
   if OperationSucceeded then
@@ -1275,7 +1275,7 @@ begin
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('clean');
-      debugln('Lazarus: running make clean:');
+      infoln('Lazarus: running make clean:');
       Run(Executable, Params);
     finally
       Params.Free;
@@ -1303,9 +1303,9 @@ begin
         Params.Add('OS_TARGET=win64');
         Params.Add('CPU_TARGET=x86_64');
         Params.Add('lcl');
-        debugln('Lazarus: running make lcl crosscompiler:');
+        infoln('Lazarus: running make lcl crosscompiler:');
         // Note: consider this optional; don't fail the function if this fails.
-        if Run(Executable, Params)<> 0 then debugln('Problem compiling 64 bit LCL; continuing regardless.');
+        if Run(Executable, Params)<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
       finally
         Params.Free;
       end;
@@ -1327,7 +1327,7 @@ begin
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('all');
-      debugln('Lazarus: running make all:');
+      infoln('Lazarus: running make all:');
       if (Run(Executable, Params)) <> 0 then
       begin
         OperationSucceeded := False;
@@ -1369,7 +1369,7 @@ begin
         on E: Exception do
         begin
           OperationSucceeded:=false;
-          debugln('Error setting Lazarus config: '+E.ClassName+'/'+E.Message);
+          infoln('Error setting Lazarus config: '+E.ClassName+'/'+E.Message);
         end;
       end;
     finally
@@ -1391,7 +1391,7 @@ begin
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('bigide');
-      debugln('Lazarus: running make bigide:');
+      infoln('Lazarus: running make bigide:');
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
     finally
@@ -1411,7 +1411,7 @@ begin
         'tools'+DirectorySeparator+
         'lazdatadesktop'+DirectorySeparator+
         'lazdatadesktop.lpr');
-      debugln('Lazarus: compiling data desktop:');
+      infoln('Lazarus: compiling data desktop:');
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
     finally
@@ -1430,7 +1430,7 @@ begin
       Params.Add(''+LazarusDirectory+
         'doceditor'+DirectorySeparator+
         'lazde.lpr');
-      debugln('Lazarus: compiling doc editor:');
+      infoln('Lazarus: compiling doc editor:');
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
     finally
@@ -1444,7 +1444,7 @@ begin
     {$IFDEF MSWINDOWS}
     if ShortCutName<>EmptyStr then
     begin
-      debugln('Lazarus: creating desktop shortcut:');
+      infoln('Lazarus: creating desktop shortcut:');
       try
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //DO pass quotes here (it's not TProcess.Params)
