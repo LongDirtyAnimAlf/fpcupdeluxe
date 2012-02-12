@@ -44,7 +44,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,Forms,Interfaces {these 2 for application options},
   installer,
-  svnclient, updatelazconfig, httpsend, ftpsend;
+  svnclient, updatelazconfig, httpsend, ftpsend,sysutils;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
@@ -91,6 +91,7 @@ begin
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
   writeln(' lazOPT=<options>      Options passed on to the lazarus make as OPT=options.');
+  writeln(' noconfirm             No confirmation asked. For batch operation. ');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
@@ -121,9 +122,12 @@ const
   PrimaryConfigPath='primary-config-path';
   SkipFPC='skipfpc';
   SkipLaz='skiplaz';
+  NoConfirm='noconfirm';
 var
   ErrorMessage: string;
   alloptions,fpcuplink:string;
+  bnoconfirm:boolean;
+  sconfirm:string;
 begin
   // Default values
   FInstaller.ShortCutName:='Lazarus_trunk';
@@ -150,7 +154,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
-    SkipFPC+' '+SkipLaz+' '+
+    SkipFPC+' '+SkipLaz+' '+NoConfirm+' '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+':'+PrimaryConfigPath+':');
   if Length(ErrorMessage) > 0 then
   begin
@@ -253,7 +257,7 @@ begin
 
   FInstaller.SkipFPC:=Application.HasOption(SkipFPC);
   FInstaller.SkipLazarus:=Application.HasOption(SkipLaz);
-
+  bnoconfirm:=Application.HasOption(NoConfirm);
 
   // FpcupLinkName has to be the last since here we store alloptions !!
   // alloptions is rebuild in this clumsy way because we lost the quotes in paramstr()
@@ -301,7 +305,16 @@ begin
   if FInstaller.SkipLazarus then
     writeln('WARNING: Skipping installation/update Lazarus ');
   writeln('');
-
+  if not bnoconfirm then
+    begin
+    write('Continue (Y/n):');
+    readln(sconfirm);
+    if uppercase(copy(sconfirm,1,1))='N' then
+      begin
+      FInstaller.Free;
+      halt(0); //quit without error
+      end;
+    end;
 end;
 
 procedure ShowErrorHints(SVNSourceDirectory: string);
@@ -353,4 +366,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
