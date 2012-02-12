@@ -1425,7 +1425,12 @@ begin
       writeln(Script,'# and ignores any system-wide fpc.cfg files');
       write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
       {$IFDEF CPU386}
-      write(Script,'ppc386');
+        //OSX intel picks up on this...
+        {$IFDEF DARWIN}
+        write(Script,'ppcuniversal');
+        {$ELSE}
+        write(Script,'ppc386');
+        {$ENDIF DARWIN}
       {$ELSE} // Assume x64 (could also be PowerPC, ARM I suppose)
       write(Script,'ppcx64');
       {$ENDIF CPU386}
