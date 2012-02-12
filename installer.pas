@@ -1424,6 +1424,7 @@ begin
       writeln(Script,'# This script starts the fpc compiler installed by fpcup');
       writeln(Script,'# and ignores any system-wide fpc.cfg files');
       write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
+      //todo: replace this perhaps with FCompilerName, or with fpc, at least use variables here instead of directly doing write
       {$IFDEF CPU386}
         //OSX intel picks up on this...
         {$IFDEF DARWIN}
@@ -1431,12 +1432,13 @@ begin
         {$ELSE}
         write(Script,'ppc386');
         {$ENDIF DARWIN}
+      {$ELSE} //not i386
+        {$IFDEF CPUARMEL}
+        write(Script,'ppcarm');
+        {$ELSE} // Assume x64 (could also be PowerPC, other ARM I suppose)
+        write(Script,'ppcx64');
+        {$ENDIF CPUARMEL}          
       {$ENDIF CPU386}
-      {$IFDEF CPUARMEL}
-      write(Script,'ppcarm');
-      {$ELSE} // Assume x64 (could also be PowerPC, other ARM I suppose)
-      write(Script,'ppcx64');
-      {$ENDIF CPUARMEL}     
       writeln(Script,' -n @',IncludeTrailingPathDelimiter(BinPath),'fpc.cfg $*');
       CloseFile(Script);
       FPChmod(FPCScript,&700);
