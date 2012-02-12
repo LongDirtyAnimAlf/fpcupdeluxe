@@ -83,9 +83,13 @@ type
     function GetBootstrapCompiler: string;
     //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
+    function GetFPCRevision: string;
     function GetFPCUrl: string;
+    function GetLazarusRevision: string;
     procedure SetAllOptions(AValue: string);
+    procedure SetFPCRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
+    procedure SetLazarusRevision(AValue: string);
     procedure SetShortCutNameFpcup(AValue: string);
     function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
@@ -123,6 +127,7 @@ type
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
     property FPCOPT: string read FFPCOPT write SetFPCOPT;
+    property FPCRevision:string read GetFPCRevision write SetFPCRevision;
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
@@ -132,6 +137,7 @@ type
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
     //SVN URL for Lazarus
     property LazarusOPT:string read FLazarusOPT write SetLazarusOPT;
+    property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     constructor Create;
@@ -926,15 +932,30 @@ begin
   Result := FUpdater.FPCDirectory;
 end;
 
+function TInstaller.GetFPCRevision: string;
+begin
+  Result := FUpdater.FPCRevision;
+end;
+
 function TInstaller.GetFPCUrl: string;
 begin
   Result := FUpdater.FPCURL;
+end;
+
+function TInstaller.GetLazarusRevision: string;
+begin
+  Result := FUpdater.LazarusRevision;
 end;
 
 procedure TInstaller.SetAllOptions(AValue: string);
 begin
   if FAllOptions=AValue then Exit;
   FAllOptions:=AValue;
+end;
+
+procedure TInstaller.SetFPCRevision(AValue: string);
+begin
+  FUpdater.FPCRevision:=AValue;
 end;
 
 function Tinstaller.GetLazarusDirectory: string;
@@ -1125,6 +1146,11 @@ begin
   begin
     FLazarusPrimaryConfigPath:=AValue;
   end;
+end;
+
+procedure TInstaller.SetLazarusRevision(AValue: string);
+begin
+  FUpdater.LazarusRevision:=AValue;
 end;
 
 procedure TInstaller.SetShortCutNameFpcup(AValue: string);
@@ -1656,7 +1682,10 @@ begin
         //DO pass quotes here (it's not TProcess.Params)
         CreateHomeStartLink(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortcutName);
         if FShortCutNameFpcupIsSet then
-          CreateHomeStartLink(paramstr(0),AllOptions,ShortCutNameFpcup);
+          begin
+          FAllOptions:=FAllOptions+' $*';
+          CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
+          end;
       finally
         //Ignore problems creating shortcut
       end;

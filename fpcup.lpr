@@ -74,6 +74,7 @@ begin
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln(' fpcOPT=options        options passed on to the fpc make as OPT=options.');
+  writeln(' fpcrevision=<number>  Revert to fpc svn revision <number>');
   writeln(' fpcuplinkname=<name>  Name of the shortcut to the fpcup script.');
   writeln('                       On Windows: a desktop shortcut.');
   writeln('                       On other systems: a shell script in your home directory.');
@@ -85,6 +86,7 @@ begin
   writeln('                       On other systems: a shell script in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
   writeln('                       Default: Lazarus_trunk');
+  writeln(' lazrevision=<number>  Revert to lazarus svn revision <number>');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
@@ -112,6 +114,8 @@ const
   FpcupLinkName='fpcuplinkname';
   LazURL='lazURL';
   LazOPT='lazOPT';
+  LazRevision='lazrevision';
+  FPCRevision='fpcrevision';
   PrimaryConfigPath='primary-config-path';
 var
   ErrorMessage: string;
@@ -141,7 +145,7 @@ begin
 
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
-    Help+' '+LazDir+': '+LazOPT+': '+
+    Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+':'+PrimaryConfigPath+':');
   if Length(ErrorMessage) > 0 then
   begin
@@ -183,6 +187,12 @@ begin
     alloptions:=alloptions+'--'+FPCOPT+'="'+FInstaller.FPCOPT+'" ';
   end;
 
+  if Application.HasOption(FPCRevision) then
+  begin
+    FInstaller.FPCRevision:=Application.GetOptionValue(FPCRevision);
+    //don't store this in alloptions !!!
+  end;
+
   if Application.HasOption(FPCURL) then
   begin
     FInstaller.FPCURL:=Application.GetOptionValue(FPCURL);
@@ -212,6 +222,12 @@ begin
   begin
     FInstaller.LazarusOPT:=Application.GetOptionValue(LazOPT);
     alloptions:=alloptions+'--'+LazOPT+'="'+FInstaller.LazarusOPT+'" ';
+  end;
+
+  if Application.HasOption(LazRevision) then
+  begin
+    FInstaller.LazarusRevision:=Application.GetOptionValue(LazRevision);
+    //don't store this in alloptions !!!
   end;
 
   if Application.HasOption(LazURL) then
@@ -267,6 +283,12 @@ begin
   writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('');
+  if FInstaller.FPCRevision<>'' then
+    writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCRevision);
+  if FInstaller.LazarusRevision<>'' then
+    writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusRevision);
+  writeln('');
+
 end;
 
 procedure ShowErrorHints(SVNSourceDirectory: string);

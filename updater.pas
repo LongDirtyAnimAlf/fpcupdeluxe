@@ -43,19 +43,25 @@ type
 
   TUpdater = class(TObject)
   private
+    FFPCRevision: string;
     FFPCURL: string;
     FFPCDirectory: string;
     FLazarusDirectory: string;
+    FLazarusRevision: string;
     FLazarusURL: string;
     FSVNClient: TSVNClient;
     FUpdated: boolean;
     function GetSVNExecutable: string;
+    procedure SetFPCRevision(AValue: string);
+    procedure SetLazarusRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
   public
     function FindSVNExecutable: string; //Search for installed SVN executable
     property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
+    property FPCRevision:string read FFPCRevision write SetFPCRevision;
     property FPCURL: string read FFPCURL write FFPCURL; //URL for FPC SVN
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
+    property LazarusRevision:string read FLazarusRevision write SetLazarusRevision;
     property LazarusURL: string read FLazarusURL write FLazarusURL; //URL for Lazarus SVN
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     //Which SVN executable to use
@@ -86,6 +92,18 @@ begin
   Result := FSVNClient.SVNExecutable;
 end;
 
+procedure TUpdater.SetFPCRevision(AValue: string);
+begin
+  if FFPCRevision=AValue then Exit;
+  FFPCRevision:=AValue;
+end;
+
+procedure TUpdater.SetLazarusRevision(AValue: string);
+begin
+  if FLazarusRevision=AValue then Exit;
+  FLazarusRevision:=AValue;
+end;
+
 function Tupdater.Updatefpc: boolean;
 var
   StartRevision: integer;
@@ -93,6 +111,7 @@ begin
   StartRevision:=-1;
   FSVNClient.LocalRepository := FPCDirectory;
   FSVNClient.Repository := FPCURL;
+  FSVNClient.Revision:=FFPCRevision;
   StartRevision:=FSVNClient.LocalRevision;
   FSVNClient.CheckOutOrUpdate;
   if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
@@ -107,6 +126,7 @@ begin
   FSVNClient.LocalRepository := LazarusDirectory;
   FSVNClient.Repository := FLazarusURL;
   StartRevision:=FSVNClient.LocalRevision;
+  FSVNClient.Revision:=FLazarusRevision;
   FSVNClient.CheckOutOrUpdate;
   if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
@@ -127,4 +147,4 @@ begin
 end;
 
 end.
-
+
