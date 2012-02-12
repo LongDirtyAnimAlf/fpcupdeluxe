@@ -65,6 +65,8 @@ type
     FMakeDir: string;
     {$ENDIF}
     FShortCutNameFpcupIsSet:boolean; //indicates if ShortCutNameFpcupSet was set
+    FSkipFPC: boolean;
+    FSkipLazarus: boolean;
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FTar: string; //Location or name of tar executable
@@ -91,6 +93,8 @@ type
     procedure SetLazarusPrimaryConfigPath(AValue: string);
     procedure SetLazarusRevision(AValue: string);
     procedure SetShortCutNameFpcup(AValue: string);
+    procedure SetSkipFPC(AValue: boolean);
+    procedure SetSkipLazarus(AValue: boolean);
     function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
@@ -140,6 +144,8 @@ type
     property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
+    property SkipFPC:boolean read FSkipFPC write SetSkipFPC;
+    property SkipLazarus:boolean read FSkipLazarus write SetSkipLazarus;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -1160,6 +1166,18 @@ begin
   FShortCutNameFpcup:=AValue;
 end;
 
+procedure TInstaller.SetSkipFPC(AValue: boolean);
+begin
+  if FSkipFPC=AValue then Exit;
+  FSkipFPC:=AValue;
+end;
+
+procedure TInstaller.SetSkipLazarus(AValue: boolean);
+begin
+  if FSkipLazarus=AValue then Exit;
+  FSkipLazarus:=AValue;
+end;
+
 procedure TInstaller.SetLazarusUrl(AValue: string);
 begin
   FUpdater.LazarusURL := AValue;
@@ -1189,6 +1207,13 @@ var
   Params: TstringList;
   Script:text;
 begin
+  if SkipFPC then
+    begin
+    result:=true;  //continue with lazarus
+    infoln('FPC installation/update skipped by user.');
+    exit;
+    end;
+
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
@@ -1436,6 +1461,12 @@ var
   OperationSucceeded: boolean;
   Params: TStringList;
 begin
+  if SkipLazarus then
+    begin
+    result:=true;  //continue with lazarus
+    infoln('Lazarus installation/update skipped by user.');
+    exit;
+    end;
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
 

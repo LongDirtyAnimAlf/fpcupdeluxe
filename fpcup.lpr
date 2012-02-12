@@ -97,6 +97,8 @@ begin
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
   writeln('                       directory is used.');
+  writeln(' skipfpc               do not update FPC.');
+  writeln(' skiplaz               do not update Lazarus.');
   writeln('');
 end;
 
@@ -117,6 +119,8 @@ const
   LazRevision='lazrevision';
   FPCRevision='fpcrevision';
   PrimaryConfigPath='primary-config-path';
+  SkipFPC='skipfpc';
+  SkipLaz='skiplaz';
 var
   ErrorMessage: string;
   alloptions,fpcuplink:string;
@@ -146,6 +150,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
+    SkipFPC+' '+SkipLaz+' '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+':'+PrimaryConfigPath+':');
   if Length(ErrorMessage) > 0 then
   begin
@@ -246,6 +251,10 @@ begin
     alloptions:=alloptions+'--'+PrimaryConfigPath+'="'+Application.GetOptionValue(PrimaryConfigPath)+'" ';
   end;
 
+  FInstaller.SkipFPC:=Application.HasOption(SkipFPC);
+  FInstaller.SkipLazarus:=Application.HasOption(SkipLaz);
+
+
   // FpcupLinkName has to be the last since here we store alloptions !!
   // alloptions is rebuild in this clumsy way because we lost the quotes in paramstr()
   // and need them for option sequences, weird paths, etc.
@@ -283,10 +292,14 @@ begin
   writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('');
-  if FInstaller.FPCRevision<>'' then
+  if not FInstaller.SkipFPC and (FInstaller.FPCRevision<>'') then
     writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCRevision);
-  if FInstaller.LazarusRevision<>'' then
+  if not FInstaller.SkipLazarus and (FInstaller.LazarusRevision<>'') then
     writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusRevision);
+  if FInstaller.SkipFPC then
+    writeln('WARNING: Skipping installation/update FPC ');
+  if FInstaller.SkipLazarus then
+    writeln('WARNING: Skipping installation/update Lazarus ');
   writeln('');
 
 end;
