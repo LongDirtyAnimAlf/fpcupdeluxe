@@ -1428,7 +1428,7 @@ begin
       {$IFDEF CPU386}
         //OSX intel picks up on this...
         {$IFDEF DARWIN}
-        write(Script,'ppcuniversal');
+        write(Script,'ppcx64'); //Assume here all Intel Macs are x64... which I think is not true...
         {$ELSE}
         write(Script,'ppc386');
         {$ENDIF DARWIN}
