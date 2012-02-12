@@ -1767,7 +1767,7 @@ begin
   {$ENDIF CPU386}
   {$ENDIF Linux}
   {$IFDEF Darwin}
-  //OSX. todo: find out powerpc/intel??? or not relevant?
+  //OSX
   FBootstrapCompilerFTP:=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
   FCompilername := 'ppcuniversal';
