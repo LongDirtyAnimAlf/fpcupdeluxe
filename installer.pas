@@ -343,7 +343,7 @@ begin
 end;
 
 function TInstaller.DownloadBootstrapCompiler: boolean;
-  // Should be done after we have unzip executable in FMakePath
+  // Should be done after we have unzip executable (on Windows: in FMakePath)
 var
   ArchiveDir: string;
   BootstrapArchive: string;
@@ -435,16 +435,13 @@ begin
     end;
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
-    todo: copy over newest linux code //todo: copy over newest linux code
     //Extract .tar.bz2, overwriting without prompting
     Params:=TStringList.Create;
     try
-      //todo: test if this works
       Params.Add('-x');
       Params.Add('-v');
       Params.Add('-j');
       Params.Add('-f');
-      Params.Add(ArchiveDir);
       Params.Add(BootstrapArchive); // zip/archive file
       if Run(FTar, Params) <> 0 then
       begin
@@ -461,25 +458,19 @@ begin
     // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
-      //todo check/fix this, should move an entire directory
-      Params:=TStringList.Create;
-      try
-        infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
-        Params.Add('ppcuniversalorwhatever');
-        Params.Add('another one');
-        for Counter:=0 to Params.Count-1 do
-        begin
-          renamefile(BootstrapArchive+Params[Counter], ExtractFilePath(BootstrapCompiler)+Params[Counter]);
-        end;
-      finally
-        Params.Free;
-      end;
+      //todo: currently tar spits out uncompressed file in current dir...
+      //which might not have proper permissions to actually create file...!?
+      infoln('Going to rename/move '+CompilerName+' to '+BootstrapCompiler);
+      sysutils.DeleteFile(BootstrapCompiler); //ignore errors
+      // We might be moving files across partitions so we cannot use renamefile
+      OperationSucceeded:=FileUtil.CopyFile(CompilerName, BootstrapCompiler);
+      sysutils.DeleteFile(CompilerName);
     end;
     if OperationSucceeded then
     begin
       //Make executable
       OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
-      if OperationSucceeded=false then debugln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
+      if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
     end;
     {$ENDIF DARWIN}
   end;
@@ -684,7 +675,7 @@ begin
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
   FBunzip2:='bunzip2';
-  FTar:='tar';
+  FTar:='gnutar'; //gnutar can decompress as well; bsd tar can't
   FUnzip:=EmptyStr;
   {$ENDIF DARIN}
 
@@ -783,17 +774,19 @@ begin
             Params.Add('-v');
             Output:=FUnzip;
           end;
-          if FTar<>EmptyStr then
-          begin
-            Params.Clear;
-            Params.Add('--version');
-            Output:=FTar;
-          end;
           if FBunzip2<>EmptyStr then
           begin
             Params.Clear;
             Params.Add('--version');
             Output:=FBUnzip2;
+          end;
+          if FTar<>EmptyStr then
+          begin
+            // We put tar after bunzip2; we use it in OSX
+            // and want to test it then.
+            Params.Clear;
+            Params.Add('--version');
+            Output:=FTar;
           end;
           if Output=EmptyStr then
           begin
@@ -1790,4 +1783,4 @@ begin
 end;
 
 end.
-
+
