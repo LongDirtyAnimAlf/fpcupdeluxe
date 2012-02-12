@@ -57,7 +57,7 @@ begin
   writeln('fpcup --<options>)');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
-  writeln(' binutilsdir=<dir>     Windows only');
+  writeln(' binutilsdir=<dir>     Windows only:');
   writeln('                       Directory where make, patch etc');
   writeln('                       (the binutils) are located. If make does not');
   writeln('                       exist, binutils will be downloaded there.');
