@@ -115,7 +115,6 @@ const
   PrimaryConfigPath='primary-config-path';
 var
   ErrorMessage: string;
-  i:integer;
   alloptions,fpcuplink:string;
 begin
   // Default values

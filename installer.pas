@@ -1405,7 +1405,7 @@ function Tinstaller.GetLazarus: boolean;
 // GetFPC would install it ;)
 // Assumed: binutils in fpc dir or in path
 var
-  Executable,s: string;
+  Executable: string;
   LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
   Params: TStringList;
@@ -1496,7 +1496,14 @@ begin
     Params:=TStringList.Create;
     try
       //Don't call params with quotes
+      {$IFDEF MSWINDOWS}
       Params.Add('FPC='+FInstalledCompiler+'');
+      {$ELSE}
+      if FileExists(FInstalledCompiler+'.sh') then //we didn't abort if creating failed
+        Params.Add('FPC='+FInstalledCompiler+'.sh')
+      else
+        Params.Add('FPC='+FInstalledCompiler);
+      {$ENDIF MSWINDOWS}
       //Should not be needed as we already copied binutils to fpc compiler dir
       //Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
       Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
@@ -1633,7 +1640,8 @@ begin
         // To installed lazarus
         CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortCutName);
         // To fpcup itself, with all options as passed when invoking it:
-        CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
+        if FShortCutNameFpcupIsSet then
+          CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
       finally
         //Ignore problems creating shortcut
       end;
@@ -1647,7 +1655,8 @@ begin
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //DO pass quotes here (it's not TProcess.Params)
         CreateHomeStartLink(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortcutName);
-        CreateHomeStartLink(paramstr(0),AllOptions,ShortCutNameFpcup);
+        if FShortCutNameFpcupIsSet then
+          CreateHomeStartLink(paramstr(0),AllOptions,ShortCutNameFpcup);
       finally
         //Ignore problems creating shortcut
       end;
@@ -1721,4 +1730,4 @@ begin
 end;
 
 end.
-
+
