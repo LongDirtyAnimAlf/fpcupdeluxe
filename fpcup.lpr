@@ -73,7 +73,7 @@ begin
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
-  writeln(' fpcOPT=options        options passed on to the fpc make as OPT=options.');
+  writeln(' fpcOPT=<options>      Options passed on to the fpc make as OPT=options.');
   writeln(' fpcrevision=<number>  Revert to fpc svn revision <number>');
   writeln(' fpcuplinkname=<name>  Name of the shortcut to the fpcup script.');
   writeln('                       On Windows: a desktop shortcut.');
@@ -90,15 +90,15 @@ begin
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
-  writeln(' lazOPT=options        options passed on to the lazarus make as OPT=options.');
+  writeln(' lazOPT=<options>      Options passed on to the lazarus make as OPT=options.');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
   writeln('                       directory is used.');
-  writeln(' skipfpc               do not update FPC.');
-  writeln(' skiplaz               do not update Lazarus.');
+  writeln(' skipfpc               Do not update or build FPC.');
+  writeln(' skiplaz               Do not update or build Lazarus.');
   writeln('');
 end;
 
@@ -353,4 +353,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
