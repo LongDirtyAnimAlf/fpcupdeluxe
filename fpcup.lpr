@@ -307,7 +307,7 @@ begin
   writeln('');
   if not bnoconfirm then
     begin
-    write('Continue (Y/n):');
+    write('Continue (Y/n): ');
     readln(sconfirm);
     if uppercase(copy(sconfirm,1,1))='N' then
       begin
@@ -366,4 +366,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+

@@ -55,9 +55,9 @@ type
     FShortcutName: string; //Name for shortcut/shell script pointing to newly installed Lazarus
     FExecutableExtension: string; //.exe on Windows
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
-    FInstalledCompiler: string; //Path to installed FPC compiler; used to compile Lazarus
+    FInstalledCompiler: string; //Complete path to installed FPC compiler; used to compile Lazarus
     FInstalledCompilerName: string; //Name only of installed PPC compiler (e.g. ppcx64 on 64 bit Intel OSX)
-    FInstalledCrossCompiler: string; //Path to an optional cross compiler that we installed (also used for Lazarus)
+    FInstalledCrossCompiler: string; //Complete path to an optional cross compiler that we installed (also used for Lazarus)
     FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string;
     FMake: string;
@@ -84,7 +84,7 @@ type
     function CheckAndGetNeededExecutables: boolean;
     function FindSVNSubDirs(): boolean;
     function GetBootstrapCompiler: string;
-    function GetCompiler: string;
+    function GetCompilerName: string;
     //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
     function GetFPCRevision: string;
@@ -119,7 +119,7 @@ type
   public
     property ShortCutName: string read FShortcutName write FShortcutName; //Name of the shortcut to Lazarus. If empty, no shortcut is generated.
     property ShortCutNameFpcup:string read FShortCutNameFpcup write SetShortCutNameFpcup;
-    property CompilerName: string read GetCompiler;
+    property CompilerName: string read GetCompilerName;
     //Name only of installed compiler
     property AllOptions:string read FAllOptions write SetAllOptions;
     property BootstrapCompiler: string read GetBootstrapCompiler;
@@ -825,7 +825,7 @@ begin
   if OperationSucceeded then
   begin
     // Check for proper FPC bootstrap CompilerName
-    infoln('Checking for FPC bootstrap compiler...');
+    infoln('Checking for FPC bootstrap compiler: '+BootStrapCompiler);
     try
       Output := '';
       Params:=TStringList.Create;
@@ -903,16 +903,17 @@ end;
 
 function TInstaller.GetBootstrapCompiler: string;
 begin
-  Result := BootstrapCompilerDirectory + CompilerName;
+  Result := BootstrapCompilerDirectory + FBootstrapCompilerName;
 end;
 
-function TInstaller.GetCompiler: string;
+function TInstaller.GetCompilerName: string;
 begin
   // Return installed CompilerName or bootstrap CompilerName as fallback
-  if FInstalledCompiler<>EmptyStr then
-    result:=FInstalledCompiler
+  // Note: we can't use BootstrapCompiler property otherwise endless loop
+  if FInstalledCompilerName<>EmptyStr then
+    result:=FInstalledCompilerName
   else
-    result:=BootstrapCompiler;
+    result:=FBootstrapCompilerName;
 end;
 
 function TInstaller.Which(Executable: string): string;
@@ -1006,10 +1007,7 @@ begin
 end;
 
 function TInstaller.Run(Executable: string; const Params: TStringList): longint;
-{ Runs executable without showing output, unless:
-1. something went wrong (result code<>0) and
-2. DEBUG is set
-}
+{ Runs executable without showing output, unless something went wrong (result code<>0) }
 var
   OutputStringList: TStringList;
 begin
@@ -1763,7 +1761,7 @@ begin
   FFPCPlatform:='i386-win32';
   {$ENDIF MSWINDOWS}
   {$IFDEF Linux}
-  //If compiled for x86 32 bit, install 32 bit as well.
+  //If compiled for x86 32 bit, install 32 bit
   //If compiled for x64, install x64 only.//todo: cross compiler!?!
   {$IFDEF CPU386}
   FBootstrapCompilerFTP :=
