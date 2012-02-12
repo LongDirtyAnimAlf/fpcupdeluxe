@@ -1439,7 +1439,7 @@ begin
       // If compiled as 32 bit, CPU386 will be true.
       // However, bootstrap compiler will compile ppcx64 if 64 bit kernel running,
       // ppc386 if 32 bit kernel running.
-      // We assume people want x64; in future we might have to use an extra --32bit option
+      // todo: We assume people want x64; in future we might have to use an extra --32bit option
       // or different bitness versions of fpcup that set up links differently.
       // Note: in either case we might need to instruct the make process to deviate from kernel bitness.
         write(Script,'ppcx64');
