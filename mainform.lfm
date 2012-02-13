@@ -1,11 +1,13 @@
 object Form1: TForm1
-  Left = 218
+  Left = 228
   Height = 795
-  Top = 60
+  Top = 146
   Width = 899
   Caption = 'fpcup GUI'
   ClientHeight = 795
   ClientWidth = 899
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   LCLVersion = '0.9.31'
   object FPCOptionsGroup: TGroupBox
     Left = 7
@@ -64,6 +66,7 @@ object Form1: TForm1
       Top = 8
       Width = 75
       Caption = 'HEAD'
+      OnClick = HeadButtonClick
       TabOrder = 2
     end
     object FPCURL: TComboBox
@@ -72,13 +75,14 @@ object Form1: TForm1
       Top = 10
       Width = 120
       ItemHeight = 15
+      ItemIndex = 0
       Items.Strings = (
         'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6'
         'http://svn.freepascal.org/svn/fpc/tags/release_2_6_0/'
         'http://svn.freepascal.org/svn/fpc/trunk'
       )
       TabOrder = 3
-      Text = 'FPCURL'
+      Text = 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6'
     end
     object Label4: TLabel
       Left = 311
@@ -110,6 +114,14 @@ object Form1: TForm1
       ScrollWidth = 174
       TabOrder = 5
     end
+    object SkipFPC: TCheckBox
+      Left = 651
+      Height = 19
+      Top = 14
+      Width = 68
+      Caption = 'Skip FPC'
+      TabOrder = 6
+    end
   end
   object UpdateButton: TButton
     Left = 700
@@ -117,6 +129,7 @@ object Form1: TForm1
     Top = 560
     Width = 75
     Caption = 'Update'
+    OnClick = UpdateButtonClick
     TabOrder = 1
   end
   object OutputTabs: TPageControl
@@ -124,14 +137,33 @@ object Form1: TForm1
     Height = 168
     Top = 592
     Width = 667
-    ActivePage = OutputTab
-    TabIndex = 1
+    ActivePage = CommandTab
+    TabIndex = 0
     TabOrder = 2
     object CommandTab: TTabSheet
       Caption = 'Command'
+      ClientHeight = 140
+      ClientWidth = 659
+      object CommandMemo: TMemo
+        Left = 4
+        Height = 114
+        Top = 8
+        Width = 616
+        TabOrder = 0
+      end
     end
     object OutputTab: TTabSheet
       Caption = 'Output'
+      ClientHeight = 140
+      ClientWidth = 659
+      object OutputMemo: TMemo
+        Left = 4
+        Height = 114
+        Top = 8
+        Width = 616
+        ScrollBars = ssAutoVertical
+        TabOrder = 0
+      end
     end
   end
   object GeneralOptionsGroup: TGroupBox
@@ -143,7 +175,7 @@ object Form1: TForm1
     ClientHeight = 127
     ClientWidth = 765
     TabOrder = 3
-    object FPCRevision2: TEdit
+    object FPCUpScriptName: TEdit
       Left = 182
       Height = 23
       Hint = 'Name of the shortcut to the fpcup script (--fpcuplinkname)'
@@ -155,16 +187,17 @@ object Form1: TForm1
       Left = 14
       Height = 16
       Top = 16
-      Width = 102
-      Caption = 'FPCUp script name'
+      Width = 151
+      Caption = 'FPCUp script/shortcut name'
       ParentColor = False
     end
     object NoFPCUPScriptButton: TButton
       Left = 286
       Height = 25
       Top = 16
-      Width = 131
-      Caption = 'No FPCUp script'
+      Width = 155
+      Caption = 'No FPCUp script/shortcut'
+      OnClick = NoFPCUPScriptButtonClick
       TabOrder = 1
     end
     object FPCBootstrapDir: TDirectoryEdit
@@ -239,12 +272,13 @@ object Form1: TForm1
       Caption = 'Revision'
       ParentColor = False
     end
-    object HeadButton1: TButton
+    object LazarusHeadButton: TButton
       Left = 487
       Height = 25
       Top = 8
       Width = 75
       Caption = 'HEAD'
+      OnClick = LazarusHeadButtonClick
       TabOrder = 2
     end
     object LazarusURL: TComboBox
@@ -253,13 +287,12 @@ object Form1: TForm1
       Top = 8
       Width = 120
       ItemHeight = 15
+      ItemIndex = 0
       Items.Strings = (
-        'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6'
-        'http://svn.freepascal.org/svn/fpc/tags/release_2_6_0/'
-        'http://svn.freepascal.org/svn/fpc/trunk'
+        'http://svn.freepascal.org/svn/lazarus/trunk'
       )
       TabOrder = 3
-      Text = 'FPCURL'
+      Text = 'http://svn.freepascal.org/svn/lazarus/trunk'
     end
     object Label10: TLabel
       Left = 311
@@ -279,7 +312,7 @@ object Form1: TForm1
     object LazarusOptionsChoices: TListBox
       Left = 495
       Height = 80
-      Top = 50
+      Top = 48
       Width = 176
       Items.Strings = (
         '-g (debug info)'
@@ -324,6 +357,14 @@ object Form1: TForm1
       Width = 95
       Caption = 'Lazarus link name'
       ParentColor = False
+    end
+    object SkipLazarus: TCheckBox
+      Left = 650
+      Height = 19
+      Top = 14
+      Width = 86
+      Caption = 'Skip Lazarus'
+      TabOrder = 8
     end
   end
 end
