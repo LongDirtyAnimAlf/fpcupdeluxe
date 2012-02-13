@@ -1405,7 +1405,7 @@ begin
         Params.Add('basepath='+ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('-o');
         Params.Add('' + FPCCfg + '');
-        infoln('Debug: Running fpcmkcfg: ');
+        infoln('Running fpcmkcfg for: '+FPCCfg);
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
       finally
@@ -1427,7 +1427,7 @@ begin
     FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
     if FileExists(FPCScript) then
     begin
-      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
+      infoln('Trying to overwrite existing fpc.sh launcher script '+FPCScript);
       sysutils.DeleteFile(FPCScript);
     end;
     AssignFile(Script,FPCScript);
