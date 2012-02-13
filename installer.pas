@@ -1387,29 +1387,9 @@ begin
     writeln(Script,'# This script starts the fpc compiler installed by fpcup');
     writeln(Script,'# and ignores any system-wide fpc.cfg files');
     writeln(Script,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-    write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
-
-    {$IFDEF DARWIN}
-    // OSX
-    // If compiled as 32 bit, CPU386 will be true.
-    // However, bootstrap compiler will compile ppcx64 if 64 bit kernel running,
-    // ppc386 if 32 bit kernel running.
-    // todo: We assume people want x64; in future we might have to use an extra --32bit option
-    // or different bitness versions of fpcup that set up links differently.
-    // Note: in either case we might need to instruct the make process to deviate from kernel bitness.
-      write(Script,'ppcx64');
-    {$ELSE} //not OSX
-      {$IFDEF CPU386}
-        write(Script,'ppc386'); //fpcup was compiled on i386, but might be running on x64 hardware!!
-      {$ELSE} //not i386
-        {$IFDEF CPUARMEL}
-        write(Script,'ppcarm');
-        {$ELSE} // Assume x64 (could also be PowerPC, other ARM I suppose)
-        write(Script,'ppcx64');
-        {$ENDIF CPUARMEL}
-      {$ENDIF CPU386}
-    {$ENDIF DARWIN}
-    writeln(Script,' -n @',IncludeTrailingPathDelimiter(BinPath),'fpc.cfg $*');
+    writeln(Script,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
+         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -Xp',
+         IncludeTrailingPathDelimiter(FPCDirectory),'compiler/ $*');
     CloseFile(Script);
     OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Update status
     if OperationSucceeded then
@@ -1770,4 +1750,4 @@ begin
 end;
 
 end.
-
+
