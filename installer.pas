@@ -1208,6 +1208,8 @@ var
   OperationSucceeded: boolean;
   Params: TstringList;
   Script:text;
+  SearchRec:TSearchRec;
+  FPCVersion:string;
 begin
   if SkipFPC then
     begin
@@ -1234,10 +1236,6 @@ begin
       {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-      {$IFDEF UNIX}
-      // Install units below FPCDirectory instead of <somewhere>/lib/fpc/$fpcversion/units/$fpctarget
-      Params.Add('INSTALL_UNITDIR='+IncludeTrailingPathDelimiter(FPCDirectory)+'units'+DirectorySeparator+ExcludeTrailingPathDelimiter(FFPCPlatform));
-      {$ENDIF UNIX}
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('clean');
@@ -1246,6 +1244,24 @@ begin
       infoln('Running make clean all install for FPC:');
       if Run(Executable, Params) <> 0 then
         OperationSucceeded := False;
+      {$IFDEF UNIX}
+      // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
+      // need to find $fpcversion first
+      FPCVersion:='';
+      if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/*',faDirectory,SearchRec)=0 then
+        repeat
+          if (SearchRec.Attr and faDirectory) <>0 then
+            begin
+            FPCVersion:=SearchRec.Name;
+            if (FPCVersion<>'') and (FPCVersion[1]>'1') and (FPCVersion[1]<='9') then
+              break;
+            end;
+        until FindNext(SearchRec)<>0;
+      //if not found will point to wrong dir
+      DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
+      fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
+      pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
+      {$ENDIF UNIX}
     finally
       Params.Free;
     end;
