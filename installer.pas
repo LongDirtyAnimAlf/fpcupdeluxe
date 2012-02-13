@@ -1744,8 +1744,7 @@ begin
   FBootstrapCompilerFTP:=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
   FBootstrapCompilerName := 'ppcuniversal';
-  //check this:
-  FFPCPlatform:='x64-OSX';
+  FFPCPlatform:='x64_64-darwin';
   {$ENDIF Darwin}
 
   {$IFDEF MSWINDOWS}
