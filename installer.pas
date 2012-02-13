@@ -1435,6 +1435,7 @@ begin
     writeln(Script,'#!/bin/sh');
     writeln(Script,'# This script starts the fpc compiler installed by fpcup');
     writeln(Script,'# and ignores any system-wide fpc.cfg files');
+    writeln(Script,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
     write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
 
     {$IFDEF DARWIN}
@@ -1459,12 +1460,16 @@ begin
     {$ENDIF DARWIN}
     writeln(Script,' -n @',IncludeTrailingPathDelimiter(BinPath),'fpc.cfg $*');
     CloseFile(Script);
-    OperationSucceeded:=FPChmod(FPCScript,&700); //Update status
+    OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Update status
     if OperationSucceeded then
+    begin
       infoln('Created launcher script for fpc:'+FPCScript);
+    end
     else
+    begin
       infoln('Error creating launcher script for fpc:'+FPCScript);
     end;
+  end;
   {$ENDIF UNIX}
   Result := OperationSucceeded;
 end;
