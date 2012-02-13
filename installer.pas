@@ -1560,7 +1560,7 @@ begin
         Params.Add('OS_TARGET=win64');
         Params.Add('CPU_TARGET=x86_64');
         Params.Add('lcl');
-        infoln('Lazarus: running make lcl crosscompiler:');
+        infoln('Lazarus: running make LCL crosscompiler:');
         // Note: consider this optional; don't fail the function if this fails.
         if Run(Executable, Params)<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
       finally

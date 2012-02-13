@@ -326,8 +326,8 @@ begin
   writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion');
   //todo: how to get windres => mingw32-binutils?
   {$ENDIF MSWINDOWS}
-  writeln('You might want to try removing all local changes in your SVN repository with:');
   writeln('- try removing all local changes in your SVN repository with: SVN revert recursive ' + SVNSourceDirectory);
+  writeln('- remove the generated fpc.cfg in the installed FPC directory. fpcup will recreate it with default settings on the next run.');
 end;
 
 var
