@@ -54,7 +54,7 @@ begin
   writeln('Open source freeware (modified LGPL/BSD), see:');
   writeln('https://bitbucket.org/reiniero/fpcup');
   writeln('');
-  writeln('fpcup --<options>)');
+  writeln('fpcup --<options>');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
   writeln(' binutilsdir=<dir>     Windows only:');
@@ -72,7 +72,6 @@ begin
   writeln(' fpcdir=<dir>          Target FPC dir, default c:\development\fpc\');
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
-  writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln(' fpcOPT=<options>      Options passed on to the fpc make as OPT=options.');
   writeln(' fpcrevision=<number>  Revert to fpc svn revision <number>');
   writeln(' fpcuplinkname=<name>  Name of the shortcut to the fpcup script.');
@@ -81,6 +80,7 @@ begin
   writeln('                       If not specified, no shortcut will be produced.');
   writeln('                       If empty specified, the shortcut will be ');
   writeln('                       Fpcup_update.');
+  writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
   writeln('                       On Windows: a desktop shortcut.');
   writeln('                       On other systems: a shell script in your home directory.');
@@ -151,6 +151,7 @@ begin
   FInstaller.MakeDirectory:='';
   {$ENDIF MSWINDOWS}
 
+  Application.CaseSensitiveOptions:=false; //Our Windows users will like this.
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
