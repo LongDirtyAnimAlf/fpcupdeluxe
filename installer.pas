@@ -1422,48 +1422,49 @@ begin
   if OperationSucceeded then
   begin
     // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
-    // We don't really care if this fails, so don't change OperationSucceeded
+    // If this fails, Lazarus compilation will fail...
     BinPath := ExtractFilePath(FInstalledCompiler);
     FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
-    if FileExists(FPCScript) = False then
+    if FileExists(FPCScript) then
     begin
-      AssignFile(Script,FPCScript);
-      Rewrite(Script);
-      writeln(Script,'#!/bin/sh');
-      writeln(Script,'# This script starts the fpc compiler installed by fpcup');
-      writeln(Script,'# and ignores any system-wide fpc.cfg files');
-      write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
-
-      {$IFDEF DARWIN}
-      // OSX
-      // If compiled as 32 bit, CPU386 will be true.
-      // However, bootstrap compiler will compile ppcx64 if 64 bit kernel running,
-      // ppc386 if 32 bit kernel running.
-      // todo: We assume people want x64; in future we might have to use an extra --32bit option
-      // or different bitness versions of fpcup that set up links differently.
-      // Note: in either case we might need to instruct the make process to deviate from kernel bitness.
-        write(Script,'ppcx64');
-      {$ELSE} //not OSX
-        {$IFDEF CPU386}
-          write(Script,'ppc386'); //fpcup was compiled on i386, but might be running on x64 hardware!!
-        {$ELSE} //not i386
-          {$IFDEF CPUARMEL}
-          write(Script,'ppcarm');
-          {$ELSE} // Assume x64 (could also be PowerPC, other ARM I suppose)
-          write(Script,'ppcx64');
-          {$ENDIF CPUARMEL}
-        {$ENDIF CPU386}
-      {$ENDIF DARWIN}
-      writeln(Script,' -n @',IncludeTrailingPathDelimiter(BinPath),'fpc.cfg $*');
-      CloseFile(Script);
-      FPChmod(FPCScript,&700);
-      infoln('Created launcher script for fpc:'+FPCScript);
-    end
-    else
-    begin
-      infoln('fpc.sh launcher script already exists ('+FPCScript+'); leaving it alone.');
+      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
+      sysutils.DeleteFile(FPCScript);
     end;
-  end;
+    AssignFile(Script,FPCScript);
+    Rewrite(Script);
+    writeln(Script,'#!/bin/sh');
+    writeln(Script,'# This script starts the fpc compiler installed by fpcup');
+    writeln(Script,'# and ignores any system-wide fpc.cfg files');
+    write(Script,IncludeTrailingPathDelimiter(FPCDirectory),'compiler/');
+
+    {$IFDEF DARWIN}
+    // OSX
+    // If compiled as 32 bit, CPU386 will be true.
+    // However, bootstrap compiler will compile ppcx64 if 64 bit kernel running,
+    // ppc386 if 32 bit kernel running.
+    // todo: We assume people want x64; in future we might have to use an extra --32bit option
+    // or different bitness versions of fpcup that set up links differently.
+    // Note: in either case we might need to instruct the make process to deviate from kernel bitness.
+      write(Script,'ppcx64');
+    {$ELSE} //not OSX
+      {$IFDEF CPU386}
+        write(Script,'ppc386'); //fpcup was compiled on i386, but might be running on x64 hardware!!
+      {$ELSE} //not i386
+        {$IFDEF CPUARMEL}
+        write(Script,'ppcarm');
+        {$ELSE} // Assume x64 (could also be PowerPC, other ARM I suppose)
+        write(Script,'ppcx64');
+        {$ENDIF CPUARMEL}
+      {$ENDIF CPU386}
+    {$ENDIF DARWIN}
+    writeln(Script,' -n @',IncludeTrailingPathDelimiter(BinPath),'fpc.cfg $*');
+    CloseFile(Script);
+    OperationSucceeded:=FPChmod(FPCScript,&700); //Update status
+    if OperationSucceeded then
+      infoln('Created launcher script for fpc:'+FPCScript);
+    else
+      infoln('Error creating launcher script for fpc:'+FPCScript);
+    end;
   {$ENDIF UNIX}
   Result := OperationSucceeded;
 end;
