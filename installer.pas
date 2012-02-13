@@ -1529,16 +1529,15 @@ begin
     Params:=TStringList.Create;
     try
       {$IFDEF MSWINDOWS}
-      Params.Add('FPC='+FInstalledCompiler+'');
+      Params.Add('FPC='+FInstalledCompiler);
       {$ELSE}
       if FileExists(FInstalledCompiler+'.sh') then //we didn't abort if creating failed
         Params.Add('FPC='+FInstalledCompiler+'.sh')
       else
         Params.Add('FPC='+FInstalledCompiler);
       {$ENDIF MSWINDOWS}
-      //Should not be needed as we already copied binutils to fpc CompilerName dir
-      //Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
       Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+      Params.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       if LazarusOPT<>'' then
