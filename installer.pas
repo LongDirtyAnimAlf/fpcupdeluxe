@@ -1224,57 +1224,7 @@ begin
 
   if OperationSucceeded then
   begin
-    // Make clean using bootstrap CompilerName
-    // Note no error on failure, might be recoverable
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      // Don't call params with quotes
-      // For directory arguments to make, always strip out trailing \ or /s
-      Params.Add('FPC=' + BootstrapCompiler+'');
-      {$IFDEF MSWINDOWS}
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FMakeDir)); //Show make where to find the binutils.
-      {$ENDIF MSWINDOWS}
-      //Alternative to CROSSBINDIR would be OPT=-FD+FBinutilsDirNoBackslash
-      Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('clean');
-      infoln('Running make clean for fpc:');
-      Run(Executable, params);
-    finally
-      Params.Free;
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Make all using bootstrap CompilerName
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      //Don't call params with quotes
-      Params.Add('FPC=' + BootstrapCompiler+'');
-      {$IFDEF MSWINDOWS}
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
-      {$ENDIF MSWINDOWS}
-      Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      if FFPCOPT<>'' then
-        Params.Add('OPT='+FFPCOPT);
-      Params.Add('all');
-      infoln('Running make for FPC:');
-      if Run(Executable, params) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Install, still using bootstrap CompilerName. //todo: go back to installed CompilerName
+    // Make clean/all/install, using bootstrap compiler. Make all should use generated compiler internally for unit compilation
     Executable := FMake;
     Params:=TStringList.Create;
     try
@@ -1290,8 +1240,10 @@ begin
       {$ENDIF UNIX}
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('clean');
+      Params.Add('all');
       Params.Add('install');
-      infoln('Running make install for FPC:');
+      infoln('Running make clean all install for FPC:');
       if Run(Executable, Params) <> 0 then
         OperationSucceeded := False;
     finally
@@ -1340,7 +1292,6 @@ begin
     infoln('Running Make all (FPC crosscompiler):');
     Params:=TStringList.Create;
     try
-      //Don't call parameters with quotes
       Params.Add('FPC='+FInstalledCompiler+'');
       //Should not be needed as we already copied binutils to fpc CompilerName dir
       //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
@@ -1405,7 +1356,7 @@ begin
         Params.Add('basepath='+ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('-o');
         Params.Add('' + FPCCfg + '');
-        infoln('Running fpcmkcfg for: '+FPCCfg);
+        infoln('Debug: Running fpcmkcfg: ');
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
       finally
@@ -1427,7 +1378,7 @@ begin
     FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
     if FileExists(FPCScript) then
     begin
-      infoln('Trying to overwrite existing fpc.sh launcher script '+FPCScript);
+      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
       sysutils.DeleteFile(FPCScript);
     end;
     AssignFile(Script,FPCScript);
@@ -1516,29 +1467,6 @@ begin
     infoln('Created Lazarus primary config directory: '+LazarusPrimaryConfigPath);
   end;
 
-  if OperationSucceeded then
-  begin
-    // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
-    // Note: you apparently can't pass FPC in the FPC= statement, you need to pass a PPC executable.
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      // Don't call params with quotes
-      // Directory parameters for make must not have trailing / or \
-      Params.Add('FPC='+FInstalledCompiler+'');
-      //Should not be needed as we already copied binutils to fpc CompilerName dir
-      //Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
-      Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('clean');
-      infoln('Lazarus: running make clean:');
-      Run(Executable, Params);
-    finally
-      Params.Free;
-    end;
-  end;
-
   {$IFDEF MSWINDOWS}
   //todo: find out what crosscompilers we can install on linux/osx
   if OperationSucceeded then
@@ -1559,7 +1487,8 @@ begin
         Params.Add('LCL_PLATFORM=win32');
         Params.Add('OS_TARGET=win64');
         Params.Add('CPU_TARGET=x86_64');
-        Params.Add('lcl');
+        Params.Add('clean'); //make clean
+        Params.Add('lcl'); //make lcl
         infoln('Lazarus: running make LCL crosscompiler:');
         // Note: consider this optional; don't fail the function if this fails.
         if Run(Executable, Params)<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
@@ -1568,15 +1497,37 @@ begin
       end;
     end;
   end;
+
+  //After this, make clean again so compiler does not get confused with 64 bit units...
+  if OperationSucceeded then
+  begin
+    // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
+    Executable := FMake;
+    Params:=TStringList.Create;
+    try
+      // Directory parameters for make must not have trailing / or \
+      Params.Add('FPC='+FInstalledCompiler+'');
+      //Should not be needed as we already copied binutils to fpc CompilerName dir
+      //Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
+      Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('clean');
+      infoln('Lazarus: running make clean after LCL crosscompiler:');
+      Run(Executable, Params);
+    finally
+      Params.Free;
+    end;
+  end;
   {$ENDIF MSWINDOWS}
 
   if OperationSucceeded then
   begin
-    // Make all (should include lcl & ide)
+    // Make clean all (should include lcl & ide)
+    // todo: check if we really need to do a make clean after lcl cross...
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
       {$IFDEF MSWINDOWS}
       Params.Add('FPC='+FInstalledCompiler+'');
       {$ELSE}
@@ -1592,8 +1543,9 @@ begin
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       if LazarusOPT<>'' then
         Params.Add('OPT='+LazarusOPT);
+      Params.Add('clean');
       Params.Add('all');
-      infoln('Lazarus: running make all:');
+      infoln('Lazarus: running make clean all:');
       if (Run(Executable, Params)) <> 0 then
       begin
         OperationSucceeded := False;
