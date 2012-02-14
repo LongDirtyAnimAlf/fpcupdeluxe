@@ -341,7 +341,7 @@ begin
   writeln('from the source Subversion/SVN repositories,');
   writeln('compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
-  writeln('fpcup compiled with : FPC '+{$INCLUDE %FPCVERSION%}+' on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%} );
+  writeln('fpcup compiled with: FPC '+{$INCLUDE %FPCVERSION%}+' on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%} );
   writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
 
   try

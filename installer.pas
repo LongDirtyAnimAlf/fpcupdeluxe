@@ -1235,7 +1235,10 @@ begin
     try
       Params.Add('FPC=' + BootstrapCompiler+'');
       {$IFDEF MSWINDOWS}
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
+      // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Find them, the official way.
+      // (Used to use CROSSBINDIR, which seemed to work)
+      Params.Add('-OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
       {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
@@ -1312,8 +1315,11 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC='+FInstalledCompiler+'');
-      //Should not be needed as we already copied binutils to fpc CompilerName dir
-      //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+      // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Find them, the official way.
+      // (Used to use CROSSBINDIR, which seemed to work)
+      // We can rely on binutils being copied to compiler bin path here:
+      Params.Add('-OPT=-FD'+ExtractFilePath(FInstalledCompiler));
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -1333,14 +1339,16 @@ begin
         // Params already assigned
         Params.Clear;
         Params.Add('FPC='+FInstalledCompiler+'');
-        //Should not be needed as we already copied binutils to fpc CompilerName dir
-        //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
-        Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
+        // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+        // Find them, the official way.
+        // (Used to use CROSSBINDIR, which seemed to work)
+        // We can rely on binutils being copied to compiler bin path here:
+        Params.Add('-OPT=-FD'+ExtractFilePath(FInstalledCompiler));         Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        Params.Add('OS_TARGET=win64');
-        Params.Add('CPU_TARGET=x86_64');
+        Params.Add('OS_TARGET=win64'); //cross compile for different OS...
+        Params.Add('CPU_TARGET=x86_64'); // and processor.
         Params.Add('crossinstall');
         // Note: consider this as an optional item, so don't fail the function if this breaks.
         if Run(Executable, Params)=0 then
@@ -1660,11 +1668,51 @@ begin
 
   if OperationSucceeded then
   begin
+    // Build lhelp chm help viewer
+    // todo: while this may compile, to integrate help we need to do more. Taken from readme:
+    // compile+install package <lazarus>/components/chmhelp/packages/idehelp/chmhelppkg.lpk
+    // compile lhelp
+    // configure paths for lhelp
+    // Download/update help from (compiler dependent):
+    // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
+    {
+    Configure the DataBases
+
+       Choose the DataBases tab.
+
+       RTLUnits:
+       this should be "rtl.chm://"
+       FCLUnits:
+       this should be "fcl.chm://"
+
+       NOTE if you have only a single lcl-fcl-rtl.chm file then paths become:
+       "lcl-fcl-rtl.chm://rtl/"
+       "lcl-fcl-rtl.chm://fcl/"
+       "lcl-fcl-rtl.chm://lcl/"
+    }
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+    Params:=TStringList.Create;
+    try
+      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'components'+DirectorySeparator+
+        'chmhelp'+DirectorySeparator+
+        'lhelp'+DirectorySeparator+
+        'lhelp.lpr');
+      infoln('Lazarus: compiling lhelp help viewer:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
     // Build data desktop, nice example of building with lazbuild
     Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     Params:=TStringList.Create;
     try
-      //Do NOT pass quotes in params
       Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
         'tools'+DirectorySeparator+
