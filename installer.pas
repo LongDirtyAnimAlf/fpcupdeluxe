@@ -1661,12 +1661,12 @@ begin
   if OperationSucceeded then
   begin
     // Build data desktop, nice example of building with lazbuild
-    Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     Params:=TStringList.Create;
     try
       //Do NOT pass quotes in params
       Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(''+LazarusDirectory+
+      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
         'tools'+DirectorySeparator+
         'lazdatadesktop'+DirectorySeparator+
         'lazdatadesktop.lpr');
@@ -1681,12 +1681,12 @@ begin
   if OperationSucceeded then
   begin
     // Build Lazarus Doceditor
-    Executable := LazarusDirectory + DirectorySeparator + 'lazbuild';
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     Params:=TStringList.Create;
     try
       //Do NOT pass quotes in params
       Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(''+LazarusDirectory+
+      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
         'doceditor'+DirectorySeparator+
         'lazde.lpr');
       infoln('Lazarus: compiling doc editor:');
@@ -1769,4 +1769,4 @@ begin
 end;
 
 end.
-
+
