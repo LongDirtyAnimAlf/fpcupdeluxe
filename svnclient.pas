@@ -51,6 +51,8 @@ type
     FReturnCode: integer;
     FRevision: string;
     FSVNExecutable: string;
+    function ExecuteCommand(const Executable, Parameters: string; Output: TStream): integer;
+    // Execute external command; put stdout in Output; return exitcode
     function GetSVNExecutable: string;
     procedure SetRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
@@ -66,9 +68,9 @@ type
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
     procedure Update; //Performs an SVN update (pull)
     function ExecuteSvnCommand(const Command: string; Output: TStream): integer;
-    //Executes a free form SVN command; returns SVN client exit code
+    //Executes a free form SVN command; puts output into stream; returns SVN client exit code
     function ExecuteSVNCommand(const Command: string; var Output: TStringList): integer;
-    //Executes a free form SVN command; returns SVN client exit code
+    //Executes a free form SVN command; puts output into stringlist; returns SVN client exit code
     function ExecuteSvnCommand(const Command: string): integer;
     //Executes a free form SVN command; returns SVN client exit code
     function LocalRepositoryExists: boolean;
@@ -94,32 +96,30 @@ const
   SVNName = 'svn';
 var
   ExeResult: longint;
+  CommandOutput: TMemoryStream;
 begin
   Result := FSVNExecutable;
   if FileExists(FSvnExecutable) then
   begin
+    // File exists, assume it is a working svn client.
     exit;
   end;
 
   if FSVNExecutable = '' then
   begin
     //todo: check what happens if svn exe is in path but not specified here?
-    // process call will still work!!?! Maybe run it once with -v or something and just set FSVNExecutable to svn.exe
+    // process call will still work!!?!
+    CommandOutput:=TMemoryStream.Create;
     try
-      {$IFDEF MSWINDOWS}
-      ExeResult := SysUtils.ExecuteProcess(SVNName, '--version', []);
-      {$ENDIF MSWINDOWS}
-      {$IFDEF UNIX}
-      ExeResult := SysUtils.ExecuteProcess(SVNName, '--version');
-      {$ENDIF UNIX}
+      ExeResult := ExecuteCommand(SVNName, '--version', CommandOutput);
       if ExeResult = 0 then
       begin
         //Found a working SVN in path
         FSVNExecutable := SVNName;
         exit;
       end;
-    except
-      //Apparently SVN exe not found in path or some other error.
+    finally
+      CommandOutput.Free;
     end;
   end;
 
@@ -158,6 +158,52 @@ begin
   if not FileExists(FSVNExecutable) then
     FSVNExecutable := ''; //Make sure we don't call an arbitrary executable
   Result := FSVNExecutable;
+end;
+
+function TSVNClient.ExecuteCommand(const Executable, Parameters: string; Output: TStream
+  ): integer;
+var
+  ExternalProcess: TProcess;
+
+  function ReadOutput: boolean;
+    // returns true if output was actually read
+  const
+    BufSize = 4096;
+  var
+    Buffer: array[0..BufSize - 1] of byte;
+    ReadBytes: integer;
+  begin
+    Result := False;
+    while ExternalProcess.Output.NumBytesAvailable > 0 do
+    begin
+      ReadBytes := ExternalProcess.Output.Read(Buffer, BufSize);
+      Output.Write(Buffer, ReadBytes);
+      Result := True;
+    end;
+  end;
+
+begin
+  FReturnCode := 255; //Preset to failure
+  if not FileExists(FSvnExecutable) then
+    raise ESVNClientError.Create('No SVN executable found');
+
+  ExternalProcess := TProcess.Create(nil);
+  try
+    ExternalProcess.CommandLine := Executable + ' ' + Parameters;
+    ExternalProcess.Options := [poUsePipes, poStderrToOutPut];
+    ExternalProcess.ShowWindow := swoHIDE;
+    ExternalProcess.Execute;
+    while ExternalProcess.Running do
+    begin
+      if not ReadOutput then
+        Sleep(100);
+    end;
+    ReadOutput;
+    FReturnCode := ExternalProcess.ExitStatus;
+    Result := FReturnCode;
+  finally
+    ExternalProcess.Free;
+  end;
 end;
 
 function TSVNClient.GetSVNExecutable: string;
@@ -258,50 +304,14 @@ begin
 end;
 
 function TSVNClient.ExecuteSvnCommand(const Command: string; Output: TStream): integer;
-var
-  SvnProcess: TProcess;
-
-  function ReadOutput: boolean;
-    // returns true if output was actually read
-  const
-    BufSize = 4096;
-  var
-    Buffer: array[0..BufSize - 1] of byte;
-    ReadBytes: integer;
-  begin
-    Result := False;
-    while SvnProcess.Output.NumBytesAvailable > 0 do
-    begin
-      ReadBytes := SvnProcess.Output.Read(Buffer, BufSize);
-      Output.Write(Buffer, ReadBytes);
-      Result := True;
-    end;
-  end;
-
 begin
   FReturnCode := 255; //Preset to failure
   // Look for SVN if necessary; error if needed:
   if not FileExists(FSVNExecutable) then FindSvnExecutable;
   if not FileExists(FSvnExecutable) then
     raise ESVNClientError.Create('No SVN executable found');
-
-  SvnProcess := TProcess.Create(nil);
-  try
-    SvnProcess.CommandLine := SvnExecutable + ' ' + Command;
-    SvnProcess.Options := [poUsePipes, poStderrToOutPut];
-    SvnProcess.ShowWindow := swoHIDE;
-    SvnProcess.Execute;
-    while SvnProcess.Running do
-    begin
-      if not ReadOutput then
-        Sleep(100);
-    end;
-    ReadOutput;
-    FReturnCode := SvnProcess.ExitStatus;
-    Result := FReturnCode;
-  finally
-    SvnProcess.Free;
-  end;
+  FReturnCode:=ExecuteCommand(FSVNExecutable, Command, Output);
+  Result := FReturnCode;
 end;
 
 function TSVNClient.ExecuteSVNCommand(const Command: string;
@@ -377,7 +387,7 @@ begin
   FRevision:='';
   FReturnCode := 0;
   FSVNExecutable := '';
-  FindSvnExecutable; //Do this so the SVNExecutable property is valid.
+  FindSvnExecutable; //Do this now so the SVNExecutable property is valid.
 end;
 
 destructor Tsvnclient.Destroy;
