@@ -10,8 +10,6 @@ uses
   Forms, mainform
   { you can add units after this };
 
-{$R *.res}
-
 begin
   RequireDerivedFormResource := True;
   Application.Initialize;

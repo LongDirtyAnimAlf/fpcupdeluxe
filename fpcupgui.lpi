@@ -6,8 +6,8 @@
     <General>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
+      <Title Value="fpcupgui"/>
       <ResourceType Value="res"/>
-      <UseXPManifest Value="True"/>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -15,8 +15,30 @@
     <VersionInfo>
       <StringTable ProductVersion=""/>
     </VersionInfo>
-    <BuildModes Count="1">
+    <BuildModes Count="2">
       <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Debug">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+          </SearchPaths>
+          <Linking>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <UseMsgFile Value="True"/>
+            </CompilerMessages>
+            <CompilerPath Value="$(CompPath)"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -55,6 +77,24 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
     </SearchPaths>
+    <CodeGeneration>
+      <SmallerCode Value="True"/>
+      <Optimizations>
+        <OptimizationLevel Value="3"/>
+      </Optimizations>
+    </CodeGeneration>
+    <Linking>
+      <Debugging>
+        <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
+      </Debugging>
+      <LinkSmart Value="True"/>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
     <Other>
       <CompilerMessages>
         <UseMsgFile Value="True"/>

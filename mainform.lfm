@@ -17,7 +17,7 @@ object Form1: TForm1
     Caption = 'FPC'
     ClientHeight = 142
     ClientWidth = 764
-    TabOrder = 0
+    TabOrder = 1
     object FPCDirectory: TDirectoryEdit
       Left = 142
       Height = 23
@@ -28,7 +28,7 @@ object Form1: TForm1
       ButtonWidth = 23
       NumGlyphs = 0
       MaxLength = 0
-      TabOrder = 0
+      TabOrder = 4
     end
     object Label1: TLabel
       Left = 16
@@ -83,7 +83,7 @@ object Form1: TForm1
         'http://svn.freepascal.org/svn/fpc/tags/release_2_6_0/'
         'http://svn.freepascal.org/svn/fpc/trunk'
       )
-      TabOrder = 3
+      TabOrder = 0
       Text = 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6'
     end
     object Label4: TLabel
@@ -99,7 +99,7 @@ object Form1: TForm1
       Height = 23
       Top = 50
       Width = 80
-      TabOrder = 4
+      TabOrder = 5
     end
     object ListBox1: TListBox
       Left = 495
@@ -114,7 +114,7 @@ object Form1: TForm1
       )
       ItemHeight = 15
       ScrollWidth = 174
-      TabOrder = 5
+      TabOrder = 6
     end
     object SkipFPC: TCheckBox
       Left = 651
@@ -122,7 +122,7 @@ object Form1: TForm1
       Top = 14
       Width = 68
       Caption = 'Skip FPC'
-      TabOrder = 6
+      TabOrder = 3
     end
   end
   object UpdateButton: TButton
@@ -132,7 +132,7 @@ object Form1: TForm1
     Width = 75
     Caption = 'Update'
     OnClick = UpdateButtonClick
-    TabOrder = 1
+    TabOrder = 2
   end
   object OutputTabs: TPageControl
     Left = 8
@@ -141,7 +141,7 @@ object Form1: TForm1
     Width = 667
     ActivePage = CommandTab
     TabIndex = 0
-    TabOrder = 2
+    TabOrder = 4
     object CommandTab: TTabSheet
       Caption = 'Command'
       ClientHeight = 140
@@ -176,7 +176,7 @@ object Form1: TForm1
     Caption = 'General options'
     ClientHeight = 127
     ClientWidth = 765
-    TabOrder = 3
+    TabOrder = 0
     object FPCUpScriptName: TEdit
       Left = 182
       Height = 23
@@ -216,7 +216,7 @@ object Form1: TForm1
       MaxLength = 0
       TabOrder = 2
     end
-    object Label6: TLabel
+    object BinutilsDirLabel: TLabel
       Left = 14
       Height = 16
       Top = 48
@@ -254,7 +254,7 @@ object Form1: TForm1
     Caption = 'Lazarus'
     ClientHeight = 182
     ClientWidth = 764
-    TabOrder = 4
+    TabOrder = 3
     object LazarusDirectory: TDirectoryEdit
       Left = 141
       Height = 23
@@ -265,7 +265,7 @@ object Form1: TForm1
       ButtonWidth = 23
       NumGlyphs = 0
       MaxLength = 0
-      TabOrder = 0
+      TabOrder = 4
     end
     object Label7: TLabel
       Left = 14
@@ -318,7 +318,7 @@ object Form1: TForm1
       Items.Strings = (
         'http://svn.freepascal.org/svn/lazarus/trunk'
       )
-      TabOrder = 3
+      TabOrder = 0
       Text = 'http://svn.freepascal.org/svn/lazarus/trunk'
     end
     object Label10: TLabel
@@ -334,7 +334,7 @@ object Form1: TForm1
       Height = 23
       Top = 50
       Width = 80
-      TabOrder = 4
+      TabOrder = 5
     end
     object LazarusOptionsChoices: TListBox
       Left = 495
@@ -349,7 +349,7 @@ object Form1: TForm1
       )
       ItemHeight = 15
       ScrollWidth = 174
-      TabOrder = 5
+      TabOrder = 6
     end
     object Label11: TLabel
       Left = 14
@@ -368,14 +368,14 @@ object Form1: TForm1
       ButtonWidth = 23
       NumGlyphs = 0
       MaxLength = 0
-      TabOrder = 6
+      TabOrder = 7
     end
     object LazarusLinkName: TEdit
       Left = 141
       Height = 23
       Top = 128
       Width = 120
-      TabOrder = 7
+      TabOrder = 8
       Text = 'Lazarus_trunk'
     end
     object Label12: TLabel
@@ -392,7 +392,7 @@ object Form1: TForm1
       Top = 14
       Width = 86
       Caption = 'Skip Lazarus'
-      TabOrder = 8
+      TabOrder = 3
     end
   end
 end

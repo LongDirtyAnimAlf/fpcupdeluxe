@@ -40,7 +40,7 @@ type
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
-    Label6: TLabel;
+    BinutilsDirLabel: TLabel;
     Label7: TLabel;
     Label8: TLabel;
     Label9: TLabel;
