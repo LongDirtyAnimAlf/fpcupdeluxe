@@ -23,6 +23,7 @@ object Form1: TForm1
       Height = 23
       Top = 53
       Width = 96
+      Directory = 'C:\development\fpc'
       ShowHidden = False
       ButtonWidth = 23
       NumGlyphs = 0
@@ -51,6 +52,7 @@ object Form1: TForm1
       Top = 10
       Width = 80
       TabOrder = 1
+      Text = 'HEAD'
     end
     object Label3: TLabel
       Left = 311
@@ -61,7 +63,7 @@ object Form1: TForm1
       ParentColor = False
     end
     object HeadButton: TButton
-      Left = 487
+      Left = 495
       Height = 25
       Top = 8
       Width = 75
@@ -182,6 +184,7 @@ object Form1: TForm1
       Top = 16
       Width = 80
       TabOrder = 0
+      Text = 'fpcup_update'
     end
     object Label5: TLabel
       Left = 14
@@ -206,6 +209,7 @@ object Form1: TForm1
       Hint = 'Directory where existing FPC compiler is or should be downloaded'
       Top = 48
       Width = 208
+      Directory = 'C:\development\fpcbootstrap'
       ShowHidden = False
       ButtonWidth = 23
       NumGlyphs = 0
@@ -235,6 +239,7 @@ object Form1: TForm1
       Height = 23
       Top = 51
       Width = 96
+      Directory = 'C:\development\lazarus'
       ShowHidden = False
       ButtonWidth = 23
       NumGlyphs = 0
@@ -263,6 +268,7 @@ object Form1: TForm1
       Top = 10
       Width = 80
       TabOrder = 1
+      Text = 'HEAD'
     end
     object Label9: TLabel
       Left = 311
@@ -273,7 +279,7 @@ object Form1: TForm1
       ParentColor = False
     end
     object LazarusHeadButton: TButton
-      Left = 487
+      Left = 495
       Height = 25
       Top = 8
       Width = 75
@@ -347,8 +353,9 @@ object Form1: TForm1
       Left = 141
       Height = 23
       Top = 128
-      Width = 80
+      Width = 120
       TabOrder = 7
+      Text = 'Lazarus_trunk'
     end
     object Label12: TLabel
       Left = 14

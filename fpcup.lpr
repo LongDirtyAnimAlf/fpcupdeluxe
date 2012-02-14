@@ -125,8 +125,8 @@ const
   NoConfirm='noconfirm';
 var
   ErrorMessage: string;
-  alloptions,fpcuplink:string;
-  bnoconfirm:boolean;
+  AllOptions,FPCUpLink:string;
+  bNoConfirm:boolean;
   sconfirm:string;
 begin
   // Default values
@@ -166,12 +166,12 @@ begin
     halt(13); //Quit with error resultcode
   end;
 
-  alloptions:='';
+  AllOptions:='';
 
   if Application.HasOption(BinutilsDir) then
   begin
     FInstaller.MakeDirectory:=Application.GetOptionValue(BinutilsDir);
-    alloptions:=alloptions+BinutilsDir+'="'+FInstaller.MakeDirectory+'" ';
+    AllOptions:=AllOptions+BinutilsDir+'="'+FInstaller.MakeDirectory+'" ';
     {$IFNDEF MSWINDOWS}
     writeln('The '+BinutilsDir+' parameter is not necessary or supported on this system.');
     writeln('The parameter will be ignored.');
@@ -182,19 +182,19 @@ begin
   if Application.HasOption(FPCBootstrapDir) then
   begin
     FInstaller.BootstrapCompilerDirectory:=Application.GetOptionValue(FPCBootstrapDir);
-    alloptions:=alloptions+'--'+FPCBootstrapDir+'="'+FInstaller.BootstrapCompilerDirectory+'" ';
+    AllOptions:=AllOptions+'--'+FPCBootstrapDir+'="'+FInstaller.BootstrapCompilerDirectory+'" ';
   end;
 
   if Application.HasOption(FPCDir) then
   begin
     FInstaller.FPCDirectory:=Application.GetOptionValue(FPCDir);
-    alloptions:=alloptions+'--'+FPCDir+'="'+FInstaller.FPCDirectory+'" ';
+    AllOptions:=AllOptions+'--'+FPCDir+'="'+FInstaller.FPCDirectory+'" ';
   end;
 
   if Application.HasOption(FPCOPT) then
   begin
     FInstaller.FPCOPT:=Application.GetOptionValue(FPCOPT);
-    alloptions:=alloptions+'--'+FPCOPT+'="'+FInstaller.FPCOPT+'" ';
+    AllOptions:=AllOptions+'--'+FPCOPT+'="'+FInstaller.FPCOPT+'" ';
   end;
 
   if Application.HasOption(FPCRevision) then
@@ -206,7 +206,7 @@ begin
   if Application.HasOption(FPCURL) then
   begin
     FInstaller.FPCURL:=Application.GetOptionValue(FPCURL);
-    alloptions:=alloptions+'--'+FPCURL+'="'+FInstaller.FPCURL+'" ';
+    AllOptions:=AllOptions+'--'+FPCURL+'="'+FInstaller.FPCURL+'" ';
   end;
 
   if Application.HasOption('h', Help) then
@@ -219,19 +219,19 @@ begin
   if Application.HasOption(LazDir) then
   begin
     FInstaller.LazarusDirectory:=Application.GetOptionValue(LazDir);
-    alloptions:=alloptions+'--'+LazDir+'="'+FInstaller.LazarusDirectory+'" ';
+    AllOptions:=AllOptions+'--'+LazDir+'="'+FInstaller.LazarusDirectory+'" ';
   end;
 
   if Application.HasOption(LazLinkName) then
   begin
     FInstaller.ShortCutName:=Application.GetOptionValue(LazLinkName);
-    alloptions:=alloptions+'--'+LazLinkName+'="'+FInstaller.ShortCutName+'" ';
+    AllOptions:=AllOptions+'--'+LazLinkName+'="'+FInstaller.ShortCutName+'" ';
   end;
 
   if Application.HasOption(LazOPT) then
   begin
     FInstaller.LazarusOPT:=Application.GetOptionValue(LazOPT);
-    alloptions:=alloptions+'--'+LazOPT+'="'+FInstaller.LazarusOPT+'" ';
+    AllOptions:=AllOptions+'--'+LazOPT+'="'+FInstaller.LazarusOPT+'" ';
   end;
 
   if Application.HasOption(LazRevision) then
@@ -243,7 +243,7 @@ begin
   if Application.HasOption(LazURL) then
   begin
     FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL);
-    alloptions:=alloptions+'--'+LazURL+'="'+FInstaller.LazarusDirectory+'" ';
+    AllOptions:=AllOptions+'--'+LazURL+'="'+FInstaller.LazarusDirectory+'" ';
   end;
 
   if Application.HasOption(PrimaryConfigPath) then
@@ -253,36 +253,36 @@ begin
     begin
       FInstaller.LazarusPrimaryConfigPath:=Application.GetOptionValue(PrimaryConfigPath);
     end;
-    alloptions:=alloptions+'--'+PrimaryConfigPath+'="'+Application.GetOptionValue(PrimaryConfigPath)+'" ';
+    AllOptions:=AllOptions+'--'+PrimaryConfigPath+'="'+Application.GetOptionValue(PrimaryConfigPath)+'" ';
   end;
 
   FInstaller.SkipFPC:=Application.HasOption(SkipFPC);
   FInstaller.SkipLazarus:=Application.HasOption(SkipLaz);
-  bnoconfirm:=Application.HasOption(NoConfirm);
+  bNoConfirm:=Application.HasOption(NoConfirm);
 
-  // FpcupLinkName has to be the last since here we store alloptions !!
-  // alloptions is rebuild in this clumsy way because we lost the quotes in paramstr()
+  // FpcupLinkName has to be the last since here we store AllOptions !!
+  // AllOptions is rebuild in this clumsy way because we lost the quotes in paramstr()
   // and need them for option sequences, weird paths, etc.
 
-  fpcuplink:='';
+  FPCUpLink:='';
   if Application.HasOption(FpcupLinkName) then
   begin
-    fpcuplink:=Application.GetOptionValue(FpcupLinkName);
-    alloptions:=alloptions+'--'+FpcupLinkName+'="'+fpcuplink+'" ';
-    FInstaller.AllOptions:=alloptions;
-    if fpcuplink='' then
+    FPCUpLink:=Application.GetOptionValue(FpcupLinkName);
+    AllOptions:=AllOptions+'--'+FpcupLinkName+'="'+FPCUpLink+'" ';
+    FInstaller.AllOptions:=AllOptions;
+    if FPCUpLink='' then
       if FInstaller.ShortCutName='' then
-        fpcuplink:='fpcup_update'
+        FPCUpLink:='fpcup_update'
       else
-        fpcuplink:=FInstaller.ShortCutName+'_update';
-    FInstaller.ShortCutNameFpcup:=fpcuplink;
+        FPCUpLink:=FInstaller.ShortCutName+'_update';
+    FInstaller.ShortCutNameFpcup:=FPCUpLink;
   end;
 
   writeln('');
   writeln('Options:');
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
   writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
-  if fpcuplink<>'' then
+  if FPCUpLink<>'' then
     writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
   writeln('FPC URL:                '+FInstaller.FPCURL);
   writeln('FPC options:            '+FInstaller.FPCOPT);
@@ -306,7 +306,7 @@ begin
   if FInstaller.SkipLazarus then
     writeln('WARNING: Skipping installation/update Lazarus ');
   writeln('');
-  if not bnoconfirm then
+  if not bNoConfirm then
     begin
     write('Continue (Y/n): ');
     readln(sconfirm);

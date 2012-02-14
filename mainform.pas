@@ -83,23 +83,37 @@ end;
 procedure TForm1.UpdateButtonClick(Sender: TObject);
 begin
   Self.UpdateCommand;
-  //todo: perform actual fpcup call
+  //todo: perform actual call to installer, analogous to how fpcup would work
 end;
 
 procedure TForm1.UpdateCommand;
 begin
   //todo: fix this
+  CommandMemo.Text:='fpcup '+FFPCUpParams.DelimitedText; //Show how fpcup cli would be invoked
 end;
 
 procedure TForm1.HeadButtonClick(Sender: TObject);
 begin
-  FPCRevision.Text:=EmptyStr;;
+  FPCRevision.Text:='HEAD';
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
   FFPCUPParams:=TStringList.Create;
+  FFPCUpParams.Delimiter:=' ';
+  FFPCUpParams.StrictDelimiter:=false; //I believe this works best for output
   FInstaller:=TInstaller.Create;
+
+  LazarusPrimaryConfigPath.Directory:=FInstaller.LazarusPrimaryConfigPath; //Get a default primary config path
+  // Set up defaults depending on platform
+  {$IFDEF WINDOWS}
+  //Defaults already set up in design mode GUI or in code above
+  {$ENDIF WINDOWS}
+  {$IFDEF UNIX}
+  FPCBootstrapDir.Directory:='~/fpcbootstrap';
+  FPCDirectory.Directory:='~/fpc';
+  LazarusDirectory.Directory:='~/lazarus';
+  {$ENDIF UNIX}
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -110,7 +124,7 @@ end;
 
 procedure TForm1.LazarusHeadButtonClick(Sender: TObject);
 begin
-  LazarusRevision.Text:=EmptyStr;
+  LazarusRevision.Text:='HEAD';
 end;
 
 {$R *.lfm}
