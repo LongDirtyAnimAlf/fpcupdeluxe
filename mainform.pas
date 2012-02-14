@@ -14,6 +14,8 @@ type
 
   TForm1 = class(TForm)
     CommandMemo: TMemo;
+    FPCBootstrapDir: TDirectoryEdit;
+    Label13: TLabel;
     OutputMemo: TMemo;
     SkipFPC: TCheckBox;
     SkipLazarus: TCheckBox;
@@ -21,7 +23,7 @@ type
     Label12: TLabel;
     LazarusPrimaryConfigPath: TDirectoryEdit;
     LazarusOptionsGroup: TGroupBox;
-    FPCBootstrapDir: TDirectoryEdit;
+    BinutilsDir: TDirectoryEdit;
     LazarusDirectory: TDirectoryEdit;
     FPCOptions: TEdit;
     FPCUpScriptName: TEdit;
@@ -88,7 +90,10 @@ end;
 
 procedure TForm1.UpdateCommand;
 begin
-  //todo: fix this
+  //First update installer properties depending on options chosen
+
+  FFPCUpParams.Clear;
+  //fill FFPCUPParms out using FInstaller settings
   CommandMemo.Text:='fpcup '+FFPCUpParams.DelimitedText; //Show how fpcup cli would be invoked
 end;
 
@@ -110,6 +115,7 @@ begin
   //Defaults already set up in design mode GUI or in code above
   {$ENDIF WINDOWS}
   {$IFDEF UNIX}
+  BinutilsDir.Visible:=false; //No use on Unix
   FPCBootstrapDir.Directory:='~/fpcbootstrap';
   FPCDirectory.Directory:='~/fpc';
   LazarusDirectory.Directory:='~/lazarus';

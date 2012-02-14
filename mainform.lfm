@@ -14,7 +14,7 @@ object Form1: TForm1
     Height = 160
     Top = 168
     Width = 768
-    Caption = 'FPCOptionsGroup'
+    Caption = 'FPC'
     ClientHeight = 142
     ClientWidth = 764
     TabOrder = 0
@@ -169,7 +169,7 @@ object Form1: TForm1
     end
   end
   object GeneralOptionsGroup: TGroupBox
-    Left = 7
+    Left = 6
     Height = 145
     Top = 8
     Width = 769
@@ -182,7 +182,7 @@ object Form1: TForm1
       Height = 23
       Hint = 'Name of the shortcut to the fpcup script (--fpcuplinkname)'
       Top = 16
-      Width = 80
+      Width = 98
       TabOrder = 0
       Text = 'fpcup_update'
     end
@@ -195,15 +195,15 @@ object Form1: TForm1
       ParentColor = False
     end
     object NoFPCUPScriptButton: TButton
-      Left = 286
+      Left = 296
       Height = 25
-      Top = 16
+      Top = 14
       Width = 155
       Caption = 'No FPCUp script/shortcut'
       OnClick = NoFPCUPScriptButtonClick
       TabOrder = 1
     end
-    object FPCBootstrapDir: TDirectoryEdit
+    object BinutilsDir: TDirectoryEdit
       Left = 182
       Height = 23
       Hint = 'Directory where existing FPC compiler is or should be downloaded'
@@ -220,6 +220,27 @@ object Form1: TForm1
       Left = 14
       Height = 16
       Top = 48
+      Width = 124
+      Caption = 'Binutils/make directory'
+      ParentColor = False
+    end
+    object FPCBootstrapDir: TDirectoryEdit
+      Left = 182
+      Height = 23
+      Hint = 'Directory where existing FPC compiler is or should be downloaded'
+      Top = 80
+      Width = 208
+      Directory = 'C:\development\fpcbootstrap'
+      ShowHidden = False
+      ButtonWidth = 23
+      NumGlyphs = 0
+      MaxLength = 0
+      TabOrder = 3
+    end
+    object Label13: TLabel
+      Left = 15
+      Height = 16
+      Top = 80
       Width = 154
       Caption = 'Compiler bootstrap directory'
       ParentColor = False
