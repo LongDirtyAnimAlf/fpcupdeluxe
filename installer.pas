@@ -924,14 +924,17 @@ begin
   Params:=TStringList.Create;
   try
     Params.Add(Executable);
-    if RunOutput('which', Params, Output)=0 then
+    RunOutput('which', Params, Output);
+    //RunOutput returned 0 on a fast x64 although result was correct.
+    while (length(output)>0) and (ord(output[length(output)])<$20) do
+      delete(output,length(output),1); //remove trailing LF
+    if fileexists(Output) then
     begin
-      result:=''; //command failed
+      result:=Output;
     end
     else
     begin
-      result:=Output;
-      while ord(result[length(result)])<$20 do delete(result,length(result),1); //remove trailing LF
+      result:=''; //command failed
     end;
   finally
     Params.Free;
