@@ -1238,7 +1238,7 @@ begin
       // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
       // Find them, the official way.
       // (Used to use CROSSBINDIR, which seemed to work)
-      Params.Add('-OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
+      Params.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
       {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
@@ -1319,7 +1319,7 @@ begin
       // Find them, the official way.
       // (Used to use CROSSBINDIR, which seemed to work)
       // We can rely on binutils being copied to compiler bin path here:
-      Params.Add('-OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -1343,7 +1343,7 @@ begin
         // Find them, the official way.
         // (Used to use CROSSBINDIR, which seemed to work)
         // We can rely on binutils being copied to compiler bin path here:
-        Params.Add('-OPT=-FD'+ExtractFilePath(FInstalledCompiler));         Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
+        Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));         Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1669,27 +1669,15 @@ begin
   if OperationSucceeded then
   begin
     // Build lhelp chm help viewer
-    // todo: while this may compile, to integrate help we need to do more. Taken from readme:
-    // compile+install package <lazarus>/components/chmhelp/packages/idehelp/chmhelppkg.lpk
+    // todo: while this may compile, to integrate help we need to do more. Taken from Laz wiki:
+    // done (via make bigide): compile+install package <lazarus>/components/chmhelp/packages/idehelp/chmhelppkg.lpk
     // compile lhelp
     // configure paths for lhelp
-    // Download/update help from (compiler dependent):
-    // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
-    {
-    Configure the DataBases
-
-       Choose the DataBases tab.
-
-       RTLUnits:
-       this should be "rtl.chm://"
-       FCLUnits:
-       this should be "fcl.chm://"
-
-       NOTE if you have only a single lcl-fcl-rtl.chm file then paths become:
-       "lcl-fcl-rtl.chm://rtl/"
-       "lcl-fcl-rtl.chm://fcl/"
-       "lcl-fcl-rtl.chm://lcl/"
-    }
+    // Download/update help from (note chmhelp readme has fpc only url):
+    // http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%200.9.30.2/fpc-lazarus-doc-chm-0.9.30.2.tar.bz2/download
+    // Copy all CHM files to lazarus/docs/html
+    // Now context sensitive help using F1 should already be working.
+    // reinier: I do suspect we will need to adjust a "help files path" somewhere though; see chmhelp readme
     Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     Params:=TStringList.Create;
     try

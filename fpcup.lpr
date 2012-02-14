@@ -333,7 +333,7 @@ var
 
 begin
   writeln('fpcup');
-  writeln('A FPC/Lazarus downloader/updater/installer');
+  writeln('An FPC/Lazarus downloader/updater/installer');
   writeln('Open source freeware (modified LGPL/BSD), see:');
   writeln('https://bitbucket.org/reiniero/fpcup');
   writeln('');
