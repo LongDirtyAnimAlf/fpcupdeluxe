@@ -30,6 +30,7 @@ program fpcup;
 
 { Command line interface to installing/updating FPC/Lazarus instances }
 {$mode objfpc}{$H+}
+
 {
 Possible additional verifications: check existing fpc locations, versions
 
@@ -49,10 +50,6 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
 begin
-  writeln('fpcup');
-  writeln('A FPC/Lazarus downloader/updater/installer');
-  writeln('Open source freeware (modified LGPL/BSD), see:');
-  writeln('https://bitbucket.org/reiniero/fpcup');
   writeln('');
   writeln('fpcup --<options>');
   writeln('Options are not required; they include:');
@@ -335,11 +332,17 @@ var
   FInstaller: TInstaller;
 
 begin
-  writeln('FCPUp FreePascal/Lazarus downloader/installer started.');
+  writeln('fpcup');
+  writeln('A FPC/Lazarus downloader/updater/installer');
+  writeln('Open source freeware (modified LGPL/BSD), see:');
+  writeln('https://bitbucket.org/reiniero/fpcup');
+  writeln('');
   writeln('This program will download the FPC and Lazarus sources');
   writeln('from the source Subversion/SVN repositories,');
   writeln('compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
+  writeln('fpcup compiled with: '+{$INCLUDE %FPCVERSION%}+' on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%} );
+  writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
 
   try
     // Adjust these directories to taste/your situation.
