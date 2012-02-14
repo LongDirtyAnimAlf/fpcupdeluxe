@@ -184,8 +184,8 @@ var
 
 begin
   FReturnCode := 255; //Preset to failure
-  if not FileExists(FSvnExecutable) then
-    raise ESVNClientError.Create('No SVN executable found');
+  // We could have checked for executable; but at least Windows
+  // will also look in the path, so don't do that.
 
   ExternalProcess := TProcess.Create(nil);
   try
