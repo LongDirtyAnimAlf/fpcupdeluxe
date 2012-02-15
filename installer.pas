@@ -824,7 +824,7 @@ begin
 
   if OperationSucceeded then
   begin
-    // Check for proper FPC bootstrap CompilerName
+    // Check for proper FPC bootstrap compiler
     infoln('Checking for FPC bootstrap compiler: '+BootStrapCompiler);
     try
       Output := '';
