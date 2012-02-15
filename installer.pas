@@ -1714,7 +1714,14 @@ begin
     Params:=TStringList.Create;
     try
       //Don't call params with quotes
-      Params.Add('FPC='+FInstalledCompiler+'');
+      {$IFDEF MSWINDOWS}
+      Params.Add('FPC='+FInstalledCompiler);
+      {$ELSE}
+      if FileExists(FInstalledCompiler+'.sh') then //we didn't abort if creating failed
+        Params.Add('FPC='+FInstalledCompiler+'.sh')
+      else
+        Params.Add('FPC='+FInstalledCompiler);
+      {$ENDIF MSWINDOWS}
       {$IFDEF MSWINDOWS}
       // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
       // Specify the ones the compiler should use:
@@ -1975,4 +1982,4 @@ begin
 end;
 
 end.
-
+
