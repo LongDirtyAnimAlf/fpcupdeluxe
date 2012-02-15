@@ -247,18 +247,14 @@ end;
 procedure Tsvnclient.CheckOutOrUpdate;
 
 begin
-  //todo: for this and update, indicate whether there actually were any updates.
-  //maybe with an oldrevision and newrevision property? something else? the svn log?
   if LocalRepositoryExists = False then
   begin
     // Checkout (first download)
-    //writeln('debug: doing checkout of ' + Repository + ' to ' + LocalRepository + '.');
     Checkout;
   end
   else
   begin
     // Update
-    //writeln('debug: doing update of ' + Repository + ' to ' + LocalRepository + '.');
     Update;
   end;
 end;
@@ -352,8 +348,7 @@ begin
   Output := TStringList.Create;
   try
     Result := False;
-    if (ExecuteSVNCommand('info ' + FLocalRepository, Output) = 0) then
-      Result := False;
+    ExecuteSVNCommand('info ' + FLocalRepository, Output);
     if Pos('Path', Output.Text) > 0 then
       Result := True;
     //This is already covered by setting stuff to false first
@@ -370,10 +365,10 @@ var
   Output: TStringList;
   LRevision: string;
 begin
+  result:=-1;
   Output := TStringList.Create;
   try
-    if (ExecuteSVNCommand('info ' + FLocalRepository, Output) = 0) then
-      Result := -1;
+    ExecuteSVNCommand('info ' + FLocalRepository, Output);
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision: "
     LRevision := Output.Text;
