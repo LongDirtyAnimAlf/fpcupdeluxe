@@ -1897,7 +1897,7 @@ begin
   SetMakePath('');
 
   {$IFDEF MSWINDOWS}
-  AssignFile(FLogFile,ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log');
+  AssignFile(FLogFile,'fpcup.log'); //current directory
   {$ELSE}
   AssignFile(FLogFile,ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log');
   {$ENDIF MSWINDOWS}
@@ -1918,4 +1918,4 @@ begin
 end;
 
 end.
-
+
