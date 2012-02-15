@@ -1254,6 +1254,32 @@ begin
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
+  //Make distclean to clean out any cruft, and speed up svn update
+  if OperationSucceeded then
+  begin
+    // Make distclean; we don't care about failure (e.g. directory might be empty etc)
+    Executable := FMake;
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC='+BootstrapCompiler);
+      {$IFDEF MSWINDOWS}
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
+      Params.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+      {$ENDIF MSWINDOWS}
+      Params.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('distclean');
+      infoln('FPC: running make distclean before checkout/update:');
+      Run(Executable, Params);
+    finally
+      Params.Free;
+    end;
+  end;
+
   infoln('Checking out/updating FPC sources...');
   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision);
   infoln('FPC was at revision: '+BeforeRevision);
@@ -1261,25 +1287,26 @@ begin
 
   if OperationSucceeded then
   begin
-    // Make clean/all/install, using bootstrap compiler. Make all should use generated compiler internally for unit compilation
+    // Make all/install, using bootstrap compiler.
+    // Make all should use generated compiler internally for unit compilation
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      Params.Add('FPC=' + BootstrapCompiler+'');
+      Params.Add('FPC='+BootstrapCompiler);
       {$IFDEF MSWINDOWS}
-      // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Find them, the official way.
-      // (Used to use CROSSBINDIR, which seemed to work)
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
       Params.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
       {$ENDIF MSWINDOWS}
-      Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
+      Params.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('clean');
       Params.Add('all');
       Params.Add('install');
-      infoln('Running make clean all install for FPC:');
+      infoln('Running make all install for FPC:');
       if Run(Executable, Params) <> 0 then
         OperationSucceeded := False;
       {$IFDEF UNIX}
@@ -1347,11 +1374,12 @@ begin
     Params:=TStringList.Create;
     try
       Params.Add('FPC='+FInstalledCompiler+'');
-      // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Find them, the official way.
-      // (Used to use CROSSBINDIR, which seemed to work)
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
       // We can rely on binutils being copied to compiler bin path here:
       Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
       Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       Params.Add('UPXPROG=echo'); //Don't use UPX
@@ -1371,11 +1399,12 @@ begin
         // Params already assigned
         Params.Clear;
         Params.Add('FPC='+FInstalledCompiler+'');
-        // Binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-        // Find them, the official way.
-        // (Used to use CROSSBINDIR, which seemed to work)
+        // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+        // Specify the ones the compiler should use:
         // We can rely on binutils being copied to compiler bin path here:
-        Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));         Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
+        Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+        //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+        Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
         Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1418,13 +1447,12 @@ begin
         infoln('Debug: Running fpcmkcfg: ');
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
-
       finally
         Params.Free;
       end;
     {$IFDEF UNIX}
     {$IFDEF cpuarmel}
-    // need to add multiarch library search path
+    // Need to add multiarch library search path
     AssignFile(TxtFile,FPCCfg);
     Append(TxtFile);
     Writeln(TxtFile,'# multiarch library search path');
@@ -1492,12 +1520,12 @@ var
   Params: TStringList;
 begin
   if SkipLazarus then
-    begin
-    result:=true;  //continue with lazarus
+  begin
+    result:=true;  //continue with whatever we do next
     infoln('Lazarus installation/update skipped by user.');
     writeln(FLogFile,'Lazarus installation/update skipped by user.');
     exit;
-    end;
+  end;
   writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
   writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
   writeln(FLogFile,'Lazarus URL:            '+LazarusURL);
@@ -1508,13 +1536,41 @@ begin
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
 
-  // If we haven't installed FPC, this won't be set
+  // If we haven't installed FPC, this won't be set:
   if FInstalledCompiler = '' then
   begin
     //Assume we've got a working compiler. This will link through to the
     //platform-specific CompilerName
     SetCompilerToInstalledCompiler;
   end;
+
+  //Make distclean to clean out any cruft, and speed up svn update
+  if OperationSucceeded then
+  begin
+    // Make distclean; we don't care about failure (e.g. directory might be empty etc)
+    Executable := FMake;
+    Params:=TStringList.Create;
+    try
+      Params.Add('FPC='+FInstalledCompiler+'');
+      {$IFDEF MSWINDOWS}
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
+      // We can rely on binutils being copied to compiler bin path here:
+      Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+      {$ENDIF MSWINDOWS}
+      Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+      Params.Add('UPXPROG=echo'); //Don't use UPX
+      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Params.Add('distclean');
+      infoln('Lazarus: running make distclean before checkout/update:');
+      Run(Executable, Params);
+    finally
+      Params.Free;
+    end;
+  end;
+
 
   // Download Lazarus source:
   if OperationSucceeded = True then
@@ -1544,8 +1600,12 @@ begin
       try
         //Don't call params with quotes
         Params.Add('FPC='+FInstalledCrossCompiler+'');
-        //Should not be needed as we already copied binutils to fpc CompilerName dir
-        //Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils; TODO: perhaps replace with 64 bit version?
+        // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+        // Specify the ones the compiler should use:
+        // We can rely on binutils being copied to compiler bin path here:
+        Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+        //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+        Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
         Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
         Params.Add('UPXPROG=echo'); //Don't use UPX
         Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1562,28 +1622,6 @@ begin
       end;
     end;
   end;
-
-  //After this, make clean again so compiler does not get confused with 64 bit units...
-  if OperationSucceeded then
-  begin
-    // Make clean; failure here might be recoverable, so no fiddling with OperationSucceeded
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      // Directory parameters for make must not have trailing / or \
-      Params.Add('FPC='+FInstalledCompiler+'');
-      //Should not be needed as we already copied binutils to fpc CompilerName dir
-      //Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory)); //Show make where to find the binutils
-      Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('clean');
-      infoln('Lazarus: running make clean after LCL crosscompiler:');
-      Run(Executable, Params);
-    finally
-      Params.Free;
-    end;
-  end;
   {$ENDIF MSWINDOWS}
 
   if OperationSucceeded then
@@ -1595,6 +1633,12 @@ begin
     try
       {$IFDEF MSWINDOWS}
       Params.Add('FPC='+FInstalledCompiler);
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
+      // We can rely on binutils being copied to compiler bin path here:
+      Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
       {$ELSE}
       if FileExists(FInstalledCompiler+'.sh') then //we didn't abort if creating failed
         Params.Add('FPC='+FInstalledCompiler+'.sh')
@@ -1671,8 +1715,14 @@ begin
     try
       //Don't call params with quotes
       Params.Add('FPC='+FInstalledCompiler+'');
-      //Should not be needed as we already copied binutils to fpc CompilerName dir
-      //Params.Add('CROSSBINDIR='+FBinutilsDirNoBackslash+''); //Show make where to find the binutils
+      {$IFDEF MSWINDOWS}
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
+      // We can rely on binutils being copied to compiler bin path here:
+      Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+      {$ENDIF MSWINDOWS}
       Params.Add('--directory='+LazarusDirectory+'');
       Params.Add('UPXPROG=echo'); //Don't use UPX
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1730,8 +1780,7 @@ begin
     // Build lhelp chm help viewer
     // todo: while this may compile, to integrate help we need to do more. Taken from Laz wiki:
     // configure paths for lhelp
-    // Download/update help from (note chmhelp readme has fpc only url):
-    // http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%200.9.30.2/fpc-lazarus-doc-chm-0.9.30.2.tar.bz2/download
+    // Download/update fpc help (see chmhelp readme)
     // Copy all CHM files to lazarus/docs/html
     // same for fpc help
     // Now context sensitive help using F1 should already be working.
