@@ -60,7 +60,7 @@ type
     procedure CheckOut;
     //Performs an SVN checkout (initial download), HEAD (latest revision) only for speed
     procedure CheckOutOrUpdate;
-    //Pulls SVN checkout if local repository doesn't exist, else does an update
+    //Runs SVN checkout if local repository doesn't exist, else does an update
     function FindSVNExecutable: string;
     //Search for installed SVN executable (might return just a filename if in the OS path)
     procedure Log(var Log: TStringList); //Shows commit log for local directory
@@ -74,14 +74,18 @@ type
     function ExecuteSvnCommand(const Command: string): integer;
     //Executes a free form SVN command; returns SVN client exit code
     function LocalRepositoryExists: boolean;
+    //Checks to see if local directory is a valid SVN repository
     property LocalRepository: string read FLocalRepository write FLocalRepository;
     //Local directory that has an SVN repository/checkout
     function LocalRevision: integer; //Revision number of local repository
     property Repository: string read FRepositoryURL write FRepositoryURL;
+    //URL where central SVN repository is placed
     property Revision: string read FRevision write SetRevision;
+    //Get/set desired revision to pull to (if none given, use HEAD)
     property ReturnCode: integer read FReturnCode;
     //Exit code returned by last SVN client command. Useful for troubleshooting
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
+    //SVN client executable. Can be set to explicitly determine which executable to use.
     constructor Create;
     destructor Destroy; override;
   end;

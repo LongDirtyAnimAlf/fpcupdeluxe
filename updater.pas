@@ -111,9 +111,9 @@ begin
   StartRevision:=-1;
   FSVNClient.LocalRepository := FPCDirectory;
   FSVNClient.Repository := FPCURL;
-  FSVNClient.Revision:=FFPCRevision;
   StartRevision:=FSVNClient.LocalRevision;
-  FSVNClient.Revert;
+  FSVNClient.Revert; //Remove local changes
+  FSVNClient.Revision:=FFPCRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
@@ -125,10 +125,10 @@ var
 begin
   StartRevision:=-1;
   FSVNClient.LocalRepository := LazarusDirectory;
-  FSVNClient.Revert;
   FSVNClient.Repository := FLazarusURL;
   StartRevision:=FSVNClient.LocalRevision;
-  FSVNClient.Revision:=FLazarusRevision;
+  FSVNClient.Revert; //Remove local changes
+  FSVNClient.Revision:=FLazarusRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
@@ -149,4 +149,4 @@ begin
 end;
 
 end.
-
+
