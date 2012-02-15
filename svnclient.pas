@@ -360,7 +360,7 @@ end;
 
 function TSVNClient.LocalRevision: integer;
 const
-  RevLength = Length('Revision: ');
+  RevLength = Length('Revision:');
 var
   Output: TStringList;
   LRevision: string;
@@ -370,9 +370,11 @@ begin
   try
     ExecuteSVNCommand('info ' + FLocalRepository, Output);
     // Could have used svnversion but that would have meant calling yet another command...
-    // Get the part after "Revision: "
     LRevision := Output.Text;
-    Result := StrToIntDef(trim(copy(Revision, pos('Revision: ', Revision) + 9, 6)), -1);
+    // Get the part after "Revision:"
+    Result := StrToIntDef(trim(copy(LRevision,
+      (pos('Revision: ', LRevision) + RevLength),
+      6)), -1);
   finally
     Output.Free;
   end;

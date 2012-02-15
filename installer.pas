@@ -1228,7 +1228,7 @@ begin
 
   infoln('Checking out/updating FPC sources...');
   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision);
-  infoln('FPC was at revision:    '+BeforeRevision);
+  infoln('FPC was at revision: '+BeforeRevision);
   if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision);
 
   if OperationSucceeded then
@@ -1482,7 +1482,7 @@ begin
   begin
     infoln('Checking out/updating Lazarus sources...');
     OperationSucceeded := FUpdater.UpdateLazarus(BeforeRevision, AfterRevision);
-    infoln('Lazarus was at revision:    '+BeforeRevision);
+    infoln('Lazarus was at revision: '+BeforeRevision);
     if FUpdater.Updated then infoln('Lazarus is now at revision: '+AfterRevision);
   end;
 
