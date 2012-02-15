@@ -925,9 +925,11 @@ begin
   try
     Params.Add(Executable);
     RunOutput('which', Params, Output);
-    //RunOutput returned 0 on a fast x64 although result was correct.
+    //Remove trailing LF(s) and other control codes:
     while (length(output)>0) and (ord(output[length(output)])<$20) do
-      delete(output,length(output),1); //remove trailing LF
+      delete(output,length(output),1);
+    // We could have checked for RunOutput exitcode, but why not
+    // do file existence check instead:
     if fileexists(Output) then
     begin
       result:=Output;
@@ -1229,7 +1231,7 @@ begin
   infoln('Checking out/updating FPC sources...');
   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision);
   infoln('FPC was at revision: '+BeforeRevision);
-  if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision);
+  if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision) else infoln('No updates for FPC found.');
 
   if OperationSucceeded then
   begin
@@ -1483,7 +1485,7 @@ begin
     infoln('Checking out/updating Lazarus sources...');
     OperationSucceeded := FUpdater.UpdateLazarus(BeforeRevision, AfterRevision);
     infoln('Lazarus was at revision: '+BeforeRevision);
-    if FUpdater.Updated then infoln('Lazarus is now at revision: '+AfterRevision);
+    if FUpdater.Updated then infoln('Lazarus is now at revision: '+AfterRevision) else infoln('No updates for Lazarus found.');
   end;
 
   // Make sure primary config path exists
