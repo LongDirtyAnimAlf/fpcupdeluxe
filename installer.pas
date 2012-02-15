@@ -1665,6 +1665,7 @@ begin
   if OperationSucceeded then
   begin
     // Make bigide: ide with additional packages as specified by user (in primary config path?)
+    // this should also make the lhelp package needed for CHM Help.
     Executable := FMake;
     Params:=TStringList.Create;
     try
@@ -1728,12 +1729,11 @@ begin
   begin
     // Build lhelp chm help viewer
     // todo: while this may compile, to integrate help we need to do more. Taken from Laz wiki:
-    // done (via make bigide): compile+install package <lazarus>/components/chmhelp/packages/idehelp/chmhelppkg.lpk
-    // compile lhelp
     // configure paths for lhelp
     // Download/update help from (note chmhelp readme has fpc only url):
     // http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%200.9.30.2/fpc-lazarus-doc-chm-0.9.30.2.tar.bz2/download
     // Copy all CHM files to lazarus/docs/html
+    // same for fpc help
     // Now context sensitive help using F1 should already be working.
     // reinier: I do suspect we will need to adjust a "help files path" somewhere though; see chmhelp readme
     Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
@@ -1746,6 +1746,46 @@ begin
         'lhelp'+DirectorySeparator+
         'lhelp.lpr');
       infoln('Lazarus: compiling lhelp help viewer:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+    Params:=TStringList.Create;
+    try
+      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'docs'+DirectorySeparator+
+        'html'+DirectorySeparator+
+        'build_lcl_docs.lpr');
+      infoln('Lazarus: compiling build_lcl_docs help compiler:');
+      if (Run(Executable, Params)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Compile Lazarus CHM help
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'docs'+DirectorySeparator+
+        'html'+DirectorySeparator+
+        'build_lcl_docs'+FExecutableExtension;
+    Params:=TStringList.Create;
+    try
+      //todo: fiddle with path such as done in build_chm.bat?
+      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+      Params.Add('--outfmt');
+      Params.Add('chm');
+      infoln('Lazarus: compiling chm help docs:');
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
     finally
