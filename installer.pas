@@ -1785,7 +1785,7 @@ begin
     Params:=TStringList.Create;
     try
       //todo: get .xct files from fpc so LCL CHM can link to it??!
-      Params.Add('--fpcdoc');
+      Params.Add('--fpdoc');
       Params.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+FExecutableExtension); //fpdoc gets called by build_lcl_docs
       Params.Add('--outfmt');
       Params.Add('chm');
