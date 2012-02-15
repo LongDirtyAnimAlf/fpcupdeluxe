@@ -1772,6 +1772,9 @@ begin
     end;
   end;
 
+  //todo: get/compile FPC docs CHM help
+  //get .xct files for FPC help so we can use that in build_lcl_docs below
+
   if OperationSucceeded then
   begin
     // Compile Lazarus CHM help
@@ -1781,11 +1784,13 @@ begin
         'build_lcl_docs'+FExecutableExtension;
     Params:=TStringList.Create;
     try
-      //todo: fiddle with path such as done in build_chm.bat?
-      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+      //todo: get .xct files from fpc so LCL CHM can link to it??!
+      Params.Add('--fpcdoc');
+      Params.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+FExecutableExtension); //fpdoc gets called by build_lcl_docs
       Params.Add('--outfmt');
       Params.Add('chm');
       infoln('Lazarus: compiling chm help docs:');
+      //they get output into <lazarusdir>/docs/html/lcl/lcl.chm
       if (Run(Executable, Params)) <> 0 then
         OperationSucceeded := False;
     finally
