@@ -1837,6 +1837,8 @@ begin
 end;
 
 constructor Tinstaller.Create;
+var
+  LogFileName: string;
 begin
   // We'll set the bootstrap compiler to a file in the temp dir.
   // This won't exist so the CheckAndGetNeededExecutables code will download it for us.
@@ -1897,11 +1899,12 @@ begin
   SetMakePath('');
 
   {$IFDEF MSWINDOWS}
-  AssignFile(FLogFile,'fpcup.log'); //current directory
+  LogFileName:='fpcup.log'; //current directory
   {$ELSE}
-  AssignFile(FLogFile,ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log');
+  LogFileName:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
   {$ENDIF MSWINDOWS}
-  if FileExistsUTF8(ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log') then
+  AssignFile(FLogFile,LogFileName);
+  if FileExistsUTF8(LogFileName) then
     Append(FLogFile)
   else
     Rewrite(FLogFile);
