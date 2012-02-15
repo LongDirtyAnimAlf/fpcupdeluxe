@@ -1203,6 +1203,8 @@ end;
 
 function Tinstaller.GetFPC: boolean;
 var
+  AfterRevision: string;
+  BeforeRevision: string;
   BinPath: string; //Path where installed CompilerName ends up
   Executable: string;
   FileCounter:integer;
@@ -1225,7 +1227,9 @@ begin
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
   infoln('Checking out/updating FPC sources...');
-  if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC;
+  if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision);
+  infoln('FPC was at revision:    '+BeforeRevision);
+  if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision);
 
   if OperationSucceeded then
   begin
@@ -1449,6 +1453,8 @@ function Tinstaller.GetLazarus: boolean;
 // GetFPC would install it ;)
 // Assumed: binutils in fpc dir or in path
 var
+  AfterRevision: string;
+  BeforeRevision: string;
   Executable: string;
   LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
@@ -1475,7 +1481,9 @@ begin
   if OperationSucceeded = True then
   begin
     infoln('Checking out/updating Lazarus sources...');
-    OperationSucceeded := FUpdater.UpdateLazarus;
+    OperationSucceeded := FUpdater.UpdateLazarus(BeforeRevision, AfterRevision);
+    infoln('Lazarus was at revision:    '+BeforeRevision);
+    if FUpdater.Updated then infoln('Lazarus is now at revision: '+AfterRevision);
   end;
 
   // Make sure primary config path exists
@@ -1816,4 +1824,4 @@ begin
 end;
 
 end.
-
+

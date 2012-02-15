@@ -66,8 +66,8 @@ type
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     //Which SVN executable to use
     property Updated: boolean read FUpdated; // Shows whether new files where downloaded/checked out/updated
-    function UpdateFPC: boolean; // Checks out or updates FPC source
-    function UpdateLazarus: boolean; //Checks out or updates Lazarus source
+    function UpdateFPC(var BeforeRevision, AfterRevision: string): boolean; // Checks out or updates FPC source
+    function UpdateLazarus(var BeforeRevision, AfterRevision: string): boolean; //Checks out or updates Lazarus source
     constructor Create;
     destructor Destroy; override;
   end;
@@ -92,6 +92,7 @@ begin
   Result := FSVNClient.SVNExecutable;
 end;
 
+
 procedure TUpdater.SetFPCRevision(AValue: string);
 begin
   if FFPCRevision=AValue then Exit;
@@ -104,33 +105,33 @@ begin
   FLazarusRevision:=AValue;
 end;
 
-function Tupdater.Updatefpc: boolean;
-var
-  StartRevision: integer;
+function Tupdater.UpdateFPC(var BeforeRevision, AfterRevision: string): boolean;
 begin
-  StartRevision:=-1;
+  BeforeRevision:='failure';
+  AfterRevision:='failure';
   FSVNClient.LocalRepository := FPCDirectory;
   FSVNClient.Repository := FPCURL;
-  StartRevision:=FSVNClient.LocalRevision;
+  BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
   FSVNClient.Revert; //Remove local changes
   FSVNClient.Revision:=FFPCRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
-  if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
+  AfterRevision:=IntToStr(FSVNClient.LocalRevision);
+  if BeforeRevision<>AfterRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
 end;
 
-function Tupdater.Updatelazarus: boolean;
-var
-  StartRevision: integer;
+function Tupdater.UpdateLazarus(var BeforeRevision, AfterRevision: string): boolean;
 begin
-  StartRevision:=-1;
+  BeforeRevision:='failure';
+  AfterRevision:='failure';
   FSVNClient.LocalRepository := LazarusDirectory;
   FSVNClient.Repository := FLazarusURL;
-  StartRevision:=FSVNClient.LocalRevision;
+  BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
   FSVNClient.Revert; //Remove local changes
   FSVNClient.Revision:=FLazarusRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
-  if FSVNClient.LocalRevision<>StartRevision then FUpdated:=true else FUpdated:=false;
+  AfterRevision:=IntToStr(FSVNClient.LocalRevision);
+  if BeforeRevision<>AfterRevision then FUpdated:=true else FUpdated:=false;
   Result := True;
 end;
 
