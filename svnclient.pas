@@ -51,11 +51,13 @@ type
     FReturnCode: integer;
     FRevision: string;
     FSVNExecutable: string;
+    FVerbose: boolean;
     function ExecuteCommand(const Executable, Parameters: string; Output: TStream): integer;
     // Execute external command; put stdout in Output; return exitcode
     function GetSVNExecutable: string;
     procedure SetRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
+    procedure SetVerbose(AValue: boolean);
   public
     procedure CheckOut;
     //Performs an SVN checkout (initial download), HEAD (latest revision) only for speed
@@ -86,6 +88,7 @@ type
     //Exit code returned by last SVN client command. Useful for troubleshooting
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     //SVN client executable. Can be set to explicitly determine which executable to use.
+    property Verbose:boolean read FVerbose write SetVerbose;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -182,6 +185,8 @@ var
     begin
       ReadBytes := ExternalProcess.Output.Read(Buffer, BufSize);
       Output.Write(Buffer, ReadBytes);
+      if Verbose then
+        write(copy(pchar(@buffer[0]),1,ReadBytes));
       Result := True;
     end;
   end;
@@ -276,6 +281,12 @@ begin
     FSVNExecutable := AValue;
     FindSVNExecutable; //Make sure it actually exists
   end;
+end;
+
+procedure TSVNClient.SetVerbose(AValue: boolean);
+begin
+  if FVerbose=AValue then Exit;
+  FVerbose:=AValue;
 end;
 
 procedure Tsvnclient.Update;

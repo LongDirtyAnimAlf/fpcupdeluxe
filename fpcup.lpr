@@ -97,6 +97,7 @@ begin
   writeln('                       directory is used.');
   writeln(' skipfpc               Do not update or build FPC.');
   writeln(' skiplaz               Do not update or build Lazarus.');
+  writeln(' verbose               Show output from svn and make');
   writeln('');
 end;
 
@@ -120,6 +121,7 @@ const
   SkipFPC='skipfpc';
   SkipLaz='skiplaz';
   NoConfirm='noconfirm';
+  Verbose='verbose';
 var
   ErrorMessage: string;
   AllOptions,FPCUpLink:string;
@@ -152,7 +154,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
-    SkipFPC+' '+SkipLaz+' '+NoConfirm+' '+
+    SkipFPC+' '+SkipLaz+' '+NoConfirm+' '+ Verbose+' '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
   if Length(ErrorMessage) > 0 then
   begin
@@ -255,6 +257,7 @@ begin
 
   FInstaller.SkipFPC:=Application.HasOption(SkipFPC);
   FInstaller.SkipLazarus:=Application.HasOption(SkipLaz);
+  FInstaller.Verbose:=Application.HasOption(Verbose);
   bNoConfirm:=Application.HasOption(NoConfirm);
 
   // FpcupLinkName has to be the last since here we store AllOptions !!

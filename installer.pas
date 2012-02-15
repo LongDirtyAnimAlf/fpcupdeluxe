@@ -60,6 +60,7 @@ type
     FInstalledCrossCompiler: string; //Complete path to an optional cross compiler that we installed (also used for Lazarus)
     FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string;
+    FLogFile:Text;
     FMake: string;
     FShortCutNameFpcup: string;
     {$IFDEF MSWINDOWS}
@@ -73,6 +74,7 @@ type
     FTar: string; //Location or name of tar executable
     FUpdater: TUpdater;
     FUnzip: string; //Location or name of unzip executable
+    FVerbose: boolean;
     procedure CreateBinutilsList;
     procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
     procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
@@ -97,6 +99,7 @@ type
     procedure SetShortCutNameFpcup(AValue: string);
     procedure SetSkipFPC(AValue: boolean);
     procedure SetSkipLazarus(AValue: boolean);
+    procedure SetVerbose(AValue: boolean);
     function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
@@ -148,6 +151,7 @@ type
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     property SkipFPC:boolean read FSkipFPC write SetSkipFPC;
     property SkipLazarus:boolean read FSkipLazarus write SetSkipLazarus;
+    property Verbose:boolean read FVerbose write SetVerbose;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -1015,6 +1019,7 @@ function TInstaller.Run(Executable: string; const Params: TStringList): longint;
 { Runs executable without showing output, unless something went wrong (result code<>0) }
 var
   OutputStringList: TStringList;
+  TempFileName:string;
 begin
   infoln('Calling:');
   infoln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
@@ -1025,6 +1030,10 @@ begin
     begin
       infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
       infoln(OutputStringList.Text);
+      TempFileName:=SysUtils.GetTempFileName;
+      OutputStringList.SaveToFile(TempFileName);
+      WriteLn(FLogFile,'ERROR running ',Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
+      WriteLn(FLogFile,'  output logged in ',TempFileName);
     end;
   finally
     OutputStringList.Free;
@@ -1050,6 +1059,8 @@ var
     begin
       ReadBytes := SpawnedProcess.Output.Read(Buffer, BufSize);
       OutputStream.Write(Buffer, ReadBytes);
+      if Verbose then
+        write(copy(pchar(@buffer[0]),1,ReadBytes));
       Result := True;
     end;
   end;
@@ -1185,6 +1196,13 @@ begin
   FSkipLazarus:=AValue;
 end;
 
+procedure TInstaller.SetVerbose(AValue: boolean);
+begin
+  FUpdater.Verbose:=AValue;
+  if FVerbose=AValue then Exit;
+  FVerbose:=AValue;
+end;
+
 procedure TInstaller.SetLazarusUrl(AValue: string);
 begin
   FUpdater.LazarusURL := AValue;
@@ -1222,8 +1240,16 @@ begin
     begin
     result:=true;  //continue with lazarus
     infoln('FPC installation/update skipped by user.');
+    writeln(FLogFile,'FPC installation/update skipped by user.');
     exit;
     end;
+  writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
+  writeln(FLogFile,'FPC URL:                '+FPCURL);
+  writeln(FLogFile,'FPC options:            '+FPCOPT);
+  writeln(FLogFile,'FPC directory:          '+FPCDirectory);
+  {$IFDEF MSWINDOWS}
+  writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
+  {$ENDIF MSWINDOWS}
 
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
@@ -1433,7 +1459,8 @@ begin
     writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
     writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
          IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -Xp',
-         IncludeTrailingPathDelimiter(FPCDirectory),'compiler/ $*');
+         IncludeTrailingPathDelimiter(FPCDirectory),'compiler/ -FD'+
+         IncludeTrailingPathDelimiter(BinPath)+' $*');
     CloseFile(TxtFile);
     OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Update status
     if OperationSucceeded then
@@ -1446,6 +1473,8 @@ begin
     end;
   end;
   {$ENDIF UNIX}
+  if OperationSucceeded then
+    writeln(FLogFile,'FPC update succeeded at revision number ', AfterRevision);
   Result := OperationSucceeded;
 end;
 
@@ -1466,8 +1495,16 @@ begin
     begin
     result:=true;  //continue with lazarus
     infoln('Lazarus installation/update skipped by user.');
+    writeln(FLogFile,'Lazarus installation/update skipped by user.');
     exit;
     end;
+  writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
+  writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
+  writeln(FLogFile,'Lazarus URL:            '+LazarusURL);
+  writeln(FLogFile,'Lazarus options:        '+LazarusOPT);
+  writeln(FLogFile,'Lazarus shortcut name:  '+ShortCutName);
+  if ShortCutNameFpcup<>'' then
+    writeln(FLogFile,'Shortcut fpcup name:    '+ShortCutNameFpcup);
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
 
@@ -1754,6 +1791,8 @@ begin
     end;
   end;
 
+  if OperationSucceeded then
+    writeln(FLogFile,'Lazarus update succeeded at revision number ', AfterRevision);
   Result := OperationSucceeded;
 end;
 
@@ -1816,14 +1855,27 @@ begin
   FUpdater := TUpdater.Create;
   SetLazarusPrimaryConfigPath(''); //Let property set up platform-dependent default
   SetMakePath('');
+
+  {$IFDEF MSWINDOWS}
+  AssignFile(FLogFile,ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log');
+  {$ELSE}
+  AssignFile(FLogFile,ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log');
+  {$ENDIF MSWINDOWS}
+  if FileExistsUTF8(ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log') then
+    Append(FLogFile)
+  else
+    Rewrite(FLogFile);
+  WriteLn(FLogFile,DateTimeToStr(now),': fpcup started.');
 end;
 
 destructor Tinstaller.Destroy;
 begin
+  WriteLn(FLogFile,DateTimeToStr(now),': fpcup finished.');
+  CloseFile(FLogFile);
   FUpdater.Free;
   FBinUtils.Free;
   inherited Destroy;
 end;
 
 end.
-
+

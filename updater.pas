@@ -51,10 +51,12 @@ type
     FLazarusURL: string;
     FSVNClient: TSVNClient;
     FUpdated: boolean;
+    FVerbose: boolean;
     function GetSVNExecutable: string;
     procedure SetFPCRevision(AValue: string);
     procedure SetLazarusRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
+    procedure SetVerbose(AValue: boolean);
   public
     function FindSVNExecutable: string; //Search for installed SVN executable
     property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
@@ -66,6 +68,7 @@ type
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     //Which SVN executable to use
     property Updated: boolean read FUpdated; // Shows whether new files where downloaded/checked out/updated
+    property Verbose:boolean read FVerbose write SetVerbose;
     function UpdateFPC(var BeforeRevision, AfterRevision: string): boolean; // Checks out or updates FPC source
     function UpdateLazarus(var BeforeRevision, AfterRevision: string): boolean; //Checks out or updates Lazarus source
     constructor Create;
@@ -80,6 +83,13 @@ implementation
 procedure TUpdater.SetSVNExecutable(AValue: string);
 begin
   FSVNClient.SVNExecutable := AValue;
+end;
+
+procedure TUpdater.SetVerbose(AValue: boolean);
+begin
+  FSVNClient.Verbose := AValue;
+  if FVerbose=AValue then Exit;
+  FVerbose:=AValue;
 end;
 
 function TUpdater.FindSVNExecutable: string;
@@ -150,4 +160,4 @@ begin
 end;
 
 end.
-
+
