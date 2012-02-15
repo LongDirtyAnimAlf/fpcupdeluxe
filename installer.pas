@@ -1210,7 +1210,7 @@ var
   FPCScript: string;
   OperationSucceeded: boolean;
   Params: TstringList;
-  Script:text;
+  TxtFile:text;
   SearchRec:TSearchRec;
   FPCVersion:string;
 begin
@@ -1386,9 +1386,20 @@ begin
         infoln('Debug: Running fpcmkcfg: ');
         if Run(Executable, Params) <> 0 then
           OperationSucceeded := False;
+
       finally
         Params.Free;
       end;
+    {$IFDEF UNIX}
+    {$IFDEF cpuarmel}
+    // need to add multiarch library search path
+    AssignFile(TxtFile,FPCCfg);
+    Append(TxtFile);
+    Writeln(TxtFile,'# multiarch library search path');
+    Writeln(TxtFile,'-Fl/usr/lib/$fpctarget-*');
+    CloseFile(TxtFile);
+    {$ENDIF armelcpu}
+    {$ENDIF UNIX}
     end
     else
     begin
@@ -1408,16 +1419,16 @@ begin
       infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
       sysutils.DeleteFile(FPCScript);
     end;
-    AssignFile(Script,FPCScript);
-    Rewrite(Script);
-    writeln(Script,'#!/bin/sh');
-    writeln(Script,'# This script starts the fpc compiler installed by fpcup');
-    writeln(Script,'# and ignores any system-wide fpc.cfg files');
-    writeln(Script,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-    writeln(Script,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
+    AssignFile(TxtFile,FPCScript);
+    Rewrite(TxtFile);
+    writeln(TxtFile,'#!/bin/sh');
+    writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+    writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+    writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+    writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
          IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -Xp',
          IncludeTrailingPathDelimiter(FPCDirectory),'compiler/ $*');
-    CloseFile(Script);
+    CloseFile(TxtFile);
     OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Update status
     if OperationSucceeded then
     begin
@@ -1805,4 +1816,4 @@ begin
 end;
 
 end.
-
+
