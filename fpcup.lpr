@@ -153,7 +153,7 @@ begin
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
     SkipFPC+' '+SkipLaz+' '+NoConfirm+' '+
-    LazLinkName+': '+FpcupLinkName+': '+LazURL+':'+PrimaryConfigPath+':');
+    LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
   if Length(ErrorMessage) > 0 then
   begin
     writeln('Error: wrong command line options given:');
@@ -370,4 +370,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
