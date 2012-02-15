@@ -23,11 +23,58 @@ On Linux/OSX: the binutils (make etc), and an svn client.
 E.g. on Debian:
 aptitude install build-essential subversion
 
+How does it work?
+=================
+FPCUp is a fancy batch script written in FPC/Lazarus ;)
+
+1. Checking/downloading prerequisites:
+- On Windows, it checks whether make.exe and unzip.exe are present in the binutils directory (default or user-specified).
+If not, it downloads them.
+- It checks if make.exe is GNU make, and not e.g. Delphi/Borland make.
+- It checks whether a Subversion client is available. On Windows: if there isn't, it downloads one.
+- If bootstrap compilers need to be downloaded, a certain unarchiver utility is needed, depending on the way the compiler is compressed.
+FPCUp checks unzip.exe for Windows, gnutar for OSX, and bunzip2 for Linux.
+- It checks if there is a valid FPC compiler in the bootstrap directory the user specified (or default).
+If it doesn't exist, it downloads a bootstrap compiler.
+
+2. Getting and compiling FPC
+- It checks out or updates FPC using Subversion.
+- It compiles FPC using the bootstrap compiler.
+- It creates a valid fpc.cfg for the new compiler.
+- On OSX/Linux: it creates a dummy fpc.sh designed to filter out existing system wide fpc.cfg (e.g. /etc/fpc.cfg) and places that in the FPC directory
+
+3. Getting and compiling Lazarus
+- It checks out or updates Lazarus using Subversion.
+- It compiles Lazarus using the installed FPC compiler (Linux/OSX: fpc.sh) and fpc.cfg
+- It does the same using make bigide, in order to get as many .lpk files compiled and included as possible
+- It creates a minimum configuration (environmentoptions.xml) in a separate primary-config-path, or updates that config with: the compiler, the FPC source directory, make location, gdb location.
+- When done, it creates a shortcut on your desktop (Windows) or shell script in home directory to the newly installed Lazarus
+
+4. Compiling additional utilities & finishing up
+- Fpcup compiles the Lazarus lhelp CHM viewer (LazDE) using lazbuild in the newly compiled Lazarus directory
+- Fpcup compiles the Lazarus documentation editor (LazDE) using lazbuild in the newly compiled Lazarus directory
+- Fpcup compiles the Lazarus data desktop using lazbuild in the newly compiled Lazarus directory
+- When done, it will create a shortcut on your desktop (Windows) or home directory shell script to fpcup with all the options you chose, so you don't have to type it all again
+
+Troubleshooting
+===============
+A big problem in designing this utility was to keep systemwide fpc.cfg on Unix/Linux from interfering with our FPC install.
+It seems the only way around this is to write a fpc proxy (fpc.sh) that explicitly ignores any fpc.cfgs).
+
+To check whether this works:
+cd ~/<yourlazarusdirectory>
+#Check system wide settings (look for FPC, FPC version, FPCDIR and UnitsDir:
+make fpc_baseinfo | less
+#Check (look for FPC, FPC version, FPCDIR and UnitsDir:
+#this should pick up the proper unit path, fpcdir and version from the fpcup-installed fpc version
+make fpc_baseinfo FPC=~/<yourfpcdirectory>/bin/fpc.sh
+~/<yourfpcdirectory>/bin/fpc.sh -vut # or something?
+
 Status
 ======
 Still in development, but does work to keep my development copies of FPC fixes_2.6 and Lazarus up to date on Windows.
 
-Busy adapting it to Linux/OSX and bugfixing Windows bootstrap functionality.
+Busy adapting it to OSX.
 Patches/updates welcome, pleas see 
 https://bitbucket.org/reiniero/fpcup/issues
 

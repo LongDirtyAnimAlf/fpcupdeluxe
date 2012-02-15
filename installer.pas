@@ -846,7 +846,7 @@ begin
         end
         else
         begin
-          //valid FPC CompilerName
+          //valid FPC compiler
           infoln('Found valid FPC bootstrap compiler.');
           OperationSucceeded:=true;
         end;
@@ -865,7 +865,7 @@ begin
         OperationSucceeded := False;
       end;
     end;
-    // Still within bootstrap CompilerName test...
+    // Still within bootstrap compilertest...
     if OperationSucceeded=false then
     begin
       infoln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
