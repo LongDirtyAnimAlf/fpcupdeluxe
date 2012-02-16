@@ -87,6 +87,8 @@ type
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
     function CheckAndGetNeededExecutables: boolean;
+    procedure EnvironmentWithOurPath(var EnvironmentList: TStringList; const NewPath: string);
+    // Return complete environment except replace path with our own value
     function FindSVNSubDirs(): boolean;
     function GetBootstrapCompiler: string;
     function GetCompilerName: string;
@@ -107,9 +109,9 @@ type
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
     function GetMakePath: string;
-    function Run(Executable: string; const Params: TStringList): longint;
-    function RunOutput(Executable: string; const Params: TStringList; var Output: TStringList): longint;
-    function RunOutput(Executable: string; const Params: TStringList; var Output: string): longint;
+    function Run(Executable: string; const Params: TStringList; const NewPath: string): longint;
+    function RunOutput(Executable: string; const Params: TStringList; const NewPath: string; var Output: TStringList): longint;
+    function RunOutput(Executable: string; const Params: TStringList; const NewPath: string; var Output: string): longint;
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetCompilerToInstalledCompiler;
     procedure SetFPCDirectory(Directory: string);
@@ -386,7 +388,7 @@ begin
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(ArchiveDir);
       Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FUnzip, Params) <> 0 then
+      if Run(FUnzip, Params, '') <> 0 then
       begin
         infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -413,7 +415,7 @@ begin
       Params.Add('-f');
       Params.Add('-q');
       Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FBunzip2, Params) <> 0 then
+      if Run(FBunzip2, Params, '') <> 0 then
       begin
         infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -451,7 +453,7 @@ begin
       Params.Add('-j');
       Params.Add('-f');
       Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FTar, Params) <> 0 then
+      if Run(FTar, Params, '') <> 0 then
       begin
         infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -640,7 +642,7 @@ begin
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(FSVNDirectory);
       Params.Add(SVNZip); // zip/archive file
-      ResultCode:=Run(FUnzip, Params);
+      ResultCode:=Run(FUnzip, Params, '');
       if ResultCode<> 0 then
       begin
         OperationSucceeded := False;
@@ -710,7 +712,7 @@ begin
       Params:=TStringList.Create;
       Params.Add('-v');
       try
-        ResultCode:=RunOutput(FMake, Params, Output);
+        ResultCode:=RunOutput(FMake, Params, '', Output);
       finally
         Params.Free;
       end;
@@ -733,7 +735,7 @@ begin
       {$IFDEF MSWINDOWS}
       // Make sure we have a sensible default.
       // Set it here so multiple calls to CheckExes will not redownload SVN all the time
-      if FSVNDirectory='' then FSVNDirectory := 'c:\development\svn\';
+      if FSVNDirectory='' then FSVNDirectory := IncludeLeadingPathDelimiter(FBootstrapCompilerDirectory)+'svn'+DirectorySeparator;
       {$ENDIF MSWINDOWS}
       FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
       {$IFDEF MSWINDOWS}
@@ -804,7 +806,7 @@ begin
           end
           else
           begin
-            ResultCode:=Run(Output, Params)
+            ResultCode:=Run(Output, Params, EmptyStr);
           end;
         finally
           Params.Free;
@@ -838,7 +840,7 @@ begin
       try
         // Show help without waiting:
         Params.Add('-h');
-        ResultCode:=RunOutput(BootstrapCompiler, Params, Output);
+        ResultCode:=RunOutput(BootstrapCompiler, Params, EmptyStr, Output);
       finally
         Params.Free;
       end;
@@ -879,6 +881,43 @@ begin
     end;
   end;
   Result := OperationSucceeded;
+end;
+
+procedure TInstaller.EnvironmentWithOurPath(
+  var EnvironmentList: TStringList; const NewPath: String);
+const
+  {$IFDEF MSWINDOWS}
+  LookFor='Path=';
+  {$ELSE MSWINDOWS}
+  LookFor='PATH=';
+  {$ENDIF MSWINDOWS}
+var
+  Counter: integer;
+  SingleLine: string;
+begin
+  // GetEnvironmentVariableCount is 1 based
+  for Counter:=1 to GetEnvironmentVariableCount do
+  begin
+    SingleLine:=GetEnvironmentString(Counter);
+    if AnsiPos(LookFor, SingleLine)>0 then
+    begin
+      //We found the PATH variable; replace it
+      //with our own
+      if ansipos(AnsiUpperCase(LookFor), AnsiUpperCase(NewPath))=0 then
+      begin
+        //Add PATH= or path= to the line for our user
+        EnvironmentList.Add(LookFor+NewPath);
+      end
+      else
+      begin
+        EnvironmentList.Add(NewPath);
+      end;
+    end
+    else
+    begin
+      EnvironmentList.Add(SingleLine);
+    end;
+  end;
 end;
 
 function TInstaller.FindSVNSubDirs(): boolean;
@@ -930,7 +969,7 @@ begin
   Params:=TStringList.Create;
   try
     Params.Add(Executable);
-    RunOutput('which', Params, Output);
+    RunOutput('which', Params, '', Output);
     //Remove trailing LF(s) and other control codes:
     while (length(output)>0) and (ord(output[length(output)])<$20) do
       delete(output,length(output),1);
@@ -1023,7 +1062,7 @@ begin
   {$ENDIF UNIX}
 end;
 
-function TInstaller.Run(Executable: string; const Params: TStringList): longint;
+function TInstaller.Run(Executable: string; const Params: TStringList; const NewPath: string): longint;
 { Runs executable without showing output, unless something went wrong (result code<>0) }
 var
   OutputStringList: TStringList;
@@ -1033,7 +1072,7 @@ begin
   infoln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
   OutputStringList := TStringList.Create;
   try
-    Result:=RunOutput(Executable, Params, OutputStringList);
+    Result:=RunOutput(Executable, Params, NewPath, OutputStringList);
     if result<>0 then
     begin
       infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
@@ -1049,8 +1088,9 @@ begin
 end;
 
 function TInstaller.RunOutput(Executable: string; const Params: TStringList;
-  var Output: TStringList): longint;
+  const NewPath: String; var Output: TStringList): longint;
 var
+  EnvironmentList: TStringList;
   SpawnedProcess: TProcess;
   OutputStream: TMemoryStream;
 
@@ -1081,6 +1121,19 @@ begin
     try
       SpawnedProcess.Executable:=Executable;
       SpawnedProcess.Parameters:=Params;
+
+      if NewPath<>EmptyStr then
+      begin
+        // Replace path of spawned process with the one we want
+        EnvironmentList:=TStringList.Create;
+        try
+          //Procedure will handle strings with and without 'PATH='...
+          EnvironmentWithOurPath(EnvironmentList, NewPath);
+          SpawnedProcess.Environment:=EnvironmentList;
+        finally
+          EnvironmentList.Free;
+        end;
+      end;
       SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
       SpawnedProcess.ShowWindow := swoHIDE;
       SpawnedProcess.Execute;
@@ -1111,13 +1164,13 @@ begin
   end;
 end;
 
-function TInstaller.RunOutput(Executable: string; const Params: TStringList; var Output: string): longint;
+function TInstaller.RunOutput(Executable: string; const Params: TStringList; const NewPath: string; var Output: string): longint;
 var
   OutputStringList: TStringList;
 begin
   OutputStringList := TStringList.Create;
   try
-    Result:=RunOutput(Executable, Params, OutputStringList);
+    Result:=RunOutput(Executable, Params, NewPath, OutputStringList);
     Output := OutputStringList.Text;
   finally
     OutputStringList.Free;
@@ -1230,10 +1283,13 @@ end;
 
 
 function Tinstaller.GetFPC: boolean;
+// In this function, we try to deal with existing system wide fpc.cfg (Unix)
+// and the wrong compilers/binutils being in the path
 var
   AfterRevision: string;
   BeforeRevision: string;
   BinPath: string; //Path where installed CompilerName ends up
+  CustomPath: string; //Our own version of path we use to pass to commands
   Executable: string;
   FileCounter:integer;
   FPCCfg: string;
@@ -1259,6 +1315,20 @@ begin
   writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
   {$ENDIF MSWINDOWS}
 
+  {$IFDEF MSWINDOWS}
+  // Try to ignore existing make.exe, fpc.exe by setting our own path:
+  CustomPath:=BootstrapCompilerDirectory+PathSeparator+
+    MakeDirectory+PathSeparator+
+    FSVNDirectory+PathSeparator+
+    FPCDirectory+PathSeparator+
+    LazarusDirectory;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  CustomPath:=Emptystr; // We need make, etc, so we can't really do anything here, can we?
+  {$ENDIF UNIX}
+  if CustomPath<>EmptyStr then
+    writeln(FLogFile,'External program path:  '+CustomPath);
+
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
@@ -1282,7 +1352,7 @@ begin
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('distclean');
       infoln('FPC: running make distclean before checkout/update:');
-      Run(Executable, Params);
+      Run(Executable, Params, CustomPath);
     finally
       Params.Free;
     end;
@@ -1315,7 +1385,7 @@ begin
       Params.Add('all');
       Params.Add('install');
       infoln('Running make all install for FPC:');
-      if Run(Executable, Params) <> 0 then
+      if Run(Executable, Params, CustomPath) <> 0 then
         OperationSucceeded := False;
       {$IFDEF UNIX}
       // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
@@ -1397,7 +1467,7 @@ begin
       if FFPCOPT<>'' then
         Params.Add('OPT='+FFPCOPT);
       Params.Add('all');
-      if Run(Executable, Params) = 0 then
+      if Run(Executable, Params, CustomPath) = 0 then
       begin
         // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
         // make all and make crossinstall perhaps equivalent to
@@ -1420,7 +1490,7 @@ begin
         Params.Add('CPU_TARGET=x86_64'); // and processor.
         Params.Add('crossinstall');
         // Note: consider this as an optional item, so don't fail the function if this breaks.
-        if Run(Executable, Params)=0 then
+        if Run(Executable, Params, CustomPath)=0 then
         begin
           // Let everyone know of our shiny new crosscompiler:
           FInstalledCrossCompiler := IncludeTrailingPathDelimiter(FPCDirectory) + 'bin' +
@@ -1453,7 +1523,7 @@ begin
         Params.Add('-o');
         Params.Add('' + FPCCfg + '');
         infoln('Debug: Running fpcmkcfg: ');
-        if Run(Executable, Params) <> 0 then
+        if Run(Executable, Params, CustomPath) <> 0 then
           OperationSucceeded := False;
       finally
         Params.Free;
@@ -1522,6 +1592,7 @@ function Tinstaller.GetLazarus: boolean;
 var
   AfterRevision: string;
   BeforeRevision: string;
+  CustomPath: string;
   Executable: string;
   LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
@@ -1552,6 +1623,20 @@ begin
     SetCompilerToInstalledCompiler;
   end;
 
+  {$IFDEF MSWINDOWS}
+  // Try to ignore existing make.exe, fpc.exe by setting our own path:
+  CustomPath:=BootstrapCompilerDirectory+PathSeparator+
+    MakeDirectory+PathSeparator+
+    FSVNDirectory+PathSeparator+
+    FPCDirectory+PathSeparator+
+    LazarusDirectory;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  CustomPath:=Emptystr; // We need make, etc, so we can't really do anything here, can we?
+  {$ENDIF UNIX}
+  if CustomPath<>EmptyStr then
+    writeln(FLogFile,'External program path:  '+CustomPath);
+
   // Make distclean to clean out any cruft, and speed up svn update
   if OperationSucceeded then
   begin
@@ -1573,7 +1658,7 @@ begin
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('distclean');
       infoln('Lazarus: running make distclean before checkout/update:');
-      Run(Executable, Params);
+      Run(Executable, Params, CustomPath);
     finally
       Params.Free;
     end;
@@ -1623,7 +1708,7 @@ begin
         Params.Add('lcl'); //make lcl
         infoln('Lazarus: running make LCL crosscompiler:');
         // Note: consider this optional; don't fail the function if this fails.
-        if Run(Executable, Params)<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
+        if Run(Executable, Params, CustomPath)<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
       finally
         Params.Free;
       end;
@@ -1656,7 +1741,7 @@ begin
       Params.Add('clean');
       Params.Add('all');
       infoln('Lazarus: running make clean all:');
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
       begin
         OperationSucceeded := False;
         FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
@@ -1727,7 +1812,7 @@ begin
       Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       Params.Add('bigide');
       infoln('Lazarus: running make bigide:');
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
         OperationSucceeded := False;
     finally
       Params.Free;
@@ -1794,7 +1879,7 @@ begin
         'lhelp'+DirectorySeparator+
         'lhelp.lpr');
       infoln('Lazarus: compiling lhelp help viewer:');
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
         OperationSucceeded := False;
     finally
       Params.Free;
@@ -1813,7 +1898,7 @@ begin
         'html'+DirectorySeparator+
         'build_lcl_docs.lpr');
       infoln('Lazarus: compiling build_lcl_docs help compiler:');
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
         OperationSucceeded := False;
     finally
       Params.Free;
@@ -1839,7 +1924,7 @@ begin
       Params.Add('chm');
       infoln('Lazarus: compiling chm help docs:');
       //they get output into <lazarusdir>/docs/html/lcl/lcl.chm
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
         OperationSucceeded := False;
     finally
       Params.Free;
@@ -1858,7 +1943,7 @@ begin
         'lazdatadesktop'+DirectorySeparator+
         'lazdatadesktop.lpr');
       infoln('Lazarus: compiling data desktop:');
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
         OperationSucceeded := False;
     finally
       Params.Free;
@@ -1871,13 +1956,12 @@ begin
     Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     Params:=TStringList.Create;
     try
-      //Do NOT pass quotes in params
       Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
         'doceditor'+DirectorySeparator+
         'lazde.lpr');
       infoln('Lazarus: compiling doc editor:');
-      if (Run(Executable, Params)) <> 0 then
+      if (Run(Executable, Params, CustomPath)) <> 0 then
         OperationSucceeded := False;
     finally
       Params.Free;
