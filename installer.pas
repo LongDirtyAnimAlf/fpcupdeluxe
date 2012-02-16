@@ -735,7 +735,7 @@ begin
       {$IFDEF MSWINDOWS}
       // Make sure we have a sensible default.
       // Set it here so multiple calls to CheckExes will not redownload SVN all the time
-      if FSVNDirectory='' then FSVNDirectory := IncludeLeadingPathDelimiter(FBootstrapCompilerDirectory)+'svn'+DirectorySeparator;
+      if FSVNDirectory='' then FSVNDirectory := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'svn'+DirectorySeparator;
       {$ENDIF MSWINDOWS}
       FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
       {$IFDEF MSWINDOWS}
@@ -923,7 +923,7 @@ begin
 end;
 
 function TInstaller.FindSVNSubDirs(): boolean;
-// Looks through SVN directory and sets updater's SVNExecutable
+// Looks through SVN directory and sbudirectories. Sets updater's SVNExecutable
 var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
