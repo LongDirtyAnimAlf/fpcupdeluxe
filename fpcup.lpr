@@ -45,7 +45,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,Forms,Interfaces {these 2 for application options},
   installer,
-  svnclient, updatelazconfig, httpsend, ftpsend,sysutils;
+  svnclient, updatelazconfig, httpsend, ftpsend,sysutils,processutils;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;

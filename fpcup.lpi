@@ -83,7 +83,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -114,6 +114,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="updatelazconfig"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="processutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="processutils"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
