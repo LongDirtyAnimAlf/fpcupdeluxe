@@ -1068,14 +1068,12 @@ var
   OutputStringList: TStringList;
   TempFileName:string;
 begin
-  infoln('Calling:');
-  infoln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
   OutputStringList := TStringList.Create;
   try
     Result:=RunOutput(Executable, Params, NewPath, OutputStringList);
     if result<>0 then
     begin
-      infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
+      //RunOutput call above should already have warned about non-zero exitstatus
       infoln(OutputStringList.Text);
       TempFileName:=SysUtils.GetTempFileName;
       OutputStringList.SaveToFile(TempFileName);
@@ -1115,6 +1113,9 @@ var
 
 begin
   Result := 255; //Preset to failure
+  infoln('Calling:');
+  infoln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
+
   OutputStream := TMemoryStream.Create;
   SpawnedProcess := TProcess.Create(nil);
   try
@@ -1145,7 +1146,11 @@ begin
       ReadOutput;
       OutputStream.Position := 0;
       Output.LoadFromStream(OutputStream);
-      Result := SpawnedProcess.ExitStatus;
+      result := SpawnedProcess.ExitStatus;
+      if result<>0 then
+      begin
+        infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
+      end;
     except
       on E: Exception do
       begin
