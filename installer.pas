@@ -376,6 +376,7 @@ begin
   if OperationSucceeded then
   begin
     OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapArchive);
+    if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
   end;
 
   if OperationSucceeded then
@@ -518,7 +519,7 @@ begin
     Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
   end;
   Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
-  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host:'+Host+'; port: '+Inttostr(Port)+'; remote path:'+Source);
+  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source);
 end;
 
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
