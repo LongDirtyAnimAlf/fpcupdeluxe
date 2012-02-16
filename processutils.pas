@@ -40,8 +40,10 @@ type
       function GetExceptionInfo: string;
       function GetOutputString: string;
       function GetOutputStrings: TstringList;
+      function GetParametersString: String;
       function GetProcessEnvironment: TProcessEnvironment;
       procedure SetOnOutput(AValue: TDumpFunc);
+      procedure SetParametersString(AValue: String);
     public
       procedure Execute;
       property Environment:TProcessEnvironment read GetProcessEnvironment;
@@ -51,6 +53,7 @@ type
       property OnOutput:TDumpFunc read FOnOutput write SetOnOutput;
       property OutputString:string read GetOutputString;
       property OutputStrings:TstringList read GetOutputStrings;
+      property ParametersString:String read GetParametersString write SetParametersString;
       constructor Create(AOwner : TComponent); override;
       destructor Destroy; override;
     end;
@@ -81,6 +84,11 @@ begin
   result:=FOutputStrings;
 end;
 
+function TProcessEx.GetParametersString: String;
+begin
+  result:=Parameters.text;
+end;
+
 function TProcessEx.GetExceptionInfo: string;
 begin
   result:=FExceptionInfoStrings.Text;
@@ -96,6 +104,11 @@ procedure TProcessEx.SetOnOutput(AValue: TDumpFunc);
 begin
   if FOnOutput=AValue then Exit;
   FOnOutput:=AValue;
+end;
+
+procedure TProcessEx.SetParametersString(AValue: String);
+begin
+  CommandToList(AValue,Parameters);
 end;
 
 procedure TProcessEx.Execute;
@@ -279,7 +292,7 @@ begin
   PE:=TProcessEx.Create(nil);
   try
     PE.Executable:=Executable;
-    CommandToList(Parameters,PE.Parameters);
+    PE.ParametersString:=Parameters;
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;
