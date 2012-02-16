@@ -98,9 +98,9 @@ type
     function GetFPCUrl: string;
     function GetLazarusRevision: string;
     procedure SetAllOptions(AValue: string);
-    procedure SetFPCRevision(AValue: string);
+    procedure SetFPCDesiredRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
-    procedure SetLazarusRevision(AValue: string);
+    procedure SetLazarusDesiredRevision(AValue: string);
     procedure SetShortCutNameFpcup(AValue: string);
     procedure SetSkipFPC(AValue: boolean);
     procedure SetSkipLazarus(AValue: boolean);
@@ -141,7 +141,7 @@ type
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
     property FPCOPT: string read FFPCOPT write SetFPCOPT;
-    property FPCRevision:string read GetFPCRevision write SetFPCRevision;
+    property FPCDesiredRevision:string read GetFPCRevision write SetFPCDesiredRevision;
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
@@ -151,7 +151,7 @@ type
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
     //SVN URL for Lazarus
     property LazarusOPT:string read FLazarusOPT write SetLazarusOPT;
-    property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
+    property LazarusDesiredRevision:string read GetLazarusRevision write SetLazarusDesiredRevision;
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     property SkipFPC:boolean read FSkipFPC write SetSkipFPC;
@@ -1017,7 +1017,7 @@ begin
   FAllOptions:=AValue;
 end;
 
-procedure TInstaller.SetFPCRevision(AValue: string);
+procedure TInstaller.SetFPCDesiredRevision(AValue: string);
 begin
   FUpdater.FPCRevision:=AValue;
 end;
@@ -1245,7 +1245,7 @@ begin
   end;
 end;
 
-procedure TInstaller.SetLazarusRevision(AValue: string);
+procedure TInstaller.SetLazarusDesiredRevision(AValue: string);
 begin
   FUpdater.LazarusRevision:=AValue;
 end;

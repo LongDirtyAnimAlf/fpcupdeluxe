@@ -198,7 +198,7 @@ begin
 
   if Application.HasOption(FPCRevision) then
   begin
-    FInstaller.FPCRevision:=Application.GetOptionValue(FPCRevision);
+    FInstaller.FPCDesiredRevision:=Application.GetOptionValue(FPCRevision);
     //don't store this in alloptions !!!
   end;
 
@@ -235,7 +235,7 @@ begin
 
   if Application.HasOption(LazRevision) then
   begin
-    FInstaller.LazarusRevision:=Application.GetOptionValue(LazRevision);
+    FInstaller.LazarusDesiredRevision:=Application.GetOptionValue(LazRevision);
     //don't store this in alloptions !!!
   end;
 
@@ -297,10 +297,10 @@ begin
   writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('');
-  if not FInstaller.SkipFPC and (FInstaller.FPCRevision<>'') then
-    writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCRevision);
-  if not FInstaller.SkipLazarus and (FInstaller.LazarusRevision<>'') then
-    writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusRevision);
+  if not FInstaller.SkipFPC and (FInstaller.FPCDesiredRevision<>'') then
+    writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);
+  if not FInstaller.SkipLazarus and (FInstaller.LazarusDesiredRevision<>'') then
+    writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusDesiredRevision);
   if FInstaller.SkipFPC then
     writeln('WARNING: Skipping installation/update FPC ');
   if FInstaller.SkipLazarus then

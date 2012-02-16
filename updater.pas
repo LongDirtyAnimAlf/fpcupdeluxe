@@ -123,7 +123,7 @@ begin
   FSVNClient.Repository := FPCURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
   FSVNClient.Revert; //Remove local changes
-  FSVNClient.Revision:=FFPCRevision; //Desired revision
+  FSVNClient.DesiredRevision:=FFPCRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);
   if BeforeRevision<>AfterRevision then FUpdated:=true else FUpdated:=false;
@@ -138,7 +138,7 @@ begin
   FSVNClient.Repository := FLazarusURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
   FSVNClient.Revert; //Remove local changes
-  FSVNClient.Revision:=FLazarusRevision; //Desired revision
+  FSVNClient.DesiredRevision:=FLazarusRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);
   if BeforeRevision<>AfterRevision then FUpdated:=true else FUpdated:=false;

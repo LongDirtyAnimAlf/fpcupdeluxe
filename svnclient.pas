@@ -49,18 +49,18 @@ type
     FLocalRepository: string;
     FRepositoryURL: string;
     FReturnCode: integer;
-    FRevision: string;
+    FDesiredRevision: string;
     FSVNExecutable: string;
     FVerbose: boolean;
     function ExecuteCommand(const Executable, Parameters: string; Output: TStream): integer;
     // Execute external command; put stdout in Output; return exitcode
     function GetSVNExecutable: string;
-    procedure SetRevision(AValue: string);
+    procedure SetDesiredRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
     procedure SetVerbose(AValue: boolean);
   public
     procedure CheckOut;
-    //Performs an SVN checkout (initial download), HEAD (latest revision) only for speed
+    //Performs an SVN checkout (initial download), unless otherwise specified HEAD (latest revision) only for speed
     procedure CheckOutOrUpdate;
     //Runs SVN checkout if local repository doesn't exist, else does an update
     function FindSVNExecutable: string;
@@ -69,6 +69,8 @@ type
     procedure Revert;
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
     procedure Update; //Performs an SVN update (pull)
+    property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
+    //Get/set desired revision to pull to (if none given, use HEAD)
     function ExecuteSvnCommand(const Command: string; Output: TStream): integer;
     //Executes a free form SVN command; puts output into stream; returns SVN client exit code
     function ExecuteSVNCommand(const Command: string; var Output: TStringList): integer;
@@ -82,8 +84,6 @@ type
     function LocalRevision: integer; //Revision number of local repository
     property Repository: string read FRepositoryURL write FRepositoryURL;
     //URL where central SVN repository is placed
-    property Revision: string read FRevision write SetRevision;
-    //Get/set desired revision to pull to (if none given, use HEAD)
     property ReturnCode: integer read FReturnCode;
     //Exit code returned by last SVN client command. Useful for troubleshooting
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
@@ -130,12 +130,11 @@ begin
 
   if not FileExists(FSvnExecutable) then
   begin
-    //current path.
-    //todo: check if this is safe (e.g. compromised svn etc)
-    if FileExists('svn.exe') then
-      FSVNExecutable := 'svn.exe';
+    //current directory. Note: potential for misuse by malicious program.
+    if FileExists(SVNName+'.exe') then
+      FSVNExecutable := SVNName+'.exe';
     if FileExists('svn') then
-      FSVNExecutable := 'svn';
+      FSVNExecutable := SVNName;
   end;
 
   if FileExists(FSVNExecutable) then
@@ -216,10 +215,10 @@ begin
   Result := FSVNExecutable;
 end;
 
-procedure TSVNClient.SetRevision(AValue: string);
+procedure TSVNClient.SetDesiredRevision(AValue: string);
 begin
-  if FRevision=AValue then Exit;
-  FRevision:=AValue;
+  if FDesiredRevision=AValue then Exit;
+  FDesiredRevision:=AValue;
 end;
 
 procedure Tsvnclient.Checkout;
@@ -229,10 +228,10 @@ var
   Command: string;
   RetryAttempt: integer;
 begin
-  if FRevision='' then
+  if FDesiredRevision='' then
     Command := 'checkout --non-interactive --revision HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := 'checkout --non-interactive -r '+ FRevision+ ' ' + Repository + ' ' + LocalRepository;
+    Command := 'checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
   ExecuteSVNCommand(Command);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -242,7 +241,7 @@ begin
     ExecuteSVNCommand(Command); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
-  FRevision:=''; //don't reuse
+  FDesiredRevision:=''; //don't reuse
 end;
 
 procedure Tsvnclient.CheckOutOrUpdate;
@@ -294,10 +293,10 @@ var
   StartRevision: integer;
 begin
   StartRevision := LocalRevision;
-  if FRevision='' then
+  if FDesiredRevision='' then
     Command := 'update --non-interactive ' + LocalRepository
   else
-    Command := 'update --non-interactive -r ' + FRevision + ' ' + LocalRepository;
+    Command := 'update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
   ExecuteSVNCommand(Command);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -307,7 +306,7 @@ begin
     ExecuteSVNCommand(Command); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
-  FRevision:=''; //don't reuse
+  FDesiredRevision:=''; //don't reuse
 end;
 
 function TSVNClient.ExecuteSvnCommand(const Command: string; Output: TStream): integer;
@@ -378,7 +377,7 @@ begin
     ExecuteSVNCommand('info ' + FLocalRepository, Output);
     // Could have used svnversion but that would have meant calling yet another command...
     LRevision := Output.Text;
-    // Get the part after "Revision:"
+    // Get the part after "DesiredRevision:"
     Result := StrToIntDef(trim(copy(LRevision,
       (pos('Revision: ', LRevision) + RevLength),
       6)), -1);
@@ -392,7 +391,7 @@ constructor Tsvnclient.Create;
 begin
   FLocalRepository := '';
   FRepositoryURL := '';
-  FRevision:='';
+  FDesiredRevision:='';
   FReturnCode := 0;
   FSVNExecutable := '';
   FindSvnExecutable; //Do this now so the SVNExecutable property is valid.
