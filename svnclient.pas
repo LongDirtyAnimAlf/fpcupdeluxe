@@ -37,7 +37,7 @@ interface
 
 uses
   Classes, SysUtils,
-  process,
+  processutils,
   FileUtil {Requires LCL};
 
 type
@@ -52,8 +52,6 @@ type
     FDesiredRevision: string;
     FSVNExecutable: string;
     FVerbose: boolean;
-    function ExecuteCommand(const Executable, Parameters: string; Output: TStream): integer;
-    // Execute external command; put stdout in Output; return exitcode
     function GetSVNExecutable: string;
     procedure SetDesiredRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
@@ -71,12 +69,6 @@ type
     procedure Update; //Performs an SVN update (pull)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
     //Get/set desired revision to pull to (if none given, use HEAD)
-    function ExecuteSvnCommand(const Command: string; Output: TStream): integer;
-    //Executes a free form SVN command; puts output into stream; returns SVN client exit code
-    function ExecuteSVNCommand(const Command: string; var Output: TStringList): integer;
-    //Executes a free form SVN command; puts output into stringlist; returns SVN client exit code
-    function ExecuteSvnCommand(const Command: string): integer;
-    //Executes a free form SVN command; returns SVN client exit code
     function LocalRepositoryExists: boolean;
     //Checks to see if local directory is a valid SVN repository
     property LocalRepository: string read FLocalRepository write FLocalRepository;
@@ -101,9 +93,6 @@ implementation
 function TSVNClient.FindSvnExecutable: string;
 const
   SVNName = 'svn';
-var
-  ExeResult: longint;
-  CommandOutput: TMemoryStream;
 begin
   Result := FSVNExecutable;
   // Look in path
@@ -140,14 +129,7 @@ begin
   if FileExists(FSVNExecutable) then
   begin
     // Check for valid svn executable
-    CommandOutput:=TMemoryStream.Create;
-    try
-      ExeResult := ExecuteCommand(FSVNExecutable, '--version', CommandOutput);
-    finally
-      CommandOutput.Free;
-    end;
-
-    if ExeResult <> 0 then
+    if ExecuteCommandHidden(FSVNExecutable, '--version',Verbose) <> 0 then
     begin
       // File exists, but is not a valid svn client
       FSVNExecutable := EmptyStr;
@@ -162,56 +144,11 @@ begin
   Result := FSVNExecutable;
 end;
 
-function TSVNClient.ExecuteCommand(const Executable, Parameters: string; Output: TStream
-  ): integer;
-var
-  ExternalProcess: TProcess;
-
-  function ReadOutput: boolean;
-    // returns true if output was actually read
-  const
-    BufSize = 4096;
-  var
-    Buffer: array[0..BufSize - 1] of byte;
-    ReadBytes: integer;
-  begin
-    Result := False;
-    while ExternalProcess.Output.NumBytesAvailable > 0 do
-    begin
-      ReadBytes := ExternalProcess.Output.Read(Buffer, BufSize);
-      Output.Write(Buffer, ReadBytes);
-      if Verbose then
-        write(copy(pchar(@buffer[0]),1,ReadBytes));
-      Result := True;
-    end;
-  end;
-
-begin
-  FReturnCode := 255; //Preset to failure
-  // We could have checked for executable; but at least Windows
-  // will also look in the path, so don't do that.
-
-  ExternalProcess := TProcess.Create(nil);
-  try
-    ExternalProcess.CommandLine := Executable + ' ' + Parameters;
-    ExternalProcess.Options := [poUsePipes, poStderrToOutPut];
-    ExternalProcess.ShowWindow := swoHIDE;
-    ExternalProcess.Execute;
-    while ExternalProcess.Running do
-    begin
-      if not ReadOutput then
-        Sleep(100);
-    end;
-    ReadOutput;
-    FReturnCode := ExternalProcess.ExitStatus;
-    Result := FReturnCode;
-  finally
-    ExternalProcess.Free;
-  end;
-end;
-
 function TSVNClient.GetSVNExecutable: string;
 begin
+  if not FileExists(FSVNExecutable) then FindSVNExecutable;
+  if not FileExists(FSVNExecutable) then
+    raise ESVNClientError.create('No SVN executable found');
   Result := FSVNExecutable;
 end;
 
@@ -232,13 +169,13 @@ begin
     Command := 'checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
   else
     Command := 'checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  ExecuteSVNCommand(Command);
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,Command,Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
   begin
     Sleep(500); //Give everybody a chance to relax ;)
-    ExecuteSVNCommand(Command); //attempt again
+    FReturnCode:=ExecuteCommandHidden(SVNExecutable,Command,Verbose); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
 end;
@@ -259,13 +196,16 @@ begin
 end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
+var
+  s:string;
 begin
-  ExecuteSVNCommand('log ' + LocalRepository, Log);
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'log ' + LocalRepository,s,Verbose);
+  Log.Text:=s;
 end;
 
 procedure Tsvnclient.Revert;
 begin
-  ExecuteSVNCommand('revert --recursive ' + LocalRepository);
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'revert --recursive ' + LocalRepository,Verbose);
 end;
 
 procedure TSVNClient.SetSVNExecutable(AValue: string);
@@ -294,92 +234,43 @@ begin
     Command := 'update --non-interactive ' + LocalRepository
   else
     Command := 'update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
-  ExecuteSVNCommand(Command);
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,command,Verbose);
+
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
   begin
     Sleep(500); //Give everybody a chance to relax ;)
-    ExecuteSVNCommand(Command); //attempt again
+    FReturnCode:=ExecuteCommandHidden(SVNExecutable,command,Verbose); //attempt again
     RetryAttempt := RetryAttempt + 1;
-  end;
-end;
-
-function TSVNClient.ExecuteSvnCommand(const Command: string; Output: TStream): integer;
-begin
-  FReturnCode := 255; //Preset to failure
-  // Look for SVN if necessary; error if needed:
-  if not FileExists(FSVNExecutable) then FindSvnExecutable;
-  if not FileExists(FSvnExecutable) then
-    raise ESVNClientError.Create('No SVN executable found');
-  FReturnCode:=ExecuteCommand(FSVNExecutable, Command, Output);
-  Result := FReturnCode;
-end;
-
-function TSVNClient.ExecuteSVNCommand(const Command: string;
-  var Output: TStringList): integer;
-var
-  OutputStream: TMemoryStream;
-begin
-  OutputStream := TMemoryStream.Create;
-  try
-    Result := ExecuteSvnCommand(Command, OutputStream);
-    OutputStream.Position := 0;
-    Output.LoadFromStream(OutputStream); //load output
-  finally
-    OutputStream.Free;
-  end;
-end;
-
-function TSVNClient.ExecuteSvnCommand(const Command: string): integer;
-var
-  OutputStream: TMemoryStream;
-begin
-  OutputStream := TMemoryStream.Create;
-  try
-    Result := ExecuteSvnCommand(Command, OutputStream);
-  finally
-    OutputStream.Free;
   end;
 end;
 
 function Tsvnclient.LocalRepositoryExists: boolean;
 var
-  Output: TStringList;
+  s:string;
 begin
-  Output := TStringList.Create;
-  try
     Result := False;
-    ExecuteSVNCommand('info ' + FLocalRepository, Output);
-    if Pos('Path', Output.Text) > 0 then
+    FReturnCode:=ExecuteCommandHidden(SVNExecutable,'info ' + FLocalRepository,s,Verbose);
+    if Pos('Path', s) > 0 then
       Result := True;
     //This is already covered by setting stuff to false first
     //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
-  finally
-    Output.Free;
-  end;
 end;
 
 function TSVNClient.LocalRevision: integer;
 const
   RevLength = Length('Revision:');
 var
-  Output: TStringList;
   LRevision: string;
 begin
   result:=-1;
-  Output := TStringList.Create;
-  try
-    ExecuteSVNCommand('info ' + FLocalRepository, Output);
-    // Could have used svnversion but that would have meant calling yet another command...
-    LRevision := Output.Text;
-    // Get the part after "DesiredRevision:"
-    Result := StrToIntDef(trim(copy(LRevision,
-      (pos('Revision: ', LRevision) + RevLength),
-      6)), -1);
-  finally
-    Output.Free;
-  end;
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'info ' + FLocalRepository,LRevision,Verbose);
+  // Could have used svnversion but that would have meant calling yet another command...
+  // Get the part after "DesiredRevision:"
+  Result := StrToIntDef(trim(copy(LRevision,
+    (pos('Revision: ', LRevision) + RevLength),
+    6)), -1);
 end;
 
 

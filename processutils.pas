@@ -35,8 +35,6 @@ type
       FOnOutput: TDumpFunc;
       FOutputStrings: TstringList;
       FOutStream: TMemoryStream;
-      FParams: string;
-      FParamsList: TstringList;
       FProcess: TProcess;
       FProcessEnvironment:TProcessEnvironment;
       function GetExceptionInfo: string;
@@ -59,8 +57,8 @@ type
 
 // Convenience functions
 
-function ExecuteCommandHidden(const Executable, Parameters: string): integer; overload;
-function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string): integer; overload;
+function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer; overload;
+function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string; Verbose:boolean): integer; overload;
 
 
 
@@ -155,7 +153,6 @@ begin
   inherited;
   FExceptionInfoStrings:= TstringList.Create;
   FOutputStrings:= TstringList.Create;
-  FParamsList:= TstringList.Create;
   FOutStream := TMemoryStream.Create;
 end;
 
@@ -163,7 +160,6 @@ destructor TProcessEx.Destroy;
 begin
   FExceptionInfoStrings.Free;
   FOutputStrings.Free;
-  FParamsList.Free;
   FOutStream.Free;
   If assigned(FProcessEnvironment) then
     FProcessEnvironment.Free;
@@ -262,23 +258,31 @@ begin
   inherited Destroy;
 end;
 
-function ExecuteCommandHidden(const Executable, Parameters: string): integer;
+
+procedure DumpConsole(Sender:TObject; output:string);
+begin
+  writeln(output);
+end;
+
+function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer;
 var
   s:string;
 begin
-  Result:=ExecuteCommandHidden(Executable, Parameters,s);
+  Result:=ExecuteCommandHidden(Executable, Parameters,s,Verbose);
 end;
 
 function ExecuteCommandHidden(const Executable, Parameters: string; var Output: string
-  ): integer;
+  ; Verbose:boolean): integer;
 var
   PE:TProcessEx;
 begin
   PE:=TProcessEx.Create(nil);
   try
     PE.Executable:=Executable;
-    PE.Parameters.Text:=Parameters;
+    CommandToList(Parameters,PE.Parameters);
     PE.ShowWindow := swoHIDE;
+    if Verbose then
+      PE.OnOutput:=@DumpConsole;
     PE.Execute;
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
