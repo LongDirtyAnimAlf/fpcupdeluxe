@@ -276,7 +276,7 @@ end;
 
 procedure DumpConsole(Sender:TObject; output:string);
 begin
-  writeln(output);
+  write(output);
 end;
 
 function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer;
