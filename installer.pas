@@ -2004,7 +2004,7 @@ begin
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //DO pass quotes here (it's not TProcess.Params)
         CreateHomeStartLink(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortcutName);
-        if FShortCutNameFpcupIsSet then
+        if ShortCutNameFpcup<>EmptyStr then
           begin
           FAllOptions:=FAllOptions+' $*';
           CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
@@ -2165,4 +2165,4 @@ begin
 end;
 
 end.
-
+

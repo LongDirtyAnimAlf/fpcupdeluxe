@@ -76,6 +76,7 @@ begin
   writeln('                       On other systems: a shell script in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
   writeln('                       Default: fpcup_update');
+  writeln('                         or <lazlinkname>_update if lazlinkname specified');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
   writeln('                       On Windows: a desktop shortcut.');
@@ -270,11 +271,11 @@ begin
   begin
     FpcupLink:=Application.GetOptionValue(FPCUpLinkName);
     FInstaller.ShortCutNameFpcup:=FPCUpLink;
-  end;
-  if FInstaller.ShortCutNameFPCUp<>EmptyStr then
-  begin
     AllOptions:=AllOptions+'--'+FpcupLinkName+'="'+FPCUpLink+'" ';
-  end;
+  end
+  else
+  if Application.HasOption(LazLinkName) and (FInstaller.ShortCutName<>'') then
+    FInstaller.ShortCutNameFpcup:=FInstaller.ShortCutName+'_Update';
 
 
   writeln('');
@@ -374,4 +375,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
