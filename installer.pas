@@ -893,25 +893,27 @@ const
   {$ENDIF MSWINDOWS}
 var
   Counter: integer;
+  CustomPath: string;
   SingleLine: string;
 begin
   // GetEnvironmentVariableCount is 1 based
   for Counter:=1 to GetEnvironmentVariableCount do
   begin
+    // Clean up path we're given
+    CustomPath:=NewPath;
+    // If missing, add PATH= or path=:
+    if ansipos(AnsiUpperCase(LookFor), AnsiUpperCase(CustomPath))=0 then
+    begin
+      CustomPath:=(LookFor+CustomPath);
+    end;
+    // Get rid of empty parts; don't know if required but clearer for log output
+    CustomPath:=StringReplace(CustomPath, PathSeparator+PathSeparator, PathSeparator, [rfReplaceAll,rfIgnoreCase]);
+
     SingleLine:=GetEnvironmentString(Counter);
     if AnsiPos(LookFor, SingleLine)>0 then
     begin
       //We found the PATH variable; replace it
-      //with our own
-      if ansipos(AnsiUpperCase(LookFor), AnsiUpperCase(NewPath))=0 then
-      begin
-        //Add PATH= or path= to the line for our user
-        EnvironmentList.Add(LookFor+NewPath);
-      end
-      else
-      begin
-        EnvironmentList.Add(NewPath);
-      end;
+      EnvironmentList.Add(CustomPath);
     end
     else
     begin
