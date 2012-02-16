@@ -120,7 +120,7 @@ begin
       FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '$(LazarusDir)fpc\$(FPCVer)\source');
       FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', 'c:\lazarus');
       FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', '%FpcBinDir%\make.exe');
-      FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '%Temp%');
+      FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', GetTempDir(false));
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '/usr/bin/fpc');
