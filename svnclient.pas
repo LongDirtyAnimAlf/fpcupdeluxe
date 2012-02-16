@@ -106,49 +106,13 @@ var
   CommandOutput: TMemoryStream;
 begin
   Result := FSVNExecutable;
-  if FileExists(FSvnExecutable) then
-  begin
-    // File exists, check if it is a working svn client.
-    CommandOutput:=TMemoryStream.Create;
-    try
-      ExeResult := ExecuteCommand(FSvnExecutable, '--version', CommandOutput);
-    finally
-      CommandOutput.Free;
-    end;
-    if ExeResult = 0 then
-    begin
-      //Ok, working SVN client
-      exit;
-    end
-    else
-    begin
-      //Executable may exist but it is not valid. Let's try the rest of our
-      //search strategy
-      FSVNExecutable := EmptyStr;
-    end;
-  end;
-
-  if FSVNExecutable = '' then
-  begin
-    //todo: check what happens if svn exe is in path but not specified here?
-    // process call will still work!!?!
-    CommandOutput:=TMemoryStream.Create;
-    try
-      ExeResult := ExecuteCommand(SVNName, '--version', CommandOutput);
-    finally
-      CommandOutput.Free;
-    end;
-
-    if ExeResult = 0 then
-    begin
-      //Found a working SVN in path, just use the name without path
-      FSVNExecutable := SVNName;
-      exit;
-    end;
-  end;
+  // Look in path
+  // Windows: will also look for <SVNName>.exe
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := FindDefaultExecutablePath(SVNName);
 
 {$IFDEF MSWINDOWS}
-  // Some popular locations for SlikSVN and Subversion
+  // Some popular locations for SlikSVN and Subversion:
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
   if not FileExists(FSvnExecutable) then
@@ -159,14 +123,9 @@ begin
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
       '\SlikSvn\bin\svn.exe';
-{$ENDIF MSWINDOWS}
-
+  //Directory where current executable is:
   if not FileExists(FSvnExecutable) then
-    FSvnExecutable := FindDefaultExecutablePath('svn');
-
-{$IFDEF MSWINDOWS}
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn'); //directory where current executable is
+    FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn');
 {$ENDIF MSWINDOWS}
 
   if not FileExists(FSvnExecutable) then
@@ -179,8 +138,28 @@ begin
       FSVNExecutable := 'svn';
   end;
 
-  if not FileExists(FSVNExecutable) then
-    FSVNExecutable := ''; //Make sure we don't call an arbitrary executable
+  if FileExists(FSVNExecutable) then
+  begin
+    // Check for valid svn executable
+    CommandOutput:=TMemoryStream.Create;
+    try
+      ExeResult := ExecuteCommand(SVNName, '--version', CommandOutput);
+    finally
+      CommandOutput.Free;
+    end;
+
+    if ExeResult <> 0 then
+    begin
+      // File exists, but is not a valid svn client
+      FSVNExecutable := EmptyStr;
+    end;
+  end
+  else
+  begin
+    // File does not exist
+    // Make sure we don't call an arbitrary executable:
+    FSVNExecutable := EmptyStr;
+  end;
   Result := FSVNExecutable;
 end;
 
