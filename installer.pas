@@ -1552,7 +1552,7 @@ begin
     SetCompilerToInstalledCompiler;
   end;
 
-  //Make distclean to clean out any cruft, and speed up svn update
+  // Make distclean to clean out any cruft, and speed up svn update
   if OperationSucceeded then
   begin
     // Make distclean; we don't care about failure (e.g. directory might be empty etc)
@@ -1676,20 +1676,18 @@ begin
     LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
     try
       try
-        // FInstalledCompiler will be often something like c:\bla\ppc386.exe, e.g.
-        // the platform specific CompilerName. In order to be able to cross compile
-        // we'd rather use fpc
-        {$IFDEF UNIX}
-        LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc.sh';
-        {$ELSE} //presumably only Windows, Windows CE for now...
-        LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
-        {$ENDIF UNIX}
         LazarusConfig.LazarusDirectory:=LazarusDirectory;
         {$IFDEF MSWINDOWS}
+        // FInstalledCompiler will be often something like c:\bla\ppc386.exe, e.g.
+        // the platform specific compiler. In order to be able to cross compile
+        // we'd rather use fpc
+        LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
         LazarusConfig.DebuggerFilename:=FMakeDir+'gdb'+FExecutableExtension;
         LazarusConfig.MakeFilename:=FMakeDir+'make'+FExecutableExtension;
         {$ENDIF MSWINDOWS}
         {$IFDEF UNIX}
+        // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
+        LazarusConfig.CompilerFilename:=FInstalledCompiler;
         LazarusConfig.DebuggerFilename:=which('gdb'); //assume in path
         LazarusConfig.MakeFilename:=which('make'); //assume in path
         {$ENDIF UNIX}
