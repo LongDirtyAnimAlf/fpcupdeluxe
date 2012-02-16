@@ -93,6 +93,7 @@ const
   ConfigFileName='environmentoptions.xml';
   HelpConfigFileName='helpoptions.xml';
   VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
+  VersionNewHelpConfig='1'; //Use this version in our help config file
 
 constructor TUpdateLazConfig.Create(ConfigPath: string);
 begin
@@ -147,9 +148,20 @@ begin
     if NewHelpFile then
     begin
       // Defaults
+      FConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
       // We don't know the location of the help viewer or help files
       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', EmptyStr);
       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', EmptyStr);
+      {todo: Perhaps need to add these as well???
+      <Databases>
+        <RTLUnits>
+          <BaseURL Value=""/>
+        </RTLUnits>
+        <FCLUnits>
+          <BaseURL Value=""/>
+        </FCLUnits>
+      </Databases>
+      }
     end;
     if CHMHelpExe<>EmptyStr then FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', CHMHelpExe);
     if CHMHelpFilesPath<>EmptyStr then       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', CHMHelpFilesPath);
