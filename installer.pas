@@ -1077,7 +1077,6 @@ begin
       infoln(OutputStringList.Text);
       TempFileName:=SysUtils.GetTempFileName;
       OutputStringList.SaveToFile(TempFileName);
-      WriteLn(FLogFile,'ERROR running ',Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
       WriteLn(FLogFile,'  output logged in ',TempFileName);
     end;
   finally
@@ -1130,6 +1129,8 @@ begin
         try
           //Procedure will handle strings with and without 'PATH='...
           EnvironmentWithOurPath(EnvironmentList, NewPath);
+          WriteLn(FLogFile,'Custom path for calling '+Executable+':');
+          WriteLn(FLogFile,NewPath);
           SpawnedProcess.Environment:=EnvironmentList;
         finally
           EnvironmentList.Free;
@@ -1150,6 +1151,7 @@ begin
       if result<>0 then
       begin
         infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
+        WriteLn(FLogFile,'ERROR running ',Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
       end;
     except
       on E: Exception do
@@ -1160,6 +1162,8 @@ begin
         //Something went wrong. We need to pass on what and mark this as a failure
         infoln('Exception calling '+Executable);
         infoln('Details: '+E.ClassName+'/'+E.Message);
+        WriteLn(FLogFile, 'Exception calling '+Executable);
+        WriteLn(FLogFile, 'Details: '+E.ClassName+'/'+E.Message);
         Result:=254; //fairly random but still an error, and distinct from earlier code
       end;
     end;
