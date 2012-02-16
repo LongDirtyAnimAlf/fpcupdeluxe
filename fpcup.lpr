@@ -89,17 +89,22 @@ begin
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
   writeln(' lazOPT=<options>      Options passed on to the lazarus make as OPT=options.');
   writeln(' noconfirm             No confirmation asked. For batch operation. ');
+  writeln(' only=<values>         update and build only the modules specified.');
+  writeln('                       The module list is separated by commas and can contain:');
+  writeln('                       FPC,lazarus,bigide,wincrossx64,doceditor,lhelp,lazdatadesktop');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
   writeln('                       directory is used.');
-  writeln(' skipfpc               Do not update or build FPC.');
-  writeln(' skiplaz               Do not update or build Lazarus.');
+  writeln(' skip=<values>         Do not update or build modules.');
+  writeln('                       The module list is separated by commas.');
+  writeln('                       See "only" for accepted values. ');
   writeln(' skiplazhelp           Do not get chm help for Lazarus.');
   writeln(' verbose               Show output from svn and make');
   writeln('');
+
 end;
 
 procedure CheckOptions(FInstaller: TInstaller);
@@ -119,9 +124,8 @@ const
   LazRevision='lazrevision';
   FPCRevision='fpcrevision';
   PrimaryConfigPath='primary-config-path';
-  SkipFPC='skipfpc';
-  SkipLaz='skiplaz';
-  SkipLazHelp='skiplazhelp';
+  Skip='skip';
+  Only='only';
   NoConfirm='noconfirm';
   Verbose='verbose';
 var
@@ -156,7 +160,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
-    SkipFPC+' '+SkipLaz+' '+SkipLazHelp+' '+NoConfirm+' '+ Verbose+' '+
+    Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
   if Length(ErrorMessage) > 0 then
   begin
@@ -247,6 +251,18 @@ begin
     AllOptions:=AllOptions+'--'+LazURL+'="'+FInstaller.LazarusDirectory+'" ';
   end;
 
+  if Application.HasOption(Skip) then
+  begin
+    FInstaller.SkipModules:=Application.GetOptionValue(Skip);
+    AllOptions:=AllOptions+'--'+Skip+'="'+FInstaller.SkipModules+'" ';
+  end;
+
+  if Application.HasOption(Only) then
+  begin
+    FInstaller.OnlyModules:=Application.GetOptionValue(Only);
+    AllOptions:=AllOptions+'--'+Only+'="'+FInstaller.SkipModules+'" ';
+  end;
+
   if Application.HasOption(PrimaryConfigPath) then
   begin
     // Only change if there's actually a valid value
@@ -257,9 +273,6 @@ begin
     AllOptions:=AllOptions+'--'+PrimaryConfigPath+'="'+Application.GetOptionValue(PrimaryConfigPath)+'" ';
   end;
 
-  FInstaller.SkipFPC:=Application.HasOption(SkipFPC);
-  FInstaller.SkipLazarus:=Application.HasOption(SkipLaz);
-  FInstaller.SkipLazarusHelp:=Application.HasOption(SkipLazHelp);
   FInstaller.Verbose:=Application.HasOption(Verbose);
   bNoConfirm:=Application.HasOption(NoConfirm);
 
@@ -282,8 +295,7 @@ begin
   writeln('Options:');
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
   writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
-  if FPCUpLink<>'' then
-    writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
+  writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
   writeln('FPC URL:                '+FInstaller.FPCURL);
   writeln('FPC options:            '+FInstaller.FPCOPT);
   writeln('FPC directory:          '+FInstaller.FPCDirectory);
@@ -297,16 +309,14 @@ begin
   writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('');
-  if not FInstaller.SkipFPC and (FInstaller.FPCDesiredRevision<>'') then
+  if (FInstaller.FPCDesiredRevision<>'') then
     writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);
-  if not FInstaller.SkipLazarus and (FInstaller.LazarusDesiredRevision<>'') then
+  if (FInstaller.LazarusDesiredRevision<>'') then
     writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusDesiredRevision);
-  if FInstaller.SkipFPC then
-    writeln('WARNING: Skipping installation/update FPC ');
-  if FInstaller.SkipLazarus then
-    writeln('WARNING: Skipping installation/update Lazarus ');
-  if FInstaller.SkipLazarusHelp then
-    writeln('WARNING: Skipping Lazarus CHM help');
+  if FInstaller.SkipModules<>'' then
+    writeln('WARNING: Skipping installation/update of '+FInstaller.SkipModules);
+  if FInstaller.OnlyModules<>'' then
+    writeln('WARNING: Limiting installation/update to '+FInstaller.OnlyModules);
   writeln('');
   if not bNoConfirm then
     begin

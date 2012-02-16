@@ -55,6 +55,7 @@ type
     FBootstrapCompilerName: string; //OS specific compiler name (e.g. ppcuniversal for OSX)
     FFPCOPT: string;
     FLazarusOPT: string;
+    FOnlyModules: string;
     FShortcutName: string; //Name for shortcut/shell script pointing to newly installed Lazarus
     FExecutableExtension: string; //.exe on Windows
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
@@ -69,9 +70,7 @@ type
     {$IFDEF MSWINDOWS}
     FMakeDir: string;
     {$ENDIF}
-    FSkipFPC: boolean;
-    FSkipLazarus: boolean;
-    FSkipLazarusHelp: boolean;
+    FSkipModules: string;
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FTar: string; //Location or name of tar executable
@@ -97,14 +96,17 @@ type
     function GetFPCRevision: string;
     function GetFPCUrl: string;
     function GetLazarusRevision: string;
+    function ModuleEnabled(Name:string):boolean;
     procedure SetAllOptions(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
     procedure SetLazarusDesiredRevision(AValue: string);
+    procedure SetOnlyModules(AValue: string);
     procedure SetShortCutNameFpcup(AValue: string);
     procedure SetSkipFPC(AValue: boolean);
     procedure SetSkipLazarus(AValue: boolean);
     procedure SetSkipLazarusHelp(AValue: boolean);
+    procedure SetSkipModules(AValue: string);
     procedure SetVerbose(AValue: boolean);
     function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
@@ -157,9 +159,8 @@ type
     property LazarusDesiredRevision:string read GetLazarusRevision write SetLazarusDesiredRevision;
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
-    property SkipFPC:boolean read FSkipFPC write SetSkipFPC;
-    property SkipLazarus:boolean read FSkipLazarus write SetSkipLazarus;
-    property SkipLazarusHelp: boolean read FSkipLazarusHelp write SetSkipLazarusHelp;
+    property SkipModules:string read FSkipModules write SetSkipModules;
+    property OnlyModules:string read FOnlyModules write SetOnlyModules;
     property Verbose:boolean read FVerbose write SetVerbose;
     constructor Create;
     destructor Destroy; override;
@@ -1020,7 +1021,7 @@ var
   OperationSucceeded: boolean;
   Params: TStringList;
 begin
-  if SkipLazarusHelp then
+  if not ModuleEnabled('LHELP') then
   begin
     result:=true;  //continue with whatever we do next
     infoln('Lazarus help skipped by user.');
@@ -1138,6 +1139,13 @@ end;
 function TInstaller.GetLazarusRevision: string;
 begin
   Result := FUpdater.LazarusRevision;
+end;
+
+function TInstaller.ModuleEnabled(Name: string): boolean;
+begin
+  result:=(((FOnlyModules='') and (FSkipModules=''))
+          or ((FOnlyModules<>'') and (Pos(Name,FOnlyModules)>0)))
+          or ((FSkipModules<>'') and (Pos(Name,FSkipModules)<=0))
 end;
 
 procedure TInstaller.SetAllOptions(AValue: string);
@@ -1379,6 +1387,12 @@ begin
   FUpdater.LazarusRevision:=AValue;
 end;
 
+procedure TInstaller.SetOnlyModules(AValue: string);
+begin
+  if FOnlyModules=AValue then Exit;
+  FOnlyModules:=Uppercase(AValue);
+end;
+
 procedure TInstaller.SetShortCutNameFpcup(AValue: string);
 begin
   if FShortCutNameFpcup=AValue then Exit;
@@ -1387,20 +1401,23 @@ end;
 
 procedure TInstaller.SetSkipFPC(AValue: boolean);
 begin
-  if FSkipFPC=AValue then Exit;
-  FSkipFPC:=AValue;
+
 end;
 
 procedure TInstaller.SetSkipLazarus(AValue: boolean);
 begin
-  if FSkipLazarus=AValue then Exit;
-  FSkipLazarus:=AValue;
+
 end;
 
 procedure TInstaller.SetSkipLazarusHelp(AValue: boolean);
 begin
-  if FSkipLazarusHelp=AValue then Exit;
-  FSkipLazarusHelp:=AValue;
+
+end;
+
+procedure TInstaller.SetSkipModules(AValue: string);
+begin
+  if FSkipModules=AValue then Exit;
+  FSkipModules:=UpperCase(AValue);
 end;
 
 procedure TInstaller.SetVerbose(AValue: boolean);
@@ -1446,7 +1463,7 @@ var
   SearchRec:TSearchRec;
   FPCVersion:string;
 begin
-  if SkipFPC then
+  if not ModuleEnabled('FPC') then
     begin
     result:=true;  //continue with lazarus
     infoln('FPC installation/update skipped by user.');
@@ -1744,7 +1761,7 @@ var
   OperationSucceeded: boolean;
   Params: TStringList;
 begin
-  if SkipLazarus then
+  if not ModuleEnabled('LAZARUS') then
   begin
     result:=true;  //continue with whatever we do next
     infoln('Lazarus installation/update skipped by user.');
@@ -1949,31 +1966,38 @@ begin
   end;
 
   if OperationSucceeded then
-  begin
-    // Make bigide: ide with additional packages as specified by user (in primary config path?)
-    // this should also make the lhelp package needed for CHM Help.
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      Params.Add('FPC='+FInstalledCompiler);
-      {$IFDEF MSWINDOWS}
-      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Specify the ones the compiler should use:
-      // We can rely on binutils being copied to compiler bin path here:
-      Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-      {$ENDIF MSWINDOWS}
-      Params.Add('--directory='+LazarusDirectory+'');
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('bigide');
-      infoln('Lazarus: running make bigide:');
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
+    if not ModuleEnabled('BIGIDE') then
+    begin
+      OperationSucceeded:=true;  //continue with whatever we do next
+      infoln('bigide skipped by user.');
+      writeln(FLogFile,'bigide skipped by user.');
+    end
+    else
+    begin
+      // Make bigide: ide with additional packages as specified by user (in primary config path?)
+      // this should also make the lhelp package needed for CHM Help.
+      Executable := FMake;
+      Params:=TStringList.Create;
+      try
+        Params.Add('FPC='+FInstalledCompiler);
+        {$IFDEF MSWINDOWS}
+        // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+        // Specify the ones the compiler should use:
+        // We can rely on binutils being copied to compiler bin path here:
+        Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+        //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+        Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+        {$ENDIF MSWINDOWS}
+        Params.Add('--directory='+LazarusDirectory+'');
+        Params.Add('UPXPROG=echo'); //Don't use UPX
+        Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        Params.Add('bigide');
+        infoln('Lazarus: running make bigide:');
+        if (Run(Executable, Params, CustomPath)) <> 0 then
+          OperationSucceeded := False;
+      finally
+        Params.Free;
+      end;
   end;
 
   if OperationSucceeded then
@@ -2017,63 +2041,82 @@ begin
   end;
 
   if OperationSucceeded then
-  begin
-    // Build lhelp chm help viewer
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-    Params:=TStringList.Create;
-    try
-      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'components'+DirectorySeparator+
-        'chmhelp'+DirectorySeparator+
-        'lhelp'+DirectorySeparator+
-        'lhelp.lpr');
-      infoln('Lazarus: compiling lhelp help viewer:');
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
+    if not ModuleEnabled('LHELP') then
+    begin
+      OperationSucceeded:=true;  //continue with whatever we do next
+      infoln('lhelp skipped by user.');
+      writeln(FLogFile,'lhelp skipped by user.');
+    end
+    else
+    begin
+      // Build lhelp chm help viewer
+      Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      Params:=TStringList.Create;
+      try
+        Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+        Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+          'components'+DirectorySeparator+
+          'chmhelp'+DirectorySeparator+
+          'lhelp'+DirectorySeparator+
+          'lhelp.lpr');
+        infoln('Lazarus: compiling lhelp help viewer:');
+        if (Run(Executable, Params, CustomPath)) <> 0 then
+          OperationSucceeded := False;
+      finally
+        Params.Free;
+      end;
     end;
-  end;
-
-  //todo: add --skiplazdocs option to not build documentation
-
-  if OperationSucceeded then
-  begin
-    // Build data desktop, nice example of building with lazbuild
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-    Params:=TStringList.Create;
-    try
-      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'tools'+DirectorySeparator+
-        'lazdatadesktop'+DirectorySeparator+
-        'lazdatadesktop.lpr');
-      infoln('Lazarus: compiling data desktop:');
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
-  end;
 
   if OperationSucceeded then
-  begin
-    // Build Lazarus Doceditor
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-    Params:=TStringList.Create;
-    try
-      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'doceditor'+DirectorySeparator+
-        'lazde.lpr');
-      infoln('Lazarus: compiling doc editor:');
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
+    if not ModuleEnabled('LAZDATADESKTOP') then
+    begin
+      OperationSucceeded:=true;  //continue with whatever we do next
+      infoln('lazdatadesktop skipped by user.');
+      writeln(FLogFile,'lazdatadesktop skipped by user.');
+    end
+    else
+    begin
+      // Build data desktop, nice example of building with lazbuild
+      Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      Params:=TStringList.Create;
+      try
+        Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+        Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+          'tools'+DirectorySeparator+
+          'lazdatadesktop'+DirectorySeparator+
+          'lazdatadesktop.lpr');
+        infoln('Lazarus: compiling data desktop:');
+        if (Run(Executable, Params, CustomPath)) <> 0 then
+          OperationSucceeded := False;
+      finally
+        Params.Free;
+      end;
     end;
-  end;
+
+  if OperationSucceeded then
+    if not ModuleEnabled('DOCEDITOR') then
+    begin
+      OperationSucceeded:=true;  //continue with whatever we do next
+      infoln('doceditor skipped by user.');
+      writeln(FLogFile,'doceditor skipped by user.');
+    end
+    else
+    begin
+      // Build Lazarus Doceditor
+      Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      Params:=TStringList.Create;
+      try
+        Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+        Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+          'doceditor'+DirectorySeparator+
+          'lazde.lpr');
+        infoln('Lazarus: compiling doc editor:');
+        if (Run(Executable, Params, CustomPath)) <> 0 then
+          OperationSucceeded := False;
+      finally
+        Params.Free;
+      end;
+    end;
 
   if OperationSucceeded then
     writeln(FLogFile,'Lazarus update succeeded at revision number ', AfterRevision);
