@@ -44,16 +44,25 @@ type
 
 TUpdateLazConfig = class(TObject)
 private
+  FCHMHelpExe: string;
+  FCHMHelpFilesPath: string;
   FConfig: TXMLConfig;
+  FHelpConfig: TXMLConfig;
   FCompilerFilename: string;
   FDebuggerFilename: string;
   FFPCSourceDirectory: string;
-  FIsNewFile: boolean;
+  FNewHelpFile: boolean;
+  FNewMainFile: boolean;
   FLazarusDirectory: string;
   FMakeFilename: string;
   FConfigFile: string;
+  FHelpConfigFile: string;
   FTestBuildDirectory: string;
 public
+  {Path to CHM help viewer, such as lhelp.exe}
+  property CHMHelpExe: string read FCHMHelpExe write FCHMHelpExe;
+  {Directory where CHM files are searched. If you want to use subdirectories, modify the baseURL settings for the individual files.}
+  property CHMHelpFilesPath: string read FCHMHelpFilesPath write FCHMHelpFilesPath;
   {New compiler filename. May include macros, except FPCVer. If empty, use current/default value:}
   property CompilerFilename: string read FCompilerFilename write FCompilerFilename;
   {Config file being created/updated:}
@@ -64,10 +73,12 @@ public
   property FPCSourceDirectory: string read FFPCSourceDirectory write FFPCSourceDirectory;
   {New Lazarus directory. May NOT include macros. If empty, use current/default value:}
   property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
-  {New make filename. May include macros. If empty, use current/default value:}
+  {NewMainFile make filename. May include macros. If empty, use current/default value:}
   property MakeFilename: string read FMakeFilename write FMakeFilename;
+  {Is this a new help config file or an existing one?}
+  property NewHelpFile: boolean read FNewHelpFile;
   {Is this a new config file or an existing one?}
-  property New: boolean read FIsNewFile;
+  property NewMainFile: boolean read FNewMainFile;
   {New test build directory (directory for testing build options). May include macros. If empty, use current/default value:}
   property TestBuildDirectory: string read FTestBuildDirectory write FTestBuildDirectory;
   {Create object; specify path (primary config path) where option files should be created or updated:}
@@ -80,21 +91,25 @@ uses FileUtil;
 { TUpdateLazConfig }
 const
   ConfigFileName='environmentoptions.xml';
+  HelpConfigFileName='helpoptions.xml';
   VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
 
 constructor TUpdateLazConfig.Create(ConfigPath: string);
 begin
   FConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFileName;
+  FHelpConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+HelpConfigFileName;
   // Assume any file that exists is also valid... might be improved by checking
   // for correct values.
-  if FileExistsUTF8(FConfigFile) then FIsNewFile:=false else FIsNewFile:=true;
+  if FileExistsUTF8(FConfigFile) then FNewMainFile:=false else FNewMainFile:=true;
+  if FileExistsUTF8(FHelpConfigFile) then FNewHelpFile:=false else FNewHelpFile:=true;
   FConfig:=TXMLConfig.Create(FConfigFile);
+  FHelpConfig:=TXMLConfig.Create(FHelpConfigFile);
 end;
 
 destructor TUpdateLazConfig.Destroy;
 begin
   try
-    if New then
+    if NewMainFile then
     begin
       // Set up some sensible defaults
       FConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewConfig);
@@ -127,8 +142,24 @@ begin
   finally
     // Regardless of what happens, try to prevent memory leaks.
     FConfig.Free;
-    inherited Destroy;
   end;
+  try
+    if NewHelpFile then
+    begin
+      // Defaults
+      // We don't know the location of the help viewer or help files
+      FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', EmptyStr);
+      FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', EmptyStr);
+    end;
+    if CHMHelpExe<>EmptyStr then FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', CHMHelpExe);
+    if CHMHelpFilesPath<>EmptyStr then       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', CHMHelpFilesPath);
+    { Writing a semantically empty xml file shouldn't hurt,
+    so no checks for dirty file needed }
+    FHelpConfig.Flush;
+  finally
+    FHelpConfig.Free;
+  end;
+  inherited Destroy;
 end;
 
 

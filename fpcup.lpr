@@ -97,6 +97,7 @@ begin
   writeln('                       directory is used.');
   writeln(' skipfpc               Do not update or build FPC.');
   writeln(' skiplaz               Do not update or build Lazarus.');
+  writeln(' skiplazhelp           Do not get chm help for Lazarus.');
   writeln(' verbose               Show output from svn and make');
   writeln('');
 end;
@@ -120,6 +121,7 @@ const
   PrimaryConfigPath='primary-config-path';
   SkipFPC='skipfpc';
   SkipLaz='skiplaz';
+  SkipLazHelp='skiplazhelp';
   NoConfirm='noconfirm';
   Verbose='verbose';
 var
@@ -154,7 +156,7 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
-    SkipFPC+' '+SkipLaz+' '+NoConfirm+' '+ Verbose+' '+
+    SkipFPC+' '+SkipLaz+' '+SkipLazHelp+' '+NoConfirm+' '+ Verbose+' '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
   if Length(ErrorMessage) > 0 then
   begin
@@ -257,6 +259,7 @@ begin
 
   FInstaller.SkipFPC:=Application.HasOption(SkipFPC);
   FInstaller.SkipLazarus:=Application.HasOption(SkipLaz);
+  FInstaller.SkipLazarusHelp:=Application.HasOption(SkipLazHelp);
   FInstaller.Verbose:=Application.HasOption(Verbose);
   bNoConfirm:=Application.HasOption(NoConfirm);
 
@@ -305,6 +308,8 @@ begin
     writeln('WARNING: Skipping installation/update FPC ');
   if FInstaller.SkipLazarus then
     writeln('WARNING: Skipping installation/update Lazarus ');
+  if FInstaller.SkipLazarusHelp then
+    writeln('WARNING: Skipping Lazarus CHM help');
   writeln('');
   if not bNoConfirm then
     begin
@@ -373,4 +378,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+

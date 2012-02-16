@@ -72,6 +72,7 @@ type
     FShortCutNameFpcupIsSet:boolean; //indicates if ShortCutNameFpcupSet was set
     FSkipFPC: boolean;
     FSkipLazarus: boolean;
+    FSkipLazarusHelp: boolean;
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     FTar: string; //Location or name of tar executable
@@ -104,6 +105,7 @@ type
     procedure SetShortCutNameFpcup(AValue: string);
     procedure SetSkipFPC(AValue: boolean);
     procedure SetSkipLazarus(AValue: boolean);
+    procedure SetSkipLazarusHelp(AValue: boolean);
     procedure SetVerbose(AValue: boolean);
     function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
     function GetLazarusDirectory: string;
@@ -144,6 +146,7 @@ type
     property FPCDesiredRevision:string read GetFPCRevision write SetFPCDesiredRevision;
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
+    function GetLazarusHelp: boolean; //Create/get/compile Lazarus help
     property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string
       read FLazarusPrimaryConfigPath write SetLazarusPrimaryConfigPath;
@@ -156,6 +159,7 @@ type
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     property SkipFPC:boolean read FSkipFPC write SetSkipFPC;
     property SkipLazarus:boolean read FSkipLazarus write SetSkipLazarus;
+    property SkipLazarusHelp: boolean read FSkipLazarusHelp write SetSkipLazarusHelp;
     property Verbose:boolean read FVerbose write SetVerbose;
     constructor Create;
     destructor Destroy; override;
@@ -1006,6 +1010,131 @@ begin
   Result := FUpdater.FPCURL;
 end;
 
+function TInstaller.GetLazarusHelp(): boolean;
+var
+  AfterRevision: string;
+  BeforeRevision: string;
+  CustomPath: string;
+  Executable: string;
+  LazarusConfig: TUpdateLazConfig;
+  OperationSucceeded: boolean;
+  Params: TStringList;
+begin
+  if SkipLazarusHelp then
+  begin
+    result:=true;  //continue with whatever we do next
+    infoln('Lazarus help skipped by user.');
+    writeln(FLogFile,'Lazarus help skipped by user.');
+    exit;
+  end;
+  writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
+  writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
+  writeln(FLogFile,'Lazarus URL:            '+LazarusURL);
+
+  //Make sure we have the proper tools.
+  OperationSucceeded := CheckAndGetNeededExecutables;
+
+  // If we haven't installed FPC, this won't be set:
+  if FInstalledCompiler = '' then
+  begin
+    //Assume we've got a working compiler. This will link through to the
+    //platform-specific compiler, e.g. our fpc.sh proxy on Unix
+    SetCompilerToInstalledCompiler;
+  end;
+
+  {$IFDEF MSWINDOWS}
+  // Try to ignore existing make.exe, fpc.exe by setting our own path:
+  CustomPath:=BootstrapCompilerDirectory+PathSeparator+
+    MakeDirectory+PathSeparator+
+    FSVNDirectory+PathSeparator+
+    FPCDirectory+PathSeparator+
+    LazarusDirectory;
+  {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  CustomPath:=Emptystr; // We need make, etc, so we can't really do anything here, can we?
+  {$ENDIF UNIX}
+  if CustomPath<>EmptyStr then
+    writeln(FLogFile,'External program path:  '+CustomPath);
+
+  if OperationSucceeded then
+  begin
+    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+    Params:=TStringList.Create;
+    try
+      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'docs'+DirectorySeparator+
+        'html'+DirectorySeparator+
+        'build_lcl_docs.lpr');
+      infoln('Lazarus: compiling build_lcl_docs help compiler:');
+      if (Run(Executable, Params, CustomPath)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  //todo: get/compile FPC docs CHM help
+  //these may supply .xct files for FPC help so we can use that in build_lcl_docs below
+
+  if OperationSucceeded then
+  begin
+    // Compile Lazarus CHM help
+    Executable := IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'docs'+DirectorySeparator+
+        'html'+DirectorySeparator+
+        'build_lcl_docs'+FExecutableExtension;
+    Params:=TStringList.Create;
+    try
+      //todo: get .xct files from fpc so LCL CHM can link to it??!
+      //todo: this now FAILS as the compiler cannot find its input files.
+      // we probably need to set the current directory to the executable's directory
+      Params.Add('--fpdoc');
+      Params.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+
+        FExecutableExtension); //fpdoc gets called by build_lcl_docs
+      Params.Add('--outfmt');
+      Params.Add('chm');
+      infoln('Lazarus: compiling chm help docs:');
+      { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
+      Though that may work when adjusting the baseurl option in Lazarus for each
+      CHM file, it's easier to move them to <lazarusdir>/docs/html,
+      which is also suggested by the wiki}
+      if (Run(Executable, Params, CustomPath)) <> 0 then
+        OperationSucceeded := False;
+    finally
+      Params.Free;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    infoln('Lazarus: moving lcl.chm to docs directory.');
+    // Move help file to doc directory
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator+
+      'lcl.chm');
+    // We might (in theory) be moving files across partitions so we cannot use renamefile
+    OperationSucceeded:=FileUtil.CopyFile(IncludeTrailingPathDelimiter(
+      LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator+
+      'lcl'+DirectorySeparator+
+      'lcl.chm',
+      IncludeTrailingPathDelimiter(LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator+
+      'lcl.chm');
+    sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator+
+      'lcl'+DirectorySeparator+
+      'lcl.chm');
+  end;
+  result:=OperationSucceeded;
+end;
+
 function TInstaller.GetLazarusRevision: string;
 begin
   Result := FUpdater.LazarusRevision;
@@ -1267,6 +1396,12 @@ procedure TInstaller.SetSkipLazarus(AValue: boolean);
 begin
   if FSkipLazarus=AValue then Exit;
   FSkipLazarus:=AValue;
+end;
+
+procedure TInstaller.SetSkipLazarusHelp(AValue: boolean);
+begin
+  if FSkipLazarusHelp=AValue then Exit;
+  FSkipLazarusHelp:=AValue;
 end;
 
 procedure TInstaller.SetVerbose(AValue: boolean);
@@ -1770,9 +1905,21 @@ begin
   if OperationSucceeded then
   begin
     // Set up a minimal config so we can use LazBuild
+    // also sets up CHM help viewer.
     LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
     try
       try
+        // Configure help path as well.
+        // Note that we might be overwriting user's settings here.
+        // todo: if overwriting user's help settings, warn him about it
+        LazarusConfig.CHMHelpExe:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+          'components'+DirectorySeparator+
+          'chmhelp'+DirectorySeparator+
+          'lhelp'+DirectorySeparator+
+          'lhelp'+FExecutableExtension;
+        LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+          'docs'+DirectorySeparator+
+          'html'+DirectorySeparator;
         LazarusConfig.LazarusDirectory:=LazarusDirectory;
         {$IFDEF MSWINDOWS}
         // FInstalledCompiler will be often something like c:\bla\ppc386.exe, e.g.
@@ -1874,13 +2021,6 @@ begin
   if OperationSucceeded then
   begin
     // Build lhelp chm help viewer
-    // todo: while this may compile, to integrate help we need to do more. Taken from Laz wiki:
-    // configure paths for lhelp
-    // Download/update fpc help (see chmhelp readme)
-    // Copy all CHM files to lazarus/docs/html
-    // same for fpc help
-    // Now context sensitive help using F1 should already be working.
-    // reinier: I do suspect we will need to adjust a "help files path" somewhere though; see chmhelp readme
     Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     Params:=TStringList.Create;
     try
@@ -1898,50 +2038,7 @@ begin
     end;
   end;
 
-  if OperationSucceeded then
-  begin
-    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-    Params:=TStringList.Create;
-    try
-      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'docs'+DirectorySeparator+
-        'html'+DirectorySeparator+
-        'build_lcl_docs.lpr');
-      infoln('Lazarus: compiling build_lcl_docs help compiler:');
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
-  end;
-
-  //todo: get/compile FPC docs CHM help
-  //get .xct files for FPC help so we can use that in build_lcl_docs below
-
-  if OperationSucceeded then
-  begin
-    // Compile Lazarus CHM help
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'docs'+DirectorySeparator+
-        'html'+DirectorySeparator+
-        'build_lcl_docs'+FExecutableExtension;
-    Params:=TStringList.Create;
-    try
-      //todo: get .xct files from fpc so LCL CHM can link to it??!
-      Params.Add('--fpdoc');
-      Params.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+FExecutableExtension); //fpdoc gets called by build_lcl_docs
-      Params.Add('--outfmt');
-      Params.Add('chm');
-      infoln('Lazarus: compiling chm help docs:');
-      //they get output into <lazarusdir>/docs/html/lcl/lcl.chm
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
-  end;
+  //todo: add --skiplazdocs option to not build documentation
 
   if OperationSucceeded then
   begin
