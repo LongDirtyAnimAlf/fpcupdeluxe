@@ -62,6 +62,7 @@ type
 
 function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer; overload;
 function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string; Verbose:boolean): integer; overload;
+procedure DumpConsole(Sender:TObject; output:string);
 
 
 
@@ -98,6 +99,7 @@ function TProcessEx.GetProcessEnvironment: TProcessEnvironment;
 begin
   If not assigned(FProcessEnvironment) then
     FProcessEnvironment:=TProcessEnvironment.Create;
+  result:=FProcessEnvironment;
 end;
 
 procedure TProcessEx.SetOnOutput(AValue: TDumpFunc);

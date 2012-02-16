@@ -174,7 +174,7 @@ implementation
 uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
-  strutils, process, FileUtil {Requires LCL}
+  strutils, process, processutils, FileUtil {Requires LCL}
 {$IFDEF MSWINDOWS}
   //Mostly for shortcut code
   ,windows, shlobj {for special folders}, ActiveX, ComObj
@@ -1453,15 +1453,14 @@ var
   BeforeRevision: string;
   BinPath: string; //Path where installed CompilerName ends up
   CustomPath: string; //Our own version of path we use to pass to commands
-  Executable: string;
   FileCounter:integer;
   FPCCfg: string;
   FPCScript: string;
   OperationSucceeded: boolean;
-  Params: TstringList;
   TxtFile:text;
   SearchRec:TSearchRec;
   FPCVersion:string;
+  ProcessEx:TProcessEx;
 begin
   if not ModuleEnabled('FPC') then
     begin
@@ -1478,6 +1477,10 @@ begin
   writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
   {$ENDIF MSWINDOWS}
 
+  ProcessEx:=TProcessEx.Create(nil);
+  if Verbose then
+    ProcessEx.OnOutput:=@DumpConsole;
+
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   CustomPath:=BootstrapCompilerDirectory+PathSeparator+
@@ -1485,9 +1488,10 @@ begin
     FSVNDirectory+PathSeparator+
     FPCDirectory+PathSeparator+
     LazarusDirectory;
+  ProcessEx.Environment.SetVar('Path',CustomPath);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  CustomPath:=Emptystr; // We need make, etc, so we can't really do anything here, can we?
+  ProcessEx.Environment.SetVar('PATH',FPCDirectory+':'+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
@@ -1495,30 +1499,27 @@ begin
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
 
+
   //Make distclean to clean out any cruft, and speed up svn update
   if OperationSucceeded then
   begin
     // Make distclean; we don't care about failure (e.g. directory might be empty etc)
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      Params.Add('FPC='+BootstrapCompiler);
-      {$IFDEF MSWINDOWS}
-      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Specify the ones the compiler should use:
-      Params.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
-      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-      {$ENDIF MSWINDOWS}
-      Params.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('distclean');
-      infoln('FPC: running make distclean before checkout/update:');
-      Run(Executable, Params, CustomPath);
-    finally
-      Params.Free;
-    end;
+    ProcessEx.Executable := FMake;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+    {$IFDEF MSWINDOWS}
+    // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+    // Specify the ones the compiler should use:
+    ProcessEx.Parameters.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
+    //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+    ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+    {$ENDIF MSWINDOWS}
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    ProcessEx.Parameters.Add('distclean');
+    infoln('FPC: running make distclean before checkout/update:');
+    ProcessEx.Execute;
   end;
 
   infoln('Checking out/updating FPC sources...');
@@ -1530,47 +1531,44 @@ begin
   begin
     // Make all/install, using bootstrap compiler.
     // Make all should use generated compiler internally for unit compilation
-    Executable := FMake;
-    Params:=TStringList.Create;
-    try
-      Params.Add('FPC='+BootstrapCompiler);
-      {$IFDEF MSWINDOWS}
-      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Specify the ones the compiler should use:
-      Params.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
-      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-      {$ENDIF MSWINDOWS}
-      Params.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('all');
-      Params.Add('install');
-      infoln('Running make all install for FPC:');
-      if Run(Executable, Params, CustomPath) <> 0 then
-        OperationSucceeded := False;
-      {$IFDEF UNIX}
-      // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
-      // need to find $fpcversion first
-      FPCVersion:='';
-      if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/*',faDirectory,SearchRec)=0 then
-        repeat
-          if (SearchRec.Attr and faDirectory) <>0 then
-            begin
-            FPCVersion:=SearchRec.Name;
-            if (FPCVersion<>'') and (FPCVersion[1]>'1') and (FPCVersion[1]<='9') then
-              break;
-            end;
-        until FindNext(SearchRec)<>0;
-      //if not found will point to wrong dir
-      DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
-      fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
-      pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
-      {$ENDIF UNIX}
-    finally
-      Params.Free;
-    end;
+    ProcessEx.Executable := FMake;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+    {$IFDEF MSWINDOWS}
+    // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+    // Specify the ones the compiler should use:
+    ProcessEx.Parameters.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
+    //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+    Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+    {$ENDIF MSWINDOWS}
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    ProcessEx.Parameters.Add('all');
+    ProcessEx.Parameters.Add('install');
+    infoln('Running make all install for FPC:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
+    {$IFDEF UNIX}
+    // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
+    // need to find $fpcversion first
+    FPCVersion:='';
+    if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/*',faDirectory,SearchRec)=0 then
+      repeat
+        if (SearchRec.Attr and faDirectory) <>0 then
+          begin
+          FPCVersion:=SearchRec.Name;
+          if (FPCVersion<>'') and (FPCVersion[1]>'1') and (FPCVersion[1]<='9') then
+            break;
+          end;
+      until FindNext(SearchRec)<>0;
+    //if not found will point to wrong dir
+    DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
+    fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
+    pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
+    {$ENDIF UNIX}
   end;
 
   // Let everyone know of our shiny new CompilerName:
@@ -1607,53 +1605,60 @@ begin
 
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
-  begin
-    // Make crosscompiler using new CompilerName- todo: check out what cross compilers we can install on Linux/OSX
-    // Note: consider this as an optional item, so don't fail the function if this breaks.
-    Executable := FMake;
-    infoln('Running Make all (FPC crosscompiler):');
-    Params:=TStringList.Create;
-    try
-      Params.Add('FPC='+FInstalledCompiler+'');
+    if not ModuleEnabled('WINCROSSX64') then
+    begin
+      OperationSucceeded:=true;  //continue with whatever we do next
+      infoln('wincrossx64 skipped by user.');
+      writeln(FLogFile,'wincrossx64 skipped by user.');
+    end
+    else
+    begin
+      // Make crosscompiler using new CompilerName- todo: check out what cross compilers we can install on Linux/OSX
+      // Note: consider this as an optional item, so don't fail the function if this breaks.
+      ProcessEx.Executable := FMake;
+      ProcessEx.Parameters.Clear;
+      infoln('Running Make all (FPC crosscompiler):');
+      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
       // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
       // Specify the ones the compiler should use:
       // We can rely on binutils being copied to compiler bin path here:
-      Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
       //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-      Params.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-      Params.Add('UPXPROG=echo'); //Don't use UPX
-      Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      Params.Add('OS_TARGET=win64');
-      Params.Add('CPU_TARGET=x86_64');
+      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+      ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
+      ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      ProcessEx.Parameters.Add('OS_TARGET=win64');
+      ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
       if FFPCOPT<>'' then
-        Params.Add('OPT='+FFPCOPT);
-      Params.Add('all');
-      if Run(Executable, Params, CustomPath) = 0 then
+        ProcessEx.Parameters.Add('OPT='+FFPCOPT);
+      ProcessEx.Parameters.Add('all');
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus = 0 then
       begin
         // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
         // make all and make crossinstall perhaps equivalent to
         // make all install CROSSCOMPILE=1??? todo: find out
-        Executable := FMake;
+        ProcessEx.Executable := FMake;
         infoln('Running Make crossinstall for FPC:');
-        // Params already assigned
-        Params.Clear;
-        Params.Add('FPC='+FInstalledCompiler+'');
+        ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
         // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
         // Specify the ones the compiler should use:
         // We can rely on binutils being copied to compiler bin path here:
-        Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+        ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
         //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-        Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-        Params.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-        Params.Add('UPXPROG=echo'); //Don't use UPX
-        Params.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        Params.Add('OS_TARGET=win64'); //cross compile for different OS...
-        Params.Add('CPU_TARGET=x86_64'); // and processor.
-        Params.Add('crossinstall');
+        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+        ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        ProcessEx.Parameters.Add('OS_TARGET=win64'); //cross compile for different OS...
+        ProcessEx.Parameters.Add('CPU_TARGET=x86_64'); // and processor.
+        ProcessEx.Parameters.Add('crossinstall');
         // Note: consider this as an optional item, so don't fail the function if this breaks.
-        if Run(Executable, Params, CustomPath)=0 then
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus=0 then
         begin
           // Let everyone know of our shiny new crosscompiler:
           FInstalledCrossCompiler := IncludeTrailingPathDelimiter(FPCDirectory) + 'bin' +
@@ -1664,10 +1669,7 @@ begin
           infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
         end;
       end;
-    finally
-      Params.Free;
     end;
-  end;
   {$ENDIF MSWINDOWS}
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
@@ -1678,19 +1680,16 @@ begin
     FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
-      Executable := BinPath + 'fpcmkcfg';
-      Params:=TStringList.Create;
-      try
-        Params.Add('-d');
-        Params.Add('basepath='+ExcludeTrailingPathDelimiter(FPCDirectory));
-        Params.Add('-o');
-        Params.Add('' + FPCCfg + '');
-        infoln('Debug: Running fpcmkcfg: ');
-        if Run(Executable, Params, CustomPath) <> 0 then
-          OperationSucceeded := False;
-      finally
-        Params.Free;
-      end;
+      ProcessEx.Executable := BinPath + 'fpcmkcfg';
+      ProcessEx.Parameters.clear;
+      ProcessEx.Parameters.Add('-d');
+      ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FPCDirectory));
+      ProcessEx.Parameters.Add('-o');
+      ProcessEx.Parameters.Add('' + FPCCfg + '');
+      infoln('Debug: Running fpcmkcfg: ');
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus <> 0 then
+        OperationSucceeded := False;
     {$IFDEF UNIX}
     {$IFDEF cpuarmel}
     // Need to add multiarch library search path
@@ -1744,6 +1743,7 @@ begin
   {$ENDIF UNIX}
   if OperationSucceeded then
     writeln(FLogFile,'FPC update succeeded at revision number ', AfterRevision);
+  ProcessEx.Free;
   Result := OperationSucceeded;
 end;
 
