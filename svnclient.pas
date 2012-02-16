@@ -143,7 +143,7 @@ begin
     // Check for valid svn executable
     CommandOutput:=TMemoryStream.Create;
     try
-      ExeResult := ExecuteCommand(SVNName, '--version', CommandOutput);
+      ExeResult := ExecuteCommand(FSVNExecutable, '--version', CommandOutput);
     finally
       CommandOutput.Free;
     end;
