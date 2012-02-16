@@ -1351,7 +1351,7 @@ begin
     // Specify the ones the compiler should use:
     ProcessEx.Parameters.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
     //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-    Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+    ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
     {$ENDIF MSWINDOWS}
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
     ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
@@ -1665,27 +1665,24 @@ begin
     begin
       ProcessEx.Executable := FMake;
       ProcessEx.Parameters.Clear;
-        ProcessEx.Parameters.Add('FPC='+FInstalledCrossCompiler+'');
-        // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-        // Specify the ones the compiler should use:
-        // We can rely on binutils being copied to compiler bin path here:
-        ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-        //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        ProcessEx.Parameters.Add('LCL_PLATFORM=win32');
-        ProcessEx.Parameters.Add('OS_TARGET=win64');
-        ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-        ProcessEx.Parameters.Add('lcl'); //make lcl; no need to run clean as distclean has been run before
-        infoln('Lazarus: running make LCL crosscompiler:');
-        // Note: consider this optional; don't fail the function if this fails.
-        ProcessEx.Execute;
-        if ProcessEx.ExitStatus<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
-      finally
-        Params.Free;
-      end;
+      ProcessEx.Parameters.Add('FPC='+FInstalledCrossCompiler+'');
+      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
+      // Specify the ones the compiler should use:
+      // We can rely on binutils being copied to compiler bin path here:
+      ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
+      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
+      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      ProcessEx.Parameters.Add('LCL_PLATFORM=win32');
+      ProcessEx.Parameters.Add('OS_TARGET=win64');
+      ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
+      ProcessEx.Parameters.Add('lcl'); //make lcl; no need to run clean as distclean has been run before
+      infoln('Lazarus: running make LCL crosscompiler:');
+      // Note: consider this optional; don't fail the function if this fails.
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
     end;
   end;
   {$ENDIF MSWINDOWS}
@@ -2006,4 +2003,4 @@ begin
 end;
 
 end.
-
+
