@@ -112,9 +112,6 @@ type
     function GetLazarusDirectory: string;
     function GetLazarusUrl: string;
     function GetMakePath: string;
-    function Run(Executable: string; const Params: TStringList; const NewPath: string): longint;
-    function RunOutput(Executable: string; const Params: TStringList; const NewPath: string; var Output: TStringList): longint;
-    function RunOutput(Executable: string; const Params: TStringList; const NewPath: string; var Output: string): longint;
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetCompilerToInstalledCompiler;
     procedure SetFPCDirectory(Directory: string);
@@ -367,7 +364,6 @@ var
   ExtractedCompiler: string;
   Log: string;
   OperationSucceeded: boolean;
-  Params: TStringList;
 begin
   OperationSucceeded:=true;
   if OperationSucceeded then
@@ -388,13 +384,7 @@ begin
   begin
     {$IFDEF MSWINDOWS}
     //Extract zip, overwriting without prompting
-    Params:=TStringList.Create;
-    try
-      Params.Add('-o'); //overwrite existing files
-      Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
-      Params.Add(ArchiveDir);
-      Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FUnzip, Params, '') <> 0 then
+    if ExecuteCommandHidden(FUnzip,'-o -d '+ArchiveDir+' '+BootstrapArchive,Verbose) <> 0 then
       begin
         infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -403,9 +393,6 @@ begin
       begin
         OperationSucceeded := True; // Spelling it out can't hurt sometimes
       end;
-    finally
-      Params.Free;
-    end;
     // Move CompilerName to proper directory
     if OperationSucceeded = True then
     begin
@@ -415,13 +402,7 @@ begin
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     //Extract bz2, overwriting without prompting
-    Params:=TStringList.Create;
-    try
-      Params.Add('-d');
-      Params.Add('-f');
-      Params.Add('-q');
-      Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FBunzip2, Params, '') <> 0 then
+    if ExecuteCommandHidden(FBunzip2,'-d -f -q '+BootstrapArchive,Verbose) <> 0 then
       begin
         infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
         OperationSucceeded := False;
@@ -431,9 +412,6 @@ begin
         ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
         OperationSucceeded := True; // Spelling it out can't hurt sometimes
       end;
-    finally
-      Params.Free;
-    end;
     // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
@@ -617,7 +595,6 @@ end;
 function TInstaller.DownloadSVN: boolean;
 var
   OperationSucceeded: boolean;
-  Params: TStringList;
   ResultCode: longint;
   SVNZip: string;
 begin
@@ -642,21 +619,11 @@ begin
   if OperationSucceeded then
   begin
     // Extract, overwrite
-    Params:=TStringList.Create;
-    try
-      Params.Add('-o'); //overwrite existing files
-      Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
-      Params.Add(FSVNDirectory);
-      Params.Add(SVNZip); // zip/archive file
-      ResultCode:=Run(FUnzip, Params, '');
-      if ResultCode<> 0 then
+    if ExecuteCommandHidden(FUnzip,'-o -d '+ FSVNDirectory+' '+SVNZip,Verbose)<> 0 then
       begin
         OperationSucceeded := False;
         infoln('resultcode: ' + IntToStr(ResultCode));
       end;
-    finally
-      Params.Free;
-    end;
   end;
 
   if OperationSucceeded then
@@ -672,7 +639,7 @@ function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
   Output: string;
-  Params: TStringList;
+  Params: string;
   ResultCode: longint;
 begin
   OperationSucceeded := True;
@@ -714,15 +681,7 @@ begin
   begin
     // Check for proper make executable
     try
-      Output := '';
-      Params:=TStringList.Create;
-      Params.Add('-v');
-      try
-        ResultCode:=RunOutput(FMake, Params, '', Output);
-      finally
-        Params.Free;
-      end;
-
+      ExecuteCommandHidden(FMake,'-v',Output,Verbose);
       if Ansipos('GNU Make', Output) = 0 then
       begin
         infoln('Found make executable but it is not GNU Make.');
@@ -778,44 +737,36 @@ begin
       try
         Output := '';
         // See unzip.h for return codes.
-        Params:=TStringList.Create;
-        try
-          // This roundabout way at least avoids messing with ifdefs
-          // note that we will test for the last program found
-          // but on Unixy systems that probably does not matter
-          Output:=EmptyStr;
-          if FUnzip<>EmptyStr then
-          begin
-            Params.Clear;
-            Params.Add('-v');
-            Output:=FUnzip;
-          end;
-          if FBunzip2<>EmptyStr then
-          begin
-            Params.Clear;
-            Params.Add('--version');
-            Output:=FBUnzip2;
-          end;
-          if FTar<>EmptyStr then
-          begin
-            // We put tar after bunzip2; we use it in OSX
-            // and want to test it then.
-            Params.Clear;
-            Params.Add('--version');
-            Output:=FTar;
-          end;
-          if Output=EmptyStr then
-          begin
-            OperationSucceeded:=false;
-            ResultCode:=-1;
-            infoln('No valid unzip/bunzip2/tar executable names/locations set up in program code. Please fix program.');
-          end
-          else
-          begin
-            ResultCode:=Run(Output, Params, EmptyStr);
-          end;
-        finally
-          Params.Free;
+        // This roundabout way at least avoids messing with ifdefs
+        // note that we will test for the last program found
+        // but on Unixy systems that probably does not matter
+        Output:=EmptyStr;
+        if FUnzip<>EmptyStr then
+        begin
+          Params:='-v';
+          Output:=FUnzip;
+        end;
+        if FBunzip2<>EmptyStr then
+        begin
+          Params:='--version';
+          Output:=FBUnzip2;
+        end;
+        if FTar<>EmptyStr then
+        begin
+          // We put tar after bunzip2; we use it in OSX
+          // and want to test it then.
+          Params:='--version';
+          Output:=FTar;
+        end;
+        if Output=EmptyStr then
+        begin
+          OperationSucceeded:=false;
+          ResultCode:=-1;
+          infoln('No valid unzip/bunzip2/tar executable names/locations set up in program code. Please fix program.');
+        end
+        else
+        begin
+          ResultCode:=ExecuteCommandHidden(Output, Params, Verbose);
         end;
 
         if ResultCode=0 then
@@ -841,17 +792,7 @@ begin
     // Check for proper FPC bootstrap compiler
     infoln('Checking for FPC bootstrap compiler: '+BootStrapCompiler);
     try
-      Output := '';
-      Params:=TStringList.Create;
-      try
-        // Show help without waiting:
-        Params.Add('-h');
-        ResultCode:=RunOutput(BootstrapCompiler, Params, EmptyStr, Output);
-      finally
-        Params.Free;
-      end;
-
-      if ResultCode=0 then
+      if ExecuteCommandHidden(BootstrapCompiler,'-h',Output,Verbose)=0 then
       begin
         if Ansipos('Free Pascal Compiler', Output) = 0 then
         begin
@@ -971,28 +912,21 @@ end;
 
 function TInstaller.Which(Executable: string): string;
 var
-  Params: TStringList;
   Output: string;
 begin
-  Params:=TStringList.Create;
-  try
-    Params.Add(Executable);
-    RunOutput('which', Params, '', Output);
-    //Remove trailing LF(s) and other control codes:
-    while (length(output)>0) and (ord(output[length(output)])<$20) do
-      delete(output,length(output),1);
-    // We could have checked for RunOutput exitcode, but why not
-    // do file existence check instead:
-    if fileexists(Output) then
-    begin
-      result:=Output;
-    end
-    else
-    begin
-      result:=''; //command failed
-    end;
-  finally
-    Params.Free;
+  ExecuteCommandHidden('which',Executable,Output,Verbose);
+  //Remove trailing LF(s) and other control codes:
+  while (length(output)>0) and (ord(output[length(output)])<$20) do
+    delete(output,length(output),1);
+  // We could have checked for ExecuteCommandHidden exitcode, but why not
+  // do file existence check instead:
+  if fileexists(Output) then
+  begin
+    result:=Output;
+  end
+  else
+  begin
+    result:=''; //command failed
   end;
 end;
 
@@ -1019,7 +953,7 @@ var
   Executable: string;
   LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
-  Params: TStringList;
+  ProcessEx:TProcessEx;
 begin
   if not ModuleEnabled('LHELP') then
   begin
@@ -1043,6 +977,11 @@ begin
     SetCompilerToInstalledCompiler;
   end;
 
+
+  ProcessEx:=TProcessEx.Create(nil);
+  if Verbose then
+    ProcessEx.OnOutput:=@DumpConsole;
+
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   CustomPath:=BootstrapCompilerDirectory+PathSeparator+
@@ -1050,9 +989,10 @@ begin
     FSVNDirectory+PathSeparator+
     FPCDirectory+PathSeparator+
     LazarusDirectory;
+  ProcessEx.Environment.SetVar('Path',CustomPath);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  CustomPath:=Emptystr; // We need make, etc, so we can't really do anything here, can we?
+  ProcessEx.Environment.SetVar('PATH',FPCDirectory+':'+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
@@ -1060,20 +1000,17 @@ begin
   if OperationSucceeded then
   begin
     // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-    Params:=TStringList.Create;
-    try
-      Params.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      Params.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'docs'+DirectorySeparator+
-        'html'+DirectorySeparator+
-        'build_lcl_docs.lpr');
-      infoln('Lazarus: compiling build_lcl_docs help compiler:');
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
+    ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+    ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator+
+      'build_lcl_docs.lpr');
+    infoln('Lazarus: compiling build_lcl_docs help compiler:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
   end;
 
   //todo: get/compile FPC docs CHM help
@@ -1082,30 +1019,27 @@ begin
   if OperationSucceeded then
   begin
     // Compile Lazarus CHM help
-    Executable := IncludeTrailingPathDelimiter(LazarusDirectory)+
+    ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory)+
         'docs'+DirectorySeparator+
         'html'+DirectorySeparator+
         'build_lcl_docs'+FExecutableExtension;
-    Params:=TStringList.Create;
-    try
-      //todo: get .xct files from fpc so LCL CHM can link to it??!
-      //todo: this now FAILS as the compiler cannot find its input files.
-      // we probably need to set the current directory to the executable's directory
-      Params.Add('--fpdoc');
-      Params.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+
-        FExecutableExtension); //fpdoc gets called by build_lcl_docs
-      Params.Add('--outfmt');
-      Params.Add('chm');
-      infoln('Lazarus: compiling chm help docs:');
-      { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
-      Though that may work when adjusting the baseurl option in Lazarus for each
-      CHM file, it's easier to move them to <lazarusdir>/docs/html,
-      which is also suggested by the wiki}
-      if (Run(Executable, Params, CustomPath)) <> 0 then
-        OperationSucceeded := False;
-    finally
-      Params.Free;
-    end;
+    ProcessEx.Parameters.Clear;
+     //todo: get .xct files from fpc so LCL CHM can link to it??!
+    //todo: this now FAILS as the compiler cannot find its input files.
+    // we probably need to set the current directory to the executable's directory
+    ProcessEx.Parameters.Add('--fpdoc');
+    ProcessEx.Parameters.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+
+      FExecutableExtension); //fpdoc gets called by build_lcl_docs
+    ProcessEx.Parameters.Add('--outfmt');
+    ProcessEx.Parameters.Add('chm');
+    infoln('Lazarus: compiling chm help docs:');
+    { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
+    Though that may work when adjusting the baseurl option in Lazarus for each
+    CHM file, it's easier to move them to <lazarusdir>/docs/html,
+    which is also suggested by the wiki}
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
   end;
 
   if OperationSucceeded then
@@ -1133,6 +1067,7 @@ begin
       'lcl'+DirectorySeparator+
       'lcl.chm');
   end;
+  ProcessEx.Free;
   result:=OperationSucceeded;
 end;
 
@@ -1202,129 +1137,6 @@ begin
   {$ENDIF UNIX}
 end;
 
-function TInstaller.Run(Executable: string; const Params: TStringList; const NewPath: string): longint;
-{ Runs executable without showing output, unless something went wrong (result code<>0) }
-var
-  OutputStringList: TStringList;
-  TempFileName:string;
-begin
-  OutputStringList := TStringList.Create;
-  try
-    Result:=RunOutput(Executable, Params, NewPath, OutputStringList);
-    if result<>0 then
-    begin
-      //RunOutput call above should already have warned about non-zero exitstatus
-      infoln(OutputStringList.Text);
-      TempFileName:=SysUtils.GetTempFileName;
-      OutputStringList.SaveToFile(TempFileName);
-      WriteLn(FLogFile,'  output logged in ',TempFileName);
-    end;
-  finally
-    OutputStringList.Free;
-  end;
-end;
-
-function TInstaller.RunOutput(Executable: string; const Params: TStringList;
-  const NewPath: String; var Output: TStringList): longint;
-var
-  EnvironmentList: TStringList;
-  SpawnedProcess: TProcess;
-  OutputStream: TMemoryStream;
-
-  function ReadOutput: boolean;
-    // returns true if output was actually read
-  const
-    BufSize = 4096;
-  var
-    Buffer: array[0..BufSize - 1] of byte;
-    ReadBytes: integer;
-  begin
-    Result := False;
-    while SpawnedProcess.Output.NumBytesAvailable > 0 do
-    begin
-      ReadBytes := SpawnedProcess.Output.Read(Buffer, BufSize);
-      OutputStream.Write(Buffer, ReadBytes);
-      if Verbose then
-        write(copy(pchar(@buffer[0]),1,ReadBytes));
-      Result := True;
-    end;
-  end;
-
-begin
-  Result := 255; //Preset to failure
-  infoln('Calling:');
-  infoln(Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
-
-  OutputStream := TMemoryStream.Create;
-  SpawnedProcess := TProcess.Create(nil);
-  try
-    try
-      SpawnedProcess.Executable:=Executable;
-      SpawnedProcess.Parameters:=Params;
-
-      if NewPath<>EmptyStr then
-      begin
-        // Replace path of spawned process with the one we want
-        EnvironmentList:=TStringList.Create;
-        try
-          //Procedure will handle strings with and without 'PATH='...
-          EnvironmentWithOurPath(EnvironmentList, NewPath);
-          WriteLn(FLogFile,'Custom path for calling '+Executable+':');
-          WriteLn(FLogFile,NewPath);
-          SpawnedProcess.Environment:=EnvironmentList;
-        finally
-          EnvironmentList.Free;
-        end;
-      end;
-      SpawnedProcess.Options := [poUsePipes, poStderrToOutPut];
-      SpawnedProcess.ShowWindow := swoHIDE;
-      SpawnedProcess.Execute;
-      while SpawnedProcess.Running do
-      begin
-        if not ReadOutput then
-          Sleep(100);
-      end;
-      ReadOutput;
-      OutputStream.Position := 0;
-      Output.LoadFromStream(OutputStream);
-      result := SpawnedProcess.ExitStatus;
-      if result<>0 then
-      begin
-        infoln('Command returned non-zero ExitStatus: '+IntToStr(result)+'. Output:');
-        WriteLn(FLogFile,'ERROR running ',Executable + ' ' +AnsiReplaceStr(Params.Text, LineEnding, ' '));
-      end;
-    except
-      on E: Exception do
-      begin
-        {We don't want to do an explicit file exists
-        as this complicates with paths, current dirs, .exe extensions etc.}
-
-        //Something went wrong. We need to pass on what and mark this as a failure
-        infoln('Exception calling '+Executable);
-        infoln('Details: '+E.ClassName+'/'+E.Message);
-        WriteLn(FLogFile, 'Exception calling '+Executable);
-        WriteLn(FLogFile, 'Details: '+E.ClassName+'/'+E.Message);
-        Result:=254; //fairly random but still an error, and distinct from earlier code
-      end;
-    end;
-  finally
-    OutputStream.Free;
-    SpawnedProcess.Free;
-  end;
-end;
-
-function TInstaller.RunOutput(Executable: string; const Params: TStringList; const NewPath: string; var Output: string): longint;
-var
-  OutputStringList: TStringList;
-begin
-  OutputStringList := TStringList.Create;
-  try
-    Result:=RunOutput(Executable, Params, NewPath, OutputStringList);
-    Output := OutputStringList.Text;
-  finally
-    OutputStringList.Free;
-  end;
-end;
 
 procedure TInstaller.SetBootstrapCompilerDirectory(AValue: string);
 begin
@@ -2105,6 +1917,7 @@ begin
 
   if OperationSucceeded then
     writeln(FLogFile,'Lazarus update succeeded at revision number ', AfterRevision);
+  ProcessEx.Free;
   Result := OperationSucceeded;
 end;
 
