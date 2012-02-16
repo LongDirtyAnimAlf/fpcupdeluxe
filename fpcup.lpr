@@ -101,7 +101,6 @@ begin
   writeln(' skip=<values>         Do not update or build modules.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See "only" for accepted values. ');
-  writeln(' skiplazhelp           Do not get chm help for Lazarus.');
   writeln(' verbose               Show output from svn and make');
   writeln('');
 
@@ -385,4 +384,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+

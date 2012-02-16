@@ -1431,22 +1431,18 @@ begin
       ProcessEx.Parameters.Clear;
       infoln('Running Make all (FPC crosscompiler):');
       ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Specify the ones the compiler should use:
-      // We can rely on binutils being copied to compiler bin path here:
-      ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      //putting all before target might help!?!?
+      ProcessEx.Parameters.Add('all');
       ProcessEx.Parameters.Add('OS_TARGET=win64');
       ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
       if FFPCOPT<>'' then
         ProcessEx.Parameters.Add('OPT='+FFPCOPT);
-      ProcessEx.Parameters.Add('all');
       ProcessEx.Execute;
+
       if ProcessEx.ExitStatus = 0 then
       begin
         // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
@@ -1456,18 +1452,14 @@ begin
         infoln('Running Make crossinstall for FPC:');
         ProcessEx.Parameters.Clear;
         ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-        // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-        // Specify the ones the compiler should use:
-        // We can rely on binutils being copied to compiler bin path here:
-        ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-        //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
         ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        //putting crossinstall before target might help!?!?
+        ProcessEx.Parameters.Add('crossinstall');
         ProcessEx.Parameters.Add('OS_TARGET=win64'); //cross compile for different OS...
         ProcessEx.Parameters.Add('CPU_TARGET=x86_64'); // and processor.
-        ProcessEx.Parameters.Add('crossinstall');
+
         // Note: consider this as an optional item, so don't fail the function if this breaks.
         ProcessEx.Execute;
         if ProcessEx.ExitStatus=0 then
