@@ -31,6 +31,9 @@ unit installer;
 {
 Gets/updates/compiles/installs FPC/Lazarus sources
 Uses updater unit to get/update the sources.
+
+General remarks:
+- For TProcess.Params, don't use (double) quotes even though this would be required in the shell
 }
 
 {$mode objfpc}{$H+}
@@ -379,7 +382,6 @@ begin
     //Extract zip, overwriting without prompting
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
       Params.Add('-o'); //overwrite existing files
       Params.Add('-d'); //Note: apparently we can't call (the FPC supplied) unzip.exe -d with "s
       Params.Add(ArchiveDir);
@@ -1011,7 +1013,13 @@ begin
     DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
+  // Default FPC compiler installed by make:
   FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+'fpc';
+  if FileExistsUTF8(FInstalledCompiler+'.sh') then
+  begin
+    //Use our proxy if it is installed
+    FInstalledCompiler:=FInstalledCompiler+'.sh';
+  end;
   {$ENDIF UNIX}
 end;
 
@@ -1490,7 +1498,7 @@ begin
          IncludeTrailingPathDelimiter(FPCDirectory),'compiler/ -FD'+
          IncludeTrailingPathDelimiter(BinPath)+' $*');
     CloseFile(TxtFile);
-    OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Update status
+    OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
     if OperationSucceeded then
     begin
       infoln('Created launcher script for fpc:'+FPCScript);
@@ -1540,7 +1548,7 @@ begin
   if FInstalledCompiler = '' then
   begin
     //Assume we've got a working compiler. This will link through to the
-    //platform-specific CompilerName
+    //platform-specific compiler, e.g. our fpc.sh proxy on Unix
     SetCompilerToInstalledCompiler;
   end;
 
@@ -1598,7 +1606,6 @@ begin
       Executable := FMake;
       Params:=TStringList.Create;
       try
-        //Don't call params with quotes
         Params.Add('FPC='+FInstalledCrossCompiler+'');
         // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
         // Specify the ones the compiler should use:
@@ -1631,19 +1638,14 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      {$IFDEF MSWINDOWS}
       Params.Add('FPC='+FInstalledCompiler);
+      {$IFDEF MSWINDOWS}
       // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
       // Specify the ones the compiler should use:
       // We can rely on binutils being copied to compiler bin path here:
       Params.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
       //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
       Params.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-      {$ELSE}
-      if FileExists(FInstalledCompiler+'.sh') then //we didn't abort if creating failed
-        Params.Add('FPC='+FInstalledCompiler+'.sh')
-      else
-        Params.Add('FPC='+FInstalledCompiler);
       {$ENDIF MSWINDOWS}
       Params.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
       Params.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
@@ -1713,15 +1715,7 @@ begin
     Executable := FMake;
     Params:=TStringList.Create;
     try
-      //Don't call params with quotes
-      {$IFDEF MSWINDOWS}
       Params.Add('FPC='+FInstalledCompiler);
-      {$ELSE}
-      if FileExists(FInstalledCompiler+'.sh') then //we didn't abort if creating failed
-        Params.Add('FPC='+FInstalledCompiler+'.sh')
-      else
-        Params.Add('FPC='+FInstalledCompiler);
-      {$ENDIF MSWINDOWS}
       {$IFDEF MSWINDOWS}
       // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
       // Specify the ones the compiler should use:
@@ -1982,4 +1976,4 @@ begin
 end;
 
 end.
-
+
