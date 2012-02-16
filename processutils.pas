@@ -5,12 +5,13 @@ unit processutils;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, process;
 type
 
+  TDumpFunc = procedure (Sender:TObject; output:string);
   { TProcessEnvironment }
 
-  TProcessEnvironment = class(tobject)
+  TProcessEnvironment = class(TObject)
     private
       FEnvironmentList:TStringList;
       FCaseSensitive:boolean;
@@ -23,7 +24,151 @@ type
       destructor Destroy; override;
     end;
 
+  { TProcessEx }
+
+  TProcessEx = class(TProcess)
+    private
+      FCmdLine: string;
+      FExceptionInfoStrings: TstringList;
+      FExecutable: string;
+      FExitStatus: integer;
+      FOnOutput: TDumpFunc;
+      FOutputStrings: TstringList;
+      FOutStream: TMemoryStream;
+      FParams: string;
+      FParamsList: TstringList;
+      FProcess: TProcess;
+      FProcessEnvironment:TProcessEnvironment;
+      function GetExceptionInfo: string;
+      function GetOutputString: string;
+      function GetOutputStrings: TstringList;
+      function GetProcessEnvironment: TProcessEnvironment;
+      procedure SetOnOutput(AValue: TDumpFunc);
+    public
+      procedure Execute;
+      property Environment:TProcessEnvironment read GetProcessEnvironment;
+      property ExceptionInfo:string read GetExceptionInfo;
+      property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
+      property ExitStatus:integer read FExitStatus;
+      property OnOutput:TDumpFunc read FOnOutput write SetOnOutput;
+      property OutputString:string read GetOutputString;
+      property OutputStrings:TstringList read GetOutputStrings;
+      constructor Create(AOwner : TComponent); override;
+      destructor Destroy; override;
+    end;
+
+// Convenience functions
+
+function ExecuteCommandHidden(const Executable, Parameters: string): integer; overload;
+function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string): integer; overload;
+
+
+
 implementation
+
+{ TProcessEx }
+
+function TProcessEx.GetOutputString: string;
+begin
+  result:=OutputStrings.Text;
+end;
+
+function TProcessEx.GetOutputStrings: TstringList;
+begin
+  if (FOutputStrings.Count=0) and (FOutStream.Size>0) then
+    begin
+    FOutStream.Position := 0;
+    FOutputStrings.LoadFromStream(FOutStream);
+    end;
+  result:=FOutputStrings;
+end;
+
+function TProcessEx.GetExceptionInfo: string;
+begin
+  result:=FExceptionInfoStrings.Text;
+end;
+
+function TProcessEx.GetProcessEnvironment: TProcessEnvironment;
+begin
+  If not assigned(FProcessEnvironment) then
+    FProcessEnvironment:=TProcessEnvironment.Create;
+end;
+
+procedure TProcessEx.SetOnOutput(AValue: TDumpFunc);
+begin
+  if FOnOutput=AValue then Exit;
+  FOnOutput:=AValue;
+end;
+
+procedure TProcessEx.Execute;
+
+  function ReadOutput: boolean;
+
+  const
+    BufSize = 4096;
+  var
+    Buffer: array[0..BufSize - 1] of byte;
+    ReadBytes: integer;
+  begin
+    Result := False;
+    while Output.NumBytesAvailable > 0 do
+    begin
+      ReadBytes := Output.Read(Buffer, BufSize);
+      FOutStream.Write(Buffer, ReadBytes);
+      if Assigned(FOnOutput) then
+        FOnOutput(Self,copy(pchar(@buffer[0]),1,ReadBytes));
+      Result := True;
+    end;
+  end;
+
+begin
+  try
+    // "Normal" linux and DOS exit codes are in the range 0 to 255.
+    // Windows System Error Codes are 0 to 15999
+    // Use negatives for internal errors.
+    FExitStatus:=-1;
+    FExceptionInfoStrings.Clear;
+    FOutputStrings.Clear;
+    if Assigned(FProcessEnvironment) then
+      inherited Environment:=FProcessEnvironment.EnvironmentList;
+    Options := Options +[poUsePipes, poStderrToOutPut];
+    inherited Execute;
+    while Running do
+    begin
+      if not ReadOutput then
+        Sleep(50);
+    end;
+    ReadOutput;
+    FExitStatus:=inherited ExitStatus;
+  except
+    on E: Exception do
+    begin
+    FExceptionInfoStrings.Add('Exception calling '+Executable+' '+Parameters.Text);
+    FExceptionInfoStrings.Add('Details: '+E.ClassName+'/'+E.Message);
+    FExitStatus:=-2;
+    end;
+  end;
+end;
+
+constructor TProcessEx.Create(AOwner : TComponent);
+begin
+  inherited;
+  FExceptionInfoStrings:= TstringList.Create;
+  FOutputStrings:= TstringList.Create;
+  FParamsList:= TstringList.Create;
+  FOutStream := TMemoryStream.Create;
+end;
+
+destructor TProcessEx.Destroy;
+begin
+  FExceptionInfoStrings.Free;
+  FOutputStrings.Free;
+  FParamsList.Free;
+  FOutStream.Free;
+  If assigned(FProcessEnvironment) then
+    FProcessEnvironment.Free;
+  inherited Destroy;
+end;
 
 { TProcessEnvironment }
 
@@ -115,6 +260,31 @@ destructor TProcessEnvironment.Destroy;
 begin
   FEnvironmentList.Free;
   inherited Destroy;
+end;
+
+function ExecuteCommandHidden(const Executable, Parameters: string): integer;
+var
+  s:string;
+begin
+  Result:=ExecuteCommandHidden(Executable, Parameters,s);
+end;
+
+function ExecuteCommandHidden(const Executable, Parameters: string; var Output: string
+  ): integer;
+var
+  PE:TProcessEx;
+begin
+  PE:=TProcessEx.Create(nil);
+  try
+    PE.Executable:=Executable;
+    PE.Parameters.Text:=Parameters;
+    PE.ShowWindow := swoHIDE;
+    PE.Execute;
+    Output:=PE.OutputString;
+    Result:=PE.ExitStatus;
+  finally
+    PE.Free;
+  end;
 end;
 
 end.
