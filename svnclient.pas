@@ -228,8 +228,8 @@ var
   Command: string;
   RetryAttempt: integer;
 begin
-  if FDesiredRevision='' then
-    Command := 'checkout --non-interactive --revision HEAD ' + Repository + ' ' + LocalRepository
+  if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
+    Command := 'checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
   else
     Command := 'checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
   ExecuteSVNCommand(Command);
@@ -241,7 +241,6 @@ begin
     ExecuteSVNCommand(Command); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
-  FDesiredRevision:=''; //don't reuse
 end;
 
 procedure Tsvnclient.CheckOutOrUpdate;
@@ -290,10 +289,8 @@ const
 var
   Command: string;
   RetryAttempt: integer;
-  StartRevision: integer;
 begin
-  StartRevision := LocalRevision;
-  if FDesiredRevision='' then
+  if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := 'update --non-interactive ' + LocalRepository
   else
     Command := 'update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
@@ -306,7 +303,6 @@ begin
     ExecuteSVNCommand(Command); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
-  FDesiredRevision:=''; //don't reuse
 end;
 
 function TSVNClient.ExecuteSvnCommand(const Command: string; Output: TStream): integer;
