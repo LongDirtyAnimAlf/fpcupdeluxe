@@ -108,8 +108,24 @@ begin
   Result := FSVNExecutable;
   if FileExists(FSvnExecutable) then
   begin
-    // File exists, assume it is a working svn client.
-    exit;
+    // File exists, check if it is a working svn client.
+    CommandOutput:=TMemoryStream.Create;
+    try
+      ExeResult := ExecuteCommand(FSvnExecutable, '--version', CommandOutput);
+    finally
+      CommandOutput.Free;
+    end;
+    if ExeResult = 0 then
+    begin
+      //Ok, working SVN client
+      exit;
+    end
+    else
+    begin
+      //Executable may exist but it is not valid. Let's try the rest of our
+      //search strategy
+      FSVNExecutable := EmptyStr;
+    end;
   end;
 
   if FSVNExecutable = '' then
@@ -119,14 +135,15 @@ begin
     CommandOutput:=TMemoryStream.Create;
     try
       ExeResult := ExecuteCommand(SVNName, '--version', CommandOutput);
-      if ExeResult = 0 then
-      begin
-        //Found a working SVN in path
-        FSVNExecutable := SVNName;
-        exit;
-      end;
     finally
       CommandOutput.Free;
+    end;
+
+    if ExeResult = 0 then
+    begin
+      //Found a working SVN in path, just use the name without path
+      FSVNExecutable := SVNName;
+      exit;
     end;
   end;
 
