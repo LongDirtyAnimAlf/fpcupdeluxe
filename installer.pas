@@ -91,7 +91,6 @@ type
     function FindSVNSubDirs(): boolean;
     function GetBootstrapCompiler: string;
     function GetCompilerName: string;
-    //Checks for binutils, svn.exe and downloads if needed. Returns true if all prereqs are met.
     function GetFpcDirectory: string;
     function GetFPCRevision: string;
     function GetFPCUrl: string;
@@ -1608,10 +1607,31 @@ begin
 end;
 
 function Tinstaller.GetLazarus: boolean;
-// Note: getlazarus depends on properly installed FPC
-// Properly installed in this case means: the way
-// GetFPC would install it ;)
-// Assumed: binutils in fpc dir or in path
+{
+This function does depend on a properly installed FPC but does not
+check if there is one.
+Assumptions: binutils in FPC directory or in path.
+
+In this function, we try to deal with existing system wide fpc.cfg (Unix)
+and the wrong compilers/binutils being in the path (Windows, mostly).
+
+When running MAKE and other external tools:
+- The --FPC= argument passed to MAKE should allow the proper compiler to be picked up.
+- We switch the current directory to the makefile's (Lazarus) directory, allowing MAKE to find
+  the makefile and source files.
+  If using lazbuild to build .lprs, we switch the directory to the project directory.
+- On Windows, we tweak the path and place our custom FPC compiler directory first.
+  The binutils (make.exe etc) should also be found there.
+  Then the Lazarus directory, for any utilities that Lazarus may place there.
+  Then the make/binutils and subversion client directories.
+  Finally the FPC bootstrap directory, as a backup.
+- On Unix, we tweak the path to include our custom FPC compiler directory first.
+
+A similar effect could be gained by using --CROSSBINDIR=<makedirectory> or
+OPT=-FD<makedirectory>, and use --directory=<makefiledir> but that would be
+more verbose / verbose and also works when calling
+other tools than make
+}
 var
   AfterRevision: string;
   BeforeRevision: string;
@@ -1623,8 +1643,8 @@ begin
   if not ModuleEnabled('LAZARUS') then
   begin
     result:=true;  //continue with whatever we do next
-    infoln('Lazarus installation/update skipped by user.');
-    writeln(FLogFile,'Lazarus installation/update skipped by user.');
+    infoln('Module LAZARUS: installation/update skipped by user.');
+    writeln(FLogFile,'Module LAZARUS: installation/update skipped by user.');
     exit;
   end
   else
@@ -1655,16 +1675,18 @@ begin
   ProcessEx.OnErrorM:=@LogError;
 
   {$IFDEF MSWINDOWS}
-  // Try to ignore existing make.exe, fpc.exe by setting our own path:
-  CustomPath:=BootstrapCompilerDirectory+PathSeparator+
+  // Try to ignore any existing make.exe, fpc.exe by setting our own path:
+  // We include the bootstrap compiler directory, but that fpc.exe will
+  // probably give different .ppu files=>more a last resort solution
+  CustomPath:=ExtractFilePath(FInstalledCompiler)+PathSeparator+
+    LazarusDirectory+PathSeparator+
     MakeDirectory+PathSeparator+
     FSVNDirectory+PathSeparator+
-    FPCDirectory+PathSeparator+
-    LazarusDirectory;
+    BootstrapCompilerDirectory;
   ProcessEx.Environment.SetVar('Path',CustomPath);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  ProcessEx.Environment.SetVar('PATH',FPCDirectory+':'+ProcessEx.Environment.GetVar('PATH'));
+  ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
@@ -1674,16 +1696,9 @@ begin
   begin
     // Make distclean; we don't care about failure (e.g. directory might be empty etc)
     ProcessEx.Executable := FMake;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-    {$IFDEF MSWINDOWS}
-    // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-    // Specify the ones the compiler should use:
-    // We can rely on binutils being copied to compiler bin path here:
-    ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-    //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-    ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-    {$ENDIF MSWINDOWS}
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1691,7 +1706,6 @@ begin
     infoln('Lazarus: running make distclean before checkout/update:');
     ProcessEx.Execute;
   end;
-
 
   // Download Lazarus source:
   if OperationSucceeded = True then
@@ -1717,14 +1731,9 @@ begin
     if FInstalledCrossCompiler<>'' then
     begin
       ProcessEx.Executable := FMake;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('FPC='+FInstalledCrossCompiler+'');
-      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Specify the ones the compiler should use:
-      // We can rely on binutils being copied to compiler bin path here:
-      ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
       ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1743,18 +1752,10 @@ begin
   if OperationSucceeded then
   begin
     // Make clean all (should include lcl & ide)
-    // todo: check if we really need to do a make clean after lcl cross...
     ProcessEx.Executable := FMake;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
-    {$IFDEF MSWINDOWS}
-    // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-    // Specify the ones the compiler should use:
-    // We can rely on binutils being copied to compiler bin path here:
-    ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-    //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-    ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-    {$ENDIF MSWINDOWS}
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
     ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
@@ -1779,7 +1780,6 @@ begin
   if OperationSucceeded then
   begin
     // Set up a minimal config so we can use LazBuild
-    // also sets up CHM help viewer.
     LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
     try
       try
@@ -1796,7 +1796,7 @@ begin
           'html'+DirectorySeparator;
         LazarusConfig.LazarusDirectory:=LazarusDirectory;
         {$IFDEF MSWINDOWS}
-        // FInstalledCompiler will be often something like c:\bla\ppc386.exe, e.g.
+        // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
         // the platform specific compiler. In order to be able to cross compile
         // we'd rather use fpc
         LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
@@ -1825,7 +1825,7 @@ begin
   end;
 
   if OperationSucceeded then
-    if not ModuleEnabled('BIGIDE') then
+    if (ModuleEnabled('BIGIDE')=false) and (ModuleEnabled('LHELP')=false) then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
       infoln('Module BIGIDE: skipped by user.');
@@ -1833,19 +1833,17 @@ begin
     end
     else
     begin
+      if ModuleEnabled('BIGIDE')=fsle then
+      begin
+        infoln('Module BIGIDE: required by module: LHELP');
+        writeln(FLogFile,'Module BIGIDE: required by module: LHELP');
+      end;
       // Make bigide: ide with additional packages as specified by user (in primary config path?)
       // this should also make the lhelp package needed for CHM Help.
       ProcessEx.Executable := FMake;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
-      {$IFDEF MSWINDOWS}
-      // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-      // Specify the ones the compiler should use:
-      // We can rely on binutils being copied to compiler bin path here:
-      ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
-      //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FInstalledCompiler));
-      {$ENDIF MSWINDOWS}
       ProcessEx.Parameters.Add('--directory='+LazarusDirectory+'');
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1901,13 +1899,18 @@ begin
     if not ModuleEnabled('LHELP') then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('lhelp skipped by user.');
-      writeln(FLogFile,'lhelp skipped by user.');
+      infoln('Module LHELP: skipped by user; not building lhelp help viewer.');
+      writeln(FLogFile,'Module LHELP: skipped by user; not building lhelp help viewer.');
     end
     else
     begin
       // Build lhelp chm help viewer
       ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      // Set directory to item we're compiling:
+      ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'components'+DirectorySeparator+
+        'chmhelp'+DirectorySeparator+
+        'lhelp'
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
@@ -1925,13 +1928,17 @@ begin
     if not ModuleEnabled('LAZDATADESKTOP') then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('lazdatadesktop skipped by user.');
-      writeln(FLogFile,'lazdatadesktop skipped by user.');
+      infoln('Module LAZDATADESKTOP: skipped by user.');
+      writeln(FLogFile,'Module LAZDATADESKTOP:  skipped by user.');
     end
     else
     begin
       // Build data desktop, nice example of building with lazbuild
       ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      // Set directory to item we're compiling:
+      ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'tools'+DirectorySeparator+
+        'lazdatadesktop';
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
@@ -1948,13 +1955,16 @@ begin
     if not ModuleEnabled('DOCEDITOR') then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('doceditor skipped by user.');
-      writeln(FLogFile,'doceditor skipped by user.');
+      infoln('Module DOCEDITOR: skipped by user.');
+      writeln(FLogFile,'Module DOCEDITOR: skipped by user.');
     end
     else
     begin
       // Build Lazarus Doceditor
       ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      // Set directory to item we're compiling:
+      ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'doceditor';
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
