@@ -364,21 +364,21 @@ begin
     FInstaller := TInstaller.Create;
     CheckOptions(FInstaller); //Process command line arguments
 
-    // Get/update/compile (if needed) FPC; only compile Lazarus if succeeded.
-    writeln('Getting and compiling fpc:');
-    if FInstaller.GetFPC then
-    begin
-      writeln('Getting and compiling lazarus:');
-      if FInstaller.GetLazarus=false then
-      begin
-        writeln('Lazarus retrieval/compilation failed.');
-        ShowErrorHints(FInstaller.LazarusDirectory);
-      end;
-    end
-    else
+    // Get/update/compile selected modules
+    if FInstaller.GetFPC=false then
     begin
       writeln('FPC retrieval/compilation failed.');
       ShowErrorHints(FInstaller.FPCDirectory);
+    end;
+    if FInstaller.GetLazarus=false then
+    begin
+      writeln('Lazarus retrieval/compilation failed.');
+      ShowErrorHints(FInstaller.LazarusDirectory);
+    end;
+    if FInstaller.GetLazarusHelp=false then
+    begin
+      writeln('Lazarus help retrieval/compilation failed.');
+      ShowErrorHints(FInstaller.LazarusDirectory);
     end;
   finally
     FInstaller.Free;

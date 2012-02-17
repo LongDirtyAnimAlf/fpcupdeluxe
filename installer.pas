@@ -962,6 +962,10 @@ begin
     infoln('Lazarus help skipped by user.');
     writeln(FLogFile,'Lazarus help skipped by user.');
     exit;
+  end
+  else
+  begin
+    infoln('Getting/compiling Lazarus help...');
   end;
 
   //Make sure we have the proper tools.
@@ -1304,12 +1308,16 @@ var
   ProcessEx:TProcessEx;
 begin
   if not ModuleEnabled('FPC') then
-    begin
+  begin
     result:=true;  //continue with lazarus
     infoln('FPC installation/update skipped by user.');
     writeln(FLogFile,'FPC installation/update skipped by user.');
     exit;
-    end;
+  end
+  else
+  begin
+    infoln('Getting/compiling FPC...');
+  end;
   writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
   writeln(FLogFile,'FPC URL:                '+FPCURL);
   writeln(FLogFile,'FPC options:            '+FPCOPT);
@@ -1608,6 +1616,10 @@ begin
     infoln('Lazarus installation/update skipped by user.');
     writeln(FLogFile,'Lazarus installation/update skipped by user.');
     exit;
+  end
+  else
+  begin
+    infoln('Getting/compiling Lazarus...');
   end;
   writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
   writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
@@ -2036,4 +2048,4 @@ begin
 end;
 
 end.
-
+
