@@ -1036,6 +1036,16 @@ begin
 
   //todo: get/compile FPC docs CHM help: rtl.chm fcl.chm
   //these may supply .xct files for FPC help so we can use that in build_lcl_docs below
+  if OperationSucceeded then
+  begin
+    // Download FPC CHMs. It seems much to difficult to compile using fpdoc right now
+    {Possible alternatives
+    1. make chm -> requires latex!!!
+    2. or
+    c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
+    ... but we'd need to include the input files extracted from the Make file.
+    }
+  end;
 
   if OperationSucceeded then
   begin
@@ -1050,7 +1060,9 @@ begin
         'docs'+DirectorySeparator+
         'html'+DirectorySeparator;
     ProcessEx.Parameters.Clear;
-     //todo: get .xct files from fpc so LCL CHM can link to it??!
+     //todo: get .xct files from fpc so LCL CHM can link to it??!:
+     //use this option:
+     //--fpcdocs <value>  The directory that contains the fcl and rtl .xct files.
     ProcessEx.Parameters.Add('--fpdoc');
     ProcessEx.Parameters.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+
       FExecutableExtension); //fpdoc gets called by build_lcl_docs
@@ -1060,7 +1072,9 @@ begin
     { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
     Though that may work when adjusting the baseurl option in Lazarus for each
     CHM file, it's easier to move them to <lazarusdir>/docs/html,
-    which is also suggested by the wiki}
+    which is also suggested by the wiki.
+    The generated .xct file is an index file for fpdoc cross file links,
+    used if you want to link to the chm from other chms.}
     // First remove any existing chm file
     sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
       'docs'+DirectorySeparator+
