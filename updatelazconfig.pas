@@ -152,16 +152,6 @@ begin
       // We don't know the location of the help viewer or help files
       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', EmptyStr);
       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', EmptyStr);
-      {todo: Perhaps need to add these as well???
-      <Databases>
-        <RTLUnits>
-          <BaseURL Value=""/>
-        </RTLUnits>
-        <FCLUnits>
-          <BaseURL Value=""/>
-        </FCLUnits>
-      </Databases>
-      }
     end;
     if CHMHelpExe<>EmptyStr then FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', CHMHelpExe);
     if CHMHelpFilesPath<>EmptyStr then       FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', CHMHelpFilesPath);

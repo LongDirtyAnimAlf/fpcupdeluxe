@@ -1291,8 +1291,25 @@ end;
 
 
 function Tinstaller.GetFPC: boolean;
-// In this function, we try to deal with existing system wide fpc.cfg (Unix)
-// and the wrong compilers/binutils being in the path
+{
+In this function, we try to deal with existing system wide fpc.cfg (Unix)
+and the wrong compilers/binutils being in the path (Windows, mostly).
+
+When running MAKE and other external tools:
+- The --FPC= argument passed to MAKE should allow the proper compiler to be picked up.
+- We switch the current directory to the makefile's directory, allowing MAKE to find
+  the makefile and source files
+- On Windows, we tweak the path and place our binutils directory first, allowing
+  the system to find make.exe etc.; then the FPC bootstrap directory (though
+  redundant: see --FPC=)
+- On Unix, we tweak the path to include our FPC bootstrap directory first.
+
+A similar effect could be gained by using --CROSSBINDIR=<makedirectory> or
+OPT=-FD<makedirectory>, and use --directory=<makefiledir> but that would be
+more verbose / verbose and also works when calling
+other tools than make
+}
+
 var
   AfterRevision: string;
   BeforeRevision: string;
@@ -1340,7 +1357,7 @@ begin
   ProcessEx.Environment.SetVar('Path',CustomPath);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  ProcessEx.Environment.SetVar('PATH',FPCDirectory+':'+ProcessEx.Environment.GetVar('PATH'));
+  ProcessEx.Environment.SetVar('PATH',FPCDirectory+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
@@ -1354,15 +1371,9 @@ begin
   begin
     // Make distclean; we don't care about failure (e.g. directory might be empty etc)
     ProcessEx.Executable := FMake;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
-    {$IFDEF MSWINDOWS}
-    // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-    // Specify the ones the compiler should use:
-    ProcessEx.Parameters.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
-    //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-    ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-    {$ENDIF MSWINDOWS}
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1383,15 +1394,9 @@ begin
     // Make all/install, using bootstrap compiler.
     // Make all should use generated compiler internally for unit compilation
     ProcessEx.Executable := FMake;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
-    {$IFDEF MSWINDOWS}
-    // Some binutils as (assembler) and ld (linker) may not be in path, or the wrong ones may be there.
-    // Specify the ones the compiler should use:
-    ProcessEx.Parameters.Add('OPT=-FD'+ExcludeTrailingPathDelimiter(MakeDirectory));
-    //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-    ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
-    {$ENDIF MSWINDOWS}
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
     ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
@@ -1459,8 +1464,8 @@ begin
     if not ModuleEnabled('WINCROSSX64') then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('wincrossx64 skipped by user.');
-      writeln(FLogFile,'wincrossx64 skipped by user.');
+      infoln('Module WINCROSSX64: skipped by user.');
+      writeln(FLogFile,'Module WINCROSSX64: skipped by user.');
     end
     else
     begin
@@ -1469,6 +1474,7 @@ begin
       // todo: possibly move this to a separate section that will be called after fpc compilation (reason: we need a valid compiler0.
       // Note: consider this as an optional item, so don't fail the function if this breaks.
       ProcessEx.Executable := FMake;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
       ProcessEx.Parameters.Clear;
       infoln('Running Make all (FPC crosscompiler):');
       //Note: make install+make crossinstall work on command line
@@ -1497,6 +1503,7 @@ begin
         // make all and make crossinstall perhaps equivalent to
         // make all install CROSSCOMPILE=1??? todo: find out
         ProcessEx.Executable := FMake;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
         infoln('Running Make crossinstall for FPC:');
         ProcessEx.Parameters.Clear;
         ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
@@ -1533,12 +1540,13 @@ begin
     if FileExists(FPCCfg) = False then
     begin
       ProcessEx.Executable := BinPath + 'fpcmkcfg';
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
       ProcessEx.Parameters.clear;
       ProcessEx.Parameters.Add('-d');
       ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('-o');
       ProcessEx.Parameters.Add('' + FPCCfg + '');
-      infoln('Debug: Running fpcmkcfg: ');
+      infoln('Creating fpc.cfg:');
       ProcessEx.Execute;
       if ProcessEx.ExitStatus <> 0 then
         OperationSucceeded := False;
@@ -1585,16 +1593,16 @@ begin
     OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
     if OperationSucceeded then
     begin
-      infoln('Created launcher script for fpc:'+FPCScript);
+      infoln('Created launcher script for FPC:'+FPCScript);
     end
     else
     begin
-      infoln('Error creating launcher script for fpc:'+FPCScript);
+      infoln('Error creating launcher script for FPC:'+FPCScript);
     end;
   end;
   {$ENDIF UNIX}
   if OperationSucceeded then
-    writeln(FLogFile,'FPC update succeeded at revision number ', AfterRevision);
+    writeln(FLogFile,'FPC: update succeeded at revision number ', AfterRevision);
   ProcessEx.Free;
   Result := OperationSucceeded;
 end;
@@ -1820,8 +1828,8 @@ begin
     if not ModuleEnabled('BIGIDE') then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('bigide skipped by user.');
-      writeln(FLogFile,'bigide skipped by user.');
+      infoln('Module BIGIDE: skipped by user.');
+      writeln(FLogFile,'Module BIGIDE: skipped by user.');
     end
     else
     begin
@@ -1836,7 +1844,7 @@ begin
       // We can rely on binutils being copied to compiler bin path here:
       ProcessEx.Parameters.Add('OPT=-FD'+ExtractFilePath(FInstalledCompiler));
       //Use CROSSBINDIR to specify binutils directly called by make (not via FPC)
-      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(MakeDirectory));
+      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FInstalledCompiler));
       {$ENDIF MSWINDOWS}
       ProcessEx.Parameters.Add('--directory='+LazarusDirectory+'');
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
