@@ -7,8 +7,11 @@ interface
 uses
   Classes, SysUtils, process;
 type
-
-  TDumpFunc = procedure (Sender:TObject; output:string);
+  TProcessEx=class; //forward
+  TDumpFunc = procedure (Sender:TProcessEx; output:string);
+  TDumpMethod = procedure (Sender:TProcessEx; output:string) of object;
+  TErrorFunc = procedure (Sender:TProcessEx;IsException:boolean);
+  TErrorMethod = procedure (Sender:TProcessEx;IsException:boolean)  of object;
   { TProcessEnvironment }
 
   TProcessEnvironment = class(TObject)
@@ -32,7 +35,10 @@ type
       FExceptionInfoStrings: TstringList;
       FExecutable: string;
       FExitStatus: integer;
+      FOnError: TErrorFunc;
+      FOnErrorM: TErrorMethod;
       FOnOutput: TDumpFunc;
+      FOnOutputM: TDumpMethod;
       FOutputStrings: TstringList;
       FOutStream: TMemoryStream;
       FProcess: TProcess;
@@ -42,7 +48,10 @@ type
       function GetOutputStrings: TstringList;
       function GetParametersString: String;
       function GetProcessEnvironment: TProcessEnvironment;
+      procedure SetOnError(AValue: TErrorFunc);
+      procedure SetOnErrorM(AValue: TErrorMethod);
       procedure SetOnOutput(AValue: TDumpFunc);
+      procedure SetOnOutputM(AValue: TDumpMethod);
       procedure SetParametersString(AValue: String);
     public
       procedure Execute;
@@ -50,7 +59,10 @@ type
       property ExceptionInfo:string read GetExceptionInfo;
       property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
       property ExitStatus:integer read FExitStatus;
+      property OnError:TErrorFunc read FOnError write SetOnError;
+      property OnErrorM:TErrorMethod read FOnErrorM write SetOnErrorM;
       property OnOutput:TDumpFunc read FOnOutput write SetOnOutput;
+      property OnOutputM:TDumpMethod read FOnOutputM write SetOnOutputM;
       property OutputString:string read GetOutputString;
       property OutputStrings:TstringList read GetOutputStrings;
       property ParametersString:String read GetParametersString write SetParametersString;
@@ -62,7 +74,7 @@ type
 
 function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer; overload;
 function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string; Verbose:boolean): integer; overload;
-procedure DumpConsole(Sender:TObject; output:string);
+procedure DumpConsole(Sender:TProcessEx; output:string);
 
 
 
@@ -102,10 +114,28 @@ begin
   result:=FProcessEnvironment;
 end;
 
+procedure TProcessEx.SetOnError(AValue: TErrorFunc);
+begin
+  if FOnError=AValue then Exit;
+  FOnError:=AValue;
+end;
+
+procedure TProcessEx.SetOnErrorM(AValue: TErrorMethod);
+begin
+  if FOnErrorM=AValue then Exit;
+  FOnErrorM:=AValue;
+end;
+
 procedure TProcessEx.SetOnOutput(AValue: TDumpFunc);
 begin
   if FOnOutput=AValue then Exit;
   FOnOutput:=AValue;
+end;
+
+procedure TProcessEx.SetOnOutputM(AValue: TDumpMethod);
+begin
+  if FOnOutputM=AValue then Exit;
+  FOnOutputM:=AValue;
 end;
 
 procedure TProcessEx.SetParametersString(AValue: String);
@@ -130,6 +160,8 @@ procedure TProcessEx.Execute;
       FOutStream.Write(Buffer, ReadBytes);
       if Assigned(FOnOutput) then
         FOnOutput(Self,copy(pchar(@buffer[0]),1,ReadBytes));
+      if Assigned(FOnOutputM) then
+        FOnOutputM(Self,copy(pchar(@buffer[0]),1,ReadBytes));
       Result := True;
     end;
   end;
@@ -153,12 +185,19 @@ begin
     end;
     ReadOutput;
     FExitStatus:=inherited ExitStatus;
+    if (FExitStatus<>0) and (Assigned(OnError) or Assigned(OnErrorM))  then
+      if Assigned(OnError) then
+        OnError(Self,false)
+      else
+        OnErrorM(Self,false);
   except
     on E: Exception do
     begin
     FExceptionInfoStrings.Add('Exception calling '+Executable+' '+Parameters.Text);
     FExceptionInfoStrings.Add('Details: '+E.ClassName+'/'+E.Message);
     FExitStatus:=-2;
+    if Assigned(OnError) then
+      OnError(Self,true);
     end;
   end;
 end;
@@ -274,7 +313,7 @@ begin
 end;
 
 
-procedure DumpConsole(Sender:TObject; output:string);
+procedure DumpConsole(Sender:TProcessEx; output:string);
 begin
   write(output);
 end;

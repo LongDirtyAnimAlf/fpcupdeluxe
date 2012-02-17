@@ -41,7 +41,7 @@ General remarks:
 interface
 
 uses
-  Classes, SysUtils, updater;
+  Classes, SysUtils, updater, processutils;
 
 type
   { TInstaller }
@@ -96,6 +96,7 @@ type
     function GetFPCRevision: string;
     function GetFPCUrl: string;
     function GetLazarusRevision: string;
+    procedure LogError(Sender:TProcessEx;IsException:boolean);
     function ModuleEnabled(Name:string):boolean;
     procedure SetAllOptions(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
@@ -171,7 +172,7 @@ implementation
 uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
-  strutils, process, processutils, FileUtil {Requires LCL}
+  strutils, process, FileUtil {Requires LCL}
 {$IFDEF MSWINDOWS}
   //Mostly for shortcut code
   ,windows, shlobj {for special folders}, ActiveX, ComObj
@@ -962,9 +963,6 @@ begin
     writeln(FLogFile,'Lazarus help skipped by user.');
     exit;
   end;
-  writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
-  writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
-  writeln(FLogFile,'Lazarus URL:            '+LazarusURL);
 
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
@@ -980,6 +978,7 @@ begin
   ProcessEx:=TProcessEx.Create(nil);
   if Verbose then
     ProcessEx.OnOutput:=@DumpConsole;
+  ProcessEx.OnErrorM:=@LogError;
 
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
@@ -1082,6 +1081,28 @@ end;
 function TInstaller.GetLazarusRevision: string;
 begin
   Result := FUpdater.LazarusRevision;
+end;
+
+procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);
+var
+  TempFileName:string;
+begin
+  TempFileName:=SysUtils.GetTempFileName;
+  if IsException then
+    begin
+    infoln('Command raised an exception: ');
+    infoln(Sender.ExceptionInfo);
+    WriteLn(FLogFile,'Exception raised running ',Sender.Executable + ' ' +Sender.ParametersString);
+    WriteLn(FLogFile,Sender.ExceptionInfo);
+    end
+  else
+    begin
+    infoln('Command returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus)+'. Output:');
+    infoln(Sender.OutputString);
+    WriteLn(FLogFile,'ERROR running ',Sender.Executable + ' ' +Sender.ParametersString);
+    Sender.OutputStrings.SaveToFile(TempFileName);
+    WriteLn(FLogFile,'  output logged in ',TempFileName);
+    end;
 end;
 
 function TInstaller.ModuleEnabled(Name: string): boolean;
@@ -1341,6 +1362,8 @@ begin
     infoln('FPC: running make distclean before checkout/update:');
     ProcessEx.Execute;
   end;
+
+  ProcessEx.OnErrorM:=@LogError;  //don't want to log errors in distclean
 
   infoln('Checking out/updating FPC sources...');
   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision);
@@ -1607,6 +1630,7 @@ begin
   ProcessEx:=TProcessEx.Create(nil);
   if Verbose then
     ProcessEx.OnOutput:=@DumpConsole;
+  ProcessEx.OnErrorM:=@LogError;
 
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
@@ -2004,6 +2028,7 @@ end;
 destructor Tinstaller.Destroy;
 begin
   WriteLn(FLogFile,DateTimeToStr(now),': fpcup finished.');
+  WriteLn(FLogFile,'------------------------------------------------');
   CloseFile(FLogFile);
   FUpdater.Free;
   FBinUtils.Free;
@@ -2011,4 +2036,4 @@ begin
 end;
 
 end.
-
+
