@@ -91,7 +91,8 @@ begin
   writeln(' noconfirm             No confirmation asked. For batch operation. ');
   writeln(' only=<values>         update and build only the modules specified.');
   writeln('                       The module list is separated by commas and can contain:');
-  writeln('                       FPC,lazarus,bigide,wincrossx64,doceditor,lhelp,lazdatadesktop');
+  writeln('                       FPC,lazarus,bigide,wincrossx64,doceditor,');
+  writeln('                       lhelp,lazdatadesktop');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');

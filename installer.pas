@@ -977,7 +977,6 @@ begin
     SetCompilerToInstalledCompiler;
   end;
 
-
   ProcessEx:=TProcessEx.Create(nil);
   if Verbose then
     ProcessEx.OnOutput:=@DumpConsole;
@@ -1023,10 +1022,13 @@ begin
         'docs'+DirectorySeparator+
         'html'+DirectorySeparator+
         'build_lcl_docs'+FExecutableExtension;
+    // Make sure directory switched to that of build_lcl_docs,
+    // otherwise paths to source files will not work.
+    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+        'docs'+DirectorySeparator+
+        'html'+DirectorySeparator;
     ProcessEx.Parameters.Clear;
      //todo: get .xct files from fpc so LCL CHM can link to it??!
-    //todo: this now FAILS as the compiler cannot find its input files.
-    // we probably need to set the current directory to the executable's directory
     ProcessEx.Parameters.Add('--fpdoc');
     ProcessEx.Parameters.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+
       FExecutableExtension); //fpdoc gets called by build_lcl_docs
@@ -1037,6 +1039,12 @@ begin
     Though that may work when adjusting the baseurl option in Lazarus for each
     CHM file, it's easier to move them to <lazarusdir>/docs/html,
     which is also suggested by the wiki}
+    // First remove any existing chm file
+    sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator+
+      'lcl'+DirectorySeparator+
+      'lcl.chm');
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       OperationSucceeded := False;
@@ -1061,7 +1069,7 @@ begin
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator+
       'lcl.chm');
-    sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator+
       'lcl'+DirectorySeparator+
@@ -1815,6 +1823,7 @@ begin
         // To installed lazarus
         CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortCutName);
         // To fpcup itself, with all options as passed when invoking it:
+        infoln('Debug: creating desktop shortcut to fpcup; alloptions: '+AllOptions); //todo: debugging, desktop shortcut doesn't seem to create parameters
         if ShortCutNameFpcup<>EmptyStr then
           CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
       finally
