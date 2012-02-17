@@ -993,7 +993,7 @@ begin
   ProcessEx.Environment.SetVar('Path',CustomPath);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
+  ProcessEx.Environment.SetVar('PATH',FPCDirectory+':'+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
@@ -1014,7 +1014,7 @@ begin
       OperationSucceeded := False;
   end;
 
-  //todo: get/compile FPC docs CHM help
+  //todo: get/compile FPC docs CHM help: rtl.chm fcl.chm
   //these may supply .xct files for FPC help so we can use that in build_lcl_docs below
 
   if OperationSucceeded then
@@ -1356,7 +1356,7 @@ begin
   ProcessEx.Environment.SetVar('Path',CustomPath);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
+  ProcessEx.Environment.SetVar('PATH',FPCDirectory+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
@@ -2068,4 +2068,4 @@ begin
 end;
 
 end.
-
+

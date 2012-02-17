@@ -110,11 +110,12 @@ begin
   writeln('                       The module list is separated by commas.');
   writeln('                       See "only" for accepted values. ');
   writeln(' verbose               Show output from svn and make');
+  //todo: not only write --verbose output to console, also to separate log file, e.g. in temp dir, like error logs are now written.
   writeln('');
 
 end;
 
-procedure CheckOptions(var FInstaller: TInstaller);
+procedure CheckOptions(FInstaller: TInstaller);
 const
   //Parameter names:
   BinutilsDir='binutilsdir';
@@ -299,8 +300,6 @@ begin
   if Application.HasOption(LazLinkName) and (FInstaller.ShortCutName<>'') then
     FInstaller.ShortCutNameFpcup:=FInstaller.ShortCutName+'_Update';
 
-  FInstaller.AllOptions:=AllOptions;
-
 
   writeln('');
   writeln('Options:');
@@ -396,4 +395,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
