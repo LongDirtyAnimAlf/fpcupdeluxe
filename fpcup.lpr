@@ -114,7 +114,7 @@ begin
 
 end;
 
-procedure CheckOptions(FInstaller: TInstaller);
+procedure CheckOptions(var FInstaller: TInstaller);
 const
   //Parameter names:
   BinutilsDir='binutilsdir';
@@ -394,4 +394,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
