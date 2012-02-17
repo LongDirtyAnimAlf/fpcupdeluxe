@@ -1833,7 +1833,7 @@ begin
     end
     else
     begin
-      if ModuleEnabled('BIGIDE')=fsle then
+      if ModuleEnabled('BIGIDE')=false then
       begin
         infoln('Module BIGIDE: required by module: LHELP');
         writeln(FLogFile,'Module BIGIDE: required by module: LHELP');
@@ -1910,7 +1910,7 @@ begin
       ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
         'components'+DirectorySeparator+
         'chmhelp'+DirectorySeparator+
-        'lhelp'
+        'lhelp';
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
