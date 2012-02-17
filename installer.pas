@@ -1361,6 +1361,17 @@ var
   FPCVersion:string;
   ProcessEx:TProcessEx;
 begin
+  // To fpcup itself, with all options as passed when invoking it:
+  infoln('Debug: creating desktop shortcut to fpcup; alloptions: '+AllOptions);
+  if ShortCutNameFpcup<>EmptyStr then
+{$IFDEF MSWINDOWS}
+    CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
+{$ELSE}
+    begin
+    FAllOptions:=FAllOptions+' $*';
+    CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
+    end;
+{$ENDIF MSWINDOWS}
   if not ModuleEnabled('FPC') then
   begin
     result:=true;  //continue with lazarus
@@ -1904,10 +1915,6 @@ begin
         //DO pass quotes here (it's not TProcess.Params)
         // To installed lazarus
         CreateDesktopShortCut(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortCutName);
-        // To fpcup itself, with all options as passed when invoking it:
-        infoln('Debug: creating desktop shortcut to fpcup; alloptions: '+AllOptions); //todo: debugging, desktop shortcut doesn't seem to create parameters
-        if ShortCutNameFpcup<>EmptyStr then
-          CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
       finally
         //Ignore problems creating shortcut
       end;
@@ -1921,11 +1928,6 @@ begin
         //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
         //DO pass quotes here (it's not TProcess.Params)
         CreateHomeStartLink(FInstalledLazarus,'--pcp="'+FLazarusPrimaryConfigPath+'"',ShortcutName);
-        if ShortCutNameFpcup<>EmptyStr then
-          begin
-          FAllOptions:=FAllOptions+' $*';
-          CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
-          end;
       finally
         //Ignore problems creating shortcut
       end;
