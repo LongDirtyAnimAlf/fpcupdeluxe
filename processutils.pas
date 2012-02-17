@@ -5,7 +5,7 @@ unit processutils;
 interface
 
 uses
-  Classes, SysUtils, process;
+  Classes, SysUtils, process, strutils;
 type
   TProcessEx=class; //forward
   TDumpFunc = procedure (Sender:TProcessEx; output:string);
@@ -99,7 +99,7 @@ end;
 
 function TProcessEx.GetParametersString: String;
 begin
-  result:=Parameters.text;
+  result:=AnsiReplaceStr(Parameters.text, LineEnding, ' ');
 end;
 
 function TProcessEx.GetExceptionInfo: string;
