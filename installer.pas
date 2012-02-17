@@ -83,6 +83,7 @@ type
     procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
     function DownloadBinUtils: boolean;
     function DownloadBootstrapCompiler: boolean;
+    function DownloadFPCHelp(URL, TargetDirectory: string): boolean;
     function DownloadFTP(URL, TargetFile: string): boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
@@ -479,6 +480,12 @@ begin
     infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive);
   end;
   Result := OperationSucceeded;
+end;
+
+function TInstaller.DownloadFPCHelp(URL, TargetDirectory: string): boolean;
+begin
+  //todo: implement downloading
+  result:=true;
 end;
 
 function TInstaller.DownloadFTP(URL, TargetFile: string): boolean;
@@ -969,6 +976,7 @@ function TInstaller.GetLazarusHelp(): boolean;
 var
   AfterRevision: string;
   BeforeRevision: string;
+  BuildLCLDocsDirectory: string;
   CustomPath: string;
   Executable: string;
   LazarusConfig: TUpdateLazConfig;
@@ -1018,47 +1026,61 @@ begin
   if CustomPath<>EmptyStr then
     writeln(FLogFile,'External program path:  '+CustomPath);
 
+  // Location of build_lcl_docs.lpr, and also of the help files to be installed.
+  BuildLCLDocsDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator;
+
   if OperationSucceeded then
   begin
     // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
     ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-    ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(LazarusDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator+
-      'build_lcl_docs.lpr');
+    ProcessEx.Parameters.Add(BuildLCLDocsDirectory+'build_lcl_docs.lpr');
     infoln('Lazarus: compiling build_lcl_docs help compiler:');
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       OperationSucceeded := False;
   end;
 
-  //todo: get/compile FPC docs CHM help: rtl.chm fcl.chm
-  //these may supply .xct files for FPC help so we can use that in build_lcl_docs below
   if OperationSucceeded then
   begin
-    // Download FPC CHMs. It seems much to difficult to compile using fpdoc right now
-    {Possible alternatives
-    1. make chm -> requires latex!!!
-    2. or
-    c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
-    ... but we'd need to include the input files extracted from the Make file.
-    }
+    if not ModuleEnabled('FPCHELP') then
+    begin
+      infoln('Module FPCHELP: skipped by user.');
+      writeln(FLogFile,'Module FPCHELP: skipped by user.');
+    end
+    else
+    begin
+      infoln('Module FPCHELP: downloading FPC RTL/CHM help...');
+      // Download FPC CHM (rtl.chm and fcl.chm).
+      {Possible alternatives
+      1. make chm -> requires latex!!!
+      2. or
+      c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
+      ... but we'd need to include the input files extracted from the Make file.
+      }
+      //Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
+      //http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
+      //which links to
+      //http://downloads.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ffreepascal%2Ffiles%2FDocumentation%2F2.6.0%2F&ts=1329491287&use_mirror=garr
+      //Note: there's also an older file on
+      //http://sourceforge.net/projects/freepascal/files/Documentation/
+      //that includes the lcl file
+      // Download and extract zip contents into build_lcl_docs directory
+      OperationSucceeded:=DownloadFPCHelp('http://downloads.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ffreepascal%2Ffiles%2FDocumentation%2F2.6.0%2F&ts=1329491287&use_mirror=garr',
+        BuildLCLDocsDirectory);
+    end;
   end;
 
   if OperationSucceeded then
   begin
     // Compile Lazarus CHM help
-    ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'docs'+DirectorySeparator+
-        'html'+DirectorySeparator+
-        'build_lcl_docs'+FExecutableExtension;
+    ProcessEx.Executable := BuildLCLDocsDirectory+'build_lcl_docs'+FExecutableExtension;
     // Make sure directory switched to that of build_lcl_docs,
     // otherwise paths to source files will not work.
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
-        'docs'+DirectorySeparator+
-        'html'+DirectorySeparator;
+    ProcessEx.CurrentDirectory:=BuildLCLDocsDirectory;
     ProcessEx.Parameters.Clear;
      //todo: get .xct files from fpc so LCL CHM can link to it??!:
      //use this option:
@@ -1079,12 +1101,6 @@ begin
     which is also suggested by the wiki.
     The generated .xct file is an index file for fpdoc cross file links,
     used if you want to link to the chm from other chms.}
-    // First remove any existing chm file
-    sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator+
-      'lcl'+DirectorySeparator+
-      'lcl.chm');
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       OperationSucceeded := False;
@@ -1092,29 +1108,26 @@ begin
 
   if OperationSucceeded then
   begin
-    infoln('Lazarus: moving lcl.chm to docs directory.');
-    // Move help file to doc directory
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator+
-      'lcl.chm');
-    // We might (in theory) be moving files across partitions so we cannot use renamefile
-    OperationSucceeded:=FileUtil.CopyFile(IncludeTrailingPathDelimiter(
-      LazarusDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator+
+    if FileExistsUTF8(BuildLCLDocsDirectory+
       'lcl'+DirectorySeparator+
-      'lcl.chm',
-      IncludeTrailingPathDelimiter(LazarusDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator+
-      'lcl.chm');
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(LazarusDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator+
-      'lcl'+DirectorySeparator+
-      'lcl.chm');
+      'lcl.chm') then
+    begin
+      infoln('Lazarus: moving lcl.chm to docs directory');
+      // Move help file to doc directory
+      Sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.chm');
+      // We might (in theory) be moving files across partitions so we cannot use renamefile
+      OperationSucceeded:=FileUtil.CopyFile(BuildLCLDocsDirectory+
+        'lcl'+DirectorySeparator+
+        'lcl.chm',
+        BuildLCLDocsDirectory+
+        'lcl.chm');
+      Sysutils.DeleteFile(BuildLCLDocsDirectory+
+        'lcl'+DirectorySeparator+
+        'lcl.chm');
+    end;
   end;
+
+  // Finish up
   ProcessEx.Free;
   result:=OperationSucceeded;
 end;
@@ -2111,4 +2124,4 @@ begin
 end;
 
 end.
-
+
