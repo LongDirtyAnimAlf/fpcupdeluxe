@@ -65,6 +65,7 @@ type
     FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string;
     FLogFile:Text;
+    FLogVerboseFile:Text;
     FMake: string;
     FShortCutNameFpcup: string;
     {$IFDEF MSWINDOWS}
@@ -85,6 +86,7 @@ type
     function DownloadFTP(URL, TargetFile: string): boolean;
     function DownloadHTTP(URL, TargetFile: string): boolean;
     function DownloadSVN: boolean;
+    procedure DumpOutput(Sender:TProcessEx; output:string);
     function CheckAndGetNeededExecutables: boolean;
     procedure EnvironmentWithOurPath(var EnvironmentList: TStringList; const NewPath: string);
     // Return complete environment except replace path with our own value
@@ -635,6 +637,24 @@ begin
   Result := OperationSucceeded;
 end;
 
+procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
+var
+  TempFileName:string;
+begin
+  if Verbose then
+    begin
+    if TextRec(FLogVerboseFile).Mode=0 then
+      begin
+      TempFileName:=SysUtils.GetTempFileName;
+      AssignFile(FLogVerboseFile,TempFileName);
+      Rewrite(FLogVerboseFile);
+      Writeln(FLogFile,'Verbose output saved to ',TempFileName);
+      end;
+    write(FLogVerboseFile,output);
+    end;
+  DumpConsole(Sender,output);
+end;
+
 function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
@@ -980,7 +1000,7 @@ begin
 
   ProcessEx:=TProcessEx.Create(nil);
   if Verbose then
-    ProcessEx.OnOutput:=@DumpConsole;
+    ProcessEx.OnOutputM:=@DumpOutput;
   ProcessEx.OnErrorM:=@LogError;
 
   {$IFDEF MSWINDOWS}
@@ -1344,7 +1364,7 @@ begin
 
   ProcessEx:=TProcessEx.Create(nil);
   if Verbose then
-    ProcessEx.OnOutput:=@DumpConsole;
+    ProcessEx.OnOutputM:=@DumpOutput;
 
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
@@ -1671,7 +1691,7 @@ begin
 
   ProcessEx:=TProcessEx.Create(nil);
   if Verbose then
-    ProcessEx.OnOutput:=@DumpConsole;
+    ProcessEx.OnOutputM:=@DumpOutput;
   ProcessEx.OnErrorM:=@LogError;
 
   {$IFDEF MSWINDOWS}
@@ -2055,6 +2075,7 @@ begin
   else
     Rewrite(FLogFile);
   WriteLn(FLogFile,DateTimeToStr(now),': fpcup started.');
+  TextRec(FLogVerboseFile).Mode:=0;  //class variables should have been 0
 end;
 
 destructor Tinstaller.Destroy;
@@ -2062,6 +2083,8 @@ begin
   WriteLn(FLogFile,DateTimeToStr(now),': fpcup finished.');
   WriteLn(FLogFile,'------------------------------------------------');
   CloseFile(FLogFile);
+  if TextRec(FLogVerboseFile).Mode<>0 then
+    CloseFile(FLogVerboseFile);
   FUpdater.Free;
   FBinUtils.Free;
   inherited Destroy;

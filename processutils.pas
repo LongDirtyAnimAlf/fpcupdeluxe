@@ -177,6 +177,10 @@ begin
     if Assigned(FProcessEnvironment) then
       inherited Environment:=FProcessEnvironment.EnvironmentList;
     Options := Options +[poUsePipes, poStderrToOutPut];
+    if Assigned(FOnOutput) then
+      FOnOutput(Self,'Executing : '+Executable+' '+ ParametersString+LineEnding);
+    if Assigned(FOnOutputM) then
+      FOnOutputM(Self,'Executing : '+Executable+' '+ ParametersString+LineEnding);
     inherited Execute;
     while Running do
     begin
