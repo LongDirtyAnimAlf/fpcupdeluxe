@@ -299,6 +299,8 @@ begin
   if Application.HasOption(LazLinkName) and (FInstaller.ShortCutName<>'') then
     FInstaller.ShortCutNameFpcup:=FInstaller.ShortCutName+'_Update';
 
+  FInstaller.AllOptions:=AllOptions;
+
 
   writeln('');
   writeln('Options:');
