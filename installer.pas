@@ -1064,8 +1064,12 @@ begin
      //use this option:
      //--fpcdocs <value>  The directory that contains the fcl and rtl .xct files.
     ProcessEx.Parameters.Add('--fpdoc');
-    ProcessEx.Parameters.Add(ExtractFilePath(FInstalledCompiler)+'fpdoc'+
-      FExecutableExtension); //fpdoc gets called by build_lcl_docs
+    // Use the fpdoc in ./utils/fpdoc/, as the compiler directory is now different between
+    // Unix+Windows
+    ProcessEx.Parameters.Add(FPCDirectory+
+    'utils'+DirectorySeparator+
+    'fpdoc'+DirectorySeparator+
+    'fpdoc'+FExecutableExtension); //fpdoc gets called by build_lcl_docs
     ProcessEx.Parameters.Add('--outfmt');
     ProcessEx.Parameters.Add('chm');
     infoln('Lazarus: compiling chm help docs:');
