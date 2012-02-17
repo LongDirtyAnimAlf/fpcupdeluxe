@@ -956,7 +956,7 @@ var
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
 begin
-  if not ModuleEnabled('LHELP') then
+  if not ModuleEnabled('LHELP') then //todo: centralize module names (constants enums whatever)
   begin
     result:=true;  //continue with whatever we do next
     infoln('Lazarus help skipped by user.');
@@ -965,7 +965,7 @@ begin
   end
   else
   begin
-    infoln('Getting/compiling Lazarus help...');
+    infoln('Module LHELP: getting/compiling Lazarus help...');
   end;
 
   //Make sure we have the proper tools.
@@ -1316,7 +1316,7 @@ begin
   end
   else
   begin
-    infoln('Getting/compiling FPC...');
+    infoln('Module FPC: Getting/compiling FPC...');
   end;
   writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
   writeln(FLogFile,'FPC URL:                '+FPCURL);
@@ -1464,7 +1464,9 @@ begin
     end
     else
     begin
-      // Make crosscompiler using new CompilerName- todo: check out what cross compilers we can install on Linux/OSX
+      // Make crosscompiler using new compiler
+      // todo: check out what cross compilers we can install on Linux/OSX (win32?)
+      // todo: possibly move this to a separate section that will be called after fpc compilation (reason: we need a valid compiler0.
       // Note: consider this as an optional item, so don't fail the function if this breaks.
       ProcessEx.Executable := FMake;
       ProcessEx.Parameters.Clear;
@@ -1619,7 +1621,7 @@ begin
   end
   else
   begin
-    infoln('Getting/compiling Lazarus...');
+    infoln('Module LAZARUS: Getting/compiling Lazarus...');
   end;
   writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
   writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
