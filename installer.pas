@@ -100,6 +100,7 @@ type
     function GetLazarusRevision: string;
     procedure LogError(Sender:TProcessEx;IsException:boolean);
     function ModuleEnabled(Name:string):boolean;
+    function MoveFile(const SrcFilename, DestFilename: string): boolean;
     procedure SetAllOptions(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
@@ -418,11 +419,8 @@ begin
     // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
-      infoln('Going to rename/move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
-      sysutils.DeleteFile(BootstrapCompiler); //ignore errors
-      // We might be moving files across partitions so we cannot use renamefile
-      OperationSucceeded:=FileUtil.CopyFile(ExtractedCompiler, BootstrapCompiler);
-      sysutils.DeleteFile(ExtractedCompiler);
+      infoln('Going to move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
+      OperationSucceeded:=FileUtil.MoveFile(ExtractedCompiler, BootstrapCompiler);
     end;
     if OperationSucceeded then
     begin
@@ -1114,15 +1112,10 @@ begin
     begin
       infoln('Lazarus: moving lcl.chm to docs directory');
       // Move help file to doc directory
-      Sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.chm');
-      // We might (in theory) be moving files across partitions so we cannot use renamefile
-      OperationSucceeded:=FileUtil.CopyFile(BuildLCLDocsDirectory+
+      OperationSucceeded:=MoveFile(BuildLCLDocsDirectory+
         'lcl'+DirectorySeparator+
         'lcl.chm',
         BuildLCLDocsDirectory+
-        'lcl.chm');
-      Sysutils.DeleteFile(BuildLCLDocsDirectory+
-        'lcl'+DirectorySeparator+
         'lcl.chm');
     end;
   end;
@@ -1164,6 +1157,25 @@ begin
   result:=(((FOnlyModules='') and (FSkipModules=''))
           or ((FOnlyModules<>'') and (Pos(Name,FOnlyModules)>0)))
           or ((FSkipModules<>'') and (Pos(Name,FSkipModules)<=0))
+end;
+
+function TInstaller.MoveFile(const SrcFilename, DestFilename: string): boolean;
+// We might (in theory) be moving files across partitions so we cannot use renamefile
+begin
+  try
+    if FileExistsUTF8(SrcFileName) then
+    begin
+      if FileUtil.CopyFile(SrcFilename, DestFileName) then Sysutils.DeleteFile(SrcFileName);
+      result:=true;
+    end
+    else
+    begin
+      //Source file does not exist, so cannot move
+      result:=false;
+    end;
+  except
+    result:=false;
+  end;
 end;
 
 procedure TInstaller.SetAllOptions(AValue: string);
