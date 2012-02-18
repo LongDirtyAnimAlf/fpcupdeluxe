@@ -1480,6 +1480,14 @@ begin
     //Make sure we have the proper tools:
     OperationSucceeded:=CheckAndGetNeededExecutables;
 
+    // We need to know compiler path so we can delete fpc.cfg etc
+    if FInstalledCompiler = '' then
+    begin
+      //Assume we've got a working compiler. This will link through to the
+      //platform-specific compiler, e.g. our fpc.sh proxy on Unix
+      SetCompilerToInstalledCompiler;
+    end;
+
     // SVN revert FPC directory
     FUpdater.RevertFPC;
 
@@ -1541,7 +1549,7 @@ begin
        'html'+DirectorySeparator;
     sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.chm');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'prot.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'prog.chm');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.chm');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.chm');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.chm');
@@ -1550,7 +1558,7 @@ begin
     // Cross reference (.xct) files:
     sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.xct');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'prot.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'prog.xct');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.xct');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.xct');
     sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.xct');
