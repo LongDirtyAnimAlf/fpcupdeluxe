@@ -62,7 +62,6 @@ type
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Complete path to installed FPC compiler; used to compile Lazarus
     FInstalledCompilerName: string; //Name only of installed PPC compiler (e.g. ppcx64 on 64 bit Intel OSX)
-    FInstalledCrossCompiler: string; //Complete path to an optional cross compiler that we installed (also used for Lazarus)
     FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string;
     FLogFile:Text;
@@ -1780,13 +1779,7 @@ begin
 
         // Note: consider this as an optional item, so don't fail the function if this breaks.
         ProcessEx.Execute;
-        if ProcessEx.ExitStatus=0 then
-        begin
-          // Let everyone know of our shiny new crosscompiler:
-          FInstalledCrossCompiler := IncludeTrailingPathDelimiter(FPCDirectory) + 'bin' +
-            DirectorySeparator + IncludeTrailingPathDelimiter(FFPCPlatform) + 'ppcrossx64.exe';
-        end
-        else
+        if ProcessEx.ExitStatus<>0 then
         begin
           infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
         end;
@@ -1994,21 +1987,28 @@ begin
   //todo: find out what crosscompilers we can install on linux/osx
   if OperationSucceeded then
   begin
-    // LCL 64 bit crosscompiler.
-    if FInstalledCrossCompiler<>'' then
+    if not ModuleEnabled('WINCROSSX64') then
     begin
+      infoln('Module WINCROSSX64: skipped by user. Not building 64 bit LCL.');
+      writeln(FLogFile,'Module WINCROSSX64: skipped by user. Not building 64 bit LCL.s');
+    end
+    else
+    begin
+      // 64 bit crosscompiler. We cheat a bit by compiling the big IDE in 64 bit mode
+      // which will compile all dependencies, including LCL.
+      // Note: make distclean has been run; if not, make bigideclean should have been run.
       ProcessEx.Executable := FMake;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
       ProcessEx.Parameters.Clear;
-      ProcessEx.Parameters.Add('FPC='+FInstalledCrossCompiler+'');
+      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
       ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       ProcessEx.Parameters.Add('LCL_PLATFORM=win32');
       ProcessEx.Parameters.Add('OS_TARGET=win64');
       ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-      ProcessEx.Parameters.Add('lcl'); //make lcl; no need to run clean as distclean has been run before
-      infoln('Lazarus: running make LCL crosscompiler:');
+      ProcessEx.Parameters.Add('bigide'); //do it; no need to run clean as distclean has been run before
+      infoln('Lazarus: running make Win64 bigide (for LCL):');
       // Note: consider this optional; don't fail the function if this fails.
       ProcessEx.Execute;
       if ProcessEx.ExitStatus<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
@@ -2330,4 +2330,4 @@ begin
 end;
 
 end.
-
+
