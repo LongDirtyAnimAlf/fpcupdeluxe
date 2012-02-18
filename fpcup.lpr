@@ -264,13 +264,11 @@ begin
     //todo: let installer.pas show list of modules at compile time. Select from these for
     // skip and only options
     FInstaller.SkipModules:=Application.GetOptionValue(Skip);
-    AllOptions:=AllOptions+'--'+Skip+'="'+FInstaller.SkipModules+'" ';
   end;
 
   if Application.HasOption(Only) then
   begin
     FInstaller.OnlyModules:=Application.GetOptionValue(Only);
-    AllOptions:=AllOptions+'--'+Only+'="'+FInstaller.SkipModules+'" ';
   end;
 
   if Application.HasOption(PrimaryConfigPath) then
@@ -396,4 +394,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
