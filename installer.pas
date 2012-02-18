@@ -78,6 +78,7 @@ type
     FUpdater: TUpdater;
     FUnzip: string; //Location or name of unzip executable
     FVerbose: boolean;
+    function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     procedure CreateBinutilsList;
     procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
     procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
@@ -325,6 +326,47 @@ begin
   FBinUtils.Add('windres'+FExecutableExtension);
   FBinUtils.Add('windres'+FExecutableExtension);
   FBinUtils.Add('zip'+FExecutableExtension);
+end;
+
+function TInstaller.CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+var
+  ResultCode: longint;
+  OperationSucceeded: boolean;
+  ExeName: string;
+  Output: string;
+begin
+  try
+    ExeName:=ExtractFileName(Executable);
+    ResultCode:=ExecuteCommandHidden(Executable, Parameters, Output, Verbose);
+    if ResultCode=0 then
+    begin
+      if (ExpectOutput<>'') and (Ansipos(ExpectOutput, Output)=0) then
+      begin
+        infoln('Error: '+Executable+' is not a valid '+ExeName+' application. '+
+          ExeName+' exists but shows no ('+ExpectOutput+')in its output.');
+        OperationSucceeded:=false
+      end
+      else
+      begin
+        OperationSucceeded:=true;
+      end;
+    end
+    else
+    begin
+      infoln('Error: '+Executable+' is not a valid '+ExeName+' application ('+
+      ExeName+' result code was: '+IntToStr(ResultCode)+')');
+      OperationSucceeded:=false;
+    end;
+  except
+    on E: Exception do
+    begin
+      infoln('Error: '+Executable+' is not a valid '+ExeName+' application ('+
+        'Exception: '+E.ClassName+'/'+E.Message+')');
+      OperationSucceeded := False;
+    end;
+  end;
+  if OperationSucceeded then infoln('Found valid '+ExeName+' application.');
+  Result:=OperationSucceeded;
 end;
 
 { TInstaller }
@@ -708,8 +750,6 @@ function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
   Output: string;
-  Params: string;
-  ResultCode: longint;
 begin
   OperationSucceeded := True;
   // The extractors used depend on the bootstrap CompilerName URL/file we download
@@ -718,17 +758,19 @@ begin
   // Need to do it here so we can pick up make path.
   FBunzip2:=EmptyStr;
   FTar:=EmptyStr;
+  // By doing this, we expect unzip.exe to be in the binutils dir.
+  // This is safe to do because it is included in the FPC binutils.
   FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + FExecutableExtension;
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
   FBunzip2:='bunzip2';
   FTar:='tar';
-  FUnzip:=EmptyStr;
+  FUnzip:='unzip'; //unzip needed at least for FPC chm help
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
-  FBunzip2:='bunzip2';
+  FBunzip2:=''; //not really necessary now
   FTar:='gnutar'; //gnutar can decompress as well; bsd tar can't
-  FUnzip:=EmptyStr;
+  FUnzip:='unzip'; //unzip needed at least for FPC chm help
   {$ENDIF DARIN}
 
   {$IFDEF MSWINDOWS}
@@ -789,107 +831,38 @@ begin
     end;
   end;
 
-
   if OperationSucceeded then
   begin
-    // Check for valid unzip/gunzip/tar executable
-    {$IFDEF MSWINDOWS}
+    // Check for valid unzip executable, if it is needed
     if FUnzip<>EmptyStr then
-    {$ENDIF MSWINDOWS}
-    {$IFDEF LINUX}
-    if FBunzip2<>EmptyStr then
-    {$ENDIF LINUX}
-    {$IFDEF DARWIN}
-    if FTar<>EmptyStr then
-    {$ENDIF DARWIN}
     begin
-      try
-        Output := '';
-        // See unzip.h for return codes.
-        // This roundabout way at least avoids messing with ifdefs
-        // note that we will test for the last program found
-        // but on Unixy systems that probably does not matter
-        Output:=EmptyStr;
-        if FUnzip<>EmptyStr then
-        begin
-          Params:='-v';
-          Output:=FUnzip;
-        end;
-        if FBunzip2<>EmptyStr then
-        begin
-          Params:='--version';
-          Output:=FBUnzip2;
-        end;
-        if FTar<>EmptyStr then
-        begin
-          // We put tar after bunzip2; we use it in OSX
-          // and want to test it then.
-          Params:='--version';
-          Output:=FTar;
-        end;
-        if Output=EmptyStr then
-        begin
-          OperationSucceeded:=false;
-          ResultCode:=-1;
-          infoln('No valid unzip/bunzip2/tar executable names/locations set up in program code. Please fix program.');
-        end
-        else
-        begin
-          ResultCode:=ExecuteCommandHidden(Output, Params, Verbose);
-        end;
-
-        if ResultCode=0 then
-        begin
-          infoln('Found valid extractor: ' + Output);
-          OperationSucceeded := true;
-        end
-        else
-        begin
-          //invalid unzip/gunzip/whatever
-          infoln('Error: could not find valid extractor: ' + Output + ' (result code was: '+IntToStr(ResultCode)+')');
-          OperationSucceeded:=false;
-        end;
-      except
-        OperationSucceeded := False;
-      end;
+      OperationSucceeded:=CheckExecutable(FUnzip, '-v', '');
     end;
   end;
 
+  if OperationSucceeded then
+  begin
+    // Check for valid bunzip2 executable, if it is needed
+    if FBunzip2 <>EmptyStr then
+    begin
+      OperationSucceeded:=CheckExecutable(FBunzip2, '--version','');
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Check for valid tar executable, if it is needed
+    if FTar<>EmptyStr then
+    begin
+      OperationSucceeded:=CheckExecutable(FTar, '--version','');
+    end;
+  end;
 
   if OperationSucceeded then
   begin
     // Check for proper FPC bootstrap compiler
     infoln('Checking for FPC bootstrap compiler: '+BootStrapCompiler);
-    try
-      if ExecuteCommandHidden(BootstrapCompiler,'-h',Output,Verbose)=0 then
-      begin
-        if Ansipos('Free Pascal Compiler', Output) = 0 then
-        begin
-          OperationSucceeded := False;
-          infoln('Found FPC executable but it is not a Free Pascal compiler. Going to overwrite it.');
-        end
-        else
-        begin
-          //valid FPC compiler
-          infoln('Found valid FPC bootstrap compiler.');
-          OperationSucceeded:=true;
-        end;
-      end
-      else
-      begin
-        //Error running bootstrapcompiler
-        infoln('Error trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output+'; resultcode: '+IntToStr(ResultCode));
-        OperationSucceeded:=false;
-      end;
-    except
-      on E: Exception do
-      begin
-        infoln('Exception trying to test run bootstrap compiler '+BootstrapCompiler+'. Received output: '+Output);
-        infoln(E.ClassName+'/'+E.Message);
-        OperationSucceeded := False;
-      end;
-    end;
-    // Still within bootstrap compilertest...
+    OperationSucceeded:=CheckExecutable(BootstrapCompiler, '-h', 'Free Pascal Compiler');
     if OperationSucceeded=false then
     begin
       infoln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
@@ -1020,7 +993,6 @@ var
   BeforeRevision: string;
   BuildLCLDocsDirectory: string;
   CustomPath: string;
-  Executable: string;
   LazarusConfig: TUpdateLazConfig;
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
@@ -1438,11 +1410,11 @@ var
   CustomPath: string; //Our own version of path we use to pass to commands
   FileCounter:integer;
   FPCCfg: string;
-  FPCScript: string;
+  FPCScript: string; //Used only in Unix code for now.
   OperationSucceeded: boolean;
-  TxtFile:text;
+  TxtFile:text; //Used only in Unix code for now.
   SearchRec:TSearchRec;
-  FPCVersion:string;
+  FPCVersion:string; //Used only in Unix code for now.
   ProcessEx:TProcessEx;
 begin
   // Link to fpcup itself, with all options as passed when invoking it:

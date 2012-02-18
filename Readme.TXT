@@ -3,9 +3,12 @@ https://bitbucket.org/reiniero/fpcup/
 
 What is it?
 ===========
-A tool that gets the current version of FreePascal Compiler (FPC) and Lazarus IDE from their subversion repositories and compiles/installs them.
+fpcup is a tool that gets the current version of FreePascal Compiler (FPC) and Lazarus IDE from their subversion repositories and compiles/installs them.
+It adds CHM documentation and configure the Lazarus help for you.
+
 It also creates a shortcut on your desktop that points to the new Lazarus installation.
-Meant to be used side by side with other FPC/Lazarus installations (it creates a separate primary config path directory for the new Lazarus installation, so it doesn't interfere with existing Lazarus installs)
+
+Meant to be used side by side with other FPC/Lazarus installations. It creates a separate primary config path directory for the new Lazarus installation, so it doesn't interfere with existing Lazarus installs.
 It's open source software, please see the code for the license.
 Run fpcup --help for command line options.
 
