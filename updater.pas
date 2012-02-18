@@ -41,6 +41,7 @@ type
 
   { TUpdater }
 
+  //todo: rewrite into 2 objects, one for Laz, one for FPC; then easily move procedure/functio var parameters out to properties
   TUpdater = class(TObject)
   private
     FFPCRevision: string;
@@ -69,8 +70,8 @@ type
     //Which SVN executable to use
     property Updated: boolean read FUpdated; // Shows whether new files where downloaded/checked out/updated
     property Verbose:boolean read FVerbose write SetVerbose;
-    function UpdateFPC(var BeforeRevision, AfterRevision: string): boolean; // Checks out or updates FPC source
-    function UpdateLazarus(var BeforeRevision, AfterRevision: string): boolean; //Checks out or updates Lazarus source
+    function UpdateFPC(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean; // Checks out or updates FPC source
+    function UpdateLazarus(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean; //Checks out or updates Lazarus source
     constructor Create;
     destructor Destroy; override;
   end;
@@ -97,6 +98,7 @@ begin
   Result:=FSVNClient.FindSVNExecutable;
 end;
 
+
 function TUpdater.GetSVNExecutable: string;
 begin
   Result := FSVNClient.SVNExecutable;
@@ -115,14 +117,14 @@ begin
   FLazarusRevision:=AValue;
 end;
 
-function Tupdater.UpdateFPC(var BeforeRevision, AfterRevision: string): boolean;
+function Tupdater.UpdateFPC(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean;
 begin
   BeforeRevision:='failure';
   AfterRevision:='failure';
   FSVNClient.LocalRepository := FPCDirectory;
   FSVNClient.Repository := FPCURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
-  FSVNClient.Revert; //Remove local changes
+  FSVNClient.LocalModifications(LocalModifications); //Get list of modified files
   FSVNClient.DesiredRevision:=FFPCRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);
@@ -130,14 +132,14 @@ begin
   Result := True;
 end;
 
-function Tupdater.UpdateLazarus(var BeforeRevision, AfterRevision: string): boolean;
+function Tupdater.UpdateLazarus(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean;
 begin
   BeforeRevision:='failure';
   AfterRevision:='failure';
   FSVNClient.LocalRepository := LazarusDirectory;
   FSVNClient.Repository := FLazarusURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
-  FSVNClient.Revert; //Remove local changes
+  FSVNClient.LocalModifications(LocalModifications); //Get list of modified files
   FSVNClient.DesiredRevision:=FLazarusRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);

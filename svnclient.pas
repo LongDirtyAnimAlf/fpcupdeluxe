@@ -253,6 +253,7 @@ var
   AllFiles: TStringList;
   Counter: integer;
   Output: string;
+  StatusCode: string;
 begin
   FReturnCode:=ExecuteCommandHidden(SVNExecutable,'status --depth infinity '+FLocalRepository,Output,Verbose);
   AllFiles:=TStringList.Create;
@@ -263,7 +264,10 @@ begin
       //sample:
       //M       C:\Development\fpc\packages\bzip2\Makefile
       //123456789
-      if Copy(AllFiles[Counter],1,1)='M' then
+      StatusCode:=Copy(AllFiles[Counter],1,1);
+      // there is probably a much more set-oriented Pascal way to do this ;)
+      //(M)odified, (C)onflicting, mer(G)ed automatically)
+      if (StatusCode='C') or (StatusCode='G') or (StatusCode='M') then
       begin
         FileList.Add(Copy(AllFiles[Counter],9,Length(AllFiles[Counter])));
       end;
