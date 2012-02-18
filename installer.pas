@@ -2109,6 +2109,17 @@ begin
       // Note: we're cheating as we're rebuilding Lazarus to 64 bit, which drags in the LCL.
       // Afterwards, rebuild as 32 bit. Reason for 32 bit: we can use components not available
       // for x64.
+      // Note: a more elegant solution might be this:
+      // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
+      // make lcl LCL_PLATFORM=win64 PP=ppcrossx64.exe CPU_TARGET=x86_64 OS_TARGET=win64
+      // or probably this would be sufficient as cross compiler should be picked up
+      // make lcl LCL_PLATFORM=win64 CPU_TARGET=x86_64 OS_TARGET=win64
+      // or, a bit more detail
+      // make packager/registration lazutils lcl
+      // alternatives:
+      // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
+      // question: why platform win64, not win32? Wiki says only change targetos, target cpu, so
+      // suppose it should be win32
       ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
       ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory);
       ProcessEx.Parameters.Clear;
