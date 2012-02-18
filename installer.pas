@@ -1491,6 +1491,10 @@ begin
     // SVN revert FPC directory
     FUpdater.RevertFPC;
 
+    { todo: build faq 2.5:
+    On Windows, the makefiles don't properly erase fpmake.exe on distclean... recursively delete fpmake
+    }
+
     // Delete any existing fpc.cfg files
     Sysutils.DeleteFile(ExtractFilePath(FInstalledCompiler)+'fpc.cfg');
 
@@ -1764,21 +1768,15 @@ begin
       ProcessEx.Executable := FMake;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
       ProcessEx.Parameters.Clear;
-      infoln('Running Make all (FPC crosscompiler):');
-      //Note: make install+make crossinstall work on command line
-      //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
-      //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
-      // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
-      //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
-      // => gives bin\i386-win32\ppcrossx64.exe
-      //but not in this program..
+      infoln('Running Make clean all (FPC crosscompiler):');
       ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      //putting all before target might help!?!?
-      ProcessEx.Parameters.Add('all');
+      // Note: running distclean/clean only cleans for the selected architecture.
+      // That's why we runn clean here as well.
+      ProcessEx.Parameters.Add('clean all');
       ProcessEx.Parameters.Add('OS_TARGET=win64');
       ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
       if FFPCOPT<>'' then
@@ -1798,7 +1796,6 @@ begin
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
         ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        //putting crossinstall before target might help!?!?
         ProcessEx.Parameters.Add('crossinstall');
         ProcessEx.Parameters.Add('OS_TARGET=win64'); //cross compile for different OS...
         ProcessEx.Parameters.Add('CPU_TARGET=x86_64'); // and processor.
@@ -2152,7 +2149,7 @@ begin
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add('--cpu=x86_64');
       ProcessEx.Parameters.Add('--operating-system==win64');
-      ProcessEx.Parameters.Add('--widgetset=win32');
+      ProcessEx.Parameters.Add('--widgetset=win32'); //or win64?
       ProcessEx.Parameters.Add('--build-all'); //build ide/everything
       ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
       infoln('Lazarus: compiling Win64 ide (for LCL):');
