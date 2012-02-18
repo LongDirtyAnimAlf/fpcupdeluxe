@@ -101,6 +101,7 @@ type
     procedure LogError(Sender:TProcessEx;IsException:boolean);
     function ModuleEnabled(Name:string):boolean;
     function MoveFile(const SrcFilename, DestFilename: string): boolean;
+    // Moves file if it exists, overwriting destination file
     procedure SetAllOptions(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
@@ -481,9 +482,45 @@ begin
 end;
 
 function TInstaller.DownloadFPCHelp(URL, TargetDirectory: string): boolean;
+var
+  OperationSucceeded: boolean;
+  ResultCode: longint;
+  DocsZip: string;
 begin
-  //todo: implement downloading
-  result:=true;
+  // Download FPC CHM docs zip into TargetDirectory.
+  OperationSucceeded:=true;
+  ForceDirectories(TargetDirectory);
+  DocsZip := SysUtils.GetTempFileName + '.zip';
+  try
+    OperationSucceeded:=DownloadHTTP(URL,DocsZip);
+  except
+    on E: Exception do
+    begin
+      // Deal with timeouts, wrong URLs etc
+      OperationSucceeded:=false;
+      infoln('DownloadFPCHelp: HTTP download failed. URL: '+URL+LineEnding+
+        'Exception: '+E.ClassName+'/'+E.Message);
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Extract, overwrite, flatten path/junk paths
+    // todo: test with spaces in path
+    if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,Verbose)<> 0 then
+    begin
+      OperationSucceeded := False;
+      infoln('DownloadFPCHelp: unzip failed with resultcode: '+IntToStr(ResultCode));
+    end;
+  end
+  else
+  begin
+    infoln('DownloadFPCHelp: HTTP download failed. URL: '+URL);
+  end;
+
+  if OperationSucceeded then
+      SysUtils.deletefile(DocsZip); //Get rid of temp zip if success.
+  Result := OperationSucceeded;
 end;
 
 function TInstaller.DownloadFTP(URL, TargetFile: string): boolean;
@@ -532,6 +569,7 @@ begin
   // Detect SourceForge download
   i := Pos(SourceForgeProjectPart, URL);
   j := Pos(SourceForgeFilesPart, URL);
+
 
   // Rewrite URL if needed for Sourceforge download redirection
   if (i > 0) and (j > 0) then
@@ -620,9 +658,15 @@ begin
   OperationSucceeded := True;
   ForceDirectories(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
-  OperationSucceeded := DownloadHTTP(
-    'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip'
-    , SVNZip);
+  try
+    OperationSucceeded := DownloadHTTP(
+      'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
+      SVNZip);
+  except
+    // Deal with timeouts, wrong URLs etc
+    OperationSucceeded:=false;
+  end;
+
   if OperationSucceeded then
   begin
     // Extract, overwrite
@@ -1051,38 +1095,53 @@ begin
     end
     else
     begin
-      infoln('Module FPCHELP: downloading FPC RTL/CHM help...');
-      // Download FPC CHM (rtl.chm and fcl.chm).
+      // Download FPC CHM (rtl.chm and fcl.chm) if necessary
       {Possible alternatives
       1. make chm -> requires latex!!!
       2. or
       c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
       ... but we'd need to include the input files extracted from the Make file.
       }
-      //Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
-      //http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
-      //which links to
-      //http://downloads.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ffreepascal%2Ffiles%2FDocumentation%2F2.6.0%2F&ts=1329491287&use_mirror=garr
-      //Note: there's also an older file on
-      //http://sourceforge.net/projects/freepascal/files/Documentation/
-      //that includes the lcl file
+      infoln('Module FPCHELP: downloading FPC RTL/CHM help...');
+      if FileExistsUTF8(BuildLCLDocsDirectory+'fcl.chm') and
+      FileExistsUTF8(BuildLCLDocsDirectory+'rtl.chm') then
+      begin
+        infoln('Skipping download: FPC rtl.chm and fcl.chm already present in docs directory '+BuildLCLDocsDirectory);
+      end
+      else
+      begin
+      // Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
+      // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
+      // which links to
+      // http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip
+      //
+      // Note: there's also an older file on
+      // http://sourceforge.net/projects/freepascal/files/Documentation/
+      // that includes the lcl file
       // Download and extract zip contents into build_lcl_docs directory
-      OperationSucceeded:=DownloadFPCHelp('http://downloads.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Ffreepascal%2Ffiles%2FDocumentation%2F2.6.0%2F&ts=1329491287&use_mirror=garr',
+      // todo: replace with main sourceforge download instead of mirror, but mirror code needs to be fixed
+      OperationSucceeded:=DownloadFPCHelp('http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip',
         BuildLCLDocsDirectory);
+      end;
     end;
   end;
 
   if OperationSucceeded then
   begin
     // Compile Lazarus CHM help
+
+    // First remove any existing cross reference to LCL.chm; I think that might confuse fpcdoc
+    DeleteFileUTF8(BuildLCLDocsDirectory+'lcl.xct');
+
     ProcessEx.Executable := BuildLCLDocsDirectory+'build_lcl_docs'+FExecutableExtension;
     // Make sure directory switched to that of build_lcl_docs,
     // otherwise paths to source files will not work.
     ProcessEx.CurrentDirectory:=BuildLCLDocsDirectory;
     ProcessEx.Parameters.Clear;
-     //todo: get .xct files from fpc so LCL CHM can link to it??!:
-     //use this option:
-     //--fpcdocs <value>  The directory that contains the fcl and rtl .xct files.
+    // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
+    // the directory that contains the fcl and rtl .xct files:
+    ProcessEx.Parameters.Add('--pfcdocs');
+    ProcessEx.Parameters.Add(BuildLCLDocsDirectory);
     ProcessEx.Parameters.Add('--fpdoc');
     // Use the fpdoc in ./utils/fpdoc/, as the compiler directory is now different between
     // Unix+Windows
@@ -1386,8 +1445,7 @@ var
   FPCVersion:string;
   ProcessEx:TProcessEx;
 begin
-  // To fpcup itself, with all options as passed when invoking it:
-  infoln('Debug: creating desktop shortcut to fpcup; alloptions: '+AllOptions);
+  // Link to fpcup itself, with all options as passed when invoking it:
   if ShortCutNameFpcup<>EmptyStr then
 {$IFDEF MSWINDOWS}
     CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
