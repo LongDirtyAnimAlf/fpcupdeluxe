@@ -1476,18 +1476,28 @@ begin
   writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
   {$ENDIF MSWINDOWS}
 
-  //Make sure we have the proper tools:
-  OperationSucceeded:=CheckAndGetNeededExecutables;
+  try
+    //Make sure we have the proper tools:
+    OperationSucceeded:=CheckAndGetNeededExecutables;
 
-  // SVN revert FPC directory
-  //todo: OperationSucceeded:=FUpdater.RevertFPC;
+    // SVN revert FPC directory
+    FUpdater.RevertFPC;
 
-  // Delete any existing fpc.cfg files
+    // Delete any existing fpc.cfg files
+    Sysutils.DeleteFile(ExtractFilePath(FInstalledCompiler)+'fpc.cfg');
 
-  {$IFDEF UNIX}
-  // Delete any fpc.sh shell scripts
-
-  {$ENDIF UNIX}
+    {$IFDEF UNIX}
+    // Delete any fpc.sh shell scripts
+    Sysutils.DeleteFile(ExtractFilePath(FInstalledCompiler)+'fpc.sh');
+    {$ENDIF UNIX}
+  except
+    on E: Exception do
+    begin
+      infoln('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      writeln(FLogFile, 'FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      OperationSucceeded:=false;
+    end;
+  end;
   result:=OperationSucceeded;
 end;
 
@@ -1498,12 +1508,21 @@ begin
   OperationSucceeded:=true;
   infoln('Module LAZARUS: cleanup...');
 
+  try
+   // SVN revert Lazarus directory
+   FUpdater.RevertLazarus;
 
-  // SVN revert Lazarus directory
-
-  infoln('Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
-  writeln(FLogFile, 'Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
-
+   infoln('Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
+   writeln(FLogFile, 'Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
+  except
+    on E: Exception do
+    begin
+      infoln('Lazarus clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      writeln(FLogFile, 'Lazarus clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      OperationSucceeded:=false;
+    end;
+  end;
+  result:=OperationSucceeded;
 end;
 
 function TInstaller.CleanLazarusHelp: boolean;
@@ -1517,27 +1536,26 @@ begin
   { Delete .chm files and .xct (cross reference) files
     that could have been downloaded in FPC docs or created by fpcup }
   try
-   BuildLCLDocsDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
+    BuildLCLDocsDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
        'docs'+DirectorySeparator+
        'html'+DirectorySeparator;
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'prot.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'toc.chm');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'user.chm');
-   // Cross reference (.xct) files:
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'prot.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'toc.xct');
-   sysutils.DeleteFile(BuildLCLDocsDirectory+'user.xct');
-
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'prot.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'toc.chm');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'user.chm');
+    // Cross reference (.xct) files:
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'prot.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'toc.xct');
+    sysutils.DeleteFile(BuildLCLDocsDirectory+'user.xct');
   except
     on E: Exception do
     begin

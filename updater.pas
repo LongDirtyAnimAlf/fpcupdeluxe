@@ -67,6 +67,8 @@ type
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
     property LazarusRevision:string read FLazarusRevision write SetLazarusRevision;
     property LazarusURL: string read FLazarusURL write FLazarusURL; //URL for Lazarus SVN
+    procedure RevertFPC;
+    procedure RevertLazarus;
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
     //Which SVN executable to use
     property Updated: boolean read FUpdated; // Shows whether new files where downloaded/checked out/updated
@@ -132,6 +134,20 @@ begin
   FLazarusRevision:=AValue;
 end;
 
+procedure Tupdater.RevertLazarus();
+begin
+  FSVNClient.LocalRepository := LazarusDirectory;
+  FSVNClient.Repository := LazarusURL;
+  FSVNClient.Revert; //Remove local changes
+end;
+
+procedure Tupdater.RevertFPC();
+begin
+  FSVNClient.LocalRepository := FPCDirectory;
+  FSVNClient.Repository := FPCURL;
+  FSVNClient.Revert; //Remove local changes
+end;
+
 function Tupdater.UpdateFPC(var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
   BeforeRevision:='failure';
@@ -191,4 +207,4 @@ begin
 end;
 
 end.
-
+

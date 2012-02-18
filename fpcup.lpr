@@ -304,6 +304,10 @@ begin
 
   writeln('');
   writeln('Options:');
+  if FInstaller.Clean then
+  begin
+    writeln('Running --clean: cleaning environment.');
+  end;
   writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
   writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
   writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
