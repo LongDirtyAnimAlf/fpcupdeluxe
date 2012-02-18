@@ -98,7 +98,7 @@ begin
   writeln(' noconfirm             No confirmation asked. For batch operation. ');
   writeln(' only=<values>         update and build only the modules specified.');
   writeln('                       The module list is separated by commas and can contain:');
-  writeln('                       FPC,FPChelp,lazarus,bigide,wincrossx64,doceditor,');
+  writeln('                       FPC,lazarus,bigide,wincrossx64,doceditor,');
   writeln('                       lhelp,lazdatadesktop');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
@@ -341,7 +341,7 @@ begin
     end;
 end;
 
-procedure ShowErrorHints(SVNSourceDirectory: string);
+procedure ShowErrorHints();
 begin
   writeln('Please check program output for details. Possible troubleshooting steps:');
   writeln('- make sure there''s a valid SVN executable in your path.');
@@ -350,7 +350,7 @@ begin
   writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion');
   //todo: how to get windres => mingw32-binutils? failing that, debian binutils-mingw-w64 => for both x86 and x64 windows apparently?
   {$ENDIF MSWINDOWS}
-  writeln('- try removing all local changes in your SVN repository with: SVN revert --recursive ' + SVNSourceDirectory);
+  writeln('- try removing all local changes in your SVN repository by running fpcup with the --clean option');
   writeln('- remove the generated fpc.cfg in the installed FPC directory. fpcup will recreate it with default settings on the next run.');
 end;
 
@@ -379,17 +379,17 @@ begin
     if FInstaller.GetFPC=false then
     begin
       writeln('FPC retrieval/compilation failed.');
-      ShowErrorHints(FInstaller.FPCDirectory);
+      ShowErrorHints;
     end;
     if FInstaller.GetLazarus=false then
     begin
       writeln('Lazarus retrieval/compilation failed.');
-      ShowErrorHints(FInstaller.LazarusDirectory);
+      ShowErrorHints;
     end;
     if FInstaller.GetLazarusHelp=false then
     begin
       writeln('Lazarus help retrieval/compilation failed.');
-      ShowErrorHints(FInstaller.LazarusDirectory);
+      ShowErrorHints;
     end;
   finally
     FInstaller.Free;

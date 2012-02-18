@@ -1060,41 +1060,33 @@ begin
 
   if OperationSucceeded then
   begin
-    if not ModuleEnabled('FPCHELP') then
+    // Download FPC CHM (rtl.chm and fcl.chm) if necessary
+    {Possible alternatives
+    1. make chm -> requires latex!!!
+    2. or
+    c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
+    ... but we'd need to include the input files extracted from the Make file.
+    }
+    infoln('Module LHELP: downloading FPC RTL/CHM help...');
+    if FileExistsUTF8(BuildLCLDocsDirectory+'fcl.chm') and
+    FileExistsUTF8(BuildLCLDocsDirectory+'rtl.chm') then
     begin
-      infoln('Module FPCHELP: skipped by user.');
-      writeln(FLogFile,'Module FPCHELP: skipped by user.');
+      infoln('Skipping download: FPC rtl.chm and fcl.chm already present in docs directory '+BuildLCLDocsDirectory);
     end
     else
     begin
-      // Download FPC CHM (rtl.chm and fcl.chm) if necessary
-      {Possible alternatives
-      1. make chm -> requires latex!!!
-      2. or
-      c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
-      ... but we'd need to include the input files extracted from the Make file.
-      }
-      infoln('Module FPCHELP: downloading FPC RTL/CHM help...');
-      if FileExistsUTF8(BuildLCLDocsDirectory+'fcl.chm') and
-      FileExistsUTF8(BuildLCLDocsDirectory+'rtl.chm') then
-      begin
-        infoln('Skipping download: FPC rtl.chm and fcl.chm already present in docs directory '+BuildLCLDocsDirectory);
-      end
-      else
-      begin
-      // Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
-      // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
-      // which links to
-      // http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip
-      //
-      // Note: there's also an older file on
-      // http://sourceforge.net/projects/freepascal/files/Documentation/
-      // that includes the lcl file
-      // Download and extract zip contents into build_lcl_docs directory
-      // todo: replace with main sourceforge download instead of mirror, but mirror code needs to be fixed
-      OperationSucceeded:=DownloadFPCHelp('http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip',
-        BuildLCLDocsDirectory);
-      end;
+    // Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
+    // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
+    // which links to
+    // http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip
+    //
+    // Note: there's also an older file on
+    // http://sourceforge.net/projects/freepascal/files/Documentation/
+    // that includes the lcl file
+    // Download and extract zip contents into build_lcl_docs directory
+    // todo: replace with main sourceforge download instead of mirror, but mirror code needs to be fixed
+    OperationSucceeded:=DownloadFPCHelp('http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip',
+      BuildLCLDocsDirectory);
     end;
   end;
 

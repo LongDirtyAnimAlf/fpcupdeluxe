@@ -69,6 +69,8 @@ type
     procedure Update; //Performs an SVN update (pull)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
     //Get/set desired revision to pull to (if none given, use HEAD)
+    procedure LocalModifications(var FileList: TStringList);
+    //Shows list of files that have been modified locally (and not committed)
     function LocalRepositoryExists: boolean;
     //Checks to see if local directory is a valid SVN repository
     property LocalRepository: string read FLocalRepository write FLocalRepository;
@@ -243,6 +245,31 @@ begin
     Sleep(500); //Give everybody a chance to relax ;)
     FReturnCode:=ExecuteCommandHidden(SVNExecutable,command,Verbose); //attempt again
     RetryAttempt := RetryAttempt + 1;
+  end;
+end;
+
+procedure TSVNClient.LocalModifications(var FileList: TStringList);
+var
+  AllFiles: TStringList;
+  Counter: integer;
+  Output: string;
+begin
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'status --depth infinity '+FLocalRepository,Output,Verbose);
+  AllFiles:=TStringList.Create;
+  try
+    AllFiles.Text:=Output;
+    for Counter := 0 to AllFiles.Count - 1 do
+    begin
+      //sample:
+      //M       C:\Development\fpc\packages\bzip2\Makefile
+      //123456789
+      if Copy(AllFiles[Counter],1,1)='M' then
+      begin
+        FileList.Add(Copy(AllFiles[Counter],9,Length(AllFiles[Counter])));
+      end;
+    end;
+  finally
+    AllFiles.Free;
   end;
 end;
 
