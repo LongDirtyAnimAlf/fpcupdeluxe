@@ -58,6 +58,7 @@ type
     procedure SetLazarusRevision(AValue: string);
     procedure SetSVNExecutable(AValue: string);
     procedure SetVerbose(AValue: boolean);
+    procedure CreateStoreDiff(DiffFileName: string; UpdateWarnings: TStringList);
   public
     function FindSVNExecutable: string; //Search for installed SVN executable
     property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
@@ -70,8 +71,8 @@ type
     //Which SVN executable to use
     property Updated: boolean read FUpdated; // Shows whether new files where downloaded/checked out/updated
     property Verbose:boolean read FVerbose write SetVerbose;
-    function UpdateFPC(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean; // Checks out or updates FPC source
-    function UpdateLazarus(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean; //Checks out or updates Lazarus source
+    function UpdateFPC(var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean; // Checks out or updates FPC source
+    function UpdateLazarus(var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean; //Checks out or updates Lazarus source
     constructor Create;
     destructor Destroy; override;
   end;
@@ -91,6 +92,20 @@ begin
   FSVNClient.Verbose := AValue;
   if FVerbose=AValue then Exit;
   FVerbose:=AValue;
+end;
+
+procedure TUpdater.CreateStoreDiff(DiffFileName: string;
+  UpdateWarnings: TStringList);
+var
+  DiffFile:Text;
+begin
+  While FileExists(DiffFileName) do
+    DiffFileName:=DiffFileName+'f';
+  AssignFile(DiffFile,DiffFileName);
+  Rewrite(DiffFile);
+  Write(DiffFile,FSVNClient.GetDiffAll);
+  CloseFile(DiffFile);
+  UpdateWarnings.Add('Diff with last revision stored in '+DiffFileName);
 end;
 
 function TUpdater.FindSVNExecutable: string;
@@ -117,14 +132,21 @@ begin
   FLazarusRevision:=AValue;
 end;
 
-function Tupdater.UpdateFPC(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean;
+function Tupdater.UpdateFPC(var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
   BeforeRevision:='failure';
   AfterRevision:='failure';
   FSVNClient.LocalRepository := FPCDirectory;
   FSVNClient.Repository := FPCURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
-  FSVNClient.LocalModifications(LocalModifications); //Get list of modified files
+  FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
+  if UpdateWarnings.Count>0 then
+    begin
+    CreateStoreDiff(IncludeTrailingPathDelimiter(FPCDirectory)+'REV'+BeforeRevision+'.diff',UpdateWarnings);
+    UpdateWarnings.Insert(0,'FPC: WARNING: found modified files.');
+    UpdateWarnings.Add('FPC: reverting before updating.');
+    FSVNClient.Revert; //Remove local changes
+    end;
   FSVNClient.DesiredRevision:=FFPCRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);
@@ -132,14 +154,21 @@ begin
   Result := True;
 end;
 
-function Tupdater.UpdateLazarus(var BeforeRevision, AfterRevision: string; LocalModifications: TStringList): boolean;
+function Tupdater.UpdateLazarus(var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
   BeforeRevision:='failure';
   AfterRevision:='failure';
   FSVNClient.LocalRepository := LazarusDirectory;
   FSVNClient.Repository := FLazarusURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
-  FSVNClient.LocalModifications(LocalModifications); //Get list of modified files
+  FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
+  if UpdateWarnings.Count>0 then
+    begin
+    CreateStoreDiff(IncludeTrailingPathDelimiter(LazarusDirectory)+'REV'+BeforeRevision+'.diff',UpdateWarnings);
+    UpdateWarnings.Insert(0,'Lazarus: WARNING: found modified files.');
+    UpdateWarnings.Add('Lazarus: reverting before updating.');
+    FSVNClient.Revert; //Remove local changes
+    end;
   FSVNClient.DesiredRevision:=FLazarusRevision; //Desired revision
   FSVNClient.CheckOutOrUpdate;
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);
@@ -162,4 +191,4 @@ begin
 end;
 
 end.
-
+

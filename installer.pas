@@ -1579,7 +1579,7 @@ var
   FileCounter:integer;
   FPCCfg: string;
   FPCScript: string; //Used only in Unix code for now.
-  ModifiedFiles: TStringList;
+  UpdateWarnings: TStringList;
   OperationSucceeded: boolean;
   TxtFile:text; //Used only in Unix code for now.
   SearchRec:TSearchRec;
@@ -1637,18 +1637,16 @@ begin
   ProcessEx.OnErrorM:=@LogError;  //don't want to log errors in distclean
 
   infoln('Checking out/updating FPC sources...');
-  ModifiedFiles:=TStringList.Create;
+  UpdateWarnings:=TStringList.Create;
   try
-   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision, ModifiedFiles);
-   if ModifiedFiles.Count>0 then
+   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision, UpdateWarnings);
+   if UpdateWarnings.Count>0 then
    begin
-     infoln('FPC: WARNING: found modified files. Updating these might result in merge conflicts. Use --clear option to clear out local modifications.');
-     infoln('Modified files: '+LineEnding+ModifiedFiles.Text);
-     writeln(FLogFile,'FPC: WARNING: found modified files. Updating these might result in merge conflicts. Use --clear option to clear out local modifications.');
-     writeln(FLogFile,'Modified files: '+LineEnding+ModifiedFiles.Text);
+     infoln(UpdateWarnings.Text);
+     writeln(FLogFile, UpdateWarnings.Text);
    end;
   finally
-    ModifiedFiles.Free;
+    UpdateWarnings.Free;
   end;
 
   infoln('FPC was at revision: '+BeforeRevision);
@@ -1903,7 +1901,7 @@ var
   BeforeRevision: string;
   CustomPath: string;
   LazarusConfig: TUpdateLazConfig;
-  ModifiedFiles:TStringList;
+  UpdateWarnings:TStringList;
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
 begin
@@ -1969,18 +1967,16 @@ begin
   if OperationSucceeded = True then
   begin
     infoln('Checking out/updating Lazarus sources...');
-    ModifiedFiles:=TStringList.Create;
+    UpdateWarnings:=TStringList.Create;
     try
-     if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateLazarus(BeforeRevision, AfterRevision, ModifiedFiles);
-     if ModifiedFiles.Count>0 then
+     if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateLazarus(BeforeRevision, AfterRevision, UpdateWarnings);
+     if UpdateWarnings.Count>0 then
      begin
-       infoln('Lazarus: WARNING: found modified files. Updating these might result in merge conflicts. Use --clear option to clear out local modifications.');
-       infoln('Modified files: '+LineEnding+ModifiedFiles.Text);
-       writeln(FLogFile,'Lazarus: WARNING: found modified files. Updating these might result in merge conflicts. Use --clear option to clear out local modifications.');
-       writeln(FLogFile,'Modified files: '+LineEnding+ModifiedFiles.Text);
+       infoln(UpdateWarnings.Text);
+       writeln(FLogFile, UpdateWarnings.Text);
      end;
     finally
-      ModifiedFiles.Free;
+      UpdateWarnings.Free;
     end;
 
     infoln('Lazarus was at revision: '+BeforeRevision);
@@ -2334,4 +2330,4 @@ begin
 end;
 
 end.
-
+

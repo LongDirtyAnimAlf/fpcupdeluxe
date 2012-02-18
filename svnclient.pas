@@ -61,6 +61,7 @@ type
     //Performs an SVN checkout (initial download), unless otherwise specified HEAD (latest revision) only for speed
     procedure CheckOutOrUpdate;
     //Runs SVN checkout if local repository doesn't exist, else does an update
+    function GetDiffAll:string; //Creates diff of all changes
     function FindSVNExecutable: string;
     //Search for installed SVN executable (might return just a filename if in the OS path)
     procedure Log(var Log: TStringList); //Shows commit log for local directory
@@ -195,6 +196,11 @@ begin
     // Update
     Update;
   end;
+end;
+
+function TSVNClient.GetDiffAll:string;
+begin
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'diff ' + LocalRepository,Result,Verbose);
 end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
