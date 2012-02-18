@@ -53,6 +53,7 @@ type
     FBootstrapCompilerDirectory: string; //Directory where bootstrap compiler is
     FBootstrapCompilerFTP: string;
     FBootstrapCompilerName: string; //OS specific compiler name (e.g. ppcuniversal for OSX)
+    FClean: boolean;
     FFPCOPT: string;
     FLazarusOPT: string;
     FOnlyModules: string;
@@ -145,6 +146,14 @@ type
     property BootstrapCompilerFTP: string read FBootstrapCompilerFTP
       write FBootstrapCompilerFTP;
     //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
+    property Clean: boolean read FClean write FClean;
+    // Switch between cleanup (svn revert etc) and build modes
+    function CleanFPC: boolean;
+    // Clean up FPC environment
+    function CleanLazarus: boolean;
+    // Clean up Lazarus environment
+    function CleanLazarusHelp: boolean;
+    // Clean up help environment
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
     property FPCOPT: string read FFPCOPT write SetFPCOPT;
@@ -162,6 +171,8 @@ type
     property LazarusDesiredRevision:string read GetLazarusRevision write SetLazarusDesiredRevision;
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
+    function Run: boolean;
+    // Main entry point to the class: perform all selected actions. Returns success or failure result.
     property SkipModules:string read FSkipModules write SetSkipModules;
     property OnlyModules:string read FOnlyModules write SetOnlyModules;
     property Verbose:boolean read FVerbose write SetVerbose;
@@ -999,17 +1010,7 @@ var
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
 begin
-  if not ModuleEnabled('LHELP') then //todo: centralize module names (constants enums whatever)
-  begin
-    result:=true;  //continue with whatever we do next
-    infoln('Lazarus help skipped by user.');
-    writeln(FLogFile,'Lazarus help skipped by user.');
-    exit;
-  end
-  else
-  begin
-    infoln('Module LHELP: getting/compiling Lazarus help...');
-  end;
+  infoln('Module LHELP: getting/compiling Lazarus help...');
 
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
@@ -1147,6 +1148,91 @@ begin
 
   // Finish up
   ProcessEx.Free;
+  result:=OperationSucceeded;
+end;
+
+function TInstaller.Run: boolean;
+var
+  OperationSucceeded:boolean;
+begin
+  OperationSucceeded:=true;
+  if Clean then
+  begin
+    //Clean
+    if ModuleEnabled('FPC') then
+    begin
+      if OperationSucceeded then OperationSucceeded:=CleanFPC;
+    end
+    else
+    begin
+      infoln('FPC cleanup skipped by user.');
+      writeln(FLogFile,'FPC clean skipped by user.');
+    end;
+
+    if ModuleEnabled('LAZARUS') then
+    begin
+      if OperationSucceeded then OperationSucceeded:=CleanLazarus;
+    end
+    else
+    begin
+      infoln('Module LAZARUS: cleanup skipped by user.');
+      writeln(FLogFile,'Module LAZARUS: cleanup skipped by user.');
+    end;
+
+    if ModuleEnabled('LHELP') then
+    begin
+       if OperationSucceeded then OperationSucceeded:=CleanLazarusHelp;
+    end
+    else
+    begin
+      infoln('Lazarus cleanup skipped by user.');
+      writeln(FLogFile,'Lazarus cleanup skipped by user.');
+    end;
+  end
+  else
+  begin
+    // Build.
+    // Link to fpcup itself, with all options as passed when invoking it:
+    if ShortCutNameFpcup<>EmptyStr then
+    begin
+     {$IFDEF MSWINDOWS}
+      CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
+     {$ELSE}
+      FAllOptions:=FAllOptions+' $*';
+      CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
+     {$ENDIF MSWINDOWS}
+    end;
+
+    if ModuleEnabled('FPC') then
+    begin
+      if OperationSucceeded then OperationSucceeded:=GetFPC;
+    end
+    else
+    begin
+      infoln('FPC installation/update skipped by user.');
+      writeln(FLogFile,'FPC installation/update skipped by user.');
+    end;
+
+    if ModuleEnabled('LAZARUS') then
+    begin
+      if OperationSucceeded then OperationSucceeded:=GetLazarus;
+    end
+    else
+    begin
+      infoln('Module LAZARUS: installation/update skipped by user.');
+      writeln(FLogFile,'Module LAZARUS: installation/update skipped by user.');
+    end;
+
+    if ModuleEnabled('LHELP') then
+    begin
+       if OperationSucceeded then OperationSucceeded:=GetLazarusHelp;
+    end
+    else
+    begin
+      infoln('Lazarus help skipped by user.');
+      writeln(FLogFile,'Lazarus help skipped by user.');
+    end;
+  end;
   result:=OperationSucceeded;
 end;
 
@@ -1376,6 +1462,53 @@ begin
   {$ENDIF MSWINDOWS}
 end;
 
+function TInstaller.CleanFPC: boolean;
+var
+  OperationSucceeded:boolean;
+begin
+  OperationSucceeded:=true;
+  infoln('Module FPC: cleanup...');
+
+  writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
+  writeln(FLogFile,'FPC URL:                '+FPCURL);
+  writeln(FLogFile,'FPC options:            '+FPCOPT);
+  writeln(FLogFile,'FPC directory:          '+FPCDirectory);
+  {$IFDEF MSWINDOWS}
+  writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
+  {$ENDIF MSWINDOWS}
+
+  //Make sure we have the proper tools:
+  OperationSucceeded:=CheckAndGetNeededExecutables;
+
+  // SVN revert FPC directory
+  OperationSucceeded:=FUpdater.RevertFPC;
+
+  // Delete any existing fpc.cfg files
+
+  {$IFDEF UNIX}
+  // Delete any fpc.sh shell scripts
+
+  {$ENDIF UNIX}
+  result:=OperationSucceeded;
+end;
+
+function TInstaller.CleanLazarus: boolean;
+begin
+
+  // SVN revert Lazarus directory
+
+  infoln('Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
+  writeln(FLogFile, 'Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
+
+end;
+
+function TInstaller.CleanLazarusHelp: boolean;
+begin
+
+  // Delete
+
+end;
+
 
 function Tinstaller.GetFPC: boolean;
 {
@@ -1412,27 +1545,8 @@ var
   FPCVersion:string; //Used only in Unix code for now.
   ProcessEx:TProcessEx;
 begin
-  // Link to fpcup itself, with all options as passed when invoking it:
-  if ShortCutNameFpcup<>EmptyStr then
-{$IFDEF MSWINDOWS}
-    CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
-{$ELSE}
-    begin
-    FAllOptions:=FAllOptions+' $*';
-    CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
-    end;
-{$ENDIF MSWINDOWS}
-  if not ModuleEnabled('FPC') then
-  begin
-    result:=true;  //continue with lazarus
-    infoln('FPC installation/update skipped by user.');
-    writeln(FLogFile,'FPC installation/update skipped by user.');
-    exit;
-  end
-  else
-  begin
-    infoln('Module FPC: Getting/compiling FPC...');
-  end;
+  infoln('Module FPC: Getting/compiling FPC...');
+
   writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
   writeln(FLogFile,'FPC URL:                '+FPCURL);
   writeln(FLogFile,'FPC options:            '+FPCOPT);
@@ -1462,7 +1576,6 @@ begin
 
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
-
 
   //Make distclean to clean out any cruft, and speed up svn update
   if OperationSucceeded then
@@ -1753,17 +1866,8 @@ var
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
 begin
-  if not ModuleEnabled('LAZARUS') then
-  begin
-    result:=true;  //continue with whatever we do next
-    infoln('Module LAZARUS: installation/update skipped by user.');
-    writeln(FLogFile,'Module LAZARUS: installation/update skipped by user.');
-    exit;
-  end
-  else
-  begin
-    infoln('Module LAZARUS: Getting/compiling Lazarus...');
-  end;
+  infoln('Module LAZARUS: Getting/compiling Lazarus...');
+
   writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
   writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
   writeln(FLogFile,'Lazarus URL:            '+LazarusURL);
@@ -2144,6 +2248,7 @@ begin
   FBootstrapCompilerName := 'ppcuniversal';
   FFPCPlatform:='x86_64-darwin';
   {$ENDIF Darwin}
+  FClean:=false; //Build, not clean, by default
 
   {$IFDEF MSWINDOWS}
   FExecutableExtension := '.exe';
