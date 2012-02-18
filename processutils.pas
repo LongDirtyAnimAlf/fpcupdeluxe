@@ -178,9 +178,9 @@ begin
       inherited Environment:=FProcessEnvironment.EnvironmentList;
     Options := Options +[poUsePipes, poStderrToOutPut];
     if Assigned(FOnOutput) then
-      FOnOutput(Self,'Executing : '+Executable+' '+ ParametersString+LineEnding);
+      FOnOutput(Self,'Executing : '+Executable+' '+ ParametersString+' (Working dir: '+ CurrentDirectory +')'+ LineEnding);
     if Assigned(FOnOutputM) then
-      FOnOutputM(Self,'Executing : '+Executable+' '+ ParametersString+LineEnding);
+      FOnOutputM(Self,'Executing : '+Executable+' '+ ParametersString+' (Working dir: '+ CurrentDirectory +')'+ LineEnding);
     inherited Execute;
     while Running do
     begin
