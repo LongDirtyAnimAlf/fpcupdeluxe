@@ -2007,7 +2007,7 @@ begin
       ProcessEx.Parameters.Add('LCL_PLATFORM=win32');
       ProcessEx.Parameters.Add('OS_TARGET=win64');
       ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-      ProcessEx.Parameters.Add('bigide'); //do it; no need to run clean as distclean has been run before
+      ProcessEx.Parameters.Add('bigideclean bigide'); //do it; no need to run clean as distclean has been run before
       infoln('Lazarus: running make Win64 bigide (for LCL):');
       // Note: consider this optional; don't fail the function if this fails.
       ProcessEx.Execute;

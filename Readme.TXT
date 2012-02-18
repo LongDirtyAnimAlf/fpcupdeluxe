@@ -32,11 +32,17 @@ sudo aptitude install build-essential subversion unzip
 
 On OSX: only tested with XCode installed; no requirements found
 
-
 How does it work?
 =================
 FPCUp is a fancy batch script written in FPC/Lazarus ;)
+You run it, with options if necessary (see fpcup --help).
+When done, it should have created a Lazarus_trunk shortcut on your desktop (Windows) or shell script in your home directory (Unix/Linux).
+Start this to start your new Lazarus instance.
+FPCUP sets up a separate primary config path to store Lazarus settings separate from other installs.
+You need to run the script/shortcut because it tells your Lazarus where to find that primary config path.
 
+Detailed workflow
+=================
 1. Checking/downloading prerequisites:
 - On Windows, it checks whether make.exe and unzip.exe are present in the binutils directory (default or user-specified).
 If not, it downloads them.
