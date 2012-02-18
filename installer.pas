@@ -421,7 +421,7 @@ begin
     if OperationSucceeded = True then
     begin
       infoln('Going to move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
-      OperationSucceeded:=FileUtil.MoveFile(ExtractedCompiler, BootstrapCompiler);
+      OperationSucceeded:=MoveFile(ExtractedCompiler, BootstrapCompiler);
     end;
     if OperationSucceeded then
     begin
