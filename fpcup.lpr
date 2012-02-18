@@ -62,13 +62,9 @@ begin
   writeln('                       Note: the binutils are copied to the');
   writeln('                       FPC directory for use by FPC. This gives');
   writeln('                       a more standard FPC environment.');
-  {todo: add --clean option that deletes --primary-config-path, fpc.cfg, fpc and lazarus
-  source directories, taking into account --skip and --only - e.g. don't delete lazarus
-  if --skip=lazarus is specified.
-  Leave bootstrap, svn and binutils dirs alone.
-  This will allow the user to clean out his environment to a tabula rasa/initial state.
-  Suggest creating separate module that runs these actions before any other.
-  }
+  writeln(' clean                 Don''t build; clear out all modules');
+  writeln('                       or limit cleaning to certain modules');
+  writeln('                       (see "only" and "skip")');
   writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
@@ -119,6 +115,7 @@ procedure CheckOptions(FInstaller: TInstaller);
 const
   //Parameter names:
   BinutilsDir='binutilsdir';
+  Clean='clean';
   FPCBootstrapDir='fpcbootstrapdir';
   FPCDir='fpcdir';
   FPCURL='fpcURL';
@@ -166,7 +163,7 @@ begin
 
   Application.CaseSensitiveOptions:=false; //Our Windows users will like this.
   ErrorMessage := Application.CheckOptions(
-    'h', Binutilsdir+': '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
+    'h', Binutilsdir+': '+Clean+' '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
     Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
@@ -190,6 +187,11 @@ begin
     writeln('The parameter will be ignored.');
     FInstaller.MakeDirectory:='';
     {$ENDIF MSWINDOWS}
+  end;
+
+  if Application.HasOption(Clean) then
+  begin
+    FInstaller.Clean:=true;
   end;
 
   if Application.HasOption(FPCBootstrapDir) then
@@ -374,19 +376,9 @@ begin
     CheckOptions(FInstaller); //Process command line arguments
 
     // Get/update/compile selected modules
-    if FInstaller.GetFPC=false then
+    if FInstaller.Run=false then
     begin
-      writeln('FPC retrieval/compilation failed.');
-      ShowErrorHints;
-    end;
-    if FInstaller.GetLazarus=false then
-    begin
-      writeln('Lazarus retrieval/compilation failed.');
-      ShowErrorHints;
-    end;
-    if FInstaller.GetLazarusHelp=false then
-    begin
-      writeln('Lazarus help retrieval/compilation failed.');
+      writeln('fpcup failed.');
       ShowErrorHints;
     end;
   finally
@@ -394,4 +386,4 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
+
