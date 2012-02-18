@@ -90,9 +90,84 @@ Status
 ======
 Still in development, but does work to keep my development copies of FPC fixes_2.6 and Lazarus up to date on Windows.
 
-Busy adapting it to OSX.
-Patches/updates welcome, pleas see 
+
+Contact
+=======
+For reportiing bugs, suggestions, patches.
+- Lazarus forum thread:
+http://lazarus.freepascal.org/index.php/topic,15701fpcup
+- Bitbucket issue tracker
 https://bitbucket.org/reiniero/fpcup/issues
 
-Lazarus forum thread:
-http://lazarus.freepascal.org/index.php/topic,15701
+Help output:
+============
+A recent fpcup --help shows this:
+
+fpcup
+An FPC/Lazarus downloader/updater/installer
+Open source freeware (modified LGPL/BSD), see:
+https://bitbucket.org/reiniero/fpcup
+
+This program will download the FPC and Lazarus sources
+from the source Subversion/SVN repositories,
+compile, and install.
+Result: you get a fresh, up-to-date Lazarus/FPC installation.
+fpcup compiled with: FPC 2.6.1 on 2012/02/18 19:10:16
+for CPU: i386 on Win32
+
+fpcup --<options>
+Options are not required; they include:
+ help                  Show this text
+ binutilsdir=<dir>     Windows only:
+                       Directory where make, patch etc
+                       (the binutils) are located. If make does not
+                       exist, binutils will be downloaded there.
+                       Default c:\development\fpcbootstrap\
+                       Note: the binutils are copied to the
+                       FPC directory for use by FPC. This gives
+                       a more standard FPC environment.
+ clean                 Don't build; clear out all modules
+                       or limit cleaning to certain modules
+                       (see "only" and "skip")
+ fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC
+                       sources. Specify location with this option; if no
+                       compiler found here, FPCUp will download one there.
+                       Default: c:\development\fpcbootstrap\
+ fpcdir=<dir>          Target FPC dir, default c:\development\fpc\
+ fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
+                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
+ fpcOPT=<options>      Options passed on to the fpc make as OPT=options.
+ fpcrevision=<number>  Revert to fpc svn revision <number>
+ fpcuplinkname=<name>  Name of the shortcut to the fpcup script.
+                       On Windows: a desktop shortcut.
+                       On other systems: a shell script in your home directory.
+                       If empty specified, no shortcut will be produced.
+                       Default: fpcup_update
+                         or <lazlinkname>_update if lazlinkname specified
+ lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\
+ lazlinkname=<name>    Name of the shortcut to the Lazarus install.
+                       On Windows: a desktop shortcut.
+                       On other systems: a shell script in your home directory.
+                       If empty specified, no shortcut will be produced.
+                       Default: Lazarus_trunk
+ lazrevision=<number>  Revert to lazarus svn revision <number>
+ lazURL=<URL>          SVN URL from which to download; default: 
+                       trunk (newest version):
+                       http://svn.freepascal.org/svn/lazarus/trunk
+ lazOPT=<options>      Options passed on to the lazarus make as OPT=options.
+ noconfirm             No confirmation asked. For batch operation. 
+ only=<values>         update and build only the modules specified.
+                       The module list is separated by commas and can contain:
+                       FPC,lazarus,bigide,wincrossx64,doceditor,
+                       lhelp,lazdatadesktop
+ primary-config-path=<dir>
+                       Analogous to Lazarus primary-config-path parameter.
+                       Determines where fpcup will create or use as primary
+                       configuration path for the Lazarus it installs/updates.
+                       Default: empty; then a OS dependent configuration
+                       directory is used.
+ skip=<values>         Do not update or build modules.
+                       The module list is separated by commas.
+                       See "only" for accepted values. 
+ verbose               Show output from svn and make
+
