@@ -19,9 +19,16 @@ Prerequisites
 On Windows: should be none.
 If needed, this tool will download an svn client, the required binutils (make.exe etc) and a bootstrap FPC compiler for you.
 
-On Linux/OSX: the binutils (make etc), and an svn client.
-E.g. on Debian:
-aptitude install build-essential subversion
+On Linux:
+- the binutils (make etc); e.g. in a package called build-essential
+- bunzip2 (probably present in most distributions)
+- unzip
+- subversion client
+E.g. on Debian or Ubuntu, do something like:
+sudo aptitude install build-essential subversion unzip
+
+On OSX: only tested with XCode installed; no requirements found
+
 
 How does it work?
 =================
