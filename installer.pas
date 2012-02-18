@@ -1983,42 +1983,10 @@ begin
     infoln('Created Lazarus primary config directory: '+LazarusPrimaryConfigPath);
   end;
 
-  {$IFDEF MSWINDOWS}
-  //todo: find out what crosscompilers we can install on linux/osx
   if OperationSucceeded then
   begin
-    if not ModuleEnabled('WINCROSSX64') then
-    begin
-      infoln('Module WINCROSSX64: skipped by user. Not building 64 bit LCL.');
-      writeln(FLogFile,'Module WINCROSSX64: skipped by user. Not building 64 bit LCL.s');
-    end
-    else
-    begin
-      // 64 bit crosscompiler. We cheat a bit by compiling the big IDE in 64 bit mode
-      // which will compile all dependencies, including LCL.
-      // Note: make distclean has been run; if not, make bigideclean should have been run.
-      ProcessEx.Executable := FMake;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
-      ProcessEx.Parameters.Clear;
-      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      ProcessEx.Parameters.Add('LCL_PLATFORM=win32');
-      ProcessEx.Parameters.Add('OS_TARGET=win64');
-      ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-      ProcessEx.Parameters.Add('bigideclean bigide'); //do it; no need to run clean as distclean has been run before
-      infoln('Lazarus: running make Win64 bigide (for LCL):');
-      // Note: consider this optional; don't fail the function if this fails.
-      ProcessEx.Execute;
-      if ProcessEx.ExitStatus<> 0 then infoln('Problem compiling 64 bit LCL; continuing regardless.');
-    end;
-  end;
-  {$ENDIF MSWINDOWS}
-
-  if OperationSucceeded then
-  begin
-    // Make clean all (should include lcl & ide)
+    // Make all (should include lcl & ide)
+    // distclean was already run; otherwise specify make clean all
     ProcessEx.Executable := FMake;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
     ProcessEx.Parameters.Clear;
@@ -2029,9 +1997,8 @@ begin
     ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
     if LazarusOPT<>'' then
       ProcessEx.Parameters.Add('OPT='+LazarusOPT);
-    ProcessEx.Parameters.Add('clean');
     ProcessEx.Parameters.Add('all');
-    infoln('Lazarus: running make clean all:');
+    infoln('Lazarus: running make all:');
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
     begin
@@ -2092,37 +2059,9 @@ begin
   end;
 
   if OperationSucceeded then
-    if (ModuleEnabled('BIGIDE')=false) and (ModuleEnabled('LHELP')=false) then
-    begin
-      OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('Module BIGIDE: skipped by user.');
-      writeln(FLogFile,'Module BIGIDE: skipped by user.');
-    end
-    else
-    begin
-      if ModuleEnabled('BIGIDE')=false then
-      begin
-        infoln('Module BIGIDE: required by module: LHELP');
-        writeln(FLogFile,'Module BIGIDE: required by module: LHELP');
-      end;
-      // Make bigide: ide with additional packages as specified by user (in primary config path?)
-      // this should also make the lhelp package needed for CHM Help.
-      ProcessEx.Executable := FMake;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
-      ProcessEx.Parameters.Clear;
-      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
-      ProcessEx.Parameters.Add('--directory='+LazarusDirectory+'');
-      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      ProcessEx.Parameters.Add('bigide');
-      infoln('Lazarus: running make bigide:');
-      ProcessEx.Execute;
-      if ProcessEx.ExitStatus <> 0 then
-        OperationSucceeded := False;
-  end;
-
-  if OperationSucceeded then
   begin
+    // Right now, we have a minimally working Lazarus directory, enough
+    // to justify creating a shortcut to it.
     // For Windows, a desktop shortcut. For Unixy systems, a script in ~
     {$IFDEF MSWINDOWS}
     if ShortCutName<>EmptyStr then
@@ -2153,7 +2092,102 @@ begin
     {$ENDIF UNIX}
   end;
 
+  {$IFDEF MSWINDOWS}
+  //todo: find out what crosscompilers we can install on linux/osx
   if OperationSucceeded then
+  begin
+    if not ModuleEnabled('WINCROSSX64') then
+    begin
+      infoln('Module WINCROSSX64: skipped by user. Not building 64 bit LCL.');
+      writeln(FLogFile,'Module WINCROSSX64: skipped by user. Not building 64 bit LCL.s');
+    end
+    else
+    begin
+      // 64 bit crosscompiler. We rely on the fact that the LCL and a working lazbuild
+      // is present. NB: don't know if a working 32 bit LCL is actually required, but
+      // it might well be.
+      // Note: we're cheating as we're rebuilding Lazarus to 64 bit, which drags in the LCL.
+      // Afterwards, rebuild as 32 bit. Reason for 32 bit: we can use components not available
+      // for x64.
+      ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+      ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+      ProcessEx.Parameters.Add('--cpu=x86_64');
+      ProcessEx.Parameters.Add('--operating-system==win64');
+      ProcessEx.Parameters.Add('--widgetset=win32');
+      ProcessEx.Parameters.Add('--build-all'); //build ide/everything
+      ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
+      infoln('Lazarus: compiling Win64 ide (for LCL):');
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus <> 0 then
+      begin
+        infoln('Lazarus: error compiling 64 bit IDE and LCL.');
+        writeln(FLogFile, 'Lazarus: error compiling 64 bit IDE and LCL.');
+        OperationSucceeded := False;
+      end;
+
+      if OperationSucceeded then
+      begin
+        ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
+        ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory);
+        ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+        ProcessEx.Parameters.Add('--cpu=i386');
+        ProcessEx.Parameters.Add('--operating-system==win32');
+        ProcessEx.Parameters.Add('--widgetset=win32');
+        ProcessEx.Parameters.Add('--build-all'); //build ide/everything
+        ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
+        infoln('Lazarus: compiling 32 bit IDE (after 64 bit compile):');
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus <> 0 then
+        begin
+          infoln('Lazarus: error compiling 32 bit IDE and LCL (after 64 bit compile).');
+          writeln(FLogFile, 'Lazarus: error compiling 64 bit IDE and LCL (after 64 bit compile).');
+          OperationSucceeded := False;
+        end;
+      end;
+    end;
+  end;
+  {$ENDIF MSWINDOWS}
+
+  if OperationSucceeded then
+    if (ModuleEnabled('BIGIDE')=false) and (ModuleEnabled('LHELP')=false) then
+    begin
+      //todo: find out if lhelp support can be realized by just compiling
+      //package chmhelppkg in some way
+      OperationSucceeded:=true;  //continue with whatever we do next
+      infoln('Module BIGIDE: skipped by user.');
+      writeln(FLogFile,'Module BIGIDE: skipped by user.');
+    end
+    else
+    begin
+      if ModuleEnabled('BIGIDE')=false then
+      begin
+        infoln('Module BIGIDE: required by module: LHELP');
+        writeln(FLogFile,'Module BIGIDE: required by module: LHELP');
+      end;
+      // Make bigide: ide with additional packages as specified by user (in primary config path?)
+      // this should also make the lhelp package needed for CHM Help.
+      ProcessEx.Executable := FMake;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
+      ProcessEx.Parameters.Add('--directory='+LazarusDirectory+'');
+      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      ProcessEx.Parameters.Add('bigide');
+      infoln('Lazarus: running make bigide:');
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus <> 0 then
+      begin
+        OperationSucceeded := False;
+      end;
+  end;
+
+
+  if OperationSucceeded then
+  begin
     if not ModuleEnabled('LHELP') then
     begin
       OperationSucceeded:=true;  //continue with whatever we do next
@@ -2179,8 +2213,13 @@ begin
       infoln('Lazarus: compiling lhelp help viewer:');
       ProcessEx.Execute;
       if ProcessEx.ExitStatus <> 0 then
+      begin
+        infoln('Lazarus: error compiling lhelp help viewer.');
+        writeln(FLogFile, 'Lazarus: error compiling lhelp help viewer.');
         OperationSucceeded := False;
+      end;
     end;
+  end;
 
   if OperationSucceeded then
     if not ModuleEnabled('LAZDATADESKTOP') then
