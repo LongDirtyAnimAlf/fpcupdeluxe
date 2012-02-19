@@ -63,6 +63,9 @@ uses
     //Mostly for shortcut code
     ,windows, shlobj {for special folders}, ActiveX, ComObj
   {$ENDIF MSWINDOWS}
+  {$IFDEF UNIX}
+  ,baseunix,processutils
+  {$ENDIF UNIX}
   ;
 
 {$IFDEF MSWINDOWS}
@@ -300,6 +303,7 @@ begin
   end;
 end;
 
+{$IFDEF MSWINDOWS}
 function GetLocalAppDataPath: string;
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
@@ -308,6 +312,7 @@ begin
   SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
   result:=AppDataPath;
 end;
+{$ENDIF MSWINDOWS}
 
 procedure infoln(Message: string);
 begin
@@ -344,7 +349,7 @@ var
   Output: string;
 begin
   {$IFDEF UNIX}
-  ExecuteCommandHidden('which',Executable,Output,Verbose);
+  ExecuteCommandHidden('which',Executable,Output,false);
   //Remove trailing LF(s) and other control codes:
   while (length(output)>0) and (ord(output[length(output)])<$20) do
     delete(output,length(output),1);
@@ -380,4 +385,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+
