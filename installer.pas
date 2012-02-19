@@ -2303,56 +2303,57 @@ begin
     end
     else
     begin
-      // 64 bit crosscompiler. We rely on the fact that the LCL and a working lazbuild
-      // is present. NB: don't know if a working 32 bit LCL is actually required, but
-      // it might well be.
-      // Note: we're cheating as we're rebuilding Lazarus to 64 bit, which drags in the LCL.
-      // Afterwards, rebuild as 32 bit. Reason for 32 bit: we can use components not available
-      // for x64.
-      // Note: a more elegant solution might be this:
-      // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
-      // make lcl LCL_PLATFORM=win64 PP=ppcrossx64.exe CPU_TARGET=x86_64 OS_TARGET=win64
-      // or probably this would be sufficient as cross compiler should be picked up
-      // make lcl LCL_PLATFORM=win64 CPU_TARGET=x86_64 OS_TARGET=win64
-      // or, a bit more detail
-      // make packager/registration lazutils lcl
+      // 64 bit LCL for use in crosscompiling to 64 bit windows
+      // Baed on Wiki on crosscompiling and Lazarus mailing list
+      // message by Sven Barth, 19 February 2012
+      // Note: we use LCL_PLATFORM=win32 because it's the 32 bit widgetset
+      // We could have combined the 2 make statements but it seems quite complex.
       // alternatives:
       // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
-      ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-      ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory);
+      ProcessEx.Executable := FMake;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
       ProcessEx.Parameters.Clear;
-      ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-      ProcessEx.Parameters.Add('--cpu=x86_64');
-      ProcessEx.Parameters.Add('--operating-system==win64');
-      ProcessEx.Parameters.Add('--widgetset=win32'); //Still a win32 widgetset, even on 64 bit windows
-      ProcessEx.Parameters.Add('--build-all'); //build ide/everything
-      ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
-      infoln('Lazarus: compiling Win64 ide (for LCL):');
+      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
+      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+      ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
+      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      ProcessEx.Parameters.Add('LCL_PLATFORM=win32'); //windows 32 bit widgetset, even on 64 bit windows
+      ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
+      ProcessEx.Parameters.Add('OS_TARGET=win64');
+      if LazarusOPT<>'' then
+        ProcessEx.Parameters.Add('OPT='+LazarusOPT);
+      ProcessEx.Parameters.Add('distclean');
+      infoln('Lazarus: running make distclean for 64 bit LCL:');
       ProcessEx.Execute;
       if ProcessEx.ExitStatus <> 0 then
       begin
-        infoln('Lazarus: error compiling 64 bit IDE and LCL.');
-        writeln(FLogFile, 'Lazarus: error compiling 64 bit IDE and LCL.');
+        infoln('Lazarus: error running make distclean for 64 bit LCL.');
+        writeln(FLogFile, 'Lazarus: error running make distclean for 64 bit LCL.');
         OperationSucceeded := False;
-      end;
-
-      if OperationSucceeded then
+      end
+      else
       begin
-        ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
-        ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory);
+        ProcessEx.Executable := FMake;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
         ProcessEx.Parameters.Clear;
-        ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-        ProcessEx.Parameters.Add('--cpu=i386');
-        ProcessEx.Parameters.Add('--operating-system==win32');
-        ProcessEx.Parameters.Add('--widgetset=win32');
-        ProcessEx.Parameters.Add('--build-all'); //build ide/everything
-        ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
-        infoln('Lazarus: compiling 32 bit IDE (after 64 bit compile):');
+        ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
+        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+        ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
+        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        ProcessEx.Parameters.Add('LCL_PLATFORM=win32'); //windows 32 bit widgetset, even on 64 bit windows
+        ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
+        ProcessEx.Parameters.Add('OS_TARGET=win64');
+        if LazarusOPT<>'' then
+          ProcessEx.Parameters.Add('OPT='+LazarusOPT);
+        ProcessEx.Parameters.Add('packager/registration lazutils lcl');
+        infoln('Lazarus: compiling 64 bit LCL:');
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
         begin
-          infoln('Lazarus: error compiling 32 bit IDE and LCL (after 64 bit compile).');
-          writeln(FLogFile, 'Lazarus: error compiling 64 bit IDE and LCL (after 64 bit compile).');
+          infoln('Lazarus: error compiling 64 bit LCL.');
+          writeln(FLogFile, 'Lazarus: error compiling 64 bit LCL.');
           OperationSucceeded := False;
         end;
       end;
@@ -2578,4 +2579,4 @@ begin
 end;
 
 end.
-
+
