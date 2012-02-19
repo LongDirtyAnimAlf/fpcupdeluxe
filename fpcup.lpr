@@ -46,7 +46,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   Classes,Forms,Interfaces {these 2 for application options},
   installer,
   svnclient, updatelazconfig, httpsend, ftpsend,sysutils,processutils,
-fpcuputil;
+fpcuputil, m_crossinstaller, m_crosswin64;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;

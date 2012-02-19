@@ -119,16 +119,6 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
       </Unit6>
-      <Unit8>
-        <Filename Value="m_crosswin64.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crosswin64"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="m_crossinstaller.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crossinstaller"/>
-      </Unit9>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
