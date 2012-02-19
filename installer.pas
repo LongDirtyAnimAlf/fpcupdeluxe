@@ -1289,7 +1289,7 @@ begin
       CreateDesktopShortCut(paramstr(0),AllOptions,ShortCutNameFpcup);
      {$ELSE}
       FAllOptions:=FAllOptions+' $*';
-      CreateHomeStartLink(paramstr(0),FAllOptions,ShortCutNameFpcup);
+      CreateHomeStartLink('"'+paramstr(0)+'"',FAllOptions,ShortCutNameFpcup);
      {$ENDIF MSWINDOWS}
     end;
 
@@ -1716,8 +1716,8 @@ var
   i:integer;
   s,s2:string;
 const
-  COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx86_64'+
-    'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx86_64';
+  COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
+    'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
 begin
   infoln('Module FPC: Getting/compiling FPC...');
 
