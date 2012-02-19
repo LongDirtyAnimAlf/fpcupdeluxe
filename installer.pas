@@ -1855,7 +1855,6 @@ begin
   begin
     // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
     // If this fails, Lazarus compilation will fail...
-    BinPath := ExtractFilePath(FInstalledCompiler);
     FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
     if FileExists(FPCScript) then
     begin
