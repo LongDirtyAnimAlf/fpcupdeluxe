@@ -1,5 +1,5 @@
 { Lazarus/FPC source downloader unit
-Copyright (C) 2012 Reinier Olislagers
+Copyright (C) 2012 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by

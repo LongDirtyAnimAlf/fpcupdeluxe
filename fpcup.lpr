@@ -1,5 +1,5 @@
 { FPC/Lazarus installer/updater
-Copyright (C) 2012 Reinier Olislagers
+Copyright (C) 2012 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -45,7 +45,8 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,Forms,Interfaces {these 2 for application options},
   installer,
-  svnclient, updatelazconfig, httpsend, ftpsend,sysutils,processutils;
+  svnclient, updatelazconfig, httpsend, ftpsend,sysutils,processutils,
+fpcuputil;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;

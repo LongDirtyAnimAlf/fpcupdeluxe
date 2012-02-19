@@ -1,5 +1,5 @@
 { Classes for using svn commands
-  Copyright (C) 2012 Reinier Olislagers
+  Copyright (C) 2012 Reinier Olislagers, Ludo Brands
 
   Based on svncommand unit
   Copyright (C) 2007 Vincent Snijders vincents@freepascal.org,

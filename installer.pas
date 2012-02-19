@@ -1,5 +1,5 @@
 { Installer unit for FPCUp
-Copyright (C) 2012 Reinier Olislagers
+Copyright (C) 2012 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -74,8 +74,8 @@ type
     FMakeDir: string;
     {$ENDIF}
     FSkipModules: string;
-    //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
+    //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FTar: string; //Location or name of tar executable
     FUpdater: TUpdater;
     FUnzip: string; //Location or name of unzip executable
@@ -203,7 +203,7 @@ uses
 {$IFDEF UNIX}
   ,baseunix
 {$ENDIF UNIX}
-  ,updatelazconfig
+  ,updatelazconfig, fpcuputil
   ;
 
 procedure infoln(Message: string);
