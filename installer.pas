@@ -1850,6 +1850,40 @@ begin
     {$ENDIF UNIX}
   end;
 
+  {$IFDEF UNIX}
+  if OperationSucceeded then
+  begin
+    // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+    // If this fails, Lazarus compilation will fail...
+    BinPath := ExtractFilePath(FInstalledCompiler);
+    FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
+    if FileExists(FPCScript) then
+    begin
+      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
+      sysutils.DeleteFile(FPCScript);
+    end;
+    AssignFile(TxtFile,FPCScript);
+    Rewrite(TxtFile);
+    writeln(TxtFile,'#!/bin/sh');
+    writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+    writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+    writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+    writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
+         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
+         IncludeTrailingPathDelimiter(BinPath)+' $*');
+    CloseFile(TxtFile);
+    OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+    if OperationSucceeded then
+    begin
+      infoln('Created launcher script for FPC:'+FPCScript);
+    end
+    else
+    begin
+      infoln('Error creating launcher script for FPC:'+FPCScript);
+    end;
+  end;
+  {$ENDIF UNIX}
+
   // Let everyone know of our shiny new CompilerName:
   if OperationSucceeded then
   begin
@@ -1984,39 +2018,6 @@ begin
     end;
   end;
 
-  {$IFDEF UNIX}
-  if OperationSucceeded then
-  begin
-    // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
-    // If this fails, Lazarus compilation will fail...
-    BinPath := ExtractFilePath(FInstalledCompiler);
-    FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
-    if FileExists(FPCScript) then
-    begin
-      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
-      sysutils.DeleteFile(FPCScript);
-    end;
-    AssignFile(TxtFile,FPCScript);
-    Rewrite(TxtFile);
-    writeln(TxtFile,'#!/bin/sh');
-    writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
-    writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
-    writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-    writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
-         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
-         IncludeTrailingPathDelimiter(BinPath)+' $*');
-    CloseFile(TxtFile);
-    OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
-    if OperationSucceeded then
-    begin
-      infoln('Created launcher script for FPC:'+FPCScript);
-    end
-    else
-    begin
-      infoln('Error creating launcher script for FPC:'+FPCScript);
-    end;
-  end;
-  {$ENDIF UNIX}
   if OperationSucceeded then
     writeln(FLogFile,'FPC: update succeeded at revision number ', AfterRevision);
   ProcessEx.Free;
