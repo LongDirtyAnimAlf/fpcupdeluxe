@@ -54,6 +54,8 @@ type
     FBootstrapCompilerFTP: string;
     FBootstrapCompilerName: string; //OS specific compiler name (e.g. ppcuniversal for OSX)
     FClean: boolean;
+    FCrossCPU_Target: string;
+    FCrossOS_Target: string;
     FFPCOPT: string;
     FLazarusOPT: string;
     FOnlyModules: string;
@@ -97,6 +99,8 @@ type
     function GetCompilerName: string;
     function GetFpcDirectory: string;
     function GetFPCRevision: string;
+    function GetFPCTarget: string;
+    function GetFPCVersion: string;
     function GetFPCUrl: string;
     function GetLazarusRevision: string;
     procedure LogError(Sender:TProcessEx;IsException:boolean);
@@ -104,6 +108,8 @@ type
     function MoveFile(const SrcFilename, DestFilename: string): boolean;
     // Moves file if it exists, overwriting destination file
     procedure SetAllOptions(AValue: string);
+    procedure SetCrossCPU_Target(AValue: string);
+    procedure SetCrossOS_Target(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
     procedure SetLazarusDesiredRevision(AValue: string);
@@ -153,6 +159,8 @@ type
     // Clean up Lazarus environment
     function CleanLazarusHelp: boolean;
     // Clean up help environment
+    property CrossCPU_Target:string read FCrossCPU_Target write SetCrossCPU_Target;
+    property CrossOS_Target:string read FCrossOS_Target write SetCrossOS_Target;
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
     property FPCOPT: string read FFPCOPT write SetFPCOPT;
@@ -994,6 +1002,88 @@ begin
   Result := FUpdater.FPCRevision;
 end;
 
+function TInstaller.GetFPCTarget: string;
+var
+  processorname,os:string;
+begin
+  processorname:='notfound';
+  os:=processorname;
+  {$ifdef cpui386}
+       processorname:='i386';
+  {$endif cpui386}
+  {$ifdef cpum68k}
+       processorname:='m68k';
+  {$endif cpum68k}
+  {$ifdef cpualpha}
+       processorname:='alpha';
+  {$endif cpualpha}
+  {$ifdef cpupowerpc}
+       processorname:='powerpc';
+  {$endif cpupowerpc}
+  {$ifdef cpupowerpc64}
+       processorname:='powerpc64';
+  {$endif cpupowerpc64}
+  {$ifdef cpuarm}
+    {$ifdef fpc_armeb}
+       processorname:='armeb';
+    {$else}
+       processorname:='arm';
+    {$endif fpc_armeb}
+  {$endif cpuarm}
+  {$ifdef cpusparc}
+       processorname:='sparc';
+  {$endif cpusparc}
+  {$ifdef cpux86_64}
+       processorname:='x86_64';
+  {$endif cpux86_64}
+  {$ifdef cpuia64}
+       processorname:='ia64';
+  {$endif cpuia64}
+  {$ifdef darwin}
+       os:='darwin';
+  {$endif darwin}
+  {$ifdef FreeBSD}
+       os:='freebsd';
+  {$endif FreeBSD}
+  {$ifdef linux}
+       os:='linux';
+  {$endif linux}
+  {$ifdef netbsd}
+       os:='netbsd';
+  {$endif netbsd}
+  {$ifdef openbsd}
+       os:='openbsd';
+  {$endif openbsd}
+  {$ifdef os2}
+       os:='os2';
+  {$endif os2}
+  {$ifdef solaris}
+       os:='solaris';
+  {$endif solaris}
+  {$ifdef wince}
+       os:='wince';
+  {$endif wince}
+  {$ifdef win32}
+       os:='win32';
+  {$endif win32}
+  {$ifdef win64}
+       os:='win64';
+  {$endif win64}
+  if FCrossCPU_Target<>'' then
+    processorname:= FCrossCPU_Target;
+  if FCrossOS_Target<>'' then
+    os:=FCrossOS_Target;
+  result:=processorname+'-'+os;
+end;
+
+function TInstaller.GetFPCVersion: string;
+begin
+  ExecuteCommandHidden(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler'+DirectorySeparator+'ppc1','-iV',result,FVerbose);
+  //Remove trailing LF(s) and other control codes:
+  while (length(result)>0) and (ord(result[length(result)])<$20) do
+    delete(result,length(result),1);
+end;
+
 function TInstaller.GetFPCUrl: string;
 begin
   Result := FUpdater.FPCURL;
@@ -1294,6 +1384,18 @@ begin
   FAllOptions:=AValue;
 end;
 
+procedure TInstaller.SetCrossCPU_Target(AValue: string);
+begin
+  if FCrossCPU_Target=AValue then Exit;
+  FCrossCPU_Target:=AValue;
+end;
+
+procedure TInstaller.SetCrossOS_Target(AValue: string);
+begin
+  if FCrossOS_Target=AValue then Exit;
+  FCrossOS_Target:=AValue;
+end;
+
 procedure TInstaller.SetFPCDesiredRevision(AValue: string);
 begin
   FUpdater.FPCRevision:=AValue;
@@ -1333,7 +1435,7 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   // Default FPC compiler installed by make:
-  FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+'fpc';
+  FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+GetFPCTarget+DirectorySeparator+'fpc';
   if FileExistsUTF8(FInstalledCompiler+'.sh') then
   begin
     //Use our proxy if it is installed
@@ -1491,10 +1593,6 @@ begin
     // SVN revert FPC directory
     FUpdater.RevertFPC;
 
-    { todo: build faq 2.5:
-    On Windows, the makefiles don't properly erase fpmake.exe on distclean... recursively delete fpmake
-    }
-
     // Delete any existing fpc.cfg files
     Sysutils.DeleteFile(ExtractFilePath(FInstalledCompiler)+'fpc.cfg');
 
@@ -1612,8 +1710,13 @@ var
   OperationSucceeded: boolean;
   TxtFile:text; //Used only in Unix code for now.
   SearchRec:TSearchRec;
-  FPCVersion:string; //Used only in Unix code for now.
+  FPCVersion,FPCTarget:string; //Used only in Unix code for now.
   ProcessEx:TProcessEx;
+  i:integer;
+  s,s2:string;
+const
+  COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx86_64'+
+    'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx86_64';
 begin
   infoln('Module FPC: Getting/compiling FPC...');
 
@@ -1685,6 +1788,50 @@ begin
   begin
     // Make all/install, using bootstrap compiler.
     // Make all should use generated compiler internally for unit compilation
+    {$IFDEF UNIX}
+    // the long way: make all, see where to install, install
+    ProcessEx.Executable := FMake;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('all');
+    infoln('Running make all for FPC:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
+    FPCVersion:=GetFPCVersion;
+    FPCTarget:=GetFPCTarget;
+    BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+FPCTarget;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
+    ProcessEx.Parameters.Add('install');
+    infoln('Running make install for FPC:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
+    // copy the freshly created compiler to the bin/$fpctarget directory so that
+    // fpc can find it
+    if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
+      repeat
+        s:=SearchRec.Name;
+        if (length(s)>4) and (pos(s,COMPILERNAMES) >0) then  //length(s)>4 skips ppc3
+          begin
+          OperationSucceeded:=OperationSucceeded and
+            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/'+s,
+             IncludeTrailingPathDelimiter(BinPath)+s);
+          OperationSucceeded:=OperationSucceeded and
+            (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
+          end;
+      until FindNext(SearchRec)<>0;
+    // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
+    DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
+    fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
+    pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
+    {$ELSE UNIX}
     ProcessEx.Executable := FMake;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
     ProcessEx.Parameters.Clear;
@@ -1699,23 +1846,6 @@ begin
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       OperationSucceeded := False;
-    {$IFDEF UNIX}
-    // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
-    // need to find $fpcversion first
-    FPCVersion:='';
-    if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/*',faDirectory,SearchRec)=0 then
-      repeat
-        if (SearchRec.Attr and faDirectory) <>0 then
-          begin
-          FPCVersion:=SearchRec.Name;
-          if (FPCVersion<>'') and (FPCVersion[1]>'1') and (FPCVersion[1]<='9') then
-            break;
-          end;
-      until FindNext(SearchRec)<>0;
-    //if not found will point to wrong dir
-    DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
-    fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
-    pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
     {$ENDIF UNIX}
   end;
 
@@ -1768,15 +1898,21 @@ begin
       ProcessEx.Executable := FMake;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
       ProcessEx.Parameters.Clear;
-      infoln('Running Make clean all (FPC crosscompiler):');
+      infoln('Running Make all (FPC crosscompiler):');
+      //Note: make install+make crossinstall work on command line
+      //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
+      //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
+      // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
+      //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
+      // => gives bin\i386-win32\ppcrossx64.exe
+      //but not in this program..
       ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      // Note: running distclean/clean only cleans for the selected architecture.
-      // That's why we runn clean here as well.
-      ProcessEx.Parameters.Add('clean all');
+      //putting all before target might help!?!?
+      ProcessEx.Parameters.Add('all');
       ProcessEx.Parameters.Add('OS_TARGET=win64');
       ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
       if FFPCOPT<>'' then
@@ -1796,6 +1932,7 @@ begin
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
         ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        //putting crossinstall before target might help!?!?
         ProcessEx.Parameters.Add('crossinstall');
         ProcessEx.Parameters.Add('OS_TARGET=win64'); //cross compile for different OS...
         ProcessEx.Parameters.Add('CPU_TARGET=x86_64'); // and processor.
@@ -1831,12 +1968,12 @@ begin
         OperationSucceeded := False;
     {$IFDEF UNIX}
     {$IFDEF cpuarmel}
-    // Need to add multiarch library search path
-    AssignFile(TxtFile,FPCCfg);
-    Append(TxtFile);
-    Writeln(TxtFile,'# multiarch library search path');
-    Writeln(TxtFile,'-Fl/usr/lib/$fpctarget-*');
-    CloseFile(TxtFile);
+      // Need to add multiarch library search path
+      AssignFile(TxtFile,FPCCfg);
+      Append(TxtFile);
+      Writeln(TxtFile,'# multiarch library search path');
+      Writeln(TxtFile,'-Fl/usr/lib/$fpctarget-*');
+      CloseFile(TxtFile);
     {$ENDIF armelcpu}
     {$ENDIF UNIX}
     end
@@ -1865,8 +2002,7 @@ begin
     writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
     writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
     writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
-         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -Xp',
-         IncludeTrailingPathDelimiter(FPCDirectory),'compiler/ -FD'+
+         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
          IncludeTrailingPathDelimiter(BinPath)+' $*');
     CloseFile(TxtFile);
     OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
@@ -2149,7 +2285,7 @@ begin
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add('--cpu=x86_64');
       ProcessEx.Parameters.Add('--operating-system==win64');
-      ProcessEx.Parameters.Add('--widgetset=win32'); //or win64?
+      ProcessEx.Parameters.Add('--widgetset=win32');
       ProcessEx.Parameters.Add('--build-all'); //build ide/everything
       ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
       infoln('Lazarus: compiling Win64 ide (for LCL):');
@@ -2403,4 +2539,4 @@ begin
 end;
 
 end.
-
+

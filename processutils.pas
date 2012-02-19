@@ -174,6 +174,7 @@ begin
     FExitStatus:=-1;
     FExceptionInfoStrings.Clear;
     FOutputStrings.Clear;
+    FOutStream.Clear;
     if Assigned(FProcessEnvironment) then
       inherited Environment:=FProcessEnvironment.EnvironmentList;
     Options := Options +[poUsePipes, poStderrToOutPut];
