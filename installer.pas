@@ -614,35 +614,75 @@ end;
 function TInstaller.DownloadHTTP(URL, TargetFile: string): boolean;
   // Download file. If ncessary deal with SourceForge redirection, thanks to
   // Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
-  // todo: check sourceforge redirection code: does it actually work?
 const
-  SourceForgeProjectPart = '//sourceforge.net/projects/';
-  SourceForgeFilesPart = '/files/';
+  SFProjectPart = '//sourceforge.net/projects/';
+  SFFilesPart = '/files/';
+  SFDownloadPart ='/download';
   MaxRetries = 3;
 var
   Buffer: TMemoryStream;
   HTTPGetResult: boolean;
   i, j: integer;
   HTTPSender: THTTPSend;
+  IsSFDownload: boolean;
+  SFProjectBegin: integer;
   RetryAttempt: integer;
-  SourceForgeProject: string;
+  SFDirectory: string; //Sourceforge directory
+  SFDirectoryBegin: integer;
+  SFFileBegin: integer;
+  SFFilename: string; //Sourceforge name of file
+  SFProject: string;
 begin
   Result := False;
-  // Detect SourceForge download
-  i := Pos(SourceForgeProjectPart, URL);
-  j := Pos(SourceForgeFilesPart, URL);
+  IsSFDownload:=false;
 
-
-  // Rewrite URL if needed for Sourceforge download redirection
-  if (i > 0) and (j > 0) then
+  // Detect SourceForge download; e.g. from URL
+  //          1         2         3         4         5         6         7         8         9
+  // 1234557890123456789012345578901234567890123455789012345678901234557890123456789012345578901234567890
+  // http://sourceforge.net/projects/base64decoder/files/base64decoder/version%202.0/b64util.zip/download
+  //                                 ^^^project^^^       ^^^directory............^^^ ^^^file^^^
+  i:=Pos(SFProjectPart, URL);
+  if i>0 then
   begin
-    SourceForgeProject := Copy(URL, i + Length(SourceForgeProjectPart), j);
-    infoln('project is *' + SourceForgeProject + '*');
+    // Possibly found project; now extract project, directory and filename parts.
+    SFProjectBegin:=i+Length(SFProjectPart);
+    j := PosEx(SFFilesPart, URL, SFProjectBegin);
+    if (j>0) then
+    begin
+      SFProject:=Copy(URL, SFProjectBegin, j-SFProjectBegin);
+      SFDirectoryBegin:=PosEx(SFFilesPart, URL, SFProjectBegin)+Length(SFFilesPart);
+      if SFDirectoryBegin>0 then
+      begin
+        // Find file
+        // URL might have trailing arguments... so: search for first
+        // /download coming up from the right, but it should be after
+        // /files/
+        i:=RPos(SFDownloadPart, URL);
+        // Now look for previous / so we can make out the file
+        // This might perhaps be the trailing / in /files/
+        SFFileBegin:=RPosEx('/',URL,i-1)+1;
+
+        if SFFileBegin>0 then
+        begin
+          SFFilename:=Copy(URL,SFFileBegin, i-SFFileBegin);
+          //Include trailing /
+          SFDirectory:=Copy(URL, SFDirectoryBegin, SFFileBegin-SFDirectoryBegin);
+          IsSFDownload:=true;
+        end;
+      end;
+    end;
+  end;
+
+  if IsSFDownload then
+  begin
     try
+      // Rewrite URL if needed for Sourceforge download redirection
       HTTPSender := THTTPSend.Create;
       while not Result do
       begin
         HTTPSender.HTTPMethod('GET', URL);
+        infoln('debug: headers:');
+        infoln(HTTPSender.Headers.Text);
         case HTTPSender.Resultcode of
           301, 302, 307: for i := 0 to HTTPSender.Headers.Count - 1 do
               if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
@@ -654,7 +694,7 @@ begin
                     'http://' + RightStr(HTTPSender.Headers.Strings[i],
                     length(HTTPSender.Headers.Strings[i]) - j - 10) +
                     '.dl.sourceforge.net/project/' +
-                    SourceForgeProject + '/' + 'DiReCtory' + 'FiLeNAMe'
+                    SFProject + '/' + SFDirectory + SFFilename
                 else
                   URl :=
                     StringReplace(HTTPSender.Headers.Strings[i], 'Location: ', '', []);
@@ -669,7 +709,7 @@ begin
               IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
         end;//case
       end;//while
-      infoln('resulting url after sf redir: *' + URL + '*');
+      infoln('debug: resulting url after sf redir: *' + URL + '*');
     finally
       HTTPSender.Free;
     end;
@@ -2278,15 +2318,13 @@ begin
       // make packager/registration lazutils lcl
       // alternatives:
       // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
-      // question: why platform win64, not win32? Wiki says only change targetos, target cpu, so
-      // suppose it should be win32
       ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDirectory) + 'lazbuild';
       ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
       ProcessEx.Parameters.Add('--cpu=x86_64');
       ProcessEx.Parameters.Add('--operating-system==win64');
-      ProcessEx.Parameters.Add('--widgetset=win32');
+      ProcessEx.Parameters.Add('--widgetset=win32'); //Still a win32 widgetset, even on 64 bit windows
       ProcessEx.Parameters.Add('--build-all'); //build ide/everything
       ProcessEx.Parameters.Add('--build-ide-options='); //Specify build IDE; pass no arguments
       infoln('Lazarus: compiling Win64 ide (for LCL):');
