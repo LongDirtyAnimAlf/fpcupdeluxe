@@ -46,7 +46,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   Classes,Forms,Interfaces {these 2 for application options},
   installer,
   svnclient, updatelazconfig, httpsend, ftpsend,sysutils,processutils,
-  fpcuputil;
+fpcuputil;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
@@ -402,4 +402,3 @@ begin
   end;
   writeln('FPCUp finished.');
 end.
-
