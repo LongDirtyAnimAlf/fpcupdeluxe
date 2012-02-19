@@ -1244,6 +1244,7 @@ function TInstaller.Run: boolean;
 var
   OperationSucceeded:boolean;
 begin
+  Writeln(FLogFile,'Running fpcup with parameters: ',FAllOptions,' --only=',FOnlyModules,' --skip=',FSkipModules);
   OperationSucceeded:=true;
   if Clean then
   begin
