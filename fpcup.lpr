@@ -53,6 +53,18 @@ procedure WriteHelp;
 begin
   writeln('');
   writeln('fpcup --<options>');
+  writeln('');
+  writeln('fpcup can work with modules - see "only", "skip" below');
+  writeln('List of modules and standard installation action:');
+  writeln('Std Name           Description');
+  writeln('on  FPC            Free Pascal compiler');
+  writeln('on  lazarus        Lazarus IDE');
+  writeln('off bigide         IDE with extra components. Selects lazarus.');
+  writeln('on  lhelp          Lazarus help. If selected, also selects bigide.');
+  writeln('on  wincrossx64    Lazarus Win32=>Win64 cross compiler.');
+  writeln('on  doceditor      Doceditor. If selected, also selects lazarus.');
+  writeln('on  lazdatadesktop Data desktop tool. If selected, also selects lazarus.');
+  writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
   writeln(' binutilsdir=<dir>     Windows only:');
@@ -94,9 +106,8 @@ begin
   writeln(' lazOPT=<options>      Options passed on to the lazarus make as OPT=options.');
   writeln(' noconfirm             No confirmation asked. For batch operation. ');
   writeln(' only=<values>         update and build only the modules specified.');
-  writeln('                       The module list is separated by commas and can contain:');
-  writeln('                       FPC,lazarus,bigide,wincrossx64,doceditor,');
-  writeln('                       lhelp,lazdatadesktop');
+  writeln('                       The module list is separated by commas.');
+  writeln('                       See above for a list of modules.');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
@@ -105,7 +116,7 @@ begin
   writeln('                       directory is used.');
   writeln(' skip=<values>         Do not update or build modules.');
   writeln('                       The module list is separated by commas.');
-  writeln('                       See "only" for accepted values. ');
+  writeln('                       See above for a list of modules.');
   writeln(' verbose               Show output from svn and make');
   //todo: not only write --verbose output to console, also to separate log file, e.g. in temp dir, like error logs are now written.
   writeln('');

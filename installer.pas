@@ -1012,7 +1012,8 @@ begin
       writeln(FLogFile,'FPC clean skipped by user.');
     end;
 
-    if ModuleEnabled('LAZARUS') then
+    if ModuleEnabled('LAZARUS') or ModuleEnabled('LHELP')
+      or ModuleEnabled('DOCEDITOR') or ModuleEnabled('BIGIDE') then
     begin
       if OperationSucceeded then OperationSucceeded:=CleanLazarus;
     end
@@ -1056,7 +1057,8 @@ begin
       writeln(FLogFile,'FPC installation/update skipped by user.');
     end;
 
-    if ModuleEnabled('LAZARUS') then
+    if ModuleEnabled('LAZARUS') or ModuleEnabled('LHELP')
+      or ModuleEnabled('DOCEDITOR') or ModuleEnabled('BIGIDE') then
     begin
       if OperationSucceeded then OperationSucceeded:=GetLazarus;
     end
@@ -1842,8 +1844,16 @@ begin
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    ProcessEx.Parameters.Add('distclean');
-    infoln('Lazarus: running make distclean before checkout/update:');
+    if ModuleEnabled('BIGIDE') then
+    begin
+      ProcessEx.Parameters.Add('distclean bigideclean');
+      infoln('Lazarus: running make distclean bigideclean before checkout/update:');
+    end
+    else
+    begin
+      ProcessEx.Parameters.Add('distclean');
+      infoln('Lazarus: running make distclean before checkout/update:');
+    end;
     ProcessEx.Execute;
   end;
 
