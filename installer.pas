@@ -861,7 +861,7 @@ var
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
 begin
-  infoln('Module LHELP: getting/compiling Lazarus help...');
+  infoln('Module HELP: getting/compiling Lazarus help...');
 
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
@@ -921,7 +921,7 @@ begin
     c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
     ... but we'd need to include the input files extracted from the Make file.
     }
-    infoln('Module LHELP: downloading FPC RTL/CHM help...');
+    infoln('Module HELP: downloading FPC RTL/CHM help...');
     if FileExistsUTF8(BuildLCLDocsDirectory+'fcl.chm') and
     FileExistsUTF8(BuildLCLDocsDirectory+'rtl.chm') then
     begin
@@ -1021,7 +1021,7 @@ begin
       writeln(FLogFile,'FPC clean skipped by user.');
     end;
 
-    if ModuleEnabled('LAZARUS') or ModuleEnabled('LHELP')
+    if ModuleEnabled('LAZARUS') or ModuleEnabled('HELP')
       or ModuleEnabled('DOCEDITOR') or ModuleEnabled('BIGIDE') then
     begin
       if OperationSucceeded then OperationSucceeded:=CleanLazarus;
@@ -1032,7 +1032,7 @@ begin
       writeln(FLogFile,'Module LAZARUS: cleanup skipped by user.');
     end;
 
-    if ModuleEnabled('LHELP') then
+    if ModuleEnabled('HELP') then
     begin
        if OperationSucceeded then OperationSucceeded:=CleanLazarusHelp;
     end
@@ -1066,7 +1066,7 @@ begin
       writeln(FLogFile,'FPC installation/update skipped by user.');
     end;
 
-    if ModuleEnabled('LAZARUS') or ModuleEnabled('LHELP')
+    if ModuleEnabled('LAZARUS') or ModuleEnabled('HELP')
       or ModuleEnabled('DOCEDITOR') or ModuleEnabled('BIGIDE') then
     begin
       if OperationSucceeded then OperationSucceeded:=GetLazarus;
@@ -1077,7 +1077,7 @@ begin
       writeln(FLogFile,'Module LAZARUS: installation/update skipped by user.');
     end;
 
-    if ModuleEnabled('LHELP') then
+    if ModuleEnabled('HELP') then
     begin
        if OperationSucceeded then OperationSucceeded:=GetLazarusHelp;
     end
@@ -1390,7 +1390,7 @@ var
   OperationSucceeded:boolean;
 begin
   OperationSucceeded:=true;
-  infoln('Module LHELP: cleanup...');
+  infoln('Module HELP: cleanup...');
 
   { Delete .chm files and .xct (cross reference) files
     that could have been downloaded in FPC docs or created by fpcup }
@@ -1418,8 +1418,8 @@ begin
   except
     on E: Exception do
     begin
-      infoln('LHELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      writeln(FLogFile, 'LHELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      infoln('HELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      writeln(FLogFile, 'HELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
       OperationSucceeded:=false;
     end;
   end;
@@ -2096,7 +2096,7 @@ begin
         {$ENDIF UNIX}
       end;
       if OperationSucceeded then
-        if (ModuleEnabled('BIGIDE')=false) and (ModuleEnabled('LHELP')=false) then
+        if (ModuleEnabled('BIGIDE')=false) and (ModuleEnabled('HELP')=false) then
         begin
           //todo: find out if lhelp support can be realized by just compiling
           //package chmhelppkg in some way
@@ -2108,8 +2108,8 @@ begin
         begin
           if ModuleEnabled('BIGIDE')=false then
           begin
-            infoln('Module BIGIDE: required by module: LHELP');
-            writeln(FLogFile,'Module BIGIDE: required by module: LHELP');
+            infoln('Module BIGIDE: required by module: HELP');
+            writeln(FLogFile,'Module BIGIDE: required by module: HELP');
           end;
           // Make bigide: ide with additional packages as specified by user (in primary config path?)
           // this should also make the lhelp package needed for CHM Help.
@@ -2132,11 +2132,11 @@ begin
 
       if OperationSucceeded then
       begin
-        if not ModuleEnabled('LHELP') then
+        if not ModuleEnabled('HELP') then
         begin
           OperationSucceeded:=true;  //continue with whatever we do next
-          infoln('Module LHELP: skipped by user; not building lhelp help viewer.');
-          writeln(FLogFile,'Module LHELP: skipped by user; not building lhelp help viewer.');
+          infoln('Module HELP: skipped by user; not building lhelp help viewer.');
+          writeln(FLogFile,'Module HELP: skipped by user; not building lhelp help viewer.');
         end
         else
         begin
