@@ -56,7 +56,7 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="6">
       <Unit0>
         <Filename Value="fpcupgui.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -69,6 +69,26 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="mainform"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="installer.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="installer"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="svnclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="svnclient"/>
+      </Unit3>
+      <Unit4>
+        <Filename Value="fpcuputil.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcuputil"/>
+      </Unit4>
+      <Unit5>
+        <Filename Value="processutils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="processutils"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

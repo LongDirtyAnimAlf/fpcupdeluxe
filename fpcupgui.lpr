@@ -7,7 +7,7 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, mainform
+  Forms, mainform, svnclient, installer, processutils, fpcuputil
   { you can add units after this };
 
 begin
