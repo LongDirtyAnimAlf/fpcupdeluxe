@@ -26,12 +26,13 @@ end;
 
 function TWin32To64.GetLibs(Basepath:string): boolean;
 begin
-
+  FLibsPath:='';
 end;
 
 function TWin32To64.GetBinUtils(Basepath:string): boolean;
 begin
-
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
 end;
 
 constructor TWin32To64.Create;
@@ -55,4 +56,4 @@ initialization
 finalization
   Win32To64.Destroy;
 end.
-
+

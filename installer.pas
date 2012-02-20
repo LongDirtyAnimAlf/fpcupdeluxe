@@ -1446,12 +1446,14 @@ var
   AfterRevision: string;
   BeforeRevision: string;
   BinPath: string; //Path where installed compiler ends up
+  CrossInstaller:TCrossInstaller;
   CustomPath: string; //Our own version of path we use to pass to commands
   FileCounter:integer;
   FPCCfg: string;
   FPCScript: string; //Used only in Unix code for now.
   UpdateWarnings: TStringList;
   OperationSucceeded: boolean;
+  Options:string;
   TxtFile:text; //Used only in Unix code for now.
   SearchRec:TSearchRec;
   FPCVersion,FPCTarget:string; //Used only in Unix code for now.
@@ -1539,6 +1541,8 @@ begin
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    if FFPCOPT<>'' then
+      ProcessEx.Parameters.Add('OPT='+FFPCOPT);
     ProcessEx.Parameters.Add('all');
     infoln('Running make all for FPC:');
     ProcessEx.Execute;
@@ -1584,6 +1588,8 @@ begin
     ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    if FFPCOPT<>'' then
+      ProcessEx.Parameters.Add('OPT='+FFPCOPT);
     ProcessEx.Parameters.Add('all');
     ProcessEx.Parameters.Add('install');
     infoln('Running make all install for FPC:');
@@ -1672,55 +1678,75 @@ begin
       // todo: check out what cross compilers we can install on Linux/OSX (win32?)
       // todo: possibly move this to a separate section that will be called after fpc compilation (reason: we need a valid compiler0.
       // Note: consider this as an optional item, so don't fail the function if this breaks.
-      ProcessEx.Executable := FMake;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-      ProcessEx.Parameters.Clear;
-      infoln('Running Make all (FPC crosscompiler):');
-      //Note: make install+make crossinstall work on command line
-      //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
-      //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
-      // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
-      //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
-      // => gives bin\i386-win32\ppcrossx64.exe
-      //but not in this program..
-      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-      ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
-      ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      //putting all before target might help!?!?
-      ProcessEx.Parameters.Add('all');
-      ProcessEx.Parameters.Add('OS_TARGET=win64');
-      ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-      if FFPCOPT<>'' then
-        ProcessEx.Parameters.Add('OPT='+FFPCOPT);
-      ProcessEx.Execute;
 
-      if ProcessEx.ExitStatus = 0 then
-      begin
-        // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
-        // make all and make crossinstall perhaps equivalent to
-        // make all install CROSSCOMPILE=1??? todo: find out
+      //Hardcode her
+      FCrossCPU_Target:='x86_64';
+      FCrossOS_Target:='win64';
+
+      CrossInstaller:=GetCrossInstaller;
+      if assigned(CrossInstaller) then
+        begin
+        CrossInstaller.GetBinUtils(FPCDirectory);
+        CrossInstaller.GetLibs(FPCDirectory);
+        if CrossInstaller.BinUtilsPath<>'' then
+          ProcessEx.Environment.SetVar('Path',CrossInstaller.BinUtilsPath+';'+ProcessEx.Environment.GetVar('Path'));
         ProcessEx.Executable := FMake;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-        infoln('Running Make crossinstall for FPC:');
         ProcessEx.Parameters.Clear;
+        infoln('Running Make all (FPC crosscompiler):');
+        //Note: make install+make crossinstall work on command line
+        //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
+        //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
+        // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
+        //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
+        // => gives bin\i386-win32\ppcrossx64.exe
+        //but not in this program..
         ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
+        ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
         ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
         ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        //putting crossinstall before target might help!?!?
-        ProcessEx.Parameters.Add('crossinstall');
-        ProcessEx.Parameters.Add('OS_TARGET=win64'); //cross compile for different OS...
-        ProcessEx.Parameters.Add('CPU_TARGET=x86_64'); // and processor.
-
-        // Note: consider this as an optional item, so don't fail the function if this breaks.
+        //putting all before target might help!?!?
+        ProcessEx.Parameters.Add('all');
+        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+        Options:=FFPCOPT;
+        if CrossInstaller.LibsPath<>''then
+          Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+        if CrossInstaller.BinUtilsPrefix<>'' then
+          Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
+        if Options<>'' then
+          ProcessEx.Parameters.Add('OPT='+Options);
         ProcessEx.Execute;
-        if ProcessEx.ExitStatus<>0 then
-        begin
-          infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
-        end;
-      end;
+
+        if ProcessEx.ExitStatus = 0 then
+          begin
+            // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
+            // make all and make crossinstall perhaps equivalent to
+            // make all install CROSSCOMPILE=1??? todo: find out
+            ProcessEx.Executable := FMake;
+            ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+            infoln('Running Make crossinstall for FPC:');
+            ProcessEx.Parameters.Clear;
+            ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
+            ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+            ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+            ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+            //putting crossinstall before target might help!?!?
+            ProcessEx.Parameters.Add('crossinstall');
+            ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
+            ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+
+            // Note: consider this as an optional item, so don't fail the function if this breaks.
+            ProcessEx.Execute;
+            if ProcessEx.ExitStatus<>0 then
+            begin
+              infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
+            end;
+          end;
+        end
+      else
+        infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
     end;
   {$ENDIF MSWINDOWS}
 
@@ -2297,4 +2323,4 @@ begin
 end;
 
 end.
-
+
