@@ -291,14 +291,20 @@ const
   //Parent directory of files. Needs trailing backslash.
 var
   Counter: integer;
+  Errors: integer;
 begin
   ForceDirectories(MakeDirectory);
-  Result := False;
+  Result:=true;
+  Errors:=0;
   for Counter := 0 to FBinUtils.Count - 1 do
   begin
     infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakeDirectory);
     try
-      Download(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter]);
+      if Download(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter])=false then
+      begin
+        Errors:=Errors+1;
+        infoln('Error downloading binutils: '+FBinUtils[Counter]+' to '+MakeDirectory);
+      end;
     except
       on E: Exception do
       begin
@@ -308,7 +314,7 @@ begin
       end;
     end;
   end;
-  Result := True;
+if Errors>0 then result:=false;
 end;
 
 function TInstaller.DownloadBootstrapCompiler: boolean;

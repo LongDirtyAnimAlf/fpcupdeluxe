@@ -39,8 +39,6 @@ uses
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 function Download(URL, TargetFile: string): boolean;
-//function DownloadFTP(URL, TargetFile: string): boolean;
-//function DownloadHTTP(URL, TargetFile: string): boolean;
 {$IFDEF MSWINDOWS}
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
@@ -161,36 +159,32 @@ begin
   if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile);
 end;
 
-function DownloadHTTP(URL, TargetFile: string): boolean;
-  // Download file. If ncessary deal with SourceForge redirection, thanks to
-  // Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
+function SourceForgeURL(URL: string): string;
+// Detects sourceforge download and tries to deal with
+// redirection, and extracting direct download link.
+// Thanks to
+// Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
 const
   SFProjectPart = '//sourceforge.net/projects/';
   SFFilesPart = '/files/';
   SFDownloadPart ='/download';
-  MaxRetries = 3;
 var
-  Buffer: TMemoryStream;
-  HTTPGetResult: boolean;
-  i, j: integer;
   HTTPSender: THTTPSend;
-  IsSFDownload: boolean;
-  SFProjectBegin: integer;
-  RetryAttempt: integer;
+  i, j: integer;
+  FoundCorrectURL: boolean;
   SFDirectory: string; //Sourceforge directory
   SFDirectoryBegin: integer;
   SFFileBegin: integer;
   SFFilename: string; //Sourceforge name of file
   SFProject: string;
+  SFProjectBegin: integer;
 begin
-  Result := False;
-  IsSFDownload:=false;
-
   // Detect SourceForge download; e.g. from URL
   //          1         2         3         4         5         6         7         8         9
   // 1234557890123456789012345578901234567890123455789012345678901234557890123456789012345578901234567890
   // http://sourceforge.net/projects/base64decoder/files/base64decoder/version%202.0/b64util.zip/download
   //                                 ^^^project^^^       ^^^directory............^^^ ^^^file^^^
+  FoundCorrectURL:=true; //Assume not a SF download
   i:=Pos(SFProjectPart, URL);
   if i>0 then
   begin
@@ -217,41 +211,50 @@ begin
           SFFilename:=Copy(URL,SFFileBegin, i-SFFileBegin);
           //Include trailing /
           SFDirectory:=Copy(URL, SFDirectoryBegin, SFFileBegin-SFDirectoryBegin);
-          IsSFDownload:=true;
+          FoundCorrectURL:=false;
         end;
       end;
     end;
   end;
 
-  if IsSFDownload then
+  if not FoundCorrectURL then
   begin
     try
       // Rewrite URL if needed for Sourceforge download redirection
+      // Detect direct link in HTML body and get URL from that
       HTTPSender := THTTPSend.Create;
-      while not Result do
+      while not FoundCorrectURL do
       begin
         HTTPSender.HTTPMethod('GET', URL);
         infoln('debug: headers:');
         infoln(HTTPSender.Headers.Text);
         case HTTPSender.Resultcode of
-          301, 302, 307: for i := 0 to HTTPSender.Headers.Count - 1 do
-              if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
-                (Pos('location: ', HTTPSender.Headers.Strings[i]) > 0) then
-              begin
-                j := Pos('use_mirror=', HTTPSender.Headers.Strings[i]);
-                if j > 0 then
-                  URL :=
-                    'http://' + RightStr(HTTPSender.Headers.Strings[i],
-                    length(HTTPSender.Headers.Strings[i]) - j - 10) +
-                    '.dl.sourceforge.net/project/' +
-                    SFProject + '/' + SFDirectory + SFFilename
-                else
-                  URl :=
-                    StringReplace(HTTPSender.Headers.Strings[i], 'Location: ', '', []);
-                HTTPSender.Clear;//httpsend
-                break;
+          301, 302, 307:
+            begin
+              for i := 0 to HTTPSender.Headers.Count - 1 do
+                if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
+                  (Pos('location: ', HTTPSender.Headers.Strings[i]) > 0) then
+                begin
+                  j := Pos('use_mirror=', HTTPSender.Headers.Strings[i]);
+                  if j > 0 then
+                    URL :=
+                      'http://' + RightStr(HTTPSender.Headers.Strings[i],
+                      length(HTTPSender.Headers.Strings[i]) - j - 10) +
+                      '.dl.sourceforge.net/project/' +
+                      SFProject + '/' + SFDirectory + SFFilename
+                  else
+                    URL:=StringReplace(
+                      HTTPSender.Headers.Strings[i], 'Location: ', '', []);
+                  HTTPSender.Clear;//httpsend
+                  FoundCorrectURL:=true;
+                  break; //out of rewriting loop
               end;
-          100..200: Result := True; //No changes necessary
+            end;
+          100..200:
+            begin
+              FoundCorrectURL:=true; //No changes necessary
+
+            end;
           500: raise Exception.Create('No internet connection available');
             //Internal Server Error ('+aURL+')');
           else
@@ -264,26 +267,49 @@ begin
       HTTPSender.Free;
     end;
   end;
+  result:=URL;
+end;
 
+function DownloadHTTPStream(URL: string; Buffer: TStream): boolean;
+  // Download file; retry if necessary.
+  // If SFDetection enabled, detect and deal with SourceForge downloads
+const
+  MaxRetries = 3;
+var
+  RetryAttempt: integer;
+  HTTPGetResult: boolean;
+begin
+  Result:=false;
+  RetryAttempt := 1;
+  HTTPGetResult := False;
+  while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
+  begin
+    HTTPGetResult := HttpGetBinary(URL, Buffer);
+    //Application.ProcessMessages;
+    Sleep(100 * RetryAttempt);
+    RetryAttempt := RetryAttempt + 1;
+  end;
+  if HTTPGetResult = False then
+    raise Exception.Create('Cannot load document from remote server');
+  Buffer.Position := 0;
+  if Buffer.Size = 0 then
+    raise Exception.Create('Downloaded document is empty.');
+  Result := True;
+end;
+
+function DownloadHTTP(URL, TargetFile: string): boolean;
+// Download file; retry if necessary.
+// Deals with SourceForge download links
+var
+  Buffer: TMemoryStream;
+begin
+  result:=false;
+  SourceForgeURL(URL); //Deal with sourceforge URLs
   try
     Buffer := TMemoryStream.Create;
-    infoln('Going to call httpgetbinary for url: ' + URL);
-    RetryAttempt := 1;
-    HTTPGetResult := False;
-    while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
-    begin
-      HTTPGetResult := HttpGetBinary(URL, Buffer);
-      //Application.ProcessMessages;
-      Sleep(100 * RetryAttempt);
-      RetryAttempt := RetryAttempt + 1;
-    end;
-    if HTTPGetResult = False then
-      raise Exception.Create('Cannot load document from remote server');
-    Buffer.Position := 0;
-    if Buffer.Size = 0 then
-      raise Exception.Create('Downloaded document is empty.');
+    DownloadHTTPStream(URL, Buffer);
     Buffer.SaveToFile(TargetFile);
-    Result := True;
+    result:=true;
   finally
     FreeAndNil(Buffer);
   end;
@@ -291,15 +317,27 @@ end;
 
 function Download(URL, TargetFile: string): boolean;
 begin
+  result:=false;
   // Assume http if no ftp detected
-  if (Copy(URL, 1, Length('ftp://'))='ftp://') or
-  (Copy(URL,1,Length('ftp.'))='ftp.') then
-  begin
-    DownloadFTP(URL, TargetFile);
-  end
-  else
-  begin
-    DownloadHTTP(URL, TargetFile);
+  try
+    infoln('Going to download '+TargetFile+' from URL: ' + URL);
+    if (Copy(URL, 1, Length('ftp://'))='ftp://') or
+    (Copy(URL,1,Length('ftp.'))='ftp.') then
+    begin
+      result:=DownloadFTP(URL, TargetFile);
+    end
+    else
+    begin
+      result:=DownloadHTTP(URL, TargetFile);
+    end;
+  except
+    on E: Exception do
+    begin
+      infoln('Download: error occurred downloading file '+TargetFile+' from URL: '+URL+
+        '. Exception occurred: '+E.ClassName+'/'+E.Message+')');
+    end;
+    //Not writing message here; to be handled by calling code with more context.
+    //if result:=false then infoln('Download: download of '+TargetFile+' from URL: '+URL+' failed.');
   end;
 end;
 
@@ -354,7 +392,7 @@ begin
   while (length(output)>0) and (ord(output[length(output)])<$20) do
     delete(output,length(output),1);
   {$ELSE}
-  infoln('todo: write me using finexecutableinpath or something');
+  Output:=FindDefaultExecutablePath(Executable);
   {$ENDIF UNIX}
   // We could have checked for ExecuteCommandHidden exitcode, but why not
   // do file existence check instead:
