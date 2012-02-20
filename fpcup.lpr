@@ -44,9 +44,9 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,Forms,Interfaces {these 2 for application options},
-  installer,
-  svnclient, updatelazconfig, httpsend, ftpsend,sysutils,processutils,
-fpcuputil, m_crossinstaller, m_crosswin64;
+  installer, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
+  fpcuputil, m_crossinstaller, m_crosswin64, synacode, synafpc, synaip,
+  synautil, synsock, blcksock;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
