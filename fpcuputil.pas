@@ -159,6 +159,79 @@ begin
   if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile);
 end;
 
+function DownloadHTTPStream(URL: string; Buffer: TStream): boolean;
+  // Download file; retry if necessary.
+  // If SFDetection enabled, detect and deal with SourceForge downloads
+const
+  MaxRetries = 3;
+var
+  RetryAttempt: integer;
+  HTTPGetResult: boolean;
+begin
+  Result:=false;
+  RetryAttempt := 1;
+  HTTPGetResult := False;
+  while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
+  begin
+    HTTPGetResult := HttpGetBinary(URL, Buffer);
+    //Application.ProcessMessages;
+    Sleep(100 * RetryAttempt);
+    RetryAttempt := RetryAttempt + 1;
+  end;
+  if HTTPGetResult = False then
+    raise Exception.Create('Cannot load document from remote server');
+  Buffer.Position := 0;
+  if Buffer.Size = 0 then
+    raise Exception.Create('Downloaded document is empty.');
+  Result := True;
+end;
+
+function SFDirectLinkURL(URL: string; Document: TMemoryStream): string;
+{
+Transform this part of the body:
+<noscript>
+<meta http-equiv="refresh" content="5; url=http://downloads.sourceforge.net/project/base64decoder/base64decoder/version%202.0/b64util.zip?r=&amp;ts=1329648745&amp;use_mirror=kent">
+</noscript>
+into a valid URL:
+http://downloads.sourceforge.net/project/base64decoder/base64decoder/version%202.0/b64util.zip?r=&amp;ts=1329648745&amp;use_mirror=kent
+}
+const
+  Refresh='<meta http-equiv="refresh"';
+  URLMarker='url=';
+var
+  Counter: integer;
+  HTMLBody: TStringList;
+  RefreshStart: integer;
+  URLStart: integer;
+begin
+  HTMLBody:=TStringList.Create;
+  try
+    HTMLBody.LoadFromStream(Document);
+    for Counter:=0 to HTMLBody.Count-1 do
+    begin
+      // This line should be between noscript tags and give the direct download locations:
+      RefreshStart:=Ansipos(Refresh, HTMLBody[Counter]);
+      if RefreshStart>0 then
+      begin
+        URLStart:=AnsiPos(URLMarker, HTMLBody[Counter])+Length(URLMarker);
+        if URLStart>RefreshStart then
+        begin
+          // Look for closing "
+          URL:=Copy(HTMLBody[Counter],
+            URLStart,
+            PosEx('"',HTMLBody[Counter],URLStart+1)-URLStart);
+          infoln('debug: new url after sf noscript:');
+          infoln(URL);
+          break;
+        end;
+      end;
+    end;
+  finally
+    HTMLBody.Free;
+  end;
+  result:=URL;
+end;
+
 function SourceForgeURL(URL: string): string;
 // Detects sourceforge download and tries to deal with
 // redirection, and extracting direct download link.
@@ -223,6 +296,8 @@ begin
       // Rewrite URL if needed for Sourceforge download redirection
       // Detect direct link in HTML body and get URL from that
       HTTPSender := THTTPSend.Create;
+      //Who knows, this might help:
+      HTTPSender.UserAgent:='curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18';
       while not FoundCorrectURL do
       begin
         HTTPSender.HTTPMethod('GET', URL);
@@ -252,8 +327,9 @@ begin
             end;
           100..200:
             begin
-              FoundCorrectURL:=true; //No changes necessary
-
+              //Assume a sourceforge timer/direct link page
+              URL:=SFDirectLinkURL(URL, HTTPSender.Document); //Find out
+              FoundCorrectURL:=true; //We're done by now
             end;
           500: raise Exception.Create('No internet connection available');
             //Internal Server Error ('+aURL+')');
@@ -270,33 +346,6 @@ begin
   result:=URL;
 end;
 
-function DownloadHTTPStream(URL: string; Buffer: TStream): boolean;
-  // Download file; retry if necessary.
-  // If SFDetection enabled, detect and deal with SourceForge downloads
-const
-  MaxRetries = 3;
-var
-  RetryAttempt: integer;
-  HTTPGetResult: boolean;
-begin
-  Result:=false;
-  RetryAttempt := 1;
-  HTTPGetResult := False;
-  while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
-  begin
-    HTTPGetResult := HttpGetBinary(URL, Buffer);
-    //Application.ProcessMessages;
-    Sleep(100 * RetryAttempt);
-    RetryAttempt := RetryAttempt + 1;
-  end;
-  if HTTPGetResult = False then
-    raise Exception.Create('Cannot load document from remote server');
-  Buffer.Position := 0;
-  if Buffer.Size = 0 then
-    raise Exception.Create('Downloaded document is empty.');
-  Result := True;
-end;
-
 function DownloadHTTP(URL, TargetFile: string): boolean;
 // Download file; retry if necessary.
 // Deals with SourceForge download links
@@ -304,7 +353,7 @@ var
   Buffer: TMemoryStream;
 begin
   result:=false;
-  SourceForgeURL(URL); //Deal with sourceforge URLs
+  URL:=SourceForgeURL(URL); //Deal with sourceforge URLs
   try
     Buffer := TMemoryStream.Create;
     DownloadHTTPStream(URL, Buffer);
@@ -387,6 +436,10 @@ var
   Output: string;
 begin
   {$IFDEF UNIX}
+  // Note: we're using external which because
+  // FindDefaultExecutablePath
+  // doesn't check if the user has execute permission
+  // on the found file.
   ExecuteCommandHidden('which',Executable,Output,false);
   //Remove trailing LF(s) and other control codes:
   while (length(output)>0) and (ord(output[length(output)])<$20) do
