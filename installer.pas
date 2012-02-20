@@ -297,7 +297,7 @@ begin
   begin
     infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakeDirectory);
     try
-      DownloadHTTP(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter]);
+      Download(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter]);
     except
       on E: Exception do
       begin
@@ -331,7 +331,7 @@ begin
   ArchiveDir := ExtractFilePath(BootstrapArchive);
   if OperationSucceeded then
   begin
-    OperationSucceeded:=DownloadFTP(FBootstrapCompilerFTP, BootstrapArchive);
+    OperationSucceeded:=Download(FBootstrapCompilerFTP, BootstrapArchive);
     if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
   end;
 
@@ -442,7 +442,7 @@ begin
   ForceDirectories(TargetDirectory);
   DocsZip := SysUtils.GetTempFileName + '.zip';
   try
-    OperationSucceeded:=DownloadHTTP(URL,DocsZip);
+    OperationSucceeded:=Download(URL,DocsZip);
   except
     on E: Exception do
     begin
@@ -495,7 +495,7 @@ begin
   ForceDirectories(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   try
-    OperationSucceeded := DownloadHTTP(
+    OperationSucceeded := Download(
       'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
       SVNZip);
   except

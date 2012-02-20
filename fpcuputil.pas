@@ -39,8 +39,8 @@ uses
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 function Download(URL, TargetFile: string): boolean;
-function DownloadFTP(URL, TargetFile: string): boolean;
-function DownloadHTTP(URL, TargetFile: string): boolean;
+//function DownloadFTP(URL, TargetFile: string): boolean;
+//function DownloadHTTP(URL, TargetFile: string): boolean;
 {$IFDEF MSWINDOWS}
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
@@ -133,20 +133,6 @@ begin
     ScriptText.Free;
   end;
   {$ENDIF UNIX}
-end;
-
-function Download(URL, TargetFile: string): boolean;
-begin
-  // Assume http if no ftp detected
-  if (Copy(URL, 1, Length('ftp://'))='ftp://') or
-  (Copy(URL,1,Length('ftp.'))='ftp.') then
-  begin
-    DownloadFTP(URL, TargetFile);
-  end
-  else
-  begin
-    DownloadHTTP(URL, TargetFile);
-  end;
 end;
 
 function DownloadFTP(URL, TargetFile: string): boolean;
@@ -303,6 +289,20 @@ begin
   end;
 end;
 
+function Download(URL, TargetFile: string): boolean;
+begin
+  // Assume http if no ftp detected
+  if (Copy(URL, 1, Length('ftp://'))='ftp://') or
+  (Copy(URL,1,Length('ftp.'))='ftp.') then
+  begin
+    DownloadFTP(URL, TargetFile);
+  end
+  else
+  begin
+    DownloadHTTP(URL, TargetFile);
+  end;
+end;
+
 {$IFDEF MSWINDOWS}
 function GetLocalAppDataPath: string;
 var
@@ -385,4 +385,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+
