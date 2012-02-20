@@ -51,6 +51,8 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
 begin
+  writeln('DON''T PANIC!');
+  writeln('Everything below is optional...');
   writeln('');
   writeln('fpcup --<options>');
   writeln('');
@@ -58,12 +60,16 @@ begin
   writeln('List of modules and standard installation action:');
   writeln('Std Name           Description');
   writeln('on  FPC            Free Pascal compiler');
-  writeln('on  lazarus        Lazarus IDE');
+  writeln('on  lazarus        LCL (and IDE if not crosscompiling)');
   writeln('off bigide         IDE with extra components. Selects lazarus.');
-  writeln('on  lhelp          Lazarus help. If selected, also selects bigide.');
+  writeln('on  help           Lazarus+FPC help. Also selects bigide.');
   writeln('on  wincrossx64    Lazarus Win32=>Win64 cross compiler.');
-  writeln('on  doceditor      Doceditor. If selected, also selects lazarus.');
-  writeln('on  lazdatadesktop Data desktop tool. If selected, also selects lazarus.');
+  writeln('                   Note: also installs lazarus 32 bit IDE.');
+  writeln('on  doceditor      Lazarus Doceditor. Also selects lazarus.');
+  writeln('on  lazdatadesktop Data desktop tool. Also selects lazarus.');
+  writeln('Because help is installed by default, it pulls in bigide and');
+  writeln('the results that all these modules get installed.');
+  writeln('(except wincrossx64 if not on Windows, of course));
   writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
@@ -84,11 +90,14 @@ begin
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
   writeln('                       Default: c:\development\fpcbootstrap\');
+  writeln('                       or ~\fpcbootstrap\');
   writeln(' fpcdir=<dir>          Target FPC dir, default c:\development\fpc\');
+  writeln('                       or ~\fpc\');
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
-  writeln(' fpcOPT=<options>      Options passed on to the fpc make as OPT=options.');
-  writeln(' fpcrevision=<number>  Revert to fpc svn revision <number>');
+  writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
+  writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
+  writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
   writeln(' fpcuplinkname=<name>  Name of the shortcut to the fpcup script.');
   writeln('                       On Windows: a desktop shortcut.');
   writeln('                       On other systems: a shell script in your home directory.');
@@ -96,20 +105,21 @@ begin
   writeln('                       Default: fpcup_update');
   writeln('                         or <lazlinkname>_update if lazlinkname specified');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
+  writeln('                       or ~\lazarus\');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
   writeln('                       On Windows: a desktop shortcut.');
   writeln('                       On other systems: a shell script in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
   writeln('                       Default: Lazarus_trunk');
-  writeln(' lazrevision=<number>  Revert to lazarus svn revision <number>');
+  writeln(' lazrevision=<number>  Revert to Lazarus SVN revision <number>');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
-  writeln(' lazOPT=<options>      Options passed on to the lazarus make as OPT=options.');
-  writeln(' lclplatform=<name>    lcl widget set. <name> has to be one of the following:');
+  writeln(' lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.');
+  writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
-  writeln(' noconfirm             No confirmation asked. For batch operation. ');
-  writeln(' only=<values>         update and build only the modules specified.');
+  writeln(' noconfirm             No confirmation asked. For batch operation.');
+  writeln(' only=<values>         Update/build or clean only the modules specified.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
   writeln(' ostarget=<name>       OS target for cross_compiling. <name> has to be one of the following:');
@@ -119,13 +129,12 @@ begin
   writeln('                       Determines where fpcup will create or use as primary');
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
-  writeln('                       directory is used.');
-  writeln(' skip=<values>         Do not update or build modules.');
+  writeln('                       path is used; directory name lazarusdevsettings.');
+  writeln(' skip=<values>         Do not update/build or clean modules.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
   writeln(' verbose               Show output from svn and make');
   writeln('');
-
 end;
 
 procedure CheckOptions(FInstaller: TInstaller);
@@ -188,6 +197,8 @@ begin
     Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+
     CPUTarget+': '+LCLPlatform+': '+OSTarget+': '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
+  // todo: check for parameters given without --
+  // these might be typos and should result in halting as well.
   if Length(ErrorMessage) > 0 then
   begin
     writeln('Error: wrong command line options given:');
