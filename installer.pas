@@ -2258,11 +2258,18 @@ begin
   {$ELSE}
   LogFileName:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
   {$ENDIF MSWINDOWS}
-  AssignFile(FLogFile,LogFileName);
-  if FileExistsUTF8(LogFileName) then
-    Append(FLogFile)
-  else
-    Rewrite(FLogFile);
+  try
+   AssignFile(FLogFile,LogFileName);
+   if FileExistsUTF8(LogFileName) then
+     Append(FLogFile)
+   else
+     Rewrite(FLogFile);
+  except
+    infoln('Error: could not open log file '+LogFileName+' for writing.');
+    infoln('This may be caused by another fpcup currently running.');
+    infoln('Aborting.');
+    halt(2); //Is there a nicer way to do this?
+  end;
   WriteLn(FLogFile,DateTimeToStr(now),': fpcup started.');
   TextRec(FLogVerboseFile).Mode:=0;  //class variables should have been 0
 end;
