@@ -1557,7 +1557,7 @@ begin
   infoln('FPC was at revision: '+BeforeRevision);
   if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision) else infoln('No updates for FPC found.');
 
-  if not FCrossCompiling or (GetFPCTarget='i386-win32') then
+  if not FCrossCompiling then
     begin  //native install
       if OperationSucceeded then
       begin
@@ -1695,7 +1695,7 @@ begin
     end; //native build
 
 
-  if FCrossCompiling or (OperationSucceeded and (GetFPCTarget='i386-win32') and ModuleEnabled('WINCROSSX64')) then
+  if FCrossCompiling or (OperationSucceeded and (GetFPCTarget='i386-win32') and not FCrossCompiling and ModuleEnabled('WINCROSSX64')) then
     begin
       // Make crosscompiler using new compiler
       // todo: check out what cross compilers we can install on Linux/OSX (win32?)
