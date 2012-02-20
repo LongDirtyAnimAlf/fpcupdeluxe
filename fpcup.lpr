@@ -69,7 +69,7 @@ begin
   writeln('on  lazdatadesktop Data desktop tool. Also selects lazarus.');
   writeln('Because help is installed by default, it pulls in bigide and');
   writeln('the results that all these modules get installed.');
-  writeln('(except wincrossx64 if not on Windows, of course));
+  writeln('(except wincrossx64 if not on Windows, of course)');
   writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
