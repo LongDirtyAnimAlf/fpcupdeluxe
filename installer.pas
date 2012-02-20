@@ -56,6 +56,7 @@ type
     FClean: boolean;
     FCrossCPU_Target: string;
     FCrossOS_Target: string;
+    FCrossLCL_Platform:string;
     FFPCOPT: string;
     FLazarusOPT: string;
     FOnlyModules: string;
@@ -1685,65 +1686,68 @@ begin
 
       CrossInstaller:=GetCrossInstaller;
       if assigned(CrossInstaller) then
-        begin
-        CrossInstaller.GetBinUtils(FPCDirectory);
-        CrossInstaller.GetLibs(FPCDirectory);
-        if CrossInstaller.BinUtilsPath<>'' then
-          ProcessEx.Environment.SetVar('Path',CrossInstaller.BinUtilsPath+';'+ProcessEx.Environment.GetVar('Path'));
-        ProcessEx.Executable := FMake;
-        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-        ProcessEx.Parameters.Clear;
-        infoln('Running Make all (FPC crosscompiler):');
-        //Note: make install+make crossinstall work on command line
-        //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
-        //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
-        // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
-        //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
-        // => gives bin\i386-win32\ppcrossx64.exe
-        //but not in this program..
-        ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-        ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
-        ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        //putting all before target might help!?!?
-        ProcessEx.Parameters.Add('all');
-        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-        Options:=FFPCOPT;
-        if CrossInstaller.LibsPath<>''then
-          Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
-        if CrossInstaller.BinUtilsPrefix<>'' then
-          Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
-        if Options<>'' then
-          ProcessEx.Parameters.Add('OPT='+Options);
-        ProcessEx.Execute;
-
-        if ProcessEx.ExitStatus = 0 then
+        if not CrossInstaller.GetBinUtils(FPCDirectory) then
+          infoln('Failed to get crossbinutils')
+        else if not CrossInstaller.GetLibs(FPCDirectory) then
+          infoln('Failed to get cross libraries')
+        else
           begin
-            // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
-            // make all and make crossinstall perhaps equivalent to
-            // make all install CROSSCOMPILE=1??? todo: find out
-            ProcessEx.Executable := FMake;
-            ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-            infoln('Running Make crossinstall for FPC:');
-            ProcessEx.Parameters.Clear;
-            ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-            ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-            ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-            ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-            //putting crossinstall before target might help!?!?
-            ProcessEx.Parameters.Add('crossinstall');
-            ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
-            ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+          if CrossInstaller.BinUtilsPath<>'' then
+            ProcessEx.Environment.SetVar('Path',CrossInstaller.BinUtilsPath+';'+ProcessEx.Environment.GetVar('Path'));
+          ProcessEx.Executable := FMake;
+          ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+          ProcessEx.Parameters.Clear;
+          infoln('Running Make all (FPC crosscompiler):');
+          //Note: make install+make crossinstall work on command line
+          //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
+          //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
+          // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
+          //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
+          // => gives bin\i386-win32\ppcrossx64.exe
+          //but not in this program..
+          ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
+          ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
+          ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+          ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+          ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+          //putting all before target might help!?!?
+          ProcessEx.Parameters.Add('all');
+          ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+          ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+          Options:=FFPCOPT;
+          if CrossInstaller.LibsPath<>''then
+            Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+          if CrossInstaller.BinUtilsPrefix<>'' then
+            Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
+          if Options<>'' then
+            ProcessEx.Parameters.Add('OPT='+Options);
+          ProcessEx.Execute;
 
-            // Note: consider this as an optional item, so don't fail the function if this breaks.
-            ProcessEx.Execute;
-            if ProcessEx.ExitStatus<>0 then
+          if ProcessEx.ExitStatus = 0 then
             begin
-              infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
+              // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
+              // make all and make crossinstall perhaps equivalent to
+              // make all install CROSSCOMPILE=1??? todo: find out
+              ProcessEx.Executable := FMake;
+              ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+              infoln('Running Make crossinstall for FPC:');
+              ProcessEx.Parameters.Clear;
+              ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
+              ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+              ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+              ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+              //putting crossinstall before target might help!?!?
+              ProcessEx.Parameters.Add('crossinstall');
+              ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
+              ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+
+              // Note: consider this as an optional item, so don't fail the function if this breaks.
+              ProcessEx.Execute;
+              if ProcessEx.ExitStatus<>0 then
+              begin
+                infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
+              end;
             end;
-          end;
         end
       else
         infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
@@ -1821,6 +1825,7 @@ other tools than make
 var
   AfterRevision: string;
   BeforeRevision: string;
+  CrossInstaller:TCrossInstaller;
   CustomPath: string;
   LazarusConfig: TUpdateLazConfig;
   UpdateWarnings:TStringList;
@@ -2047,30 +2052,24 @@ begin
       // We could have combined the 2 make statements but it seems quite complex.
       // alternatives:
       // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
-      ProcessEx.Executable := FMake;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
-      ProcessEx.Parameters.Clear;
-      ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
-      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-      ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
-      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      ProcessEx.Parameters.Add('LCL_PLATFORM=win32'); //windows 32 bit widgetset, even on 64 bit windows
-      ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-      ProcessEx.Parameters.Add('OS_TARGET=win64');
-      if LazarusOPT<>'' then
-        ProcessEx.Parameters.Add('OPT='+LazarusOPT);
-      ProcessEx.Parameters.Add('distclean');
-      infoln('Lazarus: running make distclean for 64 bit LCL:');
-      ProcessEx.Execute;
-      if ProcessEx.ExitStatus <> 0 then
-      begin
-        infoln('Lazarus: error running make distclean for 64 bit LCL.');
-        writeln(FLogFile, 'Lazarus: error running make distclean for 64 bit LCL.');
-        OperationSucceeded := False;
-      end
-      else
-      begin
+
+      //Hardcode her
+      FCrossCPU_Target:='x86_64';
+      FCrossOS_Target:='win64';
+      FCrossLCL_Platform:='win32';
+
+      CrossInstaller:=GetCrossInstaller;
+      if Assigned(CrossInstaller) then
+        if not CrossInstaller.GetBinUtils(FPCDirectory) then
+          infoln('Failed to get crossbinutils')
+        else if not CrossInstaller.GetLibs(FPCDirectory) then
+          infoln('Failed to get cross libraries')
+        else if not CrossInstaller.GetLibsLCL(FCrossLCL_Platform,FPCDirectory) then
+          infoln('Failed to get LCL cross libraries')
+        else
+        begin
+        if CrossInstaller.BinUtilsPath<>'' then
+          ProcessEx.Environment.SetVar('Path',CrossInstaller.BinUtilsPath+';'+ProcessEx.Environment.GetVar('Path'));
         ProcessEx.Executable := FMake;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
         ProcessEx.Parameters.Clear;
@@ -2078,22 +2077,47 @@ begin
         ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
         ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
         ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        ProcessEx.Parameters.Add('LCL_PLATFORM=win32'); //windows 32 bit widgetset, even on 64 bit windows
-        ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
-        ProcessEx.Parameters.Add('OS_TARGET=win64');
+        ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform);
+        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
         if LazarusOPT<>'' then
           ProcessEx.Parameters.Add('OPT='+LazarusOPT);
-        ProcessEx.Parameters.Add('packager/registration lazutils lcl');
-        infoln('Lazarus: compiling 64 bit LCL:');
+        ProcessEx.Parameters.Add('distclean');
+        infoln('Lazarus: running make distclean for 64 bit LCL:');
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
         begin
-          infoln('Lazarus: error compiling 64 bit LCL.');
-          writeln(FLogFile, 'Lazarus: error compiling 64 bit LCL.');
+          infoln('Lazarus: error running make distclean for 64 bit LCL.');
+          writeln(FLogFile, 'Lazarus: error running make distclean for 64 bit LCL.');
           OperationSucceeded := False;
+        end
+        else
+        begin
+          ProcessEx.Executable := FMake;
+          ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
+          ProcessEx.Parameters.Clear;
+          ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
+          ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
+          ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
+          ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+          ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform);
+          ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+          ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+          if LazarusOPT<>'' then
+            ProcessEx.Parameters.Add('OPT='+LazarusOPT);
+          ProcessEx.Parameters.Add('packager/registration lazutils lcl');
+          infoln('Lazarus: compiling 64 bit LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
+          ProcessEx.Execute;
+          if ProcessEx.ExitStatus <> 0 then
+          begin
+            infoln('Lazarus: error compiling LCL');
+            writeln(FLogFile, 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
+            OperationSucceeded := False;
+          end;
         end;
-      end;
+      end
+    else
+      infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
     end;
   end;
   {$ENDIF MSWINDOWS}

@@ -19,6 +19,7 @@ type
     FTargetOS: string;
   public
     function GetLibs(Basepath:string):boolean;virtual; abstract;
+    function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual; abstract;
     function GetBinUtils(Basepath:string):boolean;virtual; abstract;
     property LibsPath:string read FLibsPath;
     property BinUtilsPath:string read FBinUtilsPath;

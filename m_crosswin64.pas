@@ -17,6 +17,7 @@ private
 
 public
   function GetLibs(Basepath:string):boolean;override;
+  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -27,12 +28,19 @@ end;
 function TWin32To64.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='';
+  result:=true;
+end;
+
+function TWin32To64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+begin
+  result:=true;
 end;
 
 function TWin32To64.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
+  result:=true;
 end;
 
 constructor TWin32To64.Create;
