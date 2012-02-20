@@ -41,7 +41,7 @@ General remarks:
 interface
 
 uses
-  Classes, SysUtils, updater, processutils;
+  Classes, SysUtils, updater, processutils, m_crossinstaller;
 
 type
   { TInstaller }
@@ -93,6 +93,7 @@ type
     function FindSVNSubDirs(): boolean;
     function GetBootstrapCompiler: string;
     function GetCompilerName: string;
+    function GetCrossInstaller:TCrossInstaller;
     function GetFpcDirectory: string;
     function GetFPCRevision: string;
     function GetFPCTarget: string;
@@ -743,6 +744,15 @@ begin
     result:=FInstalledCompilerName
   else
     result:=FBootstrapCompilerName;
+end;
+
+function TInstaller.GetCrossInstaller: TCrossInstaller;
+var
+  idx:integer;
+begin
+  result:=nil;
+  if assigned(CrossInstallers) and CrossInstallers.Find(FCrossCPU_Target+'-'+FCrossOS_Target,idx) then
+    result:=TCrossInstaller(CrossInstallers.Objects[idx]);
 end;
 
 function Tinstaller.GetFpcDirectory: string;
@@ -2287,4 +2297,4 @@ begin
 end;
 
 end.
-
+
