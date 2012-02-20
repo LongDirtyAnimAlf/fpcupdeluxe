@@ -54,6 +54,7 @@ type
     FBootstrapCompilerFTP: string;
     FBootstrapCompilerName: string; //OS specific compiler name (e.g. ppcuniversal for OSX)
     FClean: boolean;
+    FCrossCompiling:boolean; // set in GetFPC and GetLazarus occurding to following vars
     FCrossCPU_Target: string;
     FCrossOS_Target: string;
     FCrossLCL_Platform:string;
@@ -105,6 +106,7 @@ type
     function ModuleEnabled(Name:string):boolean;
     procedure SetAllOptions(AValue: string);
     procedure SetCrossCPU_Target(AValue: string);
+    procedure SetCrossLCL_Platform(AValue: string);
     procedure SetCrossOS_Target(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
     procedure SetLazarusPrimaryConfigPath(AValue: string);
@@ -152,6 +154,7 @@ type
     function CleanLazarusHelp: boolean;
     // Clean up help environment
     property CrossCPU_Target:string read FCrossCPU_Target write SetCrossCPU_Target;
+    property CrossLCL_Platform:string read FCrossLCL_Platform write SetCrossLCL_Platform;
     property CrossOS_Target:string read FCrossOS_Target write SetCrossOS_Target;
     property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
     property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
@@ -291,20 +294,14 @@ const
   //Parent directory of files. Needs trailing backslash.
 var
   Counter: integer;
-  Errors: integer;
 begin
   ForceDirectories(MakeDirectory);
-  Result:=true;
-  Errors:=0;
+  Result := False;
   for Counter := 0 to FBinUtils.Count - 1 do
   begin
     infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakeDirectory);
     try
-      if Download(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter])=false then
-      begin
-        Errors:=Errors+1;
-        infoln('Error downloading binutils: '+FBinUtils[Counter]+' to '+MakeDirectory);
-      end;
+      Download(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter]);
     except
       on E: Exception do
       begin
@@ -314,7 +311,7 @@ begin
       end;
     end;
   end;
-if Errors>0 then result:=false;
+  Result := True;
 end;
 
 function TInstaller.DownloadBootstrapCompiler: boolean;
@@ -1144,6 +1141,12 @@ begin
   FCrossCPU_Target:=AValue;
 end;
 
+procedure TInstaller.SetCrossLCL_Platform(AValue: string);
+begin
+  if FCrossLCL_Platform=AValue then Exit;
+  FCrossLCL_Platform:=AValue;
+end;
+
 procedure TInstaller.SetCrossOS_Target(AValue: string);
 begin
   if FCrossOS_Target=AValue then Exit;
@@ -1470,6 +1473,34 @@ var
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
+
+  function distclean():boolean;
+  var
+    oldlog:TErrorMethod;
+  begin
+    // Make distclean; we don't care about failure (e.g. directory might be empty etc)
+    oldlog:=ProcessEx.OnErrorM;
+    ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
+    ProcessEx.Executable := FMake;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    if FCrossCompiling then
+      begin  // clean out the correct compiler
+      ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+      ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+      end;
+    ProcessEx.Parameters.Add('distclean');
+    infoln('FPC: running make distclean before checkout/update:');
+    ProcessEx.Execute;
+    ProcessEx.OnErrorM:=oldlog;
+  end;
+
+
+
 begin
   infoln('Module FPC: Getting/compiling FPC...');
 
@@ -1481,7 +1512,10 @@ begin
   writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
   {$ENDIF MSWINDOWS}
 
+  FCrossCompiling:=(FCrossCPU_Target<>'') or (FCrossOS_Target<>'');
+
   ProcessEx:=TProcessEx.Create(nil);
+  ProcessEx.OnErrorM:=@LogError;
   if Verbose then
     ProcessEx.OnOutputM:=@DumpOutput;
 
@@ -1505,21 +1539,7 @@ begin
 
   //Make distclean to clean out any cruft, and speed up svn update
   if OperationSucceeded then
-  begin
-    // Make distclean; we don't care about failure (e.g. directory might be empty etc)
-    ProcessEx.Executable := FMake;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
-    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    ProcessEx.Parameters.Add('distclean');
-    infoln('FPC: running make distclean before checkout/update:');
-    ProcessEx.Execute;
-  end;
-
-  ProcessEx.OnErrorM:=@LogError;  //don't want to log errors in distclean
+    distclean;
 
   infoln('Checking out/updating FPC sources...');
   UpdateWarnings:=TStringList.Create;
@@ -1537,159 +1557,159 @@ begin
   infoln('FPC was at revision: '+BeforeRevision);
   if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision) else infoln('No updates for FPC found.');
 
-  if OperationSucceeded then
-  begin
-    // Make all/install, using bootstrap compiler.
-    // Make all should use generated compiler internally for unit compilation
-    {$IFDEF UNIX}
-    // the long way: make all, see where to install, install
-    ProcessEx.Executable := FMake;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
-    if FFPCOPT<>'' then
-      ProcessEx.Parameters.Add('OPT='+FFPCOPT);
-    ProcessEx.Parameters.Add('all');
-    infoln('Running make all for FPC:');
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-      OperationSucceeded := False;
-    FPCVersion:=GetFPCVersion;
-    FPCTarget:=GetFPCTarget;
-    BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+FPCTarget;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
-    ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-    ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
-    ProcessEx.Parameters.Add('install');
-    infoln('Running make install for FPC:');
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-      OperationSucceeded := False;
-    // copy the freshly created compiler to the bin/$fpctarget directory so that
-    // fpc can find it
-    if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
-      repeat
-        s:=SearchRec.Name;
-        if (length(s)>4) and (pos(s,COMPILERNAMES) >0) then  //length(s)>4 skips ppc3
+  if not FCrossCompiling or (GetFPCTarget='i386-win32') then
+    begin  //native install
+      if OperationSucceeded then
+      begin
+        // Make all/install, using bootstrap compiler.
+        // Make all should use generated compiler internally for unit compilation
+        {$IFDEF UNIX}
+        // the long way: make all, see where to install, install
+        ProcessEx.Executable := FMake;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+        ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+        if FFPCOPT<>'' then
+          ProcessEx.Parameters.Add('OPT='+FFPCOPT);
+        ProcessEx.Parameters.Add('all');
+        infoln('Running make all for FPC:');
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus <> 0 then
+          OperationSucceeded := False;
+        FPCVersion:=GetFPCVersion;
+        FPCTarget:=GetFPCTarget;
+        BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+FPCTarget;
+        ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+        ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+        ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
+        ProcessEx.Parameters.Add('install');
+        infoln('Running make install for FPC:');
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus <> 0 then
+          OperationSucceeded := False;
+        // copy the freshly created compiler to the bin/$fpctarget directory so that
+        // fpc can find it
+        if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
+          repeat
+            s:=SearchRec.Name;
+            if (length(s)>4) and (pos(s,COMPILERNAMES) >0) then  //length(s)>4 skips ppc3
+              begin
+              OperationSucceeded:=OperationSucceeded and
+                FileUtil.CopyFile(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/'+s,
+                 IncludeTrailingPathDelimiter(BinPath)+s);
+              OperationSucceeded:=OperationSucceeded and
+                (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
+              end;
+          until FindNext(SearchRec)<>0;
+        // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
+        DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
+        fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
+        pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
+        {$ELSE UNIX}
+        ProcessEx.Executable := FMake;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
+        ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
+        ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        if FFPCOPT<>'' then
+          ProcessEx.Parameters.Add('OPT='+FFPCOPT);
+        ProcessEx.Parameters.Add('all');
+        ProcessEx.Parameters.Add('install');
+        infoln('Running make all install for FPC:');
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus <> 0 then
+          OperationSucceeded := False;
+        {$ENDIF UNIX}
+      end;
+
+      {$IFDEF UNIX}
+      if OperationSucceeded then
+      begin
+        // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+        // If this fails, Lazarus compilation will fail...
+        FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
+        if FileExists(FPCScript) then
+        begin
+          infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
+          sysutils.DeleteFile(FPCScript);
+        end;
+        AssignFile(TxtFile,FPCScript);
+        Rewrite(TxtFile);
+        writeln(TxtFile,'#!/bin/sh');
+        writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+        writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+        writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+        writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
+             IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
+             IncludeTrailingPathDelimiter(BinPath)+' $*');
+        CloseFile(TxtFile);
+        OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+        if OperationSucceeded then
+        begin
+          infoln('Created launcher script for FPC:'+FPCScript);
+        end
+        else
+        begin
+          infoln('Error creating launcher script for FPC:'+FPCScript);
+        end;
+      end;
+      {$ENDIF UNIX}
+
+      // Let everyone know of our shiny new CompilerName:
+      if OperationSucceeded then
+      begin
+        SetCompilerToInstalledCompiler;
+      end
+      else
+      begin
+        FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
+      end;
+
+      {$IFDEF MSWINDOWS}
+      if OperationSucceeded then
+      begin
+        //Copy over binutils to new CompilerName bin directory
+        try
+          for FileCounter:=0 to FBinUtils.Count-1 do
           begin
-          OperationSucceeded:=OperationSucceeded and
-            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/'+s,
-             IncludeTrailingPathDelimiter(BinPath)+s);
-          OperationSucceeded:=OperationSucceeded and
-            (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
+            FileUtil.CopyFile(FMakeDir+FBinUtils[FileCounter], ExtractFilePath(FInstalledCompiler)+FBinUtils[FileCounter]);
           end;
-      until FindNext(SearchRec)<>0;
-    // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
-    DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
-    fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
-    pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
-    {$ELSE UNIX}
-    ProcessEx.Executable := FMake;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
-    ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
-    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    if FFPCOPT<>'' then
-      ProcessEx.Parameters.Add('OPT='+FFPCOPT);
-    ProcessEx.Parameters.Add('all');
-    ProcessEx.Parameters.Add('install');
-    infoln('Running make all install for FPC:');
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-      OperationSucceeded := False;
-    {$ENDIF UNIX}
-  end;
-
-  {$IFDEF UNIX}
-  if OperationSucceeded then
-  begin
-    // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
-    // If this fails, Lazarus compilation will fail...
-    FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
-    if FileExists(FPCScript) then
-    begin
-      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
-      sysutils.DeleteFile(FPCScript);
-    end;
-    AssignFile(TxtFile,FPCScript);
-    Rewrite(TxtFile);
-    writeln(TxtFile,'#!/bin/sh');
-    writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
-    writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
-    writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-    writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
-         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
-         IncludeTrailingPathDelimiter(BinPath)+' $*');
-    CloseFile(TxtFile);
-    OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
-    if OperationSucceeded then
-    begin
-      infoln('Created launcher script for FPC:'+FPCScript);
-    end
-    else
-    begin
-      infoln('Error creating launcher script for FPC:'+FPCScript);
-    end;
-  end;
-  {$ENDIF UNIX}
-
-  // Let everyone know of our shiny new CompilerName:
-  if OperationSucceeded then
-  begin
-    SetCompilerToInstalledCompiler;
-  end
-  else
-  begin
-    FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
-  end;
-
-  {$IFDEF MSWINDOWS}
-  if OperationSucceeded then
-  begin
-    //Copy over binutils to new CompilerName bin directory
-    try
-      for FileCounter:=0 to FBinUtils.Count-1 do
-      begin
-        FileUtil.CopyFile(FMakeDir+FBinUtils[FileCounter], ExtractFilePath(FInstalledCompiler)+FBinUtils[FileCounter]);
+          // Also, we can change the make/binutils path to our new environment
+          // Will modify fmake as well.
+          MakeDirectory:=ExtractFilePath(FInstalledCompiler);
+        except
+          on E: Exception do
+          begin
+            infoln('Error copying binutils: '+E.Message);
+            OperationSucceeded:=false;
+          end;
+        end;
       end;
-      // Also, we can change the make/binutils path to our new environment
-      // Will modify fmake as well.
-      MakeDirectory:=ExtractFilePath(FInstalledCompiler);
-    except
-      on E: Exception do
-      begin
-        infoln('Error copying binutils: '+E.Message);
-        OperationSucceeded:=false;
-      end;
-    end;
-  end;
-  {$ENDIF MSWINDOWS}
+      {$ENDIF MSWINDOWS}
+    end; //native build
 
-  {$IFDEF MSWINDOWS}
-  if OperationSucceeded then
-    if not ModuleEnabled('WINCROSSX64') then
-    begin
-      OperationSucceeded:=true;  //continue with whatever we do next
-      infoln('Module WINCROSSX64: skipped by user.');
-      writeln(FLogFile,'Module WINCROSSX64: skipped by user.');
-    end
-    else
+
+  if FCrossCompiling or (OperationSucceeded and (GetFPCTarget='i386-win32') and ModuleEnabled('WINCROSSX64')) then
     begin
       // Make crosscompiler using new compiler
       // todo: check out what cross compilers we can install on Linux/OSX (win32?)
       // todo: possibly move this to a separate section that will be called after fpc compilation (reason: we need a valid compiler0.
       // Note: consider this as an optional item, so don't fail the function if this breaks.
 
-      //Hardcode her
-      FCrossCPU_Target:='x86_64';
-      FCrossOS_Target:='win64';
-
+      if GetFPCTarget='i386-win32' then
+        begin
+        //Hardcode her
+        FCrossCPU_Target:='x86_64';
+        FCrossOS_Target:='win64';
+        FCrossCompiling:=true;  // for distclean
+        distclean; // clean the x64 compiler
+        end;
       CrossInstaller:=GetCrossInstaller;
       if assigned(CrossInstaller) then
         if not CrossInstaller.GetBinUtils(FPCDirectory) then
@@ -1698,8 +1718,6 @@ begin
           infoln('Failed to get cross libraries')
         else
           begin
-          if CrossInstaller.BinUtilsPath<>'' then
-            ProcessEx.Environment.SetVar('Path',CrossInstaller.BinUtilsPath+';'+ProcessEx.Environment.GetVar('Path'));
           ProcessEx.Executable := FMake;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
           ProcessEx.Parameters.Clear;
@@ -1711,9 +1729,14 @@ begin
           //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
           // => gives bin\i386-win32\ppcrossx64.exe
           //but not in this program..
-          ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
+          if GetFPCTarget='i386-win32' then
+            ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'')
+          else
+            ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
           ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+          if CrossInstaller.BinUtilsPath<>'' then
+            ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FPCDirectory));
           ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           //putting all before target might help!?!?
@@ -1724,9 +1747,13 @@ begin
           if CrossInstaller.LibsPath<>''then
             Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
           if CrossInstaller.BinUtilsPrefix<>'' then
+            begin
             Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
+            ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+            end;
           if Options<>'' then
             ProcessEx.Parameters.Add('OPT='+Options);
+          infoln('Running Make crossinstall for FPC:');
           ProcessEx.Execute;
 
           if ProcessEx.ExitStatus = 0 then
@@ -1740,25 +1767,33 @@ begin
               ProcessEx.Parameters.Clear;
               ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
               ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+              if CrossInstaller.BinUtilsPath<>'' then
+                ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FPCDirectory));
               ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
               ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
               //putting crossinstall before target might help!?!?
               ProcessEx.Parameters.Add('crossinstall');
               ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
               ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+              if CrossInstaller.BinUtilsPrefix<>'' then
+                begin
+                ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+                end;
 
               // Note: consider this as an optional item, so don't fail the function if this breaks.
               ProcessEx.Execute;
               if ProcessEx.ExitStatus<>0 then
               begin
                 infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
-              end;
+                FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
+              end
+              else
+                SetCompilerToInstalledCompiler;
             end;
         end
       else
         infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
-    end;
-  {$ENDIF MSWINDOWS}
+    end; //cross build
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
   if OperationSucceeded then

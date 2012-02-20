@@ -78,6 +78,8 @@ begin
   writeln(' clean                 Don''t build; clear out all modules');
   writeln('                       or limit cleaning to certain modules');
   writeln('                       (see "only" and "skip")');
+  writeln(' cputarget=<name>      CPU target for cross_compiling. <name> has to be one of the following:');
+  writeln('                       i386,m68k,alpha,powerpc,powerpc64,armeb,arm,sparc,x86_64,ia64');
   writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
@@ -104,10 +106,14 @@ begin
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
   writeln(' lazOPT=<options>      Options passed on to the lazarus make as OPT=options.');
+  writeln(' lclplatform=<name>    lcl widget set. <name> has to be one of the following:');
+  writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
   writeln(' noconfirm             No confirmation asked. For batch operation. ');
   writeln(' only=<values>         update and build only the modules specified.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
+  writeln(' ostarget=<name>       OS target for cross_compiling. <name> has to be one of the following:');
+  writeln('                       darwin,freebsd,linux,netbsd,openbsd,os2,solaris,wince,win32,win64');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
@@ -118,7 +124,6 @@ begin
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
   writeln(' verbose               Show output from svn and make');
-  //todo: not only write --verbose output to console, also to separate log file, e.g. in temp dir, like error logs are now written.
   writeln('');
 
 end;
@@ -128,6 +133,7 @@ const
   //Parameter names:
   BinutilsDir='binutilsdir';
   Clean='clean';
+  CPUTarget='cputarget';
   FPCBootstrapDir='fpcbootstrapdir';
   FPCDir='fpcdir';
   FPCURL='fpcURL';
@@ -138,8 +144,10 @@ const
   FpcupLinkName='fpcuplinkname';
   LazURL='lazURL';
   LazOPT='lazOPT';
+  LCLPlatform='lclplatform';
   LazRevision='lazrevision';
   FPCRevision='fpcrevision';
+  OSTarget='ostarget';
   PrimaryConfigPath='primary-config-path';
   Skip='skip';
   Only='only';
@@ -178,6 +186,7 @@ begin
     'h', Binutilsdir+': '+Clean+' '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
     Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+
+    CPUTarget+': '+LCLPlatform+': '+OSTarget+': '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
   if Length(ErrorMessage) > 0 then
   begin
@@ -204,6 +213,12 @@ begin
   if Application.HasOption(Clean) then
   begin
     FInstaller.Clean:=true;
+  end;
+
+  if Application.HasOption(CPUTarget) then
+  begin
+    FInstaller.CrossCPU_Target:=Application.GetOptionValue(CPUTarget);
+    AllOptions:=AllOptions+'--'+CPUTarget+'='+FInstaller.CrossCPU_Target;
   end;
 
   if Application.HasOption(FPCBootstrapDir) then
@@ -273,6 +288,12 @@ begin
     AllOptions:=AllOptions+'--'+LazURL+'="'+FInstaller.LazarusDirectory+'" ';
   end;
 
+  if Application.HasOption(LCLPlatform) then
+  begin
+    FInstaller.CrossLCL_Platform:=Application.GetOptionValue(LCLPlatform);
+    AllOptions:=AllOptions+'--'+LCLPlatform+'='+FInstaller.CrossLCL_Platform;
+  end;
+
   if Application.HasOption(Skip) then
   begin
     //todo: let installer.pas show list of modules at compile time. Select from these for
@@ -283,6 +304,12 @@ begin
   if Application.HasOption(Only) then
   begin
     FInstaller.OnlyModules:=Application.GetOptionValue(Only);
+  end;
+
+  if Application.HasOption(OSTarget) then
+  begin
+    FInstaller.CrossOS_Target:=Application.GetOptionValue(OSTarget);
+    AllOptions:=AllOptions+'--'+OSTarget+'='+FInstaller.CrossOS_Target;
   end;
 
   if Application.HasOption(PrimaryConfigPath) then
