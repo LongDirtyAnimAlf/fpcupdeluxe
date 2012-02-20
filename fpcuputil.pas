@@ -161,7 +161,6 @@ end;
 
 function DownloadHTTPStream(URL: string; Buffer: TStream): boolean;
   // Download file; retry if necessary.
-  // If SFDetection enabled, detect and deal with SourceForge downloads
 const
   MaxRetries = 3;
 var
