@@ -1536,21 +1536,23 @@ begin
   if OperationSucceeded then
     distclean;
 
-  infoln('Checking out/updating FPC sources...');
-  UpdateWarnings:=TStringList.Create;
-  try
-   if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision, UpdateWarnings);
-   if UpdateWarnings.Count>0 then
-   begin
-     infoln(UpdateWarnings.Text);
-     writeln(FLogFile, UpdateWarnings.Text);
-   end;
-  finally
-    UpdateWarnings.Free;
+  if OperationSucceeded then
+  begin
+    infoln('Checking out/updating FPC sources...');
+    UpdateWarnings:=TStringList.Create;
+    try
+     if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision, UpdateWarnings);
+     if UpdateWarnings.Count>0 then
+     begin
+       infoln(UpdateWarnings.Text);
+       writeln(FLogFile, UpdateWarnings.Text);
+     end;
+    finally
+      UpdateWarnings.Free;
+    end;
+    infoln('FPC was at revision: '+BeforeRevision);
+    if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision) else infoln('No updates for FPC found.');
   end;
-
-  infoln('FPC was at revision: '+BeforeRevision);
-  if FUpdater.Updated then infoln('FPC is now at revision: '+AfterRevision) else infoln('No updates for FPC found.');
 
   if not FCrossCompiling then
     begin  //native install
