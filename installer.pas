@@ -391,24 +391,14 @@ begin
     {$ENDIF LINUX}
     {$IFDEF DARWIN}
     //Extract .tar.bz2, overwriting without prompting
-    Params:=TStringList.Create;
-    try
-      Params.Add('-x');
-      Params.Add('-v');
-      Params.Add('-j');
-      Params.Add('-f');
-      Params.Add(BootstrapArchive); // zip/archive file
-      if Run(FTar, Params, '') <> 0 then
-      begin
-        infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
-        OperationSucceeded := False;
-      end
-      else
-      begin
-        OperationSucceeded := True; // Spelling it out can't hurt sometimes
-      end;
-    finally
-      Params.Free;
+    if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,Verbose) <> 0 then    
+    begin
+      infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
+      OperationSucceeded := False;
+    end
+    else
+    begin
+      OperationSucceeded := True; // Spelling it out can't hurt sometimes
     end;
     // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
