@@ -6,8 +6,8 @@ uses
   {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
   {$ENDIF}{$ENDIF}
-  Classes, SysUtils, CustApp,
-  fpcuputil;
+  Classes, SysUtils, CustApp, fpcuputil, httpsend, synsock, blcksock, ftpsend,
+  synacode, synafpc, synaip, synautil;
 
 type
 
