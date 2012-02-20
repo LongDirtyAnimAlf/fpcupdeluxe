@@ -51,7 +51,7 @@ var
 
 initialization
   Win32To64:=TWin32To64.Create;
-  RegisterExtension(Win32To64.TargetCPU+'-'+Win32To64.TargetCPU,Win32To64);
+  RegisterExtension(Win32To64.TargetCPU+'-'+Win32To64.TargetOS,Win32To64);
 finalization
   Win32To64.Destroy;
 end.
