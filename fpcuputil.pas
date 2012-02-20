@@ -219,7 +219,6 @@ begin
           URL:=Copy(HTMLBody[Counter],
             URLStart,
             PosEx('"',HTMLBody[Counter],URLStart+1)-URLStart);
-          infoln('debug: new url after sf noscript:');
           infoln(URL);
           break;
         end;
@@ -300,8 +299,6 @@ begin
       while not FoundCorrectURL do
       begin
         HTTPSender.HTTPMethod('GET', URL);
-        infoln('debug: headers:');
-        infoln(HTTPSender.Headers.Text);
         case HTTPSender.Resultcode of
           301, 302, 307:
             begin
@@ -326,8 +323,12 @@ begin
             end;
           100..200:
             begin
-              //Assume a sourceforge timer/direct link page
-              URL:=SFDirectLinkURL(URL, HTTPSender.Document); //Find out
+              //Could be a sourceforge timer/direct link page, but...
+              if AnsiPos('Content-Type: text/html', HTTPSender.Headers.Text)>0 then
+              begin
+                // find out... it's at least not a binary
+                URL:=SFDirectLinkURL(URL, HTTPSender.Document);
+              end;
               FoundCorrectURL:=true; //We're done by now
             end;
           500: raise Exception.Create('No internet connection available');
@@ -337,7 +338,6 @@ begin
               IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
         end;//case
       end;//while
-      infoln('debug: resulting url after sf redir: *' + URL + '*');
     finally
       HTTPSender.Free;
     end;
