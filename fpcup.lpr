@@ -137,7 +137,7 @@ begin
   writeln('');
 end;
 
-procedure CheckOptions(FInstaller: TInstaller);
+function CheckOptions(FInstaller: TInstaller):integer;
 const
   //Parameter names:
   BinutilsDir='binutilsdir';
@@ -168,6 +168,7 @@ var
   bNoConfirm:boolean;
   sconfirm:string;
 begin
+  result:=-1; //no error
   // Default values
   FInstaller.ShortCutName:='Lazarus_trunk';
   FInstaller.ShortCutNameFpcup:='fpcup_update';
@@ -204,8 +205,8 @@ begin
     writeln('Error: wrong command line options given:');
     writeln(ErrorMessage);
     WriteHelp;
-    FInstaller.Free;
-    halt(13); //Quit with error resultcode
+    result:=13; //Quit with error resultcode
+    exit
   end;
 
   AllOptions:='';
@@ -265,8 +266,7 @@ begin
   if Application.HasOption('h', Help) then
   begin
     writehelp;
-    FInstaller.Free;
-    halt(0); //quit without error
+    result:=0; //quit without error
   end;
 
   if Application.HasOption(LazDir) then
@@ -389,8 +389,7 @@ begin
     readln(sconfirm);
     if uppercase(copy(sconfirm,1,1))='N' then
       begin
-      FInstaller.Free;
-      halt(0); //quit without error
+      result:=0; //quit without error
       end;
     end;
 end;
@@ -410,7 +409,7 @@ end;
 
 var
   FInstaller: TInstaller;
-
+  res:integer;
 begin
   writeln('fpcup');
   writeln('An FPC/Lazarus downloader/updater/installer');
@@ -427,16 +426,18 @@ begin
   try
     // Adjust these directories to taste/your situation.
     FInstaller := TInstaller.Create;
-    CheckOptions(FInstaller); //Process command line arguments
-
-    // Get/update/compile selected modules
-    if FInstaller.Run=false then
-    begin
-      writeln('fpcup failed.');
-      ShowErrorHints;
-    end;
+    res:=CheckOptions(FInstaller); //Process command line arguments
+    if res=-1 then
+      // Get/update/compile selected modules
+      if FInstaller.Run=false then
+      begin
+        writeln('fpcup failed.');
+        ShowErrorHints;
+      end;
   finally
     FInstaller.Free;
   end;
   writeln('FPCUp finished.');
+  if res<>-1 then
+    halt(res);
 end.
