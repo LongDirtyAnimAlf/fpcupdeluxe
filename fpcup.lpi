@@ -82,7 +82,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="16">
+    <Units Count="18">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -160,6 +160,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="ftpsend"/>
       </Unit15>
+      <Unit16>
+        <Filename Value="m_crosswin64.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crosswin64"/>
+      </Unit16>
+      <Unit17>
+        <Filename Value="m_crossinstaller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crossinstaller"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
