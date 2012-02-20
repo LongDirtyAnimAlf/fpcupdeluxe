@@ -46,7 +46,13 @@ end;
 
 constructor TCrossInstaller.Create;
 begin
-
+  // Help ensure our implementers do the right thing with the variables
+  // in their extensions
+  FBinUtilsPath:='Error: cross compiler extension must set FBinUtilsPath';
+  FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix';
+  FLibsPath:='Error: cross compiler extension must set FLibsPath';
+  FTargetCPU:='Error: cross compiler extension must set FTargetCPU';
+  FTargetOS:='Error: cross compiler extension must set FTargetOS';
 end;
 
 destructor TCrossInstaller.Destroy;
@@ -58,4 +64,4 @@ finalization
 if assigned(CrossInstallers) then
   CrossInstallers.Destroy;
 end.
-
+
