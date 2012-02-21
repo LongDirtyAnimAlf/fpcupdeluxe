@@ -171,6 +171,8 @@ type
     //SVN URL for Lazarus
     property LazarusOPT:string read FLazarusOPT write SetLazarusOPT;
     property LazarusDesiredRevision:string read GetLazarusRevision write SetLazarusDesiredRevision;
+    procedure WriteLog(msg:string;ToConsole:boolean=true);
+    procedure WritelnLog(msg:string;ToConsole:boolean=true);
     property MakeDirectory: string read GetMakePath write SetMakePath;
     //Directory of make executable and other binutils. If it doesn't exist, make and binutils will be downloaded
     function Run: boolean;
@@ -532,7 +534,7 @@ begin
       TempFileName:=SysUtils.GetTempFileName;
       AssignFile(FLogVerboseFile,TempFileName);
       Rewrite(FLogVerboseFile);
-      Writeln(FLogFile,'Verbose output saved to ',TempFileName);
+      WritelnLog('Verbose output saved to '+TempFileName,false);
       end;
     write(FLogVerboseFile,output);
     end;
@@ -892,7 +894,7 @@ begin
   ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+':'+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
-    writeln(FLogFile,'External program path:  '+CustomPath);
+    writelnLog('External program path:  '+CustomPath,false);
 
   // Location of build_lcl_docs.lpr, and also of the help files to be installed.
   BuildLCLDocsDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
@@ -1002,11 +1004,25 @@ begin
   result:=OperationSucceeded;
 end;
 
+procedure TInstaller.WriteLog(msg: string; ToConsole: boolean);
+begin
+  Write(FLogFile,msg);
+  if ToConsole then
+    InfoLn(msg);
+end;
+
+procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
+begin
+  WriteLog(msg+LineEnding,false); //infoln adds alread a lf
+  if ToConsole then
+    InfoLn(msg);
+end;
+
 function TInstaller.Run: boolean;
 var
   OperationSucceeded:boolean;
 begin
-  Writeln(FLogFile,'Running fpcup with parameters: ',FAllOptions,' --only=',FOnlyModules,' --skip=',FSkipModules);
+  WritelnLog('Running fpcup with parameters: '+FAllOptions+' --only='+FOnlyModules+' --skip='+FSkipModules,false);
   OperationSucceeded:=true;
   if Clean then
   begin
@@ -1020,34 +1036,29 @@ begin
     begin
       // Nuclear cleaning: delete entire FPC+Lazarus directories, but
       // don't remove primary config path or shortcuts
-      infoln('User selected --clean without options. Total cleanup started.');
-      writeln(FLogFile,'User selected --clean without options. Total cleanup started.');
+      WritelnLog('User selected --clean without options. Total cleanup started.');
       if FPCDirectory='' then
       begin
-        infoln('Error: FPC directory not known. Not cleaning FPC directory.');
-        writeln(FLogFile,'Error: FPC directory not known. Not cleaning FPC directory.');
+        WritelnLog('Error: FPC directory not known. Not cleaning FPC directory.');
       end
       else
       begin
         // todo: deletedirectory returns false on Windows; directory not removed either
         if fileutil.DeleteDirectory(FPCDirectory,false)=false then
         begin
-          infoln('Error deleting FPC directory '+FPCDirectory);
-          writeln(FLogFile,'Error deleting FPC directory '+FPCDirectory);
+          WritelnLog('Error deleting FPC directory '+FPCDirectory);
         end;
       end;
       if LazarusDirectory='' then
       begin
-        infoln('Error: Lazarus directory not known. Not cleaning Lazarus directory.');
-        writeln(FLogFile,'Error: Lazarus directory not known. Not cleaning Lazarus directory.');
+        WritelnLog('Error: Lazarus directory not known. Not cleaning Lazarus directory.');
       end
       else
       begin
         // todo: deletedirectory returns false on Windows; directory not removed either
         if fileutil.DeleteDirectory(LazarusDirectory,false)=false then
         begin
-          infoln('Error deleting Lazarus directory '+LazarusDirectory);
-          writeln(FLogFile,'Error deleting Lazarus directory '+LazarusDirectory);
+          WritelnLog('Error deleting Lazarus directory '+LazarusDirectory);
         end;
       end;
       // Nuclear cleaning finished
@@ -1061,8 +1072,7 @@ begin
       end
       else
       begin
-        infoln('FPC cleanup skipped by user.');
-        writeln(FLogFile,'FPC clean skipped by user.');
+        WritelnLog('FPC cleanup skipped by user.');
       end;
 
       if ModuleEnabled('LAZARUS') or ModuleEnabled('HELP')
@@ -1072,8 +1082,7 @@ begin
       end
       else
       begin
-        infoln('Module LAZARUS: cleanup skipped by user.');
-        writeln(FLogFile,'Module LAZARUS: cleanup skipped by user.');
+        WritelnLog('Module LAZARUS: cleanup skipped by user.');
       end;
 
       if ModuleEnabled('HELP') then
@@ -1082,8 +1091,7 @@ begin
       end
       else
       begin
-        infoln('Lazarus cleanup skipped by user.');
-        writeln(FLogFile,'Lazarus cleanup skipped by user.');
+        WritelnLog('Lazarus cleanup skipped by user.');
       end;
     end;
   end
@@ -1107,8 +1115,7 @@ begin
     end
     else
     begin
-      infoln('FPC installation/update skipped by user.');
-      writeln(FLogFile,'FPC installation/update skipped by user.');
+      WritelnLog('FPC installation/update skipped by user.');
     end;
 
     if ModuleEnabled('LAZARUS') or ModuleEnabled('HELP')
@@ -1118,8 +1125,7 @@ begin
     end
     else
     begin
-      infoln('Module LAZARUS: installation/update skipped by user.');
-      writeln(FLogFile,'Module LAZARUS: installation/update skipped by user.');
+      WritelnLog('Module LAZARUS: installation/update skipped by user.');
     end;
 
     if ModuleEnabled('HELP') then
@@ -1128,8 +1134,7 @@ begin
     end
     else
     begin
-      infoln('Lazarus help skipped by user.');
-      writeln(FLogFile,'Lazarus help skipped by user.');
+      WritelnLog('Lazarus help skipped by user.');
     end;
   end;
   result:=OperationSucceeded;
@@ -1147,18 +1152,16 @@ begin
   TempFileName:=SysUtils.GetTempFileName;
   if IsException then
     begin
-    infoln('Command raised an exception: ');
-    infoln(Sender.ExceptionInfo);
-    WriteLn(FLogFile,'Exception raised running ',Sender.Executable + ' ' +Sender.ParametersString);
-    WriteLn(FLogFile,Sender.ExceptionInfo);
+    WritelnLog('Exception raised running ',Sender.Executable + ' ' +Sender.ParametersString);
+    WritelnLog(Sender.ExceptionInfo);
     end
   else
     begin
     infoln('Command returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus)+'. Output:');
     infoln(Sender.OutputString);
-    WriteLn(FLogFile,'ERROR running ',Sender.Executable + ' ' +Sender.ParametersString);
+    WritelnLog('ERROR running '+Sender.Executable + ' ' +Sender.ParametersString,false);
     Sender.OutputStrings.SaveToFile(TempFileName);
-    WriteLn(FLogFile,'  output logged in ',TempFileName);
+    WritelnLog('  output logged in '+TempFileName,false);
     end;
 end;
 
@@ -1364,12 +1367,12 @@ begin
   OperationSucceeded:=true;
   infoln('Module FPC: cleanup...');
 
-  writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
-  writeln(FLogFile,'FPC URL:                '+FPCURL);
-  writeln(FLogFile,'FPC options:            '+FPCOPT);
-  writeln(FLogFile,'FPC directory:          '+FPCDirectory);
+  WritelnLog('Bootstrap compiler dir: '+BootstrapCompilerDirectory,false);
+  WritelnLog('FPC URL:                '+FPCURL,false);
+  WritelnLog('FPC options:            '+FPCOPT,false);
+  WritelnLog('FPC directory:          '+FPCDirectory,false);
   {$IFDEF MSWINDOWS}
-  writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
+  WritelnLog('Make/binutils path:     '+MakeDirectory,false);
   {$ENDIF MSWINDOWS}
 
   try
@@ -1397,8 +1400,7 @@ begin
   except
     on E: Exception do
     begin
-      infoln('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      writeln(FLogFile, 'FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      WritelnLog('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
       OperationSucceeded:=false;
     end;
   end;
@@ -1416,13 +1418,11 @@ begin
    // SVN revert Lazarus directory
    FUpdater.RevertLazarus;
 
-   infoln('Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
-   writeln(FLogFile, 'Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
+   WritelnLog('Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
   except
     on E: Exception do
     begin
-      infoln('Lazarus clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      writeln(FLogFile, 'Lazarus clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      WritelnLog('Lazarus clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
       OperationSucceeded:=false;
     end;
   end;
@@ -1463,8 +1463,7 @@ begin
   except
     on E: Exception do
     begin
-      infoln('HELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      writeln(FLogFile, 'HELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      WritelnLog('HELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
       OperationSucceeded:=false;
     end;
   end;
@@ -1544,12 +1543,12 @@ const
 begin
   infoln('Module FPC: Getting/compiling FPC...');
 
-  writeln(FLogFile,'Bootstrap compiler dir: '+BootstrapCompilerDirectory);
-  writeln(FLogFile,'FPC URL:                '+FPCURL);
-  writeln(FLogFile,'FPC options:            '+FPCOPT);
-  writeln(FLogFile,'FPC directory:          '+FPCDirectory);
+  WritelnLog('Bootstrap compiler dir: '+BootstrapCompilerDirectory,false);
+  WritelnLog('FPC URL:                '+FPCURL,false);
+  WritelnLog('FPC options:            '+FPCOPT,false);
+  WritelnLog('FPC directory:          '+FPCDirectory,false);
   {$IFDEF MSWINDOWS}
-  writeln(FLogFile,'Make/binutils path:     '+MakeDirectory);
+  WritelnLog('Make/binutils path:     '+MakeDirectory,false);
   {$ENDIF MSWINDOWS}
 
   FCrossCompiling:=(FCrossCPU_Target<>'') or (FCrossOS_Target<>'');
@@ -1572,7 +1571,7 @@ begin
   ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
-    writeln(FLogFile,'External program path:  '+CustomPath);
+    WritelnLog('External program path:  '+CustomPath,false);
 
   //Make sure we have the proper tools:
   OperationSucceeded:=CheckAndGetNeededExecutables;
@@ -1589,8 +1588,7 @@ begin
      if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateFPC(BeforeRevision, AfterRevision, UpdateWarnings);
      if UpdateWarnings.Count>0 then
      begin
-       infoln(UpdateWarnings.Text);
-       writeln(FLogFile, UpdateWarnings.Text);
+       WritelnLog(UpdateWarnings.Text);
      end;
     finally
       UpdateWarnings.Free;
@@ -1870,7 +1868,7 @@ begin
   end;
 
   if OperationSucceeded then
-    writeln(FLogFile,'FPC: update succeeded at revision number ', AfterRevision);
+    WritelnLog('FPC: update succeeded at revision number '+ AfterRevision,false);
   ProcessEx.Free;
   Result := OperationSucceeded;
 end;
@@ -1951,13 +1949,13 @@ var
 begin
   infoln('Module LAZARUS: Getting/compiling Lazarus...');
 
-  writeln(FLogFile,'Lazarus directory:      '+LazarusDirectory);
-  writeln(FLogFile,'Lazarus primary config path:',LazarusPrimaryConfigPath);
-  writeln(FLogFile,'Lazarus URL:            '+LazarusURL);
-  writeln(FLogFile,'Lazarus options:        '+LazarusOPT);
-  writeln(FLogFile,'Lazarus shortcut name:  '+ShortCutName);
+  WritelnLog('Lazarus directory:      '+LazarusDirectory,false);
+  WritelnLog('Lazarus primary config path:',LazarusPrimaryConfigPath,false);
+  WritelnLog('Lazarus URL:            '+LazarusURL,false);
+  WritelnLog('Lazarus options:        '+LazarusOPT,false);
+  WritelnLog('Lazarus shortcut name:  '+ShortCutName,false);
   if ShortCutNameFpcup<>'' then
-    writeln(FLogFile,'Shortcut fpcup name:    '+ShortCutNameFpcup);
+    WritelnLog('Shortcut fpcup name:    '+ShortCutNameFpcup,false);
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
 
@@ -1991,7 +1989,7 @@ begin
   ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
-    writeln(FLogFile,'External program path:  '+CustomPath);
+    WritelnLog('External program path:  '+CustomPath,false);
 
   // Make distclean to clean out any cruft, and speed up svn update
   if OperationSucceeded then
@@ -2008,8 +2006,7 @@ begin
      if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateLazarus(BeforeRevision, AfterRevision, UpdateWarnings);
      if UpdateWarnings.Count>0 then
      begin
-       infoln(UpdateWarnings.Text);
-       writeln(FLogFile, UpdateWarnings.Text);
+       WritelnLog(UpdateWarnings.Text);
      end;
     finally
       UpdateWarnings.Free;
@@ -2144,15 +2141,13 @@ begin
           //todo: find out if lhelp support can be realized by just compiling
           //package chmhelppkg in some way
           OperationSucceeded:=true;  //continue with whatever we do next
-          infoln('Module BIGIDE: skipped by user.');
-          writeln(FLogFile,'Module BIGIDE: skipped by user.');
+          WritelnLog('Module BIGIDE: skipped by user.');
         end
         else
         begin
           if ModuleEnabled('BIGIDE')=false then
           begin
-            infoln('Module BIGIDE: required by module: HELP');
-            writeln(FLogFile,'Module BIGIDE: required by module: HELP');
+            WritelnLog('Module BIGIDE: required by module: HELP');
           end;
           // Make bigide: ide with additional packages as specified by user (in primary config path?)
           // this should also make the lhelp package needed for CHM Help.
@@ -2178,8 +2173,7 @@ begin
         if not ModuleEnabled('HELP') then
         begin
           OperationSucceeded:=true;  //continue with whatever we do next
-          infoln('Module HELP: skipped by user; not building lhelp help viewer.');
-          writeln(FLogFile,'Module HELP: skipped by user; not building lhelp help viewer.');
+          WritelnLog('Module HELP: skipped by user; not building lhelp help viewer.');
         end
         else
         begin
@@ -2201,8 +2195,7 @@ begin
           ProcessEx.Execute;
           if ProcessEx.ExitStatus <> 0 then
           begin
-            infoln('Lazarus: error compiling lhelp help viewer.');
-            writeln(FLogFile, 'Lazarus: error compiling lhelp help viewer.');
+            WritelnLog('Lazarus: error compiling lhelp help viewer.');
             OperationSucceeded := False;
           end;
         end;
@@ -2212,8 +2205,7 @@ begin
         if not ModuleEnabled('LAZDATADESKTOP') then
         begin
           OperationSucceeded:=true;  //continue with whatever we do next
-          infoln('Module LAZDATADESKTOP: skipped by user.');
-          writeln(FLogFile,'Module LAZDATADESKTOP:  skipped by user.');
+          WritelnLog('Module LAZDATADESKTOP: skipped by user.');
         end
         else
         begin
@@ -2239,8 +2231,7 @@ begin
         if not ModuleEnabled('DOCEDITOR') then
         begin
           OperationSucceeded:=true;  //continue with whatever we do next
-          infoln('Module DOCEDITOR: skipped by user.');
-          writeln(FLogFile,'Module DOCEDITOR: skipped by user.');
+          WritelnLog('Module DOCEDITOR: skipped by user.');
         end
         else
         begin
@@ -2320,8 +2311,7 @@ begin
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
         begin
-          infoln('Lazarus: error compiling LCL');
-          writeln(FLogFile, 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
+          WritelnLog( 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
           OperationSucceeded := False;
         end;
       end
@@ -2331,7 +2321,7 @@ begin
 
 
   if OperationSucceeded then
-    writeln(FLogFile,'Lazarus update succeeded at revision number ', AfterRevision);
+    WritelnLog('Lazarus update succeeded at revision number '+ AfterRevision,false);
   ProcessEx.Free;
   Result := OperationSucceeded;
 end;
@@ -2416,14 +2406,14 @@ begin
     infoln('Aborting.');
     halt(2); //Is there a nicer way to do this?
   end;
-  WriteLn(FLogFile,DateTimeToStr(now),': fpcup started.');
+  WritelnLog(DateTimeToStr(now)+': fpcup started.',false);
   TextRec(FLogVerboseFile).Mode:=0;  //class variables should have been 0
 end;
 
 destructor Tinstaller.Destroy;
 begin
-  WriteLn(FLogFile,DateTimeToStr(now),': fpcup finished.');
-  WriteLn(FLogFile,'------------------------------------------------');
+  WritelnLog(DateTimeToStr(now)+': fpcup finished.',false);
+  WritelnLog('------------------------------------------------',false);
   CloseFile(FLogFile);
   if TextRec(FLogVerboseFile).Mode<>0 then
     CloseFile(FLogVerboseFile);
@@ -2433,4 +2423,4 @@ begin
 end;
 
 end.
-
+
