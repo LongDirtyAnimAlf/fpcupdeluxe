@@ -10,9 +10,9 @@ uses
 implementation
 type
 
-{ TWin32To64 }
+{ TWin64 }
 
-TWin32To64 = class(TCrossInstaller)
+TWin64 = class(TCrossInstaller)
 private
 
 public
@@ -23,45 +23,49 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32To64 }
+{ TWin64 }
 
-function TWin32To64.GetLibs(Basepath:string): boolean;
+function TWin64.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='';
   result:=true;
 end;
 
-function TWin32To64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TWin64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   result:=true;
 end;
 
-function TWin32To64.GetBinUtils(Basepath:string): boolean;
+function TWin64.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   result:=true;
 end;
 
-constructor TWin32To64.Create;
+constructor TWin64.Create;
 begin
   inherited Create;
   FTargetCPU:='x86_64';
   FTargetOS:='win64';
 end;
 
-destructor TWin32To64.Destroy;
+destructor TWin64.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Win32To64:TWin32To64;
+  Win64:TWin64;
 
 initialization
-  Win32To64:=TWin32To64.Create;
-  RegisterExtension(Win32To64.TargetCPU+'-'+Win32To64.TargetOS,Win32To64);
+{$ifdef win32}
+  Win64:=TWin64.Create;
+  RegisterExtension(Win64.TargetCPU+'-'+Win64.TargetOS,Win64);
+{$endif win32}
 finalization
-  Win32To64.Destroy;
+{$ifdef win32}
+  Win64.Destroy;
+{$endif win32}
 end.
-
+
