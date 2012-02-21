@@ -1790,6 +1790,9 @@ begin
               ProcessEx.Parameters.Clear;
               ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
               ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
+              {$IFDEF UNIX}
+              ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
+              {$ENDIF UNIX}
               if CrossInstaller.BinUtilsPath<>'' then
                 ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FPCDirectory));
               ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
