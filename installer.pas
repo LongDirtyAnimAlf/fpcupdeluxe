@@ -1152,8 +1152,8 @@ begin
   TempFileName:=SysUtils.GetTempFileName;
   if IsException then
     begin
-    WritelnLog('Exception raised running ',Sender.Executable + ' ' +Sender.ParametersString);
-    WritelnLog(Sender.ExceptionInfo);
+    WritelnLog('Exception raised running ' + Sender.Executable + ' ' +Sender.ParametersString, true);
+    WritelnLog(Sender.ExceptionInfo, true);
     end
   else
     begin
@@ -1950,7 +1950,7 @@ begin
   infoln('Module LAZARUS: Getting/compiling Lazarus...');
 
   WritelnLog('Lazarus directory:      '+LazarusDirectory,false);
-  WritelnLog('Lazarus primary config path:',LazarusPrimaryConfigPath,false);
+  WritelnLog('Lazarus primary config path:'+LazarusPrimaryConfigPath,false);
   WritelnLog('Lazarus URL:            '+LazarusURL,false);
   WritelnLog('Lazarus options:        '+LazarusOPT,false);
   WritelnLog('Lazarus shortcut name:  '+ShortCutName,false);
@@ -2423,4 +2423,4 @@ begin
 end;
 
 end.
-
+
