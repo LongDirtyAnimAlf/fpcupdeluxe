@@ -1010,36 +1010,79 @@ begin
   OperationSucceeded:=true;
   if Clean then
   begin
-    //Clean
-    if ModuleEnabled('FPC') then
+    // Clean; can be either "nuclear" clean if no other options given
+    // or limited clean if only some modules selected or some modules are
+    // skipped.
+    // Note: test is simplistic: it only checks if any --only= or --skip==
+    // modules are given, not e.g. whether the resulting module set
+    // matches the standard set.
+    if (FOnlyModules='') and (FSkipModules='') then
     begin
-      if OperationSucceeded then OperationSucceeded:=CleanFPC;
+      // Nuclear cleaning: delete entire FPC+Lazarus directories, but
+      // don't remove primary config path or shortcuts
+      infoln('User selected --clean without options. Total cleanup started.');
+      writeln(FLogFile,'User selected --clean without options. Total cleanup started.');
+      if FPCDirectory='' then
+      begin
+        infoln('Error: FPC directory not known. Not cleaning FPC directory.');
+        writeln(FLogFile,'Error: FPC directory not known. Not cleaning FPC directory.');
+      end
+      else
+      begin
+        if fileutil.DeleteDirectory(FPCDirectory,false)=false then
+        begin
+          infoln('Error deleting FPC directory '+FPCDirectory);
+          writeln(FLogFile,'Error deleting FPC directory '+FPCDirectory);
+        end;
+      end;
+      if LazarusDirectory='' then
+      begin
+        infoln('Error: Lazarus directory not known. Not cleaning Lazarus directory.');
+        writeln(FLogFile,'Error: Lazarus directory not known. Not cleaning Lazarus directory.');
+      end
+      else
+      begin
+        if fileutil.DeleteDirectory(LazarusDirectory,false)=false then
+        begin
+          infoln('Error deleting Lazarus directory '+LazarusDirectory);
+          writeln(FLogFile,'Error deleting Lazarus directory '+LazarusDirectory);
+        end;
+      end;
+      // Nuclear cleaning finished
     end
     else
     begin
-      infoln('FPC cleanup skipped by user.');
-      writeln(FLogFile,'FPC clean skipped by user.');
-    end;
+      // Clean only selected modules
+      if ModuleEnabled('FPC') then
+      begin
+        if OperationSucceeded then OperationSucceeded:=CleanFPC;
+      end
+      else
+      begin
+        infoln('FPC cleanup skipped by user.');
+        writeln(FLogFile,'FPC clean skipped by user.');
+      end;
 
-    if ModuleEnabled('LAZARUS') or ModuleEnabled('HELP')
-      or ModuleEnabled('DOCEDITOR') or ModuleEnabled('BIGIDE') then
-    begin
-      if OperationSucceeded then OperationSucceeded:=CleanLazarus;
-    end
-    else
-    begin
-      infoln('Module LAZARUS: cleanup skipped by user.');
-      writeln(FLogFile,'Module LAZARUS: cleanup skipped by user.');
-    end;
+      if ModuleEnabled('LAZARUS') or ModuleEnabled('HELP')
+        or ModuleEnabled('DOCEDITOR') or ModuleEnabled('BIGIDE') then
+      begin
+        if OperationSucceeded then OperationSucceeded:=CleanLazarus;
+      end
+      else
+      begin
+        infoln('Module LAZARUS: cleanup skipped by user.');
+        writeln(FLogFile,'Module LAZARUS: cleanup skipped by user.');
+      end;
 
-    if ModuleEnabled('HELP') then
-    begin
-       if OperationSucceeded then OperationSucceeded:=CleanLazarusHelp;
-    end
-    else
-    begin
-      infoln('Lazarus cleanup skipped by user.');
-      writeln(FLogFile,'Lazarus cleanup skipped by user.');
+      if ModuleEnabled('HELP') then
+      begin
+         if OperationSucceeded then OperationSucceeded:=CleanLazarusHelp;
+      end
+      else
+      begin
+        infoln('Lazarus cleanup skipped by user.');
+        writeln(FLogFile,'Lazarus cleanup skipped by user.');
+      end;
     end;
   end
   else

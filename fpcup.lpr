@@ -82,9 +82,11 @@ begin
   writeln('                       Note: the binutils are copied to the');
   writeln('                       FPC directory for use by FPC. This gives');
   writeln('                       a more standard FPC environment.');
-  writeln(' clean                 Don''t build; clear out all modules');
-  writeln('                       or limit cleaning to certain modules');
-  writeln('                       (see "only" and "skip")');
+  writeln(' clean                 Don''t build.');
+  writeln('                       If no skip and only options given:');
+  writeln('                       DELETE entire Lazarus/FPC directories');
+  writeln('                       Else: clean up only certain modules,');
+  writeln('                       only deleting temporary items.');
   writeln(' cputarget=<name>      CPU target for cross_compiling.');
   writeln('                       <name> has to be one of the following:');
   writeln('                       i386,m68k,alpha,powerpc,powerpc64,');
