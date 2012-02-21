@@ -89,13 +89,17 @@ fpcup has a facitility to extend its functionality using cross compiling modules
 An example is the Windows 32=>Windows 64 cross compile unit in m_crosswin64.pas. Note that this is a simple version, as there is no need for separate binutils and library paths.
 These modules get registered automatically when compiled into the fpcup code.
 
-LCL limitations
-===============
+LCL/FPC/Lazarus limitations
+===========================
+- Multiple widgetsets
 The Lazarus LCL can be installed in different directories depending on architecture. This is very helpful when building cross compilers, as the compiled units and binutils do not interfere with each other.
 fpcup uses this approach for building cross compilers.
 
 However, there is no provision for separating LCL units for multiple widgetsets. If you compile e.g. GTK2 and QT LCL widgetsets for the same platform, one will overwite the other. This means that fpcup cannot manage multiple widgetsets either.
 If you want to use multiple widgetsets, best practice is to use separated Lazarus directories (option --lazdir in fpcup).
+
+- LCL documentation generation x64 Linux
+LCL .chm documentation generation using fpdoc on x64 Linux seems to take a long time; fpcup takes a huge amount of CPU, but eventually finished.
 
 Troubleshooting
 ===============
