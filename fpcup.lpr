@@ -68,8 +68,9 @@ begin
   writeln('on  doceditor      Lazarus Doceditor. Also selects lazarus.');
   writeln('on  lazdatadesktop Data desktop tool. Also selects lazarus.');
   writeln('Because help is installed by default, it pulls in bigide and');
-  writeln('the results that all these modules get installed.');
+  writeln('the results that all modules above get installed.');
   writeln('(except wincrossx64 if not on Windows, of course)');
+  //todo: add crossinstaller module names
   writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
@@ -430,7 +431,6 @@ begin
   writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
 
   try
-    // Adjust these directories to taste/your situation.
     FInstaller := TInstaller.Create;
     res:=CheckOptions(FInstaller); //Process command line arguments
     if res=-1 then
