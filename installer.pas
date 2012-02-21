@@ -1695,10 +1695,6 @@ begin
   if FCrossCompiling or (OperationSucceeded and (GetFPCTarget='i386-win32') and not FCrossCompiling and ModuleEnabled('WINCROSSX64')) then
     begin
       // Make crosscompiler using new compiler
-      // todo: check out what cross compilers we can install on Linux/OSX (win32?)
-      // todo: possibly move this to a separate section that will be called after fpc compilation (reason: we need a valid compiler0.
-      // Note: consider this as an optional item, so don't fail the function if this breaks.
-
       if GetFPCTarget='i386-win32' then
         begin
         //Hardcode her
@@ -1719,7 +1715,7 @@ begin
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
           ProcessEx.Parameters.Clear;
           infoln('Running Make all (FPC crosscompiler):');
-          { Note: command line equivalents:
+          { Note: command line equivalents for Win32=>Win64 cross compiler:
           set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
           make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
           rem already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
