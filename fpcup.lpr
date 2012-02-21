@@ -215,7 +215,7 @@ begin
     writeln(ErrorMessage);
     WriteHelp;
     result:=13; //Quit with error resultcode
-    exit
+    exit;
   end;
 
   AllOptions:='';
@@ -276,6 +276,7 @@ begin
   begin
     writehelp;
     result:=0; //quit without error
+    exit;
   end;
 
   if Application.HasOption(LazDir) then
@@ -448,4 +449,4 @@ begin
   writeln('FPCUp finished.');
   if res<>-1 then
     halt(res);
-end.
+end.

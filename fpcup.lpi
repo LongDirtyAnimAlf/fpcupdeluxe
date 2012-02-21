@@ -83,7 +83,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="20">
+    <Units Count="7">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -105,82 +105,20 @@
         <UnitName Value="svnclient"/>
       </Unit3>
       <Unit4>
+        <Filename Value="synapse\httpsend.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="httpsend"/>
+      </Unit4>
+      <Unit5>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="updatelazconfig"/>
-      </Unit4>
-      <Unit5>
+      </Unit5>
+      <Unit6>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="synsock.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synsock"/>
       </Unit6>
-      <Unit7>
-        <Filename Value="ssfpc.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="sslinux.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="sswin32.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="blcksock.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="blcksock"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="httpsend.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="httpsend"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="ftpsend.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="ftpsend"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="fpcuputil.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcuputil"/>
-      </Unit13>
-      <Unit14>
-        <Filename Value="m_crossinstaller.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crossinstaller"/>
-      </Unit14>
-      <Unit15>
-        <Filename Value="m_crosswin64.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crosswin64"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="synacode.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synacode"/>
-      </Unit16>
-      <Unit17>
-        <Filename Value="synafpc.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synafpc"/>
-      </Unit17>
-      <Unit18>
-        <Filename Value="synaip.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synaip"/>
-      </Unit18>
-      <Unit19>
-        <Filename Value="synautil.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synautil"/>
-      </Unit19>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
