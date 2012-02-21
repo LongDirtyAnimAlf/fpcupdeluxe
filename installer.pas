@@ -958,7 +958,7 @@ begin
     ProcessEx.Parameters.Clear;
     // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
     // the directory that contains the fcl and rtl .xct files:
-    ProcessEx.Parameters.Add('--pfcdocs');
+    ProcessEx.Parameters.Add('--fpcdocs');
     ProcessEx.Parameters.Add(BuildLCLDocsDirectory);
     ProcessEx.Parameters.Add('--fpdoc');
     // Use the fpdoc in ./utils/fpdoc/, as the compiler directory is now different between
