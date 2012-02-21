@@ -84,8 +84,10 @@ begin
   writeln(' clean                 Don''t build; clear out all modules');
   writeln('                       or limit cleaning to certain modules');
   writeln('                       (see "only" and "skip")');
-  writeln(' cputarget=<name>      CPU target for cross_compiling. <name> has to be one of the following:');
-  writeln('                       i386,m68k,alpha,powerpc,powerpc64,armeb,arm,sparc,x86_64,ia64');
+  writeln(' cputarget=<name>      CPU target for cross_compiling.');
+  writeln('                       <name> has to be one of the following:');
+  writeln('                       i386,m68k,alpha,powerpc,powerpc64,');
+  writeln('                       armeb,arm,sparc,x86_64,ia64');
   writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
@@ -122,8 +124,10 @@ begin
   writeln(' only=<values>         Update/build or clean only the modules specified.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
-  writeln(' ostarget=<name>       OS target for cross_compiling. <name> has to be one of the following:');
-  writeln('                       darwin,freebsd,linux,netbsd,openbsd,os2,solaris,wince,win32,win64');
+  writeln(' ostarget=<name>       OS target for cross_compiling.');
+  writeln('                       <name> has to be one of the following:');
+  writeln('                       darwin,freebsd,linux,netbsd,openbsd,os2,');
+  writeln('                       solaris,wince,win32,win64');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
@@ -134,6 +138,8 @@ begin
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
   writeln(' verbose               Show output from svn and make');
+  writeln('');
+  writeln('Share and enjoy!');
   writeln('');
 end;
 

@@ -34,22 +34,29 @@ On OSX: only tested with XCode installed; no requirements found
 
 How does it work?
 =================
-FPCUp is a fancy batch script written in FPC/Lazarus ;)
+FPCUp is a fancy batch script written in FPC/Lazarus that simply downloads FPC and Lazarus from SVN and compiles them ;)
 You run it, with options if necessary (see fpcup --help).
 When done, it should have created a Lazarus_trunk shortcut on your desktop (Windows) or shell script in your home directory (Unix/Linux).
 Start this to start your new Lazarus instance.
-FPCUP sets up a separate primary config path to store Lazarus settings separate from other installs.
+fpcup sets up a separate primary config path to store Lazarus settings separate from other installs.
 You need to run the script/shortcut because it tells your Lazarus where to find that primary config path.
 
-Detailed workflow
-=================
-1. Checking/downloading prerequisites:
+Technical explanation
+=====================
+If you want to improve or extend fpcup, here's a more detailed description of what it does.
+
+Note that some steps will not be executed depending on the modules chosen by the user.
+By default, all modules will be run; the help module is selected by default and pulls in bigide.
+fpcup for Windows is 32 bit, but wincrossx64 will be run so users can compile 64 bit applications with Lazarus.
+
+1. Setup, checking/downloading prerequisites:
+- fpcup creates a shortcut on your desktop (Windows) or home directory shell script to fpcup with all the options you chose, so you don't have to type it all again
 - On Windows, it checks whether make.exe and unzip.exe are present in the binutils directory (default or user-specified).
 If not, it downloads them.
 - It checks if make.exe is GNU make, and not e.g. Delphi/Borland make.
 - It checks whether a Subversion client is available. On Windows: if there isn't, it downloads one.
 - If bootstrap compilers need to be downloaded, a certain unarchiver utility is needed, depending on the way the compiler is compressed.
-FPCUp checks unzip.exe for Windows, gnutar for OSX, and bunzip2 for Linux.
+fpcup checks unzip.exe for Windows, gnutar for OSX, and bunzip2 for Linux.
 - It checks if there is a valid FPC compiler in the bootstrap directory the user specified (or default).
 If it doesn't exist, it downloads a bootstrap compiler.
 
@@ -62,15 +69,32 @@ If it doesn't exist, it downloads a bootstrap compiler.
 3. Getting and compiling Lazarus
 - It checks out or updates Lazarus using Subversion.
 - It compiles Lazarus using the installed FPC compiler (Linux/OSX: fpc.sh) and fpc.cfg
-- It does the same using make bigide, in order to get as many .lpk files compiled and included as possible
-- It creates a minimum configuration (environmentoptions.xml) in a separate primary-config-path, or updates that config with: the compiler, the FPC source directory, make location, gdb location.
 - When done, it creates a shortcut on your desktop (Windows) or shell script in home directory to the newly installed Lazarus
+- It does the same using make bigide, in order to get as many .lpk files compiled and included as possible
+- It creates a minimum configuration (environmentoptions.xml) in a separate primary-config-path, or updates that config with: the compiler, the FPC source directory, make location, gdb location, help files location.
+- fpcup compiles the Lazarus documentation editor (LazDE) using lazbuild in the newly compiled Lazarus directory
+- fpcup compiles the Lazarus data desktop using lazbuild in the newly compiled Lazarus directory
 
-4. Compiling additional utilities & finishing up
-- Fpcup compiles the Lazarus lhelp CHM viewer (LazDE) using lazbuild in the newly compiled Lazarus directory
-- Fpcup compiles the Lazarus documentation editor (LazDE) using lazbuild in the newly compiled Lazarus directory
-- Fpcup compiles the Lazarus data desktop using lazbuild in the newly compiled Lazarus directory
-- When done, it will create a shortcut on your desktop (Windows) or home directory shell script to fpcup with all the options you chose, so you don't have to type it all again
+
+4. Getting help
+- It compiles the Lazarus lhelp CHM viewer (LazDE) using lazbuild in the newly compiled Lazarus directory
+- It gets the FPC chm documentation if not already present
+- It compiles the Lazarus CHM help
+
+
+Cross compiler extensions
+=========================
+fpcup has a facitility to extend its functionality using cross compiling modules. These are classes that inherit from the fpcup TCrossInstaller class defined in m_crossinstaller.pas
+An example is the Windows 32=>Windows 64 cross compile unit in m_crosswin64.pas. Note that this is a simple version, as there is no need for separate binutils and library paths.
+These modules get registered automatically when compiled into the fpcup code.
+
+LCL limitations
+===============
+The Lazarus LCL can be installed in different directories depending on architecture. This is very helpful when building cross compilers, as the compiled units and binutils do not interfere with each other.
+fpcup uses this approach for building cross compilers.
+
+However, there is no provision for separating LCL units for multiple widgetsets. If you compile e.g. GTK2 and QT LCL widgetsets for the same platform, one will overwite the other. This means that fpcup cannot manage multiple widgetsets either.
+If you want to use multiple widgetsets, best practice is to use separated Lazarus directories (option --lazdir in fpcup).
 
 Troubleshooting
 ===============
@@ -85,6 +109,10 @@ make fpc_baseinfo | less
 #this should pick up the proper unit path, fpcdir and version from the fpcup-installed fpc version
 make fpc_baseinfo FPC=~/<yourfpcdirectory>/bin/fpc.sh
 ~/<yourfpcdirectory>/bin/fpc.sh -vut # or something?
+
+Additionally, on both Windows and Unix we add our own binutils to the beginning of the path when calling make.
+This ensures that e.g. existing Delphi or cygwin make.exe does not mess with our installation.
+This is probably a bigger problem on Windows than on Linux/Unix
 
 Status
 ======
@@ -131,7 +159,7 @@ Options are not required; they include:
                        (see "only" and "skip")
  fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC
                        sources. Specify location with this option; if no
-                       compiler found here, FPCUp will download one there.
+                       compiler found here, fpcup will download one there.
                        Default: c:\development\fpcbootstrap\
  fpcdir=<dir>          Target FPC dir, default c:\development\fpc\
  fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
