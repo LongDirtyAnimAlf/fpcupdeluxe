@@ -1719,13 +1719,13 @@ begin
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
           ProcessEx.Parameters.Clear;
           infoln('Running Make all (FPC crosscompiler):');
-          //Note: make install+make crossinstall work on command line
-          //set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
-          //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
-          // => already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
-          //make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
-          // => gives bin\i386-win32\ppcrossx64.exe
-          //but not in this program..
+          { Note: command line equivalents:
+          set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
+          make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
+          rem already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
+          make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
+          rem gives bin\i386-win32\ppcrossx64.exe
+          }
           if GetFPCTarget='i386-win32' then
             ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'')
           else
