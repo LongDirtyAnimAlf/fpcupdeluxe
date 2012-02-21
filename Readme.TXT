@@ -140,10 +140,28 @@ This program will download the FPC and Lazarus sources
 from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
-fpcup compiled with: FPC 2.6.1 on 2012/02/18 19:10:16
+fpcup compiled with: FPC 2.6.1 on 2012/02/21 18:03:20
 for CPU: i386 on Win32
+DON'T PANIC!
+Everything below is optional...
 
 fpcup --<options>
+
+fpcup can work with modules - see "only", "skip" below
+List of modules and standard installation action:
+Std Name           Description
+on  FPC            Free Pascal compiler
+on  lazarus        LCL (and IDE if not crosscompiling)
+off bigide         IDE with extra components. Selects lazarus.
+on  help           Lazarus+FPC help. Also selects bigide.
+on  wincrossx64    Lazarus Win32=>Win64 cross compiler.
+                   Note: also installs lazarus 32 bit IDE.
+on  doceditor      Lazarus Doceditor. Also selects lazarus.
+on  lazdatadesktop Data desktop tool. Also selects lazarus.
+Because help is installed by default, it pulls in bigide and
+the results that all modules above get installed.
+(except wincrossx64 if not on Windows, of course)
+
 Options are not required; they include:
  help                  Show this text
  binutilsdir=<dir>     Windows only:
@@ -154,18 +172,27 @@ Options are not required; they include:
                        Note: the binutils are copied to the
                        FPC directory for use by FPC. This gives
                        a more standard FPC environment.
- clean                 Don't build; clear out all modules
-                       or limit cleaning to certain modules
-                       (see "only" and "skip")
+ clean                 Don't build.
+                       If no skip and only options given:
+                       DELETE entire Lazarus/FPC directories
+                       Else: clean up only certain modules,
+                       only deleting temporary items.
+ cputarget=<name>      CPU target for cross_compiling.
+                       <name> has to be one of the following:
+                       i386,m68k,alpha,powerpc,powerpc64,
+                       armeb,arm,sparc,x86_64,ia64
  fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC
                        sources. Specify location with this option; if no
-                       compiler found here, fpcup will download one there.
+                       compiler found here, FPCUp will download one there.
                        Default: c:\development\fpcbootstrap\
+                       or ~\fpcbootstrap\
  fpcdir=<dir>          Target FPC dir, default c:\development\fpc\
+                       or ~\fpc\
  fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
                        http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
- fpcOPT=<options>      Options passed on to the fpc make as OPT=options.
- fpcrevision=<number>  Revert to fpc svn revision <number>
+ fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
+                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
+ fpcrevision=<number>  Revert to FPC SVN revision <number>
  fpcuplinkname=<name>  Name of the shortcut to the fpcup script.
                        On Windows: a desktop shortcut.
                        On other systems: a shell script in your home directory.
@@ -173,29 +200,38 @@ Options are not required; they include:
                        Default: fpcup_update
                          or <lazlinkname>_update if lazlinkname specified
  lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\
+                       or ~\lazarus\
  lazlinkname=<name>    Name of the shortcut to the Lazarus install.
                        On Windows: a desktop shortcut.
                        On other systems: a shell script in your home directory.
                        If empty specified, no shortcut will be produced.
                        Default: Lazarus_trunk
- lazrevision=<number>  Revert to lazarus svn revision <number>
- lazURL=<URL>          SVN URL from which to download; default: 
+ lazrevision=<number>  Revert to Lazarus SVN revision <number>
+ lazURL=<URL>          SVN URL from which to download; default:
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
- lazOPT=<options>      Options passed on to the lazarus make as OPT=options.
- noconfirm             No confirmation asked. For batch operation. 
- only=<values>         update and build only the modules specified.
-                       The module list is separated by commas and can contain:
-                       FPC,lazarus,bigide,wincrossx64,doceditor,
-                       lhelp,lazdatadesktop
+ lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.
+ lclplatform=<name>    LCL widget set. <name> has to be one of the following:
+                       carbon,fpgui,gtk,gtk2,qt,win32,wince
+ noconfirm             No confirmation asked. For batch operation.
+ only=<values>         Update/build or clean only the modules specified.
+                       The module list is separated by commas.
+                       See above for a list of modules.
+ ostarget=<name>       OS target for cross_compiling.
+                       <name> has to be one of the following:
+                       darwin,freebsd,linux,netbsd,openbsd,os2,
+                       solaris,wince,win32,win64
  primary-config-path=<dir>
                        Analogous to Lazarus primary-config-path parameter.
                        Determines where fpcup will create or use as primary
                        configuration path for the Lazarus it installs/updates.
                        Default: empty; then a OS dependent configuration
-                       directory is used.
- skip=<values>         Do not update or build modules.
+                       path is used; directory name lazarusdevsettings.
+ skip=<values>         Do not update/build or clean modules.
                        The module list is separated by commas.
-                       See "only" for accepted values. 
+                       See above for a list of modules.
  verbose               Show output from svn and make
 
+Share and enjoy!
+
+FPCUp finished.
