@@ -83,7 +83,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="6">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -105,20 +105,15 @@
         <UnitName Value="svnclient"/>
       </Unit3>
       <Unit4>
-        <Filename Value="synapse\httpsend.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="httpsend"/>
-      </Unit4>
-      <Unit5>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="updatelazconfig"/>
-      </Unit5>
-      <Unit6>
+      </Unit4>
+      <Unit5>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
-      </Unit6>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
