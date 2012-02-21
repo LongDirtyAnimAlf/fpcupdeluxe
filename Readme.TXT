@@ -9,7 +9,8 @@ It adds CHM documentation and configure the Lazarus help for you.
 It also creates a shortcut on your desktop that points to the new Lazarus installation.
 
 Meant to be used side by side with other FPC/Lazarus installations. It creates a separate primary config path directory for the new Lazarus installation, so it doesn't interfere with existing Lazarus installs.
-It's open source software, please see the code for the license.
+It's open source software released under the LGPL with linking exception (same as FreePascal), and contains the Synapse libraries (BSD license). See source files for details.
+All use permitted, also commercial, but no warranties, express or implied.
 Run fpcup --help for command line options.
 
 Why yet another tool?
@@ -30,7 +31,7 @@ On Linux:
 E.g. on Debian or Ubuntu, do something like:
 sudo aptitude install build-essential subversion unzip
 
-On OSX: only tested with XCode installed; no requirements found
+On OSX: only tested with XCode installed; no requirements found.
 
 How does it work?
 =================
