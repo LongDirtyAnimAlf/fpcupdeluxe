@@ -1536,9 +1536,42 @@ const
     infoln('FPC: running make distclean before checkout/update:');
     ProcessEx.Execute;
     ProcessEx.OnErrorM:=oldlog;
+    result:=true;
   end;
 
+{$IFDEF UNIX}
+  function CreateFPCScript:boolean;
 
+  begin
+    // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+    // If this fails, Lazarus compilation will fail...
+    FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
+    if FileExists(FPCScript) then
+    begin
+      infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
+      sysutils.DeleteFile(FPCScript);
+    end;
+    AssignFile(TxtFile,FPCScript);
+    Rewrite(TxtFile);
+    writeln(TxtFile,'#!/bin/sh');
+    writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+    writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+    writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+    writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
+         IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
+         IncludeTrailingPathDelimiter(BinPath)+' $*');
+    CloseFile(TxtFile);
+    Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+    if Result then
+    begin
+      infoln('Created launcher script for FPC:'+FPCScript);
+    end
+    else
+    begin
+      infoln('Error creating launcher script for FPC:'+FPCScript);
+    end;
+  end;
+{$ENDIF UNIX}
 
 begin
   infoln('Module FPC: Getting/compiling FPC...');
@@ -1569,6 +1602,8 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
+  FPCTarget:=GetFPCTarget;
+  BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+FPCTarget;
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     WritelnLog('External program path:  '+CustomPath,false);
@@ -1618,8 +1653,6 @@ begin
         if ProcessEx.ExitStatus <> 0 then
           OperationSucceeded := False;
         FPCVersion:=GetFPCVersion;
-        FPCTarget:=GetFPCTarget;
-        BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+FPCTarget;
         ProcessEx.Parameters.Clear;
         ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
         ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
@@ -1630,24 +1663,6 @@ begin
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
           OperationSucceeded := False;
-        // copy the freshly created compiler to the bin/$fpctarget directory so that
-        // fpc can find it
-        if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
-          repeat
-            s:=SearchRec.Name;
-            if (length(s)>4) and (pos(s,COMPILERNAMES) >0) then  //length(s)>4 skips ppc3
-              begin
-              OperationSucceeded:=OperationSucceeded and
-                FileUtil.CopyFile(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/'+s,
-                 IncludeTrailingPathDelimiter(BinPath)+s);
-              OperationSucceeded:=OperationSucceeded and
-                (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
-              end;
-          until FindNext(SearchRec)<>0;
-        // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
-        DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
-        fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
-        pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
         {$ELSE UNIX}
         ProcessEx.Executable := FMake;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FPCDirectory);
@@ -1670,35 +1685,7 @@ begin
 
       {$IFDEF UNIX}
       if OperationSucceeded then
-      begin
-        // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
-        // If this fails, Lazarus compilation will fail...
-        FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
-        if FileExists(FPCScript) then
-        begin
-          infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
-          sysutils.DeleteFile(FPCScript);
-        end;
-        AssignFile(TxtFile,FPCScript);
-        Rewrite(TxtFile);
-        writeln(TxtFile,'#!/bin/sh');
-        writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
-        writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
-        writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-        writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
-             IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
-             IncludeTrailingPathDelimiter(BinPath)+' $*');
-        CloseFile(TxtFile);
-        OperationSucceeded:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
-        if OperationSucceeded then
-        begin
-          infoln('Created launcher script for FPC:'+FPCScript);
-        end
-        else
-        begin
-          infoln('Error creating launcher script for FPC:'+FPCScript);
-        end;
-      end;
+        OperationSucceeded:=CreateFPCScript;
       {$ENDIF UNIX}
 
       // Let everyone know of our shiny new CompilerName:
@@ -1824,12 +1811,38 @@ begin
                 FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
               end
               else
-                SetCompilerToInstalledCompiler;
+                begin
+              {$IFDEF UNIX}
+                  OperationSucceeded:=CreateFPCScript;
+              {$ENDIF UNIX}
+                  SetCompilerToInstalledCompiler;
+                end;
             end;
         end
       else
         infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
     end; //cross build
+
+  {$IFDEF UNIX}
+  // copy the freshly created compiler to the bin/$fpctarget directory so that
+  // fpc can find it
+  if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
+    repeat
+      s:=SearchRec.Name;
+      if (length(s)>4) and (pos(s,COMPILERNAMES) >0) then  //length(s)>4 skips ppc3
+        begin
+        OperationSucceeded:=OperationSucceeded and
+          FileUtil.CopyFile(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/'+s,
+           IncludeTrailingPathDelimiter(BinPath)+s);
+        OperationSucceeded:=OperationSucceeded and
+          (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
+        end;
+    until FindNext(SearchRec)<>0;
+  // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
+  DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
+  fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
+  pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
+  {$ENDIF UNIX}
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
   if OperationSucceeded then
@@ -2423,4 +2436,4 @@ begin
 end;
 
 end.
-
+
