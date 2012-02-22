@@ -47,13 +47,13 @@ type
   { TInstaller }
   TInstaller = class(TObject)
   private
-    FAllOptions: string;
+    FAllOptions: string; //Options/command line arguments chosen by user
     FBinUtils: TStringlist; //binutils such as make.exe, as.exe, needed for compilation
     FBunzip2: string; //Location or name of bunzip2 executable
     FBootstrapCompilerDirectory: string; //Directory where bootstrap compiler is
     FBootstrapCompilerFTP: string;
     FBootstrapCompilerName: string; //OS specific compiler name (e.g. ppcuniversal for OSX)
-    FClean: boolean;
+    FClean: boolean; //User selected clean or build
     FCrossCompiling:boolean; // set in GetFPC and GetLazarus occurding to following vars
     FCrossCPU_Target: string;
     FCrossOS_Target: string;
@@ -67,13 +67,13 @@ type
     FInstalledCompiler: string; //Complete path to installed FPC compiler; used to compile Lazarus
     FInstalledCompilerName: string; //Name only of installed PPC compiler (e.g. ppcx64 on 64 bit Intel OSX)
     FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
-    FLazarusPrimaryConfigPath: string;
+    FLazarusPrimaryConfigPath: string; //Primary config path used in our custom Lazarus install
     FLogFile:Text;
     FLogVerboseFile:Text;
-    FMake: string;
+    FMake: string; //Location or name of make executable
     FShortCutNameFpcup: string;
     {$IFDEF MSWINDOWS}
-    FMakeDir: string;
+    FMakeDir: string; //Directory where binutils (as.exe,ar.exe,make.exe,...) reside
     {$ENDIF}
     FSkipModules: string;
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
