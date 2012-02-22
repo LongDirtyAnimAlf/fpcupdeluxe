@@ -1755,10 +1755,11 @@ begin
           make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
           rem gives bin\i386-win32\ppcrossx64.exe
           }
-          if GetFPCTarget='i386-win32' then
-            ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'')
-          else
-            ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+          {$ifdef win32}
+          ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'')
+          {$else}
+          ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+          {$endif}
           ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FPCDirectory));
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FPCDirectory));
           if CrossInstaller.BinUtilsPath<>'' then
