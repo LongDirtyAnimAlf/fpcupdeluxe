@@ -547,7 +547,7 @@ var
   Output: string;
 begin
   OperationSucceeded := True;
-  // The extractors used depend on the bootstrap CompilerName URL/file we download
+  // The extractors used depend on the bootstrap compiler URL/file we download
   // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
   {$IFDEF MSWINDOWS}
   // Need to do it here so we can pick up make path.
@@ -1228,13 +1228,13 @@ end;
 
 procedure TInstaller.SetCompilerToInstalledCompiler;
 begin
+  // Compiler name could be overridden, so only assign if not done so
+  if FInstalledCompilerName=''then FInstalledCompilerName:='fpc'+FExecutableExtension;
   FInstalledCompiler:='//**#$$ Fix your ifdefs in the code.';
   // This differs between Windows and Linux.
   {$IFDEF MSWINDOWS}
-  // This will give something like ppc386.exe. We use this in case
-  // we need to pass PP=bla when running make.
-  // We mangle this later when dealing with Lazarus config, as we require
-  // fpc.exe there.
+  // This will give something like fpc.exe. We use this in case
+  // we need to pass FPC=bla when running make.
   FInstalledCompiler := FPCDirectory + 'bin' +
     DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
   {$ENDIF MSWINDOWS}
@@ -1692,7 +1692,7 @@ begin
         OperationSucceeded:=CreateFPCScript;
       {$ENDIF UNIX}
 
-      // Let everyone know of our shiny new CompilerName:
+      // Let everyone know of our shiny new compiler:
       if OperationSucceeded then
       begin
         SetCompilerToInstalledCompiler;
@@ -2367,7 +2367,7 @@ begin
   // User can specify an existing CompilerName later on, if she wants to.
   FBootstrapCompilerDirectory := SysUtils.GetTempDir;
   {$IFDEF MSWINDOWS}
-  // On Windows, we can always compile 32 bit with a 64 bit cross CompilerName, regardless
+  // On Windows, we can always compile 32 bit with a 64 bit cross compiler, regardless
   // of actual architecture (x86 or x64)
   FBootstrapCompilerFTP :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
