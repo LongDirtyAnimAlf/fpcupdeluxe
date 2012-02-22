@@ -98,7 +98,7 @@ type
     function GetCrossInstaller:TCrossInstaller;
     function GetFpcDirectory: string;
     function GetFPCRevision: string;
-    function GetFPCTarget: string;
+    function GetFPCTarget(Native:boolean): string;
     function GetFPCVersion: string;
     function GetFPCUrl: string;
     function GetLazarusRevision: string;
@@ -753,7 +753,7 @@ var
   target:string;
 begin
   result:=nil;
-  target:=FCrossCPU_Target+'-'+FCrossOS_Target;
+  target:=GetFPCTarget(false);
   if assigned(CrossInstallers) then
     for idx:=0 to CrossInstallers.Count-1 do
       if CrossInstallers[idx]=target then
@@ -773,7 +773,7 @@ begin
   Result := FUpdater.FPCRevision;
 end;
 
-function TInstaller.GetFPCTarget: string;
+function TInstaller.GetFPCTarget(Native:boolean): string;
 var
   processorname,os:string;
 begin
@@ -840,10 +840,13 @@ begin
   {$ifdef win64}
        os:='win64';
   {$endif win64}
-  if FCrossCPU_Target<>'' then
-    processorname:= FCrossCPU_Target;
-  if FCrossOS_Target<>'' then
-    os:=FCrossOS_Target;
+  if not Native then
+    begin
+    if FCrossCPU_Target<>'' then
+      processorname:= FCrossCPU_Target;
+    if FCrossOS_Target<>'' then
+      os:=FCrossOS_Target;
+    end;
   result:=processorname+'-'+os;
 end;
 
@@ -1240,7 +1243,7 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   // Default FPC compiler installed by make:
-  FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+GetFPCTarget+DirectorySeparator+'fpc';
+  FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpc';
   if FileExistsUTF8(FInstalledCompiler+'.sh') then
   begin
     //Use our proxy if it is installed
@@ -1607,8 +1610,8 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
-  FPCTarget:=GetFPCTarget;
-  BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+FPCTarget;
+  FPCTarget:=GetFPCTarget(false);
+  BinPath:=IncludeTrailingPathDelimiter(FPCDirectory)+'bin/'+GetFPCTarget(true);
   {$ENDIF UNIX}
   if CustomPath<>EmptyStr then
     WritelnLog('External program path:  '+CustomPath,false);
@@ -2281,7 +2284,7 @@ begin
             OperationSucceeded := False;
         end;
     end; //native build
-  if FCrossCompiling or (OperationSucceeded and (GetFPCTarget='i386-win32') and not FCrossCompiling and ModuleEnabled('WINCROSSX64')) then
+  if FCrossCompiling {$IFDEF win32} or (OperationSucceeded and ModuleEnabled('WINCROSSX64')){$ENDIF win32} then
   //todo: find out what crosscompilers we can install on linux/osx
     begin //cross build
       // 64 bit LCL for use in crosscompiling to 64 bit windows
@@ -2455,4 +2458,4 @@ begin
 end;
 
 end.
-
+
