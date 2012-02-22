@@ -2341,7 +2341,9 @@ begin
           end;
         if Options<>'' then
           ProcessEx.Parameters.Add('OPT='+Options);
-        ProcessEx.Parameters.Add('packager/registration lazutils lcl');
+        ProcessEx.Parameters.Add('packager/registration');
+        ProcessEx.Parameters.Add('lazutils');
+        ProcessEx.Parameters.Add('lcl');
         infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
@@ -2458,4 +2460,4 @@ begin
 end;
 
 end.
-
+
