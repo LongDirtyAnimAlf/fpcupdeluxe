@@ -1726,7 +1726,7 @@ begin
     end; //native build
 
 
-  if FCrossCompiling {$ifdef win32} or OperationSucceeded  and ModuleEnabled('WINCROSSX64')){$endif win32} then
+  if FCrossCompiling {$ifdef win32} or OperationSucceeded and ModuleEnabled('WINCROSSX64'){$endif win32} then
     begin
       // Make crosscompiler using new compiler
       {$ifdef win32}
@@ -1756,7 +1756,7 @@ begin
           rem gives bin\i386-win32\ppcrossx64.exe
           }
           {$ifdef win32}
-          ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'')
+          ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
           {$else}
           ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
           {$endif}
@@ -2455,4 +2455,4 @@ begin
 end;
 
 end.
-
+

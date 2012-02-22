@@ -78,7 +78,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="10">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -109,6 +109,26 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="m_crossinstaller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crossinstaller"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="m_crosswin32.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crosswin32"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="m_crosswin64.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crosswin64"/>
+      </Unit8>
+      <Unit9>
+        <Filename Value="fpcuputil.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcuputil"/>
+      </Unit9>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
