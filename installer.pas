@@ -1657,7 +1657,6 @@ begin
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
           OperationSucceeded := False;
-        FPCVersion:=GetFPCVersion;
         ProcessEx.Parameters.Clear;
         ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
         ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FPCDirectory));
@@ -1852,6 +1851,7 @@ begin
         end;
     until FindNext(SearchRec)<>0;
   // create link 'units' below FPCDirectory to <somewhere>/lib/fpc/$fpcversion/units
+  FPCVersion:=GetFPCVersion;
   DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
   fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
   pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
@@ -1971,6 +1971,7 @@ var
     end;
     ProcessEx.Execute;
     ProcessEx.OnErrorM:=oldlog;
+    result:=true;
   end;
 
 
@@ -2453,4 +2454,4 @@ begin
 end;
 
 end.
-
+
