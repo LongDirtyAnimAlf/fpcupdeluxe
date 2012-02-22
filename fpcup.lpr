@@ -306,7 +306,7 @@ begin
   if Application.HasOption(LazURL) then
   begin
     FInstaller.LazarusURL:=Application.GetOptionValue(LazURL);
-    AllOptions:=AllOptions+'--'+LazURL+'="'+FInstaller.LazarusDirectory+'" ';
+    AllOptions:=AllOptions+'--'+LazURL+'="'+FInstaller.LazarusURL+'" ';
   end;
 
   if Application.HasOption(LCLPlatform) then
