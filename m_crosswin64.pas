@@ -59,13 +59,9 @@ var
   Win64:TWin64;
 
 initialization
-{$ifdef win32}
   Win64:=TWin64.Create;
   RegisterExtension(Win64.TargetCPU+'-'+Win64.TargetOS,Win64);
-{$endif win32}
 finalization
-{$ifdef win32}
   Win64.Destroy;
-{$endif win32}
 end.
 

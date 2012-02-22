@@ -750,10 +750,17 @@ end;
 function TInstaller.GetCrossInstaller: TCrossInstaller;
 var
   idx:integer;
+  target:string;
 begin
   result:=nil;
-  if assigned(CrossInstallers) and CrossInstallers.Find(FCrossCPU_Target+'-'+FCrossOS_Target,idx) then
-    result:=TCrossInstaller(CrossInstallers.Objects[idx]);
+  target:=FCrossCPU_Target+'-'+FCrossOS_Target;
+  if assigned(CrossInstallers) then
+    for idx:=0 to CrossInstallers.Count-1 do
+      if CrossInstallers[idx]=target then
+        begin
+        result:=TCrossInstaller(CrossInstallers.Objects[idx]);
+        break;
+        end;
 end;
 
 function Tinstaller.GetFpcDirectory: string;
@@ -1720,17 +1727,16 @@ begin
     end; //native build
 
 
-  if FCrossCompiling or (OperationSucceeded and (GetFPCTarget='i386-win32') and not FCrossCompiling and ModuleEnabled('WINCROSSX64')) then
+  if FCrossCompiling {$ifdef win32} or OperationSucceeded  and ModuleEnabled('WINCROSSX64')){$endif win32} then
     begin
       // Make crosscompiler using new compiler
-      if GetFPCTarget='i386-win32' then
-        begin
-        //Hardcode her
-        FCrossCPU_Target:='x86_64';
-        FCrossOS_Target:='win64';
-        FCrossCompiling:=true;  // for distclean
-        distclean; // clean the x64 compiler
-        end;
+      {$ifdef win32}
+      //Hardcode her
+      FCrossCPU_Target:='x86_64';
+      FCrossOS_Target:='win64';
+      FCrossCompiling:=true;  // for distclean
+      distclean; // clean the x64 compiler
+      {$endif win32}
       CrossInstaller:=GetCrossInstaller;
       if assigned(CrossInstaller) then
         if not CrossInstaller.GetBinUtils(FPCDirectory) then
@@ -1810,6 +1816,10 @@ begin
               begin
                 infoln('Problem compiling/installing crosscompiler. Continuing regardless.');
                 FInstalledCompiler:='////\\\Error trying to compile FPC\|!';
+                {$ifndef win32}
+                //fail if this is not WINCROSSX64
+                OperationSucceeded:=false;
+                {$endif win32}
               end
               else
                 begin
@@ -1825,6 +1835,8 @@ begin
     end; //cross build
 
   {$IFDEF UNIX}
+  if OperationSucceeded then
+  begin
   // copy the freshly created compiler to the bin/$fpctarget directory so that
   // fpc can find it
   if FindFirst(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
@@ -1843,6 +1855,8 @@ begin
   DeleteFile(IncludeTrailingPathDelimiter(FPCDirectory)+'units');
   fpSymlink(pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'lib/fpc/'+FPCVersion+'/units'),
   pchar(IncludeTrailingPathDelimiter(FPCDirectory)+'units'));
+  end;
+
   {$ENDIF UNIX}
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
@@ -2276,6 +2290,7 @@ begin
       // alternatives:
       // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
 
+      {$IFDEF win32}
       if not FCrossCompiling then
         begin
         //Hardcode here
@@ -2284,6 +2299,7 @@ begin
         FCrossLCL_Platform:='win32';
         FCrossCompiling:=true;
         end;
+      {$ENDIF win32}
 
       CrossInstaller:=GetCrossInstaller;
       if Assigned(CrossInstaller) then
