@@ -1043,8 +1043,7 @@ begin
       end
       else
       begin
-        // todo: deletedirectory returns false on Windows; directory not removed either
-        if fileutil.DeleteDirectory(FPCDirectory,false)=false then
+        if DeleteDirectoryEx(FPCDirectory)=false then
         begin
           WritelnLog('Error deleting FPC directory '+FPCDirectory);
         end;
@@ -1055,8 +1054,7 @@ begin
       end
       else
       begin
-        // todo: deletedirectory returns false on Windows; directory not removed either
-        if fileutil.DeleteDirectory(LazarusDirectory,false)=false then
+        if DeleteDirectoryEx(LazarusDirectory)=false then
         begin
           WritelnLog('Error deleting Lazarus directory '+LazarusDirectory);
         end;
@@ -2439,4 +2437,4 @@ begin
 end;
 
 end.
-
+

@@ -38,6 +38,7 @@ uses
 
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
+function DeleteDirectoryEx(DirectoryName: string): boolean;
 function Download(URL, TargetFile: string): boolean;
 {$IFDEF MSWINDOWS}
 function GetLocalAppDataPath: string;
@@ -361,6 +362,49 @@ begin
   finally
     FreeAndNil(Buffer);
   end;
+end;
+
+function DeleteDirectoryEx(DirectoryName: string): boolean;
+// Lazarus fileutil.DeleteDirectory on steroids, works like
+// deltree <directory>, rmdir /s /q <directory> or rm -rf <directory>
+// - removes read-only files/directories (DeleteDirectory doesn't)
+// - removes directory itself
+// Adapted from fileutil.DeleteDirectory, thanks to Paweł Dmitruk
+var
+  FileInfo: TSearchRec;
+  CurSrcDir: String;
+  CurFilename: String;
+begin
+  Result:=false;
+  CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
+  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile,FileInfo)=0 then
+  begin
+    repeat
+      // Ignore directories and files without name:
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        // Remove all files and directories in this directory:
+        CurFilename:=CurSrcDir+FileInfo.Name;
+        // Remove read-only file attribute so we can delete it:
+        if (FileInfo.Attr and faReadOnly)>0 then
+          FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+        if (FileInfo.Attr and faDirectory)>0 then
+        begin
+          // Directory; exit with failure on error
+          if not DeleteDirectoryEx(CurFilename) then exit;
+        end
+        else
+        begin
+          // File; exit with failure on error
+          if not DeleteFileUTF8(CurFilename) then exit;
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+  end;
+  FindCloseUTF8(FileInfo);
+  // Remove root directory; exit with failure on error:
+  if (not RemoveDirUTF8(DirectoryName)) then exit;
+  Result:=true;
 end;
 
 function Download(URL, TargetFile: string): boolean;
