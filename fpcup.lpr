@@ -305,7 +305,7 @@ begin
 
   if Application.HasOption(LazURL) then
   begin
-    FInstaller.LazarusDirectory:=Application.GetOptionValue(LazURL);
+    FInstaller.LazarusURL:=Application.GetOptionValue(LazURL);
     AllOptions:=AllOptions+'--'+LazURL+'="'+FInstaller.LazarusDirectory+'" ';
   end;
 
@@ -449,4 +449,4 @@ begin
   writeln('FPCUp finished.');
   if res<>-1 then
     halt(res);
-end.
+end.
