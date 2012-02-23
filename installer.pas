@@ -63,6 +63,7 @@ type
     FSVNDirectory:string;
     FURL: string;
     FVerbose: boolean;
+    // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
     function GetMake: string;
   protected
@@ -700,7 +701,7 @@ end;
 
 function TFPCInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
-
+result:=true;
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
@@ -744,9 +745,7 @@ function TFPCInstaller.DownloadBootstrapCompiler: boolean;
 var
 ArchiveDir: string;
 BootstrapArchive: string;
-Counter: integer;
 ExtractedCompiler: string;
-Log: string;
 OperationSucceeded: boolean;
 begin
 OperationSucceeded:=true;
@@ -891,20 +890,10 @@ end;
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   AfterRevision: string;
-  BeforeRevision: string;
-  CrossInstaller:TCrossInstaller;
-  CustomPath: string; //Our own version of path we use to pass to commands
-  FileCounter:integer;
   FPCCfg: string;
-  FPCScript: string; //Used only in Unix code for now.
-  UpdateWarnings: TStringList;
   OperationSucceeded: boolean;
-  Options:string;
-  TxtFile:text; //Used only in Unix code for now.
   SearchRec:TSearchRec;
-  FPCVersion,FPCTarget:string; //Used only in Unix code for now.
-  i:integer;
-  s,s2:string;
+  s:string;
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
@@ -932,9 +921,8 @@ begin
         end;
     until FindNext(SearchRec)<>0;
   // create link 'units' below FBaseDirectory to <somewhere>/lib/fpc/$fpcversion/units
-  FPCVersion:=GetFPCVersion;
   DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
-  fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+FPCVersion+'/units'),
+  fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
   pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
   end;
 
@@ -1011,20 +999,7 @@ function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
   AfterRevision: string;
   BeforeRevision: string;
-  CrossInstaller:TCrossInstaller;
-  CustomPath: string; //Our own version of path we use to pass to commands
-  FileCounter:integer;
-  FPCCfg: string;
-  FPCScript: string; //Used only in Unix code for now.
   UpdateWarnings: TStringList;
-  OperationSucceeded: boolean;
-  Options:string;
-  TxtFile:text; //Used only in Unix code for now.
-  SearchRec:TSearchRec;
-  FPCVersion,FPCTarget:string; //Used only in Unix code for now.
-  i:integer;
-  s,s2:string;
-  Updated:boolean;
 begin
   if not InitModule then exit;
   infoln('Checking out/updating FPC sources...');
@@ -2883,18 +2858,16 @@ var
   BinPath: string; //Path where installed compiler ends up
   CrossInstaller:TCrossInstaller;
   CustomPath: string; //Our own version of path we use to pass to commands
-  FileCounter:integer;
   FPCCfg: string;
   FPCScript: string; //Used only in Unix code for now.
   UpdateWarnings: TStringList;
   OperationSucceeded: boolean;
   Options:string;
+  ProcessEx:TProcessEx;
   TxtFile:text; //Used only in Unix code for now.
   SearchRec:TSearchRec;
   FPCVersion,FPCTarget:string; //Used only in Unix code for now.
-  ProcessEx:TProcessEx;
-  i:integer;
-  s,s2:string;
+  s:string;
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
@@ -3838,4 +3811,4 @@ begin
 end;
 
 end.
-
+
