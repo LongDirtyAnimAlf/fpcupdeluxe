@@ -39,7 +39,7 @@ type
   TDumpFunc = procedure (Sender:TProcessEx; output:string);
   TDumpMethod = procedure (Sender:TProcessEx; output:string) of object;
   TErrorFunc = procedure (Sender:TProcessEx;IsException:boolean);
-  TErrorMethod = procedure (Sender:TProcessEx;IsException:boolean)  of object;
+  TErrorMethod = procedure (Sender:TProcessEx;IsException:boolean) of object;
   { TProcessEnvironment }
 
   TProcessEnvironment = class(TObject)

@@ -2082,18 +2082,18 @@ var
     if FCrossLCL_Platform <>'' then
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     if FCrossCompiling then
-      begin  // clean out the correct compiler
+    begin  // clean out the correct compiler
       ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
       ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-      end;
+    end;
+    ProcessEx.Parameters.Add('distclean');
     if ModuleEnabled('BIGIDE') then
     begin
-      ProcessEx.Parameters.Add('distclean bigideclean');
+      ProcessEx.Parameters.Add('bigideclean');
       infoln('Lazarus: running make distclean bigideclean before checkout/update:');
     end
     else
     begin
-      ProcessEx.Parameters.Add('distclean');
       infoln('Lazarus: running make distclean before checkout/update:');
     end;
     ProcessEx.Execute;
