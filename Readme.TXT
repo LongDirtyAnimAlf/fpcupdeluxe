@@ -145,7 +145,7 @@ This program will download the FPC and Lazarus sources
 from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
-fpcup compiled with: FPC 2.6.1 on 2012/02/21 18:03:20
+fpcup compiled on 2012/02/23 17:18:46 with FPC 2.6.1
 for CPU: i386 on Win32
 DON'T PANIC!
 Everything below is optional...
