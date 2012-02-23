@@ -146,7 +146,7 @@ begin
   writeln('');
 end;
 
-function CheckOptions(FInstaller: TInstaller):integer;
+function CheckOptions(FInstaller: TOldInstaller):integer;
 const
   //Parameter names:
   BinutilsDir='binutilsdir';
@@ -418,7 +418,7 @@ begin
 end;
 
 var
-  FInstaller: TInstaller;
+  FInstaller: TOldInstaller;
   res:integer;
 begin
   writeln('fpcup');
@@ -434,7 +434,7 @@ begin
   writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
 
   try
-    FInstaller := TInstaller.Create;
+    FInstaller := TOldInstaller.Create;
     res:=CheckOptions(FInstaller); //Process command line arguments
     if res=-1 then
       // Get/update/compile selected modules

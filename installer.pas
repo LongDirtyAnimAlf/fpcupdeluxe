@@ -43,9 +43,132 @@ interface
 uses
   Classes, SysUtils, updater, processutils, m_crossinstaller;
 
+{
 type
-  { TInstaller }
   TInstaller = class(TObject)
+  protected
+    function CheckAndGetNeededExecutables: boolean;
+    function GetBootstrapCompiler: string;
+  public
+    // base directory for installation (fpcdir, lazdir,... option)
+    property BaseDirectory: string;
+    // compiler to use for building. Specify empty string when using bootstrap compiler.
+    property Compiler: string;
+    // Compiler options passed on to make as OPT=
+    property CompilerOptions: string;
+    // CPU for the target
+    property CrossCPU_Target:string;
+    // OS for target
+    property CrossOS_Target:string;
+    // SVN revision override. Default is trunk
+    property DesiredRevision:string;
+    // URL for download. HTTP,ftp or svn
+    property URL: string;
+    // display and log in temp log file all sub process output
+    property Verbose:boolean;
+    // write verbatim to log and eventually console
+    procedure WriteLog(msg:string;ToConsole:boolean=true);
+    // append line ending and write to log and eventually console
+    procedure WritelnLog(msg:string;ToConsole:boolean=true);
+    // Build module
+    function BuildModule(ModuleName:string): boolean; virtual;abstract;
+    // Clean up environment
+    function CleanModule(ModuleName:string): boolean; virtual;abstract;
+    // Install update sources
+    function GetModule(ModuleName:string): boolean; virtual;abstract;
+    // Uninstall module
+    function UnInstallModule(ModuleName:string): boolean; virtual;abstract;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+type
+  TFPCInstaller = class(TInstaller)
+  protected
+  public
+    //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
+    property BootstrapCompilerDirectory: string;
+    //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
+    property BootstrapCompilerFTP: string;
+    // Build module
+    function BuildModule(ModuleName:string): boolean; override;
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; virtual;
+    // Clean up environment
+    function CleanModule(ModuleName:string): boolean; override;
+    // Install update sources
+    function GetModule(ModuleName:string): boolean; override;
+    // Uninstall module
+    function UnInstallModule(ModuleName:string): boolean; override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+type
+  TFPCNativeInstaller = class(TFPCInstaller)
+  protected
+  public
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+type
+  TFPCCrossInstaller = class(TFPCInstaller)
+  protected
+  public
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+type
+  TLazarusInstaller = class(TInstaller)
+  protected
+  public
+    // LCL widget set to be build
+    property CrossLCL_Platform:string;
+    // Build module
+    function BuildModule(ModuleName:string): boolean; override;
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; virtual;
+    // Clean up environment
+    function CleanModule(ModuleName:string): boolean; override;
+    // Install update sources
+    function GetModule(ModuleName:string): boolean; override;
+    // Uninstall module
+    function UnInstallModule(ModuleName:string): boolean; override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+type
+  TLazarusNativeInstaller = class(TLazarusInstaller)
+  protected
+  public
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+type
+  TLazarusCrossInstaller = class(TLazarusInstaller)
+  protected
+  public
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; override;
+    constructor Create;
+    destructor Destroy; override;
+  end;
+
+}
+
+type
+  { TOldInstaller }
+  TOldInstaller = class(TObject)
   private
     FAllOptions: string; //Options/command line arguments chosen by user
     FBinUtils: TStringlist; //binutils such as make.exe, as.exe, needed for compilation
@@ -193,7 +316,7 @@ uses
 {$ENDIF UNIX}
   ,updatelazconfig, fpcuputil;
 
-procedure TInstaller.CreateBinutilsList;
+procedure TOldInstaller.CreateBinutilsList;
 // Windows-centric for now; doubt if it
 // can be used in Unixy systems anyway
 begin
@@ -242,7 +365,7 @@ begin
   FBinUtils.Add('zip'+FExecutableExtension);
 end;
 
-function TInstaller.CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+function TOldInstaller.CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 var
   ResultCode: longint;
   OperationSucceeded: boolean;
@@ -283,8 +406,8 @@ begin
   Result:=OperationSucceeded;
 end;
 
-{ TInstaller }
-function TInstaller.DownloadBinUtils: boolean;
+{ TOldInstaller }
+function TOldInstaller.DownloadBinUtils: boolean;
 // Download binutils. For now, only makes sense on Windows...
 const
   {These would be the latest:
@@ -321,7 +444,7 @@ begin
   if Errors>0 then result:=false;
 end;
 
-function TInstaller.DownloadBootstrapCompiler: boolean;
+function TOldInstaller.DownloadBootstrapCompiler: boolean;
   // Should be done after we have unzip executable (on Windows: in FMakePath)
 var
   ArchiveDir: string;
@@ -432,7 +555,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-function TInstaller.DownloadFPCHelp(URL, TargetDirectory: string): boolean;
+function TOldInstaller.DownloadFPCHelp(URL, TargetDirectory: string): boolean;
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
@@ -474,7 +597,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-function TInstaller.DownloadSVN: boolean;
+function TOldInstaller.DownloadSVN: boolean;
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
@@ -523,7 +646,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
+procedure TOldInstaller.DumpOutput(Sender: TProcessEx; output: string);
 var
   TempFileName:string;
 begin
@@ -541,7 +664,7 @@ begin
   DumpConsole(Sender,output);
 end;
 
-function TInstaller.CheckAndGetNeededExecutables: boolean;
+function TOldInstaller.CheckAndGetNeededExecutables: boolean;
 var
   OperationSucceeded: boolean;
   Output: string;
@@ -667,7 +790,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-procedure TInstaller.EnvironmentWithOurPath(
+procedure TOldInstaller.EnvironmentWithOurPath(
   var EnvironmentList: TStringList; const NewPath: String);
 const
   {$IFDEF MSWINDOWS}
@@ -706,7 +829,7 @@ begin
   end;
 end;
 
-function TInstaller.FindSVNSubDirs(): boolean;
+function TOldInstaller.FindSVNSubDirs(): boolean;
 // Looks through SVN directory and sbudirectories. Sets updater's SVNExecutable
 var
   SVNFiles: TStringList;
@@ -732,12 +855,12 @@ begin
   Result := OperationSucceeded;
 end;
 
-function TInstaller.GetBootstrapCompiler: string;
+function TOldInstaller.GetBootstrapCompiler: string;
 begin
   Result := BootstrapCompilerDirectory + FBootstrapCompilerName;
 end;
 
-function TInstaller.GetCompilerName: string;
+function TOldInstaller.GetCompilerName: string;
 begin
   // Return installed CompilerName or bootstrap CompilerName as fallback
   // Note: we can't use BootstrapCompiler property otherwise endless loop
@@ -747,7 +870,7 @@ begin
     result:=FBootstrapCompilerName;
 end;
 
-function TInstaller.GetCrossInstaller: TCrossInstaller;
+function TOldInstaller.GetCrossInstaller: TCrossInstaller;
 var
   idx:integer;
   target:string;
@@ -763,17 +886,17 @@ begin
         end;
 end;
 
-function Tinstaller.GetFpcDirectory: string;
+function TOldInstaller.GetFpcDirectory: string;
 begin
   Result := FUpdater.FPCDirectory;
 end;
 
-function TInstaller.GetFPCRevision: string;
+function TOldInstaller.GetFPCRevision: string;
 begin
   Result := FUpdater.FPCRevision;
 end;
 
-function TInstaller.GetFPCTarget(Native:boolean): string;
+function TOldInstaller.GetFPCTarget(Native:boolean): string;
 var
   processorname,os:string;
 begin
@@ -850,7 +973,7 @@ begin
   result:=processorname+'-'+os;
 end;
 
-function TInstaller.GetFPCVersion: string;
+function TOldInstaller.GetFPCVersion: string;
 begin
   ExecuteCommandHidden(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler'+DirectorySeparator+'ppc1','-iV',result,FVerbose);
   //Remove trailing LF(s) and other control codes:
@@ -858,12 +981,12 @@ begin
     delete(result,length(result),1);
 end;
 
-function TInstaller.GetFPCUrl: string;
+function TOldInstaller.GetFPCUrl: string;
 begin
   Result := FUpdater.FPCURL;
 end;
 
-function TInstaller.GetLazarusHelp(): boolean;
+function TOldInstaller.GetLazarusHelp(): boolean;
 var
   AfterRevision: string;
   BeforeRevision: string;
@@ -1014,21 +1137,21 @@ begin
   result:=OperationSucceeded;
 end;
 
-procedure TInstaller.WriteLog(msg: string; ToConsole: boolean);
+procedure TOldInstaller.WriteLog(msg: string; ToConsole: boolean);
 begin
   Write(FLogFile,msg);
   if ToConsole then
     InfoLn(msg);
 end;
 
-procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
+procedure TOldInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
   WriteLog(msg+LineEnding,false); //infoln adds alread a lf
   if ToConsole then
     InfoLn(msg);
 end;
 
-function TInstaller.Run: boolean;
+function TOldInstaller.Run: boolean;
 var
   OperationSucceeded:boolean;
 begin
@@ -1148,12 +1271,12 @@ begin
   result:=OperationSucceeded;
 end;
 
-function TInstaller.GetLazarusRevision: string;
+function TOldInstaller.GetLazarusRevision: string;
 begin
   Result := FUpdater.LazarusRevision;
 end;
 
-procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);
+procedure TOldInstaller.LogError(Sender: TProcessEx; IsException: boolean);
 var
   TempFileName:string;
 begin
@@ -1173,54 +1296,54 @@ begin
     end;
 end;
 
-function TInstaller.ModuleEnabled(Name: string): boolean;
+function TOldInstaller.ModuleEnabled(Name: string): boolean;
 begin
   result:=(((FOnlyModules='') and (FSkipModules=''))
           or ((FOnlyModules<>'') and (Pos(Name,FOnlyModules)>0)))
           or ((FSkipModules<>'') and (Pos(Name,FSkipModules)<=0))
 end;
 
-procedure TInstaller.SetAllOptions(AValue: string);
+procedure TOldInstaller.SetAllOptions(AValue: string);
 begin
   if FAllOptions=AValue then Exit;
   FAllOptions:=AValue;
 end;
 
-procedure TInstaller.SetCrossCPU_Target(AValue: string);
+procedure TOldInstaller.SetCrossCPU_Target(AValue: string);
 begin
   if FCrossCPU_Target=AValue then Exit;
   FCrossCPU_Target:=AValue;
 end;
 
-procedure TInstaller.SetCrossLCL_Platform(AValue: string);
+procedure TOldInstaller.SetCrossLCL_Platform(AValue: string);
 begin
   if FCrossLCL_Platform=AValue then Exit;
   FCrossLCL_Platform:=AValue;
 end;
 
-procedure TInstaller.SetCrossOS_Target(AValue: string);
+procedure TOldInstaller.SetCrossOS_Target(AValue: string);
 begin
   if FCrossOS_Target=AValue then Exit;
   FCrossOS_Target:=AValue;
 end;
 
-procedure TInstaller.SetFPCDesiredRevision(AValue: string);
+procedure TOldInstaller.SetFPCDesiredRevision(AValue: string);
 begin
   FUpdater.FPCRevision:=AValue;
 end;
 
-function Tinstaller.GetLazarusDirectory: string;
+function TOldInstaller.GetLazarusDirectory: string;
 begin
   Result := FUpdater.LazarusDirectory;
 end;
 
-function TInstaller.GetLazarusUrl: string;
+function TOldInstaller.GetLazarusUrl: string;
 begin
   Result := FUpdater.LazarusURL;
 end;
 
 
-function TInstaller.GetMakePath: string;
+function TOldInstaller.GetMakePath: string;
 begin
   {$IFDEF MSWINDOWS}
   Result := FMakeDir;
@@ -1229,7 +1352,7 @@ begin
   {$ENDIF MSWINDOWS}
 end;
 
-procedure TInstaller.SetCompilerToInstalledCompiler;
+procedure TOldInstaller.SetCompilerToInstalledCompiler;
 begin
   // Compiler name could be overridden, so only assign if not done so
   if FInstalledCompilerName=''then FInstalledCompilerName:='fpc'+FExecutableExtension;
@@ -1253,39 +1376,39 @@ begin
 end;
 
 
-procedure TInstaller.SetBootstrapCompilerDirectory(AValue: string);
+procedure TOldInstaller.SetBootstrapCompilerDirectory(AValue: string);
 begin
   FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(ExpandFileName(AValue));
 end;
 
-procedure Tinstaller.SetFPCDirectory(Directory: string);
+procedure TOldInstaller.SetFPCDirectory(Directory: string);
 begin
   FUpdater.FPCDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
-procedure TInstaller.SetFPCOPT(AValue: string);
+procedure TOldInstaller.SetFPCOPT(AValue: string);
 begin
   if FFPCOPT=AValue then Exit;
   FFPCOPT:=AValue;
 end;
 
-procedure TInstaller.SetFPCUrl(AValue: string);
+procedure TOldInstaller.SetFPCUrl(AValue: string);
 begin
   FUpdater.FPCURL := AValue;
 end;
 
-procedure Tinstaller.SetLazarusDirectory(Directory: string);
+procedure TOldInstaller.SetLazarusDirectory(Directory: string);
 begin
   FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
 end;
 
-procedure TInstaller.SetLazarusOPT(AValue: string);
+procedure TOldInstaller.SetLazarusOPT(AValue: string);
 begin
   if FLazarusOPT=AValue then Exit;
   FLazarusOPT:=AValue;
 end;
 
-procedure TInstaller.SetLazarusPrimaryConfigPath(AValue: string);
+procedure TOldInstaller.SetLazarusPrimaryConfigPath(AValue: string);
 const
   DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
 begin
@@ -1306,58 +1429,58 @@ begin
   end;
 end;
 
-procedure TInstaller.SetLazarusDesiredRevision(AValue: string);
+procedure TOldInstaller.SetLazarusDesiredRevision(AValue: string);
 begin
   FUpdater.LazarusRevision:=AValue;
 end;
 
-procedure TInstaller.SetOnlyModules(AValue: string);
+procedure TOldInstaller.SetOnlyModules(AValue: string);
 begin
   if FOnlyModules=AValue then Exit;
   FOnlyModules:=Uppercase(AValue);
 end;
 
-procedure TInstaller.SetShortCutNameFpcup(AValue: string);
+procedure TOldInstaller.SetShortCutNameFpcup(AValue: string);
 begin
   if FShortCutNameFpcup=AValue then Exit;
   FShortCutNameFpcup:=AValue;
 end;
 
-procedure TInstaller.SetSkipFPC(AValue: boolean);
+procedure TOldInstaller.SetSkipFPC(AValue: boolean);
 begin
 
 end;
 
-procedure TInstaller.SetSkipLazarus(AValue: boolean);
+procedure TOldInstaller.SetSkipLazarus(AValue: boolean);
 begin
 
 end;
 
-procedure TInstaller.SetSkipLazarusHelp(AValue: boolean);
+procedure TOldInstaller.SetSkipLazarusHelp(AValue: boolean);
 begin
 
 end;
 
-procedure TInstaller.SetSkipModules(AValue: string);
+procedure TOldInstaller.SetSkipModules(AValue: string);
 begin
   if FSkipModules=AValue then Exit;
   FSkipModules:=UpperCase(AValue);
 end;
 
-procedure TInstaller.SetVerbose(AValue: boolean);
+procedure TOldInstaller.SetVerbose(AValue: boolean);
 begin
   FUpdater.Verbose:=AValue;
   if FVerbose=AValue then Exit;
   FVerbose:=AValue;
 end;
 
-procedure TInstaller.SetLazarusUrl(AValue: string);
+procedure TOldInstaller.SetLazarusUrl(AValue: string);
 begin
   FUpdater.LazarusURL := AValue;
 end;
 
 
-procedure TInstaller.SetMakePath(AValue: string);
+procedure TOldInstaller.SetMakePath(AValue: string);
 begin
   {$IFDEF MSWINDOWS}
   // Make sure there's a trailing delimiter
@@ -1368,7 +1491,7 @@ begin
   {$ENDIF MSWINDOWS}
 end;
 
-function TInstaller.CleanFPC: boolean;
+function TOldInstaller.CleanFPC: boolean;
 var
   OperationSucceeded:boolean;
 begin
@@ -1415,7 +1538,7 @@ begin
   result:=OperationSucceeded;
 end;
 
-function TInstaller.CleanLazarus: boolean;
+function TOldInstaller.CleanLazarus: boolean;
 var
   OperationSucceeded:boolean;
 begin
@@ -1437,7 +1560,7 @@ begin
   result:=OperationSucceeded;
 end;
 
-function TInstaller.CleanLazarusHelp: boolean;
+function TOldInstaller.CleanLazarusHelp: boolean;
 var
   BuildLCLDocsDirectory:string;
   OperationSucceeded:boolean;
@@ -1479,7 +1602,7 @@ begin
 end;
 
 
-function Tinstaller.GetFPC: boolean;
+function TOldInstaller.GetFPC: boolean;
 {
 In this function, we try to deal with existing system wide fpc.cfg (Unix)
 and the wrong compilers/binutils being in the path (Windows, mostly).
@@ -1905,7 +2028,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-function Tinstaller.GetLazarus: boolean;
+function TOldInstaller.GetLazarus: boolean;
 {
 This function does depend on a properly installed FPC but does not
 check if there is one.
@@ -2363,7 +2486,7 @@ begin
   Result := OperationSucceeded;
 end;
 
-constructor Tinstaller.Create;
+constructor TOldInstaller.Create;
 var
   LogFileName: string;
 begin
@@ -2447,7 +2570,7 @@ begin
   TextRec(FLogVerboseFile).Mode:=0;  //class variables should have been 0
 end;
 
-destructor Tinstaller.Destroy;
+destructor TOldInstaller.Destroy;
 begin
   WritelnLog(DateTimeToStr(now)+': fpcup finished.',false);
   WritelnLog('------------------------------------------------',false);
@@ -2460,4 +2583,4 @@ begin
 end;
 
 end.
-
+
