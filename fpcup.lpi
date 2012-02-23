@@ -78,7 +78,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -109,6 +109,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="topologicalsort.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="topologicalsort"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

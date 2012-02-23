@@ -46,7 +46,7 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   Classes,Forms,Interfaces {these 2 for application options},
   installer, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc, synaip,
-  synautil, synsock, blcksock;
+  synautil, synsock, blcksock, topologicalsort;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
@@ -430,7 +430,7 @@ begin
   writeln('from the source Subversion/SVN repositories,');
   writeln('compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
-  writeln('fpcup compiled with: FPC '+{$INCLUDE %FPCVERSION%}+' on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%} );
+  writeln('fpcup compiled on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%}+' with FPC '+{$INCLUDE %FPCVERSION%});
   writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
 
   try
