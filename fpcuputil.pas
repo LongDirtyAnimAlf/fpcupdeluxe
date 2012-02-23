@@ -446,6 +446,7 @@ end;
 
 procedure infoln(Message: string);
 begin
+  if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
   writeln('Info: ' + Message); //we misuse this for info output
   sleep(200); //hopefully allow output to be written without interfering with other output
   {$IFDEF DEBUG}

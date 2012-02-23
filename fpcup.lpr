@@ -406,7 +406,7 @@ end;
 
 procedure ShowErrorHints();
 begin
-  writeln('Please check program output for details. Possible troubleshooting steps:');
+  writeln('Please check log for details. Possible troubleshooting steps:');
   writeln('- make sure there''s a valid SVN executable in your path.');
   {$IFNDEF MSWINDOWS}
   writeln('- make sure the GNU binutils (make etc), windres, subversion client are installed');

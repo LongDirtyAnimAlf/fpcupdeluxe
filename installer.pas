@@ -391,7 +391,7 @@ begin
     else
     begin
       infoln('Error: '+Executable+' is not a valid '+ExeName+' application ('+
-      ExeName+' result code was: '+IntToStr(ResultCode)+')');
+        ExeName+' result code was: '+IntToStr(ResultCode)+')');
       OperationSucceeded:=false;
     end;
   except
@@ -1282,18 +1282,20 @@ var
 begin
   TempFileName:=SysUtils.GetTempFileName;
   if IsException then
-    begin
-    WritelnLog('Exception raised running ' + Sender.Executable + ' ' +Sender.ParametersString, true);
+  begin
+    WritelnLog('Exception raised running ' + Sender.ResultingCommand, true);
     WritelnLog(Sender.ExceptionInfo, true);
-    end
+  end
   else
-    begin
-    infoln('Command returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus)+'. Output:');
-    infoln(Sender.OutputString);
-    WritelnLog('ERROR running '+Sender.Executable + ' ' +Sender.ParametersString,false);
+  begin
+    infoln('Command: '+LineEnding+
+      Sender.ResultingCommand+LineEnding+
+      'returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus)+'. Output:'+LineEnding+
+      Sender.OutputString);
+    WritelnLog('ERROR running '+Sender.ResultingCommand,false);
     Sender.OutputStrings.SaveToFile(TempFileName);
-    WritelnLog('  output logged in '+TempFileName,false);
-    end;
+    WritelnLog('Output logged in '+TempFileName,false);
+  end;
 end;
 
 function TOldInstaller.ModuleEnabled(Name: string): boolean;
@@ -2583,4 +2585,4 @@ begin
 end;
 
 end.
-
+

@@ -59,7 +59,6 @@ type
 
   TProcessEx = class(TProcess)
     private
-      FCmdLine: string;
       FExceptionInfoStrings: TstringList;
       FExecutable: string;
       FExitStatus: integer;
@@ -69,8 +68,8 @@ type
       FOnOutputM: TDumpMethod;
       FOutputStrings: TstringList;
       FOutStream: TMemoryStream;
-      FProcess: TProcess;
       FProcessEnvironment:TProcessEnvironment;
+      function GetResultingCommand: string;
       function GetExceptionInfo: string;
       function GetOutputString: string;
       function GetOutputStrings: TstringList;
@@ -83,6 +82,8 @@ type
       procedure SetParametersString(AValue: String);
     public
       procedure Execute;
+      // Executable+parameters. Use Executable and Parameters/ParametersString to assign
+      property ResultingCommand: string read GetResultingCommand;
       property Environment:TProcessEnvironment read GetProcessEnvironment;
       property ExceptionInfo:string read GetExceptionInfo;
       property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
@@ -93,6 +94,7 @@ type
       property OnOutputM:TDumpMethod read FOnOutputM write SetOnOutputM;
       property OutputString:string read GetOutputString;
       property OutputStrings:TstringList read GetOutputStrings;
+      // Parameters/arguments for Executable. Alternative to .Parameters
       property ParametersString:String read GetParametersString write SetParametersString;
       constructor Create(AOwner : TComponent); override;
       destructor Destroy; override;
@@ -133,6 +135,13 @@ end;
 function TProcessEx.GetExceptionInfo: string;
 begin
   result:=FExceptionInfoStrings.Text;
+end;
+
+function TProcessEx.GetResultingCommand: string;
+begin
+  //todo: verify if parametersstring adequately represents final parameter as passed
+  // to operating system. What about quoting etc??!
+  result:=Executable+' '+ParametersString;
 end;
 
 function TProcessEx.GetProcessEnvironment: TProcessEnvironment;
@@ -207,9 +216,9 @@ begin
       inherited Environment:=FProcessEnvironment.EnvironmentList;
     Options := Options +[poUsePipes, poStderrToOutPut];
     if Assigned(FOnOutput) then
-      FOnOutput(Self,'Executing : '+Executable+' '+ ParametersString+' (Working dir: '+ CurrentDirectory +')'+ LineEnding);
+      FOnOutput(Self,'Executing : '+ResultingCommand+' (working dir: '+ CurrentDirectory +')'+ LineEnding);
     if Assigned(FOnOutputM) then
-      FOnOutputM(Self,'Executing : '+Executable+' '+ ParametersString+' (Working dir: '+ CurrentDirectory +')'+ LineEnding);
+      FOnOutputM(Self,'Executing : '+ResultingCommand+' (working dir: '+ CurrentDirectory +')'+ LineEnding);
     inherited Execute;
     while Running do
     begin
