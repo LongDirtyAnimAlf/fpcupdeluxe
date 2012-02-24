@@ -412,7 +412,7 @@ end;
 
 constructor TLazarusNativeInstaller.Create;
 begin
-
+  inherited create;
 end;
 
 destructor TLazarusNativeInstaller.Destroy;
@@ -454,7 +454,7 @@ end;
 
 constructor TLazarusInstaller.Create;
 begin
-
+  inherited create;
 end;
 
 destructor TLazarusInstaller.Destroy;
@@ -485,7 +485,7 @@ begin
       infoln('Failed to get cross libraries')
     else
       begin
-      ProcessEx.Executable := FMake;
+      ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       infoln('Running Make all (FPC crosscompiler):');
@@ -525,7 +525,7 @@ begin
           // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
           // make all and make crossinstall perhaps equivalent to
           // make all install CROSSCOMPILE=1??? todo: find out
-          ProcessEx.Executable := FMake;
+          ProcessEx.Executable := Make;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           infoln('Running Make crossinstall for FPC:');
           ProcessEx.Parameters.Clear;
@@ -589,7 +589,7 @@ end;
 
 constructor TFPCCrossInstaller.Create;
 begin
-
+  inherited create;
 end;
 
 destructor TFPCCrossInstaller.Destroy;
@@ -607,7 +607,7 @@ begin
   // Make all should use generated compiler internally for unit compilation
   {$IFDEF UNIX}
   // the long way: make all, see where to install, install
-  ProcessEx.Executable := FMake;
+  ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
@@ -630,10 +630,10 @@ begin
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
   {$ELSE UNIX}
-  ProcessEx.Executable := FMake;
+  ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('FPC='+BootstrapCompiler);
+  ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
@@ -689,7 +689,7 @@ end;
 
 constructor TFPCNativeInstaller.Create;
 begin
-
+  inherited create;
 end;
 
 destructor TFPCNativeInstaller.Destroy;
@@ -865,6 +865,47 @@ begin
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
   infoln('Module FPC: Getting/compiling FPC...');
+  if FBootstrapCompiler='' then
+    begin  // need to download it
+    {$IFDEF MSWINDOWS}
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL:=
+      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+    {$ENDIF MSWINDOWS}
+    {$IFDEF Linux}
+    //If compiled for x86 32 bit, install 32 bit
+    //If compiled for x64, install x64 only.//todo: cross compiler!?!
+    {$IFDEF CPU386}
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL :=
+      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'i386-linux-ppc386-1';
+    {$ELSE}
+    {$IFDEF cpuarmel}
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL :=
+    'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/arm-linux-ppcarm.bz2';
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'arm-linux-ppcarm';
+    FFPCPlatform:='arm-linux';
+    {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL :=
+      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'x86_64-linux-ppcx64';
+    {$ENDIF cpuarmel}
+    {$ENDIF CPU386}
+    {$ENDIF Linux}
+    {$IFDEF Darwin}
+    //OSX
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL:=
+      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcuniversal';
+    {$ENDIF Darwin}
+    end;
+  if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
+    FCompiler:=FBootstrapCompiler;
   result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
 
   WritelnLog('Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
@@ -880,11 +921,12 @@ begin
   SetPath(FBootstrapCompilerDirectory+PathSeparator+
     FMakeDirectory+PathSeparator+
     FSVNDirectory+PathSeparator+
-    FBaseDirectory);
+    FBaseDirectory,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
+  SetPath(BinPath,true);
   {$ENDIF UNIX}
+  InitDone:=result;
 end;
 
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
@@ -979,7 +1021,7 @@ begin
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('FPC='+Compiler);
+  ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1026,6 +1068,7 @@ constructor TFPCInstaller.Create;
 var
   LogFileName:string;
 begin
+  inherited create;
 
 // Binutils needed for compilation
 CreateBinutilsList;
@@ -1128,7 +1171,7 @@ begin
   begin
     // Check for binutils directory, make and unzip executables.
     // Download if needed; will download unzip - needed for SVN download
-    if (DirectoryExists(FMakeDir) = False) or (FileExists(FMake) = False) or
+    if (DirectoryExists(FMakeDir) = False) or (FileExists(Make) = False) or
       (FileExists(FUnzip) = False) then
     begin
       infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download');
@@ -1142,7 +1185,7 @@ begin
   begin
     // Check for proper make executable
     try
-      ExecuteCommandHidden(FMake,'-v',Output,FVerbose);
+      ExecuteCommandHidden(Make,'-v',Output,FVerbose);
       if Ansipos('GNU Make', Output) = 0 then
       begin
         infoln('Found make executable but it is not GNU Make.');
@@ -1510,6 +1553,7 @@ end;
 
 constructor TInstaller.Create;
 begin
+  inherited create;
   ProcessEx:=TProcessEx.Create(nil);
   ProcessEx.OnErrorM:=@LogError;
   FSVNClient:=TSVNClient.Create;
@@ -1517,8 +1561,8 @@ end;
 
 destructor TInstaller.Destroy;
 begin
-  ProcessEx.Destroy;
-  FSVNClient.Destroy;
+  ProcessEx.Free;
+  FSVNClient.Free;
   inherited Destroy;
 end;
 
@@ -2832,6 +2876,7 @@ begin
 end;
 
 
+
 function TOldInstaller.GetFPC: boolean;
 {
 In this function, we try to deal with existing system wide fpc.cfg (Unix)
@@ -2853,6 +2898,39 @@ other tools than make
 }
 
 var
+  FPCInstaller:TFPCInstaller;
+
+CONST
+  MODULE='FPC';
+begin
+// which TFPCInstaller are we going to create
+  if (FCrossCPU_Target<>'') or (FCrossOS_Target<>'') then
+    begin
+    FPCInstaller:=TFPCCrossInstaller.Create;
+    FPCInstaller.FCrossOS_Target:=FCrossOS_Target;
+    FPCInstaller.FCrossCPU_Target:=FCrossCPU_Target;
+    end
+  else
+    FPCInstaller:=TFPCNativeInstaller.Create;
+  try
+    FPCInstaller.BaseDirectory:=FPCDirectory;
+    FPCInstaller.BootstrapCompilerDirectory:=FBootstrapCompilerDirectory;
+    FPCInstaller.BootstrapCompilerURL:=FBootstrapCompilerFTP;
+    FPCInstaller.Compiler:='';  //bootstrap used
+    FPCInstaller.CompilerOptions:=FPCOPT;
+    FPCInstaller.DesiredRevision:=FPCDesiredRevision;
+    FPCInstaller.URL:=FPCURL;
+    FPCInstaller.Verbose:=Verbose;
+    result:= FPCInstaller.CleanModule(MODULE) and
+             FPCInstaller.GetModule(MODULE) and
+             FPCInstaller.BuildModule(MODULE);
+  finally
+    FPCInstaller.Free;
+  end;
+
+end;
+
+{var
   AfterRevision: string;
   BeforeRevision: string;
   BinPath: string; //Path where installed compiler ends up
@@ -3255,7 +3333,7 @@ begin
   ProcessEx.Free;
   Result := OperationSucceeded;
 end;
-
+}
 function TOldInstaller.GetLazarus: boolean;
 {
 This function does depend on a properly installed FPC but does not
