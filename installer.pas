@@ -41,7 +41,7 @@ General remarks:
 interface
 
 uses
-  Classes, SysUtils, updater, processutils, m_crossinstaller,svnclient,
+  Classes, SysUtils, updater, processutils, m_crossinstaller,
   installerfpc,installerlazarus;
 
 
@@ -58,7 +58,6 @@ type
     FBootstrapCompilerFTP: string;
     FBootstrapCompilerName: string; //OS specific compiler name (e.g. ppcuniversal for OSX)
     FClean: boolean; //User selected clean or build
-    FCrossCompiling:boolean; // set in GetFPC and GetLazarus occurding to following vars
     FCrossCPU_Target: string;
     FCrossOS_Target: string;
     FCrossLCL_Platform:string;
@@ -70,7 +69,6 @@ type
     FFPCPlatform: string; //Identification for platform in compiler path (e.g. i386-win32)
     FInstalledCompiler: string; //Complete path to installed FPC compiler; used to compile Lazarus
     FInstalledCompilerName: string; //Name only of installed PPC compiler (e.g. ppcx64 on 64 bit Intel OSX)
-    FInstalledLazarus: string; //Path to installed Lazarus; used in creating shortcuts
     FLazarusPrimaryConfigPath: string; //Primary config path used in our custom Lazarus install
     FLogFile:Text;
     FLogVerboseFile:Text;
@@ -86,24 +84,13 @@ type
     FUpdater: TUpdater;
     FUnzip: string; //Location or name of unzip executable
     FVerbose: boolean;
-    function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
-    procedure CreateBinutilsList;
-    function DownloadBinUtils: boolean;
-    function DownloadBootstrapCompiler: boolean;
     function DownloadFPCHelp(URL, TargetDirectory: string): boolean;
-    function DownloadSVN: boolean;
-    procedure DumpOutput(Sender:TProcessEx; output:string);
-    function CheckAndGetNeededExecutables: boolean;
     procedure EnvironmentWithOurPath(var EnvironmentList: TStringList; const NewPath: string);
     // Return complete environment except replace path with our own value
-    function FindSVNSubDirs(): boolean;
     function GetBootstrapCompiler: string;
     function GetCompilerName: string;
-    function GetCrossInstaller:TCrossInstaller;
     function GetFpcDirectory: string;
     function GetFPCRevision: string;
-    function GetFPCTarget(Native:boolean): string;
-    function GetFPCVersion: string;
     function GetFPCUrl: string;
     function GetLazarusRevision: string;
     procedure LogError(Sender:TProcessEx;IsException:boolean);
@@ -126,7 +113,6 @@ type
     function GetLazarusUrl: string;
     function GetMakePath: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
-    procedure SetCompilerToInstalledCompiler;
     procedure SetFPCDirectory(Directory: string);
     procedure SetFPCOPT(AValue: string);
     procedure SetFPCUrl(AValue: string);
@@ -191,7 +177,7 @@ type
 implementation
 
 uses
-  strutils, {process,} FileUtil {Requires LCL}
+  FileUtil {Requires LCL}
 {$IFDEF UNIX}
   ,baseunix
 {$ENDIF UNIX}
@@ -219,244 +205,8 @@ uses
 
 
 
-procedure TOldInstaller.CreateBinutilsList;
-// Windows-centric for now; doubt if it
-// can be used in Unixy systems anyway
-begin
-  // We need FExecutableExtension to be defined first.
-  FBinUtils:=TStringList.Create;
-  FBinUtils.Add('GoRC'+FExecutableExtension);
-  FBinUtils.Add('ar'+FExecutableExtension);
-  FBinUtils.Add('as'+FExecutableExtension);
-  FBinUtils.Add('bin2obj'+FExecutableExtension);
-  FBinUtils.Add('cmp'+FExecutableExtension);
-  FBinUtils.Add('cp'+FExecutableExtension);
-  FBinUtils.Add('cpp.exe');
-  FBinUtils.Add('cygiconv-2.dll');
-  FBinUtils.Add('cygncurses-8.dll');
-  FBinUtils.Add('cygwin1.dll');
-  FBinUtils.Add('diff'+FExecutableExtension);
-  FBinUtils.Add('dlltool'+FExecutableExtension);
-  FBinUtils.Add('fp32.ico');
-  FBinUtils.Add('gcc'+FExecutableExtension);
-  FBinUtils.Add('gdate'+FExecutableExtension);
-  //GDB.exe apparently can also be found here:
-  //http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
-  //for Windows x64:
-  //http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/
-  FBinUtils.Add('gdb'+FExecutableExtension);
-  FBinUtils.Add('gecho'+FExecutableExtension);
-  FBinUtils.Add('ginstall'+FExecutableExtension);
-  FBinUtils.Add('ginstall.exe.manifest');
-  FBinUtils.Add('gmkdir'+FExecutableExtension);
-  FBinUtils.Add('grep'+FExecutableExtension);
-  FBinUtils.Add('ld'+FExecutableExtension);
-  FBinUtils.Add('libexpat-1.dll');
-  FBinUtils.Add('make'+FExecutableExtension);
-  FBinUtils.Add('mv'+FExecutableExtension);
-  FBinUtils.Add('objdump'+FExecutableExtension);
-  FBinUtils.Add('patch'+FExecutableExtension);
-  FBinUtils.Add('patch.exe.manifest');
-  FBinUtils.Add('pwd'+FExecutableExtension);
-  FBinUtils.Add('rm'+FExecutableExtension);
-  FBinUtils.Add('strip'+FExecutableExtension);
-  FBinUtils.Add('unzip'+FExecutableExtension);
-  //We might just use gecho for that but that would probably confuse people:
-  FBinUtils.Add('upx'+FExecutableExtension);
-  FBinUtils.Add('windres'+FExecutableExtension);
-  FBinUtils.Add('windres'+FExecutableExtension);
-  FBinUtils.Add('zip'+FExecutableExtension);
-end;
 
-function TOldInstaller.CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
-var
-  ResultCode: longint;
-  OperationSucceeded: boolean;
-  ExeName: string;
-  Output: string;
-begin
-  try
-    ExeName:=ExtractFileName(Executable);
-    ResultCode:=ExecuteCommandHidden(Executable, Parameters, Output, Verbose);
-    if ResultCode=0 then
-    begin
-      if (ExpectOutput<>'') and (Ansipos(ExpectOutput, Output)=0) then
-      begin
-        infoln('Error: '+Executable+' is not a valid '+ExeName+' application. '+
-          ExeName+' exists but shows no ('+ExpectOutput+')in its output.');
-        OperationSucceeded:=false
-      end
-      else
-      begin
-        OperationSucceeded:=true;
-      end;
-    end
-    else
-    begin
-      infoln('Error: '+Executable+' is not a valid '+ExeName+' application ('+
-        ExeName+' result code was: '+IntToStr(ResultCode)+')');
-      OperationSucceeded:=false;
-    end;
-  except
-    on E: Exception do
-    begin
-      infoln('Error: '+Executable+' is not a valid '+ExeName+' application ('+
-        'Exception: '+E.ClassName+'/'+E.Message+')');
-      OperationSucceeded := False;
-    end;
-  end;
-  if OperationSucceeded then infoln('Found valid '+ExeName+' application.');
-  Result:=OperationSucceeded;
-end;
 
-{ TOldInstaller }
-function TOldInstaller.DownloadBinUtils: boolean;
-// Download binutils. For now, only makes sense on Windows...
-const
-  {These would be the latest:
-  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
-  These might work but are development, too (might end up in 2.6.2):
-  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
-  but let's use a stable version:}
-  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
-  //Parent directory of files. Needs trailing backslash.
-var
-  Counter: integer;
-  Errors: integer=0;
-begin
-  ForceDirectories(MakeDirectory);
-  Result:=true;
-  for Counter := 0 to FBinUtils.Count - 1 do
-  begin
-    infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + MakeDirectory);
-    try
-      if Download(SourceUrl + FBinUtils[Counter], MakeDirectory + FBinUtils[Counter])=false then
-      begin
-        Errors:=Errors+1;
-        infoln('Error downloading binutils: '+FBinUtils[Counter]+' to '+MakeDirectory);
-      end;
-    except
-      on E: Exception do
-      begin
-        Result := False;
-        infoln('Error downloading binutils: ' + E.Message);
-        exit; //out of function.
-      end;
-    end;
-  end;
-  if Errors>0 then result:=false;
-end;
-
-function TOldInstaller.DownloadBootstrapCompiler: boolean;
-  // Should be done after we have unzip executable (on Windows: in FMakePath)
-var
-  ArchiveDir: string;
-  BootstrapArchive: string;
-  Counter: integer;
-  ExtractedCompiler: string;
-  Log: string;
-  OperationSucceeded: boolean;
-begin
-  OperationSucceeded:=true;
-  if OperationSucceeded then
-  begin
-    OperationSucceeded:=ForceDirectories(BootstrapCompilerDirectory);
-    if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+BootstrapCompilerDirectory);
-  end;
-
-  BootstrapArchive := SysUtils.GetTempFileName;
-  ArchiveDir := ExtractFilePath(BootstrapArchive);
-  if OperationSucceeded then
-  begin
-    OperationSucceeded:=Download(FBootstrapCompilerFTP, BootstrapArchive);
-    if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
-  end;
-
-  if OperationSucceeded then
-  begin
-    {$IFDEF MSWINDOWS}
-    //Extract zip, overwriting without prompting
-    if ExecuteCommandHidden(FUnzip,'-o -d '+ArchiveDir+' '+BootstrapArchive,Verbose) <> 0 then
-      begin
-        infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
-        OperationSucceeded := False;
-      end
-      else
-      begin
-        OperationSucceeded := True; // Spelling it out can't hurt sometimes
-      end;
-    // Move CompilerName to proper directory
-    if OperationSucceeded = True then
-    begin
-      infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + BootstrapCompiler);
-      renamefile(ArchiveDir + CompilerName, BootstrapCompiler);
-    end;
-    {$ENDIF MSWINDOWS}
-    {$IFDEF LINUX}
-    //Extract bz2, overwriting without prompting
-    if ExecuteCommandHidden(FBunzip2,'-d -f -q '+BootstrapArchive,Verbose) <> 0 then
-      begin
-        infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
-        OperationSucceeded := False;
-      end
-      else
-      begin
-        ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
-        OperationSucceeded := True; // Spelling it out can't hurt sometimes
-      end;
-    // Move compiler to proper directory; note bzip2 will append .out to file
-    if OperationSucceeded = True then
-    begin
-      infoln('Going to move ' + ExtractedCompiler + ' to ' + BootstrapCompiler);
-      OperationSucceeded:=MoveFile(ExtractedCompiler, BootstrapCompiler);
-    end;
-    if OperationSucceeded then
-    begin
-      //Make executable
-      OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
-      if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
-    end;
-    {$ENDIF LINUX}
-    {$IFDEF DARWIN}
-    //Extract .tar.bz2, overwriting without prompting
-    if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,Verbose) <> 0 then    
-    begin
-      infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
-      OperationSucceeded := False;
-    end
-    else
-    begin
-      OperationSucceeded := True; // Spelling it out can't hurt sometimes
-    end;
-    // Move compiler to proper directory; note bzip2 will append .out to file
-    if OperationSucceeded = True then
-    begin
-      //todo: currently tar spits out uncompressed file in current dir...
-      //which might not have proper permissions to actually create file...!?
-      infoln('Going to rename/move '+CompilerName+' to '+BootstrapCompiler);
-      sysutils.DeleteFile(BootstrapCompiler); //ignore errors
-      // We might be moving files across partitions so we cannot use renamefile
-      OperationSucceeded:=FileUtil.CopyFile(CompilerName, BootstrapCompiler);
-      sysutils.DeleteFile(CompilerName);
-    end;
-    if OperationSucceeded then
-    begin
-      //Make executable
-      OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
-      if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
-    end;
-    {$ENDIF DARWIN}
-  end;
-  if OperationSucceeded = True then
-  begin
-    SysUtils.DeleteFile(BootstrapArchive);
-  end
-  else
-  begin
-    infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive);
-  end;
-  Result := OperationSucceeded;
-end;
 
 function TOldInstaller.DownloadFPCHelp(URL, TargetDirectory: string): boolean;
 var
@@ -500,199 +250,6 @@ begin
   Result := OperationSucceeded;
 end;
 
-function TOldInstaller.DownloadSVN: boolean;
-var
-  OperationSucceeded: boolean;
-  ResultCode: longint;
-  SVNZip: string;
-begin
-  // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
-  { Alternative 1: sourceforge packaged
-  This won't work, we'd get an .msi:
-  http://sourceforge.net/projects/win32svn/files/latest/download?source=files
-  We don't want msi/Windows installer - this way we can hopefully support Windows 2000, so use:
-  http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip
-  }
-
-  {Alternative 2: use
-  http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip
-  with subdirs bin and licenses. No further subdirs
-  However, doesn't work on Windows 2K...}
-  OperationSucceeded := True;
-  ForceDirectories(FSVNDirectory);
-  SVNZip := SysUtils.GetTempFileName + '.zip';
-  try
-    OperationSucceeded := Download(
-      'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
-      SVNZip);
-  except
-    // Deal with timeouts, wrong URLs etc
-    OperationSucceeded:=false;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Extract, overwrite
-    if ExecuteCommandHidden(FUnzip,'-o -d '+ FSVNDirectory+' '+SVNZip,Verbose)<> 0 then
-      begin
-        OperationSucceeded := False;
-        infoln('resultcode: ' + IntToStr(ResultCode));
-      end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    OperationSucceeded := FindSVNSubDirs;
-    if OperationSucceeded then
-      SysUtils.deletefile(SVNZip); //Get rid of temp zip if success.
-  end;
-  Result := OperationSucceeded;
-end;
-
-procedure TOldInstaller.DumpOutput(Sender: TProcessEx; output: string);
-var
-  TempFileName:string;
-begin
-  if Verbose then
-    begin
-    if TextRec(FLogVerboseFile).Mode=0 then
-      begin
-      TempFileName:=SysUtils.GetTempFileName;
-      AssignFile(FLogVerboseFile,TempFileName);
-      Rewrite(FLogVerboseFile);
-      WritelnLog('Verbose output saved to '+TempFileName,false);
-      end;
-    write(FLogVerboseFile,output);
-    end;
-  DumpConsole(Sender,output);
-end;
-
-function TOldInstaller.CheckAndGetNeededExecutables: boolean;
-var
-  OperationSucceeded: boolean;
-  Output: string;
-begin
-  OperationSucceeded := True;
-  // The extractors used depend on the bootstrap compiler URL/file we download
-  // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
-  {$IFDEF MSWINDOWS}
-  // Need to do it here so we can pick up make path.
-  FBunzip2:=EmptyStr;
-  FTar:=EmptyStr;
-  // By doing this, we expect unzip.exe to be in the binutils dir.
-  // This is safe to do because it is included in the FPC binutils.
-  FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + FExecutableExtension;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF LINUX}
-  FBunzip2:='bunzip2';
-  FTar:='tar';
-  FUnzip:='unzip'; //unzip needed at least for FPC chm help
-  {$ENDIF LINUX}
-  {$IFDEF DARWIN}
-  FBunzip2:=''; //not really necessary now
-  FTar:='gnutar'; //gnutar can decompress as well; bsd tar can't
-  FUnzip:='unzip'; //unzip needed at least for FPC chm help
-  {$ENDIF DARIN}
-
-  {$IFDEF MSWINDOWS}
-  if OperationSucceeded then
-  begin
-    // Check for binutils directory, make and unzip executables.
-    // Download if needed; will download unzip - needed for SVN download
-    if (DirectoryExists(FMakeDir) = False) or (FileExists(FMake) = False) or
-      (FileExists(FUnzip) = False) then
-    begin
-      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download');
-      OperationSucceeded := DownloadBinUtils;
-    end;
-  end;
-  {$ENDIF MSWINDOWS}
-
-
-  if OperationSucceeded then
-  begin
-    // Check for proper make executable
-    try
-      ExecuteCommandHidden(FMake,'-v',Output,Verbose);
-      if Ansipos('GNU Make', Output) = 0 then
-      begin
-        infoln('Found make executable but it is not GNU Make.');
-        OperationSucceeded:=false;
-      end;
-    except
-      // ignore errors, this is only an extra check
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Try to look for SVN
-    if FUpdater.FindSVNExecutable='' then
-    begin
-      {$IFDEF MSWINDOWS}
-      // Make sure we have a sensible default.
-      // Set it here so multiple calls to CheckExes will not redownload SVN all the time
-      if FSVNDirectory='' then FSVNDirectory := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'svn'+DirectorySeparator;
-      {$ENDIF MSWINDOWS}
-      FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
-      {$IFDEF MSWINDOWS}
-      // If it still can't be found, download it
-      if FUpdater.SVNExecutable='' then
-      begin
-        infoln('Going to download SVN');
-        OperationSucceeded := DownloadSVN;
-      end;
-      {$ELSE}
-      if FUpdater.SVNExecutable='' then
-      begin
-        infoln('Error: could not find SVN executable. Please make sure it is installed.');
-        OperationSucceeded:=false;
-      end;
-      {$ENDIF}
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Check for valid unzip executable, if it is needed
-    if FUnzip<>EmptyStr then
-    begin
-      OperationSucceeded:=CheckExecutable(FUnzip, '-v', '');
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Check for valid bunzip2 executable, if it is needed
-    if FBunzip2 <>EmptyStr then
-    begin
-      OperationSucceeded:=CheckExecutable(FBunzip2, '--version','');
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Check for valid tar executable, if it is needed
-    if FTar<>EmptyStr then
-    begin
-      OperationSucceeded:=CheckExecutable(FTar, '--version','');
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Check for proper FPC bootstrap compiler
-    infoln('Checking for FPC bootstrap compiler: '+BootStrapCompiler);
-    OperationSucceeded:=CheckExecutable(BootstrapCompiler, '-h', 'Free Pascal Compiler');
-    if OperationSucceeded=false then
-    begin
-      infoln('Bootstrap compiler not found or not a proper FPC compiler; downloading.');
-      OperationSucceeded := DownloadBootstrapCompiler;
-    end;
-  end;
-  Result := OperationSucceeded;
-end;
-
 procedure TOldInstaller.EnvironmentWithOurPath(
   var EnvironmentList: TStringList; const NewPath: String);
 const
@@ -732,32 +289,6 @@ begin
   end;
 end;
 
-function TOldInstaller.FindSVNSubDirs(): boolean;
-// Looks through SVN directory and sbudirectories. Sets updater's SVNExecutable
-var
-  SVNFiles: TStringList;
-  OperationSucceeded: boolean;
-begin
-  //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
-  SVNFiles := FindAllFiles(FSVNDirectory, 'svn' + FExecutableExtension, True);
-  try
-    if SVNFiles.Count > 0 then
-    begin
-      // Just get first result.
-      FUpdater.SVNExecutable := SVNFiles.Strings[0];
-      OperationSucceeded := True;
-    end
-    else
-    begin
-      infoln('Could not find svn executable in or under ' + FSVNDirectory);
-      OperationSucceeded := False;
-    end;
-  finally
-    SVNFiles.Free;
-  end;
-  Result := OperationSucceeded;
-end;
-
 function TOldInstaller.GetBootstrapCompiler: string;
 begin
   Result := BootstrapCompilerDirectory + FBootstrapCompilerName;
@@ -773,21 +304,6 @@ begin
     result:=FBootstrapCompilerName;
 end;
 
-function TOldInstaller.GetCrossInstaller: TCrossInstaller;
-var
-  idx:integer;
-  target:string;
-begin
-  result:=nil;
-  target:=GetFPCTarget(false);
-  if assigned(CrossInstallers) then
-    for idx:=0 to CrossInstallers.Count-1 do
-      if CrossInstallers[idx]=target then
-        begin
-        result:=TCrossInstaller(CrossInstallers.Objects[idx]);
-        break;
-        end;
-end;
 
 function TOldInstaller.GetFpcDirectory: string;
 begin
@@ -797,91 +313,6 @@ end;
 function TOldInstaller.GetFPCRevision: string;
 begin
   Result := FUpdater.FPCRevision;
-end;
-
-function TOldInstaller.GetFPCTarget(Native:boolean): string;
-var
-  processorname,os:string;
-begin
-  processorname:='notfound';
-  os:=processorname;
-  {$ifdef cpui386}
-       processorname:='i386';
-  {$endif cpui386}
-  {$ifdef cpum68k}
-       processorname:='m68k';
-  {$endif cpum68k}
-  {$ifdef cpualpha}
-       processorname:='alpha';
-  {$endif cpualpha}
-  {$ifdef cpupowerpc}
-       processorname:='powerpc';
-  {$endif cpupowerpc}
-  {$ifdef cpupowerpc64}
-       processorname:='powerpc64';
-  {$endif cpupowerpc64}
-  {$ifdef cpuarm}
-    {$ifdef fpc_armeb}
-       processorname:='armeb';
-    {$else}
-       processorname:='arm';
-    {$endif fpc_armeb}
-  {$endif cpuarm}
-  {$ifdef cpusparc}
-       processorname:='sparc';
-  {$endif cpusparc}
-  {$ifdef cpux86_64}
-       processorname:='x86_64';
-  {$endif cpux86_64}
-  {$ifdef cpuia64}
-       processorname:='ia64';
-  {$endif cpuia64}
-  {$ifdef darwin}
-       os:='darwin';
-  {$endif darwin}
-  {$ifdef FreeBSD}
-       os:='freebsd';
-  {$endif FreeBSD}
-  {$ifdef linux}
-       os:='linux';
-  {$endif linux}
-  {$ifdef netbsd}
-       os:='netbsd';
-  {$endif netbsd}
-  {$ifdef openbsd}
-       os:='openbsd';
-  {$endif openbsd}
-  {$ifdef os2}
-       os:='os2';
-  {$endif os2}
-  {$ifdef solaris}
-       os:='solaris';
-  {$endif solaris}
-  {$ifdef wince}
-       os:='wince';
-  {$endif wince}
-  {$ifdef win32}
-       os:='win32';
-  {$endif win32}
-  {$ifdef win64}
-       os:='win64';
-  {$endif win64}
-  if not Native then
-    begin
-    if FCrossCPU_Target<>'' then
-      processorname:= FCrossCPU_Target;
-    if FCrossOS_Target<>'' then
-      os:=FCrossOS_Target;
-    end;
-  result:=processorname+'-'+os;
-end;
-
-function TOldInstaller.GetFPCVersion: string;
-begin
-  ExecuteCommandHidden(IncludeTrailingPathDelimiter(FPCDirectory)+'compiler'+DirectorySeparator+'ppc1','-iV',result,FVerbose);
-  //Remove trailing LF(s) and other control codes:
-  while (length(result)>0) and (ord(result[length(result)])<$20) do
-    delete(result,length(result),1);
 end;
 
 function TOldInstaller.GetFPCUrl: string;
@@ -899,7 +330,7 @@ var
   OperationSucceeded: boolean;
   ProcessEx:TProcessEx;
 begin
-  infoln('Module HELP: getting/compiling Lazarus help...');
+{  infoln('Module HELP: getting/compiling Lazarus help...');
 
   //Make sure we have the proper tools.
   OperationSucceeded := CheckAndGetNeededExecutables;
@@ -1038,7 +469,7 @@ begin
   // Finish up
   ProcessEx.Free;
   result:=OperationSucceeded;
-end;
+}end;
 
 procedure TOldInstaller.WriteLog(msg: string; ToConsole: boolean);
 begin
@@ -1257,28 +688,6 @@ begin
   {$ENDIF MSWINDOWS}
 end;
 
-procedure TOldInstaller.SetCompilerToInstalledCompiler;
-begin
-  // Compiler name could be overridden, so only assign if not done so
-  if FInstalledCompilerName=''then FInstalledCompilerName:='fpc'+FExecutableExtension;
-  FInstalledCompiler:='//**#$$ Fix your ifdefs in the code.';
-  // This differs between Windows and Linux.
-  {$IFDEF MSWINDOWS}
-  // This will give something like fpc.exe. We use this in case
-  // we need to pass FPC=bla when running make.
-  FInstalledCompiler := FPCDirectory + 'bin' +
-    DirectorySeparator + FFPCPlatform + DirectorySeparator + CompilerName;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF UNIX}
-  // Default FPC compiler installed by make:
-  FInstalledCompiler := FPCDirectory + 'bin' +DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpc';
-  if FileExistsUTF8(FInstalledCompiler+'.sh') then
-  begin
-    //Use our proxy if it is installed
-    FInstalledCompiler:=FInstalledCompiler+'.sh';
-  end;
-  {$ENDIF UNIX}
-end;
 
 
 procedure TOldInstaller.SetBootstrapCompilerDirectory(AValue: string);
@@ -1397,72 +806,13 @@ begin
 end;
 
 function TOldInstaller.CleanFPC: boolean;
-var
-  OperationSucceeded:boolean;
 begin
-  OperationSucceeded:=true;
-  infoln('Module FPC: cleanup...');
-
-  WritelnLog('Bootstrap compiler dir: '+BootstrapCompilerDirectory,false);
-  WritelnLog('FPC URL:                '+FPCURL,false);
-  WritelnLog('FPC options:            '+FPCOPT,false);
-  WritelnLog('FPC directory:          '+FPCDirectory,false);
-  {$IFDEF MSWINDOWS}
-  WritelnLog('Make/binutils path:     '+MakeDirectory,false);
-  {$ENDIF MSWINDOWS}
-
-  try
-    //Make sure we have the proper tools:
-    OperationSucceeded:=CheckAndGetNeededExecutables;
-
-    // We need to know compiler path so we can delete fpc.cfg etc
-    if FInstalledCompiler = '' then
-    begin
-      //Assume we've got a working compiler. This will link through to the
-      //platform-specific compiler, e.g. our fpc.sh proxy on Unix
-      SetCompilerToInstalledCompiler;
-    end;
-
-    // SVN revert FPC directory
-    FUpdater.RevertFPC;
-
-    // Delete any existing fpc.cfg files
-    Sysutils.DeleteFile(ExtractFilePath(FInstalledCompiler)+'fpc.cfg');
-
-    {$IFDEF UNIX}
-    // Delete any fpc.sh shell scripts
-    Sysutils.DeleteFile(ExtractFilePath(FInstalledCompiler)+'fpc.sh');
-    {$ENDIF UNIX}
-  except
-    on E: Exception do
-    begin
-      WritelnLog('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      OperationSucceeded:=false;
-    end;
-  end;
-  result:=OperationSucceeded;
+//moved to TFPCInstaller.UnInstall
 end;
 
 function TOldInstaller.CleanLazarus: boolean;
-var
-  OperationSucceeded:boolean;
 begin
-  OperationSucceeded:=true;
-  infoln('Module LAZARUS: cleanup...');
-
-  try
-   // SVN revert Lazarus directory
-   FUpdater.RevertLazarus;
-
-   WritelnLog('Lazarus: note: NOT cleaning primary config path '+LazarusPrimaryConfigPath+'. If you want to, you can delete it yourself.');
-  except
-    on E: Exception do
-    begin
-      WritelnLog('Lazarus clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      OperationSucceeded:=false;
-    end;
-  end;
-  result:=OperationSucceeded;
+  //moved to TLazarusInstaller.UnInstall
 end;
 
 function TOldInstaller.CleanLazarusHelp: boolean;
@@ -1620,7 +970,8 @@ begin
     LazarusInstaller.Verbose:=Verbose;
     result:= LazarusInstaller.CleanModule(MODULE) and
              LazarusInstaller.GetModule(MODULE) and
-             LazarusInstaller.BuildModule(MODULE);
+             LazarusInstaller.BuildModule(MODULE) and
+             LazarusInstaller.ConfigLazarus(FLazarusPrimaryConfigPath);
   finally
     LazarusInstaller.Free;
   end;
@@ -1638,199 +989,8 @@ end;
   Options:string;
   ProcessEx:TProcessEx;
 
-  function distclean():boolean;
-  var
-    oldlog:TErrorMethod;
-  begin
-    // Make distclean; we don't care about failure (e.g. directory might be empty etc)
-    oldlog:=ProcessEx.OnErrorM;
-    ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
-    ProcessEx.Executable := FMake;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('FPC='+FInstalledCompiler+'');
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    if FCrossLCL_Platform <>'' then
-      ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-    if FCrossCompiling then
-    begin  // clean out the correct compiler
-      ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-      ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-    end;
-    ProcessEx.Parameters.Add('distclean');
-    if ModuleEnabled('BIGIDE') then
-    begin
-      ProcessEx.Parameters.Add('bigideclean');
-      infoln('Lazarus: running make distclean bigideclean before checkout/update:');
-    end
-    else
-    begin
-      infoln('Lazarus: running make distclean before checkout/update:');
-    end;
-    ProcessEx.Execute;
-    ProcessEx.OnErrorM:=oldlog;
-    result:=true;
-  end;
-
 
 begin
-  infoln('Module LAZARUS: Getting/compiling Lazarus...');
-
-  WritelnLog('Lazarus directory:      '+LazarusDirectory,false);
-  WritelnLog('Lazarus primary config path:'+LazarusPrimaryConfigPath,false);
-  WritelnLog('Lazarus URL:            '+LazarusURL,false);
-  WritelnLog('Lazarus options:        '+LazarusOPT,false);
-  WritelnLog('Lazarus shortcut name:  '+ShortCutName,false);
-  if ShortCutNameFpcup<>'' then
-    WritelnLog('Shortcut fpcup name:    '+ShortCutNameFpcup,false);
-  //Make sure we have the proper tools.
-  OperationSucceeded := CheckAndGetNeededExecutables;
-
-  // If we haven't installed FPC, this won't be set:
-  if FInstalledCompiler = '' then
-  begin
-    //Assume we've got a working compiler. This will link through to the
-    //platform-specific compiler, e.g. our fpc.sh proxy on Unix
-    SetCompilerToInstalledCompiler;
-  end;
-
-  ProcessEx:=TProcessEx.Create(nil);
-  if Verbose then
-    ProcessEx.OnOutputM:=@DumpOutput;
-  ProcessEx.OnErrorM:=@LogError;
-
-  FCrossCompiling:=(FCrossCPU_Target<>'') or (FCrossOS_Target<>'');
-
-  {$IFDEF MSWINDOWS}
-  // Try to ignore any existing make.exe, fpc.exe by setting our own path:
-  // We include the bootstrap compiler directory, but that fpc.exe will
-  // probably give different .ppu files=>more a last resort solution
-  CustomPath:=ExtractFilePath(FInstalledCompiler)+PathSeparator+
-    LazarusDirectory+PathSeparator+
-    MakeDirectory+PathSeparator+
-    FSVNDirectory+PathSeparator+
-    BootstrapCompilerDirectory;
-  ProcessEx.Environment.SetVar('Path',CustomPath);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF UNIX}
-  ProcessEx.Environment.SetVar('PATH',ExtractFilePath(FInstalledCompiler)+PathSeparator+ProcessEx.Environment.GetVar('PATH'));
-  {$ENDIF UNIX}
-  if CustomPath<>EmptyStr then
-    WritelnLog('External program path:  '+CustomPath,false);
-
-  // Make distclean to clean out any cruft, and speed up svn update
-  if OperationSucceeded then
-  begin
-    distclean;
-  end;
-
-  // Download Lazarus source:
-  if OperationSucceeded = True then
-  begin
-    infoln('Checking out/updating Lazarus sources...');
-    UpdateWarnings:=TStringList.Create;
-    try
-     if OperationSucceeded then OperationSucceeded:=FUpdater.UpdateLazarus(BeforeRevision, AfterRevision, UpdateWarnings);
-     if UpdateWarnings.Count>0 then
-     begin
-       WritelnLog(UpdateWarnings.Text);
-     end;
-    finally
-      UpdateWarnings.Free;
-    end;
-
-    infoln('Lazarus was at revision: '+BeforeRevision);
-    if FUpdater.Updated then infoln('Lazarus is now at revision: '+AfterRevision) else infoln('No updates for Lazarus found.');
-  end;
-
-  // Make sure primary config path exists
-  if DirectoryExists(LazarusPrimaryConfigPath) = False then
-  begin
-    OperationSucceeded:=ForceDirectories(LazarusPrimaryConfigPath);
-    infoln('Created Lazarus primary config directory: '+LazarusPrimaryConfigPath);
-  end;
-
-  if not FCrossCompiling then
-    begin // make native lazarus
-      if OperationSucceeded then
-      begin
-        // Make all (should include lcl & ide)
-        // distclean was already run; otherwise specify make clean all
-        ProcessEx.Executable := FMake;
-        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
-        ProcessEx.Parameters.Clear;
-        ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
-        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-        ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
-        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-        if FCrossLCL_Platform <>'' then
-          ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-        if LazarusOPT<>'' then
-          ProcessEx.Parameters.Add('OPT='+LazarusOPT);
-        ProcessEx.Parameters.Add('all');
-        infoln('Lazarus: running make all:');
-        ProcessEx.Execute;
-        if ProcessEx.ExitStatus <> 0 then
-        begin
-          OperationSucceeded := False;
-          FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
-        end
-        else
-        begin
-          FInstalledLazarus:=IncludeTrailingPathDelimiter(LazarusDirectory)+'lazarus'+FExecutableExtension;
-        end;
-      end;
-
-      if OperationSucceeded then
-      begin
-        // Set up a minimal config so we can use LazBuild
-        LazarusConfig:=TUpdateLazConfig.Create(LazarusPrimaryConfigPath);
-        try
-          try
-            // Configure help path as well.
-            // Note that we might be overwriting user's settings here.
-            // todo: if overwriting user's help settings, warn him about it
-            LazarusConfig.CHMHelpExe:=IncludeTrailingPathDelimiter(LazarusDirectory)+
-              'components'+DirectorySeparator+
-              'chmhelp'+DirectorySeparator+
-              'lhelp'+DirectorySeparator+
-              'lhelp'+FExecutableExtension;
-            LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(LazarusDirectory)+
-              'docs'+DirectorySeparator+
-              'html'+DirectorySeparator;
-            LazarusConfig.LazarusDirectory:=LazarusDirectory;
-            {$IFDEF MSWINDOWS}
-            // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
-            // the platform specific compiler. In order to be able to cross compile
-            // we'd rather use fpc
-            LazarusConfig.CompilerFilename:=ExtractFilePath(FInstalledCompiler)+'fpc'+FExecutableExtension;
-            LazarusConfig.DebuggerFilename:=FMakeDir+'gdb'+FExecutableExtension;
-            LazarusConfig.MakeFilename:=FMakeDir+'make'+FExecutableExtension;
-            {$ENDIF MSWINDOWS}
-            {$IFDEF UNIX}
-            // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
-            LazarusConfig.CompilerFilename:=FInstalledCompiler;
-            LazarusConfig.DebuggerFilename:=which('gdb'); //assume in path
-            LazarusConfig.MakeFilename:=which('make'); //assume in path
-            {$ENDIF UNIX}
-            // Source dir in stock Lazarus on windows is something like
-            // $(LazarusDir)fpc\$(FPCVer)\source\
-            LazarusConfig.FPCSourceDirectory:=FPCDirectory;
-          except
-            on E: Exception do
-            begin
-              OperationSucceeded:=false;
-              infoln('Error setting Lazarus config: '+E.ClassName+'/'+E.Message);
-            end;
-          end;
-        finally
-          LazarusConfig.Free;
-        end;
-      end;
-
       if OperationSucceeded then
       begin
         // Right now, we have a minimally working Lazarus directory, enough
@@ -1980,79 +1140,6 @@ begin
             OperationSucceeded := False;
         end;
     end; //native build
-  if FCrossCompiling {$IFDEF win32} or (OperationSucceeded and ModuleEnabled('WINCROSSX64')){$ENDIF win32} then
-  //todo: find out what crosscompilers we can install on linux/osx
-    begin //cross build
-      // 64 bit LCL for use in crosscompiling to 64 bit windows
-      // Baed on Wiki on crosscompiling and Lazarus mailing list
-      // message by Sven Barth, 19 February 2012
-      // Note: we use LCL_PLATFORM=win32 because it's the 32 bit widgetset
-      // We could have combined the 2 make statements but it seems quite complex.
-      // alternatives:
-      // http://lazarus.freepascal.org/index.php/topic,13195.msg68826.html#msg68826
-
-      {$IFDEF win32}
-      if not FCrossCompiling then
-        begin
-        //Hardcode here
-        FCrossCPU_Target:='x86_64';
-        FCrossOS_Target:='win64';
-        FCrossLCL_Platform:='win32';
-        FCrossCompiling:=true;
-        end;
-      {$ENDIF win32}
-
-      CrossInstaller:=GetCrossInstaller;
-      if Assigned(CrossInstaller) then
-        if not CrossInstaller.GetBinUtils(FPCDirectory) then
-          infoln('Failed to get crossbinutils')
-        else if not CrossInstaller.GetLibs(FPCDirectory) then
-          infoln('Failed to get cross libraries')
-        else if not CrossInstaller.GetLibsLCL(FCrossLCL_Platform,FPCDirectory) then
-          infoln('Failed to get LCL cross libraries')
-        else
-        begin
-        infoln('Lazarus: running make distclean for 64 bit LCL:');
-        distclean();
-        ProcessEx.Executable := FMake;
-        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDirectory);
-        ProcessEx.Parameters.Clear;
-        ProcessEx.Parameters.Add('FPC='+FInstalledCompiler);
-        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(LazarusDirectory));
-        ProcessEx.Parameters.Add('FPCDIR='+FPCDirectory); //Make sure our FPC units can be found by Lazarus
-        if CrossInstaller.BinUtilsPath<>'' then
-          ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FPCDirectory));
-        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-        if FCrossLCL_Platform <>'' then
-          ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-        Options:=LazarusOPT;
-        if CrossInstaller.LibsPath<>''then
-          Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
-        if CrossInstaller.BinUtilsPrefix<>'' then
-          begin
-          Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
-          ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
-          end;
-        if Options<>'' then
-          ProcessEx.Parameters.Add('OPT='+Options);
-        ProcessEx.Parameters.Add('packager/registration');
-        ProcessEx.Parameters.Add('lazutils');
-        ProcessEx.Parameters.Add('lcl');
-        infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
-        ProcessEx.Execute;
-        if ProcessEx.ExitStatus <> 0 then
-        begin
-          WritelnLog( 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
-          OperationSucceeded := False;
-        end;
-      end
-    else
-      infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
-    end;
-
-
   if OperationSucceeded then
     WritelnLog('Lazarus update succeeded at revision number '+ AfterRevision,false);
   ProcessEx.Free;
@@ -2115,8 +1202,6 @@ begin
   {$ENDIF MSWINDOWS}
   FShortcutName:='Lazarus_trunk'; //Default shortcut name; if it's not empty, shortcut will be written.
   FShortCutNameFpcup:='fpcup_update'; //Default shortcut name; if it's not empty, shortcut will be written.
-  // Binutils needed for compilation
-  CreateBinutilsList;
 
   FInstalledCompiler := '';
   FSVNDirectory := '';

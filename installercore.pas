@@ -5,7 +5,7 @@ unit installerCore;
 interface
 
 uses
-  Classes, SysUtils, SvnClient, processutils;
+  Classes, SysUtils, SvnClient, processutils,m_crossinstaller;
 
 type
 
@@ -47,6 +47,7 @@ type
     function FindSVNSubDirs(): boolean;
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
+    function GetCrossInstaller: TCrossInstaller;
     function GetFPCTarget(Native:boolean): string;
     procedure LogError(Sender:TProcessEx;IsException:boolean);
     procedure SetPath(NewPath:string; Prepend:boolean);
@@ -111,6 +112,22 @@ begin
     end
   else
     result:=FCompiler
+end;
+
+function TInstaller.GetCrossInstaller: TCrossInstaller;
+var
+  idx:integer;
+  target:string;
+begin
+  result:=nil;
+  target:=GetFPCTarget(false);
+  if assigned(CrossInstallers) then
+    for idx:=0 to CrossInstallers.Count-1 do
+      if CrossInstallers[idx]=target then
+        begin
+        result:=TCrossInstaller(CrossInstallers.Objects[idx]);
+        break;
+        end;
 end;
 
 function TInstaller.GetMake: string;

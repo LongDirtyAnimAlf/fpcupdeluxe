@@ -65,7 +65,6 @@ type
   protected
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
-    function GetCrossInstaller: TCrossInstaller;
   public
     constructor Create;
     destructor Destroy; override;
@@ -180,21 +179,6 @@ begin
     infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target);
 end;
 
-function TFPCCrossInstaller.GetCrossInstaller: TCrossInstaller;
-var
-  idx:integer;
-  target:string;
-begin
-  result:=nil;
-  target:=GetFPCTarget(false);
-  if assigned(CrossInstallers) then
-    for idx:=0 to CrossInstallers.Count-1 do
-      if CrossInstallers[idx]=target then
-        begin
-        result:=TCrossInstaller(CrossInstallers.Objects[idx]);
-        break;
-        end;
-end;
 
 constructor TFPCCrossInstaller.Create;
 begin
@@ -672,6 +656,28 @@ end;
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   if not InitModule then exit;
+  infoln('Module FPC: cleanup...');
+  try
+    // SVN revert FPC directory
+     FSVNClient.LocalRepository := FBaseDirectory;
+     FSVNClient.Repository := FURL;
+     FSVNClient.Revert; //Remove local changes
+
+    // Delete any existing fpc.cfg files
+    Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
+
+    {$IFDEF UNIX}
+    // Delete any fpc.sh shell scripts
+    Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
+    {$ENDIF UNIX}
+    result:=true;
+  except
+    on E: Exception do
+    begin
+      WritelnLog('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+      result:=false;
+    end;
+  end;
 end;
 
 constructor TFPCInstaller.Create;
@@ -697,4 +703,4 @@ begin
 end;
 
 end.
-
+
