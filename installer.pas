@@ -42,7 +42,7 @@ interface
 
 uses
   Classes, SysUtils, updater, processutils, m_crossinstaller,svnclient,
-  installerfpc;
+  installerfpc,installerlazarus;
 
 
 
@@ -1559,6 +1559,7 @@ begin
     result:= FPCInstaller.CleanModule(MODULE) and
              FPCInstaller.GetModule(MODULE) and
              FPCInstaller.BuildModule(MODULE);
+    FInstalledCompiler:=FPCInstaller.Compiler;
   finally
     FPCInstaller.Free;
   end;
@@ -1592,6 +1593,41 @@ more verbose / verbose and also works when calling
 other tools than make
 }
 var
+  LazarusInstaller:TLazarusInstaller;
+
+CONST
+  MODULE='Lazarus';
+begin
+// which TLazarusInstaller are we going to create
+  if (FCrossCPU_Target<>'') or (FCrossOS_Target<>'') then
+    begin
+    LazarusInstaller:=TLazarusCrossInstaller.Create;
+    LazarusInstaller.CrossOS_Target:=FCrossOS_Target;
+    LazarusInstaller.CrossCPU_Target:=FCrossCPU_Target;
+    end
+  else
+    LazarusInstaller:=TLazarusNativeInstaller.Create;
+  try
+    LazarusInstaller.BaseDirectory:=FPCDirectory;
+    LazarusInstaller.Compiler:=FInstalledCompiler;
+    LazarusInstaller.CompilerOptions:=FPCOPT;
+    LazarusInstaller.DesiredRevision:=FPCDesiredRevision;
+    LazarusInstaller.LogFile:=FLogFile;
+    {$IFDEF MSWINDOWS}
+    LazarusInstaller.MakeDirectory:=FMakeDir;
+    {$ENDIF}
+    LazarusInstaller.URL:=LazarusURL;
+    LazarusInstaller.Verbose:=Verbose;
+    result:= LazarusInstaller.CleanModule(MODULE) and
+             LazarusInstaller.GetModule(MODULE) and
+             LazarusInstaller.BuildModule(MODULE);
+  finally
+    LazarusInstaller.Free;
+  end;
+end;
+
+
+{var
   AfterRevision: string;
   BeforeRevision: string;
   CrossInstaller:TCrossInstaller;
@@ -2022,6 +2058,8 @@ begin
   ProcessEx.Free;
   Result := OperationSucceeded;
 end;
+
+}
 
 constructor TOldInstaller.Create;
 var
