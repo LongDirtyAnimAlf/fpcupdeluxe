@@ -78,7 +78,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="9">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -109,6 +109,21 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="installercore.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="installerCore"/>
+      </Unit6>
+      <Unit7>
+        <Filename Value="installerfpc.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="installerFpc"/>
+      </Unit7>
+      <Unit8>
+        <Filename Value="installerlazarus.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="installerLazarus"/>
+      </Unit8>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
