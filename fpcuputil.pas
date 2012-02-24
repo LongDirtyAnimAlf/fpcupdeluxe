@@ -36,11 +36,16 @@ interface
 uses
   Classes, SysUtils;
 
+// Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
+// Create shell script in ~ directory that links to Target
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
+// Delete directory and children, even read-only. Equivalent to rm -rf <directory>
 function DeleteDirectoryEx(DirectoryName: string): boolean;
+// Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
 {$IFDEF MSWINDOWS}
+// Get path for Windows per user storage of application data. Useful for storing settings
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
 procedure infoln(Message: string);
@@ -50,7 +55,8 @@ function MoveFile(const SrcFilename, DestFilename: string): boolean;
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 {$ENDIF UNIX}
-function Which(Executable: string): string; //Runs which command. Returns full path of executable, if it exists
+// Emulates/runs which to find executable in path. If not found, returns empty string
+function Which(Executable: string): string;
 
 
 implementation
@@ -520,4 +526,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+
