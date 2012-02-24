@@ -916,7 +916,7 @@ begin
   {$IFDEF MSWINDOWS}
   WritelnLog('Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
-  BinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin/'+GetFPCTarget(true);
+  BinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   SetPath(FBootstrapCompilerDirectory+PathSeparator+
@@ -945,7 +945,7 @@ const
 begin
   if not InitModule then exit;
   result:=false;
-  OperationSucceeded:=BuildModuleCustom(ModuleName);
+  OperationSucceeded:=true or BuildModuleCustom(ModuleName);   //remove
   {$IFDEF UNIX}
   if OperationSucceeded then
   begin
@@ -975,11 +975,10 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
-    BinPath := ExtractFilePath(FCompiler);
     FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
-      ProcessEx.Executable := BinPath + 'fpcmkcfg';
+      ProcessEx.Executable := IncludeTrailingPathDelimiter(BinPath) + 'fpcmkcfg';
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.clear;
       ProcessEx.Parameters.Add('-d');
@@ -3961,4 +3960,4 @@ begin
 end;
 
 end.
-
+
