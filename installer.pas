@@ -945,7 +945,7 @@ const
 begin
   if not InitModule then exit;
   result:=false;
-  OperationSucceeded:=true or BuildModuleCustom(ModuleName);   //remove
+  OperationSucceeded:=BuildModuleCustom(ModuleName);
   {$IFDEF UNIX}
   if OperationSucceeded then
   begin
@@ -1628,6 +1628,8 @@ end;
 
 destructor TInstaller.Destroy;
 begin
+  if Assigned(FBinUtils) then
+    FBinUtils.Free;
   ProcessEx.Free;
   FSVNClient.Free;
   inherited Destroy;
