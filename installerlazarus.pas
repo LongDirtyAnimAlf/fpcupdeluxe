@@ -220,11 +220,9 @@ begin
 end;
 
 function TLazarusInstaller.BuildModule(ModuleName: string): boolean;
-var
-  OperationSucceeded: boolean;
 begin
   if not InitModule then exit;
-  OperationSucceeded:=BuildModuleCustom(ModuleName);
+  result:=BuildModuleCustom(ModuleName);
 end;
 
 function TLazarusInstaller.ConfigLazarus(PrimaryConfigPath: string): boolean;

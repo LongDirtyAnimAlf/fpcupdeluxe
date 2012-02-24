@@ -41,7 +41,7 @@ General remarks:
 interface
 
 uses
-  Classes, SysUtils, updater, processutils, m_crossinstaller,
+  Classes, SysUtils, processutils, m_crossinstaller,
   installerfpc,installerlazarus;
 
 
@@ -61,7 +61,11 @@ type
     FCrossCPU_Target: string;
     FCrossOS_Target: string;
     FCrossLCL_Platform:string;
+    FFPCDesiredRevision: string;
+    FFPCDirectory: string;
     FFPCOPT: string;
+    FFPCURL: string;
+    FLazarusDesiredRevision: string;
     FLazarusOPT: string;
     FOnlyModules: string;
     FShortcutName: string; //Name for shortcut/shell script pointing to newly installed Lazarus
@@ -81,7 +85,6 @@ type
     FSVNDirectory: string; //Unpack SVN files in this directory. Actual SVN exe may be below this directory.
     //todo: check if we shouldn't rather use FSVNExecutable, extract dir from that.
     FTar: string; //Location or name of tar executable
-    FUpdater: TUpdater;
     FUnzip: string; //Location or name of unzip executable
     FVerbose: boolean;
     function DownloadFPCHelp(URL, TargetDirectory: string): boolean;
@@ -89,10 +92,6 @@ type
     // Return complete environment except replace path with our own value
     function GetBootstrapCompiler: string;
     function GetCompilerName: string;
-    function GetFpcDirectory: string;
-    function GetFPCRevision: string;
-    function GetFPCUrl: string;
-    function GetLazarusRevision: string;
     procedure LogError(Sender:TProcessEx;IsException:boolean);
     function ModuleEnabled(Name:string):boolean;
     procedure SetAllOptions(AValue: string);
@@ -100,8 +99,8 @@ type
     procedure SetCrossLCL_Platform(AValue: string);
     procedure SetCrossOS_Target(AValue: string);
     procedure SetFPCDesiredRevision(AValue: string);
-    procedure SetLazarusPrimaryConfigPath(AValue: string);
     procedure SetLazarusDesiredRevision(AValue: string);
+    procedure SetLazarusPrimaryConfigPath(AValue: string);
     procedure SetOnlyModules(AValue: string);
     procedure SetShortCutNameFpcup(AValue: string);
     procedure SetSkipFPC(AValue: boolean);
@@ -146,10 +145,10 @@ type
     property CrossCPU_Target:string read FCrossCPU_Target write SetCrossCPU_Target;
     property CrossLCL_Platform:string read FCrossLCL_Platform write SetCrossLCL_Platform;
     property CrossOS_Target:string read FCrossOS_Target write SetCrossOS_Target;
-    property FPCDirectory: string read GetFPCDirectory write SetFPCDirectory;
-    property FPCURL: string read GetFPCUrl write SetFPCUrl; //SVN URL for FPC
+    property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
+    property FPCURL: string read FFPCURL write SetFPCURL; //SVN URL for FPC
     property FPCOPT: string read FFPCOPT write SetFPCOPT;
-    property FPCDesiredRevision:string read GetFPCRevision write SetFPCDesiredRevision;
+    property FPCDesiredRevision:string read FFPCDesiredRevision write SetFPCDesiredRevision;
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
     function GetLazarusHelp: boolean; //Create/get/compile Lazarus help
@@ -160,7 +159,7 @@ type
     property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
     //SVN URL for Lazarus
     property LazarusOPT:string read FLazarusOPT write SetLazarusOPT;
-    property LazarusDesiredRevision:string read GetLazarusRevision write SetLazarusDesiredRevision;
+    property LazarusDesiredRevision:string read FLazarusDesiredRevision write SetLazarusDesiredRevision;
     procedure WriteLog(msg:string;ToConsole:boolean=true);
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
     property MakeDirectory: string read GetMakePath write SetMakePath;
@@ -304,21 +303,6 @@ begin
     result:=FBootstrapCompilerName;
 end;
 
-
-function TOldInstaller.GetFpcDirectory: string;
-begin
-  Result := FUpdater.FPCDirectory;
-end;
-
-function TOldInstaller.GetFPCRevision: string;
-begin
-  Result := FUpdater.FPCRevision;
-end;
-
-function TOldInstaller.GetFPCUrl: string;
-begin
-  Result := FUpdater.FPCURL;
-end;
 
 function TOldInstaller.GetLazarusHelp(): boolean;
 var
@@ -605,10 +589,6 @@ begin
   result:=OperationSucceeded;
 end;
 
-function TOldInstaller.GetLazarusRevision: string;
-begin
-  Result := FUpdater.LazarusRevision;
-end;
 
 procedure TOldInstaller.LogError(Sender: TProcessEx; IsException: boolean);
 var
@@ -665,18 +645,16 @@ end;
 
 procedure TOldInstaller.SetFPCDesiredRevision(AValue: string);
 begin
-  FUpdater.FPCRevision:=AValue;
+  if FFPCDesiredRevision=AValue then Exit;
+  FFPCDesiredRevision:=AValue;
 end;
 
-function TOldInstaller.GetLazarusDirectory: string;
+procedure TOldInstaller.SetLazarusDesiredRevision(AValue: string);
 begin
-  Result := FUpdater.LazarusDirectory;
+  if FLazarusDesiredRevision=AValue then Exit;
+  FLazarusDesiredRevision:=AValue;
 end;
 
-function TOldInstaller.GetLazarusUrl: string;
-begin
-  Result := FUpdater.LazarusURL;
-end;
 
 
 function TOldInstaller.GetMakePath: string;
@@ -697,8 +675,9 @@ end;
 
 procedure TOldInstaller.SetFPCDirectory(Directory: string);
 begin
-  FUpdater.FPCDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
+
 end;
+
 
 procedure TOldInstaller.SetFPCOPT(AValue: string);
 begin
@@ -708,18 +687,24 @@ end;
 
 procedure TOldInstaller.SetFPCUrl(AValue: string);
 begin
-  FUpdater.FPCURL := AValue;
+
 end;
 
 procedure TOldInstaller.SetLazarusDirectory(Directory: string);
 begin
-  FUpdater.LazarusDirectory := IncludeTrailingPathDelimiter(ExpandFileName(Directory));
+
 end;
+
 
 procedure TOldInstaller.SetLazarusOPT(AValue: string);
 begin
   if FLazarusOPT=AValue then Exit;
   FLazarusOPT:=AValue;
+end;
+
+procedure TOldInstaller.SetLazarusUrl(AValue: string);
+begin
+
 end;
 
 procedure TOldInstaller.SetLazarusPrimaryConfigPath(AValue: string);
@@ -743,10 +728,6 @@ begin
   end;
 end;
 
-procedure TOldInstaller.SetLazarusDesiredRevision(AValue: string);
-begin
-  FUpdater.LazarusRevision:=AValue;
-end;
 
 procedure TOldInstaller.SetOnlyModules(AValue: string);
 begin
@@ -783,14 +764,18 @@ end;
 
 procedure TOldInstaller.SetVerbose(AValue: boolean);
 begin
-  FUpdater.Verbose:=AValue;
   if FVerbose=AValue then Exit;
   FVerbose:=AValue;
 end;
 
-procedure TOldInstaller.SetLazarusUrl(AValue: string);
+function TOldInstaller.GetLazarusDirectory: string;
 begin
-  FUpdater.LazarusURL := AValue;
+
+end;
+
+function TOldInstaller.GetLazarusUrl: string;
+begin
+
 end;
 
 
@@ -894,7 +879,7 @@ begin
   else
     FPCInstaller:=TFPCNativeInstaller.Create;
   try
-    FPCInstaller.BaseDirectory:=FPCDirectory;
+    FPCInstaller.BaseDirectory:=FFPCDirectory;
     FPCInstaller.BootstrapCompilerDirectory:=FBootstrapCompilerDirectory;
     FPCInstaller.BootstrapCompilerURL:=FBootstrapCompilerFTP;
     FPCInstaller.Compiler:='';  //bootstrap used
@@ -1205,7 +1190,6 @@ begin
 
   FInstalledCompiler := '';
   FSVNDirectory := '';
-  FUpdater := TUpdater.Create;
   SetLazarusPrimaryConfigPath(''); //Let property set up platform-dependent default
   SetMakePath('');
 
@@ -1237,7 +1221,6 @@ begin
   CloseFile(FLogFile);
   if TextRec(FLogVerboseFile).Mode<>0 then
     CloseFile(FLogVerboseFile);
-  FUpdater.Free;
   FBinUtils.Free;
   inherited Destroy;
 end;
