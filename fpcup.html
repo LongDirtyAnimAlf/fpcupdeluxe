@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>fpcup</TITLE>
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 2cm }
+		P { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 0; orphans: 0 }
+		P.western { font-family: "Times New Roman", serif; font-size: 12pt; so-language: nl-NL }
+		H1 { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 0; orphans: 0 }
+		H1.western { font-family: "Arial", sans-serif; font-size: 16pt; so-language: nl-NL }
+		H2 { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 0; orphans: 0 }
+		H2.western { font-family: "Arial", sans-serif; font-size: 14pt; so-language: nl-NL; font-style: italic }
+	-->
+	</STYLE>
+</HEAD>
+<BODY DIR="LTR">
+<H1 CLASS="western">Architecture</H1>
+<H2 CLASS="western">Modules</H2>
+<P>A thing that can be installed/updated/uninstalled
+in fpcup is called a module. Modules can specify dependencies on
+other modules.</P>
+<P>For base level items, such as FPC, Lazarus, these
+modules are implemented using the T*** class.</P>
+<P>Cross compiler clases form the next level of
+modules and are descendents of the T*** class.</P>
+<P>For “external” modules, the parent class is
+T***</P>
+<P>Module names may not conflict and must contain of
+alphanumeric characters, _ and - (hyphen).</P>
+<H2 CLASS="western">Dependency checking</H2>
+<P>Simple dependency checking is performed on each
+install run.</P>
+<P>A dummy module called @base with dependencies on
+fpc, ide is inserted to make sure fpc/ide are always compiled first</P>
+<P>todo: submodules provided by 2 or more modules (e.g. laz config by ide and help)=>create dummy submodule for dependencies?</P>
+<P>todo: Uninstall: reverse order?</P>
+</BODY>
+</HTML>
