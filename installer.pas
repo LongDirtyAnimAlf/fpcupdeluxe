@@ -79,7 +79,9 @@ type
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     procedure CreateBinutilsList;
     procedure CreateStoreSVNDiff(DiffFileName: string;UpdateWarnings: TStringList);
-    function DownloadSVN(ModuleName:string;var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList):boolean;
+    function DownloadBinUtils: boolean;
+    function DownloadFromSVN(ModuleName:string;var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList):boolean;
+    function DownloadSVN: boolean;
     procedure DumpOutput(Sender:TProcessEx; output:string);
     function FindSVNSubDirs(): boolean;
     function GetFPCTarget(Native:boolean): string;
@@ -98,6 +100,9 @@ type
     property CrossOS_Target:string write FCrossOS_Target;
     // SVN revision override. Default is trunk
     property DesiredRevision:string write FDesiredRevision;
+    // Open handle to the logfile
+    property LogFile:Text write FLogFile;
+    property MakeDirectory:string write FMakeDir;
     // URL for download. HTTP,ftp or svn
     property URL: string write FURL;
     // display and log in temp log file all sub process output
@@ -470,13 +475,6 @@ var
   Options:String;
 begin
   // Make crosscompiler using new compiler
-  {$ifdef win32}
-  //Hardcode her
-  FCrossCPU_Target:='x86_64';
-  FCrossOS_Target:='win64';
-  FCrossCompiling:=true;  // for distclean
-  distclean; // clean the x64 compiler
-  {$endif win32}
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
@@ -602,6 +600,7 @@ end;
 function TFPCNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   OperationSucceeded:boolean;
+  FileCounter:integer;
 begin
   // Make all/install, using bootstrap compiler.
   // Make all should use generated compiler internally for unit compilation
@@ -638,8 +637,8 @@ begin
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-  if FFPCOPT<>'' then
-    ProcessEx.Parameters.Add('OPT='+FFPCOPT);
+  if FCompilerOptions <>'' then
+    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
   infoln('Running make all install for FPC:');
@@ -670,11 +669,11 @@ begin
     try
       for FileCounter:=0 to FBinUtils.Count-1 do
       begin
-        FileUtil.CopyFile(FMakeDir+FBinUtils[FileCounter], ExtractFilePath(FInstalledCompiler)+FBinUtils[FileCounter]);
+        FileUtil.CopyFile(FMakeDir+FBinUtils[FileCounter], IncludeTrailingBackslash(BinPath)+FBinUtils[FileCounter]);
       end;
       // Also, we can change the make/binutils path to our new environment
       // Will modify fmake as well.
-      MakeDirectory:=ExtractFilePath(FInstalledCompiler);
+      FMakeDir:=BinPath;
     except
       on E: Exception do
       begin
@@ -745,6 +744,7 @@ function TFPCInstaller.DownloadBootstrapCompiler: boolean;
 var
 ArchiveDir: string;
 BootstrapArchive: string;
+CompilerName:string;
 ExtractedCompiler: string;
 OperationSucceeded: boolean;
 begin
@@ -756,7 +756,6 @@ begin
 end;
 
 BootstrapArchive := SysUtils.GetTempFileName;
-ArchiveDir := ExtractFilePath(BootstrapArchive);
 if OperationSucceeded then
 begin
   OperationSucceeded:=Download(FBootstrapCompilerURL, BootstrapArchive);
@@ -766,8 +765,10 @@ end;
 if OperationSucceeded then
 begin
   {$IFDEF MSWINDOWS}
+  ArchiveDir := ExtractFilePath(BootstrapArchive);
+  CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract zip, overwriting without prompting
-  if ExecuteCommandHidden(FUnzip,'-o -d '+ArchiveDir+' '+BootstrapArchive,Verbose) <> 0 then
+  if ExecuteCommandHidden(FUnzip,'-o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
     begin
       infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
       OperationSucceeded := False;
@@ -913,13 +914,13 @@ begin
   WritelnLog('FPC options:            '+FCompilerOptions,false);
   WritelnLog('FPC directory:          '+FBaseDirectory,false);
   {$IFDEF MSWINDOWS}
-  WritelnLog('Make/binutils path:     '+FMakeDirectory,false);
+  WritelnLog('Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
   BinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin/'+GetFPCTarget(true);
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   SetPath(FBootstrapCompilerDirectory+PathSeparator+
-    FMakeDirectory+PathSeparator+
+    FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
     FBaseDirectory,false);
   {$ENDIF MSWINDOWS}
@@ -1047,7 +1048,7 @@ begin
   infoln('Checking out/updating FPC sources...');
   UpdateWarnings:=TStringList.Create;
   try
-   result:=DownloadSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
+   result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
    if UpdateWarnings.Count>0 then
    begin
      WritelnLog(UpdateWarnings.Text);
@@ -1077,24 +1078,6 @@ FCompiler := '';
 FSVNDirectory := '';
 FMakeDir :='';
 
-{$IFDEF MSWINDOWS}
-LogFileName:='fpcup.log'; //current directory
-{$ELSE}
-LogFileName:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
-{$ENDIF MSWINDOWS}
-try
- AssignFile(FLogFile,LogFileName);
- if FileExistsUTF8(LogFileName) then
-   Append(FLogFile)
- else
-   Rewrite(FLogFile);
-except
-  infoln('Error: could not open log file '+LogFileName+' for writing.');
-  infoln('This may be caused by another fpcup currently running.');
-  infoln('Aborting.');
-  halt(2); //Is there a nicer way to do this?
-end;
-WritelnLog(DateTimeToStr(now)+': fpcup started.',false);
 TextRec(FLogVerboseFile).Mode:=0;  //class variables should have been 0
   InitDone:=false;
 end;
@@ -1132,7 +1115,7 @@ begin
   if FMake='' then
     {$IFDEF MSWINDOWS}
     // Make sure there's a trailing delimiter
-    FMake:=IncludeTrailingPathDelimiter(FMakeDir)+'make'+FExecutableExtension;
+    FMake:=IncludeTrailingPathDelimiter(FMakeDir)+'make'+GetExeExt;
     {$ELSE}
     FMake:='make'; //assume in path
     {$ENDIF MSWINDOWS}
@@ -1153,7 +1136,7 @@ begin
   FTar:=EmptyStr;
   // By doing this, we expect unzip.exe to be in the binutils dir.
   // This is safe to do because it is included in the FPC binutils.
-  FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + FExecutableExtension;
+  FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + GetExeExt;
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
   FBunzip2:='bunzip2';
@@ -1204,7 +1187,7 @@ begin
       {$IFDEF MSWINDOWS}
       // Make sure we have a sensible default.
       // Set it here so multiple calls to CheckExes will not redownload SVN all the time
-      if FSVNDirectory='' then FSVNDirectory := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'svn'+DirectorySeparator;
+      if FSVNDirectory='' then FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir)+'svn'+DirectorySeparator;
       {$ENDIF MSWINDOWS}
       FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
       {$IFDEF MSWINDOWS}
@@ -1358,7 +1341,44 @@ begin
   UpdateWarnings.Add('Diff with last revision stored in '+DiffFileName);
 end;
 
-function TInstaller.DownloadSVN(ModuleName: string; var BeforeRevision,
+function TInstaller.DownloadBinUtils: boolean;
+// Download binutils. For now, only makes sense on Windows...
+const
+  {These would be the latest:
+  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
+  These might work but are development, too (might end up in 2.6.2):
+  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
+  but let's use a stable version:}
+  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
+  //Parent directory of files. Needs trailing backslash.
+var
+  Counter: integer;
+  Errors: integer=0;
+begin
+  ForceDirectories(FMakeDir);
+  Result:=true;
+  for Counter := 0 to FBinUtils.Count - 1 do
+  begin
+    infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + FMakeDir);
+    try
+      if Download(SourceUrl + FBinUtils[Counter], FMakeDir + FBinUtils[Counter])=false then
+      begin
+        Errors:=Errors+1;
+        infoln('Error downloading binutils: '+FBinUtils[Counter]+' to '+FMakeDir);
+      end;
+    except
+      on E: Exception do
+      begin
+        Result := False;
+        infoln('Error downloading binutils: ' + E.Message);
+        exit; //out of function.
+      end;
+    end;
+  end;
+  if Errors>0 then result:=false;
+end;
+
+function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision,
   AfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
   BeforeRevision:='failure';
@@ -1379,6 +1399,55 @@ begin
   AfterRevision:=IntToStr(FSVNClient.LocalRevision);
   if BeforeRevision<>AfterRevision then FSVNUpdated:=true else FSVNUpdated:=false;
   Result := True;
+end;
+
+function TInstaller.DownloadSVN: boolean;
+var
+  OperationSucceeded: boolean;
+  ResultCode: longint;
+  SVNZip: string;
+begin
+  // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
+  { Alternative 1: sourceforge packaged
+  This won't work, we'd get an .msi:
+  http://sourceforge.net/projects/win32svn/files/latest/download?source=files
+  We don't want msi/Windows installer - this way we can hopefully support Windows 2000, so use:
+  http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip
+  }
+
+  {Alternative 2: use
+  http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip
+  with subdirs bin and licenses. No further subdirs
+  However, doesn't work on Windows 2K...}
+  OperationSucceeded := True;
+  ForceDirectories(FSVNDirectory);
+  SVNZip := SysUtils.GetTempFileName + '.zip';
+  try
+    OperationSucceeded := Download(
+      'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
+      SVNZip);
+  except
+    // Deal with timeouts, wrong URLs etc
+    OperationSucceeded:=false;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Extract, overwrite
+    if ExecuteCommandHidden(FUnzip,'-o -d '+ FSVNDirectory+' '+SVNZip,FVerbose)<> 0 then
+      begin
+        OperationSucceeded := False;
+        infoln('resultcode: ' + IntToStr(ResultCode));
+      end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    OperationSucceeded := FindSVNSubDirs;
+    if OperationSucceeded then
+      SysUtils.deletefile(SVNZip); //Get rid of temp zip if success.
+  end;
+  Result := OperationSucceeded;
 end;
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
@@ -2919,6 +2988,8 @@ begin
     FPCInstaller.Compiler:='';  //bootstrap used
     FPCInstaller.CompilerOptions:=FPCOPT;
     FPCInstaller.DesiredRevision:=FPCDesiredRevision;
+    FPCInstaller.LogFile:=FLogFile;
+    FPCInstaller.MakeDirectory:=FMakeDir;
     FPCInstaller.URL:=FPCURL;
     FPCInstaller.Verbose:=Verbose;
     result:= FPCInstaller.CleanModule(MODULE) and
@@ -3889,4 +3960,4 @@ begin
 end;
 
 end.
-
+
