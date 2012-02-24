@@ -1009,7 +1009,6 @@ begin
 
   if OperationSucceeded then
     WritelnLog('FPC: update succeeded at revision number '+ AfterRevision,false);
-  ProcessEx.Free;
   Result := OperationSucceeded;
 end;
 
@@ -2989,7 +2988,9 @@ begin
     FPCInstaller.CompilerOptions:=FPCOPT;
     FPCInstaller.DesiredRevision:=FPCDesiredRevision;
     FPCInstaller.LogFile:=FLogFile;
+    {$IFDEF MSWINDOWS}
     FPCInstaller.MakeDirectory:=FMakeDir;
+    {$ENDIF}
     FPCInstaller.URL:=FPCURL;
     FPCInstaller.Verbose:=Verbose;
     result:= FPCInstaller.CleanModule(MODULE) and
@@ -3960,4 +3961,4 @@ begin
 end;
 
 end.
-
+
