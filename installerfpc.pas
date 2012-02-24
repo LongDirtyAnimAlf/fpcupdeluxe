@@ -73,7 +73,11 @@ type
 
 implementation
 
-uses fpcuputil,fileutil,processutils;
+uses fpcuputil,fileutil,processutils
+  {$IFDEF UNIX}
+    ,baseunix
+  {$ENDIF UNIX}
+  ;
 { TFPCCrossInstaller }
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
@@ -693,4 +697,4 @@ begin
 end;
 
 end.
-
+
