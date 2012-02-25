@@ -47,7 +47,8 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   installer, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
   synaip, synautil, synsock, blcksock, topologicalsort, installerCore,
-  installerfpc, installerLazarus, installerHelp, installerUniversal;
+  installerfpc, installerLazarus, installerHelp, installerUniversal,
+installerManager;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp;
