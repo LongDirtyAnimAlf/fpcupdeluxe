@@ -944,9 +944,11 @@ begin
     LazarusInstaller:=TLazarusNativeInstaller.Create;
   try
     LazarusInstaller.BaseDirectory:=FPCDirectory;
+    if FInstalledCompiler='' then
+      FInstalledCompiler:=LazarusInstaller.GetCompilerInDir(FPCDirectory);
     LazarusInstaller.Compiler:=FInstalledCompiler;
-    LazarusInstaller.CompilerOptions:=FPCOPT;
-    LazarusInstaller.DesiredRevision:=FPCDesiredRevision;
+    LazarusInstaller.CompilerOptions:=LazarusOPT;
+    LazarusInstaller.DesiredRevision:=LazarusDesiredRevision;
     LazarusInstaller.LogFile:=FLogFile;
     {$IFDEF MSWINDOWS}
     LazarusInstaller.MakeDirectory:=FMakeDir;

@@ -79,6 +79,7 @@ type
     function BuildModule(ModuleName:string): boolean; virtual;abstract;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; virtual;abstract;
+    function GetCompilerInDir(Dir:string):string;
     // Install update sources
     function GetModule(ModuleName:string): boolean; virtual;abstract;
     // Uninstall module
@@ -94,22 +95,9 @@ uses installerfpc,fileutil,fpcuputil;
 { TInstaller }
 
 function TInstaller.GetCompiler: string;
-var
-  ExeName, InstalledCompiler:string;
 begin
   if (Self is TFPCNativeInstaller) or (Self is TFPCInstaller) then
-    begin
-    ExeName:='fpc'+GetExeExt;
-    InstalledCompiler := FBaseDirectory + 'bin' +DirectorySeparator+
-      GetFPCTarget(true)+DirectorySeparator+'fpc';
-    {$IFDEF UNIX}
-    if FileExistsUTF8(InstalledCompiler+'.sh') then
-    begin
-      //Use our proxy if it is installed
-      InstalledCompiler:=InstalledCompiler+'.sh';
-    end;
-    {$ENDIF UNIX}
-    end
+    result:=GetCompilerInDir(FBaseDirectory)
   else
     result:=FCompiler
 end;
@@ -638,6 +626,22 @@ begin
   WriteLog(msg+LineEnding,false); //infoln adds alread a lf
   if ToConsole then
     InfoLn(msg);
+end;
+
+function TInstaller.GetCompilerInDir(Dir: string): string;
+var
+  ExeName:string;
+begin
+  ExeName:='fpc'+GetExeExt;
+  result :=  IncludeTrailingBackslash(Dir) + 'bin' +DirectorySeparator+
+    GetFPCTarget(true)+DirectorySeparator+'fpc';
+  {$IFDEF UNIX}
+  if FileExistsUTF8(result+'.sh') then
+  begin
+    //Use our proxy if it is installed
+    result:=result+'.sh';
+  end;
+  {$ENDIF UNIX}
 end;
 
 constructor TInstaller.Create;
