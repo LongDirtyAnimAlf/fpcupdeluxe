@@ -503,7 +503,10 @@ begin
                           result:=Run(StateMachine[InstructionPointer].param);
         SMrequire     : result:=Run(StateMachine[InstructionPointer].param);
         SMexec        : result:=DoExec(StateMachine[InstructionPointer].param);
-        SMend         : exit; //success
+        SMend         : begin
+                          SeqAttr^.Executed:=ESSucceeded;
+                          exit; //success
+                        end;
         SMcleanmodule : result:=DoCleanModule(StateMachine[InstructionPointer].param);
         SMgetmodule   : result:=DoGetModule(StateMachine[InstructionPointer].param);
         SMbuildmodule : result:=DoBuildModule(StateMachine[InstructionPointer].param);
@@ -513,8 +516,17 @@ begin
         SMSetOS       : DoSetOS(StateMachine[InstructionPointer].param);
         SMSetCPU      : DoSetCPU(StateMachine[InstructionPointer].param);
         end;
-      if not result then exit; //failure, bail out
+      if not result then
+        begin
+        SeqAttr^.Executed:=ESFailed;
+        exit; //failure, bail out
+        end;
       InstructionPointer:=InstructionPointer+1;
+      if InstructionPointer>=length(StateMachine) then  //somebody forgot end
+        begin
+        SeqAttr^.Executed:=ESSucceeded;
+        exit; //success
+        end;
       end;
     end
   else
