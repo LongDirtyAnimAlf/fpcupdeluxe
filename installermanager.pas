@@ -336,6 +336,7 @@ begin
   idx:=ModuleList.IndexOf(SequenceName);
   if (idx >0) then
     begin
+    result:=true;
     SeqAttr:=PSequenceAttributes(pointer(ModuleList.Objects[idx]));
     InstructionPointer:=SeqAttr^.EntryPoint;
     while true do
