@@ -939,6 +939,7 @@ begin
     LazarusInstaller.Compiler:=FInstalledCompiler;
     LazarusInstaller.CompilerOptions:=LazarusOPT;
     LazarusInstaller.DesiredRevision:=LazarusDesiredRevision;
+    LazarusInstaller.FPCDir:=FPCDirectory;
     LazarusInstaller.LogFile:=FLogFile;
     {$IFDEF MSWINDOWS}
     LazarusInstaller.MakeDirectory:=FMakeDir;
