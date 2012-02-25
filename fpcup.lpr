@@ -421,6 +421,7 @@ end;
 
 var
   FInstaller: TOldInstaller;
+  FPCupManager:TFPCupManager;
   res:integer;
 begin
   writeln('fpcup');
@@ -434,7 +435,13 @@ begin
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
   writeln('fpcup compiled on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%}+' with FPC '+{$INCLUDE %FPCVERSION%});
   writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
-
+  try
+    FPCupManager:=TFPCupManager.Create;
+    FPCupManager.LoadModuleList;
+    FPCupManager.Run;
+  finally
+    FPCupManager.free;
+  end;
   try
     FInstaller := TOldInstaller.Create;
     res:=CheckOptions(FInstaller); //Process command line arguments

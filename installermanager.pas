@@ -72,9 +72,8 @@ type
     Sequencer: TSequencer;
   protected
     LogFile:Text;
-    ModuleList:TStringList;
-    function LoadModuleList:boolean;
-   public
+    FModuleList:TStringList;
+    public
     property ShortCutName: string read FShortCutName write FShortCutName;
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup;
     property CompilerName: string read FCompilerName write FCompilerName;
@@ -96,9 +95,11 @@ type
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property MakeDirectory: string read FMakeDirectory write FMakeDirectory;
+    property ModuleList: TStringList read FModuleList;
     property SkipModules:string read FSkipModules write FSkipModules;
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Verbose:boolean read FVerbose write FVerbose;
+    function LoadModuleList:boolean;
     function Run: boolean;
     constructor Create;
     destructor Destroy; override;
@@ -166,26 +167,23 @@ function TFPCupManager.Run: boolean;
 
 begin
   result:=false;
-  if LoadModuleList then
+  if FOnlyModules<>'' then
     begin
-    if FOnlyModules<>'' then
-      begin
-      Sequencer.CreateOnly(FOnlyModules);
-      result:=Sequencer.Run('Only');
-      Sequencer.DeleteOnly;
-      end
-    else
-      {$ifdef win32}
-      result:=Sequencer.Run('DefaultWin32');
-      {$else}
-      result:=Sequencer.Run('Default');
-      {$endif win32}
-    end;
+    Sequencer.CreateOnly(FOnlyModules);
+    result:=Sequencer.Run('Only');
+    Sequencer.DeleteOnly;
+    end
+  else
+    {$ifdef win32}
+    result:=Sequencer.Run('DefaultWin32');
+    {$else}
+    result:=Sequencer.Run('Default');
+    {$endif win32}
 end;
 
 constructor TFPCupManager.Create;
 begin
-  ModuleList:=TStringList.Create;
+  FModuleList:=TStringList.Create;
   Sequencer:=TSequencer.create;
   Sequencer.Parent:=Self;
 end;
@@ -193,9 +191,9 @@ end;
 destructor TFPCupManager.Destroy;
 var i:integer;
 begin
-  for i:=0 to ModuleList.Count-1 do
-    Freemem(ModuleList.Objects[i]);
-  ModuleList.Free;
+  for i:=0 to FModuleList.Count-1 do
+    Freemem(FModuleList.Objects[i]);
+  FModuleList.Free;
   Sequencer.free;
   inherited Destroy;
 end;
@@ -229,7 +227,7 @@ end;
 
 function TSequencer.DoExec(FunctionName: string): boolean;
 begin
-
+  result:=true;
 end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;
@@ -358,7 +356,7 @@ end;
 
 function TSequencer.IsSkipped(ModuleName: string): boolean;
 begin
-  result:=SkipList.IndexOf(Uppercase(ModuleName))>=0;
+  result:=assigned(SkipList) and (SkipList.IndexOf(Uppercase(ModuleName))>=0);
 end;
 
 function TSequencer.AddSequence(Sequence: string): boolean;
@@ -390,7 +388,7 @@ while Sequence<>'' do
   begin
   i:=pos(LineEnding,Sequence);
   if i>0 then
-    line:=copy(Sequence,1,i)
+    line:=copy(Sequence,1,i-1)
   else
     line:=Sequence;
   delete(Sequence,1,length(line+LineEnding));
@@ -400,7 +398,7 @@ while Sequence<>'' do
     i:=pos(' ',line);
     if i>0 then
       begin
-      key:=copy(line,1,i);
+      key:=copy(line,1,i-1);
       param:=trim(copy(line,i,length(line)));
       end
     else
