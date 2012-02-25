@@ -7,6 +7,39 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller;
 
+
+Const
+  Sequences=
+//standard lazarus build
+    'Declare lazarus'+LineEnding+
+    'Cleanmodule lazarus'+LineEnding+
+    'Getmodule lazarus'+LineEnding+
+    'Buildmodule lazarus'+LineEnding+
+    'ConfigModule lazarus'+LineEnding+
+    'End'+LineEnding+
+//standard bigide build
+    'Declare BIGIDE'+LineEnding+
+    'Requires lazarus'+LineEnding+
+    'Cleanmodule BIGIDE'+LineEnding+
+    'Buildmodule BIGIDE'+LineEnding+
+    'End'+LineEnding+
+//selective actions triggered with --only=SequenceName
+    'Declare LazarusCleanOnly'+LineEnding+
+    'Cleanmodule lazarus'+LineEnding+
+    'End'+LineEnding+
+
+    'Declare LazarusGetOnly'+LineEnding+
+    'Getmodule lazarus'+LineEnding+
+    'End'+LineEnding+
+
+    'Declare LazarusBuildOnly'+LineEnding+
+    'Buildmodule lazarus'+LineEnding+
+    'End'+LineEnding+
+
+    'Declare LazarusConfigOnly'+LineEnding+
+    'Configmodule lazarus'+LineEnding+
+    'End';
+
 type
 
   { TLazarusInstaller }

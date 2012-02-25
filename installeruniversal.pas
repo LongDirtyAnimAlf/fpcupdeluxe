@@ -47,6 +47,8 @@ type
     destructor Destroy; override;
   end;
 
+var sequences:string;
+
 implementation
 
 { TUniversalInstaller }
@@ -117,5 +119,14 @@ begin
   inherited Destroy;
 end;
 
+procedure ReadInifile;
+begin
+// read inifile
+// parse inifile
+// fill in var sequences
+end;
+
+initialization
+ReadInifile;
 end.
 

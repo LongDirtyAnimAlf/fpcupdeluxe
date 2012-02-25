@@ -7,7 +7,39 @@ interface
 uses
   Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerUniversal;
 
+Const
+  Sequences=
+//default sequence
+    'Declare default'+LineEnding+
+    'Exec CreateFpcupScript'+LineEnding+
+    'Do fpc'+LineEnding+
+    'Do lazarus'+LineEnding+
+    'Exec CreateLazarusScript'+LineEnding+
+    'Do help'+LineEnding+
+    'Do LAZDATADESKTOP'+LineEnding+
+    'Do DOCEDITOR'+LineEnding+
+    'End'+LineEnding+
+//default sequence for win32
+    'Declare defaultwin32'+LineEnding+
+    'Exec CreateFpcupScript'+LineEnding+
+    'Do fpc'+LineEnding+
+    'Do lazarus'+LineEnding+
+    'Exec CreateLazarusScript'+LineEnding+
+    'Do help'+LineEnding+
+    'Do LAZDATADESKTOP'+LineEnding+
+    'Do DOCEDITOR'+LineEnding+
+    'Do DOCEDITOR'+LineEnding+
+    'SetCPU x86_64'+LineEnding+
+    'SetOS win64'+LineEnding+
+    'Cleanmodule fpc'+LineEnding+
+    'Buildmodule fpc'+LineEnding+
+    'Cleanmodule lazarus'+LineEnding+
+    'Buildmodule lazarus'+LineEnding+
+    'End'+LineEnding;
+
 type
+  TSequencer=class; //forward
+
 
   { TFPCupManager }
 
@@ -37,13 +69,12 @@ type
     FShortCutNameFpcup: string;
     FSkipModules: string;
     FVerbose: boolean;
+    Sequencer: TSequencer;
   protected
     LogFile:Text;
     ModuleList:TStringList;
-    function CreateOnly(OnlyModules:string):boolean;
     function LoadModuleList:boolean;
-    function DeleteOnly:boolean;
-  public
+   public
     property ShortCutName: string read FShortCutName write FShortCutName;
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup;
     property CompilerName: string read FCompilerName write FCompilerName;
@@ -99,6 +130,7 @@ type
       Installer:TInstaller;  //current installer
       SkipList:TStringList;
       StateMachine:array of TState;
+      procedure AddToModuleList(ModuleName:string;EntryPoint:integer);
       function DoBuildModule(ModuleName:string):boolean;
       function DoCleanModule(ModuleName:string):boolean;
       function DoConfigModule(ModuleName:string):boolean;
@@ -112,6 +144,9 @@ type
       function IsSkipped(ModuleName:string):boolean;
     public
       property Parent:TFPCupManager write Fparent;
+      function AddSequence(Sequence:string):boolean;
+      function CreateOnly(OnlyModules:string):boolean;
+      function DeleteOnly:boolean;
       function Run(SequenceName:string):boolean;
     end;
 
@@ -119,59 +154,63 @@ implementation
 
 { TFPCupManager }
 
-function TFPCupManager.CreateOnly(OnlyModules: string): boolean;
-begin
-
-end;
-
 function TFPCupManager.LoadModuleList: boolean;
 begin
-
-end;
-
-function TFPCupManager.DeleteOnly: boolean;
-begin
-
+Sequencer.AddSequence(Sequences);
+Sequencer.AddSequence(installerFPC.Sequences);
+Sequencer.AddSequence(installerLazarus.Sequences);
+Sequencer.AddSequence(installerUniversal.Sequences);
 end;
 
 function TFPCupManager.Run: boolean;
-var Sequencer:TSequencer;
+
 begin
   result:=false;
-  Sequencer:=TSequencer.create;
-  Sequencer.Parent:=Self;
-  try
-    if LoadModuleList then
+  if LoadModuleList then
+    begin
+    if FOnlyModules<>'' then
       begin
-      if FOnlyModules<>'' then
-        begin
-        CreateOnly(FOnlyModules);
-        result:=Sequencer.Run('Only');
-        DeleteOnly;
-        end
-      else
-        {$ifdef win32}
-        result:=Sequencer.Run('DefaultWin32');
-        {$else}
-        result:=Sequencer.Run('Default');
-        {$endif win32}
-      end;
-  finally
-    Sequencer.free;
-  end;
+      Sequencer.CreateOnly(FOnlyModules);
+      result:=Sequencer.Run('Only');
+      Sequencer.DeleteOnly;
+      end
+    else
+      {$ifdef win32}
+      result:=Sequencer.Run('DefaultWin32');
+      {$else}
+      result:=Sequencer.Run('Default');
+      {$endif win32}
+    end;
 end;
 
 constructor TFPCupManager.Create;
 begin
-
+  ModuleList:=TStringList.Create;
+  Sequencer:=TSequencer.create;
+  Sequencer.Parent:=Self;
 end;
 
 destructor TFPCupManager.Destroy;
+var i:integer;
 begin
+  for i:=0 to ModuleList.Count-1 do
+    Freemem(ModuleList.Objects[i]);
+  ModuleList.Free;
+  Sequencer.free;
   inherited Destroy;
 end;
 
 { TSequencer }
+
+procedure TSequencer.AddToModuleList(ModuleName: string; EntryPoint: integer);
+var
+  SeqAttr:PSequenceAttributes;
+begin
+getmem(SeqAttr,sizeof(TSequenceAttributes));
+SeqAttr^.EntryPoint:=EntryPoint;
+SeqAttr^.Executed:=ESNever;
+FParent.ModuleList.AddObject(ModuleName,TObject(SeqAttr));
+end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
 begin
@@ -319,7 +358,119 @@ end;
 
 function TSequencer.IsSkipped(ModuleName: string): boolean;
 begin
-  result:=SkipList.IndexOf(ModuleName)>=0;
+  result:=SkipList.IndexOf(Uppercase(ModuleName))>=0;
+end;
+
+function TSequencer.AddSequence(Sequence: string): boolean;
+//our mini parser
+var
+  line,key,param:string;
+  i:integer;
+
+  function KeyStringToKeyword(Key:string):TKeyword;
+
+  begin
+    if key='DECLARE' then result:=SMdeclare
+    else if key='DO' then result:=SMdo
+    else if key='REQUIRE' then result:=SMrequire
+    else if key='EXEC' then result:=SMexec
+    else if key='END' then result:=SMend
+    else if key='CLEANMODULE' then result:=SMcleanmodule
+    else if key='GETMODULE' then result:=SMgetmodule
+    else if key='BUILDMODULE' then result:=SMbuildmodule
+    else if key='UNINSTALLMODULE' then result:=SMuninstallmodule
+    else if key='CONFIGMODULE' then result:=SMconfigmodule
+    else if key='SETLCL' then result:=SMSetLCL
+    else if key='SETOS' then result:=SMSetOS
+    else if key='SETCPU' then result:=SMSetCPU;
+  end;
+
+begin
+while Sequence<>'' do
+  begin
+  i:=pos(LineEnding,Sequence);
+  if i>0 then
+    line:=copy(Sequence,1,i)
+  else
+    line:=Sequence;
+  delete(Sequence,1,length(line+LineEnding));
+  line:=trim(line);
+  if line<>'' then
+    begin
+    i:=pos(' ',line);
+    if i>0 then
+      begin
+      key:=copy(line,1,i);
+      param:=trim(copy(line,i,length(line)));
+      end
+    else
+      begin
+      key:=line;
+      param:='';
+      end;
+    if key<>'' then
+      begin
+      i:=Length(StateMachine);
+      SetLength(StateMachine,i+1);
+      StateMachine[i].instr:=KeyStringToKeyword(Uppercase(Key));
+      StateMachine[i].param:=param;
+      if StateMachine[i].instr=SMdeclare then
+        AddToModuleList(uppercase(param),i);
+      end;
+    end;
+  end;
+result:=true;
+end;
+
+
+// create the sequence corresponding with the only parameters
+function TSequencer.CreateOnly(OnlyModules: string): boolean;
+var
+  i:integer;
+  seq:string;
+
+begin
+AddToModuleList('ONLY',Length(StateMachine));
+while Onlymodules<>'' do
+  begin
+  i:=pos(LineEnding,Onlymodules);
+  if i>0 then
+    seq:=copy(Onlymodules,1,i)
+  else
+    seq:=Onlymodules;
+  delete(Onlymodules,1,length(seq)+1);
+  if seq<>'' then
+    begin
+    i:=Length(StateMachine);
+    SetLength(StateMachine,i+1);
+    StateMachine[i].instr:=SMdo;
+    StateMachine[i].param:=seq;
+    end;
+  end;
+i:=Length(StateMachine);
+SetLength(StateMachine,i+1);
+StateMachine[i].instr:=SMend;
+StateMachine[i].param:='';
+result:=true;
+end;
+
+function TSequencer.DeleteOnly: boolean;
+var i,idx:integer;
+  SeqAttr:^TSequenceAttributes;
+begin
+idx:=FParent.ModuleList.IndexOf('ONLY');
+if (idx >0) then
+  begin
+  SeqAttr:=PSequenceAttributes(pointer(FParent.ModuleList.Objects[idx]));
+  i:=SeqAttr^.EntryPoint;
+  while i<length(StateMachine) do
+    begin
+    StateMachine[i].param:='';
+    end;
+  SetLength(StateMachine,SeqAttr^.EntryPoint);
+  Freemem(FParent.ModuleList.Objects[idx]);
+  FParent.ModuleList.Delete(idx);
+  end;
 end;
 
 function TSequencer.Run(SequenceName: string): boolean;
@@ -333,7 +484,7 @@ begin
     result:=false;
     exit;
     end;
-  idx:=FParent.ModuleList.IndexOf(SequenceName);
+  idx:=FParent.ModuleList.IndexOf(Uppercase(SequenceName));
   if (idx >0) then
     begin
     result:=true;
