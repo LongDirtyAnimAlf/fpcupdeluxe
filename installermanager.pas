@@ -39,6 +39,10 @@ type
     FVerbose: boolean;
   protected
     LogFile:Text;
+    ModuleList:TStringList;
+    function CreateOnly(OnlyModules:string):boolean;
+    function LoadModuleList:boolean;
+    function DeleteOnly:boolean;
   public
     property ShortCutName: string read FShortCutName write FShortCutName;
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup;
@@ -93,7 +97,6 @@ type
       FParent:TFPCupManager;
       CurrentModule:String;
       Installer:TInstaller;  //current installer
-      ModuleList:TStringList;
       SkipList:TStringList;
       StateMachine:array of TState;
       function DoBuildModule(ModuleName:string):boolean;
@@ -109,15 +112,27 @@ type
       function IsSkipped(ModuleName:string):boolean;
     public
       property Parent:TFPCupManager write Fparent;
-      function CreateOnly(OnlyModules:string):boolean;
-      function LoadModuleList:boolean;
-      function DeleteOnly:boolean;
       function Run(SequenceName:string):boolean;
     end;
 
 implementation
 
 { TFPCupManager }
+
+function TFPCupManager.CreateOnly(OnlyModules: string): boolean;
+begin
+
+end;
+
+function TFPCupManager.LoadModuleList: boolean;
+begin
+
+end;
+
+function TFPCupManager.DeleteOnly: boolean;
+begin
+
+end;
 
 function TFPCupManager.Run: boolean;
 var Sequencer:TSequencer;
@@ -126,13 +141,13 @@ begin
   Sequencer:=TSequencer.create;
   Sequencer.Parent:=Self;
   try
-    if Sequencer.LoadModuleList then
+    if LoadModuleList then
       begin
       if FOnlyModules<>'' then
         begin
-        Sequencer.CreateOnly(FOnlyModules);
+        CreateOnly(FOnlyModules);
         result:=Sequencer.Run('Only');
-        Sequencer.DeleteOnly;
+        DeleteOnly;
         end
       else
         {$ifdef win32}
@@ -312,32 +327,22 @@ begin
   result:=SkipList.IndexOf(ModuleName)>=0;
 end;
 
-function TSequencer.CreateOnly(OnlyModules: string): boolean;
-begin
-
-end;
-
-function TSequencer.LoadModuleList: boolean;
-begin
-
-end;
-
-function TSequencer.DeleteOnly: boolean;
-begin
-
-end;
-
 function TSequencer.Run(SequenceName: string): boolean;
 var
   InstructionPointer:integer;
   idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
-  idx:=ModuleList.IndexOf(SequenceName);
+  if not assigned(FParent.ModuleList) then
+    begin
+    result:=false;
+    exit;
+    end;
+  idx:=FParent.ModuleList.IndexOf(SequenceName);
   if (idx >0) then
     begin
     result:=true;
-    SeqAttr:=PSequenceAttributes(pointer(ModuleList.Objects[idx]));
+    SeqAttr:=PSequenceAttributes(pointer(FParent.ModuleList.Objects[idx]));
     case SeqAttr^.Executed of
       ESFailed   : begin
                      result:=false;
@@ -354,7 +359,7 @@ begin
                           result:=Run(StateMachine[InstructionPointer].param);
         SMrequire     : result:=Run(StateMachine[InstructionPointer].param);
         SMexec        : result:=DoExec(StateMachine[InstructionPointer].param);
-        SMend         : exit;
+        SMend         : exit; //success
         SMcleanmodule : result:=DoCleanModule(StateMachine[InstructionPointer].param);
         SMgetmodule   : result:=DoGetModule(StateMachine[InstructionPointer].param);
         SMbuildmodule : result:=DoBuildModule(StateMachine[InstructionPointer].param);
@@ -364,7 +369,7 @@ begin
         SMSetOS       : DoSetOS(StateMachine[InstructionPointer].param);
         SMSetCPU      : DoSetCPU(StateMachine[InstructionPointer].param);
         end;
-      if not result then exit;
+      if not result then exit; //failure, bail out
       InstructionPointer:=InstructionPointer+1;
       end;
     end
