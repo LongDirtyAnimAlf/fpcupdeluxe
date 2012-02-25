@@ -338,6 +338,13 @@ begin
     begin
     result:=true;
     SeqAttr:=PSequenceAttributes(pointer(ModuleList.Objects[idx]));
+    case SeqAttr^.Executed of
+      ESFailed   : begin
+                     result:=false;
+                     exit;
+                   end;
+      ESSucceeded : exit;
+      end;
     InstructionPointer:=SeqAttr^.EntryPoint;
     while true do
       begin
