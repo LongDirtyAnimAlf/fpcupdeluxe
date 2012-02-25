@@ -78,7 +78,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="10">
+    <Units Count="11">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -129,6 +129,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
       </Unit9>
+      <Unit10>
+        <Filename Value="installeruniversal.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="installerUniversal"/>
+      </Unit10>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

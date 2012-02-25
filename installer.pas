@@ -42,7 +42,7 @@ interface
 
 uses
   Classes, SysUtils, processutils, m_crossinstaller,
-  installerfpc,installerlazarus;
+  installerFpc,installerLazarus,installerUniversal;
 
 
 
