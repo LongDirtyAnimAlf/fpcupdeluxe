@@ -675,7 +675,7 @@ end;
 
 procedure TOldInstaller.SetFPCDirectory(Directory: string);
 begin
-
+  FFPCDirectory:=Directory;
 end;
 
 
@@ -687,12 +687,12 @@ end;
 
 procedure TOldInstaller.SetFPCUrl(AValue: string);
 begin
-
+  FFPCURL:=AValue;
 end;
 
 procedure TOldInstaller.SetLazarusDirectory(Directory: string);
 begin
-
+  FLazarusDirectory:=Directory;
 end;
 
 
@@ -704,7 +704,7 @@ end;
 
 procedure TOldInstaller.SetLazarusUrl(AValue: string);
 begin
-
+  FLazarusURL:=AValue;
 end;
 
 procedure TOldInstaller.SetLazarusPrimaryConfigPath(AValue: string);
