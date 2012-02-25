@@ -348,21 +348,21 @@ begin
     InstructionPointer:=SeqAttr^.EntryPoint;
     while true do
       begin
-      case StateMachine[idx].instr of
+      case StateMachine[InstructionPointer].instr of
         SMdeclare     :;
-        SMdo          : if not IsSkipped(StateMachine[idx].param) then
-                          result:=Run(StateMachine[idx].param);
-        SMrequire     : result:=Run(StateMachine[idx].param);
-        SMexec        : result:=DoExec(StateMachine[idx].param);
+        SMdo          : if not IsSkipped(StateMachine[InstructionPointer].param) then
+                          result:=Run(StateMachine[InstructionPointer].param);
+        SMrequire     : result:=Run(StateMachine[InstructionPointer].param);
+        SMexec        : result:=DoExec(StateMachine[InstructionPointer].param);
         SMend         : exit;
-        SMcleanmodule : result:=DoCleanModule(StateMachine[idx].param);
-        SMgetmodule   : result:=DoGetModule(StateMachine[idx].param);
-        SMbuildmodule : result:=DoBuildModule(StateMachine[idx].param);
-        SMuninstallmodule: result:=DoUnInstallModule(StateMachine[idx].param);
-        SMconfigmodule: result:=DoConfigModule(StateMachine[idx].param);
-        SMSetLCL      : DoSetLCL(StateMachine[idx].param);
-        SMSetOS       : DoSetOS(StateMachine[idx].param);
-        SMSetCPU      : DoSetCPU(StateMachine[idx].param);
+        SMcleanmodule : result:=DoCleanModule(StateMachine[InstructionPointer].param);
+        SMgetmodule   : result:=DoGetModule(StateMachine[InstructionPointer].param);
+        SMbuildmodule : result:=DoBuildModule(StateMachine[InstructionPointer].param);
+        SMuninstallmodule: result:=DoUnInstallModule(StateMachine[InstructionPointer].param);
+        SMconfigmodule: result:=DoConfigModule(StateMachine[InstructionPointer].param);
+        SMSetLCL      : DoSetLCL(StateMachine[InstructionPointer].param);
+        SMSetOS       : DoSetOS(StateMachine[InstructionPointer].param);
+        SMSetCPU      : DoSetCPU(StateMachine[InstructionPointer].param);
         end;
       if not result then exit;
       InstructionPointer:=InstructionPointer+1;
