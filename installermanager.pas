@@ -16,7 +16,7 @@ type
     FAllOptions: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
-    FBootstrapCompilerFTP: string;
+    FBootstrapCompilerURL: string;
     FClean: boolean;
     FCompilerName: string;
     FCrossCPU_Target: string;
@@ -50,7 +50,7 @@ type
     property AllOptions:string read FAllOptions write FAllOptions;
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
-    property BootstrapCompilerFTP: string read FBootstrapCompilerFTP write FBootstrapCompilerFTP;
+    property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
     property Clean: boolean read FClean write FClean;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
@@ -175,20 +175,17 @@ end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
 begin
-if GetInstaller(ModuleName) then
-  result:=Installer.BuildModule(ModuleName);
+  result:= GetInstaller(ModuleName) and Installer.BuildModule(ModuleName);
 end;
 
 function TSequencer.DoCleanModule(ModuleName: string): boolean;
 begin
-if GetInstaller(ModuleName) then
-  result:=Installer.CleanModule(ModuleName);
+  result:= GetInstaller(ModuleName) and Installer.CleanModule(ModuleName);
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
 begin
-if GetInstaller(ModuleName) then
-  result:=(Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath);
+  result:= GetInstaller(ModuleName) and (Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath);
 end;
 
 function TSequencer.DoExec(FunctionName: string): boolean;
@@ -198,8 +195,7 @@ end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;
 begin
-if GetInstaller(ModuleName) then
-  result:=Installer.GetModule(ModuleName);
+  result:= GetInstaller(ModuleName) and Installer.GetModule(ModuleName);
 end;
 
 function TSequencer.DoSetCPU(CPU: string): boolean;
@@ -219,8 +215,7 @@ end;
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
 begin
-if GetInstaller(ModuleName) then
-  result:=Installer.UnInstallModule(ModuleName);
+  result:= GetInstaller(ModuleName) and Installer.UnInstallModule(ModuleName);
 end;
 
 {GetInstaller gets a new installer for ModuleName and initialises parameters unless one exist already.}
@@ -244,7 +239,7 @@ begin
       else
         Installer.free; // get rid of old installer
       end;
-    if not CrossCompiling then
+    if CrossCompiling then
       begin
       Installer:=TFPCCrossInstaller.Create;
       Installer.CrossOS_Target:=FParent.CrossOS_Target;
@@ -254,7 +249,7 @@ begin
       Installer:=TFPCNativeInstaller.Create;
     Installer.BaseDirectory:=FParent.FPCDirectory;
     (Installer as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
-    (Installer as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerFTP;
+    (Installer as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
     Installer.Compiler:='';  //bootstrap used
     Installer.CompilerOptions:=FParent.FPCOPT;
     Installer.DesiredRevision:=FParent.FPCDesiredRevision;
@@ -278,7 +273,7 @@ begin
       else
         Installer.free; // get rid of old installer
       end;
-    if not CrossCompiling then
+    if CrossCompiling then
       begin
       Installer:=TLazarusCrossInstaller.Create;
       Installer.CrossOS_Target:=FParent.CrossOS_Target;

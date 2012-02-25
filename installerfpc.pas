@@ -7,6 +7,28 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller;
 
+Const
+  Sequences=
+//standard fpc build
+    'Declare FPC'+LineEnding+
+    'Cleanmodule FPC'+LineEnding+
+    'Getmodule FPC'+LineEnding+
+    'Buildmodule FPC'+LineEnding+
+    'End'+LineEnding+
+//selective actions triggered with --only=SequenceName
+    'Declare FPCCleanOnly'+LineEnding+
+    'Cleanmodule FPC'+LineEnding+
+    'End'+LineEnding+
+
+    'Declare FPCGetOnly'+LineEnding+
+    'Getmodule FPC'+LineEnding+
+    'End'+LineEnding+
+
+    'Declare FPCBuildOnly'+LineEnding+
+    'Buildmodule FPC'+LineEnding+
+    'End';
+
+
 
 type
   { TFPCInstaller }
@@ -69,6 +91,7 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
+
 
 implementation
 
