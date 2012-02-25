@@ -943,7 +943,7 @@ begin
   else
     LazarusInstaller:=TLazarusNativeInstaller.Create;
   try
-    LazarusInstaller.BaseDirectory:=FPCDirectory;
+    LazarusInstaller.BaseDirectory:=LazarusDirectory;
     if FInstalledCompiler='' then
       FInstalledCompiler:=LazarusInstaller.GetCompilerInDir(FPCDirectory);
     LazarusInstaller.Compiler:=FInstalledCompiler;
