@@ -65,8 +65,10 @@ type
     FFPCDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
+    FLazarusDirectory: string;
     FLazarusDesiredRevision: string;
     FLazarusOPT: string;
+    FLazarusURL: string;
     FOnlyModules: string;
     FShortcutName: string; //Name for shortcut/shell script pointing to newly installed Lazarus
     FExecutableExtension: string; //.exe on Windows
@@ -108,8 +110,6 @@ type
     procedure SetSkipLazarusHelp(AValue: boolean);
     procedure SetSkipModules(AValue: string);
     procedure SetVerbose(AValue: boolean);
-    function GetLazarusDirectory: string;
-    function GetLazarusUrl: string;
     function GetMakePath: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetFPCDirectory(Directory: string);
@@ -152,11 +152,11 @@ type
     function GetFPC: boolean; //Get/update FPC
     function GetLazarus: boolean; //Get/update Lazarus
     function GetLazarusHelp: boolean; //Create/get/compile Lazarus help
-    property LazarusDirectory: string read GetLazarusDirectory write SetLazarusDirectory;
+    property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
     property LazarusPrimaryConfigPath: string
       read FLazarusPrimaryConfigPath write SetLazarusPrimaryConfigPath;
     //The directory where the configuration for this Lazarus instance must be stored.
-    property LazarusURL: string read GetLazarusUrl write SetLazarusUrl;
+    property LazarusURL: string read FLazarusUrl write FLazarusUrl;
     //SVN URL for Lazarus
     property LazarusOPT:string read FLazarusOPT write SetLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write SetLazarusDesiredRevision;
@@ -766,16 +766,6 @@ procedure TOldInstaller.SetVerbose(AValue: boolean);
 begin
   if FVerbose=AValue then Exit;
   FVerbose:=AValue;
-end;
-
-function TOldInstaller.GetLazarusDirectory: string;
-begin
-
-end;
-
-function TOldInstaller.GetLazarusUrl: string;
-begin
-
 end;
 
 
