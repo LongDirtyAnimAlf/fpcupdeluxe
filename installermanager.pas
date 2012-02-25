@@ -75,8 +75,8 @@ type
   TSequenceAttributes=record
     EntryPoint:integer;  //instead of rescanning the sequence table everytime, we can as well store the index in the table
     Executed:TExecState; //  Reset to ESNever at sequencer start up
-    Standard:boolean;    //true: added by code; false: added at run-time by TUniversalInstaller
   end;
+  PSequenceAttributes=^TSequenceAttributes;
 
   TKeyword=(SMdeclare, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
     SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU);
@@ -95,11 +95,15 @@ type
       Installer:TInstaller;  //current installer
       ModuleList:TStringList;
       SkipList:TStringList;
-      TStateMachine:array of TState;
+      StateMachine:array of TState;
       function DoBuildModule(ModuleName:string):boolean;
+      function DoCleanModule(ModuleName:string):boolean;
       function DoConfigModule(ModuleName:string):boolean;
       function DoExec(FunctionName:string):boolean;
       function DoGetModule(ModuleName:string):boolean;
+      function DoSetCPU(CPU:string):boolean;
+      function DoSetOS(OS:string):boolean;
+      function DoSetLCL(LCL:string):boolean;
       function DoUnInstallModule(ModuleName:string):boolean;
       function GetInstaller(ModuleName:string):boolean;
       function IsSkipped(ModuleName:string):boolean;
@@ -156,12 +160,20 @@ end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
 begin
+if GetInstaller(ModuleName) then
+  result:=Installer.BuildModule(ModuleName);
+end;
 
+function TSequencer.DoCleanModule(ModuleName: string): boolean;
+begin
+if GetInstaller(ModuleName) then
+  result:=Installer.CleanModule(ModuleName);
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
 begin
-
+if GetInstaller(ModuleName) then
+  result:=(Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath);
 end;
 
 function TSequencer.DoExec(FunctionName: string): boolean;
@@ -171,12 +183,29 @@ end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;
 begin
+if GetInstaller(ModuleName) then
+  result:=Installer.GetModule(ModuleName);
+end;
 
+function TSequencer.DoSetCPU(CPU: string): boolean;
+begin
+  FParent.CrossCPU_Target:=CPU;
+end;
+
+function TSequencer.DoSetOS(OS: string): boolean;
+begin
+  FParent.CrossOS_Target:=OS;
+end;
+
+function TSequencer.DoSetLCL(LCL: string): boolean;
+begin
+  FParent.CrossLCL_Platform:=LCL;
 end;
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
 begin
-
+if GetInstaller(ModuleName) then
+  result:=Installer.UnInstallModule(ModuleName);
 end;
 
 {GetInstaller gets a new installer for ModuleName and initialises parameters unless one exist already.}
@@ -280,7 +309,7 @@ end;
 
 function TSequencer.IsSkipped(ModuleName: string): boolean;
 begin
-
+  result:=SkipList.IndexOf(ModuleName)>=0;
 end;
 
 function TSequencer.CreateOnly(OnlyModules: string): boolean;
@@ -299,8 +328,40 @@ begin
 end;
 
 function TSequencer.Run(SequenceName: string): boolean;
+var
+  InstructionPointer:integer;
+  idx:integer;
+  SeqAttr:^TSequenceAttributes;
 begin
-
+  idx:=ModuleList.IndexOf(SequenceName);
+  if (idx >0) then
+    begin
+    SeqAttr:=PSequenceAttributes(pointer(ModuleList.Objects[idx]));
+    InstructionPointer:=SeqAttr^.EntryPoint;
+    while true do
+      begin
+      case StateMachine[idx].instr of
+        SMdeclare     :;
+        SMdo          : if not IsSkipped(StateMachine[idx].param) then
+                          result:=Run(StateMachine[idx].param);
+        SMrequire     : result:=Run(StateMachine[idx].param);
+        SMexec        : result:=DoExec(StateMachine[idx].param);
+        SMend         : exit;
+        SMcleanmodule : result:=DoCleanModule(StateMachine[idx].param);
+        SMgetmodule   : result:=DoGetModule(StateMachine[idx].param);
+        SMbuildmodule : result:=DoBuildModule(StateMachine[idx].param);
+        SMuninstallmodule: result:=DoUnInstallModule(StateMachine[idx].param);
+        SMconfigmodule: result:=DoConfigModule(StateMachine[idx].param);
+        SMSetLCL      : DoSetLCL(StateMachine[idx].param);
+        SMSetOS       : DoSetOS(StateMachine[idx].param);
+        SMSetCPU      : DoSetCPU(StateMachine[idx].param);
+        end;
+      if not result then exit;
+      InstructionPointer:=InstructionPointer+1;
+      end;
+    end
+  else
+    result:=false;  // sequence not found
 end;
 
 end.
