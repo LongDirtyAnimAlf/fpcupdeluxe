@@ -63,6 +63,7 @@ Const
     'Requires BIGIDE;'+
     'Requires lhelp;'+
     'CleanModule helplazarus;'+
+    'GetModule helplazarus;'+
     'BuildModule helplazarus;'+
     'ConfigModule helplazarus;'+
     'End;'+
