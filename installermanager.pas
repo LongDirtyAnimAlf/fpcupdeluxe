@@ -71,6 +71,7 @@ type
     FSkipModules: string;
     FVerbose: boolean;
     Sequencer: TSequencer;
+    function GetLazarusPrimaryConfigPath: string;
   protected
     LogFile:Text;
     VerBoseLog:Text;
@@ -98,7 +99,7 @@ type
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision:string read FFPCDesiredRevision write FFPCDesiredRevision;
     property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
-    property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
+    property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write FLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
@@ -169,6 +170,23 @@ implementation
 
 { TFPCupManager }
 
+function TFPCupManager.GetLazarusPrimaryConfigPath: string;
+const
+  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
+begin
+  if FLazarusPrimaryConfigPath='' then
+    begin
+      {$IFDEF MSWINDOWS}
+      // Somewhere in local appdata special folder
+      FLazarusPrimaryConfigPath := IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
+      {$ELSE}
+      //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+      LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+      {$ENDIF MSWINDOWS}
+    end;
+  result:=FLazarusPrimaryConfigPath;
+end;
+
 procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);
 begin
 Write(LogFile,msg);
@@ -191,7 +209,7 @@ Sequencer.AddSequence(installerFPC.Sequences);
 Sequencer.AddSequence(installerLazarus.Sequences);
 Sequencer.AddSequence(installerUniversal.Sequences);
 //append universal modules to the lists
-installerUniversal.GetModuleList(FConfigFile,FModuleList);
+Sequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
 installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
@@ -281,19 +299,7 @@ begin
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
-const
-  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
 begin
-  if FParent.LazarusPrimaryConfigPath='' then
-    begin
-      {$IFDEF MSWINDOWS}
-      // Somewhere in local appdata special folder
-      FParent.LazarusPrimaryConfigPath := IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
-      {$ELSE}
-      //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
-      FParent.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
-      {$ENDIF MSWINDOWS}
-    end;
   result:= GetInstaller(ModuleName) and (Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath);
 end;
 
@@ -518,6 +524,18 @@ begin
       Installer:=TUniversalInstaller.Create;
       CurrentModule:=ModuleName;
       //assign properties
+      (Installer as TUniversalInstaller).FPCDir:=FParent.FFPCDirectory;
+      (Installer as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
+      (Installer as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      Installer.LogFile:=FParent.LogFile;
+      {$IFDEF MSWINDOWS}
+      Installer.MakeDirectory:=FParent.MakeDirectory;
+      {$ENDIF}
+      if FParent.CompilerName='' then
+        Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+      else
+        Installer.Compiler:=FParent.CompilerName;
+      Installer.Verbose:=FParent.Verbose;
     end;
 end;
 
@@ -653,6 +671,7 @@ if (idx >0) then
   while i<length(StateMachine) do
     begin
     StateMachine[i].param:='';
+    i:=i+1;
     end;
   SetLength(StateMachine,SeqAttr^.EntryPoint);
   Freemem(FParent.ModuleList.Objects[idx]);

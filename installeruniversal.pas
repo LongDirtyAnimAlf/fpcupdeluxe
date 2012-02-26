@@ -5,7 +5,7 @@ unit installerUniversal;
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,processutils;
+  Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
 
 
 type
@@ -17,9 +17,10 @@ type
     FConfigFile:string;
     FFPCDir:string;
     FLazarusDir:string;
+    FLazarusPrimaryConfigPath:string;
     InitDone:boolean;
   protected
-    function GetValue(Key:string):string;
+    function GetValue(Key:string;sl:TStringList):string;
     // internal initialisation, called from BuildModule,CLeanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
@@ -28,6 +29,8 @@ type
     property ConfigFile:string read FConfigFile write FConfigFile;
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
+    // Lazarus primary config path
+    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
     // Lazarus base directory
     property LazarusDir:string read FLazarusDir write FLazarusDir;
     // Build module
@@ -46,8 +49,8 @@ type
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
-  // Gets the list of modules from ConfigFile. Appends to existing TStringList
-  function GetModuleList(ConfigFile:string; var ModuleList:TStringList):boolean;
+  // Gets the sequence representation for all modules
+  function GetModuleList(ConfigFile:string):string;
 
 
 var sequences:string;
@@ -67,9 +70,51 @@ var
 
 { TUniversalInstaller }
 
-function TUniversalInstaller.GetValue(Key: string): string;
+function TUniversalInstaller.GetValue(Key: string;sl:TStringList): string;
+var
+  i,len:integer;
+  s,macro:string;
 begin
-
+  Key:=UpperCase(Key);
+  s:='';
+  for i:=0 to sl.Count-1 do
+    begin
+    s:=sl[i];
+    if (copy(UpperCase(s),1, length(Key))=Key) and ((s[length(Key)+1]='=') or (s[length(Key)+1]=' ')) then
+      begin
+      if pos('=',s)>0 then
+        s:=trim(copy(s,pos('=',s)+1,length(s)));
+      break;
+      end;
+    s:='';
+    end;
+//expand macros
+  if s<>'' then
+    while pos('$(',s)>0 do
+      begin
+      i:=pos('$(',s);
+      macro:=copy(s,i+2,length(s));
+      if pos(')',macro)>0 then
+        begin
+        delete(macro,pos(')',macro),length(macro));
+        macro:=UpperCase(macro);
+        len:=length(macro)+3; // the brackets
+        if macro='FPCDIR' then macro:=FFPCDir
+        else if macro='LAZARUSDIR' then macro:=FLazarusDir
+        else if macro='LAZARUSPRIMARYCONFIGPATH' then macro:=FLazarusPrimaryConfigPath
+        else macro:=GetValue(macro,sl); //user defined value
+        // quote if containing spaces
+        if pos(' ',macro)>0 then
+          macro:=''''+macro+'''';
+        delete(s,i,len);
+        insert(macro,s,i);
+        end;
+      end;
+  // correct path delimiter
+  for i:=1 to length(s) do
+    if (s[i]='/') or (s[i]='\') then
+      s[i]:=DirectorySeparator;
+  result:=s;
 end;
 
 function TUniversalInstaller.InitModule: boolean;
@@ -79,7 +124,7 @@ begin
     exit;
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
-  result:=CheckAndGetNeededExecutables;
+//  result:=CheckAndGetNeededExecutables;
   BinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   InitDone:=result;
 end;
@@ -87,52 +132,66 @@ end;
 function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
 var
   i,j,idx:integer;
-  exec,cmd,param,output:string;
+  exec,output:string;
   Workingdir:string;
   sl:TStringList;
+  PE:TProcessEx;
 begin
-  if not InitModule then exit;
-  idx:=UniModuleList.IndexOf(ModuleName);
+  result:=InitModule;
+  if not result then exit;
+  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
-    sl:=TStringList(UniModuleList.Objects[idx]);
-    Workingdir:=GetValue('Workingdir');
-    for i:=1 to MAXINSTRUCTIONS do
-      begin
-      exec:=GetValue('InstallExecute'+IntToStr(i));
-      if exec='' then break;
-      //split off command and parameters
-      j:=1;
-      while j<=length(exec) do
+    PE:=TProcessEx.Create(nil);
+    try
+      sl:=TStringList(UniModuleList.Objects[idx]);
+      PE.CurrentDirectory:=GetValue('Workingdir',sl);
+      for i:=1 to MAXINSTRUCTIONS do
         begin
-        if exec[j]='"' then
-          repeat  //skip until next quote
-            j:=j+1;
-          until (exec[j]='"') or (j=length(exec));
-        j:=j+1;
-        if exec[j]=' ' then break;
+        exec:=GetValue('InstallExecute'+IntToStr(i),sl);
+        if exec='' then break;
+        //split off command and parameters
+        j:=1;
+        while j<=length(exec) do
+          begin
+          if exec[j]='"' then
+            repeat  //skip until next quote
+              j:=j+1;
+            until (exec[j]='"') or (j=length(exec));
+          j:=j+1;
+          if exec[j]=' ' then break;
+          end;
+        PE.Executable:=trim(copy(exec,1,j));
+        PE.ParametersString:=trim(copy(exec,j,length(exec)));
+        PE.ShowWindow := swoHIDE;
+        if FVerbose then
+          PE.OnOutput:=@DumpConsole;
+        PE.Execute;
+        Output:=PE.OutputString;
+        result:=PE.ExitStatus<>0;
+        if not result then
+          break;
         end;
-      cmd:=trim(copy(exec,1,j));
-      param:=trim(copy(exec,j,length(exec)));
-      result:=ExecuteCommandHidden(cmd,param,output,FVerbose)=0;
-      if not result then
-        exit;
-      end;
+    finally
+      PE.Free;
+    end;
     end
   else
     result:=false;
+
 end;
 
 function TUniversalInstaller.CleanModule(ModuleName: string): boolean;
 begin
-  if not InitModule then exit;
-
+  result:=InitModule;
+  if not result then exit;
+  result:=true;
 end;
 
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 begin
   if not InitModule then exit;
-
+  result:=true;
 end;
 
 function TUniversalInstaller.GetModuleRequirements(ModuleName: string;
@@ -151,14 +210,10 @@ end;
 constructor TUniversalInstaller.Create;
 begin
   inherited Create;
-  UniModuleList:=TStringList.Create;
-  UniModuleEnabledList:=TStringList.Create;
 end;
 
 destructor TUniversalInstaller.Destroy;
 begin
-  UniModuleList.Free;
-  UniModuleEnabledList.Free;
   inherited Destroy;
 end;
 
@@ -188,10 +243,10 @@ var
     if result then
       begin
       if ini.ReadString(ModuleName,'Enabled','')='1' then
-        UniModuleEnabledList.Add(name);
+        UniModuleEnabledList.Add(uppercase(name));
       // store the section as is and attach as object to UniModuleList
       sl:=TstringList.Create;
-      ini.ReadSection(ModuleName,sl);
+      ini.ReadSectionRaw(ModuleName,sl);
       UniModuleList.AddObject(name,TObject(sl));
       end;
   end;
@@ -234,13 +289,22 @@ begin
     ModuleList.Add(UniModuleEnabledList[i]);
 end;
 
-function GetModuleList(ConfigFile: string; var ModuleList: TStringList
-  ): boolean;
-var i:integer;
+function GetModuleList(ConfigFile: string): string;
+var
+  i:integer;
+  s:string;
 begin
   ReadInifile(ConfigFile);
+  result:='';
   for i:=0 to UniModuleList.Count -1 do
-    ModuleList.Add(UniModuleList[i]);
+    begin
+    s:=UniModuleList[i];
+    result:=result+'Declare '+ s + ';' +
+        'Cleanmodule '+ s +';' +
+        'Getmodule '+ s +';' +
+        'Buildmodule '+ s +';' +
+        'End;';
+    end;
 end;
 
 initialization
