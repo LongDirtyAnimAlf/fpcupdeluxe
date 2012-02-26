@@ -276,7 +276,7 @@ end;
 
 function THelpInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
-
+//todo: do this
 end;
 
 constructor THelpInstaller.Create;
@@ -293,7 +293,8 @@ end;
 
 function THelpFPCInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
-
+  // A no op right now...
+  result:=true;
 end;
 
 function THelpFPCInstaller.InitModule: boolean;
