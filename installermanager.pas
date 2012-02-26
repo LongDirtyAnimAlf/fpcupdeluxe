@@ -727,6 +727,8 @@ begin
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
+        //todo: perhaps get writelnlog in here?
+        infoln('Error running fpcup. Technical details: error executing sequence '+SequenceName);
         exit; //failure, bail out
         end;
       InstructionPointer:=InstructionPointer+1;
