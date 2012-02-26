@@ -15,7 +15,7 @@ Const
     'Do fpc;'+
     'Do lazarus;'+
     'Exec CreateLazarusScript;'+
-    'Do help;'+
+    'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
     'End;'+
@@ -25,7 +25,7 @@ Const
     'Do fpc;'+
     'Do lazarus;'+
     'Exec CreateLazarusScript;'+
-    'Do help;'+
+    'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
     'Do DOCEDITOR;'+
