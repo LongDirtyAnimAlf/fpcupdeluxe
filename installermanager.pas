@@ -5,7 +5,7 @@ unit installerManager;
 interface
 
 uses
-  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerUniversal;
+  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerUniversal,fpcuputil,fileutil;
 
 Const
   Sequences=
@@ -73,6 +73,7 @@ type
   protected
     LogFile:Text;
     FModuleList:TStringList;
+    FModuleEnabledList:TStringList;
     public
     property ShortCutName: string read FShortCutName write FShortCutName;
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup;
@@ -95,7 +96,10 @@ type
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property MakeDirectory: string read FMakeDirectory write FMakeDirectory;
+    //List of all sequences available
     property ModuleList: TStringList read FModuleList;
+    //List of all default enabled sequences available
+    property ModuleEnabledList: TStringList read FModuleEnabledList;
     property SkipModules:string read FSkipModules write FSkipModules;
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Verbose:boolean read FVerbose write FVerbose;
@@ -159,11 +163,18 @@ implementation
 { TFPCupManager }
 
 function TFPCupManager.LoadModuleList: boolean;
+var i:integer;
 begin
 Sequencer.AddSequence(Sequences);
 Sequencer.AddSequence(installerFPC.Sequences);
 Sequencer.AddSequence(installerLazarus.Sequences);
+// add all standard modules to ModuleEnabledList
+for i:=0 to FModuleList.Count-1 do
+  FModuleEnabledList.Add(FModuleList[i]);
 Sequencer.AddSequence(installerUniversal.Sequences);
+//append universal modules to the lists
+installerUniversal.GetModuleList(FModuleList);
+installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
 function TFPCupManager.Run: boolean;
@@ -186,9 +197,10 @@ end;
 
 constructor TFPCupManager.Create;
 begin
-  FModuleList:=TStringList.Create;
-  Sequencer:=TSequencer.create;
-  Sequencer.Parent:=Self;
+FModuleList:=TStringList.Create;
+FModuleEnabledList:=TStringList.Create;
+Sequencer:=TSequencer.create;
+Sequencer.Parent:=Self;
 end;
 
 destructor TFPCupManager.Destroy;
@@ -197,6 +209,7 @@ begin
   for i:=0 to FModuleList.Count-1 do
     Freemem(FModuleList.Objects[i]);
   FModuleList.Free;
+  FModuleEnabledList.Free;
   Sequencer.free;
   inherited Destroy;
 end;
@@ -229,8 +242,51 @@ begin
 end;
 
 function TSequencer.DoExec(FunctionName: string): boolean;
+
+  function CreateFpcupScript:boolean;
+  begin
+    // Link to fpcup itself, with all options as passed when invoking it:
+    if FParent.ShortCutNameFpcup<>EmptyStr then
+    begin
+     {$IFDEF MSWINDOWS}
+      CreateDesktopShortCut(paramstr(0),FParent.AllOptions,FParent.ShortCutNameFpcup);
+     {$ELSE}
+      FParent.AllOptions:=FParent.AllOptions+' $*';
+      CreateHomeStartLink('"'+paramstr(0)+'"',FParent.AllOptions,FParent.ShortCutNameFpcup);
+     {$ENDIF MSWINDOWS}
+    end;
+  end;
+
+
+  function CreateLazarusScript:boolean;
+  //calculate InstalledLazarus. Don't use this function when lazarus is not installed.
+  var
+    InstalledLazarus:string;
+  begin
+  if FParent.ShortCutName<>EmptyStr then
+  begin
+    infoln('Lazarus: creating desktop shortcut:');
+    try
+      //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+
+      InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
+      {$IFDEF MSWINDOWS}
+      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
+      {$ENDIF MSWINDOWS}
+      {$IFDEF UNIX}
+      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
+      {$ENDIF UNIX}
+    finally
+      //Ignore problems creating shortcut
+    end;
+  end;
+  end;
+
 begin
-  result:=true;
+  if UpperCase(FunctionName)='CREATEFPCUPSCRIPT' then
+    result:=CreateFpcupScript
+  else if UpperCase(FunctionName)='CREATELAZARUSSCRIPT' then
+    result:=CreateLazarusScript;
 end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;

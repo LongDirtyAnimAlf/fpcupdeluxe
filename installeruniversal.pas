@@ -33,12 +33,8 @@ type
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
-    // Gets the list of modules enabled in ConfigFile
-    function GetDefaultModuleList(var ModuleList:TStringList):boolean;
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
-    // Gets the list of modules from ConfigFile
-    function GetModuleList(var ModuleList:TStringList):boolean;
     // Gets the list of required modules for ModuleName
     function GetModuleRequirements(ModuleName:string; var RequirementList:TStringList): boolean;
     // Uninstall module
@@ -46,6 +42,12 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
+
+  // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
+  function GetModuleEnabledList(var ModuleList:TStringList):boolean;
+  // Gets the list of modules from ConfigFile. Appends to existing TStringList
+  function GetModuleList(var ModuleList:TStringList):boolean;
+
 
 var sequences:string;
 
@@ -77,20 +79,7 @@ begin
 
 end;
 
-function TUniversalInstaller.GetDefaultModuleList(var ModuleList: TStringList
-  ): boolean;
-begin
-  if not InitModule then exit;
-
-end;
-
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
-begin
-  if not InitModule then exit;
-
-end;
-
-function TUniversalInstaller.GetModuleList(var ModuleList: TStringList): boolean;
 begin
   if not InitModule then exit;
 
@@ -124,6 +113,18 @@ begin
 // read inifile
 // parse inifile
 // fill in var sequences
+// fill in ModuleList
+// fill in ModuleEnabled
+end;
+
+function GetModuleEnabledList(var ModuleList: TStringList): boolean;
+begin
+
+end;
+
+function GetModuleList(var ModuleList: TStringList): boolean;
+begin
+
 end;
 
 initialization
