@@ -81,7 +81,7 @@ begin
     writeln(ModuleList[i]);
     end;
   writeln('');
-  writeln('The following modules run per default:');
+  writeln('The following modules run by default:');
   For i:=0 to ModuleEnabledList.Count-1 do
     begin
     writeln(ModuleEnabledList[i]);
@@ -194,6 +194,7 @@ var
 begin
   result:=-1; //no error
   // Default values
+  FInstaller.ConfigFile:='fpcup.ini';  //todo add command line option
   FInstaller.ShortCutName:='Lazarus_trunk';
   FInstaller.ShortCutNameFpcup:='fpcup_update';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
@@ -226,6 +227,7 @@ begin
   // these might be typos and should result in halting as well.
   if Length(ErrorMessage) > 0 then
   begin
+    FInstaller.LoadModuleList;
     writeln('Error: wrong command line options given:');
     writeln(ErrorMessage);
     WriteHelp(FInstaller.ModuleList,FInstaller.ModuleEnabledList);
@@ -235,6 +237,9 @@ begin
 
   AllOptions:='';
 
+  //todo: get configfile option here before LoadModuleList
+
+  FInstaller.LoadModuleList;
   if Application.HasOption(BinutilsDir) then
   begin
     FInstaller.MakeDirectory:=Application.GetOptionValue(BinutilsDir);
@@ -450,7 +455,6 @@ begin
   writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
   try
     FPCupManager:=TFPCupManager.Create;
-    FPCupManager.LoadModuleList;
     res:=CheckOptions(FPCupManager); //Process command line arguments
     if res=-1 then
       // Get/update/compile selected modules

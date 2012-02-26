@@ -51,22 +51,18 @@ Const
     'Declare helpfpc;'+
     'Cleanmodule helpfpc;'+
     'Getmodule helpfpc;'+
-    'Buildmodule helpfpc;'+
     'End;'+
-    //Lazarus help
-    {Note: we don't use helpfpc because that will put the
-    help files in the FPC base directory, not in the
-    Lazarus base directory
-    }
-    //todo: replace help with lazhelp in main state machine
-    'Declare helplazarus;'+
+//Lazarus/FPC help
+    'Declare help;'+
     'Requires BIGIDE;'+
     'Requires lhelp;'+
+    // We need FPC help before building:
+    'Requires helpfpc;'+
     'CleanModule helplazarus;'+
     'BuildModule helplazarus;'+
     'ConfigModule helplazarus;'+
     'End;'+
-    //selective actions triggered with --only=SequenceName
+//selective actions triggered with --only=SequenceName
     'Declare HelpFPCCleanOnly;'+
     'Cleanmodule helpfpc;'+
     'End;'+
@@ -79,24 +75,8 @@ Const
     'Getmodule helpfpc;'+
     'End;'+
 
-    'Declare HelpLazarusGetOnly;'+
-    'Getmodule helplazarus;'+
-    'End;'+
-
-    'Declare HelpFPCBuildOnly;'+
-    'Buildmodule helpfpc;'+
-    'End;'+
-
-    'Declare HelpFPCBuildOnly;'+
-    'Buildmodule helpfpc;'+
-    'End;'+
-
     'Declare HelpLazarusBuildOnly;'+
     'Buildmodule helplazarus;'+
-    'End;'+
-
-    'Declare HelpFPCConfigOnly;'+
-    'Configmodule helpfpc;'+
     'End;'+
 
     'Declare HelpLazarusConfigOnly;'+
@@ -109,15 +89,12 @@ type
 THelpInstaller = class(TInstaller)
 private
   InitDone:boolean;
-  // Directory where help files are placed
-  FTargetDirectory: string;
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; virtual;
   // internal initialisation, called from BuildModule,CLeanModule,GetModule
   // and UnInstallModule but executed only once
-  function InitModule:boolean; virtual;
-  property TargetDirectory: string read FTargetDirectory write FTargetDirectory;
+  function InitModule:boolean;
 public
   // Build module
   function BuildModule(ModuleName:string): boolean; override;
@@ -131,43 +108,27 @@ public
   destructor Destroy; override;
 end;
 
-{ THelpFPCInstaller }
-
 THelpFPCInstaller = class(THelpInstaller)
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; override;
-  function InitModule:boolean; override;
 public
-  // Clean up environment
-  function CleanModule(ModuleName:string): boolean; override;
-  // Install update sources
-  function GetModule(ModuleName:string): boolean; override;
   constructor Create;
   destructor Destroy; override;
 end;
 
-{ THelpLazarusInstaller }
-
 THelpLazarusInstaller = class(THelpInstaller)
-private
-  FLazarusPrimaryConfigPath: string;
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; override;
-  function InitModule:boolean; override;
 public
-  // Clean up environment
-  function CleanModule(ModuleName:string): boolean; override;
-  // Configuration for Lazarus; required for building lhelp, as well as configuration
-  property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
   constructor Create;
   destructor Destroy; override;
 end;
 
 implementation
 
-uses fpcuputil, processutils, FileUtil;
+uses fpcuputil;
 
 { THelpInstaller }
 
@@ -178,75 +139,75 @@ end;
 
 function THelpInstaller.InitModule: boolean;
 begin
-  result:=true;
+
 end;
 
 function THelpInstaller.BuildModule(ModuleName: string): boolean;
 begin
   if not InitModule then exit;
-  result:=true;
+  // We pass all responsibility to specialized THelpInstaller descendants.
+  result:=BuildModuleCustom(ModuleName);
 end;
 
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
 begin
-  if not InitModule then exit;
-  result:=true;
+
 end;
 
 function THelpInstaller.GetModule(ModuleName: string): boolean;
-const
-  // Location of FPC CHM help zip
-  FPC_CHM_URL='http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip';
 var
-  DocsZip: string;
   OperationSucceeded: boolean;
   ResultCode: longint;
+  DocsZip: string;
 begin
   if not InitModule then exit;
-  // Download FPC CHM docs zip into TargetDirectory.
-  {Possible alternatives
-  1. make chm -> requires latex!!!
-  2. or
-  c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
-  ... but we'd need to include the input files extracted from the Make file.
-  }
-  OperationSucceeded:=true;
-  ForceDirectories(TargetDirectory);
-  DocsZip := SysUtils.GetTempFileName + '.zip';
-  try
-    OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
-  except
-    on E: Exception do
-    begin
-      // Deal with timeouts, wrong URLs etc
-      OperationSucceeded:=false;
-      infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
-        'Exception: '+E.ClassName+'/'+E.Message);
-    end;
-  end;
-
-  if OperationSucceeded then
+  OperationSucceeded:=false;
+  //todo: check if this is the right way to specify that fpc help
+  //must be used
+  if UpperCase(ModuleName)='HELPFPC' then
   begin
-    // Extract, overwrite, flatten path/junk paths
-    // todo: test with spaces in path
-    if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,FVerbose)= 0 then
+    if (Self is THelpFPCInstaller)=false then
     begin
-      SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
+      writelnlog('Don''t know how to get module '+ModuleName,true);
+      OperationSucceeded:=false;
     end
     else
     begin
-      OperationSucceeded := False;
-      infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode));
-    end;
-  end
-  else
-  begin
-    infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL);
-  end;
+      // Download FPC CHM docs zip into TargetDirectory.
+      OperationSucceeded:=true;
+      ForceDirectories(TargetDirectory);
+      DocsZip := SysUtils.GetTempFileName + '.zip';
+      try
+        OperationSucceeded:=Download(URL,DocsZip);
+      except
+        on E: Exception do
+        begin
+          // Deal with timeouts, wrong URLs etc
+          OperationSucceeded:=false;
+          infoln('DownloadFPCHelp: HTTP download failed. URL: '+URL+LineEnding+
+            'Exception: '+E.ClassName+'/'+E.Message);
+        end;
+      end;
 
-  if UpperCase(ModuleName)='HELPLAZARUS' then
-  begin
-    // Additionally, build LCL help using FPC sources
+      if OperationSucceeded then
+      begin
+        // Extract, overwrite, flatten path/junk paths
+        // todo: test with spaces in path
+        if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,Verbose)= 0 then
+        begin
+          SysUtils.deletefile(DocsZip); //Get rid of temp zip if success.
+        end
+        else
+        begin
+          OperationSucceeded := False;
+          infoln('DownloadFPCHelp: unzip failed with resultcode: '+IntToStr(ResultCode));
+        end;
+      end
+      else
+      begin
+        infoln('DownloadFPCHelp: HTTP download failed. URL: '+URL);
+      end;
+    end;
   end;
   Result := OperationSucceeded;
 end;
@@ -273,57 +234,6 @@ begin
 
 end;
 
-function THelpFPCInstaller.InitModule: boolean;
-begin
-  result:=false;
-  if inherited InitModule then
-  begin
-    //todo: check with FreeVision FPCIDE to see if this is a sensible location.
-    //todo: why is the BaseDirectory property write-only? Why use FBaseDirectory?
-    TargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-      'doc'+DirectorySeparator+
-      'ide'+DirectorySeparator; ;
-    result:=true;
-  end;
-end;
-
-function THelpFPCInstaller.CleanModule(ModuleName: string): boolean;
-begin
-  result:=inherited CleanModule(ModuleName);
-  if result then
-  try
-    { Delete .chm files and .xct (cross reference) files
-      that could have been downloaded in FPC docs or created by fpcup }
-    sysutils.DeleteFile(TargetDirectory+'fcl.chm');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.chm');
-    sysutils.DeleteFile(TargetDirectory+'prog.chm');
-    sysutils.DeleteFile(TargetDirectory+'ref.chm');
-    sysutils.DeleteFile(TargetDirectory+'rtl.chm');
-    sysutils.DeleteFile(TargetDirectory+'toc.chm');
-    sysutils.DeleteFile(TargetDirectory+'user.chm');
-    // Cross reference (.xct) files:
-    sysutils.DeleteFile(TargetDirectory+'fcl.xct');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.xct');
-    sysutils.DeleteFile(TargetDirectory+'prog.xct');
-    sysutils.DeleteFile(TargetDirectory+'ref.xct');
-    sysutils.DeleteFile(TargetDirectory+'rtl.xct');
-    sysutils.DeleteFile(TargetDirectory+'toc.xct');
-    sysutils.DeleteFile(TargetDirectory+'user.xct');
-    result:=true;
-  except
-    on E: Exception do
-    begin
-      WritelnLog(ModuleName+' clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')',true);
-      result:=false;
-    end;
-  end;
-end;
-
-function THelpFPCInstaller.GetModule(ModuleName: string): boolean;
-begin
-  Result:=inherited GetModule(ModuleName);
-end;
-
 constructor THelpFPCInstaller.Create;
 begin
   inherited Create;
@@ -337,74 +247,8 @@ end;
 { THelpLazarusInstaller }
 
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
-var
-  OperationSucceeded:boolean;
 begin
-  OperationSucceeded:=true;
-  if OperationSucceeded then
-  begin
-    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-    ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild';
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
-    ProcessEx.Parameters.Add(TargetDirectory+'build_lcl_docs.lpr');
-    infoln(ModuleName+': compiling build_lcl_docs help compiler:');
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-      OperationSucceeded := False;
-  end;
 
-  if OperationSucceeded then
-  begin
-    // Build LCL CHM help
-  end;
-  result:=OperationSucceeded;
-end;
-
-function THelpLazarusInstaller.InitModule: boolean;
-begin
-  result:=false;
-  if inherited InitModule then
-  begin
-    TargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-      'docs'+DirectorySeparator+
-      'html'+DirectorySeparator; ;
-    result:=true;
-  end;
-end;
-
-function THelpLazarusInstaller.CleanModule(ModuleName: string): boolean;
-begin
-  result:=inherited CleanModule(ModuleName);
-  if result then
-  try
-    { Delete .chm files and .xct (cross reference) files
-      that could have been downloaded in FPC docs or created by fpcup }
-    sysutils.DeleteFile(TargetDirectory+'fcl.chm');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.chm');
-    sysutils.DeleteFile(TargetDirectory+'prog.chm');
-    sysutils.DeleteFile(TargetDirectory+'ref.chm');
-    sysutils.DeleteFile(TargetDirectory+'rtl.chm');
-    sysutils.DeleteFile(TargetDirectory+'lcl.chm');
-    sysutils.DeleteFile(TargetDirectory+'toc.chm');
-    sysutils.DeleteFile(TargetDirectory+'user.chm');
-    // Cross reference (.xct) files:
-    sysutils.DeleteFile(TargetDirectory+'fcl.xct');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.xct');
-    sysutils.DeleteFile(TargetDirectory+'prog.xct');
-    sysutils.DeleteFile(TargetDirectory+'ref.xct');
-    sysutils.DeleteFile(TargetDirectory+'rtl.xct');
-    sysutils.DeleteFile(TargetDirectory+'lcl.xct');
-    sysutils.DeleteFile(TargetDirectory+'toc.xct');
-    sysutils.DeleteFile(TargetDirectory+'user.xct');
-    result:=true;
-  except
-    on E: Exception do
-    begin
-      WritelnLog(ModuleName+' clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')',true);
-      result:=false;
-    end;
-  end;
 end;
 
 constructor THelpLazarusInstaller.Create;
