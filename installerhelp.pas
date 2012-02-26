@@ -51,6 +51,7 @@ Const
     'Declare helpfpc;'+
     'Cleanmodule helpfpc;'+
     'Getmodule helpfpc;'+
+    'Buildmodule helpfpc;'+
     'End;'+
     //Lazarus help
     {Note: we don't use helpfpc because that will put the
@@ -78,8 +79,24 @@ Const
     'Getmodule helpfpc;'+
     'End;'+
 
+    'Declare HelpLazarusGetOnly;'+
+    'Getmodule helplazarus;'+
+    'End;'+
+
+    'Declare HelpFPCBuildOnly;'+
+    'Buildmodule helpfpc;'+
+    'End;'+
+
+    'Declare HelpFPCBuildOnly;'+
+    'Buildmodule helpfpc;'+
+    'End;'+
+
     'Declare HelpLazarusBuildOnly;'+
     'Buildmodule helplazarus;'+
+    'End;'+
+
+    'Declare HelpFPCConfigOnly;'+
+    'Configmodule helpfpc;'+
     'End;'+
 
     'Declare HelpLazarusConfigOnly;'+
@@ -122,6 +139,8 @@ protected
   function BuildModuleCustom(ModuleName:string): boolean; override;
   function InitModule:boolean; override;
 public
+  // Clean up environment
+  function CleanModule(ModuleName:string): boolean; override;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
   constructor Create;
@@ -131,18 +150,24 @@ end;
 { THelpLazarusInstaller }
 
 THelpLazarusInstaller = class(THelpInstaller)
+private
+  FLazarusPrimaryConfigPath: string;
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; override;
   function InitModule:boolean; override;
 public
+  // Clean up environment
+  function CleanModule(ModuleName:string): boolean; override;
+  // Configuration for Lazarus; required for building lhelp, as well as configuration
+  property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
   constructor Create;
   destructor Destroy; override;
 end;
 
 implementation
 
-uses fpcuputil, processutils;
+uses fpcuputil, processutils, FileUtil;
 
 { THelpInstaller }
 
@@ -164,22 +189,8 @@ end;
 
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
 begin
-  result:=false;
   if not InitModule then exit;
-  case UpperCase(ModuleName) of
-    'HELPFPC':
-    begin
-
-    end;
-    'HELPLAZARUS':
-    begin
-
-    end;
-    else
-      begin
-        writelnlog('Don''t know how to clean module '+ModuleName,true);
-      end;
-  end;
+  result:=true;
 end;
 
 function THelpInstaller.GetModule(ModuleName: string): boolean;
@@ -193,6 +204,12 @@ var
 begin
   if not InitModule then exit;
   // Download FPC CHM docs zip into TargetDirectory.
+  {Possible alternatives
+  1. make chm -> requires latex!!!
+  2. or
+  c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
+  ... but we'd need to include the input files extracted from the Make file.
+  }
   OperationSucceeded:=true;
   ForceDirectories(TargetDirectory);
   DocsZip := SysUtils.GetTempFileName + '.zip';
@@ -270,6 +287,38 @@ begin
   end;
 end;
 
+function THelpFPCInstaller.CleanModule(ModuleName: string): boolean;
+begin
+  result:=inherited CleanModule(ModuleName);
+  if result then
+  try
+    { Delete .chm files and .xct (cross reference) files
+      that could have been downloaded in FPC docs or created by fpcup }
+    sysutils.DeleteFile(TargetDirectory+'fcl.chm');
+    sysutils.DeleteFile(TargetDirectory+'fpdoc.chm');
+    sysutils.DeleteFile(TargetDirectory+'prog.chm');
+    sysutils.DeleteFile(TargetDirectory+'ref.chm');
+    sysutils.DeleteFile(TargetDirectory+'rtl.chm');
+    sysutils.DeleteFile(TargetDirectory+'toc.chm');
+    sysutils.DeleteFile(TargetDirectory+'user.chm');
+    // Cross reference (.xct) files:
+    sysutils.DeleteFile(TargetDirectory+'fcl.xct');
+    sysutils.DeleteFile(TargetDirectory+'fpdoc.xct');
+    sysutils.DeleteFile(TargetDirectory+'prog.xct');
+    sysutils.DeleteFile(TargetDirectory+'ref.xct');
+    sysutils.DeleteFile(TargetDirectory+'rtl.xct');
+    sysutils.DeleteFile(TargetDirectory+'toc.xct');
+    sysutils.DeleteFile(TargetDirectory+'user.xct');
+    result:=true;
+  except
+    on E: Exception do
+    begin
+      WritelnLog(ModuleName+' clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')',true);
+      result:=false;
+    end;
+  end;
+end;
+
 function THelpFPCInstaller.GetModule(ModuleName: string): boolean;
 begin
   Result:=inherited GetModule(ModuleName);
@@ -288,8 +337,28 @@ end;
 { THelpLazarusInstaller }
 
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
+var
+  OperationSucceeded:boolean;
 begin
+  OperationSucceeded:=true;
+  if OperationSucceeded then
+  begin
+    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
+    ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild';
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
+    ProcessEx.Parameters.Add(TargetDirectory+'build_lcl_docs.lpr');
+    infoln(ModuleName+': compiling build_lcl_docs help compiler:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
+  end;
 
+  if OperationSucceeded then
+  begin
+    // Build LCL CHM help
+  end;
+  result:=OperationSucceeded;
 end;
 
 function THelpLazarusInstaller.InitModule: boolean;
@@ -301,6 +370,40 @@ begin
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator; ;
     result:=true;
+  end;
+end;
+
+function THelpLazarusInstaller.CleanModule(ModuleName: string): boolean;
+begin
+  result:=inherited CleanModule(ModuleName);
+  if result then
+  try
+    { Delete .chm files and .xct (cross reference) files
+      that could have been downloaded in FPC docs or created by fpcup }
+    sysutils.DeleteFile(TargetDirectory+'fcl.chm');
+    sysutils.DeleteFile(TargetDirectory+'fpdoc.chm');
+    sysutils.DeleteFile(TargetDirectory+'prog.chm');
+    sysutils.DeleteFile(TargetDirectory+'ref.chm');
+    sysutils.DeleteFile(TargetDirectory+'rtl.chm');
+    sysutils.DeleteFile(TargetDirectory+'lcl.chm');
+    sysutils.DeleteFile(TargetDirectory+'toc.chm');
+    sysutils.DeleteFile(TargetDirectory+'user.chm');
+    // Cross reference (.xct) files:
+    sysutils.DeleteFile(TargetDirectory+'fcl.xct');
+    sysutils.DeleteFile(TargetDirectory+'fpdoc.xct');
+    sysutils.DeleteFile(TargetDirectory+'prog.xct');
+    sysutils.DeleteFile(TargetDirectory+'ref.xct');
+    sysutils.DeleteFile(TargetDirectory+'rtl.xct');
+    sysutils.DeleteFile(TargetDirectory+'lcl.xct');
+    sysutils.DeleteFile(TargetDirectory+'toc.xct');
+    sysutils.DeleteFile(TargetDirectory+'user.xct');
+    result:=true;
+  except
+    on E: Exception do
+    begin
+      WritelnLog(ModuleName+' clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')',true);
+      result:=false;
+    end;
   end;
 end;
 

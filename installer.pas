@@ -791,44 +791,8 @@ begin
 end;
 
 function TOldInstaller.CleanLazarusHelp: boolean;
-var
-  BuildLCLDocsDirectory:string;
-  OperationSucceeded:boolean;
 begin
-  OperationSucceeded:=true;
-  infoln('Module HELP: cleanup...');
-
-  { Delete .chm files and .xct (cross reference) files
-    that could have been downloaded in FPC docs or created by fpcup }
-  try
-    BuildLCLDocsDirectory:=IncludeTrailingPathDelimiter(LazarusDirectory)+
-       'docs'+DirectorySeparator+
-       'html'+DirectorySeparator;
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'prog.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'toc.chm');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'user.chm');
-    // Cross reference (.xct) files:
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'fcl.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'fpdoc.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'prog.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'ref.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'rtl.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'lcl.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'toc.xct');
-    sysutils.DeleteFile(BuildLCLDocsDirectory+'user.xct');
-  except
-    on E: Exception do
-    begin
-      WritelnLog('HELP clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      OperationSucceeded:=false;
-    end;
-  end;
-  result:=true;
+  //moved to TInstallerLazarusHelp.Clean/TInstallerFPCHelp.Clean
 end;
 
 

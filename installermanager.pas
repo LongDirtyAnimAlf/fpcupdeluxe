@@ -465,7 +465,15 @@ begin
           Installer.free; // get rid of old installer
         end;
       Installer:=THelpFPCInstaller.Create;
-      //todo: set Installer properties used
+      Installer.BaseDirectory:=FParent.FPCDirectory;
+      if FParent.CompilerName='' then
+        Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+      else
+        Installer.Compiler:=FParent.CompilerName;
+      Installer.LogFile:=FParent.LogFile;
+      {$IFDEF MSWINDOWS}
+      Installer.MakeDirectory:=FParent.MakeDirectory;
+      {$ENDIF}
       end
   else if AnsiPos('HELPLAZARUS', uppercase(ModuleName))=1 then
       begin
@@ -480,7 +488,16 @@ begin
           Installer.free; // get rid of old installer
         end;
       Installer:=THelpLazarusInstaller.Create;
-      //todo: set Installer properties used
+      Installer.BaseDirectory:=FParent.LazarusDirectory ;
+      if FParent.CompilerName='' then
+        Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+      else
+        Installer.Compiler:=FParent.CompilerName;
+      (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      Installer.LogFile:=FParent.LogFile;
+      {$IFDEF MSWINDOWS}
+      Installer.MakeDirectory:=FParent.MakeDirectory;
+      {$ENDIF}
       end
   else       // this is a universal module
     begin
