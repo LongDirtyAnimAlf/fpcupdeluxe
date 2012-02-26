@@ -279,7 +279,19 @@ begin
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
+const
+  DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
 begin
+  if FParent.LazarusPrimaryConfigPath='' then
+    begin
+      {$IFDEF MSWINDOWS}
+      // Somewhere in local appdata special folder
+      FParent.LazarusPrimaryConfigPath := IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
+      {$ELSE}
+      //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+      FParent.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+      {$ENDIF MSWINDOWS}
+    end;
   result:= GetInstaller(ModuleName) and (Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath);
 end;
 

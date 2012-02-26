@@ -53,6 +53,7 @@ var sequences:string;
 
 implementation
 
+uses inifiles;
 { TUniversalInstaller }
 
 function TUniversalInstaller.InitModule: boolean;
@@ -109,6 +110,7 @@ begin
 end;
 
 procedure ReadInifile;
+var ini:TIniFile;
 begin
 // read inifile
 // parse inifile
