@@ -482,6 +482,7 @@ begin
       {$IFDEF MSWINDOWS}
       Installer.MakeDirectory:=FParent.MakeDirectory;
       {$ENDIF}
+      Installer.Verbose:=FParent.Verbose;
       end
   else if uppercase(ModuleName)='HELPLAZARUS' then
       begin
@@ -507,6 +508,7 @@ begin
       Installer.MakeDirectory:=FParent.MakeDirectory;
       {$ENDIF}
       (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      Installer.Verbose:=FParent.Verbose;
       end
   else       // this is a universal module
     begin
