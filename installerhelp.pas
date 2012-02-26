@@ -192,43 +192,44 @@ var
   ResultCode: longint;
 begin
   if not InitModule then exit;
-  OperationSucceeded:=false;
-  if UpperCase(ModuleName)='HELPLAZARUS' then
-  begin
-    // Download FPC CHM docs zip into TargetDirectory.
-    OperationSucceeded:=true;
-    ForceDirectories(TargetDirectory);
-    DocsZip := SysUtils.GetTempFileName + '.zip';
-    try
-      OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
-    except
-      on E: Exception do
-      begin
-        // Deal with timeouts, wrong URLs etc
-        OperationSucceeded:=false;
-        infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
-          'Exception: '+E.ClassName+'/'+E.Message);
-      end;
-    end;
-
-    if OperationSucceeded then
+  // Download FPC CHM docs zip into TargetDirectory.
+  OperationSucceeded:=true;
+  ForceDirectories(TargetDirectory);
+  DocsZip := SysUtils.GetTempFileName + '.zip';
+  try
+    OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
+  except
+    on E: Exception do
     begin
-      // Extract, overwrite, flatten path/junk paths
-      // todo: test with spaces in path
-      if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,FVerbose)= 0 then
-      begin
-        SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
-      end
-      else
-      begin
-        OperationSucceeded := False;
-        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode));
-      end;
+      // Deal with timeouts, wrong URLs etc
+      OperationSucceeded:=false;
+      infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
+        'Exception: '+E.ClassName+'/'+E.Message);
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Extract, overwrite, flatten path/junk paths
+    // todo: test with spaces in path
+    if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,FVerbose)= 0 then
+    begin
+      SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
     end
     else
     begin
-      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL);
+      OperationSucceeded := False;
+      infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode));
     end;
+  end
+  else
+  begin
+    infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL);
+  end;
+
+  if UpperCase(ModuleName)='HELPLAZARUS' then
+  begin
+    // Additionally, build LCL help using FPC sources
   end;
   Result := OperationSucceeded;
 end;

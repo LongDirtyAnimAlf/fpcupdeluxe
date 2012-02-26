@@ -5,7 +5,7 @@ unit installerManager;
 interface
 
 uses
-  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerUniversal,fpcuputil,fileutil;
+  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerHelp,installerUniversal,fpcuputil,fileutil;
 
 Const
   Sequences=
@@ -450,9 +450,38 @@ begin
     Installer.URL:=FParent.FPCURL;
     Installer.Verbose:=FParent.Verbose;
     end
-  else if (uppercase(ModuleName)='HELP') then
-    begin
-    end
+  //Convention: help modules start with HelpFPC
+  //or HelpLazarus
+  else if AnsiPos('HELPFPC', uppercase(ModuleName))=1 then
+      begin
+      if assigned(Installer) then
+        begin
+        if (Installer is THelpFPCInstaller) then
+          begin
+          result:=true; //all fine, continue with current installer
+          exit;
+          end
+        else
+          Installer.free; // get rid of old installer
+        end;
+      Installer:=THelpFPCInstaller.Create;
+      //todo: set Installer properties used
+      end
+  else if AnsiPos('HELPLAZARUS', uppercase(ModuleName))=1 then
+      begin
+      if assigned(Installer) then
+        begin
+       if (Installer is THelpLazarusInstaller) then
+          begin
+          result:=true; //all fine, continue with current installer
+          exit;
+          end
+        else
+          Installer.free; // get rid of old installer
+        end;
+      Installer:=THelpLazarusInstaller.Create;
+      //todo: set Installer properties used
+      end
   else       // this is a universal module
     begin
       if assigned(Installer) then
