@@ -52,17 +52,20 @@ Const
     'Cleanmodule helpfpc;'+
     'Getmodule helpfpc;'+
     'End;'+
-//Lazarus/FPC help
-    'Declare help;'+
+    //Lazarus help
+    {Note: we don't use helpfpc because that will put the
+    help files in the FPC base directory, not in the
+    Lazarus base directory
+    }
+    //todo: replace help with lazhelp in main state machine
+    'Declare helplazarus;'+
     'Requires BIGIDE;'+
     'Requires lhelp;'+
-    // We need FPC help before building:
-    'Requires helpfpc;'+
     'CleanModule helplazarus;'+
     'BuildModule helplazarus;'+
     'ConfigModule helplazarus;'+
     'End;'+
-//selective actions triggered with --only=SequenceName
+    //selective actions triggered with --only=SequenceName
     'Declare HelpFPCCleanOnly;'+
     'Cleanmodule helpfpc;'+
     'End;'+
@@ -151,22 +154,35 @@ end;
 
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
 begin
+  result:=false;
+  if not InitModule then exit;
+  case UpperCase(ModuleName) of
+    'HELPFPC':
+    begin
 
+    end;
+    'HELPLAZARUS':
+    begin
+
+    end;
+    else
+      begin
+        writelnlog('Don''t know how to clean module '+ModuleName,true);
+      end;
+  end;
 end;
 
 function THelpInstaller.GetModule(ModuleName: string): boolean;
 var
+  DocsZip: string;
   OperationSucceeded: boolean;
   ResultCode: longint;
-  DocsZip: string;
 begin
   if not InitModule then exit;
   OperationSucceeded:=false;
-  //todo: check if this is the right way to specify that fpc help
-  //must be used
-  if UpperCase(ModuleName)='HELPFPC' then
+  if UpperCase(ModuleName)='HELPLAZARUS' then
   begin
-    if (Self is THelpFPCInstaller)=false then
+    if (Self is THelpLazarusInstaller)=false then
     begin
       writelnlog('Don''t know how to get module '+ModuleName,true);
       OperationSucceeded:=false;
