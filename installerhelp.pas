@@ -130,6 +130,8 @@ public
   function BuildModule(ModuleName:string): boolean; override;
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
+  // Configure FPC or Lazarus to use the help
+  function ConfigModule:boolean; virtual;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
   // Uninstall module
@@ -148,6 +150,8 @@ protected
 public
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
+  // Configure FPC to use the help
+  function ConfigModule:boolean; override;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
   constructor Create;
@@ -167,6 +171,8 @@ protected
 public
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
+  // Configure Lazarus to use the help
+  function ConfigModule:boolean; override;
   // Root directory of FPC; needed for finding fpdoc tool
   property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
   // Configuration for Lazarus; required for building lhelp, as well as configuration
@@ -177,7 +183,7 @@ end;
 
 implementation
 
-uses fpcuputil, processutils, FileUtil;
+uses fpcuputil, processutils, FileUtil, updatelazconfig;
 
 { THelpInstaller }
 
@@ -200,6 +206,11 @@ end;
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
 begin
   if not InitModule then exit;
+  result:=true;
+end;
+
+function THelpInstaller.ConfigModule: boolean;
+begin
   result:=true;
 end;
 
@@ -343,6 +354,12 @@ begin
   end;
 end;
 
+function THelpFPCInstaller.ConfigModule: boolean;
+begin
+  Result:=inherited ConfigModule;
+  //todo: implement config for fpide
+end;
+
 function THelpFPCInstaller.GetModule(ModuleName: string): boolean;
 begin
   Result:=inherited GetModule(ModuleName);
@@ -475,6 +492,50 @@ begin
     begin
       WritelnLog(ModuleName+' clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')',true);
       result:=false;
+    end;
+  end;
+end;
+
+function THelpLazarusInstaller.ConfigModule: boolean;
+var
+  LazarusConfig: TUpdateLazConfig;
+begin
+  result:=inherited ConfigModule;
+  if result then
+  begin
+    result:=ForceDirectories(FLazarusPrimaryConfigPath);
+  end
+  else
+  begin
+    writelnlog('Lazarus help: error: could not create primary config path '+FLazarusPrimaryConfigPath);
+  end;
+  if result then
+  begin
+    LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
+    try
+      try
+        // Configure help path
+        // Note that we might be overwriting user's settings here.
+        // todo: if overwriting user's help settings, warn him about it
+        LazarusConfig.CHMHelpExe:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+          'components'+DirectorySeparator+
+          'chmhelp'+DirectorySeparator+
+          'lhelp'+DirectorySeparator+
+          'lhelp'+GetExeExt;
+        LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+          'docs'+DirectorySeparator+
+          'html'+DirectorySeparator;
+        LazarusConfig.LazarusDirectory:=FBaseDirectory;
+        result:=true;
+      except
+        on E: Exception do
+        begin
+          result:=false;
+          writelnlog('Lazarus help: Error setting Lazarus config: '+E.ClassName+'/'+E.Message, true);
+        end;
+      end;
+    finally
+      LazarusConfig.Free;
     end;
   end;
 end;

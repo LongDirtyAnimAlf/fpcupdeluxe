@@ -268,17 +268,6 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(PrimaryConfigPath);
   try
     try
-      // Configure help path as well.
-      // Note that we might be overwriting user's settings here.
-      // todo: if overwriting user's help settings, warn him about it
-      LazarusConfig.CHMHelpExe:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-        'components'+DirectorySeparator+
-        'chmhelp'+DirectorySeparator+
-        'lhelp'+DirectorySeparator+
-        'lhelp'+GetExeExt;
-      LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-        'docs'+DirectorySeparator+
-        'html'+DirectorySeparator;
       LazarusConfig.LazarusDirectory:=FBaseDirectory;
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.

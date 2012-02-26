@@ -303,6 +303,8 @@ begin
   result:= GetInstaller(ModuleName);
   if result and (Installer is TLazarusInstaller) then
     result:=(Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath)
+  else if result and (Installer is THelpInstaller) then
+    result:=(Installer as THelpInstaller).ConfigModule
   else
     begin
     result:=false;
