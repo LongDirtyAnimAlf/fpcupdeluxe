@@ -266,7 +266,8 @@ begin
     begin
       // Extract, overwrite, flatten path/junk paths
       // todo: test with spaces in path
-      if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose)= 0 then
+      ResultCode:=ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
+      if ResultCode = 0 then
       begin
         SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
       end
@@ -287,6 +288,7 @@ end;
 function THelpInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
 //todo: do this
+  result:=true;
 end;
 
 constructor THelpInstaller.Create;

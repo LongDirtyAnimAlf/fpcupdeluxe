@@ -62,7 +62,6 @@ begin
   writeln('fpcup can work with modules - see "only", "skip" below');
   writeln('List of modules and standard installation action:');
   writeln('Std Name           Description');
-  writeln('Std Name           Description');
   writeln('on  FPC            Free Pascal compiler');
   writeln('on  lazarus        LCL (and IDE if not crosscompiling)');
   writeln('off bigide         IDE with extra components. Selects lazarus.');
