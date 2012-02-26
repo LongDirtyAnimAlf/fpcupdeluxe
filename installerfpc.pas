@@ -9,23 +9,24 @@ uses
 
 Const
   Sequences=
+// convention: FPC sequences start with 'FPC'. Used in SetLCL.
 //standard fpc build
-    'Declare FPC'+LineEnding+
-    'Cleanmodule FPC'+LineEnding+
-    'Getmodule FPC'+LineEnding+
-    'Buildmodule FPC'+LineEnding+
-    'End'+LineEnding+
+    'Declare FPC;'+
+    'Cleanmodule FPC;'+
+    'Getmodule FPC;'+
+    'Buildmodule FPC;'+
+    'End;'+
 //selective actions triggered with --only=SequenceName
-    'Declare FPCCleanOnly'+LineEnding+
-    'Cleanmodule FPC'+LineEnding+
-    'End'+LineEnding+
+    'Declare FPCCleanOnly;'+
+    'Cleanmodule FPC;'+
+    'End;'+
 
-    'Declare FPCGetOnly'+LineEnding+
-    'Getmodule FPC'+LineEnding+
-    'End'+LineEnding+
+    'Declare FPCGetOnly;'+
+    'Getmodule FPC;'+
+    'End;'+
 
-    'Declare FPCBuildOnly'+LineEnding+
-    'Buildmodule FPC'+LineEnding+
+    'Declare FPCBuildOnly;'+
+    'Buildmodule FPC;'+
     'End';
 
 

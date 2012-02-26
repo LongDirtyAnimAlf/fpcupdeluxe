@@ -11,33 +11,33 @@ uses
 Const
   Sequences=
 //standard lazarus build
-    'Declare lazarus'+LineEnding+
-    'Cleanmodule lazarus'+LineEnding+
-    'Getmodule lazarus'+LineEnding+
-    'Buildmodule lazarus'+LineEnding+
-    'ConfigModule lazarus'+LineEnding+
-    'End'+LineEnding+
+    'Declare lazarus;'+
+    'Cleanmodule lazarus;'+
+    'Getmodule lazarus;'+
+    'Buildmodule lazarus;'+
+    'ConfigModule lazarus;'+
+    'End;'+
 //standard bigide build
-    'Declare BIGIDE'+LineEnding+
-    'Requires lazarus'+LineEnding+
-    'Cleanmodule BIGIDE'+LineEnding+
-    'Buildmodule BIGIDE'+LineEnding+
-    'End'+LineEnding+
+    'Declare BIGIDE;'+
+    'Requires lazarus;'+
+    'Cleanmodule BIGIDE;'+
+    'Buildmodule BIGIDE;'+
+    'End;'+
 //selective actions triggered with --only=SequenceName
-    'Declare LazarusCleanOnly'+LineEnding+
-    'Cleanmodule lazarus'+LineEnding+
-    'End'+LineEnding+
+    'Declare LazarusCleanOnly;'+
+    'Cleanmodule lazarus;'+
+    'End;'+
 
-    'Declare LazarusGetOnly'+LineEnding+
-    'Getmodule lazarus'+LineEnding+
-    'End'+LineEnding+
+    'Declare LazarusGetOnly;'+
+    'Getmodule lazarus;'+
+    'End;'+
 
-    'Declare LazarusBuildOnly'+LineEnding+
-    'Buildmodule lazarus'+LineEnding+
-    'End'+LineEnding+
+    'Declare LazarusBuildOnly;'+
+    'Buildmodule lazarus;'+
+    'End;'+
 
-    'Declare LazarusConfigOnly'+LineEnding+
-    'Configmodule lazarus'+LineEnding+
+    'Declare LazarusConfigOnly;'+
+    'Configmodule lazarus;'+
     'End';
 
 type

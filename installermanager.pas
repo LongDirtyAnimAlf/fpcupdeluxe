@@ -10,32 +10,32 @@ uses
 Const
   Sequences=
 //default sequence
-    'Declare default'+LineEnding+
-    'Exec CreateFpcupScript'+LineEnding+
-    'Do fpc'+LineEnding+
-    'Do lazarus'+LineEnding+
-    'Exec CreateLazarusScript'+LineEnding+
-    'Do help'+LineEnding+
-    'Do LAZDATADESKTOP'+LineEnding+
-    'Do DOCEDITOR'+LineEnding+
-    'End'+LineEnding+
+    'Declare default;'+
+    'Exec CreateFpcupScript;'+
+    'Do fpc;'+
+    'Do lazarus;'+
+    'Exec CreateLazarusScript;'+
+    'Do help;'+
+    'Do LAZDATADESKTOP;'+
+    'Do DOCEDITOR;'+
+    'End;'+
 //default sequence for win32
-    'Declare defaultwin32'+LineEnding+
-    'Exec CreateFpcupScript'+LineEnding+
-    'Do fpc'+LineEnding+
-    'Do lazarus'+LineEnding+
-    'Exec CreateLazarusScript'+LineEnding+
-    'Do help'+LineEnding+
-    'Do LAZDATADESKTOP'+LineEnding+
-    'Do DOCEDITOR'+LineEnding+
-    'Do DOCEDITOR'+LineEnding+
-    'SetCPU x86_64'+LineEnding+
-    'SetOS win64'+LineEnding+
-    'Cleanmodule fpc'+LineEnding+
-    'Buildmodule fpc'+LineEnding+
-    'Cleanmodule lazarus'+LineEnding+
-    'Buildmodule lazarus'+LineEnding+
-    'End'+LineEnding;
+    'Declare defaultwin32;'+
+    'Exec CreateFpcupScript;'+
+    'Do fpc;'+
+    'Do lazarus;'+
+    'Exec CreateLazarusScript;'+
+    'Do help;'+
+    'Do LAZDATADESKTOP;'+
+    'Do DOCEDITOR;'+
+    'Do DOCEDITOR;'+
+    'SetCPU x86_64;'+
+    'SetOS win64;'+
+    'Cleanmodule fpc;'+
+    'Buildmodule fpc;'+
+    'Cleanmodule lazarus;'+
+    'Buildmodule lazarus;'+
+    'End;';
 
 type
   TSequencer=class; //forward
@@ -143,12 +143,15 @@ type
       function DoUnInstallModule(ModuleName:string):boolean;
       function GetInstaller(ModuleName:string):boolean;
       function IsSkipped(ModuleName:string):boolean;
+      procedure ResetAllExecuted(SkipFPC:boolean=false);
     public
       property Parent:TFPCupManager write Fparent;
       function AddSequence(Sequence:string):boolean;
       function CreateOnly(OnlyModules:string):boolean;
       function DeleteOnly:boolean;
       function Run(SequenceName:string):boolean;
+      constructor Create;
+      destructor Destroy; override;
     end;
 
 implementation
@@ -238,16 +241,19 @@ end;
 function TSequencer.DoSetCPU(CPU: string): boolean;
 begin
   FParent.CrossCPU_Target:=CPU;
+  ResetAllExecuted;
 end;
 
 function TSequencer.DoSetOS(OS: string): boolean;
 begin
   FParent.CrossOS_Target:=OS;
+  ResetAllExecuted;
 end;
 
 function TSequencer.DoSetLCL(LCL: string): boolean;
 begin
   FParent.CrossLCL_Platform:=LCL;
+  ResetAllExecuted(true);
 end;
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
@@ -359,6 +365,16 @@ begin
   result:=assigned(SkipList) and (SkipList.IndexOf(Uppercase(ModuleName))>=0);
 end;
 
+procedure TSequencer.ResetAllExecuted(SkipFPC: boolean);
+var
+  idx:integer;
+begin
+for idx:=0 to FParent.ModuleList.Count -1 do
+  // convention: FPC sequences that are to be skipped start with 'FPC'. Used in SetLCL.
+  if not SkipFPC or (pos('FPC',Uppercase(FParent.ModuleList[idx]))<>1) then
+    PSequenceAttributes(FParent.ModuleList.Objects[idx])^.Executed:=ESNever;
+end;
+
 function TSequencer.AddSequence(Sequence: string): boolean;
 //our mini parser
 var
@@ -383,29 +399,38 @@ var
     else if key='SETCPU' then result:=SMSetCPU;
   end;
 
+  //remove white space and line terminator
+  function NoWhite(s:string):string;
+  begin
+    while (s[1]<=' ') or (s[1]=';') do delete(s,1,1);
+    while (s[length(s)]<=' ') or (s[length(s)]=';') do delete(s,length(s),1);
+    result:=s;
+  end;
+
 begin
 while Sequence<>'' do
   begin
-  i:=pos(LineEnding,Sequence);
+  i:=pos(';',Sequence);
   if i>0 then
     line:=copy(Sequence,1,i-1)
   else
     line:=Sequence;
-  delete(Sequence,1,length(line+LineEnding));
-  line:=trim(line);
+  delete(Sequence,1,length(line)+1);
+  line:=NoWhite(line);
   if line<>'' then
     begin
     i:=pos(' ',line);
     if i>0 then
       begin
       key:=copy(line,1,i-1);
-      param:=trim(copy(line,i,length(line)));
+      param:=NoWhite(copy(line,i,length(line)));
       end
     else
       begin
       key:=line;
       param:='';
       end;
+    key:=NoWhite(key);
     if key<>'' then
       begin
       i:=Length(StateMachine);
@@ -431,12 +456,15 @@ begin
 AddToModuleList('ONLY',Length(StateMachine));
 while Onlymodules<>'' do
   begin
-  i:=pos(LineEnding,Onlymodules);
+  i:=pos(',',Onlymodules);
   if i>0 then
-    seq:=copy(Onlymodules,1,i)
+    seq:=copy(Onlymodules,1,i-1)
   else
     seq:=Onlymodules;
   delete(Onlymodules,1,length(seq)+1);
+  // We could build a sequence string and have it parsed by AddSequence.
+  // Pro: no dependency on statemachine structure
+  // Con: dependency on sequence format; double parsing
   if seq<>'' then
     begin
     i:=Length(StateMachine);
@@ -531,6 +559,16 @@ begin
     end
   else
     result:=false;  // sequence not found
+end;
+
+constructor TSequencer.Create;
+begin
+
+end;
+
+destructor TSequencer.Destroy;
+begin
+  inherited Destroy;
 end;
 
 end.
