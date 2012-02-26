@@ -454,7 +454,7 @@ begin
     end
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
-  else if AnsiPos('HELPFPC', uppercase(ModuleName))=1 then
+  else if uppercase(ModuleName)='HELPFPC' then
       begin
       if assigned(Installer) then
         begin
@@ -477,7 +477,7 @@ begin
       Installer.MakeDirectory:=FParent.MakeDirectory;
       {$ENDIF}
       end
-  else if AnsiPos('HELPLAZARUS', uppercase(ModuleName))=1 then
+  else if uppercase(ModuleName)='HELPLAZARUS' then
       begin
       if assigned(Installer) then
         begin
@@ -495,11 +495,12 @@ begin
         Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
       else
         Installer.Compiler:=FParent.CompilerName;
-      (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      (Installer as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
       Installer.LogFile:=FParent.LogFile;
       {$IFDEF MSWINDOWS}
       Installer.MakeDirectory:=FParent.MakeDirectory;
       {$ENDIF}
+      (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       end
   else       // this is a universal module
     begin

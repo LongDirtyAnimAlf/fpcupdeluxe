@@ -117,7 +117,8 @@ protected
   // internal initialisation, called from BuildModule,CLeanModule,GetModule
   // and UnInstallModule but executed only once
   function InitModule:boolean; virtual;
-  property TargetDirectory: string read FTargetDirectory write FTargetDirectory;
+  // Directory where docs will be installed.
+  property TargetDirectory: string read FTargetDirectory;
 public
   // Build module
   function BuildModule(ModuleName:string): boolean; override;
@@ -151,6 +152,7 @@ end;
 
 THelpLazarusInstaller = class(THelpInstaller)
 private
+  FFPCDirectory: string;
   FLazarusPrimaryConfigPath: string;
 protected
   // Build module descendant customisation
@@ -159,6 +161,8 @@ protected
 public
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
+  // Root directory of FPC; needed for finding fpdoc tool
+  property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
   // Configuration for Lazarus; required for building lhelp, as well as configuration
   property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
   constructor Create;
@@ -196,6 +200,14 @@ end;
 function THelpInstaller.GetModule(ModuleName: string): boolean;
 const
   // Location of FPC CHM help zip
+  // Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
+  // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
+  // which links to
+  // http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip
+  //
+  // Note: there's also an older file on
+  // http://sourceforge.net/projects/freepascal/files/Documentation/
+  // that includes the lcl file
   FPC_CHM_URL='http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip';
 var
   DocsZip: string;
@@ -280,7 +292,7 @@ begin
   begin
     //todo: check with FreeVision FPCIDE to see if this is a sensible location.
     //todo: why is the BaseDirectory property write-only? Why use FBaseDirectory?
-    TargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
     result:=true;
@@ -356,7 +368,53 @@ begin
 
   if OperationSucceeded then
   begin
-    // Build LCL CHM help
+    // Compile Lazarus LCL CHM help
+    ProcessEx.Executable := TargetDirectory+'build_lcl_docs'+GetExeExt;
+    // Make sure directory switched to that of build_lcl_docs,
+    // otherwise paths to source files will not work.
+    ProcessEx.CurrentDirectory:=TargetDirectory;
+    ProcessEx.Parameters.Clear;
+    // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
+    // the directory that contains the fcl and rtl .xct files:
+    ProcessEx.Parameters.Add('--fpcdocs');
+    ProcessEx.Parameters.Add(TargetDirectory);
+    // Let build_lcl_docs know which fpdoc application to use:
+    ProcessEx.Parameters.Add('--fpdoc');
+    { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
+    can be different between Unix+Windows }
+    ProcessEx.Parameters.Add(FPCDirectory+
+    'utils'+DirectorySeparator+
+    'fpdoc'+DirectorySeparator+
+    'fpdoc'+GetExeExt);
+    ProcessEx.Parameters.Add('--outfmt');
+    ProcessEx.Parameters.Add('chm');
+    infoln('Lazarus: compiling chm help docs:');
+    { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
+    Though that may work when adjusting the baseurl option in Lazarus for each
+    CHM file, it's easier to move them to <lazarusdir>/docs/html,
+    which is also suggested by the wiki.
+    The generated .xct file is an index file for fpdoc cross file links,
+    used if you want to link to the chm from other chms.}
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      OperationSucceeded := False;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Move files if required
+    if FileExistsUTF8(TargetDirectory+
+      'lcl'+DirectorySeparator+
+      'lcl.chm') then
+    begin
+      infoln(ModuleName+': moving lcl.chm to docs directory');
+      // Move help file to doc directory
+      OperationSucceeded:=MoveFile(TargetDirectory+
+        'lcl'+DirectorySeparator+
+        'lcl.chm',
+        TargetDirectory+
+        'lcl.chm');
+    end;
   end;
   result:=OperationSucceeded;
 end;
@@ -366,7 +424,9 @@ begin
   result:=false;
   if inherited InitModule then
   begin
-    TargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+    // This must be the directory of the build_lcl_docs project, otherwise
+    // build_lcl_docs will fail; at least it won't pick up the FPC help files for cross references
+    FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator; ;
     result:=true;
