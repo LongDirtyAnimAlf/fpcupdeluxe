@@ -63,7 +63,6 @@ Const
     }
     'Declare helplazarus;'+
     'Requires BIGIDE;'+
-    'Requires lhelp;'+
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
     redownload them}
@@ -233,11 +232,11 @@ var
 begin
   if not InitModule then exit;
 
-  if FileExistsUTF8(TargetDirectory+'fcl.chm') and
-    FileExistsUTF8(TargetDirectory+'rtl.chm') then
+  if FileExistsUTF8(FTargetDirectory+'fcl.chm') and
+    FileExistsUTF8(FTargetDirectory+'rtl.chm') then
   begin
     OperationSucceeded:=true;
-    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+TargetDirectory);
+    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory);
   end
   else
   begin
@@ -249,7 +248,7 @@ begin
     ... but we'd need to include the input files extracted from the Make file.
     }
     OperationSucceeded:=true;
-    ForceDirectories(TargetDirectory);
+    ForceDirectories(FTargetDirectory);
     DocsZip := SysUtils.GetTempFileName + '.zip';
     try
       OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
@@ -267,7 +266,7 @@ begin
     begin
       // Extract, overwrite, flatten path/junk paths
       // todo: test with spaces in path
-      if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,FVerbose)= 0 then
+      if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose)= 0 then
       begin
         SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
       end
@@ -329,21 +328,21 @@ begin
   try
     { Delete .chm files and .xct (cross reference) files
       that could have been downloaded in FPC docs or created by fpcup }
-    sysutils.DeleteFile(TargetDirectory+'fcl.chm');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.chm');
-    sysutils.DeleteFile(TargetDirectory+'prog.chm');
-    sysutils.DeleteFile(TargetDirectory+'ref.chm');
-    sysutils.DeleteFile(TargetDirectory+'rtl.chm');
-    sysutils.DeleteFile(TargetDirectory+'toc.chm');
-    sysutils.DeleteFile(TargetDirectory+'user.chm');
+    sysutils.DeleteFile(FTargetDirectory+'fcl.chm');
+    sysutils.DeleteFile(FTargetDirectory+'fpdoc.chm');
+    sysutils.DeleteFile(FTargetDirectory+'prog.chm');
+    sysutils.DeleteFile(FTargetDirectory+'ref.chm');
+    sysutils.DeleteFile(FTargetDirectory+'rtl.chm');
+    sysutils.DeleteFile(FTargetDirectory+'toc.chm');
+    sysutils.DeleteFile(FTargetDirectory+'user.chm');
     // Cross reference (.xct) files:
-    sysutils.DeleteFile(TargetDirectory+'fcl.xct');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.xct');
-    sysutils.DeleteFile(TargetDirectory+'prog.xct');
-    sysutils.DeleteFile(TargetDirectory+'ref.xct');
-    sysutils.DeleteFile(TargetDirectory+'rtl.xct');
-    sysutils.DeleteFile(TargetDirectory+'toc.xct');
-    sysutils.DeleteFile(TargetDirectory+'user.xct');
+    sysutils.DeleteFile(FTargetDirectory+'fcl.xct');
+    sysutils.DeleteFile(FTargetDirectory+'fpdoc.xct');
+    sysutils.DeleteFile(FTargetDirectory+'prog.xct');
+    sysutils.DeleteFile(FTargetDirectory+'ref.xct');
+    sysutils.DeleteFile(FTargetDirectory+'rtl.xct');
+    sysutils.DeleteFile(FTargetDirectory+'toc.xct');
+    sysutils.DeleteFile(FTargetDirectory+'user.xct');
     result:=true;
   except
     on E: Exception do
@@ -379,16 +378,40 @@ end;
 
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
+  LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
   OperationSucceeded:=true;
+
+  if OperationSucceeded then
+  begin
+    // Build lhelp chm help viewer
+    LHelpDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+      'components'+DirectorySeparator+
+      'chmhelp'+DirectorySeparator+
+      'lhelp'+DirectorySeparator;
+    ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild';
+    // Set directory to item we're compiling:
+    ProcessEx.CurrentDirectory:=LHelpDirectory;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
+    ProcessEx.Parameters.Add(LHelpDirectory+'lhelp.lpr');
+    infoln(ModuleName+': compiling lhelp help viewer:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+    begin
+      WritelnLog(ModuleName+': error compiling lhelp help viewer.');
+      OperationSucceeded := False;
+    end;
+  end;
+
   if OperationSucceeded then
   begin
     // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
     ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild';
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
-    ProcessEx.Parameters.Add(TargetDirectory+'build_lcl_docs.lpr');
+    ProcessEx.Parameters.Add(FTargetDirectory+'build_lcl_docs.lpr');
     infoln(ModuleName+': compiling build_lcl_docs help compiler:');
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
@@ -398,15 +421,15 @@ begin
   if OperationSucceeded then
   begin
     // Compile Lazarus LCL CHM help
-    ProcessEx.Executable := TargetDirectory+'build_lcl_docs'+GetExeExt;
+    ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
     // Make sure directory switched to that of build_lcl_docs,
     // otherwise paths to source files will not work.
-    ProcessEx.CurrentDirectory:=TargetDirectory;
+    ProcessEx.CurrentDirectory:=FTargetDirectory;
     ProcessEx.Parameters.Clear;
     // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
     // the directory that contains the fcl and rtl .xct files:
     ProcessEx.Parameters.Add('--fpcdocs');
-    ProcessEx.Parameters.Add(TargetDirectory);
+    ProcessEx.Parameters.Add(FTargetDirectory);
     // Let build_lcl_docs know which fpdoc application to use:
     ProcessEx.Parameters.Add('--fpdoc');
     { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
@@ -432,16 +455,16 @@ begin
   if OperationSucceeded then
   begin
     // Move files if required
-    if FileExistsUTF8(TargetDirectory+
+    if FileExistsUTF8(FTargetDirectory+
       'lcl'+DirectorySeparator+
       'lcl.chm') then
     begin
       infoln(ModuleName+': moving lcl.chm to docs directory');
       // Move help file to doc directory
-      OperationSucceeded:=MoveFile(TargetDirectory+
+      OperationSucceeded:=MoveFile(FTargetDirectory+
         'lcl'+DirectorySeparator+
         'lcl.chm',
-        TargetDirectory+
+        FTargetDirectory+
         'lcl.chm');
     end;
   end;
@@ -469,23 +492,23 @@ begin
   try
     { Delete .chm files and .xct (cross reference) files
       that could have been downloaded in FPC docs or created by fpcup }
-    sysutils.DeleteFile(TargetDirectory+'fcl.chm');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.chm');
-    sysutils.DeleteFile(TargetDirectory+'prog.chm');
-    sysutils.DeleteFile(TargetDirectory+'ref.chm');
-    sysutils.DeleteFile(TargetDirectory+'rtl.chm');
-    sysutils.DeleteFile(TargetDirectory+'lcl.chm');
-    sysutils.DeleteFile(TargetDirectory+'toc.chm');
-    sysutils.DeleteFile(TargetDirectory+'user.chm');
+    sysutils.DeleteFile(FTargetDirectory+'fcl.chm');
+    sysutils.DeleteFile(FTargetDirectory+'fpdoc.chm');
+    sysutils.DeleteFile(FTargetDirectory+'prog.chm');
+    sysutils.DeleteFile(FTargetDirectory+'ref.chm');
+    sysutils.DeleteFile(FTargetDirectory+'rtl.chm');
+    sysutils.DeleteFile(FTargetDirectory+'lcl.chm');
+    sysutils.DeleteFile(FTargetDirectory+'toc.chm');
+    sysutils.DeleteFile(FTargetDirectory+'user.chm');
     // Cross reference (.xct) files:
-    sysutils.DeleteFile(TargetDirectory+'fcl.xct');
-    sysutils.DeleteFile(TargetDirectory+'fpdoc.xct');
-    sysutils.DeleteFile(TargetDirectory+'prog.xct');
-    sysutils.DeleteFile(TargetDirectory+'ref.xct');
-    sysutils.DeleteFile(TargetDirectory+'rtl.xct');
-    sysutils.DeleteFile(TargetDirectory+'lcl.xct');
-    sysutils.DeleteFile(TargetDirectory+'toc.xct');
-    sysutils.DeleteFile(TargetDirectory+'user.xct');
+    sysutils.DeleteFile(FTargetDirectory+'fcl.xct');
+    sysutils.DeleteFile(FTargetDirectory+'fpdoc.xct');
+    sysutils.DeleteFile(FTargetDirectory+'prog.xct');
+    sysutils.DeleteFile(FTargetDirectory+'ref.xct');
+    sysutils.DeleteFile(FTargetDirectory+'rtl.xct');
+    sysutils.DeleteFile(FTargetDirectory+'lcl.xct');
+    sysutils.DeleteFile(FTargetDirectory+'toc.xct');
+    sysutils.DeleteFile(FTargetDirectory+'user.xct');
     result:=true;
   except
     on E: Exception do
