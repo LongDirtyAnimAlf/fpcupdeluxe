@@ -623,7 +623,7 @@ end;
 
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
-  WriteLog(msg+LineEnding,false); //infoln adds alread a lf
+  WriteLog(msg+LineEnding,false); //infoln adds already a lf
   if ToConsole then
     InfoLn(msg);
 end;

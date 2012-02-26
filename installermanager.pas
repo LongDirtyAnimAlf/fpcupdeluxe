@@ -72,9 +72,14 @@ type
     Sequencer: TSequencer;
   protected
     LogFile:Text;
+    VerBoseLog:Text;
     FModuleList:TStringList;
     FModuleEnabledList:TStringList;
-    public
+     // write verbatim to log and eventually console
+    procedure WriteLog(msg:string;ToConsole:boolean=true);
+    // append line ending and write to log and eventually console
+    procedure WritelnLog(msg:string;ToConsole:boolean=true);
+ public
     property ShortCutName: string read FShortCutName write FShortCutName;
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup;
     property CompilerName: string read FCompilerName write FCompilerName;
@@ -162,15 +167,26 @@ implementation
 
 { TFPCupManager }
 
+procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);
+begin
+Write(LogFile,msg);
+if ToConsole then
+  InfoLn(msg);
+end;
+
+procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
+begin
+WriteLog(msg+LineEnding,false); //infoln adds already a lf
+if ToConsole then
+  InfoLn(msg);
+end;
+
 function TFPCupManager.LoadModuleList: boolean;
 var i:integer;
 begin
 Sequencer.AddSequence(Sequences);
 Sequencer.AddSequence(installerFPC.Sequences);
 Sequencer.AddSequence(installerLazarus.Sequences);
-// add all standard modules to ModuleEnabledList
-for i:=0 to FModuleList.Count-1 do
-  FModuleEnabledList.Add(FModuleList[i]);
 Sequencer.AddSequence(installerUniversal.Sequences);
 //append universal modules to the lists
 installerUniversal.GetModuleList(FModuleList);
@@ -189,18 +205,41 @@ begin
     end
   else
     {$ifdef win32}
-    result:=Sequencer.Run('DefaultWin32');
+    if pos('WINCROSSX64',UpperCase(SkipModules))>0 then
+      result:=Sequencer.Run('Default')
+    else
+      result:=Sequencer.Run('DefaultWin32');
     {$else}
     result:=Sequencer.Run('Default');
     {$endif win32}
 end;
 
 constructor TFPCupManager.Create;
+var
+  LogFileName: string;
 begin
 FModuleList:=TStringList.Create;
 FModuleEnabledList:=TStringList.Create;
 Sequencer:=TSequencer.create;
 Sequencer.Parent:=Self;
+{$IFDEF MSWINDOWS}
+LogFileName:='fpcup.log'; //current directory
+{$ELSE}
+LogFileName:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
+{$ENDIF MSWINDOWS}
+try
+ AssignFile(LogFile,LogFileName);
+ if FileExistsUTF8(LogFileName) then
+   Append(LogFile)
+ else
+   Rewrite(LogFile);
+except
+  infoln('Error: could not open log file '+LogFileName+' for writing.');
+  infoln('This may be caused by another fpcup currently running.');
+  infoln('Aborting.');
+  halt(2); //Is there a nicer way to do this?
+end;
+WritelnLog(DateTimeToStr(now)+': fpcup started.',false);
 end;
 
 destructor TFPCupManager.Destroy;
@@ -211,6 +250,9 @@ begin
   FModuleList.Free;
   FModuleEnabledList.Free;
   Sequencer.free;
+  WritelnLog(DateTimeToStr(now)+': fpcup finished.',false);
+  WritelnLog('------------------------------------------------',false);
+  CloseFile(LogFile);
   inherited Destroy;
 end;
 
@@ -245,6 +287,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
   function CreateFpcupScript:boolean;
   begin
+    result:=true;
     // Link to fpcup itself, with all options as passed when invoking it:
     if FParent.ShortCutNameFpcup<>EmptyStr then
     begin
@@ -263,6 +306,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   var
     InstalledLazarus:string;
   begin
+  result:=true;
   if FParent.ShortCutName<>EmptyStr then
   begin
     infoln('Lazarus: creating desktop shortcut:');

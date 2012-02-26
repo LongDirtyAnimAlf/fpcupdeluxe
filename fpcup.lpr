@@ -51,7 +51,8 @@ uses {$IFDEF UNIX} {$IFDEF UseCThreads}
 installerManager;
 
 //{$R *.res} //Keep it simple, no resources
-procedure WriteHelp;
+procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList);
+var i:integer;
 begin
   writeln('DON''T PANIC!');
   writeln('Everything below is optional...');
@@ -60,6 +61,7 @@ begin
   writeln('');
   writeln('fpcup can work with modules - see "only", "skip" below');
   writeln('List of modules and standard installation action:');
+  writeln('Std Name           Description');
   writeln('Std Name           Description');
   writeln('on  FPC            Free Pascal compiler');
   writeln('on  lazarus        LCL (and IDE if not crosscompiling)');
@@ -72,7 +74,18 @@ begin
   writeln('Because help is installed by default, it pulls in bigide and');
   writeln('the results that all modules above get installed.');
   writeln('(except wincrossx64 if not on Windows, of course)');
-  //todo: add crossinstaller module names
+  writeln('');
+  writeln('List of all modules:');
+  For i:=0 to ModuleList.Count-1 do
+    begin
+    writeln(ModuleList[i]);
+    end;
+  writeln('');
+  writeln('The following modules run per default:');
+  For i:=0 to ModuleEnabledList.Count-1 do
+    begin
+    writeln(ModuleEnabledList[i]);
+    end;
   writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
@@ -148,7 +161,7 @@ begin
   writeln('');
 end;
 
-function CheckOptions(FInstaller: TOldInstaller):integer;
+function CheckOptions(FInstaller: TFPCupManager):integer;
 const
   //Parameter names:
   BinutilsDir='binutilsdir';
@@ -215,7 +228,7 @@ begin
   begin
     writeln('Error: wrong command line options given:');
     writeln(ErrorMessage);
-    WriteHelp;
+    WriteHelp(FInstaller.ModuleList,FInstaller.ModuleEnabledList);
     result:=13; //Quit with error resultcode
     exit;
   end;
@@ -276,7 +289,7 @@ begin
 
   if Application.HasOption('h', Help) then
   begin
-    writehelp;
+    writehelp(FInstaller.ModuleList,FInstaller.ModuleEnabledList);
     result:=0; //quit without error
     exit;
   end;
@@ -438,22 +451,16 @@ begin
   try
     FPCupManager:=TFPCupManager.Create;
     FPCupManager.LoadModuleList;
-    FPCupManager.Run;
-  finally
-    FPCupManager.free;
-  end;
-  try
-    FInstaller := TOldInstaller.Create;
-    res:=CheckOptions(FInstaller); //Process command line arguments
+    res:=CheckOptions(FPCupManager); //Process command line arguments
     if res=-1 then
       // Get/update/compile selected modules
-      if FInstaller.Run=false then
+      if FPCupManager.Run=false then
       begin
         writeln('fpcup failed.');
         ShowErrorHints;
       end;
   finally
-    FInstaller.Free;
+    FPCupManager.free;
   end;
   writeln('FPCUp finished.');
   if res<>-1 then
