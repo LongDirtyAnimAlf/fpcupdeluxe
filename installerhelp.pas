@@ -49,7 +49,10 @@ Const
 // Convention: help modules start with help
 //FPC .CHM download
     'Declare helpfpc;'+
-    'Cleanmodule helpfpc;'+
+    {Not using cleanmodule as we're downloading;
+    getmodule will detect existing docs and not
+    redownload them}
+    //'Cleanmodule helpfpc;'+
     'Getmodule helpfpc;'+
     'Buildmodule helpfpc;'+
     'End;'+
@@ -58,11 +61,13 @@ Const
     help files in the FPC base directory, not in the
     Lazarus base directory
     }
-    //todo: replace help with lazhelp in main state machine
     'Declare helplazarus;'+
     'Requires BIGIDE;'+
     'Requires lhelp;'+
-    'CleanModule helplazarus;'+
+    {Not using cleanmodule as we're downloading;
+    getmodule will detect existing docs and not
+    redownload them}
+    //'CleanModule helplazarus;'+
     'GetModule helplazarus;'+
     'BuildModule helplazarus;'+
     'ConfigModule helplazarus;'+
@@ -216,50 +221,55 @@ var
   ResultCode: longint;
 begin
   if not InitModule then exit;
-  // Download FPC CHM docs zip into TargetDirectory.
-  {Possible alternatives
-  1. make chm -> requires latex!!!
-  2. or
-  c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
-  ... but we'd need to include the input files extracted from the Make file.
-  }
-  OperationSucceeded:=true;
-  ForceDirectories(TargetDirectory);
-  DocsZip := SysUtils.GetTempFileName + '.zip';
-  try
-    OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
-  except
-    on E: Exception do
-    begin
-      // Deal with timeouts, wrong URLs etc
-      OperationSucceeded:=false;
-      infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
-        'Exception: '+E.ClassName+'/'+E.Message);
-    end;
-  end;
 
-  if OperationSucceeded then
+  if FileExistsUTF8(TargetDirectory+'fcl.chm') and
+    FileExistsUTF8(TargetDirectory+'rtl.chm') then
   begin
-    // Extract, overwrite, flatten path/junk paths
-    // todo: test with spaces in path
-    if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,FVerbose)= 0 then
-    begin
-      SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
-    end
-    else
-    begin
-      OperationSucceeded := False;
-      infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode));
-    end;
+    OperationSucceeded:=true;
+    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+TargetDirectory);
   end
   else
   begin
-    infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL);
-  end;
+    // Download FPC CHM docs zip into TargetDirectory.
+    {Possible alternatives
+    1. make chm -> requires latex!!!
+    2. or
+    c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
+    ... but we'd need to include the input files extracted from the Make file.
+    }
+    OperationSucceeded:=true;
+    ForceDirectories(TargetDirectory);
+    DocsZip := SysUtils.GetTempFileName + '.zip';
+    try
+      OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
+    except
+      on E: Exception do
+      begin
+        // Deal with timeouts, wrong URLs etc
+        OperationSucceeded:=false;
+        infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
+          'Exception: '+E.ClassName+'/'+E.Message);
+      end;
+    end;
 
-  if UpperCase(ModuleName)='HELPLAZARUS' then
-  begin
-    // Additionally, build LCL help using FPC sources
+    if OperationSucceeded then
+    begin
+      // Extract, overwrite, flatten path/junk paths
+      // todo: test with spaces in path
+      if ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(TargetDirectory)+' '+DocsZip,FVerbose)= 0 then
+      begin
+        SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
+      end
+      else
+      begin
+        OperationSucceeded := False;
+        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode));
+      end;
+    end
+    else
+    begin
+      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL);
+    end;
   end;
   Result := OperationSucceeded;
 end;
