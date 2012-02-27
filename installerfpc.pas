@@ -229,6 +229,11 @@ begin
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
+  {$IF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
+  // On Intel x86/x64 OSX, force FPC to compile as i386. This is in line with
+  // the way the FPC installer works. Later we can crosscompile an x64 version.
+  ProcessEx.Parameters.Add('CPU_TARGET=i386');
+  {$ENDIF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
@@ -237,8 +242,14 @@ begin
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
+
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
+  {$IF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
+  // On Intel x86/x64 OSX, force FPC to compile as i386. This is in line with
+  // the way the FPC installer works. Later we can crosscompile an x64 version.
+  ProcessEx.Parameters.Add('CPU_TARGET=i386');
+  {$ENDIF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
