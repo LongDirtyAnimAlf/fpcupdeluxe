@@ -422,6 +422,11 @@ begin
   if FInstaller.OnlyModules<>'' then
     writeln('WARNING: Limiting installation/update to '+FInstaller.OnlyModules);
   writeln('');
+  if FInstaller.Uninstall then
+    writeln('WARNING: UNINSTALLING !!!')
+  else if FInstaller.Clean then
+    writeln('WARNING: CLEANING !!!');
+  writeln('');
   if not bNoConfirm then
     begin
     write('Continue (Y/n): ');

@@ -74,6 +74,9 @@ type
     Sequencer: TSequencer;
     function GetLazarusPrimaryConfigPath: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
+    procedure SetFPCDirectory(AValue: string);
+    procedure SetLazarusDirectory(AValue: string);
+    procedure SetMakeDirectory(AValue: string);
   protected
     LogFile:Text;
     VerBoseLog:Text;
@@ -97,16 +100,16 @@ type
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
-    property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
+    property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
     property FPCURL: string read FFPCURL write FFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision:string read FFPCDesiredRevision write FFPCDesiredRevision;
-    property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
+    property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write FLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
-    property MakeDirectory: string read FMakeDirectory write FMakeDirectory;
+    property MakeDirectory: string read FMakeDirectory write SetMakeDirectory;
     ////List of all sequences
     //property ModuleList: TStringList read FModuleList;
     //List of all default enabled sequences available
@@ -196,6 +199,21 @@ end;
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
 begin
 FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(ExpandFileName(AValue));
+end;
+
+procedure TFPCupManager.SetFPCDirectory(AValue: string);
+begin
+  FFPCDirectory:=ExpandFileName(AValue);
+end;
+
+procedure TFPCupManager.SetLazarusDirectory(AValue: string);
+begin
+  FLazarusDirectory:=ExpandFileName(AValue);
+end;
+
+procedure TFPCupManager.SetMakeDirectory(AValue: string);
+begin
+  FMakeDirectory:=ExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);

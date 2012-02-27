@@ -16,6 +16,12 @@ Const
     'Getmodule FPC;'+
     'Buildmodule FPC;'+
     'End;'+
+
+//standard uninstall
+    'Declare FPCuninstall;'+
+    'Uninstallmodule FPC;'+
+    'End;'+
+
 //selective actions triggered with --only=SequenceName
     'Declare FPCCleanOnly;'+
     'Cleanmodule FPC;'+
@@ -690,6 +696,15 @@ end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
+  if not (FBaseDirectory<>'') or (DeleteDirectoryEx(FBaseDirectory)=false) then
+  begin
+    WritelnLog('Error deleting FPC directory '+FBaseDirectory);
+    result:=false;
+  end
+  else
+  result:=true;
+
+{ todo: where does this go?
   if not InitModule then exit;
   infoln('Module FPC: cleanup...');
   try
@@ -713,6 +728,7 @@ begin
       result:=false;
     end;
   end;
+}
 end;
 
 constructor TFPCInstaller.Create;
