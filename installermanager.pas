@@ -726,9 +726,15 @@ begin
     exit;
     end;
   if FParent.Uninstall then  // uninstall overrides clean
-    SequenceName:=SequenceName+'uninstall'
+    begin
+    if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-8,9))<>'UNINSTALL') then
+      SequenceName:=SequenceName+'uninstall';
+    end
   else if FParent.Clean  then
-    SequenceName:=SequenceName+'clean';
+    begin
+    if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-4,5))<>'CLEAN') then
+      SequenceName:=SequenceName+'clean';
+    end;
   idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
   if (idx>=0) then
     begin
