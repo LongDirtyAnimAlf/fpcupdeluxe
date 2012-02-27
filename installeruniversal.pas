@@ -160,7 +160,7 @@ begin
         PE.OnOutput:=@DumpConsole;
       PE.Execute;
       Output:=PE.OutputString;
-      result:=PE.ExitStatus<>0;
+      result:=PE.ExitStatus=0;
       if not result then
         break;
       end;
