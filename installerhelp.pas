@@ -60,7 +60,7 @@ Const
     'Declare helpfpcuninstall;'+
     'CleanModule helpfpc;'+
     'UninstallModule helpfpc;'+
-    'End;
+    'End;'+
     //Lazarus help
     {Note: we don't use helpfpc because that will put the
     help files in the FPC base directory, not in the
@@ -81,7 +81,7 @@ Const
     'Declare helplazarusuninstall;'+
     'CleanModule helplazarus;'+
     'UninstallModule helplazarus;'+
-    'End;
+    'End;'+
     //selective actions triggered with --only=SequenceName
     'Declare HelpFPCCleanOnly;'+
     'Cleanmodule helpfpc;'+
