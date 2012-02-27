@@ -213,6 +213,7 @@ begin
 Sequencer.AddSequence(Sequences);
 Sequencer.AddSequence(installerFPC.Sequences);
 Sequencer.AddSequence(installerLazarus.Sequences);
+Sequencer.AddSequence(installerHelp.Sequences);
 Sequencer.AddSequence(installerUniversal.Sequences);
 //append universal modules to the lists
 Sequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
