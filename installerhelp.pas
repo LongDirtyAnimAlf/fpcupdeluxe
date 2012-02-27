@@ -176,6 +176,8 @@ public
   property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
   // Configuration for Lazarus; required for building lhelp, as well as configuration
   property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
+  // Uninstall module
+  function UnInstallModule(ModuleName:string): boolean; override;
   constructor Create;
   destructor Destroy; override;
 end;
@@ -550,7 +552,32 @@ begin
         LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+
           'docs'+DirectorySeparator+
           'html'+DirectorySeparator;
-        LazarusConfig.LazarusDirectory:=FBaseDirectory;
+        result:=true;
+      except
+        on E: Exception do
+        begin
+          result:=false;
+          writelnlog('Lazarus help: Error setting Lazarus config: '+E.ClassName+'/'+E.Message, true);
+        end;
+      end;
+    finally
+      LazarusConfig.Free;
+    end;
+  end;
+end;
+
+function THelpLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
+var
+  LazarusConfig: TUpdateLazConfig;
+begin
+  Result:=inherited UnInstallModule(ModuleName);
+  if result then
+  begin
+    LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
+    try
+      try
+        // Remove link to help files
+        LazarusConfig.DeleteValue(VCHMHelpFilesPath);
         result:=true;
       except
         on E: Exception do
