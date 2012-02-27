@@ -441,8 +441,6 @@ begin
   end;
 end;
 
-{$IFDEF MSWINDOWS}
-
 function ParentDirectoryIsNotRoot(Dir: string): boolean;
 var s:string;
 begin
@@ -456,6 +454,8 @@ begin
     result:=s<>Dir; //to avoid fe. c:\\\
     end;
 end;
+
+{$IFDEF MSWINDOWS}
 
 function GetLocalAppDataPath: string;
 var
