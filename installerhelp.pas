@@ -56,6 +56,11 @@ Const
     'Getmodule helpfpc;'+
     'Buildmodule helpfpc;'+
     'End;'+
+    //Remove FPC help:
+    'Declare helpfpcuninstall;'+
+    'CleanModule helpfpc;'+
+    'UninstallModule helpfpc;'+
+    'End;
     //Lazarus help
     {Note: we don't use helpfpc because that will put the
     help files in the FPC base directory, not in the
@@ -72,6 +77,11 @@ Const
     'BuildModule helplazarus;'+
     'ConfigModule helplazarus;'+
     'End;'+
+    //Remove Lazarus help:
+    'Declare helplazarusuninstall;'+
+    'CleanModule helplazarus;'+
+    'UninstallModule helplazarus;'+
+    'End;
     //selective actions triggered with --only=SequenceName
     'Declare HelpFPCCleanOnly;'+
     'Cleanmodule helpfpc;'+
