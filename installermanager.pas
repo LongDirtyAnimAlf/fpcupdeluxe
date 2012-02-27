@@ -72,6 +72,7 @@ type
     FVerbose: boolean;
     Sequencer: TSequencer;
     function GetLazarusPrimaryConfigPath: string;
+    procedure SetBootstrapCompilerDirectory(AValue: string);
   protected
     LogFile:Text;
     VerBoseLog:Text;
@@ -87,7 +88,7 @@ type
     property CompilerName: string read FCompilerName write FCompilerName;
     property AllOptions:string read FAllOptions write FAllOptions;
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
-    property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write FBootstrapCompilerDirectory;
+    property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
     property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string write FConfigFile;
@@ -185,6 +186,11 @@ begin
       {$ENDIF MSWINDOWS}
     end;
   result:=FLazarusPrimaryConfigPath;
+end;
+
+procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
+begin
+FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(ExpandFileName(AValue));
 end;
 
 procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);
