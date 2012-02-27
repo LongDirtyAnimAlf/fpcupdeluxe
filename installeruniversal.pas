@@ -14,7 +14,6 @@ type
   TUniversalInstaller = class(TInstaller)
   private
     BinPath:string;
-    FConfigFile:string;
     FFPCDir:string;
     FLazarusDir:string;
     FLazarusPrimaryConfigPath:string;
@@ -25,8 +24,6 @@ type
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
-    // Configuration file in ini format containing module definitions
-    property ConfigFile:string read FConfigFile write FConfigFile;
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
     // Lazarus primary config path
@@ -37,6 +34,7 @@ type
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
+    function ConfigModule(ModuleName:string): boolean; override;
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
     // Gets the list of required modules for ModuleName
@@ -185,6 +183,11 @@ function TUniversalInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=InitModule;
   if not result then exit;
+  result:=true;
+end;
+
+function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
+begin
   result:=true;
 end;
 

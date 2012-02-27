@@ -44,11 +44,11 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 uses {$IFDEF UNIX} {$IFDEF UseCThreads}
   cthreads, {$ENDIF} {$ENDIF}
   Classes,Forms,Interfaces {these 2 for application options},
-  installer, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
+  svnclient, updatelazconfig, ftpsend, sysutils, processutils,
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
   synaip, synautil, synsock, blcksock, topologicalsort, installerCore,
   installerfpc, installerLazarus, installerHelp, installerUniversal,
-installerManager;
+  installerManager;
 
 //{$R *.res} //Keep it simple, no resources
 procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList);
@@ -452,7 +452,6 @@ begin
 end;
 
 var
-  FInstaller: TOldInstaller;
   FPCupManager:TFPCupManager;
   res:integer;
 begin

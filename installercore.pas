@@ -79,6 +79,8 @@ type
     function BuildModule(ModuleName:string): boolean; virtual;abstract;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; virtual;abstract;
+    // Config  module
+    function ConfigModule(ModuleName:string): boolean; virtual;abstract;
     function GetCompilerInDir(Dir:string):string;
     // Install update sources
     function GetModule(ModuleName:string): boolean; virtual;abstract;

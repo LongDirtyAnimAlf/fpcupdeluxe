@@ -141,7 +141,7 @@ public
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
   // Configure FPC or Lazarus to use the help
-  function ConfigModule:boolean; virtual;
+  function ConfigModule(ModuleName:string): boolean; override;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
   // Uninstall module
@@ -161,7 +161,7 @@ public
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
   // Configure FPC to use the help
-  function ConfigModule:boolean; override;
+  function ConfigModule(ModuleName:string): boolean; override;
   // Install update sources
   function GetModule(ModuleName:string): boolean; override;
   constructor Create;
@@ -182,7 +182,7 @@ public
   // Clean up environment
   function CleanModule(ModuleName:string): boolean; override;
   // Configure Lazarus to use the help
-  function ConfigModule:boolean; override;
+  function ConfigModule(ModuleName:string): boolean; override;
   // Root directory of FPC; needed for finding fpdoc tool
   property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
   // Configuration for Lazarus; required for building lhelp, as well as configuration
@@ -221,7 +221,7 @@ begin
   result:=true;
 end;
 
-function THelpInstaller.ConfigModule: boolean;
+function THelpInstaller.ConfigModule(ModuleName: string): boolean;
 begin
   result:=true;
 end;
@@ -368,9 +368,9 @@ begin
   end;
 end;
 
-function THelpFPCInstaller.ConfigModule: boolean;
+function THelpFPCInstaller.ConfigModule(ModuleName: string): boolean;
 begin
-  Result:=inherited ConfigModule;
+  Result:=inherited ConfigModule(ModuleName);
   //todo: implement config for fpide
 end;
 
@@ -514,11 +514,11 @@ begin
   end;
 end;
 
-function THelpLazarusInstaller.ConfigModule: boolean;
+function THelpLazarusInstaller.ConfigModule(ModuleName: string): boolean;
 var
   LazarusConfig: TUpdateLazConfig;
 begin
-  result:=inherited ConfigModule;
+  result:=inherited ConfigModule(ModuleName);
   if result then
   begin
     result:=ForceDirectories(FLazarusPrimaryConfigPath);

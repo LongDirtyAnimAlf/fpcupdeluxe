@@ -110,8 +110,6 @@ type
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property MakeDirectory: string read FMakeDirectory write SetMakeDirectory;
-    ////List of all sequences
-    //property ModuleList: TStringList read FModuleList;
     //List of all default enabled sequences available
     property ModuleEnabledList: TStringList read FModuleEnabledList;
     //List of all publicly visible sequences
@@ -332,16 +330,7 @@ end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
 begin
-  result:= GetInstaller(ModuleName);
-  if result and (Installer is TLazarusInstaller) then
-    result:=(Installer as TLazarusInstaller).ConfigLazarus(FParent.LazarusPrimaryConfigPath)
-  else if result and (Installer is THelpInstaller) then
-    result:=(Installer as THelpInstaller).ConfigModule
-  else
-    begin
-    result:=false;
-    FParent.WritelnLog('Error: Calling ConfigModule on : ' + ModuleName);
-    end;
+  result:= GetInstaller(ModuleName) and Installer.ConfigModule(ModuleName);
 end;
 
 function TSequencer.DoExec(FunctionName: string): boolean;
@@ -501,6 +490,7 @@ begin
     {$IFDEF MSWINDOWS}
     Installer.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
+    (Installer as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     Installer.URL:=FParent.FPCURL;
     Installer.Verbose:=FParent.Verbose;
     end

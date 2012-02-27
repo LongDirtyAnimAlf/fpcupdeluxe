@@ -48,6 +48,7 @@ type
   private
     BinPath:string;
     FCrossLCL_Platform: string;
+    FPrimaryConfigPath: string;
     InitDone:boolean;
   protected
     FFPCDir:string;
@@ -62,10 +63,12 @@ type
     property CrossLCL_Platform:string write FCrossLCL_Platform;
     // FPC base directory
     property FPCDir:string write FFPCDir;
+    // lazarus pimary config path
+    property PrimaryConfigPath:string write FPrimaryConfigPath;
     // Build module
     function BuildModule(ModuleName:string): boolean; override;
     // Create configuration in PrimaryConfigPath
-    function ConfigLazarus(PrimaryConfigPath:string):boolean;
+    function ConfigModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
     // Install update sources
@@ -258,14 +261,14 @@ begin
   result:=BuildModuleCustom(ModuleName);
 end;
 
-function TLazarusInstaller.ConfigLazarus(PrimaryConfigPath: string): boolean;
+function TLazarusInstaller.ConfigModule(ModuleName:string): boolean;
 var
   LazarusConfig: TUpdateLazConfig;
 begin
-  Result:=ForceDirectories(PrimaryConfigPath);
-  infoln('Created Lazarus primary config directory: '+PrimaryConfigPath);
+  Result:=ForceDirectories(FPrimaryConfigPath);
+  infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath);
     // Set up a minimal config so we can use LazBuild
-  LazarusConfig:=TUpdateLazConfig.Create(PrimaryConfigPath);
+  LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
   try
     try
       LazarusConfig.LazarusDirectory:=FBaseDirectory;

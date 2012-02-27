@@ -65,6 +65,7 @@ type
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
+    function ConfigModule(ModuleName:string): boolean; override;
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
     // Uninstall module
@@ -670,6 +671,11 @@ begin
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
   result:=ProcessEx.ExitStatus=0;
+end;
+
+function TFPCInstaller.ConfigModule(ModuleName: string): boolean;
+begin
+  result:=true;
 end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
