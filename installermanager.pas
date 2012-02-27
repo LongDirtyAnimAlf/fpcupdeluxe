@@ -69,6 +69,7 @@ type
     FShortCutName: string;
     FShortCutNameFpcup: string;
     FSkipModules: string;
+    FUninstall:boolean;
     FVerbose: boolean;
     Sequencer: TSequencer;
     function GetLazarusPrimaryConfigPath: string;
@@ -78,7 +79,8 @@ type
     VerBoseLog:Text;
     FModuleList:TStringList;
     FModuleEnabledList:TStringList;
-     // write verbatim to log and eventually console
+    FModulePublishedList:TStringList;
+    // write verbatim to log and eventually console
     procedure WriteLog(msg:string;ToConsole:boolean=true);
     // append line ending and write to log and eventually console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
@@ -91,7 +93,7 @@ type
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
     property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
     property Clean: boolean read FClean write FClean;
-    property ConfigFile: string write FConfigFile;
+    property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
@@ -105,12 +107,15 @@ type
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property MakeDirectory: string read FMakeDirectory write FMakeDirectory;
-    //List of all sequences available
-    property ModuleList: TStringList read FModuleList;
+    ////List of all sequences
+    //property ModuleList: TStringList read FModuleList;
     //List of all default enabled sequences available
     property ModuleEnabledList: TStringList read FModuleEnabledList;
+    //List of all publicly visible sequences
+    property ModulePublishedList: TStringList read FModulePublishedList;
     property SkipModules:string read FSkipModules write FSkipModules;
     property OnlyModules:string read FOnlyModules write FOnlyModules;
+    property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
     function LoadModuleList:boolean;
     function Run: boolean;
@@ -127,7 +132,7 @@ type
   end;
   PSequenceAttributes=^TSequenceAttributes;
 
-  TKeyword=(SMdeclare, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
+  TKeyword=(SMdeclare, SMdeclareHidden, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
     SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU);
 
   TState=record
@@ -247,6 +252,7 @@ var
 begin
 FModuleList:=TStringList.Create;
 FModuleEnabledList:=TStringList.Create;
+FModulePublishedList:=TStringList.Create;
 Sequencer:=TSequencer.create;
 Sequencer.Parent:=Self;
 {$IFDEF MSWINDOWS}
@@ -275,6 +281,7 @@ begin
   for i:=0 to FModuleList.Count-1 do
     Freemem(FModuleList.Objects[i]);
   FModuleList.Free;
+  FModulePublishedList.Free;
   FModuleEnabledList.Free;
   Sequencer.free;
   WritelnLog(DateTimeToStr(now)+': fpcup finished.',false);
@@ -292,7 +299,7 @@ begin
 getmem(SeqAttr,sizeof(TSequenceAttributes));
 SeqAttr^.EntryPoint:=EntryPoint;
 SeqAttr^.Executed:=ESNever;
-FParent.ModuleList.AddObject(ModuleName,TObject(SeqAttr));
+FParent.FModuleList.AddObject(ModuleName,TObject(SeqAttr));
 end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
@@ -571,11 +578,11 @@ procedure TSequencer.ResetAllExecuted(SkipFPC: boolean);
 var
   idx:integer;
 begin
-for idx:=0 to FParent.ModuleList.Count -1 do
+for idx:=0 to FParent.FModuleList.Count -1 do
   // convention: FPC sequences that are to be skipped start with 'FPC'. Used in SetLCL.
   // todo: skip also help???? Who would call several help installs in one sequence? SubSequences?
-  if not SkipFPC or (pos('FPC',Uppercase(FParent.ModuleList[idx]))<>1) then
-    PSequenceAttributes(FParent.ModuleList.Objects[idx])^.Executed:=ESNever;
+  if not SkipFPC or (pos('FPC',Uppercase(FParent.FModuleList[idx]))<>1) then
+    PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESNever;
 end;
 
 function TSequencer.AddSequence(Sequence: string): boolean;
@@ -588,6 +595,7 @@ var
 
   begin
     if key='DECLARE' then result:=SMdeclare
+    else if key='DECLAREHIDDEN' then result:=SMdeclareHidden
     else if key='DO' then result:=SMdo
     else if key='REQUIRE' then result:=SMrequire
     else if key='EXEC' then result:=SMexec
@@ -640,8 +648,10 @@ while Sequence<>'' do
       SetLength(StateMachine,i+1);
       StateMachine[i].instr:=KeyStringToKeyword(Uppercase(Key));
       StateMachine[i].param:=param;
-      if StateMachine[i].instr=SMdeclare then
+      if StateMachine[i].instr in [SMdeclare,SMdeclareHidden] then
         AddToModuleList(uppercase(param),i);
+      if StateMachine[i].instr = SMdeclare then
+        FParent.FModulePublishedList.Add(param);
       end;
     end;
   end;
@@ -687,10 +697,10 @@ function TSequencer.DeleteOnly: boolean;
 var i,idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
-idx:=FParent.ModuleList.IndexOf('ONLY');
+idx:=FParent.FModuleList.IndexOf('ONLY');
 if (idx >0) then
   begin
-  SeqAttr:=PSequenceAttributes(pointer(FParent.ModuleList.Objects[idx]));
+  SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
   i:=SeqAttr^.EntryPoint;
   while i<length(StateMachine) do
     begin
@@ -698,8 +708,8 @@ if (idx >0) then
     i:=i+1;
     end;
   SetLength(StateMachine,SeqAttr^.EntryPoint);
-  Freemem(FParent.ModuleList.Objects[idx]);
-  FParent.ModuleList.Delete(idx);
+  Freemem(FParent.FModuleList.Objects[idx]);
+  FParent.FModuleList.Delete(idx);
   end;
 end;
 
@@ -709,17 +719,21 @@ var
   idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
-  if not assigned(FParent.ModuleList) then
+  if not assigned(FParent.FModuleList) then
     begin
     result:=false;
     FParent.WritelnLog('Error: No sequences loaded when trying to find' + SequenceName);
     exit;
     end;
-  idx:=FParent.ModuleList.IndexOf(Uppercase(SequenceName));
+  if FParent.Uninstall then  // uninstall overrides clean
+    SequenceName:=SequenceName+'uninstall'
+  else if FParent.Clean  then
+    SequenceName:=SequenceName+'clean';
+  idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
   if (idx>=0) then
     begin
     result:=true;
-    SeqAttr:=PSequenceAttributes(pointer(FParent.ModuleList.Objects[idx]));
+    SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
     case SeqAttr^.Executed of
       ESFailed   : begin
                      result:=false;
@@ -732,6 +746,7 @@ begin
       begin
       case StateMachine[InstructionPointer].instr of
         SMdeclare     :;
+        SMdeclareHidden :;
         SMdo          : if not IsSkipped(StateMachine[InstructionPointer].param) then
                           result:=Run(StateMachine[InstructionPointer].param);
         SMrequire     : result:=Run(StateMachine[InstructionPointer].param);

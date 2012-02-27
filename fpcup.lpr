@@ -96,11 +96,10 @@ begin
   writeln('                       Note: the binutils are copied to the');
   writeln('                       FPC directory for use by FPC. This gives');
   writeln('                       a more standard FPC environment.');
-  writeln(' clean                 Don''t build.');
-  writeln('                       If no skip and only options given:');
-  writeln('                       DELETE entire Lazarus/FPC directories');
-  writeln('                       Else: clean up only certain modules,');
-  writeln('                       only deleting temporary items.');
+  writeln(' clean                 Remove files created with build. ');
+  writeln('                       Can be combined with skip and only options.');
+  writeln(' configfile=<filename> Load module definition file from <filename>.');
+  writeln('                       Default: fpcup.ini in the program directory.');
   writeln(' cputarget=<name>      CPU target for cross_compiling.');
   writeln('                       <name> has to be one of the following:');
   writeln('                       i386,m68k,alpha,powerpc,powerpc64,');
@@ -154,6 +153,10 @@ begin
   writeln(' skip=<values>         Do not update/build or clean modules.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
+  writeln(' uninstall             uninstall sources and all generated files');
+  writeln('                       If no skip and only options given:');
+  writeln('                       DELETE entire Lazarus/FPC directories');
+  writeln('                       Else: uninstall only certain modules.');
   writeln(' verbose               Show output from svn and make');
   writeln('');
   writeln('Share and enjoy!');
@@ -165,6 +168,7 @@ const
   //Parameter names:
   BinutilsDir='binutilsdir';
   Clean='clean';
+  ConfigFile='configfile';
   CPUTarget='cputarget';
   FPCBootstrapDir='fpcbootstrapdir';
   FPCDir='fpcdir';
@@ -184,6 +188,7 @@ const
   Skip='skip';
   Only='only';
   NoConfirm='noconfirm';
+  Uninstall='uninstall';
   Verbose='verbose';
 var
   ErrorMessage: string;
@@ -219,8 +224,8 @@ begin
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+Clean+' '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
     Help+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
-    Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+
-    CPUTarget+': '+LCLPlatform+': '+OSTarget+': '+
+    Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+ Uninstall+' '+
+    CPUTarget+': '+LCLPlatform+': '+OSTarget+': '+ ConfigFile+': '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
   // todo: check for parameters given without --
   // these might be typos and should result in halting as well.
@@ -229,14 +234,18 @@ begin
     FInstaller.LoadModuleList;
     writeln('Error: wrong command line options given:');
     writeln(ErrorMessage);
-    WriteHelp(FInstaller.ModuleList,FInstaller.ModuleEnabledList);
+    WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
     result:=13; //Quit with error resultcode
     exit;
   end;
 
   AllOptions:='';
 
-  //todo: get configfile option here before LoadModuleList
+  if Application.HasOption(ConfigFile) then
+  begin
+    FInstaller.ConfigFile:=Application.GetOptionValue(ConfigFile);
+    AllOptions:=AllOptions+'--'+ConfigFile+'='+FInstaller.ConfigFile;
+  end;
 
   FInstaller.LoadModuleList;
   if Application.HasOption(BinutilsDir) then
@@ -293,7 +302,7 @@ begin
 
   if Application.HasOption('h', Help) then
   begin
-    writehelp(FInstaller.ModuleList,FInstaller.ModuleEnabledList);
+    writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
     result:=0; //quit without error
     exit;
   end;
@@ -362,6 +371,7 @@ begin
     AllOptions:=AllOptions+'--'+PrimaryConfigPath+'="'+Application.GetOptionValue(PrimaryConfigPath)+'" ';
   end;
 
+  FInstaller.Uninstall:=Application.HasOption(Uninstall);
   FInstaller.Verbose:=Application.HasOption(Verbose);
   bNoConfirm:=Application.HasOption(NoConfirm);
 
