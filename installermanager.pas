@@ -709,7 +709,7 @@ begin
     exit;
     end;
   idx:=FParent.ModuleList.IndexOf(Uppercase(SequenceName));
-  if (idx >0) then
+  if (idx>=0) then
     begin
     result:=true;
     SeqAttr:=PSequenceAttributes(pointer(FParent.ModuleList.Objects[idx]));
