@@ -577,7 +577,7 @@ begin
     try
       try
         // Remove link to help files
-        LazarusConfig.DeleteValue(VCHMHelpFilesPath);
+        LazarusConfig.DeleteVariable(VCHMHelpFilesPath);
         result:=true;
       except
         on E: Exception do

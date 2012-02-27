@@ -71,7 +71,7 @@ public
   {New debugger filename. May include macros. If empty, use current/default value:}
   property DebuggerFilename: string read FDebuggerFilename write FDebuggerFilename;
   {Removes entire entry for configuration setting. This will OVERRIDE any variable set via the other properties}
-  procedure DeleteValue(Variable:TConfigVariable);
+  procedure DeleteVariable(Variable:TConfigVariable);
   {New FPC source directory. May include macros. If empty, use current/default value:}
   property FPCSourceDirectory: string read FFPCSourceDirectory write FFPCSourceDirectory;
   {New Lazarus directory. May NOT include macros. If empty, use current/default value:}
@@ -98,7 +98,7 @@ const
   VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
   VersionNewHelpConfig='1'; //Use this version in our help config file
 
-procedure TUpdateLazConfig.DeleteValue(Variable: TConfigVariable);
+procedure TUpdateLazConfig.DeleteVariable(Variable: TConfigVariable);
 // Deleted values override set values regardless of the order
 // the property/procedure is called
 // todo: rewrite class to use a dictionary or similar that maps
