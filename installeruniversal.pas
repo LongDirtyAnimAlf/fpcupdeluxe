@@ -23,6 +23,7 @@ type
     // internal initialisation, called from BuildModule,CLeanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
+    function RunCommands(directive:string;sl:TStringList):boolean;
   public
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
@@ -127,56 +128,62 @@ begin
   InitDone:=result;
 end;
 
-function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
+function TUniversalInstaller.RunCommands(directive: string;sl:TStringList): boolean;
 var
-  i,j,idx:integer;
+  i,j:integer;
   exec,output:string;
   Workingdir:string;
-  sl:TStringList;
   PE:TProcessEx;
+begin
+  PE:=TProcessEx.Create(nil);
+  try
+    PE.CurrentDirectory:=GetValue('Workingdir',sl);
+    for i:=1 to MAXINSTRUCTIONS do
+      begin
+      exec:=GetValue(directive+IntToStr(i),sl);
+      if exec='' then break;
+      //split off command and parameters
+      j:=1;
+      while j<=length(exec) do
+        begin
+        if exec[j]='"' then
+          repeat  //skip until next quote
+            j:=j+1;
+          until (exec[j]='"') or (j=length(exec));
+        j:=j+1;
+        if exec[j]=' ' then break;
+        end;
+      PE.Executable:=trim(copy(exec,1,j));
+      PE.ParametersString:=trim(copy(exec,j,length(exec)));
+      PE.ShowWindow := swoHIDE;
+      if FVerbose then
+        PE.OnOutput:=@DumpConsole;
+      PE.Execute;
+      Output:=PE.OutputString;
+      result:=PE.ExitStatus<>0;
+      if not result then
+        break;
+      end;
+  finally
+    PE.Free;
+  end;
+end;
+
+function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
+var
+  idx:integer;
+  sl:TStringList;
 begin
   result:=InitModule;
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
-    PE:=TProcessEx.Create(nil);
-    try
-      sl:=TStringList(UniModuleList.Objects[idx]);
-      PE.CurrentDirectory:=GetValue('Workingdir',sl);
-      for i:=1 to MAXINSTRUCTIONS do
-        begin
-        exec:=GetValue('InstallExecute'+IntToStr(i),sl);
-        if exec='' then break;
-        //split off command and parameters
-        j:=1;
-        while j<=length(exec) do
-          begin
-          if exec[j]='"' then
-            repeat  //skip until next quote
-              j:=j+1;
-            until (exec[j]='"') or (j=length(exec));
-          j:=j+1;
-          if exec[j]=' ' then break;
-          end;
-        PE.Executable:=trim(copy(exec,1,j));
-        PE.ParametersString:=trim(copy(exec,j,length(exec)));
-        PE.ShowWindow := swoHIDE;
-        if FVerbose then
-          PE.OnOutput:=@DumpConsole;
-        PE.Execute;
-        Output:=PE.OutputString;
-        result:=PE.ExitStatus<>0;
-        if not result then
-          break;
-        end;
-    finally
-      PE.Free;
-    end;
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    result:=RunCommands('InstallExecute',sl);
     end
   else
     result:=false;
-
 end;
 
 function TUniversalInstaller.CleanModule(ModuleName: string): boolean;
@@ -187,8 +194,61 @@ begin
 end;
 
 function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
-begin
+var
+  idx:integer;
+  sl:TStringList;
+
+  //dummy function
+  function Addxml(filename,key,value:string):boolean;
+  begin
   result:=true;
+  end;
+  //dummy function
+  function Finishxml(filename:string):boolean;
+  begin
+  result:=true;
+  end;
+
+  function AddToLazXML(xmlfile:string):boolean;
+  var
+    i,j:integer;
+    exec:string;
+    bdirty:boolean;
+  begin
+  bdirty:=false;
+  for i:=1 to MAXINSTRUCTIONS do
+    begin
+    exec:=GetValue('AddTo'+xmlfile+IntToStr(i),sl);
+    if exec='' then break;
+    //split off key and value
+    j:=1;
+    while j<=length(exec) do
+      begin
+      j:=j+1;
+      if exec[j]=':' then break;
+      end;
+    result:=Addxml(xmlfile+'.xml',trim(copy(exec,1,j-1)),trim(copy(exec,j+1,length(exec))));
+    if not result then
+      break;
+    bdirty:=true;
+    end;
+  if bdirty then
+    Finishxml(xmlfile+'.xml');
+  end;
+
+begin
+  result:=InitModule;
+  if not result then exit;
+  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  if idx>=0 then
+    begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    AddToLazXML('environmentoptions');
+    AddToLazXML('helpoptions');
+    AddToLazXML('packagefiles');
+    end
+  else
+    result:=false;
 end;
 
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
@@ -205,9 +265,20 @@ begin
 end;
 
 function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
+var
+  idx:integer;
+  sl:TStringList;
 begin
-  if not InitModule then exit;
-
+  result:=InitModule;
+  if not result then exit;
+  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  if idx>=0 then
+    begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    result:=RunCommands('UnInstallExecute',sl);
+    end
+  else
+    result:=false;
 end;
 
 constructor TUniversalInstaller.Create;
@@ -306,6 +377,7 @@ begin
         'Cleanmodule '+ s +';' +
         'Getmodule '+ s +';' +
         'Buildmodule '+ s +';' +
+        'Configmodule '+ s +';' +
         'End;';
     end;
 end;
