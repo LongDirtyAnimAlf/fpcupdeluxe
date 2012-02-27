@@ -702,13 +702,25 @@ end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
-  if not (FBaseDirectory<>'') or (DeleteDirectoryEx(FBaseDirectory)=false) then
-  begin
-    WritelnLog('Error deleting FPC directory '+FBaseDirectory);
-    result:=false;
-  end
+  //sanity check
+  if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'MakeFile') and
+    DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'compiler') and
+    DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'rtl') and
+    ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FBaseDirectory)) then
+    begin
+    if DeleteDirectoryEx(FBaseDirectory)=false then
+    begin
+      WritelnLog('Error deleting FPC directory '+FBaseDirectory);
+      result:=false;
+    end
+    else
+    result:=true;
+    end
   else
-  result:=true;
+  begin
+    WritelnLog('Error: invalid FPC directory :'+FBaseDirectory);
+    result:=false;
+  end;
 
 { todo: where does this go?
   if not InitModule then exit;

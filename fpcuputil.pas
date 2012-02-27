@@ -44,6 +44,8 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
+//check if there is at least one directory between Dir and root
+function ParentDirectoryIsNotRoot(Dir:string):boolean;
 {$IFDEF MSWINDOWS}
 // Get path for Windows per user storage of application data. Useful for storing settings
 function GetLocalAppDataPath: string;
@@ -440,6 +442,21 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
+
+function ParentDirectoryIsNotRoot(Dir: string): boolean;
+var s:string;
+begin
+  result:=false;
+  Dir:=ExcludeTrailingBackslash(Dir);
+  s:=ExtractFileDir(Dir);
+  if s<>Dir then //to avoid fe. c:\\\
+    begin  // this is one level up
+    Dir:=ExcludeTrailingBackslash(s);
+    s:=ExtractFileDir(Dir);
+    result:=s<>Dir; //to avoid fe. c:\\\
+    end;
+end;
+
 function GetLocalAppDataPath: string;
 var
   AppDataPath: array[0..MaxPathLen] of char; //Allocate memory

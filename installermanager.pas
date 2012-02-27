@@ -134,7 +134,7 @@ type
   PSequenceAttributes=^TSequenceAttributes;
 
   TKeyword=(SMdeclare, SMdeclareHidden, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
-    SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU);
+    SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU,SMInvalid);
 
   TState=record
     instr:TKeyword;
@@ -598,6 +598,8 @@ function TSequencer.AddSequence(Sequence: string): boolean;
 var
   line,key,param:string;
   i:integer;
+  instr:TKeyword;
+  sequencename:string;
 
   function KeyStringToKeyword(Key:string):TKeyword;
 
@@ -605,7 +607,7 @@ var
     if key='DECLARE' then result:=SMdeclare
     else if key='DECLAREHIDDEN' then result:=SMdeclareHidden
     else if key='DO' then result:=SMdo
-    else if key='REQUIRE' then result:=SMrequire
+    else if key='REQUIRES' then result:=SMrequire
     else if key='EXEC' then result:=SMexec
     else if key='END' then result:=SMend
     else if key='CLEANMODULE' then result:=SMcleanmodule
@@ -615,7 +617,8 @@ var
     else if key='CONFIGMODULE' then result:=SMconfigmodule
     else if key='SETLCL' then result:=SMSetLCL
     else if key='SETOS' then result:=SMSetOS
-    else if key='SETCPU' then result:=SMSetCPU;
+    else if key='SETCPU' then result:=SMSetCPU
+    else result:=SMInvalid;
   end;
 
   //remove white space and line terminator
@@ -654,11 +657,17 @@ while Sequence<>'' do
       begin
       i:=Length(StateMachine);
       SetLength(StateMachine,i+1);
-      StateMachine[i].instr:=KeyStringToKeyword(Uppercase(Key));
+      instr:=KeyStringToKeyword(Uppercase(Key));
+      StateMachine[i].instr:=instr;
+      if instr=SMInvalid then
+        FParent.WritelnLog('Invalid instruction '+Key+' in sequence '+sequencename);
       StateMachine[i].param:=param;
-      if StateMachine[i].instr in [SMdeclare,SMdeclareHidden] then
+      if instr in [SMdeclare,SMdeclareHidden] then
+        begin
         AddToModuleList(uppercase(param),i);
-      if StateMachine[i].instr = SMdeclare then
+        sequencename:=param;
+        end;
+      if instr = SMdeclare then
         FParent.FModulePublishedList.Add(param);
       end;
     end;
