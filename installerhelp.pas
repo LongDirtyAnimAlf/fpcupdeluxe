@@ -63,6 +63,7 @@ Const
     }
     'Declare helplazarus;'+
     'Requires BIGIDE;'+
+    'Requires lhelp;'+
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
     redownload them}
@@ -387,27 +388,7 @@ var
 begin
   OperationSucceeded:=true;
 
-  if OperationSucceeded then
-  begin
-    // Build lhelp chm help viewer
-    LHelpDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-      'components'+DirectorySeparator+
-      'chmhelp'+DirectorySeparator+
-      'lhelp'+DirectorySeparator;
-    ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild';
-    // Set directory to item we're compiling:
-    ProcessEx.CurrentDirectory:=LHelpDirectory;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('--primary-config-path='+FLazarusPrimaryConfigPath+'');
-    ProcessEx.Parameters.Add(LHelpDirectory+'lhelp.lpr');
-    infoln(ModuleName+': compiling lhelp help viewer:');
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-    begin
-      WritelnLog(ModuleName+': error compiling lhelp help viewer.');
-      OperationSucceeded := False;
-    end;
-  end;
+  // We need lhelp viewer but that should already have been taken care of by the dependencies.
 
   if OperationSucceeded then
   begin
@@ -543,12 +524,6 @@ begin
       try
         // Configure help path
         // Note that we might be overwriting user's settings here.
-        // todo: if overwriting user's help settings, warn him about it
-        LazarusConfig.CHMHelpExe:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-          'components'+DirectorySeparator+
-          'chmhelp'+DirectorySeparator+
-          'lhelp'+DirectorySeparator+
-          'lhelp'+GetExeExt;
         LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+
           'docs'+DirectorySeparator+
           'html'+DirectorySeparator;
