@@ -23,6 +23,23 @@ Const
     'Cleanmodule BIGIDE;'+
     'Buildmodule BIGIDE;'+
     'End;'+
+
+//standard uninstall
+    'Declare lazarusuninstall;'+
+    'Uninstallmodule lazarus;'+
+    'Exec DeleteLazarusScript;'+
+    'End;'+
+
+//standard clean
+    'Declare lazarusclean;'+
+    'cleanmodule lazarus;'+
+    'End;'+
+
+    'Declare BIGIDEclean;'+
+    'cleanmodule BIGIDE;'+
+    'End;'+
+
+
 //selective actions triggered with --only=SequenceName
     'Declare LazarusCleanOnly;'+
     'Cleanmodule lazarus;'+
@@ -366,19 +383,42 @@ end;
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   if not InitModule then exit;
-  infoln('Module Lazarus: cleanup...');
-  try
-    // SVN revert Lazarus directory
-     FSVNClient.LocalRepository := FBaseDirectory;
-     FSVNClient.Repository := FURL;
-     FSVNClient.Revert; //Remove local changes
-    result:=true;
-  except
-    on E: Exception do
+  infoln('Module Lazarus: Uninstall...');
+  //sanity check
+  if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'MakeFile') and
+    DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'ide') and
+    DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'lcl') and
+    ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FBaseDirectory)) then
     begin
-      WritelnLog('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
+    if DeleteDirectoryEx(FBaseDirectory)=false then
+    begin
+      WritelnLog('Error deleting Lazarus directory '+FBaseDirectory);
       result:=false;
-    end;
+    end
+    else
+    result:=true;
+    end
+  else
+  begin
+    WritelnLog('Error: invalid Lazarus directory :'+FBaseDirectory);
+    result:=false;
+  end;
+  if result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+'environmentoptions.xml') and
+    FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+'editoroptions.xml') and
+    ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FPrimaryConfigPath)) then
+    begin
+    if DeleteDirectoryEx(FPrimaryConfigPath)=false then
+    begin
+      WritelnLog('Error deleting Lazarus PrimaryConfigPath directory '+FPrimaryConfigPath);
+      result:=false;
+    end
+    else
+    result:=true;
+    end
+  else
+  begin
+    WritelnLog('Error: invalid Lazarus FPrimaryConfigPath :'+FPrimaryConfigPath);
+    result:=false;
   end;
 end;
 

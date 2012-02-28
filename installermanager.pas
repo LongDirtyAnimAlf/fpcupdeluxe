@@ -28,13 +28,45 @@ Const
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
-    'Do DOCEDITOR;'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
     'Cleanmodule lazarus;'+
     'Buildmodule lazarus;'+
+    'End;'+
+//default clean sequence
+    'Declare defaultclean;'+
+    'Do fpcclean;'+
+    'Do lazarusclean;'+
+    'Do helplazarusclean;'+
+    'CleanModule LAZDATADESKTOP;'+
+    'CleanModule DOCEDITOR;'+
+    'End;'+
+//default clean sequence for win32
+    'Declare defaultwin32clean;'+
+    'Do fpcclean;'+
+    'Do lazarusclean;'+
+    'Do helplazarusclean;'+
+    'CleanModule LAZDATADESKTOP;'+
+    'CleanModule DOCEDITOR;'+
+    'SetCPU x86_64;'+
+    'SetOS win64;'+
+    'Cleanmodule fpc;'+
+    'Cleanmodule lazarus;'+
+    'End;'+
+
+//default uninstall sequence
+    'Declare defaultuninstall;'+
+    'Do fpcuninstall;'+
+    'Do lazarusuninstall;'+
+    'Do helpuninstall;'+
+    'UninstallModule LAZDATADESKTOP;'+
+    'UninstallModule DOCEDITOR;'+
+    'End;'+
+//default clean sequence for win32
+    'Declare defaultwin32clean;'+
+    'Do defaultuninstall;'+
     'End;';
 
 type
@@ -382,11 +414,38 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   end;
   end;
 
+  function DeleteLazarusScript:boolean;
+  //calculate InstalledLazarus. Don't use this function when lazarus is not installed.
+  var
+    InstalledLazarus:string;
+  begin
+  result:=true;
+  if FParent.ShortCutName<>EmptyStr then
+  begin
+    infoln('Lazarus: deleting desktop shortcut:');
+    try
+      //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+
+      InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
+      {$IFDEF MSWINDOWS}
+//todo      DeleteDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
+      {$ENDIF MSWINDOWS}
+      {$IFDEF UNIX}
+      DeleteFileUTF8(FParent.ShortcutName);
+      {$ENDIF UNIX}
+    finally
+      //Ignore problems creating shortcut
+    end;
+  end;
+  end;
+
 begin
   if UpperCase(FunctionName)='CREATEFPCUPSCRIPT' then
     result:=CreateFpcupScript
   else if UpperCase(FunctionName)='CREATELAZARUSSCRIPT' then
     result:=CreateLazarusScript
+  else if UpperCase(FunctionName)='DELETELAZARUSSCRIPT' then
+    result:=DeleteLazarusScript
   else
     begin
     result:=false;

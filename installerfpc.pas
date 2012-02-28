@@ -22,6 +22,11 @@ Const
     'Uninstallmodule FPC;'+
     'End;'+
 
+//standard clean
+    'Declare FPCclean;'+
+    'cleanmodule FPC;'+
+    'End;'+
+
 //selective actions triggered with --only=SequenceName
     'Declare FPCCleanOnly;'+
     'Cleanmodule FPC;'+
