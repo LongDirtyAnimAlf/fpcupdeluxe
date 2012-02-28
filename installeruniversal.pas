@@ -272,7 +272,8 @@ var
   idx:integer;
   sl:TStringList;
   SVN,InstallDir:string;
-  SVNC:TSVNClient;
+  BeforeRevision, AfterRevision: string;
+  UpdateWarnings: TStringList;
 begin
   result:=InitModule;
   if not result then exit;
@@ -288,15 +289,20 @@ begin
     SVN:=GetValue('SVNURL',sl);
     if SVN<>'' then
       begin
-      SVNC:=TSVNClient.Create;
+      UpdateWarnings:=TStringList.Create;
       try
-        SVNC.Verbose:=FVerbose;
-        SVNC.LocalRepository:=ExcludeTrailingBackslash(InstallDir);
-        SVNC.Repository:=SVN;
-        SVNC.CheckOutOrUpdate;
-        result:=SVNC.ReturnCode=0;
+        FSVNClient:=TSVNClient.Create;
+        FSVNClient.Verbose:=FVerbose;
+        FBaseDirectory:=InstallDir;
+        FUrl:=SVN;
+        result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        if UpdateWarnings.Count>0 then
+        begin
+          WritelnLog(UpdateWarnings.Text);
+        end;
+        FSVNClient.Free;
       finally
-        SVNC.Free;
+        UpdateWarnings.Free;
       end;
       end;
     end
