@@ -401,7 +401,7 @@ begin
 OperationSucceeded:=true;
 if OperationSucceeded then
 begin
-  OperationSucceeded:=ForceDirectories(FBootstrapCompilerDirectory);
+  OperationSucceeded:=ForceDirectoriesUTF8(FBootstrapCompilerDirectory);
   if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+FBootstrapCompilerDirectory);
 end;
 

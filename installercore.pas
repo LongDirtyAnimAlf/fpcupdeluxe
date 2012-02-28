@@ -365,7 +365,7 @@ var
   Counter: integer;
   Errors: integer=0;
 begin
-  ForceDirectories(FMakeDir);
+  ForceDirectoriesUTF8(FMakeDir);
   Result:=true;
   for Counter := 0 to FBinUtils.Count - 1 do
   begin
@@ -430,7 +430,7 @@ begin
   with subdirs bin and licenses. No further subdirs
   However, doesn't work on Windows 2K...}
   OperationSucceeded := True;
-  ForceDirectories(FSVNDirectory);
+  ForceDirectoriesUTF8(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   try
     OperationSucceeded := Download(

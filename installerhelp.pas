@@ -261,7 +261,7 @@ begin
     ... but we'd need to include the input files extracted from the Make file.
     }
     OperationSucceeded:=true;
-    ForceDirectories(FTargetDirectory);
+    ForceDirectoriesUTF8(FTargetDirectory);
     DocsZip := SysUtils.GetTempFileName + '.zip';
     try
       OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
@@ -521,7 +521,7 @@ begin
   result:=inherited ConfigModule(ModuleName);
   if result then
   begin
-    result:=ForceDirectories(FLazarusPrimaryConfigPath);
+    result:=ForceDirectoriesUTF8(FLazarusPrimaryConfigPath);
   end
   else
   begin

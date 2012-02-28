@@ -215,7 +215,7 @@ var
 begin
   // Download FPC CHM docs zip into TargetDirectory.
   OperationSucceeded:=true;
-  ForceDirectories(TargetDirectory);
+  ForceDirectoriesUTF8(TargetDirectory);
   DocsZip := SysUtils.GetTempFileName + '.zip';
   try
     OperationSucceeded:=Download(URL,DocsZip);

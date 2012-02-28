@@ -56,7 +56,7 @@ var sequences:string;
 
 implementation
 
-uses inifiles;
+uses inifiles,updatelazconfig,svnclient,fileutil;
 
 Const
   STARTUSERMODULES=1000;
@@ -110,9 +110,12 @@ begin
         end;
       end;
   // correct path delimiter
-  for i:=1 to length(s) do
-    if (s[i]='/') or (s[i]='\') then
-      s[i]:=DirectorySeparator;
+  if pos('URL',Key)<=0 then
+    begin
+    for i:=1 to length(s) do
+      if (s[i]='/') or (s[i]='\') then
+        s[i]:=DirectorySeparator;
+    end;
   result:=s;
 end;
 
@@ -198,25 +201,16 @@ function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
 var
   idx:integer;
   sl:TStringList;
-
-  //dummy function
-  function Addxml(filename,key,value:string):boolean;
-  begin
-  result:=true;
-  end;
-  //dummy function
-  function Finishxml(filename:string):boolean;
-  begin
-  result:=true;
-  end;
+  ULC:TUpdateLazConfig;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
-    i,j:integer;
-    exec:string;
+    i,j,k:integer;
+    exec,key,counter,filename:string;
     bdirty:boolean;
+    count:integer;
   begin
-  bdirty:=false;
+  filename:=xmlfile+'.xml';
   for i:=1 to MAXINSTRUCTIONS do
     begin
     exec:=GetValue('AddTo'+xmlfile+IntToStr(i),sl);
@@ -228,13 +222,28 @@ var
       j:=j+1;
       if exec[j]=':' then break;
       end;
-    result:=Addxml(xmlfile+'.xml',trim(copy(exec,1,j-1)),trim(copy(exec,j+1,length(exec))));
+    key:=trim(copy(exec,1,j-1));
+    k:=pos('@',key);
+    if k<=0 then
+      ULC.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))))
+    else //we got a counter
+      begin
+      counter:= trim(copy(key,k+1,length(key)));
+      key:=trim(copy(key,1,j-1));
+      count:=ULC.GetVariable(filename,counter,0);
+      k:=pos('#',key);
+      while k>0 do
+        begin //replace # with count
+        delete(key,k,1);
+        insert(inttostr(count),key,k);
+        k:=pos('#',key);
+        end;
+      ULC.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))));
+      end;
     if not result then
       break;
     bdirty:=true;
     end;
-  if bdirty then
-    Finishxml(xmlfile+'.xml');
   end;
 
 begin
@@ -243,19 +252,51 @@ begin
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
+    ULC:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
     sl:=TStringList(UniModuleList.Objects[idx]);
     AddToLazXML('environmentoptions');
     AddToLazXML('helpoptions');
     AddToLazXML('packagefiles');
+    ULC.Destroy;
     end
   else
     result:=false;
 end;
 
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
+var
+  idx:integer;
+  sl:TStringList;
+  SVN,InstallDir:string;
+  SVNC:TSVNClient;
 begin
-  if not InitModule then exit;
+  result:=InitModule;
+  if not result then exit;
   result:=true;
+  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  if idx>=0 then
+    begin
+    sl:=TStringList(UniModuleList.Objects[idx]);
+    WritelnLog('Getting module '+ModuleName);
+    InstallDir:=GetValue('InstallDir',sl);
+    if InstallDir<>'' then
+      ForceDirectoriesUTF8(InstallDir);
+    SVN:=GetValue('SVNURL',sl);
+    if SVN<>'' then
+      begin
+      SVNC:=TSVNClient.Create;
+      try
+        SVNC.Verbose:=FVerbose;
+        SVNC.LocalRepository:=ExcludeTrailingBackslash(InstallDir);
+        SVNC.Repository:=SVN;
+        SVNC.CheckOutOrUpdate;
+      finally
+        SVNC.Free;
+      end;
+      end;
+    end
+  else
+    result:=false;
 end;
 
 function TUniversalInstaller.GetModuleRequirements(ModuleName: string;
@@ -321,6 +362,7 @@ var
       if ini.ReadString(ModuleName,'Enabled','')='1' then
         UniModuleEnabledList.Add(uppercase(name));
       // store the section as is and attach as object to UniModuleList
+      // TstringList cleared in finalization
       sl:=TstringList.Create;
       ini.ReadSectionRaw(ModuleName,sl);
       UniModuleList.AddObject(name,TObject(sl));

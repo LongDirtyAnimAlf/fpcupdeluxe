@@ -267,7 +267,7 @@ var
 begin
   if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
   begin
-    if ForceDirectories(FPrimaryConfigPath) then
+    if ForceDirectoriesUTF8(FPrimaryConfigPath) then
       infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath);
   end;
   // Set up a minimal config so we can use LazBuild
