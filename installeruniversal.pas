@@ -19,7 +19,7 @@ type
     FLazarusPrimaryConfigPath:string;
     InitDone:boolean;
   protected
-    function GetValue(Key:string;sl:TStringList):string;
+    function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CLeanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
@@ -62,6 +62,7 @@ Const
   STARTUSERMODULES=1000;
   MAXUSERMODULES=100;
   MAXINSTRUCTIONS=20;
+  MAXRECURSIONS=10;
 
 var
   IniGeneralSection:TStringList=nil;
@@ -70,13 +71,19 @@ var
 
 { TUniversalInstaller }
 
-function TUniversalInstaller.GetValue(Key: string;sl:TStringList): string;
+
+function TUniversalInstaller.GetValue(Key: string; sl: TStringList;
+  recursion: integer): string;
+
+
 var
   i,len:integer;
   s,macro:string;
 begin
   Key:=UpperCase(Key);
   s:='';
+  if recursion=MAXRECURSIONS then
+    exit;
   for i:=0 to sl.Count-1 do
     begin
     s:=sl[i];
@@ -114,7 +121,7 @@ begin
         if macro='FPCDIR' then macro:=FFPCDir
         else if macro='LAZARUSDIR' then macro:=FLazarusDir
         else if macro='LAZARUSPRIMARYCONFIGPATH' then macro:=FLazarusPrimaryConfigPath
-        else macro:=GetValue(macro,sl); //user defined value
+        else macro:=GetValue(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
         if pos(' ',macro)>0 then
           macro:=''''+macro+'''';
