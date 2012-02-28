@@ -180,6 +180,7 @@ begin
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
+    WritelnLog('Building module '+ModuleName);
     result:=RunCommands('InstallExecute',sl);
     end
   else
@@ -275,6 +276,7 @@ begin
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
+    WritelnLog('UnInstalling module '+ModuleName);
     result:=RunCommands('UnInstallExecute',sl);
     end
   else
