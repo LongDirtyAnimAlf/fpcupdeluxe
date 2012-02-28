@@ -28,7 +28,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 unit updatelazconfig;
-{ Creates or updates Lazarus config in primary config path given.}
+{ Creates or updates Lazarus configs (or XML files).
+Can handle arbitrary number of config files.
+Specify filename only if you want to save in the config path set in the Create constructor; else specify path and filename.
+Will save all configs when it is destroyed.
+}
 
 {$mode objfpc}{$H+}
 

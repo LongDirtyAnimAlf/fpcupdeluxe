@@ -50,6 +50,8 @@ type
   protected
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
+    // Retrieves compiler version string
+    function GetCompilerVersion(CompilerPath: string): string;
     function CreateFPCScript:boolean;
     function DownloadBootstrapCompiler: boolean;
     function GetFPCVersion: string;
@@ -340,6 +342,16 @@ begin
 result:=true;
 end;
 
+function TFPCInstaller.GetCompilerVersion(CompilerPath: string): string;
+var
+  Output: string;
+  ResultCode: longint;
+begin
+  Output:='';
+  ResultCode:=ExecuteCommandHidden(CompilerPath, '-iW', Output, FVerbose);
+  Result:=Output;
+end;
+
 function TFPCInstaller.CreateFPCScript: boolean;
 var
   FPCScript:string;
@@ -496,6 +508,9 @@ begin
 end;
 
 function TFPCInstaller.InitModule:boolean;
+var
+  BootstrapVersion: string;
+  Output: string;
 begin
   result:=true;
   if InitDone then
@@ -504,7 +519,7 @@ begin
     ProcessEx.OnOutputM:=@DumpOutput;
   infoln('Module FPC: Getting/compiling FPC...');
   if FBootstrapCompiler='' then
-    begin  // need to download it
+    begin  // may need to download it
     {$IFDEF MSWINDOWS}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL:=
@@ -513,7 +528,7 @@ begin
     {$ENDIF MSWINDOWS}
     {$IFDEF Linux}
     //If compiled for x86 32 bit, install 32 bit
-    //If compiled for x64, install x64 only.//todo: cross compiler!?!
+    //If compiled for x64, install x64 only.
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL :=
@@ -544,7 +559,16 @@ begin
     end;
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
     FCompiler:=FBootstrapCompiler;
-  result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
+  // Only download bootstrap compiler if there's no valid one
+  if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
+    begin
+      infoln('Found valid bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler));
+      result:=CheckAndGetNeededExecutables;
+    end
+    else
+    begin
+      result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
+    end;
 
   WritelnLog('Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
   WritelnLog('FPC URL:                '+FURL,false);
