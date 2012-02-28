@@ -695,6 +695,14 @@ begin
   infoln('FPC: running make distclean before checkout/update:');
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
+
+  // Delete any existing fpc.cfg files
+  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
+  {$IFDEF UNIX}
+  // Delete any fpc.sh shell scripts
+  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
+  {$ENDIF UNIX}
+
   result:=ProcessEx.ExitStatus=0;
 end;
 
@@ -746,32 +754,6 @@ begin
     WritelnLog('Error: invalid FPC directory :'+FBaseDirectory);
     result:=false;
   end;
-
-{ todo: where does this go?
-  if not InitModule then exit;
-  infoln('Module FPC: cleanup...');
-  try
-    // SVN revert FPC directory
-     FSVNClient.LocalRepository := FBaseDirectory;
-     FSVNClient.Repository := FURL;
-     FSVNClient.Revert; //Remove local changes
-
-    // Delete any existing fpc.cfg files
-    Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
-
-    {$IFDEF UNIX}
-    // Delete any fpc.sh shell scripts
-    Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
-    {$ENDIF UNIX}
-    result:=true;
-  except
-    on E: Exception do
-    begin
-      WritelnLog('FPC clean: error: exception occurred: '+E.ClassName+'/'+E.Message+')');
-      result:=false;
-    end;
-  end;
-}
 end;
 
 constructor TFPCInstaller.Create;
