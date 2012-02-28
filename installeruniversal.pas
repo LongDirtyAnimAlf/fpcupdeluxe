@@ -304,7 +304,6 @@ begin
       begin
       UpdateWarnings:=TStringList.Create;
       try
-        FSVNClient:=TSVNClient.Create;
         FSVNClient.Verbose:=FVerbose;
         FBaseDirectory:=InstallDir;
         FUrl:=SVN;
@@ -313,7 +312,6 @@ begin
         begin
           WritelnLog(UpdateWarnings.Text);
         end;
-        FSVNClient.Free;
       finally
         UpdateWarnings.Free;
       end;

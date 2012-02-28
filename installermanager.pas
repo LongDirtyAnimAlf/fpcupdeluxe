@@ -742,6 +742,16 @@ var
   EntryPoint,InstructionPointer:integer;
   idx:integer;
   SeqAttr:^TSequenceAttributes;
+
+  Procedure CleanUpInstaller;
+  begin
+    if assigned(Installer) then
+      begin
+      Installer.Free;
+      Installer:=nil;
+      end;
+  end;
+
 begin
   if not assigned(FParent.FModuleList) then
     begin
@@ -789,6 +799,7 @@ begin
         SMexec        : result:=DoExec(StateMachine[InstructionPointer].param);
         SMend         : begin
                           SeqAttr^.Executed:=ESSucceeded;
+                          CleanUpInstaller;
                           exit; //success
                         end;
         SMcleanmodule : result:=DoCleanModule(StateMachine[InstructionPointer].param);
@@ -806,12 +817,14 @@ begin
         FParent.WritelnLog('Error running fpcup. Technical details: error executing sequence '+SequenceName+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
           ', param: '+StateMachine[InstructionPointer].param);
+        CleanUpInstaller;
         exit; //failure, bail out
         end;
       InstructionPointer:=InstructionPointer+1;
       if InstructionPointer>=length(StateMachine) then  //somebody forgot end
         begin
         SeqAttr^.Executed:=ESSucceeded;
+        CleanUpInstaller;
         exit; //success
         end;
       end;
