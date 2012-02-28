@@ -290,6 +290,7 @@ begin
         SVNC.LocalRepository:=ExcludeTrailingBackslash(InstallDir);
         SVNC.Repository:=SVN;
         SVNC.CheckOutOrUpdate;
+        result:=SVNC.ReturnCode=0;
       finally
         SVNC.Free;
       end;
