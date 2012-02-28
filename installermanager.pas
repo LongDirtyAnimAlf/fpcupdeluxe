@@ -118,7 +118,9 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
+    // Fill in ModulePublishedList and ModuleEnabledList
     function LoadModuleList:boolean;
+    // Stop talking. Do it!
     function Run: boolean;
     constructor Create;
     destructor Destroy; override;
@@ -165,9 +167,13 @@ type
       procedure ResetAllExecuted(SkipFPC:boolean=false);
     public
       property Parent:TFPCupManager write Fparent;
+      // parse a sequence source code and append to the statemachine
       function AddSequence(Sequence:string):boolean;
+      // Add the "only" sequence from the statemachine based on the --only list
       function CreateOnly(OnlyModules:string):boolean;
+      // deletes the "only" sequence from the statemachine
       function DeleteOnly:boolean;
+      // run the statemachine starting at SequenceName
       function Run(SequenceName:string):boolean;
       constructor Create;
       destructor Destroy; override;
@@ -733,7 +739,7 @@ end;
 
 function TSequencer.Run(SequenceName: string): boolean;
 var
-  InstructionPointer:integer;
+  EntryPoint,InstructionPointer:integer;
   idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
@@ -743,6 +749,7 @@ begin
     FParent.WritelnLog('Error: No sequences loaded when trying to find' + SequenceName);
     exit;
     end;
+  // --clean or --install ??
   if FParent.Uninstall then  // uninstall overrides clean
     begin
     if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-8,9))<>'UNINSTALL') then
@@ -753,11 +760,13 @@ begin
     if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-4,5))<>'CLEAN') then
       SequenceName:=SequenceName+'clean';
     end;
+  // find sequence
   idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
   if (idx>=0) then
     begin
     result:=true;
     SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
+    // Don't run if already run
     case SeqAttr^.Executed of
       ESFailed   : begin
                      result:=false;
@@ -765,7 +774,10 @@ begin
                    end;
       ESSucceeded : exit;
       end;
+    // Get entry point in statemachine
     InstructionPointer:=SeqAttr^.EntryPoint;
+    EntryPoint:=InstructionPointer;
+    // run sequence until end or failure
     while true do
       begin
       case StateMachine[InstructionPointer].instr of
@@ -792,7 +804,8 @@ begin
         begin
         SeqAttr^.Executed:=ESFailed;
         FParent.WritelnLog('Error running fpcup. Technical details: error executing sequence '+SequenceName+
-          '; instruction: '+StateMachine[InstructionPointer].param);
+          '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
+          ', param: '+StateMachine[InstructionPointer].param);
         exit; //failure, bail out
         end;
       InstructionPointer:=InstructionPointer+1;
