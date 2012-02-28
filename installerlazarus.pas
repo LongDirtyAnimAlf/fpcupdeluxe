@@ -274,8 +274,6 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
   try
     try
-      // Magic value for version
-      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Version/Value', VersionNewConfig);
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FBaseDirectory);
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
