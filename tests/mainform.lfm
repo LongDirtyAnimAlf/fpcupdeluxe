@@ -1,0 +1,92 @@
+object frmMainform: TfrmMainform
+  Left = 349
+  Height = 547
+  Top = 199
+  Width = 764
+  Caption = 'tsort2'
+  ClientHeight = 547
+  ClientWidth = 764
+  OnClick = FormClick
+  OnCreate = FormCreate
+  OnResize = FormResize
+  LCLVersion = '0.9.31'
+  object stgDependencies: TStringGrid
+    Left = 8
+    Height = 168
+    Top = 32
+    Width = 744
+    ColCount = 0
+    FixedCols = 0
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSizing, goColSizing, goRowMoving, goColMoving, goEditing, goRowSelect, goAlwaysShowEditor, goSmoothScroll, goFixedRowNumbering]
+    RowCount = 0
+    TabOrder = 0
+  end
+  object stgSorted: TStringGrid
+    Left = 8
+    Height = 256
+    Top = 248
+    Width = 744
+    ColCount = 0
+    FixedCols = 0
+    FixedRows = 0
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goRangeSelect, goRowSizing, goColSizing, goRowMoving, goColMoving, goSmoothScroll, goFixedRowNumbering]
+    RowCount = 0
+    TabOrder = 1
+    OnClick = stgSortedClick
+  end
+  object btnLoadDeps: TButton
+    Left = 184
+    Height = 25
+    Top = 0
+    Width = 151
+    Caption = 'Load file...'
+    OnClick = btnLoadDepsClick
+    TabOrder = 2
+  end
+  object btnSort: TButton
+    Left = 312
+    Height = 25
+    Hint = 'Sorts the data'
+    Top = 208
+    Width = 75
+    Caption = 'Sort'
+    OnClick = btnSortClick
+    TabOrder = 3
+  end
+  object btnCopy: TButton
+    Left = 256
+    Height = 25
+    Hint = 'Copies results to clipboard'
+    Top = 512
+    Width = 75
+    Caption = 'Copy'
+    OnClick = btnCopyClick
+    TabOrder = 4
+    Visible = False
+  end
+  object btnSave: TButton
+    Left = 376
+    Height = 25
+    Hint = 'Saves results to text file'
+    Top = 512
+    Width = 75
+    Caption = 'Save'
+    OnClick = btnSaveClick
+    TabOrder = 5
+    Visible = False
+  end
+  object btnLoadSample: TButton
+    Left = 360
+    Height = 25
+    Hint = 'Loads sample data and shows explanation'
+    Top = 0
+    Width = 151
+    Caption = 'Load sample data...'
+    OnClick = btnLoadSampleClick
+    TabOrder = 6
+  end
+  object OpenDialog1: TOpenDialog
+    left = 8
+  end
+end
