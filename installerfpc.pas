@@ -461,7 +461,7 @@ begin
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
   //Extract .tar.bz2, overwriting without prompting
-  if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,Verbose) <> 0 then
+  if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
   begin
     infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
     OperationSucceeded := False;
@@ -475,17 +475,17 @@ begin
   begin
     //todo: currently tar spits out uncompressed file in current dir...
     //which might not have proper permissions to actually create file...!?
-    infoln('Going to rename/move '+CompilerName+' to '+BootstrapCompiler);
-    sysutils.DeleteFile(BootstrapCompiler); //ignore errors
+    infoln('Going to rename/move '+CompilerName+' to '+FBootStrapCompiler);
+    sysutils.DeleteFile(FBootStrapCompiler); //ignore errors
     // We might be moving files across partitions so we cannot use renamefile
-    OperationSucceeded:=FileUtil.CopyFile(CompilerName, BootstrapCompiler);
+    OperationSucceeded:=FileUtil.CopyFile(CompilerName, FBootStrapCompiler);
     sysutils.DeleteFile(CompilerName);
   end;
   if OperationSucceeded then
   begin
     //Make executable
-    OperationSucceeded:=(fpChmod(BootStrapCompiler, &700)=0); //rwx------
-    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+BootstrapCompiler);
+    OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler);
   end;
   {$ENDIF DARWIN}
 end;
