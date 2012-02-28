@@ -265,30 +265,35 @@ function TLazarusInstaller.ConfigModule(ModuleName:string): boolean;
 var
   LazarusConfig: TUpdateLazConfig;
 begin
-  Result:=ForceDirectories(FPrimaryConfigPath);
-  infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath);
-    // Set up a minimal config so we can use LazBuild
+  if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
+  begin
+    if ForceDirectories(FPrimaryConfigPath) then
+      infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath);
+  end;
+  // Set up a minimal config so we can use LazBuild
   LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
   try
     try
-      LazarusConfig.LazarusDirectory:=FBaseDirectory;
+      // Magic value for version
+      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Version/Value', VersionNewConfig);
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FBaseDirectory);
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
       // the platform specific compiler. In order to be able to cross compile
       // we'd rather use fpc
-      LazarusConfig.CompilerFilename:=ExtractFilePath(FCompiler)+'fpc'+GetExeExt;
-      LazarusConfig.DebuggerFilename:=FMakeDir+'gdb'+GetExeExt;
-      LazarusConfig.MakeFilename:=FMakeDir+'make'+GetExeExt;
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/CompilerFilename/Value',ExtractFilePath(FCompiler)+'fpc'+GetExeExt);
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',FMakeDir+'gdb'+GetExeExt);
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',FMakeDir+'make'+GetExeExt);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
-      LazarusConfig.CompilerFilename:=FCompiler;
-      LazarusConfig.DebuggerFilename:=which('gdb'); //assume in path
-      LazarusConfig.MakeFilename:=which('make'); //assume in path
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/CompilerFilename/Value',FCompiler);
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',which('gdb')); //assume in path
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',which('make')); //assume in path
       {$ENDIF UNIX}
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
-      LazarusConfig.FPCSourceDirectory:=FFPCDir;
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/FPCSourceDirectory/Value',FFPCDir);
     except
       on E: Exception do
       begin

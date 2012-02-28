@@ -36,54 +36,55 @@ interface
 
 uses
   Classes, SysUtils, laz2_xmlcfg;
+const
+  EnvironmentConfig='environmentoptions.xml';
+  HelpConfig='helpoptions.xml';
+  VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
+  VersionNewHelpConfig='1'; //Use this version in our help config file
+
 type
-//todo: append as needed
-TConfigVariable=(VCHMHelpFilesPath);
+
+{ TConfigVariable }
+
+TConfig=class; //forward declaration
+TUpdateLazConfig=class; //forward declaration
+
+TConfig = class(TXMLConfig)
+private
+  FDirty: boolean;
+  FNew: boolean;
+protected
+  //todo: check if this will work.
+  procedure AddChild(ParentPath, ChildVar, ChildValue: string); unimplemented;
+  // Counts subunits. Uses convention: parent name is stripped child name +s
+  // Child name=stripped child name+number
+  // E.g. Units=>Unit0,Unit1.. etc
+  function CountChildren(ParentPath: string): integer; unimplemented;
+  // Did the config file exist before using it?
+  property New: boolean read FNew;
+  // Save our changes to the config variable
+  procedure Save;
+public
+  constructor Create(const AFilename: String); overload; // create and load
+  destructor Destroy; override;
+end;
 
 { TUpdateLazConfig }
 TUpdateLazConfig = class(TObject)
 private
-  FCHMHelpExe: string;
-  FCHMHelpFilesPath: string;
-  FConfig: TXMLConfig;
-  // List of settings that need to be deleted for the help section
-  FHelpDeleteList: TStringlist;
-  FHelpConfig: TXMLConfig;
-  FCompilerFilename: string;
-  FDebuggerFilename: string;
-  FFPCSourceDirectory: string;
-  FNewHelpFile: boolean;
-  FNewMainFile: boolean;
-  FLazarusDirectory: string;
-  FMakeFilename: string;
-  FConfigFile: string;
-  FHelpConfigFile: string;
-  FTestBuildDirectory: string;
+  //List of TConfigs, with absolute file names
+  FConfigs: TStringList;
+  // Place where config files stores if no path component given
+  FDefaultConfigPath: string;
+  function GetConfig(const ConfigFile: string): TConfig;
+  procedure WriteConfig;
 public
-  {Path to CHM help viewer, such as lhelp.exe}
-  property CHMHelpExe: string read FCHMHelpExe write FCHMHelpExe;
-  {Directory where CHM files are searched. If you want to use subdirectories, modify the baseURL settings for the individual files.}
-  property CHMHelpFilesPath: string read FCHMHelpFilesPath write FCHMHelpFilesPath;
-  {New compiler filename. May include macros, except FPCVer. If empty, use current/default value:}
-  property CompilerFilename: string read FCompilerFilename write FCompilerFilename;
-  {Config file being created/updated:}
-  property ConfigFile: string read FConfigFile;
-  {New debugger filename. May include macros. If empty, use current/default value:}
-  property DebuggerFilename: string read FDebuggerFilename write FDebuggerFilename;
-  {Removes entire entry for configuration setting. This will OVERRIDE any variable set via the other properties}
-  procedure DeleteVariable(Variable:TConfigVariable);
-  {New FPC source directory. May include macros. If empty, use current/default value:}
-  property FPCSourceDirectory: string read FFPCSourceDirectory write FFPCSourceDirectory;
-  {New Lazarus directory. May NOT include macros. If empty, use current/default value:}
-  property LazarusDirectory: string read FLazarusDirectory write FLazarusDirectory;
-  {NewMainFile make filename. May include macros. If empty, use current/default value:}
-  property MakeFilename: string read FMakeFilename write FMakeFilename;
-  {Is this a new help config file or an existing one?}
-  property NewHelpFile: boolean read FNewHelpFile;
-  {Is this a new config file or an existing one?}
-  property NewMainFile: boolean read FNewMainFile;
-  {New test build directory (directory for testing build options). May include macros. If empty, use current/default value:}
-  property TestBuildDirectory: string read FTestBuildDirectory write FTestBuildDirectory;
+  { Remove entire variable }
+  procedure DeleteVariable(ConfigFile, Variable:string);
+  { Sets variable to a certain value.}
+  procedure SetVariable(ConfigFile, Variable, Value: string);
+  { Sets variable to a certain value, only if a config file is created for us.}
+  procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
   {Create object; specify path (primary config path) where option files should be created or updated:}
   constructor Create(ConfigPath: string);
   destructor Destroy; override;
@@ -91,99 +92,125 @@ end;
 implementation
 uses FileUtil;
 
-{ TUpdateLazConfig }
-const
-  ConfigFileName='environmentoptions.xml';
-  HelpConfigFileName='helpoptions.xml';
-  VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
-  VersionNewHelpConfig='1'; //Use this version in our help config file
+{ TConfig }
 
-procedure TUpdateLazConfig.DeleteVariable(Variable: TConfigVariable);
-// Deleted values override set values regardless of the order
-// the property/procedure is called
-// todo: rewrite class to use a dictionary or similar that maps
-// config names to strings used in FConfig.setvalue/deletevalue or
-// have a single list for both add and delete...
+procedure TConfig.AddChild(ParentPath, ChildVar, ChildValue: string); unimplemented;
 begin
-  case Variable of
-    VCHMHelpFilesPath: FHelpDeleteList.Add('Viewers/TChmHelpViewer/CHMHelp/FilesPath');
+//todo: implement. Note procedure signature may change depending on needs
+end;
+
+function TConfig.CountChildren(ParentPath: string): integer; unimplemented;
+begin
+  //todo: implement
+end;
+
+procedure TConfig.Save;
+// Alias for flush, really..
+begin
+  inherited Flush;
+end;
+
+constructor TConfig.Create(const AFilename: String);
+begin
+  FNew:=not(FileExistsUTF8(AFileName));
+  (Self as TXMLConfig).Create(AFileName);
+  FDirty:=false;
+end;
+
+destructor TConfig.Destroy;
+var
+  Counter:integer;
+begin
+  // The destroy will call flush to save
+  // the config...
+  inherited Destroy;
+end;
+
+
+procedure TUpdateLazConfig.WriteConfig;
+var
+  Counter:integer;
+begin
+  // Write all configs to disk if necessary
+  for Counter:=0 to FConfigs.Count-1 do
+  begin
+   (FConfigs.Objects[Counter] As TConfig).Save;
   end;
+end;
+
+function TUpdateLazConfig.GetConfig(const ConfigFile: string): TConfig;
+var
+  ConfigIndex: integer;
+  FileName: string;
+  NewConfig: TConfig;
+begin
+  if ExtractFileName(ConfigFile)=Configfile then
+  begin
+    // No directory given, place in config path
+    FileName:=ExpandFileName(IncludeTrailingPathDelimiter(FDefaultConfigPath)+
+      ConfigFile);
+  end
+  else
+  begin
+    // Normalize
+    FileName:=ExpandFileName(ConfigFile);
+  end;
+  ConfigIndex:=FConfigs.IndexOf(FileName);
+  if ConfigIndex=-1 then
+  begin
+    NewConfig:=TConfig.Create(FileName);
+    ConfigIndex:=FConfigs.AddObject(FileName, NewConfig);
+    //NewConfig.Free; //This would remove object from stringlist
+  end;
+  Result:=(FConfigs.Objects[ConfigIndex] As TConfig);
+end;
+
+procedure TUpdateLazConfig.DeleteVariable(ConfigFile, Variable:string);
+var
+  Config: TConfig;
+  VariableIndex: integer;
+begin
+  Config:=GetConfig(ConfigFile);
+  Config.DeleteValue(Variable);
+end;
+
+procedure TUpdateLazConfig.SetVariable(ConfigFile, Variable, Value: string);
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  Config.SetValue(Variable, Value);
+end;
+
+procedure TUpdateLazConfig.SetVariableIfNewFile(ConfigFile, Variable,
+  Value: string);
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  if Config.New then Config.SetValue(Variable, Value);
 end;
 
 constructor TUpdateLazConfig.Create(ConfigPath: string);
 begin
-  FConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+ConfigFileName;
-  FHelpConfigFile:=IncludeTrailingPathDelimiter(ConfigPath)+HelpConfigFileName;
-  // Assume any file that exists is also valid... might be improved by checking
-  // for correct values.
-  if FileExistsUTF8(FConfigFile) then FNewMainFile:=false else FNewMainFile:=true;
-  if FileExistsUTF8(FHelpConfigFile) then FNewHelpFile:=false else FNewHelpFile:=true;
-  FConfig:=TXMLConfig.Create(FConfigFile);
-  FHelpConfig:=TXMLConfig.Create(FHelpConfigFile);
-  FHelpDeleteList:=TStringList.Create;
+  FConfigs:=TStringList.Create;
+  FConfigs.Sorted:=true;
+  FConfigs.Duplicates:=dupError;
+  FDefaultConfigPath:=IncludeTrailingPathDelimiter(ExpandFileName(ConfigPath));
 end;
 
 destructor TUpdateLazConfig.Destroy;
 var
-  DeleteCounter:integer;
+  Counter: integer;
 begin
-  try
-    if NewMainFile then
-    begin
-      // Set up some sensible defaults
-      FConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewConfig);
-      FConfig.SetValue('EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
-      {$IFDEF MSWINDOWS}
-      FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '%FpcBinDir%\fpc.exe');
-      FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', 'gdb.exe'); //assume in path
-      FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '$(LazarusDir)fpc\$(FPCVer)\source');
-      FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', 'c:\lazarus');
-      FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', '%FpcBinDir%\make.exe');
-      FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', GetTempDir(false));
-      {$ENDIF MSWINDOWS}
-      {$IFDEF UNIX}
-      FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', '/usr/bin/fpc');
-      FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', 'gdb'); //assume in path
-      FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', '/usr/share/fpcsrc/$(FPCVer)/fpc/');
-      FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', '/usr/share/lazarus');
-      FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', 'make'); //assume in path
-      FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', '/tmp');
-      {$ENDIF UNIX}
-    end;
-    if FCompilerFileName<>Emptystr then FConfig.SetValue('EnvironmentOptions/CompilerFilename/Value', FCompilerFileName);
-    if FDebuggerFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/DebuggerFilename/Value', FDebuggerFilename);
-    if FFPCSourceDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/FPCSourceDirectory/Value', FFPCSourceDirectory);
-    if FLazarusDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/LazarusDirectory/Value', FLazarusDirectory);
-    if FMakeFilename<>Emptystr then FConfig.SetValue('EnvironmentOptions/MakeFilename/Value', FMakeFilename);
-    if FTestBuildDirectory<>Emptystr then FConfig.SetValue('EnvironmentOptions/TestBuildDirectory/Value', FTestBuildDirectory);
-    FConfig.Flush; //write out newly created or updated file
-  finally
-    // Regardless of what happens, try to prevent memory leaks.
-    FConfig.Free;
+  // When FConfigs go out of scope, they save to file first...
+  for Counter:=0 to FConfigs.Count-1 do
+  begin
+    FConfigs.Objects[Counter].Free;
   end;
-  try
-    if NewHelpFile then
-    begin
-      // Defaults
-      FConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
-      // We don't know the location of the help viewer or help files
-      FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', EmptyStr);
-      FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', EmptyStr);
-    end;
-    if FCHMHelpExe<>EmptyStr then FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/Exe', FCHMHelpExe);
-    if FCHMHelpFilesPath<>EmptyStr then FHelpConfig.SetValue('Viewers/TChmHelpViewer/CHMHelp/FilesPath', FCHMHelpFilesPath);
-    // Deleted items override set items for now...
-    for DeleteCounter:=0 to FHelpDeleteList.Count-1 do
-    begin
-      FHelpConfig.DeleteValue(FHelpDeleteList[DeleteCounter]);
-    end;
-    { Writing a semantically empty xml file shouldn't hurt,
-    so no checks for dirty file needed... }
-    FHelpConfig.Flush;
-  finally
-    FHelpConfig.Free;
-    FHelpDeleteList.Free;
-  end;
+  FConfigs.Free;
   inherited Destroy;
 end;
 

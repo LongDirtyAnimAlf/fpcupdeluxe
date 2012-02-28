@@ -534,9 +534,13 @@ begin
       try
         // Configure help path
         // Note that we might be overwriting user's settings here.
-        LazarusConfig.CHMHelpFilesPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+        LazarusConfig.SetVariableIfNewFile(HelpConfig,
+          'HelpOptions/Version/Value',VersionNewHelpConfig);
+        LazarusConfig.SetVariable(HelpConfig,
+          'Viewers/TChmHelpViewer/CHMHelp/FilesPath',
+          IncludeTrailingPathDelimiter(FBaseDirectory)+
           'docs'+DirectorySeparator+
-          'html'+DirectorySeparator;
+          'html'+DirectorySeparator);
         result:=true;
       except
         on E: Exception do
@@ -562,7 +566,8 @@ begin
     try
       try
         // Remove link to help files
-        LazarusConfig.DeleteVariable(VCHMHelpFilesPath);
+        LazarusConfig.DeleteVariable(HelpConfig,
+          'Viewers/TChmHelpViewer/CHMHelp/FilesPath');
         result:=true;
       except
         on E: Exception do

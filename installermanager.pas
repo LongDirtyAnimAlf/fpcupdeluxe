@@ -486,6 +486,7 @@ begin
       Installer.Compiler:=FParent.CompilerName;
     Installer.CompilerOptions:=FParent.LazarusOPT;
     Installer.DesiredRevision:=FParent.LazarusDesiredRevision;
+    (Installer As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
     Installer.LogFile:=FParent.LogFile;
     {$IFDEF MSWINDOWS}
     Installer.MakeDirectory:=FParent.MakeDirectory;
