@@ -299,7 +299,7 @@ var
   i:integer;
 begin
   for i:=0 to UniModuleList.Count -1 do
-    FreeMem(UniModuleList.Objects[i]);
+    TStringList(UniModuleList.Objects[i]).free;
 end;
 
 procedure ReadInifile(ConfigFile: string);
