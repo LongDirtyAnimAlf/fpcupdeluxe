@@ -349,6 +349,7 @@ var
 begin
   Output:='';
   ResultCode:=ExecuteCommandHidden(CompilerPath, '-iW', Output, FVerbose);
+  Output:=StringReplace(Output,LineEnding,'',[rfReplaceAll,rfIgnoreCase]);
   Result:=Output;
 end;
 
@@ -562,7 +563,7 @@ begin
   // Only download bootstrap compiler if there's no valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
     begin
-      infoln('Found valid bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler));
+      infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler));
       result:=CheckAndGetNeededExecutables;
     end
     else

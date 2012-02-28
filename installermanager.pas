@@ -791,7 +791,8 @@ begin
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
-        FParent.WritelnLog('Error running fpcup. Technical details: error executing sequence '+SequenceName);
+        FParent.WritelnLog('Error running fpcup. Technical details: error executing sequence '+SequenceName+
+          '; instruction: '+StateMachine[InstructionPointer].param);
         exit; //failure, bail out
         end;
       InstructionPointer:=InstructionPointer+1;
