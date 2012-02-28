@@ -64,6 +64,7 @@ Const
   MAXINSTRUCTIONS=20;
 
 var
+  IniGeneralSection:TStringList=nil;
   UniModuleList:TStringList=nil;
   UniModuleEnabledList:TStringlist=nil;
 
@@ -87,6 +88,18 @@ begin
       end;
     s:='';
     end;
+  if s='' then //search general section
+    for i:=0 to IniGeneralSection.Count-1 do
+      begin
+      s:=IniGeneralSection[i];
+      if (copy(UpperCase(s),1, length(Key))=Key) and ((s[length(Key)+1]='=') or (s[length(Key)+1]=' ')) then
+        begin
+        if pos('=',s)>0 then
+          s:=trim(copy(s,pos('=',s)+1,length(s)));
+        break;
+        end;
+      s:='';
+      end;
 //expand macros
   if s<>'' then
     while pos('$(',s)>0 do
@@ -385,6 +398,7 @@ begin
   ini.CaseSensitive:=false;
 // parse inifile
   try
+    ini.ReadSectionRaw('General',IniGeneralSection);
     for i:=1 to STARTUSERMODULES do
       if not LoadModule('Module'+IntToStr(i)) then break; //require contiguous numbering
     for i:=STARTUSERMODULES to STARTUSERMODULES+MAXUSERMODULES do
@@ -438,15 +452,13 @@ begin
 end;
 
 initialization
+ IniGeneralSection:=TStringList.create;
  UniModuleList:=TStringList.create;
  UniModuleEnabledList:=TStringList.create;
 finalization
-if assigned(UniModuleList) then
-  begin
-  ClearUniModuleList;
-  UniModuleList.free;
-  end;
-if assigned(UniModuleEnabledList) then
-  UniModuleEnabledList.free;
+ClearUniModuleList;
+UniModuleList.free;
+UniModuleEnabledList.free;
+IniGeneralSection.Free;
 end.
 
