@@ -79,10 +79,18 @@ private
 public
   { Remove entire variable }
   procedure DeleteVariable(ConfigFile, Variable:string);
-  { Returns variable content, or empty string if it doesn't exist }
+  { Returns string variable content, or empty string if it doesn't exist }
   function GetVariable(ConfigFile, Variable: string): string;
-  { Sets variable to a certain value.}
+  { Returns integer variable content, or Default if it doesn't exit }
+  function GetVariable(ConfigFile, Variable: string; Default: integer): integer;
+  { Returns boolean variable content, or Default if it doesn't exit }
+  function GetVariable(ConfigFile, Variable: string; Default: boolean): boolean;
+  { Sets string variable to a certain value.}
   procedure SetVariable(ConfigFile, Variable, Value: string);
+  { Sets integer variable to a certain value}
+  procedure SetVariable(ConfigFile, Variable: string; Value: integer);
+  { Sets boolean variable to a certain value}
+  procedure SetVariable(ConfigFile, Variable: string; Value: boolean);
   { Sets variable to a certain value, only if a config file is created for us.}
   procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
   {Create object; specify path (primary config path) where option files should be created or updated:}
@@ -173,7 +181,47 @@ begin
   result:=Config.GetValue(Variable, '');
 end;
 
+function TUpdateLazConfig.GetVariable(ConfigFile, Variable: string;
+  Default: integer): integer;
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetValue(Variable, Default);
+end;
+
+function TUpdateLazConfig.GetVariable(ConfigFile, Variable: string;
+  Default: boolean): boolean;
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetValue(Variable, Default);
+end;
+
 procedure TUpdateLazConfig.SetVariable(ConfigFile, Variable, Value: string);
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  Config.SetValue(Variable, Value);
+end;
+
+procedure TUpdateLazConfig.SetVariable(ConfigFile, Variable: string;
+  Value: integer);
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  Config.SetValue(Variable, Value);
+end;
+
+procedure TUpdateLazConfig.SetVariable(ConfigFile, Variable: string;
+  Value: boolean);
 var
   Config: TConfig;
 begin
