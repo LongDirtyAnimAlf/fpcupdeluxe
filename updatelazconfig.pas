@@ -43,7 +43,7 @@ uses
 const
   EnvironmentConfig='environmentoptions.xml';
   HelpConfig='helpoptions.xml';
-  VersionNewConfig='106'; //We can assume Lazarus SVN can parse this version
+  VersionNewEnvironmentConfig='106'; //We can assume Lazarus SVN can parse this version
   VersionNewHelpConfig='1'; //Use this version in our help config file
 
 type
@@ -55,7 +55,6 @@ TUpdateLazConfig=class; //forward declaration
 
 TConfig = class(TXMLConfig)
 private
-  FDirty: boolean;
   FNew: boolean;
 protected
   // Did the config file exist before using it?
@@ -109,10 +108,11 @@ begin
 end;
 
 constructor TConfig.Create(const AFilename: String);
+var
+  FileOnly: string;
 begin
   FNew:=not(FileExistsUTF8(AFileName));
   (Self as TXMLConfig).Create(AFileName);
-  FDirty:=false;
 end;
 
 destructor TConfig.Destroy;
@@ -158,6 +158,14 @@ begin
   begin
     NewConfig:=TConfig.Create(FileName);
     ConfigIndex:=FConfigs.AddObject(FileName, NewConfig);
+    if NewConfig.New then
+    begin
+      // Lazarus wants a version number...
+      case (ExtractFileName(ConfigFile)) of
+        EnvironmentConfig: NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
+        HelpConfig: NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
+      end;
+    end;
     //NewConfig.Free; //This would remove object from stringlist
   end;
   Result:=(FConfigs.Objects[ConfigIndex] As TConfig);

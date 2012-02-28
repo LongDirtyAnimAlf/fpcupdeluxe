@@ -534,8 +534,6 @@ begin
       try
         // Configure help path
         // Note that we might be overwriting user's settings here.
-        LazarusConfig.SetVariableIfNewFile(HelpConfig,
-          'HelpOptions/Version/Value',VersionNewHelpConfig);
         LazarusConfig.SetVariable(HelpConfig,
           'Viewers/TChmHelpViewer/CHMHelp/FilesPath',
           IncludeTrailingPathDelimiter(FBaseDirectory)+
