@@ -122,6 +122,7 @@ var
   CrossInstaller:TCrossInstaller;
   Options:String;
 begin
+  result:=true;
   // Make crosscompiler using new compiler
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
