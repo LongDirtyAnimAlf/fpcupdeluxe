@@ -58,12 +58,6 @@ private
   FDirty: boolean;
   FNew: boolean;
 protected
-  //todo: check if this will work.
-  procedure AddChild(ParentPath, ChildVar, ChildValue: string); unimplemented;
-  // Counts subunits. Uses convention: parent name is stripped child name +s
-  // Child name=stripped child name+number
-  // E.g. Units=>Unit0,Unit1.. etc
-  function CountChildren(ParentPath: string): integer; unimplemented;
   // Did the config file exist before using it?
   property New: boolean read FNew;
   // Save our changes to the config variable
@@ -85,6 +79,8 @@ private
 public
   { Remove entire variable }
   procedure DeleteVariable(ConfigFile, Variable:string);
+  { Returns variable content, or empty string if it doesn't exist }
+  function GetVariable(ConfigFile, Variable: string): string;
   { Sets variable to a certain value.}
   procedure SetVariable(ConfigFile, Variable, Value: string);
   { Sets variable to a certain value, only if a config file is created for us.}
@@ -97,16 +93,6 @@ implementation
 uses FileUtil;
 
 { TConfig }
-
-procedure TConfig.AddChild(ParentPath, ChildVar, ChildValue: string); unimplemented;
-begin
-//todo: implement. Note procedure signature may change depending on needs
-end;
-
-function TConfig.CountChildren(ParentPath: string): integer; unimplemented;
-begin
-  //todo: implement
-end;
 
 procedure TConfig.Save;
 // Alias for flush, really..
@@ -176,6 +162,15 @@ var
 begin
   Config:=GetConfig(ConfigFile);
   Config.DeleteValue(Variable);
+end;
+
+function TUpdateLazConfig.GetVariable(ConfigFile, Variable: string): string;
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  result:=Config.GetValue(Variable, '');
 end;
 
 procedure TUpdateLazConfig.SetVariable(ConfigFile, Variable, Value: string);
