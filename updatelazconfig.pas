@@ -43,8 +43,10 @@ uses
 const
   EnvironmentConfig='environmentoptions.xml';
   HelpConfig='helpoptions.xml';
+  PackageConfig='packagefiles.xml';
   VersionNewEnvironmentConfig='106'; //We can assume Lazarus SVN can parse this version
-  VersionNewHelpConfig='1'; //Use this version in our help config file
+  VersionNewHelpConfig='1'; //Use this version in new help config file
+  VersionNewPackageConfig='2'; //Use this version in new package config file
 
 type
 
@@ -164,6 +166,12 @@ begin
       case (ExtractFileName(ConfigFile)) of
         EnvironmentConfig: NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
         HelpConfig: NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
+        PackageConfig:
+          begin
+            // Note: Version= in this file is an attribute of UserPkgLinks; might not matter
+            NewConfig.SetValue('UserPkgLinks/Version', VersionNewPackageConfig);
+            NewConfig.SetValue('UserPkgLinks/Count', '0');
+          end;
       end;
     end;
     //NewConfig.Free; //This would remove object from stringlist
