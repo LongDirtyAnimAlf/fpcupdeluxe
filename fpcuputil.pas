@@ -40,8 +40,10 @@ uses
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
 // Create shell script in ~ directory that links to Target
 procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
+{$IFDEF MSWINDOWS}
 // Delete shortcut on desktop
 procedure DeleteDesktopShortcut(ShortcutName: string);
+{$ENDIF MSWINDOWS}
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
@@ -374,6 +376,7 @@ begin
   end;
 end;
 
+{$IFDEF MSWINDOWS}
 procedure DeleteDesktopShortcut(ShortcutName: string);
 var
   PIDL: PItemIDList;
@@ -386,6 +389,7 @@ begin
   LinkName := InFolder + PathDelim + ShortcutName+'.lnk';
   SysUtils.DeleteFile(LinkName);
 end;
+{$ENDIF MSWINDOWS}
 
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Lazarus fileutil.DeleteDirectory on steroids, works like
