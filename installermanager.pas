@@ -556,7 +556,7 @@ begin
     Installer.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
     (Installer as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-    Installer.URL:=FParent.FPCURL;
+    Installer.URL:=FParent.LazarusURL;
     Installer.Verbose:=FParent.Verbose;
     end
   //Convention: help modules start with HelpFPC
@@ -902,4 +902,4 @@ begin
 end;
 
 end.
-
+
