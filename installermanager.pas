@@ -516,12 +516,7 @@ begin
     Installer.Compiler:='';  //bootstrap used
     Installer.CompilerOptions:=FParent.FPCOPT;
     Installer.DesiredRevision:=FParent.FPCDesiredRevision;
-    Installer.LogFile:=FParent.LogFile;
-    {$IFDEF MSWINDOWS}
-    Installer.MakeDirectory:=FParent.MakeDirectory;
-    {$ENDIF}
     Installer.URL:=FParent.FPCURL;
-    Installer.Verbose:=FParent.Verbose;
     end
   else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='BIGIDE') then
     begin
@@ -551,13 +546,8 @@ begin
     Installer.CompilerOptions:=FParent.LazarusOPT;
     Installer.DesiredRevision:=FParent.LazarusDesiredRevision;
     (Installer As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
-    Installer.LogFile:=FParent.LogFile;
-    {$IFDEF MSWINDOWS}
-    Installer.MakeDirectory:=FParent.MakeDirectory;
-    {$ENDIF}
     (Installer as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     Installer.URL:=FParent.LazarusURL;
-    Installer.Verbose:=FParent.Verbose;
     end
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
@@ -578,11 +568,6 @@ begin
         Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
       else
         Installer.Compiler:=FParent.CompilerName;
-      Installer.LogFile:=FParent.LogFile;
-      {$IFDEF MSWINDOWS}
-      Installer.MakeDirectory:=FParent.MakeDirectory;
-      {$ENDIF}
-      Installer.Verbose:=FParent.Verbose;
       end
   else if uppercase(ModuleName)='HELPLAZARUS' then
       begin
@@ -602,12 +587,7 @@ begin
       else
         Installer.Compiler:=FParent.CompilerName;
       (Installer as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
-      Installer.LogFile:=FParent.LogFile;
-      {$IFDEF MSWINDOWS}
-      Installer.MakeDirectory:=FParent.MakeDirectory;
-      {$ENDIF}
       (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-      Installer.Verbose:=FParent.Verbose;
       end
   else       // this is a universal module
     begin
@@ -627,16 +607,16 @@ begin
       (Installer as TUniversalInstaller).FPCDir:=FParent.FFPCDirectory;
       (Installer as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
       (Installer as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-      Installer.LogFile:=FParent.LogFile;
-      {$IFDEF MSWINDOWS}
-      Installer.MakeDirectory:=FParent.MakeDirectory;
-      {$ENDIF}
       if FParent.CompilerName='' then
         Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
       else
         Installer.Compiler:=FParent.CompilerName;
-      Installer.Verbose:=FParent.Verbose;
     end;
+  Installer.Verbose:=FParent.Verbose;
+  Installer.LogFile:=FParent.LogFile;
+  {$IFDEF MSWINDOWS}
+  Installer.MakeDirectory:=FParent.MakeDirectory;
+  {$ENDIF}
 end;
 
 function TSequencer.IsSkipped(ModuleName: string): boolean;

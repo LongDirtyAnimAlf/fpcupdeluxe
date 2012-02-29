@@ -765,8 +765,6 @@ begin
 end;
 
 constructor TFPCInstaller.Create;
-var
-  LogFileName:string;
 begin
   inherited create;
 
@@ -777,8 +775,7 @@ FCompiler := '';
 FSVNDirectory := '';
 FMakeDir :='';
 
-TextRec(FLogVerboseFile).Mode:=0;  //class variables should have been 0
-  InitDone:=false;
+InitDone:=false;
 end;
 
 destructor TFPCInstaller.Destroy;
