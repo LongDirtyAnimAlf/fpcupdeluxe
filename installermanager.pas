@@ -487,6 +487,7 @@ function TSequencer.GetInstaller(ModuleName: string): boolean;
 var
   CrossCompiling:boolean;
 begin
+  result:=true;
   CrossCompiling:= (FParent.CrossCPU_Target<>'') or (FParent.CrossOS_Target<>'');
   //check if this is a known module
   if uppercase(ModuleName)='FPC' then
@@ -496,8 +497,7 @@ begin
       if (not crosscompiling and (Installer is TFPCNativeInstaller)) or
         ( crosscompiling and (Installer is TFPCCrossInstaller)) then
         begin
-        result:=true; //all fine, continue with current installer
-        exit;
+        exit; //all fine, continue with current installer
         end
       else
         Installer.free; // get rid of old installer
@@ -530,8 +530,7 @@ begin
       if (not crosscompiling and (Installer is TLazarusNativeInstaller)) or
         ( crosscompiling and (Installer is TLazarusCrossInstaller)) then
         begin
-        result:=true; //all fine, continue with current installer
-        exit;
+        exit; //all fine, continue with current installer
         end
       else
         Installer.free; // get rid of old installer
@@ -568,8 +567,7 @@ begin
         begin
         if (Installer is THelpFPCInstaller) then
           begin
-          result:=true; //all fine, continue with current installer
-          exit;
+          exit; //all fine, continue with current installer
           end
         else
           Installer.free; // get rid of old installer
@@ -592,8 +590,7 @@ begin
         begin
        if (Installer is THelpLazarusInstaller) then
           begin
-          result:=true; //all fine, continue with current installer
-          exit;
+          exit; //all fine, continue with current installer
           end
         else
           Installer.free; // get rid of old installer
@@ -619,8 +616,7 @@ begin
         if (Installer is TUniversalInstaller) and
           (CurrentModule= ModuleName) then
           begin
-          result:=true; //all fine, continue with current installer
-          exit;
+          exit; //all fine, continue with current installer
           end
         else
           Installer.free; // get rid of old installer
