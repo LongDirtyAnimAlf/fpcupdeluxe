@@ -631,6 +631,7 @@ begin
           (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
         end;
     until FindNext(SearchRec)<>0;
+  FindClose(SearchRec);
   // create link 'units' below FBaseDirectory to <somewhere>/lib/fpc/$fpcversion/units
   DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
   fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
