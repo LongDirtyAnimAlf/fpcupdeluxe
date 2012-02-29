@@ -174,8 +174,8 @@ begin
           // Install crosscompiler using new compiler
           ProcessEx.Executable := Make;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-          infoln('Running Make crossinstall (FPC crosscompiler):');
           ProcessEx.Parameters.Clear;
+          infoln('Running Make crossinstall (FPC crosscompiler):');
           ProcessEx.Parameters.Add('FPC='+FCompiler);
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
           {$IFDEF UNIX}
