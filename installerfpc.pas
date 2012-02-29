@@ -727,6 +727,7 @@ begin
   infoln('Checking out/updating FPC sources...');
   UpdateWarnings:=TStringList.Create;
   try
+   FSVNClient.Verbose:=FVerbose;
    result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
    if UpdateWarnings.Count>0 then
    begin
