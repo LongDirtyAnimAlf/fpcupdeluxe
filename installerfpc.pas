@@ -710,7 +710,7 @@ begin
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
   {$ENDIF UNIX}
 
-  result:=ProcessEx.ExitStatus=0;
+  result:=true;
 end;
 
 function TFPCInstaller.ConfigModule(ModuleName: string): boolean;
