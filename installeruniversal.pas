@@ -372,11 +372,11 @@ begin
     TStringList(UniModuleList.Objects[i]).free;
 end;
 
-procedure ReadInifile(ConfigFile: string);
+function GetModuleList(ConfigFile: string): string;
 var
   ini:TMemIniFile;
   i,j:integer;
-  val,name:string;
+  val,name,req:string;
 
   function LoadModule(ModuleName:string):boolean;
   var
@@ -398,16 +398,44 @@ var
       end;
   end;
 
+  function CreateModuleSequence(ModuleName:string):string;
+  var
+    name,req:string;
+  begin
+    result:='';
+    name:=ini.ReadString(ModuleName,'Name','');
+    if name<>'' then
+      begin
+      req:=ini.ReadString(ModuleName,'requires','');
+      if req<>'' then
+        begin
+        req:='Requires '+req+';';
+        req:=StringReplace(req, ',', '; Requires ', [rfReplaceAll,rfIgnoreCase]);
+        end;
+      result:='Declare '+ name + ';' + req +
+          'Cleanmodule '+ name +';' +
+          'Getmodule '+ name +';' +
+          'Buildmodule '+ name +';' +
+          'Configmodule '+ name +';' +
+          'End;';
+      end;
+  end;
+
 begin
+  result:='';
   ini:=TMemIniFile.Create(ConfigFile);
   ini.CaseSensitive:=false;
 // parse inifile
   try
     ini.ReadSectionRaw('General',IniGeneralSection);
     for i:=1 to STARTUSERMODULES do
-      if not LoadModule('Module'+IntToStr(i)) then break; //require contiguous numbering
+      if not LoadModule('Module'+IntToStr(i)) then
+        break //require contiguous numbering
+      else
+        result:=result+CreateModuleSequence('Module'+IntToStr(i));
     for i:=STARTUSERMODULES to STARTUSERMODULES+MAXUSERMODULES do
-      LoadModule('Module'+IntToStr(i));   // don't require contiguous
+      if LoadModule('Module'+IntToStr(i))then   // don't require contiguous
+        result:=result+CreateModuleSequence('Module'+IntToStr(i));
     // the overrides
     for i:=0 to UniModuleList.Count-1 do
       begin
@@ -437,24 +465,6 @@ begin
     ModuleList.Add(UniModuleEnabledList[i]);
 end;
 
-function GetModuleList(ConfigFile: string): string;
-var
-  i:integer;
-  s:string;
-begin
-  ReadInifile(ConfigFile);
-  result:='';
-  for i:=0 to UniModuleList.Count -1 do
-    begin
-    s:=UniModuleList[i];
-    result:=result+'Declare '+ s + ';' +
-        'Cleanmodule '+ s +';' +
-        'Getmodule '+ s +';' +
-        'Buildmodule '+ s +';' +
-        'Configmodule '+ s +';' +
-        'End;';
-    end;
-end;
 
 initialization
  IniGeneralSection:=TStringList.create;
