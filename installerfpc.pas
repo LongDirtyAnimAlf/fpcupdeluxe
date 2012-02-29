@@ -124,6 +124,16 @@ var
 begin
   result:=true;
   // Make crosscompiler using new compiler
+  { Note: command line equivalents for Win32=>Win64 cross compiler:
+  set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
+  make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
+  rem already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
+  make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
+  rem gives bin\i386-win32\ppcrossx64.exe
+
+  make all and make crossinstall perhaps equivalent to
+  make all install CROSSCOMPILE=1??? find out?
+  }
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
@@ -136,13 +146,6 @@ begin
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       infoln('Running Make all (FPC crosscompiler):');
-      { Note: command line equivalents for Win32=>Win64 cross compiler:
-      set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
-      make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo all OS_TARGET=win64 CPU_TARGET=x86_64
-      rem already gives compiler\ppcrossx64.exe, compiler\ppcx64.exe
-      make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
-      rem gives bin\i386-win32\ppcrossx64.exe
-      }
       ProcessEx.Parameters.Add('FPC='+FCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -164,17 +167,14 @@ begin
         end;
       if Options<>'' then
         ProcessEx.Parameters.Add('OPT='+Options);
-      infoln('Running Make crossinstall for FPC:');
       ProcessEx.Execute;
 
       if ProcessEx.ExitStatus = 0 then
         begin
-          // Install crosscompiler using new CompilerName - todo: only for Windows!?!?
-          // make all and make crossinstall perhaps equivalent to
-          // make all install CROSSCOMPILE=1??? todo: find out
+          // Install crosscompiler using new compiler
           ProcessEx.Executable := Make;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-          infoln('Running Make crossinstall for FPC:');
+          infoln('Running Make crossinstall (FPC crosscompiler):');
           ProcessEx.Parameters.Clear;
           ProcessEx.Parameters.Add('FPC='+FCompiler);
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -784,4 +784,4 @@ begin
 end;
 
 end.
-
+
