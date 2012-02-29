@@ -324,6 +324,7 @@ end;
 
 function THelpFPCInstaller.InitModule: boolean;
 begin
+  infoln('Module FPCHELP: Initializing module...');
   result:=false;
   if inherited InitModule then
   begin
@@ -332,6 +333,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
+    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory);
     result:=true;
   end;
 end;
@@ -435,7 +437,7 @@ begin
     'fpdoc'+GetExeExt);
     ProcessEx.Parameters.Add('--outfmt');
     ProcessEx.Parameters.Add('chm');
-    infoln('Lazarus: compiling chm help docs:');
+    infoln('HELPLAZARUS: compiling chm help docs:');
     { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
     Though that may work when adjusting the baseurl option in Lazarus for each
     CHM file, it's easier to move them to <lazarusdir>/docs/html,
@@ -469,13 +471,15 @@ end;
 function THelpLazarusInstaller.InitModule: boolean;
 begin
   result:=false;
+  infoln('Module HELPLAZARUS: initializing module...');
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
     // build_lcl_docs will fail; at least it won't pick up the FPC help files for cross references
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
-      'html'+DirectorySeparator; ;
+      'html'+DirectorySeparator;
+    infoln('Module HELPLAZARUS: documentation directory: '+FTargetDirectory);
     result:=true;
   end;
 end;
@@ -591,4 +595,4 @@ begin
 end;
 
 end.
-
+
