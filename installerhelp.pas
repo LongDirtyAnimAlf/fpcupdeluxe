@@ -206,7 +206,7 @@ end;
 
 function THelpInstaller.InitModule: boolean;
 begin
-  result:=true;
+  result:=CheckAndGetNeededExecutables;
 end;
 
 function THelpInstaller.BuildModule(ModuleName: string): boolean;
@@ -591,4 +591,4 @@ begin
 end;
 
 end.
-
+
