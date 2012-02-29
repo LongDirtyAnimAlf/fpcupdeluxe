@@ -744,7 +744,7 @@ end;
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   //sanity check
-  if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'MakeFile') and
+  if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'Makefile') and
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'compiler') and
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'rtl') and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FBaseDirectory)) then
@@ -787,4 +787,4 @@ begin
 end;
 
 end.
-
+

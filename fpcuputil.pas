@@ -404,7 +404,7 @@ var
 begin
   Result:=false;
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile,FileInfo)=0 then
+  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -415,15 +415,23 @@ begin
         // Remove read-only file attribute so we can delete it:
         if (FileInfo.Attr and faReadOnly)>0 then
           FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
-        if (FileInfo.Attr and faDirectory)>0 then
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
         begin
           // Directory; exit with failure on error
-          if not DeleteDirectoryEx(CurFilename) then exit;
+          if not DeleteDirectoryEx(CurFilename) then
+            begin
+            FindCloseUTF8(FileInfo);
+            exit;
+            end;
         end
         else
         begin
           // File; exit with failure on error
-          if not DeleteFileUTF8(CurFilename) then exit;
+          if not DeleteFileUTF8(CurFilename) then
+            begin
+            FindCloseUTF8(FileInfo);
+            exit;
+            end;
         end;
       end;
     until FindNextUTF8(FileInfo)<>0;
@@ -562,4 +570,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+

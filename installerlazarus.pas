@@ -386,7 +386,7 @@ begin
   if not InitModule then exit;
   infoln('Module Lazarus: Uninstall...');
   //sanity check
-  if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'MakeFile') and
+  if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'Makefile') and
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'ide') and
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'lcl') and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FBaseDirectory)) then
@@ -435,4 +435,4 @@ begin
 end;
 
 end.
-
+
