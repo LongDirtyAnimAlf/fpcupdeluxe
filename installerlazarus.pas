@@ -186,6 +186,7 @@ end;
 
 constructor TLazarusCrossInstaller.Create;
 begin
+  inherited Create;
 end;
 
 destructor TLazarusCrossInstaller.Destroy;
@@ -435,4 +436,4 @@ begin
 end;
 
 end.
-
+
