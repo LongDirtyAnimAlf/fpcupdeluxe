@@ -17,6 +17,7 @@ type
   protected
     FBaseDirectory: string;
     FBinUtils:TStringList;
+    FBin64Utils:TStringList;
     FBunzip2:string;
     FCompiler: string;
     FCompilerOptions: string;
@@ -300,8 +301,10 @@ begin
   // We need GetExeExt to be defined first.
   FBinUtils:=TStringList.Create;
   FBinUtils.Add('GoRC'+GetExeExt);
+  {$ifndef win64}
   FBinUtils.Add('ar'+GetExeExt);
   FBinUtils.Add('as'+GetExeExt);
+  {$endif win64}
   FBinUtils.Add('bin2obj'+GetExeExt);
   FBinUtils.Add('cmp'+GetExeExt);
   FBinUtils.Add('cp'+GetExeExt);
@@ -324,7 +327,9 @@ begin
   FBinUtils.Add('ginstall.exe.manifest');
   FBinUtils.Add('gmkdir'+GetExeExt);
   FBinUtils.Add('grep'+GetExeExt);
+  {$ifndef win64}
   FBinUtils.Add('ld'+GetExeExt);
+  {$endif win64}
   FBinUtils.Add('libexpat-1.dll');
   FBinUtils.Add('make'+GetExeExt);
   FBinUtils.Add('mv'+GetExeExt);
@@ -340,6 +345,12 @@ begin
   FBinUtils.Add('windres'+GetExeExt);
   FBinUtils.Add('windres'+GetExeExt);
   FBinUtils.Add('zip'+GetExeExt);
+  {$ifdef win64}
+  FBin64Utils:=TStringList.Create;
+  FBin64Utils.Add('ar'+GetExeExt);
+  FBin64Utils.Add('as'+GetExeExt);
+  FBin64Utils.Add('ld'+GetExeExt);
+  {$endif win64}
 end;
 
 procedure TInstaller.CreateStoreSVNDiff(DiffFileName: string;
@@ -364,6 +375,7 @@ const
   These might work but are development, too (might end up in 2.6.2):
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
   but let's use a stable version:}
+  SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw64/';
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
   //Parent directory of files. Needs trailing backslash.
 var
@@ -390,6 +402,26 @@ begin
       end;
     end;
   end;
+  {$ifdef win64}
+  for Counter := 0 to FBin64Utils.Count - 1 do
+  begin
+    infoln('Downloading: ' + FBin64Utils[Counter] + ' into ' + FMakeDir);
+    try
+      if Download(SourceUrl64 + FBin64Utils[Counter], FMakeDir + FBin64Utils[Counter])=false then
+      begin
+        Errors:=Errors+1;
+        infoln('Error downloading binutils: '+FBin64Utils[Counter]+' to '+FMakeDir);
+      end;
+    except
+      on E: Exception do
+      begin
+        Result := False;
+        infoln('Error downloading binutils: ' + E.Message);
+        exit; //out of function.
+      end;
+    end;
+  end;
+  {$endif win64}
   if Errors>0 then result:=false;
 end;
 
@@ -663,6 +695,8 @@ destructor TInstaller.Destroy;
 begin
   if Assigned(FBinUtils) then
     FBinUtils.Free;
+  if Assigned(FBin64Utils) then
+    FBin64Utils.Free;
   ProcessEx.Free;
   FSVNClient.Free;
   inherited Destroy;

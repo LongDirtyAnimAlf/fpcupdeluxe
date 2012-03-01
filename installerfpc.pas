@@ -531,7 +531,11 @@ begin
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL:=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
+    {$ifdef win64}
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcx64.exe';
+    {$ELSE}
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+    {$endif win64}
     {$ENDIF MSWINDOWS}
     {$IFDEF Linux}
     //If compiled for x86 32 bit, install 32 bit
@@ -564,8 +568,6 @@ begin
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcuniversal';
     {$ENDIF Darwin}
     end;
-  if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
-    FCompiler:=FBootstrapCompiler;
   // Only download bootstrap compiler if there's no valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
     begin
@@ -574,9 +576,14 @@ begin
     end
     else
     begin
+      {$ifdef win64}
+      //don't have a win64 bootstrap. Will have to build one later
+      FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+      {$endif win64}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
     end;
-
+  if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
+    FCompiler:=FBootstrapCompiler;
   WritelnLog('Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
   WritelnLog('FPC URL:                '+FURL,false);
   WritelnLog('FPC options:            '+FCompilerOptions,false);
@@ -613,6 +620,30 @@ const
 begin
   if not InitModule then exit;
   result:=false;
+  {$ifdef win64}
+  if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
+    begin
+    ProcessEx.Executable := Make;
+    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+FCompiler);
+    ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
+    ProcessEx.Parameters.Add('OS_TARGET=win64');
+    ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
+    ProcessEx.Parameters.Add('cycle');
+    infoln('Running make cycle for FPC64:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      result := False;
+      WritelnLog('FPC: Failed to build ppcx64 bootstrap compiler ');
+      exit;
+    end;
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcx64.exe',
+     ExtractFilePath(FCompiler)+'ppcx64.exe');
+    FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';
+    end;
+  {$endif win64}
   OperationSucceeded:=BuildModuleCustom(ModuleName);
   {$IFDEF UNIX}
   if OperationSucceeded then
