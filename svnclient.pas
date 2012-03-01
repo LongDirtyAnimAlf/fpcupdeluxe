@@ -151,8 +151,9 @@ function TSVNClient.GetSVNExecutable: string;
 begin
   if not FileExists(FSVNExecutable) then FindSVNExecutable;
   if not FileExists(FSVNExecutable) then
-    raise ESVNClientError.create('No SVN executable found');
-  Result := FSVNExecutable;
+    Result:=''
+  else
+    Result := FSVNExecutable;
 end;
 
 procedure TSVNClient.SetDesiredRevision(AValue: string);
