@@ -42,6 +42,7 @@ type
     procedure CreateStoreSVNDiff(DiffFileName: string;UpdateWarnings: TStringList);
     function DownloadBinUtils: boolean;
     function DownloadFromSVN(ModuleName:string;var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList):boolean;
+    // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
     procedure DumpOutput(Sender:TProcessEx; output:string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
@@ -197,15 +198,18 @@ begin
     begin
       {$IFDEF MSWINDOWS}
       // Make sure we have a sensible default.
-      // Set it here so multiple calls to CheckExes will not redownload SVN all the time
+      // Set it here so multiple calls will not redownload SVN all the time
       if FSVNDirectory='' then FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir)+'svn'+DirectorySeparator;
       {$ENDIF MSWINDOWS}
-      FindSVNSubDirs; //Find svn in or below FSVNDirectory; will also set Updater's SVN executable
+      // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
+      FindSVNSubDirs;
       {$IFDEF MSWINDOWS}
       // If it still can't be found, download it
       if FSVNClient.SVNExecutable='' then
       begin
         infoln('Going to download SVN');
+        // Download will look in and below FSVNDirectory
+        // and set FSVNClient.SVNExecutable if succesful
         OperationSucceeded := DownloadSVN;
       end;
       {$ELSE}
