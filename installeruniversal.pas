@@ -420,6 +420,12 @@ var
           'Getmodule '+ name +';' +
           'Buildmodule '+ name +';' +
           'Configmodule '+ name +';' +
+          'End;'+
+          'Declare '+ name + 'clean;'+
+          'Cleanmodule '+ name +';' +
+          'End;'+
+          'Declare '+ name + 'uninstall;'+
+          'Uninstallmodule '+ name +';' +
           'End;';
       end;
   end;
