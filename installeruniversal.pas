@@ -19,6 +19,7 @@ type
     FLazarusPrimaryConfigPath:string;
     InitDone:boolean;
   protected
+    function FirstSpaceAfterCommand(CommandLine: string): integer;
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CLeanModule,GetModule
     // and UnInstallModule but executed only once
@@ -151,6 +152,24 @@ begin
   InitDone:=result;
 end;
 
+function TUniversalInstaller.FirstSpaceAfterCommand(CommandLine: string): integer;
+  var
+    j: integer;
+  begin
+    //split off command and parameters
+    j:=1;
+    while j<=length(CommandLine) do
+      begin
+      if CommandLine[j]='"' then
+        repeat  //skip until next quote
+          j:=j+1;
+        until (CommandLine[j]='"') or (j=length(CommandLine));
+      j:=j+1;
+      if CommandLine[j]=' ' then break;
+      end;
+    Result:=j;
+  end;
+
 function TUniversalInstaller.RunCommands(directive: string;sl:TStringList): boolean;
 var
   i,j:integer;
@@ -165,22 +184,10 @@ begin
       begin
       exec:=GetValue(directive+IntToStr(i),sl);
       if exec='' then break;
-      //split off command and parameters
-      j:=1;
-      while j<=length(exec) do
-        begin
-        if exec[j]='"' then
-          repeat  //skip until next quote
-            j:=j+1;
-          until (exec[j]='"') or (j=length(exec));
-        j:=j+1;
-        if exec[j]=' ' then break;
-        end;
-      //PE.Executable:=trim(copy(exec,1,j));
-      //PE.ParametersString:=trim(copy(exec,j,length(exec)));
-      //fails because of double quoting ex: --primary-config-path="C:\Documents and Settings\Ludo\Local Settings\Application Data\lazarusdevsettings"
-      //todo Rewrite Tprocess
-      PE.CommandLine:=exec;
+      j:=FirstSpaceAfterCommand(exec);
+      PE.Executable:=trim(copy(exec,1,j));
+      PE.ParametersString:=trim(copy(exec,j,length(exec)));
+      //PE.CommandLine:=exec;
       PE.ShowWindow := swoHIDE;
       if FVerbose then
         PE.OnOutput:=@DumpConsole;
