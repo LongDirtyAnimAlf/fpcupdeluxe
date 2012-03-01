@@ -104,17 +104,20 @@ begin
     FSvnExecutable := FindDefaultExecutablePath(SVNName);
 
 {$IFDEF MSWINDOWS}
-  // Some popular locations for SlikSVN and Subversion:
+  // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
+  // Covers both 32 bit and 64 bit Windows.
   if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\Subversion\bin\svn.exe';
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\svn.exe';
   if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
-      '\Subversion\bin\svn.exe';
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\svn.exe';
   if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles') + '\SlikSvn\bin\svn.exe';
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\svn.exe';
   if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)') +
-      '\SlikSvn\bin\svn.exe';
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\svn.exe';
+  if not FileExists(FSvnExecutable) then
+    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\svn.exe';
   //Directory where current executable is:
   if not FileExists(FSvnExecutable) then
     FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn');

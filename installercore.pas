@@ -44,6 +44,7 @@ type
     function DownloadFromSVN(ModuleName:string;var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList):boolean;
     function DownloadSVN: boolean;
     procedure DumpOutput(Sender:TProcessEx; output:string);
+    // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
     function FindSVNSubDirs(): boolean;
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
