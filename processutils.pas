@@ -102,6 +102,10 @@ type
 
 // Convenience functions
 
+function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload;
+function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
+function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
+function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
 function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer; overload;
 function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string; Verbose:boolean): integer; overload;
 procedure DumpConsole(Sender:TProcessEx; output:string);
@@ -369,12 +373,99 @@ begin
   write(output);
 end;
 
+function ExecuteCommand(Commandline: string; Verbose: boolean): integer;
+var
+  s:string;
+begin
+  Result:=ExecuteCommandInDir(Commandline,'',s,Verbose);
+end;
+
+function ExecuteCommand(Commandline: string; var Output: string;
+  Verbose: boolean): integer;
+begin
+  Result:=ExecuteCommandInDir(Commandline,'',Output,Verbose);
+end;
+
+function ExecuteCommandInDir(Commandline, Directory: string; Verbose: boolean
+  ): integer;
+var
+  s:string;
+begin
+  Result:=ExecuteCommandInDir(Commandline,Directory,s,Verbose);
+end;
+
+function ExecuteCommandInDir(Commandline, Directory: string;
+  var Output: string; Verbose: boolean): integer;
+var
+  PE:TProcessEx;
+  s:string;
+
+  function GetFirstWord:string;
+  var
+    i:integer;
+    LastQuote:char;
+    InQuote:boolean;
+  const
+    QUOTES = ['"',''''];
+  begin
+  Commandline:=trim(Commandline);
+  i:=1;
+  InQuote:=false;
+  while (i<length(Commandline)) and (InQuote or (Commandline[i]>' ')) do
+    begin
+    if Commandline[i] in QUOTES then
+      if InQuote then
+        begin
+        if Commandline[i]=LastQuote then
+          begin
+          InQuote:=false;
+          delete(Commandline,i,1);
+          i:=i-1
+          end;
+        end
+      else
+        begin
+        InQuote:=True;
+        LastQuote:=Commandline[i];
+        delete(Commandline,i,1);
+        i:=i-1
+        end;
+    i:=i+1;
+    end;
+  result:=trim(copy(Commandline,1,i));
+  delete(Commandline,1,i);
+  end;
+
+begin
+  PE:=TProcessEx.Create(nil);
+  try
+    if Directory<>'' then
+      PE.CurrentDirectory:=Directory;
+    PE.Executable:=GetFirstWord;
+    s:=GetFirstWord;
+    while s<>'' do
+      begin
+      PE.Parameters.Add(s);
+      s:=GetFirstWord;
+      end;
+    PE.ShowWindow := swoHIDE;
+    if Verbose then
+      PE.OnOutput:=@DumpConsole;
+    PE.Execute;
+    Output:=PE.OutputString;
+    Result:=PE.ExitStatus;
+  finally
+    PE.Free;
+  end;
+end;
+
 function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer;
 var
   s:string;
 begin
   Result:=ExecuteCommandHidden(Executable, Parameters,s,Verbose);
 end;
+
 
 function ExecuteCommandHidden(const Executable, Parameters: string; var Output: string
   ; Verbose:boolean): integer;

@@ -172,34 +172,19 @@ function TUniversalInstaller.FirstSpaceAfterCommand(CommandLine: string): intege
 
 function TUniversalInstaller.RunCommands(directive: string;sl:TStringList): boolean;
 var
-  i,j:integer;
+  i:integer;
   exec,output:string;
   Workingdir:string;
-  PE:TProcessEx;
 begin
-  PE:=TProcessEx.Create(nil);
-  try
-    PE.CurrentDirectory:=GetValue('Workingdir',sl);
-    for i:=1 to MAXINSTRUCTIONS do
-      begin
-      exec:=GetValue(directive+IntToStr(i),sl);
-      if exec='' then break;
-      j:=FirstSpaceAfterCommand(exec);
-      PE.Executable:=trim(copy(exec,1,j));
-      PE.ParametersString:=trim(copy(exec,j,length(exec)));
-      //PE.CommandLine:=exec;
-      PE.ShowWindow := swoHIDE;
-      if FVerbose then
-        PE.OnOutput:=@DumpConsole;
-      PE.Execute;
-      Output:=PE.OutputString;
-      result:=PE.ExitStatus=0;
-      if not result then
-        break;
-      end;
-  finally
-    PE.Free;
-  end;
+  Workingdir:=GetValue('Workingdir',sl);
+  for i:=1 to MAXINSTRUCTIONS do
+    begin
+    exec:=GetValue(directive+IntToStr(i),sl);
+    if exec='' then break;
+    result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
+    if not result then
+      break;
+    end;
 end;
 
 function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
