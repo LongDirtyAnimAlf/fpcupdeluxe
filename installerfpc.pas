@@ -131,7 +131,8 @@ begin
   make FPC=c:\development\fpc\bin\i386-win32\fpc.exe --directory=c:\development\fpc INSTALL_PREFIX=c:\development\fpc UPXPROG=echo COPYTREE=echo crossinstall OS_TARGET=win64 CPU_TARGET=x86_64
   rem gives bin\i386-win32\ppcrossx64.exe
 
-  make all and make crossinstall perhaps equivalent to
+  Note: make install CROSSINSTALL=1 apparently installs, but does NOT install utilities (ld etc?) for that
+  platform; see posting Jonas Maebe http://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
   make all install CROSSCOMPILE=1??? find out?
   }
   CrossInstaller:=GetCrossInstaller;
@@ -171,7 +172,9 @@ begin
 
       if ProcessEx.ExitStatus = 0 then
         begin
-          // Install crosscompiler using new compiler
+          // Install crosscompiler
+          // todo: this doesn't seem to work. If it keeps on not working, test
+          // with installed compiler instead of bootstrap compiler.
           ProcessEx.Executable := Make;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
