@@ -186,11 +186,7 @@ end;
 procedure TProcessEx.SetParametersString(AValue: String);
 
 begin
-  //CommandToList apparently doesn't work
   CommandToList(AValue,Parameters);
-  writeln('debug: commandtolist gives: '+Parameters.Text);
-  sleep(300);
-  //Parameters.Clear;
 end;
 
 procedure TProcessEx.Execute;
@@ -232,10 +228,7 @@ begin
       FOnOutput(Self,'Executing : '+ResultingCommand+' (working dir: '+ CurrentDirectory +')'+ LineEnding);
     if Assigned(FOnOutputM) then
       FOnOutputM(Self,'Executing : '+ResultingCommand+' (working dir: '+ CurrentDirectory +')'+ LineEnding);
-    //debug
-    if CommandLine<>'' then writeln('debug: commandline: '+Commandline);
-    writeln('debug: using parameters: '+Parameters.Text);
-    //debug
+
     inherited Execute;
     while Running do
     begin

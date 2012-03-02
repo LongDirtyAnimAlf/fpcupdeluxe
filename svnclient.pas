@@ -327,8 +327,6 @@ begin
     URLPos:=pos('URL: ', Output)+URLLen;
     URL:= trim(copy(Output,
       (URLPos), Posex(LineEnding,Output,URLPos)-URLPos ));
-    writeln('debug: urlpos: '+inttostr(urlpos));
-    writeln('debug: lineending at:'+Inttostr(Posex(LineEnding,Output,URLPos)));
     writeln('URL:'+URL);
     if FRepositoryURL='' then
     begin
