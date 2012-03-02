@@ -330,7 +330,9 @@ begin
   //http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
   //for Windows x64:
   //http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/
+  {$ifndef win64}
   FBinUtils.Add('gdb'+GetExeExt);
+  {$endif win64}
   FBinUtils.Add('gecho'+GetExeExt);
   FBinUtils.Add('ginstall'+GetExeExt);
   FBinUtils.Add('ginstall.exe.manifest');
@@ -359,6 +361,8 @@ begin
   FBin64Utils.Add('ar'+GetExeExt);
   FBin64Utils.Add('as'+GetExeExt);
   FBin64Utils.Add('ld'+GetExeExt);
+  FBin64Utils.Add('gdb.exe');     //different source, don't change position.
+  FBin64Utils.Add('libiconv-2.dll');
   {$endif win64}
 end;
 
@@ -385,11 +389,13 @@ const
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
   but let's use a stable version:}
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw64/';
+  SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
   //Parent directory of files. Needs trailing backslash.
 var
   Counter: integer;
   Errors: integer=0;
+  sURL:string;
 begin
   ForceDirectoriesUTF8(FMakeDir);
   Result:=true;
@@ -412,11 +418,14 @@ begin
     end;
   end;
   {$ifdef win64}
+  sURL:=SourceURL64;
   for Counter := 0 to FBin64Utils.Count - 1 do
   begin
     infoln('Downloading: ' + FBin64Utils[Counter] + ' into ' + FMakeDir);
     try
-      if Download(SourceUrl64 + FBin64Utils[Counter], FMakeDir + FBin64Utils[Counter])=false then
+      if FBin64Utils[Counter]='gdb.exe' then // switch source
+        sURL:=SourceURL64_gdb;
+      if Download(sURL + FBin64Utils[Counter], FMakeDir + FBin64Utils[Counter])=false then
       begin
         Errors:=Errors+1;
         infoln('Error downloading binutils: '+FBin64Utils[Counter]+' to '+FMakeDir);
