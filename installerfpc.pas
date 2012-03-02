@@ -173,11 +173,11 @@ begin
       if ProcessEx.ExitStatus = 0 then
         begin
           // Install crosscompiler
-          // todo: this doesn't seem to work. If it keeps on not working, test
-          // with installed compiler instead of bootstrap compiler.
           ProcessEx.Executable := Make;
           //satisfy fpcmake:
-          ProcessEx.Environment.SetVar('Path',Binpath+';'+FMakeDir);
+          //todo: in effect, this is Windows only (FMakeDir is empty on Unix, right?)
+          // should this be moved up as a Path property up to the fpcinstaller and lazarusinstaller classes?
+          if FMakeDir<>'' then ProcessEx.Environment.SetVar('Path',Binpath+PathSeparator+FMakeDir);
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
           infoln('Running Make crossinstall (FPC crosscompiler):');

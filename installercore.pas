@@ -99,10 +99,10 @@ uses installerfpc,fileutil,fpcuputil;
 
 const
   {$IFDEF MSWINDOWS}
-  PATHVARNAME='PATH';
+  PATHVARNAME='Path';
   {$ELSE}
   //Unix/Linux
-  PATHVARNAME='path';
+  PATHVARNAME='PATH';
   {$ENDIF MSWINDOWS}
 
 { TInstaller }
@@ -653,14 +653,8 @@ end;
 procedure TInstaller.SetPath(NewPath: string; Prepend:boolean);
 begin
   if Prepend then
-  {$IFDEF MSWINDOWS}
-    NewPath:=NewPath+PathSeparator+ProcessEx.Environment.GetVar('Path');
-  ProcessEx.Environment.SetVar('Path',NewPath);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF UNIX}
-    NewPath:=NewPath+PathSeparator+ProcessEx.Environment.GetVar('PATH');
-  ProcessEx.Environment.SetVar('PATH',NewPath);
-  {$ENDIF UNIX}
+    NewPath:=NewPath+PathSeparator+ProcessEx.Environment.GetVar(PATHVARNAME);
+  ProcessEx.Environment.SetVar(PATHVARNAME,NewPath);
   if NewPath<>EmptyStr then
     WritelnLog('External program path:  '+NewPath,false);
   if FVerbose then infoln('Set path to: '+NewPath);
