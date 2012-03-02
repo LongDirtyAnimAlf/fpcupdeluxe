@@ -405,7 +405,11 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
+      {$IFDEF DARWIN}
+      CreateHomeStartLink(InstalledLazarus+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
+      {$ELSE}
       CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
+      {$ENDIF DARWIN}
       {$ENDIF UNIX}
     finally
       //Ignore problems creating shortcut
@@ -880,4 +884,4 @@ begin
 end;
 
 end.
-
+
