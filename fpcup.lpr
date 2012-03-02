@@ -198,7 +198,7 @@ var
 begin
   result:=-1; //no error
   // Default values
-  FInstaller.ConfigFile:='fpcup.ini';  //todo add command line option
+  FInstaller.ConfigFile:=ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME;
   FInstaller.ShortCutName:='Lazarus_trunk';
   FInstaller.ShortCutNameFpcup:='fpcup_update';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';

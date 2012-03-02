@@ -7,6 +7,7 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
 
+{$R fpcup.rc}
 
 type
   { TUniversalInstaller }
@@ -54,6 +55,9 @@ type
 
 
 var sequences:string;
+
+Const
+  CONFIGFILENAME='fpcup.ini';
 
 implementation
 
@@ -398,6 +402,23 @@ begin
     TStringList(UniModuleList.Objects[i]).free;
 end;
 
+procedure SaveIniFromResource(filename:string);
+var fs:Tfilestream;
+begin
+with TResourceStream.Create(hInstance, 'fpcup_ini', 'file') do
+try
+  try
+    fs:=Tfilestream.Create(Filename,fmCreate);
+    savetostream(fs);
+  finally
+     fs.Free;
+  end;
+finally
+  Free;
+end;
+end;
+
+
 function GetModuleList(ConfigFile: string): string;
 var
   ini:TMemIniFile;
@@ -455,6 +476,9 @@ var
 
 begin
   result:='';
+  if (ConfigFile=ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME)
+    and not FileExistsUTF8(CONFIGFILENAME) then
+    SaveIniFromResource(CONFIGFILENAME);
   ini:=TMemIniFile.Create(ConfigFile);
   ini.CaseSensitive:=false;
 // parse inifile
