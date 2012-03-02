@@ -21,19 +21,19 @@ Const
     'End;'+
 //default sequence for win32
     'Declare defaultwin32;'+
-    //'Exec CreateFpcupScript;'+
-    //'Do fpc;'+
-    //'Do lazarus;'+
-    //'Exec CreateLazarusScript;'+
-    //'Do helplazarus;'+
-    //'Do LAZDATADESKTOP;'+
-    //'Do DOCEDITOR;'+
+    'Exec CreateFpcupScript;'+
+    'Do fpc;'+
+    'Do lazarus;'+
+    'Exec CreateLazarusScript;'+
+    'Do helplazarus;'+
+    'Do LAZDATADESKTOP;'+
+    'Do DOCEDITOR;'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
-    //'Cleanmodule lazarus;'+
-    //'Buildmodule lazarus;'+
+    'Cleanmodule lazarus;'+
+    'Buildmodule lazarus;'+
     'End;'+
 //default clean sequence
     'Declare defaultclean;'+
