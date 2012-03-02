@@ -261,11 +261,6 @@ begin
 
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
-  {$IF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
-  // On Intel x86/x64 OSX, force FPC to compile as i386. This is in line with
-  // the way the FPC installer works. Later we can crosscompile an x64 version.
-  ProcessEx.Parameters.Add('CPU_TARGET=i386');
-  {$ENDIF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
@@ -540,7 +535,7 @@ begin
       FBootstrapCompilerURL:=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
     {$ifdef win64}
-    //There is no win64 bootstrap comiler, yet
+    //There is no win64 bootstrap compiler, yet
     //We'll make our own starting with the ppc386.exe bootstrap compiler
     //If we made it already pick it up here
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcx64.exe';
@@ -573,10 +568,13 @@ begin
     {$ENDIF Linux}
     {$IFDEF Darwin}
     //OSX
+    //pcuniversal is not a good bootstrap compiler since it creates a compiler that doesn't handle generics !?!?!?
+    //We'll make our own ppc386 starting with the pcuniversal bootstrap compiler
+    //If we made it already pick it up here
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386';
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL:=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcuniversal';
     {$ENDIF Darwin}
     end;
   // Only download bootstrap compiler if there's no valid one
@@ -590,6 +588,10 @@ begin
       {$ifdef win64}
       //don't have a win64 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
       FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+      {$endif win64}
+      {$ifdef darwin}
+      //don't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
+      FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcuniversal';
       {$endif win64}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
     end;
@@ -655,6 +657,29 @@ begin
     FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';
     end;
   {$endif win64}
+  {$ifdef darwin}
+  if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
+    begin
+    ProcessEx.Executable := Make;
+    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+FCompiler);
+    ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
+    ProcessEx.Parameters.Add('CPU_TARGET=i386');
+    ProcessEx.Parameters.Add('cycle');
+    infoln('Running make cycle for FPC i386:');
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      result := False;
+      WritelnLog('FPC: Failed to build ppc386 bootstrap compiler ');
+      exit;
+    end;
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppc386',
+     ExtractFilePath(FCompiler)+'ppc386');
+    FCompiler:=ExtractFilePath(FCompiler)+'ppc386';
+    end;
+  {$endif darwin}
   OperationSucceeded:=BuildModuleCustom(ModuleName);
   {$IFDEF UNIX}
   if OperationSucceeded then
