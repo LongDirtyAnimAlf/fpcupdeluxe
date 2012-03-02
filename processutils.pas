@@ -186,7 +186,7 @@ end;
 procedure TProcessEx.SetParametersString(AValue: String);
 
 begin
-  CommandToList(AValue,Parameters);
+  //CommandToList(AValue,Parameters);
 end;
 
 procedure TProcessEx.Execute;
@@ -460,28 +460,14 @@ function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:bool
 var
   s:string;
 begin
-  Result:=ExecuteCommandHidden(Executable, Parameters,s,Verbose);
+  Result:=ExecuteCommand(Executable+' '+ Parameters,s,Verbose);
 end;
 
 
 function ExecuteCommandHidden(const Executable, Parameters: string; var Output: string
   ; Verbose:boolean): integer;
-var
-  PE:TProcessEx;
 begin
-  PE:=TProcessEx.Create(nil);
-  try
-    PE.Executable:=Executable;
-    PE.ParametersString:=Parameters;
-    PE.ShowWindow := swoHIDE;
-    if Verbose then
-      PE.OnOutput:=@DumpConsole;
-    PE.Execute;
-    Output:=PE.OutputString;
-    Result:=PE.ExitStatus;
-  finally
-    PE.Free;
-  end;
+Result:=ExecuteCommand(Executable+' '+ Parameters,output,Verbose);
 end;
 
 end.

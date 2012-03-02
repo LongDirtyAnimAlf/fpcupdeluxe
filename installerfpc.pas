@@ -245,11 +245,6 @@ begin
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
-  {$IF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
-  // On Intel x86/x64 OSX, force FPC to compile as i386. This is in line with
-  // the way the FPC installer works. Later we can crosscompile an x64 version.
-  ProcessEx.Parameters.Add('CPU_TARGET=i386');
-  {$ENDIF DEFINED(DARWIN) AND NOT DEFINED(CPUPOWERPC)}
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
@@ -464,6 +459,7 @@ begin
   {$IFDEF DARWIN}
   CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract .tar.bz2, overwriting without prompting
+  CompilerName:=ExtractFileName(FBootstrapCompiler);
   if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
   begin
     infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
@@ -678,6 +674,7 @@ begin
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppc386',
      ExtractFilePath(FCompiler)+'ppc386');
     FCompiler:=ExtractFilePath(FCompiler)+'ppc386';
+    fpChmod(FCompiler,&755);
     end;
   {$endif darwin}
   OperationSucceeded:=BuildModuleCustom(ModuleName);
@@ -851,4 +848,4 @@ begin
 end;
 
 end.
-
+
