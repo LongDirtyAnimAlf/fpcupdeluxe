@@ -97,6 +97,14 @@ implementation
 
 uses installerfpc,fileutil,fpcuputil;
 
+const
+  {$IFDEF MSWINDOWS}
+  PATHVARNAME='PATH';
+  {$ELSE}
+  //Unix/Linux
+  PATHVARNAME='path';
+  {$ENDIF MSWINDOWS}
+
 { TInstaller }
 
 function TInstaller.GetCompiler: string;
@@ -630,9 +638,13 @@ begin
     end
   else
     begin
-    infoln('Command returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus)+'. Output:');
+    writelnlog('ERROR running '+Sender.Executable + ' ' +Sender.ParametersString, true);
+    writelnlog('Command returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus),true);
+    writelnlog('Command path set to: '+Sender.Environment.GetVar(PATHVARNAME),true);
+    writelnlog('Command current directory: '+Sender.CurrentDirectory,true);
+    writelnlog('Command output:',true);
+    // Dump command output to screen and detailed log
     infoln(Sender.OutputString);
-    WritelnLog('ERROR running '+Sender.Executable + ' ' +Sender.ParametersString,false);
     Sender.OutputStrings.SaveToFile(TempFileName);
     WritelnLog('  output logged in '+TempFileName,false);
     end;
