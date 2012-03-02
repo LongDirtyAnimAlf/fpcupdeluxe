@@ -32,6 +32,9 @@ unit updatelazconfig;
 Can handle arbitrary number of config files.
 Specify filename only if you want to save in the config path set in the Create constructor; else specify path and filename.
 Will save all configs when it is destroyed.
+
+Note: if you pass a variable such as Help#, this will cause an exception in the XML writing code that is called by laz2_xmlcfg
+I'm not adding error protection here, as we should not write those kinds of variables; if we do, I'd like to see the error in the calling module.
 }
 
 {$mode objfpc}{$H+}
