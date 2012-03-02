@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
 
-{$R fpcup.res}
+{$R fpcup.rc}
 
 type
   { TUniversalInstaller }
