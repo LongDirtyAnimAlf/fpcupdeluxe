@@ -509,8 +509,14 @@ Result := OperationSucceeded;
 end;
 
 function TFPCInstaller.GetFPCVersion: string;
+var testcompiler:string;
 begin
-  ExecuteCommandHidden(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler'+DirectorySeparator+'ppc1','-iV',result,FVerbose);
+  testcompiler:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler'+DirectorySeparator+'ppc1';
+  if not FileExistsUTF8(testcompiler) then
+    begin //darwin
+    testcompiler:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler'+DirectorySeparator+'ppc';
+    end;
+  ExecuteCommandHidden(testcompiler,'-iV',result,FVerbose);
   //Remove trailing LF(s) and other control codes:
   while (length(result)>0) and (ord(result[length(result)])<$20) do
     delete(result,length(result),1);
