@@ -280,6 +280,16 @@ var
   end;
 
 begin
+// Add values to lazarus config files. Syntax:
+// AddTo<filename><number>=key[@counter]:value
+// filename: xml file to update in --primary-config-path. The list of files is limited to the list below for securit reasons.
+// number: command number, starting from 1 for every file. The numbers have to be sequential. Scanning stops at the first missing number.
+// key: the attribute to change in the format aa/bb/cc
+// counter: the attribute key for the counter used to keep track of lists. Used to insert a new value in a list. Read and incremented by 1;
+//          When using a counter, <key> can use a the '#' character as a placeholder for the new count written to <counter>
+// value:  the string value to sore in <key>.
+
+
   result:=InitModule;
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));

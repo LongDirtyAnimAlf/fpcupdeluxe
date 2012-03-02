@@ -174,10 +174,6 @@ begin
         begin
           // Install crosscompiler
           ProcessEx.Executable := Make;
-          //satisfy fpcmake:
-          //todo: in effect, this is Windows only (FMakeDir is empty on Unix, right?)
-          // should this be moved up as a Path property up to the fpcinstaller and lazarusinstaller classes?
-          if FMakeDir<>'' then ProcessEx.Environment.SetVar('Path',Binpath+PathSeparator+FMakeDir);
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
           infoln('Running Make crossinstall (FPC crosscompiler):');
@@ -605,7 +601,7 @@ begin
   SetPath(FBootstrapCompilerDirectory+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
-    FBaseDirectory,false);
+    BinPath,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   SetPath(BinPath,true);
