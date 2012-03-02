@@ -38,7 +38,8 @@ begin
   end;
 
   // parse parameters
-  if HasOption('h','help') then begin
+  if (HasOption('h','help')) or
+    (LowerCase(ParamStr(1))='help') then begin
     WriteHelp;
     Terminate;
     Exit;
@@ -55,7 +56,9 @@ begin
     URL:=ParamStr(1);
   end;
 
-  Download(URL, 'output');
+  // Use ExtractFileName for the document name. It isn't perhaps meant to, but it works.
+  // Otherwise use the URIParser code in FCL.
+  Download(URL, ExtractFileName(URL));
 
   // stop program loop
   Terminate;

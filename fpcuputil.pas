@@ -172,32 +172,6 @@ begin
   if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile);
 end;
 
-function DownloadHTTPStream(URL: string; Buffer: TStream): boolean;
-  // Download file; retry if necessary.
-const
-  MaxRetries = 3;
-var
-  RetryAttempt: integer;
-  HTTPGetResult: boolean;
-begin
-  Result:=false;
-  RetryAttempt := 1;
-  HTTPGetResult := False;
-  while ((HTTPGetResult = False) and (RetryAttempt < MaxRetries)) do
-  begin
-    HTTPGetResult := HttpGetBinary(URL, Buffer);
-    //Application.ProcessMessages;
-    Sleep(100 * RetryAttempt);
-    RetryAttempt := RetryAttempt + 1;
-  end;
-  if HTTPGetResult = False then
-    raise Exception.Create('Cannot load document from remote server');
-  Buffer.Position := 0;
-  if Buffer.Size = 0 then
-    raise Exception.Create('Downloaded document is empty.');
-  Result := True;
-end;
-
 function SFDirectLinkURL(URL: string; Document: TMemoryStream): string;
 {
 Transform this part of the body:
@@ -361,18 +335,54 @@ end;
 function DownloadHTTP(URL, TargetFile: string): boolean;
 // Download file; retry if necessary.
 // Deals with SourceForge download links
+// Could use Synapse HttpGetBinary, but that doesn't deal
+// with result codes (i.e. it happily downloads a 404 error document)
+const
+  MaxRetries=3;
 var
-  Buffer: TMemoryStream;
+  HTTPGetResult: boolean;
+  HTTPSender: THTTPSend;
+  RetryAttempt: integer;
 begin
   result:=false;
+  RetryAttempt:=1;
   URL:=SourceForgeURL(URL); //Deal with sourceforge URLs
+  HTTPSender:=THTTPSend.Create;
   try
-    Buffer := TMemoryStream.Create;
-    DownloadHTTPStream(URL, Buffer);
-    Buffer.SaveToFile(TargetFile);
-    result:=true;
+    try
+      // Try to get the file
+      HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
+      while (HTTPGetResult=false) and (RetryAttempt<MaxRetries) do
+      begin
+        sleep(500*RetryAttempt);
+        HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
+        RetryAttempt:=RetryAttempt+1;
+      end;
+      // If we have an answer from the server, check if the file
+      // was sent to us.
+      case HTTPSender.Resultcode of
+        100..299:
+          begin
+            with TFileStream.Create(TargetFile,fmCreate or fmOpenWrite) do
+            try
+              Seek(0, soFromBeginning);
+              CopyFrom(HTTPSender.Document, 0);
+            finally
+              Free;
+            end;
+            result:=true;
+          end; //informational, success
+        300..399: result:=false; //redirection. Not implemented, but could be.
+        400..499: result:=false; //client error; 404 not found etc
+        500..599: result:=false; //internal server error
+        else result:=false; //unknown code
+      end;
+    except
+      // We don't care for the reason for this error; the download failed.
+      result:=false;
+    end;
   finally
-    FreeAndNil(Buffer);
+    HTTPSender.Free;
   end;
 end;
 
@@ -570,4 +580,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+

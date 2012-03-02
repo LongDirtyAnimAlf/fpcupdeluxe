@@ -26,6 +26,7 @@
           <PathDelim Value="\"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value=".."/>
           </SearchPaths>
           <Other>
             <CompilerMessages>
@@ -53,74 +54,17 @@
         <PackageName Value="LCL"/>
       </Item1>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="2">
       <Unit0>
         <Filename Value="paswget.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="paswget"/>
       </Unit0>
       <Unit1>
-        <Filename Value="installer.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="installer"/>
-      </Unit1>
-      <Unit2>
-        <Filename Value="fpcuputil.pas"/>
+        <Filename Value="..\fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
-      </Unit2>
-      <Unit3>
-        <Filename Value="httpsend.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="httpsend"/>
-      </Unit3>
-      <Unit4>
-        <Filename Value="synsock.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synsock"/>
-      </Unit4>
-      <Unit5>
-        <Filename Value="ssfpc.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit5>
-      <Unit6>
-        <Filename Value="sslinux.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit6>
-      <Unit7>
-        <Filename Value="sswin32.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit7>
-      <Unit8>
-        <Filename Value="blcksock.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="blcksock"/>
-      </Unit8>
-      <Unit9>
-        <Filename Value="ftpsend.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="ftpsend"/>
-      </Unit9>
-      <Unit10>
-        <Filename Value="synacode.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synacode"/>
-      </Unit10>
-      <Unit11>
-        <Filename Value="synafpc.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synafpc"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="synaip.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synaip"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="synautil.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="synautil"/>
-      </Unit13>
+      </Unit1>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
