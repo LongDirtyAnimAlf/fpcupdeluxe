@@ -216,7 +216,7 @@ function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
 var
   idx:integer;
   sl:TStringList;
-  ULC:TUpdateLazConfig;
+  LazarusConfig:TUpdateLazConfig;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
@@ -228,6 +228,8 @@ var
   oldcounter:='';
   for i:=1 to MAXINSTRUCTIONS do
     begin
+    // Read command, e.g. AddToHelpOptions1
+    // and deduce which XML settings file to update
     exec:=GetValue('AddTo'+xmlfile+IntToStr(i),sl);
     if exec='' then break;
     //split off key and value
@@ -238,17 +240,29 @@ var
       if exec[j]=':' then break;
       end;
     key:=trim(copy(exec,1,j-1));
+    { Use @ as a prefix in your keys to indicate a counter of subsections.
+    The key afterwards is used to determine the variable that
+    keeps the count.
+    Example:
+    <ExternalTools Count="2">
+      <Tool1>
+        <Format Version="2"/>
+        <Title Value="LazDataDesktop"/>
+        <Filename Value="C:\Lazarus\tools\lazdatadesktop\lazdatadesktop.exe"/>
+      </Tool1>
+    => use @Count as your key to match ExternalTools Count="2"
+    }
     k:=pos('@',key);
     if k<=0 then
-      ULC.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))))
+      LazarusConfig.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))))
     else //we got a counter
       begin
       counter:= trim(copy(key,k+1,length(key)));
       key:=trim(copy(key,1,k-1));
       if oldcounter<>counter then //read write counter only once
         begin
-        count:=ULC.GetVariable(filename,counter,0)+1;
-        ULC.SetVariable(filename,counter,count);
+        count:=LazarusConfig.GetVariable(filename,counter,0)+1;
+        LazarusConfig.SetVariable(filename,counter,count);
         oldcounter:=counter;
         end;
       k:=pos('#',key);
@@ -258,7 +272,7 @@ var
         insert(inttostr(count),key,k);
         k:=pos('#',key);
         end;
-      ULC.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))));
+      LazarusConfig.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))));
       end;
     if not result then
       break;
@@ -271,12 +285,19 @@ begin
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
-    ULC:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
-    sl:=TStringList(UniModuleList.Objects[idx]);
-    AddToLazXML('environmentoptions');
-    AddToLazXML('helpoptions');
-    AddToLazXML('packagefiles');
-    ULC.Destroy;
+      LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
+      try
+        try
+          sl:=TStringList(UniModuleList.Objects[idx]);
+          AddToLazXML('environmentoptions');
+          AddToLazXML('helpoptions');
+          AddToLazXML('packagefiles');
+        except
+          writelnlog('ERROR: Universal installer: exception changing Lazarus config; module: '+ModuleName, true);
+        end;
+      finally
+        LazarusConfig.Destroy;
+      end;
     end
   else
     result:=false;
