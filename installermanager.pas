@@ -64,8 +64,8 @@ Const
     'UninstallModule LAZDATADESKTOP;'+
     'UninstallModule DOCEDITOR;'+
     'End;'+
-//default clean sequence for win32
-    'Declare defaultwin32clean;'+
+//default uninstall sequence for win32
+    'Declare defaultwin32uninstall;'+
     'Do defaultuninstall;'+
     'End;';
 
