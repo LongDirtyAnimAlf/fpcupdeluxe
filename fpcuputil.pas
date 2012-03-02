@@ -156,10 +156,14 @@ var
   Source: string;
   FoundPos: integer;
 begin
+  // Strip out scheme info:
   if LeftStr(URL, length(FTPScheme))=FTPScheme then URL:=Copy(URL, length(FTPScheme)+1, length(URL));
+
+  // Crude parsing; could have used URI parsing code in FPC packages...
   FoundPos:=pos('/', URL);
   Host:=LeftStr(URL, FoundPos-1);
   Source:=Copy(URL, FoundPos+1, Length(URL));
+
   //Check for port numbers:
   FoundPos:=pos(':', Host);
   Port:=FTPPort;

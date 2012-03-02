@@ -40,6 +40,10 @@ uses
   processutils,
   FileUtil {Requires LCL};
 
+const
+  // Custom return codes
+  FRET_LOCAL_REMOTE_URL_NOMATCH= -2;
+
 type
   ESVNClientError = class(Exception);
   { TSVNClient }
@@ -57,32 +61,37 @@ type
     procedure SetSVNExecutable(AValue: string);
     procedure SetVerbose(AValue: boolean);
   public
-    procedure CheckOut;
     //Performs an SVN checkout (initial download), unless otherwise specified HEAD (latest revision) only for speed
-    procedure CheckOutOrUpdate;
+    procedure CheckOut;
     //Runs SVN checkout if local repository doesn't exist, else does an update
-    function GetDiffAll:string; //Creates diff of all changes
-    function FindSVNExecutable: string;
+    procedure CheckOutOrUpdate;
+    //Creates diff of all changes in the local directory versus the SVN version
+    function GetDiffAll:string;
     //Search for installed SVN executable (might return just a filename if in the OS path)
-    procedure Log(var Log: TStringList); //Shows commit log for local directory
-    procedure Revert;
+    function FindSVNExecutable: string;
+    //Shows commit log for local directory
+    procedure Log(var Log: TStringList);
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
-    procedure Update; //Performs an SVN update (pull)
+    procedure Revert;
+    //Performs an SVN update (pull)
+    procedure Update;
+    //Get/set desired revision to checkout/pull to (if none given, use HEAD)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
-    //Get/set desired revision to pull to (if none given, use HEAD)
-    procedure LocalModifications(var FileList: TStringList);
     //Shows list of files that have been modified locally (and not committed)
+    procedure LocalModifications(var FileList: TStringList);
+    //Checks to see if local directory is a valid SVN repository for the repository URL given (if any)
     function LocalRepositoryExists: boolean;
-    //Checks to see if local directory is a valid SVN repository
-    property LocalRepository: string read FLocalRepository write FLocalRepository;
     //Local directory that has an SVN repository/checkout
-    function LocalRevision: integer; //Revision number of local repository
-    property Repository: string read FRepositoryURL write FRepositoryURL;
+    property LocalRepository: string read FLocalRepository write FLocalRepository;
+    //Revision number of local repository
+    function LocalRevision: integer;
     //URL where central SVN repository is placed
-    property ReturnCode: integer read FReturnCode;
+    property Repository: string read FRepositoryURL write FRepositoryURL;
     //Exit code returned by last SVN client command. Useful for troubleshooting
-    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
+    property ReturnCode: integer read FReturnCode;
     //SVN client executable. Can be set to explicitly determine which executable to use.
+    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
+    //Show additional console/log output?
     property Verbose:boolean read FVerbose write SetVerbose;
     constructor Create;
     destructor Destroy; override;
@@ -90,11 +99,13 @@ type
 
 
 implementation
+uses strutils;
 
 
 { TSVNClient }
 function TSVNClient.FindSvnExecutable: string;
 const
+  // Application name:
   SVNName = 'svn';
 begin
   Result := FSVNExecutable;
@@ -188,12 +199,20 @@ begin
 end;
 
 procedure Tsvnclient.CheckOutOrUpdate;
-
 begin
   if LocalRepositoryExists = False then
   begin
-    // Checkout (first download)
-    Checkout;
+    if FReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH then
+    begin
+      // We could delete the entire directory and checkout
+      // but the user could take issue with that.
+      // We already set the return code, so just let caller handle it.
+    end
+    else
+    begin
+      // Checkout (first download)
+      Checkout;
+    end;
   end
   else
   begin
@@ -209,7 +228,7 @@ end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
 var
-  s:string;
+  s:string='';
 begin
   FReturnCode:=ExecuteCommandHidden(SVNExecutable,'log ' + LocalRepository,s,Verbose);
   Log.Text:=s;
@@ -262,7 +281,7 @@ procedure TSVNClient.LocalModifications(var FileList: TStringList);
 var
   AllFiles: TStringList;
   Counter: integer;
-  Output: string;
+  Output: string='';
   StatusCode: string;
 begin
   FReturnCode:=ExecuteCommandHidden(SVNExecutable,'status --depth infinity '+FLocalRepository,Output,Verbose);
@@ -288,15 +307,49 @@ begin
 end;
 
 function Tsvnclient.LocalRepositoryExists: boolean;
+const
+  URLLen=Length('URL: ');
 var
-  s:string;
+  Output:string='';
+  URL: string;
+  URLPos: integer;
 begin
-    Result := False;
-    FReturnCode:=ExecuteCommandHidden(SVNExecutable,'info ' + FLocalRepository,s,Verbose);
-    if Pos('Path', s) > 0 then
-      Result := True;
-    //This is already covered by setting stuff to false first
-    //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
+  Result := False;
+  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'info ' + FLocalRepository,Output,Verbose);
+  //This is already covered by setting stuff to false first
+  //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
+  if Pos('Path', Output) > 0 then
+  begin
+    // There is an SVN repository here.
+    // Output from info command can include:
+    // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
+    // Repository URL might differ from the one we've set though
+    URLPos:=pos('URL: ', Output)+URLLen;
+    URL:= trim(copy(Output,
+      (URLPos), Posex(LineEnding,Output,URLPos)-URLPos ));
+    writeln('debug: urlpos: '+inttostr(urlpos));
+    writeln('debug: lineending at:'+Inttostr(Posex(LineEnding,Output,URLPos)));
+    writeln('URL:'+URL);
+    if FRepositoryURL='' then
+    begin
+      FRepositoryURL:=URL;
+      Result:=true;
+    end
+    else
+    begin
+      if FRepositoryURL=URL then
+      begin
+        result:=true;
+      end
+      else
+      begin
+        // There is a repository here, but it was checked out
+        // from a different URL...
+        // Keep result false; show caller what's going on.
+        FReturnCode:=FRET_LOCAL_REMOTE_URL_NOMATCH;
+      end;
+    end;
+  end;
 end;
 
 function TSVNClient.LocalRevision: integer;

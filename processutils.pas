@@ -34,6 +34,10 @@ interface
 
 uses
   Classes, SysUtils, process, strutils;
+
+const
+  // Error code/result code:
+  PROC_INTERNALERROR=-1;
 type
   TProcessEx=class; //forward
   TDumpFunc = procedure (Sender:TProcessEx; output:string);
@@ -217,7 +221,7 @@ begin
     // "Normal" linux and DOS exit codes are in the range 0 to 255.
     // Windows System Error Codes are 0 to 15999
     // Use negatives for internal errors.
-    FExitStatus:=-1;
+    FExitStatus:=PROC_INTERNALERROR;
     FExceptionInfoStrings.Clear;
     FOutputStrings.Clear;
     FOutStream.Clear;

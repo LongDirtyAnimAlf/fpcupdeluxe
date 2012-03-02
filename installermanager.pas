@@ -400,7 +400,6 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     infoln('Lazarus: creating desktop shortcut:');
     try
       //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
       {$IFDEF MSWINDOWS}
       CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
@@ -424,8 +423,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   begin
     infoln('Lazarus: deleting desktop shortcut:');
     try
-      //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-
+      //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
       {$IFDEF MSWINDOWS}
       DeleteDesktopShortCut(FParent.ShortCutName);
@@ -546,7 +544,7 @@ begin
     Installer.CompilerOptions:=FParent.LazarusOPT;
     Installer.DesiredRevision:=FParent.LazarusDesiredRevision;
     (Installer As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
-    (Installer as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+    (Installer As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     Installer.URL:=FParent.LazarusURL;
     end
   //Convention: help modules start with HelpFPC

@@ -651,6 +651,7 @@ begin
   {$ENDIF UNIX}
   if NewPath<>EmptyStr then
     WritelnLog('External program path:  '+NewPath,false);
+  if FVerbose then infoln('Set path to: '+NewPath);
 end;
 
 procedure TInstaller.WriteLog(msg: string; ToConsole: boolean);
