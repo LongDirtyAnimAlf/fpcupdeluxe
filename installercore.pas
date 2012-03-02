@@ -42,6 +42,7 @@ type
     procedure CreateBinutilsList;
     procedure CreateStoreSVNDiff(DiffFileName: string;UpdateWarnings: TStringList);
     function DownloadBinUtils: boolean;
+    // Checkout/update from SVN
     function DownloadFromSVN(ModuleName:string;var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList):boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
@@ -435,6 +436,8 @@ end;
 
 function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision,
   AfterRevision: string; UpdateWarnings: TStringList): boolean;
+var
+  ReturnCode: integer;
 begin
   BeforeRevision:='failure';
   AfterRevision:='failure';
@@ -450,10 +453,27 @@ begin
     FSVNClient.Revert; //Remove local changes
     end;
   FSVNClient.DesiredRevision:=FDesiredRevision; //Desired revision
+  // CheckoutOrUpdate) sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
-  AfterRevision:=IntToStr(FSVNClient.LocalRevision);
-  if BeforeRevision<>AfterRevision then FSVNUpdated:=true else FSVNUpdated:=false;
-  Result := True;
+  ReturnCode:=FSVNClient.ReturnCode;
+  case ReturnCode of
+    FRET_LOCAL_REMOTE_URL_NOMATCH:
+      begin
+      FSVNUpdated:=false;
+      result:=false;
+      writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
+      writelnlog('Local directory: '+FSVNClient.LocalRepository, true);
+      infoln('Have you specified the wrong directory or a directory with an old SVN checkout?');
+      end;
+  else
+    begin
+    // For now, assume it worked even with non-zero result code. We can because
+    // we do the AfterRevision check as well.
+    AfterRevision:=IntToStr(FSVNClient.LocalRevision);
+    if (BeforeRevision<>AfterRevision) then FSVNUpdated:=true else FSVNUpdated:=false;
+    Result:=true;
+    end;
+  end;
 end;
 
 function TInstaller.DownloadSVN: boolean;

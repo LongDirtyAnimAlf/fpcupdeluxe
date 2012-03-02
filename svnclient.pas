@@ -87,7 +87,7 @@ type
     function LocalRevision: integer;
     //URL where central SVN repository is placed
     property Repository: string read FRepositoryURL write FRepositoryURL;
-    //Exit code returned by last SVN client command. Useful for troubleshooting
+    //Exit code returned by last SVN client command; 0 for success. Useful for troubleshooting
     property ReturnCode: integer read FReturnCode;
     //SVN client executable. Can be set to explicitly determine which executable to use.
     property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
@@ -327,7 +327,6 @@ begin
     URLPos:=pos('URL: ', Output)+URLLen;
     URL:= trim(copy(Output,
       (URLPos), Posex(LineEnding,Output,URLPos)-URLPos ));
-    writeln('URL:'+URL);
     if FRepositoryURL='' then
     begin
       FRepositoryURL:=URL;
