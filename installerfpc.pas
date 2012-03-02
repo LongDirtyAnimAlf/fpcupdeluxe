@@ -176,6 +176,8 @@ begin
           // todo: this doesn't seem to work. If it keeps on not working, test
           // with installed compiler instead of bootstrap compiler.
           ProcessEx.Executable := Make;
+          //satisfy fpcmake:
+          ProcessEx.Environment.SetVar('Path',Binpath+';'+FMakeDir);
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
           infoln('Running Make crossinstall (FPC crosscompiler):');
@@ -535,6 +537,9 @@ begin
       FBootstrapCompilerURL:=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
     {$ifdef win64}
+    //There is no win64 bootstrap comiler, yet
+    //We'll make our own starting with the ppc386.exe bootstrap compiler
+    //If we made it already pick it up here
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcx64.exe';
     {$ELSE}
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
@@ -580,7 +585,7 @@ begin
     else
     begin
       {$ifdef win64}
-      //don't have a win64 bootstrap. Will have to build one later
+      //don't have a win64 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
       FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
       {$endif win64}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
