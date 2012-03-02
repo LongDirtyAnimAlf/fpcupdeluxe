@@ -241,8 +241,7 @@ var
       end;
     key:=trim(copy(exec,1,j-1));
     { Use @ as a prefix in your keys to indicate a counter of subsections.
-    The key afterwards is used to determine the variable that
-    keeps the count.
+    The key afterwards is used to determine the variable that keeps the count.
     Example:
     <ExternalTools Count="2">
       <Tool1>
@@ -250,7 +249,7 @@ var
         <Title Value="LazDataDesktop"/>
         <Filename Value="C:\Lazarus\tools\lazdatadesktop\lazdatadesktop.exe"/>
       </Tool1>
-    => use @Count as your key to match ExternalTools Count="2"
+    => use @Count in your key to match ExternalTools Count="2"
     }
     k:=pos('@',key);
     if k<=0 then
@@ -267,7 +266,7 @@ var
         end;
       k:=pos('#',key);
       while k>0 do
-        begin //replace # with count
+        begin //replace # with current count
         delete(key,k,1);
         insert(inttostr(count),key,k);
         k:=pos('#',key);
@@ -282,14 +281,12 @@ var
 begin
 // Add values to lazarus config files. Syntax:
 // AddTo<filename><number>=key[@counter]:value
-// filename: xml file to update in --primary-config-path. The list of files is limited to the list below for securit reasons.
+// filename: xml file to update in --primary-config-path. The list of files is limited to the list below for security reasons.
 // number: command number, starting from 1 for every file. The numbers have to be sequential. Scanning stops at the first missing number.
 // key: the attribute to change in the format aa/bb/cc
 // counter: the attribute key for the counter used to keep track of lists. Used to insert a new value in a list. Read and incremented by 1;
 //          When using a counter, <key> can use a the '#' character as a placeholder for the new count written to <counter>
-// value:  the string value to sore in <key>.
-
-
+// value:  the string value to store in <key>.
   result:=InitModule;
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
