@@ -246,7 +246,7 @@ begin
     // Check for valid bunzip2 executable, if it is needed
     if FBunzip2 <>EmptyStr then
     begin
-      OperationSucceeded:=CheckExecutable(FBunzip2, '--version','');
+      OperationSucceeded:=CheckExecutable(FBunzip2, '--help','');
     end;
   end;
 
@@ -740,4 +740,4 @@ end;
 
 
 end.
-
+

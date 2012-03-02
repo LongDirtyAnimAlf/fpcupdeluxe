@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
 
-{$R fpcup.rc}
+{$R fpcup.res}
 
 type
   { TUniversalInstaller }
@@ -532,4 +532,4 @@ UniModuleList.free;
 UniModuleEnabledList.free;
 IniGeneralSection.Free;
 end.
-
+
