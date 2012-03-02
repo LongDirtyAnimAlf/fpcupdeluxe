@@ -300,7 +300,10 @@ begin
           AddToLazXML('helpoptions');
           AddToLazXML('packagefiles');
         except
-          writelnlog('ERROR: Universal installer: exception changing Lazarus config; module: '+ModuleName, true);
+          on E: Exception do
+          begin
+            writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' changing Lazarus config; module: '+ModuleName, true);
+          end;
         end;
       finally
         LazarusConfig.Destroy;

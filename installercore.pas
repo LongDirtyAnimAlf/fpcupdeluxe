@@ -75,9 +75,9 @@ type
     property URL: string write FURL;
     // display and log in temp log file all sub process output
     property Verbose:boolean write FVerbose;
-    // write verbatim to log and eventually console
+    // write verbatim to log and, if specified, console
     procedure WriteLog(msg:string;ToConsole:boolean=true);
-    // append line ending and write to log and eventually console
+    // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
     // Build module
     function BuildModule(ModuleName:string): boolean; virtual;abstract;
