@@ -467,6 +467,7 @@ begin
   end;
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
+  CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract .tar.bz2, overwriting without prompting
   if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
   begin
