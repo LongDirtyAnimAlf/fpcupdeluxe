@@ -24,7 +24,7 @@ type
     // internal initialisation, called from BuildModule,CLeanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
-    function RunCommands(directive:string;sl:TStringList):boolean;
+    function RunCommands(Directive:string;sl:TStringList):boolean;
   public
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
@@ -170,7 +170,7 @@ function TUniversalInstaller.FirstSpaceAfterCommand(CommandLine: string): intege
     Result:=j;
   end;
 
-function TUniversalInstaller.RunCommands(directive: string;sl:TStringList): boolean;
+function TUniversalInstaller.RunCommands(Directive: string;sl:TStringList): boolean;
 var
   i:integer;
   exec,output:string;
@@ -179,7 +179,7 @@ begin
   Workingdir:=GetValue('Workingdir',sl);
   for i:=1 to MAXINSTRUCTIONS do
     begin
-    exec:=GetValue(directive+IntToStr(i),sl);
+    exec:=GetValue(Directive+IntToStr(i),sl);
     if exec='' then break;
     result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
     if not result then

@@ -162,7 +162,7 @@ begin
     ConfigIndex:=FConfigs.AddObject(FileName, NewConfig);
     if NewConfig.New then
     begin
-      // Lazarus wants a version number...
+      // Set up default config, including version number
       case (ExtractFileName(ConfigFile)) of
         EnvironmentConfig: NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
         HelpConfig: NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
