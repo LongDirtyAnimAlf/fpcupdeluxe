@@ -307,6 +307,11 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',which('gdb')); //assume in path
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',which('make')); //assume in path
       {$ENDIF UNIX}
+      // Set gdb as the default debugger instead of "none". Not sure if all needed. Better safe than sorry.
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/EventLogLineLimit','100');
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/WatchesDlg/ColumnNameWidth','-1');
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/WatchesDlg/ColumnValueWidth','-1');
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/FPCSourceDirectory/Value',FFPCDir);
