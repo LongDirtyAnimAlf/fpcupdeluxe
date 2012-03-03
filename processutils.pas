@@ -83,7 +83,6 @@ type
       procedure SetOnErrorM(AValue: TErrorMethod);
       procedure SetOnOutput(AValue: TDumpFunc);
       procedure SetOnOutputM(AValue: TDumpMethod);
-      procedure SetParametersString(AValue: String);
     public
       procedure Execute;
       // Executable+parameters. Use Executable and Parameters/ParametersString to assign
@@ -98,8 +97,6 @@ type
       property OnOutputM:TDumpMethod read FOnOutputM write SetOnOutputM;
       property OutputString:string read GetOutputString;
       property OutputStrings:TstringList read GetOutputStrings;
-      // Parameters/arguments for Executable. Alternative to .Parameters
-      property ParametersString:String read GetParametersString write SetParametersString;
       constructor Create(AOwner : TComponent); override;
       destructor Destroy; override;
     end;
@@ -110,8 +107,6 @@ function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload
 function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
-function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer; overload;
-function ExecuteCommandHidden(const Executable, Parameters: string; var Output:string; Verbose:boolean): integer; overload;
 procedure DumpConsole(Sender:TProcessEx; output:string);
 
 
@@ -146,10 +141,14 @@ begin
 end;
 
 function TProcessEx.GetResultingCommand: string;
+var i:integer;
 begin
-  //todo: verify if parametersstring adequately represents final parameter as passed
-  // to operating system. What about quoting etc??!
-  result:=Executable+' '+ParametersString;
+  //this is not the command as executed. The quotes are surrounding individual params.
+  //the actual quoting is platform dependant
+  //perhaps better to use another quoting character to make this clear to the user.
+  result:=Executable;
+  for i:=0 to Parameters.Count-1 do
+    result:=result+' "'+Parameters[i]+'"';
 end;
 
 function TProcessEx.GetProcessEnvironment: TProcessEnvironment;
@@ -181,12 +180,6 @@ procedure TProcessEx.SetOnOutputM(AValue: TDumpMethod);
 begin
   if FOnOutputM=AValue then Exit;
   FOnOutputM:=AValue;
-end;
-
-procedure TProcessEx.SetParametersString(AValue: String);
-
-begin
-  //CommandToList(AValue,Parameters);
 end;
 
 procedure TProcessEx.Execute;

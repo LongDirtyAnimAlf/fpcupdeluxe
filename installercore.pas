@@ -190,7 +190,7 @@ begin
   begin
     // Check for proper make executable
     try
-      ExecuteCommandHidden(Make,'-v',Output,FVerbose);
+      ExecuteCommand(Make+' -v',Output,FVerbose);
       if Ansipos('GNU Make', Output) = 0 then
       begin
         infoln('Found make executable but it is not GNU Make.');
@@ -271,7 +271,7 @@ var
 begin
   try
     ExeName:=ExtractFileName(Executable);
-    ResultCode:=ExecuteCommandHidden(Executable, Parameters, Output, FVerbose);
+    ResultCode:=ExecuteCommand(Executable+' '+ Parameters, Output, FVerbose);
     if ResultCode=0 then
     begin
       if (ExpectOutput<>'') and (Ansipos(ExpectOutput, Output)=0) then
@@ -518,7 +518,7 @@ begin
   if OperationSucceeded then
   begin
     // Extract, overwrite
-    if ExecuteCommandHidden(FUnzip,'-o -d '+ FSVNDirectory+' '+SVNZip,FVerbose)<> 0 then
+    if ExecuteCommand(FUnzip+' -o -d '+ FSVNDirectory+' '+SVNZip,FVerbose)<> 0 then
       begin
         OperationSucceeded := False;
         infoln('resultcode: ' + IntToStr(ResultCode));
@@ -662,12 +662,12 @@ begin
   TempFileName:=SysUtils.GetTempFileName;
   if IsException then
     begin
-    WritelnLog('Exception raised running ' + Sender.Executable + ' ' +Sender.ParametersString, true);
+    WritelnLog('Exception raised running ' + Sender.ResultingCommand, true);
     WritelnLog(Sender.ExceptionInfo, true);
     end
   else
     begin
-    writelnlog('ERROR running '+Sender.Executable + ' ' +Sender.ParametersString, true);
+    writelnlog('ERROR running '+Sender.ResultingCommand, true);
     writelnlog('Command returned non-zero ExitStatus: '+IntToStr(Sender.ExitStatus),true);
     writelnlog('Command path set to: '+Sender.Environment.GetVar(PATHVARNAME),true);
     writelnlog('Command current directory: '+Sender.CurrentDirectory,true);
@@ -740,4 +740,4 @@ end;
 
 
 end.
-
+

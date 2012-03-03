@@ -146,7 +146,7 @@ begin
   if FileExists(FSVNExecutable) then
   begin
     // Check for valid svn executable
-    if ExecuteCommandHidden(FSVNExecutable, '--version',Verbose) <> 0 then
+    if ExecuteCommand(FSVNExecutable+ ' --version',Verbose) <> 0 then
     begin
       // File exists, but is not a valid svn client
       FSVNExecutable := EmptyStr;
@@ -184,16 +184,16 @@ var
   RetryAttempt: integer;
 begin
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
-    Command := 'checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
+    Command := ' checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := 'checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,Command,Verbose);
+    Command := ' checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
+  FReturnCode:=ExecuteCommand(SVNExecutable+Command,Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
   begin
     Sleep(500); //Give everybody a chance to relax ;)
-    FReturnCode:=ExecuteCommandHidden(SVNExecutable,Command,Verbose); //attempt again
+    FReturnCode:=ExecuteCommand(SVNExecutable+Command,Verbose); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
 end;
@@ -223,20 +223,20 @@ end;
 
 function TSVNClient.GetDiffAll:string;
 begin
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'diff ' + LocalRepository,Result,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+' diff ' + LocalRepository,Result,Verbose);
 end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
 var
   s:string='';
 begin
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'log ' + LocalRepository,s,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+' log ' + LocalRepository,s,Verbose);
   Log.Text:=s;
 end;
 
 procedure Tsvnclient.Revert;
 begin
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'revert --recursive ' + LocalRepository,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+' revert --recursive ' + LocalRepository,Verbose);
 end;
 
 procedure TSVNClient.SetSVNExecutable(AValue: string);
@@ -262,17 +262,17 @@ var
   RetryAttempt: integer;
 begin
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
-    Command := 'update --non-interactive ' + LocalRepository
+    Command := ' update --non-interactive ' + LocalRepository
   else
-    Command := 'update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,command,Verbose);
+    Command := ' update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
+  FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
   begin
     Sleep(500); //Give everybody a chance to relax ;)
-    FReturnCode:=ExecuteCommandHidden(SVNExecutable,command,Verbose); //attempt again
+    FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
     RetryAttempt := RetryAttempt + 1;
   end;
 end;
@@ -284,7 +284,7 @@ var
   Output: string='';
   StatusCode: string;
 begin
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'status --depth infinity '+FLocalRepository,Output,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+' status --depth infinity '+FLocalRepository,Output,Verbose);
   AllFiles:=TStringList.Create;
   try
     AllFiles.Text:=Output;
@@ -315,7 +315,7 @@ var
   URLPos: integer;
 begin
   Result := False;
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'info ' + FLocalRepository,Output,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
   //This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then
@@ -356,7 +356,7 @@ var
   LRevision: string;
 begin
   result:=-1;
-  FReturnCode:=ExecuteCommandHidden(SVNExecutable,'info ' + FLocalRepository,LRevision,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,LRevision,Verbose);
   // Could have used svnversion but that would have meant calling yet another command...
   // Get the part after "DesiredRevision:"
   Result := StrToIntDef(trim(copy(LRevision,

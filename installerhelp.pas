@@ -279,7 +279,7 @@ begin
     begin
       // Extract, overwrite, flatten path/junk paths
       // todo: test with spaces in path
-      ResultCode:=ExecuteCommandHidden(FUnzip,'-o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
+      ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
       if ResultCode = 0 then
       begin
         SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.

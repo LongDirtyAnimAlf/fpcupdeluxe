@@ -345,7 +345,7 @@ var
   ResultCode: longint;
 begin
   Output:='';
-  ResultCode:=ExecuteCommandHidden(CompilerPath, '-iW', Output, FVerbose);
+  ResultCode:=ExecuteCommand(CompilerPath+ ' -iW', Output, FVerbose);
   Output:=StringReplace(Output,LineEnding,'',[rfReplaceAll,rfIgnoreCase]);
   Result:=Output;
 end;
@@ -415,7 +415,7 @@ begin
   ArchiveDir := ExtractFilePath(BootstrapArchive);
   CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract zip, overwriting without prompting
-  if ExecuteCommandHidden(FUnzip,'-o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
+  if ExecuteCommand(FUnzip+' -o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
     begin
       infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
       OperationSucceeded := False;
@@ -507,7 +507,7 @@ begin
     begin //darwin
     testcompiler:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler'+DirectorySeparator+'ppc';
     end;
-  ExecuteCommandHidden(testcompiler,'-iV',result,FVerbose);
+  ExecuteCommand(testcompiler+' -iV',result,FVerbose);
   //Remove trailing LF(s) and other control codes:
   while (length(result)>0) and (ord(result[length(result)])<$20) do
     delete(result,length(result),1);
