@@ -548,7 +548,7 @@ begin
   // FindDefaultExecutablePath
   // doesn't check if the user has execute permission
   // on the found file.
-  ExecuteCommandHidden('which',Executable,Output,false);
+  ExecuteCommand('which '+Executable,Output,false);
   //Remove trailing LF(s) and other control codes:
   while (length(output)>0) and (ord(output[length(output)])<$20) do
     delete(output,length(output),1);
@@ -584,4 +584,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+

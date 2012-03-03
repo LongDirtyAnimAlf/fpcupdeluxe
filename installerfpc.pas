@@ -433,7 +433,7 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
   //Extract bz2, overwriting without prompting
-  if ExecuteCommandHidden(FBunzip2,'-d -f -q '+BootstrapArchive,FVerbose) <> 0 then
+  if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
     begin
       infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
       OperationSucceeded := False;
@@ -460,7 +460,7 @@ begin
   CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract .tar.bz2, overwriting without prompting
   CompilerName:=ExtractFileName(FBootstrapCompiler);
-  if ExecuteCommandHidden(FTar,'-x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
+  if ExecuteCommand(FTar+' -x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
   begin
     infoln('Error: Received non-zero exit code extracting bootstrap compiler. This will abort further processing.');
     OperationSucceeded := False;
@@ -848,4 +848,4 @@ begin
 end;
 
 end.
-
+

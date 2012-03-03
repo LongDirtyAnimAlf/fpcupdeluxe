@@ -449,19 +449,5 @@ begin
   end;
 end;
 
-function ExecuteCommandHidden(const Executable, Parameters: string; Verbose:boolean): integer;
-var
-  s:string;
-begin
-  Result:=ExecuteCommand(Executable+' '+ Parameters,s,Verbose);
-end;
-
-
-function ExecuteCommandHidden(const Executable, Parameters: string; var Output: string
-  ; Verbose:boolean): integer;
-begin
-Result:=ExecuteCommand(Executable+' '+ Parameters,output,Verbose);
-end;
-
 end.
 
