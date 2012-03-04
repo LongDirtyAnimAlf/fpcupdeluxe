@@ -218,9 +218,10 @@ end;
 
 function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
 var
-  idx:integer;
+  idx,cnt,i:integer;
   sl:TStringList;
   LazarusConfig:TUpdateLazConfig;
+  directive,xmlfile,key:string;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
@@ -303,10 +304,59 @@ begin
           AddToLazXML('environmentoptions');
           AddToLazXML('helpoptions');
           AddToLazXML('packagefiles');
+          // Process specials
+          Directive:=GetValue('RegisterExternalTool',sl);
+          if Directive<>'' then
+            begin
+            xmlfile:='environmentoptions.xml';
+            key:='EnvironmentOptions/ExternalTools/Count';
+            cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+            // check if tool is already registered
+            i:=cnt;
+            while i>0 do
+              begin
+              if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')
+                =ModuleName then
+                  break;
+              i:=i-1;
+              end;
+            if i<1 then //not found
+              begin
+              cnt:=cnt+1;
+              LazarusConfig.SetVariable(xmlfile,key,cnt);
+              end
+            else
+              cnt:=i;
+            key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
+            LazarusConfig.SetVariable(xmlfile,key+'Format/Version','2');
+            LazarusConfig.SetVariable(xmlfile,key+'Title/Value',ModuleName);
+            LazarusConfig.SetVariable(xmlfile,key+'Filename/Value',Directive+GetExeExt);
+            Directive:=GetValue('RegisterExternalToolCmdLineParams',sl);
+            if Directive<>'' then
+              LazarusConfig.SetVariable(xmlfile,key+'CmdLineParams/Value',Directive);
+            Directive:=GetValue('RegisterExternalToolWorkingDirectory',sl);
+            if Directive<>'' then
+              LazarusConfig.SetVariable(xmlfile,key+'WorkingDirectory/Value',Directive);
+            Directive:=GetValue('RegisterExternalToolScanOutputForFPCMessages',sl);
+            if (Directive<>'') and (Directive<>'0') then // default = false
+              LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForFPCMessages/Value','True')
+            else
+              LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForFPCMessages/Value');
+            Directive:=GetValue('RegisterExternalToolScanOutputForMakeMessages',sl);
+            if (Directive<>'') and (Directive<>'0') then // default = false
+              LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForMakeMessages/Value','True')
+            else
+              LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForMakeMessages/Value');
+            Directive:=GetValue('RegisterExternalToolHideMainForm',sl);
+            if Directive='0' then // default = true
+              LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value','False')
+            else
+              LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
+            end;
         except
           on E: Exception do
           begin
-            writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' changing Lazarus config; module: '+ModuleName, true);
+            writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName, true);
           end;
         end;
       finally
@@ -368,8 +418,10 @@ end;
 
 function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
 var
-  idx:integer;
+  idx,cnt,i:integer;
   sl:TStringList;
+  Directive,xmlfile,key,keyfrom:string;
+  LazarusConfig:TUpdateLazConfig;
 begin
   result:=InitModule;
   if not result then exit;
@@ -379,6 +431,72 @@ begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     WritelnLog('UnInstalling module '+ModuleName);
     result:=RunCommands('UnInstallExecute',sl);
+    LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
+    try
+    // Process specials
+    Directive:=GetValue('RegisterExternalTool',sl);
+    if Directive<>'' then
+      begin
+      xmlfile:='environmentoptions.xml';
+      key:='EnvironmentOptions/ExternalTools/Count';
+      cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+      // check if tool is  registered
+      i:=cnt;
+      while i>0 do
+        begin
+        if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')
+          =ModuleName then
+            break;
+        i:=i-1;
+        end;
+      if i>=1 then // found
+        begin
+        LazarusConfig.SetVariable(xmlfile,key,cnt-1);
+        key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/';
+        //todo replace with DeletePath(xmlfile,key)
+        LazarusConfig.DeleteVariable(xmlfile,key+'Format/Version');
+        LazarusConfig.DeleteVariable(xmlfile,key+'Title/Value');
+        LazarusConfig.DeleteVariable(xmlfile,key+'Filename/Value');
+        LazarusConfig.DeleteVariable(xmlfile,key+'CmdLineParams/Value');
+        LazarusConfig.DeleteVariable(xmlfile,key+'WorkingDirectory/Value');
+        LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForFPCMessages/Value');
+        LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForMakeMessages/Value');
+        LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
+        if i<cnt then
+          begin
+          //Move last entry to deleted entry to limit movements
+          //todo replace with RenamePath(xmlfile,keyfrom,keyto)
+          keyfrom:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
+          LazarusConfig.SetVariable(xmlfile,key+'Format/Version',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'Format/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'Title/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'Title/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'Filename/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'Filename/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'CmdLineParams/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'CmdLineParams/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'WorkingDirectory/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'WorkingDirectory/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForFPCMessages/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'ScanOutputForFPCMessages/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForMakeMessages/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'ScanOutputForMakeMessages/Version'));
+          LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value',
+              LazarusConfig.GetVariable(xmlfile,keyfrom+'HideMainForm/Version'));
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'Format/Version');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'Title/Value');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'Filename/Value');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'CmdLineParams/Value');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'WorkingDirectory/Value');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'ScanOutputForFPCMessages/Value');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'ScanOutputForMakeMessages/Value');
+          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'HideMainForm/Value');
+          end;
+        end;
+      end;
+    finally
+      LazarusConfig.Destroy;
+    end;
     end
   else
     result:=false;
@@ -533,4 +651,4 @@ UniModuleList.free;
 UniModuleEnabledList.free;
 IniGeneralSection.Free;
 end.
-
+
