@@ -184,6 +184,22 @@ begin
     end;
   end;
   {$ENDIF MSWINDOWS}
+  {$IFDEF LINUX}
+  if OperationSucceeded then
+  begin
+    // Check for proper assembler
+    try
+      if ExecuteCommand('as --version',Output,FVerbose)<>0 then
+       begin
+        infoln('ERROR: Missing assembler as. Please install the developper tools.');
+        OperationSucceeded:=false;
+      end;
+    except
+      OperationSucceeded:=false;
+     // ignore errors, this is only an extra check
+    end;
+  end;
+  {$ENDIF LINUX}
 
 
   if OperationSucceeded then
@@ -740,4 +756,4 @@ end;
 
 
 end.
-
+

@@ -5,12 +5,19 @@ unit installerManager;
 interface
 
 uses
-  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerHelp,installerUniversal,fpcuputil,fileutil;
+  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerHelp,installerUniversal,fpcuputil,fileutil
+  {$ifdef linux}
+  ,dynlibs
+  {$endif linux}
+  ;
 
 Const
   Sequences=
 //default sequence
     'Declare default;'+
+    {$ifdef linux}
+    'Exec CheckDevLibs;'+
+    {$endif linux}
     'Exec CreateFpcupScript;'+
     'Do fpc;'+
     'Do lazarus;'+
@@ -441,6 +448,51 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   end;
   end;
 
+
+  {$ifdef linux}
+  function CheckDevLibs(LCLPlatform: string): boolean;
+  const
+    LIBSCNT=4;
+  type
+    TLibList=array[1..LIBSCNT] of string;
+  const
+    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so');
+    QTLIBS:TLibList = ('libQt4Pas.so','','','');
+  var
+    i:integer;
+    pll:^TLibList;
+
+    function TestLib(LibName:string):boolean;
+    var
+      Lib : TLibHandle;
+    begin
+      result:=true;
+      if LibName<>'' then
+        begin
+        Lib:=LoadLibrary(LibName);
+        result:=Lib<>0;
+        if result then
+          UnloadLibrary(Lib);
+        end;
+    end;
+
+  begin
+    result:=true;
+    if (LCLPlatform='') or (Uppercase(LCLPlatform)='GTK2') then
+      pll:=@LCLLIBS
+    else if Uppercase(LCLPlatform)='QT' then
+      pll:=@QTLIBS;
+    for i:=1 to LIBSCNT do
+      begin
+      if not TestLib(pll^[i]) then
+        begin
+        FParent.WritelnLog('ERROR: required -dev packages are not installed for Lazarus: '+pll^[i]);
+        result:=false;
+        end;
+      end;
+  end;
+  {$endif linux}
+
 begin
   if UpperCase(FunctionName)='CREATEFPCUPSCRIPT' then
     result:=CreateFpcupScript
@@ -448,6 +500,10 @@ begin
     result:=CreateLazarusScript
   else if UpperCase(FunctionName)='DELETELAZARUSSCRIPT' then
     result:=DeleteLazarusScript
+  {$ifdef linux}
+  else if UpperCase(FunctionName)='CHECKDEVLIBS' then
+    result:=CheckDevLibs(FParent.CrossLCL_Platform)
+  {$endif linux}
   else
     begin
     result:=false;

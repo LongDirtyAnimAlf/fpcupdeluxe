@@ -41,8 +41,8 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 
 //todo: check out build-cross.bat in win dir for lazarus for crosscompiling setup instructions
 
-uses {$IFDEF UNIX} {$IFDEF UseCThreads}
-  cthreads, {$ENDIF} {$ENDIF}
+uses {$IFDEF UNIX}
+  cthreads, {$ENDIF}
   Classes,Forms,Interfaces {these 2 for application options},
   svnclient, updatelazconfig, ftpsend, sysutils, processutils,
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
@@ -483,4 +483,4 @@ begin
   writeln('FPCUp finished.');
   if res<>-1 then
     halt(res);
-end.
+end.

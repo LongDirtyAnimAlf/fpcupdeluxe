@@ -7,7 +7,7 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
 
-{$R fpcup.rc}
+{$R fpcup.res}
 
 type
   { TUniversalInstaller }
@@ -61,7 +61,7 @@ Const
 
 implementation
 
-uses inifiles,updatelazconfig,svnclient,fileutil;
+uses inifiles,updatelazconfig,fileutil;
 
 Const
   STARTUSERMODULES=1000;
@@ -361,7 +361,8 @@ end;
 function TUniversalInstaller.GetModuleRequirements(ModuleName: string;
   var RequirementList: TStringList): boolean;
 begin
-  if not InitModule then exit;
+result:=InitModule;
+if not result then exit;
 
 end;
 

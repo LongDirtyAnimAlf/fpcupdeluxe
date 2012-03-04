@@ -609,7 +609,8 @@ begin
     BinPath,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  SetPath(BinPath,true);
+  //add fpc/utils to solve data2inc not found by fpcmkcfg
+  SetPath(BinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true);
   {$ENDIF UNIX}
   InitDone:=result;
 end;
@@ -627,8 +628,8 @@ const
 
 
 begin
-  if not InitModule then exit;
-  result:=false;
+  result:=InitModule;
+  if not result then exit;
   {$ifdef win64}
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
@@ -748,7 +749,8 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 var
   oldlog:TErrorMethod;
 begin
-  if not InitModule then exit;
+  result:=InitModule;
+  if not result then exit;
   ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -788,7 +790,8 @@ var
   BeforeRevision: string;
   UpdateWarnings: TStringList;
 begin
-  if not InitModule then exit;
+  result:=InitModule;
+  if not result then exit;
   infoln('Checking out/updating FPC sources...');
   UpdateWarnings:=TStringList.Create;
   try

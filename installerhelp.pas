@@ -211,14 +211,14 @@ end;
 
 function THelpInstaller.BuildModule(ModuleName: string): boolean;
 begin
-  if not InitModule then exit;
-  result:=true;
+  result:=InitModule;
+  if not result then exit;
 end;
 
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
 begin
-  if not InitModule then exit;
-  result:=true;
+  result:=InitModule;
+  if not result then exit;
 end;
 
 function THelpInstaller.ConfigModule(ModuleName: string): boolean;
@@ -243,7 +243,8 @@ var
   OperationSucceeded: boolean;
   ResultCode: longint;
 begin
-  if not InitModule then exit;
+  result:=InitModule;
+  if not result then exit;
 
   if FileExistsUTF8(FTargetDirectory+'fcl.chm') and
     FileExistsUTF8(FTargetDirectory+'rtl.chm') then
@@ -595,4 +596,4 @@ begin
 end;
 
 end.
-
+
