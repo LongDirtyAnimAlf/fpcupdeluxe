@@ -82,6 +82,12 @@ If it doesn't exist, it downloads a bootstrap compiler.
 - It gets the FPC chm documentation if not already present
 - It compiles the Lazarus CHM help
 
+5. Getting and compiling external modules
+- It reads fpcup.ini and parses the items specified.
+- It can download from HTTP and FTP sites, and use SVN to keep repositories up to date.
+- It can register executables as external tools in Lazarus
+- Please see fpcup.ini for details
+
 
 Cross compiler extensions
 =========================
