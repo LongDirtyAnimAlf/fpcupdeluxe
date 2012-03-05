@@ -149,7 +149,6 @@
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="synapse"/>
     </SearchPaths>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
@@ -164,6 +163,9 @@
       </Optimizations>
     </CodeGeneration>
     <Linking>
+      <Debugging>
+        <UseExternalDbgSyms Value="True"/>
+      </Debugging>
       <LinkSmart Value="True"/>
     </Linking>
     <Other>
