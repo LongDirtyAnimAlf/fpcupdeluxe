@@ -372,7 +372,7 @@ begin
   writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
   writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
        IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
-       IncludeTrailingPathDelimiter(BinPath)+' $*');
+       IncludeTrailingPathDelimiter(BinPath)+' "$@"');
   CloseFile(TxtFile);
   Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
