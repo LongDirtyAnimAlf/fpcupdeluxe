@@ -41,6 +41,7 @@ type
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     procedure CreateBinutilsList;
     procedure CreateStoreSVNDiff(DiffFileName: string;UpdateWarnings: TStringList);
+    // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     // Checkout/update from SVN
     function DownloadFromSVN(ModuleName:string;var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList):boolean;
@@ -179,7 +180,7 @@ begin
     if (DirectoryExists(FMakeDir) = False) or (FileExists(Make) = False) or
       (FileExists(FUnzip) = False) then
     begin
-      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download');
+      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download binutils.');
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
@@ -191,7 +192,7 @@ begin
     try
       if ExecuteCommand('as --version',Output,FVerbose)<>0 then
        begin
-        infoln('ERROR: Missing assembler as. Please install the developper tools.');
+        infoln('ERROR: Missing assembler as. Please install the developer tools.');
         OperationSucceeded:=false;
       end;
     except
@@ -330,13 +331,19 @@ begin
   FBinUtils.Add('ar'+GetExeExt);
   FBinUtils.Add('as'+GetExeExt);
   {$endif win64}
+  {$IFDEF WIN64}
+  // bin2obj not present in the win32 2.6 release directory...
   FBinUtils.Add('bin2obj'+GetExeExt);
+  {$ENDIF WIN64}
   FBinUtils.Add('cmp'+GetExeExt);
   FBinUtils.Add('cp'+GetExeExt);
   FBinUtils.Add('cpp.exe');
+  {$IFDEF WIN64}
+  // The cygwin files are not present in the win32 2.6 release directory...
   FBinUtils.Add('cygiconv-2.dll');
   FBinUtils.Add('cygncurses-8.dll');
   FBinUtils.Add('cygwin1.dll');
+  {$ENDIF WIN64}
   FBinUtils.Add('diff'+GetExeExt);
   FBinUtils.Add('dlltool'+GetExeExt);
   FBinUtils.Add('fp32.ico');
@@ -407,12 +414,12 @@ const
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw64/';
   SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
-  //Parent directory of files. Needs trailing backslash.
 var
   Counter: integer;
   Errors: integer=0;
   sURL:string;
 begin
+  //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesUTF8(FMakeDir);
   Result:=true;
   for Counter := 0 to FBinUtils.Count - 1 do
@@ -456,7 +463,11 @@ begin
     end;
   end;
   {$endif win64}
-  if Errors>0 then result:=false;
+  if Errors>0 then
+  begin
+    result:=false;
+    WritelnLog('DownloadBinUtils: '+IntToStr(Errors)+' downloading binutils.', true);
+  end;
 end;
 
 function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision,
@@ -756,4 +767,4 @@ end;
 
 
 end.
-
+
