@@ -727,6 +727,8 @@ begin
     WritelnLog('External program path:  '+NewPath,false);
     // for some reason, writing this often leads to a missing line ending!
     Flush(FLogFile);
+    // Flush is not enough; sleep as well
+    sleep(50);
     end;
   if FVerbose then infoln('Set path to: '+NewPath);
 end;
