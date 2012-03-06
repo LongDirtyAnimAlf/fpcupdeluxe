@@ -712,7 +712,11 @@ begin
     NewPath:=NewPath+PathSeparator+ProcessEx.Environment.GetVar(PATHVARNAME);
   ProcessEx.Environment.SetVar(PATHVARNAME,NewPath);
   if NewPath<>EmptyStr then
+    begin
     WritelnLog('External program path:  '+NewPath,false);
+    // for some reason, writing this often leads to a missing line ending!
+    Flush(FLogFile);
+    end;
   if FVerbose then infoln('Set path to: '+NewPath);
 end;
 
@@ -725,7 +729,8 @@ end;
 
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
-  WriteLog(msg+LineEnding,false); //infoln adds already a lf
+  //Infoln already adds a lf, so we need to handle it here:
+  WriteLog(msg+LineEnding,false);
   if ToConsole then
     InfoLn(msg);
 end;
