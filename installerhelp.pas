@@ -330,7 +330,6 @@ begin
   if inherited InitModule then
   begin
     //todo: check with FreeVision FPCIDE to see if this is a sensible location.
-    //todo: why is the BaseDirectory property write-only? Why use FBaseDirectory?
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
@@ -596,4 +595,4 @@ begin
 end;
 
 end.
-
+

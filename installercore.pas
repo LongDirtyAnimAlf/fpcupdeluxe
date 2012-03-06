@@ -263,6 +263,9 @@ begin
     // Check for valid bunzip2 executable, if it is needed
     if FBunzip2 <>EmptyStr then
     begin
+      { Used to use bunzip2 --version, but on e.g. Fedora Core
+      that returns an error message e.g. can't read from cp
+      }
       OperationSucceeded:=CheckExecutable(FBunzip2, '--help','');
     end;
   end;
