@@ -516,6 +516,8 @@ begin
 end;
 
 function TInstaller.DownloadSVN: boolean;
+const
+  SourceURL='http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip';
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
@@ -537,22 +539,28 @@ begin
   ForceDirectoriesUTF8(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   try
-    OperationSucceeded := Download(
-      'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip',
-      SVNZip);
+    OperationSucceeded := Download(SourceURL, SVNZip);
   except
     // Deal with timeouts, wrong URLs etc
-    OperationSucceeded:=false;
+    on E: Exception do
+    begin
+      OperationSucceeded:=false;
+      writelnlog('ERROR: exception '+E.ClassName+'/'+E.Message+' downloading SVN client from '+SourceURL, true);
+    end;
   end;
 
   if OperationSucceeded then
   begin
     // Extract, overwrite
     if ExecuteCommand(FUnzip+' -o -d '+ FSVNDirectory+' '+SVNZip,FVerbose)<> 0 then
-      begin
-        OperationSucceeded := False;
-        infoln('resultcode: ' + IntToStr(ResultCode));
-      end;
+    begin
+      OperationSucceeded := False;
+      writelnlog('DownloadSVN: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+    end;
+  end
+  else
+  begin
+    writelnlog('ERROR downloading SVN client from '+SourceURL, true);
   end;
 
   if OperationSucceeded then
