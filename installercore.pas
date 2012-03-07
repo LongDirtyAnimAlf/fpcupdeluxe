@@ -483,6 +483,13 @@ begin
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
   BeforeRevision:=IntToStr(FSVNClient.LocalRevision);
+  if BeforeRevision=IntToStr(FRET_WORKING_COPY_TOO_OLD) then
+    begin
+    writelnlog('ERROR: The working copy in '+FBaseDirectory+' was created with an older, incompatible version of svn.', true);
+    writelnlog('  Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
+    result:=false;  //fail
+    exit;
+    end;
   FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
   if UpdateWarnings.Count>0 then
     begin

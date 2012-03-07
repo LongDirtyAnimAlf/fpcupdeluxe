@@ -43,6 +43,7 @@ uses
 const
   // Custom return codes
   FRET_LOCAL_REMOTE_URL_NOMATCH= -2;
+  FRET_WORKING_COPY_TOO_OLD= -3;
 
 type
   ESVNClientError = class(Exception);
@@ -359,9 +360,15 @@ begin
   FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,LRevision,Verbose);
   // Could have used svnversion but that would have meant calling yet another command...
   // Get the part after "DesiredRevision:"
-  Result := StrToIntDef(trim(copy(LRevision,
-    (pos('Revision: ', LRevision) + RevLength),
-    6)), -1);
+  if FReturnCode=0 then
+    Result := StrToIntDef(trim(copy(LRevision,
+      (pos('Revision: ', LRevision) + RevLength),
+      6)), -1)
+  else
+    if Pos('E155036',LRevision)>0 then
+      begin
+      result:=FRET_WORKING_COPY_TOO_OLD;
+      end;
 end;
 
 
