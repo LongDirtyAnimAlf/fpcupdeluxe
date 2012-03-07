@@ -290,6 +290,12 @@ function TFPCupManager.Run: boolean;
 
 begin
   result:=false;
+  if SkipModules<>'' then
+    begin
+    Sequencer.SkipList:=TStringList.Create;
+    Sequencer.SkipList.Delimiter:=',';
+    Sequencer.SkipList.DelimitedText:=SkipModules;
+    end;
   if FOnlyModules<>'' then
     begin
     Sequencer.CreateOnly(FOnlyModules);
@@ -305,6 +311,8 @@ begin
     {$else}
     result:=Sequencer.Run('Default');
     {$endif win32}
+  if assigned(Sequencer.SkipList) then
+    Sequencer.SkipList.Free;
 end;
 
 constructor TFPCupManager.Create;
