@@ -595,12 +595,13 @@ var
 
 begin
   result:='';
+  // Create fpcup.ini from resource if it doesn't exist yet
   if (ConfigFile=ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME)
     and not FileExistsUTF8(CONFIGFILENAME) then
     SaveIniFromResource(CONFIGFILENAME);
   ini:=TMemIniFile.Create(ConfigFile);
   ini.CaseSensitive:=false;
-// parse inifile
+  // parse inifile
   try
     ini.ReadSectionRaw('General',IniGeneralSection);
     for i:=1 to STARTUSERMODULES do
