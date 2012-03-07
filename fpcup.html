@@ -21,25 +21,20 @@
 <P>A thing that can be installed/updated/uninstalled
 in fpcup is called a module. Modules can specify dependencies on
 other modules.</P>
-<P>For base level items, such as FPC, Lazarus, these
-modules are implemented using the T*** class.</P>
-<P>Cross compiler clases form the next level of
-modules and are descendents of the T*** class.</P>
-<P>For “external” modules, the parent class is
-T***</P>
-<P>Module names may not conflict and must contain of
-alphanumeric characters, _ and - (hyphen).</P>
+<P>Any installation tasks in fpcup are performed by TInstaller descendants, and driven by a state machine in the installerManager unit.</P>
+<P>FPC and Lazarus installers are implemented using TFPCInstaller and TLazarusInstaller descendants (native and cross compiler).</P>
+<P>Help content is installed using THelpInstaller descendents - FPC and Lazarus help content for Lazarus is installed by default; FPC help for the FPC IDE has been more or less setup but not run by default.</P>
+<P>For “external” modules, the parent class is TUniversalInstaller. You can specify what you want installed in fpcup.ini (see below in external modules)</P>
+<P>Module names may not conflict and must contain of alphanumeric characters, _ and - (hyphen).</P>
 <H2 CLASS="western">Dependency checking</H2>
-<P>Simple dependency checking is performed on each
-install run.</P>
-<P>A dummy module called @base with dependencies on
-fpc, ide is inserted to make sure fpc/ide are always compiled first</P>
-<P>todo: submodules provided by 2 or more modules (e.g. laz config by ide and help)=>create dummy submodule for dependencies?</P>
-<P>todo: Uninstall: reverse order?</P>
+<P>Dependency checking is performed by the state machine. For external modules, you can specify one module requires another.</P>
 <H3 CLASS="western">External modules</H3>
 <P>External modules are modules where the installation/uninstall parameters are specified in an ini file.</P>
 <P>The ini file e.g. specifies what SVN repository to download from into what directory.</P>
 <P>A core fpcup ini file is maintained by the fpcup team. Users can enable/disable units in this ini file at will.</P>
 <P>As the ini file is designed for easy customization, users can add their own modules and submit them to the team for inclusion in the next release, making it easy to extend fpcup functionality for new repositories (e.g. Lazarus CCR, synapes, tiopf, vampyre imaging library).</P>
+<H3 CLASS="western">Cleaning and uninstall</H3>
+<P>By default, running fpcup will install/update components. You can specify --clean to remove intermediate files, which is useful when troubleshooting.</P>
+<P>To remove components, you can specify --uninstall, which will remove entire installation directories.</P>
 </BODY>
 </HTML>
