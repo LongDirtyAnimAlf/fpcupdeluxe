@@ -46,7 +46,7 @@ uses {$IFDEF UNIX}
   Classes,Forms,Interfaces {these 2 for application options},
   svnclient, updatelazconfig, ftpsend, sysutils, processutils,
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
-  synaip, synautil, synsock, blcksock, topologicalsort, installerCore,
+  synaip, synautil, synsock, blcksock, installerCore,
   installerfpc, installerLazarus, installerHelp, installerUniversal,
   installerManager;
 
