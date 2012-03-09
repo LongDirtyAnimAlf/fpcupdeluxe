@@ -60,20 +60,6 @@ begin
   writeln('fpcup --<options>');
   writeln('');
   writeln('fpcup can work with modules - see "only", "skip" below');
-  writeln('List of modules and standard installation action:');
-  writeln('Std Name           Description');
-  writeln('on  FPC            Free Pascal compiler');
-  writeln('on  lazarus        LCL (and IDE if not crosscompiling)');
-  writeln('off bigide         IDE with extra components. Selects lazarus.');
-  writeln('on  help           Lazarus+FPC help. Also selects bigide.');
-  writeln('on  wincrossx64    Lazarus Win32=>Win64 cross compiler.');
-  writeln('                   Note: also installs lazarus 32 bit IDE.');
-  writeln('on  doceditor      Lazarus Doceditor. Also selects lazarus.');
-  writeln('on  lazdatadesktop Data desktop tool. Also selects lazarus.');
-  writeln('Because help is installed by default, it pulls in bigide and');
-  writeln('the results that all modules above get installed.');
-  writeln('(except wincrossx64 if not on Windows, of course)');
-  writeln('');
   writeln('List of all modules:');
   For i:=0 to ModuleList.Count-1 do
     begin
@@ -483,4 +469,4 @@ begin
   writeln('FPCUp finished.');
   if res<>-1 then
     halt(res);
-end.
+end.
