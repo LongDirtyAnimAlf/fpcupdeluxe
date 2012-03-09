@@ -407,8 +407,9 @@ begin
     WritelnLog('Error: invalid Lazarus directory :'+FBaseDirectory);
     result:=false;
   end;
+  // Sanity check so we don't try to delete random directories
+  // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
   if result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+'environmentoptions.xml') and
-    FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+'editoroptions.xml') and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FPrimaryConfigPath)) then
     begin
     if DeleteDirectoryEx(FPrimaryConfigPath)=false then
@@ -421,7 +422,7 @@ begin
     end
   else
   begin
-    WritelnLog('Error: invalid Lazarus FPrimaryConfigPath :'+FPrimaryConfigPath);
+    WritelnLog('Error: invalid Lazarus FPrimaryConfigPath: '+FPrimaryConfigPath);
     result:=false;
   end;
 end;
@@ -438,4 +439,4 @@ begin
 end;
 
 end.
-
+
