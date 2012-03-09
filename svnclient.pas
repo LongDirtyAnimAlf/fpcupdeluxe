@@ -58,7 +58,10 @@ type
     FSVNExecutable: string;
     FVerbose: boolean;
     function GetSVNExecutable: string;
+    // Makes sure non-empty strings have a / at the end.
+    function IncludeTrailingSlash(AValue: string): string;
     procedure SetDesiredRevision(AValue: string);
+    procedure SetRepositoryURL(AValue: string);
     procedure SetSVNExecutable(AValue: string);
     procedure SetVerbose(AValue: boolean);
   public
@@ -87,7 +90,7 @@ type
     //Revision number of local repository
     function LocalRevision: integer;
     //URL where central SVN repository is placed
-    property Repository: string read FRepositoryURL write FRepositoryURL;
+    property Repository: string read FRepositoryURL write SetRepositoryURL;
     //Exit code returned by last SVN client command; 0 for success. Useful for troubleshooting
     property ReturnCode: integer read FReturnCode;
     //SVN client executable. Can be set to explicitly determine which executable to use.
@@ -171,10 +174,29 @@ begin
     Result := FSVNExecutable;
 end;
 
+function TSVNClient.IncludeTrailingSlash(AValue: string): string;
+begin
+  // Default: either empty string or / already there
+  result:=AValue;
+  if (AValue<>'') and (RightStr(AValue,1)<>'/') then
+  begin
+    result:=AValue+'/';
+  end;
+end;
+
+
 procedure TSVNClient.SetDesiredRevision(AValue: string);
 begin
   if FDesiredRevision=AValue then Exit;
   FDesiredRevision:=AValue;
+end;
+
+procedure TSVNClient.SetRepositoryURL(AValue: string);
+// Make sure there's a trailing / in the URL.
+// This normalization helps matching remote and local URLs
+begin
+  if FRepositoryURL=AValue then Exit;
+  FRepositoryURL:=IncludeTrailingSlash(AValue);
 end;
 
 procedure Tsvnclient.Checkout;
@@ -326,8 +348,8 @@ begin
     // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
     // Repository URL might differ from the one we've set though
     URLPos:=pos('URL: ', Output)+URLLen;
-    URL:= trim(copy(Output,
-      (URLPos), Posex(LineEnding,Output,URLPos)-URLPos ));
+    URL:= IncludeTrailingSlash(trim(copy(Output,
+      (URLPos), Posex(LineEnding,Output,URLPos)-URLPos )));
     if FRepositoryURL='' then
     begin
       FRepositoryURL:=URL;
