@@ -25,6 +25,7 @@ Const
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
+    'Do UniversalDefault;'+
     'End;'+
 //default sequence for win32
     'Declare defaultwin32;'+
@@ -35,6 +36,11 @@ Const
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
+    'Do UniversalDefault;'+
+    'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
+    'End;'+
+//cross sequence for win32
+    'Declare crosswin32-64;'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
@@ -49,6 +55,7 @@ Const
     'Do helplazarusclean;'+
     'CleanModule LAZDATADESKTOP;'+
     'CleanModule DOCEDITOR;'+
+    'Do UniversalDefaultClean;'+
     'End;'+
 //default clean sequence for win32
     'Declare defaultwin32clean;'+
@@ -57,6 +64,11 @@ Const
     'Do helplazarusclean;'+
     'CleanModule LAZDATADESKTOP;'+
     'CleanModule DOCEDITOR;'+
+    'Do UniversalDefaultClean;'+
+    'Do crosswin32-64Clean;'+   //this has to be the last. All TExecState reset!
+    'End;'+
+//default cross clean sequence for win32
+    'Declare crosswin32-64Clean;'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
@@ -70,6 +82,7 @@ Const
     'Do helpuninstall;'+
     'UninstallModule LAZDATADESKTOP;'+
     'UninstallModule DOCEDITOR;'+
+    'Do UniversalDefaultUnInstall;'+
     'End;'+
 //default uninstall sequence for win32
     'Declare defaultwin32uninstall;'+

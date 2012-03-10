@@ -629,6 +629,19 @@ begin
           UniModuleEnabledList.Delete(j);
         end;
       end;
+    // create the sequences for default modules
+    result:=result+'DeclareHidden UniversalDefault;';
+    for i:=0 to UniModuleEnabledList.Count-1 do
+      result:=result+'Do '+UniModuleEnabledList[i]+';';
+    result:=result+'End;';
+    result:=result+'DeclareHidden UniversalDefaultClean;';
+    for i:=0 to UniModuleEnabledList.Count-1 do
+      result:=result+'Do '+UniModuleEnabledList[i]+'Clean;';
+    result:=result+'End;';
+    result:=result+'DeclareHidden UniversalDefaultUninstall;';
+    for i:=0 to UniModuleEnabledList.Count-1 do
+      result:=result+'Do '+UniModuleEnabledList[i]+'Uninstall;';
+    result:=result+'End;';
   finally
     ini.Free;
   end;
