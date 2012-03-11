@@ -31,7 +31,7 @@ On Linux:
 E.g. on Debian or Ubuntu, do something like:
 sudo aptitude install build-essential subversion unzip
 
-On OSX: only tested with XCode installed; no requirements found.
+On OSX: only tested with XCode installed; no other requirements found.
 
 How does it work?
 =================
