@@ -26,7 +26,7 @@ other modules.</P>
 <P>Help content is installed using THelpInstaller descendents - FPC and Lazarus help content for Lazarus is installed by default; FPC help for the FPC IDE has been more or less setup but not run by default.</P>
 <P>For “external” modules, the parent class is TUniversalInstaller. You can specify what you want installed in fpcup.ini (see below in external modules)</P>
 <P>Module names may not conflict and must contain of alphanumeric characters, _ and - (hyphen).</P>
-<H2 CLASS="western">Dependency checking</H2>
+<H3 CLASS="western">Dependency checking</H2>
 <P>Dependency checking is performed by the state machine. For external modules, you can specify one module requires another.</P>
 <H3 CLASS="western">External modules</H3>
 <P>External modules are modules where the installation/uninstall parameters are specified in an ini file.</P>
@@ -36,5 +36,9 @@ other modules.</P>
 <H3 CLASS="western">Cleaning and uninstall</H3>
 <P>By default, running fpcup will install/update components. You can specify --clean to remove intermediate files, which is useful when troubleshooting.</P>
 <P>To remove components, you can specify --uninstall, which will remove entire installation directories.</P>
+<H3 CLASS="western">Customization</H3>
+<P>The two major ways to extend fpcup are writing your own crossinstaller (that checks/downloads required binutils and libraries, and compiles the cross-compiler/LCL), and external modules.</P>
+<P>See above for how to add external modules without changing the fpcup code.</P>
+<P>An idea could also be to integrate mercurial/hg or git repositories into the external module functionality</P>
 </BODY>
 </HTML>
