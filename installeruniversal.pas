@@ -222,6 +222,7 @@ var
   sl:TStringList;
   LazarusConfig:TUpdateLazConfig;
   directive,xmlfile,key:string;
+  LazDocPath: string;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
@@ -352,6 +353,29 @@ begin
               LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value','False')
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
+            end;
+
+          Directive:=GetValue('RegisterLazDocPath',sl);
+          if Directive<>'' then
+            begin
+            xmlfile:='environmentoptions.xml';
+            key:='EnvironmentOptions/LazDoc/Paths';
+            // In future we could replace possible bla/../ entries in the directive with the direct path
+            LazDocPath:=ExcludeLeadingPathDelimiter(LazarusConfig.GetVariable(xmlfile,key));
+            if LazDocPath<>'' then
+              begin
+              if AnsiPos(Directive,LazDocPath)=0 then
+                begin
+                // If the setting does not include our path, add it:
+                Directive:=Directive+';'+LazDocPath;
+                end
+                else
+                begin
+                // Setting already includes our path
+                Directive:=LazDocPath;
+                end;
+              end;
+              LazarusConfig.SetVariable(xmlfile,key,Directive);
             end;
         except
           on E: Exception do
