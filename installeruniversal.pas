@@ -7,7 +7,15 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
 
+{$IFDEF MSWINDOWS}
+// On Windows, we can be certain a valid FPC install has
+// windres, so use it.
+{$R fpcup.rc}
+{$ELSE}
+// On other platforms, we trust a previous windows compile or
+// manual windres invocation has updated fpcup.res
 {$R fpcup.res}
+{$ENDIF MSWINDOWS}
 
 type
   { TUniversalInstaller }
