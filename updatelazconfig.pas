@@ -81,6 +81,8 @@ private
   function GetConfig(const ConfigFile: string): TConfig;
   procedure WriteConfig;
 public
+  { Remove path leading up to a variable (e.g. EnvironmentOptions/ExternalTools) }
+  procedure DeletePath(ConfigFile, Path: string);
   { Remove entire variable }
   procedure DeleteVariable(ConfigFile, Variable:string);
   { Returns string variable content, or empty string if it doesn't exist }
@@ -139,6 +141,15 @@ begin
   begin
    (FConfigs.Objects[Counter] As TConfig).Save;
   end;
+end;
+
+procedure TUpdateLazConfig.DeletePath(ConfigFile, Path: string);
+var
+  Config: TConfig;
+  VariableIndex: integer;
+begin
+  Config:=GetConfig(ConfigFile);
+  Config.DeletePath(Path);
 end;
 
 function TUpdateLazConfig.GetConfig(const ConfigFile: string): TConfig;

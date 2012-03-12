@@ -472,7 +472,7 @@ begin
       xmlfile:='environmentoptions.xml';
       key:='EnvironmentOptions/ExternalTools/Count';
       cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
-      // check if tool is  registered
+      // check if tool is registered
       i:=cnt;
       while i>0 do
         begin
@@ -485,19 +485,10 @@ begin
         begin
         LazarusConfig.SetVariable(xmlfile,key,cnt-1);
         key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/';
-        //todo replace with DeletePath(xmlfile,key)
-        LazarusConfig.DeleteVariable(xmlfile,key+'Format/Version');
-        LazarusConfig.DeleteVariable(xmlfile,key+'Title/Value');
-        LazarusConfig.DeleteVariable(xmlfile,key+'Filename/Value');
-        LazarusConfig.DeleteVariable(xmlfile,key+'CmdLineParams/Value');
-        LazarusConfig.DeleteVariable(xmlfile,key+'WorkingDirectory/Value');
-        LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForFPCMessages/Value');
-        LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForMakeMessages/Value');
-        LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
+        LazarusConfig.DeletePath(xmlfile,key);
         if i<cnt then
           begin
           //Move last entry to deleted entry to limit movements
-          //todo replace with RenamePath(xmlfile,keyfrom,keyto)
           keyfrom:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
           LazarusConfig.SetVariable(xmlfile,key+'Format/Version',
               LazarusConfig.GetVariable(xmlfile,keyfrom+'Format/Version'));
@@ -515,14 +506,8 @@ begin
               LazarusConfig.GetVariable(xmlfile,keyfrom+'ScanOutputForMakeMessages/Version'));
           LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value',
               LazarusConfig.GetVariable(xmlfile,keyfrom+'HideMainForm/Version'));
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'Format/Version');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'Title/Value');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'Filename/Value');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'CmdLineParams/Value');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'WorkingDirectory/Value');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'ScanOutputForFPCMessages/Value');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'ScanOutputForMakeMessages/Value');
-          LazarusConfig.DeleteVariable(xmlfile,keyfrom+'HideMainForm/Value');
+          // Clean up old, removed key
+          LazarusConfig.DeletePath(xmlfile,keyfrom);
           end;
         end;
       end;
