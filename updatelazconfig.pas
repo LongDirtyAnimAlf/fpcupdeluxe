@@ -42,7 +42,7 @@ I'm not adding error protection here, as we should not write those kinds of vari
 interface
 
 uses
-  Classes, SysUtils, laz2_xmlcfg;
+  Classes, SysUtils, laz2_xmlcfg, Laz2_DOM;
 const
   EnvironmentConfig='environmentoptions.xml';
   HelpConfig='helpoptions.xml';
@@ -64,6 +64,8 @@ private
 protected
   // Did the config file exist before using it?
   property New: boolean read FNew;
+  // Move a child from a different part of the tree
+  procedure MovePath(OldPath, NewPath: string);
   // Save our changes to the config variable
   procedure Save;
 public
@@ -91,6 +93,8 @@ public
   function GetVariable(ConfigFile, Variable: string; Default: integer): integer;
   { Returns boolean variable content, or Default if it doesn't exit }
   function GetVariable(ConfigFile, Variable: string; Default: boolean): boolean;
+  { Move part of the tree to another part of the tree: can be used to move children }
+  procedure MovePath(ConfigFile, OldPath, NewPath: string);
   { Sets string variable to a certain value.}
   procedure SetVariable(ConfigFile, Variable, Value: string);
   { Sets integer variable to a certain value}
@@ -107,6 +111,18 @@ implementation
 uses FileUtil;
 
 { TConfig }
+
+procedure TConfig.MovePath(OldPath, NewPath: string);
+var
+  NewChild, OldChild: TDOMNode;
+begin
+  // Assumes no variables at the end are specified
+  OldChild:=FindNode(OldPath, false);
+  if OldChild=nil then exit;
+  NewChild:=FindNode(NewPath, false);
+  if NewChild=nil then exit;
+  doc.ReplaceChild(NewChild, OldChild);
+end;
 
 procedure TConfig.Save;
 // Alias for flush, really..
@@ -229,6 +245,14 @@ begin
   // Don't free this one, as it will remove it from the list
   Config:=GetConfig(ConfigFile);
   result:=Config.GetValue(Variable, Default);
+end;
+
+procedure TUpdateLazConfig.MovePath(ConfigFile, OldPath, NewPath: string);
+var
+  Config: TConfig;
+begin
+  Config:=GetConfig(ConfigFile);
+  Config.MovePath(OldPath, NewPath);
 end;
 
 procedure TUpdateLazConfig.SetVariable(ConfigFile, Variable, Value: string);
