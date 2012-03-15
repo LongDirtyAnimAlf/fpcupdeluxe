@@ -42,7 +42,7 @@ I'm not adding error protection here, as we should not write those kinds of vari
 interface
 
 uses
-  Classes, SysUtils, laz2_xmlcfg, Laz2_DOM;
+  Classes, SysUtils, Laz_DOM, Laz_XMLRead, Laz_XMLWrite;
 const
   EnvironmentConfig='environmentoptions.xml';
   HelpConfig='helpoptions.xml';
@@ -58,16 +58,30 @@ type
 TConfig=class; //forward declaration
 TUpdateLazConfig=class; //forward declaration
 
-TConfig = class(TXMLConfig)
+TConfig = class(TObject)
 private
+  bChanged:boolean;
+  Filename:string;
   FNew: boolean;
+  Doc:TXMLDocument;
 protected
   // Did the config file exist before using it?
   property New: boolean read FNew;
+  // Delete a child from a different part of the tree
+  procedure DeletePath(OldPath: string);
+  procedure DeleteValue(const APath: string);
+  function FindNode(APath: string;var AttrName:string;bCreate:boolean):TDomNode;
+  function GetValue(const APath, ADefault: String): String;
+  function GetValue(const APath: String; ADefault: Integer): Integer;
+  function GetValue(const APath: String; ADefault: Boolean): Boolean;
   // Move a child from a different part of the tree
   procedure MovePath(OldPath, NewPath: string);
   // Save our changes to the config variable
   procedure Save;
+  procedure SetValue(const APath, AValue: String);
+  procedure SetValue(const APath: String; AValue: Integer);
+  procedure SetValue(const APath: String; AValue: Boolean);
+
 public
   constructor Create(const AFilename: String); overload; // create and load
   destructor Destroy; override;
@@ -112,38 +126,177 @@ uses FileUtil;
 
 { TConfig }
 
+procedure TConfig.DeletePath(OldPath: string);
+var
+  OldChild: TDOMNode;
+  AttrName: string;
+begin
+  if OldPath[length(OldPath)]='/' then
+    SetLength(OldPath,length(OldPath)-1);
+  OldChild:=FindNode(OldPath+'/blah',AttrName,false); // add dummy attribute to path
+  if not Assigned(OldChild) then
+    exit;
+  OldChild.ParentNode.RemoveChild(OldChild);
+  bChanged:=true;
+end;
+
+procedure TConfig.DeleteValue(const APath: string);
+var
+  Node: TDomNode;
+  AttrName: string;
+begin
+  Node:=FindNode(APath,AttrName,false);
+  if Node=nil then
+    exit;
+  if Assigned(TDOMElement(Node).GetAttributeNode(AttrName)) then begin
+    begin
+    TDOMElement(Node).RemoveAttribute(AttrName);
+    bChanged:=true;
+    end;
+  end;
+end;
+
+function TConfig.FindNode(APath: string;var AttrName:string;bCreate:boolean): TDomNode;
+var
+  Node,Parent: TDOMNode;
+  NodeName: String;
+  StartPos: integer;
+begin
+  result:=nil;
+  AttrName:='';
+  Node:=Doc.FindNode('CONFIG');
+  while assigned(Node) and (pos('/',APath)>0) do //walk in tree until no more /
+    begin
+    NodeName:=copy(APath,1,pos('/',APath)-1);
+    Delete(APath,1,length(NodeName)+1);
+    Parent:=Node;
+    Node:=Node.FindNode(NodeName);
+    if not assigned(Node) and bCreate then
+      begin
+      Node:=Doc.CreateElement(NodeName);
+      Parent.AppendChild(Node);
+      end;
+    end;
+  if assigned(Node) then
+    begin
+    AttrName:=APath;
+    result:=Node;
+    end;
+end;
+
+function TConfig.GetValue(const APath, ADefault: String): String;
+var
+  Node, Attr: TDOMNode;
+  AttrName: String;
+  StartPos: integer;
+begin
+  Result:=ADefault;
+  Node:=FindNode(APath,AttrName,false);
+  if Node=nil then
+    exit;
+  Attr := Node.Attributes.GetNamedItem(AttrName);
+  if Assigned(Attr) then
+    Result := Attr.NodeValue;
+end;
+
+function TConfig.GetValue(const APath: String; ADefault: Integer): Integer;
+begin
+  Result := StrToIntDef(GetValue(APath, IntToStr(ADefault)),ADefault);
+end;
+
+function TConfig.GetValue(const APath: String; ADefault: Boolean): Boolean;
+var
+  s: String;
+begin
+  if ADefault then
+    s := 'True'
+  else
+    s := 'False';
+
+  s := GetValue(APath, s);
+
+  if CompareText(s,'TRUE')=0 then
+    Result := True
+  else if CompareText(s,'FALSE')=0 then
+    Result := False
+  else
+    Result := ADefault;
+end;
+
 procedure TConfig.MovePath(OldPath, NewPath: string);
 var
-  NewChild, OldChild: TDOMNode;
+  NewChild, OldChild,Parent: TDOMNode;
+  AttrName:string;
+  i:integer;
 begin
-  // Assumes no variables at the end are specified
-  OldChild:=FindNode(OldPath, false);
-  if OldChild=nil then exit;
-  NewChild:=FindNode(NewPath, false);
-  if NewChild=nil then exit;
-  doc.ReplaceChild(NewChild, OldChild);
+  if NewPath[length(NewPath)]='/' then
+    SetLength(NewPath,length(NewPath)-1);
+  if OldPath[length(OldPath)]='/' then
+    SetLength(OldPath,length(OldPath)-1);
+  NewChild:=FindNode(NewPath+'/blah',AttrName,false);  // append dummy attribute to path
+  OldChild:=FindNode(OldPath+'/bloh',AttrName,false);
+  while Assigned(NewChild.FirstChild) do
+    NewChild.RemoveChild(NewChild.FirstChild);
+  for i:=0 to OldChild.ChildNodes.Count-1 do
+    begin
+    NewChild.AppendChild(OldChild.ChildNodes.Item[i].CloneNode(True));
+    end;
+  bChanged:=true;
 end;
 
 procedure TConfig.Save;
-// Alias for flush, really..
 begin
-  inherited Flush;
+  WriteXMLFile(Doc,Filename);
+end;
+
+procedure TConfig.SetValue(const APath, AValue: String);
+var
+  Node: TDOMNode;
+  AttrName: String;
+  StartPos: integer;
+begin
+  Node:=FindNode(APath,AttrName,true);
+  if Node=nil then
+    exit;
+  if (not Assigned(TDOMElement(Node).GetAttributeNode(AttrName))) or
+    (TDOMElement(Node)[AttrName] <> AValue) then
+  begin
+    TDOMElement(Node)[AttrName] := AValue;
+    bChanged:=true;
+  end;
+end;
+
+procedure TConfig.SetValue(const APath: String; AValue: Integer);
+begin
+  SetValue(APath, IntToStr(AValue));
+end;
+
+procedure TConfig.SetValue(const APath: String; AValue: Boolean);
+begin
+  if AValue then
+    SetValue(APath, 'True')
+  else
+    SetValue(APath, 'False');
 end;
 
 constructor TConfig.Create(const AFilename: String);
 var
   FileOnly: string;
 begin
+  Filename:=AFilename;
   FNew:=not(FileExistsUTF8(AFileName));
-  (Self as TXMLConfig).Create(AFileName);
+  if FNew then
+    Doc:=TXMLDocument.Create
+  else
+    ReadXMLFile(Doc,AFilename);
+  bChanged:=false;
 end;
 
 destructor TConfig.Destroy;
-var
-  Counter:integer;
 begin
-  // The destroy will call flush to save
-  // the config...
+  If bChanged then
+    Save;
+  Doc.Free;
   inherited Destroy;
 end;
 

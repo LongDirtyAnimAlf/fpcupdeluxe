@@ -485,30 +485,13 @@ begin
         begin
         LazarusConfig.SetVariable(xmlfile,key,cnt-1);
         key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/';
-        LazarusConfig.DeletePath(xmlfile,key);
-        if i<cnt then
+        while i<cnt do
           begin
-          //Move last entry to deleted entry to limit movements
-          keyfrom:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
-          LazarusConfig.SetVariable(xmlfile,key+'Format/Version',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'Format/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'Title/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'Title/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'Filename/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'Filename/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'CmdLineParams/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'CmdLineParams/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'WorkingDirectory/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'WorkingDirectory/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForFPCMessages/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'ScanOutputForFPCMessages/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForMakeMessages/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'ScanOutputForMakeMessages/Version'));
-          LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value',
-              LazarusConfig.GetVariable(xmlfile,keyfrom+'HideMainForm/Version'));
-          // Clean up old, removed key
-          LazarusConfig.DeletePath(xmlfile,keyfrom);
+          LazarusConfig.MovePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i+1)+'/',
+             'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/');
+          i:=i+1;
           end;
+        LazarusConfig.DeletePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/');
         end;
       end;
     finally
