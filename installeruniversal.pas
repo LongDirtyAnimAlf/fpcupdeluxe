@@ -30,7 +30,7 @@ type
   protected
     function FirstSpaceAfterCommand(CommandLine: string): integer;
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
-    // internal initialisation, called from BuildModule,CLeanModule,GetModule
+    // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
     function RunCommands(Directive:string;sl:TStringList):boolean;

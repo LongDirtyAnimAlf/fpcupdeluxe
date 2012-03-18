@@ -60,7 +60,7 @@ type
     function CreateFPCScript:boolean;
     function DownloadBootstrapCompiler: boolean;
     function GetFPCVersion: string;
-    // internal initialisation, called from BuildModule,CLeanModule,GetModule
+    // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
@@ -851,4 +851,4 @@ begin
 end;
 
 end.
-
+

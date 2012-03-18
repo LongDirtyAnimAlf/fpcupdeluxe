@@ -72,7 +72,7 @@ type
     FInstalledLazarus:string;
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
-    // internal initialisation, called from BuildModule,CLeanModule,GetModule
+    // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
