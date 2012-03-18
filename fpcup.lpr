@@ -477,7 +477,7 @@ begin
       // Get/update/compile selected modules
       if FPCupManager.Run=false then
       begin
-        writeln('fpcup failed.');
+        writeln('FPCUp failed.');
         ShowErrorHints;
       end;
   finally

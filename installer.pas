@@ -1,3 +1,6 @@
+// This unit is obsolete. It is the old style architecture installer unit.
+// Only kept for reference...
+
 { Installer unit for FPCUp
 Copyright (C) 2012 Reinier Olislagers, Ludo Brands
 
@@ -26,7 +29,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
-unit installer;
+unit installer; deprecated;
 
 {
 Gets/updates/compiles/installs FPC/Lazarus sources
@@ -1219,4 +1222,4 @@ begin
 end;
 
 end.
-
+

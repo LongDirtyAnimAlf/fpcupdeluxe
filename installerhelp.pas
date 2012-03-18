@@ -401,7 +401,6 @@ begin
   OperationSucceeded:=true;
 
   // We need lhelp viewer but that should already have been taken care of by the dependencies.
-
   if OperationSucceeded then
   begin
     // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
@@ -412,7 +411,10 @@ begin
     infoln(ModuleName+': compiling build_lcl_docs help compiler:');
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
+    begin
+      writelnlog('HELPLAZARUS: error compiling build_lcl_docs docs builder. Abroting.', true);
       OperationSucceeded := False;
+    end;
   end;
 
   if OperationSucceeded then
