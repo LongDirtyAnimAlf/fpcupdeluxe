@@ -184,7 +184,7 @@ public
   // Configure Lazarus to use the help
   function ConfigModule(ModuleName:string): boolean; override;
   // Root directory of FPC; needed for finding fpdoc tool
-  property FPCDirectory: string read FFPCDirectory write FFPCDirectory;
+  property FPCDirectory: string write FFPCDirectory;
   // Configuration for Lazarus; required for building lhelp, as well as configuration
   property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
   // Uninstall module
@@ -195,7 +195,7 @@ end;
 
 implementation
 
-uses fpcuputil, processutils, FileUtil, updatelazconfig;
+uses fpcuputil, processutils, FileUtil, updatelazconfig, dateutils;
 
 { THelpInstaller }
 
@@ -213,6 +213,7 @@ function THelpInstaller.BuildModule(ModuleName: string): boolean;
 begin
   result:=InitModule;
   if not result then exit;
+  result:=BuildModuleCustom(ModuleName);
 end;
 
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
@@ -395,6 +396,7 @@ end;
 
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
+  LCLDate: TDateTime;
   LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
@@ -419,36 +421,51 @@ begin
 
   if OperationSucceeded then
   begin
-    // Compile Lazarus LCL CHM help
-    ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
-    // Make sure directory switched to that of build_lcl_docs,
-    // otherwise paths to source files will not work.
-    ProcessEx.CurrentDirectory:=FTargetDirectory;
-    ProcessEx.Parameters.Clear;
-    // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
-    // the directory that contains the fcl and rtl .xct files:
-    ProcessEx.Parameters.Add('--fpcdocs');
-    ProcessEx.Parameters.Add(FTargetDirectory);
-    // Let build_lcl_docs know which fpdoc application to use:
-    ProcessEx.Parameters.Add('--fpdoc');
-    { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
-    can be different between Unix+Windows }
-    ProcessEx.Parameters.Add(FPCDirectory+
-    'utils'+DirectorySeparator+
-    'fpdoc'+DirectorySeparator+
-    'fpdoc'+GetExeExt);
-    ProcessEx.Parameters.Add('--outfmt');
-    ProcessEx.Parameters.Add('chm');
-    infoln('HELPLAZARUS: compiling chm help docs:');
-    { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
-    Though that may work when adjusting the baseurl option in Lazarus for each
-    CHM file, it's easier to move them to <lazarusdir>/docs/html,
-    which is also suggested by the wiki.
-    The generated .xct file is an index file for fpdoc cross file links,
-    used if you want to link to the chm from other chms.}
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-      OperationSucceeded := False;
+    try
+      LCLDate:=FileDateToDateTime(FileAgeUTF8(FTargetDirectory+'lcl.chm'));
+    except
+      // A safe, old value
+      LCLDate:=EncodeDate(1910,01,01);
+    end;
+
+    if DaysBetween(Now,LCLDate)>1 then
+    begin
+      // Compile Lazarus LCL CHM help
+      ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
+      // Make sure directory switched to that of build_lcl_docs,
+      // otherwise paths to source files will not work.
+      ProcessEx.CurrentDirectory:=FTargetDirectory;
+      ProcessEx.Parameters.Clear;
+      // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
+      // the directory that contains the fcl and rtl .xct files:
+      ProcessEx.Parameters.Add('--fpcdocs');
+      ProcessEx.Parameters.Add(FTargetDirectory);
+      // Let build_lcl_docs know which fpdoc application to use:
+      ProcessEx.Parameters.Add('--fpdoc');
+      { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
+      can be different between Unix+Windows }
+      ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FFPCDirectory)+
+      'utils'+DirectorySeparator+
+      'fpdoc'+DirectorySeparator+
+      'fpdoc'+GetExeExt);
+      ProcessEx.Parameters.Add('--outfmt');
+      ProcessEx.Parameters.Add('chm');
+      infoln('HELPLAZARUS: compiling chm help docs:');
+      { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
+      Though that may work when adjusting the baseurl option in Lazarus for each
+      CHM file, it's easier to move them to <lazarusdir>/docs/html,
+      which is also suggested by the wiki.
+      The generated .xct file is an index file for fpdoc cross file links,
+      used if you want to link to the chm from other chms.}
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus <> 0 then
+        OperationSucceeded := False;
+    end
+    else
+    begin
+      // LCL was recently created
+      infoln('HELPLAZARUS: not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate));
+    end;
   end;
 
   if OperationSucceeded then
