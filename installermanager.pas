@@ -111,6 +111,7 @@ type
     FFPCDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
+    FKeepLocalDiffs: boolean;
     FLazarusDesiredRevision: string;
     FLazarusDirectory: string;
     FLazarusOPT: string;
@@ -156,6 +157,7 @@ type
     property FPCURL: string read FFPCURL write FFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision:string read FFPCDesiredRevision write FFPCDesiredRevision;
+    property KeepLocalDiffs: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
     property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write FLazarusURL;
@@ -597,6 +599,7 @@ begin
     Installer.DesiredRevision:=FParent.FPCDesiredRevision;
     Installer.URL:=FParent.FPCURL;
     end
+
   else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='BIGIDE') then
     begin
     if assigned(Installer) then
@@ -628,6 +631,7 @@ begin
     (Installer As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     Installer.URL:=FParent.LazarusURL;
     end
+
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
   else if uppercase(ModuleName)='HELPFPC' then
@@ -648,6 +652,7 @@ begin
       else
         Installer.Compiler:=FParent.CompilerName;
       end
+
   else if uppercase(ModuleName)='HELPLAZARUS' then
       begin
       if assigned(Installer) then
@@ -668,6 +673,7 @@ begin
       (Installer as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
       (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       end
+
   else       // this is a universal module
     begin
       if assigned(Installer) then
@@ -691,6 +697,8 @@ begin
       else
         Installer.Compiler:=FParent.CompilerName;
     end;
+
+  Installer.KeepLocalDiffs:=FParent.KeepLocalDiffs;
   Installer.Verbose:=FParent.Verbose;
   Installer.LogFile:=FParent.LogFile;
   {$IFDEF MSWINDOWS}
