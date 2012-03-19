@@ -20,6 +20,7 @@ type
     FBinUtils: TStringList;
     FBin64Utils: TStringList;
     FBunzip2: string;
+    // Compiler executable
     FCompiler: string;
     FCompilerOptions: string;
     FCrossCPU_Target: string;
