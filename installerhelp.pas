@@ -428,7 +428,7 @@ begin
       LCLDate:=EncodeDate(1910,01,01);
     end;
 
-    if DaysBetween(Now,LCLDate)>1 then
+    if (DaysBetween(Now,LCLDate)>1) or (FileSize(FTargetDirectory+'lcl.chm')=0) then
     begin
       // Compile Lazarus LCL CHM help
       ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
