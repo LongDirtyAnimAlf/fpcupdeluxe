@@ -13,7 +13,7 @@ type
 
   TInstaller = class(TObject)
   private
-    FKeepLocalDiffs: boolean;
+    FKeepLocalChanges: boolean;
     function GetMake: string;
   protected
     FBaseDirectory: string;
@@ -71,7 +71,7 @@ type
     // SVN revision override. Default is trunk
     property DesiredRevision: string write FDesiredRevision;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
-    property KeepLocalDiffs: boolean write FKeepLocalDiffs;
+    property KeepLocalChanges: boolean write FKeepLocalChanges;
     // Open handle to the logfile
     property LogFile: Text write FLogFile;
     property MakeDirectory: string write FMakeDir;
@@ -494,7 +494,7 @@ begin
   if UpdateWarnings.Count > 0 then
   begin
     UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
-    if FKeepLocalDiffs=false then
+    if FKeepLocalChanges=false then
     begin
       CreateStoreSVNDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevision + '.diff', UpdateWarnings);
       UpdateWarnings.Add(ModuleName + ': reverting before updating.');

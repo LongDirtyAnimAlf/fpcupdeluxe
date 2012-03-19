@@ -157,7 +157,7 @@ type
     property FPCURL: string read FFPCURL write FFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision:string read FFPCDesiredRevision write FFPCDesiredRevision;
-    property KeepLocalDiffs: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
+    property KeepLocalChanges: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
     property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write FLazarusURL;
@@ -698,7 +698,7 @@ begin
         Installer.Compiler:=FParent.CompilerName;
     end;
 
-  Installer.KeepLocalDiffs:=FParent.KeepLocalDiffs;
+  Installer.KeepLocalChanges:=FParent.KeepLocalChanges;
   Installer.Verbose:=FParent.Verbose;
   Installer.LogFile:=FParent.LogFile;
   {$IFDEF MSWINDOWS}

@@ -107,7 +107,7 @@ begin
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
-  writeln(' keeplocaldiffs        Keep locally modified files (normally these would be');
+  writeln(' keeplocalchanges      Keep locally modified files (normally these would be');
   writeln('                       backed up as .diff files before doing svn revert.');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln('                       or ~\lazarus\');
@@ -162,7 +162,7 @@ const
   FPCURL='fpcURL';
   FPCOPT='fpcOPT';
   Help='help';
-  KeepLocalDiffs='keeplocaldiffs';
+  KeepLocalChanges='keeplocalchanges';
   LazDir='lazdir';
   LazLinkName='lazlinkname';
   FpcupLinkName='fpcuplinkname';
@@ -191,7 +191,7 @@ begin
   FInstaller.ShortCutNameFpcup:='fpcup_update';
   FInstaller.FPCURL := 'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6';
   FInstaller.FPCOPT:='';
-  FInstaller.KeepLocalDiffs:=false;
+  FInstaller.KeepLocalChanges:=false;
   FInstaller.LazarusPrimaryConfigPath:=''; //Let installer figure out default value
   FInstaller.LazarusURL := 'http://svn.freepascal.org/svn/lazarus/trunk';
   //svn2 seems to lag behind a lot, so don't use that.
@@ -212,7 +212,7 @@ begin
   Application.CaseSensitiveOptions:=false; //Our Windows users will like this.
   ErrorMessage := Application.CheckOptions(
     'h', Binutilsdir+': '+Clean+' '+FPCBootstrapDir+': '+FPCDir+': '+FPCURL+': '+FPCOPT+': '+
-    Help+' '+KeepLocalDiffs+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
+    Help+' '+KeepLocalChanges+' '+LazDir+': '+LazOPT+': '+ LazRevision+': '+FPCRevision+': '+
     Skip+': '+Only+': '+NoConfirm+' '+ Verbose+' '+ Uninstall+' '+
     CPUTarget+': '+LCLPlatform+': '+OSTarget+': '+ ConfigFile+': '+
     LazLinkName+': '+FpcupLinkName+': '+LazURL+': '+PrimaryConfigPath+': ');
@@ -296,10 +296,10 @@ begin
     exit;
   end;
 
-  if Application.HasOption(KeepLocalDiffs) then
+  if Application.HasOption(KeepLocalChanges) then
   begin
-    FInstaller.KeepLocalDiffs:=true;
-    AllOptions:=AllOptions+'--'+KeepLocalDiffs;
+    FInstaller.KeepLocalChanges:=true;
+    AllOptions:=AllOptions+'--'+KeepLocalChanges;
   end;
 
   if Application.HasOption(LazDir) then
@@ -403,7 +403,7 @@ begin
   writeln('(Lazarus settings path) '+FInstaller.LazarusPrimaryConfigPath);
   writeln('Lazarus URL:            '+FInstaller.LazarusURL);
   writeln('Lazarus options:        '+FInstaller.LazarusOPT);
-  if FInstaller.KeepLocalDiffs then
+  if FInstaller.KeepLocalChanges then
   begin
     writeln('Keep local diffs:       yes');
   end
