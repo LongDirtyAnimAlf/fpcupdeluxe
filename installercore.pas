@@ -301,7 +301,7 @@ begin
       if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
       begin
         infoln('Error: ' + Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ')in its output.');
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.');
         OperationSucceeded := false;
       end
       else
@@ -743,10 +743,12 @@ begin
   if NewPath <> EmptyStr then
   begin
     WritelnLog('External program path:  ' + NewPath, false);
-    // for some reason, writing this often leads to a missing line ending!
-    Flush(FLogFile);
+    // for some reason, writing this often leads to the output being interspersed
+    // with later log output!!
     // Flush is not enough; sleep as well
-    sleep(50);
+    sleep(500);
+    // and another flush
+    Flush(FLogFile);
   end;
   if FVerbose then
     infoln('Set path to: ' + NewPath);
@@ -755,6 +757,8 @@ end;
 procedure TInstaller.WriteLog(msg: string; ToConsole: boolean);
 begin
   Write(FLogFile, msg);
+  // Try to make sure entire message is written
+  Flush(FLogFile);
   if ToConsole then
     InfoLn(msg);
 end;

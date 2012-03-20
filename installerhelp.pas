@@ -414,18 +414,19 @@ begin
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
     begin
-      writelnlog('HELPLAZARUS: error compiling build_lcl_docs docs builder. Abroting.', true);
+      writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Abroting.', true);
       OperationSucceeded := False;
     end;
   end;
 
   if OperationSucceeded then
   begin
+    // A safe, old value
+    LCLDate:=EncodeDate(1910,01,01);
     try
-      LCLDate:=FileDateToDateTime(FileAgeUTF8(FTargetDirectory+'lcl.chm'));
+      if FileExistsUTF8(FTargetDirectory+'lcl.chm') then LCLDate:=FileDateToDateTime(FileAgeUTF8(FTargetDirectory+'lcl.chm'));
     except
-      // A safe, old value
-      LCLDate:=EncodeDate(1910,01,01);
+      // Ignore exceptions, leave old date as is
     end;
 
     if (DaysBetween(Now,LCLDate)>1) or (FileSize(FTargetDirectory+'lcl.chm')=0) then
@@ -450,7 +451,9 @@ begin
       'fpdoc'+GetExeExt);
       ProcessEx.Parameters.Add('--outfmt');
       ProcessEx.Parameters.Add('chm');
-      infoln('HELPLAZARUS: compiling chm help docs:');
+      // Show application output if desired:
+      if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
+      infoln(ModuleName+': compiling chm help docs:');
       { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
       Though that may work when adjusting the baseurl option in Lazarus for each
       CHM file, it's easier to move them to <lazarusdir>/docs/html,
@@ -464,7 +467,7 @@ begin
     else
     begin
       // LCL was recently created
-      infoln('HELPLAZARUS: not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate));
+      infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate));
     end;
   end;
 
@@ -475,13 +478,27 @@ begin
       'lcl'+DirectorySeparator+
       'lcl.chm') then
     begin
-      infoln(ModuleName+': moving lcl.chm to docs directory');
-      // Move help file to doc directory
-      OperationSucceeded:=MoveFile(FTargetDirectory+
+      if FileSize(FTargetDirectory+
+      'lcl'+DirectorySeparator+
+      'lcl.chm')>0 then
+      begin
+        infoln(ModuleName+': moving lcl.chm to docs directory');
+        // Move help file to doc directory
+        OperationSucceeded:=MoveFile(FTargetDirectory+
+          'lcl'+DirectorySeparator+
+          'lcl.chm',
+          FTargetDirectory+
+          'lcl.chm');
+      end
+      else
+      begin
+        // File exists, but is empty. We might have an older file still present
+        writelnlog(ModuleName+': WARNING: '+FTargetDirectory+
         'lcl'+DirectorySeparator+
-        'lcl.chm',
-        FTargetDirectory+
-        'lcl.chm');
+        'lcl.chm was created but is empty. Lcl.chm may be out of date! Try running with --verbose to see build_lcl_docs error messages.', true);
+        // Todo: change this once fixes for fpdoc chm generation are in fixes_26:
+        OperationSucceeded:=true;
+      end;
     end;
   end;
   result:=OperationSucceeded;
@@ -490,7 +507,7 @@ end;
 function THelpLazarusInstaller.InitModule: boolean;
 begin
   result:=false;
-  infoln('Module HELPLAZARUS: initializing module...');
+  infoln('HELPLAZARUS: initializing module...');
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
@@ -498,7 +515,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
-    infoln('Module HELPLAZARUS: documentation directory: '+FTargetDirectory);
+    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory);
     result:=true;
   end;
 end;

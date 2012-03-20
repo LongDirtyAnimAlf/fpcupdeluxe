@@ -405,11 +405,11 @@ begin
   writeln('Lazarus options:        '+FInstaller.LazarusOPT);
   if FInstaller.KeepLocalChanges then
   begin
-    writeln('Keep local diffs:       yes');
+    writeln('Keep local changes:     yes');
   end
   else
   begin
-    writeln('Keep local diffs:       no');
+    writeln('Keep local changess:     no');
   end;
   writeln('Parameter list:         '+FInstaller.AllOptions);
   {$IFDEF MSWINDOWS}
