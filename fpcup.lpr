@@ -483,7 +483,6 @@ begin
   finally
     FPCupManager.free;
   end;
-  writeln('FPCUp finished.');
   if res<>-1 then
     halt(res);
 end.

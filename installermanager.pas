@@ -356,7 +356,7 @@ except
   infoln('Aborting.');
   halt(2); //Is there a nicer way to do this?
 end;
-WritelnLog(DateTimeToStr(now)+': fpcup started.',false);
+WritelnLog(DateTimeToStr(now)+': fpcup started.',true);
 end;
 
 destructor TFPCupManager.Destroy;
@@ -368,7 +368,7 @@ begin
   FModulePublishedList.Free;
   FModuleEnabledList.Free;
   Sequencer.free;
-  WritelnLog(DateTimeToStr(now)+': fpcup finished.',false);
+  WritelnLog(DateTimeToStr(now)+': fpcup finished.',true);
   WritelnLog('------------------------------------------------',false);
   CloseFile(LogFile);
   inherited Destroy;
