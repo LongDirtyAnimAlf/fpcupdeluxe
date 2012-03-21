@@ -409,7 +409,7 @@ begin
   end
   else
   begin
-    writeln('Keep local changess:     no');
+    writeln('Keep local changess:    no');
   end;
   writeln('Parameter list:         '+FInstaller.AllOptions);
   {$IFDEF MSWINDOWS}

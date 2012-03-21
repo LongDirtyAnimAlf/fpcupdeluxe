@@ -77,7 +77,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="13">
+    <Units Count="15">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -142,6 +142,16 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
       </Unit12>
+      <Unit13>
+        <Filename Value="m_crosswin64.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crosswin64"/>
+      </Unit13>
+      <Unit14>
+        <Filename Value="m_crosswin32.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crosswin32"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
