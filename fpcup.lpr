@@ -258,7 +258,7 @@ begin
     end
     else
     begin
-      writeln('Keep local changess:     no');
+      writeln('Keep local changes:     no');
     end;
     writeln('Parameter list:         '+FInstaller.AllOptions);
     {$IFDEF MSWINDOWS}
@@ -336,7 +336,6 @@ begin
   finally
     FPCupManager.free;
   end;
-  writeln('FPCUp finished.');
   if res<>-1 then
     halt(res);
 end.
