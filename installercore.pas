@@ -471,7 +471,7 @@ begin
   if Errors > 0 then
   begin
     Result := false;
-    WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' downloading binutils.', true);
+    WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' errors downloading binutils.', true);
   end;
 end;
 
