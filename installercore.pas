@@ -337,19 +337,9 @@ begin
   FBinUtils.Add('ar' + GetExeExt);
   FBinUtils.Add('as' + GetExeExt);
   {$endif win64}
-  {$IFDEF WIN64}
-  // bin2obj not present in the win32 2.6 release directory...
-  FBinUtils.Add('bin2obj' + GetExeExt);
-  {$ENDIF WIN64}
   FBinUtils.Add('cmp' + GetExeExt);
   FBinUtils.Add('cp' + GetExeExt);
   FBinUtils.Add('cpp.exe');
-  {$IFDEF WIN64}
-  // The cygwin files are not present in the win32 2.6 release directory...
-  FBinUtils.Add('cygiconv-2.dll');
-  FBinUtils.Add('cygncurses-8.dll');
-  FBinUtils.Add('cygwin1.dll');
-  {$ENDIF WIN64}
   FBinUtils.Add('diff' + GetExeExt);
   FBinUtils.Add('dlltool' + GetExeExt);
   FBinUtils.Add('fp32.ico');
