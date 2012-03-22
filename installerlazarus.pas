@@ -300,8 +300,8 @@ begin
       // the platform specific compiler. In order to be able to cross compile
       // we'd rather use fpc
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/CompilerFilename/Value',ExtractFilePath(FCompiler)+'fpc'+GetExeExt);
-      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',FMakeDir+'gdb'+GetExeExt);
-      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',FMakeDir+'make'+GetExeExt);
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+GetExeExt);
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',IncludeTrailingPathDelimiter(FMakeDir)+'make'+GetExeExt);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed

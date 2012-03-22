@@ -142,10 +142,9 @@ function TInstaller.GetMake: string;
 begin
   if FMake = '' then
     {$IFDEF MSWINDOWS}
-    // Make sure there's a trailing delimiter
     FMake := IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt;
     {$ELSE}
-  FMake := 'make'; //assume in path
+    FMake := 'make'; //assume in path
     {$ENDIF MSWINDOWS}
   Result := FMake;
 end;
@@ -212,7 +211,6 @@ begin
     // Check for proper make executable
     try
       ExecuteCommand(Make + ' -v', Output, FVerbose);
-      writeln('debug: output='+Output);
       if Ansipos('GNU Make', Output) = 0 then
       begin
         infoln('Found make executable but it is not GNU Make.');
