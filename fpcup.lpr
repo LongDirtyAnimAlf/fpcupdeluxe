@@ -241,6 +241,7 @@ begin
     begin
       writeln('Running --clean: cleaning environment.');
     end;
+    writeln('Binutils/make dir:      '+FInstaller.MakeDirectory);
     writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
     writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
     writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
