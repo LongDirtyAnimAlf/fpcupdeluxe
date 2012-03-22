@@ -212,6 +212,7 @@ begin
     // Check for proper make executable
     try
       ExecuteCommand(Make + ' -v', Output, FVerbose);
+      writeln('debug: output='+Output);
       if Ansipos('GNU Make', Output) = 0 then
       begin
         infoln('Found make executable but it is not GNU Make.');
@@ -421,7 +422,7 @@ begin
   begin
     infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + FMakeDir);
     try
-      if Download(SourceUrl + FBinUtils[Counter], FMakeDir + FBinUtils[Counter]) = false then
+      if Download(SourceUrl + FBinUtils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBinUtils[Counter]) = false then
       begin
         Errors := Errors + 1;
         infoln('Error downloading binutils: ' + FBinUtils[Counter] + ' to ' + FMakeDir);
@@ -443,7 +444,7 @@ begin
     try
       if FBin64Utils[Counter] = 'gdb.exe' then // switch source
         sURL := SourceURL64_gdb;
-      if Download(sURL + FBin64Utils[Counter], FMakeDir + FBin64Utils[Counter]) = false then
+      if Download(sURL + FBin64Utils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBin64Utils[Counter]) = false then
       begin
         Errors := Errors + 1;
         infoln('Error downloading binutils: ' + FBin64Utils[Counter] + ' to ' + FMakeDir);
