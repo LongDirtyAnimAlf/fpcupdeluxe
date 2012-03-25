@@ -228,7 +228,7 @@ begin
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     if FCompilerOptions<>'' then
       ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
-    case ModuleName of
+    case UpperCase(ModuleName) of
       'BIGIDE':
       begin
         ProcessEx.Parameters.Add('bigide');
@@ -247,7 +247,7 @@ begin
     else //raise error;
       begin
         ProcessEx.Parameters.Add('--help'); // this should render make harmless
-        WritelnLog('Invalid module name '+ModuleName+' specified! Please fix the code.', true);
+        WritelnLog('BuildModule: Invalid module name '+ModuleName+' specified! Please fix the code.', true);
         FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
         result:=false;
         exit;
@@ -398,7 +398,7 @@ begin
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
   end;
   ProcessEx.Parameters.Add('distclean');
-  case ModuleName of
+  case UpperCase(ModuleName) of
     'BIGIDE':
     begin
       ProcessEx.Parameters.Add('bigide');
@@ -417,7 +417,7 @@ begin
   else //raise error;
     begin
       ProcessEx.Parameters.Add('--help'); //this should render it harmless.
-      WritelnLog('Invalid module name '+ModuleName+' specified! Please fix the code.', true);
+      WritelnLog('CleanModule: Invalid module name '+ModuleName+' specified! Please fix the code.', true);
       FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
       result:=false;
       exit;
