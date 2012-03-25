@@ -118,7 +118,7 @@ end;
 {$IFDEF UNIX}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
-  infoln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname);
+  infoln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname, warning);
 end;
 {$ENDIF UNIX}
 
@@ -596,4 +596,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+

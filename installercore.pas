@@ -195,7 +195,7 @@ begin
     try
       if ExecuteCommand('as --version', Output, FVerbose) <> 0 then
       begin
-        infoln('ERROR: Missing assembler as. Please install the developer tools.');
+        infoln('Missing assembler as. Please install the developer tools.',error);
         OperationSucceeded := false;
       end;
     except
@@ -246,7 +246,7 @@ begin
       {$ELSE}
       if FSVNClient.SVNExecutable = '' then
       begin
-        infoln('Error: could not find SVN executable. Please make sure it is installed.');
+        infoln('Could not find SVN executable. Please make sure it is installed.',error);
         OperationSucceeded := false;
       end;
       {$ENDIF}
@@ -799,4 +799,4 @@ end;
 
 
 end.
-
+

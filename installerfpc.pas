@@ -249,7 +249,7 @@ begin
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
-  infoln('Running make all for FPC:');
+  infoln('Running make all for FPC:',info);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
@@ -260,7 +260,7 @@ begin
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
   ProcessEx.Parameters.Add('install');
-  infoln('Running make install for FPC:');
+  infoln('Running make install for FPC:',info);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
@@ -361,7 +361,7 @@ begin
   FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
   if FileExists(FPCScript) then
   begin
-    infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.');
+    infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',info);
     sysutils.DeleteFile(FPCScript);
   end;
   AssignFile(TxtFile,FPCScript);
@@ -377,11 +377,11 @@ begin
   Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
   begin
-    infoln('Created launcher script for FPC:'+FPCScript);
+    infoln('Created launcher script for FPC:'+FPCScript,info);
   end
   else
   begin
-    infoln('Error creating launcher script for FPC:'+FPCScript);
+    infoln('Error creating launcher script for FPC:'+FPCScript,error);
   end;
   {$ENDIF UNIX}
 end;
@@ -446,14 +446,14 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler);
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,info);
     OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
   end;
   if OperationSucceeded then
   begin
     //Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
-    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler);
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,warning);
   end;
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
@@ -851,4 +851,4 @@ begin
 end;
 
 end.
-
+

@@ -510,7 +510,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       begin
       if not TestLib(pll^[i]) then
         begin
-        FParent.WritelnLog('Required -dev packages are not installed for Lazarus: '+pll^[i], error);
+        FParent.WritelnLog('Required -dev packages are not installed for Lazarus: '+pll^[i], true);
         result:=false;
         end;
       end;
@@ -970,4 +970,4 @@ begin
 end;
 
 end.
-
+
