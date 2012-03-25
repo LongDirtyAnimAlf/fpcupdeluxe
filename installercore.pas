@@ -183,7 +183,7 @@ begin
     // Download if needed; will download unzip - needed for SVN download
     if (DirectoryExists(FMakeDir) = false) or (FileExists(Make) = false) or (FileExists(FUnzip) = false) then
     begin
-      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download binutils.');
+      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download binutils.',info);
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
@@ -213,7 +213,7 @@ begin
       ExecuteCommand(Make + ' -v', Output, FVerbose);
       if Ansipos('GNU Make', Output) = 0 then
       begin
-        infoln('Found make executable but it is not GNU Make.');
+        infoln('Found make executable but it is not GNU Make.',warning);
         OperationSucceeded := false;
       end;
     except
@@ -238,7 +238,7 @@ begin
       // If it still can't be found, download it
       if FSVNClient.SVNExecutable = '' then
       begin
-        infoln('Going to download SVN');
+        infoln('Going to download SVN',info);
         // Download will look in and below FSVNDirectory
         // and set FSVNClient.SVNExecutable if succesful
         OperationSucceeded := DownloadSVN;
@@ -299,8 +299,9 @@ begin
     begin
       if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
       begin
-        infoln('Error: ' + Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.');
+        // This is not a warning/error message as sometimes we can use multiple different versions of executables
+        infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',info);
         OperationSucceeded := false;
       end
       else
@@ -310,18 +311,20 @@ begin
     end
     else
     begin
-      infoln('Error: ' + Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')');
+      // This is not a warning/error message as sometimes we can use multiple different versions of executables
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',info);
       OperationSucceeded := false;
     end;
   except
     on E: Exception do
     begin
-      infoln('Error: ' + Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')');
+      // This is not a warning/error message as sometimes we can use multiple different versions of executables
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', info);
       OperationSucceeded := false;
     end;
   end;
   if OperationSucceeded then
-    infoln('Found valid ' + ExeName + ' application.');
+    infoln('Found valid ' + ExeName + ' application.',info);
   Result := OperationSucceeded;
 end;
 
@@ -418,18 +421,18 @@ begin
   Result := true;
   for Counter := 0 to FBinUtils.Count - 1 do
   begin
-    infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + FMakeDir);
+    infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + FMakeDir,info);
     try
       if Download(SourceUrl + FBinUtils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBinUtils[Counter]) = false then
       begin
         Errors := Errors + 1;
-        infoln('Error downloading binutils: ' + FBinUtils[Counter] + ' to ' + FMakeDir);
+        infoln('Error downloading binutils: ' + FBinUtils[Counter] + ' to ' + FMakeDir,error);
       end;
     except
       on E: Exception do
       begin
         Result := false;
-        infoln('Error downloading binutils: ' + E.Message);
+        infoln('Error downloading binutils: ' + E.Message,error);
         exit; //out of function.
       end;
     end;
@@ -438,20 +441,20 @@ begin
   sURL := SourceURL64;
   for Counter := 0 to FBin64Utils.Count - 1 do
   begin
-    infoln('Downloading: ' + FBin64Utils[Counter] + ' into ' + FMakeDir);
+    infoln('Downloading: ' + FBin64Utils[Counter] + ' into ' + FMakeDir,info);
     try
       if FBin64Utils[Counter] = 'gdb.exe' then // switch source
         sURL := SourceURL64_gdb;
       if Download(sURL + FBin64Utils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBin64Utils[Counter]) = false then
       begin
         Errors := Errors + 1;
-        infoln('Error downloading binutils: ' + FBin64Utils[Counter] + ' to ' + FMakeDir);
+        infoln('Error downloading binutils: ' + FBin64Utils[Counter] + ' to ' + FMakeDir,error);
       end;
     except
       on E: Exception do
       begin
         Result := false;
-        infoln('Error downloading binutils: ' + E.Message);
+        infoln('Error downloading binutils: ' + E.Message,error);
         exit; //out of function.
       end;
     end;
@@ -506,7 +509,7 @@ begin
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FSVNClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old SVN checkout?');
+      infoln('Have you specified the wrong directory or a directory with an old SVN checkout?',info);
     end;
     else
     begin
@@ -613,7 +616,7 @@ begin
     end
     else
     begin
-      infoln('Could not find svn executable in or under ' + FSVNDirectory);
+      infoln('Could not find svn executable in or under ' + FSVNDirectory,warning);
       OperationSucceeded := false;
     end;
   finally
@@ -718,7 +721,7 @@ begin
     writelnlog('Command current directory: ' + Sender.CurrentDirectory, true);
     writelnlog('Command output:', true);
     // Dump command output to screen and detailed log
-    infoln(Sender.OutputString);
+    infoln(Sender.OutputString,info);
     Sender.OutputStrings.SaveToFile(TempFileName);
     WritelnLog('  output logged in ' + TempFileName, false);
   end;
@@ -740,7 +743,7 @@ begin
     Flush(FLogFile);
   end;
   if FVerbose then
-    infoln('Set path to: ' + NewPath);
+    infoln('Set path to: ' + NewPath,debug);
 end;
 
 procedure TInstaller.WriteLog(msg: string; ToConsole: boolean);
@@ -749,7 +752,7 @@ begin
   // Try to make sure entire message is written
   Flush(FLogFile);
   if ToConsole then
-    InfoLn(msg);
+    InfoLn(msg,info);
 end;
 
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
@@ -757,7 +760,7 @@ begin
   //Infoln already adds a lf, so we need to handle it here:
   WriteLog(msg + LineEnding, false);
   if ToConsole then
-    InfoLn(msg);
+    InfoLn(msg,info);
 end;
 
 function TInstaller.GetCompilerInDir(Dir: string): string;

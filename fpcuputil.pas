@@ -36,6 +36,10 @@ interface
 uses
   Classes, SysUtils;
 
+type
+  // Log/display markers, in ascending level of seriousness.
+  LogLevel = (Debug, Info, Warning, Error);
+
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
 // Create shell script in ~ directory that links to Target
@@ -54,7 +58,7 @@ function ParentDirectoryIsNotRoot(Dir:string):boolean;
 // Get path for Windows per user storage of application data. Useful for storing settings
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
-procedure infoln(Message: string);
+procedure infoln(Message: string; Level: logLevel);
 //Uses writeln for now, and waits a bit afterwards so output is hopefully not garbled
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // Moves file if it exists, overwriting destination file
@@ -125,7 +129,7 @@ var
   ScriptFile: string;
 begin
   {$IFDEF MSWINDOWS}
-  infoln('todo: write me (CreateHomeStartLink)!');
+  infoln('todo: write me (CreateHomeStartLink)!', error);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist
@@ -173,7 +177,7 @@ begin
     Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
   end;
   Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
-  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile);
+  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile, error);
 end;
 
 function SFDirectLinkURL(URL: string; Document: TMemoryStream): string;
@@ -210,7 +214,6 @@ begin
           URL:=Copy(HTMLBody[Counter],
             URLStart,
             PosEx('"',HTMLBody[Counter],URLStart+1)-URLStart);
-          infoln(URL);
           break;
         end;
       end;
@@ -461,7 +464,7 @@ begin
   result:=false;
   // Assume http if no ftp detected
   try
-    infoln('Going to download '+TargetFile+' from URL: ' + URL);
+    infoln('Going to download '+TargetFile+' from URL: ' + URL, info);
     if (Copy(URL, 1, Length('ftp://'))='ftp://') or
     (Copy(URL,1,Length('ftp.'))='ftp.') then
     begin
@@ -475,7 +478,7 @@ begin
     on E: Exception do
     begin
       infoln('Download: error occurred downloading file '+TargetFile+' from URL: '+URL+
-        '. Exception occurred: '+E.ClassName+'/'+E.Message+')');
+        '. Exception occurred: '+E.ClassName+'/'+E.Message+')', error);
     end;
     //Not writing message here; to be handled by calling code with more context.
     //if result:=false then infoln('Download: download of '+TargetFile+' from URL: '+URL+' failed.');
@@ -508,8 +511,17 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-procedure infoln(Message: string);
+procedure infoln(Message: string; Level: LogLevel);
+var
+  Seriousness: string;
 begin
+  case Level of
+    Debug: Seriousness:='Debug:';
+    Info: Seriousness:='Info:';
+    Warning: Seriousness:='WARNING:';
+    Error: Seriousness:='ERROR:';
+    else Seriousness:='UNKNOWN CATEGORY!!:'
+  end;
   if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
   writeln('Info: ' + Message); //we misuse this for info output
   sleep(200); //hopefully allow output to be written without interfering with other output
@@ -584,4 +596,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+

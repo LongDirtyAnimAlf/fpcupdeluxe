@@ -20,7 +20,7 @@ Const
     {$endif linux}
     'Exec CreateFpcupScript;'+
     'Do fpc;'+
-    'Do lazarus;'+
+    'Do USERIDE;'+
     'Exec CreateLazarusScript;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
@@ -31,7 +31,7 @@ Const
     'Declare defaultwin32;'+
     'Exec CreateFpcupScript;'+
     'Do fpc;'+
-    'Do lazarus;'+
+    'Do USERIDE;'+
     'Exec CreateLazarusScript;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
@@ -45,6 +45,7 @@ Const
     'SetOS win64;'+
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
+    //Getmodule has already been done
     'Cleanmodule lazarus;'+
     'Buildmodule lazarus;'+
     'End;'+
@@ -278,14 +279,14 @@ procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);
 begin
 Write(LogFile,msg);
 if ToConsole then
-  InfoLn(msg);
+  InfoLn(msg,info);
 end;
 
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
 begin
 WriteLog(msg+LineEnding,false); //infoln adds already a lf
 if ToConsole then
-  InfoLn(msg);
+  InfoLn(msg,info);
 end;
 
 function TFPCupManager.LoadModuleList: boolean;
@@ -351,9 +352,9 @@ try
  else
    Rewrite(LogFile);
 except
-  infoln('Error: could not open log file '+LogFileName+' for writing.');
-  infoln('This may be caused by another fpcup currently running.');
-  infoln('Aborting.');
+  infoln('Error: could not open log file '+LogFileName+' for writing.'+LineEnding+
+  'This may be caused by another fpcup currently running.'+LineEnding+
+  'Aborting.',error);
   halt(2); //Is there a nicer way to do this?
 end;
 WritelnLog(DateTimeToStr(now)+': fpcup started.',true);
@@ -427,7 +428,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutName<>EmptyStr then
   begin
-    infoln('Lazarus: creating desktop shortcut:');
+    infoln('Lazarus: creating desktop shortcut:',info);
     try
       //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
@@ -455,7 +456,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutName<>EmptyStr then
   begin
-    infoln('Lazarus: deleting desktop shortcut:');
+    infoln('Lazarus: deleting desktop shortcut:',info);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
@@ -509,7 +510,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       begin
       if not TestLib(pll^[i]) then
         begin
-        FParent.WritelnLog('ERROR: required -dev packages are not installed for Lazarus: '+pll^[i]);
+        FParent.WritelnLog('Required -dev packages are not installed for Lazarus: '+pll^[i], error);
         result:=false;
         end;
       end;
@@ -600,7 +601,7 @@ begin
     Installer.URL:=FParent.FPCURL;
     end
 
-  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='BIGIDE') then
+  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='BIGIDE') or (uppercase(ModuleName)='USERIDE') then
     begin
     if assigned(Installer) then
       begin

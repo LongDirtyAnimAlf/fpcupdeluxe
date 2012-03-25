@@ -251,7 +251,7 @@ begin
     FileExistsUTF8(FTargetDirectory+'rtl.chm') then
   begin
     OperationSucceeded:=true;
-    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory);
+    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory,info);
   end
   else
   begin
@@ -273,7 +273,7 @@ begin
         // Deal with timeouts, wrong URLs etc
         OperationSucceeded:=false;
         infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
-          'Exception: '+E.ClassName+'/'+E.Message);
+          'Exception: '+E.ClassName+'/'+E.Message, warning);
       end;
     end;
 
@@ -289,12 +289,12 @@ begin
       else
       begin
         OperationSucceeded := False;
-        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode));
+        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),warning);
       end;
     end
     else
     begin
-      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL);
+      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL,error);
     end;
   end;
   Result := OperationSucceeded;
@@ -326,7 +326,7 @@ end;
 
 function THelpFPCInstaller.InitModule: boolean;
 begin
-  infoln('Module FPCHELP: Initializing module...');
+  infoln('Module FPCHELP: Initializing module...',info);
   result:=false;
   if inherited InitModule then
   begin
@@ -334,7 +334,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
-    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory);
+    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,info);
     result:=true;
   end;
 end;
@@ -410,7 +410,7 @@ begin
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
     ProcessEx.Parameters.Add(FTargetDirectory+'build_lcl_docs.lpr');
-    infoln(ModuleName+': compiling build_lcl_docs help compiler:');
+    infoln(ModuleName+': compiling build_lcl_docs help compiler:',info);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
     begin
@@ -453,7 +453,7 @@ begin
       ProcessEx.Parameters.Add('chm');
       // Show application output if desired:
       if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
-      infoln(ModuleName+': compiling chm help docs:');
+      infoln(ModuleName+': compiling chm help docs:',info);
       { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
       Though that may work when adjusting the baseurl option in Lazarus for each
       CHM file, it's easier to move them to <lazarusdir>/docs/html,
@@ -467,7 +467,7 @@ begin
     else
     begin
       // LCL was recently created
-      infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate));
+      infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),info);
     end;
   end;
 
@@ -482,7 +482,7 @@ begin
       'lcl'+DirectorySeparator+
       'lcl.chm')>0 then
       begin
-        infoln(ModuleName+': moving lcl.chm to docs directory');
+        infoln(ModuleName+': moving lcl.chm to docs directory',info);
         // Move help file to doc directory
         OperationSucceeded:=MoveFile(FTargetDirectory+
           'lcl'+DirectorySeparator+
@@ -507,7 +507,7 @@ end;
 function THelpLazarusInstaller.InitModule: boolean;
 begin
   result:=false;
-  infoln('HELPLAZARUS: initializing module...');
+  infoln('HELPLAZARUS: initializing module...',info);
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
@@ -515,7 +515,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
-    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory);
+    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory,info);
     result:=true;
   end;
 end;
