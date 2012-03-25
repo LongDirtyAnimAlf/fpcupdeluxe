@@ -46,8 +46,8 @@ Const
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
     //Getmodule has already been done
-    'Cleanmodule lazarus;'+
-    'Buildmodule lazarus;'+
+    'Cleanmodule LCL;'+
+    'Buildmodule LCL;'+
     'End;'+
 //default clean sequence
     'Declare defaultclean;'+
@@ -601,7 +601,8 @@ begin
     Installer.URL:=FParent.FPCURL;
     end
 
-  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='BIGIDE') or (uppercase(ModuleName)='USERIDE') then
+  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LCL') or
+    (uppercase(ModuleName)='BIGIDE') or (uppercase(ModuleName)='USERIDE') then
     begin
     if assigned(Installer) then
       begin
@@ -970,4 +971,4 @@ begin
 end;
 
 end.
-
+

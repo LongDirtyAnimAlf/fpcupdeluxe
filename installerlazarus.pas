@@ -228,15 +228,30 @@ begin
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     if FCompilerOptions<>'' then
       ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
-    if ModuleName='BIGIDE' then
-    begin
-      ProcessEx.Parameters.Add('bigide');
-      infoln('Lazarus: running make bigide:',info);
-    end
-    else
-    begin
-      ProcessEx.Parameters.Add('all');
-      infoln('Lazarus: running make all:',info);
+    case ModuleName of
+      'BIGIDE':
+      begin
+        ProcessEx.Parameters.Add('bigide');
+        infoln(ModuleName+': running make bigide:',info);
+      end;
+      'LAZARUS':
+      begin
+        ProcessEx.Parameters.Add('all');
+        infoln(ModuleName+': running make all:',info);
+      end;
+      'LCL':
+      begin
+        ProcessEx.Parameters.Add('lcl lclbase intf');
+        infoln(ModuleName+': running make lcl lclbase intf:', info);
+      end
+    else //raise error;
+      begin
+        ProcessEx.Parameters.Add('--help'); // this should render make harmless
+        WritelnLog('Invalid module name '+ModuleName+' specified! Please fix the code.', true);
+        FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
+        result:=false;
+        exit;
+      end;
     end;
     ProcessEx.Execute;
   end
@@ -383,14 +398,30 @@ begin
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
   end;
   ProcessEx.Parameters.Add('distclean');
-  if ModuleName='BIGIDE' then
-  begin
-    ProcessEx.Parameters.Add('bigideclean');
-    infoln('Lazarus: running make distclean bigideclean before checkout/update:,info',info);
-  end
-  else
-  begin
-    infoln('Lazarus: running make distclean before checkout/update:',info);
+  case ModuleName of
+    'BIGIDE':
+    begin
+      ProcessEx.Parameters.Add('bigide');
+      infoln('Lazarus: running make distclean bigideclean:',info);
+    end;
+    'LAZARUS':
+    begin
+      ProcessEx.Parameters.Add('all');
+      infoln('Lazarus: running make distclean all:',info);
+    end;
+    'LCL':
+    begin
+      ProcessEx.Parameters.Add('lcl lclbase intf');
+      infoln('Lazarus: running make distclean lcl lclbase intf:',info);
+    end
+  else //raise error;
+    begin
+      ProcessEx.Parameters.Add('--help'); //this should render it harmless.
+      WritelnLog('Invalid module name '+ModuleName+' specified! Please fix the code.', true);
+      FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
+      result:=false;
+      exit;
+    end;
   end;
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
@@ -404,7 +435,7 @@ var
   UpdateWarnings: TStringList;
 begin
   if not InitModule then exit;
-  infoln('Checking out/updating Lazarus sources...',info);
+  infoln('Checking out/updating Lazarus sources:',info);
   UpdateWarnings:=TStringList.Create;
   try
    FSVNClient.Verbose:=FVerbose;
