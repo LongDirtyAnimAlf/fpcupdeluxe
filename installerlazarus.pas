@@ -261,7 +261,7 @@ begin
     ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('--pcp="'+FPrimaryConfigPath+'"');
+    ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
     ProcessEx.Parameters.Add('--build-ide=');
     if FCrossLCL_Platform <>'' then
       ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
