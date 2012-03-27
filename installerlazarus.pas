@@ -24,16 +24,9 @@ Const
     'Buildmodule BIGIDE;'+
     'End;'+
 //standard IDE build with user-selected packages
-// Rather than requiring another module, we pick
-// and choose actions.
+// We'll need BIGIDE for lhelp later on anyway...
     'Declare USERIDE;'+
-    // Clean up source directory
-    'Cleanmodule lazarus;'+
-    'Cleanmodule BIGIDE;'+
-    'Getmodule lazarus;'+
-    //If bigide fails, user will at least have default lazarus:
-    'Buildmodule lazarus;'+
-    'Buildmodule BIGIDE;'+
+    'Requires BIGIDE;'+
     'Buildmodule USERIDE;'+
     'End;'+
 
