@@ -241,7 +241,10 @@ begin
     begin
       writeln('Running --clean: cleaning environment.');
     end;
+    {$IFDEF MSWINDOWS}
+    // Makes no sense on other platforms
     writeln('Binutils/make dir:      '+FInstaller.MakeDirectory);
+    {$ENDIF MSWINDOWS}
     writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
     writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
     writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
@@ -339,4 +342,4 @@ begin
   end;
   if res<>-1 then
     halt(res);
-end.
+end.
