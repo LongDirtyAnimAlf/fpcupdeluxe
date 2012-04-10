@@ -177,8 +177,8 @@ begin
       end;
     if Options<>'' then
       ProcessEx.Parameters.Add('OPT='+Options);
-    ProcessEx.Parameters.Add('packager/registration');
-    ProcessEx.Parameters.Add('lazutils');
+    ProcessEx.Parameters.Add('registration'); //makefile: required by lazutils
+    ProcessEx.Parameters.Add('lazutils'); //required by lcl
     ProcessEx.Parameters.Add('lcl');
     infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform,info);
     ProcessEx.Execute;
