@@ -142,6 +142,7 @@ uses fpcuputil, fileutil, processutils, updatelazconfig
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   CrossInstaller:TCrossInstaller;
+  LCLOption: string;
   Options:String;
 begin
   CrossInstaller:=GetCrossInstaller;
@@ -163,8 +164,6 @@ begin
     if CrossInstaller.BinUtilsPath<>'' then
       ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FFPCDir));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-    if FCrossLCL_Platform <>'' then
-      ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
     ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
     Options:=FCompilerOptions;
@@ -177,9 +176,22 @@ begin
       end;
     if Options<>'' then
       ProcessEx.Parameters.Add('OPT='+Options);
-    ProcessEx.Parameters.Add('registration'); //makefile: required by lazutils
-    ProcessEx.Parameters.Add('lazutils'); //required by lcl
-    ProcessEx.Parameters.Add('lcl');
+{
+Lazarus mailing list, message by Mattias Gaertner, 10 April 2012
+Changes of make, part III
+Precompiling a second LCL platform:
+Do not use "make lcl LCL_PLATFORM=qt", as this will update
+lclbase.compiled and this tells the IDE to rebuild the
+existing ppu of the first platform.
+Use instead:
+make -C lcl/interfaces/qt
+}
+    ProcessEx.Parameters.Add('-C');
+    if FCrossLCL_Platform <>'' then
+      LCLOption:='lcl/platform/'+FCrossLCL_Platform
+      else
+      LCLOption:='lcl';
+    ProcessEx.Parameters.Add(LCLOption);
     infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform,info);
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
