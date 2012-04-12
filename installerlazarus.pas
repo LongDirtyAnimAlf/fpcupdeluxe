@@ -187,10 +187,15 @@ Use instead:
 make -C lcl/interfaces/qt
 }
     ProcessEx.Parameters.Add('-C');
-    if FCrossLCL_Platform <>'' then
-      LCLOption:='lcl/platform/'+FCrossLCL_Platform
+    if FCrossLCL_Platform<>'' then
+      LCLOption:='lcl/interfaces/'+FCrossLCL_Platform
       else
-      LCLOption:='lcl';
+      if (FCrossOS_Target='win32') or (FCrossOS_Target='win64') then
+        // Fix for cross compile on same platform; we still need to give
+        // the widgetset.
+        LCLOption:='lcl/interfaces/win32'
+        else
+        LCLOption:='lcl';
     ProcessEx.Parameters.Add(LCLOption);
     infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform,info);
     ProcessEx.Execute;
@@ -246,8 +251,12 @@ begin
       end;
       'LCL':
       begin
-        ProcessEx.Parameters.Add('lcl lclbase intf');
-        infoln(ModuleName+': running make lcl lclbase intf:', info);
+        // April 2012: lcl now requires lazutils and registration
+        // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+        // todo: do we need to add ideintf?
+        // todo: do we need to replace this with make -C lcl/platform/bla?
+        ProcessEx.Parameters.Add('registration lazutils lcl');
+        infoln(ModuleName+': running make registration lazutils lcl:', info);
       end
     else //raise error;
       begin
