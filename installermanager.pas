@@ -272,7 +272,12 @@ end;
 
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
 begin
-  FMakeDirectory:=ExpandFileName(AValue);
+  // Make directory can be empty (e.g. in Linux). In this case
+  // expanding '' gives the user's home directory, which is not what we want.
+  if AValue='' then
+    FMakeDirectory:=''
+  else
+    FMakeDirectory:=ExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);
