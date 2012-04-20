@@ -227,8 +227,8 @@ begin
     {$IFNDEF MSWINDOWS}
     if FInstaller.MakeDirectory<>'' then
       begin
-      writeln('The "binutilsdir" parameter is not necessary or supported on this system.'+LineEnding+
-        'The parameter will be ignored.',warning);
+      writeln('The "binutilsdir" parameter (currently set to '+FInstaller.MakeDirectory+') is not necessary or supported on this system.'+LineEnding+
+        'The parameter will be ignored.');
       FInstaller.MakeDirectory:='';
       end;
     {$ENDIF MSWINDOWS}

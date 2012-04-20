@@ -185,8 +185,12 @@ lclbase.compiled and this tells the IDE to rebuild the
 existing ppu of the first platform.
 Use instead:
 make -C lcl/interfaces/qt
+*note*: -C is the same option as --directory=
 }
     ProcessEx.Parameters.Add('-C');
+    { lcl requires lazutils and registration
+    http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+    }
     if FCrossLCL_Platform<>'' then
       LCLOption:='lcl/interfaces/'+FCrossLCL_Platform
       else
@@ -425,8 +429,10 @@ begin
     end;
     'LCL':
     begin
-      ProcessEx.Parameters.Add('lcl lclbase intf');
-      infoln('Lazarus: running make distclean lcl lclbase intf:',info);
+      //Per April 2012, LCL requires lazutils which requires registration
+      //http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+      ProcessEx.Parameters.Add('registration lazutils lcl');
+      infoln('Lazarus: running make distclean registration lazutils lcl:',info);
     end
   else //raise error;
     begin
