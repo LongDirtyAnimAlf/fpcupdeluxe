@@ -159,7 +159,6 @@ begin
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('FPCDIR='+FFPCDir); //Make sure our FPC units can be found by Lazarus
     if CrossInstaller.BinUtilsPath<>'' then
       ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FFPCDir));
@@ -187,10 +186,10 @@ Use instead:
 make -C lcl/interfaces/qt
 *note*: -C is the same option as --directory=
 }
+//debug
+ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+    {
     ProcessEx.Parameters.Add('-C');
-    { lcl requires lazutils and registration
-    http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
-    }
     if FCrossLCL_Platform<>'' then
       LCLOption:='lcl/interfaces/'+FCrossLCL_Platform
       else
@@ -199,8 +198,20 @@ make -C lcl/interfaces/qt
         // the widgetset.
         LCLOption:='lcl/interfaces/win32'
         else
-        LCLOption:='lcl';
+        begin
+          // Regular lcl
+          ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+          LCLOption:='';
+        end;
     ProcessEx.Parameters.Add(LCLOption);
+    }
+    //debug
+    { lcl requires lazutils and registration
+    http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+    }
+    ProcessEx.Parameters.Add('registration');
+    ProcessEx.Parameters.Add('lazutils');
+    ProcessEx.Parameters.Add('lcl');
     infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform,info);
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
