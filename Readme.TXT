@@ -48,7 +48,7 @@ If you want to improve or extend fpcup, here's a more detailed description of wh
 
 Note that some steps will not be executed depending on the modules chosen by the user.
 By default, all modules will be run; the help module is selected by default and pulls in bigide.
-fpcup for Windows is 32 bit, but wincrossx64 will be run so users can compile 64 bit applications with Lazarus.
+fpcup for Windows is 32 bit, but the crosswin32-64 module will be run so users can compile 64 bit applications with Lazarus.
 
 1. Setup, checking/downloading prerequisites:
 - fpcup creates a shortcut on your desktop (Windows) or home directory shell script to fpcup with all the options you chose, so you don't have to type it all again
