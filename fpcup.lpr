@@ -307,7 +307,7 @@ begin
   writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion');
   //todo: how to get windres => mingw32-binutils? failing that, debian binutils-mingw-w64 => for both x86 and x64 windows apparently?
   {$ENDIF MSWINDOWS}
-  writeln('- try removing all intermediate files by running fpcup with the --uninstall option');
+  writeln('- try removing all intermediate files by running fpcup with the --clean option');
   writeln('- if that does not work: use the --uninstall option to remove all files (including your FPC and lazarus directories)');
   writeln('- remove the bootstrap compiler. fpcup will download it if required.');
 end;
