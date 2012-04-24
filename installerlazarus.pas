@@ -142,7 +142,6 @@ uses fpcuputil, fileutil, processutils, updatelazconfig
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   CrossInstaller:TCrossInstaller;
-  LCLOption: string;
   Options:String;
 begin
   CrossInstaller:=GetCrossInstaller;
@@ -155,60 +154,83 @@ begin
       infoln('Failed to get LCL cross libraries',error)
     else
     begin
-    ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('FPCDIR='+FFPCDir); //Make sure our FPC units can be found by Lazarus
-    if CrossInstaller.BinUtilsPath<>'' then
-      ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FFPCDir));
-    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-    ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-    ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-    Options:=FCompilerOptions;
-    if CrossInstaller.LibsPath<>''then
-      Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
-    if CrossInstaller.BinUtilsPrefix<>'' then
-      begin
-      Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
-      ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
-      end;
-    if Options<>'' then
-      ProcessEx.Parameters.Add('OPT='+Options);
-{
-Lazarus mailing list, message by Mattias Gaertner, 10 April 2012
-Changes of make, part III
-Precompiling a second LCL platform:
-Do not use "make lcl LCL_PLATFORM=qt", as this will update
-lclbase.compiled and this tells the IDE to rebuild the
-existing ppu of the first platform.
-Use instead:
-make -C lcl/interfaces/qt
-*note*: -C is the same option as --directory=
-}
-    ProcessEx.Parameters.Add('-C');
-    { lcl requires lazutils and registration
-    http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
-    }
+    // If we're "crosscompiling" with the native compiler and binutils - "cross compiling lite" - use lazbuild.
+    // Advantages:
+    // - dependencies are taken care of
+    // - it won't trigger a rebuild of the LCL when the user compiles his first cross project.
+    // Otherwise, use make; advantages:
+    // - can deal with various bin tools
+    // - can deal with compiler options
+    // todo: how to reliably detect which version we're using???
     if FCrossLCL_Platform<>'' then
-      LCLOption:='lcl/interfaces/'+FCrossLCL_Platform
-      else
-      if (FCrossOS_Target='win32') or (FCrossOS_Target='win64') then
-        // Fix for cross compile on same platform; we still need to give
-        // the widgetset.
-        LCLOption:='lcl/interfaces/win32'
-        else
-        LCLOption:='lcl';
-    ProcessEx.Parameters.Add(LCLOption);
-    infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform,info);
+      begin
+      {
+      Lazarus mailing list, message by Mattias Gaertner, 10 April 2012
+      Changes of make, part III
+      Precompiling a second LCL platform:
+      Do not use "make lcl LCL_PLATFORM=qt", as this will update
+      lclbase.compiled and this tells the IDE to rebuild the
+      existing ppu of the first platform.
+      Use instead:
+      make -C lcl/interfaces/qt
+      *note*: -C is the same option as --directory=
+      => however, this would require us to split compilation into
+      - prerequisites
+      - LCL
+      }
+      ProcessEx.Executable := Make;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('FPC='+FCompiler);
+      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+      ProcessEx.Parameters.Add('FPCDIR='+FFPCDir); //Make sure our FPC units can be found by Lazarus
+      if CrossInstaller.BinUtilsPath<>'' then
+        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FFPCDir));
+      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+      if FCrossLCL_Platform <>'' then
+        ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
+      ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+      ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+      Options:=FCompilerOptions;
+      if CrossInstaller.LibsPath<>''then
+        Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+      if CrossInstaller.BinUtilsPrefix<>'' then
+        begin
+        Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
+        ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+        end;
+      if Options<>'' then
+        ProcessEx.Parameters.Add('OPT='+Options);
+      //Per April 2012, LCL requires lazutils which requires registration
+      //http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+      ProcessEx.Parameters.Add('registration');
+      ProcessEx.Parameters.Add('lazutils');
+      ProcessEx.Parameters.Add('lcl');
+      end
+    else
+      begin
+      // Use lazbuild for cross compiling lite:
+      ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
+      ProcessEx.Parameters.Add('--cpu='+FCrossCPU_Target);
+      ProcessEx.Parameters.Add('--os='+FCrossOS_Target);
+      if FCrossLCL_Platform<>'' then
+        ProcessEx.Parameters.Add('--widgetset='+FCrossLCL_Platform);
+      ProcessEx.Parameters.Add('lcl\interfaces\lcl.lpk');
+      end;
+    if FCrossLCL_Platform='' then
+      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target,info)
+    else
+      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform,info);
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
     if not result then
       WritelnLog( 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
-  end
-else
-  infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,error);
+    end
+  else
+    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,error);
 end;
 
 constructor TLazarusCrossInstaller.Create;
@@ -257,9 +279,9 @@ begin
       begin
         // April 2012: lcl now requires lazutils and registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
-        // todo: do we need to add ideintf?
-        // todo: do we need to replace this with make -C lcl/platform/bla?
-        ProcessEx.Parameters.Add('registration lazutils lcl');
+        ProcessEx.Parameters.Add('registration');
+        ProcessEx.Parameters.Add('lazutils');
+        ProcessEx.Parameters.Add('lcl');
         infoln(ModuleName+': running make registration lazutils lcl:', info);
       end
     else //raise error;
@@ -416,33 +438,7 @@ begin
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
   end;
   ProcessEx.Parameters.Add('distclean');
-  case UpperCase(ModuleName) of
-    'BIGIDE':
-    begin
-      ProcessEx.Parameters.Add('bigide');
-      infoln('Lazarus: running make distclean bigideclean:',info);
-    end;
-    'LAZARUS':
-    begin
-      ProcessEx.Parameters.Add('all');
-      infoln('Lazarus: running make distclean all:',info);
-    end;
-    'LCL':
-    begin
-      //Per April 2012, LCL requires lazutils which requires registration
-      //http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
-      ProcessEx.Parameters.Add('registration lazutils lcl');
-      infoln('Lazarus: running make distclean registration lazutils lcl:',info);
-    end
-  else //raise error;
-    begin
-      ProcessEx.Parameters.Add('--help'); //this should render it harmless.
-      WritelnLog('CleanModule: Invalid module name '+ModuleName+' specified! Please fix the code.', true);
-      FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
-      result:=false;
-      exit;
-    end;
-  end;
+  // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
   result:=true;
