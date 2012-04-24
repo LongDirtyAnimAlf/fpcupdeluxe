@@ -141,6 +141,7 @@ uses fpcuputil, fileutil, processutils, updatelazconfig
 
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
+  BuildMethod:String;
   CrossInstaller:TCrossInstaller;
   Options:String;
 begin
@@ -178,6 +179,7 @@ begin
       - prerequisites
       - LCL
       }
+      BuildMethod:='make';
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
@@ -210,6 +212,7 @@ begin
     else
       begin
       // Use lazbuild for cross compiling lite:
+      BuildMethod:='lazbuild';
       ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
@@ -221,9 +224,9 @@ begin
       ProcessEx.Parameters.Add('lcl\interfaces\lcl.lpk');
       end;
     if FCrossLCL_Platform='' then
-      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target,info)
+      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' using '+BuildMethod,info)
     else
-      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform,info);
+      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform+' using '+BuildMethod,info);
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
     if not result then
@@ -439,6 +442,7 @@ begin
   end;
   ProcessEx.Parameters.Add('distclean');
   // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
+  infoln('Lazarus: running make distclean:',info);
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
   result:=true;
