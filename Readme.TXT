@@ -151,27 +151,96 @@ This program will download the FPC and Lazarus sources
 from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
-fpcup compiled on 2012/02/23 17:18:46 with FPC 2.6.1
+fpcup compiled on 2012/04/24 09:53:53 with FPC 2.6.1
 for CPU: i386 on Win32
+Info: 24-4-2012 9:56:46: fpcup started.
 DON'T PANIC!
 Everything below is optional...
 
 fpcup --<options>
 
 fpcup can work with modules - see "only", "skip" below
-List of modules and standard installation action:
-Std Name           Description
-on  FPC            Free Pascal compiler
-on  lazarus        LCL (and IDE if not crosscompiling)
-off bigide         IDE with extra components. Selects lazarus.
-on  help           Lazarus+FPC help. Also selects bigide.
-on  wincrossx64    Lazarus Win32=>Win64 cross compiler.
-                   Note: also installs lazarus 32 bit IDE.
-on  doceditor      Lazarus Doceditor. Also selects lazarus.
-on  lazdatadesktop Data desktop tool. Also selects lazarus.
-Because help is installed by default, it pulls in bigide and
-the results that all modules above get installed.
-(except wincrossx64 if not on Windows, of course)
+List of all modules:
+default
+defaultwin32
+crosswin32-64
+defaultclean
+defaultwin32clean
+crosswin32-64Clean
+defaultuninstall
+defaultwin32uninstall
+FPC
+FPCuninstall
+FPCclean
+FPCCleanOnly
+FPCGetOnly
+FPCBuildOnly
+lazarus
+BIGIDE
+USERIDE
+lazarusuninstall
+lazarusclean
+BIGIDEclean
+LazarusCleanOnly
+LazarusGetOnly
+LazarusBuildOnly
+LazarusConfigOnly
+helpfpc
+helpfpcuninstall
+helplazarus
+helplazarusuninstall
+HelpFPCCleanOnly
+HelpLazarusCleanOnly
+HelpFPCGetOnly
+HelpLazarusGetOnly
+HelpFPCBuildOnly
+HelpFPCBuildOnly
+HelpLazarusBuildOnly
+HelpFPCConfigOnly
+HelpLazarusConfigOnly
+lhelp
+lhelpclean
+lhelpuninstall
+lazdatadesktop
+lazdatadesktopclean
+lazdatadesktopuninstall
+doceditor
+doceditorclean
+doceditoruninstall
+synapse
+synapseclean
+synapseuninstall
+lazarus_ccr
+lazarus_ccrclean
+lazarus_ccruninstall
+fpspreadsheet
+fpspreadsheetclean
+fpspreadsheetuninstall
+tiopf_source
+tiopf_sourceclean
+tiopf_sourceuninstall
+tiopf_demos
+tiopf_demosclean
+tiopf_demosuninstall
+tiopf_docs
+tiopf_docsclean
+tiopf_docsuninstall
+tiopf
+tiopfclean
+tiopfuninstall
+fpcdocs
+fpcdocsclean
+fpcdocsuninstall
+lazres
+lazresclean
+lazresuninstall
+
+The following modules run by default:
+LHELP
+LAZDATADESKTOP
+DOCEDITOR
+FPCDOCS
+LAZRES
 
 Options are not required; they include:
  help                  Show this text
@@ -183,11 +252,10 @@ Options are not required; they include:
                        Note: the binutils are copied to the
                        FPC directory for use by FPC. This gives
                        a more standard FPC environment.
- clean                 Don't build.
-                       If no skip and only options given:
-                       DELETE entire Lazarus/FPC directories
-                       Else: clean up only certain modules,
-                       only deleting temporary items.
+ clean                 Remove files created with build. 
+                       Can be combined with skip and only options.
+ configfile=<filename> Load module definition file from <filename>.
+                       Default: fpcup.ini in the program directory.
  cputarget=<name>      CPU target for cross_compiling.
                        <name> has to be one of the following:
                        i386,m68k,alpha,powerpc,powerpc64,
@@ -199,17 +267,19 @@ Options are not required; they include:
                        or ~\fpcbootstrap\
  fpcdir=<dir>          Target FPC dir, default c:\development\fpc\
                        or ~\fpc\
- fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
-                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
- fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
-                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
- fpcrevision=<number>  Revert to FPC SVN revision <number>
  fpcuplinkname=<name>  Name of the shortcut to the fpcup script.
                        On Windows: a desktop shortcut.
                        On other systems: a shell script in your home directory.
                        If empty specified, no shortcut will be produced.
                        Default: fpcup_update
                          or <lazlinkname>_update if lazlinkname specified
+ fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
+                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
+ fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
+                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
+ fpcrevision=<number>  Revert to FPC SVN revision <number>
+ keeplocalchanges      Keep locally modified files (normally these would be
+                       backed up as .diff files before doing svn revert.
  lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\
                        or ~\lazarus\
  lazlinkname=<name>    Name of the shortcut to the Lazarus install.
@@ -218,7 +288,7 @@ Options are not required; they include:
                        If empty specified, no shortcut will be produced.
                        Default: Lazarus_trunk
  lazrevision=<number>  Revert to Lazarus SVN revision <number>
- lazURL=<URL>          SVN URL from which to download; default:
+ lazURL=<URL>          SVN URL from which to download; default: 
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
  lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.
@@ -241,8 +311,12 @@ Options are not required; they include:
  skip=<values>         Do not update/build or clean modules.
                        The module list is separated by commas.
                        See above for a list of modules.
+ uninstall             uninstall sources and all generated files
+                       If no skip and only options given:
+                       DELETE entire Lazarus/FPC directories
+                       Else: uninstall only certain modules.
  verbose               Show output from svn and make
 
 Share and enjoy!
 
-FPCUp finished.
+Info: 24-4-2012 9:56:46: fpcup finished.
