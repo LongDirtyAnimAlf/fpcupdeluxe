@@ -304,8 +304,6 @@ begin
 // Example adding the synapse package:
 // AddToPackageFiles1=CONFIG/UserPkgLinks/Item#/Name:synapse
 // AddToPackageFiles2=CONFIG/UserPkgLinks/Item#/Filename:$(Installdir)/laz_synapse.lpk
-// Ignore LastUsed value
-//todo: this won't work...
   result:=InitModule;
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
@@ -316,9 +314,10 @@ begin
         try
           // The files below are the only files we allow adding to/modifying:
           sl:=TStringList(UniModuleList.Objects[idx]);
-          AddToLazXML('environmentoptions');
+          AddToLazXML('environmentoptions'); //general options
           AddToLazXML('helpoptions');
-          AddToLazXML('packagefiles');
+          AddToLazXML('miscellaneousoptions'); //e.g. list of packages to be installed on recompile
+          AddToLazXML('packagefiles'); //e.g. list of available packages
           // Process specials
           Directive:=GetValue('RegisterExternalTool',sl);
           if Directive<>'' then
