@@ -367,6 +367,7 @@ begin
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
             end;
+
           Directive:=GetValue('AddPackage',sl);
           if Directive<>'' then
             begin
@@ -411,6 +412,14 @@ begin
               LazarusConfig.SetVariable(xmlfile,key,cnt);
               LazarusConfig.SetVariable(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/Value',PackageName);
               end
+            end;
+
+          Directive:=GetValue('RegisterHelpViewer',sl);
+          if Directive<>'' then
+            begin
+            xmlfile:='helpoptions.xml';
+            key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
+            LazarusConfig.SetVariable(xmlfile,key,Directive+GetExeExt);
             end;
 
           Directive:=GetValue('RegisterLazDocPath',sl);
@@ -597,6 +606,14 @@ begin
           end;
         LazarusConfig.DeletePath(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/');
         end
+      end;
+
+    Directive:=GetValue('RegisterHelpViewer',sl);
+    if Directive<>'' then
+      begin
+      xmlfile:='helpoptions.xml';
+      key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
+      LazarusConfig.SetVariable(xmlfile,key,'');
       end;
     finally
       LazarusConfig.Destroy;
