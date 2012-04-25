@@ -286,7 +286,10 @@ begin
   Filename:=AFilename;
   FNew:=not(FileExistsUTF8(AFileName));
   if FNew then
-    Doc:=TXMLDocument.Create
+    begin
+    Doc:=TXMLDocument.Create;
+    Doc.AppendChild(Doc.CreateElement('CONFIG'));
+    end
   else
     ReadXMLFile(Doc,AFilename);
   bChanged:=false;

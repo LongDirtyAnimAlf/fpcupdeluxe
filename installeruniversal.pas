@@ -230,7 +230,7 @@ var
   sl:TStringList;
   LazarusConfig:TUpdateLazConfig;
   directive,xmlfile,key:string;
-  LazDocPath: string;
+  LazDocPath,PackageName: string;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
@@ -367,6 +367,51 @@ begin
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
             end;
+          Directive:=GetValue('AddPackage',sl);
+          if Directive<>'' then
+            begin
+            PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(Directive));
+            xmlfile:='packagefiles.xml';
+            key:='UserPkgLinks/Count';
+            cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+            // check if package is already registered
+            i:=cnt;
+            while i>0 do
+              begin
+              if LazarusConfig.GetVariable(xmlfile,'UserPkgLinks/Item'+IntToStr(i)+'/Name/Value')
+                =PackageName then
+                  break;
+              i:=i-1;
+              end;
+            if i<1 then //not found
+              begin
+              cnt:=cnt+1;
+              LazarusConfig.SetVariable(xmlfile,key,cnt);
+              end
+            else
+              cnt:=i;
+            key:='UserPkgLinks/Item'+IntToStr(cnt)+'/';
+            LazarusConfig.SetVariable(xmlfile,key+'Filename/Value',Directive);
+            LazarusConfig.SetVariable(xmlfile,key+'Name/Value',PackageName);
+            xmlfile:='miscellaneousoptions.xml';
+            key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Count';
+            cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+            // check if package is already registered
+            i:=cnt;
+            while i>0 do
+              begin
+              if LazarusConfig.GetVariable(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i)+'/Value')
+                =PackageName then
+                  break;
+              i:=i-1;
+              end;
+            if i<1 then //not found
+              begin
+              cnt:=cnt+1;
+              LazarusConfig.SetVariable(xmlfile,key,cnt);
+              LazarusConfig.SetVariable(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/Value',PackageName);
+              end
+            end;
 
           Directive:=GetValue('RegisterLazDocPath',sl);
           if Directive<>'' then
@@ -457,7 +502,7 @@ function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
 var
   idx,cnt,i:integer;
   sl:TStringList;
-  Directive,xmlfile,key,keyfrom:string;
+  Directive,xmlfile,key,keyfrom,PackageName:string;
   LazarusConfig:TUpdateLazConfig;
 begin
   result:=InitModule;
@@ -498,6 +543,60 @@ begin
           end;
         LazarusConfig.DeletePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/');
         end;
+      end;
+
+    Directive:=GetValue('AddPackage',sl);
+    if Directive<>'' then
+      begin
+      PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(Directive));
+      xmlfile:='packagefiles.xml';
+      key:='UserPkgLinks/Count';
+      cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+      // check if package is already registered
+      i:=cnt;
+      while i>0 do
+        begin
+        if LazarusConfig.GetVariable(xmlfile,'UserPkgLinks/Item'+IntToStr(i)+'/Name/Value')
+          =PackageName then
+            break;
+        i:=i-1;
+        end;
+      if i>1 then // found
+        begin
+        LazarusConfig.SetVariable(xmlfile,key,cnt-1);
+        key:='UserPkgLinks/Item'+IntToStr(cnt)+'/';
+        while i<cnt do
+          begin
+          LazarusConfig.MovePath(xmlfile,'UserPkgLinks/Item'+IntToStr(i+1)+'/',
+             'UserPkgLinks/Item'+IntToStr(i)+'/');
+          i:=i+1;
+          end;
+        LazarusConfig.DeletePath(xmlfile,'UserPkgLinks/Item'+IntToStr(cnt)+'/');
+        end;
+      xmlfile:='miscellaneousoptions.xml';
+      key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Count';
+      cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+      // check if package is already registered
+      i:=cnt;
+      while i>0 do
+        begin
+        if LazarusConfig.GetVariable(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i)+'/Value')
+          =PackageName then
+            break;
+        i:=i-1;
+        end;
+      if i>1 then // found
+        begin
+        LazarusConfig.SetVariable(xmlfile,key,cnt-1);
+        key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/';
+        while i<cnt do
+          begin
+          LazarusConfig.MovePath(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i+1)+'/',
+             'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i)+'/');
+          i:=i+1;
+          end;
+        LazarusConfig.DeletePath(xmlfile,'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/');
+        end
       end;
     finally
       LazarusConfig.Destroy;
