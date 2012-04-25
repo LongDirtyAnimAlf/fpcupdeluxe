@@ -301,6 +301,11 @@ begin
 // counter: the attribute key for the counter used to keep track of lists. Used to insert a new value in a list. Read and incremented by 1;
 //          When using a counter, <key> can use a the '#' character as a placeholder for the new count written to <counter>
 // value:  the string value to store in <key>.
+// Example adding the synapse package:
+// AddToPackageFiles1=CONFIG/UserPkgLinks/Item#/Name:synapse
+// AddToPackageFiles2=CONFIG/UserPkgLinks/Item#/Filename:$(Installdir)/laz_synapse.lpk
+// Ignore LastUsed value
+//todo: this won't work...
   result:=InitModule;
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
@@ -309,6 +314,7 @@ begin
       LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
       try
         try
+          // The files below are the only files we allow adding to/modifying:
           sl:=TStringList(UniModuleList.Objects[idx]);
           AddToLazXML('environmentoptions');
           AddToLazXML('helpoptions');
