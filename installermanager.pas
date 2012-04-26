@@ -20,23 +20,33 @@ Const
     {$endif linux}
     'Exec CreateFpcupScript;'+
     'Do fpc;'+
-    'Do USERIDE;'+
+    //Get bigide so we at least have a compiler:
+    'Do BIGIDE;'+
     'Exec CreateLazarusScript;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
+    //Get external packages/universal modules
     'Do UniversalDefault;'+
+    //Recompile user IDE so any packages selected by the
+    //universal installer are compiled into the IDE:
+    'Do USERIDE;'+
     'End;'+
 //default sequence for win32
     'Declare defaultwin32;'+
     'Exec CreateFpcupScript;'+
     'Do fpc;'+
-    'Do USERIDE;'+
+    //Get bigide so we at least have a compiler:
+    'Do BIGIDE;'+
     'Exec CreateLazarusScript;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
+    //Get external packages/universal modules
     'Do UniversalDefault;'+
+    //Recompile user IDE so any packages selected by the
+    //universal installer are compiled into the IDE:
+    'Do USERIDE;'+
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     'End;'+
 //cross sequence for win32
@@ -606,7 +616,7 @@ begin
     Installer.URL:=FParent.FPCURL;
     end
 
-  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LCL') or
+  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LAZBUILD') or (uppercase(ModuleName)='LCL') or
     (uppercase(ModuleName)='BIGIDE') or (uppercase(ModuleName)='USERIDE') then
     begin
     if assigned(Installer) then

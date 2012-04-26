@@ -613,6 +613,7 @@ begin
       begin
       xmlfile:='helpoptions.xml';
       key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
+      // Setting the variable to empty should be enough to disable the help viewer.
       LazarusConfig.SetVariable(xmlfile,key,'');
       end;
     finally

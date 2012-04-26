@@ -288,6 +288,7 @@ begin
   if FNew then
     begin
     Doc:=TXMLDocument.Create;
+    // CONFIG node present in all Lazarus configs=>we ensure the config file gets created if it doesn't exist yet:
     Doc.AppendChild(Doc.CreateElement('CONFIG'));
     end
   else

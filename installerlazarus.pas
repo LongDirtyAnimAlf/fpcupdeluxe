@@ -14,19 +14,31 @@ Const
     'Declare lazarus;'+
     'Cleanmodule lazarus;'+
     'Getmodule lazarus;'+
+    //config lazarus so we can use lazbuild in the build step:
+    'ConfigModule lazarus;'+
     'Buildmodule lazarus;'+
+    //Config again to fix any wrong settings introduced:
     'ConfigModule lazarus;'+
     'End;'+
+
 //standard bigide build
     'Declare BIGIDE;'+
     'Requires lazarus;'+
     'Cleanmodule BIGIDE;'+
     'Buildmodule BIGIDE;'+
     'End;'+
+
+//Nogui widgetset+Lazbuild:
+    'Declare lazbuild;'+
+    'Cleanmodule lazbuild;'+
+    'Buildmodule lazbuild;'+
+    'End;'+
+
 //standard IDE build with user-selected packages
-// We'll need BIGIDE for lhelp later on anyway...
+//Requires lazbuild for building
     'Declare USERIDE;'+
-    'Requires BIGIDE;'+
+    'Requires lazbuild;'+
+    'Cleanmodule USERIDE;'+
     'Buildmodule USERIDE;'+
     'End;'+
 
@@ -278,6 +290,11 @@ begin
         ProcessEx.Parameters.Add('all');
         infoln(ModuleName+': running make all:',info);
       end;
+      'LAZBUILD':
+      begin
+        ProcessEx.Parameters.Add('lazbuild');
+        infoln(ModuleName+': running make lazbuild:',info);
+      end;
       'LCL':
       begin
         // April 2012: lcl now requires lazutils and registration
@@ -435,7 +452,8 @@ begin
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   if FCrossLCL_Platform <>'' then
     ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-  if Self is TLazarusCrossInstaller then
+  //Detect cross compiler or cross compiler light:
+  if (Self is TLazarusCrossInstaller) or (FCrossOS_Target<>'') then
   begin  // clean out the correct compiler
     ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
@@ -472,6 +490,8 @@ begin
 end;
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
+const
+  LookForConfigFile='environmentoptions.xml';
 begin
   if not InitModule then exit;
   infoln('Module Lazarus: Uninstall...',info);
@@ -496,7 +516,7 @@ begin
   end;
   // Sanity check so we don't try to delete random directories
   // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
-  if result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+'environmentoptions.xml') and
+  if result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+LookForConfigFile) and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FPrimaryConfigPath)) then
     begin
     if DeleteDirectoryEx(FPrimaryConfigPath)=false then
