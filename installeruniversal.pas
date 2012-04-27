@@ -69,7 +69,7 @@ Const
 
 implementation
 
-uses inifiles,updatelazconfig,fileutil;
+uses inifiles,updatelazconfig,fileutil,fpcuputil;
 
 Const
   STARTUSERMODULES=1000;
@@ -155,6 +155,7 @@ end;
 function TUniversalInstaller.InitModule: boolean;
 begin
   result:=true;
+  infoln('TUniversalInstaller: initialising...',Debug);
   if InitDone then
     exit;
   if FVerbose then
@@ -206,11 +207,14 @@ var
 begin
   result:=InitModule;
   if not result then exit;
+  // Log to console and log:
+  writelnlog('TUniversalInstaller: building module '+ModuleName+'...',true);
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
-    WritelnLog('Building module '+ModuleName);
+    // More detailed logging only if verbose:
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' using InstallExecute '+sl.text,true);
     result:=RunCommands('InstallExecute',sl);
     end
   else

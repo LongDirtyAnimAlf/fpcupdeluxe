@@ -39,9 +39,11 @@ type
     FUnzip: string;
     ProcessEx: TProcessEx;
     property Make: string read GetMake;
+    // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     procedure CreateBinutilsList;
+    // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
     // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
@@ -324,7 +326,7 @@ begin
     end;
   end;
   if OperationSucceeded then
-    infoln('Found valid ' + ExeName + ' application.',info);
+    infoln('Found valid ' + ExeName + ' application.',debug);
   Result := OperationSucceeded;
 end;
 
@@ -799,4 +801,4 @@ end;
 
 
 end.
-
+

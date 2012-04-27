@@ -326,7 +326,7 @@ end;
 
 function THelpFPCInstaller.InitModule: boolean;
 begin
-  infoln('Module FPCHELP: Initializing module...',info);
+  infoln('THelpFPCInstaller: initialising...',Debug);
   result:=false;
   if inherited InitModule then
   begin
@@ -507,7 +507,7 @@ end;
 function THelpLazarusInstaller.InitModule: boolean;
 begin
   result:=false;
-  infoln('HELPLAZARUS: initializing module...',info);
+  infoln('THelpLazarusInstaller: initialising...',Debug);
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise

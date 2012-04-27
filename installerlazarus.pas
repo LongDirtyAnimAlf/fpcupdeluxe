@@ -160,6 +160,7 @@ var
   Options:String;
 begin
   CrossInstaller:=GetCrossInstaller;
+  infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',info);
   if Assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils',error)
@@ -266,6 +267,7 @@ end;
 function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   result:=true;
+  infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',info);
   if ModuleName<>'USERIDE' then
   begin
     // Make all (should include lcl & ide)
@@ -320,7 +322,9 @@ begin
   end
   else
   begin
-    // useride; using lazbuild
+    // useride; using lazbuild. Note: in recent Lazarus we could also run make lazbuild useride
+    // todo: look at implementing this; it will simplify program structure and get rid of some dependencies
+    // in sequences
     ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
@@ -363,11 +367,12 @@ end;
 function TLazarusInstaller.InitModule: boolean;
 begin
   result:=true;
+  infoln('TLazarusInstaller: initialising...',Debug);
   if InitDone then
     exit;
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
-  infoln('Module LAZARUS: Getting/compiling module...',info);
+  WritelnLog('TLazarusInstaller init:',false);
   WritelnLog('Lazarus directory:      '+FBaseDirectory,false);
   WritelnLog('Lazarus URL:            '+FURL,false);
   WritelnLog('Lazarus options:        '+FCompilerOptions,false);

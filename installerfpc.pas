@@ -523,7 +523,7 @@ begin
     exit;
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
-  infoln('Module FPC: Getting/compiling FPC...',info);
+  infoln('TFPCInstaller: initialising...',Debug);
   if FBootstrapCompiler='' then
     begin  // may need to download it
     {$IFDEF MSWINDOWS}
@@ -593,6 +593,7 @@ begin
     end;
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
     FCompiler:=FBootstrapCompiler;
+  WritelnLog('TFPCInstaller init:',false);
   WritelnLog('Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
   WritelnLog('FPC URL:                '+FURL,false);
   WritelnLog('FPC options:            '+FCompilerOptions,false);
@@ -630,6 +631,7 @@ const
 begin
   result:=InitModule;
   if not result then exit;
+  infoln('TFPCInstaller: building module '+ModuleName+'...',info);
   {$ifdef win64}
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin

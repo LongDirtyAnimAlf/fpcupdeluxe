@@ -37,7 +37,7 @@ uses
   Classes, SysUtils;
 
 type
-  // Log/display markers, in ascending level of seriousness.
+  // Log/display markers, in ascending level of seriousness/descending level of verbosity.
   LogLevel = (Debug, Info, Warning, Error);
 
 // Create shortcut on desktop to Target file
@@ -58,10 +58,10 @@ function ParentDirectoryIsNotRoot(Dir:string):boolean;
 // Get path for Windows per user storage of application data. Useful for storing settings
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
+//Shows message on screen; if DEBUG defined, also shows debug messages
 procedure infoln(Message: string; Level: logLevel);
-//Uses writeln for now, and waits a bit afterwards so output is hopefully not garbled
-function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // Moves file if it exists, overwriting destination file
+function MoveFile(const SrcFilename, DestFilename: string): boolean;
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 {$ENDIF UNIX}
@@ -522,14 +522,22 @@ begin
     Error: Seriousness:='ERROR:';
     else Seriousness:='UNKNOWN CATEGORY!!:'
   end;
-  if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-  writeln('Info: ' + Message); //we misuse this for info output
-  sleep(200); //hopefully allow output to be written without interfering with other output
-  {$IFDEF DEBUG}
-  {DEBUG conditional symbol is defined using
-  Project Options/Other/Custom Options using -dDEBUG}
-  //Possibly more extensive logging
-  {$ENDIF DEBUG}
+  if (Level<>Debug) then
+    begin
+      if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
+      writeln(Seriousness+' '+ Message); //we misuse this for info output
+      sleep(200); //hopefully allow output to be written without interfering with other output
+    end
+  else
+    begin
+      {$IFDEF DEBUG}
+      {DEBUG conditional symbol is defined using
+      Project Options/Other/Custom Options using -dDEBUG}
+      if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
+      writeln(Seriousness+' '+ Message); //we misuse this for info output
+      sleep(200); //hopefully allow output to be written without interfering with other output
+      {$ENDIF DEBUG}
+    end;
 end;
 
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
@@ -596,4 +604,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+
