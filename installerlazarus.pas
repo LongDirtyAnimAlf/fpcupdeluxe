@@ -367,7 +367,7 @@ begin
     exit;
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
-  infoln('Module LAZARUS: Getting/compiling Lazarus...',info);
+  infoln('Module LAZARUS: Getting/compiling module...',info);
   WritelnLog('Lazarus directory:      '+FBaseDirectory,false);
   WritelnLog('Lazarus URL:            '+FURL,false);
   WritelnLog('Lazarus options:        '+FCompilerOptions,false);
