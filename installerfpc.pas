@@ -202,7 +202,7 @@ begin
             infoln('Problem compiling/installing crosscompiler. Continuing regardless.', warning);
             FCompiler:='////\\\Error trying to compile FPC\|!';
             {$ifndef win32}
-            //fail if this is not WINCROSSX64
+            //fail if this is not crosswin32-64
             result:=false;
             {$endif win32}
           end
@@ -851,4 +851,4 @@ begin
 end;
 
 end.
-
+

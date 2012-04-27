@@ -49,7 +49,8 @@ Const
     'Do USERIDE;'+
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     'End;'+
-//cross sequence for win32
+//cross sequence for win32. Note: if changing this name,
+    //also change checks for this in skipmodules etc.
     'Declare crosswin32-64;'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
@@ -143,13 +144,13 @@ type
     procedure SetMakeDirectory(AValue: string);
   protected
     LogFile:Text;
-    VerBoseLog:Text;
+    VerboseLog:Text;
     FModuleList:TStringList;
     FModuleEnabledList:TStringList;
     FModulePublishedList:TStringList;
-    // write verbatim to log and eventually console
+    // write verbatim to log and possibly console
     procedure WriteLog(msg:string;ToConsole:boolean=true);
-    // append line ending and write to log and eventually console
+    // append line ending and write to log and possibly console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
  public
     property ShortCutName: string read FShortCutName write FShortCutName;
@@ -335,7 +336,8 @@ begin
     end
   else
     {$ifdef win32}
-    if pos('WINCROSSX64',UpperCase(SkipModules))>0 then
+    // Run Windows specific cross compiler or regular version
+    if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then
       result:=Sequencer.Run('Default')
     else
       result:=Sequencer.Run('DefaultWin32');

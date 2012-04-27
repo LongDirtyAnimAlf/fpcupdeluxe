@@ -16,6 +16,8 @@ Const
     'Getmodule lazarus;'+
     //config lazarus so we can use lazbuild in the build step:
     'ConfigModule lazarus;'+
+    // Cross compile support at least requires lazbuild:
+    'Requires lazbuild;'+
     'Buildmodule lazarus;'+
     //Config again to fix any wrong settings introduced:
     'ConfigModule lazarus;'+
@@ -94,11 +96,11 @@ type
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
-    // LCL widget set to be build
+    // LCL widget set to be built
     property CrossLCL_Platform:string write FCrossLCL_Platform;
     // FPC base directory
     property FPCDir:string write FFPCDir;
-    // lazarus pimary config path
+    // Lazarus primary config path
     property PrimaryConfigPath:string write FPrimaryConfigPath;
     // Build module
     function BuildModule(ModuleName:string): boolean; override;
@@ -174,6 +176,7 @@ begin
     // Otherwise, use make; advantages:
     // - can deal with various bin tools
     // - can deal with compiler options
+    // - doesn't need existing lazbuild(+nogui LCL)
     // todo: how to reliably detect which version we're using???
     if FCrossLCL_Platform<>'' then
       begin
@@ -452,8 +455,7 @@ begin
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   if FCrossLCL_Platform <>'' then
     ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-  //Detect cross compiler or cross compiler light:
-  if (Self is TLazarusCrossInstaller) or (FCrossOS_Target<>'') then
+  if (Self is TLazarusCrossInstaller) then
   begin  // clean out the correct compiler
     ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
