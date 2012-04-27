@@ -11,13 +11,17 @@ uses
 Const
   Sequences=
 //standard lazarus build
+    //Note: we only do a getmodule/cleanmodule once here in this sequence,
+    //otherwise we keep running distclean and svn
     'Declare lazarus;'+
     'Cleanmodule lazarus;'+
     'Getmodule lazarus;'+
     //config lazarus so we can use lazbuild in the build step:
     'ConfigModule lazarus;'+
-    // Cross compile support at least requires lazbuild:
-    'Requires lazbuild;'+
+    // Cross compile support at least requires lazbuild.
+    // we're building it here directly to avoid circular
+    // dependencies (don't know if these are a problem)
+    'Buildmodule lazbuild;'+
     'Buildmodule lazarus;'+
     //Config again to fix any wrong settings introduced:
     'ConfigModule lazarus;'+
@@ -25,22 +29,22 @@ Const
 
 //standard bigide build
     'Declare BIGIDE;'+
+    //Note dependency on Lazarus sources:
     'Requires lazarus;'+
-    'Cleanmodule BIGIDE;'+
     'Buildmodule BIGIDE;'+
     'End;'+
 
 //Nogui widgetset+Lazbuild:
     'Declare lazbuild;'+
-    'Cleanmodule lazbuild;'+
+    //Note dependency on Lazarus sources:
+    'Requires lazarus;'+
     'Buildmodule lazbuild;'+
     'End;'+
 
 //standard IDE build with user-selected packages
-//Requires lazbuild for building
     'Declare USERIDE;'+
+    //Requires lazbuild for building
     'Requires lazbuild;'+
-    'Cleanmodule USERIDE;'+
     'Buildmodule USERIDE;'+
     'End;'+
 
