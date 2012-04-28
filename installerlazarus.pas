@@ -29,15 +29,18 @@ Const
 
 //standard bigide build
     'Declare BIGIDE;'+
-    //Note dependency on Lazarus sources:
-    'Requires lazarus;'+
+    //This requires Lazarus sources, but we're not
+    //going to Require lazarus as that will run make etc.
+    //Instead, just get lazarus sources
+    //'Cleanmodule lazarus;'+
+    'Getmodule lazarus;'+
     'Buildmodule BIGIDE;'+
     'End;'+
 
 //Nogui widgetset+Lazbuild:
     'Declare lazbuild;'+
-    //Note dependency on Lazarus sources:
-    'Requires lazarus;'+
+    //Same story as in BIGIDE
+    'Getmodule lazarus;'+
     'Buildmodule lazbuild;'+
     'End;'+
 
@@ -468,10 +471,15 @@ begin
   begin  // clean out the correct compiler
     ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',info);
+  end
+  else
+  begin
+    infoln('Lazarus: running make distclean:',info);
   end;
   ProcessEx.Parameters.Add('distclean');
   // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
-  infoln('Lazarus: running make distclean:',info);
+
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
   result:=true;
