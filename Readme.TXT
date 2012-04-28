@@ -318,5 +318,3 @@ Options are not required; they include:
  verbose               Show output from svn and make
 
 Share and enjoy!
-
-Info: 24-4-2012 9:56:46: fpcup finished.
