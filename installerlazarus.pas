@@ -479,7 +479,6 @@ begin
   end;
   ProcessEx.Parameters.Add('distclean');
   // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
-
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
   result:=true;

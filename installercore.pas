@@ -786,6 +786,8 @@ begin
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
   FSVNClient := TSVNClient.Create;
+  // List of binutils that can be downloaded:
+  CreateBinutilsList;
 end;
 
 destructor TInstaller.Destroy;

@@ -108,6 +108,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
+        <CommandLineParams Value="--fpcbootstrapdir=c:\windows\temp\boostrap --binutilsdir=c:\windows\temp\boostrap --keeplocalchanges"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>

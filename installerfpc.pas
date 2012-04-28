@@ -837,9 +837,6 @@ constructor TFPCInstaller.Create;
 begin
   inherited create;
 
-// Binutils needed for compilation
-CreateBinutilsList;
-
 FCompiler := '';
 FSVNDirectory := '';
 FMakeDir :='';
