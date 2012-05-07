@@ -553,7 +553,6 @@ begin
       FBootstrapCompilerURL :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/arm-linux-ppcarm.bz2';
     FBootstrapCompiler := FBootstrapCompilerDirectory +'arm-linux-ppcarm';
-    FFPCPlatform:='arm-linux';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL :=
@@ -623,6 +622,7 @@ var
   OperationSucceeded: boolean;
   SearchRec:TSearchRec;
   s:string;
+  TxtFile:Text;  //cpuarmel
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
@@ -850,4 +850,4 @@ begin
 end;
 
 end.
-
+
