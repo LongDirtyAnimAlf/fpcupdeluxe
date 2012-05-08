@@ -81,6 +81,7 @@ begin
   writeln('                       Note: the binutils are copied to the');
   writeln('                       FPC directory for use by FPC. This gives');
   writeln('                       a more standard FPC environment.');
+  writeln('                       Make sure it is not in the fpcdir directory');
   writeln(' clean                 Remove files created with build. ');
   writeln('                       Can be combined with skip and only options.');
   writeln(' configfile=<filename> Load module definition file from <filename>.');
@@ -92,6 +93,7 @@ begin
   writeln(' fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC');
   writeln('                       sources. Specify location with this option; if no');
   writeln('                       compiler found here, FPCUp will download one there.');
+  writeln('                       Make sure it is not in the fpcdir directory');
   writeln('                       Default: c:\development\fpcbootstrap\');
   writeln('                       or ~\fpcbootstrap\');
   writeln(' fpcdir=<dir>          Target FPC dir, default c:\development\fpc\');
