@@ -607,7 +607,7 @@ begin
   SetPath(FBootstrapCompilerDirectory+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
-    +IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
+    IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
     BinPath,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
