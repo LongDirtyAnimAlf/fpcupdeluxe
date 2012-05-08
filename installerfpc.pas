@@ -603,9 +603,11 @@ begin
   BinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
+  // add fpc/utils to solve data2inc not found by fpcmkcfg
   SetPath(FBootstrapCompilerDirectory+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
+    +IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
     BinPath,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
