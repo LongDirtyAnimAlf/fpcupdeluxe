@@ -305,7 +305,7 @@ begin
     try
       for FileCounter:=0 to FBinUtils.Count-1 do
       begin
-        FileUtil.CopyFile(FMakeDir+FBinUtils[FileCounter], IncludeTrailingBackslash(BinPath)+FBinUtils[FileCounter]);
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[FileCounter], IncludeTrailingPathDelimiter(BinPath)+FBinUtils[FileCounter]);
       end;
       // Also, we can change the make/binutils path to our new environment
       // Will modify fmake as well.
@@ -850,4 +850,4 @@ begin
 end;
 
 end.
-
+
