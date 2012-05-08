@@ -25,6 +25,8 @@ Const
     'Buildmodule lazarus;'+
     //Config again to fix any wrong settings introduced:
     'ConfigModule lazarus;'+
+    // Make sure the user can use the IDE:
+    'Exec CreateLazarusScript;'+
     'End;'+
 
 //standard bigide build
