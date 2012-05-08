@@ -22,7 +22,6 @@ Const
     'Do fpc;'+
     //Get bigide so we at least have a compiler:
     'Do BIGIDE;'+
-    'Exec CreateLazarusScript;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
@@ -38,7 +37,6 @@ Const
     'Do fpc;'+
     //Get bigide so we at least have a compiler:
     'Do BIGIDE;'+
-    'Exec CreateLazarusScript;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+

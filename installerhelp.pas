@@ -396,6 +396,7 @@ end;
 
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
+  BuildResult: integer;
   LCLDate: TDateTime;
   LHelpDirectory: string;
   OperationSucceeded:boolean;
@@ -414,7 +415,7 @@ begin
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
     begin
-      writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Abroting.', true);
+      writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Aborting.', true);
       OperationSucceeded := False;
     end;
   end;
@@ -461,8 +462,12 @@ begin
       The generated .xct file is an index file for fpdoc cross file links,
       used if you want to link to the chm from other chms.}
       ProcessEx.Execute;
-      if ProcessEx.ExitStatus <> 0 then
+      BuildResult:=ProcessEx.ExitStatus;
+      if BuildResult <> 0 then
+      begin
+        writelnlog(ModuleName+': error creating chm help dos. build_lcl_docs exit status: '+inttostr(BuildResult), true);
         OperationSucceeded := False;
+      end;
     end
     else
     begin

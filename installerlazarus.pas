@@ -35,6 +35,10 @@ Const
     //'Cleanmodule lazarus;'+
     'Getmodule lazarus;'+
     'Buildmodule BIGIDE;'+
+    //config lazarus, in case we only run BIGIDE (without lazarus):
+    'ConfigModule lazarus;'+
+    // Make sure the user can use the IDE:
+    'Exec CreateLazarusScript;'+
     'End;'+
 
 //Nogui widgetset+Lazbuild:
@@ -42,13 +46,17 @@ Const
     //Same story as in BIGIDE
     'Getmodule lazarus;'+
     'Buildmodule lazbuild;'+
+    //config lazarus, so lazbuild will work:
+    'ConfigModule lazarus;'+
     'End;'+
 
 //standard IDE build with user-selected packages
     'Declare USERIDE;'+
-    //Requires lazbuild for building
+    //Run lazbuild first for building
     'Requires lazbuild;'+
     'Buildmodule USERIDE;'+
+    // Make sure the user can use the IDE:
+    'Exec CreateLazarusScript;'+
     'End;'+
 
 //standard uninstall
