@@ -267,7 +267,7 @@ begin
   if FSVNExecutable <> AValue then
   begin
     FSVNExecutable := AValue;
-    FindSVNExecutable; //Make sure it actually exists
+    FindSVNExecutable; //Make sure it actually exists; use fallbacks if possible
   end;
 end;
 
@@ -401,7 +401,7 @@ begin
   FDesiredRevision:='';
   FReturnCode := 0;
   FSVNExecutable := '';
-  FindSvnExecutable; //Do this now so the SVNExecutable property is valid.
+  FindSvnExecutable; //Do this now so hopefully the SVNExecutable property is valid.
 end;
 
 destructor Tsvnclient.Destroy;

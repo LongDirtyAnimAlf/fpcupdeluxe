@@ -160,7 +160,12 @@ begin
     exit;
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
-//  result:=CheckAndGetNeededExecutables;
+  // While getting svn etc may help a bit, if Lazarus isn't installed correctly,
+  // it probably won't help for normal use cases.
+  // However, in theory, we could run only external modules and
+  // only download some SVN repositories
+  // So.. enable this.
+  result:=CheckAndGetNeededExecutables;
   BinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   InitDone:=result;
 end;

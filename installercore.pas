@@ -225,7 +225,7 @@ begin
 
   if OperationSucceeded then
   begin
-    // Try to look for SVN
+    // Look for SVN executable and set it if found:
     if FSVNClient.FindSVNExecutable = '' then
     begin
       {$IFDEF MSWINDOWS}
