@@ -67,7 +67,6 @@ Const
     Lazarus base directory
     }
     'Declare helplazarus;'+
-    'Requires BIGIDE;'+
     'Requires lhelp;'+
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
@@ -396,30 +395,16 @@ end;
 
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
+  BuildLCLDocsExe: string;
   BuildResult: integer;
   FPDocExe: string;
+  LazbuildExe: string;
   LCLDate: TDateTime;
   LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
-  OperationSucceeded:=true;
-
   // We need lhelp viewer but that should already have been taken care of by the dependencies.
-  if OperationSucceeded then
-  begin
-    // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-    ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild';
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
-    ProcessEx.Parameters.Add(FTargetDirectory+'build_lcl_docs.lpr');
-    infoln(ModuleName+': compiling build_lcl_docs help compiler:',info);
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-    begin
-      writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Aborting.', true);
-      OperationSucceeded := False;
-    end;
-  end;
+  OperationSucceeded:=true;
 
   if OperationSucceeded then
   begin
@@ -433,6 +418,43 @@ begin
 
     if (DaysBetween(Now,LCLDate)>1) or (FileSize(FTargetDirectory+'lcl.chm')=0) then
     begin
+      // Only rebuild if lcl.chm is fairly old.
+
+      BuildLCLDocsExe:=FTargetDirectory+'build_lcl_docs'+GetExeExt;
+      if OperationSucceeded then
+      begin
+        // Only recompile build_lcl_docs.exe if needed
+        if CheckExecutable(BuildLCLDocsExe, '--help', 'build_lcl_docs')=false then
+        begin
+          // Check for valid lazbuild.
+          // Note: we don't check if we have a valid primary config path, but that will come out
+          // in the next steps.
+          LazbuildExe:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild'+GetExeExt;;
+          if CheckExecutable(LazbuildExe, '--help','lazbuild')=false then
+          begin
+            writelnlog(ModuleName+': No valid lazbuild executable found. Aborting.', true);
+            OperationSucceeded:=false;
+          end;
+
+          if OperationSucceeded then
+          begin
+            // We have a working lazbuild; let's hope it works with primary config path as well
+            // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
+            ProcessEx.Executable := LazBuildExe;
+            ProcessEx.Parameters.Clear;
+            ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
+            ProcessEx.Parameters.Add(FTargetDirectory+'build_lcl_docs.lpr');
+            infoln(ModuleName+': compiling build_lcl_docs help compiler:',info);
+            ProcessEx.Execute;
+            if ProcessEx.ExitStatus <> 0 then
+            begin
+              writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Aborting.', true);
+              OperationSucceeded := False;
+            end;
+          end;
+        end;
+      end;
+
       // Check for proper fpdoc
       { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
       can be different between Unix+Windows }
@@ -449,7 +471,7 @@ begin
       if OperationSucceeded then
       begin
         // Compile Lazarus LCL CHM help
-        ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
+        ProcessEx.Executable := BuildLCLDocsExe;
         // Make sure directory switched to that of build_lcl_docs,
         // otherwise paths to source files will not work.
         ProcessEx.CurrentDirectory:=FTargetDirectory;
