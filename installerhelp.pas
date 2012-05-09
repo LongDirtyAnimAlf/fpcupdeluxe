@@ -397,6 +397,7 @@ end;
 function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   BuildResult: integer;
+  FPDocExe: string;
   LCLDate: TDateTime;
   LHelpDirectory: string;
   OperationSucceeded:boolean;
@@ -432,41 +433,83 @@ begin
 
     if (DaysBetween(Now,LCLDate)>1) or (FileSize(FTargetDirectory+'lcl.chm')=0) then
     begin
-      // Compile Lazarus LCL CHM help
-      ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
-      // Make sure directory switched to that of build_lcl_docs,
-      // otherwise paths to source files will not work.
-      ProcessEx.CurrentDirectory:=FTargetDirectory;
-      ProcessEx.Parameters.Clear;
-      // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
-      // the directory that contains the fcl and rtl .xct files:
-      ProcessEx.Parameters.Add('--fpcdocs');
-      ProcessEx.Parameters.Add(FTargetDirectory);
-      // Let build_lcl_docs know which fpdoc application to use:
-      ProcessEx.Parameters.Add('--fpdoc');
+      // Check for proper fpdoc
       { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
       can be different between Unix+Windows }
-      ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FFPCDirectory)+
+      FPDocExe:=IncludeTrailingPathDelimiter(FFPCDirectory)+
       'utils'+DirectorySeparator+
       'fpdoc'+DirectorySeparator+
-      'fpdoc'+GetExeExt);
-      ProcessEx.Parameters.Add('--outfmt');
-      ProcessEx.Parameters.Add('chm');
-      // Show application output if desired:
-      if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
-      infoln(ModuleName+': compiling chm help docs:',info);
-      { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
-      Though that may work when adjusting the baseurl option in Lazarus for each
-      CHM file, it's easier to move them to <lazarusdir>/docs/html,
-      which is also suggested by the wiki.
-      The generated .xct file is an index file for fpdoc cross file links,
-      used if you want to link to the chm from other chms.}
-      ProcessEx.Execute;
-      BuildResult:=ProcessEx.ExitStatus;
-      if BuildResult <> 0 then
+      'fpdoc'+GetExeExt;
+      if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
       begin
-        writelnlog(ModuleName+': error creating chm help dos. build_lcl_docs exit status: '+inttostr(BuildResult), true);
+        writelnlog(ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
         OperationSucceeded := False;
+      end;
+
+      if OperationSucceeded then
+      begin
+        // Compile Lazarus LCL CHM help
+        ProcessEx.Executable := FTargetDirectory+'build_lcl_docs'+GetExeExt;
+        // Make sure directory switched to that of build_lcl_docs,
+        // otherwise paths to source files will not work.
+        ProcessEx.CurrentDirectory:=FTargetDirectory;
+        ProcessEx.Parameters.Clear;
+        // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
+        // the directory that contains the fcl and rtl .xct files:
+        ProcessEx.Parameters.Add('--fpcdocs');
+        ProcessEx.Parameters.Add(FTargetDirectory);
+        // Let build_lcl_docs know which fpdoc application to use:
+        ProcessEx.Parameters.Add('--fpdoc');
+        ProcessEx.Parameters.Add(FPDocExe);
+        ProcessEx.Parameters.Add('--outfmt');
+        ProcessEx.Parameters.Add('chm');
+        // Show application output if desired:
+        if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
+        infoln(ModuleName+': compiling chm help docs:',info);
+        { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
+        Though that may work when adjusting the baseurl option in Lazarus for each
+        CHM file, it's easier to move them to <lazarusdir>/docs/html,
+        which is also suggested by the wiki.
+        The generated .xct file is an index file for fpdoc cross file links,
+        used if you want to link to the chm from other chms.}
+        ProcessEx.Execute;
+        BuildResult:=ProcessEx.ExitStatus;
+        if BuildResult <> 0 then
+        begin
+          writelnlog(ModuleName+': error creating chm help dos. build_lcl_docs exit status: '+inttostr(BuildResult), true);
+          OperationSucceeded := False;
+        end;
+      end;
+
+      if OperationSucceeded then
+      begin
+        // Move files if required
+        if FileExistsUTF8(FTargetDirectory+
+          'lcl'+DirectorySeparator+
+          'lcl.chm') then
+        begin
+          if FileSize(FTargetDirectory+
+          'lcl'+DirectorySeparator+
+          'lcl.chm')>0 then
+          begin
+            infoln(ModuleName+': moving lcl.chm to docs directory',info);
+            // Move help file to doc directory
+            OperationSucceeded:=MoveFile(FTargetDirectory+
+              'lcl'+DirectorySeparator+
+              'lcl.chm',
+              FTargetDirectory+
+              'lcl.chm');
+          end
+          else
+          begin
+            // File exists, but is empty. We might have an older file still present
+            writelnlog(ModuleName+': WARNING: '+FTargetDirectory+
+            'lcl'+DirectorySeparator+
+            'lcl.chm was created but is empty. Lcl.chm may be out of date! Try running with --verbose to see build_lcl_docs error messages.', true);
+            // Todo: change this once fixes for fpdoc chm generation are in fixes_26:
+            OperationSucceeded:=true;
+          end;
+        end;
       end;
     end
     else
@@ -476,36 +519,6 @@ begin
     end;
   end;
 
-  if OperationSucceeded then
-  begin
-    // Move files if required
-    if FileExistsUTF8(FTargetDirectory+
-      'lcl'+DirectorySeparator+
-      'lcl.chm') then
-    begin
-      if FileSize(FTargetDirectory+
-      'lcl'+DirectorySeparator+
-      'lcl.chm')>0 then
-      begin
-        infoln(ModuleName+': moving lcl.chm to docs directory',info);
-        // Move help file to doc directory
-        OperationSucceeded:=MoveFile(FTargetDirectory+
-          'lcl'+DirectorySeparator+
-          'lcl.chm',
-          FTargetDirectory+
-          'lcl.chm');
-      end
-      else
-      begin
-        // File exists, but is empty. We might have an older file still present
-        writelnlog(ModuleName+': WARNING: '+FTargetDirectory+
-        'lcl'+DirectorySeparator+
-        'lcl.chm was created but is empty. Lcl.chm may be out of date! Try running with --verbose to see build_lcl_docs error messages.', true);
-        // Todo: change this once fixes for fpdoc chm generation are in fixes_26:
-        OperationSucceeded:=true;
-      end;
-    end;
-  end;
   result:=OperationSucceeded;
 end;
 
