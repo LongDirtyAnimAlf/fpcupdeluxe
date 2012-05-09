@@ -30,6 +30,7 @@ type
     FLogVerboseFile: Text;
     FMake: string;
     FMakeDir: string;
+    FNeededExecutablesChecked: boolean;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
     FSVNUpdated: boolean;
@@ -157,133 +158,137 @@ var
   Output: string;
 begin
   OperationSucceeded := true;
-  // The extractors used depend on the bootstrap compiler URL/file we download
-  // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
-  {$IFDEF MSWINDOWS}
-  // Need to do it here so we can pick up make path.
-  FBunzip2 := EmptyStr;
-  FTar := EmptyStr;
-  // By doing this, we expect unzip.exe to be in the binutils dir.
-  // This is safe to do because it is included in the FPC binutils.
-  FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + GetExeExt;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF LINUX}
-  FBunzip2 := 'bunzip2';
-  FTar := 'tar';
-  FUnzip := 'unzip'; //unzip needed at least for FPC chm help
-  {$ENDIF LINUX}
-  {$IFDEF DARWIN}
-  FBunzip2 := ''; //not really necessary now
-  FTar := 'gnutar'; //gnutar can decompress as well; bsd tar can't
-  FUnzip := 'unzip'; //unzip needed at least for FPC chm help
-  {$ENDIF DARIN}
+  if not FNeededExecutablesChecked then
+  begin
+    // The extractors used depend on the bootstrap compiler URL/file we download
+    // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
+    {$IFDEF MSWINDOWS}
+    // Need to do it here so we can pick up make path.
+    FBunzip2 := EmptyStr;
+    FTar := EmptyStr;
+    // By doing this, we expect unzip.exe to be in the binutils dir.
+    // This is safe to do because it is included in the FPC binutils.
+    FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + GetExeExt;
+    {$ENDIF MSWINDOWS}
+    {$IFDEF LINUX}
+    FBunzip2 := 'bunzip2';
+    FTar := 'tar';
+    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    {$ENDIF LINUX}
+    {$IFDEF DARWIN}
+    FBunzip2 := ''; //not really necessary now
+    FTar := 'gnutar'; //gnutar can decompress as well; bsd tar can't
+    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    {$ENDIF DARIN}
 
-  {$IFDEF MSWINDOWS}
-  if OperationSucceeded then
-  begin
-    // Check for binutils directory, make and unzip executables.
-    // Download if needed; will download unzip - needed for SVN download
-    if (DirectoryExists(FMakeDir) = false) or (FileExists(Make) = false) or (FileExists(FUnzip) = false) then
+    {$IFDEF MSWINDOWS}
+    if OperationSucceeded then
     begin
-      infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download binutils.',info);
-      OperationSucceeded := DownloadBinUtils;
-    end;
-  end;
-  {$ENDIF MSWINDOWS}
-  {$IFDEF LINUX}
-  if OperationSucceeded then
-  begin
-    // Check for proper assembler
-    try
-      if ExecuteCommand('as --version', Output, FVerbose) <> 0 then
+      // Check for binutils directory, make and unzip executables.
+      // Download if needed; will download unzip - needed for SVN download
+      if (DirectoryExists(FMakeDir) = false) or (FileExists(Make) = false) or (FileExists(FUnzip) = false) then
       begin
-        infoln('Missing assembler as. Please install the developer tools.',error);
+        infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download binutils.',info);
+        OperationSucceeded := DownloadBinUtils;
+      end;
+    end;
+    {$ENDIF MSWINDOWS}
+    {$IFDEF LINUX}
+    if OperationSucceeded then
+    begin
+      // Check for proper assembler
+      try
+        if ExecuteCommand('as --version', Output, FVerbose) <> 0 then
+        begin
+          infoln('Missing assembler as. Please install the developer tools.',error);
+          OperationSucceeded := false;
+        end;
+      except
         OperationSucceeded := false;
+        // ignore errors, this is only an extra check
       end;
-    except
-      OperationSucceeded := false;
-      // ignore errors, this is only an extra check
     end;
-  end;
-  {$ENDIF LINUX}
+    {$ENDIF LINUX}
 
 
-  if OperationSucceeded then
-  begin
-    // Check for proper make executable
-    try
-      ExecuteCommand(Make + ' -v', Output, FVerbose);
-      if Ansipos('GNU Make', Output) = 0 then
+    if OperationSucceeded then
+    begin
+      // Check for proper make executable
+      try
+        ExecuteCommand(Make + ' -v', Output, FVerbose);
+        if Ansipos('GNU Make', Output) = 0 then
+        begin
+          infoln('Found make executable but it is not GNU Make.',warning);
+          OperationSucceeded := false;
+        end;
+      except
+        // ignore errors, this is only an extra check
+      end;
+    end;
+
+    if OperationSucceeded then
+    begin
+      // Look for SVN executable and set it if found:
+      if FSVNClient.FindSVNExecutable = '' then
       begin
-        infoln('Found make executable but it is not GNU Make.',warning);
-        OperationSucceeded := false;
-      end;
-    except
-      // ignore errors, this is only an extra check
-    end;
-  end;
+        {$IFDEF MSWINDOWS}
+        // Make sure we have a sensible default.
+        // Set it here so multiple calls will not redownload SVN all the time
+        if FSVNDirectory = '' then
+          FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + 'svn' + DirectorySeparator;
+        {$ENDIF MSWINDOWS}
+        // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
+        FindSVNSubDirs;
+        {$IFDEF MSWINDOWS}
+        // If it still can't be found, download it
+        if FSVNClient.SVNExecutable = '' then
+        begin
+          infoln('Going to download SVN',info);
+          // Download will look in and below FSVNDirectory
+          // and set FSVNClient.SVNExecutable if succesful
+          OperationSucceeded := DownloadSVN;
+        end;
+        {$ENDIF}
 
-  if OperationSucceeded then
-  begin
-    // Look for SVN executable and set it if found:
-    if FSVNClient.FindSVNExecutable = '' then
+        // Regardless of platform, SVN should now be either set up correctly or we should give up.
+        if FSVNClient.SVNExecutable = '' then
+        begin
+          infoln('Could not find SVN executable. Please make sure it is installed.',error);
+          OperationSucceeded := false;
+        end;
+      end;
+    end;
+
+    if OperationSucceeded then
     begin
-      {$IFDEF MSWINDOWS}
-      // Make sure we have a sensible default.
-      // Set it here so multiple calls will not redownload SVN all the time
-      if FSVNDirectory = '' then
-        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + 'svn' + DirectorySeparator;
-      {$ENDIF MSWINDOWS}
-      // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
-      FindSVNSubDirs;
-      {$IFDEF MSWINDOWS}
-      // If it still can't be found, download it
-      if FSVNClient.SVNExecutable = '' then
+      // Check for valid unzip executable, if it is needed
+      if FUnzip <> EmptyStr then
       begin
-        infoln('Going to download SVN',info);
-        // Download will look in and below FSVNDirectory
-        // and set FSVNClient.SVNExecutable if succesful
-        OperationSucceeded := DownloadSVN;
+        OperationSucceeded := CheckExecutable(FUnzip, '-v', '');
       end;
-      {$ENDIF}
+    end;
 
-      // Regardless of platform, SVN should now be either set up correctly or we should give up.
-      if FSVNClient.SVNExecutable = '' then
+    if OperationSucceeded then
+    begin
+      // Check for valid bunzip2 executable, if it is needed
+      if FBunzip2 <> EmptyStr then
       begin
-        infoln('Could not find SVN executable. Please make sure it is installed.',error);
-        OperationSucceeded := false;
+        { Used to use bunzip2 --version, but on e.g. Fedora Core
+        that returns an error message e.g. can't read from cp
+        }
+        OperationSucceeded := CheckExecutable(FBunzip2, '--help', '');
       end;
     end;
-  end;
 
-  if OperationSucceeded then
-  begin
-    // Check for valid unzip executable, if it is needed
-    if FUnzip <> EmptyStr then
+    if OperationSucceeded then
     begin
-      OperationSucceeded := CheckExecutable(FUnzip, '-v', '');
+      // Check for valid tar executable, if it is needed
+      if FTar <> EmptyStr then
+      begin
+        OperationSucceeded := CheckExecutable(FTar, '--version', '');
+      end;
     end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Check for valid bunzip2 executable, if it is needed
-    if FBunzip2 <> EmptyStr then
-    begin
-      { Used to use bunzip2 --version, but on e.g. Fedora Core
-      that returns an error message e.g. can't read from cp
-      }
-      OperationSucceeded := CheckExecutable(FBunzip2, '--help', '');
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Check for valid tar executable, if it is needed
-    if FTar <> EmptyStr then
-    begin
-      OperationSucceeded := CheckExecutable(FTar, '--version', '');
-    end;
+    FNeededExecutablesChecked:=OperationSucceeded;
   end;
   Result := OperationSucceeded;
 end;
@@ -789,6 +794,7 @@ begin
   FSVNClient := TSVNClient.Create;
   // List of binutils that can be downloaded:
   CreateBinutilsList;
+  FNeededExecutablesChecked:=false;
 end;
 
 destructor TInstaller.Destroy;
