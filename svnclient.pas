@@ -204,20 +204,39 @@ const
   MaxRetries = 3;
 var
   Command: string;
+  Output: string;
   RetryAttempt: integer;
 begin
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := ' checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
   else
     Command := ' checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(SVNExecutable+Command,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+Command,Output,Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
-  while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+  if (ReturnCode<>0) then
   begin
-    Sleep(500); //Give everybody a chance to relax ;)
-    FReturnCode:=ExecuteCommand(SVNExecutable+Command,Verbose); //attempt again
-    RetryAttempt := RetryAttempt + 1;
+    if Pos('E155004',Output)>0 then
+    {
+    E155004: Working copy '<directory>' locked.
+    run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+    }
+    begin
+      // Let's try one time to fix it.
+      FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+      // We probably ended up with a local repository where not all files were checked out.
+      // Let's call update to do so.
+      Update;
+    end
+    else
+    begin
+      while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+      begin
+        Sleep(500); //Give everybody a chance to relax ;)
+        FReturnCode:=ExecuteCommand(SVNExecutable+Command,Verbose); //attempt again
+        RetryAttempt := RetryAttempt + 1;
+      end;
+    end;
   end;
 end;
 
@@ -282,18 +301,28 @@ const
   MaxRetries = 3;
 var
   Command: string;
+  Output: string;
   RetryAttempt: integer;
 begin
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := ' update --non-interactive ' + LocalRepository
   else
     Command := ' update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose);
+  FReturnCode:=ExecuteCommand(SVNExecutable+command,Output,Verbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
   begin
+    if Pos('E155004',Output)>0 then
+    {
+    E155004: Working copy '<directory>' locked.
+    run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+    }
+    begin
+      // Let's try to release locks.
+      FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+    end;
     Sleep(500); //Give everybody a chance to relax ;)
     FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
     RetryAttempt := RetryAttempt + 1;
