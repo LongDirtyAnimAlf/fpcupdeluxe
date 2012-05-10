@@ -769,7 +769,14 @@ begin
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
     end;
   ProcessEx.Parameters.Add('distclean');
-  infoln('FPC: running make distclean before checkout/update:',info);
+  if (FCrossOS_Target='') and (FCrossCPU_Target='') then
+    begin
+    infoln('FPC: running make distclean:',info);
+    end
+  else
+    begin
+    infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',info);
+    end;
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
 
