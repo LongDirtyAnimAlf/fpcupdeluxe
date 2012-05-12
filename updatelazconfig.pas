@@ -44,12 +44,18 @@ interface
 uses
   Classes, SysUtils, Laz_DOM, Laz_XMLRead, Laz_XMLWrite;
 const
+  // Some fixed configuration files.
+  // General options:
   EnvironmentConfig='environmentoptions.xml';
+  // Help optons:
   HelpConfig='helpoptions.xml';
+  // Packages:
   PackageConfig='packagefiles.xml';
-  VersionNewEnvironmentConfig='106'; //We can assume Lazarus SVN can parse this version
-  VersionNewHelpConfig='1'; //Use this version in new help config file
-  VersionNewPackageConfig='2'; //Use this version in new package config file
+  // Versions used when new config files are generated.
+  // We can assume Lazarus SVN can parse this version:
+  VersionNewEnvironmentConfig='106';
+  VersionNewHelpConfig='1';
+  VersionNewPackageConfig='2';
 
 type
 

@@ -32,7 +32,7 @@ Const
 //standard bigide build
     'Declare BIGIDE;'+
     //This requires Lazarus sources, but we're not
-    //going to Require lazarus as that will run make etc.
+    //going to Require lazarus as that will run make etc. to compile the regular IDE+LCL
     //Instead, just get lazarus sources
     //'Cleanmodule lazarus;'+
     'Getmodule lazarus;'+

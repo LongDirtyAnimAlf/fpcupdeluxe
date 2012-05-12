@@ -219,7 +219,7 @@ begin
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     // More detailed logging only if verbose:
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' using InstallExecute '+sl.text,true);
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' using InstallExecute with these commands: '+sl.text,true);
     result:=RunCommands('InstallExecute',sl);
     end
   else
@@ -310,9 +310,6 @@ begin
 // counter: the attribute key for the counter used to keep track of lists. Used to insert a new value in a list. Read and incremented by 1;
 //          When using a counter, <key> can use a the '#' character as a placeholder for the new count written to <counter>
 // value:  the string value to store in <key>.
-// Example adding the synapse package:
-// AddToPackageFiles1=CONFIG/UserPkgLinks/Item#/Name:synapse
-// AddToPackageFiles2=CONFIG/UserPkgLinks/Item#/Filename:$(Installdir)/laz_synapse.lpk
   result:=InitModule;
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
@@ -321,17 +318,19 @@ begin
       LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
       try
         try
-          // The files below are the only files we allow adding to/modifying:
           sl:=TStringList(UniModuleList.Objects[idx]);
+
+          // For security reasons, the files below are the only files we allow adding to/modifying:
           AddToLazXML('environmentoptions'); //general options
           AddToLazXML('helpoptions');
           AddToLazXML('miscellaneousoptions'); //e.g. list of packages to be installed on recompile
           AddToLazXML('packagefiles'); //e.g. list of available packages
+
           // Process specials
           Directive:=GetValue('RegisterExternalTool',sl);
           if Directive<>'' then
             begin
-            xmlfile:='environmentoptions.xml';
+            xmlfile:=EnvironmentConfig;
             key:='EnvironmentOptions/ExternalTools/Count';
             cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
             // check if tool is already registered
@@ -377,11 +376,14 @@ begin
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
             end;
 
+          // Compile a package and add it to the list of user-installed packages.
+          // Usage:
+          // AddPackage=<path to package>\<package.lpk>
           Directive:=GetValue('AddPackage',sl);
           if Directive<>'' then
             begin
             PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(Directive));
-            xmlfile:='packagefiles.xml';
+            xmlfile:=PackageConfig;
             key:='UserPkgLinks/Count';
             cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
             // check if package is already registered
@@ -426,7 +428,7 @@ begin
           Directive:=GetValue('RegisterHelpViewer',sl);
           if Directive<>'' then
             begin
-            xmlfile:='helpoptions.xml';
+            xmlfile:=HelpConfig;
             key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
             LazarusConfig.SetVariable(xmlfile,key,Directive+GetExeExt);
             end;
@@ -434,7 +436,7 @@ begin
           Directive:=GetValue('RegisterLazDocPath',sl);
           if Directive<>'' then
             begin
-            xmlfile:='environmentoptions.xml';
+            xmlfile:=EnvironmentConfig;
             key:='EnvironmentOptions/LazDoc/Paths';
             // In future we could replace possible bla/../ entries in the directive with the direct path
             LazDocPath:=ExcludeLeadingPathDelimiter(LazarusConfig.GetVariable(xmlfile,key));
@@ -456,7 +458,10 @@ begin
         except
           on E: Exception do
           begin
-            writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName, true);
+            if Directive='' then
+              writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName, true)
+            else
+              writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName+' (parsing directive:'+Directive+')', true);
           end;
         end;
       finally
@@ -537,7 +542,7 @@ begin
     Directive:=GetValue('RegisterExternalTool',sl);
     if Directive<>'' then
       begin
-      xmlfile:='environmentoptions.xml';
+      xmlfile:=EnvironmentConfig;
       key:='EnvironmentOptions/ExternalTools/Count';
       cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
       // check if tool is registered
@@ -567,7 +572,7 @@ begin
     if Directive<>'' then
       begin
       PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(Directive));
-      xmlfile:='packagefiles.xml';
+      xmlfile:=PackageConfig;
       key:='UserPkgLinks/Count';
       cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
       // check if package is already registered
@@ -620,7 +625,7 @@ begin
     Directive:=GetValue('RegisterHelpViewer',sl);
     if Directive<>'' then
       begin
-      xmlfile:='helpoptions.xml';
+      xmlfile:=HelpConfig;
       key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
       // Setting the variable to empty should be enough to disable the help viewer.
       LazarusConfig.SetVariable(xmlfile,key,'');
