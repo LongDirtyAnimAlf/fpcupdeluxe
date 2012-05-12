@@ -37,6 +37,30 @@ Note: if you pass a variable such as Help#, this will cause an exception in the 
 I'm not adding error protection here, as we should not write those kinds of variables; if we do, I'd like to see the error in the calling module.
 }
 
+{ Changes in v1.0 Lazarus config versus earlier config:
+Ran fpcup without settings, then ran Lazarus 1.1 (trunk) and converted to new format.
+After conversion, probably quite a lot of default settings were filled in by the IDE when saving for the first time.
+Therefore the difference listed below may be exaggerated.
+1. Environmentoptions.xml
+- Version 106=>107, add Lazarus="1.1" (or 1.0 or whatever) attribute to version
+- adds history count... list to LazarusDirectory, CompilerFilename, MakeFilename
+- adds a lot of new elements with children: Desktop, PseudoTerminal, Watches, BreakPoints, Locals, CallStack...
+- adds ObjectInspectorOptions section after EnvironmentOptions
+2. FPCDefines.xml
+- for some strange reason, in this line
+3. Newly created files - probably default settings:
+- editoroptions.xml
+- includelinks.xml
+- inputhistory.xml
+- laz_indentation.xml
+- lazarus.dci
+- projectsessions directory
+4. Deleted file: compilertest.pas does not exist in the new verison.
+RealCompiler File="C:\development\fpc\bin\i386-win32\ppc386.exe"
+I now get InPath="C:\development\fpcbootstrap\ppc386.exe" instead of the fpc\bin path
+
+}
+
 {$mode objfpc}{$H+}
 
 interface

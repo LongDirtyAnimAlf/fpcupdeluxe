@@ -33,6 +33,10 @@ type
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
+    // Processes all directives that have <Directive>x where x is a number
+    // This allows running e.g.
+    // InstallExecute1=bla
+    // InstallExecute2=blabla
     function RunCommands(Directive:string;sl:TStringList):boolean;
   public
     // FPC base directory
@@ -85,10 +89,9 @@ var
 { TUniversalInstaller }
 
 
+// Look for entries with Key and process macros etc in value
 function TUniversalInstaller.GetValue(Key: string; sl: TStringList;
   recursion: integer): string;
-
-
 var
   i,len:integer;
   s,macro:string;
@@ -205,6 +208,7 @@ begin
     end;
 end;
 
+// Runs all InstallExecut<n> commands inside a specified module
 function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
 var
   idx:integer;
@@ -233,6 +237,7 @@ begin
   result:=true;
 end;
 
+// Processes a single module (i.e. section in fpcup.ini)
 function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
 var
   idx,cnt,i:integer;
