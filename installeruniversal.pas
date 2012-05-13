@@ -517,11 +517,17 @@ begin
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
+      sl:=TStringList(UniModuleList.Objects[idx]);
+      // Process AddPackage
+      // Compile a package and add it to the list of user-installed packages.
+      // Usage:
+      // AddPackage<n>=<path to package>\<package.lpk>
+      // As this will modify config values, we keep it out the section below.
+      AddPackages(sl);
+
       LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
       try
         try
-          sl:=TStringList(UniModuleList.Objects[idx]);
-
           // For security reasons, the files below are the only files we allow adding to/modifying:
           AddToLazXML('environmentoptions'); //general options
           AddToLazXML('helpoptions');
@@ -529,11 +535,6 @@ begin
           AddToLazXML('packagefiles'); //e.g. list of available packages
 
           // Process specials
-          // Compile a package and add it to the list of user-installed packages.
-          // Usage:
-          // AddPackage=<path to package>\<package.lpk>
-          AddPackages(sl);
-
           Directive:=GetValue('RegisterExternalTool',sl);
           if Directive<>'' then
             begin
@@ -695,8 +696,15 @@ begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     WritelnLog('UnInstalling module '+ModuleName);
     result:=RunCommands('UnInstallExecute',sl);
+
+    // Process all AddPackage<n> directives.
+    // As this changes config files, we keep it outside
+    // the section where LazarusConfig is modified
+    RemovePackages(sl);
+
     LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
     try
+
     // Process specials
     Directive:=GetValue('RegisterExternalTool',sl);
     if Directive<>'' then
@@ -726,9 +734,6 @@ begin
         LazarusConfig.DeletePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/');
         end;
       end;
-
-    // Process all AddPackage<n> directives:
-    RemovePackages(sl);
 
     Directive:=GetValue('RegisterHelpViewer',sl);
     if Directive<>'' then

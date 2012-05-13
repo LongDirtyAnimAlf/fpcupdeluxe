@@ -333,7 +333,7 @@ begin
       begin
         ProcessEx.Parameters.Add('--help'); // this should render make harmless
         WritelnLog('BuildModule: Invalid module name '+ModuleName+' specified! Please fix the code.', true);
-        FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
+        FInstalledLazarus:= '//*\\error/ / \ \';
         result:=false;
         exit;
       end;
@@ -352,7 +352,7 @@ begin
     begin
       writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.',true);
       result:=false;
-      FInstalledLazarus:= '//*\\error//\\ no valid lazbuild found'; //todo: check if this really is an invalid filename. it should be.
+      FInstalledLazarus:= '//*\\error/ / \ \ no valid lazbuild found';
       exit;
     end
     else
@@ -372,7 +372,7 @@ begin
   if ProcessEx.ExitStatus <> 0 then
   begin
     result := False;
-    FInstalledLazarus:= '//*\\error//\\'; //todo: check if this really is an invalid filename. it should be.
+    FInstalledLazarus:= '//*\\error/ / \ \';
   end
   else
   begin
