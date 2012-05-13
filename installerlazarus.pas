@@ -429,6 +429,8 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
   try
     try
+      // Force English language
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Language/ID', 'en');
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FBaseDirectory);
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
