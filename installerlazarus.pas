@@ -447,6 +447,8 @@ begin
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/FPCSourceDirectory/Value',FFPCDir);
+      // Debugger type needs to be specified at least since Lazarus 1.1
+      LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
     except
       on E: Exception do
       begin

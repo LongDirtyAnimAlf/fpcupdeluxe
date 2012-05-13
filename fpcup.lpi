@@ -56,6 +56,7 @@
             <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item2>
       <Item3 Name="64bit">
@@ -98,6 +99,7 @@ end;"/>
             </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item3>
     </BuildModes>
@@ -232,6 +234,7 @@ end;"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
+    <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">
