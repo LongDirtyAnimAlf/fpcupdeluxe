@@ -200,9 +200,10 @@ begin
     i:=cnt;
     while i>0 do
       begin
-      if LazarusConfig.GetVariable(PackageConfig, 'UserPkgLinks/Item'+IntToStr(i)+'/'
-        +'Name/Value')
-        =PackageName then
+      // Ignore package name casing
+      if UpperCase(LazarusConfig.GetVariable(PackageConfig, 'UserPkgLinks/Item'+IntToStr(i)+'/'
+        +'Name/Value'))
+        =UpperCase(PackageName) then
           break;
       i:=i-1;
       end;
@@ -345,9 +346,10 @@ begin
     i:=cnt;
     while i>0 do
       begin
-      if LazarusConfig.GetVariable(xmlfile, 'UserPkgLinks/Item'+IntToStr(i)+'/'
-        +'Name/Value')
-        =PackageName then
+      // Ignore package name casing
+      if UpperCase(LazarusConfig.GetVariable(xmlfile, 'UserPkgLinks/Item'+IntToStr(i)+'/'
+        +'Name/Value'))
+        =UpperCase(PackageName) then
           break;
       i:=i-1;
       end;
@@ -371,10 +373,11 @@ begin
     i:=cnt;
     while i>0 do
       begin
-      if LazarusConfig.GetVariable(xmlfile, 'MiscellaneousOptions/'
-        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i)+'/Val'
-          +'ue')
-        =PackageName then
+      // Ignore package name casing
+      if UpperCase(LazarusConfig.GetVariable(xmlfile, 'MiscellaneousOptions/'
+        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+
+        IntToStr(i)+'/Value'))
+        =UpperCase(PackageName) then
           break;
       i:=i-1;
       end;
