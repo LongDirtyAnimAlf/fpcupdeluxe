@@ -348,7 +348,7 @@ begin
     // Note: we don't check if we have a valid primary config path, but that will come out
     // in the next steps.
     LazBuildApp:=IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
-    if CheckExecutable(LazBuildApp, '--help', 'build_lcl_docs')=false then
+    if CheckExecutable(LazBuildApp, '--help', 'lazbuild')=false then
     begin
       writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.',true);
       result:=false;
