@@ -81,8 +81,8 @@ implementation
 uses inifiles,updatelazconfig,fileutil,fpcuputil;
 
 Const
-  STARTUSERMODULES=1000;
-  MAXUSERMODULES=100;
+  MAXSYSMODULES=100;
+  MAXUSERMODULES=20;
   // Allow enough instructions per module:
   MAXINSTRUCTIONS=200;
   MAXRECURSIONS=10;
@@ -785,7 +785,7 @@ end;
 function GetModuleList(ConfigFile: string): string;
 var
   ini:TMemIniFile;
-  i,j:integer;
+  i,j,maxmodules:integer;
   val,name,req:string;
 
   function LoadModule(ModuleName:string):boolean;
@@ -847,15 +847,15 @@ begin
   ini.CaseSensitive:=false;
   // parse inifile
   try
+    maxmodules:=ini.ReadInteger('General','MaxSysModules',MAXSYSMODULES);
     ini.ReadSectionRaw('General',IniGeneralSection);
-    for i:=1 to STARTUSERMODULES do
-      if not LoadModule('Module'+IntToStr(i)) then
-        break //require contiguous numbering
-      else
-        result:=result+CreateModuleSequence('Module'+IntToStr(i));
-    for i:=STARTUSERMODULES to STARTUSERMODULES+MAXUSERMODULES do
-      if LoadModule('Module'+IntToStr(i))then   // don't require contiguous
-        result:=result+CreateModuleSequence('Module'+IntToStr(i));
+    for i:=1 to maxmodules do
+      if LoadModule('FPCUPModule'+IntToStr(i)) then
+        result:=result+CreateModuleSequence('FPCUPModule'+IntToStr(i));
+    maxmodules:=ini.ReadInteger('General','MaxUserModules',MAXUSERMODULES);
+    for i:=1 to maxmodules do
+      if LoadModule('UserModule'+IntToStr(i))then
+        result:=result+CreateModuleSequence('UserModule'+IntToStr(i));
     // the overrides
     for i:=0 to UniModuleList.Count-1 do
       begin
