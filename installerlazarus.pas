@@ -54,8 +54,9 @@ Const
 
 //standard IDE build with user-selected packages
     'Declare USERIDE;'+
-    //Run lazbuild first for building
-    'Requires lazbuild;'+
+    //We need lazbuild, but we can check for it in our USERIDE code.
+    //If we Require it here, it will kick off a lazbuild build cycle that
+    //may already have been done.
     'Buildmodule USERIDE;'+
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;'+
@@ -282,6 +283,8 @@ end;
 { TLazarusNativeInstaller }
 
 function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
+var
+  LazBuildApp: string;
 begin
   result:=true;
   infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',info);
@@ -340,17 +343,30 @@ begin
   else
   begin
     // useride; using lazbuild. Note: in recent Lazarus we could also run make lazbuild useride
-    // todo: look at implementing this; it will simplify program structure and get rid of some dependencies
-    // in sequences
-    ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
-    ProcessEx.Parameters.Add('--build-ide=');
-    if FCrossLCL_Platform <>'' then
-      ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
-    infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',info);
-    ProcessEx.Execute;
+
+    // Check for valid lazbuild.
+    // Note: we don't check if we have a valid primary config path, but that will come out
+    // in the next steps.
+    LazBuildApp:=IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt;
+    if CheckExecutable(LazBuildApp, '--help', 'build_lcl_docs')=false then
+    begin
+      writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.',true);
+      result:=false;
+      FInstalledLazarus:= '//*\\error//\\ no valid lazbuild found'; //todo: check if this really is an invalid filename. it should be.
+      exit;
+    end
+    else
+    begin
+      ProcessEx.Executable := LazBuildApp;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
+      ProcessEx.Parameters.Add('--build-ide=');
+      if FCrossLCL_Platform <>'' then
+        ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
+      infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',info);
+      ProcessEx.Execute;
+    end;
   end;
 
   if ProcessEx.ExitStatus <> 0 then
