@@ -191,6 +191,7 @@ var
   PackageName: string;
   xmlfile: string;
 begin
+  result:=false;
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
     PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
@@ -226,10 +227,11 @@ begin
     i:=cnt;
     while i>0 do
       begin
-      if LazarusConfig.GetVariable(xmlfile, 'MiscellaneousOptions/'
-        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i)+'/Val'
-          +'ue')
-        =PackageName then
+      // Do a case-insensitive comparison on package names
+      if UpperCase(LazarusConfig.GetVariable(xmlfile, 'MiscellaneousOptions/'
+        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'
+        +IntToStr(i)+'/Value'))
+        =UpperCase(PackageName) then
           break;
       i:=i-1;
       end;
@@ -244,6 +246,7 @@ begin
   finally
     LazarusConfig.Free;
   end;
+  result:=true;
 end;
 
 function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;
@@ -402,6 +405,7 @@ begin
   finally
     LazarusConfig.Free;
   end;
+  result:=true;
 end;
 
 // Runs all InstallExecut<n> commands inside a specified module
