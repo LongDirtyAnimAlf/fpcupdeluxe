@@ -13,6 +13,9 @@ Const
 //standard fpc build
     'Declare FPC;'+
     'Cleanmodule FPC;'+
+    // Create the link early so invalid previous
+    // versions are overwritten:
+    'Exec CreateFpcupScript;'+
     'Getmodule FPC;'+
     'Buildmodule FPC;'+
     'End;'+

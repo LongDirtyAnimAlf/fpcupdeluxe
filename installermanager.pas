@@ -18,7 +18,6 @@ Const
     {$ifdef linux}
     'Exec CheckDevLibs;'+
     {$endif linux}
-    'Exec CreateFpcupScript;'+
     'Do fpc;'+
     //Get bigide so we at least have a compiler:
     'Do BIGIDE;'+
@@ -33,7 +32,6 @@ Const
     'End;'+
 //default sequence for win32
     'Declare defaultwin32;'+
-    'Exec CreateFpcupScript;'+
     'Do fpc;'+
     //Get bigide so we at least have a compiler:
     'Do BIGIDE;'+
