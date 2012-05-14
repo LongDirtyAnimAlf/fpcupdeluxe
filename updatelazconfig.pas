@@ -77,7 +77,8 @@ const
   PackageConfig='packagefiles.xml';
   // Versions used when new config files are generated.
   // We can assume Lazarus SVN can parse this version:
-  VersionNewEnvironmentConfig='106';
+  // Lazarus pre 1.0: 106
+  VersionNewEnvironmentConfig='107';
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='2';
 
@@ -381,7 +382,13 @@ begin
     begin
       // Set up default config, including version number
       case (ExtractFileName(ConfigFile)) of
-        EnvironmentConfig: NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
+        EnvironmentConfig:
+          begin
+          NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
+          // If we don't add this, we trigger an upgrade process on first start on Lazarus 1.1+.
+          // We don't know what version we're downloading so just use 1.1
+          NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.1');
+          end;
         HelpConfig: NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
         PackageConfig:
           begin

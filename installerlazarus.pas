@@ -37,8 +37,8 @@ Const
     //'Cleanmodule lazarus;'+
     'Getmodule lazarus;'+
     'Buildmodule BIGIDE;'+
-    //config lazarus, in case we only run BIGIDE (without lazarus):
-    'ConfigModule lazarus;'+
+    // bigide config includes Lazarus config:
+    'ConfigModule BIGIDE;'+
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;'+
     'End;'+
@@ -343,6 +343,7 @@ begin
   else
   begin
     // useride; using lazbuild. Note: in recent Lazarus we could also run make lazbuild useride
+    // ... but that apparently calls lazbuild internally anyway.
 
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out
@@ -362,6 +363,10 @@ begin
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
       ProcessEx.Parameters.Add('--build-ide=');
+      // We can specify a build mode; otherwise probably the latest build mode will be used
+      // which could well be a stripped IDE
+      // todo: check if we respect user compiler settings. Perhaps create an FPCUP profile that is changed every time this is run?
+      ProcessEx.Parameters.Add('--build-mode=Normal IDE');
       if FCrossLCL_Platform <>'' then
         ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
       infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',info);
@@ -433,8 +438,11 @@ begin
 end;
 
 function TLazarusInstaller.ConfigModule(ModuleName:string): boolean;
+const
+  StaticPackagesFile='staticpackages.inc';
 var
   LazarusConfig: TUpdateLazConfig;
+  StaticPackages: TStringList;
 begin
   if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
   begin
@@ -476,6 +484,39 @@ begin
     end;
   finally
     LazarusConfig.Free;
+  end;
+  if UpperCase(ModuleName)='BIGIDE' then
+  begin
+    // We might need to add a default staticpackages if it doesn't exist yet.
+    // Otherwise adding our own packages could be a mess.
+    //todo: note: experimental; don't know if this actually is needed.
+    if FileExistsUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile)=false then
+    begin
+      StaticPackages:=TStringList.Create;
+      try
+        // Based on list when adding a new package to a Lazarus SVN (1.1) BIGIDE (April 2012)
+        StaticPackages.Add('sqldblaz,');
+        StaticPackages.Add('runtimetypeinfocontrols,');
+        StaticPackages.Add('printers4lazide,');
+        StaticPackages.Add('leakview,');
+        StaticPackages.Add('memdslaz,');
+        StaticPackages.Add('instantfpclaz,');
+        StaticPackages.Add('externhelp,');
+        StaticPackages.Add('turbopoweripro,');
+        StaticPackages.Add('jcfidelazarus,');
+        StaticPackages.Add('chmhelppkg,');
+        StaticPackages.Add('fpcunitide,');
+        StaticPackages.Add('projtemplates,');
+        StaticPackages.Add('tachartlazaruspkg,');
+        StaticPackages.Add('todolistlaz,');
+        StaticPackages.Add('dbflaz,');
+        StaticPackages.Add('printer4lazarus,');
+        StaticPackages.Add('sdflaz,');
+        StaticPackages.SaveToFile(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile);
+      finally
+        StaticPackages.Free;
+      end;
+    end;
   end;
 end;
 

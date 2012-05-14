@@ -195,6 +195,7 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
     PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+    if FVerbose then WritelnLog('TUniversalInstaller: going to install package '+PackageName,true);
     key:='UserPkgLinks/Count';
     cnt:=LazarusConfig.GetVariable(xmlfile, key, 0);
     // check if package is already registered
@@ -254,21 +255,23 @@ const
   // The command that will be processed:
   Directive='AddPackage';
 var
+  Failure: boolean;
   i:integer;
   PackagePath:string;
   Workingdir:string;
 begin
+  Failure:=false;
   Workingdir:=GetValue('Workingdir',sl);
-  // Go backward; reverse order to deal with dependencies
+  // Go backward; reverse order to deal with any dependencies
   for i:=MAXINSTRUCTIONS downto 1 do
     begin
     PackagePath:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if PackagePath='' then continue;
-    result:=UnInstallPackage(PackagePath,WorkingDir);
-    if not result then
-      break;
+    // Try to uninstall everything, even if some of these fail.
+    if UnInstallPackage(PackagePath,WorkingDir)=false then Failure:=true;
     end;
+  result:=Failure;
 end;
 
 function TUniversalInstaller.FirstSpaceAfterCommand(CommandLine: string): integer;
@@ -306,7 +309,10 @@ begin
     if PackagePath='' then continue;
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
+      begin
+      if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',true);
       break;
+      end;
     end;
 end;
 
@@ -322,6 +328,7 @@ begin
     exec:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
+    if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
     result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
     if not result then
       break;
@@ -340,6 +347,7 @@ begin
   result:=false;
 
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+  if FVerbose then WritelnLog('TUniversalInstaller: going to uninstall package '+PackageName,true);
   xmlfile:=PackageConfig;
   key:='UserPkgLinks/Count';
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
@@ -423,7 +431,7 @@ begin
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     // More detailed logging only if verbose:
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' using InstallExecute with these commands: '+sl.text,true);
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' with these commands: '+sl.text,true);
     result:=RunCommands('InstallExecute',sl);
     end
   else
