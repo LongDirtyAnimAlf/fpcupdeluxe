@@ -52,6 +52,8 @@ procedure DeleteDesktopShortcut(ShortcutName: string);
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
+// File size; returns 0 if empty, non-existent or error.
+function FileSizeUTF8(FileName: string): int64;
 //check if there is at least one directory between Dir and root
 function ParentDirectoryIsNotRoot(Dir:string):boolean;
 {$IFDEF MSWINDOWS}
@@ -483,6 +485,18 @@ begin
     //Not writing message here; to be handled by calling code with more context.
     //if result:=false then infoln('Download: download of '+TargetFile+' from URL: '+URL+' failed.');
   end;
+end;
+
+// returns file size in bytes or 0 if not found.
+function FileSizeUTF8(FileName: string) : Int64;
+var
+  sr : TSearchRec;
+begin
+  if FindFirstUTF8(FileName, faAnyFile, sr ) = 0 then
+     result := Int64(sr.FindData.nFileSizeHigh) shl Int64(32) + Int64(sr.FindData.nFileSizeLow)
+  else
+     result := 0;
+  FindCloseUTF8(sr);
 end;
 
 function ParentDirectoryIsNotRoot(Dir: string): boolean;

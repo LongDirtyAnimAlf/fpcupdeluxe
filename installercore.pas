@@ -766,6 +766,7 @@ end;
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
   //Infoln already adds a lf, so we need to handle it here:
+  //todo: possibly replace with TEventLog (to file?) as log output from writelog is sometimes truncate
   WriteLog(msg + LineEnding, false);
   if ToConsole then
     InfoLn(msg,info);

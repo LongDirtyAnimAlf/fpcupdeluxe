@@ -56,6 +56,7 @@
             <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item2>
       <Item3 Name="64bit">
@@ -98,6 +99,7 @@ end;"/>
             </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item3>
     </BuildModes>
@@ -109,7 +111,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--only=suggestedpackages --noconfirm"/>
+        <CommandLineParams Value="--only=fpspreadsheet --noconfirm"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
@@ -121,81 +123,76 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="14">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcup"/>
       </Unit0>
       <Unit1>
-        <Filename Value="installer.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="installer"/>
-      </Unit1>
-      <Unit2>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="svnclient"/>
-      </Unit2>
-      <Unit3>
+      </Unit1>
+      <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="updatelazconfig"/>
-      </Unit3>
-      <Unit4>
+      </Unit2>
+      <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="processutils"/>
-      </Unit4>
-      <Unit5>
+      </Unit3>
+      <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
-      </Unit5>
-      <Unit6>
+      </Unit4>
+      <Unit5>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
-      </Unit6>
-      <Unit7>
+      </Unit5>
+      <Unit6>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-      </Unit7>
-      <Unit8>
+      </Unit6>
+      <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
-      </Unit8>
-      <Unit9>
+      </Unit7>
+      <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-      </Unit9>
-      <Unit10>
+      </Unit8>
+      <Unit9>
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-      </Unit10>
-      <Unit11>
+      </Unit9>
+      <Unit10>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-      </Unit11>
-      <Unit12>
+      </Unit10>
+      <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
-      </Unit12>
-      <Unit13>
+      </Unit11>
+      <Unit12>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_crosswin64"/>
-      </Unit13>
-      <Unit14>
+      </Unit12>
+      <Unit13>
         <Filename Value="m_crosswin32.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_crosswin32"/>
-      </Unit14>
+      </Unit13>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -232,6 +229,7 @@ end;"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
     </Other>
+    <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="3">

@@ -490,8 +490,11 @@ begin
     // We might need to add a default staticpackages if it doesn't exist yet.
     // Otherwise adding our own packages could be a mess.
     //todo: note: experimental; don't know if this actually is needed.
-    if FileExistsUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile)=false then
+    // todo: if possible, let Lazarus generate this somehow? Could be by registering a package, but that is not part of the Lazarus install
+    if FileSizeUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile)<=0 then
     begin
+      // Alternative? Try to generate staticpackages list as a byproduct of registering a package that is in bigide anyway:: chmhelpkg
+      //infoln('TESTING: not writing static package list. please fix this before release.',error);
       StaticPackages:=TStringList.Create;
       try
         // Based on list when adding a new package to a Lazarus SVN (1.1) BIGIDE (April 2012)

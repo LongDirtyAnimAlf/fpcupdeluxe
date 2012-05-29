@@ -5,7 +5,7 @@ unit installerUniversal;
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,processutils,process;
+  Classes, SysUtils, installerCore, m_crossinstaller,processutils;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -180,74 +180,26 @@ begin
 end;
 
 function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string): boolean;
-// Todo: add support for workingdir - i.e. relative paths
-
 var
-  key: string;
-  LazarusConfig: TUpdateLazConfig;
-  sl: TStringList;
-  i: integer;
-  cnt: integer;
-  PackageName: string;
-  xmlfile: string;
+  PackageAbsolutePath: string;
 begin
   result:=false;
-  LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
-  try
-    PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
-    if FVerbose then WritelnLog('TUniversalInstaller: going to install package '+PackageName,true);
-    key:='UserPkgLinks/Count';
-    cnt:=LazarusConfig.GetVariable(xmlfile, key, 0);
-    // check if package is already registered
-    i:=cnt;
-    while i>0 do
-      begin
-      // Ignore package name casing
-      if UpperCase(LazarusConfig.GetVariable(PackageConfig, 'UserPkgLinks/Item'+IntToStr(i)+'/'
-        +'Name/Value'))
-        =UpperCase(PackageName) then
-          break;
-      i:=i-1;
-      end;
-    if i<1 then //not found
-      begin
-      cnt:=cnt+1;
-      LazarusConfig.SetVariable(PackageConfig, key, cnt);
-      end
-    else
-      cnt:=i;
-    key:='UserPkgLinks/Item'+IntToStr(cnt)+'/';
-    LazarusConfig.SetVariable(PackageConfig, key+'Filename/Value', PackagePath);
-    LazarusConfig.SetVariable(PackageConfig, key+'Name/Value', PackageName);
-
-    xmlfile:='miscellaneousoptions.xml';
-    key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/'
-      +'Count';
-    cnt:=LazarusConfig.GetVariable(xmlfile, key, 0);
-    // check if package is already registered
-    i:=cnt;
-    while i>0 do
-      begin
-      // Do a case-insensitive comparison on package names
-      if UpperCase(LazarusConfig.GetVariable(xmlfile, 'MiscellaneousOptions/'
-        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'
-        +IntToStr(i)+'/Value'))
-        =UpperCase(PackageName) then
-          break;
-      i:=i-1;
-      end;
-    if i<1 then //not found
-      begin
-      cnt:=cnt+1;
-      LazarusConfig.SetVariable(xmlfile, key, cnt);
-      LazarusConfig.SetVariable(xmlfile, 'MiscellaneousOptions/'
-        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/'
-          +'Value', PackageName);
-      end
-  finally
-    LazarusConfig.Free;
-  end;
-  result:=true;
+  // Convert any relative path to absolute path, if it's not just a file/package name:
+  if ExtractFileName(PackagePath)=PackagePath then
+    PackageAbsolutePath:=PackagePath
+  else
+    PackageAbsolutePath:=ExpandFilename(PackagePath);
+  ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+  if WorkingDir<>'' then
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+  ProcessEx.Parameters.Add('--add-package');
+  ProcessEx.Parameters.Add(PackageAbsolutePath);
+  ProcessEx.Execute;
+  result:= ProcessEx.ExitStatus =0;
+  if not result then
+    WritelnLog( 'InstallerUniversal: error trying to add package '+PackagePath);
 end;
 
 function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;

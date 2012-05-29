@@ -42,6 +42,10 @@ Start this to start your new Lazarus instance.
 fpcup sets up a separate primary config path to store Lazarus settings separate from other installs.
 You need to run the script/shortcut because it tells your Lazarus where to find that primary config path.
 
+Hint: after the first run, you can add/remove packages, set up your settings as wanted etc.
+You can then run fpcup --only=fpc,lazarus to only update FPC and Lazarus sources, which saves time, as you're not rebuilding help, installing packages, etc.
+Of course, you could run the full version e.g. once per day to make sure all external repositories etc are up to date.
+
 Technical explanation
 =====================
 If you want to improve or extend fpcup, here's a more detailed description of what it does.
@@ -86,6 +90,7 @@ If it doesn't exist, it downloads a bootstrap compiler.
 - It reads fpcup.ini and parses the items specified.
 - It can download from HTTP and FTP sites, and use SVN to keep repositories up to date.
 - It can register executables as external tools in Lazarus
+- It can add packages to the IDE (needs Lazarus SVN r37443 (Lazarus 1.1 branch) or later)
 - Please see fpcup.ini for details
 
 
@@ -105,7 +110,10 @@ However, there is no provision for separating LCL units for multiple widgetsets.
 If you want to use multiple widgetsets, best practice is to use separated Lazarus directories (option --lazdir in fpcup).
 
 - LCL documentation generation x64 Linux
-LCL .chm documentation generation using fpdoc on x64 Linux seems to take a long time; fpcup takes a huge amount of CPU, but eventually finished.
+Fpdoc from FPC 2.6 has known bugs; LCL .chm documentation generation on x64 Linux takes a long time; fpcup takes a huge amount of CPU, but eventually finished.
+
+- LCL documentation generation x86 Windows
+Fpdoc from FPC 2.6 has known bugs; LCL .chm documentation generation may take a long time or fail.
 
 Troubleshooting
 ===============
@@ -132,7 +140,7 @@ Still in development, but does work to keep my development copies of FPC fixes_2
 
 Contact
 =======
-For reportiing bugs, suggestions, patches.
+For reporting bugs, suggestions, patches.
 - Lazarus forum thread:
 http://lazarus.freepascal.org/index.php/topic,15701fpcup
 - Bitbucket issue tracker
