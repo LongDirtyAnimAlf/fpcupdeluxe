@@ -222,7 +222,13 @@ begin
     if Assigned(FOnOutputM) then
       FOnOutputM(Self,'Executing : '+ResultingCommand+' (working dir: '+ CurrentDirectory +')'+ LineEnding);
 
-    inherited Execute;
+    try
+      inherited Execute;
+    except
+      // Leave exitstatus as proc_internalerror
+      // This should handle calling non-existing application etc.
+    end;
+
     while Running do
     begin
       if not ReadOutput then
