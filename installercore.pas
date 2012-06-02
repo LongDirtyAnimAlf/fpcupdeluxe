@@ -509,7 +509,7 @@ begin
     end;
   end;
 
-  FSVNClient.DesiredRevision := FDesiredRevision; //Desired revision
+  FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   // CheckoutOrUpdate) sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
   ReturnCode := FSVNClient.ReturnCode;

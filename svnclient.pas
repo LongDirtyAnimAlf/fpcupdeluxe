@@ -404,7 +404,7 @@ var
   URLPos: integer;
 begin
   Result := False;
-  FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
   //This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then
