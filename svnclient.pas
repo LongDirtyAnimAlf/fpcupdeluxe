@@ -91,6 +91,9 @@ type
     property LocalRepository: string read FLocalRepository write FLocalRepository;
     //Revision number of local repository
     function LocalRevision: integer;
+    //Parses output given by some commands (svn update, svn status) and returns files.
+    // Files are marked by single characters (U,M,etc); you can filter on ore mor of these (pass [''] if not required).
+    procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
     //URL where central SVN repository is placed
     property Repository: string read FRepositoryURL write SetRepositoryURL;
     //Exit code returned by last SVN client command; 0 for success. Useful for troubleshooting
@@ -306,30 +309,10 @@ const
   MaxUpdateRetries = 9;
 var
   Command: string;
+  FileList: TStringList;
   Output: string;
   AfterErrorRetry: integer; // Keeps track of retry attempts after error result
   UpdateRetry: integer; // Keeps track of retry attempts to get all files
-  function NumberOfFiles(CommandOutput: string): integer;
-  // Updated files example extract:
-  //A    fpctrunk\tests\webtbs\tw15683.pp
-  //U    fpctrunk\compiler\ncal.pas
-  //Updated to revision 21454.
-  //123456789
-  // Update for already updated repo gives only:
-  //At revision 21454.
-  // So we can count number of lines, subtract 1 and get an idea of number of files
-  var
-    OutputLines: TStringList;
-  begin
-    OutputLines:=TStringList.Create;
-    try
-      OutputLines.Text:=CommandOutput;
-      result := OutputLines.Count-1;
-      if result < 0 then result := 0;
-    finally
-      OutputLines.Free;
-    end;
-  end;
 begin
   AfterErrorRetry := 1;
   UpdateRetry := 1;
@@ -339,57 +322,84 @@ begin
   else
     Command := ' update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
 
-  // On Windows, at least certain SVN versions don't update everything.
-  // So we try until there are no more files downloaded.
-  FReturnCode:=ExecuteCommand(SVNExecutable+command,Output,Verbose);
+  FileList:=TStringList.Create;
+  try
+    // On Windows, at least certain SVN versions don't update everything.
+    // So we try until there are no more files downloaded.
+    FReturnCode:=ExecuteCommand(SVNExecutable+command,Output,Verbose);
 
-  // Detect when svn up cannot update any more files anymore.
-  while (NumberOfFiles(Output)>0) and (UpdateRetry < MaxUpdateRetries) do
-  begin
-    // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-    while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
+    //todo: parse output into filelist
+    FileList.Clear;
+    ParseFileList(Output, FileList, []);
+
+    // Detect when svn up cannot update any more files anymore.
+    while (FileList.Count>0) and (UpdateRetry < MaxUpdateRetries) do
     begin
-      if Pos('E155004',Output)>0 then
-      {
-      E155004: Working copy '<directory>' locked.
-      run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
-      }
+      // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+      while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
       begin
-        // Let's try to release locks.
-        FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+        if Pos('E155004',Output)>0 then
+        {
+        E155004: Working copy '<directory>' locked.
+        run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+        }
+        begin
+          // Let's try to release locks.
+          FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+        end;
+        Sleep(500); //Give everybody a chance to relax ;)
+        FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
+        AfterErrorRetry := AfterErrorRetry + 1;
       end;
-      Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
-      AfterErrorRetry := AfterErrorRetry + 1;
+      UpdateRetry := UpdateRetry + 1;
     end;
-    UpdateRetry := UpdateRetry + 1;
+  finally
+    FileList.Free;
+  end;
+end;
+
+procedure TSVNClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
+// Parses file lists from svn update and svn status outputs
+// If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
+// Case-sensitive filter.
+var
+  AllFilesRaw: TStringList;
+  Counter: integer;
+  StatusCode: string;
+begin
+  AllFilesRaw:=TStringList.Create;
+  try
+    AllFilesRaw.Text := CommandOutput;
+    for Counter := 0 to AllFilesRaw.Count - 1 do
+    begin
+      //Some sample files (using svn update and svn status):
+      //A    fpctrunk\tests\webtbs\tw15683.pp
+      //U    fpctrunk\compiler\ncal.pas
+      //M       C:\Development\fpc\packages\bzip2\Makefile
+      //123456789
+      StatusCode:=Copy(AllFilesRaw[Counter],1,1);
+      if (High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes) then
+      begin
+        FileList.Add(Trim(Copy(AllFilesRaw[Counter],2,Length(AllFilesRaw[Counter]))));
+      end;
+    end;
+  finally
+    AllFilesRaw.Free;
   end;
 end;
 
 procedure TSVNClient.LocalModifications(var FileList: TStringList);
 var
   AllFiles: TStringList;
-  Counter: integer;
   Output: string='';
-  StatusCode: string;
 begin
   FReturnCode:=ExecuteCommand(SVNExecutable+' status --depth infinity '+FLocalRepository,Output,Verbose);
+  FileList.Clear;
   AllFiles:=TStringList.Create;
   try
-    AllFiles.Text:=Output;
-    for Counter := 0 to AllFiles.Count - 1 do
-    begin
-      //sample:
-      //M       C:\Development\fpc\packages\bzip2\Makefile
-      //123456789
-      StatusCode:=Copy(AllFiles[Counter],1,1);
-      // there is probably a much more set-oriented Pascal way to do this ;)
-      //(M)odified, (C)onflicting, mer(G)ed automatically)
-      if (StatusCode='C') or (StatusCode='G') or (StatusCode='M') then
-      begin
-        FileList.Add(Copy(AllFiles[Counter],9,Length(AllFiles[Counter])));
-      end;
-    end;
+    // Only return files that are (M)odified, (C)onflicting, mer(G)ed automatically
+    ParseFileList(Output, AllFiles, ['C','G','M']);
+    FileList.AddStrings(AllFiles);
   finally
     AllFiles.Free;
   end;
