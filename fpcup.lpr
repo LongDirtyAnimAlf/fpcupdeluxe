@@ -270,7 +270,14 @@ begin
     {$IFDEF MSWINDOWS}
     writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
     {$ENDIF MSWINDOWS}
+
+    // Show warnings to the user:
     writeln('');
+
+    // Note: we don't have a unicode version of ExpandFileName; investigate consequences for Unicode paths!??!?
+    // User could have specified relative paths so we're normalizing them.
+    if ExpandFileName(FInstaller.LazarusDirectory)=ExpandFileName(FInstaller.FPCDirectory) then
+      writeln('WARNING: FPC and Lazarus directories are the same ('+FInstaller.FPCDirectory+'). This will not work!');
     if (FInstaller.FPCDesiredRevision<>'') then
       writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);
     if (FInstaller.LazarusDesiredRevision<>'') then
@@ -285,6 +292,8 @@ begin
     else if FInstaller.Clean then
       writeln('WARNING: CLEANING !!!');
     writeln('');
+
+    // Get user confirmation unless otherwise specified
     if not bNoConfirm then
       begin
       write('Continue (Y/n): ');
