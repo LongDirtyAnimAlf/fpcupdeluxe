@@ -66,6 +66,7 @@ type
     procedure SetVerbose(AValue: boolean);
   public
     //Performs an SVN checkout (initial download), unless otherwise specified HEAD (latest revision) only for speed
+    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
     procedure CheckOut;
     //Runs SVN checkout if local repository doesn't exist, else does an update
     procedure CheckOutOrUpdate;
@@ -78,6 +79,7 @@ type
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
     procedure Revert;
     //Performs an SVN update (pull)
+    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
     procedure Update;
     //Get/set desired revision to checkout/pull to (if none given, use HEAD)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
@@ -254,6 +256,8 @@ begin
     begin
       // Checkout (first download)
       Checkout;
+      // Just to be sure, update as well (checkout may have failed without warning):
+      Update;
     end;
   end
   else
@@ -298,34 +302,67 @@ end;
 
 procedure Tsvnclient.Update;
 const
-  MaxRetries = 3;
+  MaxErrorRetries = 3;
+  MaxUpdateRetries = 9;
 var
   Command: string;
   Output: string;
-  RetryAttempt: integer;
+  AfterErrorRetry: integer; // Keeps track of retry attempts after error result
+  UpdateRetry: integer; // Keeps track of retry attempts to get all files
+  function NumberOfFiles(CommandOutput: string): integer;
+  // Updated files example extract:
+  //A    fpctrunk\tests\webtbs\tw15683.pp
+  //U    fpctrunk\compiler\ncal.pas
+  //Updated to revision 21454.
+  //123456789
+  // Update for already updated repo gives only:
+  //At revision 21454.
+  // So we can count number of lines, subtract 1 and get an idea of number of files
+  var
+    OutputLines: TStringList;
+  begin
+    OutputLines:=TStringList.Create;
+    try
+      OutputLines.Text:=CommandOutput;
+      result := OutputLines.Count-1;
+      if result < 0 then result := 0;
+    finally
+      OutputLines.Free;
+    end;
+  end;
 begin
+  AfterErrorRetry := 1;
+  UpdateRetry := 1;
+
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := ' update --non-interactive ' + LocalRepository
   else
     Command := ' update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
+
+  // On Windows, at least certain SVN versions don't update everything.
+  // So we try until there are no more files downloaded.
   FReturnCode:=ExecuteCommand(SVNExecutable+command,Output,Verbose);
 
-  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-  RetryAttempt := 1;
-  while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+  // Detect when svn up cannot update any more files anymore.
+  while (NumberOfFiles(Output)>0) and (UpdateRetry < MaxUpdateRetries) do
   begin
-    if Pos('E155004',Output)>0 then
-    {
-    E155004: Working copy '<directory>' locked.
-    run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
-    }
+    // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+    while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
     begin
-      // Let's try to release locks.
-      FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+      if Pos('E155004',Output)>0 then
+      {
+      E155004: Working copy '<directory>' locked.
+      run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+      }
+      begin
+        // Let's try to release locks.
+        FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+      end;
+      Sleep(500); //Give everybody a chance to relax ;)
+      FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
+      AfterErrorRetry := AfterErrorRetry + 1;
     end;
-    Sleep(500); //Give everybody a chance to relax ;)
-    FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
-    RetryAttempt := RetryAttempt + 1;
+    UpdateRetry := UpdateRetry + 1;
   end;
 end;
 
