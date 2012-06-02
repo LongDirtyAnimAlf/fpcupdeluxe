@@ -483,6 +483,7 @@ begin
   AfterRevision := 'failure';
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
+
   BeforeRevision := IntToStr(FSVNClient.LocalRevision);
   if BeforeRevision = IntToStr(FRET_WORKING_COPY_TOO_OLD) then
   begin
@@ -491,6 +492,7 @@ begin
     Result := false;  //fail
     exit;
   end;
+
   FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
   if UpdateWarnings.Count > 0 then
   begin
@@ -506,6 +508,7 @@ begin
       UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
     end;
   end;
+
   FSVNClient.DesiredRevision := FDesiredRevision; //Desired revision
   // CheckoutOrUpdate) sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
