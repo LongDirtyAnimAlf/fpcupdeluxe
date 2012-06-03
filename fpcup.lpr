@@ -118,11 +118,11 @@ begin
   writeln('                       On other systems: a shell script in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
   writeln('                       Default: Lazarus_trunk');
+  writeln(' lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.');
   writeln(' lazrevision=<number>  Revert to Lazarus SVN revision <number>');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
-  writeln(' lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.');
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
   writeln(' noconfirm             No confirmation asked. For batch operation.');
