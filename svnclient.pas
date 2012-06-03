@@ -365,6 +365,8 @@ procedure TSVNClient.ParseFileList(const CommandOutput: string; var FileList: TS
 var
   AllFilesRaw: TStringList;
   Counter: integer;
+  FileName: string;
+  SpaceAfterStatus: integer;
   StatusCode: string;
 begin
   AllFilesRaw:=TStringList.Create;
@@ -376,15 +378,21 @@ begin
       //A    fpctrunk\tests\webtbs\tw15683.pp
       //U    fpctrunk\compiler\ncal.pas
       //M       C:\Development\fpc\packages\bzip2\Makefile
+      //I think I also saw something like:
+      // u      C:\Development\fpc\packages\bzip2\Makefile
       //123456789
-      StatusCode:=Copy(AllFilesRaw[Counter],1,1);
-      if (High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes) then
+      // Also accept space in first column and entry on second column
+      // Get the first character after a space in the first 2 columns:
+      FileName:='';
+      StatusCode:=Copy(Trim(Copy(AllFilesRaw[Counter],1,2)),1,1);
+      SpaceAfterStatus:=PosEx(' ', AllFilesRaw[Counter], Pos(StatusCode, AllFilesRaw[Counter]));
+      // Process if there are two spaces after the status character, and
+      // we're either not filtering or we have a filter match
+      if (Copy(AllFilesRaw[Counter], SpaceAfterStatus,2)='  ') and
+        ((High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes)) then
       begin
-        // I think I also saw something like
-        // u      C:\Development\fpc\packages\bzip2\Makefile
-        //123456789
-        // so let's start from position 3
-        FileList.Add(Trim(Copy(AllFilesRaw[Counter],3,Length(AllFilesRaw[Counter]))));
+        FileName:=(Trim(Copy(AllFilesRaw[Counter],SpaceAfterStatus,Length(AllFilesRaw[Counter]))));
+        if FileName<>'' then FileList.Add(FileName);
       end;
     end;
   finally
