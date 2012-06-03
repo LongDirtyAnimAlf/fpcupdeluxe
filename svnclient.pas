@@ -380,7 +380,11 @@ begin
       StatusCode:=Copy(AllFilesRaw[Counter],1,1);
       if (High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes) then
       begin
-        FileList.Add(Trim(Copy(AllFilesRaw[Counter],2,Length(AllFilesRaw[Counter]))));
+        // I think I also saw something like
+        // u      C:\Development\fpc\packages\bzip2\Makefile
+        //123456789
+        // so let's start from position 3
+        FileList.Add(Trim(Copy(AllFilesRaw[Counter],3,Length(AllFilesRaw[Counter]))));
       end;
     end;
   finally
