@@ -237,6 +237,8 @@ const
   // Note: there's also an older file on
   // http://sourceforge.net/projects/freepascal/files/Documentation/
   // that includes the lcl file
+  // Snapshot alternative... that changes name... and is a .tar.bz2
+  // ftp://freepascal.dfmk.hu/pub/lazarus/snapshots/fpc-lazarus-doc-chm-20120622.tar.bz2
   FPC_CHM_URL='http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip';
 var
   DocsZip: string;

@@ -48,7 +48,7 @@ type
     procedure CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
     // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
-    // Checkout/update from SVN
+    // Checkout/update using SVN
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
