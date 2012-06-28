@@ -80,7 +80,6 @@ If it doesn't exist, it downloads a bootstrap compiler.
 - fpcup compiles the Lazarus documentation editor (LazDE) using lazbuild in the newly compiled Lazarus directory
 - fpcup compiles the Lazarus data desktop using lazbuild in the newly compiled Lazarus directory
 
-
 4. Getting help
 - It compiles the Lazarus lhelp CHM viewer (LazDE) using lazbuild in the newly compiled Lazarus directory
 - It gets the FPC chm documentation if not already present
@@ -99,6 +98,7 @@ Cross compiler extensions
 fpcup has a facitility to extend its functionality using cross compiling modules. These are classes that inherit from the fpcup TCrossInstaller class defined in m_crossinstaller.pas
 An example is the Windows 32=>Windows 64 cross compile unit in m_crosswin64.pas. Note that this is a simple version, as there is no need for separate binutils and library paths.
 These modules get registered automatically when compiled into the fpcup code.
+See fpcup.html for more details on implementing your own cross compilers and extensions.
 
 LCL/FPC/Lazarus limitations
 ===========================
@@ -135,7 +135,7 @@ This is probably a bigger problem on Windows than on Linux/Unix
 
 Status
 ======
-Still in development, but does work to keep my development copies of FPC fixes_2.6 and Lazarus up to date on Windows.
+In development, but does work for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux.
 
 
 Contact
@@ -149,7 +149,6 @@ https://bitbucket.org/reiniero/fpcup/issues
 Help output:
 ============
 A recent fpcup --help shows this:
-
 fpcup
 An FPC/Lazarus downloader/updater/installer
 Open source freeware (modified LGPL/BSD), see:
@@ -159,9 +158,12 @@ This program will download the FPC and Lazarus sources
 from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
-fpcup compiled on 2012/04/24 09:53:53 with FPC 2.6.1
-for CPU: i386 on Win32
-Info: 24-4-2012 9:56:46: fpcup started.
+
+Version: based on commit 89f29320fee5
+Build date: Thu Jun 28 15:29:19 2012 +0200
+Compiled for CPU: i386 on Win32
+
+Info: 28-6-2012 16:14:32: fpcup started.
 DON'T PANIC!
 Everything below is optional...
 
@@ -185,6 +187,7 @@ FPCGetOnly
 FPCBuildOnly
 lazarus
 BIGIDE
+lazbuild
 USERIDE
 lazarusuninstall
 lazarusclean
@@ -206,6 +209,9 @@ HelpFPCBuildOnly
 HelpLazarusBuildOnly
 HelpFPCConfigOnly
 HelpLazarusConfigOnly
+suggestedpackages
+suggestedpackagesclean
+suggestedpackagesuninstall
 lhelp
 lhelpclean
 lhelpuninstall
@@ -242,8 +248,27 @@ fpcdocsuninstall
 lazres
 lazresclean
 lazresuninstall
+synapsetrunk
+synapsetrunkclean
+synapsetrunkuninstall
+pascalsane
+pascalsaneclean
+pascalsaneuninstall
+leptonica
+leptonicaclean
+leptonicauninstall
+tesseract
+tesseractclean
+tesseractuninstall
+OCRivist
+OCRivistclean
+OCRivistuninstall
+bigidepackages
+bigidepackagesclean
+bigidepackagesuninstall
 
 The following modules run by default:
+SUGGESTEDPACKAGES
 LHELP
 LAZDATADESKTOP
 DOCEDITOR
@@ -260,7 +285,8 @@ Options are not required; they include:
                        Note: the binutils are copied to the
                        FPC directory for use by FPC. This gives
                        a more standard FPC environment.
- clean                 Remove files created with build. 
+                       Make sure it is not in the fpcdir directory
+ clean                 Remove files created with build.
                        Can be combined with skip and only options.
  configfile=<filename> Load module definition file from <filename>.
                        Default: fpcup.ini in the program directory.
@@ -271,6 +297,7 @@ Options are not required; they include:
  fpcbootstrapdir=<dir> An existing FPC compiler is needed to compile the FPC
                        sources. Specify location with this option; if no
                        compiler found here, FPCUp will download one there.
+                       Make sure it is not in the fpcdir directory
                        Default: c:\development\fpcbootstrap\
                        or ~\fpcbootstrap\
  fpcdir=<dir>          Target FPC dir, default c:\development\fpc\
@@ -295,11 +322,11 @@ Options are not required; they include:
                        On other systems: a shell script in your home directory.
                        If empty specified, no shortcut will be produced.
                        Default: Lazarus_trunk
+ lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.
  lazrevision=<number>  Revert to Lazarus SVN revision <number>
- lazURL=<URL>          SVN URL from which to download; default: 
+ lazURL=<URL>          SVN URL from which to download; default:
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
- lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.
  lclplatform=<name>    LCL widget set. <name> has to be one of the following:
                        carbon,fpgui,gtk,gtk2,qt,win32,wince
  noconfirm             No confirmation asked. For batch operation.
@@ -323,6 +350,9 @@ Options are not required; they include:
                        If no skip and only options given:
                        DELETE entire Lazarus/FPC directories
                        Else: uninstall only certain modules.
- verbose               Show output from svn and make
+ verbose               Show output from svn and make.
+ version               Show version info and quit.
 
 Share and enjoy!
+
+Info: 28-6-2012 16:14:32: fpcup finished.
