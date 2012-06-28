@@ -56,7 +56,7 @@
             <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
-              <Command Value="hgversion.exe"/>
+              <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
@@ -103,7 +103,7 @@ end;"/>
             </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
-              <Command Value="hgversion.exe"/>
+              <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
@@ -237,7 +237,7 @@ end;"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
       <ExecuteBefore>
-        <Command Value="hgversion.exe"/>
+        <Command Value="hgversion$(ExeExt)"/>
         <CompileReasons Run="False"/>
       </ExecuteBefore>
     </Other>
