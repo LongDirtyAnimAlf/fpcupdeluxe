@@ -221,26 +221,23 @@ begin
   RetryAttempt := 1;
   if (ReturnCode<>0) then
   begin
-    if Pos('E155004',Output)>0 then
-    {
-    E155004: Working copy '<directory>' locked.
-    run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
-    }
+    while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
-      // Let's try one time to fix it.
-      FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
-      // We probably ended up with a local repository where not all files were checked out.
-      // Let's call update to do so.
-      Update;
-    end
-    else
-    begin
-      while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+      if Pos('E155004',Output)>0 then
+      {
+      E155004: Working copy '<directory>' locked.
+      run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+      }
       begin
-        Sleep(500); //Give everybody a chance to relax ;)
-        FReturnCode:=ExecuteCommand(SVNExecutable+Command,Verbose); //attempt again
-        RetryAttempt := RetryAttempt + 1;
+        // Let's try one time to fix it.
+        FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+        // We probably ended up with a local repository where not all files were checked out.
+        // Let's call update to do so.
+        Update;
       end;
+      Sleep(500); //Give everybody a chance to relax ;)
+      FReturnCode:=ExecuteCommand(SVNExecutable+Command,Output,Verbose); //attempt again
+      RetryAttempt := RetryAttempt + 1;
     end;
   end;
 end;
