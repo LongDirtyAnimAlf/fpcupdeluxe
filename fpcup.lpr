@@ -50,6 +50,18 @@ uses {$IFDEF UNIX}
   installerManager,commandline;
 
 //{$R *.res} //Keep it simple, no resources
+
+// Get revision from our source code repository:
+{$i revision.inc}
+
+procedure WriteVersion;
+begin
+  writeln('Version: based on commit '+RevisionStr);
+  writeln('Build date: '+versiondate);
+  writeln('Compiled for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
+  writeln('');
+end;
+
 procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList);
 var i:integer;
 begin
@@ -146,7 +158,8 @@ begin
   writeln('                       If no skip and only options given:');
   writeln('                       DELETE entire Lazarus/FPC directories');
   writeln('                       Else: uninstall only certain modules.');
-  writeln(' verbose               Show output from svn and make');
+  writeln(' verbose               Show output from svn and make.');
+  writeln(' version               Show version info and quit.');
   writeln('');
   writeln('Share and enjoy!');
   writeln('');
@@ -155,7 +168,7 @@ end;
 function CheckOptions(FInstaller: TFPCupManager):integer;
 var
   AllOptions,FPCUpLink:string;
-  bNoConfirm,bHelp:boolean;
+  bNoConfirm,bHelp,bVersion:boolean;
   sconfirm:string;
   Options:TCommandLineOptions;
 begin
@@ -197,6 +210,7 @@ begin
   FInstaller.LazarusPrimaryConfigPath:=Options.GetOption('','primary-config-path','');
   FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
   FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
+  bVersion:=Options.GetOptionNoParam('','version',false);
   bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
   except
     on E:Exception do
@@ -219,6 +233,11 @@ begin
   else if bHelp then
     begin
     writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
+    result:=0; //quit without error
+    end
+  else if bVersion then
+    begin
+    //writeversion; //version will be written anyway
     result:=0; //quit without error
     end
   else
@@ -333,8 +352,8 @@ begin
   writeln('from the source Subversion/SVN repositories,');
   writeln('compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
-  writeln('fpcup compiled on '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%}+' with FPC '+{$INCLUDE %FPCVERSION%});
-  writeln('for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
+  writeln('');
+  writeversion;
   try
     FPCupManager:=TFPCupManager.Create;
     res:=CheckOptions(FPCupManager); //Process command line arguments

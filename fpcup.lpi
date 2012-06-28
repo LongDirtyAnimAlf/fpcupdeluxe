@@ -55,6 +55,10 @@
             </CompilerMessages>
             <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
+            <ExecuteBefore>
+              <Command Value="hgversion.exe"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
           </Other>
           <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
@@ -98,6 +102,10 @@ end;"/>
               <UseMsgFile Value="True"/>
             </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
+            <ExecuteBefore>
+              <Command Value="hgversion.exe"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
           </Other>
           <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
@@ -228,6 +236,10 @@ end;"/>
         <UseMsgFile Value="True"/>
       </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
+      <ExecuteBefore>
+        <Command Value="hgversion.exe"/>
+        <CompileReasons Run="False"/>
+      </ExecuteBefore>
     </Other>
     <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
