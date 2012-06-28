@@ -267,9 +267,6 @@ begin
       writeln('Keep local changes:     no');
     end;
     writeln('Parameter list:         '+FInstaller.AllOptions);
-    {$IFDEF MSWINDOWS}
-    writeln('Make/binutils path:     '+FInstaller.MakeDirectory);
-    {$ENDIF MSWINDOWS}
 
     // Show warnings to the user:
     writeln('');
