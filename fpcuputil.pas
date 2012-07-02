@@ -492,11 +492,15 @@ function FileSizeUTF8(FileName: string) : Int64;
 var
   sr : TSearchRec;
 begin
+{$ifdef unix}
+  result:=filesize(FileName);
+{$else}
   if FindFirstUTF8(FileName, faAnyFile, sr ) = 0 then
      result := Int64(sr.FindData.nFileSizeHigh) shl Int64(32) + Int64(sr.FindData.nFileSizeLow)
   else
      result := 0;
   FindCloseUTF8(sr);
+{$endif}
 end;
 
 function ParentDirectoryIsNotRoot(Dir: string): boolean;
@@ -618,4 +622,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+
