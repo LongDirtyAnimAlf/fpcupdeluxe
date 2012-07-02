@@ -9,29 +9,22 @@ in your programs.
 
 {$mode objfpc}{$H+}
 uses
-  sysutils,process,
-  {$IF FPC_FULLVERSION < 20701}
-  processutils {Runcommand support..}
-  {$ENDIF FPC_FULLVERSION}
-  ;
+  sysutils,process,processutils {Runcommand support..};
 const
-  HgCommand = 'hg parents --template "const RevisionStr=''{node|short}'';versiondate=''{date|date}'';" ""';
+  HgCommand = 'hg parents --template "const RevisionStr=''{node|short}'';versiondate=''{date|date}'';"';
 var
   s:string;
   F:text;
 begin
-  {$IF FPC_FULLVERSION < 20701}
   if (ExecuteCommand(HgCommand,s,false)=0) then
-  {$ELSE}
-  if RunCommand(HgCommand,[],s) then
-  {$ENDIF FPC_FULLVERSION}  
     begin
     AssignFile(F,'revision.inc');
     Rewrite(F);
+    while pos('"',s)>0 do delete(s,pos('"',s),1);
     writeln(F,s);
     Closefile(F);
     writeln(s);
     end
   else
     writeln('Failed : ',s);
-end.
+end.
