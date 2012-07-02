@@ -67,7 +67,8 @@ Const
     Lazarus base directory
     }
     'Declare helplazarus;'+
-    'Requires lhelp;'+
+    'Requires BIGIDE;'+
+    {Bigide contains lhelp in recent Lazarus }
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
     redownload them}

@@ -66,7 +66,7 @@ I now get InPath="C:\development\fpcbootstrap\ppc386.exe" instead of the fpc\bin
 interface
 
 uses
-  Classes, SysUtils, Laz2_DOM, Laz_XMLRead, Laz_XMLWrite;
+  Classes, SysUtils, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
 const
   // Some fixed configuration files.
   // General options:
@@ -511,4 +511,4 @@ end;
 
 
 end.
-
+
