@@ -87,7 +87,8 @@ Const
     'Cleanmodule helpfpc;'+
     'End;'+
 
-    'Declare HelpLazarusCleanOnly;'+
+    'Declare helplazarusclean;'+
+    // This cleaning sequence will be called by --clean
     'Cleanmodule helplazarus;'+
     'End;'+
 
@@ -185,7 +186,7 @@ public
   function ConfigModule(ModuleName:string): boolean; override;
   // Root directory of FPC; needed for finding fpdoc tool
   property FPCDirectory: string write FFPCDirectory;
-  // Configuration for Lazarus; required for building lhelp, as well as configuration
+  // Configuration for Lazarus; required for configuration
   property LazarusPrimaryConfigPath: string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
   // Uninstall module
   function UnInstallModule(ModuleName:string): boolean; override;
