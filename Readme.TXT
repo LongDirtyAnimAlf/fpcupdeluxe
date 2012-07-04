@@ -159,11 +159,11 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit 89f29320fee5
-Build date: Thu Jun 28 15:29:19 2012 +0200
+Version: based on commit 68da47860894
+Build date: Wed Jul 04 09:04:57 2012 +0200
 Compiled for CPU: i386 on Win32
 
-Info: 28-6-2012 16:14:32: fpcup started.
+Info: 4-7-2012 9:19:23: fpcup started.
 DON'T PANIC!
 Everything below is optional...
 
@@ -201,7 +201,7 @@ helpfpcuninstall
 helplazarus
 helplazarusuninstall
 HelpFPCCleanOnly
-HelpLazarusCleanOnly
+helplazarusclean
 HelpFPCGetOnly
 HelpLazarusGetOnly
 HelpFPCBuildOnly
@@ -355,4 +355,4 @@ Options are not required; they include:
 
 Share and enjoy!
 
-Info: 28-6-2012 16:14:32: fpcup finished.
+Info: 4-7-2012 9:19:23: fpcup finished.
