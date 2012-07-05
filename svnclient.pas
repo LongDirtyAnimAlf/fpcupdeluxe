@@ -230,7 +230,7 @@ begin
       }
       begin
         // Let's try one time to fix it.
-        FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+        FReturnCode:=ExecuteCommand(SVNExecutable+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
         // We probably ended up with a local repository where not all files were checked out.
         // Let's call update to do so.
         Update;
