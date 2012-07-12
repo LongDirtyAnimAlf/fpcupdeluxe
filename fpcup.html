@@ -39,7 +39,7 @@ other modules.</P>
 <H3 CLASS="western">Customization</H3>
 <P>The two major ways to extend fpcup are writing your own crossinstaller (that checks/downloads required binutils and libraries, and compiles the cross-compiler/LCL), and external modules.</P>
 <P>See above for how to add external modules without changing the fpcup code.</P>
-<P>An idea could also be to integrate mercurial/hg or git repositories into the external module functionality</P>
+<P>An idea could also be to integrate mercurial/hg or git repositories into the external module functionality. See hgversion.pas for a very small example of using hg with FreePascal; it can probably be programmed much like the current svn unit.</P>
 <H4 CLASS="western">Adding non-universal, non-crosscompiling modules</H4>
 <P>If you want to add modules to the FPC, Lazarus etc units, you will need to adjust both the sequences (instructions for the state machine) as well as the InstallerManager.GetInstaller so it knows what installer to get depending on the module.<P>
 <P>If you don't do the latter, you will get cryptic error messages like: Info: Error running fpcup. Technical details: error executing sequence USERIDE;</P>

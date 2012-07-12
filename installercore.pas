@@ -477,15 +477,22 @@ end;
 
 function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 var
+  BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
 begin
   BeforeRevision := 'failure';
+  BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
 
-  BeforeRevision := IntToStr(FSVNClient.LocalRevision);
-  if BeforeRevision = IntToStr(FRET_WORKING_COPY_TOO_OLD) then
+  if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
+    BeforeRevision := 'revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)
+  else
+    BeforeRevision := 'branch revision '+IntToStr(FSVNClient.LocalRevision)+' (repository revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)+')';
+  BeforeRevisionShort:=IntToStr(FSVNClient.LocalRevision);
+
+  if FSVNClient.LocalRevisionWholeRepo = FRET_WORKING_COPY_TOO_OLD then
   begin
     writelnlog('ERROR: The working copy in ' + FBaseDirectory + ' was created with an older, incompatible version of svn.', true);
     writelnlog('  Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
@@ -499,7 +506,7 @@ begin
     UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
     if FKeepLocalChanges=false then
     begin
-      CreateStoreSVNDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevision + '.diff', UpdateWarnings);
+      CreateStoreSVNDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings);
       UpdateWarnings.Add(ModuleName + ': reverting before updating.');
       FSVNClient.Revert; //Remove local changes
     end
@@ -510,7 +517,7 @@ begin
   end;
 
   FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
-  // CheckoutOrUpdate) sets result code. We'd like to detect e.g. mixed repositories.
+  // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
   ReturnCode := FSVNClient.ReturnCode;
   case ReturnCode of
@@ -526,8 +533,11 @@ begin
     begin
       // For now, assume it worked even with non-zero result code. We can because
       // we do the AfterRevision check as well.
-      AfterRevision := IntToStr(FSVNClient.LocalRevision);
-      if (BeforeRevision <> AfterRevision) then
+      if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
+        AfterRevision := 'revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)
+      else
+        AfterRevision := 'branch revision '+IntToStr(FSVNClient.LocalRevision)+' (repository revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)+')';
+      if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (StrToIntDef(BeforeRevisionShort, FRET_UNKNOWN_REVISION) <> FSVNClient.LocalRevision) then
         FSVNUpdated := true
       else
         FSVNUpdated := false;

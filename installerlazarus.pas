@@ -577,8 +577,8 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-  infoln('Lazarus was at revision: '+BeforeRevision,info);
-  if FSVNUpdated then infoln('Lazarus is now at revision: '+AfterRevision,info) else infoln('No updates for Lazarus found.',info);
+  infoln('Lazarus was at: '+BeforeRevision,info);
+  if FSVNUpdated then infoln('Lazarus is now at: '+AfterRevision,info) else infoln('No updates for Lazarus found.',info);
 end;
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;

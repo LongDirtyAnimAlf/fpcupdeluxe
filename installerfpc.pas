@@ -818,8 +818,8 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-  infoln('FPC was at revision: '+BeforeRevision,info);
-  if FSVNUpdated then infoln('FPC is now at revision: '+AfterRevision,info) else infoln('No updates for FPC found.',info);
+  infoln('FPC was at: '+BeforeRevision,info);
+  if FSVNUpdated then infoln('FPC is now at: '+AfterRevision,info) else infoln('No updates for FPC found.',info);
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;

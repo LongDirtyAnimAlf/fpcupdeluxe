@@ -44,6 +44,7 @@ const
   // Custom return codes
   FRET_LOCAL_REMOTE_URL_NOMATCH= -2;
   FRET_WORKING_COPY_TOO_OLD= -3;
+  FRET_UNKNOWN_REVISION=-4;
 
 type
   ESVNClientError = class(Exception);
@@ -52,11 +53,16 @@ type
   TSVNClient = class(TObject)
   private
     FLocalRepository: string;
+    FLocalRevision: integer;
+    FLocalRevisionWholeRepo: integer;
     FRepositoryURL: string;
     FReturnCode: integer;
     FDesiredRevision: string;
     FSVNExecutable: string;
     FVerbose: boolean;
+    function GetLocalRevision: integer;
+    function GetLocalRevisionWholeRepo: integer;
+    procedure GetLocalRevisions;
     function GetSVNExecutable: string;
     // Makes sure non-empty strings have a / at the end.
     function IncludeTrailingSlash(AValue: string): string;
@@ -89,8 +95,10 @@ type
     function LocalRepositoryExists: boolean;
     //Local directory that has an SVN repository/checkout
     property LocalRepository: string read FLocalRepository write FLocalRepository;
-    //Revision number of local repository
-    function LocalRevision: integer;
+    //Revision number of local repository: branch revision number if we're in a branch.
+    property LocalRevision: integer read GetLocalRevision;
+    //Revision number of local repository - the repository wide revision number regardless of what branch we are in
+    property LocalRevisionWholeRepo: integer read GetLocalRevisionWholeRepo;
     //Parses output given by some commands (svn update, svn status) and returns files.
     // Files are marked by single characters (U,M,etc); you can filter on ore mor of these (pass [''] if not required).
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
@@ -212,6 +220,10 @@ var
   Output: string;
   RetryAttempt: integer;
 begin
+  // Invalidate our revision number cache
+  FLocalRevision:=FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
+
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := ' checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
   else
@@ -313,6 +325,10 @@ var
 begin
   AfterErrorRetry := 1;
   UpdateRetry := 1;
+
+  // Invalidate our revision number cache
+  FLocalRevision:=FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
 
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := ' update --non-interactive ' + LocalRepository
@@ -451,31 +467,62 @@ begin
         // There is a repository here, but it was checked out
         // from a different URL...
         // Keep result false; show caller what's going on.
+        FLocalRevision:=FRET_UNKNOWN_REVISION;
+        FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
         FReturnCode:=FRET_LOCAL_REMOTE_URL_NOMATCH;
       end;
     end;
   end;
 end;
 
-function TSVNClient.LocalRevision: integer;
+procedure TSVNClient.GetLocalRevisions;
 const
+  BranchRevLength = Length('Last Changed Rev:');
   RevLength = Length('Revision:');
 var
-  LRevision: string;
+  LBranchRevision: string;
+  LRevision: string; // Revision of repository as a whole
+  Output: string;
 begin
-  result:=-1;
-  FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,LRevision,Verbose);
-  // Could have used svnversion but that would have meant calling yet another command...
-  // Get the part after "DesiredRevision:"
-  if FReturnCode=0 then
-    Result := StrToIntDef(trim(copy(LRevision,
-      (pos('Revision: ', LRevision) + RevLength),
-      6)), -1)
-  else
-    if Pos('E155036',LRevision)>0 then
+  // Only update if we have invalid revision info, in order to minimize svn info calls
+  if (FLocalRevision<0) or (FLocalRevisionWholeRepo<0) then
+  begin
+    FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
+    // Could have used svnversion but that would have meant calling yet another command...
+    // Get the part after "Revision:"...
+    // unless we're in a branch/tag where we need "Last Changed Rev: "
+    if FReturnCode=0 then
       begin
-      result:=FRET_WORKING_COPY_TOO_OLD;
-      end;
+      // This is going to be problematic for localized SVNs....
+      FLocalRevision:=StrToIntDef(trim(copy(Output,
+        (pos('Last Changed Rev: ', Output) + BranchRevLength),
+        6)), FRET_UNKNOWN_REVISION);
+      FLocalRevisionWholeRepo:=StrToIntDef(trim(copy(Output,
+        (pos('Revision: ', Output) + RevLength),
+        6)), FRET_UNKNOWN_REVISION);
+      // If we happen to be in the root (no branch), cater for that:
+      if FLocalRevision=FRET_UNKNOWN_REVISION then FLocalRevision:=FLocalRevisionWholeRepo;
+      end
+    else
+      if Pos('E155036',LRevision)>0 then
+        begin
+        FLocalRevision:=FRET_UNKNOWN_REVISION;
+        FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
+        FReturnCode:=FRET_WORKING_COPY_TOO_OLD;
+        end;
+  end;
+end;
+
+function TSVNClient.GetLocalRevision: integer;
+begin
+  GetLocalRevisions;
+  result:=FLocalRevision;
+end;
+
+function TSVNClient.GetLocalRevisionWholeRepo: integer;
+begin
+  GetLocalRevisions;
+  result:=FLocalRevisionWholeRepo;
 end;
 
 
@@ -484,6 +531,8 @@ begin
   FLocalRepository := '';
   FRepositoryURL := '';
   FDesiredRevision:='';
+  FLocalRevision:=FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
   FReturnCode := 0;
   FSVNExecutable := '';
   FindSvnExecutable; //Do this now so hopefully the SVNExecutable property is valid.
