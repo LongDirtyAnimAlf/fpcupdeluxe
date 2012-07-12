@@ -11,6 +11,11 @@ uses
   {$endif linux}
   ;
 
+// Get revision from our source code repository:
+{$i revision.inc}
+//RevisionStr
+//versiondate
+
 Const
   Sequences=
 //default sequence
@@ -370,7 +375,7 @@ except
   'Aborting.',error);
   halt(2); //Is there a nicer way to do this?
 end;
-WritelnLog(DateTimeToStr(now)+': fpcup started.',true);
+WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
 end;
 
 destructor TFPCupManager.Destroy;

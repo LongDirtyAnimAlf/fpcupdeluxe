@@ -376,8 +376,8 @@ var
 begin
   result:=InitModule;
   if not result then exit;
-  // Log to console and log:
-  writelnlog('TUniversalInstaller: building module '+ModuleName+'...',true);
+  // Log to console only:
+  infoln('TUniversalInstaller: building module '+ModuleName+'...',Info);
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
