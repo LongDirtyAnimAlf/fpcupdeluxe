@@ -109,11 +109,11 @@ fpcup uses this approach for building cross compilers.
 However, there is no provision for separating LCL units for multiple widgetsets. If you compile e.g. GTK2 and QT LCL widgetsets for the same platform, one will overwite the other. This means that fpcup cannot manage multiple widgetsets either.
 If you want to use multiple widgetsets, best practice is to use separated Lazarus directories (option --lazdir in fpcup).
 
-- LCL documentation generation x64 Linux
-Fpdoc from FPC 2.6 has known bugs; LCL .chm documentation generation on x64 Linux takes a long time; fpcup takes a huge amount of CPU, but eventually finished.
+- LCL documentation generation 
+Fpdoc from FPC 2.6 has known bugs, some of which are fixed in FPC 2.7.
+LCL .chm documentation generation on x64 Linux and x86 Windows may take a long time; fpcup takes a huge amount of CPU, but eventually finished.
 
-- LCL documentation generation x86 Windows
-Fpdoc from FPC 2.6 has known bugs; LCL .chm documentation generation may take a long time or fail.
+Due to bugs in either the help sources or fpdoc, document generation may fail and generate 0 byte files, especially on FPC2.6.x. Fpcup checks for this and will not overwrite existing help files with empty files.
 
 Troubleshooting
 ===============
@@ -129,13 +129,13 @@ make fpc_baseinfo | less
 make fpc_baseinfo FPC=~/<yourfpcdirectory>/bin/fpc.sh
 ~/<yourfpcdirectory>/bin/fpc.sh -vut # or something?
 
-Additionally, on both Windows and Unix we add our own binutils to the beginning of the path when calling make.
+Additionally, on both Windows and Unix we add our own binutils directory to the beginning of the path when calling make.
 This ensures that e.g. existing Delphi or cygwin make.exe does not mess with our installation.
 This is probably a bigger problem on Windows than on Linux/Unix
 
 Status
 ======
-In development, but does work for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux.
+Works for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux. Testing version for OSX available.
 
 
 Contact
