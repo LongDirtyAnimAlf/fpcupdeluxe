@@ -22,6 +22,7 @@ Prerequisites
 =============
 On Windows: should be none.
 If needed, this tool will download an svn client, the required binutils (make.exe etc) and a bootstrap FPC compiler for you.
+Note: you can build Lazarus without svn being in your path, but the Lazarus tool svn2revisioninc won't work and you won't get an SVn revision number in your Help/About box.
 
 On Linux:
 - the binutils (make etc); e.g. in a package called build-essential
