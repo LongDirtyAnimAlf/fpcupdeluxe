@@ -12,19 +12,30 @@ uses
   sysutils,process,processutils {Runcommand support..};
 const
   HgCommand = 'hg parents --template "const RevisionStr=''{node|short}'';versiondate=''{date|date}'';"';
+  FailedOutput = 'const RevisionStr=''unknown'';versiondate=''unknown'';';
 var
+  ResultCode:integer;
   s:string;
   F:text;
 begin
-  if (ExecuteCommand(HgCommand,s,false)=0) then
+  ResultCode:=ExecuteCommand(HgCommand,s,false);
+  if ResultCode=0 then
     begin
-    AssignFile(F,'revision.inc');
-    Rewrite(F);
     while pos('"',s)>0 do delete(s,pos('"',s),1);
-    writeln(F,s);
-    Closefile(F);
+    // Extra test for e.g. OSX where we get here even though there's no hg command:
+    if s='' then s:=FailedOutput;
     writeln(s);
     end
-  else
-    writeln('Failed : ',s);
-end.
+    else
+    begin
+    writeln('Failed: ',s);
+    s:=FailedOutput;
+    writeln('Command result code was: '+inttostr(ResultCode));
+    writeln('Writing this to file:');
+    writeln(s);
+    end;
+  AssignFile(F,'revision.inc');
+  Rewrite(F);
+  writeln(F,s);
+  Closefile(F);
+end.

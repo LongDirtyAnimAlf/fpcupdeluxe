@@ -477,7 +477,7 @@ begin
   begin
     //todo: currently tar spits out uncompressed file in current dir...
     //which might not have proper permissions to actually create file...!?
-    infoln('Going to rename/move '+CompilerName+' to '+FBootStrapCompiler);
+    infoln('Going to rename/move '+CompilerName+' to '+FBootStrapCompiler,warning);
     sysutils.DeleteFile(FBootStrapCompiler); //ignore errors
     // We might be moving files across partitions so we cannot use renamefile
     OperationSucceeded:=FileUtil.CopyFile(CompilerName, FBootStrapCompiler);
@@ -487,7 +487,7 @@ begin
   begin
     //Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
-    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler);
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler,error);
   end;
   {$ENDIF DARWIN}
 end;
@@ -671,7 +671,7 @@ begin
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
     ProcessEx.Parameters.Add('cycle');
-    infoln('Running make cycle for FPC i386:');
+    infoln('Running make cycle for FPC i386:',info);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin
