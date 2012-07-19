@@ -262,7 +262,8 @@ begin
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
       begin
-      if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',true);
+      infoln('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',error);
+      if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',false);
       break;
       end;
     end;

@@ -167,7 +167,7 @@ end;
 
 function CheckOptions(FInstaller: TFPCupManager):integer;
 var
-  AllOptions,FPCUpLink:string;
+  {$IFNDEF MSWINDOWS}AllOptions,FPCUpLink:string;{$ENDIF}
   bNoConfirm,bHelp,bVersion:boolean;
   sconfirm:string;
   Options:TCommandLineOptions;

@@ -13,9 +13,9 @@ uses
 
 // Get revision from our source code repository:
 {$i revision.inc}
-//RevisionStr
-//versiondate
+//Contains RevisionStr and versiondate constants
 
+// These sequences determine standard installation/uninstallation order/content:
 Const
   Sequences=
 //default sequence
@@ -61,6 +61,32 @@ Const
     'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
     'End;'+
+//default sequence for win64
+    'Declare defaultwin64;'+
+    'Do fpc;'+
+    //Get bigide so we at least have a compiler:
+    'Do BIGIDE;'+
+    'Do helplazarus;'+
+    'Do LAZDATADESKTOP;'+
+    'Do DOCEDITOR;'+
+    //Get external packages/universal modules
+    'Do UniversalDefault;'+
+    //Recompile user IDE so any packages selected by the
+    //universal installer are compiled into the IDE:
+    'Do USERIDE;'+
+    'Do crosswin64-32;'+  //this has to be the last. All TExecState reset!
+    'End;'+
+//cross sequence for win32. Note: if changing this name,
+    //also change checks for this in skipmodules etc.
+    'Declare crosswin64-32;'+
+    'SetCPU i386;'+
+    'SetOS win32;'+
+    'Cleanmodule fpc;'+
+    'Buildmodule fpc;'+
+    //Getmodule has already been done
+    'Cleanmodule LCL;'+
+    'Buildmodule LCL;'+
+    'End;'+
 //default clean sequence
     'Declare defaultclean;'+
     'Do fpcclean;'+
@@ -87,6 +113,13 @@ Const
     'Cleanmodule fpc;'+
     'Cleanmodule lazarus;'+
     'End;'+
+//default cross clean sequence for win64
+    'Declare crosswin64-32Clean;'+
+    'SetCPU i386;'+
+    'SetOS win32;'+
+    'Cleanmodule fpc;'+
+    'Cleanmodule lazarus;'+
+    'End;'+
 
 //default uninstall sequence
     'Declare defaultuninstall;'+
@@ -99,6 +132,10 @@ Const
     'End;'+
 //default uninstall sequence for win32
     'Declare defaultwin32uninstall;'+
+    'Do defaultuninstall;'+
+    'End;'+
+//default uninstall sequence for win64
+    'Declare defaultwin64uninstall;'+
     'Do defaultuninstall;'+
     'End;';
 
@@ -307,7 +344,6 @@ if ToConsole then
 end;
 
 function TFPCupManager.LoadModuleList: boolean;
-var i:integer;
 begin
 Sequencer.AddSequence(Sequences);
 Sequencer.AddSequence(installerFPC.Sequences);
@@ -336,15 +372,21 @@ begin
     Sequencer.DeleteOnly;
     end
   else
-    {$ifdef win32}
+    {$if defined(win32)}
     // Run Windows specific cross compiler or regular version
     if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then
       result:=Sequencer.Run('Default')
     else
       result:=Sequencer.Run('DefaultWin32');
+    {$elseif defined(win64)}
+    if pos('CROSSWIN64-32',UpperCase(SkipModules))>0 then
+      result:=Sequencer.Run('Default')
+    else
+      result:=Sequencer.Run('DefaultWin64');
     {$else}
+    // Linux, OSX
     result:=Sequencer.Run('Default');
-    {$endif win32}
+    {$endif}
   if assigned(Sequencer.SkipList) then
     Sequencer.SkipList.Free;
 end;
@@ -467,9 +509,6 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   end;
 
   function DeleteLazarusScript:boolean;
-  //calculate InstalledLazarus. Don't use this function when lazarus is not installed.
-  var
-    InstalledLazarus:string;
   begin
   result:=true;
   if FParent.ShortCutName<>EmptyStr then
@@ -477,7 +516,6 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     infoln('Lazarus: deleting desktop shortcut:',info);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-      InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
       {$IFDEF MSWINDOWS}
       DeleteDesktopShortCut(FParent.ShortCutName);
       {$ENDIF MSWINDOWS}
@@ -590,12 +628,19 @@ begin
   result:=true;
   CrossCompiling:= (FParent.CrossCPU_Target<>'') or (FParent.CrossOS_Target<>'');
   //check if this is a known module
+
+  // FPC:
   if uppercase(ModuleName)='FPC' then
     begin
     if assigned(Installer) then
       begin
+      // Check for existing normal compiler, or exact same cross compiler
       if (not crosscompiling and (Installer is TFPCNativeInstaller)) or
-        ( crosscompiling and (Installer is TFPCCrossInstaller)) then
+        ( crosscompiling and
+        (Installer is TFPCCrossInstaller) and
+        (Installer.CrossOS_Target=FParent.CrossOS_Target) and
+        (Installer.CrossCPU_Target=FParent.CrossCPU_Target)
+        ) then
         begin
         exit; //all fine, continue with current installer
         end
@@ -619,6 +664,7 @@ begin
     Installer.URL:=FParent.FPCURL;
     end
 
+  // Lazarus:
   else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LAZBUILD') or (uppercase(ModuleName)='LCL') or
     (uppercase(ModuleName)='BIGIDE') or (uppercase(ModuleName)='USERIDE') then
     begin

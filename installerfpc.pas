@@ -208,6 +208,10 @@ begin
             //fail if this is not crosswin32-64
             result:=false;
             {$endif win32}
+            {$ifndef win64}
+            //fail if this is not crosswin64-32
+            result:=false;
+            {$endif win64}
           end
           else
             begin

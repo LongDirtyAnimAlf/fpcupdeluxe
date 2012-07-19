@@ -69,9 +69,9 @@ type
     // Compiler options passed on to make as OPT=
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target
-    property CrossCPU_Target: string write FCrossCPU_Target;
+    property CrossCPU_Target: string read FCrossCPU_Target write FCrossCPU_Target;
     // OS for target
-    property CrossOS_Target: string write FCrossOS_Target;
+    property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
     // SVN revision override. Default is trunk
     property DesiredRevision: string write FDesiredRevision;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling

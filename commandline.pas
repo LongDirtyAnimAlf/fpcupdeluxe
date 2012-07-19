@@ -281,7 +281,7 @@ end;
 function TCommandLineOptions.GetOption(shortname, name: string;
   var param: string; bAppendToAllOptions, bHasParam: boolean): boolean;
 var
-  i,j:integer;
+  i:integer;
   sParam,sCSParam:string;
   sCSshortname,sCSname:string;
 begin
@@ -308,7 +308,6 @@ begin
       sCSParam:=sParam;
     if sParam[1]='-'then
       begin
-      j:=0;
       if (Length(sParam)>1) and (sParam[2]='-') then
         begin     //long option
         delete(sParam,1,2);
