@@ -164,7 +164,7 @@ end;
 function TUniversalInstaller.InitModule: boolean;
 begin
   result:=true;
-  infoln('TUniversalInstaller: initialising...',Debug);
+  infoln('TUniversalInstaller: initialising...',etDebug);
   if InitDone then
     exit;
   if FVerbose then
@@ -262,7 +262,7 @@ begin
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
       begin
-      infoln('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',error);
+      infoln('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',eterror);
       if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',false);
       break;
       end;
@@ -378,7 +378,7 @@ begin
   result:=InitModule;
   if not result then exit;
   // Log to console only:
-  infoln('TUniversalInstaller: building module '+ModuleName+'...',Info);
+  infoln('TUniversalInstaller: building module '+ModuleName+'...',etInfo);
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin

@@ -141,15 +141,15 @@ begin
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
-      infoln('Failed to get crossbinutils', Error)
+      infoln('Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
-      infoln('Failed to get cross libraries', Error)
+      infoln('Failed to get cross libraries', etError)
     else
       begin
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
-      infoln('Running Make all (FPC crosscompiler):',info);
+      infoln('Running Make all (FPC crosscompiler):',etinfo);
       ProcessEx.Parameters.Add('FPC='+FCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -179,7 +179,7 @@ begin
           ProcessEx.Executable := Make;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
-          infoln('Running Make crossinstall (FPC crosscompiler):', info);
+          infoln('Running Make crossinstall (FPC crosscompiler):', etinfo);
           ProcessEx.Parameters.Add('FPC='+FCompiler);
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
           {$IFDEF UNIX}
@@ -202,7 +202,7 @@ begin
           ProcessEx.Execute;
           if ProcessEx.ExitStatus<>0 then
           begin
-            infoln('Problem compiling/installing crosscompiler. Continuing regardless.', warning);
+            infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etwarning);
             FCompiler:='////\\\Error trying to compile FPC\|!';
             {$ifndef win32}
             //fail if this is not crosswin32-64
@@ -223,7 +223,7 @@ begin
         end;
     end
   else
-    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,warning);
+    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
 end;
 
 
@@ -284,7 +284,7 @@ begin
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
-  infoln('Running make all install for FPC:',info);
+  infoln('Running make all install for FPC:',etinfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
@@ -320,7 +320,7 @@ begin
     except
       on E: Exception do
       begin
-        infoln('Error copying binutils: '+E.Message,error);
+        infoln('Error copying binutils: '+E.Message,eterror);
         OperationSucceeded:=false;
       end;
     end;
@@ -406,7 +406,7 @@ OperationSucceeded:=true;
 if OperationSucceeded then
 begin
   OperationSucceeded:=ForceDirectoriesUTF8(FBootstrapCompilerDirectory);
-  if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+FBootstrapCompilerDirectory,error);
+  if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+FBootstrapCompilerDirectory,eterror);
 end;
 
 BootstrapArchive := SysUtils.GetTempFileName;
@@ -424,7 +424,7 @@ begin
   //Extract zip, overwriting without prompting
   if ExecuteCommand(FUnzip+' -o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
     begin
-      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',error);
+      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
       OperationSucceeded := False;
     end
     else
@@ -434,7 +434,7 @@ begin
   // Move CompilerName to proper directory
   if OperationSucceeded = True then
   begin
-    infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, info);
+    infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, etinfo);
     renamefile(ArchiveDir + CompilerName, FBootstrapCompiler);
   end;
   {$ENDIF MSWINDOWS}
@@ -501,7 +501,7 @@ begin
 end
 else
 begin
-  infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive, error);
+  infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive, eterror);
 end;
 Result := OperationSucceeded;
 end;
@@ -530,7 +530,7 @@ begin
     exit;
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
-  infoln('TFPCInstaller: initialising...',Debug);
+  infoln('TFPCInstaller: initialising...',etDebug);
   if FBootstrapCompiler='' then
     begin  // may need to download it
     {$IFDEF MSWINDOWS}
@@ -582,7 +582,7 @@ begin
   // Only download bootstrap compiler if there's no valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
     begin
-      infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler),info);
+      infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler),etinfo);
       result:=CheckAndGetNeededExecutables;
     end
     else
@@ -640,7 +640,7 @@ const
 begin
   result:=InitModule;
   if not result then exit;
-  infoln('TFPCInstaller: building module '+ModuleName+'...',info);
+  infoln('TFPCInstaller: building module '+ModuleName+'...',etinfo);
   {$ifdef win64}
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
@@ -730,7 +730,7 @@ begin
       ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('-o');
       ProcessEx.Parameters.Add('' + FPCCfg + '');
-      infoln('Creating fpc.cfg:',info);
+      infoln('Creating fpc.cfg:',etinfo);
       ProcessEx.Execute;
       if ProcessEx.ExitStatus <> 0 then
         OperationSucceeded := False;
@@ -747,7 +747,7 @@ begin
     end
     else
     begin
-      infoln('fpc.cfg already exists; leaving it alone.',info);
+      infoln('fpc.cfg already exists; leaving it alone.',etinfo);
     end;
   end;
 
@@ -778,11 +778,11 @@ begin
   ProcessEx.Parameters.Add('distclean');
   if (FCrossOS_Target='') and (FCrossCPU_Target='') then
     begin
-    infoln('FPC: running make distclean:',info);
+    infoln('FPC: running make distclean:',etinfo);
     end
   else
     begin
-    infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',info);
+    infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
     end;
   ProcessEx.Execute;
   ProcessEx.OnErrorM:=oldlog;
@@ -810,7 +810,7 @@ var
 begin
   result:=InitModule;
   if not result then exit;
-  infoln('Checking out/updating FPC sources...',info);
+  infoln('Checking out/updating FPC sources...',etinfo);
   UpdateWarnings:=TStringList.Create;
   try
    FSVNClient.Verbose:=FVerbose;
@@ -822,8 +822,8 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-  infoln('FPC was at: '+BeforeRevision,info);
-  if FSVNUpdated then infoln('FPC is now at: '+AfterRevision,info) else infoln('No updates for FPC found.',info);
+  infoln('FPC was at: '+BeforeRevision,etinfo);
+  if FSVNUpdated then infoln('FPC is now at: '+AfterRevision,etinfo) else infoln('No updates for FPC found.',etinfo);
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;

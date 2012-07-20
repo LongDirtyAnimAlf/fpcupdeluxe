@@ -181,14 +181,12 @@ type
     procedure SetLazarusDirectory(AValue: string);
     procedure SetMakeDirectory(AValue: string);
   protected
-    LogFile:Text;
-    VerboseLog:Text;
+    FLog:TLogger;
+    FVerboseLog:TLogger;
     FModuleList:TStringList;
     FModuleEnabledList:TStringList;
     FModulePublishedList:TStringList;
-    // write verbatim to log and possibly console
-    procedure WriteLog(msg:string;ToConsole:boolean=true);
-    // append line ending and write to log and possibly console
+    // Write msg to log with line ending. Can also write to console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
  public
     property ShortCutName: string read FShortCutName write FShortCutName;
@@ -329,18 +327,9 @@ begin
     FMakeDirectory:=ExpandFileName(AValue);
 end;
 
-procedure TFPCupManager.WriteLog(msg: string; ToConsole: boolean);
-begin
-Write(LogFile,msg);
-if ToConsole then
-  InfoLn(msg,info);
-end;
-
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
 begin
-WriteLog(msg+LineEnding,false); //infoln adds already a lf
-if ToConsole then
-  InfoLn(msg,info);
+  FLog.WriteLog(msg,ToConsole);
 end;
 
 function TFPCupManager.LoadModuleList: boolean;
@@ -400,23 +389,12 @@ FModuleEnabledList:=TStringList.Create;
 FModulePublishedList:=TStringList.Create;
 Sequencer:=TSequencer.create;
 Sequencer.Parent:=Self;
+FLog:=TLogger.Create;
 {$IFDEF MSWINDOWS}
-LogFileName:='fpcup.log'; //current directory
+FLog.LogFile:='fpcup.log'; //current directory
 {$ELSE}
-LogFileName:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
+FLog.LogFile:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
 {$ENDIF MSWINDOWS}
-try
- AssignFile(LogFile,LogFileName);
- if FileExistsUTF8(LogFileName) then
-   Append(LogFile)
- else
-   Rewrite(LogFile);
-except
-  infoln('Error: could not open log file '+LogFileName+' for writing.'+LineEnding+
-  'This may be caused by another fpcup currently running.'+LineEnding+
-  'Aborting.',error);
-  halt(2); //Is there a nicer way to do this?
-end;
 WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
 end;
 
@@ -431,7 +409,7 @@ begin
   Sequencer.free;
   WritelnLog(DateTimeToStr(now)+': fpcup finished.',true);
   WritelnLog('------------------------------------------------',false);
-  CloseFile(LogFile);
+  FLog.Free;
   inherited Destroy;
 end;
 
@@ -488,7 +466,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutName<>EmptyStr then
   begin
-    infoln('Lazarus: creating desktop shortcut:',info);
+    infoln('Lazarus: creating desktop shortcut:',etinfo);
     try
       //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
@@ -513,7 +491,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutName<>EmptyStr then
   begin
-    infoln('Lazarus: deleting desktop shortcut:',info);
+    infoln('Lazarus: deleting desktop shortcut:',etinfo);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       {$IFDEF MSWINDOWS}
@@ -766,7 +744,7 @@ begin
 
   Installer.KeepLocalChanges:=FParent.KeepLocalChanges;
   Installer.Verbose:=FParent.Verbose;
-  Installer.LogFile:=FParent.LogFile;
+  Installer.Log:=FParent.FLog;
   {$IFDEF MSWINDOWS}
   Installer.MakeDirectory:=FParent.MakeDirectory;
   {$ENDIF}
@@ -832,6 +810,7 @@ while Sequence<>'' do
     line:=copy(Sequence,1,i-1)
   else
     line:=Sequence;
+  if FParent.Verbose then writeln('Sequence: adding line: '+line);
   delete(Sequence,1,length(line)+1);
   line:=NoWhite(line);
   if line<>'' then

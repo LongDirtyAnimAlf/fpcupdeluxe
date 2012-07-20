@@ -178,14 +178,14 @@ var
   Options:String;
 begin
   CrossInstaller:=GetCrossInstaller;
-  infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',info);
+  infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',etinfo);
   if Assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
-      infoln('Failed to get crossbinutils',error)
+      infoln('Failed to get crossbinutils',eterror)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
-      infoln('Failed to get cross libraries',error)
+      infoln('Failed to get cross libraries',eterror)
     else if not CrossInstaller.GetLibsLCL(FCrossLCL_Platform,FBaseDirectory) then
-      infoln('Failed to get LCL cross libraries',error)
+      infoln('Failed to get LCL cross libraries',eterror)
     else
     begin
     // If we're "crosscompiling" with the native compiler and binutils - "cross compiling lite" - use lazbuild.
@@ -258,16 +258,16 @@ begin
       ProcessEx.Parameters.Add('lcl\interfaces\lcl.lpk');
       end;
     if FCrossLCL_Platform='' then
-      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' using '+BuildMethod,info)
+      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' using '+BuildMethod,etinfo)
     else
-      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform+' using '+BuildMethod,info);
+      infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform+' using '+BuildMethod,etinfo);
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
     if not result then
       WritelnLog( 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
     end
   else
-    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,error);
+    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,eterror);
 end;
 
 constructor TLazarusCrossInstaller.Create;
@@ -287,7 +287,7 @@ var
   LazBuildApp: string;
 begin
   result:=true;
-  infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',info);
+  infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',etinfo);
   if ModuleName<>'USERIDE' then
   begin
     // Make all (should include lcl & ide)
@@ -308,17 +308,17 @@ begin
       'BIGIDE':
       begin
         ProcessEx.Parameters.Add('bigide');
-        infoln(ModuleName+': running make bigide:',info);
+        infoln(ModuleName+': running make bigide:',etinfo);
       end;
       'LAZARUS':
       begin
         ProcessEx.Parameters.Add('all');
-        infoln(ModuleName+': running make all:',info);
+        infoln(ModuleName+': running make all:',etinfo);
       end;
       'LAZBUILD':
       begin
         ProcessEx.Parameters.Add('lazbuild');
-        infoln(ModuleName+': running make lazbuild:',info);
+        infoln(ModuleName+': running make lazbuild:',etinfo);
       end;
       'LCL':
       begin
@@ -327,7 +327,7 @@ begin
         ProcessEx.Parameters.Add('registration');
         ProcessEx.Parameters.Add('lazutils');
         ProcessEx.Parameters.Add('lcl');
-        infoln(ModuleName+': running make registration lazutils lcl:', info);
+        infoln(ModuleName+': running make registration lazutils lcl:', etinfo);
       end
     else //raise error;
       begin
@@ -369,7 +369,7 @@ begin
       ProcessEx.Parameters.Add('--build-mode=Normal IDE');
       if FCrossLCL_Platform <>'' then
         ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
-      infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',info);
+      infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etinfo);
       ProcessEx.Execute;
     end;
   end;
@@ -405,7 +405,7 @@ end;
 function TLazarusInstaller.InitModule: boolean;
 begin
   result:=true;
-  infoln('TLazarusInstaller: initialising...',Debug);
+  infoln('TLazarusInstaller: initialising...',etDebug);
   if InitDone then
     exit;
   if FVerbose then
@@ -447,7 +447,7 @@ begin
   if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
   begin
     if ForceDirectoriesUTF8(FPrimaryConfigPath) then
-      infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath,info);
+      infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath,etinfo);
   end;
   // Set up a minimal config so we can use LazBuild
   LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
@@ -479,7 +479,7 @@ begin
       on E: Exception do
       begin
         result:=false;
-        infoln('Error setting Lazarus config: '+E.ClassName+'/'+E.Message,error);
+        infoln('Error setting Lazarus config: '+E.ClassName+'/'+E.Message,eterror);
       end;
     end;
   finally
@@ -545,11 +545,11 @@ begin
   begin  // clean out the correct compiler
     ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',info);
+    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
   end
   else
   begin
-    infoln('Lazarus: running make distclean:',info);
+    infoln('Lazarus: running make distclean:',etinfo);
   end;
   ProcessEx.Parameters.Add('distclean');
   // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
@@ -565,7 +565,7 @@ var
   UpdateWarnings: TStringList;
 begin
   if not InitModule then exit;
-  infoln('Checking out/updating Lazarus sources:',info);
+  infoln('Checking out/updating Lazarus sources:',etinfo);
   UpdateWarnings:=TStringList.Create;
   try
    FSVNClient.Verbose:=FVerbose;
@@ -577,8 +577,8 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-  infoln('Lazarus was at: '+BeforeRevision,info);
-  if FSVNUpdated then infoln('Lazarus is now at: '+AfterRevision,info) else infoln('No updates for Lazarus found.',info);
+  infoln('Lazarus was at: '+BeforeRevision,etinfo);
+  if FSVNUpdated then infoln('Lazarus is now at: '+AfterRevision,etinfo) else infoln('No updates for Lazarus found.',etinfo);
 end;
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
@@ -586,7 +586,7 @@ const
   LookForConfigFile='environmentoptions.xml';
 begin
   if not InitModule then exit;
-  infoln('Module Lazarus: Uninstall...',info);
+  infoln('Module Lazarus: Uninstall...',etinfo);
   //sanity check
   if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'Makefile') and
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'ide') and

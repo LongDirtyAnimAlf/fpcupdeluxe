@@ -34,11 +34,23 @@ unit fpcuputil;
 
 interface
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, eventlog;
+
 
 type
-  // Log/display markers, in ascending level of seriousness/descending level of verbosity.
-  LogLevel = (Debug, Info, Warning, Error);
+
+  { TLogger }
+
+  TLogger = class(TObject)
+  private
+    FLog: TEventLog; //Logging/debug output to file
+    procedure SetLogFile(AValue: string);
+  public
+    procedure WriteLog(Message: string; ToConsole: Boolean=true);
+    property LogFile: string write SetLogFile;
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
@@ -61,7 +73,7 @@ function ParentDirectoryIsNotRoot(Dir:string):boolean;
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
 //Shows message on screen; if DEBUG defined, also shows debug messages
-procedure infoln(Message: string; Level: logLevel);
+procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 {$IFDEF UNIX}
@@ -131,7 +143,7 @@ var
   ScriptFile: string;
 begin
   {$IFDEF MSWINDOWS}
-  infoln('todo: write me (CreateHomeStartLink)!', error);
+  infoln('todo: write me (CreateHomeStartLink)!', eterror);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist
@@ -179,7 +191,7 @@ begin
     Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
   end;
   Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
-  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile, error);
+  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile, eterror);
 end;
 
 function SFDirectLinkURL(URL: string; Document: TMemoryStream): string;
@@ -466,7 +478,7 @@ begin
   result:=false;
   // Assume http if no ftp detected
   try
-    infoln('Going to download '+TargetFile+' from URL: ' + URL, info);
+    infoln('Going to download '+TargetFile+' from URL: ' + URL, etinfo);
     if (Copy(URL, 1, Length('ftp://'))='ftp://') or
     (Copy(URL,1,Length('ftp.'))='ftp.') then
     begin
@@ -480,7 +492,7 @@ begin
     on E: Exception do
     begin
       infoln('Download: error occurred downloading file '+TargetFile+' from URL: '+URL+
-        '. Exception occurred: '+E.ClassName+'/'+E.Message+')', error);
+        '. Exception occurred: '+E.ClassName+'/'+E.Message+')', eterror);
     end;
     //Not writing message here; to be handled by calling code with more context.
     //if result:=false then infoln('Download: download of '+TargetFile+' from URL: '+URL+' failed.');
@@ -529,18 +541,19 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-procedure infoln(Message: string; Level: LogLevel);
+procedure infoln(Message: string; Level: TEventType);
 var
   Seriousness: string;
 begin
   case Level of
-    Debug: Seriousness:='Debug:';
-    Info: Seriousness:='Info:';
-    Warning: Seriousness:='WARNING:';
-    Error: Seriousness:='ERROR:';
+    etCustom: Seriousness:='Custom:';
+    etDebug: Seriousness:='Debug:';
+    etInfo: Seriousness:='Info:';
+    etWarning: Seriousness:='WARNING:';
+    etError: Seriousness:='ERROR:';
     else Seriousness:='UNKNOWN CATEGORY!!:'
   end;
-  if (Level<>Debug) then
+  if (Level<>etDebug) then
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
       writeln(Seriousness+' '+ Message); //we misuse this for info output
@@ -605,6 +618,35 @@ begin
   end;
 end;
 
+{ TLogger }
+
+procedure TLogger.SetLogFile(AValue: string);
+begin
+  if AValue<>FLog.FileName then
+  begin
+    FLog.Active:=false;//save WriteLog output
+    FLog.FileName:=AValue;
+  end;
+end;
+
+procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
+begin
+  FLog.Log(Message); //etInfo
+  if ToConsole then infoln(Message,etinfo);
+end;
+
+constructor TLogger.Create;
+begin
+  FLog:=TEventLog.Create(nil);
+  FLog.LogType:=ltFile;
+end;
+
+destructor TLogger.Destroy;
+begin
+  FLog.Active:=false;//save WriteLog text
+  FLog.Free;
+  inherited Destroy;
+end;
 
 {$IFDEF UNIX}
 //Adapted from sysutils; Unix/Linux only
@@ -622,4 +664,4 @@ end;
 {$ENDIF UNIX}
 
 end.
-
+

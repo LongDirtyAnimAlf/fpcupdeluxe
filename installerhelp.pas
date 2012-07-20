@@ -254,7 +254,7 @@ begin
     FileExistsUTF8(FTargetDirectory+'rtl.chm') then
   begin
     OperationSucceeded:=true;
-    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory,info);
+    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory,etinfo);
   end
   else
   begin
@@ -276,7 +276,7 @@ begin
         // Deal with timeouts, wrong URLs etc
         OperationSucceeded:=false;
         infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
-          'Exception: '+E.ClassName+'/'+E.Message, warning);
+          'Exception: '+E.ClassName+'/'+E.Message, etwarning);
       end;
     end;
 
@@ -292,12 +292,12 @@ begin
       else
       begin
         OperationSucceeded := False;
-        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),warning);
+        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
     end
     else
     begin
-      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL,error);
+      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL,eterror);
     end;
   end;
   Result := OperationSucceeded;
@@ -329,7 +329,7 @@ end;
 
 function THelpFPCInstaller.InitModule: boolean;
 begin
-  infoln('THelpFPCInstaller: initialising...',Debug);
+  infoln('THelpFPCInstaller: initialising...',etDebug);
   result:=false;
   if inherited InitModule then
   begin
@@ -337,7 +337,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
-    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,info);
+    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,etinfo);
     result:=true;
   end;
 end;
@@ -448,7 +448,7 @@ begin
             ProcessEx.Parameters.Clear;
             ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
             ProcessEx.Parameters.Add(FTargetDirectory+'build_lcl_docs.lpr');
-            infoln(ModuleName+': compiling build_lcl_docs help compiler:',info);
+            infoln(ModuleName+': compiling build_lcl_docs help compiler:',etinfo);
             ProcessEx.Execute;
             if ProcessEx.ExitStatus <> 0 then
             begin
@@ -491,7 +491,7 @@ begin
         ProcessEx.Parameters.Add('chm');
         // Show application output if desired:
         if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
-        infoln(ModuleName+': compiling chm help docs:',info);
+        infoln(ModuleName+': compiling chm help docs:',etinfo);
         { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
         Though that may work when adjusting the baseurl option in Lazarus for each
         CHM file, it's easier to move them to <lazarusdir>/docs/html,
@@ -518,7 +518,7 @@ begin
           'lcl'+DirectorySeparator+
           'lcl.chm')>0 then
           begin
-            infoln(ModuleName+': moving lcl.chm to docs directory',info);
+            infoln(ModuleName+': moving lcl.chm to docs directory',etinfo);
             // Move help file to doc directory
             OperationSucceeded:=MoveFile(FTargetDirectory+
               'lcl'+DirectorySeparator+
@@ -541,7 +541,7 @@ begin
     else
     begin
       // LCL was recently created
-      infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),info);
+      infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),etinfo);
     end;
   end;
 
@@ -551,7 +551,7 @@ end;
 function THelpLazarusInstaller.InitModule: boolean;
 begin
   result:=false;
-  infoln('THelpLazarusInstaller: initialising...',Debug);
+  infoln('THelpLazarusInstaller: initialising...',etDebug);
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
@@ -559,7 +559,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
-    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory,info);
+    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory,etinfo);
     result:=true;
   end;
 end;
