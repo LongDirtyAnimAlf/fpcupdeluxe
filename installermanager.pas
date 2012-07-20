@@ -810,7 +810,6 @@ while Sequence<>'' do
     line:=copy(Sequence,1,i-1)
   else
     line:=Sequence;
-  if FParent.Verbose then writeln('Sequence: adding line: '+line);
   delete(Sequence,1,length(line)+1);
   line:=NoWhite(line);
   if line<>'' then
