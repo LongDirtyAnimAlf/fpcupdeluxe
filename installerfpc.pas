@@ -652,7 +652,7 @@ begin
     ProcessEx.Parameters.Add('OS_TARGET=win64');
     ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
     ProcessEx.Parameters.Add('cycle');
-    infoln('Running make cycle for FPC64:',info);
+    infoln('Running make cycle for FPC64:',etinfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin
