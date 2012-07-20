@@ -442,7 +442,7 @@ begin
   //Extract bz2, overwriting without prompting
   if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
     begin
-      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',error);
+      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
       OperationSucceeded := False;
     end
     else
