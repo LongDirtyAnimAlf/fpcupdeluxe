@@ -256,7 +256,7 @@ begin
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
-  infoln('Running make all for FPC:',info);
+  infoln('Running make all for FPC:',etinfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
@@ -267,7 +267,7 @@ begin
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
   ProcessEx.Parameters.Add('install');
-  infoln('Running make install for FPC:',info);
+  infoln('Running make install for FPC:',etinfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
     OperationSucceeded := False;
@@ -368,7 +368,7 @@ begin
   FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
   if FileExists(FPCScript) then
   begin
-    infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',info);
+    infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etinfo);
     sysutils.DeleteFile(FPCScript);
   end;
   AssignFile(TxtFile,FPCScript);
@@ -384,11 +384,11 @@ begin
   Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
   begin
-    infoln('Created launcher script for FPC:'+FPCScript,info);
+    infoln('Created launcher script for FPC:'+FPCScript,etinfo);
   end
   else
   begin
-    infoln('Error creating launcher script for FPC:'+FPCScript,error);
+    infoln('Error creating launcher script for FPC:'+FPCScript,eterror);
   end;
   {$ENDIF UNIX}
 end;
@@ -453,14 +453,14 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,info);
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etinfo);
     OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
   end;
   if OperationSucceeded then
   begin
     //Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
-    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,warning);
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
   end;
   {$ENDIF LINUX}
   {$IFDEF DARWIN}
@@ -469,7 +469,7 @@ begin
   CompilerName:=ExtractFileName(FBootstrapCompiler);
   if ExecuteCommand(FTar+' -x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
   begin
-    infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',error);
+    infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
     OperationSucceeded := False;
   end
   else
@@ -481,7 +481,7 @@ begin
   begin
     //todo: currently tar spits out uncompressed file in current dir...
     //which might not have proper permissions to actually create file...!?
-    infoln('Going to rename/move '+CompilerName+' to '+FBootStrapCompiler,warning);
+    infoln('Going to rename/move '+CompilerName+' to '+FBootStrapCompiler,etwarning);
     sysutils.DeleteFile(FBootStrapCompiler); //ignore errors
     // We might be moving files across partitions so we cannot use renamefile
     OperationSucceeded:=FileUtil.CopyFile(CompilerName, FBootStrapCompiler);
@@ -491,7 +491,7 @@ begin
   begin
     //Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
-    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler,error);
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler,eterror);
   end;
   {$ENDIF DARWIN}
 end;
@@ -675,7 +675,7 @@ begin
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
     ProcessEx.Parameters.Add('cycle');
-    infoln('Running make cycle for FPC i386:',info);
+    infoln('Running make cycle for FPC i386:',etinfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin

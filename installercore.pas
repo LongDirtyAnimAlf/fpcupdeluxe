@@ -197,7 +197,7 @@ begin
       try
         if ExecuteCommand('as --version', Output, FVerbose) <> 0 then
         begin
-          infoln('Missing assembler as. Please install the developer tools.',error);
+          infoln('Missing assembler as. Please install the developer tools.',eterror);
           OperationSucceeded := false;
         end;
       except

@@ -46,7 +46,10 @@ type
     FLog: TEventLog; //Logging/debug output to file
     procedure SetLogFile(AValue: string);
   public
+    // Write to log and optionally console with seriousness etInfo
     procedure WriteLog(Message: string; ToConsole: Boolean=true);
+    // Write to log and optionally console with specified seriousness
+    procedure WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
     property LogFile: string write SetLogFile;
     constructor Create;
     destructor Destroy; override;
@@ -132,7 +135,7 @@ end;
 {$IFDEF UNIX}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
-  infoln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname, warning);
+  infoln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname, etwarning);
 end;
 {$ENDIF UNIX}
 
@@ -631,7 +634,13 @@ end;
 
 procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
 begin
-  FLog.Log(Message); //etInfo
+  FLog.Log(etInfo, Message);
+  if ToConsole then infoln(Message,etinfo);
+end;
+
+procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
+begin
+  FLog.Log(EventType, Message);
   if ToConsole then infoln(Message,etinfo);
 end;
 

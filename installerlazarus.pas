@@ -494,7 +494,7 @@ begin
     if FileSizeUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile)<=0 then
     begin
       // Alternative? Try to generate staticpackages list as a byproduct of registering a package that is in bigide anyway:: chmhelpkg
-      //infoln('TESTING: not writing static package list. please fix this before release.',error);
+      //infoln('TESTING: not writing static package list. please fix this before release.',eterror);
       StaticPackages:=TStringList.Create;
       try
         // Based on list when adding a new package to a Lazarus SVN (1.1) BIGIDE (April 2012)
