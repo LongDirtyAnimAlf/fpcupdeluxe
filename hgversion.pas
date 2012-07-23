@@ -18,7 +18,8 @@ var
   s:string;
   F:text;
 begin
-  ResultCode:=ExecuteCommand(HgCommand,s,false);
+  // We add an empty parameter to force quoting
+  ResultCode:=ExecuteCommand(HgCommand+' ""',s,false);
   if ResultCode=0 then
     begin
     while pos('"',s)>0 do delete(s,pos('"',s),1);
