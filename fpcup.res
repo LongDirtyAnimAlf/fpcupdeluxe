@@ -291,7 +291,7 @@ AddPackage1=$(Installdir)\packages\lazarus\zcomponent.lpk
 ;http://lazarus.freepascal.org/index.php/topic,16736.0.html
 ;http://sourceforge.net/projects/kzdesktop/
 Name=kzdesktop
-Enabled=0
+Enabled=1
 Installdir=$(fpcdir)/../extras/$(name)
 SVNURL=http://svn.code.sf.net/p/kzdesktop/code/trunk
 UnInstall1=rm -Rf $(Installdir)
