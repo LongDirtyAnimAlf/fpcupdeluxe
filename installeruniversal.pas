@@ -406,6 +406,7 @@ var
   LazarusConfig:TUpdateLazConfig;
   directive,xmlfile,key:string;
   LazDocPath: string;
+  TempList: TStringList;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
@@ -560,26 +561,41 @@ begin
 
           Directive:=GetValue('RegisterLazDocPath',sl);
           if Directive<>'' then
-            begin
+          begin
+            // Normalize path in directive so we can compare:
+            Directive:=ExcludeLeadingPathDelimiter(ExpandFileName(Directive));
             xmlfile:=EnvironmentConfig;
             key:='EnvironmentOptions/LazDoc/Paths';
-            // In future we could replace possible bla/../ entries in the directive with the direct path
-            LazDocPath:=ExcludeLeadingPathDelimiter(LazarusConfig.GetVariable(xmlfile,key));
+            LazDocPath:=LazarusConfig.GetVariable(xmlfile,key);
             if LazDocPath<>'' then
               begin
-              if AnsiPos(Directive,LazDocPath)=0 then
+              TempList:=TStringList.Create;
+              try
+                // Analyze all paths specified
+                TempList.Delimiter:=';';
+                TempList.StrictDelimiter:=True;
+                TempList.DelimitedText:=LazDocPath;
+                // Normalize all paths stored in setting:
+                for i := 0 to TempList.Count - 1 do
                 begin
-                // If the setting does not include our path, add it:
-                Directive:=Directive+';'+LazDocPath;
-                end
-                else
-                begin
-                // Setting already includes our path
-                Directive:=LazDocPath;
+                  TempList[i]:=ExcludeLeadingPathDelimiter(ExpandFileName(TempList[i]));
+                  if TempList[i]=Directive then
+                    begin
+                      // Settings already include this dir
+                      Directive:=LazDocPath;
+                      TempList.Clear; //Signal we're done
+                      break;
+                    end;
                 end;
+                // Only add our setting if not already found
+                if TempList.Count>0 then
+                  Directive:=Directive+';'+LazDocPath;
+              finally
+                TempList.Free;
               end;
               LazarusConfig.SetVariable(xmlfile,key,Directive);
             end;
+          end;
         except
           on E: Exception do
           begin

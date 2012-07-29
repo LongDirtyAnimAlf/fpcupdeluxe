@@ -62,7 +62,7 @@ Const
     'Buildmodule LCL;'+
     'End;'+
 //default sequence for win64
-//todo: currently not enabled; see
+//todo: win64 sequence currently not enabled; see
 //{$elseif defined(win64)}
 //below
     'Declare defaultwin64;'+

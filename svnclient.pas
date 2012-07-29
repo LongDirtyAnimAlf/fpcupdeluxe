@@ -341,7 +341,6 @@ begin
     // So we try until there are no more files downloaded.
     FReturnCode:=ExecuteCommand(SVNExecutable+command,Output,Verbose);
 
-    //todo: parse output into filelist
     FileList.Clear;
     ParseFileList(Output, FileList, []);
 

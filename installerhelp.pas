@@ -415,7 +415,8 @@ begin
     // A safe, old value
     LCLDate:=EncodeDate(1910,01,01);
     try
-      if FileExistsUTF8(FTargetDirectory+'lcl.chm') then LCLDate:=FileDateToDateTime(FileAgeUTF8(FTargetDirectory+'lcl.chm'));
+      if FileExistsUTF8(FTargetDirectory+'lcl.chm') then
+        LCLDate:=FileDateToDateTime(FileAgeUTF8(FTargetDirectory+'lcl.chm'));
     except
       // Ignore exceptions, leave old date as is
     end;

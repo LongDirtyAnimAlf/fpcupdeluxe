@@ -762,7 +762,6 @@ end;
 
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
-  //todo: create our own log if not done?
   if Assigned(FLog) then
   begin
     FLog.WriteLog(msg,ToConsole);
