@@ -455,6 +455,7 @@ begin
     try
       // Force English language
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Language/ID', 'en');
+      // Set Lazarus directory
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FBaseDirectory);
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
@@ -475,6 +476,8 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/FPCSourceDirectory/Value',FFPCDir);
       // Debugger type needs to be specified at least since Lazarus 1.1
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
+      // Add <lazarus>\docs\xml top fpdoc editor paths
+      LazDocPathAdd(IncludeTrailingPathDelimiter(FBaseDirectory)+'docs\xml',LazarusConfig);
     except
       on E: Exception do
       begin

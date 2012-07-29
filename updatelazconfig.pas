@@ -148,12 +148,65 @@ public
   procedure SetVariable(ConfigFile, Variable: string; Value: boolean);
   { Sets variable to a certain value, only if a config file is created for us.}
   procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
-  {Create object; specify path (primary config path) where option files should be created or updated:}
+  { Create object; specify path (primary config path) where option files should be created or updated:}
   constructor Create(ConfigPath: string);
   destructor Destroy; override;
 end;
+
+procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig); //Add a path to the LazDoc/fpcdoc list
+
 implementation
 uses FileUtil;
+
+procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
+var
+  CleanedPath: string;
+  FoundIt: boolean;
+  i: integer;
+  TempList: TStringList;
+  key,LazDocPath,xmlfile: string;
+begin
+  if PathToAdd<>'' then
+  begin
+    // Normalize path so we can compare:
+    CleanedPath:=ExcludeLeadingPathDelimiter(ExpandFileName(PathToAdd));
+    FoundIt:=false;
+    xmlfile:=EnvironmentConfig;
+    key:='EnvironmentOptions/LazDoc/Paths';
+    LazDocPath:=LazarusConfig.GetVariable(xmlfile, key);
+    // In an empty config, we just add our CleanedPath.
+    // If it's not empty, we need to check if the config already contains our path:
+    if LazDocPath<>'' then
+    begin
+      TempList:=TStringList.Create;
+      try
+        // Analyze all paths specified
+        TempList.Delimiter:=';';
+        TempList.StrictDelimiter:=True;
+        TempList.DelimitedText:=LazDocPath;
+        // Normalize all paths stored in setting and look for our value:
+        for i := 0 to TempList.Count - 1 do
+        begin
+          TempList[i]:=ExcludeLeadingPathDelimiter(ExpandFileName(TempList[i]));
+          if TempList[i]=CleanedPath then
+            begin
+              // Settings already include this dir
+              FoundIt:=true;
+              break;
+            end;
+        end;
+        // Only add our setting if not already found
+        if FoundIt then
+          CleanedPath:=LazDocPath
+        else
+          CleanedPath:=CleanedPath+';'+LazDocPath;
+      finally
+        TempList.Free;
+      end;
+    end;
+    LazarusConfig.SetVariable(xmlfile, key, CleanedPath);
+  end;
+end;
 
 { TConfig }
 

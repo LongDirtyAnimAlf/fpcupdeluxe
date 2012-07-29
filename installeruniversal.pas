@@ -5,7 +5,7 @@ unit installerUniversal;
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,processutils;
+  Classes, SysUtils, installerCore, m_crossinstaller,processutils,updatelazconfig;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -78,7 +78,7 @@ Const
 
 implementation
 
-uses inifiles,updatelazconfig,fileutil,fpcuputil;
+uses inifiles,fileutil,fpcuputil;
 
 Const
   MAXSYSMODULES=100;
@@ -405,8 +405,6 @@ var
   sl:TStringList;
   LazarusConfig:TUpdateLazConfig;
   directive,xmlfile,key:string;
-  LazDocPath: string;
-  TempList: TStringList;
 
   function AddToLazXML(xmlfile:string):boolean;
   var
@@ -559,43 +557,9 @@ begin
             LazarusConfig.SetVariable(xmlfile,key,Directive+GetExeExt);
             end;
 
+          // Register path to help source if given
           Directive:=GetValue('RegisterLazDocPath',sl);
-          if Directive<>'' then
-          begin
-            // Normalize path in directive so we can compare:
-            Directive:=ExcludeLeadingPathDelimiter(ExpandFileName(Directive));
-            xmlfile:=EnvironmentConfig;
-            key:='EnvironmentOptions/LazDoc/Paths';
-            LazDocPath:=LazarusConfig.GetVariable(xmlfile,key);
-            if LazDocPath<>'' then
-              begin
-              TempList:=TStringList.Create;
-              try
-                // Analyze all paths specified
-                TempList.Delimiter:=';';
-                TempList.StrictDelimiter:=True;
-                TempList.DelimitedText:=LazDocPath;
-                // Normalize all paths stored in setting:
-                for i := 0 to TempList.Count - 1 do
-                begin
-                  TempList[i]:=ExcludeLeadingPathDelimiter(ExpandFileName(TempList[i]));
-                  if TempList[i]=Directive then
-                    begin
-                      // Settings already include this dir
-                      Directive:=LazDocPath;
-                      TempList.Clear; //Signal we're done
-                      break;
-                    end;
-                end;
-                // Only add our setting if not already found
-                if TempList.Count>0 then
-                  Directive:=Directive+';'+LazDocPath;
-              finally
-                TempList.Free;
-              end;
-              LazarusConfig.SetVariable(xmlfile,key,Directive);
-            end;
-          end;
+          LazDocPathAdd(directive, LazarusConfig);
         except
           on E: Exception do
           begin
