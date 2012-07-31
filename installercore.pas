@@ -43,6 +43,7 @@ type
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+    // Make a list of all binutils that can be downloaded
     procedure CreateBinutilsList;
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
@@ -383,6 +384,7 @@ begin
   FBinUtils.Add('windres' + GetExeExt);
   FBinUtils.Add('zip' + GetExeExt);
   {$ifdef win64}
+  // Same name, different OS.
   FBin64Utils := TStringList.Create;
   FBin64Utils.Add('ar' + GetExeExt);
   FBin64Utils.Add('as' + GetExeExt);
