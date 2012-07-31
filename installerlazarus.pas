@@ -524,7 +524,7 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/FPCSourceDirectory/Value',FFPCDir);
       // Debugger type needs to be specified at least since Lazarus 1.1
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/Debugger/Class','TGDBMIDebugger');
-      // Add <lazarus>\docs\xml top fpdoc editor paths
+      // Add <lazarus>\docs\xml to fpdoc editor paths
       LazDocPathAdd(IncludeTrailingPathDelimiter(FBaseDirectory)+'docs\xml',LazarusConfig);
     except
       on E: Exception do
