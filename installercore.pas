@@ -59,6 +59,7 @@ type
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
     function GetCrossInstaller: TCrossInstaller;
+    // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
     procedure LogError(Sender: TProcessEx; IsException: boolean);
     procedure SetPath(NewPath: string; Prepend: boolean);

@@ -357,12 +357,7 @@ begin
     begin
       if OperationSucceeded then
       begin
-        {$ifdef win32}
-        DebuggerPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\i386-win32\';
-        {$endif win32}
-        {$ifdef win64}
-        DebuggerPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\x86_64-win64\';
-        {$endif win64}
+        DebuggerPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\'+GetFPCTarget(true)+'\';
         ForceDirectoriesUTF8(DebuggerPath);
         //Copy over binutils, all dlls, all manifests to new CompilerName bin directory
         try
@@ -510,23 +505,12 @@ begin
       // Post r38092, Lazarus supports this path: $(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb.exe
       // or perhaps $(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb.exe
       // check for this and fallback to make/binutils directory
-      //todo: we really should have some NativeCPU/NativeOS property in our installer!?!? This would cut down on ifdefs
-      {$IFDEF win32}
-      if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\i386-win32\gdb'+GetExeExt) then
+      if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\'+GetFPCTarget(true)+'\gdb'+GetExeExt) then
         LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value','$(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb'+GetExeExt)
-      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\i386-win32\bin\gdb.exe') then
+      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\'+GetFPCTarget(true)+'\bin\gdb.exe') then
         LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value','$(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb'+GetExeExt)
       else
         LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+GetExeExt);
-      {$ENDIF}
-      {$IFDEF win64}
-      if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\x86_64-win64\gdb'+GetExeExt) then
-        LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value','$(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb'+GetExeExt)
-      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\x86_64-win64\bin\gdb'+GetExeExt) then
-          LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value','$(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb'+GetExeExt)
-      else
-        LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+GetExeExt);
-      {$ENDIF}
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',IncludeTrailingPathDelimiter(FMakeDir)+'make'+GetExeExt);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
