@@ -128,6 +128,8 @@ private
   InitDone:boolean;
   // Directory where help files are placed
   FTargetDirectory: string;
+  // Directory where build_lcl_docs.exe is placed
+  FBuildLCLDocsExeDirectory: string;
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; virtual;
@@ -231,17 +233,20 @@ end;
 function THelpInstaller.GetModule(ModuleName: string): boolean;
 const
   // Location of FPC CHM help zip
-  // Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files
+  // Link to 2.6 documentation: rtl, chm, and reference manuals, including .xct files, and as a bonus: lcl files:
+  // http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0RC1/fpc-lazarus-doc-chm-1.0RC1.zip/download
+  //
+  // Older:
   // http://sourceforge.net/projects/freepascal/files/Documentation/2.6.0/doc-chm.zip/download
   // which links to
   // http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip
   //
-  // Note: there's also an older file on
+  // Even older file on
   // http://sourceforge.net/projects/freepascal/files/Documentation/
   // that includes the lcl file
   // Snapshot alternative... that changes name... and is a .tar.bz2
   // ftp://freepascal.dfmk.hu/pub/lazarus/snapshots/fpc-lazarus-doc-chm-20120622.tar.bz2
-  FPC_CHM_URL='http://garr.dl.sourceforge.net/project/freepascal/Documentation/2.6.0/doc-chm.zip';
+  FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0RC1/fpc-lazarus-doc-chm-1.0RC1.zip/download';
 var
   DocsZip: string;
   OperationSucceeded: boolean;
@@ -425,7 +430,7 @@ begin
     begin
       // Only rebuild if lcl.chm is fairly old.
 
-      BuildLCLDocsExe:=FTargetDirectory+'build_lcl_docs'+GetExeExt;
+      BuildLCLDocsExe:=FBuildLCLDocsExeDirectory+'build_lcl_docs'+GetExeExt;
       if OperationSucceeded then
       begin
         // Only recompile build_lcl_docs.exe if needed
@@ -448,7 +453,7 @@ begin
             ProcessEx.Executable := LazBuildExe;
             ProcessEx.Parameters.Clear;
             ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
-            ProcessEx.Parameters.Add(FTargetDirectory+'build_lcl_docs.lpr');
+            ProcessEx.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             infoln(ModuleName+': compiling build_lcl_docs help compiler:',etinfo);
             ProcessEx.Execute;
             if ProcessEx.ExitStatus <> 0 then
@@ -477,8 +482,9 @@ begin
       begin
         // Compile Lazarus LCL CHM help
         ProcessEx.Executable := BuildLCLDocsExe;
-        // Make sure directory switched to that of build_lcl_docs,
+        // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
+        //todo: check: perhaps this needs to be FBuildLCLDocsExeDirectory
         ProcessEx.CurrentDirectory:=FTargetDirectory;
         ProcessEx.Parameters.Clear;
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
@@ -493,17 +499,17 @@ begin
         // Show application output if desired:
         if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
         infoln(ModuleName+': compiling chm help docs:',etinfo);
-        { The CHM file gets output into <lazarusdir>/docs/html/lcl/lcl.chm
+        { The CHM file gets output into <lazarusdir>/docs/chm/lcl/lcl.chm
         Though that may work when adjusting the baseurl option in Lazarus for each
-        CHM file, it's easier to move them to <lazarusdir>/docs/html,
-        which is also suggested by the wiki.
+        CHM file, it's easier to move them to <lazarusdir>/docs/chm,
+        which is picked up by the default Lazarus settings.
         The generated .xct file is an index file for fpdoc cross file links,
         used if you want to link to the chm from other chms.}
         ProcessEx.Execute;
         BuildResult:=ProcessEx.ExitStatus;
         if BuildResult <> 0 then
         begin
-          writelnlog(ModuleName+': error creating chm help dos. build_lcl_docs exit status: '+inttostr(BuildResult), true);
+          writelnlog(ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+inttostr(BuildResult), true);
           OperationSucceeded := False;
         end;
       end;
@@ -559,8 +565,12 @@ begin
     // build_lcl_docs will fail; at least it won't pick up the FPC help files for cross references
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
-      'html'+DirectorySeparator;
-    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory,etinfo);
+      'chm'+DirectorySeparator;
+    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory,etInfo);
+    FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+      'docs'+DirectorySeparator+
+      'html'+DirectorySeparator;;
+    infoln('HELPLAZARUS: FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
     result:=true;
   end;
 end;
@@ -617,13 +627,16 @@ begin
     LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
     try
       try
-        // Configure help path
-        // Note that we might be overwriting user's settings here.
+        {
+        We don't need to set explicit paths as long as we use the defaults, e.g.
+        $(LazarusDir)\docs\html and $(LazarusDir)\docs\chm
+        http://wiki.lazarus.freepascal.org/Installing_Help_in_the_IDE#Installing_CHM_help_.28Lazarus_1.0RC1_and_later.29
+        We could set it explicitly with
         LazarusConfig.SetVariable(HelpConfig,
           'Viewers/TChmHelpViewer/CHMHelp/FilesPath',
-          IncludeTrailingPathDelimiter(FBaseDirectory)+
-          'docs'+DirectorySeparator+
-          'html'+DirectorySeparator);
+          IncludeTrailingPathDelimiter(FBaseDirectory)+'docs'+DirectorySeparator+'chm'+DirectorySeparator
+          );
+        }
         result:=true;
       except
         on E: Exception do
@@ -643,26 +656,7 @@ var
   LazarusConfig: TUpdateLazConfig;
 begin
   Result:=inherited UnInstallModule(ModuleName);
-  if result then
-  begin
-    LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
-    try
-      try
-        // Remove link to help files
-        LazarusConfig.DeleteVariable(HelpConfig,
-          'Viewers/TChmHelpViewer/CHMHelp/FilesPath');
-        result:=true;
-      except
-        on E: Exception do
-        begin
-          result:=false;
-          writelnlog('Lazarus help: Error setting Lazarus config: '+E.ClassName+'/'+E.Message, true);
-        end;
-      end;
-    finally
-      LazarusConfig.Free;
-    end;
-  end;
+  // Removing config not needed anymore since we use the default
 end;
 
 constructor THelpLazarusInstaller.Create;
