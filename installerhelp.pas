@@ -409,7 +409,9 @@ function THelpLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   BuildLCLDocsExe: string;
   BuildResult: integer;
+  ExistingLCLHelp: string;
   FPDocExe: string;
+  GeneratedLCLHelp: string;
   LazbuildExe: string;
   LCLDate: TDateTime;
   LHelpDirectory: string;
@@ -417,22 +419,30 @@ var
 begin
   // We need lhelp viewer but that should already have been taken care of by the dependencies.
   OperationSucceeded:=true;
+  // The locations of the LCL.chm we generate and the existing one we can overwrite:
+  ExistingLCLHelp:=FTargetDirectory+'lcl.chm';
+  GeneratedLCLHelp:=FTargetDirectory+'lcl'+DirectorySeparator+'lcl.chm';
 
   if OperationSucceeded then
   begin
     // A safe, old value
     LCLDate:=EncodeDate(1910,01,01);
     try
-      if FileExistsUTF8(FTargetDirectory+'lcl.chm') then
-        LCLDate:=FileDateToDateTime(FileAgeUTF8(FTargetDirectory+'lcl.chm'));
+      if FileExistsUTF8(ExistingLCLHelp) then
+        LCLDate:=FileDateToDateTime(FileAgeUTF8(ExistingLCLHelp));
     except
       // Ignore exceptions, leave old date as is
     end;
 
-    if (DaysBetween(Now,LCLDate)>1) or (FileSize(FTargetDirectory+'lcl.chm')=0) then
+    // Only consider building if lcl.chm is not read-only.
+    // Then it should be old or empty.
+    // We assume that readonly means the user doesn't want to
+    // overwrite.
+    if (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
+      and
+      ((DaysBetween(Now,LCLDate)>1)
+      or (FileSize(ExistingLCLHelp)=0)) then
     begin
-      // Only rebuild if lcl.chm is fairly old.
-
       BuildLCLDocsExe:=FBuildLCLDocsExeDirectory+'build_lcl_docs'+GetExeExt;
       if OperationSucceeded then
       begin
@@ -520,28 +530,18 @@ begin
       if OperationSucceeded then
       begin
         // Move files if required
-        if FileExistsUTF8(FTargetDirectory+
-          'lcl'+DirectorySeparator+
-          'lcl.chm') then
+        if FileExistsUTF8(GeneratedLCLHelp) then
         begin
-          if FileSize(FTargetDirectory+
-          'lcl'+DirectorySeparator+
-          'lcl.chm')>0 then
+          if FileSize(GeneratedLCLHelp)>0 then
           begin
             infoln(ModuleName+': moving lcl.chm to docs directory',etinfo);
-            // Move help file to doc directory
-            OperationSucceeded:=MoveFile(FTargetDirectory+
-              'lcl'+DirectorySeparator+
-              'lcl.chm',
-              FTargetDirectory+
-              'lcl.chm');
+            OperationSucceeded:=MoveFile(GeneratedLCLHelp,ExistingLCLHelp);
           end
           else
           begin
             // File exists, but is empty. We might have an older file still present
-            writelnlog(ModuleName+': WARNING: '+FTargetDirectory+
-            'lcl'+DirectorySeparator+
-            'lcl.chm was created but is empty. Lcl.chm may be out of date! Try running with --verbose to see build_lcl_docs error messages.', true);
+            writelnlog(ModuleName+': WARNING: '+GeneratedLCLHelp+
+            ' was created but is empty (perhaps due to FPC bugs). Lcl.chm may be out of date! Try running with --verbose to see build_lcl_docs error messages.', true);
             // Todo: change this once fixes for fpdoc chm generation are in fixes_26:
             OperationSucceeded:=true;
           end;
