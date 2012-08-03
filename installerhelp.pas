@@ -67,8 +67,11 @@ Const
     Lazarus base directory
     }
     'Declare helplazarus;'+
+    {Although Bigide contains lhelp in recent Lazarus, and lhelp should
+    be compiled on demand once F1 is pressed, bug 22565 causes that to fail sometimes.
+    Therefore we build it explicitly by Requiring it. }
+    'Requires lhelp;'+
     'Requires BIGIDE;'+
-    {Bigide contains lhelp in recent Lazarus }
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
     redownload them}
