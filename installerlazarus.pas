@@ -359,7 +359,7 @@ begin
       begin
         DebuggerPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\'+GetFPCTarget(true)+'\';
         ForceDirectoriesUTF8(DebuggerPath);
-        //Copy over binutils, all dlls, all manifests to new CompilerName bin directory
+        //Copy over binutils, all dlls, all manifests to new Debuggerpath directory
         try
           for FileCounter:=0 to FBinUtils.Count-1 do
           begin
