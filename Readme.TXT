@@ -47,6 +47,9 @@ Hint: after the first run, you can add/remove packages, set up your settings as 
 You can then run fpcup --only=fpc,lazarus to only update FPC and Lazarus sources, which saves time, as you're not rebuilding help, installing packages, etc.
 Of course, you could run the full version e.g. once per day to make sure all external repositories etc are up to date.
 
+If you want to compile fpcup from source, please compile hgversion.pas first; this should give a hgversion executable, which is used by the fpcup project build action (Compilation/Execute Before command) to generate the current fpcup version info into revision.inc
+If you don't do this, you'll probably get incorrect version information in fpcup or compilation problems ("Can't open include file "revision.inc"").
+
 Technical explanation
 =====================
 If you want to improve or extend fpcup, here's a more detailed description of what it does.
