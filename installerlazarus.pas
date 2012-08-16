@@ -360,6 +360,7 @@ begin
         DebuggerPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\'+GetFPCTarget(true)+'\';
         ForceDirectoriesUTF8(DebuggerPath);
         //Copy over binutils, all dlls, all manifests to new Debuggerpath directory
+        //todo: we should really deal with the debuggerfiles here. Rather than using multiple stringlists, can't we use an array or object list with custom objects/records or something?
         try
           for FileCounter:=0 to FBinUtils.Count-1 do
           begin

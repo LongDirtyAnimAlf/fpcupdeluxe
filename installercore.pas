@@ -17,10 +17,9 @@ type
     function GetMake: string;
   protected
     FBaseDirectory: string;
-    FBinUtils: TStringList;
-    FBin64Utils: TStringList;
+    FBinUtils: TStringList; //List of executables such as make.exe needed for compilation on Win32
     FBunzip2: string;
-    // Compiler executable
+    // Compiler executable:
     FCompiler: string;
     FCompilerOptions: string;
     FCrossCPU_Target: string;
@@ -111,7 +110,6 @@ const
   {$ELSE}
   //Unix/Linux
   PATHVARNAME = 'PATH';
-
   {$ENDIF MSWINDOWS}
 
 { TInstaller }
@@ -153,6 +151,8 @@ end;
 
 function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
+  AllThere: boolean;
+  i: integer;
   OperationSucceeded: boolean;
   Output: string;
 begin
@@ -183,13 +183,28 @@ begin
     {$IFDEF MSWINDOWS}
     if OperationSucceeded then
     begin
-      // Check for binutils directory, make and unzip executables.
-      // Download if needed; will download unzip - needed for SVN download
-      if (DirectoryExists(FMakeDir) = false) or (FileExists(Make) = false) or (FileExists(FUnzip) = false) then
+      // Download if needed, including unzip - needed for SVN download
+      // Check for binutils directory
+      AllThere:=true;
+      if DirectoryExists(FMakeDir) = false then
       begin
-        infoln('Make path ' + FMakeDir + ' doesn''t have binutils. Going to download binutils.',etinfo);
-        OperationSucceeded := DownloadBinUtils;
+        infoln('Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etinfo);
+        AllThere:=false;
+      end
+      else
+      begin
+        // Check all binutils in directory
+        for i:=0 to FBinUtils.Count-1 do
+        begin
+          if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[i])) then
+          begin
+            AllThere:=false;
+            infoln('Make path ' + FMakeDir + ' does not have (all) binutils. Going to download binutils.',etinfo);
+            break;
+          end;
+        end;
       end;
+      if not(AllThere) then OperationSucceeded := DownloadBinUtils;
     end;
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
@@ -339,37 +354,38 @@ procedure TInstaller.CreateBinutilsList;
 // Windows-centric for now; doubt if it
 // can be used in Unixy systems anyway
 begin
-  // We need GetExeExt to be defined first.
   FBinUtils := TStringList.Create;
   FBinUtils.Add('GoRC' + GetExeExt);
-  {$ifndef win64}
   FBinUtils.Add('ar' + GetExeExt);
   FBinUtils.Add('as' + GetExeExt);
-  {$endif win64}
   FBinUtils.Add('cmp' + GetExeExt);
   FBinUtils.Add('cp' + GetExeExt);
-  FBinUtils.Add('cpp.exe');
+  FBinUtils.Add('cpp' + GetExeExt);
   FBinUtils.Add('diff' + GetExeExt);
   FBinUtils.Add('dlltool' + GetExeExt);
   FBinUtils.Add('fp32.ico');
   FBinUtils.Add('gcc' + GetExeExt);
   FBinUtils.Add('gdate' + GetExeExt);
-  //GDB.exe apparently can also be found here:
-  //http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
-  //for Windows x64:
-  //http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/
-  {$ifndef win64}
   FBinUtils.Add('gdb' + GetExeExt);
-  {$endif win64}
   FBinUtils.Add('gecho' + GetExeExt);
   FBinUtils.Add('ginstall' + GetExeExt);
   FBinUtils.Add('ginstall.exe.manifest');
   FBinUtils.Add('gmkdir' + GetExeExt);
   FBinUtils.Add('grep' + GetExeExt);
-  {$ifndef win64}
   FBinUtils.Add('ld' + GetExeExt);
-  {$endif win64}
+  {$ifdef win32}
+  // Debugger support files
+  // On changes, please update debugger list in DownloadBinUtils:
   FBinUtils.Add('libexpat-1.dll');
+  FBinUtils.Add('libgcc_s_dw2-1.dll');
+  FBinUtils.Add('libiconv-2.dll');
+  FBinUtils.Add('libintl-8.dll');
+  {$endif win32}
+  {$ifdef win64}
+  // Debugger support files:
+  // On changes, please update debugger list in DownloadBinUtils:
+  FBinUtils.Add('libiconv-2.dll');
+  {$endif win64}
   FBinUtils.Add('make' + GetExeExt);
   FBinUtils.Add('mv' + GetExeExt);
   FBinUtils.Add('objdump' + GetExeExt);
@@ -379,20 +395,11 @@ begin
   FBinUtils.Add('rm' + GetExeExt);
   FBinUtils.Add('strip' + GetExeExt);
   FBinUtils.Add('unzip' + GetExeExt);
-  //We might just use gecho for that but that would probably confuse people:
+  //Upx is fairly useless. We might just use gecho as upx that but that would probably confuse people..
   FBinUtils.Add('upx' + GetExeExt);
   FBinUtils.Add('windres' + GetExeExt);
-  FBinUtils.Add('windres' + GetExeExt);
+  FBinUtils.Add('windres.h');
   FBinUtils.Add('zip' + GetExeExt);
-  {$ifdef win64}
-  // Same name, different OS.
-  FBin64Utils := TStringList.Create;
-  FBin64Utils.Add('ar' + GetExeExt);
-  FBin64Utils.Add('as' + GetExeExt);
-  FBin64Utils.Add('ld' + GetExeExt);
-  FBin64Utils.Add('gdb.exe');     //different source, don't change position.
-  FBin64Utils.Add('libiconv-2.dll');
-  {$endif win64}
 end;
 
 procedure TInstaller.CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
@@ -416,62 +423,117 @@ const
   These might work but are development, too (might end up in 2.6.2):
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
   but let's use a stable version:}
+  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
+  // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
+  // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
+  SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
+
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw64/';
   SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
-  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
+  //todo: add Qt and Qt4Pas5.dll in http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/?
 var
   Counter: integer;
-  Errors: integer = 0;
-  sURL: string;
-begin
-  //Parent directory of files. Needs trailing backslash.
-  ForceDirectoriesUTF8(FMakeDir);
-  Result := true;
-  for Counter := 0 to FBinUtils.Count - 1 do
-  begin
-    infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + FMakeDir,etinfo);
-    try
-      if Download(SourceUrl + FBinUtils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBinUtils[Counter]) = false then
-      begin
-        Errors := Errors + 1;
-        infoln('Error downloading binutils: ' + FBinUtils[Counter] + ' to ' + FMakeDir,eterror);
-      end;
-    except
-      on E: Exception do
-      begin
-        Result := false;
-        infoln('Error downloading binutils: ' + E.Message,eterror);
-        exit; //out of function.
-      end;
-    end;
-  end;
+  {$ifdef win32}
+  DebuggerFiles: TStringList; //Files on the SourceURL_gdb page
+  {$endif win32}
   {$ifdef win64}
-  sURL := SourceURL64;
-  for Counter := 0 to FBin64Utils.Count - 1 do
-  begin
-    infoln('Downloading: ' + FBin64Utils[Counter] + ' into ' + FMakeDir,etinfo);
-    try
-      if FBin64Utils[Counter] = 'gdb.exe' then // switch source
-        sURL := SourceURL64_gdb;
-      if Download(sURL + FBin64Utils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBin64Utils[Counter]) = false then
-      begin
-        Errors := Errors + 1;
-        infoln('Error downloading binutils: ' + FBin64Utils[Counter] + ' to ' + FMakeDir,eterror);
-      end;
-    except
-      on E: Exception do
-      begin
-        Result := false;
-        infoln('Error downloading binutils: ' + E.Message,eterror);
-        exit; //out of function.
+  Debugger64Files: TStringList; //Files on the SourceURL64_gdb page
+  Win64SpecificFiles: TStringList; //Files on the SourceURL64 page
+  {$endif win64}
+  Errors: integer = 0;
+  RootURL: string;
+begin
+  {$ifdef win32}
+  DebuggerFiles:=TStringList.Create;
+  {$endif win32}
+  {$ifdef win64}
+  Debugger64Files:=TStringList.Create;
+  Win64SpecificFiles:=TStringList.Create;
+  {$endif win64}
+  try
+    //Parent directory of files. Needs trailing backslash.
+    ForceDirectoriesUTF8(FMakeDir);
+    Result := true;
+    // Set up exception list:
+    {$ifdef win32}
+    DebuggerFiles.Add('gdb.exe');
+    DebuggerFiles.Add('libexpat-1.dll');
+    DebuggerFiles.Add('libgcc_s_dw2-1.dll');
+    DebuggerFiles.Add('libiconv-2.dll');
+    DebuggerFiles.Add('libintl-8.dll');
+    {$endif win32}
+    {$ifdef win64}
+    Debugger64Files.Add('gdb.exe');
+    Debugger64Files.Add('libiconv-2.dll');
+    // These files are from the 64 bit site...
+    Win64SpecificFiles.Add('GoRC.exe');
+    Win64SpecificFiles.Add('ar.exe');
+    Win64SpecificFiles.Add('as.exe');
+    Win64SpecificFiles.Add('cmp.exe');
+    Win64SpecificFiles.Add('cp.exe');
+    Win64SpecificFiles.Add('diff.exe');
+    Win64SpecificFiles.Add('gdate.exe');
+    Win64SpecificFiles.Add('gecho.exe');
+    Win64SpecificFiles.Add('ginstall.exe');
+    Win64SpecificFiles.Add('ginstall.exe.manifest');
+    Win64SpecificFiles.Add('gmkdir.exe');
+    Win64SpecificFiles.Add('ld.exe');
+    Win64SpecificFiles.Add('make.exe');
+    Win64SpecificFiles.Add('mv.exe');
+    Win64SpecificFiles.Add('objdump.exe');
+    Win64SpecificFiles.Add('pwd.exe');
+    Win64SpecificFiles.Add('rm.exe');
+    Win64SpecificFiles.Add('strip.exe');
+    // ... the rest will be downloaded from the 32 bit site
+    {$endif win64}
+    for Counter := 0 to FBinUtils.Count - 1 do
+    begin
+      infoln('Downloading: ' + FBinUtils[Counter] + ' into ' + FMakeDir,etinfo);
+      try
+        {$ifdef win32}
+        if DebuggerFiles.IndexOf(FBinUtils[Counter])>-1 then
+          RootUrl:=SourceURL_gdb
+        else
+          RootURL:=SourceURL;
+        {$endif win32}
+        {$ifdef win64}
+        // First override with specific locations before falling back
+        // to the win32 site
+        if Debugger64Files.IndexOf(FBinUtils[Counter])>-1 then
+          RootUrl:=SourceURL64_gdb
+        else if Win64Specific.IndexOf(FBinUtils[Counter])>-1 then
+          RootURL:=SourceURL64
+        else
+          RootURL:=SourceURL;
+        {$endif win64}
+        if Download(RootUrl + FBinUtils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBinUtils[Counter]) = false then
+        begin
+          Errors := Errors + 1;
+          infoln('Error downloading binutils: ' + FBinUtils[Counter] + ' to ' + FMakeDir,eterror);
+        end;
+      except
+        on E: Exception do
+        begin
+          Result := false;
+          infoln('Error downloading binutils: ' + E.Message,eterror);
+          exit; //out of function.
+        end;
       end;
     end;
-  end;
-  {$endif win64}
-  if Errors > 0 then
-  begin
-    Result := false;
-    WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' errors downloading binutils.', true);
+
+    if Errors > 0 then
+    begin
+      Result := false;
+      WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' errors downloading binutils.', true);
+    end;
+  finally
+    {$ifdef win32}
+    DebuggerFiles.Free;
+    {$endif win32}
+    {$ifdef win64}
+    Debugger64Files.Free;
+    Win64SpecificFiles.Free;
+    {$endif win64}
   end;
 end;
 
@@ -802,8 +864,6 @@ destructor TInstaller.Destroy;
 begin
   if Assigned(FBinUtils) then
     FBinUtils.Free;
-  if Assigned(FBin64Utils) then
-    FBin64Utils.Free;
   ProcessEx.Free;
   FSVNClient.Free;
   inherited Destroy;
