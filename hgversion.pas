@@ -18,8 +18,11 @@ var
   s:string;
   F:text;
 begin
-  // We add an empty parameter to force quoting
-  ResultCode:=ExecuteCommand(HgCommand+' ""',s,false);
+  // Quotes:
+  // HgCommand : If we don't add anything, this will work on FPC 2.7, but fail on at least Win x86+FPC 2.6.x
+  // HgCommand+' ""': will work on Win x86+FPC 2.6.x, fail on Linux
+  // HgCommand+' "': will work on Linux+FPC 2.6.x, Win x86+FPC. Thanks, Arny!
+  ResultCode:=ExecuteCommand(HgCommand+' "',s,false);
   if ResultCode=0 then
     begin
     while pos('"',s)>0 do delete(s,pos('"',s),1);

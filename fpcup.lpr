@@ -52,6 +52,7 @@ uses {$IFDEF UNIX}
 //{$R *.res} //Keep it simple, no resources
 
 // Get revision from our source code repository:
+// If you have a file not found error for revision.inc, please make sure you compile hgversion.pas before compiling this project.
 {$i revision.inc}
 
 procedure WriteVersion;
