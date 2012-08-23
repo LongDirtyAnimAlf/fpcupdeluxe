@@ -149,13 +149,13 @@ begin
     XdgDesktopContent.Add('[Desktop Entry]');
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
-    XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images\icons\lazarus.ico');
+    XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments);
-    XdgDesktopContent.Add('Name='+LinkName);
-    XdgDesktopContent.SaveAsFile(XdgDesktopFile);
+    XdgDesktopContent.Add('Name='+ShortcutName);
+    XdgDesktopContent.SaveToFile(XdgDesktopFile);
     // We're going to try and call xdg-desktop-icon
-    OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon + ' install ' + XdgDesktopFile)=0);
-    if OperationSucceeded=false then infoln('CreateDesktopShortcut: failed to create shortcut to '+Target);
+    OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon install ' + XdgDesktopFile,false)=0);
+    if OperationSucceeded=false then infoln('CreateDesktopShortcut: failed to create shortcut to '+Target,etWarning);
     try
       DeleteFile(XdgDesktopFile);
     finally
