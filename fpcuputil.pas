@@ -149,6 +149,7 @@ begin
     XdgDesktopContent.Add('[Desktop Entry]');
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
+    XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images\icons\lazarus.ico');
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments);
     XdgDesktopContent.Add('Name='+LinkName);
     XdgDesktopContent.SaveAsFile(XdgDesktopFile);
