@@ -132,10 +132,37 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
+
 {$IFDEF UNIX}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+var
+  OperationSucceeded: boolean;
+  ResultCode: boolean;
+  XdgDesktopContent: TStringList;
+  XdgDesktopFile: string;
 begin
-  infoln('todo: implement createdesktopshortcut for '+Target+' with '+TargetArguments+' as '+Shortcutname, etwarning);
+  // Fail by default:
+  OperationSucceeded:=false;
+  XdgDesktopFile:=IncludeTrailingPathDelimiter(GetTempDir(false))+'fpcup-'+shortcutname+'.desktop';
+  XdgDesktopContent:=TStringList.Create;
+  try
+    XdgDesktopContent.Add('[Desktop Entry]');
+    XdgDesktopContent.Add('Encoding=UTF-8');
+    XdgDesktopContent.Add('Type=Application');
+    XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments);
+    XdgDesktopContent.Add('Name='+LinkName);
+    XdgDesktopContent.SaveAsFile(XdgDesktopFile);
+    // We're going to try and call xdg-desktop-icon
+    OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon + ' install ' + XdgDesktopFile)=0);
+    if OperationSucceeded=false then infoln('CreateDesktopShortcut: failed to create shortcut to '+Target);
+    try
+      DeleteFile(XdgDesktopFile);
+    finally
+      // Swallow, let filesystem maintenance clear it up
+    end;
+  finally
+    XdgDesktopContent.Free;
+  end;
 end;
 {$ENDIF UNIX}
 
