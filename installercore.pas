@@ -501,7 +501,7 @@ begin
         // to the win32 site
         if Debugger64Files.IndexOf(FBinUtils[Counter])>-1 then
           RootUrl:=SourceURL64_gdb
-        else if Win64Specific.IndexOf(FBinUtils[Counter])>-1 then
+        else if Win64SpecificFiles.IndexOf(FBinUtils[Counter])>-1 then
           RootURL:=SourceURL64
         else
           RootURL:=SourceURL;
