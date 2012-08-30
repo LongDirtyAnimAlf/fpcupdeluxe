@@ -124,6 +124,12 @@ begin
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
   writeln(' keeplocalchanges      Keep locally modified files (normally these would be');
   writeln('                       backed up as .diff files before doing svn revert.');
+  writeln(' installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,');
+  writeln('                       lazarus in <dir>\lazarus\, bootstrap compiler in ');
+  writeln('                       <dir>\fpcbootstrap\, extra modules in <dir>\extras\ and');
+  writeln('                       configuration in <dir>\config\. See fpcdir, lazdir,');
+  writeln('                       fpcbootstrapdir, primary-config-path for the defaults when');
+  writeln('                       installdir is not specified and to override these values.');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln('                       or ~\lazarus\');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
@@ -172,6 +178,8 @@ var
   bNoConfirm,bHelp,bVersion:boolean;
   sconfirm:string;
   Options:TCommandLineOptions;
+  sInstallDir,s:string;
+  bHaveInstalldir:boolean;
 begin
   Options:=TCommandLineOptions.create;
   try
@@ -179,20 +187,26 @@ begin
   Options.CaseSensitive:=false;
   try
   {$IFDEF MSWINDOWS}
-  FInstaller.MakeDirectory:=Options.GetOption('','binutilsdir','C:\development\fpcbootstrap\');
-  FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir','c:\development\fpcbootstrap\');
-  FInstaller.FPCDirectory:=Options.GetOption('','fpcdir','c:\development\fpc');
-  FInstaller.LazarusDirectory:=Options.GetOption('','lazdir','c:\development\lazarus');
+  sInstallDir:=ExcludeTrailingPathDelimiter(Options.GetOption('','installdir','C:\development'));
+  bHaveInstalldir:=sInstallDir<>'C:\development';
+  FInstaller.MakeDirectory:=Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap\');
+  FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap\');
+  FInstaller.FPCDirectory:=Options.GetOption('','fpcdir',sInstallDir+'\fpc\');
+  FInstaller.LazarusDirectory:=Options.GetOption('','lazdir',sInstallDir+'\lazarus\');
   {$ELSE}
+  sInstallDir:=ExcludeTrailingPathDelimiter(Options.GetOption('','installdir','~'));
+  bHaveInstalldir:=sInstallDir<>'~';
   FInstaller.MakeDirectory:=Options.GetOption('','binutilsdir','');
-  FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir','~/fpcbootstrap');
-  FInstaller.FPCDirectory:=Options.GetOption('','fpcdir','~/fpc');
-  FInstaller.LazarusDirectory:=Options.GetOption('','lazdir','~/lazarus');
+  FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap');
+  FInstaller.FPCDirectory:=Options.GetOption('','fpcdir',sInstallDir+'/fpc');
+  FInstaller.LazarusDirectory:=Options.GetOption('','lazdir',sInstallDir+'/lazarus');
   {$ENDIF MSWINDOWS}
   FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
   FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
   FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
   FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname','fpcup_update');
+  if (FInstaller.ShortCutName='fpcup_update') and bHaveInstalldir then
+    FInstaller.ShortCutName:=ExtractFileName(sInstallDir)+'_update';  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
   FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
   //svn2 seems to lag behind a lot, so don't use that.
@@ -200,6 +214,8 @@ begin
   bHelp:=Options.GetOptionNoParam('h','help',false);
   FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
   FInstaller.ShortCutName:=Options.GetOption('','lazlinkname','Lazarus_trunk');
+  if (FInstaller.ShortCutName='Lazarus_trunk') and bHaveInstalldir then
+    FInstaller.ShortCutName:=ExtractFileName(sInstallDir);  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
   FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
   //svn2 seems to lag behind a lot, so don't use that.
@@ -208,7 +224,11 @@ begin
   FInstaller.SkipModules:=Options.GetOption('','skip','',false);
   FInstaller.OnlyModules:=Options.GetOption('','only','',false);
   FInstaller.CrossOS_Target:=Options.GetOption('','ostarget','');
-  FInstaller.LazarusPrimaryConfigPath:=Options.GetOption('','primary-config-path','');
+  s:=Options.GetOption('','primary-config-path','');
+  if (s='') and bHaveInstalldir then
+    FInstaller.LazarusPrimaryConfigPath:=sInstallDir+DirectorySeparator+'config'+DirectorySeparator
+  else
+    FInstaller.LazarusPrimaryConfigPath:=s;
   FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
   FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
   bVersion:=Options.GetOptionNoParam('','version',false);
