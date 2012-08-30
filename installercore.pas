@@ -26,7 +26,7 @@ type
     FCrossOS_Target: string;
     FDesiredRevision: string;
     FLog: TLogger;
-    FLogVerbose: TLogger;
+    FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
     FMake: string;
     FMakeDir: string;
     FNeededExecutablesChecked: boolean;
@@ -666,21 +666,17 @@ begin
 end;
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
-var
-  LogVerbose: TLogger;
-  TempFileName: string;
 begin
   if FVerbose then
   begin
-    TempFileName := SysUtils.GetTempFileName;
-    LogVerbose:=TLogger.Create;
-    try
-      LogVerbose.LogFile:=TempFileName;
-      WritelnLog('Verbose output saved to ' + TempFileName, false);
-      LogVerbose.WriteLog(Output,false);
-    finally
-      LogVerbose.Free;
+    // Set up initial output
+    if Assigned(FLogVerbose)=false then
+    begin
+      FLogVerbose:=TLogger.Create;
+      FLogVerbose.LogFile:=SysUtils.GetTempFileName;
+      WritelnLog('Verbose output saved to ' + FLogVerbose.LogFile, false);
     end;
+    FLogVerbose.WriteLog(Output,false);
   end;
   DumpConsole(Sender, output);
 end;
@@ -858,6 +854,9 @@ begin
   // List of binutils that can be downloaded:
   CreateBinutilsList;
   FNeededExecutablesChecked:=false;
+  // Set up verbose log: will be done in dumpoutput
+  // as it depends on verbosity etc
+  //FLogVerbose: TLogger.Create;
 end;
 
 destructor TInstaller.Destroy;
@@ -866,6 +865,8 @@ begin
     FBinUtils.Free;
   ProcessEx.Free;
   FSVNClient.Free;
+  if Assigned(FLogVerbose) then
+    FLogVerbose.Free;
   inherited Destroy;
 end;
 

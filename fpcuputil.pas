@@ -44,13 +44,14 @@ type
   TLogger = class(TObject)
   private
     FLog: TEventLog; //Logging/debug output to file
+    function GetLogFile: string;
     procedure SetLogFile(AValue: string);
   public
     // Write to log and optionally console with seriousness etInfo
     procedure WriteLog(Message: string; ToConsole: Boolean=true);
     // Write to log and optionally console with specified seriousness
     procedure WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
-    property LogFile: string write SetLogFile;
+    property LogFile: string read GetLogFile write SetLogFile ;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -650,6 +651,11 @@ begin
 end;
 
 { TLogger }
+
+function TLogger.GetLogFile: string;
+begin
+  result:=FLog.FileName
+end;
 
 procedure TLogger.SetLogFile(AValue: string);
 begin
