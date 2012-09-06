@@ -16,7 +16,7 @@ type
     FKeepLocalChanges: boolean;
     function GetMake: string;
   protected
-    FBaseDirectory: string;
+    FBaseDirectory: string; //Top directory for a product (FPC, Lazarus)
     FBinUtils: TStringList; //List of executables such as make.exe needed for compilation on Win32
     FBunzip2: string;
     // Compiler executable:

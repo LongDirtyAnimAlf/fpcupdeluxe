@@ -642,6 +642,9 @@ begin
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etinfo);
   {$ifdef win64}
+  // On win64, we need to build the PPCX64 bootstrap compiler from our
+  // PPC386.exe. We could redo this each time so we're (almost) guaranteed it builds...
+  // ... however, leave that for clean
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
     ProcessEx.Executable := Make;
@@ -789,6 +792,12 @@ begin
 
   // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
+  {$IFDEF WIN64}
+  // Delete  bootstrap compiler; will be regenerated later with new
+  // version:
+  infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
+  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
+  {$ENDIF WIN64}
   {$IFDEF UNIX}
   // Delete any fpc.sh shell scripts
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
