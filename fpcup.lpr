@@ -197,7 +197,8 @@ begin
   FInstaller.FPCDirectory:=Options.GetOption('','fpcdir',sInstallDir+'\fpc\');
   FInstaller.LazarusDirectory:=Options.GetOption('','lazdir',sInstallDir+'\lazarus\');
   {$ELSE}
-  sInstallDir:=ExcludeTrailingPathDelimiter(Options.GetOption('','installdir','~/development'));
+  // Use expandfilenameUTF8 to expand ~ to correct directory
+  sInstallDir:=ExcludeTrailingPathDelimiter(Options.GetOption('','installdir',ExpandFileNameUTF8('~/development')));
   bHaveInstalldir:=sInstallDir<>'~';
   FInstaller.MakeDirectory:=Options.GetOption('','binutilsdir','');
   FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap');
