@@ -297,10 +297,10 @@ begin
     begin
       {$IFDEF MSWINDOWS}
       // Somewhere in local appdata special folder
-      FLazarusPrimaryConfigPath := IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
+      FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
       {$ELSE}
-      //Note: normsl GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
-      LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+      //Note: normal GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+      FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
       {$ENDIF MSWINDOWS}
     end;
   result:=FLazarusPrimaryConfigPath;
