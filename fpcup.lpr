@@ -209,8 +209,8 @@ begin
   FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
   FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
   FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname','fpcup_update');
-  if (FInstaller.ShortCutName='fpcup_update') and bHaveInstalldir then
-    FInstaller.ShortCutName:=ExtractFileName(sInstallDir)+'_update';  // sInstallDir has no terminating pathdelimiter!!
+  if (FInstaller.ShortCutNameFpcup='fpcup_update') and bHaveInstalldir then
+    FInstaller.ShortCutNameFpcup:=ExtractFileName(sInstallDir)+'_update';  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
   FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
   //svn2 seems to lag behind a lot, so don't use that.
@@ -219,7 +219,7 @@ begin
   FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
   FInstaller.ShortCutName:=Options.GetOption('','lazlinkname','Lazarus_trunk');
   if (FInstaller.ShortCutName='Lazarus_trunk') and bHaveInstalldir then
-    FInstaller.ShortCutName:=ExtractFileName(sInstallDir);  // sInstallDir has no terminating pathdelimiter!!
+    FInstaller.ShortCutName:='Lazarus_'+ExtractFileName(sInstallDir);  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
   FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
   //svn2 seems to lag behind a lot, so don't use that.
