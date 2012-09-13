@@ -69,6 +69,9 @@ type
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
   // Gets the sequence representation for all modules
   function GetModuleList(ConfigFile:string):string;
+  // gets alias for keywords in Dictionary.
+  //The keyword 'list' is reserved and returns the list if keywords as commatext
+  function GetAlias(ConfigFile,Dictionary,keyword: string): string;
 
 
 var sequences:string;
@@ -731,6 +734,33 @@ finally
 end;
 end;
 
+function GetAlias(ConfigFile,Dictionary,KeyWord: string): string;
+var
+  ini:TMemIniFile;
+  sl:TStringList;
+  e:Exception;
+begin
+sl:=TStringList.Create;
+ini:=TMemIniFile.Create(ConfigFile);
+ini.CaseSensitive:=false;
+try
+  ini.ReadSection('ALIAS'+Dictionary,sl);
+  if Uppercase(KeyWord)='LIST' then
+    result:=sl.CommaText
+  else
+    begin
+    result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
+    if result='' then
+      begin
+      e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[Dictionary,KeyWord,sl.CommaText]);
+      raise e;
+      end;
+    end;
+finally
+  ini.Free;
+  sl.free;
+end;
+end;
 
 function GetModuleList(ConfigFile: string): string;
 var

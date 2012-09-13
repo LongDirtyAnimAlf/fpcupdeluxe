@@ -182,7 +182,9 @@ type
     function GetLazarusPrimaryConfigPath: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetFPCDirectory(AValue: string);
+    procedure SetFPCURL(AValue: string);
     procedure SetLazarusDirectory(AValue: string);
+    procedure SetLazarusURL(AValue: string);
     procedure SetMakeDirectory(AValue: string);
   protected
     FLog:TLogger;
@@ -206,13 +208,13 @@ type
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
     property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
-    property FPCURL: string read FFPCURL write FFPCURL;
+    property FPCURL: string read FFPCURL write SetFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision:string read FFPCDesiredRevision write FFPCDesiredRevision;
     property KeepLocalChanges: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
     property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
-    property LazarusURL: string read FLazarusURL write FLazarusURL;
+    property LazarusURL: string read FLazarusURL write SetLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     property MakeDirectory: string read FMakeDirectory write SetMakeDirectory;
@@ -224,8 +226,8 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
-    // Fill in ModulePublishedList and ModuleEnabledList
-    function LoadModuleList:boolean;
+    // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
+    function LoadFPCUPConfig:boolean;
     // Stop talking. Do it!
     function Run: boolean;
     constructor Create;
@@ -316,9 +318,27 @@ begin
   FFPCDirectory:=ExpandFileName(AValue);
 end;
 
+procedure TFPCupManager.SetFPCURL(AValue: string);
+begin
+  if FFPCURL=AValue then Exit;
+  if pos('//',AValue)>0 then
+    FFPCURL:=AValue
+  else
+    FFPCURL:=installerUniversal.GetAlias(FConfigFile,'fpcURL',AValue);
+end;
+
 procedure TFPCupManager.SetLazarusDirectory(AValue: string);
 begin
   FLazarusDirectory:=ExpandFileName(AValue);
+end;
+
+procedure TFPCupManager.SetLazarusURL(AValue: string);
+begin
+  if FLazarusURL=AValue then Exit;
+  if pos('//',AValue)>0 then
+    FLazarusURL:=AValue
+  else
+    FLazarusURL:=installerUniversal.GetAlias(FConfigFile,'lazURL',AValue);
 end;
 
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
@@ -336,7 +356,7 @@ begin
   FLog.WriteLog(msg,ToConsole);
 end;
 
-function TFPCupManager.LoadModuleList: boolean;
+function TFPCupManager.LoadFPCUPConfig: boolean;
 begin
 Sequencer.AddSequence(Sequences);
 Sequencer.AddSequence(installerFPC.Sequences);

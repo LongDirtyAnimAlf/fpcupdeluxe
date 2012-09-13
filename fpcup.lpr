@@ -63,7 +63,7 @@ begin
   writeln('');
 end;
 
-procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList);
+procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList;ConfigFile:string);
 var i:integer;
 begin
   writeln('DON''T PANIC!');
@@ -119,6 +119,7 @@ begin
   writeln('                         or <lazlinkname>_update if lazlinkname specified');
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+  writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'fpcURL','list'));
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
@@ -145,6 +146,7 @@ begin
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
+  writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'lazURL','list'));
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
   writeln(' noconfirm             No confirmation asked. For batch operation.');
@@ -213,8 +215,6 @@ begin
     FInstaller.ShortCutNameFpcup:=ExtractFileName(sInstallDir)+'_update';  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
   FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
-  //svn2 seems to lag behind a lot, so don't use that.
-  FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   bHelp:=Options.GetOptionNoParam('h','help',false);
   FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
   FInstaller.ShortCutName:=Options.GetOption('','lazlinkname','Lazarus_trunk');
@@ -222,8 +222,6 @@ begin
     FInstaller.ShortCutName:='Lazarus_'+ExtractFileName(sInstallDir);  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
   FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
-  //svn2 seems to lag behind a lot, so don't use that.
-  FInstaller.LazarusURL:=Options.GetOption('','lazURL','http://svn.freepascal.org/svn/lazarus/trunk');
   FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
   FInstaller.SkipModules:=Options.GetOption('','skip','',false);
   FInstaller.OnlyModules:=Options.GetOption('','only','',false);
@@ -242,22 +240,37 @@ begin
     begin
     writeln('Error: wrong command line options given:');
     writeln(E.Message);
-    WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
+    WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
     result:=13; //Quit with error resultcode
+    exit;
     end
   end;
-  FInstaller.LoadModuleList;
+  FInstaller.LoadFPCUPConfig;
+  //svn2 seems to lag behind a lot, so don't use that.
+  //load URL's after LoadFPCUPConfig so that we have loaded the aliases
+  try
+    FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+    FInstaller.LazarusURL:=Options.GetOption('','lazURL','http://svn.freepascal.org/svn/lazarus/trunk');
+  except
+    on E:Exception do
+    begin
+    writeln('Error: wrong command line options given:');
+    writeln(E.Message);
+    result:=13; //Quit with error resultcode
+    exit;
+    end;
+  end;
 
   if Options.ValidateOptions<>'' then
     begin
     writeln('Error: wrong command line options given:');
     writeln(Options.ValidateOptions);
-    WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
+    WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
     result:=13; //Quit with error resultcode
     end
   else if bHelp then
     begin
-    writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
+    writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
     result:=0; //quit without error
     end
   else if bVersion then
@@ -394,4 +407,4 @@ begin
   end;
   if res<>-1 then
     halt(res);
-end.
+end.
