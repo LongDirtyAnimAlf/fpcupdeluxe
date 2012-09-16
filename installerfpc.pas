@@ -643,8 +643,9 @@ begin
   infoln('TFPCInstaller: building module '+ModuleName+'...',etinfo);
   {$ifdef win64}
   // On win64, we need to build the PPCX64 bootstrap compiler from our
-  // PPC386.exe. We could redo this each time so we're (almost) guaranteed it builds...
-  // ... however, leave that for clean
+  // PPC386.exe.
+  // In cleanmodule which should have run before this, we remove the temp PPCX64
+  // bootstrap compiler so we're (almost) guaranteed it builds...
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
     ProcessEx.Executable := Make;
@@ -665,6 +666,7 @@ begin
     end;
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcx64.exe',
      ExtractFilePath(FCompiler)+'ppcx64.exe');
+    // Now we can change the compiler from the i386 to the x64 compiler:
     FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';
     end;
   {$endif win64}
