@@ -539,9 +539,10 @@ begin
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
     {$ifdef win64}
     //There is no win64 bootstrap compiler, yet
-    //We'll make our own starting with the ppc386.exe bootstrap compiler
-    //If we made it already pick it up here
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcx64.exe';
+    //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
+    //This should eliminate issues with the wrong RTL etc.
+    //FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcx64.exe';
+    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
     {$ELSE}
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
     {$endif win64}
@@ -570,8 +571,8 @@ begin
     {$ENDIF Linux}
     {$IFDEF Darwin}
     //OSX
-    //pcuniversal is not a good bootstrap compiler since it creates a compiler that doesn't handle generics !?!?!?
-    //We'll make our own ppc386 starting with the pcuniversal bootstrap compiler
+    //ppcuniversal is not a good bootstrap compiler since it creates a compiler that doesn't handle generics !?!?!?
+    //We'll make our own ppc386 starting with the ppcuniversal bootstrap compiler
     //If we made it already pick it up here
     FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386';
     if FBootstrapCompilerURL='' then
@@ -579,7 +580,7 @@ begin
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
     {$ENDIF Darwin}
     end;
-  // Only download bootstrap compiler if there's no valid one
+  // Only download bootstrap compiler if we can't find a valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
     begin
       infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler),etinfo);
@@ -589,6 +590,7 @@ begin
     begin
       {$ifdef win64}
       //don't have a win64 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
+      // For that, we need to download the i386 compiler.
       FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
       {$endif win64}
       {$ifdef darwin}
