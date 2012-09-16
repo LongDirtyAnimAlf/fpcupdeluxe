@@ -426,7 +426,17 @@ FLog.LogFile:='fpcup.log'; //current directory
 {$ELSE}
 FLog.LogFile:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
 {$ENDIF MSWINDOWS}
-WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
+try
+  WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
+except
+  // Writing to log failed, probably duplicate run. Inform user and get out.
+  writeln('***ERROR***');
+  writeln('Could not open log file '+FLog.LogFile+' for writing.');
+  writeln('Perhaps another fpcup is running?');
+  writeln('Aborting.');
+  halt(2);
+end;
+
 end;
 
 destructor TFPCupManager.Destroy;
