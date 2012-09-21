@@ -576,37 +576,46 @@ begin
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
+// Currently, this function implements "nuclear" cleaning: it removes .ppu files
+// etc without looking at architecutre. This is bad for cross compilers etc.
+// Slightly more reasonable would be to only delete .ppu files as they should
+// be automatically rebuilt anyway
+// However, it is much faster than running make distclean and avoids fpmake bugs
+//todo: implement platform-specific directory checks
 var
-  oldlog:TErrorMethod;
+  DeleteExtensions: TStringList;
 begin
   result:=InitModule;
   if not result then exit;
-  // Make distclean; we don't care about failure (e.g. directory might be empty etc)
-  oldlog:=ProcessEx.OnErrorM;
-  ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
-  ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('FPC='+FCompiler+'');
-  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-  ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-  if FCrossLCL_Platform <>'' then
-    ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-  if (Self is TLazarusCrossInstaller) then
-  begin  // clean out the correct compiler
-    ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-    ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
-  end
-  else
-  begin
-    infoln('Lazarus: running make distclean:',etinfo);
+  DeleteExtensions:=TStringList.Create;
+  try
+    DeleteExtensions.Add('ppu');
+    DeleteExtensions.Add('a');
+    DeleteExtensions.Add('o');
+    //Makefile does not seem to delete lrs files:
+    //DeleteExtensions.Add('lrs');
+    DeleteExtensions.Add('or');
+    DeleteExtensions.Add('res');
+    // The makefile also removes a lot of .lfm files in the units directories...
+    { Also fpcmade.i386-win32, Package.fpc
+    }
+
+    if (Self is TLazarusCrossInstaller) then
+    begin
+      // Do nothing; cleanup should already have happened with regular installer.
+      // If we do clean up here, we miss .res files etc as we don't do an svn up which is what happens in the straight compiler.
+      // In any case, doing an svn up will give potentially different straight+cross compiler source versions
+      infoln('Lazarus: NOT running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+      //todo: this is a problem if we only want to run the cross compiler... have to fix that.
+    end
+    else
+    begin
+      infoln('Lazarus: running make distclean equivalent:',etinfo);
+      DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions);
+    end;
+  finally
+    DeleteExtensions.Free;
   end;
-  ProcessEx.Parameters.Add('distclean');
-  // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
-  ProcessEx.Execute;
-  ProcessEx.OnErrorM:=oldlog;
   result:=true;
 end;
 

@@ -764,37 +764,45 @@ begin
 end;
 
 function TFPCInstaller.CleanModule(ModuleName: string): boolean;
+// Currently, this function implements "nuclear" cleaning: it removes .ppu files
+// etc without looking at architecutre. This is bad for cross compilers etc.
+// Slightly more reasonable would be to only delete .ppu files as they should
+// be automatically rebuilt anyway
+// However, it is much faster than running make distclean and avoids fpmake bugs
+//todo: implement platform-specific directory checks
+//todo: remove some kind of build stamp - we now get
 var
-  oldlog:TErrorMethod;
+  DeleteExtensions: TStringList;
 begin
   result:=InitModule;
   if not result then exit;
-  ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
-  ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('FPC='+FCompiler);
-  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-  ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-  if Self is TFPCCrossInstaller then
-    begin  // clean out the correct compiler
-    ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-    ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-    end;
-  ProcessEx.Parameters.Add('distclean');
+  // Fool make into thinking it's clean. Well, fool?!?
   if (FCrossOS_Target='') and (FCrossCPU_Target='') then
     begin
-    infoln('FPC: running make distclean:',etinfo);
+      infoln('FPC: running make distclean equivalent:',etinfo);
+      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+GetFPCTarget(true));
+      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'base.build-stamp.'+GetFPCTarget(true));
+      // Only clean ppus if doing a straight compile. Otherwise a run with the cross compiler will remove
+      // the straight .ppus.
+      //todo: fix this with platform-specific directory checking
+      DeleteExtensions:=TStringList.Create;
+      try
+        DeleteExtensions.Add('ppu');
+        DeleteExtensions.Add('a');
+        DeleteExtensions.Add('o');
+        DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions);
+      finally
+        DeleteExtensions.Free;
+      end;
     end
   else
     begin
-    infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+      infoln('FPC: running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+FCrossCPU_Target+'-'+FCrossOS_Target);
+      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'base.build-stamp.'+FCrossCPU_Target+'-'+FCrossOS_Target);
     end;
-  ProcessEx.Execute;
-  ProcessEx.OnErrorM:=oldlog;
 
-  // Delete any existing fpc.cfg files
+  // Delete any existing fpc.cfg files; ignore success or failure
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
   {$IFDEF WIN64}
   // Delete  bootstrap compiler; will be regenerated later with new
@@ -807,6 +815,7 @@ begin
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
   {$ENDIF UNIX}
 
+  // Even if we cleaned imperfectly, allow continuing to the next step
   result:=true;
 end;
 

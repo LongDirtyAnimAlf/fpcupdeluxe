@@ -66,6 +66,8 @@ procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>
 function DeleteDirectoryEx(DirectoryName: string): boolean;
+// Recursively delete files with specified extension(s)
+function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
 // File size; returns 0 if empty, non-existent or error.
@@ -502,6 +504,66 @@ begin
   FindCloseUTF8(FileInfo);
   // Remove root directory; exit with failure on error:
   if (not RemoveDirUTF8(DirectoryName)) then exit;
+  Result:=true;
+end;
+
+function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList): boolean;
+// Deletes all files ending in one of the extensions, starting from
+// DirectoryName and recursing down.
+// Extensions can contain * to cover everything (other extensions will then be
+// ignored), making it delete all files, but leaving the directories.
+// Will try to remove read-only files.
+var
+  AllFiles: boolean;
+  CurSrcDir: String;
+  CurFilename: String;
+  FileInfo: TSearchRec;
+  i: integer;
+begin
+  Result:=false;
+  // Make sure we can compare extensions using ExtractFileExt
+  for i:=0 to Extensions.Count-1 do
+  begin
+    if copy(Extensions[i],1,1)<>'.' then Extensions[i]:='.'+Extensions[i];
+  end;
+  AllFiles:=(Extensions.Count=0) or (Extensions.IndexOf('.*')>=0);
+  CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
+  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      // Ignore directories and files without name:
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        // Remove all files and directories in this directory:
+        CurFilename:=CurSrcDir+FileInfo.Name;
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        begin
+          // Directory; call recursively exit with failure on error
+          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions) then
+          begin
+            FindCloseUTF8(FileInfo);
+            exit;
+          end;
+        end
+        else
+        begin
+          // Only delete if extension is right
+          if AllFiles or (Extensions.IndexOf(ExtractFileExt(FileInfo.Name))>=0) then
+          begin
+            // Remove read-only file attribute so we can delete it:
+            if (FileInfo.Attr and faReadOnly)>0 then
+              FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+            if not DeleteFileUTF8(CurFilename) then
+            begin
+              FindCloseUTF8(FileInfo);
+              exit;
+            end;
+          end;
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+  end;
+  FindCloseUTF8(FileInfo);
   Result:=true;
 end;
 

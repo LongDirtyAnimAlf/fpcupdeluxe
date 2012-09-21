@@ -19,11 +19,10 @@ type
     FBaseDirectory: string; //Top directory for a product (FPC, Lazarus)
     FBinUtils: TStringList; //List of executables such as make.exe needed for compilation on Win32
     FBunzip2: string;
-    // Compiler executable:
-    FCompiler: string;
+    FCompiler: string; // Compiler executable
     FCompilerOptions: string;
-    FCrossCPU_Target: string;
-    FCrossOS_Target: string;
+    FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
+    FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FDesiredRevision: string;
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
@@ -69,9 +68,9 @@ type
     property Compiler: string read GetCompiler write FCompiler;
     // Compiler options passed on to make as OPT=
     property CompilerOptions: string write FCompilerOptions;
-    // CPU for the target
+    // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
     property CrossCPU_Target: string read FCrossCPU_Target write FCrossCPU_Target;
-    // OS for target
+    // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
     property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
     // SVN revision override. Default is trunk
     property DesiredRevision: string write FDesiredRevision;
