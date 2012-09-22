@@ -577,11 +577,9 @@ end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
 // Currently, this function implements "nuclear" cleaning: it removes .ppu files
-// etc without looking at architecutre. This is bad for cross compilers etc.
-// Slightly more reasonable would be to only delete .ppu files as they should
-// be automatically rebuilt anyway
+// etc
 // However, it is much faster than running make distclean and avoids fpmake bugs
-//todo: implement platform-specific directory checks
+//todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
 var
   CPU_OSSignature:string;
   DeleteExtensions: TStringList;
@@ -600,6 +598,7 @@ begin
     // The makefile also removes a lot of .lfm files in the units directories...
     { Also fpcmade.i386-win32, Package.fpc
     }
+    //todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
 
     if (Self is TLazarusCrossInstaller) then
     begin
