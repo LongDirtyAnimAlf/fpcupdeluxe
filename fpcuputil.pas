@@ -64,9 +64,11 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 // Delete shortcut on desktop
 procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
-// Delete directory and children, even read-only. Equivalent to rm -rf <directory>
+// Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
 function DeleteDirectoryEx(DirectoryName: string): boolean;
-// Recursively delete files with specified extension(s), only if path contains specfied directory name
+// Recursively delete files with specified name(s), only if path contains specfied directory name:
+function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList; const OnlyIfPathHas: string): boolean;
+// Recursively delete files with specified extension(s), only if path contains specfied directory name:
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
@@ -475,7 +477,7 @@ begin
       // Ignore directories and files without name:
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
       begin
-        // Remove all files and directories in this directory:
+        // Look at all files and directories in this directory:
         CurFilename:=CurSrcDir+FileInfo.Name;
         // Remove read-only file attribute so we can delete it:
         if (FileInfo.Attr and faReadOnly)>0 then
@@ -507,6 +509,69 @@ begin
   Result:=true;
 end;
 
+function DeleteFilesSubDirs(const DirectoryName: string;
+  const Names: TStringList; const OnlyIfPathHas: string): boolean;
+// Deletes all named files starting from DirectoryName and recursing down.
+// If the Names are empty, all files will be deleted
+// It only deletes files if any directory of the path contains OnlyIfPathHas,
+// unless that is empty
+// Will try to remove read-only files.
+//todo: check how this works with case insensitive file system like Windows
+var
+  AllFiles: boolean;
+  CurSrcDir: String;
+  CurFilename: String;
+  FileInfo: TSearchRec;
+begin
+  Result:=false;
+  AllFiles:=(Names.Count=0);
+  CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
+  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      // Ignore directories and files without name:
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        // Look at all files and directories in this directory:
+        CurFilename:=CurSrcDir+FileInfo.Name;
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        begin
+          // Directory; call recursively exit with failure on error
+          if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then
+          begin
+            FindCloseUTF8(FileInfo);
+            exit;
+          end;
+        end
+        else
+        begin
+          // If we are in the right path:
+          //todo: get utf8 replacement for ExtractFilePath
+          if (OnlyIfPathHas='') or
+            (pos(DirectorySeparator+OnlyIfPathHas+DirectorySeparator,ExtractFilePath(CurFileName))>0) then
+          begin
+            // Only delete if file name is right
+            //todo: get utf8 extractfilename
+            if AllFiles or (Names.IndexOf(ExtractFileName(FileInfo.Name))>=0) then
+            begin
+              // Remove read-only file attribute so we can delete it:
+              if (FileInfo.Attr and faReadOnly)>0 then
+                FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+              if not DeleteFileUTF8(CurFilename) then
+              begin
+                FindCloseUTF8(FileInfo);
+                exit;
+              end;
+            end;
+          end;
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+  end;
+  FindCloseUTF8(FileInfo);
+  Result:=true;
+end;
+
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // Deletes all files ending in one of the extensions, starting from
 // DirectoryName and recursing down.
@@ -515,6 +580,7 @@ function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensi
 // Extensions can contain * to cover everything (other extensions will then be
 // ignored), making it delete all files, but leaving the directories.
 // Will try to remove read-only files.
+//todo: check how this works with case insensitive file system like Windows
 var
   AllFiles: boolean;
   CurSrcDir: String;
@@ -536,7 +602,7 @@ begin
       // Ignore directories and files without name:
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
       begin
-        // Remove all files and directories in this directory:
+        // Look at all files and directories in this directory:
         CurFilename:=CurSrcDir+FileInfo.Name;
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
         begin

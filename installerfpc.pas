@@ -769,7 +769,7 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // However, it is much faster than running make distclean and avoids fpmake bugs
 //todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
 var
-  DeleteExtensions: TStringList;
+  DeleteList: TStringList;
   CPU_OSSignature:string;
 begin
   result:=InitModule;
@@ -791,14 +791,19 @@ begin
   // Clean ppus etc in any directory that has our cpu-os signature.
   // This may miss some, but straight compiles will not interfere with cross compile
   // units and the other way round
-  DeleteExtensions:=TStringList.Create;
+  DeleteList:=TStringList.Create;
   try
-    DeleteExtensions.Add('ppu');
-    DeleteExtensions.Add('a');
-    DeleteExtensions.Add('o');
-    DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions,CPU_OSSignature);
+    DeleteList.Add('ppu');
+    DeleteList.Add('a');
+    DeleteList.Add('o');
+    DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
+
+    //Delete all fpcmade.i38-win32 etc marker files:
+    DeleteList.Clear;
+    DeleteList.Add('fpcmade.'+CPU_OSSignature);
+    DeleteFilesSubDirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,'');
   finally
-    DeleteExtensions.Free;
+    DeleteList.Free;
   end;
 
   // Delete any existing fpc.cfg files; ignore success or failure
