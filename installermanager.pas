@@ -521,7 +521,9 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
       {$ENDIF DARWIN}
       {$IFDEF LINUX}
+      // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
       CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
+      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
       {$ENDIF LINUX}
       {$ENDIF UNIX}
     finally
