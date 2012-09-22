@@ -296,15 +296,17 @@ const
   DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
 begin
   if FLazarusPrimaryConfigPath='' then
-    begin
-      {$IFDEF MSWINDOWS}
-      // Somewhere in local appdata special folder
-      FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
-      {$ELSE}
-      //Note: normal GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
-      FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
-      {$ENDIF MSWINDOWS}
-    end;
+  begin
+    {$IFDEF MSWINDOWS}
+    // Somewhere in local appdata special folder
+    FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
+    {$ELSE}
+    // Note: normal GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
+    // XdgConfigHome normally resolves to something like ~/.config
+    // which is a reasonable default if we have no Lazarus primary config path set
+    FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+    {$ENDIF MSWINDOWS}
+  end;
   result:=FLazarusPrimaryConfigPath;
 end;
 
