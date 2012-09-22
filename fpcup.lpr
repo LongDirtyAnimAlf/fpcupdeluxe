@@ -228,7 +228,10 @@ begin
   FInstaller.CrossOS_Target:=Options.GetOption('','ostarget','');
   s:=Options.GetOption('','primary-config-path','');
   if (s='') then
-    FInstaller.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(sInstallDir)+'config'+DirectorySeparator
+    // If we have no input from the user, let's create a name based on the directory where
+    // Lazarus is to be installed
+    FInstaller.LazarusPrimaryConfigPath:=
+      IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FInstaller.LazarusDirectory))+DirectorySeparator
   else
     FInstaller.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(s);
   FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
