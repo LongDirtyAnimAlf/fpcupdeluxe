@@ -217,7 +217,7 @@ begin
   FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
   bHelp:=Options.GetOptionNoParam('h','help',false);
   FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
-  FInstaller.ShortCutName:=Options.GetOption('','lazlinkname','Lazarus_trunk');
+  FInstaller.ShortCutName:=Options.GetOption('','lazlinkname','Lazarus_fpcup');
   if (FInstaller.ShortCutName='Lazarus_trunk') and bHaveInstalldir then
     FInstaller.ShortCutName:='Lazarus_'+ExtractFileName(sInstallDir);  // sInstallDir has no terminating pathdelimiter!!
   FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
