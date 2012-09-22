@@ -183,8 +183,8 @@ var
   bNoConfirm,bHelp,bVersion:boolean;
   sconfirm:string;
   Options:TCommandLineOptions;
-  sInstallDir,s:string;
-  bHaveInstalldir:boolean;
+  sInstallDir,s:string; // Root installation directory
+  bHaveInstalldir:boolean; //Has user specified a non-standard install dir?
 begin
   Options:=TCommandLineOptions.create;
   try
@@ -227,7 +227,7 @@ begin
   FInstaller.OnlyModules:=Options.GetOption('','only','',false);
   FInstaller.CrossOS_Target:=Options.GetOption('','ostarget','');
   s:=Options.GetOption('','primary-config-path','');
-  if (s='') and bHaveInstalldir then
+  if (s='') then
     FInstaller.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(sInstallDir)+'config'+DirectorySeparator
   else
     FInstaller.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(s);
