@@ -583,6 +583,7 @@ function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
 // However, it is much faster than running make distclean and avoids fpmake bugs
 //todo: implement platform-specific directory checks
 var
+  CPU_OSSignature:string;
   DeleteExtensions: TStringList;
 begin
   result:=InitModule;
@@ -602,17 +603,15 @@ begin
 
     if (Self is TLazarusCrossInstaller) then
     begin
-      // Do nothing; cleanup should already have happened with regular installer.
-      // If we do clean up here, we miss .res files etc as we don't do an svn up which is what happens in the straight compiler.
-      // In any case, doing an svn up will give potentially different straight+cross compiler source versions
-      infoln('Lazarus: NOT running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
-      //todo: this is a problem if we only want to run the cross compiler... have to fix that.
+      CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
+      infoln('Lazarus: running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
     end
     else
     begin
+      CPU_OSSignature:=GetFPCTarget(true);
       infoln('Lazarus: running make distclean equivalent:',etinfo);
-      DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions);
     end;
+    DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions,CPU_OSSignature);
   finally
     DeleteExtensions.Free;
   end;

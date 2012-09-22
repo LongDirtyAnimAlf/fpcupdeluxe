@@ -66,8 +66,8 @@ procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>
 function DeleteDirectoryEx(DirectoryName: string): boolean;
-// Recursively delete files with specified extension(s)
-function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList): boolean;
+// Recursively delete files with specified extension(s), only if path contains specfied directory name
+function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
 // File size; returns 0 if empty, non-existent or error.
@@ -507,9 +507,11 @@ begin
   Result:=true;
 end;
 
-function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList): boolean;
+function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // Deletes all files ending in one of the extensions, starting from
 // DirectoryName and recursing down.
+// It only deletes files if any directory of the path contains OnlyIfPathHas,
+// unless that is empty
 // Extensions can contain * to cover everything (other extensions will then be
 // ignored), making it delete all files, but leaving the directories.
 // Will try to remove read-only files.
@@ -539,7 +541,7 @@ begin
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
         begin
           // Directory; call recursively exit with failure on error
-          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions) then
+          if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then
           begin
             FindCloseUTF8(FileInfo);
             exit;
@@ -547,16 +549,22 @@ begin
         end
         else
         begin
-          // Only delete if extension is right
-          if AllFiles or (Extensions.IndexOf(ExtractFileExt(FileInfo.Name))>=0) then
+          // If we are in the right path:
+          //todo: get utf8 replacement for ExtractFilePath
+          if (OnlyIfPathHas='') or
+            (pos(DirectorySeparator+OnlyIfPathHas+DirectorySeparator,ExtractFilePath(CurFileName))>0) then
           begin
-            // Remove read-only file attribute so we can delete it:
-            if (FileInfo.Attr and faReadOnly)>0 then
-              FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
-            if not DeleteFileUTF8(CurFilename) then
+            // Only delete if extension is right
+            if AllFiles or (Extensions.IndexOf(ExtractFileExt(FileInfo.Name))>=0) then
             begin
-              FindCloseUTF8(FileInfo);
-              exit;
+              // Remove read-only file attribute so we can delete it:
+              if (FileInfo.Attr and faReadOnly)>0 then
+                FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+              if not DeleteFileUTF8(CurFilename) then
+              begin
+                FindCloseUTF8(FileInfo);
+                exit;
+              end;
             end;
           end;
         end;

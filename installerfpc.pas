@@ -773,34 +773,36 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 //todo: remove some kind of build stamp - we now get
 var
   DeleteExtensions: TStringList;
+  CPU_OSSignature:string;
 begin
   result:=InitModule;
   if not result then exit;
   // Fool make into thinking it's clean. Well, fool?!?
   if (FCrossOS_Target='') and (FCrossCPU_Target='') then
-    begin
-      infoln('FPC: running make distclean equivalent:',etinfo);
-      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+GetFPCTarget(true));
-      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'base.build-stamp.'+GetFPCTarget(true));
-      // Only clean ppus if doing a straight compile. Otherwise a run with the cross compiler will remove
-      // the straight .ppus.
-      //todo: fix this with platform-specific directory checking
-      DeleteExtensions:=TStringList.Create;
-      try
-        DeleteExtensions.Add('ppu');
-        DeleteExtensions.Add('a');
-        DeleteExtensions.Add('o');
-        DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions);
-      finally
-        DeleteExtensions.Free;
-      end;
-    end
+  begin
+    infoln('FPC: running make distclean equivalent:',etinfo);
+    CPU_OSSignature:=GetFPCTarget(true);
+  end
   else
-    begin
-      infoln('FPC: running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
-      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+FCrossCPU_Target+'-'+FCrossOS_Target);
-      DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'base.build-stamp.'+FCrossCPU_Target+'-'+FCrossOS_Target);
-    end;
+  begin
+    infoln('FPC: running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+    CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
+  end;
+  DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+CPU_OSSignature);
+  DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'base.build-stamp.'+CPU_OSSignature);
+
+  // Clean ppus etc in any directory that has our cpu-os signature.
+  // This may miss some, but straight compiles will not interfere with cross compile
+  // units and the other way round
+  DeleteExtensions:=TStringList.Create;
+  try
+    DeleteExtensions.Add('ppu');
+    DeleteExtensions.Add('a');
+    DeleteExtensions.Add('o');
+    DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions,CPU_OSSignature);
+  finally
+    DeleteExtensions.Free;
+  end;
 
   // Delete any existing fpc.cfg files; ignore success or failure
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
