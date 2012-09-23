@@ -19,7 +19,8 @@ uses
 // These sequences determine standard installation/uninstallation order/content:
 Const
   Sequences=
-//default sequence
+//default sequence. Using declare makes this show up in the module list given by fpcup --help
+    // If you don't want that, use DeclareHidden
     'Declare default;'+
     {$ifdef linux}
     'Exec CheckDevLibs;'+

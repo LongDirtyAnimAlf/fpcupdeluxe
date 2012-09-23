@@ -143,9 +143,11 @@ begin
         delete(macro,pos(')',macro),length(macro));
         macro:=UpperCase(macro);
         len:=length(macro)+3; // the brackets
-        if macro='FPCDIR' then macro:=FFPCDir
-        else if macro='LAZARUSDIR' then macro:=FLazarusDir
-        else if macro='LAZARUSPRIMARYCONFIGPATH' then macro:=FLazarusPrimaryConfigPath
+        // For the directory macros, the user expects to add path separators himself in fpcup.ini, so strip them
+        // out if they are there.
+        if macro='FPCDIR' then macro:=ExcludeTrailingPathDelimiter(FFPCDir)
+        else if macro='LAZARUSDIR' then macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
+        else if macro='LAZARUSPRIMARYCONFIGPATH' then macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
         else macro:=GetValue(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
         if pos(' ',macro)>0 then

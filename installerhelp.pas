@@ -572,11 +572,11 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
       'chm'+DirectorySeparator;
-    infoln('HELPLAZARUS: documentation directory: '+FTargetDirectory,etInfo);
+    infoln('helplazarus: documentation directory: '+FTargetDirectory,etInfo);
     FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;;
-    infoln('HELPLAZARUS: FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
+    infoln('helplazarus: FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
     result:=true;
   end;
 end;
