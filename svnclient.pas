@@ -67,6 +67,7 @@ type
     // Makes sure non-empty strings have a / at the end.
     function IncludeTrailingSlash(AValue: string): string;
     procedure SetDesiredRevision(AValue: string);
+    procedure SetLocalRepository(AValue: string);
     procedure SetRepositoryURL(AValue: string);
     procedure SetSVNExecutable(AValue: string);
     procedure SetVerbose(AValue: boolean);
@@ -93,8 +94,9 @@ type
     procedure LocalModifications(var FileList: TStringList);
     //Checks to see if local directory is a valid SVN repository for the repository URL given (if any)
     function LocalRepositoryExists: boolean;
-    //Local directory that has an SVN repository/checkout
-    property LocalRepository: string read FLocalRepository write FLocalRepository;
+    //Local directory that has an SVN repository/checkout.
+    //When setting, relative paths will be expanded; trailing path delimiters will be removed
+    property LocalRepository: string read FLocalRepository write SetLocalRepository;
     //Revision number of local repository: branch revision number if we're in a branch.
     property LocalRevision: integer read GetLocalRevision;
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
@@ -202,6 +204,14 @@ procedure TSVNClient.SetDesiredRevision(AValue: string);
 begin
   if FDesiredRevision=AValue then Exit;
   FDesiredRevision:=AValue;
+end;
+
+procedure TSVNClient.SetLocalRepository(AValue: string);
+// Sets local repository, converting relative path to absolute path
+// and adding a trailing / or \
+begin
+  if FLocalRepository=AValue then Exit;
+  FLocalRepository:=ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
 end;
 
 procedure TSVNClient.SetRepositoryURL(AValue: string);
