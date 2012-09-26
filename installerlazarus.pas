@@ -457,7 +457,7 @@ begin
   WritelnLog('Lazarus options:        '+FCompilerOptions,false);
   result:=CheckAndGetNeededExecutables;
   // Look for make etc in the current compiler directory:
-  BinPath:=ExtractFilePath(FCompiler);
+  BinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   SetPath(BinPath+PathSeparator+

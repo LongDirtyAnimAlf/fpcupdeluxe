@@ -174,7 +174,7 @@ type
     FLazarusURL: string;
     FMakeDirectory: string;
     FOnlyModules: string;
-    FShortCutName: string;
+    FShortCutNameLazarus: string;
     FShortCutNameFpcup: string;
     FSkipModules: string;
     FUninstall:boolean;
@@ -196,8 +196,8 @@ type
     // Write msg to log with line ending. Can also write to console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
  public
-    property ShortCutName: string read FShortCutName write FShortCutName;
-    property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup;
+    property ShortCutNameLazarus: string read FShortCutNameLazarus write FShortCutNameLazarus; //Name of the shortcut that points to the fpcup-installed Lazarus
+    property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup; //Name of the shortcut that points to fpcup
     property CompilerName: string read FCompilerName write FCompilerName;
     property AllOptions:string read FAllOptions write FAllOptions;
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
@@ -300,12 +300,12 @@ begin
   begin
     {$IFDEF MSWINDOWS}
     // Somewhere in local appdata special folder
-    FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
+    FLazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
     {$ELSE}
     // Note: normal GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
     // XdgConfigHome normally resolves to something like ~/.config
     // which is a reasonable default if we have no Lazarus primary config path set
-    FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
+    FLazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(XdgConfigHome)+DefaultPCPSubdir;
     {$ENDIF MSWINDOWS}
   end;
   result:=FLazarusPrimaryConfigPath;
@@ -313,7 +313,7 @@ end;
 
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
 begin
-FBootstrapCompilerDirectory:=IncludeTrailingPathDelimiter(ExpandFileName(AValue));
+FBootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
 end;
 
 procedure TFPCupManager.SetFPCDirectory(AValue: string);
@@ -508,14 +508,14 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     InstalledLazarus:string;
   begin
   result:=true;
-  if FParent.ShortCutName<>EmptyStr then
+  if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
     infoln('Lazarus: creating desktop shortcut:',etinfo);
     try
       //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
       {$IFDEF MSWINDOWS}
-      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
+      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       {$IFDEF DARWIN}
@@ -538,13 +538,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   function DeleteLazarusScript:boolean;
   begin
   result:=true;
-  if FParent.ShortCutName<>EmptyStr then
+  if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
     infoln('Lazarus: deleting desktop shortcut:',etinfo);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       {$IFDEF MSWINDOWS}
-      DeleteDesktopShortCut(FParent.ShortCutName);
+      DeleteDesktopShortCut(FParent.ShortCutNameLazarus);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       DeleteFileUTF8(FParent.ShortcutName);

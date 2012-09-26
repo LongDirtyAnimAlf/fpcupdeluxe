@@ -29,6 +29,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 program fpcup;
 
 { Command line interface to installing/updating FPC/Lazarus instances }
+{ Code conventions in this project:
+- comment as much as you can
+- all variables with directories contain:
+  no trailing delimiter (/ or \) and
+  absolute paths
+}
 {$mode objfpc}{$H+}
 
 {
@@ -140,7 +146,7 @@ begin
   writeln('                       On Windows: a desktop shortcut.');
   writeln('                       On other systems: a shell script in your home directory.');
   writeln('                       If empty specified, no shortcut will be produced.');
-  writeln('                       Default: Lazarus_trunk');
+  writeln('                       Default: depends on Lazarus directory');
   writeln(' lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.');
   writeln(' lazrevision=<number>  Revert to Lazarus SVN revision <number>');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
@@ -181,7 +187,7 @@ function CheckOptions(FInstaller: TFPCupManager):integer;
 var
   {$IFNDEF MSWINDOWS}AllOptions,FPCUpLink:string;{$ENDIF}
   bNoConfirm,bHelp,bVersion:boolean;
-  sconfirm:string;
+  sConfirm:string;
   Options:TCommandLineOptions;
   sInstallDir,s:string; // Root installation directory
   bHaveInstalldir:boolean; //Has user specified a non-standard install dir?
@@ -191,35 +197,56 @@ begin
   result:=-1; //no error
   Options.CaseSensitive:=false;
   try
+  // All directories specified here should be cleaned up: absolute paths without trailing delimiter
   {$IFDEF MSWINDOWS}
-  sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','installdir','C:\development')));
-  bHaveInstalldir:=sInstallDir<>'C:\development';
-  FInstaller.MakeDirectory:=Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap\');
-  FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap\');
-  FInstaller.FPCDirectory:=Options.GetOption('','fpcdir',sInstallDir+'\fpc\');
-  FInstaller.LazarusDirectory:=Options.GetOption('','lazdir',sInstallDir+'\lazarus\');
+  sInstallDir:=Options.GetOption('','installdir','');
+  if sInstallDir='' then begin
+    sInstallDir:='C:\development';
+    bHaveInstalldir:=false;
+  end
+  else begin
+    sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
+    bHaveInstalldir:=true;
+  end;
+  FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap')));
+  FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap')));
+  FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
+  FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
   {$ELSE}
-  // Use expandfilenameUTF8 to expand ~ to correct directory
-  sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','installdir','~/development')));
-  bHaveInstalldir:=sInstallDir<>ExpandFileNameUTF8('~/development');
-  FInstaller.MakeDirectory:=Options.GetOption('','binutilsdir','');
-  FInstaller.BootstrapCompilerDirectory:=Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap');
-  FInstaller.FPCDirectory:=Options.GetOption('','fpcdir',sInstallDir+'/fpc');
-  FInstaller.LazarusDirectory:=Options.GetOption('','lazdir',sInstallDir+'/lazarus');
+  sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','installdir','')));
+  if sInstallDir='' then begin
+    sInstallDir:=ExpandFileNameUTF8('~/development');
+    bHaveInstalldir:=true;
+  end
+  else begin
+    bHaveInstalldir:=false;
+  end;
+  FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir','')));
+  FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap')));
+  FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
+  FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
   {$ENDIF MSWINDOWS}
   FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
   FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
   FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
-  FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname','fpcup_update');
-  if (FInstaller.ShortCutNameFpcup='fpcup_update') and bHaveInstalldir then
-    FInstaller.ShortCutNameFpcup:=ExtractFileName(sInstallDir)+'_update';  // sInstallDir has no terminating pathdelimiter!!
+  FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname','');
+  if FInstaller.ShortcutNameFPCup='' then
+    if bHaveInstallDir then
+      FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
+    else
+      FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
   FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
   FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
   bHelp:=Options.GetOptionNoParam('h','help',false);
   FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
-  FInstaller.ShortCutName:=Options.GetOption('','lazlinkname','Lazarus_fpcup');
-  if (FInstaller.ShortCutName='Lazarus_trunk') and bHaveInstalldir then
-    FInstaller.ShortCutName:='Lazarus_'+ExtractFileName(sInstallDir);  // sInstallDir has no terminating pathdelimiter!!
+  FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname','');
+  if (FInstaller.ShortCutNameLazarus='') then
+    if bHaveInstalldir then
+      FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
+    else if UpperCase(ExtractFileName(FInstaller.LazarusDirectory))='LAZARUS' then
+      FInstaller.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
+    else
+      FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FInstaller.LazarusDirectory);
   FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
   FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
   FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
@@ -231,9 +258,9 @@ begin
     // If we have no input from the user, let's create a name based on the directory where
     // Lazarus is to be installed
     FInstaller.LazarusPrimaryConfigPath:=
-      IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FInstaller.LazarusDirectory))+DirectorySeparator
+      IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FInstaller.LazarusDirectory))
   else
-    FInstaller.LazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(s);
+    FInstaller.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
   FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
   FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
   bVersion:=Options.GetOptionNoParam('','version',false);
@@ -283,8 +310,6 @@ begin
     end
   else
     begin
-    if ('fpcup_update' = FInstaller.ShortCutNameFpcup) and ('Lazarus_trunk'<>FInstaller.ShortCutName) then
-      FInstaller.ShortCutNameFpcup:=FInstaller.ShortCutName+'_Update';
 
     {$IFNDEF MSWINDOWS}
     if FInstaller.MakeDirectory<>'' then
@@ -308,7 +333,7 @@ begin
     writeln('Binutils/make dir:      '+FInstaller.MakeDirectory);
     {$ENDIF MSWINDOWS}
     writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
-    writeln('Lazarus shortcut name:  '+FInstaller.ShortCutName);
+    writeln('Lazarus shortcut name:  '+FInstaller.ShortCutNameLazarus);
     writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
     writeln('FPC URL:                '+FInstaller.FPCURL);
     writeln('FPC options:            '+FInstaller.FPCOPT);
@@ -354,8 +379,8 @@ begin
     if not bNoConfirm then
       begin
       write('Continue (Y/n): ');
-      readln(sconfirm);
-      if uppercase(copy(sconfirm,1,1))='N' then
+      readln(sConfirm);
+      if uppercase(copy(sConfirm,1,1))='N' then
         begin
         result:=0; //quit without error
         end;

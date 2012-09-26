@@ -180,7 +180,7 @@ begin
   // only download some SVN repositories
   // So.. enable this.
   result:=CheckAndGetNeededExecutables;
-  BinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  BinPath:=ExcludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   InitDone:=result;
 end;
 

@@ -541,10 +541,10 @@ begin
     //There is no win64 bootstrap compiler, yet
     //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
     //This should eliminate issues with the wrong RTL etc.
-    //FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcx64.exe';
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+    //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     {$ELSE}
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     {$endif win64}
     {$ENDIF MSWINDOWS}
     {$IFDEF Linux}
@@ -554,18 +554,18 @@ begin
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL :=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'i386-linux-ppc386-1';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
     {$ELSE}
     {$IFDEF cpuarmel}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL :=
     'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/arm-linux-ppcarm.bz2';
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'arm-linux-ppcarm';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL :=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'x86_64-linux-ppcx64';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
     {$ENDIF cpuarmel}
     {$ENDIF CPU386}
     {$ENDIF Linux}
@@ -574,7 +574,7 @@ begin
     //ppcuniversal is not a good bootstrap compiler since it creates a compiler that doesn't handle generics !?!?!?
     //We'll make our own ppc386 starting with the ppcuniversal bootstrap compiler
     //If we made it already pick it up here
-    FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL:=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
@@ -591,11 +591,11 @@ begin
       {$ifdef win64}
       //don't have a win64 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
       // For that, we need to download the i386 compiler.
-      FBootstrapCompiler := FBootstrapCompilerDirectory +'ppc386.exe';
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
       {$endif win64}
       {$ifdef darwin}
       //don't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
-      FBootstrapCompiler := FBootstrapCompilerDirectory +'ppcuniversal';
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
       {$endif win64}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
     end;
