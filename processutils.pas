@@ -224,18 +224,18 @@ begin
 
     try
       inherited Execute;
+      while Running do
+      begin
+        if not ReadOutput then
+          Sleep(50);
+      end;
+      ReadOutput;
+      FExitStatus:=inherited ExitStatus;
     except
       // Leave exitstatus as proc_internalerror
       // This should handle calling non-existing application etc.
     end;
 
-    while Running do
-    begin
-      if not ReadOutput then
-        Sleep(50);
-    end;
-    ReadOutput;
-    FExitStatus:=inherited ExitStatus;
     if (FExitStatus<>0) and (Assigned(OnError) or Assigned(OnErrorM))  then
       if Assigned(OnError) then
         OnError(Self,false)
