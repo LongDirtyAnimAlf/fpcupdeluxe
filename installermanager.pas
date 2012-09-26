@@ -519,14 +519,14 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       {$IFDEF DARWIN}
-      CreateHomeStartLink(InstalledLazarus+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
+      CreateHomeStartLink(InstalledLazarus+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ELSE}
-      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
+      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ENDIF DARWIN}
       {$IFDEF LINUX}
       // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
-      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutName);
-      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutName);
+      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
+      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ENDIF LINUX}
       {$ENDIF UNIX}
     finally
@@ -547,7 +547,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       DeleteDesktopShortCut(FParent.ShortCutNameLazarus);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
-      DeleteFileUTF8(FParent.ShortcutName);
+      DeleteFileUTF8(FParent.ShortcutNameLazarus);
       {$ENDIF UNIX}
     finally
       //Ignore problems creating shortcut
