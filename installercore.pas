@@ -426,7 +426,6 @@ const
   // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
   SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
-
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw64/';
   SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
   //todo: add Qt and Qt4Pas5.dll in http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/?
@@ -457,9 +456,13 @@ begin
     {$ifdef win32}
     DebuggerFiles.Add('gdb.exe');
     DebuggerFiles.Add('libexpat-1.dll');
+    {
+    http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
+    only has libexpat-1, so no need for these:
     DebuggerFiles.Add('libgcc_s_dw2-1.dll');
     DebuggerFiles.Add('libiconv-2.dll');
     DebuggerFiles.Add('libintl-8.dll');
+    }
     {$endif win32}
     {$ifdef win64}
     Debugger64Files.Add('gdb.exe');
