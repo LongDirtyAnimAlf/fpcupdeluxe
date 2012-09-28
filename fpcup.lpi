@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="14">
+    <Units Count="15">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -246,6 +246,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_crosswin32"/>
       </Unit13>
+      <Unit14>
+        <Filename Value="wininstaller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="wininstaller"/>
+      </Unit14>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

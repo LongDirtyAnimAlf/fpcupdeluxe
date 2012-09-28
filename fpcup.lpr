@@ -53,7 +53,7 @@ uses {$IFDEF UNIX}
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
   synaip, synautil, synsock, blcksock, installerCore,
   installerfpc, installerLazarus, installerHelp, installerUniversal,
-  installerManager,commandline;
+  installerManager,commandline, wininstaller;
 
 //{$R *.res} //Keep it simple, no resources
 
