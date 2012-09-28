@@ -1,4 +1,4 @@
-unit wininstaller;
+unit winInstaller;
 
 { wininstaller: Windows installer creator
 
@@ -58,9 +58,101 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, installerCore {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL};
+
+type
+
+  { TWinInstaller }
+
+  TWinInstaller = class(TInstaller)
+    //todo: or descend from installermanager!?! we need probably laz dir+fpc dir
+    //better option is to write it as a new module with our own properties=>we then
+    //need to pass the universal installer more properties etc. that does seem clearest
+  private
+    FCreateInstallerBatch: string; //Location of create_installer.bat, which needs editing according to our situation
+    FInnoSetupCompiler: string; //Path to the command line Inno Ssetup compiler (required)
+    procedure FindInno;
+  protected
+    // Build module descendant customisation
+    function BuildModuleCustom(ModuleName:string): boolean; virtual;
+    // internal initialisation, called from BuildModule,CleanModule,GetModule
+    // and UnInstallModule but executed only once
+    function InitModule:boolean;
+  public
+    property InnoSetupCompiler: string write FInnoSetupCompiler; //Path to the command line Inno Ssetup compiler (required)
+    constructor Create;
+    destructor Destroy; override;
+  end;
 
 implementation
+
+{ TWinInstaller }
+
+procedure TWinInstaller.FindInno;
+var
+  CompileCommand: string='';
+  Registry: TRegistry;
+begin
+  Registry := TRegistry.Create;
+  try
+    // Navigate to proper "directory":
+    Registry.RootKey := HKEY_LOCAL_MACHINE;
+    if Registry.OpenKeyReadOnly('\SOFTWARE\Classes\InnoSetupScriptFile\shell\Compile\Command') then
+      CompileCommand:=Registry.ReadString(''); //read the value of the default name
+    if CompileCommand<>'' then
+      // Often something like
+      //"d:\Program Files (x86)\Inno Setup 5\Compil32.exe" /cc "%1"
+      CompileCommand:=Copy(CompileCommand,1,pos(uppercase(CompileCommand),'.EXE')+3);
+    if Copy(CompileCommand,1,1)='"' then
+      CompileCommand:=Copy(CompileCommand,2,length(CompileCommand));
+    if CompileCommand='' then
+      if fileexistsutf8('C:\Program Files (x86)\Inno Setup 5\Compil32.exe') then
+    if CompileCommand<>'' then
+    begin
+      FInnoSetupCompiler:=CompileCommand;
+    end;
+  finally
+    Registry.Free;
+  end;
+end;
+
+function TWinInstaller.BuildModuleCustom(ModuleName: string): boolean;
+begin
+  //edit fcreateinstallerbatch
+  //todo: move to configmodule?!?
+  {set environment vars
+  SET ISCC="C:\Program Files (x86)\Inno Setup 5\ISCC.exe"
+  SET LAZTEMPBUILDDIR="c:\temp\lazarusbuild"
+  SET SVN="C:\Program Files\Subversion\bin\svn.exe"
+  }
+
+  {
+  create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
+  or
+  create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC IDE_WIDGETSET PATCHFILE CHMHELPFILES
+  }
+
+  {check installer.log}
+end;
+
+function TWinInstaller.InitModule: boolean;
+begin
+
+end;
+
+constructor TWinInstaller.Create;
+begin
+  // Sensible default for an x64 Windows:
+  FindInno;
+  if FInnoSetupCompiler='' then
+    FInnoSetupCompiler:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
+  //todo: set FCreateInstallerBatch depending on laz dir, check location
+end;
+
+destructor TWinInstaller.Destroy;
+begin
+  inherited Destroy;
+end;
 
 end.
 
