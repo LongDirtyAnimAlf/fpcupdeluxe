@@ -53,7 +53,7 @@ uses {$IFDEF UNIX}
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
   synaip, synautil, synsock, blcksock, installerCore,
   installerfpc, installerLazarus, installerHelp, installerUniversal,
-  installerManager,commandline, wininstaller;
+  installerManager,commandline{$IFDEF MSWINDOWS}, wininstaller{$ENDIF};
 
 //{$R *.res} //Keep it simple, no resources
 
@@ -214,13 +214,14 @@ begin
   FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
   {$ELSE}
   //todo: don't expand home dirs here, do it if passible after we've saved the options to the shortcut so it can be used with other users as well
-  sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','installdir','')));
+  sInstallDir:=Options.GetOption('','installdir','');
   if sInstallDir='' then begin
     sInstallDir:=ExpandFileNameUTF8('~/development');
-    bHaveInstalldir:=true;
+    bHaveInstalldir:=false;
   end
   else begin
-    bHaveInstalldir:=false;
+    sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
+    bHaveInstalldir:=true;
   end;
   FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir','')));
   FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap')));
