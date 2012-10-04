@@ -249,7 +249,7 @@ end;"/>
       <Unit14>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="wininstaller"/>
+        <UnitName Value="winInstaller"/>
       </Unit14>
     </Units>
   </ProjectOptions>

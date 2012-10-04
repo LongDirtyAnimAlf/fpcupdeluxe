@@ -58,13 +58,13 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL};
+  Classes, SysUtils, installerUniversal {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL};
 
 type
 
   { TWinInstaller }
 
-  TWinInstaller = class(TInstaller)
+  TWinInstaller = class(TUniversalInstaller)
     //todo: or descend from installermanager!?! we need probably laz dir+fpc dir
     //better option is to write it as a new module with our own properties=>we then
     //need to pass the universal installer more properties etc. that does seem clearest
@@ -105,8 +105,9 @@ begin
       CompileCommand:=Copy(CompileCommand,1,pos(uppercase(CompileCommand),'.EXE')+3);
     if Copy(CompileCommand,1,1)='"' then
       CompileCommand:=Copy(CompileCommand,2,length(CompileCommand));
-    if CompileCommand='' then
-      if fileexistsutf8('C:\Program Files (x86)\Inno Setup 5\Compil32.exe') then
+    if (CompileCommand='') then CompileCommand:=FindDefaultExecutablePath('Compil32.exe');
+    if (CompileCommand='') and (fileexistsutf8('C:\Program Files (x86)\Inno Setup 5\Compil32.exe')) then CompileCommand:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
+    if (CompileCommand='') and (fileexistsutf8('C:\Program Files\Inno Setup 5\Compil32.exe')) then CompileCommand:='C:\Program Files\Inno Setup 5\Compil32.exe';
     if CompileCommand<>'' then
     begin
       FInnoSetupCompiler:=CompileCommand;
