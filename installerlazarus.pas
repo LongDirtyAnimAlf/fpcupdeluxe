@@ -408,7 +408,7 @@ begin
       // todo: check if we respect user compiler settings. Perhaps create an FPCUP profile that is changed every time this is run?
       ProcessEx.Parameters.Add('--build-mode=-dKeepInstalledPackages');
       //todo: test if --build-ide=-dKeepInstalledPackages works for keeping packages once a useride has been built; otherwise revert to --build-mode=Normal IDE, which apparently is language-dependent!!!
-      //see lazarus.pp, http://bugs.freepascal.org/view.php?id=23061
+      //see lazarus.pp, http://bugs.freepascal.org/view.php?id=23054
       if FCrossLCL_Platform <>'' then
         ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
       infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etinfo);
