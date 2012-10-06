@@ -72,7 +72,7 @@ type
     property CrossCPU_Target: string read FCrossCPU_Target write FCrossCPU_Target;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
     property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
-    // SVN revision override. Default is trunk
+    // SVN revision override. Default is HEAD/latest revision
     property DesiredRevision: string write FDesiredRevision;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;

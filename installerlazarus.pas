@@ -104,6 +104,7 @@ type
     BinPath:string;
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
+    FRevision: string;
     InitDone:boolean;
   protected
     FFPCDir:string;
@@ -120,6 +121,8 @@ type
     property FPCDir:string write FFPCDir;
     // Lazarus primary config path
     property PrimaryConfigPath:string write FPrimaryConfigPath;
+    // Local revision of source
+    property Revision:string read FRevision write FRevision;
     // Build module
     function BuildModule(ModuleName:string): boolean; override;
     // Create configuration in PrimaryConfigPath
@@ -402,12 +405,21 @@ begin
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
-      //todo: test if --build-ide=-dKeepInstalledPackages works for keeping packages once a useride has been built; otherwise revert to --build-mode=Normal IDE, which apparently is language-dependent!!!
-      //see lazarus.pp, http://bugs.freepascal.org/view.php?id=23054
-      ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages');
-      // We can specify a build mode; otherwise probably the latest build mode will be used
-      // which could well be a stripped IDE
-      ProcessEx.Parameters.Add('--build-mode=');
+      //todo: test if --build-ide=-dKeepInstalledPackages works for keeping packages once a useride has been built
+      if strtointdef(Revision,0)>=38971 then
+      begin
+        ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages');
+        ProcessEx.Parameters.Add('--build-mode=');
+      end
+      else
+      begin
+        //Language dependent fallback
+        // We can specify a build mode; otherwise probably the latest build mode will be used
+        // which could well be a stripped IDE
+        ProcessEx.Parameters.Add('--build-ide=');
+        ProcessEx.Parameters.Add('--build-mode=Normal IDE');
+      end;
+
       if FCrossLCL_Platform <>'' then
         ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
       infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etinfo);
@@ -637,8 +649,18 @@ begin
   finally
     UpdateWarnings.Free;
   end;
+
   infoln('Lazarus was at: '+BeforeRevision,etinfo);
-  if FSVNUpdated then infoln('Lazarus is now at: '+AfterRevision,etinfo) else infoln('No updates for Lazarus found.',etinfo);
+  if FSVNUpdated then
+  begin
+    Revision:=AfterRevision;
+    infoln('Lazarus is now at: '+AfterRevision,etinfo);
+  end
+  else
+  begin
+    Revision:=BeforeRevision;
+    infoln('No updates for Lazarus found.',etinfo);
+  end;
 end;
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
