@@ -402,13 +402,12 @@ begin
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
-      ProcessEx.Parameters.Add('--build-ide=');
-      // We can specify a build mode; otherwise probably the latest build mode will be used
-      // which could well be a stripped IDE
-      // todo: check if we respect user compiler settings. Perhaps create an FPCUP profile that is changed every time this is run?
-      ProcessEx.Parameters.Add('--build-mode=-dKeepInstalledPackages');
       //todo: test if --build-ide=-dKeepInstalledPackages works for keeping packages once a useride has been built; otherwise revert to --build-mode=Normal IDE, which apparently is language-dependent!!!
       //see lazarus.pp, http://bugs.freepascal.org/view.php?id=23054
+      ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages');
+      // We can specify a build mode; otherwise probably the latest build mode will be used
+      // which could well be a stripped IDE
+      ProcessEx.Parameters.Add('--build-mode=');
       if FCrossLCL_Platform <>'' then
         ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
       infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etinfo);
