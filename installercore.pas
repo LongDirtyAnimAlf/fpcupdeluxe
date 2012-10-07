@@ -719,67 +719,11 @@ var
 begin
   processorname := 'notfound';
   os := processorname;
-  {$ifdef cpui386}
-  processorname := 'i386';
-  {$endif cpui386}
-  {$ifdef cpum68k}
-  processorname := 'm68k';
-  {$endif cpum68k}
-  {$ifdef cpualpha}
-  processorname := 'alpha';
-  {$endif cpualpha}
-  {$ifdef cpupowerpc}
-  processorname := 'powerpc';
-  {$endif cpupowerpc}
-  {$ifdef cpupowerpc64}
-  processorname := 'powerpc64';
-  {$endif cpupowerpc64}
-  {$ifdef cpuarm}
-    {$ifdef fpc_armeb}
-  processorname := 'armeb';
-    {$else}
-  processorname := 'arm';
-    {$endif fpc_armeb}
-  {$endif cpuarm}
-  {$ifdef cpusparc}
-  processorname := 'sparc';
-  {$endif cpusparc}
-  {$ifdef cpux86_64}
-  processorname := 'x86_64';
-  {$endif cpux86_64}
-  {$ifdef cpuia64}
-  processorname := 'ia64';
-  {$endif cpuia64}
-  {$ifdef darwin}
-  os := 'darwin';
-  {$endif darwin}
-  {$ifdef FreeBSD}
-  os := 'freebsd';
-  {$endif FreeBSD}
-  {$ifdef linux}
-  os := 'linux';
-  {$endif linux}
-  {$ifdef netbsd}
-  os := 'netbsd';
-  {$endif netbsd}
-  {$ifdef openbsd}
-  os := 'openbsd';
-  {$endif openbsd}
-  {$ifdef os2}
-  os := 'os2';
-  {$endif os2}
-  {$ifdef solaris}
-  os := 'solaris';
-  {$endif solaris}
-  {$ifdef wince}
-  os := 'wince';
-  {$endif wince}
-  {$ifdef win32}
-  os := 'win32';
-  {$endif win32}
-  {$ifdef win64}
-  os := 'win64';
-  {$endif win64}
+  os := {$I %FPCTARGETOS%};
+  processorname := {$I %FPCTARGETCPU%};
+  os := LowerCase(os); //match usage in makefiles
+  processorname := LowerCase(processorname); //match usage in makefiles
+
   if not Native then
   begin
     if FCrossCPU_Target <> '' then
