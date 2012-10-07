@@ -65,7 +65,7 @@ procedure WriteVersion;
 begin
   writeln('Version: based on commit '+RevisionStr);
   writeln('Build date: '+versiondate);
-  writeln('Compiled for CPU: '+{$INCLUDE %FPCTARGETCPU%}+' on '+{$INCLUDE %FPCTARGETOS%});
+  writeln('Compiled for CPU: '+lowercase({$INCLUDE %FPCTARGETCPU%})+' on '+lowercase({$INCLUDE %FPCTARGETOS%}));
   writeln('');
 end;
 
@@ -155,6 +155,8 @@ begin
   writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'lazURL','list'));
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
+  writeln(' logfilename=<file>    Location of log file. If nothing specified,');
+  writeln('                       fpcup.log in the current directory.');
   writeln(' noconfirm             No confirmation asked. For batch operation.');
   writeln(' only=<values>         Update/build or clean only the modules specified.');
   writeln('                       The module list is separated by commas.');
@@ -191,8 +193,9 @@ var
   Options:TCommandLineOptions;
   sInstallDir,s:string; // Root installation directory
   bHaveInstalldir:boolean; //Has user specified a non-standard install dir?
+  sLogFile:string; //Filename for log
 begin
-  Options:=TCommandLineOptions.create;
+  Options:=TCommandLineOptions.Create;
   try
   result:=-1; //no error
   Options.CaseSensitive:=false;
@@ -228,6 +231,16 @@ begin
   FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
   FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
   {$ENDIF MSWINDOWS}
+  sLogFile:=Options.GetOption('','logfilename','',true);
+  if sLogFile='' then
+    {$IFDEF MSWINDOWS}
+    FInstaller.LogFileName:='fpcup.log'
+    {$ELSE}
+    FInstaller.LogFileName:=ExpandFileNameUTF8('~/fpcup.log')
+    {$ENDIF MSWINDOWS}
+  else
+    FInstaller.LogFileName:=sLogFile;
+
   FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
   FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
   FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
@@ -353,6 +366,7 @@ begin
     begin
       writeln('Keep local changes:     no');
     end;
+    writeln('Log file name:          '+FInstaller.LogFileName);
     writeln('Parameter list:         '+FInstaller.AllOptions);
 
     // Show warnings to the user:

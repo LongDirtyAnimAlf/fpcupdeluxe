@@ -181,11 +181,13 @@ type
     FVerbose: boolean;
     Sequencer: TSequencer;
     function GetLazarusPrimaryConfigPath: string;
+    function GetLogFileName: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetFPCDirectory(AValue: string);
     procedure SetFPCURL(AValue: string);
     procedure SetLazarusDirectory(AValue: string);
     procedure SetLazarusURL(AValue: string);
+    procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
   protected
     FLog:TLogger;
@@ -218,6 +220,8 @@ type
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
+    // Location where fpcup log will be written to.
+    property LogFileName: string read GetLogFileName write SetLogFileName;
     property MakeDirectory: string read FMakeDirectory write SetMakeDirectory;
     //List of all default enabled sequences available
     property ModuleEnabledList: TStringList read FModuleEnabledList;
@@ -311,6 +315,11 @@ begin
   result:=FLazarusPrimaryConfigPath;
 end;
 
+function TFPCupManager.GetLogFileName: string;
+begin
+  result:=FLog.LogFile;
+end;
+
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
 begin
 FBootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
@@ -344,6 +353,25 @@ begin
     FLazarusURL:=installerUniversal.GetAlias(FConfigFile,'lazURL',AValue);
 end;
 
+procedure TFPCupManager.SetLogFileName(AValue: string);
+begin
+  // Don't change existing log file
+  if (AValue<>'') and (FLog.LogFile=AValue) then Exit;
+  // Defaults if empty value specified
+  if AValue='' then
+    begin
+    {$IFDEF MSWINDOWS}
+    FLog.LogFile:='fpcup.log'; //current directory
+    {$ELSE}
+    FLog.LogFile:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
+    {$ENDIF MSWINDOWS}
+    end
+  else
+    begin
+    FLog.LogFile:=AValue;
+    end;
+end;
+
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
 begin
   // Make directory can be empty (e.g. in Linux). In this case
@@ -356,6 +384,7 @@ end;
 
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
 begin
+  // Set up log if it doesn't exist yet
   FLog.WriteLog(msg,ToConsole);
 end;
 
@@ -375,6 +404,18 @@ function TFPCupManager.Run: boolean;
 
 begin
   result:=false;
+
+  try
+    WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
+  except
+    // Writing to log failed, probably duplicate run. Inform user and get out.
+    writeln('***ERROR***');
+    writeln('Could not open log file '+FLog.LogFile+' for writing.');
+    writeln('Perhaps another fpcup is running?');
+    writeln('Aborting.');
+    halt(2);
+  end;
+
   if SkipModules<>'' then
     begin
     Sequencer.SkipList:=TStringList.Create;
@@ -415,8 +456,7 @@ begin
 end;
 
 constructor TFPCupManager.Create;
-var
-  LogFileName: string;
+
 begin
 FModuleList:=TStringList.Create;
 FModuleEnabledList:=TStringList.Create;
@@ -424,22 +464,7 @@ FModulePublishedList:=TStringList.Create;
 Sequencer:=TSequencer.create;
 Sequencer.Parent:=Self;
 FLog:=TLogger.Create;
-{$IFDEF MSWINDOWS}
-FLog.LogFile:='fpcup.log'; //current directory
-{$ELSE}
-FLog.LogFile:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
-{$ENDIF MSWINDOWS}
-try
-  WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
-except
-  // Writing to log failed, probably duplicate run. Inform user and get out.
-  writeln('***ERROR***');
-  writeln('Could not open log file '+FLog.LogFile+' for writing.');
-  writeln('Perhaps another fpcup is running?');
-  writeln('Aborting.');
-  halt(2);
-end;
-
+// Log filename will be set on first log write
 end;
 
 destructor TFPCupManager.Destroy;
@@ -451,8 +476,12 @@ begin
   FModulePublishedList.Free;
   FModuleEnabledList.Free;
   Sequencer.free;
-  WritelnLog(DateTimeToStr(now)+': fpcup finished.',true);
-  WritelnLog('------------------------------------------------',false);
+  try
+    WritelnLog(DateTimeToStr(now)+': fpcup finished.',true);
+    WritelnLog('------------------------------------------------',false);
+  finally
+    //ignore logging errors
+  end;
   FLog.Free;
   inherited Destroy;
 end;

@@ -819,6 +819,7 @@ constructor TLogger.Create;
 begin
   FLog:=TEventLog.Create(nil);
   FLog.LogType:=ltFile;
+  FLog.AppendContent:=true;
 end;
 
 destructor TLogger.Destroy;
