@@ -245,16 +245,21 @@ begin
   FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
   FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
   FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname','');
+  //todo: find out if the user specified --fpcuplinkname= to explicitly block creation of a link, or just didn't specify anything. Up to then, don't create a link.
+  {
   if FInstaller.ShortcutNameFPCup='' then
     if bHaveInstallDir then
       FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
     else
       FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
+  }
   FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
   FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
   bHelp:=Options.GetOptionNoParam('h','help',false);
   FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
   FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname','');
+  //todo: find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything. Up to then, don't create a link.
+  {
   if (FInstaller.ShortCutNameLazarus='') then
     if bHaveInstalldir then
       FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir)  // sInstallDir has no terminating pathdelimiter!!
@@ -262,6 +267,7 @@ begin
       FInstaller.ShortCutNameLazarus:='Lazarus_fpcup' // default installdir, default lazarus dir
     else
       FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FInstaller.LazarusDirectory);
+  }
   FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
   FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
   FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
