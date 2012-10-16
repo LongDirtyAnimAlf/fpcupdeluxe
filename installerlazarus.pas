@@ -101,7 +101,7 @@ type
 
   TLazarusInstaller = class(TInstaller)
   private
-    BinPath:string;
+    FBinPath:string;
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
     FRevision: string;
@@ -470,16 +470,16 @@ begin
   WritelnLog('Lazarus options:        '+FCompilerOptions,false);
   result:=CheckAndGetNeededExecutables;
   // Look for make etc in the current compiler directory:
-  BinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
+  FBinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
-  SetPath(BinPath+PathSeparator+
+  SetPath(FBinPath+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
     FBaseDirectory,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  SetPath(BinPath,true);
+  SetPath(FBinPath,true);
   {$ENDIF UNIX}
   InitDone:=result;
 end;
@@ -592,7 +592,12 @@ function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
 // Currently, this function implements "nuclear" cleaning: it removes .ppu files
 // etc
 // However, it is much faster than running make distclean and avoids fpmake bugs
-//todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
+{todo: for this Lazarus cleaner, add an svn up or perhaps svn revert (but mind keeplocalchanges!) in some way
+to the current local revision before running clean.
+This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
+Not so big a problem now if you run default sequence; if you run only clean, you will clean too much
+}
+
 var
   CPU_OSSignature:string;
   DeleteExtensions: TStringList;
@@ -603,11 +608,12 @@ begin
   try
     DeleteExtensions.Add('ppu');
     DeleteExtensions.Add('a');
-    DeleteExtensions.Add('o');
-    //Makefile does not seem to delete lrs files:
-    //DeleteExtensions.Add('lrs');
+    //Makefile does not seem to delete lrs files, but we can as long as svn updats them again:
+    DeleteExtensions.Add('lrs');
+    DeleteExtensions.Add('o'); //trust on svn up to get back whatever is needed
     DeleteExtensions.Add('or');
-    DeleteExtensions.Add('res');
+    DeleteExtensions.Add('res'); //trust on svn up to get back whatever is needed
+    DeleteExtensions.Add('rst'); //trust on svn up to get back whatever is needed
     // The makefile also removes a lot of .lfm files in the units directories...
     { Also fpcmade.i386-win32, Package.fpc
     }
@@ -623,6 +629,7 @@ begin
       CPU_OSSignature:=GetFPCTarget(true);
       infoln('Lazarus: running make distclean equivalent:',etinfo);
     end;
+    // Clean out, but only in directories with our CPU/OS signature:
     DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions,CPU_OSSignature);
   finally
     DeleteExtensions.Free;

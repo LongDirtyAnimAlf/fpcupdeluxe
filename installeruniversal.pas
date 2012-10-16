@@ -50,7 +50,7 @@ type
 
   TUniversalInstaller = class(TInstaller)
   private
-    BinPath:string;
+    FBinPath:string;
     FFPCDir:string;
     FLazarusDir:string;
     FLazarusPrimaryConfigPath:string;
@@ -208,7 +208,7 @@ begin
   // only download some SVN repositories
   // So.. enable this.
   result:=CheckAndGetNeededExecutables;
-  BinPath:=ExcludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  FBinPath:=ExcludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   InitDone:=result;
 end;
 

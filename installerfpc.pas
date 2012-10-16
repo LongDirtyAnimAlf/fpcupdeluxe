@@ -50,11 +50,11 @@ type
 
   TFPCInstaller = class(TInstaller)
   private
-    BinPath:string;
+    FBinPath: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
-    InitDone:boolean;
+    InitDone: boolean;
   protected
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
@@ -183,7 +183,7 @@ begin
           ProcessEx.Parameters.Add('FPC='+FCompiler);
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
           {$IFDEF UNIX}
-          ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
+          ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF UNIX}
           if CrossInstaller.BinUtilsPath<>'' then
             ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -265,7 +265,7 @@ begin
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  ProcessEx.Parameters.Add('INSTALL_BINDIR='+BinPath);
+  ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   ProcessEx.Parameters.Add('install');
   infoln('Running make install for FPC:',etinfo);
   ProcessEx.Execute;
@@ -312,11 +312,11 @@ begin
     try
       for FileCounter:=0 to FBinUtils.Count-1 do
       begin
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[FileCounter], IncludeTrailingPathDelimiter(BinPath)+FBinUtils[FileCounter]);
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[FileCounter], IncludeTrailingPathDelimiter(FBinPath)+FBinUtils[FileCounter]);
       end;
       // Also, we can change the make/binutils path to our new environment
       // Will modify fmake as well.
-      FMakeDir:=BinPath;
+      FMakeDir:=FBinPath;
     except
       on E: Exception do
       begin
@@ -365,7 +365,7 @@ begin
   {$IFDEF UNIX}
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
   // If this fails, Lazarus compilation will fail...
-  FPCScript := IncludeTrailingPathDelimiter(BinPath) + 'fpc.sh';
+  FPCScript := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.sh';
   if FileExists(FPCScript) then
   begin
     infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etinfo);
@@ -377,9 +377,9 @@ begin
   writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
   writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
   writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-  writeln(TxtFile,IncludeTrailingPathDelimiter(BinPath),'fpc  -n @',
-       IncludeTrailingPathDelimiter(BinPath),'fpc.cfg -FD'+
-       IncludeTrailingPathDelimiter(BinPath)+' "$@"');
+  writeln(TxtFile,IncludeTrailingPathDelimiter(FBinPath),'fpc  -n @',
+       IncludeTrailingPathDelimiter(FBinPath),'fpc.cfg -FD'+
+       IncludeTrailingPathDelimiter(FBinPath)+' "$@"');
   CloseFile(TxtFile);
   Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
@@ -609,7 +609,7 @@ begin
   {$IFDEF MSWINDOWS}
   WritelnLog('Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
-  BinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  FBinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // add fpc/utils to solve data2inc not found by fpcmkcfg
@@ -617,11 +617,11 @@ begin
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
     IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
-    BinPath,false);
+    FBinPath,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(BinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true);
+  SetPath(FBinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true);
   {$ENDIF UNIX}
   InitDone:=result;
 end;
@@ -637,7 +637,6 @@ var
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
-
 
 begin
   result:=InitModule;
@@ -709,9 +708,9 @@ begin
         begin
         OperationSucceeded:=OperationSucceeded and
           FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
-           IncludeTrailingPathDelimiter(BinPath)+s);
+           IncludeTrailingPathDelimiter(FBinPath)+s);
         OperationSucceeded:=OperationSucceeded and
-          (0=fpChmod(IncludeTrailingPathDelimiter(BinPath)+s,&755));
+          (0=fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755));
         end;
     until FindNext(SearchRec)<>0;
   FindClose(SearchRec);
@@ -727,10 +726,10 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
-    FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
-      ProcessEx.Executable := IncludeTrailingPathDelimiter(BinPath) + 'fpcmkcfg';
+      ProcessEx.Executable := IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.clear;
       ProcessEx.Parameters.Add('-d');
@@ -767,7 +766,12 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // Currently, this function implements "nuclear" cleaning: it removes .ppu files
 // etc
 // However, it is much faster than running make distclean and avoids fpmake bugs
-//todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
+{todo: add an svn up or perhaps svn revert (but mind keeplocalchanges!) in some way
+to the current local revision before running clean.
+This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
+Not so big a problem now if you run default sequence; if you run only clean, you will clean too much
+}
+
 var
   DeleteList: TStringList;
   CPU_OSSignature:string;
@@ -793,23 +797,28 @@ begin
   // units and the other way round
   DeleteList:=TStringList.Create;
   try
-    DeleteList.Add('ppu');
-    DeleteList.Add('a');
-    DeleteList.Add('o');
+    DeleteList.Add('ppu'); // Compiled units
+    DeleteList.Add('a'); //static object code library
+    DeleteList.Add('o'); //object file
+    DeleteList.Add('rst'); //resource strings
     DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
 
     //Delete all fpcmade.i38-win32 etc marker files:
     DeleteList.Clear;
     DeleteList.Add('fpcmade.'+CPU_OSSignature);
+    DeleteList.Add('fpunits.cfg'); //Apparently does not (yet) apply for Lazarus
     DeleteFilesSubDirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,'');
   finally
     DeleteList.Free;
   end;
 
-  // Delete any existing fpc.cfg files; ignore success or failure
+  {
+  //todo: stopped deleting fpc.cfg because of problems with ein32=>win64 compiler and/or win32+win64 compiler
+  //in same fpc base directory getting missing fpc.cfg
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
+  }
   {$IFDEF WIN64}
-  // Delete  bootstrap compiler; will be regenerated later with new
+  // Delete bootstrap compiler; will be regenerated later with new
   // version:
   infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
