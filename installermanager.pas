@@ -58,15 +58,18 @@ Const
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
-    'Buildmodule fpc;'+
-    //Getmodule has already been done
+    // Getmodule has already been done; however nuclear cleaning removes a lot of
+    // files that should still be there. Workaround until we do an svn up in the cleaner module
+    'Getmodule fpc;'+
+    // Getmodule has already been donecleaner module
     'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
     'End;'+
 //default sequence for win64
-//todo: win64 sequence currently not enabled; see
-//{$elseif defined(win64)}
-//below
+{todo: win64 sequence currently not enabled; see
+{$elseif defined(win64)}
+below}
+//todo: if enabled, check if workaround for nuclear cleaning (see above) is also needed
     'Declare defaultwin64;'+
     'Do fpc;'+
     //Get bigide so we at least have a compiler:

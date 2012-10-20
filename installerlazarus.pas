@@ -607,18 +607,6 @@ begin
   DeleteExtensions:=TStringList.Create;
   try
     DeleteExtensions.Add('ppu');
-    DeleteExtensions.Add('a');
-    //Makefile does not seem to delete lrs files, but we can as long as svn updats them again:
-    DeleteExtensions.Add('lrs');
-    DeleteExtensions.Add('o'); //trust on svn up to get back whatever is needed
-    DeleteExtensions.Add('or');
-    DeleteExtensions.Add('res'); //trust on svn up to get back whatever is needed
-    DeleteExtensions.Add('rst'); //trust on svn up to get back whatever is needed
-    // The makefile also removes a lot of .lfm files in the units directories...
-    { Also fpcmade.i386-win32, Package.fpc
-    }
-    //todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
-
     if (Self is TLazarusCrossInstaller) then
     begin
       CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
@@ -626,6 +614,17 @@ begin
     end
     else
     begin
+      // In native installers, we can clean more because we can let svn up get new files
+      DeleteExtensions.Add('a');
+      DeleteExtensions.Add('lrs'); //trust on svn up to get back whatever is needed.
+      DeleteExtensions.Add('o'); //trust on svn up to get back whatever is needed
+      DeleteExtensions.Add('or');
+      DeleteExtensions.Add('res'); //trust on svn up to get back whatever is needed
+      DeleteExtensions.Add('rst'); //trust on svn up to get back whatever is needed
+      // The makefile also removes a lot of .lfm files in the units directories...
+      { Also fpcmade.i386-win32, Package.fpc
+      }
+      //todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
       CPU_OSSignature:=GetFPCTarget(true);
       infoln('Lazarus: running make distclean equivalent:',etinfo);
     end;

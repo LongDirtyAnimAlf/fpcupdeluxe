@@ -47,7 +47,7 @@ type
     procedure CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
     // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
-    // Checkout/update using SVN
+    // Checkout/update using SVN; use FBaseDirectory as local repository
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
@@ -398,8 +398,8 @@ begin
   FBinUtils.Add('rm' + GetExeExt);
   FBinUtils.Add('strip' + GetExeExt);
   FBinUtils.Add('unzip' + GetExeExt);
-  //Upx is fairly useless. We might just use gecho as upx that but that would probably confuse people..
-  FBinUtils.Add('upx' + GetExeExt);
+  // As of FPC 2.6.2, UPX is no longer included:
+  //FBinUtils.Add('upx' + GetExeExt);
   FBinUtils.Add('windres' + GetExeExt);
   FBinUtils.Add('windres.h');
   FBinUtils.Add('zip' + GetExeExt);

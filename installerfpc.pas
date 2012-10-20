@@ -773,13 +773,15 @@ Not so big a problem now if you run default sequence; if you run only clean, you
 }
 
 var
+  CrossCompiling: boolean;
   DeleteList: TStringList;
   CPU_OSSignature:string;
 begin
   result:=InitModule;
   if not result then exit;
+  CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
   // Fool make into thinking it's clean. Well, fool?!?
-  if (FCrossOS_Target='') and (FCrossCPU_Target='') then
+  if not CrossCompiling then
   begin
     infoln('FPC: running make distclean equivalent:',etinfo);
     CPU_OSSignature:=GetFPCTarget(true);
@@ -798,16 +800,25 @@ begin
   DeleteList:=TStringList.Create;
   try
     DeleteList.Add('ppu'); // Compiled units
-    DeleteList.Add('a'); //static object code library
+    // If we're not crosscompiling, a subsequent svn up will restore a lot of needed files:
+    DeleteList.Add('a'); //static object code libraries
     DeleteList.Add('o'); //object file
-    DeleteList.Add('rst'); //resource strings
+    DeleteList.Add('rst'); //resource strings; let svn up get new ones
     DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
+
+
+    //todo: this doesn't really help anything!?? check source of fpc error messages "can't find bla..."
+    {
+    DeleteList.Clear;
+    DeleteList.Add('fpunits.cfg');
+    DeleteFilesSubDirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
+    }
 
     //Delete all fpcmade.i38-win32 etc marker files:
     DeleteList.Clear;
     DeleteList.Add('fpcmade.'+CPU_OSSignature);
-    DeleteList.Add('fpunits.cfg'); //Apparently does not (yet) apply for Lazarus
     DeleteFilesSubDirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,'');
+    //todo: look into dealing with /rtl, /units
   finally
     DeleteList.Free;
   end;
