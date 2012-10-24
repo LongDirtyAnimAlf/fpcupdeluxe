@@ -656,6 +656,8 @@ begin
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('OS_TARGET=win64');
     ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
+    // Override makefile checks that checks for stable compiler in FPC trunk
+    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC64:',etinfo);
     ProcessEx.Execute;
@@ -680,6 +682,8 @@ begin
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
+    // Override makefile checks that checks for stable compiler in FPC trunk
+    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC i386:',etinfo);
     ProcessEx.Execute;
