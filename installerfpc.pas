@@ -54,6 +54,7 @@ type
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
+    FTrunkBootstrapCompiler: boolean;
     InitDone: boolean;
   protected
     // Build module descendant customisation
@@ -78,6 +79,10 @@ type
     function ConfigModule(ModuleName:string): boolean; override;
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
+    // If yes, the bootstrap compiler used will be generated using the trunk sources.
+    // If no, a stable FPC bootstrap compiler will be used.
+    // This is required information for setting make file optioins
+    property TrunkBootstrapCompiler: boolean read FTrunkBootstrapCompiler;
     // Uninstall module
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
@@ -157,6 +162,10 @@ begin
         ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      //Don't really know if this is necessary, but it can't hurt:
+      // Override makefile checks that checks for stable compiler in FPC trunk
+      if FTrunkBootstrapCompiler then
+        ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       //putting all before target might help!?!?
       ProcessEx.Parameters.Add('all');
       ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
@@ -253,6 +262,9 @@ begin
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+  // Override makefile checks that checks for stable compiler in FPC trunk
+  if FTrunkBootstrapCompiler then
+    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
@@ -280,6 +292,9 @@ begin
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  // Override makefile checks that checks for stable compiler in FPC trunk
+  if FTrunkBootstrapCompiler then
+    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   if FCompilerOptions <>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
@@ -533,6 +548,7 @@ begin
   infoln('TFPCInstaller: initialising...',etDebug);
   if FBootstrapCompiler='' then
     begin  // may need to download it
+    FTrunkBootstrapCompiler:=false;
     {$IFDEF MSWINDOWS}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL:=
@@ -543,6 +559,7 @@ begin
     //This should eliminate issues with the wrong RTL etc.
     //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
+    FTrunkBootstrapCompiler:=true;
     {$ELSE}
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     {$endif win64}
@@ -578,6 +595,7 @@ begin
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL:=
       'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
+    FTrunkBootstrapCompiler:=false;
     {$ENDIF Darwin}
     end;
   // Only download bootstrap compiler if we can't find a valid one
@@ -657,7 +675,8 @@ begin
     ProcessEx.Parameters.Add('OS_TARGET=win64');
     ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
     // Override makefile checks that checks for stable compiler in FPC trunk
-    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+    if FTrunkBootstrapCompiler then
+      ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC64:',etinfo);
     ProcessEx.Execute;
@@ -683,7 +702,8 @@ begin
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
     // Override makefile checks that checks for stable compiler in FPC trunk
-    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+    if FTrunkBootstrapCompiler then
+      ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC i386:',etinfo);
     ProcessEx.Execute;
