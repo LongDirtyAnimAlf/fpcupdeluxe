@@ -164,7 +164,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--primary-config-path=c:\development\lazarus64settings_fpctrunk  --fpcuplinkname= --lazlinkname=Laz64FPCTrunk --binutilsdir=c:\development\fpcbootstrap64 --fpcbootstrapdir=c:\development\fpcbootstrap64"/>
+        <CommandLineParams Value="--keeplocalchanges"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>

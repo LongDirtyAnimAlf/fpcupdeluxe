@@ -13,6 +13,7 @@ uses
 const
   HgCommand = 'hg parents --template "const RevisionStr=''{node|short}'';versiondate=''{date|date}'';"';
   FailedOutput = 'const RevisionStr=''unknown'';versiondate=''unknown'';';
+  OutputFile = 'revision.inc';
 var
   ResultCode:integer;
   s:string;
@@ -38,7 +39,7 @@ begin
     writeln('Writing this to file:');
     writeln(s);
     end;
-  AssignFile(F,'revision.inc');
+  AssignFile(F,OutputFile);
   Rewrite(F);
   writeln(F,s);
   Closefile(F);

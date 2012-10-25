@@ -40,7 +40,7 @@ Const
 //default sequence for win32
     'Declare defaultwin32;'+
     'Do fpc;'+
-    //Get bigide so we at least have a compiler:
+    //Get bigide so we at least have a working IDE:
     'Do BIGIDE;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
@@ -61,6 +61,7 @@ Const
     // Getmodule has already been done; however nuclear cleaning removes a lot of
     // files that should still be there. Workaround until we do an svn up in the cleaner module
     'Getmodule fpc;'+
+    'Buildmodule fpc;'+
     // Getmodule has already been donecleaner module
     'Cleanmodule LCL;'+
     'Buildmodule LCL;'+

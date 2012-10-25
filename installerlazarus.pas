@@ -198,8 +198,7 @@ begin
     // Otherwise, use make; advantages:
     // - can deal with various bin tools
     // - can deal with compiler options
-    // - doesn't need existing lazbuild(+nogui LCL)
-    // todo: how to reliably detect which version we're using???
+    // - doesn't need existing lazbuild (+nogui LCL)
     if FCrossLCL_Platform<>'' then
       begin
       {
