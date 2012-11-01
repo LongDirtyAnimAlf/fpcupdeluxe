@@ -57,12 +57,10 @@ Const
     'Declare crosswin32-64;'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
+    // Getmodule has already been done
     'Cleanmodule fpc;'+
-    // Getmodule has already been done; however nuclear cleaning removes a lot of
-    // files that should still be there. Workaround until we do an svn up in the cleaner module
-    'Getmodule fpc;'+
     'Buildmodule fpc;'+
-    // Getmodule has already been donecleaner module
+    // Getmodule has already been done
     'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
     'End;'+
@@ -90,6 +88,7 @@ below}
     'Declare crosswin64-32;'+
     'SetCPU i386;'+
     'SetOS win32;'+
+    //Getmodule has already been done
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
     //Getmodule has already been done

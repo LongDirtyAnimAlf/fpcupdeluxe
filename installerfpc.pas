@@ -787,73 +787,45 @@ begin
 end;
 
 function TFPCInstaller.CleanModule(ModuleName: string): boolean;
-// Currently, this function implements "nuclear" cleaning: it removes .ppu files
-// etc
-// However, it is much faster than running make distclean and avoids fpmake bugs
-{todo: add an svn up or perhaps svn revert (but mind keeplocalchanges!) in some way
-to the current local revision before running clean.
-This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
-Not so big a problem now if you run default sequence; if you run only clean, you will clean too much
-}
-
+// Make distclean is unreliable; at least for FPC.
+// Running it twice apparently can fix a lot of problems; see FPC ML message
+// by Jonas Maebe, 1 November 2012
 var
-  CrossCompiling: boolean;
-  DeleteList: TStringList;
-  CPU_OSSignature:string;
+  oldlog:TErrorMethod;
 begin
   result:=InitModule;
   if not result then exit;
-  CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
-  // Fool make into thinking it's clean. Well, fool?!?
-  if not CrossCompiling then
-  begin
-    infoln('FPC: running make distclean equivalent:',etinfo);
-    CPU_OSSignature:=GetFPCTarget(true);
-  end
+  ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
+  ProcessEx.Executable := Make;
+  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add('FPC='+FCompiler);
+  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+  ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+  ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  if Self is TFPCCrossInstaller then
+    begin  // clean out the correct compiler
+    ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+    ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+    end;
+  ProcessEx.Parameters.Add('distclean');
+  if (FCrossOS_Target='') and (FCrossCPU_Target='') then
+    begin
+    infoln('FPC: running make distclean:',etinfo);
+    end
   else
-  begin
-    infoln('FPC: running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
-    CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
-  end;
-  DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+CPU_OSSignature);
-  DeleteFileUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+'base.build-stamp.'+CPU_OSSignature);
+    begin
+    infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+    end;
+  ProcessEx.Execute;
+  Sleep(100); //now do it again
+  ProcessEx.Execute;
+  ProcessEx.OnErrorM:=oldlog;
 
-  // Clean ppus etc in any directory that has our cpu-os signature.
-  // This may miss some, but straight compiles will not interfere with cross compile
-  // units and the other way round
-  DeleteList:=TStringList.Create;
-  try
-    DeleteList.Add('ppu'); // Compiled units
-    // If we're not crosscompiling, a subsequent svn up will restore a lot of needed files:
-    DeleteList.Add('a'); //static object code libraries
-    DeleteList.Add('o'); //object file
-    DeleteList.Add('rst'); //resource strings; let svn up get new ones
-    DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
-
-
-    //todo: this doesn't really help anything!?? check source of fpc error messages "can't find bla..."
-    {
-    DeleteList.Clear;
-    DeleteList.Add('fpunits.cfg');
-    DeleteFilesSubDirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
-    }
-
-    //Delete all fpcmade.i38-win32 etc marker files:
-    DeleteList.Clear;
-    DeleteList.Add('fpcmade.'+CPU_OSSignature);
-    DeleteFilesSubDirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteList,'');
-    //todo: look into dealing with /rtl, /units
-  finally
-    DeleteList.Free;
-  end;
-
-  {
-  //todo: stopped deleting fpc.cfg because of problems with ein32=>win64 compiler and/or win32+win64 compiler
-  //in same fpc base directory getting missing fpc.cfg
+  // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
-  }
   {$IFDEF WIN64}
-  // Delete bootstrap compiler; will be regenerated later with new
+  // Delete  bootstrap compiler; will be regenerated later with new
   // version:
   infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
@@ -863,7 +835,6 @@ begin
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
   {$ENDIF UNIX}
 
-  // Even if we cleaned imperfectly, allow continuing to the next step
   result:=true;
 end;
 

@@ -588,50 +588,42 @@ begin
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
-// Currently, this function implements "nuclear" cleaning: it removes .ppu files
-// etc
-// However, it is much faster than running make distclean and avoids fpmake bugs
-{todo: for this Lazarus cleaner, add an svn up or perhaps svn revert (but mind keeplocalchanges!) in some way
-to the current local revision before running clean.
-This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
-Not so big a problem now if you run default sequence; if you run only clean, you will clean too much
-}
-
+// Make distclean is unreliable; at least for FPC.
+// Running it twice apparently can fix a lot of problems; see FPC ML message
+// by Jonas Maebe, 1 November 2012
 var
-  CPU_OSSignature:string;
-  DeleteExtensions: TStringList;
+  oldlog:TErrorMethod;
 begin
   result:=InitModule;
   if not result then exit;
-  DeleteExtensions:=TStringList.Create;
-  try
-    DeleteExtensions.Add('ppu');
-    if (Self is TLazarusCrossInstaller) then
-    begin
-      CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
-      infoln('Lazarus: running make distclean equivalent (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
-    end
-    else
-    begin
-      // In native installers, we can clean more because we can let svn up get new files
-      DeleteExtensions.Add('a');
-      DeleteExtensions.Add('lrs'); //trust on svn up to get back whatever is needed.
-      DeleteExtensions.Add('o'); //trust on svn up to get back whatever is needed
-      DeleteExtensions.Add('or');
-      DeleteExtensions.Add('res'); //trust on svn up to get back whatever is needed
-      DeleteExtensions.Add('rst'); //trust on svn up to get back whatever is needed
-      // The makefile also removes a lot of .lfm files in the units directories...
-      { Also fpcmade.i386-win32, Package.fpc
-      }
-      //todo: add an svn up to the current local revision before running clean. This should restore behaviour that --clean gives the same effect as make clean (i.e. situation after say svn co)
-      CPU_OSSignature:=GetFPCTarget(true);
-      infoln('Lazarus: running make distclean equivalent:',etinfo);
-    end;
-    // Clean out, but only in directories with our CPU/OS signature:
-    DeleteFilesExtensionsSubdirs(ExcludeTrailingPathDelimiter(FBaseDirectory),DeleteExtensions,CPU_OSSignature);
-  finally
-    DeleteExtensions.Free;
+  // Make distclean; we don't care about failure (e.g. directory might be empty etc)
+  oldlog:=ProcessEx.OnErrorM;
+  ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
+  ProcessEx.Executable := Make;
+  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add('FPC='+FCompiler+'');
+  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+  ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+  ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  if FCrossLCL_Platform <>'' then
+    ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
+  if (Self is TLazarusCrossInstaller) then
+  begin  // clean out the correct compiler
+    ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+    ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+  end
+  else
+  begin
+    infoln('Lazarus: running make distclean:',etinfo);
   end;
+  ProcessEx.Parameters.Add('distclean');
+  // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
+  ProcessEx.Execute;
+  sleep(100); //now do it again:
+  ProcessEx.Execute;
+  ProcessEx.OnErrorM:=oldlog;
   result:=true;
 end;
 
