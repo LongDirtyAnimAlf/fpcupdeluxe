@@ -222,7 +222,7 @@ begin
     PackageAbsolutePath:=PackagePath
   else
     PackageAbsolutePath:=ExpandFilename(PackagePath);
-  writeln('debug: packageabsolutepath: '+PackageAbsolutePath);
+  infoln('InstallPackage: packageabsolutepath: '+PackageAbsolutePath,etDebug);
   ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   if WorkingDir<>'' then
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
@@ -417,7 +417,8 @@ begin
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
-    // More detailed logging only if verbose:
+    // More detailed logging only if verbose or debug:
+    infoln('TUniversalInstaller: building module '+ModuleName+' with these commands: '+sl.text,etDebug);
     if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' with these commands: '+sl.text,true);
     result:=RunCommands('InstallExecute',sl);
     end
