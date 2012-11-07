@@ -222,6 +222,7 @@ begin
     PackageAbsolutePath:=PackagePath
   else
     PackageAbsolutePath:=ExpandFilename(PackagePath);
+  writeln('debug: packageabsolutepath: '+PackageAbsolutePath);
   ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   if WorkingDir<>'' then
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
@@ -230,9 +231,9 @@ begin
   ProcessEx.Parameters.Add('--add-package');
   ProcessEx.Parameters.Add(PackageAbsolutePath);
   ProcessEx.Execute;
-  result:= ProcessEx.ExitStatus =0;
+  result:= ProcessEx.ExitStatus=0;
   if not result then
-    WritelnLog( 'InstallerUniversal: error trying to add package '+PackagePath);
+    WritelnLog('InstallerUniversal: error trying to add package '+PackagePath);
 end;
 
 function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;
