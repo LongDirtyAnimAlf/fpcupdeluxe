@@ -98,7 +98,7 @@ type
   // Gets the sequence representation for all modules
   function GetModuleList(ConfigFile:string):string;
   // gets alias for keywords in Dictionary.
-  //The keyword 'list' is reserved and returns the list if keywords as commatext
+  //The keyword 'list' is reserved and returns the list of keywords as commatext
   function GetAlias(ConfigFile,Dictionary,keyword: string): string;
 
 
@@ -126,9 +126,9 @@ var
 { TUniversalInstaller }
 
 
-// Look for entries with Key and process macros etc in value
 function TUniversalInstaller.GetValue(Key: string; sl: TStringList;
   recursion: integer): string;
+// Look for entries with Key and process macros etc in value
 var
   i,len:integer;
   s,macro:string;
@@ -418,7 +418,6 @@ begin
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     // More detailed logging only if verbose or debug:
-    infoln('TUniversalInstaller: building module '+ModuleName+' with these commands: '+sl.text,etDebug);
     if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' with these commands: '+sl.text,true);
     result:=RunCommands('InstallExecute',sl);
     end

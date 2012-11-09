@@ -790,11 +790,30 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // Make distclean is unreliable; at least for FPC.
 // Running it twice apparently can fix a lot of problems; see FPC ML message
 // by Jonas Maebe, 1 November 2012
+// On Windows, removing fpmake.exe, see Build FAQ (Nov 2011), 2.5
 var
   oldlog:TErrorMethod;
+  CrossCompiling: boolean;
+  DeleteList: TStringList;
+  CPU_OSSignature:string;
 begin
   result:=InitModule;
   if not result then exit;
+  CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
+  if CrossCompiling then
+    CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target
+  else
+    CPU_OSSignature:=GetFPCTarget(true);
+  {$IFDEF MSWINDOWS}
+  DeleteList:=TStringList.Create;
+  try
+    DeleteList.Add('fpmake.exe');
+    DeleteFilesSubDirs(IncludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
+  finally
+    DeleteList.Free;
+  end;
+  {$ENDIF}
+
   ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -825,7 +844,7 @@ begin
   // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
   {$IFDEF WIN64}
-  // Delete  bootstrap compiler; will be regenerated later with new
+  // Delete bootstrap compiler; will be regenerated later with new
   // version:
   infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
