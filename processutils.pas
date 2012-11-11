@@ -88,6 +88,7 @@ type
       // Executable+parameters. Use Executable and Parameters/ParametersString to assign
       property ResultingCommand: string read GetResultingCommand;
       property Environment:TProcessEnvironment read GetProcessEnvironment;
+      // All environment variables, e.g. PATH
       property ExceptionInfo:string read GetExceptionInfo;
       property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
       property ExitStatus:integer read FExitStatus;

@@ -472,6 +472,10 @@ begin
   FBinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
+  // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
+  // at least one ; to be present in the path. If you only have one entry, you
+  // can add PathSeparator without problems.
+  // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
   SetPath(FBinPath+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
