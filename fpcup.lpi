@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="15">
+    <Units Count="16">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -251,6 +251,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="winInstaller"/>
       </Unit14>
+      <Unit15>
+        <Filename Value="commandline.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="commandline"/>
+      </Unit15>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
