@@ -202,9 +202,10 @@ begin
     // - ini file (using --inioptions=bla.ini)
     // - section/profile (using --profile=johndoe)
     // then rather load that
+    {
     Options.IniFile:='fpcupoptions.ini';
     Options.CaseSensitive:=false;
-    arghlblaf fix this
+    }
     try
       // All directories specified here should be cleaned up: absolute paths without trailing delimiter
       {$IFDEF MSWINDOWS}
