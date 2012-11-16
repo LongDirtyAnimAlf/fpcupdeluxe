@@ -223,7 +223,7 @@ begin
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
       {$ELSE}
-      //todo: don't expand home dirs here, do it if passible after we've saved the options to the shortcut so it can be used with other users as well
+      //todo: don't expand home dirs here, do it if possible after we've saved the options to the shortcut so it can be used with other users as well
       sInstallDir:=Options.GetOption('','installdir','');
       if sInstallDir='' then begin
         sInstallDir:=ExpandFileNameUTF8('~/development');
