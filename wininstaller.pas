@@ -91,8 +91,17 @@ implementation
 procedure TWinInstaller.FindInno;
 var
   CompileCommand: string='';
+  ProgramFiles: string;
+  ProgramFilesx86: string;
   Registry: TRegistry;
 begin
+  ProgramFiles:=GetEnvironmentVariableUTF8('ProgramFiles');
+  if ProgramFiles='' then
+    ProgramFiles:='C:\Program Files';
+  ProgramFilesx86:=GetEnvironmentVariableUTF8('ProgramFiles(x86)');
+  if ProgramFilesx86='' then
+    ProgramFilesx86:='C:\Program Files (x86)';
+    // will happen on x86 Windows but it can't hurt to search here, too
   Registry := TRegistry.Create;
   try
     // Navigate to proper "directory":
@@ -101,13 +110,16 @@ begin
       CompileCommand:=Registry.ReadString(''); //read the value of the default name
     if CompileCommand<>'' then
       // Often something like
-      //"d:\Program Files (x86)\Inno Setup 5\Compil32.exe" /cc "%1"
+      //"c:\Program Files (x86)\Inno Setup 5\Compil32.exe" /cc "%1"
       CompileCommand:=Copy(CompileCommand,1,pos(uppercase(CompileCommand),'.EXE')+3);
     if Copy(CompileCommand,1,1)='"' then
       CompileCommand:=Copy(CompileCommand,2,length(CompileCommand));
-    if (CompileCommand='') then CompileCommand:=FindDefaultExecutablePath('Compil32.exe');
-    if (CompileCommand='') and (fileexistsutf8('C:\Program Files (x86)\Inno Setup 5\Compil32.exe')) then CompileCommand:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
-    if (CompileCommand='') and (fileexistsutf8('C:\Program Files\Inno Setup 5\Compil32.exe')) then CompileCommand:='C:\Program Files\Inno Setup 5\Compil32.exe';
+    if (CompileCommand='') then
+      CompileCommand:=FindDefaultExecutablePath('Compil32.exe');
+    if (CompileCommand='') and (fileexistsutf8(ProgramFiles+'\Inno Setup 5\Compil32.exe')) then
+      CompileCommand:=ProgramFiles+'\Inno Setup 5\Compil32.exe';
+    if (CompileCommand='') and (fileexistsutf8(ProgramFilesx86+'\Inno Setup 5\Compil32.exe')) then
+      CompileCommand:=ProgramFilesx86+'\Inno Setup 5\Compil32.exe';
     if CompileCommand<>'' then
     begin
       FInnoSetupCompiler:=CompileCommand;
