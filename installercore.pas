@@ -60,6 +60,7 @@ type
     // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
     procedure LogError(Sender: TProcessEx; IsException: boolean);
+    // Sets the search/binary path to NewPath or adds NewPath to path:
     procedure SetPath(NewPath: string; Prepend: boolean);
   public
     // base directory for installation (fpcdir, lazdir,... option)

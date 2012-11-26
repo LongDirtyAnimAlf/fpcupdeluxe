@@ -1,6 +1,8 @@
 unit winInstaller;
 
 { wininstaller: Windows installer creator
+  See $(LazarusDir)\tools\install\win\readme.txt for manual install instructions
+  which this module tries to follow as much as possible.
 
   Copyright (c) 2012 Reinier Olislagers
   Licensed at your choice as MIT or modified LGPL - see below.
@@ -65,11 +67,10 @@ type
   { TWinInstaller }
 
   TWinInstaller = class(TUniversalInstaller)
-    //todo: or descend from installermanager!?! we need probably laz dir+fpc dir
-    //better option is to write it as a new module with our own properties=>we then
-    //need to pass the universal installer more properties etc. that does seem clearest
   private
-    FCreateInstallerBatch: string; //Location of create_installer.bat, which needs editing according to our situation
+    FFPCBuildDir: string; //Location of fpcbuild sources
+    FLazarusBinaryDir: string; //Location of Lazarus binaries
+    FInstallerBuildDir: string; //Directory where the installer script builds the installer
     FInnoSetupCompiler: string; //Path to the command line Inno Ssetup compiler (required)
     procedure FindInno;
   protected
@@ -89,6 +90,9 @@ implementation
 { TWinInstaller }
 
 procedure TWinInstaller.FindInno;
+// Finds Inno Compiler executable location.
+// Note: if you want to support Win9x, you'll need to use an ANSI Inno Setup
+// version lower than 5.5.0
 var
   CompileCommand: string='';
   ProgramFiles: string;
@@ -130,20 +134,64 @@ begin
 end;
 
 function TWinInstaller.BuildModuleCustom(ModuleName: string): boolean;
+var
+  HelpFileDir: string;
 begin
-  //edit fcreateinstallerbatch
-  //todo: move to configmodule?!?
-  {set environment vars
-  SET ISCC="C:\Program Files (x86)\Inno Setup 5\ISCC.exe"
-  SET LAZTEMPBUILDDIR="c:\temp\lazarusbuild"
-  SET SVN="C:\Program Files\Subversion\bin\svn.exe"
-  }
+  // todo: split up, move to config, perhaps make dirs properties etc
 
+  //checkout fpc build sources svn checkout
+  FFPCBuildDir:=GetTempDir(false)+'fpcbuild';
+  ForceDirectory(FFPCBuildDir);
+  FSVNClient.LocalRepository:=FFPCBuildDir;
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6_0';
+  FSVNClient.CheckOutOrUpdate;
+
+  //checkout laz binaries
+  FLazarusBinaryDir:=GetTempDir(false)+'lazbin';
+  ForceDirectory(FLazarusBinaryDir);
+  FSVNClient.LocalRepository:=FLazarusBinaryDir;
+  //todo: adapt for win64 (x86_64-win64/)
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/';
+  FSVNClient.CheckOutOrUpdate;
+
+  FInstallerBuildDir:=GetTempDir(false)+'lazinstaller';
+  ForceDirectory(FInstallerBuildDir);
+
+  //Basically a copy from the help installer:
+  HelpFileDir:=IncludeTrailingPathDelimiter(FLazarusDir)+
+      'docs'+DirectorySeparator+
+      'chm'+DirectorySeparator;
+
+  // Feed this environment to the batch file:
+  ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
+  ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
+  if GetEnvironmentVariable('SVN')='' then
+    ProcessEx.Environment.SetVar('SVN',FSVNClient.SVNExecutable);
+
+  ProcessEx.Executable := IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win\create_installer.bat';
+  ProcessEx.CurrentDirectory:=GetTempDir(false);
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add(FFPCDir); //FPCSVNDIR
+  ProcessEx.Parameters.Add(FLazarusDir); //LAZSVNDIR
+  ProcessEx.Parameters.Add(FLazarusBinaryDir); //LAZSVNBINDIR
+  // Should officially be a bootstrap compiler but should work with current compiler:
+  ProcessEx.Parameters.Add(FCompiler); //RELEASE_PPC
+  ProcessEx.Execute;
   {
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
   or
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC IDE_WIDGETSET PATCHFILE CHMHELPFILES
+  where:
+  FPCSVNDIR: Path to the fpc sources checked out of svn (see A.3)
+  LAZSVNDIR: Path to the lazarus sources checked out of svn => FLazarusDir
+  LAZSVNBINDIR: Path to the svn lazarus binaries (see A.5)
+  RELEASE_PPC: Path to the FPC compiler required to start the build of fpc it FPCSVNDIR (see A.6)
+  IDE_WIDGETSET: Optional: IDE widgetset to be created. If not needed: don't enter it or use ""
+  PATCHFILE: Optional: name of FPC patch file for the FPC sources. If not needed: don't enter it or use ""
+  CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
+  //change directory to build dir
+  //run script, installer will be in output subdir
 
   {check installer.log}
 end;
@@ -159,7 +207,6 @@ begin
   FindInno;
   if FInnoSetupCompiler='' then
     FInnoSetupCompiler:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
-  //todo: set FCreateInstallerBatch depending on laz dir, check location
 end;
 
 destructor TWinInstaller.Destroy;

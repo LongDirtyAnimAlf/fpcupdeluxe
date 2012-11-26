@@ -51,11 +51,14 @@ type
   TUniversalInstaller = class(TInstaller)
   private
     FBinPath:string;
-    FFPCDir:string;
-    FLazarusDir:string;
-    FLazarusPrimaryConfigPath:string;
     InitDone:boolean;
   protected
+    //FPC base directory - directory where FPC is (to be) installed:
+    FFPCDir:string;
+    //Lazarus base directory - directory where Lazarus is (to be) installed:
+    FLazarusDir:string;
+    //Directory where configuration for Lazarus is stored:
+    FLazarusPrimaryConfigPath:string;
     // Scans for and adds all packages specfied in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
     function FirstSpaceAfterCommand(CommandLine: string): integer;

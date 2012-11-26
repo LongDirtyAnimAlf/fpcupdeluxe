@@ -104,7 +104,7 @@ type
     //Parses output given by some commands (svn update, svn status) and returns files.
     // Files are marked by single characters (U,M,etc); you can filter on ore mor of these (pass [''] if not required).
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
-    //URL where central SVN repository is placed
+    //URL where central (remote) SVN repository is placed
     property Repository: string read FRepositoryURL write SetRepositoryURL;
     //Exit code returned by last SVN client command; 0 for success. Useful for troubleshooting
     property ReturnCode: integer read FReturnCode;
