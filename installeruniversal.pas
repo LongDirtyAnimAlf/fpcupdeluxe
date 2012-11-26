@@ -312,7 +312,7 @@ end;
 function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList;ModuleName:string): boolean;
 var
   i:integer;
-  exec,output:string;
+  InstallDir,exec,output:string;
   Installer: TWinInstaller;
   Workingdir:string;
 begin
@@ -334,10 +334,16 @@ begin
     Installer:=TWinInstaller.Create;
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
+      InstallDir:=IncludeTrailingPathDelimiter(GetValue('InstallDir',sl));
+      if InstallDir<>'' then
+        ForceDirectoriesUTF8(InstallDir);
       Installer.FPCDir:=FPCDir;
-      Installer.Verbose:=FVerbose;
+      Installer.FPCBuildDir:=InstallDir+'fpcbuild';
+      Installer.LazarusBinaryDir:=InstallDir+'lazbin';
       Installer.LazarusDir:=FLazarusDir;
       Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
+      Installer.Verbose:=FVerbose;
+
       Installer.BuildModuleCustom(ModuleName);
     finally
       Installer.Free;

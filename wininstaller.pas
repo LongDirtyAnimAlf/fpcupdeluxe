@@ -80,12 +80,16 @@ type
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     property InnoSetupCompiler: string write FInnoSetupCompiler; //Path to the command line Inno Ssetup compiler (required)
+    // Directory with FPC build files repository
+    property FPCBuildDir:string write FFPCBuildDir;
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
-    // Lazarus primary config path
-    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
+    // Directory with Lazarus binaries repository
+    property LazarusBinaryDir:string write FLazarusBinaryDir;
     // Lazarus base directory
     property LazarusDir:string read FLazarusDir write FLazarusDir;
+    // Lazarus primary config path
+    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -149,7 +153,6 @@ begin
 
   //checkout fpc build sources svn checkout
   if FVerbose then WritelnLog(ClassName+': Getting FPC build repository',true);
-  FFPCBuildDir:=GetTempDir(false)+'fpcbuild';
   ForceDirectory(FFPCBuildDir);
   FSVNClient.LocalRepository:=FFPCBuildDir;
   FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6_0';
@@ -157,7 +160,6 @@ begin
 
   //checkout laz binaries
   if FVerbose then WritelnLog(ClassName+': Getting Lazarus binaries repository',true);
-  FLazarusBinaryDir:=GetTempDir(false)+'lazbin';
   ForceDirectory(FLazarusBinaryDir);
   FSVNClient.LocalRepository:=FLazarusBinaryDir;
   //todo: adapt for win64 (x86_64-win64/)
@@ -205,8 +207,7 @@ begin
   if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
 
-  //change directory to build dir
-  //run script, installer will be in output subdir
+  //todo: Copy over installer from output subdir
 
   {check installer.log}
 end;
@@ -218,6 +219,9 @@ begin
   FindInno;
   if FInnoSetupCompiler='' then
     FInnoSetupCompiler:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
+  // Some defaults:
+  FFPCBuildDir:=GetTempDir(false)+'fpcbuild';
+  FLazarusBinaryDir:=GetTempDir(false)+'lazbin';
 end;
 
 destructor TWinInstaller.Destroy;
