@@ -61,6 +61,9 @@ type
     FLazarusPrimaryConfigPath:string;
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
+    // Filters (a module's) sl stringlist and creates all <Directive> installers.
+    // Directive can now only be Windows/Windows32/Winx86 (synonyms)
+    function CreateInstallers(Directive:string;sl:TStringList):boolean;
     function FirstSpaceAfterCommand(CommandLine: string): integer;
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -70,7 +73,7 @@ type
     function InstallPackage(PackagePath, WorkingDir: string): boolean;
     // Scans for and removes all packages specfied in a (module's) stringlist with commands:
     function RemovePackages(sl:TStringList): boolean;
-    // Processes InstallExecute<n> and UninstallExecute<n> commands for a module's stringlist with commands:
+    // Filters (a module's) sl stringlist and runs all <Directive> commands:
     function RunCommands(Directive:string;sl:TStringList):boolean;
     // Uninstall a single package:
     function UnInstallPackage(PackagePath,WorkingDir: string): boolean;
@@ -306,6 +309,34 @@ begin
     end;
 end;
 
+function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList
+  ): boolean;
+var
+  i:integer;
+  exec,output:string;
+  Workingdir:string;
+begin
+  Workingdir:=GetValue('Workingdir',sl);
+  for i:=1 to MAXINSTRUCTIONS do
+    begin
+    exec:=GetValue(Directive+IntToStr(i),sl);
+    // Skip over missing numbers:
+    if exec='' then continue;
+    case uppercase(exec) of
+      'WINDOWS','WINDOWS32','WINX86': ;
+      else
+        begin
+        writelnlog('TUniversalInstaller: unknown installer name '+exec+'. Ignoring',true;
+        continue;
+        end;
+    end;
+    if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
+    result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
+    if not result then
+      break;
+    end;
+end;
+
 function TUniversalInstaller.RunCommands(Directive: string;sl:TStringList): boolean;
 var
   i:integer;
@@ -420,9 +451,16 @@ begin
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
+
+
+    // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' with these commands: '+sl.text,true);
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all InstallExecute commands in: '+sl.text,true);
     result:=RunCommands('InstallExecute',sl);
+
+    // Run all CreateInstaller<n> commands:
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+sl.text,true);
+    result:=CreateInstallers('CreateInstaller',sl);
     end
   else
     result:=false;
@@ -614,6 +652,7 @@ begin
     result:=false;
 end;
 
+// Download from SVN for module
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 var
   idx:integer;
@@ -663,6 +702,7 @@ if not result then exit;
 
 end;
 
+// Runs all UnInstallExecute<n> commands inside a specified module
 function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
 var
   idx,cnt,i:integer;
@@ -679,7 +719,7 @@ begin
     WritelnLog('UnInstalling module '+ModuleName);
     result:=RunCommands('UnInstallExecute',sl);
 
-    // Process all AddPackage<n> directives.
+    // Process all AddPackage<n> directives in reverse.
     // As this changes config files, we keep it outside
     // the section where LazarusConfig is modified
     RemovePackages(sl);
