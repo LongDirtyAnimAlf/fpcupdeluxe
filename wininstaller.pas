@@ -92,6 +92,8 @@ type
 
 implementation
 
+const
+  ClassName = 'TWinInstaller';
 { TWinInstaller }
 
 procedure TWinInstaller.FindInno;
@@ -146,6 +148,7 @@ begin
   FSVNClient.Verbose:=FVerbose;
 
   //checkout fpc build sources svn checkout
+  if FVerbose then WritelnLog(ClassName+': Getting FPC build repository',true);
   FFPCBuildDir:=GetTempDir(false)+'fpcbuild';
   ForceDirectory(FFPCBuildDir);
   FSVNClient.LocalRepository:=FFPCBuildDir;
@@ -153,6 +156,7 @@ begin
   FSVNClient.CheckOutOrUpdate;
 
   //checkout laz binaries
+  if FVerbose then WritelnLog(ClassName+': Getting Lazarus binaries repository',true);
   FLazarusBinaryDir:=GetTempDir(false)+'lazbin';
   ForceDirectory(FLazarusBinaryDir);
   FSVNClient.LocalRepository:=FLazarusBinaryDir;
@@ -198,6 +202,7 @@ begin
   ProcessEx.Parameters.Add(''); //IDE_WIDGETSET
   ProcessEx.Parameters.Add(''); //PATCHFILE
   ProcessEx.Parameters.Add(HelpFileDir); //CHMHELPFILES
+  if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
 
   //change directory to build dir

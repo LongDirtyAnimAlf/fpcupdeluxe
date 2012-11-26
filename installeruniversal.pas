@@ -51,14 +51,14 @@ type
   TUniversalInstaller = class(TInstaller)
   private
     FBinPath:string;
-    InitDone:boolean;
-  protected
     //FPC base directory - directory where FPC is (to be) installed:
     FFPCDir:string;
     //Lazarus base directory - directory where Lazarus is (to be) installed:
     FLazarusDir:string;
     //Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
+    InitDone:boolean;
+  protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
     // Filters (a module's) sl stringlist and creates all <Directive> installers.
@@ -335,6 +335,7 @@ begin
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
       Installer.FPCDir:=FPCDir;
+      Installer.Verbose:=FVerbose;
       Installer.LazarusDir:=FLazarusDir;
       Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
       Installer.BuildModuleCustom(ModuleName);
