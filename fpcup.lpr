@@ -70,7 +70,9 @@ begin
 end;
 
 procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList;ConfigFile:string);
-var i:integer;
+var
+  i:integer;
+  SortedModules: TStringList;
 begin
   writeln('DON''T PANIC!');
   writeln('Everything below is optional...');
@@ -79,10 +81,17 @@ begin
   writeln('');
   writeln('fpcup can work with modules - see "only", "skip" below');
   writeln('List of all modules:');
-  For i:=0 to ModuleList.Count-1 do
-    begin
-    writeln(ModuleList[i]);
-    end;
+  SortedModules:=TStringList.Create;
+  try
+    SortedModules.Sorted:=true;
+    SortedModules.AddStrings(ModuleList);
+    for i:=0 to SortedModules.Count-1 do
+      begin
+      writeln(SortedModules[i]);
+      end;
+  finally
+    SortedModules.Free;
+  end;
   writeln('');
   writeln('The following modules run by default:');
   For i:=0 to ModuleEnabledList.Count-1 do

@@ -59,7 +59,7 @@ type
     FLazarusDir:string;
     //Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
-    // Scans for and adds all packages specfied in a (module's) stringlist with commands:
+    // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
     function FirstSpaceAfterCommand(CommandLine: string): integer;
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
@@ -406,7 +406,7 @@ begin
   result:=true;
 end;
 
-// Runs all InstallExecut<n> commands inside a specified module
+// Runs all InstallExecute<n> commands inside a specified module
 function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
 var
   idx:integer;
