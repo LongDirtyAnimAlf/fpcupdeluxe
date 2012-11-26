@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,processutils,updatelazconfig;
+  Classes, SysUtils, installerCore, m_crossinstaller,processutils,updatelazconfig{$IFDEF MSWINDOWS}, wininstaller{$ENDIF};
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -63,7 +63,7 @@ type
     function AddPackages(sl:TStringList): boolean;
     // Filters (a module's) sl stringlist and creates all <Directive> installers.
     // Directive can now only be Windows/Windows32/Winx86 (synonyms)
-    function CreateInstallers(Directive:string;sl:TStringList):boolean;
+    function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
     function FirstSpaceAfterCommand(CommandLine: string): integer;
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -309,11 +309,11 @@ begin
     end;
 end;
 
-function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList
-  ): boolean;
+function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList;ModuleName:string): boolean;
 var
   i:integer;
   exec,output:string;
+  Installer: TWinInstaller;
   Workingdir:string;
 begin
   Workingdir:=GetValue('Workingdir',sl);
@@ -326,11 +326,21 @@ begin
       'WINDOWS','WINDOWS32','WINX86': ;
       else
         begin
-        writelnlog('TUniversalInstaller: unknown installer name '+exec+'. Ignoring',true;
+        writelnlog('TUniversalInstaller: unknown installer name '+exec+'. Ignoring',true);
         continue;
         end;
     end;
     if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
+    Installer:=TWinInstaller.Create;
+    try
+      //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
+      Installer.FPCDir:=FPCDir;
+      Installer.LazarusDir:=FLazarusDir;
+      Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
+      Installer.BuildModuleCustom(ModuleName);
+    finally
+      Installer.Free;
+    end;
     result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
     if not result then
       break;
@@ -452,7 +462,6 @@ begin
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
 
-
     // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
     if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all InstallExecute commands in: '+sl.text,true);
@@ -460,7 +469,7 @@ begin
 
     // Run all CreateInstaller<n> commands:
     if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+sl.text,true);
-    result:=CreateInstallers('CreateInstaller',sl);
+    result:=CreateInstallers('CreateInstaller',sl, ModuleName);
     end
   else
     result:=false;

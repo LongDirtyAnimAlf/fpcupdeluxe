@@ -60,27 +60,32 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerUniversal {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL};
+  Classes, SysUtils, installerCore {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL};
 
 type
 
   { TWinInstaller }
 
-  TWinInstaller = class(TUniversalInstaller)
+  TWinInstaller = class(TInstaller)
   private
     FFPCBuildDir: string; //Location of fpcbuild sources
+    FFPCDir: string;
     FLazarusBinaryDir: string; //Location of Lazarus binaries
     FInstallerBuildDir: string; //Directory where the installer script builds the installer
     FInnoSetupCompiler: string; //Path to the command line Inno Ssetup compiler (required)
+    FLazarusDir: string;
+    FLazarusPrimaryConfigPath: string;
     procedure FindInno;
-  protected
+  public
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
-    // internal initialisation, called from BuildModule,CleanModule,GetModule
-    // and UnInstallModule but executed only once
-    function InitModule:boolean;
-  public
     property InnoSetupCompiler: string write FInnoSetupCompiler; //Path to the command line Inno Ssetup compiler (required)
+    // FPC base directory
+    property FPCDir:string read FFPCDir write FFPCDir;
+    // Lazarus primary config path
+    property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
+    // Lazarus base directory
+    property LazarusDir:string read FLazarusDir write FLazarusDir;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -138,6 +143,7 @@ var
   HelpFileDir: string;
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
+  FSVNClient.Verbose:=FVerbose;
 
   //checkout fpc build sources svn checkout
   FFPCBuildDir:=GetTempDir(false)+'fpcbuild';
@@ -157,10 +163,10 @@ begin
   FInstallerBuildDir:=GetTempDir(false)+'lazinstaller';
   ForceDirectory(FInstallerBuildDir);
 
-  //Basically a copy from the help installer:
+  //Basically a copy from the help installer - without trailing delimiter
   HelpFileDir:=IncludeTrailingPathDelimiter(FLazarusDir)+
       'docs'+DirectorySeparator+
-      'chm'+DirectorySeparator;
+      'chm';
 
   // Feed this environment to the batch file:
   ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
@@ -168,15 +174,6 @@ begin
   if GetEnvironmentVariable('SVN')='' then
     ProcessEx.Environment.SetVar('SVN',FSVNClient.SVNExecutable);
 
-  ProcessEx.Executable := IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win\create_installer.bat';
-  ProcessEx.CurrentDirectory:=GetTempDir(false);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add(FFPCDir); //FPCSVNDIR
-  ProcessEx.Parameters.Add(FLazarusDir); //LAZSVNDIR
-  ProcessEx.Parameters.Add(FLazarusBinaryDir); //LAZSVNBINDIR
-  // Should officially be a bootstrap compiler but should work with current compiler:
-  ProcessEx.Parameters.Add(FCompiler); //RELEASE_PPC
-  ProcessEx.Execute;
   {
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
   or
@@ -190,19 +187,28 @@ begin
   PATCHFILE: Optional: name of FPC patch file for the FPC sources. If not needed: don't enter it or use ""
   CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
+  ProcessEx.Executable := IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win\create_installer.bat';
+  ProcessEx.CurrentDirectory:=GetTempDir(false);
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add(FFPCDir); //FPCSVNDIR
+  ProcessEx.Parameters.Add(FLazarusDir); //LAZSVNDIR
+  ProcessEx.Parameters.Add(FLazarusBinaryDir); //LAZSVNBINDIR
+  // Should officially be a bootstrap compiler but should work with current compiler:
+  ProcessEx.Parameters.Add(FCompiler); //RELEASE_PPC
+  ProcessEx.Parameters.Add(''); //IDE_WIDGETSET
+  ProcessEx.Parameters.Add(''); //PATCHFILE
+  ProcessEx.Parameters.Add(HelpFileDir); //CHMHELPFILES
+  ProcessEx.Execute;
+
   //change directory to build dir
   //run script, installer will be in output subdir
 
   {check installer.log}
 end;
 
-function TWinInstaller.InitModule: boolean;
-begin
-
-end;
-
 constructor TWinInstaller.Create;
 begin
+  inherited Create;
   // Sensible default for an x64 Windows:
   FindInno;
   if FInnoSetupCompiler='' then
