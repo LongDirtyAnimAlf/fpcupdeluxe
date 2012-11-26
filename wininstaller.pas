@@ -110,13 +110,8 @@ var
   ProgramFilesx86: string;
   Registry: TRegistry;
 begin
-  ProgramFiles:=GetEnvironmentVariableUTF8('ProgramFiles');
-  if ProgramFiles='' then
-    ProgramFiles:='C:\Program Files';
-  ProgramFilesx86:=GetEnvironmentVariableUTF8('ProgramFiles(x86)');
-  if ProgramFilesx86='' then
-    ProgramFilesx86:='C:\Program Files (x86)';
-    // will happen on x86 Windows but it can't hurt to search here, too
+  ProgramFiles:=GetEnvironmentVariable('ProgramFiles');
+  ProgramFilesx86:=GetEnvironmentVariable('ProgramFiles(x86)');
   Registry := TRegistry.Create;
   try
     // Navigate to proper "directory":
@@ -126,7 +121,7 @@ begin
     if CompileCommand<>'' then
       // Often something like
       //"c:\Program Files (x86)\Inno Setup 5\Compil32.exe" /cc "%1"
-      CompileCommand:=Copy(CompileCommand,1,pos(uppercase(CompileCommand),'.EXE')+3);
+      CompileCommand:=Copy(CompileCommand,1,pos('.EXE',uppercase(CompileCommand))+3);
     if Copy(CompileCommand,1,1)='"' then
       CompileCommand:=Copy(CompileCommand,2,length(CompileCommand));
     if (CompileCommand='') then
