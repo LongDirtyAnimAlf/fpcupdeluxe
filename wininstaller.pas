@@ -212,6 +212,7 @@ begin
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
   if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
+  //todo: basically rewrite those batch files into fpc code. They just don't seem to work.
 
   //todo: Copy over installer from output subdir
   if ProcessEx.ExitStatus <> 0 then
