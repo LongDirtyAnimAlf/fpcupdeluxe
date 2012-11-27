@@ -344,11 +344,10 @@ begin
       Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
       Installer.Verbose:=FVerbose;
 
-      Installer.BuildModuleCustom(ModuleName);
+      result:=Installer.BuildModuleCustom(ModuleName);
     finally
       Installer.Free;
     end;
-    result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
     if not result then
       break;
     end;
@@ -471,11 +470,13 @@ begin
 
     // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all InstallExecute commands in: '+sl.text,true);
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
+      sl.text,true);
     result:=RunCommands('InstallExecute',sl);
 
     // Run all CreateInstaller<n> commands:
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+sl.text,true);
+    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
+      sl.text,true);
     result:=CreateInstallers('CreateInstaller',sl, ModuleName);
     end
   else

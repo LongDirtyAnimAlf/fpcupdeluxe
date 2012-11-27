@@ -142,11 +142,15 @@ end;
 function TWinInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   HelpFileDir: string;
+  TempDir: string; //use for building installer, current dir for batch etc.
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
   FSVNClient.Verbose:=FVerbose;
 
+  TempDir:=IncludeTrailingPathDelimiter(GetTempDir(false));
+
   //checkout fpc build sources svn checkout
+  //This repository includes the full FPC sources as well...
   if FVerbose then WritelnLog(ClassName+': Getting FPC build repository',true);
   ForceDirectory(FFPCBuildDir);
   FSVNClient.LocalRepository:=FFPCBuildDir;
@@ -155,14 +159,14 @@ begin
 
   //checkout laz binaries
   if FVerbose then WritelnLog(ClassName+': Getting Lazarus binaries repository',true);
-  ForceDirectory(FLazarusBinaryDir);
+  ForceDirectories(FLazarusBinaryDir);
   FSVNClient.LocalRepository:=FLazarusBinaryDir;
   //todo: adapt for win64 (x86_64-win64/)
   FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/';
   FSVNClient.CheckOutOrUpdate;
 
-  FInstallerBuildDir:=GetTempDir(false)+'lazinstaller';
-  ForceDirectory(FInstallerBuildDir);
+  FInstallerBuildDir:=TempDir+'lazinstaller';
+  ForceDirectories(FInstallerBuildDir);
 
   //Basically a copy from the help installer - without trailing delimiter
   HelpFileDir:=IncludeTrailingPathDelimiter(FLazarusDir)+
@@ -170,10 +174,17 @@ begin
       'chm';
 
   // Feed this environment to the batch file:
-  ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
+  // Setting iscc will go wrong in the batch file (bug 23385),
+  // so a solution is to add it to the path:
+  //ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
+  SetPath(ExtractFileDir(FInnoSetupCompiler),true);
+  ProcessEx.Environment.SetVar('ISCC','');
+
+  //Same goes for svn:
+  SetPath(ExtractFileDir(FSVNClient.SVNExecutable),true);
+  ProcessEx.Environment.SetVar('SVN','');
+
   ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
-  if GetEnvironmentVariable('SVN')='' then
-    ProcessEx.Environment.SetVar('SVN',FSVNClient.SVNExecutable);
 
   {
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
@@ -189,20 +200,30 @@ begin
   CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
   ProcessEx.Executable := IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win\create_installer.bat';
-  ProcessEx.CurrentDirectory:=GetTempDir(false);
+  ProcessEx.CurrentDirectory:=TempDir;
   ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add(FFPCDir); //FPCSVNDIR
-  ProcessEx.Parameters.Add(FLazarusDir); //LAZSVNDIR
-  ProcessEx.Parameters.Add(FLazarusBinaryDir); //LAZSVNBINDIR
+  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCDir)); //FPCSVNDIR
+  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
+  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
   // Should officially be a bootstrap compiler but should work with current compiler:
   ProcessEx.Parameters.Add(FCompiler); //RELEASE_PPC
   ProcessEx.Parameters.Add(''); //IDE_WIDGETSET
   ProcessEx.Parameters.Add(''); //PATCHFILE
-  ProcessEx.Parameters.Add(HelpFileDir); //CHMHELPFILES
+  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
   if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
 
   //todo: Copy over installer from output subdir
+  if ProcessEx.ExitStatus <> 0 then
+  begin
+    result := False;
+    WritelnLog(ClassName+': Failed to create installer; '+ProcessEx.Executable+' returned '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+      'Installer log at '+TempDir+'installer.log',true);
+  end
+  else
+  begin
+    result := True;
+  end;
 
   {check installer.log}
 end;
@@ -215,8 +236,8 @@ begin
   if FInnoSetupCompiler='' then
     FInnoSetupCompiler:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
   // Some defaults:
-  FFPCBuildDir:=GetTempDir(false)+'fpcbuild';
-  FLazarusBinaryDir:=GetTempDir(false)+'lazbin';
+  FFPCBuildDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'fpcbuild';
+  FLazarusBinaryDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'lazbin';
 end;
 
 destructor TWinInstaller.Destroy;
