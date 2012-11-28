@@ -61,9 +61,12 @@ type
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
+    {$IFDEF MSWINDOWS}
     // Filters (a module's) sl stringlist and creates all <Directive> installers.
     // Directive can now only be Windows/Windows32/Winx86 (synonyms)
+    // For now Windows-only; could be extended to generic cross platform installer class once this works
     function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
+    {$ENDIF MSWINDOWS}
     function FirstSpaceAfterCommand(CommandLine: string): integer;
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -309,6 +312,7 @@ begin
     end;
 end;
 
+{$IFDEF MSWINDOWS}
 function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList;ModuleName:string): boolean;
 var
   i:integer;
@@ -330,6 +334,7 @@ begin
         continue;
         end;
     end;
+
     if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
     Installer:=TWinInstaller.Create;
     try
@@ -348,10 +353,12 @@ begin
     finally
       Installer.Free;
     end;
+
     if not result then
       break;
     end;
 end;
+{$ENDIF MSWINDOWS}
 
 function TUniversalInstaller.RunCommands(Directive: string;sl:TStringList): boolean;
 var
@@ -474,11 +481,13 @@ begin
       sl.text,true);
     result:=RunCommands('InstallExecute',sl);
 
-    // Run all CreateInstaller<n> commands:
+    // Run all CreateInstaller<n> commands; for now Windows only
+    {$IFDEF MSWINDOWS}
     if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
       sl.text,true);
     result:=CreateInstallers('CreateInstaller',sl, ModuleName);
     end
+    {$ENDIF MSWINDOWS}
   else
     result:=false;
 end;

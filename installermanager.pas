@@ -400,7 +400,7 @@ Sequencer.AddSequence(installerHelp.Sequences);
 Sequencer.AddSequence(installerUniversal.Sequences);
 //append universal modules to the lists
 Sequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
-installerUniversal.GetModuleEnabledList(FModuleEnabledList);
+result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
 function TFPCupManager.Run: boolean;
@@ -659,18 +659,21 @@ function TSequencer.DoSetCPU(CPU: string): boolean;
 begin
   FParent.CrossCPU_Target:=CPU;
   ResetAllExecuted;
+  result:=true;
 end;
 
 function TSequencer.DoSetOS(OS: string): boolean;
 begin
   FParent.CrossOS_Target:=OS;
   ResetAllExecuted;
+  result:=true;
 end;
 
 function TSequencer.DoSetLCL(LCL: string): boolean;
 begin
   FParent.CrossLCL_Platform:=LCL;
   ResetAllExecuted(true);
+  result:=true;
 end;
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
@@ -982,6 +985,7 @@ if (idx >0) then
   Freemem(FParent.FModuleList.Objects[idx]);
   FParent.FModuleList.Delete(idx);
   end;
+result:=true;
 end;
 
 function TSequencer.Run(SequenceName: string): boolean;
