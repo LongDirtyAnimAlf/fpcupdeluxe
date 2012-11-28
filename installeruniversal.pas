@@ -486,8 +486,8 @@ begin
     if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
       sl.text,true);
     result:=CreateInstallers('CreateInstaller',sl, ModuleName);
-    end
     {$ENDIF MSWINDOWS}
+    end
   else
     result:=false;
 end;
