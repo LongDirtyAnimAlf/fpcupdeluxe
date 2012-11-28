@@ -432,10 +432,12 @@ begin
   writeln('- make sure there''s a valid SVN executable in your path.');
   {$IFNDEF MSWINDOWS}
   writeln('- make sure the GNU binutils (make etc), windres, subversion client are installed');
-  writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential subversion');
-  //todo: how to get windres => mingw32-binutils? failing that, debian binutils-mingw-w64 => for both x86 and x64 windows apparently?
+  writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential mingw32-binutils subversion ');
+  writeln('  ln -s /usr/bin/i586-mingw32msvc-windres /usr/bin/windres');
+  writeln('  see http://wiki.lazarus.freepascal.org/Lazarus_Resources#Checking_you_have_windres');
   {$ENDIF MSWINDOWS}
   writeln('- try removing all intermediate files by running fpcup with the --clean option');
+  writeln('  and/or manually deleting *.ppu/*.a/*.o followed by svn up');
   writeln('- if that does not work: use the --uninstall option to remove all files (including your FPC and lazarus directories)');
   writeln('- remove the bootstrap compiler. fpcup will download it if required.');
 end;
