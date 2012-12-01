@@ -375,6 +375,7 @@ begin
           on E: Exception do
           begin
             infoln('Error copying debugger files: '+E.Message,eterror);
+            infoln('Hint: perhaps you have gdb running at the moment - please kill it.',etwarning);
             OperationSucceeded:=false;
           end;
         end;
