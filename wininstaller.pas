@@ -196,7 +196,8 @@ begin
   // svnversion exe:
   ProcessEx.Environment.SetVar('SVNVER','"'+ExtractFilePath(FSVNClient.SVNExecutable)+'svnversion'+GetExeExt+'"');
 
-  ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR','"'+ExcludeLeadingPathDelimiter(FInstallerBuildDir)+'"');
+  // Provide this dir without quotes; may work with them but output looks weird
+  ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
 
   {
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
@@ -220,8 +221,8 @@ begin
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
   // Should officially be a bootstrap compiler but should work with current compiler:
   ProcessEx.Parameters.Add(FCompiler); //RELEASE_PPC
-  ProcessEx.Parameters.Add(''); //IDE_WIDGETSET
-  ProcessEx.Parameters.Add(''); //PATCHFILE
+  ProcessEx.Parameters.Add('""'); //an empty parameter as IDE_WIDGETSET
+  ProcessEx.Parameters.Add('""'); //an empty parameter as PATCHFILE
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
   if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
