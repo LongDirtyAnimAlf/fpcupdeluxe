@@ -336,20 +336,17 @@ begin
     end;
 
     if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
-    Installer:=TWinInstaller.Create(FCompiler);
+    // Convert any relative path to absolute path:
+    InstallDir:=IncludeTrailingPathDelimiter(ExpandFileName(GetValue('InstallDir',sl)));
+    if InstallDir<>'' then
+      ForceDirectoriesUTF8(InstallDir);
+    Installer:=TWinInstaller.Create(InstallDir,FCompiler,FVerbose);
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
-      // Convert any relative path to absolute path:
-      InstallDir:=IncludeTrailingPathDelimiter(ExpandFileName(GetValue('InstallDir',sl)));
-      if InstallDir<>'' then
-        ForceDirectoriesUTF8(InstallDir);
       Installer.FPCDir:=FPCDir;
-      Installer.FPCBuildDir:=InstallDir+'fpcbuild';
-      Installer.LazarusBinaryDir:=InstallDir+'lazbin';
       Installer.LazarusDir:=FLazarusDir;
+      // todo: following not strictly needed:?!?
       Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
-      Installer.Verbose:=FVerbose;
-
       result:=Installer.BuildModuleCustom(ModuleName);
     finally
       Installer.Free;

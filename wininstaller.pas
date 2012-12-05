@@ -90,7 +90,7 @@ type
     property LazarusDir:string read FLazarusDir write FLazarusDir;
     // Lazarus primary config path
     property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
-    constructor Create(FPCCompiler: string);
+    constructor Create(InstallDirectory, FPCCompiler: string; Verbosity: boolean);
     destructor Destroy; override;
   end;
 
@@ -150,6 +150,13 @@ begin
   FSVNClient.Verbose:=FVerbose;
   infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
 
+  // Basedirectory = install directory from fpcup.ini/universal module.
+  // We use it to put SVN repos needed for building.
+  if FFPCBuildDir='' then
+    FFPCBuildDir:=IncludeTrailingPathDelimiter(FBaseDirectory)+'fpcbuild';
+  if FLazarusBinaryDir='' then
+    FLazarusBinaryDir:=IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbin';
+
   InstallerBatchDir:=IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win';
 
   //checkout fpc build sources svn checkout
@@ -196,7 +203,7 @@ begin
   or
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC IDE_WIDGETSET PATCHFILE CHMHELPFILES
   where:
-  FPCSVNDIR: Path to the fpc sources checked out of svn (see A.3)
+  FPCSVNDIR: Path to the fpc sources checked out of svn (see A.3) => i.e. the BUILD sources, not regular FPC source
   LAZSVNDIR: Path to the lazarus sources checked out of svn => FLazarusDir
   LAZSVNBINDIR: Path to the svn lazarus binaries (see A.5)
   RELEASE_PPC: Path to the FPC compiler required to start the build of fpc it FPCSVNDIR (see A.6)
@@ -208,7 +215,7 @@ begin
   // MUST be set to create_installer.bat otherwise it can't find the fpcbuild/lazbuild scripts
   ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
   ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCDir)); //FPCSVNDIR
+  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCBuildDir)); //FPCSVNDIR
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
   // Should officially be a bootstrap compiler but should work with current compiler:
@@ -235,9 +242,11 @@ begin
   end;
 end;
 
-constructor TWinInstaller.Create(FPCCompiler: string);
+constructor TWinInstaller.Create(InstallDirectory, FPCCompiler: string; Verbosity: boolean);
 begin
   inherited Create;
+  FBaseDirectory:=InstallDirectory;
+  FVerbose:=Verbosity;
   FCompiler:=FPCCompiler;
   // Sensible default for an x64 Windows:
   FindInno;
