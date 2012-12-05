@@ -69,8 +69,8 @@ type
   TWinInstaller = class(TInstaller)
   private
     FFPCBuildDir: string; //Location of fpcbuild sources
-    FFPCDir: string;
-    FLazarusBinaryDir: string; //Location of Lazarus binaries
+    FFPCDir: string; //Location of FPC sources
+    FLazarusBinaryDir: string; //Location of Lazarus binaries repository
     FInstallerBuildDir: string; //Directory where the installer script builds the installer (which must not exist yet)
     FInnoSetupCompiler: string; //Path to the command line Inno Ssetup compiler (required)
     FLazarusDir: string;
@@ -252,9 +252,6 @@ begin
   FindInno;
   if FInnoSetupCompiler='' then
     FInnoSetupCompiler:='C:\Program Files (x86)\Inno Setup 5\Compil32.exe';
-  // Some defaults:
-  FFPCBuildDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'fpcbuild';
-  FLazarusBinaryDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'lazbin';
 end;
 
 destructor TWinInstaller.Destroy;
