@@ -101,9 +101,12 @@ const
 { TWinInstaller }
 
 procedure TWinInstaller.FindInno;
-// Finds Inno Compiler executable location.
+// Finds Inno Compiler command line compiler executable location.
+// Note: this is iscc, different from the GUI Inno executable
 // Note: if you want to support Win9x, you'll need to use an ANSI Inno Setup
 // version lower than 5.5.0
+const
+  CommandLineCompiler='iscc.exe';
 var
   CompileCommand: string='';
   ProgramFiles: string;
@@ -118,18 +121,21 @@ begin
     Registry.RootKey := HKEY_LOCAL_MACHINE;
     if Registry.OpenKeyReadOnly('\SOFTWARE\Classes\InnoSetupScriptFile\shell\Compile\Command') then
       CompileCommand:=Registry.ReadString(''); //read the value of the default name
+    // Often something like
+    //"c:\Program Files (x86)\Inno Setup 5\Compil32.exe" /cc "%1"
     if CompileCommand<>'' then
-      // Often something like
-      //"c:\Program Files (x86)\Inno Setup 5\Compil32.exe" /cc "%1"
       CompileCommand:=Copy(CompileCommand,1,pos('.EXE',uppercase(CompileCommand))+3);
     if Copy(CompileCommand,1,1)='"' then
       CompileCommand:=Copy(CompileCommand,2,length(CompileCommand));
+    // Replace GUI exe with command line compiler
+    if CompileCommand<>'' then
+      CompileCommand:=StringReplace(UpperCase(CompileCommand),'COMPIL32','ISCC',[rfReplaceAll]);
     if (CompileCommand='') then
       CompileCommand:=FindDefaultExecutablePath('Compil32.exe');
-    if (CompileCommand='') and (fileexistsutf8(ProgramFiles+'\Inno Setup 5\Compil32.exe')) then
-      CompileCommand:=ProgramFiles+'\Inno Setup 5\Compil32.exe';
-    if (CompileCommand='') and (fileexistsutf8(ProgramFilesx86+'\Inno Setup 5\Compil32.exe')) then
-      CompileCommand:=ProgramFilesx86+'\Inno Setup 5\Compil32.exe';
+    if (CompileCommand='') and (fileexistsutf8(ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler)) then
+      CompileCommand:=ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler;
+    if (CompileCommand='') and (fileexistsutf8(ProgramFilesx86+'\Inno Setup 5\'+CommandLineCompiler)) then
+      CompileCommand:=ProgramFilesx86+'\Inno Setup 5\'+CommandLineCompiler;
     if CompileCommand<>'' then
     begin
       FInnoSetupCompiler:=CompileCommand;
@@ -227,7 +233,6 @@ begin
   if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
 
-  //todo: Copy over installer from output subdir
   if ProcessEx.ExitStatus <> 0 then
   begin
     result := False;
