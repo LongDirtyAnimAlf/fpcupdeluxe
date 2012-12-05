@@ -236,9 +236,10 @@ begin
   end
   else
   begin
-    // remove log file
-    DeleteFile(IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log');
-    infoln('TWinInstaller: finished creating installer in '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'output',etInfo);
+    // Batch file ended, but no idea if it actually was succesful because it does not return result codes.
+    // So removing the log
+    //DeleteFile(IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log');
+    infoln('TWinInstaller: finished running the installer creator. If it worked, the installer is in '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'output',etInfo);
     result := True;
   end;
 end;
