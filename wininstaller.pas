@@ -60,7 +60,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL};
+  Classes, SysUtils, installerCore {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL}, fpcuputil;
 
 type
 
@@ -71,7 +71,7 @@ type
     FFPCBuildDir: string; //Location of fpcbuild sources
     FFPCDir: string;
     FLazarusBinaryDir: string; //Location of Lazarus binaries
-    FInstallerBuildDir: string; //Directory where the installer script builds the installer
+    FInstallerBuildDir: string; //Directory where the installer script builds the installer (which must not exist yet)
     FInnoSetupCompiler: string; //Path to the command line Inno Ssetup compiler (required)
     FLazarusDir: string;
     FLazarusPrimaryConfigPath: string;
@@ -142,12 +142,14 @@ end;
 function TWinInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   HelpFileDir: string;
+  InstallerBatchDir: string; //directory where installer batch script is; will contain log and output dir with installer
   TempDir: string; //use for building installer, current dir for batch etc.
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
   FSVNClient.Verbose:=FVerbose;
 
   TempDir:=IncludeTrailingPathDelimiter(GetTempDir(false));
+  InstallerBatchDir:=IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win';
 
   //checkout fpc build sources svn checkout
   //This repository includes the full FPC sources as well...
@@ -161,12 +163,17 @@ begin
   if FVerbose then WritelnLog(ClassName+': Getting Lazarus binaries repository',true);
   ForceDirectories(FLazarusBinaryDir);
   FSVNClient.LocalRepository:=FLazarusBinaryDir;
-  //todo: adapt for win64 (x86_64-win64/)
-  FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/';
+  // Will have at least i386, x64 and arm-wince subfolders
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/';
   FSVNClient.CheckOutOrUpdate;
 
+  // Lazbuilddir may not exist - so if it is there, remove it
   FInstallerBuildDir:=TempDir+'lazinstaller';
-  ForceDirectories(FInstallerBuildDir);
+  if DirectoryExistsUTF8(FInstallerBuildDir) then
+  begin
+    infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
+    DeleteDirectory(FInstallerBuildDir,false);
+  end;
 
   //Basically a copy from the help installer - without trailing delimiter
   HelpFileDir:=IncludeTrailingPathDelimiter(FLazarusDir)+
@@ -174,15 +181,12 @@ begin
       'chm';
 
   // Feed this environment to the batch file:
-  // Setting iscc will go wrong in the batch file (bug 23385),
-  // so a solution is to add it to the path:
-  //ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
-  SetPath(ExtractFileDir(FInnoSetupCompiler),true);
-  ProcessEx.Environment.SetVar('ISCC','');
-
-  //Same goes for svn:
-  SetPath(ExtractFileDir(FSVNClient.SVNExecutable),true);
-  ProcessEx.Environment.SetVar('SVN','');
+  // Setup compiler exe:
+  ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
+  // SVN executable:
+  ProcessEx.Environment.SetVar('SVN',FSVNClient.SVNExecutable);
+  // svnversion exe:
+  ProcessEx.Environment.SetVar('SVN',ExtractFilePath(FSVNClient.SVNExecutable)+'svnversion'+GetExeExt);
 
   ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
 
@@ -199,8 +203,9 @@ begin
   PATCHFILE: Optional: name of FPC patch file for the FPC sources. If not needed: don't enter it or use ""
   CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
-  ProcessEx.Executable := IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win\create_installer.bat';
-  ProcessEx.CurrentDirectory:=TempDir;
+  ProcessEx.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
+  // MUST be set to create_installer.bat otherwise it can't find the fpcbuild/lazbuild scripts
+  ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCDir)); //FPCSVNDIR
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
@@ -212,17 +217,18 @@ begin
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
   if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
   ProcessEx.Execute;
-  //todo: basically rewrite those batch files into fpc code. They just don't seem to work.
 
   //todo: Copy over installer from output subdir
   if ProcessEx.ExitStatus <> 0 then
   begin
     result := False;
     WritelnLog(ClassName+': Failed to create installer; '+ProcessEx.Executable+' returned '+inttostr(ProcessEx.ExitStatus)+LineEnding+
-      'Installer log at '+TempDir+'installer.log',true);
+      'Installer log at '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log',true);
   end
   else
   begin
+    // remove log file
+    DeleteFile(IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log');
     result := True;
   end;
 
