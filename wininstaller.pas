@@ -90,7 +90,7 @@ type
     property LazarusDir:string read FLazarusDir write FLazarusDir;
     // Lazarus primary config path
     property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
-    constructor Create;
+    constructor Create(FPCCompiler: string);
     destructor Destroy; override;
   end;
 
@@ -143,12 +143,13 @@ function TWinInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   HelpFileDir: string;
   InstallerBatchDir: string; //directory where installer batch script is; will contain log and output dir with installer
-  TempDir: string; //use for building installer, current dir for batch etc.
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
+  if FVerbose then
+    ProcessEx.OnOutputM:=@DumpOutput;
   FSVNClient.Verbose:=FVerbose;
+  infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
 
-  TempDir:=IncludeTrailingPathDelimiter(GetTempDir(false));
   InstallerBatchDir:=IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win';
 
   //checkout fpc build sources svn checkout
@@ -167,8 +168,8 @@ begin
   FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/';
   FSVNClient.CheckOutOrUpdate;
 
-  // Lazbuilddir may not exist - so if it is there, remove it
-  FInstallerBuildDir:=TempDir+'lazinstaller';
+  // Lazbuilddir may not exist (or should be empty) - so if it is there, remove it
+  FInstallerBuildDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'lazinstaller';
   if DirectoryExistsUTF8(FInstallerBuildDir) then
   begin
     infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
@@ -180,15 +181,15 @@ begin
       'docs'+DirectorySeparator+
       'chm';
 
-  // Feed this environment to the batch file:
+  // Feed this environment to the batch file. In older Laz revisions, double quoting is required
   // Setup compiler exe:
-  ProcessEx.Environment.SetVar('ISCC',FInnoSetupCompiler);
+  ProcessEx.Environment.SetVar('ISCC','"'+FInnoSetupCompiler+'"');
   // SVN executable:
-  ProcessEx.Environment.SetVar('SVN',FSVNClient.SVNExecutable);
+  ProcessEx.Environment.SetVar('SVN','"'+FSVNClient.SVNExecutable+'"');
   // svnversion exe:
-  ProcessEx.Environment.SetVar('SVN',ExtractFilePath(FSVNClient.SVNExecutable)+'svnversion'+GetExeExt);
+  ProcessEx.Environment.SetVar('SVNVER','"'+ExtractFilePath(FSVNClient.SVNExecutable)+'svnversion'+GetExeExt+'"');
 
-  ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
+  ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR','"'+ExcludeLeadingPathDelimiter(FInstallerBuildDir)+'"');
 
   {
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
@@ -229,15 +230,15 @@ begin
   begin
     // remove log file
     DeleteFile(IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log');
+    infoln('TWinInstaller: finished creating installer in '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'output',etInfo);
     result := True;
   end;
-
-  {check installer.log}
 end;
 
-constructor TWinInstaller.Create;
+constructor TWinInstaller.Create(FPCCompiler: string);
 begin
   inherited Create;
+  FCompiler:=FPCCompiler;
   // Sensible default for an x64 Windows:
   FindInno;
   if FInnoSetupCompiler='' then

@@ -336,10 +336,11 @@ begin
     end;
 
     if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
-    Installer:=TWinInstaller.Create;
+    Installer:=TWinInstaller.Create(FCompiler);
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
-      InstallDir:=IncludeTrailingPathDelimiter(GetValue('InstallDir',sl));
+      // Convert any relative path to absolute path:
+      InstallDir:=IncludeTrailingPathDelimiter(ExpandFileName(GetValue('InstallDir',sl)));
       if InstallDir<>'' then
         ForceDirectoriesUTF8(InstallDir);
       Installer.FPCDir:=FPCDir;
