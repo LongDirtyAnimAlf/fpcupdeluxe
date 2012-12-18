@@ -68,7 +68,6 @@ Const
 {todo: win64 sequence currently not enabled; see
 {$elseif defined(win64)}
 below}
-//todo: if enabled, check if workaround for nuclear cleaning (see above) is also needed
     'Declare defaultwin64;'+
     'Do fpc;'+
     //Get bigide so we at least have a compiler:

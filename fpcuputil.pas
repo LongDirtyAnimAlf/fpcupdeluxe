@@ -769,7 +769,7 @@ begin
   // doesn't check if the user has execute permission
   // on the found file.
   ExecuteCommand('which '+Executable,Output,false);
-  //Remove trailing LF(s) and other control codes:
+  // Remove trailing LF(s) and other control codes:
   while (length(output)>0) and (ord(output[length(output)])<$20) do
     delete(output,length(output),1);
   {$ELSE}
@@ -777,7 +777,7 @@ begin
   {$ENDIF UNIX}
   // We could have checked for ExecuteCommandHidden exitcode, but why not
   // do file existence check instead:
-  if fileexists(Output) then
+  if (Output<>'') and fileexists(Output) then
   begin
     result:=Output;
   end
