@@ -805,10 +805,44 @@ begin
   else
     CPU_OSSignature:=GetFPCTarget(true);
   {$IFDEF MSWINDOWS}
+  // Remove all fpmakes
   DeleteList:=TStringList.Create;
   try
     DeleteList.Add('fpmake.exe');
     DeleteFilesSubDirs(IncludeTrailingPathDelimiter(FBaseDirectory),DeleteList,CPU_OSSignature);
+  finally
+    DeleteList.Free;
+  end;
+
+  // At least on windows, compiling dbtestframework yourself may lead to problems compiling fpc later on,
+  // so clean compiled files from both packages and test
+  DeleteList:=TStringList.Create;
+  try
+    DeleteList.Add('.a');
+    DeleteList.Add('.o');
+    DeleteList.Add('.ppu');
+    //todo: check if all these dirs are required - probably the units one is not needed
+    // For some reason base has no cpu subdir - what is this used for!?!?
+    // is this only done by the test framework!?!?
+    DeleteFilesExtensionsSubdirs(IncludeTrailingPathDelimiter(FBaseDirectory)+
+      'packages'+DirectorySeparator+
+      'fcl-db'+DirectorySeparator+
+      'src'+DirectorySeparator+
+      'base',DeleteList,'');
+    DeleteFilesExtensionsSubdirs(IncludeTrailingPathDelimiter(FBaseDirectory)+
+      'packages'+DirectorySeparator+
+      'fcl-db'+DirectorySeparator+
+      'units',DeleteList,CPU_OSSignature);
+    DeleteFilesExtensionsSubdirs(IncludeTrailingPathDelimiter(FBaseDirectory)+
+      'packages'+DirectorySeparator+
+      'fcl-db'+DirectorySeparator+
+      'tests',DeleteList,'');
+    //crazy experiment: also delete the db*.ppu from the units directory in case that's looked for, too
+    //C:\Development\fpctrunk\units
+    DeleteFilesExtensionsSubdirs(IncludeTrailingPathDelimiter(FBaseDirectory)+
+      'units'+DirectorySeparator+
+      CPU_OSSignature+DirectorySeparator+
+      'fcl-db',DeleteList,'');
   finally
     DeleteList.Free;
   end;

@@ -66,9 +66,9 @@ procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
 function DeleteDirectoryEx(DirectoryName: string): boolean;
-// Recursively delete files with specified name(s), only if path contains specfied directory name:
+// Recursively delete files with specified name(s), only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList; const OnlyIfPathHas: string): boolean;
-// Recursively delete files with specified extension(s), only if path contains specfied directory name:
+// Recursively delete files with specified extension(s), only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 function Download(URL, TargetFile: string): boolean;
