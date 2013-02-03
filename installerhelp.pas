@@ -417,7 +417,7 @@ var
   LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
-  // We need lhelp viewer but that should already have been taken care of by the dependencies.
+  // We need lhelp viewer but that should already have been taken care of by a previous step (Requires lhelp)
   OperationSucceeded:=true;
   // The locations of the LCL.chm we generate and the existing one we can overwrite:
   ExistingLCLHelp:=FTargetDirectory+'lcl.chm';

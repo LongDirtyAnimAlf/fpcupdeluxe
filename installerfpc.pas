@@ -814,7 +814,7 @@ begin
     DeleteList.Free;
   end;
 
-  // At least on windows, compiling dbtestframework yourself may lead to problems compiling fpc later on,
+  // At least on Windows, compiling dbtestframework yourself may lead to problems compiling fpc later on,
   // so clean compiled files from both packages and test
   DeleteList:=TStringList.Create;
   try
