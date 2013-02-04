@@ -118,7 +118,7 @@ type
 
 
 implementation
-uses strutils;
+uses strutils, regexpr;
 
 
 { TSVNClient }
@@ -488,10 +488,13 @@ procedure TSVNClient.GetLocalRevisions;
 const
   BranchRevLength = Length('Last Changed Rev:');
   RevLength = Length('Revision:');
+  RevExpression = '\:\s+(\d+)\s'; //regex to match revision in svn info
 var
   LBranchRevision: string;
   LRevision: string; // Revision of repository as a whole
   Output: string;
+  RevExtr: TRegExpr;
+  RevCount: Integer;
 begin
   // Only update if we have invalid revision info, in order to minimize svn info calls
   if (FLocalRevision<0) or (FLocalRevisionWholeRepo<0) then
@@ -502,13 +505,34 @@ begin
     // unless we're in a branch/tag where we need "Last Changed Rev: "
     if FReturnCode=0 then
       begin
-      // This is going to be problematic for localized SVNs....
-      FLocalRevision:=StrToIntDef(trim(copy(Output,
-        (pos('Last Changed Rev: ', Output) + BranchRevLength),
-        6)), FRET_UNKNOWN_REVISION);
-      FLocalRevisionWholeRepo:=StrToIntDef(trim(copy(Output,
-        (pos('Revision: ', Output) + RevLength),
-        6)), FRET_UNKNOWN_REVISION);
+        // Use regex to try and extract from localized SVNs:
+        // match exactly 2 occurences of the revision regex.
+        RevCount:=0;
+        RevExtr:=TRegExpr.Create;
+        try
+          RevExtr.Expression:=RevExpression;
+          if RevExtr.Exec(Output) then begin
+             Inc(RevCount);
+             FLocalRevisionWholeRepo:=StrToIntDef(RevExtr.Match[1],FRET_UNKNOWN_REVISION);
+             if RevExtr.ExecNext then begin
+                Inc(RevCount); //we only have valid revision info when we get both repo and branch revision...
+                FLocalRevision:=StrToIntDef(RevExtr.Match[1],FRET_UNKNOWN_REVISION);
+             end;
+          end;
+        finally
+          RevExtr.Free;
+        end;
+        if RevCount<>2 then
+          begin
+          // Regex failed; trying for English revision message (though this may be
+          // superfluous with the regex)
+          FLocalRevision:=StrToIntDef(trim(copy(Output,
+            (pos('Last Changed Rev: ', Output) + BranchRevLength),
+            6)), FRET_UNKNOWN_REVISION);
+          FLocalRevisionWholeRepo:=StrToIntDef(trim(copy(Output,
+            (pos('Revision: ', Output) + RevLength),
+            6)), FRET_UNKNOWN_REVISION);
+          end;
       // If we happen to be in the root (no branch), cater for that:
       if FLocalRevision=FRET_UNKNOWN_REVISION then FLocalRevision:=FLocalRevisionWholeRepo;
       end
