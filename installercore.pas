@@ -178,7 +178,7 @@ begin
     FBunzip2 := ''; //not really necessary now
     FTar := 'gnutar'; //gnutar can decompress as well; bsd tar can't
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
-    {$ENDIF DARIN}
+    {$ENDIF DARWIN}
 
     {$IFDEF MSWINDOWS}
     if OperationSucceeded then
