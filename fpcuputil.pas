@@ -376,7 +376,7 @@ begin
               end;
               FoundCorrectURL:=true; //We're done by now
             end;
-          500: raise Exception.Create('No internet connection available');
+          500: raise Exception.Create('Internal server error 500; perhaps no internet connection available');
             //Internal Server Error ('+aURL+')');
           else
             raise Exception.Create('Download failed with error code ' +
