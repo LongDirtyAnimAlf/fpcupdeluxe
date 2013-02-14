@@ -170,7 +170,7 @@ begin
   if FVerbose then WritelnLog(ClassName+': Getting FPC build repository',true);
   ForceDirectory(FFPCBuildDir);
   FSVNClient.LocalRepository:=FFPCBuildDir;
-  FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6_0';
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2';
   FSVNClient.CheckOutOrUpdate;
 
   //checkout laz binaries

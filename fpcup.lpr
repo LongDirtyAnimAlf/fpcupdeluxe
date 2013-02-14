@@ -132,8 +132,8 @@ begin
   writeln('                       If empty specified, no shortcut will be produced.');
   writeln('                       Default: fpcup_update');
   writeln('                         or <lazlinkname>_update if lazlinkname specified');
-  writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
-  writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+  writeln(' fpcURL=<URL>          SVN URL from which to download; default: 2.6.2:');
+  writeln('                       http://svn.freepascal.org/svn/fpc/tags/release_2_6_2');
   writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'fpcURL','list'));
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
@@ -313,7 +313,7 @@ begin
     //svn2 seems to lag behind a lot, so don't use that.
     //load URL's after LoadFPCUPConfig so that we have loaded the aliases
     try
-      FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+      FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/tags/release_2_6_2');
       FInstaller.LazarusURL:=Options.GetOption('','lazURL','http://svn.freepascal.org/svn/lazarus/trunk');
     except
       on E:Exception do

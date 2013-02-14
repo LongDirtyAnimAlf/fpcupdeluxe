@@ -427,7 +427,7 @@ const
   These might work but are development, too (might end up in 2.6.2):
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
   but let's use a stable version:}
-  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_0/install/binw32/';
+  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw32/';
   // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
   SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
