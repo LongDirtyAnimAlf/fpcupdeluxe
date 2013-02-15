@@ -536,6 +536,9 @@ begin
 end;
 
 function TFPCInstaller.InitModule:boolean;
+const
+  // Common path used to get bootstrap compilers
+  FTPPath='ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
 var
   BootstrapVersion: string;
   Output: string;
@@ -552,8 +555,7 @@ begin
     {$IFDEF MSWINDOWS}
     //todo: on 2.6.2 release, change this and other ftp download locations.
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL:=
-      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-win32-ppc386.zip';
+      FBootstrapCompilerURL := FTPPath+'i386-win32-ppc386.zip';
     {$ifdef win64}
     //There is no win64 bootstrap compiler, yet
     //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
@@ -570,19 +572,16 @@ begin
     //If compiled for x64, install x64 only.
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL :=
-      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/i386-linux-ppc386.bz2';
+      FBootstrapCompilerURL := FTPPath+'i386-linux-ppc386.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
     {$ELSE}
     {$IFDEF cpuarmel}
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL :=
-    'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/arm-linux-ppcarm.bz2';
+      FBootstrapCompilerURL := FTPPath+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL :=
-      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/x86_64-linux-ppcx64.bz2';
+      FBootstrapCompilerURL := FTPPath+'x86_64-linux-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
     {$ENDIF cpuarmel}
     {$ENDIF CPU386}
@@ -594,8 +593,7 @@ begin
     //If we made it already pick it up here
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL:=
-      'ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/universal-darwin-ppcuniversal.tar.bz2';
+      FBootstrapCompilerURL := FTPPath+'universal-darwin-ppcuniversal.tar.bz2';
     FTrunkBootstrapCompiler:=false;
     {$ENDIF Darwin}
     end;
