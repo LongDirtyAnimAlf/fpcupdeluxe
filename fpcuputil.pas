@@ -835,6 +835,7 @@ begin
   FLog:=TEventLog.Create(nil);
   FLog.LogType:=ltFile;
   FLog.AppendContent:=true;
+  FLog.RaiseExceptionOnError:=false; //Don't throw exceptions on log errors.
 end;
 
 destructor TLogger.Destroy;
