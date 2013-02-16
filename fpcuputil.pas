@@ -1,5 +1,5 @@
 { Utility unit for FPCUp
-Copyright (C) 2012 Reinier Olislagers, Ludo Brands
+Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -787,11 +787,26 @@ begin
   end;
 end;
 
+{$IFDEF UNIX}
+//Adapted from sysutils; Unix/Linux only
+Function XdgConfigHome: String;
+{ Follows base-dir spec,
+  see [http://freedesktop.org/Standards/basedir-spec].
+  Always ends with PathDelim. }
+begin
+  Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
+  if (Result='') then
+    Result:=IncludeTrailingPathDelimiter(ExpandFileNameUTF8('~'))+'.config'+DirectorySeparator
+  else
+    Result:=IncludeTrailingPathDelimiter(Result);
+end;
+{$ENDIF UNIX}
+
 { TLogger }
 
 function TLogger.GetLogFile: string;
 begin
-  result:=FLog.FileName
+  result:=FLog.FileName;
 end;
 
 procedure TLogger.SetLogFile(AValue: string);
@@ -828,21 +843,6 @@ begin
   FLog.Free;
   inherited Destroy;
 end;
-
-{$IFDEF UNIX}
-//Adapted from sysutils; Unix/Linux only
-Function XdgConfigHome: String;
-{ Follows base-dir spec,
-  see [http://freedesktop.org/Standards/basedir-spec].
-  Always ends with PathDelim. }
-begin
-  Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
-  if (Result='') then
-    Result:=IncludeTrailingPathDelimiter(ExpandFileNameUTF8('~'))+'.config'+DirectorySeparator
-  else
-    Result:=IncludeTrailingPathDelimiter(Result);
-end;
-{$ENDIF UNIX}
 
 end.
 
