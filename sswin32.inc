@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 002.003.000 |
+| Project : Ararat Synapse                                       | 002.003.001 |
 |==============================================================================|
 | Content: Socket Independent Platform Layer - Win32/64 definition include     |
 |==============================================================================|
-| Copyright (c)1999-2011, Lukas Gebauer                                        |
+| Copyright (c)1999-2012, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2003-2011.                |
+| Portions created by Lukas Gebauer are Copyright (c)2003-2012.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -242,13 +242,21 @@ For IPv6 support you must have new API!
   {$ELSE}
     {$PACKRECORDS C}
   {$ENDIF}
+{$ELSE}
+  {$IFDEF WIN64}
+    {$ALIGN ON}
+    {$MINENUMSIZE 4}
+  {$ELSE}
+    {$MINENUMSIZE 4}
+    {$ALIGN OFF}
+  {$ENDIF}
 {$ENDIF}
 
 interface
 
 uses
   SyncObjs, SysUtils, Classes,
-  LCLIntf, LCLType, LMessages;
+  Windows;
 
 function InitSocketInterface(stack: String): Boolean;
 function DestroySocketInterface: Boolean;
@@ -953,12 +961,6 @@ function ResolvePort(Port: AnsiString; Family, SockProtocol, SockType: integer):
 
 {==============================================================================}
 implementation
-{$IFDEF FPC}
-uses dynlibs;
-{$ENDIF}
-
-
-
 
 var
   SynSockCount: Integer = 0;
@@ -1504,7 +1506,6 @@ end;
 function InitSocketInterface(stack: String): Boolean;
 begin
   Result := False;
-  SockEnhancedApi := False;
   if stack = '' then
     stack := DLLStackName;
   SynSockCS.Enter;
