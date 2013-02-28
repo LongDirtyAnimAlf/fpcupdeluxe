@@ -645,7 +645,6 @@ end;
 
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
-  AfterRevision: string;
   FPCCfg: string;
   OperationSucceeded: boolean;
   SearchRec:TSearchRec;
@@ -781,7 +780,7 @@ begin
   end;
 
   if OperationSucceeded then
-    WritelnLog('FPC: update succeeded at revision number '+ AfterRevision,false);
+    WritelnLog('FPC: update succeeded.',false);
   Result := OperationSucceeded;
 end;
 
