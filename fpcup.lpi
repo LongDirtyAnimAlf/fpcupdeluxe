@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="16">
+    <Units Count="17">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -256,6 +256,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="commandline"/>
       </Unit15>
+      <Unit16>
+        <Filename Value="hgclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="hgclient"/>
+      </Unit16>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

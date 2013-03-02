@@ -653,7 +653,7 @@ begin
   end;
 
   infoln('Lazarus was at: '+BeforeRevision,etinfo);
-  if FSVNUpdated then
+  if FRepositoryUpdated then
   begin
     Revision:=AfterRevision;
     infoln('Lazarus is now at: '+AfterRevision,etinfo);

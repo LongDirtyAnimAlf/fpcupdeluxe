@@ -5,7 +5,7 @@ unit installerCore;
 interface
 
 uses
-  Classes, SysUtils, SvnClient, processutils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, HGClient, SvnClient, processutils, m_crossinstaller, fpcuputil;
 
 type
 
@@ -24,6 +24,7 @@ type
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FDesiredRevision: string;
+    FHGClient: THGClient;
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
     FMake: string;
@@ -31,7 +32,7 @@ type
     FNeededExecutablesChecked: boolean;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
-    FSVNUpdated: boolean;
+    FRepositoryUpdated: boolean;
     FURL: string;
     FVerbose: boolean;
     FTar: string;
@@ -44,9 +45,11 @@ type
     // Make a list of all binutils that can be downloaded
     procedure CreateBinutilsList;
     // Get a diff of all modified files in and below the directory and save it
-    procedure CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
+    procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
     // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
+    // Clone/update using HG; use FBaseDirectory as local repository
+    function DownloadFromHG(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Checkout/update using SVN; use FBaseDirectory as local repository
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
@@ -406,7 +409,8 @@ begin
   FBinUtils.Add('zip' + GetExeExt);
 end;
 
-procedure TInstaller.CreateStoreSVNDiff(DiffFileName: string; UpdateWarnings: TStringList);
+procedure TInstaller.CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
+// todo: rebuild properly when hg and svn have a common parent
 var
   DiffFile: Text;
 begin
@@ -414,7 +418,22 @@ begin
     DiffFileName := DiffFileName + 'f';
   AssignFile(DiffFile, DiffFileName);
   Rewrite(DiffFile);
-  Write(DiffFile, FSVNClient.GetDiffAll);
+  if assigned(RepoClass) then
+  begin
+    if RepoClass is THGClient then
+    begin
+      Write(DiffFile, FHGClient.GetDiffAll);
+    end
+    else if RepoClass is TSVNClient then
+    begin
+      Write(DiffFile, FSVNClient.GetDiffAll);
+    end
+    else raise Exception.CreateFmt('Error writing diff file. Technical details: unknown repository object %s passed. Please fix the code.',[RepoClass.ClassName]);
+  end
+  else
+  begin
+    raise Exception.Create('Error writing diff file. Technical details: invalid/no repository object passed. Please fix the code.');
+  end;
   CloseFile(DiffFile);
   UpdateWarnings.Add('Diff with last revision stored in ' + DiffFileName);
 end;
@@ -544,6 +563,64 @@ begin
   end;
 end;
 
+function TInstaller.DownloadFromHG(ModuleName: string; var BeforeRevision,
+  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+var
+  BeforeRevisionShort: string; //Basically the branch revision number
+  ReturnCode: integer;
+begin
+  BeforeRevision := 'failure';
+  BeforeRevisionShort:='unknown';
+  AfterRevision := 'failure';
+  FHGClient.LocalRepository := FBaseDirectory;
+  FHGClient.Repository := FURL;
+
+  BeforeRevision := 'revision '+FHGClient.LocalRevision;
+  BeforeRevisionShort:=FHGClient.LocalRevision;
+
+  FHGClient.LocalModifications(UpdateWarnings); //Get list of modified files
+  if UpdateWarnings.Count > 0 then
+  begin
+    UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
+    if FKeepLocalChanges=false then
+    begin
+      CreateStoreRepositoryDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings,FHGClient);
+      UpdateWarnings.Add(ModuleName + ': reverting before updating.');
+      FHGClient.Revert; //Remove local changes
+    end
+    else
+    begin
+      UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
+    end;
+  end;
+
+  FHGClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
+  // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
+  FHGClient.CheckOutOrUpdate;
+  ReturnCode := FHGClient.ReturnCode;
+  case ReturnCode of
+    FRET_LOCAL_REMOTE_URL_NOMATCH:
+    begin
+      FRepositoryUpdated := false;
+      Result := false;
+      writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
+      writelnlog('Local directory: ' + FHGClient.LocalRepository, true);
+      infoln('Have you specified the wrong directory or a directory with an old SVN checkout?',etinfo);
+    end;
+    else
+    begin
+      // For now, assume it worked even with non-zero result code. We can because
+      // we do the AfterRevision check as well.
+      AfterRevision := 'revision '+FHGClient.LocalRevision;
+      if (FHGClient.LocalRevision<>FRET_HG_UNKNOWN_REVISION) and (BeforeRevisionShort <> FHGClient.LocalRevision) then
+        FRepositoryUpdated := true
+      else
+        FRepositoryUpdated := false;
+      Result := true;
+    end;
+  end;
+end;
+
 function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 var
   BeforeRevisionShort: string; //Basically the branch revision number
@@ -575,7 +652,7 @@ begin
     UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
     if FKeepLocalChanges=false then
     begin
-      CreateStoreSVNDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings);
+      CreateStoreRepositoryDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings,FSVNClient);
       UpdateWarnings.Add(ModuleName + ': reverting before updating.');
       FSVNClient.Revert; //Remove local changes
     end
@@ -592,7 +669,7 @@ begin
   case ReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:
     begin
-      FSVNUpdated := false;
+      FRepositoryUpdated := false;
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FSVNClient.LocalRepository, true);
@@ -607,9 +684,9 @@ begin
       else
         AfterRevision := 'branch revision '+IntToStr(FSVNClient.LocalRevision)+' (repository revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)+')';
       if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (StrToIntDef(BeforeRevisionShort, FRET_UNKNOWN_REVISION) <> FSVNClient.LocalRevision) then
-        FSVNUpdated := true
+        FRepositoryUpdated := true
       else
-        FSVNUpdated := false;
+        FRepositoryUpdated := false;
       Result := true;
     end;
   end;
@@ -801,6 +878,7 @@ begin
   inherited Create;
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
+  FHGClient := THGClient.Create;
   FSVNClient := TSVNClient.Create;
   // List of binutils that can be downloaded:
   CreateBinutilsList;
@@ -815,6 +893,7 @@ begin
   if Assigned(FBinUtils) then
     FBinUtils.Free;
   ProcessEx.Free;
+  FHGClient.Free;
   FSVNClient.Free;
   if Assigned(FLogVerbose) then
     FLogVerbose.Free;

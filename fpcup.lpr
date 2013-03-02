@@ -51,9 +51,9 @@ uses {$IFDEF UNIX}
   Classes,Forms,Interfaces {these 2 for application options},
   svnclient, updatelazconfig, ftpsend, sysutils, processutils, fileutil,
   fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
-  synaip, synautil, synsock, blcksock, installerCore,
-  installerfpc, installerLazarus, installerHelp, installerUniversal,
-  installerManager{$IFDEF MSWINDOWS}, wininstaller{$ENDIF},commandline;
+  synaip, synautil, synsock, blcksock, installerCore, installerfpc,
+  installerLazarus, installerHelp, installerUniversal, installerManager,
+  wininstaller, commandline, hgclient;
 
 //{$R *.res} //Keep it simple, no resources
 

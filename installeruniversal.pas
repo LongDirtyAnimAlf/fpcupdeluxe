@@ -676,12 +676,12 @@ begin
     result:=false;
 end;
 
-// Download from SVN for module
+// Download from SVN, hg for module
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 var
   idx:integer;
   sl:TStringList;
-  SVN,InstallDir:string;
+  RemoteURL,InstallDir:string;
   BeforeRevision, AfterRevision: string;
   UpdateWarnings: TStringList;
 begin
@@ -696,15 +696,35 @@ begin
     InstallDir:=GetValue('InstallDir',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
-    SVN:=GetValue('SVNURL',sl);
-    if SVN<>'' then
+    // Handle SVN urls
+    RemoteURL:=GetValue('SVNURL',sl);
+    if RemoteURL<>'' then
       begin
       UpdateWarnings:=TStringList.Create;
       try
         FSVNClient.Verbose:=FVerbose;
         FBaseDirectory:=InstallDir;
-        FUrl:=SVN;
+        FUrl:=RemoteURL;
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        if UpdateWarnings.Count>0 then
+        begin
+          WritelnLog(UpdateWarnings.Text);
+        end;
+      finally
+        UpdateWarnings.Free;
+      end;
+      end;
+
+    // Handle HG URLs
+    RemoteURL:=GetValue('HGURL',sl);
+    if RemoteURL<>'' then
+      begin
+      UpdateWarnings:=TStringList.Create;
+      try
+        FHGClient.Verbose:=FVerbose;
+        FBaseDirectory:=InstallDir;
+        FUrl:=RemoteURL;
+        result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
