@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="17">
+    <Units Count="18">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -261,6 +261,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="hgclient"/>
       </Unit16>
+      <Unit17>
+        <Filename Value="repoclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="repoclient"/>
+      </Unit17>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

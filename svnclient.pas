@@ -1,5 +1,5 @@
 { Classes for using svn commands
-  Copyright (C) 2012 Reinier Olislagers, Ludo Brands
+  Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
 
   Based on svncommand unit
   Copyright (C) 2007 Vincent Snijders vincents@freepascal.org,
@@ -38,19 +38,12 @@ interface
 uses
   Classes, SysUtils,
   processutils,
-  FileUtil {Requires LCL};
+  FileUtil {Requires LCL}, repoclient;
 
-const
-  // Custom return codes
-  FRET_LOCAL_REMOTE_URL_NOMATCH= -2;
-  FRET_WORKING_COPY_TOO_OLD= -3;
-  FRET_UNKNOWN_REVISION=-4;
-
-type
   ESVNClientError = class(Exception);
   { TSVNClient }
 
-  TSVNClient = class(TObject)
+  TSVNClient = class(TRepoClient)
   private
     FLocalRepository: string;
     FLocalRevision: integer;
