@@ -228,8 +228,7 @@ begin
 
   // Get updates (equivalent to git fetch and git merge)
   // --all: fetch all remotes
-  // --strategy=theirs: overwrite any local changes
-  Command := ' pull --all --recurse-submodules=yes --strategy=theirs';
+  Command := ' pull --all --recurse-submodules=yes';
   FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+command,FLocalRepository,Verbose);
 
   if FReturnCode=0 then
