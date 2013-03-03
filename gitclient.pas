@@ -161,7 +161,7 @@ begin
 
   // Actual clone/checkout
   Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose);
+  FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+Command,Output,FVerbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -170,7 +170,7 @@ begin
     while (FReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose); //attempt again
+      FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+Command,Output,FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
