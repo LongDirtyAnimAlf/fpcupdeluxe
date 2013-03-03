@@ -40,71 +40,29 @@ uses
   processutils,
   FileUtil {Requires LCL}, repoclient;
 
+const
+  // Custom return codes
+  FRET_LOCAL_REMOTE_URL_NOMATCH=repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
+  FRET_WORKING_COPY_TOO_OLD=repoclient.FRET_WORKING_COPY_TOO_OLD;
+  FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
+
+type
   ESVNClientError = class(Exception);
   { TSVNClient }
 
   TSVNClient = class(TRepoClient)
-  private
-    FLocalRepository: string;
-    FLocalRevision: integer;
-    FLocalRevisionWholeRepo: integer;
-    FRepositoryURL: string;
-    FReturnCode: integer;
-    FDesiredRevision: string;
-    FSVNExecutable: string;
-    FVerbose: boolean;
-    function GetLocalRevision: integer;
-    function GetLocalRevisionWholeRepo: integer;
+  protected
+    FLocalRevisionWholeRepo: string;
+    function GetLocalRevision: string; override;
+    function GetLocalRevisionWholeRepo: string;
     procedure GetLocalRevisions;
-    function GetSVNExecutable: string;
-    // Makes sure non-empty strings have a / at the end.
-    function IncludeTrailingSlash(AValue: string): string;
-    procedure SetDesiredRevision(AValue: string);
-    procedure SetLocalRepository(AValue: string);
-    procedure SetRepositoryURL(AValue: string);
-    procedure SetSVNExecutable(AValue: string);
-    procedure SetVerbose(AValue: boolean);
+    function GetRepoExecutable: string; override;
+    procedure SetRepoExecutable(AValue: string); override;
   public
-    //Performs an SVN checkout (initial download), unless otherwise specified HEAD (latest revision) only for speed
-    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
-    procedure CheckOut;
-    //Runs SVN checkout if local repository doesn't exist, else does an update
-    procedure CheckOutOrUpdate;
-    //Creates diff of all changes in the local directory versus the SVN version
-    function GetDiffAll:string;
     //Search for installed SVN executable (might return just a filename if in the OS path)
-    function FindSVNExecutable: string;
-    //Shows commit log for local directory
-    procedure Log(var Log: TStringList);
-    //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
-    procedure Revert;
-    //Performs an SVN update (pull)
-    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
-    procedure Update;
-    //Get/set desired revision to checkout/pull to (if none given, use HEAD)
-    property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
-    //Shows list of files that have been modified locally (and not committed)
-    procedure LocalModifications(var FileList: TStringList);
-    //Checks to see if local directory is a valid SVN repository for the repository URL given (if any)
-    function LocalRepositoryExists: boolean;
-    //Local directory that has an SVN repository/checkout.
-    //When setting, relative paths will be expanded; trailing path delimiters will be removed
-    property LocalRepository: string read FLocalRepository write SetLocalRepository;
-    //Revision number of local repository: branch revision number if we're in a branch.
-    property LocalRevision: integer read GetLocalRevision;
+    function FindRepoExecutable: string; override;
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
-    property LocalRevisionWholeRepo: integer read GetLocalRevisionWholeRepo;
-    //Parses output given by some commands (svn update, svn status) and returns files.
-    // Files are marked by single characters (U,M,etc); you can filter on ore mor of these (pass [''] if not required).
-    procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
-    //URL where central (remote) SVN repository is placed
-    property Repository: string read FRepositoryURL write SetRepositoryURL;
-    //Exit code returned by last SVN client command; 0 for success. Useful for troubleshooting
-    property ReturnCode: integer read FReturnCode;
-    //SVN client executable. Can be set to explicitly determine which executable to use.
-    property SVNExecutable: string read GetSVNExecutable write SetSVNExecutable;
-    //Show additional console/log output?
-    property Verbose:boolean read FVerbose write SetVerbose;
+    property LocalRevisionWholeRepo: string read GetLocalRevisionWholeRepo;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -115,105 +73,74 @@ uses strutils, regexpr;
 
 
 { TSVNClient }
-function TSVNClient.FindSvnExecutable: string;
+function TSVNClient.FindRepoExecutable: string;
 const
   // Application name:
   SVNName = 'svn';
 begin
-  Result := FSVNExecutable;
+  Result := FRepoExecutable;
   // Look in path
   // Windows: will also look for <SVNName>.exe
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := FindDefaultExecutablePath(SVNName);
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := FindDefaultExecutablePath(SVNName);
 
 {$IFDEF MSWINDOWS}
   // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
   // Covers both 32 bit and 64 bit Windows.
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\svn.exe');
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\svn.exe');
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\svn.exe');
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\svn.exe');
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\svn.exe');
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\svn.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\svn.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\svn.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\svn.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\svn.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\svn.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\svn.exe');
   //Directory where current executable is:
-  if not FileExists(FSvnExecutable) then
-    FSvnExecutable := (ExtractFilePath(ParamStr(0)) + 'svn');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + 'svn');
 {$ENDIF MSWINDOWS}
 
-  if not FileExists(FSvnExecutable) then
+  if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
     if FileExists(SVNName+'.exe') then
-      FSVNExecutable := SVNName+'.exe';
+      FRepoExecutable := SVNName+'.exe';
     if FileExists('svn') then
-      FSVNExecutable := SVNName;
+      FRepoExecutable := SVNName;
   end;
 
-  if FileExists(FSVNExecutable) then
+  if FileExists(FRepoExecutable) then
   begin
     // Check for valid svn executable
-    if ExecuteCommand(FSVNExecutable+ ' --version',Verbose) <> 0 then
+    if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
     begin
       // File exists, but is not a valid svn client
-      FSVNExecutable := EmptyStr;
+      FRepoExecutable := EmptyStr;
     end;
   end
   else
   begin
     // File does not exist
     // Make sure we don't call an arbitrary executable:
-    FSVNExecutable := EmptyStr;
+    FRepoExecutable := EmptyStr;
   end;
-  Result := FSVNExecutable;
+  Result := FRepoExecutable;
 end;
 
-function TSVNClient.GetSVNExecutable: string;
+function TSVNClient.GetRepoExecutable: string;
 begin
-  if not FileExists(FSVNExecutable) then FindSVNExecutable;
-  if not FileExists(FSVNExecutable) then
+  if not FileExists(FRepoExecutable) then FindRepoExecutable;
+  if not FileExists(FRepoExecutable) then
     Result:=''
   else
-    Result := FSVNExecutable;
-end;
-
-function TSVNClient.IncludeTrailingSlash(AValue: string): string;
-begin
-  // Default: either empty string or / already there
-  result:=AValue;
-  if (AValue<>'') and (RightStr(AValue,1)<>'/') then
-  begin
-    result:=AValue+'/';
-  end;
+    Result := FRepoExecutable;
 end;
 
 
-procedure TSVNClient.SetDesiredRevision(AValue: string);
-begin
-  if FDesiredRevision=AValue then Exit;
-  FDesiredRevision:=AValue;
-end;
-
-procedure TSVNClient.SetLocalRepository(AValue: string);
-// Sets local repository, converting relative path to absolute path
-// and adding a trailing / or \
-begin
-  if FLocalRepository=AValue then Exit;
-  FLocalRepository:=ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
-end;
-
-procedure TSVNClient.SetRepositoryURL(AValue: string);
-// Make sure there's a trailing / in the URL.
-// This normalization helps matching remote and local URLs
-begin
-  if FRepositoryURL=AValue then Exit;
-  FRepositoryURL:=IncludeTrailingSlash(AValue);
-end;
 
 procedure Tsvnclient.Checkout;
 const
@@ -300,20 +227,15 @@ begin
   FReturnCode:=ExecuteCommand(SVNExecutable+' revert --recursive ' + LocalRepository,Verbose);
 end;
 
-procedure TSVNClient.SetSVNExecutable(AValue: string);
+procedure TSVNClient.SetRepoExecutable(AValue: string);
 begin
-  if FSVNExecutable <> AValue then
+  if FRepoExecutable <> AValue then
   begin
-    FSVNExecutable := AValue;
-    FindSVNExecutable; //Make sure it actually exists; use fallbacks if possible
+    FRepoExecutable := AValue;
+    FindRepoExecutable; //Make sure it actually exists; use fallbacks if possible
   end;
 end;
 
-procedure TSVNClient.SetVerbose(AValue: boolean);
-begin
-  if FVerbose=AValue then Exit;
-  FVerbose:=AValue;
-end;
 
 procedure Tsvnclient.Update;
 const
@@ -490,7 +412,7 @@ var
   RevCount: Integer;
 begin
   // Only update if we have invalid revision info, in order to minimize svn info calls
-  if (FLocalRevision<0) or (FLocalRevisionWholeRepo<0) then
+  if (FLocalRevision=FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo=FRET_UNKNOWN_REVISION) then
   begin
     FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
     // Could have used svnversion but that would have meant calling yet another command...
@@ -506,10 +428,12 @@ begin
           RevExtr.Expression:=RevExpression;
           if RevExtr.Exec(Output) then begin
              Inc(RevCount);
-             FLocalRevisionWholeRepo:=StrToIntDef(RevExtr.Match[1],FRET_UNKNOWN_REVISION);
+             FLocalRevisionWholeRepo:=RevExtr.Match[1];
+             if FLocalRevisionWholeRepo='' then FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
              if RevExtr.ExecNext then begin
                 Inc(RevCount); //we only have valid revision info when we get both repo and branch revision...
-                FLocalRevision:=StrToIntDef(RevExtr.Match[1],FRET_UNKNOWN_REVISION);
+                FLocalRevision:=RevExtr.Match[1];
+                if FLocalRevision='' then FLocalRevision:=FRET_UNKNOWN_REVISION;
              end;
           end;
         finally
@@ -519,12 +443,14 @@ begin
           begin
           // Regex failed; trying for English revision message (though this may be
           // superfluous with the regex)
-          FLocalRevision:=StrToIntDef(trim(copy(Output,
+          FLocalRevision:=FRET_UNKNOWN_REVISION;
+          FLocalRevision:=trim(copy(Output,
             (pos('Last Changed Rev: ', Output) + BranchRevLength),
-            6)), FRET_UNKNOWN_REVISION);
-          FLocalRevisionWholeRepo:=StrToIntDef(trim(copy(Output,
+            6));
+          FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
+          FLocalRevisionWholeRepo:=trim(copy(Output,
             (pos('Revision: ', Output) + RevLength),
-            6)), FRET_UNKNOWN_REVISION);
+            6));
           end;
       // If we happen to be in the root (no branch), cater for that:
       if FLocalRevision=FRET_UNKNOWN_REVISION then FLocalRevision:=FLocalRevisionWholeRepo;
@@ -539,13 +465,13 @@ begin
   end;
 end;
 
-function TSVNClient.GetLocalRevision: integer;
+function TSVNClient.GetLocalRevision: string;
 begin
   GetLocalRevisions;
   result:=FLocalRevision;
 end;
 
-function TSVNClient.GetLocalRevisionWholeRepo: integer;
+function TSVNClient.GetLocalRevisionWholeRepo: string;
 begin
   GetLocalRevisions;
   result:=FLocalRevisionWholeRepo;
@@ -560,8 +486,8 @@ begin
   FLocalRevision:=FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
   FReturnCode := 0;
-  FSVNExecutable := '';
-  FindSvnExecutable; //Do this now so hopefully the SVNExecutable property is valid.
+  FRepoExecutable := '';
+  FindRepoExecutable; //Do this now so hopefully the SVNExecutable property is valid.
 end;
 
 destructor Tsvnclient.Destroy;

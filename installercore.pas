@@ -612,7 +612,7 @@ begin
       // For now, assume it worked even with non-zero result code. We can because
       // we do the AfterRevision check as well.
       AfterRevision := 'revision '+FHGClient.LocalRevision;
-      if (FHGClient.LocalRevision<>FRET_HG_UNKNOWN_REVISION) and (BeforeRevisionShort <> FHGClient.LocalRevision) then
+      if (FHGClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FHGClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
@@ -633,12 +633,12 @@ begin
   FSVNClient.Repository := FURL;
 
   if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-    BeforeRevision := 'revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)
+    BeforeRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
   else
-    BeforeRevision := 'branch revision '+IntToStr(FSVNClient.LocalRevision)+' (repository revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)+')';
-  BeforeRevisionShort:=IntToStr(FSVNClient.LocalRevision);
+    BeforeRevision := 'branch revision '+FSVNClient.LocalRevision+' (repository revision '+FSVNClient.LocalRevisionWholeRepo+')';
+  BeforeRevisionShort:=FSVNClient.LocalRevision;
 
-  if FSVNClient.LocalRevisionWholeRepo = FRET_WORKING_COPY_TOO_OLD then
+  if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
     writelnlog('ERROR: The working copy in ' + FBaseDirectory + ' was created with an older, incompatible version of svn.', true);
     writelnlog('  Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
@@ -680,10 +680,10 @@ begin
       // For now, assume it worked even with non-zero result code. We can because
       // we do the AfterRevision check as well.
       if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-        AfterRevision := 'revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)
+        AfterRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
       else
-        AfterRevision := 'branch revision '+IntToStr(FSVNClient.LocalRevision)+' (repository revision '+IntToStr(FSVNClient.LocalRevisionWholeRepo)+')';
-      if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (StrToIntDef(BeforeRevisionShort, FRET_UNKNOWN_REVISION) <> FSVNClient.LocalRevision) then
+        AfterRevision := 'branch revision '+FSVNClient.LocalRevision+' (repository revision '+FSVNClient.LocalRevisionWholeRepo+')';
+      if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FSVNClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;

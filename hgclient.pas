@@ -29,7 +29,7 @@
   along with this library; if not, write to the Free Software Foundation,
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
-//to do: set up common ancestor for hg, svn and git classes
+
 unit hgclient;
 
 {$mode objfpc}{$H+}
@@ -39,80 +39,24 @@ interface
 uses
   Classes, SysUtils,
   processutils,
-  FileUtil {Requires LCL};
+  FileUtil {Requires LCL}, repoclient;
 
 const
   // Custom return codes
-  FRET_LOCAL_REMOTE_URL_NOMATCH= -2;
-  FRET_WORKING_COPY_TOO_OLD= -3;
-  FRET_HG_UNKNOWN_REVISION='FRET_UNKNOWN_REVISION';
+  FRET_LOCAL_REMOTE_URL_NOMATCH=repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
+  FRET_WORKING_COPY_TOO_OLD=repoclient.FRET_WORKING_COPY_TOO_OLD;
+  FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
 
 type
   EHGClientError = class(Exception);
   { ThgClient }
 
-  THGClient = class(TObject)
-  private
-    FLocalRepository: string;
-    FLocalRevision: string;
-    FLocalRevisionWholeRepo: string;
-    FRepositoryURL: string; //Remote URL; can be parsed from hg showconfig paths.default
-    FReturnCode: integer;
-    FDesiredRevision: string;
-    FHGExecutable: string;
-    FVerbose: boolean;
-    function GetLocalRevision: string;
-    function GetLocalRevisionWholeRepo: string;
-    procedure GetLocalRevisions;
-    function GethgExecutable: string;
-    // Makes sure non-empty strings have a / at the end.
-    function IncludeTrailingSlash(AValue: string): string;
-    procedure SetDesiredRevision(AValue: string);
-    procedure SetLocalRepository(AValue: string);
-    procedure SetRepositoryURL(AValue: string);
-    procedure SethgExecutable(AValue: string);
-    procedure SetVerbose(AValue: boolean);
+  THGClient = class(TRepoClient)
+  protected
+    function GetLocalRevision: string; override;
+    function GetRepoExecutable: string; override;
+    procedure SetRepoExecutable(AValue: string); override;
   public
-    //Performs a hg clone (initial download), akin to SVN checkout, unless otherwise specified tip (latest revision) only for speed
-    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
-    procedure Checkout;
-    //Runs hg checkout if local repository doesn't exist, else does an update
-    procedure CheckOutOrUpdate;
-    //Creates diff of all changes in the local directory versus the hg version (in git format so renames etc are included)
-    function GetDiffAll:string;
-    //Search for installed hg executable (might return just a filename if in the OS path)
-    function FindhgExecutable: string;
-    //Shows commit log for local directory
-    procedure Log(var Log: TStringList);
-    //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
-    procedure Revert;
-    //Performs an hg update (pull)
-    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
-    procedure Update;
-    //Get/set desired revision to checkout/pull to (if none given, use tip)
-    property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
-    //Shows list of files that have been modified locally (and not committed)
-    procedure LocalModifications(var FileList: TStringList);
-    //Checks to see if local directory is a valid hg repository for the repository URL given (if any)
-    function LocalRepositoryExists: boolean;
-    //Local directory that has an hg repository/checkout.
-    //When setting, relative paths will be expanded; trailing path delimiters will be removed
-    property LocalRepository: string read FLocalRepository write SetLocalRepository;
-    //Revision number of local repository: branch revision number if we're in a branch.
-    property LocalRevision: string read GetLocalRevision;
-    //Revision number of local repository - the repository wide revision number regardless of what branch we are in
-    property LocalRevisionWholeRepo: string read GetLocalRevisionWholeRepo;
-    //Parses output given by some commands (hg update, hg status) and returns files.
-    // Files are marked by single characters (U,M,etc); you can filter on ore mor of these (pass [''] if not required).
-    procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
-    //URL where central (remote) hg repository is placed
-    property Repository: string read FRepositoryURL write SetRepositoryURL;
-    //Exit code returned by last hg client command; 0 for success. Useful for troubleshooting
-    property ReturnCode: integer read FReturnCode;
-    //hg client executable. Can be set to explicitly determine which executable to use.
-    property hgExecutable: string read GethgExecutable write SethgExecutable;
-    //Show additional console/log output?
-    property Verbose:boolean read FVerbose write SetVerbose;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -123,75 +67,66 @@ uses strutils, regexpr;
 
 
 { ThgClient }
-function ThgClient.FindhgExecutable: string;
+function ThgClient.FindRepoExecutable: string;
 const
   // Application name:
   hgName = 'hg';
 begin
-  Result := FhgExecutable;
+  Result := FRepoExecutable;
   // Look in path
   // Windows: will also look for <hgName>.exe
-  if not FileExists(FhgExecutable) then
-    FhgExecutable := FindDefaultExecutablePath(hgName);
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := FindDefaultExecutablePath(hgName);
 
 {$IFDEF MSWINDOWS}
   // Some popular locations for Tortoisehg:
   // Covers both 32 bit and 64 bit Windows.
-  if not FileExists(FhgExecutable) then
-    FhgExecutable := GetEnvironmentVariable('ProgramFiles\TorToisehg\hg.exe');
-  if not FileExists(FhgExecutable) then
-    FhgExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisehg\hg.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToisehg\hg.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisehg\hg.exe');
   //Directory where current executable is:
-  if not FileExists(FhgExecutable) then
-    FhgExecutable := (ExtractFilePath(ParamStr(0)) + 'hg');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + 'hg');
 {$ENDIF MSWINDOWS}
 
-  if not FileExists(FhgExecutable) then
+  if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
   {$IFDEF MSWINDOWS}
     if FileExists(hgName+'.exe') then
-      FhgExecutable := hgName+'.exe';
+      FRepoExecutable := hgName+'.exe';
   {$ENDIF MSWINDOWS}
     if FileExists('hg') then
-      FhgExecutable := hgName;
+      FRepoExecutable := hgName;
   end;
 
-  if FileExists(FhgExecutable) then
+  if FileExists(FRepoExecutable) then
   begin
     // Check for valid hg executable
-    if ExecuteCommand(FhgExecutable+ ' --version',Verbose) <> 0 then
+    if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
     begin
       // File exists, but is not a valid hg client
-      FhgExecutable := EmptyStr;
+      FRepoExecutable := EmptyStr;
     end;
   end
   else
   begin
     // File does not exist
     // Make sure we don't call an arbitrary executable:
-    FhgExecutable := EmptyStr;
+    FRepoExecutable := EmptyStr;
   end;
-  Result := FhgExecutable;
+  Result := FRepoExecutable;
 end;
 
-function ThgClient.GethgExecutable: string;
+function ThgClient.GetRepoExecutable: string;
+//todo: replace with getrepoexecutable
 begin
-  if not FileExists(FhgExecutable) then FindhgExecutable;
-  if not FileExists(FhgExecutable) then
+  if not FileExists(FRepoExecutable) then FindhgExecutable;
+  if not FileExists(FRepoExecutable) then
     Result:=''
   else
-    Result := FhgExecutable;
-end;
-
-function ThgClient.IncludeTrailingSlash(AValue: string): string;
-begin
-  // Default: either empty string or / already there
-  result:=AValue;
-  if (AValue<>'') and (RightStr(AValue,1)<>'/') then
-  begin
-    result:=AValue+'/';
-  end;
+    Result := FRepoExecutable;
 end;
 
 
@@ -227,8 +162,7 @@ var
   RetryAttempt: integer;
 begin
   // Invalidate our revision number cache
-  FLocalRevision:=FRET_HG_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo:=FRET_HG_UNKNOWN_REVISION;
+  FLocalRevision:=FRET_UNKNOWN_REVISION;
 
   //tip is similar to svn HEAD
   // Could add --insecure to ignore certificate problems, but rather not
@@ -293,11 +227,11 @@ begin
   FReturnCode:=ExecuteCommandInDir(hgExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
 end;
 
-procedure ThgClient.SethgExecutable(AValue: string);
+procedure ThgClient.SetRepoExecutable(AValue: string);
 begin
-  if FhgExecutable <> AValue then
+  if FRepoExecutable <> AValue then
   begin
-    FhgExecutable := AValue;
+    FRepoExecutable := AValue;
     FindhgExecutable; //Make sure it actually exists; use fallbacks if possible
   end;
 end;
@@ -321,8 +255,7 @@ begin
   UpdateRetry := 1;
 
   // Invalidate our revision number cache
-  FLocalRevision:=FRET_HG_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo:=FRET_HG_UNKNOWN_REVISION;
+  FLocalRevision:=FRET_UNKNOWN_REVISION;
 
   // Combined hg pull & hg update by specifying --update
   if (FDesiredRevision='') or (trim(FDesiredRevision)='tip') then
@@ -432,60 +365,43 @@ begin
         // There is a repository here, but it was checked out
         // from a different URL...
         // Keep result false; show caller what's going on.
-        FLocalRevision:=FRET_HG_UNKNOWN_REVISION;
-        FLocalRevisionWholeRepo:=FRET_HG_UNKNOWN_REVISION;
+        FLocalRevision:=FRET_UNKNOWN_REVISION;
         FReturnCode:=FRET_LOCAL_REMOTE_URL_NOMATCH;
       end;
     end;
   end;
 end;
 
-procedure ThgClient.GetLocalRevisions;
+function ThgClient.GetLocalRevision: string;
 const
   HashLength=12; //12 characters in hg revision hash
 var
   Output: string;
-
 begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
-  if (FLocalRevision=FRET_HG_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo=FRET_HG_UNKNOWN_REVISION) then
+  if FLocalRevision=FRET_UNKNOWN_REVISION then
   begin
     FReturnCode:=ExecuteCommandInDir(hgExecutable+' identify --id ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
-      FLocalRevisionWholeRepo:=copy(trim(Output),1,HashLength); //ignore any + - changed working copy - at the end of the revision
-      FLocalRevision:=FLocalRevisionWholeRepo; //for compatibility with the svnclient code
+      FLocalRevision:=copy(trim(Output),1,HashLength); //ignore any + - changed working copy - at the end of the revision
     end
     else
     begin
-      FLocalRevisionWholeRepo:=FRET_HG_UNKNOWN_REVISION;
-      FLocalRevision:=FRET_HG_UNKNOWN_REVISION; //for compatibility with the svnclient code
+      FLocalRevision:=FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
     end;
   end;
-end;
-
-function ThgClient.GetLocalRevision: string;
-begin
-  GetLocalRevisions;
   result:=FLocalRevision;
 end;
-
-function ThgClient.GetLocalRevisionWholeRepo: string;
-begin
-  GetLocalRevisions;
-  result:=FLocalRevisionWholeRepo;
-end;
-
 
 constructor Thgclient.Create;
 begin
   FLocalRepository := '';
   FRepositoryURL := '';
   FDesiredRevision:='';
-  FLocalRevision:=FRET_HG_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo:=FRET_HG_UNKNOWN_REVISION;
+  FLocalRevision:=FRET_UNKNOWN_REVISION;
   FReturnCode := 0;
-  FhgExecutable := '';
+  FRepoExecutable := '';
   FindhgExecutable; //Do this now so hopefully the hgExecutable property is valid.
 end;
 
