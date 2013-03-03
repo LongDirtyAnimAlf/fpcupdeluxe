@@ -38,6 +38,7 @@ uses
 const
   // Error code/result code:
   PROC_INTERNALERROR=-1;
+
 type
   TProcessEx=class; //forward
   TDumpFunc = procedure (Sender:TProcessEx; output:string);

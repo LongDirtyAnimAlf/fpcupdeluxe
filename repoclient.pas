@@ -36,9 +36,9 @@ uses
   Classes, SysUtils;
 
 const
-  // Custom return codes
-  FRET_LOCAL_REMOTE_URL_NOMATCH=-1; //Return code that indicates remote and local repository URLs don't match
-  FRET_WORKING_COPY_TOO_OLD=-2; //Return code for SVN problem with old client version used
+  // Custom return codes; note: keep separate from ProcessEx return codes (processutils.PROC_INTERNALERROR=-1)
+  FRET_LOCAL_REMOTE_URL_NOMATCH=-10; //Return code that indicates remote and local repository URLs don't match
+  FRET_WORKING_COPY_TOO_OLD=-11; //Return code for SVN problem with old client version used
   FRET_UNKNOWN_REVISION='FRET_UNKNOWN_REVISION';
 
 type
@@ -55,6 +55,9 @@ type
     FRepositoryURL: string;
     FReturnCode: integer;
     FVerbose: boolean;
+    //Performs a checkout/initial download
+    //Note: it's often easier to call CheckOutOrUpdate
+    procedure CheckOut; virtual;
     function GetLocalRevision: string; virtual;
     function GetRepoExecutable: string; virtual;
     // Makes sure non-empty strings have a / at the end.
@@ -64,11 +67,11 @@ type
     procedure SetRepositoryURL(AValue: string); virtual;
     procedure SetRepoExecutable(AValue: string); virtual;
     procedure SetVerbose(AValue: boolean); virtual;
+    //Performs an update (pull)
+    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
+    procedure Update; virtual;
   public
-    //Performs a checkout/initial download
-    //Note: it's often easier to call CheckOutOrUpdate
-    procedure CheckOut; virtual;
-    //Runs checkout if local repository doesn't exist, else does an update
+    //Downloads from remote repo: runs checkout if local repository doesn't exist, else does an update
     procedure CheckOutOrUpdate; virtual;
     //Search for installed version control client executable (might return just a filename if in the OS path)
     function FindRepoExecutable: string; virtual;
@@ -80,9 +83,6 @@ type
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); virtual;
     //Reverts/removes local changes so we get a clean copy again. Note: will remove modifications to files!
     procedure Revert; virtual;
-    //Performs an update (pull)
-    //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
-    procedure Update; virtual;
     //Get/set desired revision to checkout/pull to (if none given, use HEAD/tip/newest)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
     //Shows list of files that have been modified locally (and not committed)
@@ -163,7 +163,9 @@ begin
   if FRepoExecutable <> AValue then
   begin
     FRepoExecutable := AValue;
-    FindRepoExecutable; //Make sure it actually exists; use fallbacks if possible
+    // If it exists, assume it's the correct client; if not...
+    if not(FileExists(FRepoExecutable)) then
+      FindRepoExecutable; //... use fallbacks to get a working client
   end;
 end;
 

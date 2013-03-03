@@ -68,6 +68,7 @@ type
     function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
     {$ENDIF MSWINDOWS}
     function FirstSpaceAfterCommand(CommandLine: string): integer;
+    // Get a value for a key=value pair. Case-insensitive for keys.
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
@@ -733,6 +734,26 @@ begin
         UpdateWarnings.Free;
       end;
       end;
+
+    // Handle Git URLs
+    RemoteURL:=GetValue('GITURL',sl);
+    if RemoteURL<>'' then
+      begin
+      UpdateWarnings:=TStringList.Create;
+      try
+        FGitClient.Verbose:=FVerbose;
+        FBaseDirectory:=InstallDir;
+        FUrl:=RemoteURL;
+        result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        if UpdateWarnings.Count>0 then
+        begin
+          WritelnLog(UpdateWarnings.Text);
+        end;
+      finally
+        UpdateWarnings.Free;
+      end;
+      end;
+
     end
   else
     result:=false;

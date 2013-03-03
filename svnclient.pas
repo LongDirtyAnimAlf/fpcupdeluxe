@@ -53,13 +53,13 @@ type
   TSVNClient = class(TRepoClient)
   protected
     FLocalRevisionWholeRepo: string;
+    procedure CheckOut; override;
     function GetLocalRevision: string; override;
     function GetLocalRevisionWholeRepo: string;
     procedure GetLocalRevisions;
     function GetRepoExecutable: string; override;
-    procedure SetRepoExecutable(AValue: string); override;
+    procedure Update; override;
   public
-    procedure CheckOut; override;
     procedure CheckOutOrUpdate; override;
     function FindRepoExecutable: string; override;
     function GetDiffAll:string; override;
@@ -70,7 +70,6 @@ type
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
     procedure Revert; override;
-    procedure Update; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -234,16 +233,6 @@ procedure Tsvnclient.Revert;
 begin
   FReturnCode:=ExecuteCommand(FRepoExecutable+' revert --recursive ' + LocalRepository,Verbose);
 end;
-
-procedure TSVNClient.SetRepoExecutable(AValue: string);
-begin
-  if FRepoExecutable <> AValue then
-  begin
-    FRepoExecutable := AValue;
-    FindRepoExecutable; //Make sure it actually exists; use fallbacks if possible
-  end;
-end;
-
 
 procedure Tsvnclient.Update;
 const

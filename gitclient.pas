@@ -52,7 +52,6 @@ type
   protected
     function GetLocalRevision: string; override;
     function GetRepoExecutable: string; override;
-    procedure SetRepoExecutable(AValue: string); override;
   public
     procedure CheckOut; override;
     procedure CheckOutOrUpdate; override;
@@ -85,13 +84,26 @@ begin
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := FindDefaultExecutablePath(gitName);
 
+
 {$IFDEF MSWINDOWS}
+  // Git on Windows can be a .cmd file
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := FindDefaultExecutablePath(gitName+'.cmd');
+  // Git installed via msyswin
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := 'C:\msysgit\bin\'+gitname+'.exe';
   // Some popular locations for Tortoisegit:
   // Covers both 32 bit and 64 bit Windows.
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToisegit\git.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TortoiseGit\bin\git.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisegit\git.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TortoiseGit\bin\git.exe');
+  // Commandline git tools
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Git\bin\git.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Git\bin\git.exe');
+
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := (ExtractFilePath(ParamStr(0)) + 'git');
@@ -127,7 +139,6 @@ begin
 end;
 
 function TGitClient.GetRepoExecutable: string;
-//todo: replace with getrepoexecutable
 begin
   if not FileExists(FRepoExecutable) then FindRepoExecutable;
   if not FileExists(FRepoExecutable) then
@@ -137,31 +148,30 @@ begin
 end;
 
 procedure TGitClient.CheckOut;
+// SVN checkout is more or less equivalent to git clone
 const
   MaxRetries = 3;
 var
   Command: string;
-  Output: string;
+  Output: string='';
   RetryAttempt: integer;
 begin
   // Invalidate our revision number cache
   FLocalRevision:=FRET_UNKNOWN_REVISION;
 
-  //tip is similar to svn HEAD
-  // Could add --insecure to ignore certificate problems, but rather not
-  if (FDesiredRevision='') or (trim(FDesiredRevision)='tip') then
-    Command := ' clone -r tip ' + Repository + ' ' + LocalRepository
-  else
-    Command := ' clone -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,Verbose);
+  // Actual clone/checkout
+  Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
+  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose);
+  writeln('todo: debug: freturncode: ',freturncode);
+
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
-  if (ReturnCode<>0) then
+  if (FReturnCode<>0) then
   begin
-    while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+    while (FReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,Verbose); //attempt again
+      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -181,7 +191,7 @@ begin
     begin
       // Clone (first download)
       Checkout;
-      // Just to be sure, update as well (Clone may have failed without warning):
+      // If we use a desired revision, we'll need to update to that. Doesn't hurt anyway to run this command
       Update;
     end;
   end
@@ -210,37 +220,34 @@ begin
   FReturnCode:=ExecuteCommandInDir(RepoExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
 end;
 
-procedure TGitClient.SetRepoExecutable(AValue: string);
-begin
-  if FRepoExecutable <> AValue then
-  begin
-    FRepoExecutable := AValue;
-    FindRepoExecutable; //Make sure it actually exists; use fallbacks if possible
-  end;
-end;
-
 procedure TGitClient.Update;
-const
-  MaxErrorRetries = 3;
-  MaxUpdateRetries = 9;
 var
   Command: string;
-  AfterErrorRetry: integer; // Keeps track of retry attempts after error result
-  UpdateRetry: integer; // Keeps track of retry attempts to get all files
 begin
-  AfterErrorRetry := 1;
-  UpdateRetry := 1;
-
   // Invalidate our revision number cache
   FLocalRevision:=FRET_UNKNOWN_REVISION;
 
-  // Combined git pull & git update by specifying --update
-  if (FDesiredRevision='') or (trim(FDesiredRevision)='tip') then
-    Command := ' pull --update '
-  else
-    Command := ' pull --update -r ' + FDesiredRevision;
-//todo: check if this desired revision works
+  // Get updates (equivalent to git fetch and git merge)
+  // --all: fetch all remotes
+  // --strategy=theirs: overwrite any local changes
+  Command := ' pull --all --recurse-submodules=yes --strategy=theirs';
   FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+
+  if FReturnCode=0 then
+  begin
+    // Notice that the result of a merge will not be checked out in the submodule,
+    //"git submodule update" has to be called afterwards to bring the work tree up to date with the merge result.
+    Command := ' submodule update ';
+    FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+  end;
+
+  if (FReturnCode=0) and (FDesiredRevision<>'') and (uppercase(trim(FDesiredRevision))='HEAD') then
+  begin
+    // If user wants a certain revision, move back to it:
+    //todo: check if this desired revision works
+    Command := ' reset --hard '+FDesiredRevision;
+    FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+  end;
 end;
 
 procedure TGitClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
@@ -259,10 +266,11 @@ begin
     AllFilesRaw.Text := CommandOutput;
     for Counter := 0 to AllFilesRaw.Count - 1 do
     begin
-      //Some sample files (git status):
-      //M fpcup.ini
-      //123456789
-      // Also accept space in first column and entry on second column
+      { Output like (first column is a space)
+       D Aircraft/Socata-ST10/Models/Interior/Panel/Instruments/Switch/Switch.ac
+       M README
+      }
+      // Accept space in first column and entry on second column
       // Get the first character after a space in the first 2 columns:
       FileName:='';
       StatusCode:=Copy(Trim(Copy(AllFilesRaw[Counter],1,2)),1,1);
@@ -272,7 +280,9 @@ begin
       if (Copy(AllFilesRaw[Counter], SpaceAfterStatus,1)=' ') and
         ((High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes)) then
       begin
+        // Replace / with \ if on Windows:
         FileName:=(Trim(Copy(AllFilesRaw[Counter],SpaceAfterStatus,Length(AllFilesRaw[Counter]))));
+        FileName:=StringReplace(FileName,'/',DirectorySeparator,[rfReplaceAll]);
         if FileName<>'' then FileList.Add(FileName);
       end;
     end;
@@ -286,13 +296,14 @@ var
   AllFiles: TStringList;
   Output: string='';
 begin
-  //quiet: hide untracked files; only show modified/added/removed/deleted files, not clean files
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' status --modified --added --removed --deleted --quiet ',FLocalRepository,Output,Verbose);
+  // --porcelain indicate stable output;
+  // -z would indicate machine-parsable output but uses ascii 0 to terminate strings, which doesn't match ParseFileList;
+  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' status --porcelain --untracked-files=no ',FLocalRepository,Output,Verbose);
   FileList.Clear;
   AllFiles:=TStringList.Create;
   try
-    // No filter necessary; command above already preselected relevant files
-    ParseFileList(Output, AllFiles, []);
+    // Modified, Added, Deleted, Renamed
+    ParseFileList(Output, AllFiles, ['M','A','D','R']);
     FileList.AddStrings(AllFiles);
   finally
     AllFiles.Free;
@@ -300,26 +311,25 @@ begin
 end;
 
 function TGitClient.LocalRepositoryExists: boolean;
-const
-  URLLen=Length('URL: ');
 var
   Output:string='';
   URL: string;
-  URLPos: integer;
 begin
   Result := False;
-  //svn info=>git summary;
-  FReturnCode := ExecuteCommandInDir(RepoExecutable+' summary ',FLocalRepository,Output,Verbose);
-  if Pos('branch:', Output) > 0 then
+  // This will output nothing to stdout and
+  // fatal: Not a git repository (or any of the parent directories): .git
+  // to std err
+  FReturnCode := ExecuteCommandInDir(RepoExecutable+' status --porcelain ',FLocalRepository,Output,Verbose);
+  if FReturnCode=0 then
   begin
-    // There is an git repository here.
+    // There is a git repository here.
 
     // Now, repository URL might differ from the one we've set
-    // Try to find out remote repo (could also have used git paths, which gives default = https://bitbucket.org/reiniero/fpcup)
-    FReturnCode := ExecuteCommandInDir(RepoExecutable+' showconfig paths.default ',FLocalRepository,Output,Verbose);
+    // Try to find out remote repo
+    FReturnCode := ExecuteCommandInDir(RepoExecutable+' config remote.origin.url ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
-      URL:=IncludeTrailingSlash(trim(Output)); //todo: check trailing slash
+      URL:=IncludeTrailingSlash(trim(Output));
     end
     else
     begin
@@ -350,18 +360,19 @@ begin
 end;
 
 function TGitClient.GetLocalRevision: string;
-const
-  HashLength=12; //12 characters in git revision hash
 var
-  Output: string;
+  Output: string='';
 begin
   // Only update if we have invalid revision info, in order to minimize git info calls
   if FLocalRevision=FRET_UNKNOWN_REVISION then
   begin
-    FReturnCode:=ExecuteCommandInDir(RepoExecutable+' identify --id ',FLocalRepository,Output,Verbose);
+    //todo: find out:
+    // without max-count, I can get multiple entries. No idea what these mean!??
+    // alternative command: rev-parse --verify "HEAD^0" but that doesn't look as low-level ;)
+    FReturnCode:=ExecuteCommandInDir(RepoExecutable+' rev-list --max-count=1 HEAD ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
-      FLocalRevision:=copy(trim(Output),1,HashLength); //ignore any + - changed working copy - at the end of the revision
+      FLocalRevision:=trim(Output);
     end
     else
     begin

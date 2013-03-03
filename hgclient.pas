@@ -50,11 +50,11 @@ type
 
   THGClient = class(TRepoClient)
   protected
+    procedure CheckOut; override;
     function GetLocalRevision: string; override;
     function GetRepoExecutable: string; override;
-    procedure SetRepoExecutable(AValue: string); override;
+    procedure Update; override;
   public
-    procedure CheckOut; override;
     procedure CheckOutOrUpdate; override;
     function GetDiffAll:string; override;
     function FindRepoExecutable: string; override;
@@ -63,7 +63,6 @@ type
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
     procedure Revert; override;
-    procedure Update; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -127,7 +126,6 @@ begin
 end;
 
 function ThgClient.GetRepoExecutable: string;
-//todo: replace with getrepoexecutable
 begin
   if not FileExists(FRepoExecutable) then FindRepoExecutable;
   if not FileExists(FRepoExecutable) then
@@ -153,7 +151,7 @@ begin
     Command := ' clone -r tip ' + Repository + ' ' + LocalRepository
   else
     Command := ' clone -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,Verbose);
+  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (ReturnCode<>0) then
@@ -161,7 +159,7 @@ begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,Verbose); //attempt again
+      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -208,15 +206,6 @@ end;
 procedure Thgclient.Revert;
 begin
   FReturnCode:=ExecuteCommandInDir(RepoExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
-end;
-
-procedure ThgClient.SetRepoExecutable(AValue: string);
-begin
-  if FRepoExecutable <> AValue then
-  begin
-    FRepoExecutable := AValue;
-    FindRepoExecutable; //Make sure it actually exists; use fallbacks if possible
-  end;
 end;
 
 procedure Thgclient.Update;
@@ -308,7 +297,7 @@ begin
     FReturnCode := ExecuteCommandInDir(RepoExecutable+' showconfig paths.default ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
-      URL:=IncludeTrailingSlash(trim(Output)); //todo: check trailing slash
+      URL:=IncludeTrailingSlash(trim(Output));
     end
     else
     begin

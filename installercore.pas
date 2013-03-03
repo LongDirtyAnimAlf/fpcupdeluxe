@@ -5,7 +5,7 @@ unit installerCore;
 interface
 
 uses
-  Classes, SysUtils, HGClient, SvnClient, processutils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, GitClient, HGClient, SvnClient, processutils, m_crossinstaller, fpcuputil;
 
 type
 
@@ -24,6 +24,7 @@ type
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FDesiredRevision: string;
+    FGitClient: TGitClient;
     FHGClient: THGClient;
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
@@ -50,6 +51,8 @@ type
     function DownloadBinUtils: boolean;
     // Clone/update using HG; use FBaseDirectory as local repository
     function DownloadFromHG(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+    // Clone/update using Git; use FBaseDirectory as local repository
+    function DownloadFromGit(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Checkout/update using SVN; use FBaseDirectory as local repository
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
@@ -605,7 +608,7 @@ begin
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FHGClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old SVN checkout?',etinfo);
+      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etinfo);
     end;
     else
     begin
@@ -613,6 +616,68 @@ begin
       // we do the AfterRevision check as well.
       AfterRevision := 'revision '+FHGClient.LocalRevision;
       if (FHGClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FHGClient.LocalRevision) then
+        FRepositoryUpdated := true
+      else
+        FRepositoryUpdated := false;
+      Result := true;
+    end;
+  end;
+end;
+
+function TInstaller.DownloadFromGit(ModuleName: string; var BeforeRevision,
+  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+//todo: look into merging this with DownloadFromHG, DownloadFromSVN, passing a repoclient object
+var
+  BeforeRevisionShort: string; //Basically the branch revision number
+  ReturnCode: integer;
+begin
+  BeforeRevision := 'failure';
+  BeforeRevisionShort:='unknown';
+  AfterRevision := 'failure';
+  FGitClient.LocalRepository := FBaseDirectory;
+  FGitClient.Repository := FURL;
+
+  BeforeRevision := 'revision '+FGitClient.LocalRevision;
+  BeforeRevisionShort:=FGitClient.LocalRevision;
+
+  if BeforeRevisionShort<>FRET_UNKNOWN_REVISION then
+  begin
+    FGitClient.LocalModifications(UpdateWarnings); //Get list of modified files
+    if UpdateWarnings.Count > 0 then
+    begin
+      UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
+      if FKeepLocalChanges=false then
+      begin
+        CreateStoreRepositoryDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings,FGitClient);
+        UpdateWarnings.Add(ModuleName + ': reverting before updating.');
+        FGitClient.Revert; //Remove local changes
+      end
+      else
+      begin
+        UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
+      end;
+    end;
+  end;
+
+  FGitClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
+  // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
+  FGitClient.CheckOutOrUpdate;
+  ReturnCode := FGitClient.ReturnCode;
+  case ReturnCode of
+    FRET_LOCAL_REMOTE_URL_NOMATCH:
+    begin
+      FRepositoryUpdated := false;
+      Result := false;
+      writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
+      writelnlog('Local directory: ' + FGitClient.LocalRepository, true);
+      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etinfo);
+    end;
+    else
+    begin
+      // For now, assume it worked even with non-zero result code. We can because
+      // we do the AfterRevision check as well.
+      AfterRevision := 'revision '+FGitClient.LocalRevision;
+      if (FGitClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FGitClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
@@ -673,7 +738,7 @@ begin
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FSVNClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old SVN checkout?',etinfo);
+      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etinfo);
     end;
     else
     begin
@@ -878,6 +943,7 @@ begin
   inherited Create;
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
+  FGitClient := TGitClient.Create;
   FHGClient := THGClient.Create;
   FSVNClient := TSVNClient.Create;
   // List of binutils that can be downloaded:
@@ -893,6 +959,7 @@ begin
   if Assigned(FBinUtils) then
     FBinUtils.Free;
   ProcessEx.Free;
+  FGitClient.Free;
   FHGClient.Free;
   FSVNClient.Free;
   if Assigned(FLogVerbose) then
