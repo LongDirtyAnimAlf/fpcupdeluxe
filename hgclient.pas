@@ -57,6 +57,16 @@ type
     function GetRepoExecutable: string; override;
     procedure SetRepoExecutable(AValue: string); override;
   public
+    procedure CheckOut; override;
+    procedure CheckOutOrUpdate; override;
+    function GetDiffAll:string; override;
+    function FindRepoExecutable: string; override;
+    procedure LocalModifications(var FileList: TStringList); override;
+    function LocalRepositoryExists: boolean; override;
+    procedure Log(var Log: TStringList); override;
+    procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
+    procedure Revert; override;
+    procedure Update; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -122,35 +132,11 @@ end;
 function ThgClient.GetRepoExecutable: string;
 //todo: replace with getrepoexecutable
 begin
-  if not FileExists(FRepoExecutable) then FindhgExecutable;
+  if not FileExists(FRepoExecutable) then FindRepoExecutable;
   if not FileExists(FRepoExecutable) then
     Result:=''
   else
     Result := FRepoExecutable;
-end;
-
-
-procedure ThgClient.SetDesiredRevision(AValue: string);
-begin
-  if FDesiredRevision=AValue then Exit;
-  FDesiredRevision:=AValue;
-end;
-
-procedure ThgClient.SetLocalRepository(AValue: string);
-// Sets local repository, converting relative path to absolute path
-// and adding a trailing / or \
-begin
-  if FLocalRepository=AValue then Exit;
-  FLocalRepository:=ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
-end;
-
-procedure ThgClient.SetRepositoryURL(AValue: string);
-// Make sure there's a trailing / in the URL.
-// This normalization helps matching remote and local URLs
-begin
-  if FRepositoryURL=AValue then Exit;
-  //todo: hg uses non trailing slash; check how we deal with that
-  FRepositoryURL:=IncludeTrailingSlash(AValue);
 end;
 
 procedure Thgclient.CheckOut;
@@ -170,7 +156,7 @@ begin
     Command := ' clone -r tip ' + Repository + ' ' + LocalRepository
   else
     Command := ' clone -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(hgExecutable+Command,Output,Verbose);
+  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (ReturnCode<>0) then
@@ -178,7 +164,7 @@ begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(hgExecutable+Command,Output,Verbose); //attempt again
+      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,Verbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -211,20 +197,20 @@ end;
 
 function ThgClient.GetDiffAll:string;
 begin
-  FReturnCode:=ExecuteCommandInDir(hgExecutable+' diff --git ',LocalRepository,Result,Verbose);
+  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' diff --git ',LocalRepository,Result,Verbose);
 end;
 
 procedure Thgclient.Log(var Log: TStringList);
 var
   s:string='';
 begin
-  FReturnCode:=ExecuteCommandInDir(hgExecutable+' log ',LocalRepository,s,Verbose);
+  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' log ',LocalRepository,s,Verbose);
   Log.Text:=s;
 end;
 
 procedure Thgclient.Revert;
 begin
-  FReturnCode:=ExecuteCommandInDir(hgExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
+  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
 end;
 
 procedure ThgClient.SetRepoExecutable(AValue: string);
@@ -232,14 +218,8 @@ begin
   if FRepoExecutable <> AValue then
   begin
     FRepoExecutable := AValue;
-    FindhgExecutable; //Make sure it actually exists; use fallbacks if possible
+    FindRepoExecutable; //Make sure it actually exists; use fallbacks if possible
   end;
-end;
-
-procedure ThgClient.SetVerbose(AValue: boolean);
-begin
-  if FVerbose=AValue then Exit;
-  FVerbose:=AValue;
 end;
 
 procedure Thgclient.Update;
@@ -263,7 +243,7 @@ begin
   else
     Command := ' pull --update -r ' + FDesiredRevision;
 //todo: check if this desired revision works
-  FReturnCode:=ExecuteCommandInDir(hgExecutable+command,FLocalRepository,Verbose);
+  FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
 end;
 
 procedure ThgClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
@@ -310,7 +290,7 @@ var
   Output: string='';
 begin
   //quiet: hide untracked files; only show modified/added/removed/deleted files, not clean files
-  FReturnCode:=ExecuteCommandInDir(hgExecutable+' status --modified --added --removed --deleted --quiet ',FLocalRepository,Output,Verbose);
+  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' status --modified --added --removed --deleted --quiet ',FLocalRepository,Output,Verbose);
   FileList.Clear;
   AllFiles:=TStringList.Create;
   try
@@ -332,14 +312,14 @@ var
 begin
   Result := False;
   //svn info=>hg summary;
-  FReturnCode := ExecuteCommandInDir(hgExecutable+' summary ',FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommandInDir(RepoExecutable+' summary ',FLocalRepository,Output,Verbose);
   if Pos('branch:', Output) > 0 then
   begin
     // There is an hg repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo (could also have used hg paths, which gives default = https://bitbucket.org/reiniero/fpcup)
-    FReturnCode := ExecuteCommandInDir(hgExecutable+' showconfig paths.default ',FLocalRepository,Output,Verbose);
+    FReturnCode := ExecuteCommandInDir(RepoExecutable+' showconfig paths.default ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
       URL:=IncludeTrailingSlash(trim(Output)); //todo: check trailing slash
@@ -381,7 +361,7 @@ begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
   if FLocalRevision=FRET_UNKNOWN_REVISION then
   begin
-    FReturnCode:=ExecuteCommandInDir(hgExecutable+' identify --id ',FLocalRepository,Output,Verbose);
+    FReturnCode:=ExecuteCommandInDir(RepoExecutable+' identify --id ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
       FLocalRevision:=copy(trim(Output),1,HashLength); //ignore any + - changed working copy - at the end of the revision
@@ -396,13 +376,7 @@ end;
 
 constructor Thgclient.Create;
 begin
-  FLocalRepository := '';
-  FRepositoryURL := '';
-  FDesiredRevision:='';
-  FLocalRevision:=FRET_UNKNOWN_REVISION;
-  FReturnCode := 0;
-  FRepoExecutable := '';
-  FindhgExecutable; //Do this now so hopefully the hgExecutable property is valid.
+  inherited Create;
 end;
 
 destructor Thgclient.Destroy;

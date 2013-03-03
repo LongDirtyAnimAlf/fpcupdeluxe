@@ -200,9 +200,9 @@ begin
   // Setup compiler exe:
   ProcessEx.Environment.SetVar('ISCC','"'+FInnoSetupCompiler+'"');
   // SVN executable:
-  ProcessEx.Environment.SetVar('SVN','"'+FSVNClient.SVNExecutable+'"');
+  ProcessEx.Environment.SetVar('SVN','"'+FSVNClient.RepoExecutable+'"');
   // svnversion exe:
-  ProcessEx.Environment.SetVar('SVNVER','"'+ExtractFilePath(FSVNClient.SVNExecutable)+'svnversion'+GetExeExt+'"');
+  ProcessEx.Environment.SetVar('SVNVER','"'+ExtractFilePath(FSVNClient.RepoExecutable)+'svnversion'+GetExeExt+'"');
 
   // Provide this dir without quotes; may work with them but output looks weird
   ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));

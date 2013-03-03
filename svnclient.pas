@@ -59,10 +59,18 @@ type
     function GetRepoExecutable: string; override;
     procedure SetRepoExecutable(AValue: string); override;
   public
-    //Search for installed SVN executable (might return just a filename if in the OS path)
+    procedure CheckOut; override;
+    procedure CheckOutOrUpdate; override;
     function FindRepoExecutable: string; override;
+    function GetDiffAll:string; override;
+    procedure LocalModifications(var FileList: TStringList); override;
+    function LocalRepositoryExists: boolean; override;
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
     property LocalRevisionWholeRepo: string read GetLocalRevisionWholeRepo;
+    procedure Log(var Log: TStringList); override;
+    procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
+    procedure Revert; override;
+    procedure Update; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -158,7 +166,7 @@ begin
     Command := ' checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
   else
     Command := ' checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(SVNExecutable+Command,Output,Verbose);
+  FReturnCode:=ExecuteCommand(FRepoExecutable+Command,Output,Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (ReturnCode<>0) then
@@ -172,13 +180,13 @@ begin
       }
       begin
         // Let's try one time to fix it.
-        FReturnCode:=ExecuteCommand(SVNExecutable+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+        FReturnCode:=ExecuteCommand(FRepoExecutable+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
         // We probably ended up with a local repository where not all files were checked out.
         // Let's call update to do so.
         Update;
       end;
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(SVNExecutable+Command,Output,Verbose); //attempt again
+      FReturnCode:=ExecuteCommand(FRepoExecutable+Command,Output,Verbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -211,20 +219,20 @@ end;
 
 function TSVNClient.GetDiffAll:string;
 begin
-  FReturnCode:=ExecuteCommand(SVNExecutable+' diff ' + LocalRepository,Result,Verbose);
+  FReturnCode:=ExecuteCommand(FRepoExecutable+' diff ' + LocalRepository,Result,Verbose);
 end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
 var
   s:string='';
 begin
-  FReturnCode:=ExecuteCommand(SVNExecutable+' log ' + LocalRepository,s,Verbose);
+  FReturnCode:=ExecuteCommand(FRepoExecutable+' log ' + LocalRepository,s,Verbose);
   Log.Text:=s;
 end;
 
 procedure Tsvnclient.Revert;
 begin
-  FReturnCode:=ExecuteCommand(SVNExecutable+' revert --recursive ' + LocalRepository,Verbose);
+  FReturnCode:=ExecuteCommand(FRepoExecutable+' revert --recursive ' + LocalRepository,Verbose);
 end;
 
 procedure TSVNClient.SetRepoExecutable(AValue: string);
@@ -264,7 +272,7 @@ begin
   try
     // On Windows, at least certain SVN versions don't update everything.
     // So we try until there are no more files downloaded.
-    FReturnCode:=ExecuteCommand(SVNExecutable+command,Output,Verbose);
+    FReturnCode:=ExecuteCommand(FRepoExecutable+command,Output,Verbose);
 
     FileList.Clear;
     ParseFileList(Output, FileList, []);
@@ -282,10 +290,10 @@ begin
         }
         begin
           // Let's try to release locks.
-          FReturnCode:=ExecuteCommand(SVNExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+          FReturnCode:=ExecuteCommand(FRepoExecutable+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
         end;
         Sleep(500); //Give everybody a chance to relax ;)
-        FReturnCode:=ExecuteCommand(SVNExecutable+command,Verbose); //attempt again
+        FReturnCode:=ExecuteCommand(FRepoExecutable+command,Verbose); //attempt again
         AfterErrorRetry := AfterErrorRetry + 1;
       end;
       UpdateRetry := UpdateRetry + 1;
@@ -342,7 +350,7 @@ var
   AllFiles: TStringList;
   Output: string='';
 begin
-  FReturnCode:=ExecuteCommand(SVNExecutable+' status --depth infinity '+FLocalRepository,Output,Verbose);
+  FReturnCode:=ExecuteCommand(FRepoExecutable+' status --depth infinity '+FLocalRepository,Output,Verbose);
   FileList.Clear;
   AllFiles:=TStringList.Create;
   try
@@ -363,7 +371,7 @@ var
   URLPos: integer;
 begin
   Result := False;
-  FReturnCode := ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommand(FRepoExecutable+' info ' + FLocalRepository,Output,Verbose);
   //This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then
@@ -414,7 +422,7 @@ begin
   // Only update if we have invalid revision info, in order to minimize svn info calls
   if (FLocalRevision=FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo=FRET_UNKNOWN_REVISION) then
   begin
-    FReturnCode:=ExecuteCommand(SVNExecutable+' info ' + FLocalRepository,Output,Verbose);
+    FReturnCode:=ExecuteCommand(FRepoExecutable+' info ' + FLocalRepository,Output,Verbose);
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision:"...
     // unless we're in a branch/tag where we need "Last Changed Rev: "
@@ -480,14 +488,7 @@ end;
 
 constructor Tsvnclient.Create;
 begin
-  FLocalRepository := '';
-  FRepositoryURL := '';
-  FDesiredRevision:='';
-  FLocalRevision:=FRET_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
-  FReturnCode := 0;
-  FRepoExecutable := '';
-  FindRepoExecutable; //Do this now so hopefully the SVNExecutable property is valid.
+  inherited Create;
 end;
 
 destructor Tsvnclient.Destroy;

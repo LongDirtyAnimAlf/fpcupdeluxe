@@ -246,7 +246,7 @@ begin
     if OperationSucceeded then
     begin
       // Look for SVN executable and set it if found:
-      if FSVNClient.FindSVNExecutable = '' then
+      if FSVNClient.FindRepoExecutable = '' then
       begin
         {$IFDEF MSWINDOWS}
         // Make sure we have a sensible default.
@@ -258,7 +258,7 @@ begin
         FindSVNSubDirs;
         {$IFDEF MSWINDOWS}
         // If it still can't be found, download it
-        if FSVNClient.SVNExecutable = '' then
+        if FSVNClient.RepoExecutable = '' then
         begin
           infoln('Going to download SVN',etinfo);
           // Download will look in and below FSVNDirectory
@@ -268,7 +268,7 @@ begin
         {$ENDIF}
 
         // Regardless of platform, SVN should now be either set up correctly or we should give up.
-        if FSVNClient.SVNExecutable = '' then
+        if FSVNClient.RepoExecutable = '' then
         begin
           infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
           OperationSucceeded := false;
@@ -776,7 +776,7 @@ begin
     if SVNFiles.Count > 0 then
     begin
       // Just get first result.
-      FSVNClient.SVNExecutable := SVNFiles.Strings[0];
+      FSVNClient.RepoExecutable := SVNFiles.Strings[0];
       OperationSucceeded := true;
     end
     else

@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="18">
+    <Units Count="19">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -266,6 +266,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="repoclient"/>
       </Unit17>
+      <Unit18>
+        <Filename Value="gitclient.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="gitclient"/>
+      </Unit18>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
