@@ -1,8 +1,5 @@
-{ Classes for using git commands
+{ Classes for using git commands, based on git and svn classes
   Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
-
-  Based on svncommand unit
-  Copyright (C) 2007 Vincent Snijders vincents@freepascal.org,
 
   This library is free software; you can redistribute it and/or modify it
   under the terms of the GNU Library General Public License as published by
@@ -48,7 +45,7 @@ const
   FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
 
 type
-  EGitClientError = class(Exception);
+  EGitClientError = class(ERepoClientError);
   { TGitClient }
 
   TGitClient = class(TRepoClient)
@@ -73,8 +70,8 @@ type
 
 
 implementation
-uses strutils, regexpr;
 
+uses strutils;
 
 { TGitClient }
 function TGitClient.FindRepoExecutable: string;

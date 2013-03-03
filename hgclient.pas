@@ -1,9 +1,6 @@
 { Classes for using mercurial/hg commands
   Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
 
-  Based on svncommand unit
-  Copyright (C) 2007 Vincent Snijders vincents@freepascal.org,
-
   This library is free software; you can redistribute it and/or modify it
   under the terms of the GNU Library General Public License as published by
   the Free Software Foundation; either version 2 of the License, or (at your
@@ -48,7 +45,7 @@ const
   FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
 
 type
-  EHGClientError = class(Exception);
+  EHGClientError = class(ERepoClientError);
   { ThgClient }
 
   THGClient = class(TRepoClient)
@@ -73,7 +70,7 @@ type
 
 
 implementation
-uses strutils, regexpr;
+uses strutils;
 
 
 { ThgClient }
@@ -144,7 +141,7 @@ const
   MaxRetries = 3;
 var
   Command: string;
-  Output: string;
+  Output: string='';
   RetryAttempt: integer;
 begin
   // Invalidate our revision number cache
@@ -223,17 +220,9 @@ begin
 end;
 
 procedure Thgclient.Update;
-const
-  MaxErrorRetries = 3;
-  MaxUpdateRetries = 9;
 var
   Command: string;
-  AfterErrorRetry: integer; // Keeps track of retry attempts after error result
-  UpdateRetry: integer; // Keeps track of retry attempts to get all files
 begin
-  AfterErrorRetry := 1;
-  UpdateRetry := 1;
-
   // Invalidate our revision number cache
   FLocalRevision:=FRET_UNKNOWN_REVISION;
 
@@ -303,12 +292,9 @@ begin
 end;
 
 function Thgclient.LocalRepositoryExists: boolean;
-const
-  URLLen=Length('URL: ');
 var
   Output:string='';
   URL: string;
-  URLPos: integer;
 begin
   Result := False;
   //svn info=>hg summary;
@@ -356,7 +342,7 @@ function ThgClient.GetLocalRevision: string;
 const
   HashLength=12; //12 characters in hg revision hash
 var
-  Output: string;
+  Output: string='';
 begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
   if FLocalRevision=FRET_UNKNOWN_REVISION then

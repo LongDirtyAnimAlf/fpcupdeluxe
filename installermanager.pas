@@ -66,7 +66,7 @@ Const
     'End;'+
 //default sequence for win64
 {todo: win64 sequence currently not enabled; see
-{$elseif defined(win64)}
+$elseif defined(win64)
 below}
     'Declare defaultwin64;'+
     'Do fpc;'+

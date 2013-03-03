@@ -42,6 +42,7 @@ const
   FRET_UNKNOWN_REVISION='FRET_UNKNOWN_REVISION';
 
 type
+  ERepoClientError = class(Exception);
 
   { TRepoClient }
 

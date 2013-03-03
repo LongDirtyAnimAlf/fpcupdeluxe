@@ -47,7 +47,7 @@ const
   FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
 
 type
-  ESVNClientError = class(Exception);
+  ESVNClientError = class(ERepoClientError);
   { TSVNClient }
 
   TSVNClient = class(TRepoClient)
