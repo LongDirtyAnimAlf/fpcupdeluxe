@@ -122,22 +122,18 @@ begin
 
   if FileExists(FRepoExecutable) then
   begin
-    // Check for valid git executable; note: on Windows we have to quote otherwise paths with spaces and git.cmd will get mangled
-  {$IFDEF MSWINDOWS}
-    if ExecuteCommand('"'+FRepoExecutable + '" --version',Verbose) <> 0 then
-  {$ELSE}
-    if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
-  {$ENDIF}
+    // Check for valid git executable:
+    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+ ' --version',Verbose) <> 0 then
     begin
       // File exists, but is not a valid git client
-      FRepoExecutable := EmptyStr;
+      FRepoExecutable := '';
     end;
   end
   else
   begin
     // File does not exist
     // Make sure we don't call an arbitrary executable:
-    FRepoExecutable := EmptyStr;
+    FRepoExecutable := '';
   end;
   Result := FRepoExecutable;
 end;
@@ -207,20 +203,20 @@ end;
 
 function TGitClient.GetDiffAll:string;
 begin
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' diff --git ',LocalRepository,Result,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' diff --git ',LocalRepository,Result,Verbose);
 end;
 
 procedure TGitClient.Log(var Log: TStringList);
 var
   s:string='';
 begin
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' log ',LocalRepository,s,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' log ',LocalRepository,s,Verbose);
   Log.Text:=s;
 end;
 
 procedure TGitClient.Revert;
 begin
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' revert --all --no-backup ',LocalRepository,Verbose);
 end;
 
 procedure TGitClient.Update;
@@ -234,14 +230,14 @@ begin
   // --all: fetch all remotes
   // --strategy=theirs: overwrite any local changes
   Command := ' pull --all --recurse-submodules=yes --strategy=theirs';
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+command,FLocalRepository,Verbose);
 
   if FReturnCode=0 then
   begin
     // Notice that the result of a merge will not be checked out in the submodule,
     //"git submodule update" has to be called afterwards to bring the work tree up to date with the merge result.
     Command := ' submodule update ';
-    FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+    FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+command,FLocalRepository,Verbose);
   end;
 
   if (FReturnCode=0) and (FDesiredRevision<>'') and (uppercase(trim(FDesiredRevision))='HEAD') then
@@ -249,7 +245,7 @@ begin
     // If user wants a certain revision, move back to it:
     //todo: check if this desired revision works
     Command := ' reset --hard '+FDesiredRevision;
-    FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+    FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+command,FLocalRepository,Verbose);
   end;
 end;
 
@@ -301,7 +297,7 @@ var
 begin
   // --porcelain indicate stable output;
   // -z would indicate machine-parsable output but uses ascii 0 to terminate strings, which doesn't match ParseFileList;
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' status --porcelain --untracked-files=no ',FLocalRepository,Output,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' status --porcelain --untracked-files=no ',FLocalRepository,Output,Verbose);
   FileList.Clear;
   AllFiles:=TStringList.Create;
   try
@@ -322,14 +318,14 @@ begin
   // This will output nothing to stdout and
   // fatal: Not a git repository (or any of the parent directories): .git
   // to std err
-  FReturnCode := ExecuteCommandInDir(RepoExecutable+' status --porcelain ',FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' status --porcelain ',FLocalRepository,Output,Verbose);
   if FReturnCode=0 then
   begin
     // There is a git repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo
-    FReturnCode := ExecuteCommandInDir(RepoExecutable+' config remote.origin.url ',FLocalRepository,Output,Verbose);
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' config remote.origin.url ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
       URL:=IncludeTrailingSlash(trim(Output));
@@ -372,7 +368,7 @@ begin
     //todo: find out:
     // without max-count, I can get multiple entries. No idea what these mean!??
     // alternative command: rev-parse --verify "HEAD^0" but that doesn't look as low-level ;)
-    FReturnCode:=ExecuteCommandInDir(RepoExecutable+' rev-list --max-count=1 HEAD ',FLocalRepository,Output,Verbose);
+    FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' rev-list --max-count=1 HEAD ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
       FLocalRevision:=trim(Output);

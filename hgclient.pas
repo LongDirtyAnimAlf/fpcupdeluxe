@@ -109,22 +109,18 @@ begin
 
   if FileExists(FRepoExecutable) then
   begin
-    // Check for valid hg executable - note we may need quoting on Windows for paths with spaces
-    {$IFDEF MSWINDOWS}
-    if ExecuteCommand('"'+FRepoExecutable + '" --version',Verbose) <> 0 then
-    {$ELSE}
-    if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
-    {$ENDIF}
+    // Check for valid hg executable
+    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+ ' --version',Verbose) <> 0 then
     begin
       // File exists, but is not a valid hg client
-      FRepoExecutable := EmptyStr;
+      FRepoExecutable := '';
     end;
   end
   else
   begin
     // File does not exist
     // Make sure we don't call an arbitrary executable:
-    FRepoExecutable := EmptyStr;
+    FRepoExecutable := '';
   end;
   Result := FRepoExecutable;
 end;
@@ -196,20 +192,20 @@ end;
 
 function ThgClient.GetDiffAll:string;
 begin
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' diff --git ',LocalRepository,Result,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' diff --git ',LocalRepository,Result,Verbose);
 end;
 
 procedure Thgclient.Log(var Log: TStringList);
 var
   s:string='';
 begin
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' log ',LocalRepository,s,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' log ',LocalRepository,s,Verbose);
   Log.Text:=s;
 end;
 
 procedure Thgclient.Revert;
 begin
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' revert --all --no-backup ',LocalRepository,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' revert --all --no-backup ',LocalRepository,Verbose);
 end;
 
 procedure Thgclient.Update;
@@ -225,7 +221,7 @@ begin
   else
     Command := ' pull --update -r ' + FDesiredRevision;
 //todo: check if this desired revision works
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+command,FLocalRepository,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+command,FLocalRepository,Verbose);
 end;
 
 procedure ThgClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
@@ -272,7 +268,7 @@ var
   Output: string='';
 begin
   //quiet: hide untracked files; only show modified/added/removed/deleted files, not clean files
-  FReturnCode:=ExecuteCommandInDir(RepoExecutable+' status --modified --added --removed --deleted --quiet ',FLocalRepository,Output,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' status --modified --added --removed --deleted --quiet ',FLocalRepository,Output,Verbose);
   FileList.Clear;
   AllFiles:=TStringList.Create;
   try
@@ -291,14 +287,14 @@ var
 begin
   Result := False;
   //svn info=>hg summary;
-  FReturnCode := ExecuteCommandInDir(RepoExecutable+' summary ',FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' summary ',FLocalRepository,Output,Verbose);
   if Pos('branch:', Output) > 0 then
   begin
     // There is an hg repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo (could also have used hg paths, which gives default = https://bitbucket.org/reiniero/fpcup)
-    FReturnCode := ExecuteCommandInDir(RepoExecutable+' showconfig paths.default ',FLocalRepository,Output,Verbose);
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' showconfig paths.default ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
       URL:=IncludeTrailingSlash(trim(Output));
@@ -340,7 +336,7 @@ begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
   if FLocalRevision=FRET_UNKNOWN_REVISION then
   begin
-    FReturnCode:=ExecuteCommandInDir(RepoExecutable+' identify --id ',FLocalRepository,Output,Verbose);
+    FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' identify --id ',FLocalRepository,Output,Verbose);
     if FReturnCode=0 then
     begin
       FLocalRevision:=copy(trim(Output),1,HashLength); //ignore any + - changed working copy - at the end of the revision

@@ -58,6 +58,8 @@ type
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut; virtual;
+    // Double quotes unquoted filenames if on Windows. Useful before running commands
+    function DoubleQuoteIfNeeded(FileName: string): string;
     function GetLocalRevision: string; virtual;
     function GetRepoExecutable: string; virtual;
     // Makes sure non-empty strings have a / at the end.
@@ -173,6 +175,17 @@ procedure TRepoClient.SetVerbose(AValue: boolean);
 begin
   if FVerbose=AValue then Exit;
   FVerbose:=AValue;
+end;
+
+function TRepoClient.DoubleQuoteIfNeeded(FileName: string): string;
+begin
+  {$IFDEF MSWINDOWS}
+  // Unfortunately, we need to double quote in case there's spaces in the path and it's e.g. a .cmd file
+  if Copy(FileName, 1, 1)<>'"' then
+    result:='"'+FileName+'"';
+  {$ELSE}
+  result:=filename;
+  {$ENDIF}
 end;
 
 procedure TRepoClient.CheckOut;
