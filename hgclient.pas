@@ -109,8 +109,12 @@ begin
 
   if FileExists(FRepoExecutable) then
   begin
-    // Check for valid hg executable
+    // Check for valid hg executable - note we may need quoting on Windows for paths with spaces
+    {$IFDEF MSWINDOWS}
+    if ExecuteCommand('"'+FRepoExecutable + '" --version',Verbose) <> 0 then
+    {$ELSE}
     if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
+    {$ENDIF}
     begin
       // File exists, but is not a valid hg client
       FRepoExecutable := EmptyStr;

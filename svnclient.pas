@@ -122,8 +122,12 @@ begin
 
   if FileExists(FRepoExecutable) then
   begin
-    // Check for valid svn executable
+    // Check for valid svn executable; note on Windows we may need quoting for paths with spaces
+    {$IFDEF MSWINDOWS}
+    if ExecuteCommand('"'+FRepoExecutable + '" --version',Verbose) <> 0 then
+    {$ELSE}
     if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
+    {$ENDIF}
     begin
       // File exists, but is not a valid svn client
       FRepoExecutable := EmptyStr;

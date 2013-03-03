@@ -122,8 +122,12 @@ begin
 
   if FileExists(FRepoExecutable) then
   begin
-    // Check for valid git executable
+    // Check for valid git executable; note: on Windows we have to quote otherwise paths with spaces and git.cmd will get mangled
+  {$IFDEF MSWINDOWS}
+    if ExecuteCommand('"'+FRepoExecutable + '" --version',Verbose) <> 0 then
+  {$ELSE}
     if ExecuteCommand(FRepoExecutable+ ' --version',Verbose) <> 0 then
+  {$ENDIF}
     begin
       // File exists, but is not a valid git client
       FRepoExecutable := EmptyStr;
