@@ -737,6 +737,8 @@ begin
 
     // Handle Git URLs
     RemoteURL:=GetValue('GITURL',sl);
+    {todo: handle branches (e.g. tiopf doesn't use master branch), perhaps a space after the url and then branch name?
+    Similar construction could be used for hg. Suggest leaving svn as is}
     if RemoteURL<>'' then
       begin
       UpdateWarnings:=TStringList.Create;
