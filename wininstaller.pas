@@ -59,8 +59,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 interface
 
+{$IFDEF MSWINDOWS}
+// for now, keep this Windows-only (should still run on Wine)
 uses
-  Classes, SysUtils, installerCore {$IFDEF MSWINDOWS},registry{$ENDIF}, FileUtil {Requires LCL}, fpcuputil;
+  Classes, SysUtils, installerCore,registry, FileUtil {Requires LCL}, fpcuputil;
 
 type
 
@@ -93,8 +95,10 @@ type
     constructor Create(InstallDirectory, FPCCompiler: string; Verbosity: boolean);
     destructor Destroy; override;
   end;
+{$ENDIF MSWINDOWS}
 
 implementation
+{$IFDEF MSWINDOWS}
 
 const
   ClassName = 'TWinInstaller';
@@ -111,6 +115,7 @@ var
   CompileCommand: string='';
   ProgramFiles: string;
   ProgramFilesx86: string;
+
   Registry: TRegistry;
 begin
   ProgramFiles:=GetEnvironmentVariable('ProgramFiles');
@@ -267,6 +272,6 @@ destructor TWinInstaller.Destroy;
 begin
   inherited Destroy;
 end;
-
+{$ENDIF MSWINDOWS}
 end.
 
