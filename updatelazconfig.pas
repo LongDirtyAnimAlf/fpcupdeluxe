@@ -169,7 +169,7 @@ begin
   if PathToAdd<>'' then
   begin
     // Normalize path so we can compare:
-    CleanedPath:=ExcludeLeadingPathDelimiter(ExpandFileName(PathToAdd));
+    CleanedPath:=ExcludeTrailingPathDelimiter(ExpandFileName(PathToAdd));
     FoundIt:=false;
     xmlfile:=EnvironmentConfig;
     key:='EnvironmentOptions/LazDoc/Paths';

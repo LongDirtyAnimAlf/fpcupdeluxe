@@ -584,6 +584,7 @@ begin
         StaticPackages.Add('dbflaz,');
         StaticPackages.Add('printer4lazarus,');
         StaticPackages.Add('sdflaz,');
+        StaticPackages.Add(''); //empty line at end occurs in my installed Lazarus
         StaticPackages.SaveToFile(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile);
       finally
         StaticPackages.Free;
