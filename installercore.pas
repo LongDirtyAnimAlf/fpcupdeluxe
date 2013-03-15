@@ -150,7 +150,12 @@ begin
     {$IFDEF MSWINDOWS}
     FMake := IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt;
     {$ELSE}
+    {$IF defined(BSD) and not defined(DARWIN)}
+    FMake := 'gmake'; //GNU make; assume in path
+    {$else}
+    // Linux, OSX
     FMake := 'make'; //assume in path
+    {$ENDIF}
     {$ENDIF MSWINDOWS}
   Result := FMake;
 end;

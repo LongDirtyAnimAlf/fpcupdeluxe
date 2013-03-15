@@ -267,7 +267,16 @@ begin
           FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
           FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
+      {$IF (defined(BSD)) and (not defined(Darwin))}
+      //todo: check for other BSDs
       FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
+      if pos(FInstaller.FPCOPT,'-Fl/usr/local/lib/')<0 then
+      begin
+        writeln('FreeBSD needs -Fl/usr/local/lib in OPT; adding it. For details, see '+LineEnding+
+          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
+        FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
+      end;
+      {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
       bHelp:=Options.GetOptionNoParam('h','help',false);
       FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
