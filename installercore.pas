@@ -186,9 +186,8 @@ begin
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     {$ENDIF LINUX}
     {$IFDEF BSD} //Includes FreeBSD, NetBSD, OpenBSD
-    //todo: freebsd: check
     FBunzip2 := 'bunzip2';
-    FTar := 'gnutar'; //check if available
+    FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     {$ENDIF BSD}
     {$IFDEF DARWIN}
