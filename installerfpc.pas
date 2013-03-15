@@ -478,6 +478,32 @@ begin
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
   end;
   {$ENDIF LINUX}
+  {$IFDEF BSD} //Includes FreeBSD, OpenBSD, NetBSD
+  //todo: test parameters
+  //Extract bz2, overwriting without prompting
+  if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
+    begin
+      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
+      OperationSucceeded := False;
+    end
+    else
+    begin
+      ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
+      OperationSucceeded := True; // Spelling it out can't hurt sometimes
+    end;
+  // Move compiler to proper directory; note bzip2 will append .out to file
+  if OperationSucceeded = True then
+  begin
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etinfo);
+    OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
+  end;
+  if OperationSucceeded then
+  begin
+    //Make executable
+    OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
+  end;
+  {$ENDIF BSD}
   {$IFDEF DARWIN}
   CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract .tar.bz2, overwriting without prompting
@@ -537,8 +563,10 @@ end;
 
 function TFPCInstaller.InitModule:boolean;
 const
-  // Common path used to get bootstrap compilers
+  // Common path used to get bootstrap compilers.
+  //todo: replace when enough compilers are available via 2.6.2
   FTPPath='ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
+  FTP262Path='ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
 var
   BootstrapVersion: string;
   Output: string;
@@ -596,6 +624,38 @@ begin
       FBootstrapCompilerURL := FTPPath+'universal-darwin-ppcuniversal.tar.bz2';
     FTrunkBootstrapCompiler:=false;
     {$ENDIF Darwin}
+    {$IFDEF FREEBSD}
+    {$IFDEF CPU386}
+    // Assuming user has FreeBSD 9...
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL := FTP262Path+'i386-freebsd9-ppc386.bz2';
+    {$ENDIF CPU386}
+    {$IFDEF CPUX86_64}
+    // Assuming user has FreeBSD 9...
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL := FTP262Path+'x86_64-freebsd9.ppcx64.bz2';
+    {$ENDIF CPUX86_64}
+    {$ENDIF FREEBSD}
+    {$IFDEF NETBSD}
+    {$IFDEF CPU386}
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL := FTP262Path+'i386-netbsd-ppc386.bz2';
+    {$ENDIF CPU386}
+    {$IFDEF CPUX86_64}
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL := FTP262Path+'x86_64-netbsd-ppcx64.bz2';
+    {$ENDIF CPUX86_64}
+    {$ENDIF NETBSD}
+    {$IFDEF OPENBSD}
+    {$IFDEF CPU386}
+    // No bootstrap compiler available
+    raise Exception.Create('No bootstrap compiler available for this operating system.');
+    {$ENDIF CPU386}
+    {$IFDEF CPUX86_64}
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL := FTP262Path+'x86_64-openbsd-ppcx64.bz2';
+    {$ENDIF CPUX86_64}
+    {$ENDIF OPENBSD}
     end;
   // Only download bootstrap compiler if we can't find a valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then

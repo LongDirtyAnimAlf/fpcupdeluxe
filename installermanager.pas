@@ -554,11 +554,11 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       {$ELSE}
       CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ENDIF DARWIN}
-      {$IFDEF LINUX}
+      {$IF (defined(LINUX)) or (defined(BSD))}
       // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
       CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
       CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
-      {$ENDIF LINUX}
+      {$ENDIF (defined(LINUX)) or (defined(BSD))}
       {$ENDIF UNIX}
     finally
       //Ignore problems creating shortcut
@@ -855,7 +855,7 @@ var
   line,key,param:string;
   i:integer;
   instr:TKeyword;
-  sequencename:string;
+  sequencename:string='';
 
   function KeyStringToKeyword(Key:string):TKeyword;
 

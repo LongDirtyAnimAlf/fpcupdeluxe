@@ -180,6 +180,12 @@ begin
     FTar := 'tar';
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     {$ENDIF LINUX}
+    {$IFDEF BSD} //Includes FreeBSD, NetBSD, OpenBSD
+    //todo: freebsd: check
+    FBunzip2 := 'bunzip2';
+    FTar := 'gnutar'; //check if available
+    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    {$ENDIF BSD}
     {$IFDEF DARWIN}
     FBunzip2 := ''; //not really necessary now
     FTar := 'gnutar'; //gnutar can decompress as well; bsd tar can't
@@ -296,6 +302,7 @@ begin
         { Used to use bunzip2 --version, but on e.g. Fedora Core
         that returns an error message e.g. can't read from cp
         }
+        //todo: freebsd check parameter works
         OperationSucceeded := CheckExecutable(FBunzip2, '--help', '');
       end;
     end;
