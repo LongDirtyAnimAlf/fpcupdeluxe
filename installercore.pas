@@ -174,8 +174,8 @@ begin
     // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
     {$IFDEF MSWINDOWS}
     // Need to do it here so we can pick up make path.
-    FBunzip2 := EmptyStr;
-    FTar := EmptyStr;
+    FBunzip2 := '';
+    FTar := '';
     // By doing this, we expect unzip.exe to be in the binutils dir.
     // This is safe to do because it is included in the FPC binutils.
     FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + GetExeExt;
@@ -293,9 +293,20 @@ begin
     if OperationSucceeded then
     begin
       // Check for valid unzip executable, if it is needed
-      if FUnzip <> EmptyStr then
+      if FUnzip <> '' then
       begin
         OperationSucceeded := CheckExecutable(FUnzip, '-v', '');
+        {$IFDEF BSD}
+        {$IFNDEF DARWIN}
+        if not(OperationSucceeded) then
+        begin
+          // bit of a stopgap solution but FreeBSD unzip does not seem to have any --help or similar command.
+          // Not willing to construct a zip archive and test it.
+          infoln('Ignoring any errors checking for unzip application on *BSD.',etInfo);
+          OperationSucceeded:=true;
+        end;
+        {$ENDIF}
+        {$ENDIF BSD}
       end;
     end;
 
