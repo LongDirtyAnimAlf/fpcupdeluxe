@@ -272,7 +272,7 @@ begin
       //todo: check for other BSDs
       if pos(FInstaller.FPCOPT,'-Fl/usr/local/lib/')<0 then
       begin
-        writeln('FreeBSD needs -Fl/usr/local/lib in OPT; adding it. For details, see '+LineEnding+
+        writeln('FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
@@ -291,6 +291,27 @@ begin
           FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FInstaller.LazarusDirectory);
 
       FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
+      {$IF (defined(BSD)) and (not defined(Darwin))}
+      //todo: check for other BSDs
+      if (pos(FInstaller.LazarusOPT,'-Fl/usr/local/lib/')<0) then
+      begin
+        writeln('FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
+        FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/local/lib';
+      end;
+      if (pos(FInstaller.LazarusOPT,'-Fl/usr/X11R6/lib')<0) then
+      begin
+        writeln('FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
+          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
+        FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib';
+      end;
+      {
+      todo: when building linux cross compiler use these
+-Fl/compat/linux/lib
+-Fl/compat/linux/usr/lib
+-Fl/compat/linux/usr/X11R6/lib
+      }
+      {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
       FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
       FInstaller.SkipModules:=Options.GetOption('','skip','',false);
