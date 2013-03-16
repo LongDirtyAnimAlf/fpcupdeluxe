@@ -185,16 +185,17 @@ begin
     FTar := 'tar';
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     {$ENDIF LINUX}
-    {$IFDEF BSD} //Includes FreeBSD, NetBSD, OpenBSD
-    FBunzip2 := 'bunzip2';
-    FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
-    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
-    {$ENDIF BSD}
+    {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
     FBunzip2 := ''; //not really necessary now
     FTar := 'gnutar'; //gnutar can decompress as well; bsd tar can't
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    {$ELSE} //FreeBSD, OpenBSD, NetBSD
+    FBunzip2 := 'bunzip2';
+    FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
+    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     {$ENDIF DARWIN}
+    {$ENDIF BSD}
 
     {$IFDEF MSWINDOWS}
     if OperationSucceeded then
@@ -223,7 +224,8 @@ begin
       if not(AllThere) then OperationSucceeded := DownloadBinUtils;
     end;
     {$ENDIF MSWINDOWS}
-    {$IFDEF LINUX}
+    {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
+    //todo: check if we need as on OSX as well
     if OperationSucceeded then
     begin
       // Check for proper assembler
@@ -238,8 +240,7 @@ begin
         // ignore errors, this is only an extra check
       end;
     end;
-    {$ENDIF LINUX}
-
+    {$ENDIF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))}
 
     if OperationSucceeded then
     begin

@@ -413,10 +413,11 @@ function TFPCInstaller.DownloadBootstrapCompiler: boolean;
 var
 ArchiveDir: string;
 BootstrapArchive: string;
-CompilerName:string;
+CompilerName:string; // File name of compiler in bootstrap archive
 ExtractedCompiler: string;
 OperationSucceeded: boolean;
 begin
+
 OperationSucceeded:=true;
 if OperationSucceeded then
 begin
@@ -478,7 +479,8 @@ begin
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
   end;
   {$ENDIF LINUX}
-  {$IFDEF BSD} //Includes FreeBSD, OpenBSD, NetBSD
+  {$IFDEF BSD} //*BSD, OSX
+  {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   //todo: test parameters
   //Extract bz2, overwriting without prompting
   if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
@@ -503,9 +505,8 @@ begin
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
   end;
-  {$ENDIF BSD}
+  {$ENDIF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   {$IFDEF DARWIN}
-  CompilerName:=ExtractFileName(FBootstrapCompiler);
   //Extract .tar.bz2, overwriting without prompting
   CompilerName:=ExtractFileName(FBootstrapCompiler);
   if ExecuteCommand(FTar+' -x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
@@ -535,6 +536,7 @@ begin
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler,eterror);
   end;
   {$ENDIF DARWIN}
+  {$ENDIF BSD}
 end;
 if OperationSucceeded = True then
 begin
