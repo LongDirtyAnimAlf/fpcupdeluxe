@@ -535,11 +535,13 @@ begin
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/CompilerFilename/Value',FCompiler);
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',which('gdb')); //assume in path
-      {$IF defined(BSD) and (not defined(DARWIN))}
+      {$IFDEF BSD}
+      {$IFDEF DARWIN}
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',which('make')); //assume in path
-      {$ELSE}
+      {$ELSE} //*BSD: FreeBSD, NetBSD, OpenBSD
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',which('gmake')); //GNU make; assume in path
-      {$ENDIF defined(BSD) and (not defined(DARWIN))}
+      {$ENDIF DARWIN}
+      {$ENDIF BSD}
       {$ENDIF UNIX}
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
