@@ -631,21 +631,25 @@ begin
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-freebsd9-ppc386.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-freebsd9-ppc386';
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-freebsd9.ppcx64.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-freebsd9.ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF FREEBSD}
     {$IFDEF NETBSD}
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-netbsd-ppc386.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-netbsd-ppc386';
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-netbsd-ppcx64.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-netbsd-ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF NETBSD}
     {$IFDEF OPENBSD}
@@ -656,6 +660,7 @@ begin
     {$IFDEF CPUX86_64}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-openbsd-ppcx64.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-openbsd-ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF OPENBSD}
     end;
