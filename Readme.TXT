@@ -32,6 +32,10 @@ On Linux:
 E.g. on Debian or Ubuntu, do something like:
 sudo aptitude install build-essential subversion unzip
 
+On FreeBSD 9+:
+- should be none
+- for Lazarus, you'll need XWindows with GTK (default) or Qt
+
 On OSX: only tested with XCode installed; no other requirements found.
 
 How does it work?
@@ -65,7 +69,7 @@ If not, it downloads them.
 - It checks if make.exe is GNU make, and not e.g. Delphi/Borland make.
 - It checks whether a Subversion client is available. On Windows: if there isn't, it downloads one.
 - If bootstrap compilers need to be downloaded, a certain unarchiver utility is needed, depending on the way the compiler is compressed.
-fpcup checks unzip.exe for Windows, gnutar for OSX, and bunzip2 for Linux.
+fpcup checks unzip, gnutar, and bunzip2 depending on the file format.
 - It checks if there is a valid FPC compiler in the bootstrap directory the user specified (or default).
 If it doesn't exist, it downloads a bootstrap compiler.
 
@@ -73,11 +77,11 @@ If it doesn't exist, it downloads a bootstrap compiler.
 - It checks out or updates FPC using Subversion.
 - It compiles FPC using the bootstrap compiler.
 - It creates a valid fpc.cfg for the new compiler.
-- On OSX/Linux: it creates a dummy fpc.sh designed to filter out existing system wide fpc.cfg (e.g. /etc/fpc.cfg) and places that in the FPC directory
+- On FreeBSD/Linux/OSX: it creates a dummy fpc.sh designed to filter out existing system wide fpc.cfg (e.g. /etc/fpc.cfg) and places that in the FPC directory
 
 3. Getting and compiling Lazarus
 - It checks out or updates Lazarus using Subversion.
-- It compiles Lazarus using the installed FPC compiler (Linux/OSX: fpc.sh) and fpc.cfg
+- It compiles Lazarus using the installed FPC compiler (FreeBSD/Linux/OSX: fpc.sh) and fpc.cfg
 - When done, it creates a shortcut on your desktop (Windows) or shell script in home directory to the newly installed Lazarus
 - It does the same using make bigide, in order to get as many .lpk files compiled and included as possible
 - It creates a minimum configuration (environmentoptions.xml) in a separate primary-config-path, or updates that config with: the compiler, the FPC source directory, make location, gdb location, help files location.
@@ -139,7 +143,7 @@ This is probably a bigger problem on Windows than on Linux/Unix
 
 Status
 ======
-Works for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux. Testing version for OSX available.
+Works for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux. Testing versions for FreeBSD 9+ x64 and OSX available.
 
 
 Contact
