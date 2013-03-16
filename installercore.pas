@@ -42,6 +42,7 @@ type
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
+    // Check executable is the right one: run Executable with Parameters and look for ExpectOutput. Returns false if no match.
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     // Make a list of all binutils that can be downloaded
     procedure CreateBinutilsList;
@@ -295,18 +296,14 @@ begin
       // Check for valid unzip executable, if it is needed
       if FUnzip <> '' then
       begin
+        {$IF (defined(BSD)) and (not defined(Darwin))}
+        // FreeBSD doesn't have an unzip applicationt that responds without needing a zip file
+        // No motivation to go feed it a zip file just to test it
+        OperationSucceeded := true;
+        {$ELSE}
+        // OSes with a normal unzip
         OperationSucceeded := CheckExecutable(FUnzip, '-v', '');
-        {$IFDEF BSD}
-        {$IFNDEF DARWIN}
-        if not(OperationSucceeded) then
-        begin
-          // bit of a stopgap solution but FreeBSD unzip does not seem to have any --help or similar command.
-          // Not willing to construct a zip archive and test it.
-          infoln('Ignoring any errors checking for unzip application on *BSD.',etInfo);
-          OperationSucceeded:=true;
-        end;
-        {$ENDIF}
-        {$ENDIF BSD}
+        {$ENDIF (defined(BSD)) and (not defined(Darwin))}
       end;
     end;
 
