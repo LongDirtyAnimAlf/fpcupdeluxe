@@ -270,7 +270,7 @@ begin
       FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
-      if pos(FInstaller.FPCOPT,'-Fl/usr/local/lib/')<0 then
+      if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
       begin
         writeln('FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
@@ -293,13 +293,13 @@ begin
       FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
-      if (pos(FInstaller.LazarusOPT,'-Fl/usr/local/lib/')<0) then
+      if (pos('-Fl/usr/local/lib/',FInstaller.LazarusOPT)=0) then
       begin
         writeln('FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/local/lib';
       end;
-      if (pos(FInstaller.LazarusOPT,'-Fl/usr/X11R6/lib')<0) then
+      if (pos('-Fl/usr/X11R6/lib',FInstaller.LazarusOPT)=0) then
       begin
         writeln('FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
