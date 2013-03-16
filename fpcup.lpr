@@ -267,9 +267,9 @@ begin
           FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
           FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
+      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
-      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
       if pos(FInstaller.FPCOPT,'-Fl/usr/local/lib/')<0 then
       begin
         writeln('FreeBSD needs -Fl/usr/local/lib in OPT; adding it. For details, see '+LineEnding+
