@@ -48,12 +48,12 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 
 uses {$IFDEF UNIX}
   cthreads, {$ENDIF}
-  Classes,
-  svnclient, updatelazconfig, ftpsend, sysutils, processutils, fileutil,
-  fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode, synafpc,
-  synaip, synautil, synsock, blcksock, installerCore, installerfpc,
+  Classes, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
+  fileutil, fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32, synacode,
+  synafpc, synaip, synautil, synsock, blcksock, installerCore, installerfpc,
   installerLazarus, installerHelp, installerUniversal, installerManager,
-  wininstaller, commandline, hgclient, repoclient, gitclient;
+  wininstaller, commandline, hgclient, repoclient, gitclient,
+  m_freebsd_to_linux386;
 
 //{$R *.res} //Keep it simple, no resources
 
