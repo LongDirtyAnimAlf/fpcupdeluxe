@@ -45,7 +45,7 @@ end;
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
-  FBinUtilsPath:='';
+  FBinUtilsPath:='/usr/bin'; //try with regular binutils
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
 end;

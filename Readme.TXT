@@ -110,6 +110,8 @@ These modules get registered automatically when compiled into the fpcup code.
 To use them, you would specify 
 --cputarget= (e.g. i386, x86_64... the way FPC defines the CPU names)
 --ostarget= (e.g. freebsd, win32,...... the way FPC defines the OS names)
+What you want to build e.g.
+--only=FPCBuildOnly,LazarusBuildOnly
 If there's a cross compiler available for the combination source+target OS/CPU, it will run. Otherwise you will get an error message
 
 See fpcup.html for more details on implementing your own cross compilers and extensions.
