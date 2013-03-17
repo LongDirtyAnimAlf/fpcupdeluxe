@@ -82,12 +82,12 @@ begin
 end;
 
 var
-  FreeBSD_Linux386:TFreeBSD_win386;
+  FreeBSD_win386:TFreeBSD_win386;
 
 initialization
-  FreeBSD_Linux386:=TFreeBSD_win386.Create;
-  RegisterExtension(FreeBSD_Linux386.TargetCPU+'-'+FreeBSD_Linux386.TargetOS,FreeBSD_Linux386);
+  FreeBSD_win386:=TFreeBSD_win386.Create;
+  RegisterExtension(FreeBSD_win386.TargetCPU+'-'+FreeBSD_win386.TargetOS,FreeBSD_win386);
 finalization
-  FreeBSD_Linux386.Destroy;
+  FreeBSD_win386.Destroy;
 end.
 
