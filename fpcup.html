@@ -38,10 +38,10 @@ other modules.</P>
 <P>To remove components, you can specify --uninstall, which will remove entire installation directories.</P>
 <H3 CLASS="western">Customization</H3>
 <P>The two major ways to extend fpcup are writing your own crossinstaller (that checks/downloads required binutils and libraries, and compiles the cross-compiler/LCL), and external modules.</P>
+<P>See above for how to add external modules without changing the fpcup code.</P>
 <H4 CLASS="western">Crosscompiling modules</H4>
 <P>To write a cross-compiler module, you have to inherit from m_crossinstaller.pas. That unit contains details about the minimum set of properties/methods you will need to provide.</P>
 <P>An example of a simple crosscompiler module that does not need to check for libraries etc is the Win64=>Win32 cross compiler in m_crosswin32.pas.</P>
-<P>See above for how to add external modules without changing the fpcup code.</P>
 <H4 CLASS="western">Adding non-universal, non-crosscompiling modules</H4>
 <P>If you want to add modules to the FPC, Lazarus etc units, you will need to adjust both the sequences (instructions for the state machine) as well as the InstallerManager.GetInstaller so it knows what installer to get depending on the module.<P>
 <P>If you don't do the latter, you will get cryptic error messages like: Info: Error running fpcup. Technical details: error executing sequence USERIDE;</P>

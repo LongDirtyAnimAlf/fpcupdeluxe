@@ -103,7 +103,7 @@ If it doesn't exist, it downloads a bootstrap compiler.
 
 Cross compiler extensions
 =========================
-fpcup has a facitility to extend its functionality using cross compiling modules. These are classes that inherit from the fpcup TCrossInstaller class defined in m_crossinstaller.pas
+fpcup has a facility to extend its functionality using cross compiling modules. These are classes that inherit from the fpcup TCrossInstaller class defined in m_crossinstaller.pas
 An example is the Windows 32=>Windows 64 cross compile unit in m_crosswin64.pas. Note that this is a simple version, as there is no need for separate binutils and library paths.
 These modules get registered automatically when compiled into the fpcup code.
 See fpcup.html for more details on implementing your own cross compilers and extensions.

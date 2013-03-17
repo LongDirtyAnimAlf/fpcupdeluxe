@@ -50,7 +50,7 @@ uses {$IFDEF UNIX}
   cthreads, {$ENDIF}
   Classes, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
   fileutil, fpcuputil,
-  m_crossinstaller, m_crosswin64, m_crosswin32, m_freebsd_to_linux386, m_freebsd_to_win386,
+  m_crossinstaller, m_crosswin64, m_crosswin32, m_freebsd_to_linux386, m_freebsd_to_win386, m_freebsd64_to_freebsd32,
   synacode, synafpc, synaip, synautil, synsock, blcksock,
   installerCore, installerfpc,
   installerLazarus, installerHelp, installerUniversal, installerManager,
@@ -274,7 +274,7 @@ begin
       //todo: check for other BSDs
       if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
       begin
-        writeln('FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        writeln('FPC options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
@@ -297,13 +297,13 @@ begin
       //todo: check for other BSDs
       if (pos('-Fl/usr/local/lib/',FInstaller.LazarusOPT)=0) then
       begin
-        writeln('FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
+        writeln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/local/lib';
       end;
       if (pos('-Fl/usr/X11R6/lib',FInstaller.LazarusOPT)=0) then
       begin
-        writeln('FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
+        writeln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib';
       end;
