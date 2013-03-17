@@ -405,8 +405,9 @@ begin
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
-      //todo: test if --build-ide=-dKeepInstalledPackages works for keeping packages once a useride has been built
-      if strtointdef(Revision,0)>=38971 then
+      // Support keeping userdefined installed packages when building.
+      // Assume new Laz version on failure
+      if strtointdef(Revision,38971)>=38971 then
       begin
         ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages');
         ProcessEx.Parameters.Add('--build-mode=');

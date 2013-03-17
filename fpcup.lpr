@@ -53,7 +53,7 @@ uses {$IFDEF UNIX}
   synafpc, synaip, synautil, synsock, blcksock, installerCore, installerfpc,
   installerLazarus, installerHelp, installerUniversal, installerManager,
   wininstaller, commandline, hgclient, repoclient, gitclient,
-  m_freebsd_to_linux386;
+  m_freebsd_to_linux386, m_freebsd_to_win386;
 
 //{$R *.res} //Keep it simple, no resources
 

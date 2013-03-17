@@ -315,7 +315,6 @@ begin
         { Used to use bunzip2 --version, but on e.g. Fedora Core
         that returns an error message e.g. can't read from cp
         }
-        //todo: freebsd check parameter works
         OperationSucceeded := CheckExecutable(FBunzip2, '--help', '');
       end;
     end;
@@ -433,7 +432,6 @@ begin
 end;
 
 procedure TInstaller.CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
-// todo: rebuild properly when hg and svn have a common parent
 var
   DiffFile: Text;
 begin

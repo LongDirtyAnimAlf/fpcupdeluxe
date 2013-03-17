@@ -312,7 +312,7 @@ end;
 
 function THelpInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
-//todo: do this
+//todo: implement help uninstall
   result:=true;
 end;
 

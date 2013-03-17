@@ -583,7 +583,6 @@ begin
     begin  // may need to download it
     FTrunkBootstrapCompiler:=false;
     {$IFDEF MSWINDOWS}
-    //todo: on 2.6.2 release, change this and other ftp download locations.
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
     {$ifdef win64}
