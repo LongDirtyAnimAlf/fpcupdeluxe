@@ -47,7 +47,7 @@ function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=fileexists(FBinUtilsPath+'as');
+  result:=true;
 end;
 
 constructor TFreeBSD64_FreeBSD386.Create;
