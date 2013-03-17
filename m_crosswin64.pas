@@ -1,4 +1,5 @@
 unit m_crosswin64;
+{ Compiles from Windows 32 to Windows 64 bit }
 
 {$mode objfpc}{$H+}
 
@@ -64,4 +65,4 @@ initialization
 finalization
   Win64.Destroy;
 end.
-
+
