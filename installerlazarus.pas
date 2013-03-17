@@ -222,8 +222,9 @@ begin
       ProcessEx.Parameters.Add('FPC='+FCompiler);
       ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('FPCDIR='+FFPCDir); //Make sure our FPC units can be found by Lazarus
+      // Tell make where to find the target binutils if cross-compiling:
       if CrossInstaller.BinUtilsPath<>'' then
-        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FFPCDir));
+        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       if FCrossLCL_Platform <>'' then
         ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );

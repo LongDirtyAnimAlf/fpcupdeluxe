@@ -66,7 +66,7 @@ function TFreeBSD_win386.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='/usr/local/mingw32/bin';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=fileexists(FBinUtilsPath+'as';
+  result:=fileexists(FBinUtilsPath+'as');
 end;
 
 constructor TFreeBSD_win386.Create;

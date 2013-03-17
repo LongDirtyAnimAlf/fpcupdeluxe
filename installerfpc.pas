@@ -158,8 +158,9 @@ begin
       ProcessEx.Parameters.Add('FPC='+FCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+      // Tell make where to find the target binutils if cross-compiling:
       if CrossInstaller.BinUtilsPath<>'' then
-        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       //Don't really know if this is necessary, but it can't hurt:
@@ -194,8 +195,9 @@ begin
           {$IFDEF UNIX}
           ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF UNIX}
+          // Tell make where to find the target binutils if cross-compiling:
           if CrossInstaller.BinUtilsPath<>'' then
-            ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+            ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
           ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           //putting crossinstall before target might help!?!?
