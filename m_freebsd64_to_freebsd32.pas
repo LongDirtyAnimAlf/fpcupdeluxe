@@ -65,11 +65,14 @@ end;
 var
   FreeBSD64_FreeBSD386:TFreeBSD64_FreeBSD386;
 
+//todo: FreeBSD64_FreeBSD386: enable when working. For this, we'll probably need to pass -32 to ld etc. Perhaps do this with batch scripts
+{
 initialization
   FreeBSD64_FreeBSD386:=TFreeBSD64_FreeBSD386.Create;
   RegisterExtension(FreeBSD64_FreeBSD386.TargetCPU+'-'+FreeBSD64_FreeBSD386.TargetOS,FreeBSD64_FreeBSD386);
 finalization
   FreeBSD64_FreeBSD386.Destroy;
+}
 end.
 
 

@@ -11,7 +11,7 @@ Needed ports/packages:
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
 const
@@ -39,7 +39,7 @@ type
 
 TFreeBSD_win386 = class(TCrossInstaller)
 private
-
+  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
@@ -54,6 +54,11 @@ function TFreeBSD_win386.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/usr/local/mingw32/lib';
   result:=directoryexists(FLibsPath);
+  if (result=false) and (FAlreadyWarned=false) then
+  begin
+    infoln(ErrorNotFound,etError);
+    FAlreadyWarned:=true;
+  end;
 end;
 
 function TFreeBSD_win386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -67,6 +72,11 @@ begin
   FBinUtilsPath:='/usr/local/mingw32/bin';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=fileexists(FBinUtilsPath+'/as'); //let the assembler be our coalmine canay
+  if (result=false) and (FAlreadyWarned=false) then
+  begin
+    infoln(ErrorNotFound,etError);
+    FAlreadyWarned:=true;
+  end;
 end;
 
 constructor TFreeBSD_win386.Create;
@@ -74,6 +84,7 @@ begin
   inherited Create;
   FTargetCPU:='i386';
   FTargetOS:='win32';
+  FAlreadyWarned:=false;
 end;
 
 destructor TFreeBSD_win386.Destroy;
