@@ -54,7 +54,7 @@ type
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
-    FTrunkBootstrapCompiler: boolean;
+    FBootstrapCompilerOverrideVersionCheck: boolean; //Indicate to make we really want to compile with this version (e.g. trunk compiler), even if it is not the latest stable version
     InitDone: boolean;
   protected
     // Build module descendant customisation
@@ -62,6 +62,7 @@ type
     // Retrieves compiler version string
     function GetCompilerVersion(CompilerPath: string): string;
     function CreateFPCScript:boolean;
+    // Downloads bootstrap compiler for relevant platform, reports result.
     function DownloadBootstrapCompiler: boolean;
     function GetFPCVersion: string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -82,7 +83,7 @@ type
     // If yes, the bootstrap compiler used will be generated using the trunk sources.
     // If no, a stable FPC bootstrap compiler will be used.
     // This is required information for setting make file optioins
-    property TrunkBootstrapCompiler: boolean read FTrunkBootstrapCompiler;
+    property TrunkBootstrapCompiler: boolean read FBootstrapCompilerOverrideVersionCheck;
     // Uninstall module
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
@@ -124,6 +125,8 @@ uses fpcuputil,fileutil,processutils
   {$ENDIF UNIX}
   ;
 { TFPCCrossInstaller }
+const
+  Win64FallBackUsingCrossCompiler=false; //Set to true to download i386 boostrap compiler and cross compile. Leave to use native win x64 compiler
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
@@ -165,7 +168,7 @@ begin
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
       //Don't really know if this is necessary, but it can't hurt:
       // Override makefile checks that checks for stable compiler in FPC trunk
-      if FTrunkBootstrapCompiler then
+      if FBootstrapCompilerOverrideVersionCheck then
         ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
       //putting all before target might help!?!?
       ProcessEx.Parameters.Add('all');
@@ -265,7 +268,7 @@ begin
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   // Override makefile checks that checks for stable compiler in FPC trunk
-  if FTrunkBootstrapCompiler then
+  if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
@@ -295,7 +298,7 @@ begin
   ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   // Override makefile checks that checks for stable compiler in FPC trunk
-  if FTrunkBootstrapCompiler then
+  if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   if FCompilerOptions <>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
@@ -583,19 +586,33 @@ begin
   infoln('TFPCInstaller: initialising...',etDebug);
   if FBootstrapCompiler='' then
     begin  // may need to download it
-    FTrunkBootstrapCompiler:=false;
+    // We assume we're using the regular latest stable compiler, so don't
+    // suggest to make to override version checks.
+    // Useful if we forget to update compiler versions when a new stable is released.
+    FBootstrapCompilerOverrideVersionCheck:=false;
     {$IFDEF MSWINDOWS}
+    {$ifdef win64}
+    if Win64FallBackUsingCrossCompiler then
+      begin
+      //There is no win64 bootstrap compiler, yet
+      //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
+      //This should eliminate issues with the wrong RTL etc.
+      if FBootstrapCompilerURL='' then
+        FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
+      FBootstrapCompilerOverrideVersionCheck:=true;
+      end
+      else
+      begin
+      // Use regular x64 compiler
+      if FBootstrapCompilerURL='' then
+        FBootstrapCompilerURL := FTP262Path+'x86_64-win64-ppcx64.zip';
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
+      end;
+    {$ELSE}
+    //Win32
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
-    {$ifdef win64}
-    //todo: incorporate ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/x86_64-win64-ppcx64.zip but keep fallback code
-    //There is no win64 bootstrap compiler, yet
-    //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
-    //This should eliminate issues with the wrong RTL etc.
-    //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
-    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
-    FTrunkBootstrapCompiler:=true;
-    {$ELSE}
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     {$endif win64}
     {$ENDIF MSWINDOWS}
@@ -626,7 +643,7 @@ begin
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTPPath+'universal-darwin-ppcuniversal.tar.bz2';
-    FTrunkBootstrapCompiler:=false;
+    FBootstrapCompilerOverrideVersionCheck:=false;
     {$ENDIF Darwin}
     {$IFDEF FREEBSD}
     {$IFDEF CPU386}
@@ -666,6 +683,7 @@ begin
     {$ENDIF CPUX86_64}
     {$ENDIF OPENBSD}
     end;
+
   // Only download bootstrap compiler if we can't find a valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
     begin
@@ -674,15 +692,11 @@ begin
     end
     else
     begin
-      {$ifdef win64}
-      //don't have a win64 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
-      // For that, we need to download the i386 compiler.
-      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
-      {$endif win64}
       {$ifdef darwin}
-      //don't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
+      // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
+      //doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
-      {$endif win64}
+      {$endif darwin}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
     end;
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
@@ -728,10 +742,7 @@ begin
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etinfo);
   {$ifdef win64}
-  // On win64, we need to build the PPCX64 bootstrap compiler from our
-  // PPC386.exe.
-  // In cleanmodule which should have run before this, we remove the temp PPCX64
-  // bootstrap compiler so we're (almost) guaranteed it builds...
+  // Deals dynamically with either ppc386.exe or native ppcx64.exe
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
     ProcessEx.Executable := Make;
@@ -742,7 +753,7 @@ begin
     ProcessEx.Parameters.Add('OS_TARGET=win64');
     ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
     // Override makefile checks that checks for stable compiler in FPC trunk
-    if FTrunkBootstrapCompiler then
+    if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC64:',etinfo);
@@ -757,7 +768,7 @@ begin
      ExtractFilePath(FCompiler)+'ppcx64.exe');
     // Now we can change the compiler from the i386 to the x64 compiler:
     FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';
-    end;
+  end;
   {$endif win64}
   {$ifdef darwin}
   if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
@@ -769,7 +780,7 @@ begin
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
     // Override makefile checks that checks for stable compiler in FPC trunk
-    if FTrunkBootstrapCompiler then
+    if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC i386:',etinfo);
@@ -945,10 +956,14 @@ begin
   // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
   {$IFDEF WIN64}
-  // Delete bootstrap compiler; will be regenerated later with new
-  // version:
-  infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
-  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
+  if Win64FallBackUsingCrossCompiler then
+    begin
+    // Only if we're using an i386 stable "bootstrap bootstrap" to create
+    // the x64 bootstrap:
+    // Delete bootstrap compiler; will be regenerated later with new version:
+    infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
+    Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
+    end;
   {$ENDIF WIN64}
   {$IFDEF UNIX}
   // Delete any fpc.sh shell scripts
