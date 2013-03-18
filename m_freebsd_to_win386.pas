@@ -52,8 +52,8 @@ end;
 
 function TFreeBSD_win386.GetLibs(Basepath:string): boolean;
 begin
-  FLibsPath:='/usr/local/mingw32/lib';
-  result:=directoryexists(FLibsPath);
+  FLibsPath:=''; //todo: perhaps BasePath/libs/i386-win32/ so user can place his files there?
+  result:=true;
   if (result=false) and (FAlreadyWarned=false) then
   begin
     infoln(ErrorNotFound,etError);
@@ -69,9 +69,9 @@ end;
 
 function TFreeBSD_win386.GetBinUtils(Basepath:string): boolean;
 begin
-  FBinUtilsPath:='/usr/local/mingw32/bin';
+  FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=fileexists(FBinUtilsPath+'/as'); //let the assembler be our coalmine canay
+  result:=true; //use built in linker
   if (result=false) and (FAlreadyWarned=false) then
   begin
     infoln(ErrorNotFound,etError);
