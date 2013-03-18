@@ -154,7 +154,7 @@ begin
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
-      infoln('Running Make all (FPC crosscompiler):',etinfo);
+      infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etinfo);
       ProcessEx.Parameters.Add('FPC='+FCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -189,7 +189,7 @@ begin
           ProcessEx.Executable := Make;
           ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
-          infoln('Running Make crossinstall (FPC crosscompiler):', etinfo);
+          infoln('Running Make crossinstall (FPC crosscompiler): '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS, etinfo);
           ProcessEx.Parameters.Add('FPC='+FCompiler);
           ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
           {$IFDEF UNIX}

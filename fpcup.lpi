@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="22">
+    <Units Count="23">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -286,6 +286,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_freebsd64_to_freebsd32"/>
       </Unit21>
+      <Unit22>
+        <Filename Value="m_freebsd_to_linux64.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_freebsd_to_linux64"/>
+      </Unit22>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

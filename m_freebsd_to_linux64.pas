@@ -1,6 +1,6 @@
-unit m_freebsd_to_linux386;
+unit m_freebsd_to_linux64;
 
-{ Cross compiles from FreeBSD x64 and presumably x86 to Linux using the emulator libraries in /compat
+{ Cross compiles from FreeBSD x64 to Linux using the emulator libraries in /compat
 Needed ports/packages:
 emulators/linux_base
 something like /usr/ports/emulators/linux_dist* however that does not seem to work in PCBSD right now
@@ -27,9 +27,9 @@ uses
 implementation
 type
 
-{ TFreeBSD_Linux386 }
+{ TFreeBSD_Linux64 }
 
-TFreeBSD_Linux386 = class(TCrossInstaller)
+TFreeBSD_Linux64 = class(TCrossInstaller)
 private
 
 public
@@ -42,43 +42,43 @@ end;
 
 { TWin32 }
 
-function TFreeBSD_Linux386.GetLibs(Basepath:string): boolean;
+function TFreeBSD_Linux64.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/compat/linux/lib';
   result:=DirectoryExists(FLibsPath);
 end;
 
-function TFreeBSD_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TFreeBSD_Linux64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   result:=true;
 end;
 
-function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
+function TFreeBSD_Linux64.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though
   FBinUtilsPrefix:='';
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
 end;
 
-constructor TFreeBSD_Linux386.Create;
+constructor TFreeBSD_Linux64.Create;
 begin
   inherited Create;
-  FTargetCPU:='i386';
+  FTargetCPU:='x86_64';
   FTargetOS:='linux';
 end;
 
-destructor TFreeBSD_Linux386.Destroy;
+destructor TFreeBSD_Linux64.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  FreeBSD_Linux386:TFreeBSD_Linux386;
+  FreeBSD_Linux64:TFreeBSD_Linux64;
 
 initialization
-  FreeBSD_Linux386:=TFreeBSD_Linux386.Create;
-  RegisterExtension(FreeBSD_Linux386.TargetCPU+'-'+FreeBSD_Linux386.TargetOS,FreeBSD_Linux386);
+  FreeBSD_Linux64:=TFreeBSD_Linux64.Create;
+  RegisterExtension(FreeBSD_Linux64.TargetCPU+'-'+FreeBSD_Linux64.TargetOS,FreeBSD_Linux64);
 finalization
-  FreeBSD_Linux386.Destroy;
+  FreeBSD_Linux64.Destroy;
 end.
 
