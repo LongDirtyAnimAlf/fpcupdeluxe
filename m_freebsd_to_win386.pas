@@ -53,7 +53,7 @@ end;
 function TFreeBSD_win386.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/usr/local/mingw32/lib';
-  result:=true;
+  result:=directoryexists(FLibsPath);
 end;
 
 function TFreeBSD_win386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -66,7 +66,7 @@ function TFreeBSD_win386.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='/usr/local/mingw32/bin';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=fileexists(FBinUtilsPath+'as');
+  result:=fileexists(FBinUtilsPath+'/as'); //let the assembler be our coalmine canay
 end;
 
 constructor TFreeBSD_win386.Create;

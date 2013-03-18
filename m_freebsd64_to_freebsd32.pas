@@ -35,7 +35,7 @@ end;
 function TFreeBSD64_FreeBSD386.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/usr/lib32';
-  result:=true;
+  result:=fileexists(FLibsPath+'/libc.so'); //let the c library be our coalmine canary
 end;
 
 function TFreeBSD64_FreeBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;

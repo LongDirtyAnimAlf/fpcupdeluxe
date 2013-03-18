@@ -588,6 +588,7 @@ begin
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
     {$ifdef win64}
+    //todo: incorporate ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/x86_64-win64-ppcx64.zip but keep fallback code
     //There is no win64 bootstrap compiler, yet
     //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
     //This should eliminate issues with the wrong RTL etc.

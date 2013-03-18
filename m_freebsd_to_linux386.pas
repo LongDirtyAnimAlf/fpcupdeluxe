@@ -38,7 +38,7 @@ end;
 function TFreeBSD_Linux386.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/compat/linux/lib';
-  result:=true;
+  result:=DirectoryExists(FLibsPath);
 end;
 
 function TFreeBSD_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -50,7 +50,7 @@ function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
 begin
   FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though
   FBinUtilsPrefix:='';
-  result:=FileExists(FBinUtilsPath+'as');
+  result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
 end;
 
 constructor TFreeBSD_Linux386.Create;
