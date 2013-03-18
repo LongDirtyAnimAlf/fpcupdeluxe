@@ -882,6 +882,7 @@ begin
     CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target
   else
     CPU_OSSignature:=GetFPCTarget(true);
+
   {$IFDEF MSWINDOWS}
   // Remove all fpmakes
   DeleteList:=TStringList.Create;

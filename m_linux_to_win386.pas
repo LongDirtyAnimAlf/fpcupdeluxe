@@ -15,8 +15,8 @@ uses
 
 implementation
 const
-  ErrorNotFound='Not all required files are present.'+LineEnding+
-    'todo: specify what is missing';
+  ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
+    'todo: specify what exactly is missing';
 
 type
 
