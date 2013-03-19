@@ -176,7 +176,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="24">
+    <Units Count="23">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -277,25 +277,20 @@ end;"/>
         <UnitName Value="m_freebsd_to_linux386"/>
       </Unit19>
       <Unit20>
-        <Filename Value="m_freebsd_to_win386.pas"/>
-        <IsPartOfProject Value="True"/>
-        <UnitName Value="m_freebsd_to_win386"/>
-      </Unit20>
-      <Unit21>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_freebsd64_to_freebsd32"/>
-      </Unit21>
-      <Unit22>
+      </Unit20>
+      <Unit21>
         <Filename Value="m_freebsd_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_freebsd_to_linux64"/>
-      </Unit22>
-      <Unit23>
-        <Filename Value="m_linux_to_win386.pas"/>
+      </Unit21>
+      <Unit22>
+        <Filename Value="m_anyinternallinker_to_win386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_linux_to_win386"/>
-      </Unit23>
+        <UnitName Value="m_anyinternallinker_to_win386"/>
+      </Unit22>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

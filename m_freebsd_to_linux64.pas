@@ -27,7 +27,7 @@ make -DBATCH install distclean
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
 type
@@ -36,7 +36,8 @@ type
 
 TFreeBSD_Linux64 = class(TCrossInstaller)
 private
-
+  FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
@@ -45,7 +46,11 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32 }
+{ TFreeBSD_Linux64 }
+function TFreeBSD_Linux64.TargetSignature: string;
+begin
+  result:=FTargetCPU+'-'+TargetOS;
+end;
 
 function TFreeBSD_Linux64.GetLibs(Basepath:string): boolean;
 begin
@@ -60,8 +65,16 @@ end;
 
 function TFreeBSD_Linux64.GetBinUtils(Basepath:string): boolean;
 begin
-  FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though
+  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'/cross/bin/'+TargetSignature; //these do not contain as etc though
+  if not(ForceDirectories(FBinUtilsPath)) then
+  begin
+    infoln('TFreeBSD_Linux64: Could not create binutils directory '+FBinUtilsPath,etError);
+    FAlreadyWarned:=true;
+    exit(false);
+  end;
   FBinUtilsPrefix:='';
+  // Check for and get Linux binutils. We do need Linux compatibility on FreeBSD, otherwise this won't work
+
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
 end;
 
@@ -70,6 +83,7 @@ begin
   inherited Create;
   FTargetCPU:='x86_64';
   FTargetOS:='linux';
+  FAlreadyWarned:=false;
 end;
 
 destructor TFreeBSD_Linux64.Destroy;
