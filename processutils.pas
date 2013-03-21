@@ -53,8 +53,11 @@ type
       FCaseSensitive:boolean;
       function GetVarIndex(VarName:string):integer;
     public
+      // Get environment variable
       function GetVar(VarName:string):string;
+      // Set environment variable
       procedure SetVar(VarName,VarValue:string);
+      // List of all environment variables (name and value)
       property EnvironmentList:TStringList read FEnvironmentList;
       constructor Create;
       destructor Destroy; override;
@@ -66,7 +69,7 @@ type
     private
       FExceptionInfoStrings: TstringList;
       FExecutable: string;
-      FExitStatus: integer;
+      FExitStatus: integer; //result code/exit status that executable returned with
       FOnError: TErrorFunc;
       FOnErrorM: TErrorMethod;
       FOnOutput: TDumpFunc;
@@ -92,6 +95,7 @@ type
       // All environment variables, e.g. PATH
       property ExceptionInfo:string read GetExceptionInfo;
       property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
+      // Return code/exit status that the process returned with. Often 0 for success.
       property ExitStatus:integer read FExitStatus;
       property OnError:TErrorFunc read FOnError write SetOnError;
       property OnErrorM:TErrorMethod read FOnErrorM write SetOnErrorM;

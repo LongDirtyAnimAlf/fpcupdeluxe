@@ -431,7 +431,8 @@ begin
 
   if ProcessEx.ExitStatus <> 0 then
   begin
-    result := False;
+    infoln('Lazarus: buildmodulecustom: make/lazbuild returned error code '+inttostr(ProcessEx.ExitStatus),etDebug);
+    OperationSucceeded:= false;
     FInstalledLazarus:= '//*\\error/ / \ \';
   end
   else
