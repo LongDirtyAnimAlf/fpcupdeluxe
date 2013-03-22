@@ -305,18 +305,13 @@ end;"/>
 end;"/>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
-      <Checks>
-        <IOChecks Value="True"/>
-        <RangeChecks Value="True"/>
-        <OverflowChecks Value="True"/>
-        <StackChecks Value="True"/>
-      </Checks>
       <Optimizations>
         <OptimizationLevel Value="2"/>
       </Optimizations>
     </CodeGeneration>
     <Linking>
       <Debugging>
+        <GenerateDebugInfo Value="False"/>
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
