@@ -1,5 +1,7 @@
 unit installerLazarus;
 
+{ Installs Lazarus+LCL }
+
 {$mode objfpc}{$H+}
 
 interface

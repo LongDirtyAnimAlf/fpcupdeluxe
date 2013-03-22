@@ -22,7 +22,7 @@ Another solution would be to get the relevant binutils/libs from a working Linux
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
 type
@@ -55,6 +55,10 @@ end;
 
 function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
 begin
+  //todo: remove once done
+  infoln('Experimental, not finished. Stopping now.',etError);
+  result:=false;
+
   FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though
   FBinUtilsPrefix:='';
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary

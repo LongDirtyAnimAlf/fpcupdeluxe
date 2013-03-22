@@ -11,7 +11,7 @@ cd /usr/src && make build32 install32 && ldconfig -v -m -R /usr/lib32
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
 
@@ -45,6 +45,9 @@ end;
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
+  //todo: remove once done
+  infoln('Experimental, not finished. Stopping now.',etError);
+  result:=false;
   FBinUtilsPath:='/usr/bin'; //try with regular binutils
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
