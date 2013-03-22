@@ -112,7 +112,11 @@ To use them, you would specify
 --ostarget= (e.g. freebsd, win32,...... the way FPC defines the OS names)
 What you want to build e.g.
 --only=FPCBuildOnly,LazarusBuildOnly
-If there's a cross compiler available for the combination source+target OS/CPU, it will run. Otherwise you will get an error message
+If there's a cross compiler available for the combination source+target OS/CPU, it will run. Otherwise you will get an error message.
+
+For any platform that as an internal linker in FPC (FreeBSD, Linux,..) you can run a Windows cross compiler:
+--cputarget=i386 --ostarget=win32 --only=FPCBuildOnly,LazarusBuildOnly
+When that is done, you can cross compile to Windows using Lazrus.
 
 See fpcup.html for more details on implementing your own cross compilers and extensions.
 
