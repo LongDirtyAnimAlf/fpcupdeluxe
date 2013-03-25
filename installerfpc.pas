@@ -747,7 +747,7 @@ begin
     begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
-    if (ForceDirectoriesUTF8(ProcessEx.CurrentDirectory)<>0) then
+    if not(ForceDirectoriesUTF8(ProcessEx.CurrentDirectory)) then
       begin
       result := False;
       WritelnLog('FPC: Failed to build ppcx64 bootstrap compiler: could not create directory '+ProcessEx.CurrentDirectory);
@@ -781,7 +781,7 @@ begin
     begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
-    if (ForceDirectoriesUTF8(ProcessEx.CurrentDirectory)<>0) then
+    if not(ForceDirectoriesUTF8(ProcessEx.CurrentDirectory)) then
       begin
       result := False;
       WritelnLog('FPC: Failed to build ppc386 bootstrap compiler: could not create directory '+ProcessEx.CurrentDirectory);
