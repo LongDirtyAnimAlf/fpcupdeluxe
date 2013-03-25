@@ -40,8 +40,10 @@ uses
 // windres, so use it.
 {$R fpcup.rc}
 {$ELSE}
-// On other platforms, we trust a previous windows compile or
-// manual windres invocation has updated fpcup.res
+// On other platforms, we trust either
+// - a previous windows compile
+// - manual windres invocation
+// has updated fpcup.res
 {$R fpcup.res}
 {$ENDIF MSWINDOWS}
 
@@ -68,7 +70,7 @@ type
     function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
     {$ENDIF MSWINDOWS}
     function FirstSpaceAfterCommand(CommandLine: string): integer;
-    // Get a value for a key=value pair. Case-insensitive for keys.
+    // Get a value for a key=value pair. Case-insensitive for keys. Expands macros in values.
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
