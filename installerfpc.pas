@@ -80,10 +80,10 @@ type
     function ConfigModule(ModuleName:string): boolean; override;
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
-    // If yes, the bootstrap compiler used will be generated using the trunk sources.
-    // If no, a stable FPC bootstrap compiler will be used.
+    // If yes, an override option will be passed to make (OVERRIDEVERSIONCHECK=1)
+    // If no, latest stable FPC bootstrap compiler needs to be used.
     // This is required information for setting make file optioins
-    property TrunkBootstrapCompiler: boolean read FBootstrapCompilerOverrideVersionCheck;
+    property CompilerOverrideVersionCheck: boolean read FBootstrapCompilerOverrideVersionCheck;
     // Uninstall module
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
@@ -643,7 +643,8 @@ begin
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTPPath+'universal-darwin-ppcuniversal.tar.bz2';
-    FBootstrapCompilerOverrideVersionCheck:=false;
+    // If we're using an old compiler to build trunk, we need this:
+    FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF Darwin}
     {$IFDEF FREEBSD}
     {$IFDEF CPU386}
@@ -696,6 +697,8 @@ begin
       // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
       //doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
+      // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
+      FBootstrapCompilerOverrideVersionCheck:=true;
       {$endif darwin}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
     end;
