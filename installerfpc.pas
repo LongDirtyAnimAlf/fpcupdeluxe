@@ -747,6 +747,12 @@ begin
     begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    if ForceDirectories(ProcessEx.CurrentDirectory)<>0 then
+      begin
+      result := False;
+      WritelnLog('FPC: Failed to build ppcx64 bootstrap compiler: could not create directory '+ProcessEx.CurrentDirectory);
+      exit;
+    end;
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
@@ -775,6 +781,12 @@ begin
     begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    if ForceDirectories(ProcessEx.CurrentDirectory)<>0 then
+      begin
+      result := False;
+      WritelnLog('FPC: Failed to build ppc386 bootstrap compiler: could not create directory '+ProcessEx.CurrentDirectory);
+      exit;
+    end;
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
@@ -798,6 +810,7 @@ begin
     end;
   {$endif darwin}
   OperationSucceeded:=BuildModuleCustom(ModuleName);
+
   {$IFDEF UNIX}
   if OperationSucceeded then
   begin
@@ -821,7 +834,6 @@ begin
   fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
   pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
   end;
-
   {$ENDIF UNIX}
 
   //todo: after fpcmkcfg create a config file for fpkpkg or something
