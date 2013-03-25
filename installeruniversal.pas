@@ -677,7 +677,7 @@ begin
     result:=false;
 end;
 
-// Download from SVN, hg for module
+// Download from SVN, hg, git for module
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 var
   idx:integer;
@@ -702,18 +702,18 @@ begin
     if RemoteURL<>'' then
       begin
       UpdateWarnings:=TStringList.Create;
-      try
-        FSVNClient.Verbose:=FVerbose;
-        FBaseDirectory:=InstallDir;
-        FUrl:=RemoteURL;
-        result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
+        try
+          FSVNClient.Verbose:=FVerbose;
+          FBaseDirectory:=InstallDir;
+          FUrl:=RemoteURL;
+          result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          if UpdateWarnings.Count>0 then
+          begin
+            WritelnLog(UpdateWarnings.Text);
+          end;
+        finally
+          UpdateWarnings.Free;
         end;
-      finally
-        UpdateWarnings.Free;
-      end;
       end;
 
     // Handle HG URLs
@@ -721,18 +721,18 @@ begin
     if RemoteURL<>'' then
       begin
       UpdateWarnings:=TStringList.Create;
-      try
-        FHGClient.Verbose:=FVerbose;
-        FBaseDirectory:=InstallDir;
-        FUrl:=RemoteURL;
-        result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
+        try
+          FHGClient.Verbose:=FVerbose;
+          FBaseDirectory:=InstallDir;
+          FUrl:=RemoteURL;
+          result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          if UpdateWarnings.Count>0 then
+          begin
+            WritelnLog(UpdateWarnings.Text);
+          end;
+        finally
+          UpdateWarnings.Free;
         end;
-      finally
-        UpdateWarnings.Free;
-      end;
       end;
 
     // Handle Git URLs
@@ -742,20 +742,19 @@ begin
     if RemoteURL<>'' then
       begin
       UpdateWarnings:=TStringList.Create;
-      try
-        FGitClient.Verbose:=FVerbose;
-        FBaseDirectory:=InstallDir;
-        FUrl:=RemoteURL;
-        result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
+        try
+          FGitClient.Verbose:=FVerbose;
+          FBaseDirectory:=InstallDir;
+          FUrl:=RemoteURL;
+          result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          if UpdateWarnings.Count>0 then
+          begin
+            WritelnLog(UpdateWarnings.Text);
+          end;
+        finally
+          UpdateWarnings.Free;
         end;
-      finally
-        UpdateWarnings.Free;
       end;
-      end;
-
     end
   else
     result:=false;
