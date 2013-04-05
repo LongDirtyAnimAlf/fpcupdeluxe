@@ -90,7 +90,6 @@ type
   TProcessEx = class(TProcess)
     private
       FExceptionInfoStrings: TstringList;
-      FExecutable: string;
       FExitStatus: integer; //result code/exit status that executable returned with
       FOnError: TErrorFunc;
       FOnErrorM: TErrorMethod;
@@ -110,7 +109,8 @@ type
       procedure SetOnOutput(AValue: TDumpFunc);
       procedure SetOnOutputM(AValue: TDumpMethod);
     public
-      procedure Execute;
+      // Run executable with parameters etc. Comes in place of inherited execute.
+      {%H-}procedure Execute;
       // Executable+parameters. Use Executable and Parameters/ParametersString to assign
       property ResultingCommand: string read GetResultingCommand;
       property Environment:TProcessEnvironment read GetProcessEnvironment;
@@ -223,7 +223,7 @@ procedure TProcessEx.Execute;
     Result := False;
     while Output.NumBytesAvailable > 0 do
     begin
-      ReadBytes := Output.Read(Buffer, BufSize);
+      ReadBytes := {%H-}Output.Read(Buffer, BufSize);
       FOutStream.Write(Buffer, ReadBytes);
       if Assigned(FOnOutput) then
         FOnOutput(Self,copy(pchar(@buffer[0]),1,ReadBytes));
@@ -261,7 +261,7 @@ begin
 
       //todo: debug
       Sleep(50);
-      writeln('FExitStatus for process ',FExecutable,' is: ',(inherited ExitStatus));
+      writeln('FExitStatus for process ',Executable,' is: ',(inherited ExitStatus));
 
       FExitStatus:=inherited ExitStatus;
     except
@@ -404,7 +404,7 @@ end;
 
 function ExecuteCommand(Commandline: string; Verbose: boolean): integer;
 var
-  s:string;
+  s:string='';
 begin
   Result:=ExecuteCommandInDir(Commandline,'',s,Verbose);
 end;
@@ -418,7 +418,7 @@ end;
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose: boolean
   ): integer;
 var
-  s:string;
+  s:string='';
 begin
   Result:=ExecuteCommandInDir(Commandline,Directory,s,Verbose);
 end;
@@ -432,7 +432,7 @@ var
   function GetFirstWord:string;
   var
     i:integer;
-    LastQuote:char;
+    LastQuote:char=#0;
     InQuote:boolean;
   const
     QUOTES = ['"',''''];
