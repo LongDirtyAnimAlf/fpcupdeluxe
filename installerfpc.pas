@@ -323,7 +323,7 @@ begin
   if OperationSucceeded then
     begin
     if FVerbose then
-      infoln('Creating fpc script:',etInfo);
+      infoln('Creating fpc script:',etInfo)
     else
       infoln('Creating fpc script:',etDebug);
     OperationSucceeded:=CreateFPCScript;
