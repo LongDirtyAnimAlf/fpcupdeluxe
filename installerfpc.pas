@@ -188,52 +188,52 @@ begin
 
       if ProcessEx.ExitStatus = 0 then
         begin
-          // Install crosscompiler
-          ProcessEx.Executable := Make;
-          ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-          ProcessEx.Parameters.Clear;
-          infoln('Running Make crossinstall (FPC crosscompiler): '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS, etinfo);
-          ProcessEx.Parameters.Add('FPC='+FCompiler);
-          ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-          {$IFDEF UNIX}
-          ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
-          {$ENDIF UNIX}
-          // Tell make where to find the target binutils if cross-compiling:
-          if CrossInstaller.BinUtilsPath<>'' then
-            ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
-          ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-          ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-          //putting crossinstall before target might help!?!?
-          ProcessEx.Parameters.Add('crossinstall');
-          ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
-          ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
-          if CrossInstaller.BinUtilsPrefix<>'' then
-            begin
-            ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
-            end;
-
-          // Note: consider this as an optional item, so don't fail the function if this breaks.
-          ProcessEx.Execute;
-          if ProcessEx.ExitStatus<>0 then
+        // Install crosscompiler
+        ProcessEx.Executable := Make;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+        ProcessEx.Parameters.Clear;
+        infoln('Running Make crossinstall (FPC crosscompiler): '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS, etinfo);
+        ProcessEx.Parameters.Add('FPC='+FCompiler);
+        ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+        {$IFDEF UNIX}
+        ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+        {$ENDIF UNIX}
+        // Tell make where to find the target binutils if cross-compiling:
+        if CrossInstaller.BinUtilsPath<>'' then
+          ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
+        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        //putting crossinstall before target might help!?!?
+        ProcessEx.Parameters.Add('crossinstall');
+        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
+        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+        if CrossInstaller.BinUtilsPrefix<>'' then
           begin
-            infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etwarning);
-            FCompiler:='////\\\Error trying to compile FPC\|!';
-            {$ifndef win32}
-            //fail if this is not crosswin32-64
-            result:=false;
-            {$endif win32}
-            {$ifndef win64}
-            //fail if this is not crosswin64-32
-            result:=false;
-            {$endif win64}
+          ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+          end;
+
+        // Note: consider this as an optional item, so don't fail the function if this breaks.
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus<>0 then
+          begin
+          infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etwarning);
+          FCompiler:='////\\\Error trying to compile FPC\|!';
+          {$ifndef win32}
+          //fail if this is not crosswin32-64
+          result:=false;
+          {$endif win32}
+          {$ifndef win64}
+          //fail if this is not crosswin64-32
+          result:=false;
+          {$endif win64}
           end
-          else
-            begin
-          {$IFDEF UNIX}
-              result:=CreateFPCScript;
-          {$ENDIF UNIX}
-              GetCompiler;
-            end;
+        else
+          begin
+        {$IFDEF UNIX}
+          result:=CreateFPCScript;
+        {$ENDIF UNIX}
+          GetCompiler;
+          end;
         end;
     end
   else
@@ -276,7 +276,10 @@ begin
   infoln('Running make all for FPC:',etinfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
+    begin
     OperationSucceeded := False;
+    WritelnLog('FPC: Running fpc make all failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+    end;
 
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
@@ -287,7 +290,10 @@ begin
   infoln('Running make install for FPC:',etinfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
+    begin
     OperationSucceeded := False;
+    WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+    end;
   {$ELSE UNIX}
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -307,13 +313,19 @@ begin
   infoln('Running make all install for FPC:',etinfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
+    begin
     OperationSucceeded := False;
+    WritelnLog('FPC: Running fpc make all install failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+    end;
   {$ENDIF UNIX}
 
   {$IFDEF UNIX}
   if OperationSucceeded then
     begin
-    infoln('Creating fpc script:',etDebug);
+    if FVerbose then
+      infoln('Creating fpc script:',etInfo);
+    else
+      infoln('Creating fpc script:',etDebug);
     OperationSucceeded:=CreateFPCScript;
     end;
   {$ENDIF UNIX}
@@ -853,7 +865,10 @@ begin
       infoln('Creating fpc.cfg:',etinfo);
       ProcessEx.Execute;
       if ProcessEx.ExitStatus <> 0 then
+        begin
         OperationSucceeded := False;
+        WritelnLog('FPC: Running fpcmkcfg make all failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+        end;
     {$IFDEF UNIX}
     {$IFDEF cpuarmel}
       // Need to add multiarch library search path

@@ -80,7 +80,7 @@ function ParentDirectoryIsNotRoot(Dir:string):boolean;
 // Get path for Windows per user storage of application data. Useful for storing settings
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
-//Shows non-debug messages on screen; also shows debug messages if DEBUG defined
+// Shows non-debug messages on screen (no logging); also shows debug messages if DEBUG defined
 procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;

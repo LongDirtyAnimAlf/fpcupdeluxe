@@ -269,7 +269,7 @@ begin
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
     if not result then
-      WritelnLog( 'Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
+      WritelnLog('Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
     end
   else
     infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,eterror);
@@ -433,7 +433,7 @@ begin
 
   if ProcessEx.ExitStatus <> 0 then
   begin
-    infoln('Lazarus: buildmodulecustom: make/lazbuild returned error code '+inttostr(ProcessEx.ExitStatus),etDebug);
+    writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code '+inttostr(ProcessEx.ExitStatus),true);
     OperationSucceeded:= false;
     FInstalledLazarus:= '//*\\error/ / \ \';
   end
