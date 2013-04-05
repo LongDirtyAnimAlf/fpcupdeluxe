@@ -332,34 +332,41 @@ begin
 
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
-  begin
+    begin
     GetCompiler;
-  end
+    // Verify it exists
+    if not(FileExistsUTF8(FCompiler)) then
+      begin
+      WritelnLog('FPC: error: could not find compiler '+FCompiler+' that should have been created.',true);
+      OperationSucceeded:=false;
+      end;
+    end
   else
-  begin
+    begin
     FCompiler:='////\\\Error trying to compile FPC\|!';
-  end;
+    OperationSucceeded:=false;
+    end;
 
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
-  begin
+    begin
     //Copy over binutils to new CompilerName bin directory
     try
       for FileCounter:=0 to FBinUtils.Count-1 do
-      begin
+        begin
         FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[FileCounter], IncludeTrailingPathDelimiter(FBinPath)+FBinUtils[FileCounter]);
-      end;
+        end;
       // Also, we can change the make/binutils path to our new environment
       // Will modify fmake as well.
       FMakeDir:=FBinPath;
     except
       on E: Exception do
-      begin
-        infoln('Error copying binutils: '+E.Message,eterror);
+        begin
+        writelnlog('FPC: Error copying binutils: '+E.Message,true);
         OperationSucceeded:=false;
-      end;
+        end;
     end;
-  end;
+    end;
   {$ENDIF MSWINDOWS}
   result:=OperationSucceeded;
 end;

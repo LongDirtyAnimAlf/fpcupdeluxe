@@ -468,6 +468,7 @@ begin
   writeln('  ln -s /usr/bin/i586-mingw32msvc-windres /usr/bin/windres');
   writeln('  see http://wiki.lazarus.freepascal.org/Lazarus_Resources#Checking_you_have_windres');
   {$ENDIF MSWINDOWS}
+  writeln('- if compiling Lazarus, make sure your lhelp is closed.');
   writeln('- try removing all intermediate files by running fpcup with the --clean option');
   writeln('  and/or manually deleting *.ppu/*.a/*.o followed by svn up');
   writeln('- if that does not work: use the --uninstall option to remove all files (including your FPC and lazarus directories)');

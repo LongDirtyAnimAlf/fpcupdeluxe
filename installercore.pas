@@ -98,6 +98,9 @@ type
     function CleanModule(ModuleName: string): boolean; virtual; abstract;
     // Config module
     function ConfigModule(ModuleName: string): boolean; virtual; abstract;
+    // Constructs compiler path from directory and architecture
+    // Corrects for use of our fpc.sh launcher on *nix
+    // Does not verify compiler actually exists.
     function GetCompilerInDir(Dir: string): string;
     // Install update sources
     function GetModule(ModuleName: string): boolean; virtual; abstract;
