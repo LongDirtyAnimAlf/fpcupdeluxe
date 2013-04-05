@@ -481,6 +481,7 @@ begin
     if Verbose then
       PE.OnOutput:=@DumpConsole;
     PE.Execute;
+
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
   finally

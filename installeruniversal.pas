@@ -243,7 +243,7 @@ begin
   ProcessEx.Parameters.Add('--add-package');
   ProcessEx.Parameters.Add(PackageAbsolutePath);
   ProcessEx.Execute;
-  result:= ProcessEx.ExitStatus=0;
+  result := ProcessEx.ExitStatus=0;
   if not result then
     WritelnLog('InstallerUniversal: error trying to add package '+PackagePath);
 end;
@@ -626,7 +626,11 @@ begin
             key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
             LazarusConfig.SetVariable(xmlfile,key+'Format/Version','2');
             LazarusConfig.SetVariable(xmlfile,key+'Title/Value',ModuleName);
+            infoln('Going to register external tool '+Directive+GetExeExt,etDebug);
             LazarusConfig.SetVariable(xmlfile,key+'Filename/Value',Directive+GetExeExt);
+
+            // If we're registering external tools, we should look for associated/
+            // detailed directives as well:
             Directive:=GetValue('RegisterExternalToolCmdLineParams',sl);
             if Directive<>'' then
               LazarusConfig.SetVariable(xmlfile,key+'CmdLineParams/Value',Directive);
@@ -650,18 +654,22 @@ begin
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
             end;
 
-
           Directive:=GetValue('RegisterHelpViewer',sl);
           if Directive<>'' then
             begin
             xmlfile:=HelpConfig;
             key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
+            infoln('Going to register help viewer '+Directive+GetExeExt,etDebug);
             LazarusConfig.SetVariable(xmlfile,key,Directive+GetExeExt);
             end;
 
           // Register path to help source if given
           Directive:=GetValue('RegisterLazDocPath',sl);
-          LazDocPathAdd(directive, LazarusConfig);
+          if Directive<>'' then
+            begin
+            infoln('Going to add docpath '+Directive,etDebug);
+            LazDocPathAdd(Directive, LazarusConfig);
+            end;
         except
           on E: Exception do
           begin
@@ -703,6 +711,7 @@ begin
     RemoteURL:=GetValue('SVNURL',sl);
     if RemoteURL<>'' then
       begin
+      infoln('Going to download/update from SVN repository '+RemoteURL,etDebug);
       UpdateWarnings:=TStringList.Create;
         try
           FSVNClient.Verbose:=FVerbose;
