@@ -96,7 +96,7 @@ type
 
   TFPCNativeInstaller = class(TFPCInstaller)
   protected
-    // Build module descendant customisation
+    // Build module descendant customisation. Runs make all/install for native FPC
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
     constructor Create;
@@ -312,7 +312,10 @@ begin
 
   {$IFDEF UNIX}
   if OperationSucceeded then
+    begin
+    infoln('Creating fpc script:',etDebug);
     OperationSucceeded:=CreateFPCScript;
+    end;
   {$ENDIF UNIX}
 
   // Let everyone know of our shiny new compiler:
@@ -378,9 +381,11 @@ begin
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
+  {$IFDEF UNIX}
 var
   FPCScript:string;
   TxtFile:Text;
+  {$ENDIF UNIX}
 begin
   {$IFDEF UNIX}
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
@@ -389,7 +394,11 @@ begin
   if FileExists(FPCScript) then
   begin
     infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etinfo);
-    sysutils.DeleteFile(FPCScript);
+    if not(sysutils.DeleteFile(FPCScript)) then
+    begin
+      infoln('Error deleting existing launcher script for FPC:'+FPCScript,eterror);
+      Exit(false);
+    end;
   end;
   AssignFile(TxtFile,FPCScript);
   Rewrite(TxtFile);

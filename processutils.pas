@@ -259,10 +259,6 @@ begin
       end;
       ReadOutput;
 
-      //todo: debug
-      Sleep(50);
-      writeln('FExitStatus for process ',Executable,' is: ',(inherited ExitStatus));
-
       FExitStatus:=inherited ExitStatus;
     except
       // Leave exitstatus as proc_internalerror
