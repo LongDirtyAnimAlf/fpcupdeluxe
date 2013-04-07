@@ -9,6 +9,7 @@ interface
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,dynlibs;
 //todo: use processex callback to report on errors like it's done in installerfpc
+//
 
 Const
   Sequences=
