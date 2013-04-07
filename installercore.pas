@@ -991,14 +991,18 @@ destructor TInstaller.Destroy;
 begin
   if Assigned(FBinUtils) then
     FBinUtils.Free;
+  if Assigned(FLogVerbose) then
+    FLogVerbose.Free;
+  if Assigned(FErrorLog) then
+    FErrorLog.Free;
+  if Assigned(ProcessEx.OnErrorM) then
+    ProcessEx.OnErrorM:=nil;
+  if Assigned(ProcessEx.OnError) then
+    ProcessEx.OnError:=nil;
   ProcessEx.Free;
   FGitClient.Free;
   FHGClient.Free;
   FSVNClient.Free;
-  if Assigned(FLogVerbose) then
-    FLogVerbose.Free;
-  ProcessEx.OnErrorM:=nil;
-  FErrorLog.Free;
   inherited Destroy;
 end;
 
