@@ -7,9 +7,9 @@ unit installerLazarus;
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,dynlibs;
+  Classes, SysUtils, installerCore, m_crossinstaller,dynlibs,processutils;
 //todo: use processex callback to report on errors like it's done in installerfpc
-//
+
 
 Const
   Sequences=
@@ -169,7 +169,7 @@ type
 
 
 implementation
-uses fpcuputil, fileutil, processutils, updatelazconfig
+uses fpcuputil, fileutil, updatelazconfig
   {$IFDEF UNIX}
     ,baseunix
   {$ENDIF UNIX}
@@ -185,6 +185,7 @@ var
 begin
   CrossInstaller:=GetCrossInstaller;
   infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',etinfo);
+  FErrorLog.Clear;
   if Assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils',eterror)
@@ -270,7 +271,8 @@ begin
     ProcessEx.Execute;
     result:= ProcessEx.ExitStatus =0;
     if not result then
-      WritelnLog('Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform);
+      WritelnLog('Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform+LineEnding+
+        'Details: '+FErrorLog.Text,true);
     end
   else
     infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,eterror);
@@ -301,6 +303,7 @@ begin
   begin
     // Make all (should include lcl & ide)
     // distclean was already run; otherwise specify make clean all
+    FErrorLog.Clear;
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
@@ -348,7 +351,7 @@ begin
         exit;
       end;
     end;
-    ProcessEx.Execute;
+    ProcessEx.Execute; //check for exitcode takes place further below
 
     // Set up debugger if building the IDE
     {$IFDEF MSWINDOWS}
@@ -406,6 +409,7 @@ begin
     else
     begin
       ProcessEx.Executable := LazBuildApp;
+      FErrorLog.Clear;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
@@ -434,7 +438,8 @@ begin
 
   if ProcessEx.ExitStatus <> 0 then
   begin
-    writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code '+inttostr(ProcessEx.ExitStatus),true);
+    writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+      'Details: '+FErrorLog.Text,true);
     OperationSucceeded:= false;
     FInstalledLazarus:= '//*\\error/ / \ \';
   end

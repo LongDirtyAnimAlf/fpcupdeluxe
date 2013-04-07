@@ -51,7 +51,6 @@ type
   TFPCInstaller = class(TInstaller)
   private
     FBinPath: string;
-    FErrorLog: TStringList;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -73,8 +72,6 @@ type
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
-    // Get processerrors and put them into FErrorLog
-    procedure ProcessError(Sender:TProcessEx;IsException:boolean);
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
     //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
@@ -772,12 +769,6 @@ begin
   InitDone:=result;
 end;
 
-procedure TFPCInstaller.ProcessError(Sender: TProcessEx; IsException: boolean);
-begin
-  // Add exception info generated from processex
-  FErrorLog.AddStrings(Sender.ExceptionInfoStrings);
-end;
-
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   FPCCfg: string;
@@ -1089,15 +1080,11 @@ FCompiler := '';
 FSVNDirectory := '';
 FMakeDir :='';
 
-FErrorLog:=TStringList.Create;;
-ProcessEx.OnErrorM:=@(ProcessError);
 InitDone:=false;
 end;
 
 destructor TFPCInstaller.Destroy;
 begin
-  ProcessEx.OnErrorM:=nil;
-  FErrorLog.Free;
   inherited Destroy;
 end;
 

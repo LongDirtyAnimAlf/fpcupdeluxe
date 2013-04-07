@@ -24,6 +24,8 @@ type
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FDesiredRevision: string;
+    // Stores tprocessex exception info:
+    FErrorLog: TStringList;
     FGitClient: TGitClient;
     FHGClient: THGClient;
     FLog: TLogger;
@@ -70,6 +72,8 @@ type
     // Sets the search/binary path to NewPath or adds NewPath to path:
     procedure SetPath(NewPath: string; Prepend: boolean);
   public
+    // Get processerrors and put them into FErrorLog
+    procedure ProcessError(Sender:TProcessEx;IsException:boolean);
     // base directory for installation (fpcdir, lazdir,... option)
     property BaseDirectory: string write FBaseDirectory;
     // compiler to use for building. Specify empty string when using bootstrap compiler.
@@ -935,6 +939,12 @@ begin
     infoln('Set path to: ' + NewPath,etdebug);
 end;
 
+procedure TInstaller.ProcessError(Sender: TProcessEx; IsException: boolean);
+begin
+  // Add exception info generated from processex
+  FErrorLog.AddStrings(Sender.ExceptionInfoStrings);
+end;
+
 procedure TInstaller.WritelnLog(msg: string; ToConsole: boolean);
 begin
   if Assigned(FLog) then
@@ -973,6 +983,8 @@ begin
   // Set up verbose log: will be done in dumpoutput
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;
+  FErrorLog := TStringList.Create;
+  ProcessEx.OnErrorM:=@(ProcessError);
 end;
 
 destructor TInstaller.Destroy;
@@ -985,6 +997,8 @@ begin
   FSVNClient.Free;
   if Assigned(FLogVerbose) then
     FLogVerbose.Free;
+  ProcessEx.OnErrorM:=nil;
+  FErrorLog.Free;
   inherited Destroy;
 end;
 
