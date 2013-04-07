@@ -58,8 +58,9 @@ uses
   Classes, SysUtils, process, strutils;
 
 const
-  // Error code/result code:
-  PROC_INTERNALERROR=-1;
+  // Internal error code/result codes:
+  PROC_INTERNALERROR=-1; //
+  PROC_INTERNALEXCEPTION=-2; //exception while running code
 
 type
   TProcessEx=class; //forward
@@ -119,7 +120,9 @@ type
       property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
       // Return code/exit status that the process returned with. Often 0 for success.
       property ExitStatus:integer read FExitStatus;
+      // Use callback to catch error messages
       property OnError:TErrorFunc read FOnError write SetOnError;
+      // Use callback to catch error messages
       property OnErrorM:TErrorMethod read FOnErrorM write SetOnErrorM;
       property OnOutput:TDumpFunc read FOnOutput write SetOnOutput;
       property OnOutputM:TDumpMethod read FOnOutputM write SetOnOutputM;
@@ -275,7 +278,7 @@ begin
     begin
     FExceptionInfoStrings.Add('Exception calling '+Executable+' '+Parameters.Text);
     FExceptionInfoStrings.Add('Details: '+E.ClassName+'/'+E.Message);
-    FExitStatus:=-2;
+    FExitStatus:=PROC_INTERNALEXCEPTION;
     if Assigned(OnError) then
       OnError(Self,true);
     end;
@@ -445,7 +448,7 @@ var
           begin
           InQuote:=false;
           delete(Commandline,i,1);
-          i:=i-1
+          i:=i-1;
           end;
         end
       else
@@ -453,7 +456,7 @@ var
         InQuote:=True;
         LastQuote:=Commandline[i];
         delete(Commandline,i,1);
-        i:=i-1
+        i:=i-1;
         end;
     i:=i+1;
     end;

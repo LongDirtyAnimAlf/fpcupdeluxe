@@ -8,7 +8,7 @@ interface
 
 uses
   Classes, SysUtils, installerCore, m_crossinstaller,dynlibs;
-
+//todo: use processex callback to report on errors like it's done in installerfpc
 
 Const
   Sequences=
@@ -565,6 +565,7 @@ begin
   finally
     LazarusConfig.Free;
   end;
+
   if UpperCase(ModuleName)='BIGIDE' then
   begin
     // We might need to add a default staticpackages if it doesn't exist yet.

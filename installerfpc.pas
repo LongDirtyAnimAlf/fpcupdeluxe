@@ -5,7 +5,7 @@ unit installerFpc;
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller;
+  Classes, SysUtils, installerCore, m_crossinstaller, processutils;
 
 Const
   Sequences=
@@ -51,6 +51,7 @@ type
   TFPCInstaller = class(TInstaller)
   private
     FBinPath: string;
+    FErrorLog: TStringList;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -61,14 +62,19 @@ type
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
     function GetCompilerVersion(CompilerPath: string): string;
+    // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
     function DownloadBootstrapCompiler: boolean;
+    // Another way to get the compiler version string
+    //todo: choose either GetCompilerVersion or GetFPCVersion
     function GetFPCVersion: string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
+    // Get processerrors and put them into FErrorLog
+    procedure ProcessError(Sender:TProcessEx;IsException:boolean);
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
     //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
@@ -119,7 +125,7 @@ type
 
 implementation
 
-uses fpcuputil,fileutil,processutils
+uses fpcuputil,fileutil
   {$IFDEF UNIX}
     ,baseunix
   {$ENDIF UNIX}
@@ -237,7 +243,10 @@ begin
         end;
     end
   else
+    begin
     infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
+    result:=false;
+    end;
 end;
 
 
@@ -262,6 +271,7 @@ begin
   // Make all should use generated compiler internally for unit compilation
   {$IFDEF UNIX}
   // the long way: make all, see where to install, install
+  FErrorLog.Clear;
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
@@ -278,10 +288,12 @@ begin
   if ProcessEx.ExitStatus <> 0 then
     begin
     OperationSucceeded := False;
-    WritelnLog('FPC: Running fpc make all failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+    WritelnLog('FPC: Running fpc make all failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+      'Details: '+FErrorLog.Text,true);
     end;
 
   ProcessEx.Parameters.Clear;
+  FErrorLog.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -292,10 +304,12 @@ begin
   if ProcessEx.ExitStatus <> 0 then
     begin
     OperationSucceeded := False;
-    WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+    WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+      'Details: '+FErrorLog.Text,true);
     end;
   {$ELSE UNIX}
   ProcessEx.Executable := Make;
+  FErrorLog.Clear;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
@@ -315,7 +329,8 @@ begin
   if ProcessEx.ExitStatus <> 0 then
     begin
     OperationSucceeded := False;
-    WritelnLog('FPC: Running fpc make all install failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+    WritelnLog('FPC: Running fpc make all install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+      'Details: '+FErrorLog.Text,true);
     end;
   {$ENDIF UNIX}
 
@@ -638,7 +653,7 @@ begin
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
       end;
     {$ELSE}
-    //Win32
+    // Win32
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
@@ -755,6 +770,12 @@ begin
   SetPath(FBinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true);
   {$ENDIF UNIX}
   InitDone:=result;
+end;
+
+procedure TFPCInstaller.ProcessError(Sender: TProcessEx; IsException: boolean);
+begin
+  // Add exception info generated from processex
+  FErrorLog.AddStrings(Sender.ExceptionInfoStrings);
 end;
 
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
@@ -1068,11 +1089,15 @@ FCompiler := '';
 FSVNDirectory := '';
 FMakeDir :='';
 
+FErrorLog:=TStringList.Create;;
+ProcessEx.OnErrorM:=@(ProcessError);
 InitDone:=false;
 end;
 
 destructor TFPCInstaller.Destroy;
 begin
+  ProcessEx.OnErrorM:=nil;
+  FErrorLog.Free;
   inherited Destroy;
 end;
 
