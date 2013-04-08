@@ -369,6 +369,7 @@ var
   exec,output:string;
   Workingdir:string;
 begin
+  result:=true; //not finding any instructions at all should not be a problem.
   Workingdir:=GetValue('Workingdir',sl);
   for i:=1 to MAXINSTRUCTIONS do
     begin
