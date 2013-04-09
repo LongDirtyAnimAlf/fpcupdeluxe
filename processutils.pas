@@ -59,8 +59,8 @@ uses
 
 const
   // Internal error code/result codes:
-  PROC_INTERNALERROR=-1; //
-  PROC_INTERNALEXCEPTION=-2; //exception while running code
+  PROC_INTERNALERROR=-1; // error while running process code in this unit
+  PROC_INTERNALEXCEPTION=-2; //exception while running process code in this unit
 
 type
   TProcessEx=class; //forward
@@ -279,8 +279,10 @@ begin
     FExceptionInfoStrings.Add('Exception calling '+Executable+' '+Parameters.Text);
     FExceptionInfoStrings.Add('Details: '+E.ClassName+'/'+E.Message);
     FExitStatus:=PROC_INTERNALEXCEPTION;
-    if Assigned(OnError) then
-      OnError(Self,true);
+    if (Assigned(OnError) or Assigned(OnErrorM)) then
+      OnError(Self,false)
+    else
+      OnErrorM(Self,false);
     end;
   end;
 end;

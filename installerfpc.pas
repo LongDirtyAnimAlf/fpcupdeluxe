@@ -281,13 +281,24 @@ begin
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   infoln('Running make all for FPC:',etinfo);
-  ProcessEx.Execute;
-  if ProcessEx.ExitStatus <> 0 then
-    begin
-    OperationSucceeded := False;
-    WritelnLog('FPC: Running fpc make all failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
-      'Details: '+FErrorLog.Text,true);
-    end;
+  try
+    // At least on 2.7.1 we get access violations running fpc make
+    // perhaps this try..except isolates that
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      OperationSucceeded := False;
+      WritelnLog('FPC: Running fpc make all failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+        'Details: '+FErrorLog.Text,true);
+      end;
+  except
+    on E: Exception do
+      begin
+      OperationSucceeded := False;
+      WritelnLog('FPC: Running fpc make all install failed with an exception!'+LineEnding+
+        'Details: '+E.Message,true);
+      end;
+  end;
 
   ProcessEx.Parameters.Clear;
   FErrorLog.Clear;
@@ -297,14 +308,26 @@ begin
   ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   ProcessEx.Parameters.Add('install');
   infoln('Running make install for FPC:',etinfo);
-  ProcessEx.Execute;
-  if ProcessEx.ExitStatus <> 0 then
-    begin
-    OperationSucceeded := False;
-    WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
-      'Details: '+FErrorLog.Text,true);
-    end;
-  {$ELSE UNIX}
+  try
+    // At least on 2.7.1 Windows we get access violations running fpc make
+    // perhaps this try..except isolates that
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      OperationSucceeded := False;
+      WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+        'Details: '+FErrorLog.Text,true);
+      end;
+  except
+    on E: Exception do
+      begin
+      OperationSucceeded := False;
+      WritelnLog('FPC: Running fpc make all install failed with an exception!'+LineEnding+
+        'Details: '+E.Message,true);
+      end;
+  end;
+
+  {$ELSE UNIX} // Windows
   ProcessEx.Executable := Make;
   FErrorLog.Clear;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -322,13 +345,24 @@ begin
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
   infoln('Running make all install for FPC:',etinfo);
-  ProcessEx.Execute;
-  if ProcessEx.ExitStatus <> 0 then
-    begin
-    OperationSucceeded := False;
-    WritelnLog('FPC: Running fpc make all install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
-      'Details: '+FErrorLog.Text,true);
-    end;
+  try
+    // At least on 2.7.1 we get access violations running fpc make
+    // perhaps this try..except isolates that
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      OperationSucceeded := False;
+      WritelnLog('FPC: Running fpc make all install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+        'Details: '+FErrorLog.Text,true);
+      end;
+  except
+    on E: Exception do
+      begin
+      OperationSucceeded := False;
+      WritelnLog('FPC: Running fpc make all install failed with an exception!'+LineEnding+
+        'Details: '+E.Message,true);
+      end;
+  end;
   {$ENDIF UNIX}
 
   {$IFDEF UNIX}

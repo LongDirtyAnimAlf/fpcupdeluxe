@@ -243,11 +243,19 @@ begin
   ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
   ProcessEx.Parameters.Add('--add-package');
   ProcessEx.Parameters.Add(PackageAbsolutePath);
-  ProcessEx.Execute;
-  result := ProcessEx.ExitStatus=0;
-  if not result then
-    WritelnLog('InstallerUniversal: error trying to add package '+PackagePath+LineEnding+
-      'Details: '+FErrorLog.Text,true);
+  try
+    ProcessEx.Execute;
+    result := ProcessEx.ExitStatus=0;
+    if not result then
+      WritelnLog('InstallerUniversal: error trying to add package '+PackagePath+LineEnding+
+        'Details: '+FErrorLog.Text,true);
+  except
+    on E: Exception do
+      begin
+      WritelnLog('InstallerUniversal: exception trying to add package '+PackagePath+LineEnding+
+        'Details: '+E.Message,true);
+      end;
+  end;
 end;
 
 function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;
@@ -377,9 +385,17 @@ begin
     // Skip over missing numbers:
     if exec='' then continue;
     if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
-    result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
-    if not result then
-      break;
+    try
+      result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
+      if not result then
+        break;
+    except
+      on E: Exception do
+        begin
+        WritelnLog('InstallerUniversal: exception trying to execute '+exec+LineEnding+
+          'Details: '+E.Message,true);
+        end;
+    end;
     end;
 end;
 
