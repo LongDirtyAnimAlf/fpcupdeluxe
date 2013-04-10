@@ -103,6 +103,7 @@ begin
   writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
+  writeln('');
   writeln(' binutilsdir=<dir>     Windows only:');
   writeln('                       Directory where make, patch etc');
   writeln('                       (the binutils) are located. If make does not');
@@ -142,6 +143,15 @@ begin
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
   writeln(' keeplocalchanges      Keep locally modified files (normally these would be');
   writeln('                       backed up as .diff files before doing svn revert.');
+  writeln(' inifile=<file>        Reads in ini file with options.');
+  writeln('                       Example ini file:');
+  writeln('[General]');
+  writeln('help=true ; Use true for options that do not normally have arguments');
+  writeln('binutilsdir=c:\dev\binutils');
+  writeln('                       Options can be overwritten by command line parameters.');
+  writeln('');
+  writeln(' inifilesection=<sec>  Section name to be used if an @file is specified.');
+  writeln('                       If not given, use [General]');
   writeln(' installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,');
   writeln('                       Lazarus in <dir>\lazarus\, bootstrap compiler in ');
   writeln('                       <dir>\fpcbootstrap\, (Windows only) binutils in ');
@@ -202,24 +212,26 @@ var
   bNoConfirm,bHelp,bVersion:boolean;
   sConfirm:string;
   Options:TCommandLineOptions;
-  sInstallDir,s:string; // Root installation directory
-  bHaveInstalldir:boolean; //Has user specified a non-standard install dir?
-  sLogFile:string; //Filename for log
+  sIniFile: string;
+  sInstallDir,s: string; // Root installation directory
+  bHaveInstalldir: boolean; //Has user specified a non-standard install dir?
+  sLogFile: string; //Filename for log
 begin
   Options:=TCommandLineOptions.Create;
   try
     result:=-1; //no error
-    // Load ini file (if present); if user asked for specific
-    // - ini file (using --inioptions=bla.ini)
-    // - section/profile (using --profile=johndoe)
-    // then rather load that
-    {
-    Options.IniFile:='fpcupoptions.ini';
-    Options.CaseSensitive:=false;
-    }
     try
-      // All directories specified here should be cleaned up: absolute paths without trailing delimiter
+      sIniFile:=Options.GetOption('','inifile','');
+      if sIniFile<>'' then
+      begin
+        Options.IniFileSection:=Options.GetOption('','inisection','General');
+        Options.CaseSensitive:=false; //easier when dealing with ini files
+        // Setting this option loads the file:
+        Options.IniFile:=sIniFile;
+      end;
+
       {$IFDEF MSWINDOWS}
+      // All directories specified: absolute paths without trailing delimiter
       sInstallDir:=Options.GetOption('','installdir','');
       if sInstallDir='' then begin
         sInstallDir:='C:\development';
@@ -233,7 +245,7 @@ begin
       FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap')));
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
-      {$ELSE}
+      {$ELSE} //*nix
       //todo: don't expand home dirs here, do it if possible after we've saved the options to the shortcut so it can be used with other users as well
       sInstallDir:=Options.GetOption('','installdir','');
       if sInstallDir='' then begin
@@ -249,6 +261,7 @@ begin
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
       {$ENDIF MSWINDOWS}
+
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
         {$IFDEF MSWINDOWS}
@@ -258,8 +271,14 @@ begin
         {$ENDIF MSWINDOWS}
       else
         FInstaller.LogFileName:=sLogFile;
-
-      FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
+      // Deal with options coming from ini (e.g. Clean=true)
+      try
+        FInstaller.Clean:=Options.GetOption('','clean',false);
+      except
+        // option did not have an argument
+        //todo: use proper exception in commandline instead of general one, catch it here
+        FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
+      end;
       FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
       FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
@@ -280,8 +299,19 @@ begin
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
-      bHelp:=Options.GetOptionNoParam('h','help',false);
-      FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+      // Deal with options coming from ini (e.g. Help=true)
+      try
+        bHelp:=Options.GetOption('h','help',false);
+      except
+        // option did not have an argument
+        bHelp:=Options.GetOptionNoParam('h','help',false);
+      end;
+      try
+        FInstaller.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
+      except
+        // option did not have an argument
+        FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+      end;
       FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
       // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
       if (FInstaller.ShortCutNameLazarus=DirectorySeparator) then
@@ -327,10 +357,35 @@ begin
           IncludeTrailingPathDelimiter(sInstallDir)+'config_'+ExtractFileName(ExcludeTrailingPathDelimiter(FInstaller.LazarusDirectory))
       else
         FInstaller.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
-      FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
-      FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
-      bVersion:=Options.GetOptionNoParam('','version',false);
-      bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
+
+      // Deal with options coming from ini (e.g. Help=true)
+      try
+        FInstaller.Uninstall:=Options.GetOption('','uninstall',false);
+      except
+        // option did not have an argument
+        FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
+      end;
+
+      try
+        // do not add to default options
+        FInstaller.Verbose:=Options.GetOption('','verbose',false,false);
+      except
+        // option did not have an argument
+        FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
+      end;
+      try
+        //do not add to default options
+        bVersion:=Options.GetOption('','version',false,false);
+      except
+        // option did not have an argument
+        bVersion:=Options.GetOptionNoParam('','version',false);
+      end;
+      try
+        bNoConfirm:=Options.GetOption('','noconfirm',false);
+      except
+        // option did not have an argument
+        bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
+      end;
     except
       on E:Exception do
       begin

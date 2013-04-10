@@ -51,6 +51,22 @@ Hint: after the first run, you can add/remove packages, set up your settings as 
 You can then run fpcup --only=fpc,lazarus to only update FPC and Lazarus sources, which saves time, as you're not rebuilding help, installing packages, etc.
 Of course, you could run the full version e.g. once per day to make sure all external repositories etc are up to date.
 
+
+Storing your settings
+=====================
+After running, fpcup creates a batch/shell script file by default to run it again with the same parameters.
+
+Additionally, you can save the settings in an ini file and call fpcup --inifile=theinifile.ini
+example - the parameters not specified are default settings and can be overruled when calling from the command line:
+
+[general]
+fpcurl=http://svn.freepascal.org/svn/fpc/trunk
+keeplocalchanges=true
+
+As you can see, parameters like --keeplocalchanges that have no arguments on the command line versions are represented like keeplocalchanges=true in the ini file.
+
+Compiling
+=========
 If you want to compile fpcup from source, please compile hgversion.pas first; this should give a hgversion executable, which is used by the fpcup project build action (Compilation/Execute Before command) to generate the current fpcup version info into revision.inc
 If you don't do this, you'll probably get incorrect version information in fpcup or compilation problems ("Can't open include file "revision.inc"").
 
@@ -179,11 +195,10 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit 68da47860894
-Build date: Wed Jul 04 09:04:57 2012 +0200
-Compiled for CPU: i386 on Win32
+Version: based on commit 639611f10ea9+ (Wed Apr 10 08:13:31 2013 +0200)
+Build date: 2013/04/10 09:55:27
+Compiled for CPU: i386 on win32
 
-Info: 4-7-2012 9:19:23: fpcup started.
 DON'T PANIC!
 Everything below is optional...
 
@@ -191,112 +206,152 @@ fpcup --<options>
 
 fpcup can work with modules - see "only", "skip" below
 List of all modules:
-default
-defaultwin32
-crosswin32-64
-defaultclean
-defaultwin32clean
-crosswin32-64Clean
-defaultuninstall
-defaultwin32uninstall
-FPC
-FPCuninstall
-FPCclean
-FPCCleanOnly
-FPCGetOnly
-FPCBuildOnly
-lazarus
+bgracontrols
+bgracontrolsclean
+bgracontrolsuninstall
 BIGIDE
-lazbuild
-USERIDE
-lazarusuninstall
-lazarusclean
 BIGIDEclean
-LazarusCleanOnly
-LazarusGetOnly
-LazarusBuildOnly
-LazarusConfigOnly
-helpfpc
-helpfpcuninstall
-helplazarus
-helplazarusuninstall
-HelpFPCCleanOnly
-helplazarusclean
-HelpFPCGetOnly
-HelpLazarusGetOnly
-HelpFPCBuildOnly
-HelpFPCBuildOnly
-HelpLazarusBuildOnly
-HelpFPCConfigOnly
-HelpLazarusConfigOnly
-suggestedpackages
-suggestedpackagesclean
-suggestedpackagesuninstall
-lhelp
-lhelpclean
-lhelpuninstall
-lazdatadesktop
-lazdatadesktopclean
-lazdatadesktopuninstall
-doceditor
-doceditorclean
-doceditoruninstall
-synapse
-synapseclean
-synapseuninstall
-lazarus_ccr
-lazarus_ccrclean
-lazarus_ccruninstall
-fpspreadsheet
-fpspreadsheetclean
-fpspreadsheetuninstall
-tiopf_source
-tiopf_sourceclean
-tiopf_sourceuninstall
-tiopf_demos
-tiopf_demosclean
-tiopf_demosuninstall
-tiopf_docs
-tiopf_docsclean
-tiopf_docsuninstall
-tiopf
-tiopfclean
-tiopfuninstall
-fpcdocs
-fpcdocsclean
-fpcdocsuninstall
-lazres
-lazresclean
-lazresuninstall
-synapsetrunk
-synapsetrunkclean
-synapsetrunkuninstall
-pascalsane
-pascalsaneclean
-pascalsaneuninstall
-leptonica
-leptonicaclean
-leptonicauninstall
-tesseract
-tesseractclean
-tesseractuninstall
-OCRivist
-OCRivistclean
-OCRivistuninstall
 bigidepackages
 bigidepackagesclean
 bigidepackagesuninstall
+brookframework
+brookframeworkclean
+brookframeworkuninstall
+crosswin32-64
+crosswin32-64Clean
+crosswin64-32
+crosswin64-32Clean
+default
+defaultclean
+defaultuninstall
+defaultwin32
+defaultwin32clean
+defaultwin32uninstall
+defaultwin64
+defaultwin64uninstall
+doceditor
+doceditorclean
+doceditoruninstall
+fblib
+fblibclean
+fblibuninstall
+FPC
+FPCBuildOnly
+FPCclean
+FPCCleanOnly
+fpcdocs
+fpcdocsclean
+fpcdocsuninstall
+FPCGetOnly
+FPCuninstall
+fpcup
+fpcupclean
+fpcupuninstall
+fpspreadsheet
+fpspreadsheetclean
+fpspreadsheetuninstall
+greyhound
+greyhoundclean
+greyhounduninstall
+helpfpc
+HelpFPCBuildOnly
+HelpFPCCleanOnly
+HelpFPCConfigOnly
+HelpFPCGetOnly
+helpfpcuninstall
+helplazarus
+HelpLazarusBuildOnly
+helplazarusclean
+HelpLazarusConfigOnly
+HelpLazarusGetOnly
+helplazarusuninstall
+installerlazwin
+installerlazwinclean
+installerlazwinuninstall
+kzdesktop
+kzdesktopclean
+kzdesktopuninstall
+lazarus
+lazarus_ccr
+lazarus_ccrclean
+lazarus_ccruninstall
+LazarusBuildOnly
+lazarusclean
+LazarusCleanOnly
+LazarusConfigOnly
+LazarusGetOnly
+lazarusuninstall
+lazbuild
+lazdatadesktop
+lazdatadesktopclean
+lazdatadesktopuninstall
+lazpackager
+lazpackagerclean
+lazpackageruninstall
+lazpaint
+lazpaintclean
+lazpaintuninstall
+lazres
+lazresclean
+lazresuninstall
+leptonica
+leptonicaclean
+leptonicauninstall
+lhelp
+lhelpclean
+lhelpuninstall
+ljgridutils
+ljgridutilsclean
+ljgridutilsuninstall
+lnet
+lnetclean
+lnetuninstall
+mupdf
+mupdfclean
+mupdfuninstall
+OCRivist
+OCRivistclean
+OCRivistuninstall
+pascalsane
+pascalsaneclean
+pascalsaneuninstall
+rx
+rxclean
+rxuninstall
+suggestedpackages
+suggestedpackagesclean
+suggestedpackagesuninstall
+synapse
+synapseclean
+synapsetrunk
+synapsetrunkclean
+synapsetrunkuninstall
+synapseuninstall
+tesseract
+tesseractclean
+tesseractuninstall
+tiopf
+tiopfclean
+tiopfuninstall
+USERIDE
+vampyre
+vampyreclean
+vampyreuninstall
+zeostesting
+zeostestingclean
+zeostestinguninstall
 
 The following modules run by default:
 SUGGESTEDPACKAGES
-LHELP
 LAZDATADESKTOP
 DOCEDITOR
 FPCDOCS
 LAZRES
+LAZPACKAGER
 
 Options are not required; they include:
  help                  Show this text
+
  binutilsdir=<dir>     Windows only:
                        Directory where make, patch etc
                        (the binutils) are located. If make does not
@@ -306,7 +361,7 @@ Options are not required; they include:
                        FPC directory for use by FPC. This gives
                        a more standard FPC environment.
                        Make sure it is not in the fpcdir directory
- clean                 Remove files created with build.
+ clean                 Remove files created with build. 
                        Can be combined with skip and only options.
  configfile=<filename> Load module definition file from <filename>.
                        Default: fpcup.ini in the program directory.
@@ -330,25 +385,47 @@ Options are not required; they include:
                          or <lazlinkname>_update if lazlinkname specified
  fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
                        http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
+                       Accepts shortcuts: 2.7.1,trunk,2.6.3,fixes,2.6.2,2.6.0
  fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
                        E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
  fpcrevision=<number>  Revert to FPC SVN revision <number>
  keeplocalchanges      Keep locally modified files (normally these would be
                        backed up as .diff files before doing svn revert.
+ inifile=<file>        Reads in ini file with options.
+                       Example ini file:
+[General]
+help=true ; Use true for options that do not normally have arguments
+binutilsdir=c:\dev\binutils
+                       Options can be overwritten by command line parameters.
+
+ inifilesection=<sec>  Section name to be used if an @file is specified.
+                       If not given, use [General]
+ installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,
+                       Lazarus in <dir>\lazarus\, bootstrap compiler in 
+                       <dir>\fpcbootstrap\, (Windows only) binutils in 
+                       <dir>\fpcbootstrap\, extra modules in <dir>\extras\ 
+                       and configuration in <dir>\config\. See fpcdir, lazdir,
+                       fpcbootstrapdir, binutilsdir, primary-config-path
+                       for the defaults when installdir is not specified.
+                       You can also use these to override the defaults given
+                       by installdir.
  lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\
                        or ~\lazarus\
  lazlinkname=<name>    Name of the shortcut to the Lazarus install.
                        On Windows: a desktop shortcut.
                        On other systems: a shell script in your home directory.
                        If empty specified, no shortcut will be produced.
-                       Default: Lazarus_trunk
+                       Default: depends on Lazarus directory
  lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.
  lazrevision=<number>  Revert to Lazarus SVN revision <number>
- lazURL=<URL>          SVN URL from which to download; default:
+ lazURL=<URL>          SVN URL from which to download; default: 
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
+                       Accepts shortcuts: trunk,1.1,1.0.8,1.0.6,1.0
  lclplatform=<name>    LCL widget set. <name> has to be one of the following:
                        carbon,fpgui,gtk,gtk2,qt,win32,wince
+ logfilename=<file>    Location of log file. If nothing specified,
+                       fpcup.log in the current directory.
  noconfirm             No confirmation asked. For batch operation.
  only=<values>         Update/build or clean only the modules specified.
                        The module list is separated by commas.
@@ -375,4 +452,4 @@ Options are not required; they include:
 
 Share and enjoy!
 
-Info: 4-7-2012 9:19:23: fpcup finished.
+Info: 10-4-2013 9:56:18: fpcup finished.

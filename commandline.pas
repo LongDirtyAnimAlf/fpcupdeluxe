@@ -58,7 +58,10 @@ type
     property AllOptions:string read FAllOptions;
     property CaseSensitive:boolean read FCaseSensitive write FCaseSensitive;
     // specify inifile to load params from inifile
+    // these parameters are overridden by command-line parameters
     property IniFile:string read FIniFile write SetIniFile ;
+    // Section name (e.g. [General]) where parameters are if using ini files
+    property IniFileSection: string read FIniFileSection write FIniFileSection;
     // arguments left after getting all command line parameters
     property RestArguments:TStringList read Params;
     function GetOption(shortname,name,defaultVal:string;AppendToAllOptions:boolean=true):string;
@@ -70,7 +73,7 @@ type
     function ValidateOptions:string;
     // If IniFileSection specified, the @filename param will attempt to load filename as inifile first,
     // else @filename will always be interpreted as a series of command line arguments
-    constructor create(IniFileSection:string='');
+    constructor create(FileSection:string='');
     destructor destroy;override;
   end;
 
@@ -160,6 +163,7 @@ begin
   if (FIniFile<>'') and FileExists(FIniFile) then
     begin
     ini:=TIniFile.Create(FIniFile);
+    ini.StripQuotes:=true; //let ini handle e.g. lazopt="-g -gl -O1" for us
     SecVals:=TStringList.Create;
     try
       if (FIniFileSection<>'') then
@@ -190,7 +194,9 @@ begin
   while i<=Paramcount do
     begin
     sParam:=ParamStr(i);
-    if sParam[1]='@' then
+    // First load in @file or @ file if specified
+    // This lets us override with command line args later
+    if sParam[i]='@' then
       begin
       if (length(sParam)=1) and (i<Paramcount) then
         begin
@@ -199,8 +205,18 @@ begin
         end
       else
         LoadFile(copy(ParamStr(i),2,length(ParamStr(i))));
-      end
-    else
+      end;
+    i:=i+1;
+    end;
+
+  // Load in normal parameters
+  i:=1;
+  while i<=Paramcount do
+    begin
+    sParam:=ParamStr(i);
+    // First load in @file if specified
+    // This lets us override with command line args later
+    if sParam[i]<>'@' then
       Params.Add(ParamStr(i));
     i:=i+1;
     end;
@@ -365,11 +381,11 @@ begin
     end;
 end;
 
-constructor TCommandLineOptions.create(IniFileSection: string);
+constructor TCommandLineOptions.create(FileSection: string);
 begin
   inherited create;
   Params:=TStringList.Create;
-  FIniFileSection:=IniFileSection;
+  FIniFileSection:=FileSection;
   LoadParams;
 end;
 
