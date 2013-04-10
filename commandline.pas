@@ -37,6 +37,7 @@ uses
   Classes, SysUtils;
 
 type
+  ECommandLineError=class(Exception);
 
   { TCommandLineOptions }
 
@@ -176,7 +177,10 @@ begin
         begin
         result:=true;
         for i:=0 to SecVals.Count-1 do
-          Params.Insert(i,'--'+SecVals[i]);
+          // Ignore comments; convert rest to parameters
+          if (copy(trim(SecVals[i]),1,1)<>';') and
+            (copy(trim(SecVals[i]),1,1)<>'#')  then
+            Params.Insert(i,'--'+SecVals[i]);
         end;
     finally
       SecVals.Free;
@@ -227,7 +231,12 @@ begin
   if FIniFile=AValue then Exit;
   FIniFile:=AValue;
   //load params from ini file, params are overriden by everything else
-  LoadIniFile;
+  // If we have problems loading the file or its contents, we should let the user know.
+  // After all, he thinks/hopes the ini file exists & contains valid parameters/sections.
+  // Throwing an exception is a bit drastic but short of adding an error property, it's the
+  // best we can do.
+  if not(LoadIniFile) then
+    raise ECommandLineError.CreateFmt('Specified ini file %s could not be read or no values present',[AValue]);
 end;
 
 function TCommandLineOptions.GetOption(shortname, name, defaultVal: string;
@@ -331,7 +340,7 @@ begin
         if (name<>'') and (sCSname=copy(sCSParam,1,length(name))) then
           begin
           if bHasParam and (pos('=',sParam)<=0) then
-            raise exception.Create('Option -'+shortname+', --'+name+' needs an argument: '+ Params[i]);
+            raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ Params[i]);
           delete(sParam,1,length(name));
           Params.delete(i);
           i:=i-1;
@@ -346,7 +355,7 @@ begin
         if (shortname<>'') and (sCSshortname=copy(sCSParam,1,length(shortname))) then
           begin
           if bHasParam and (pos('=',sParam)<=0) then
-            raise exception.Create('Option -'+shortname+', --'+name+' needs an argument: '+ Params[i]);
+            raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ Params[i]);
           delete(sParam,1,length(shortname));
           Params.delete(i);
           i:=i-1;
@@ -362,7 +371,7 @@ begin
     if not bHasParam then
       begin
       if (param<>'') then //error, no argument for this option
-        raise exception.Create('Option -'+shortname+', --'+name+' does not allow an argument');
+        raise ECommandLineError.Create('Option -'+shortname+', --'+name+' does not allow an argument');
       if bAppendToAllOptions then
         if name<>'' then
           FAllOptions:=trim(FAllOptions+' --'+name)

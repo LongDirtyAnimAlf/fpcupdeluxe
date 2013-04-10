@@ -399,7 +399,7 @@ help=true ; Use true for options that do not normally have arguments
 binutilsdir=c:\dev\binutils
                        Options can be overwritten by command line parameters.
 
- inifilesection=<sec>  Section name to be used if an @file is specified.
+ inisection=<sec>      Section name to be used if an ini file is specified.
                        If not given, use [General]
  installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,
                        Lazarus in <dir>\lazarus\, bootstrap compiler in 

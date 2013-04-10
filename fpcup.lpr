@@ -146,7 +146,7 @@ begin
   writeln(' inifile=<file>        Reads in ini file with options.');
   writeln('                       Example ini file: see settings.ini');
   writeln('                       Options can be overwritten by command line parameters.');
-  writeln(' inifilesection=<sec>  Section name to be used if an @file is specified.');
+  writeln(' inisection=<sec>      Section name to be used if an ini file is specified.');
   writeln('                       If not given, use [General]');
   writeln(' installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,');
   writeln('                       Lazarus in <dir>\lazarus\, bootstrap compiler in ');
@@ -222,8 +222,24 @@ begin
       begin
         Options.IniFileSection:=Options.GetOption('','inisection','General');
         Options.CaseSensitive:=false; //easier when dealing with ini files
-        // Setting this option loads the file:
-        Options.IniFile:=sIniFile;
+        // Setting this property loads the file:
+        try
+          Options.IniFile:=sIniFile;
+        except
+          on E:ECommandLineError do
+          begin
+            // Empty file, invalid section name etc
+            Options.IniFile:='';
+            infoln('Specified ini file '+sIniFile+' cannot be read or does not have section '+Options.IniFileSection+'. Aborting.',etError);
+            halt(3);
+          end;
+          on F:Exception do
+          begin
+            infoln('Error reading specified ini file '+sIniFile+'. Aborting!',etError);
+            halt(3);
+          end;
+        end;
+
       end;
 
       {$IFDEF MSWINDOWS}
