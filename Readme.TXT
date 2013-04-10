@@ -56,8 +56,9 @@ Storing your settings
 =====================
 After running, fpcup creates a batch/shell script file by default to run it again with the same parameters.
 
-Additionally, you can save the settings in an ini file and call fpcup --inifile=theinifile.ini
-example - the parameters not specified are default settings and can be overruled when calling from the command line:
+Additionally, you can save the settings in an ini file and call fpcup --inifile=settings.ini
+(see the settings.ini examle file)
+The parameters not specified are default settings and can be overruled when calling from the command line:
 
 [general]
 fpcurl=http://svn.freepascal.org/svn/fpc/trunk

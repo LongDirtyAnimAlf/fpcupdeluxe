@@ -144,12 +144,8 @@ begin
   writeln(' keeplocalchanges      Keep locally modified files (normally these would be');
   writeln('                       backed up as .diff files before doing svn revert.');
   writeln(' inifile=<file>        Reads in ini file with options.');
-  writeln('                       Example ini file:');
-  writeln('[General]');
-  writeln('help=true');
-  writeln('binutilsdir=c:\dev\binutils');
+  writeln('                       Example ini file: see settings.ini');
   writeln('                       Options can be overwritten by command line parameters.');
-  writeln('');
   writeln(' inifilesection=<sec>  Section name to be used if an @file is specified.');
   writeln('                       If not given, use [General]');
   writeln(' installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,');
