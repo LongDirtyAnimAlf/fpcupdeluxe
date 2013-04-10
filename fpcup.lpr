@@ -81,7 +81,7 @@ begin
   writeln('');
   writeln('fpcup --<options>');
   writeln('');
-  writeln('fpcup can work with modules - see "only", "skip" below');
+  writeln('fpcup can work with modules - see "only", "include", "skip" below');
   writeln('List of all modules:');
   SortedModules:=TStringList.Create;
   try
@@ -139,6 +139,10 @@ begin
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
+  writeln(' include=<values>      Update/build or clean the modules specified as well ');
+  writeln('                       as the default ones.');
+  writeln('                       The module list is separated by commas.');
+  writeln('                       See above for a list of modules.');
   writeln(' inifile=<file>        Reads in ini file with options.');
   writeln('                       Example ini file: see settings.ini');
   writeln('                       Options can be overwritten by command line parameters.');
@@ -188,7 +192,7 @@ begin
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
   writeln('                       path is used; directory name lazarusdevsettings.');
-  writeln(' skip=<values>         Do not update/build or clean modules.');
+  writeln(' skip=<values>         Do not update/build or clean specified modules.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
   writeln(' uninstall             uninstall sources and all generated files');
@@ -498,6 +502,7 @@ begin
         writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);
       if (FInstaller.LazarusDesiredRevision<>'') then
         writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusDesiredRevision);
+      //todo: add --include= modules to module list
       if FInstaller.SkipModules<>'' then
         writeln('WARNING: Skipping installation/update of '+FInstaller.SkipModules);
       if FInstaller.OnlyModules<>'' then
