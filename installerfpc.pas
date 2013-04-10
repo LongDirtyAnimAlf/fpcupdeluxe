@@ -169,7 +169,7 @@ begin
         ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
       ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      //Don't really know if this is necessary, but it can't hurt:
+      // Don't really know if this is necessary, but it can't hurt:
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
@@ -187,7 +187,17 @@ begin
         end;
       if Options<>'' then
         ProcessEx.Parameters.Add('OPT='+Options);
-      ProcessEx.Execute;
+      try
+        ProcessEx.Execute;
+      except
+        on E: Exception do
+          begin
+          WritelnLog('FPC: Running fpc crossinstall make all failed with an exception!'+LineEnding+
+            'Details: '+E.Message,true);
+          exit(false);
+          end;
+      end;
+
 
       if ProcessEx.ExitStatus = 0 then
         begin
@@ -216,7 +226,17 @@ begin
           end;
 
         // Note: consider this as an optional item, so don't fail the function if this breaks.
-        ProcessEx.Execute;
+        try
+          ProcessEx.Execute;
+        except
+          on E: Exception do
+            begin
+            WritelnLog('FPC: Running fpc crossinstall make crossinstall failed with an exception!'+LineEnding+
+              'Details: '+E.Message,true);
+            result:=false;
+            end;
+        end;
+
         if ProcessEx.ExitStatus<>0 then
           begin
           infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etwarning);
