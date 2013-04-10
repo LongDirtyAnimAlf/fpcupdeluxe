@@ -115,8 +115,6 @@ begin
   writeln('                       Make sure it is not in the fpcdir directory');
   writeln(' clean                 Remove files created with build. ');
   writeln('                       Can be combined with skip and only options.');
-  writeln(' configfile=<filename> Load module definition file from <filename>.');
-  writeln('                       Default: fpcup.ini in the program directory.');
   writeln(' cputarget=<name>      CPU target for cross_compiling.');
   writeln('                       <name> has to be one of the following:');
   writeln('                       i386,m68k,alpha,powerpc,powerpc64,');
@@ -141,8 +139,6 @@ begin
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
-  writeln(' keeplocalchanges      Keep locally modified files (normally these would be');
-  writeln('                       backed up as .diff files before doing svn revert.');
   writeln(' inifile=<file>        Reads in ini file with options.');
   writeln('                       Example ini file: see settings.ini');
   writeln('                       Options can be overwritten by command line parameters.');
@@ -157,6 +153,10 @@ begin
   writeln('                       for the defaults when installdir is not specified.');
   writeln('                       You can also use these to override the defaults given');
   writeln('                       by installdir.');
+  writeln(' keeplocalchanges      Keep locally modified files (normally these would be');
+  writeln('                       backed up as .diff files before doing svn revert.');
+  writeln(' moduleconfig=<file>   Load external module definition file from <file>.');
+  writeln('                       Default: fpcup.ini in the program directory.');
   writeln(' lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\');
   writeln('                       or ~\lazarus\');
   writeln(' lazlinkname=<name>    Name of the shortcut to the Lazarus install.');
@@ -291,7 +291,7 @@ begin
         //todo: use proper exception in commandline instead of general one, catch it here
         FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
       end;
-      FInstaller.ConfigFile:=Options.GetOption('','configfile',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
+      FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
       FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
       // Find out if the user specified --fpcuplinkname= to explicitly block creation of a link, or just didn't specify anything.
