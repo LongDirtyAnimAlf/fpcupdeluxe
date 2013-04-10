@@ -146,7 +146,7 @@ begin
   writeln(' inifile=<file>        Reads in ini file with options.');
   writeln('                       Example ini file:');
   writeln('[General]');
-  writeln('help=true ; Use true for options that do not normally have arguments');
+  writeln('help=true');
   writeln('binutilsdir=c:\dev\binutils');
   writeln('                       Options can be overwritten by command line parameters.');
   writeln('');
