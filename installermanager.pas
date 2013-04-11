@@ -168,6 +168,7 @@ type
     FFPCDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
+    FIncludeModules: string;
     FKeepLocalDiffs: boolean;
     FLazarusDesiredRevision: string;
     FLazarusDirectory: string;
@@ -229,7 +230,12 @@ type
     property ModuleEnabledList: TStringList read FModuleEnabledList;
     //List of all publicly visible sequences
     property ModulePublishedList: TStringList read FModulePublishedList;
+    // List of modules that must be processed in addition to the default ones
+    property IncludeModules:string read FIncludeModules write FIncludeModules;
+    // List of modules that must not be processed
     property SkipModules:string read FSkipModules write FSkipModules;
+    // Exhaustive/exclusive list of modules that must be processed; no other
+    // modules may be processed.
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
@@ -431,6 +437,7 @@ begin
     Sequencer.DeleteOnly;
     end
   else
+    begin
     {$if defined(win32)}
     // Run Windows specific cross compiler or regular version
     if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then
@@ -453,6 +460,12 @@ begin
     // Linux, OSX
     result:=Sequencer.Run('Default');
     {$endif}
+    if (FIncludeModules<>'') and (result) then
+      // run additional modules using the only mechanism
+      Sequencer.CreateOnly(FIncludeModules);
+      result:=Sequencer.Run('Only');
+      Sequencer.DeleteOnly;
+    end;
   if assigned(Sequencer.SkipList) then
     Sequencer.SkipList.Free;
 end;

@@ -362,6 +362,7 @@ begin
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
       FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
+      FInstaller.IncludeModules:=Options.GetOption('','include','',false);
       FInstaller.SkipModules:=Options.GetOption('','skip','',false);
       FInstaller.OnlyModules:=Options.GetOption('','only','',false);
       FInstaller.CrossOS_Target:=Options.GetOption('','ostarget','');
@@ -489,6 +490,7 @@ begin
         writeln('Keep local changes:     no');
       end;
       writeln('Log file name:          '+FInstaller.LogFileName);
+      writeln('Additional modules:     '+FInstaller.IncludeModules);
       writeln('Parameter list:         '+FInstaller.AllOptions);
 
       // Show warnings to the user:
@@ -502,7 +504,6 @@ begin
         writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);
       if (FInstaller.LazarusDesiredRevision<>'') then
         writeln('WARNING: Reverting Lazarus to revision '+FInstaller.LazarusDesiredRevision);
-      //todo: add --include= modules to module list
       if FInstaller.SkipModules<>'' then
         writeln('WARNING: Skipping installation/update of '+FInstaller.SkipModules);
       if FInstaller.OnlyModules<>'' then

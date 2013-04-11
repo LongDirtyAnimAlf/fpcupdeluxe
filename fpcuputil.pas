@@ -95,7 +95,8 @@ implementation
 uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
-  FileUtil, strutils
+  FileUtil {lazutils, for utf8 functions},
+  strutils
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
     ,windows, shlobj {for special folders}, ActiveX, ComObj

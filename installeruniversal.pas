@@ -1,6 +1,6 @@
 unit installerUniversal;
 { Universal installer unit driven by .ini file directives
-Copyright (C) 2012 Ludo Brands, Reinier Olislagers
+Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -40,7 +40,7 @@ uses
 // windres, so use it.
 {$R fpcup.rc}
 {$ELSE}
-// On other platforms, we trust either
+// On other platforms we cannot be certain, so we trust either
 // - a previous windows compile
 // - manual windres invocation
 // has updated fpcup.res
@@ -94,6 +94,7 @@ type
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
+    // Configure module
     function ConfigModule(ModuleName:string): boolean; override;
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
@@ -107,7 +108,9 @@ type
 
   // Gets the list of modules enabled in ConfigFile. Appends to existing TStringList
   function GetModuleEnabledList(var ModuleList:TStringList):boolean;
-  // Gets the sequence representation for all modules
+  // Gets the sequence representation for all modules in the ini file
+  // Used to pass on to higher level code for selection, display etc.
+  //todo: get Description field into module list
   function GetModuleList(ConfigFile:string):string;
   // gets alias for keywords in Dictionary.
   //The keyword 'list' is reserved and returns the list of keywords as commatext
@@ -340,7 +343,7 @@ begin
     // Skip over missing numbers:
     if exec='' then continue;
     case uppercase(exec) of
-      'WINDOWS','WINDOWS32','WINX86': ;
+      'WINDOWS','WINDOWS32','WINX86': {good name};
       else
         begin
         writelnlog('TUniversalInstaller: unknown installer name '+exec+'. Ignoring',true);
@@ -940,7 +943,7 @@ var
 
   function LoadModule(ModuleName:string):boolean;
   var
-    name,val:string;
+    name,description,val:string;
     i:integer;
     sl:TStringList;
   begin
@@ -995,6 +998,8 @@ begin
     SaveIniFromResource(CONFIGFILENAME);
   ini:=TMemIniFile.Create(ConfigFile);
   ini.CaseSensitive:=false;
+  ini.StripQuotes:=true; //helps read description lines
+
   // parse inifile
   try
     maxmodules:=ini.ReadInteger('General','MaxSysModules',MAXSYSMODULES);
@@ -1006,7 +1011,7 @@ begin
     for i:=1 to maxmodules do
       if LoadModule('UserModule'+IntToStr(i))then
         result:=result+CreateModuleSequence('UserModule'+IntToStr(i));
-    // the overrides
+    // the overrides in the [general] section
     for i:=0 to UniModuleList.Count-1 do
       begin
       name:=UniModuleList[i];
