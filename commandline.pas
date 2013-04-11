@@ -131,7 +131,7 @@ begin
               if i>1 then
                 begin
                 // Add param to begin of list
-                if FParams.Count=0 then
+                if cnt>=FParams.Count then
                   FParams.Add(copy(s,1,i-1))
                 else
                   FParams.Insert(cnt,copy(s,1,i-1));
@@ -145,7 +145,7 @@ begin
         if (i>length(s)) then
           begin
           // Add param at start
-          if FParams.Count=0 then
+          if cnt>=FParams.Count then
             FParams.Add(copy(s,1,i-1))
           else
             FParams.Insert(cnt,copy(s,1,i-1));
@@ -188,7 +188,7 @@ begin
           if (copy(trim(SecVals[i]),1,1)<>';') and
             (copy(trim(SecVals[i]),1,1)<>'#')  then
               // Add param to begin of list
-              if FParams.Count=0 then
+              if i>=FParams.Count then
                 FParams.Add('--'+SecVals[i])
               else
                 FParams.Insert(i,'--'+SecVals[i]);

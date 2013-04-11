@@ -366,7 +366,7 @@ UnInstall=rm -Rf $(Installdir)
 Name=lazpackager
 Description="Packaging addin for creating Debian packages from your Lazarus project. Requires git to be installed."
 Installdir=$(fpcdir)/../extras/$(name)
-Enabled=1
+Enabled=0
 GITURL=https://github.com/prof7bit/LazPackager.git
 UnInstall=rm -Rf $(Installdir)
 
