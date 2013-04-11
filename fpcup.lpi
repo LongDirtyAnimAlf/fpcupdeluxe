@@ -163,7 +163,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--verbose --only=tiopf"/>
+        <CommandLineParams Value="--verbose --inifile=settings.ini"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
@@ -328,7 +328,7 @@ end;"/>
     <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="5">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -341,6 +341,9 @@ end;"/>
       <Item4>
         <Name Value="EProcess"/>
       </Item4>
+      <Item5>
+        <Name Value="ECommandLineError"/>
+      </Item5>
     </Exceptions>
   </Debugging>
 </CONFIG>

@@ -47,7 +47,7 @@ type
     FCaseSensitive: boolean;
     FIniFile: string;
     FIniFileSection: string;
-    Params:TStringList;
+    FParams:TStringList;
     function GetOption(shortname,name:string;var param:string;bAppendToAllOptions,bHasParam:boolean):boolean;
     procedure LoadFile(fname:string);
     function LoadIniFile:boolean;
@@ -58,13 +58,13 @@ type
     //lists all options retrieved with AppendToAllOptions=true in command line arg format.
     property AllOptions:string read FAllOptions;
     property CaseSensitive:boolean read FCaseSensitive write FCaseSensitive;
-    // specify inifile to load params from inifile
+    // specify inifile to load FParams from inifile
     // these parameters are overridden by command-line parameters
     property IniFile:string read FIniFile write SetIniFile ;
     // Section name (e.g. [General]) where parameters are if using ini files
     property IniFileSection: string read FIniFileSection write FIniFileSection;
     // arguments left after getting all command line parameters
-    property RestArguments:TStringList read Params;
+    property RestArguments:TStringList read FParams;
     function GetOption(shortname,name,defaultVal:string;AppendToAllOptions:boolean=true):string;
     function GetOption(shortname,name:string;defaultVal:integer;AppendToAllOptions:boolean=true):integer;
     function GetOption(shortname,name:string;defaultVal:boolean;AppendToAllOptions:boolean=true):boolean;
@@ -93,7 +93,7 @@ var
 begin
   if FileExists(fname) then
     begin
-    if (FIniFileSection<>'') then // try to read it as a ini file
+    if (FIniFileSection<>'') then // try to read it as an ini file
       begin
       FIniFile:=fname;
       if LoadIniFile then
@@ -130,7 +130,7 @@ begin
               begin
               if i>1 then
                 begin
-                Params.Insert(cnt,copy(s,1,i-1));
+                FParams.Add(copy(s,1,i-1));
                 cnt:=cnt+1;
                 end;
               delete(s,1,i);
@@ -140,13 +140,13 @@ begin
           end;
         if (i>length(s)) then
           begin
-          Params.Insert(cnt,copy(s,1,i-1));
+          FParams.Add(copy(s,1,i-1));
           cnt:=cnt+1;
           delete(s,1,i);
           end;
         end;
       if length(s)>0 then
-        Params.Add(s);
+        FParams.Add(s);
       end;
     CloseFile(f);
     end;
@@ -156,9 +156,8 @@ function TCommandLineOptions.LoadIniFile: boolean;
 var
   ini:TIniFile;
   i:integer;
-  cQuote:char;
-  sSection,s:string;
-  SecKeys,SecVals:TStringList;
+  sSection:string;
+  SecVals:TStringList;
 begin
   result:=false;
   if (FIniFile<>'') and FileExists(FIniFile) then
@@ -180,7 +179,7 @@ begin
           // Ignore comments; convert rest to parameters
           if (copy(trim(SecVals[i]),1,1)<>';') and
             (copy(trim(SecVals[i]),1,1)<>'#')  then
-            Params.Insert(i,'--'+SecVals[i]);
+            FParams.Add('--'+SecVals[i]);
         end;
     finally
       SecVals.Free;
@@ -221,7 +220,7 @@ begin
     // First load in @file if specified
     // This lets us override with command line args later
     if sParam[i]<>'@' then
-      Params.Add(ParamStr(i));
+      FParams.Add(ParamStr(i));
     i:=i+1;
     end;
 end;
@@ -230,7 +229,7 @@ procedure TCommandLineOptions.SetIniFile(AValue: string);
 begin
   if FIniFile=AValue then Exit;
   FIniFile:=AValue;
-  //load params from ini file, params are overriden by everything else
+  //load FParams from ini file, FParams are overriden by everything else
   // If we have problems loading the file or its contents, we should let the user know.
   // After all, he thinks/hopes the ini file exists & contains valid parameters/sections.
   // Throwing an exception is a bit drastic but short of adding an error property, it's the
@@ -242,7 +241,7 @@ end;
 function TCommandLineOptions.GetOption(shortname, name, defaultVal: string;
   AppendToAllOptions: boolean): string;
 var
-  s:string;
+  s:string='';
 begin
   if GetOption(shortname, name,s,AppendToAllOptions,true) then
     result:=s
@@ -253,7 +252,7 @@ end;
 function TCommandLineOptions.GetOption(shortname, name: string;
   defaultVal: integer; AppendToAllOptions: boolean): integer;
 var
-  s:string;
+  s:string='';
 begin
   if GetOption(shortname, name,s,AppendToAllOptions,true) then
     result:=StrToIntDef(s,defaultVal)
@@ -264,7 +263,7 @@ end;
 function TCommandLineOptions.GetOptionNoParam(shortname, name: string;
   AppendToAllOptions: boolean): boolean;
 var
-  s:string;
+  s:string='';
 begin
   result:=GetOption(shortname, name,s,AppendToAllOptions,false);
 end;
@@ -272,7 +271,7 @@ end;
 function TCommandLineOptions.GetOption(shortname, name: string;
   defaultVal: boolean; AppendToAllOptions: boolean): boolean;
 var
-  s:string;
+  s:string='';
 begin
   if GetOption(shortname, name,s,AppendToAllOptions,true) then
     result:=StrToBoolDef(s,defaultVal)
@@ -283,7 +282,7 @@ end;
 function TCommandLineOptions.GetOption(shortname, name: string;
   defaultVal: double; AppendToAllOptions: boolean): double;
 var
-  s:string;
+  s:string='';
 begin
   if GetOption(shortname, name,s,AppendToAllOptions,true) then
     result:=StrToFloatDef(s,defaultVal)
@@ -295,10 +294,10 @@ function TCommandLineOptions.ValidateOptions: string;
 var i:integer;
 begin
   result:='';
-  for i:=0 to Params.Count-1 do
-    if Params[i][1]='-' then
+  for i:=0 to FParams.Count-1 do
+    if FParams[i][1]='-' then
       begin
-      result:=Params[i];
+      result:=FParams[i];
       break;
       end;
 end;
@@ -324,9 +323,9 @@ begin
     sCSshortname:=shortname;
     sCSname:=name;
     end;
-  while (i<Params.Count) do
+  while (i<FParams.Count) do
     begin
-    sParam:=Params[i];
+    sParam:=FParams[i];
     if not CaseSensitive then
       sCSParam:=UpperCase(sParam)
     else
@@ -340,9 +339,9 @@ begin
         if (name<>'') and (sCSname=copy(sCSParam,1,length(name))) then
           begin
           if bHasParam and (pos('=',sParam)<=0) then
-            raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ Params[i]);
+            raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(name));
-          Params.delete(i);
+          FParams.delete(i);
           i:=i-1;
           param:=sParam;
           Result:=true;
@@ -355,9 +354,9 @@ begin
         if (shortname<>'') and (sCSshortname=copy(sCSParam,1,length(shortname))) then
           begin
           if bHasParam and (pos('=',sParam)<=0) then
-            raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ Params[i]);
+            raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(shortname));
-          Params.delete(i);
+          FParams.delete(i);
           i:=i-1;
           param:=sParam;
           Result:=true;
@@ -393,14 +392,14 @@ end;
 constructor TCommandLineOptions.create(FileSection: string);
 begin
   inherited create;
-  Params:=TStringList.Create;
+  FParams:=TStringList.Create;
   FIniFileSection:=FileSection;
   LoadParams;
 end;
 
 destructor TCommandLineOptions.destroy;
 begin
-  Params.Free;
+  FParams.Free;
   inherited destroy;
 end;
 

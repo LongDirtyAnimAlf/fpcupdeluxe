@@ -210,12 +210,14 @@ function CheckOptions(FInstaller: TFPCupManager):integer;
 var
   {$IFNDEF MSWINDOWS}AllOptions,FPCUpLink:string;{$ENDIF}
   bNoConfirm,bHelp,bVersion:boolean;
+  i, iCurrentOption: integer;
   sConfirm:string;
   Options:TCommandLineOptions;
   sIniFile: string;
   sInstallDir,s: string; // Root installation directory
   bHaveInstalldir: boolean; //Has user specified a non-standard install dir?
   sLogFile: string; //Filename for log
+  LeftOverOptions: TStringList; //Options left over after processing; may contain module=0 options
 begin
   Options:=TCommandLineOptions.Create;
   try
@@ -239,7 +241,7 @@ begin
           end;
           on F:Exception do
           begin
-            infoln('Error reading specified ini file '+sIniFile+'. Aborting!',etError);
+            infoln('Error reading specified ini file '+sIniFile+'. Exception: '+F.Message+'. Aborting!',etError);
             halt(3);
           end;
         end;
@@ -291,9 +293,10 @@ begin
       try
         FInstaller.Clean:=Options.GetOption('','clean',false);
       except
-        // option did not have an argument
-        //todo: use proper exception in commandline instead of general one, catch it here
-        FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
+        on E: ECommandLineError do begin
+          // option quite probably did not have an argument
+          FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
+        end;
       end;
       FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
@@ -319,14 +322,18 @@ begin
       try
         bHelp:=Options.GetOption('h','help',false);
       except
+        on E: ECommandLineError do begin
         // option did not have an argument
         bHelp:=Options.GetOptionNoParam('h','help',false);
+        end;
       end;
       try
         FInstaller.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
       except
+        on E: ECommandLineError do begin
         // option did not have an argument
         FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+        end;
       end;
       FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
       // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
@@ -379,29 +386,37 @@ begin
       try
         FInstaller.Uninstall:=Options.GetOption('','uninstall',false);
       except
+        on E: ECommandLineError do begin
         // option did not have an argument
         FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
+        end;
       end;
 
       try
         // do not add to default options
         FInstaller.Verbose:=Options.GetOption('','verbose',false,false);
       except
+        on E: ECommandLineError do begin
         // option did not have an argument
         FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
+        end;
       end;
       try
         //do not add to default options
         bVersion:=Options.GetOption('','version',false,false);
       except
+        on E: ECommandLineError do begin
         // option did not have an argument
         bVersion:=Options.GetOptionNoParam('','version',false);
+        end;
       end;
       try
         bNoConfirm:=Options.GetOption('','noconfirm',false);
       except
+        on E: ECommandLineError do begin
         // option did not have an argument
         bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
+        end;
       end;
     except
       on E:Exception do
@@ -431,12 +446,47 @@ begin
 
     if Options.ValidateOptions<>'' then
       begin
-      writeln('Error: wrong command line options given:');
-      writeln(Options.ValidateOptions);
-      WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
-      result:=13; //Quit with error resultcode
-      end
-    else if bHelp then
+      // settings.ini can contain include=fpspreadsheet,mupdf but also
+      // the fpcup.ini style
+      // fpspreadsheet=1
+      // mupdf=0
+      // Process those modules now
+      try
+        LeftOverOptions:=TStringList.Create;
+        for i:=0 to Options.RestArguments.Count-1 do begin
+          iCurrentOption:=LeftOverOptions.Add(copy(Options.RestArguments[i],length('--')+1,length(Options.RestArguments[i])));
+          if (FInstaller.ModulePublishedList.IndexOf(LeftOverOptions.Names[iCurrentOption])<>-1) then
+            case (uppercase(LeftOverOptions.ValueFromIndex[iCurrentOption])) of
+              '-1','1','TRUE','YES','INSTALL','ENABLE': begin
+                FInstaller.IncludeModules:=FInstaller.IncludeModules+','+LeftOverOptions.Names[iCurrentOption];
+                LeftOverOptions.Delete(iCurrentOption);
+              end;
+              '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE': begin
+                FInstaller.SkipModules:=FInstaller.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
+                LeftOverOptions.Delete(iCurrentOption);
+              end
+            else
+              // Invalid option. leave LeftOverOptions[iCurrentOption] for the error handling below.
+            end;
+        end;
+        // Fix up any added initial commas
+        if copy(FInstaller.IncludeModules,1,1)=',' then
+          FInstaller.IncludeModules:=copy(FInstaller.IncludeModules,2,Length(FInstaller.IncludeModules));
+        if copy(FInstaller.SkipModules,1,1)=',' then
+          FInstaller.SkipModules:=copy(FInstaller.SkipModules,2,Length(FInstaller.SkipModules));
+        if LeftOverOptions.Count>0 then begin
+          writeln('Error: wrong command line options given:');
+          writeln(LeftOverOptions.Text);
+          WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
+          result:=13; //Quit with error resultcode
+          exit;
+        end;
+      finally
+        LeftOverOptions.Free;
+      end;
+      end; //end of options validations
+
+    if bHelp then
       begin
       writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
       result:=0; //quit without error
@@ -448,7 +498,6 @@ begin
       end
     else
       begin
-
       {$IFNDEF MSWINDOWS}
       if FInstaller.MakeDirectory<>'' then
         begin

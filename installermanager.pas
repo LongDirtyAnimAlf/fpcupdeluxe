@@ -444,13 +444,13 @@ begin
       result:=Sequencer.Run('Default')
     else
       result:=Sequencer.Run('DefaultWin32');
-    {
     // We would like to have a win64=>win32 crosscompiler, but at least with current
     // FPC trunk that won't work due to errors like
     // fpcdefs.inc(216,2) Error: User defined: Cross-compiling from systems
     // without support for an 80 bit extended floating point type to i386 is
-    // not yet supported at this time
-    {$elseif defined(win64)}
+    // not yet supported at this time. If it is, uncomment until the else conditional:
+    //{$elseif defined(win64)}
+    {
     if pos('CROSSWIN64-32',UpperCase(SkipModules))>0 then
       result:=Sequencer.Run('Default')
     else
