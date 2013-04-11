@@ -130,7 +130,11 @@ begin
               begin
               if i>1 then
                 begin
-                FParams.Add(copy(s,1,i-1));
+                // Add param to begin of list
+                if FParams.Count=0 then
+                  FParams.Add(copy(s,1,i-1))
+                else
+                  FParams.Insert(cnt,copy(s,1,i-1));
                 cnt:=cnt+1;
                 end;
               delete(s,1,i);
@@ -140,7 +144,11 @@ begin
           end;
         if (i>length(s)) then
           begin
-          FParams.Add(copy(s,1,i-1));
+          // Add param at start
+          if FParams.Count=0 then
+            FParams.Add(copy(s,1,i-1))
+          else
+            FParams.Insert(cnt,copy(s,1,i-1));
           cnt:=cnt+1;
           delete(s,1,i);
           end;
@@ -179,7 +187,11 @@ begin
           // Ignore comments; convert rest to parameters
           if (copy(trim(SecVals[i]),1,1)<>';') and
             (copy(trim(SecVals[i]),1,1)<>'#')  then
-            FParams.Add('--'+SecVals[i]);
+              // Add param to begin of list
+              if FParams.Count=0 then
+                FParams.Add('--'+SecVals[i])
+              else
+                FParams.Insert(i,'--'+SecVals[i]);
         end;
     finally
       SecVals.Free;
