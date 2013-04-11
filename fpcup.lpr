@@ -457,11 +457,11 @@ begin
           iCurrentOption:=LeftOverOptions.Add(copy(Options.RestArguments[i],length('--')+1,length(Options.RestArguments[i])));
           if (FInstaller.ModulePublishedList.IndexOf(LeftOverOptions.Names[iCurrentOption])<>-1) then
             case (uppercase(LeftOverOptions.ValueFromIndex[iCurrentOption])) of
-              '-1','1','TRUE','YES','INSTALL','ENABLE': begin
+              '-1','1','TRUE','YES','INSTALL','ENABLE', 'ON': begin
                 FInstaller.IncludeModules:=FInstaller.IncludeModules+','+LeftOverOptions.Names[iCurrentOption];
                 LeftOverOptions.Delete(iCurrentOption);
               end;
-              '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE': begin
+              '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE', 'OFF': begin
                 FInstaller.SkipModules:=FInstaller.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
                 LeftOverOptions.Delete(iCurrentOption);
               end

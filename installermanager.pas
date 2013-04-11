@@ -424,26 +424,27 @@ begin
     halt(2);
   end;
 
-  if SkipModules<>'' then
-    begin
+  if SkipModules<>'' then begin
     Sequencer.SkipList:=TStringList.Create;
     Sequencer.SkipList.Delimiter:=',';
     Sequencer.SkipList.DelimitedText:=SkipModules;
     end;
-  if FOnlyModules<>'' then
-    begin
+  if FOnlyModules<>'' then begin
     Sequencer.CreateOnly(FOnlyModules);
     result:=Sequencer.Run('Only');
     Sequencer.DeleteOnly;
     end
-  else
-    begin
+  else begin
     {$if defined(win32)}
     // Run Windows specific cross compiler or regular version
-    if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then
-      result:=Sequencer.Run('Default')
-    else
+    if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then begin
+      infoln('InstallerManager: going to run sequencer for sequence: Default.',etDebug);
+      result:=Sequencer.Run('Default');
+    end
+    else begin
+      infoln('InstallerManager: going to run sequencer for sequence: DefaultWin32.',etDebug);
       result:=Sequencer.Run('DefaultWin32');
+    end;
     // We would like to have a win64=>win32 crosscompiler, but at least with current
     // FPC trunk that won't work due to errors like
     // fpcdefs.inc(216,2) Error: User defined: Cross-compiling from systems
@@ -458,13 +459,16 @@ begin
     }
     {$else}
     // Linux, OSX
+    infoln('InstallerManager: going to run sequencer for sequence Default.',etDebug);
     result:=Sequencer.Run('Default');
     {$endif}
-    if (FIncludeModules<>'') and (result) then
-      // run additional modules using the only mechanism
+    if (FIncludeModules<>'') and (result) then begin
+      // run specified additional modules using the only mechanism
+      infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
       Sequencer.CreateOnly(FIncludeModules);
       result:=Sequencer.Run('Only');
       Sequencer.DeleteOnly;
+    end;
     end;
   if assigned(Sequencer.SkipList) then
     Sequencer.SkipList.Free;
