@@ -891,22 +891,6 @@ begin
     TStringList(UniModuleList.Objects[i]).free;
 end;
 
-procedure SaveIniFromResource(filename:string);
-var fs:Tfilestream;
-begin
-with TResourceStream.Create(hInstance, 'fpcup_ini', 'file') do
-try
-  try
-    fs:=Tfilestream.Create(Filename,fmCreate);
-    savetostream(fs);
-  finally
-     fs.Free;
-  end;
-finally
-  Free;
-end;
-end;
-
 function GetAlias(ConfigFile,Dictionary,KeyWord: string): string;
 var
   ini:TMemIniFile;
@@ -995,7 +979,7 @@ begin
   // Create fpcup.ini from resource if it doesn't exist yet
   if (ConfigFile=ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME)
     and not FileExistsUTF8(CONFIGFILENAME) then
-    SaveIniFromResource(CONFIGFILENAME);
+    SaveInisFromResource(CONFIGFILENAME,'fpcup_ini');
   ini:=TMemIniFile.Create(ConfigFile);
   ini.CaseSensitive:=false;
   ini.StripQuotes:=true; //helps read description lines

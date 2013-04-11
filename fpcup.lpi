@@ -174,7 +174,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="23">
+    <Units Count="24">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -289,6 +289,10 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_anyinternallinker_to_win386"/>
       </Unit22>
+      <Unit23>
+        <Filename Value="settings.ini"/>
+        <IsPartOfProject Value="True"/>
+      </Unit23>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

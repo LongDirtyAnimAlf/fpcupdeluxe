@@ -219,6 +219,12 @@ var
   sLogFile: string; //Filename for log
   LeftOverOptions: TStringList; //Options left over after processing; may contain module=0 options
 begin
+  // First check for settings.ini; it might not be present but specified anyway.
+  // In any case, we need to extract it from the resource sometime unless we
+  // want to create an installer for each platform.
+  if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+'settings.ini') then
+    SaveInisFromResource('settings.ini','settings_ini');
+
   Options:=TCommandLineOptions.Create;
   try
     result:=-1; //no error

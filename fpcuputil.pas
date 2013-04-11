@@ -84,6 +84,9 @@ function GetLocalAppDataPath: string;
 procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
+// Copies specified resource (e.g. fpcup.ini, settings.ini)
+// to application directory
+procedure SaveInisFromResource(filename,resourcename:string);
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 {$ENDIF UNIX}
@@ -105,6 +108,22 @@ uses
   ,baseunix,processutils
   {$ENDIF UNIX}
   ;
+
+procedure SaveInisFromResource(filename,resourcename:string);
+var fs:Tfilestream;
+begin
+with TResourceStream.Create(hInstance, resourcename, 'file') do
+try
+  try
+    fs:=Tfilestream.Create(Filename,fmCreate);
+    savetostream(fs);
+  finally
+     fs.Free;
+  end;
+finally
+  Free;
+end;
+end;
 
 {$IFDEF MSWINDOWS}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
