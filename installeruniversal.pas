@@ -223,6 +223,13 @@ begin
   // only download some SVN repositories
   // So.. enable this.
   result:=CheckAndGetNeededExecutables;
+  if not(result) then
+    infoln('Universalinstaller: missing required executables. Aborting.',etError);
+  if not(FileExistsUTF8(IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt)) then
+  begin
+    result:=false;
+    infoln('Universalinstaller: missing lazbuild. Aborting.',etError);
+  end;
   FBinPath:=ExcludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   InitDone:=result;
 end;
