@@ -583,7 +583,7 @@ begin
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
       DebuggerPath:='/usr/local/bin/';
       if CheckExecutable(DebuggerPath+'gdb','--version','GNU gdb') then
-        DebuggerPath:=LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',DebuggerPath+'gdb')
+        LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',DebuggerPath+'gdb')
       else
         LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',which('gdb')); //system gdb; assume in path
       {$ELSE} //other *nix
