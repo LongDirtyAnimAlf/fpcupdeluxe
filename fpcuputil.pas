@@ -179,10 +179,16 @@ begin
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.SaveToFile(XdgDesktopFile);
     // We're going to try and call xdg-desktop-icon
-    OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon install ' + XdgDesktopFile,false)=0);
+    // this may fail if shortcut exists already
+    try
+      OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon install ' + XdgDesktopFile,false)=0);
+    except
+      OperationSucceeded:=false;
+    end;
+
     if OperationSucceeded=false then
       infoln('CreateDesktopShortcut: failed to create shortcut to '+Target,etWarning);
-    // Temp file is no longer needed.... I think:
+    // Temp file is no longer needed....
     try
       DeleteFile(XdgDesktopFile);
     finally
