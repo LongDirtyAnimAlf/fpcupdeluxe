@@ -601,7 +601,7 @@ begin
   writeln('- try removing all intermediate files by running fpcup with the --clean option');
   writeln('  and/or manually deleting all *.ppu/*.a/*.o followed by svn up');
   writeln('- if that does not work: use the --uninstall option to remove all files ');
-  wirteln(   including your FPC and Lazarus directories)');
+  writeln('  including your FPC and Lazarus directories');
   writeln('- remove the bootstrap compiler. fpcup will download it if required.');
 end;
 
