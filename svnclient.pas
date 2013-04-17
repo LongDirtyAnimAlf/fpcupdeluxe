@@ -160,10 +160,13 @@ begin
   FLocalRevision:=FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
 
+  // Avoid
+  //svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
+  //by --trust-server-cert
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
-    Command := ' checkout --non-interactive -r HEAD ' + Repository + ' ' + LocalRepository
+    Command := ' checkout --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := ' checkout --non-interactive -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
+    Command := ' checkout --non-interactive --trust-server-cert -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
   FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+Command,Output,Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -252,9 +255,9 @@ begin
   FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
 
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
-    Command := ' update --non-interactive ' + LocalRepository
+    Command := ' update --non-interactive --trust-server-cert ' + LocalRepository
   else
-    Command := ' update --non-interactive -r ' + FDesiredRevision + ' ' + LocalRepository;
+    Command := ' update --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
 
   FileList:=TStringList.Create;
   try
