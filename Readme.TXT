@@ -20,23 +20,34 @@ I also was tired of writing batch scripts and then having to press all kinds of 
 
 Prerequisites
 =============
-On Windows: should be none.
-If needed, this tool will download an svn client, the required binutils (make.exe etc) and a bootstrap FPC compiler for you.
-Note: you can build Lazarus without svn being in your path, but the Lazarus tool svn2revisioninc won't work and you won't get an SVn revision number in your Help/About box.
 
-On Linux:
+- Windows
+=========
+- none, but an svn installation in your path (e.g. TortoiseSVN) is recommended
+You can build Lazarus without an svn.exe in your path, but the Lazarus tool svn2revisioninc won't work and you won't get an SVN revision number in your Help/About box.
+If needed, the tool will download all needed binaries (bootstrap compiler, binutils, svn executable)
+
+- Linux
+=======
 - the binutils (make etc); e.g. in a package called build-essential
 - bunzip2 (probably present in most distributions)
 - unzip
-- subversion client
+- subversion client: svn
 E.g. on Debian or Ubuntu, do something like:
 sudo aptitude install build-essential subversion unzip
 
-On FreeBSD 9+:
-- should be none
+- Apple OSX
+===========
+- Xcode and Xcode command line tools
+
+- FreeBSD 9+
+=============
+- none, but *strongly recommended* to use a newer gdb than the 6.1 version supplied with the system, e .g. by
+cd /usr/ports/devel/gdb
+make -DBATCH install clean
+Use gdb in /usr/local/bin/gdb
 - for Lazarus, you'll need XWindows with GTK (default) or Qt
 
-On OSX: only tested with XCode installed; no other requirements found.
 
 How does it work?
 =================
