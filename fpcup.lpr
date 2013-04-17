@@ -36,7 +36,7 @@ program fpcup;
   absolute paths
 }
 {$mode objfpc}{$H+}
-//todo: download & set new gdb to FreeBSD (newer than 6.1) in bootstrap dir
+
 {
 Possible additional verifications: check existing fpc locations, versions
 

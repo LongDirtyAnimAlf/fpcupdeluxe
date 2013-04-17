@@ -541,6 +541,7 @@ function TLazarusInstaller.ConfigModule(ModuleName:string): boolean;
 const
   StaticPackagesFile='staticpackages.inc';
 var
+  DebuggerPath: string;
   LazarusConfig: TUpdateLazConfig;
   StaticPackages: TStringList;
 begin
@@ -576,7 +577,19 @@ begin
       {$IFDEF UNIX}
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/CompilerFilename/Value',FCompiler);
+
+      {$IFDEF FREEBSD}
+      // Check for newer user-installed debugger (e.g. from ports tree
+      // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
+      DebuggerPath:='/usr/local/bin/';
+      if CheckExecutable(DebuggerPath+'gdb','--version','GNU gdb') then
+        DebuggerPath:=LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',DebuggerPath+'gdb')
+      else
+        LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',which('gdb')); //system gdb; assume in path
+      {$ELSE} //other *nix
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/DebuggerFilename/Value',which('gdb')); //assume in path
+      {$ENDIF FREEBSD}
+
       {$IFDEF BSD}
       {$IFDEF DARWIN}
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/MakeFilename/Value',which('make')); //assume in path
@@ -585,6 +598,7 @@ begin
       {$ENDIF DARWIN}
       {$ENDIF BSD}
       {$ENDIF UNIX}
+
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
       LazarusConfig.SetVariable(EnvironmentConfig,'EnvironmentOptions/FPCSourceDirectory/Value',FFPCDir);
