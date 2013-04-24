@@ -273,7 +273,7 @@ begin
 
       try
         ProcessEx.Execute;
-        result:= ProcessEx.ExitStatus =0;
+        result:= ProcessEx.ExitStatus=0;
         if not result then
           WritelnLog('Lazarus: error compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' '+FCrossLCL_Platform+LineEnding+
             'Details: '+FErrorLog.Text,true);

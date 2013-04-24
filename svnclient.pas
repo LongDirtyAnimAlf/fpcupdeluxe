@@ -188,6 +188,10 @@ begin
       end;
       Sleep(500); //Give everybody a chance to relax ;)
       FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+Command,Output,Verbose); //attempt again
+      // Throw in another check for locked files after checkout or update command
+      if (ReturnCode <> 0) and (Pos('E155004',Output)>0) then
+        FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -285,6 +289,9 @@ begin
         end;
         Sleep(500); //Give everybody a chance to relax ;)
         FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+command,Verbose); //attempt again
+        // Throw in another check for locked files after checkout or update command
+        if (ReturnCode <> 0) and (Pos('E155004',Output)>0) then
+          FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
         AfterErrorRetry := AfterErrorRetry + 1;
       end;
       UpdateRetry := UpdateRetry + 1;
