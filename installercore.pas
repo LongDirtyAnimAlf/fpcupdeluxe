@@ -714,7 +714,7 @@ end;
 function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 var
   BeforeRevisionShort: string; //Basically the branch revision number
-  ReturnCode: integer;
+  CheckoutOrUpdateReturnCode: integer;
 begin
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
@@ -755,8 +755,8 @@ begin
   FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
-  ReturnCode := FSVNClient.ReturnCode;
-  case ReturnCode of
+  CheckoutOrUpdateReturnCode := FSVNClient.ReturnCode;
+  case CheckoutOrUpdateReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:
     begin
       FRepositoryUpdated := false;
@@ -778,7 +778,7 @@ begin
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
-      Result := (ReturnCode=0);
+      Result := (CheckoutOrUpdateReturnCode=0);
     end;
   end;
 end;
