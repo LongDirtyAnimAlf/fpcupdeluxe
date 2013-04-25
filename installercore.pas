@@ -767,8 +767,9 @@ begin
     end;
     else
     begin
-      // For now, assume it worked even with non-zero result code. We can because
-      // we do the AfterRevision check as well.
+      // If there are svn errors, return a false result.
+      // We used to do a check for the revision, but that does not check the integrity
+      // or existence of all files in the svn repo.
       if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
         AfterRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
       else
@@ -777,7 +778,7 @@ begin
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
-      Result := true;
+      Result := (ReturnCode=0);
     end;
   end;
 end;
