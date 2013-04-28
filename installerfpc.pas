@@ -315,39 +315,43 @@ begin
     on E: Exception do
       begin
       OperationSucceeded := False;
-      WritelnLog('FPC: Running fpc make all install failed with an exception!'+LineEnding+
+      WritelnLog('FPC: Running fpc make all failed with an exception!'+LineEnding+
         'Details: '+E.Message,true);
       end;
   end;
 
-  ProcessEx.Parameters.Clear;
-  FErrorLog.Clear;
-  ProcessEx.Parameters.Add('FPC='+FCompiler);
-  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
-  ProcessEx.Parameters.Add('install');
-  infoln('Running make install for FPC:',etinfo);
-  try
-    // At least on 2.7.1 Windows we get access violations running fpc make
-    // perhaps this try..except isolates that
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
-      begin
-      OperationSucceeded := False;
-      WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
-        'Details: '+FErrorLog.Text,true);
-      end;
-  except
-    on E: Exception do
-      begin
-      OperationSucceeded := False;
-      WritelnLog('FPC: Running fpc make all install failed with an exception!'+LineEnding+
-        'Details: '+E.Message,true);
-      end;
+  if OperationSucceeded then
+  begin
+    ProcessEx.Parameters.Clear;
+    FErrorLog.Clear;
+    ProcessEx.Parameters.Add('FPC='+FCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+    ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+    ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+    ProcessEx.Parameters.Add('install');
+    infoln('Running make install for FPC:',etinfo);
+    try
+      // At least on 2.7.1 Windows we get access violations running fpc make
+      // perhaps this try..except isolates that
+      ProcessEx.Execute;
+      if ProcessEx.ExitStatus <> 0 then
+        begin
+        OperationSucceeded := False;
+        WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+          'Details: '+FErrorLog.Text,true);
+        end;
+    except
+      on E: Exception do
+        begin
+        OperationSucceeded := False;
+        WritelnLog('FPC: Running fpc make install failed with an exception!'+LineEnding+
+          'Details: '+E.Message,true);
+        end;
+    end;
   end;
 
   {$ELSE UNIX} // Windows
+
   ProcessEx.Executable := Make;
   FErrorLog.Clear;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -384,6 +388,7 @@ begin
       end;
   end;
   {$ENDIF UNIX}
+
 
   {$IFDEF UNIX}
   if OperationSucceeded then
