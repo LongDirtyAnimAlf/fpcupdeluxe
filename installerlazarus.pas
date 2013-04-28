@@ -436,18 +436,20 @@ begin
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FPrimaryConfigPath);
       // Support keeping userdefined installed packages when building.
-      // Assume new Laz version on failure
+      // Compile with selected compiler options
+      // Assume new Laz version on failure getting revision
       if strtointdef(Revision,38971)>=38971 then
       begin
-        ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages');
+        ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages '+FCompilerOptions);
         ProcessEx.Parameters.Add('--build-mode=');
       end
       else
       begin
-        //Language dependent fallback
+        // Fallback - depends on hardcoded "Normal IDE" build mode being present
         // We can specify a build mode; otherwise probably the latest build mode will be used
         // which could well be a stripped IDE
-        ProcessEx.Parameters.Add('--build-ide=');
+        // Let's see how/if FCompilerOptions clashes with the settings in normal build mode
+        ProcessEx.Parameters.Add('--build-ide= '+FCompilerOptions);
         ProcessEx.Parameters.Add('--build-mode=Normal IDE');
       end;
 
