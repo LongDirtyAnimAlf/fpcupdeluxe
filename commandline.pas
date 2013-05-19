@@ -211,7 +211,7 @@ begin
     sParam:=ParamStr(i);
     // First load in @file or @ file if specified
     // This lets us override with command line args later
-    if sParam[i]='@' then
+    if sParam[1]='@' then
       begin
       if (length(sParam)=1) and (i<Paramcount) then
         begin
@@ -231,7 +231,7 @@ begin
     sParam:=ParamStr(i);
     // First load in @file if specified
     // This lets us override with command line args later
-    if sParam[i]<>'@' then
+    if sParam[1]<>'@' then
       FParams.Add(ParamStr(i));
     i:=i+1;
     end;
