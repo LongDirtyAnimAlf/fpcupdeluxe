@@ -941,11 +941,21 @@ begin
       ProcessEx.Parameters.Add('-o');
       ProcessEx.Parameters.Add('' + FPCCfg + '');
       infoln('Creating fpc.cfg:',etinfo);
-      ProcessEx.Execute;
+      try
+        ProcessEx.Execute;
+      except
+        on E: Exception do
+          begin
+          WritelnLog('FPC: Running fpcmkcfg failed with an exception!'+LineEnding+
+            'Details: '+E.Message,true);
+          OperationSucceeded := False;
+          end;
+      end;
+
       if ProcessEx.ExitStatus <> 0 then
         begin
         OperationSucceeded := False;
-        WritelnLog('FPC: Running fpcmkcfg make all failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+        WritelnLog('FPC: Running fpcmkcfg failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
         end;
     {$IFDEF UNIX}
     {$IFDEF cpuarmel}
