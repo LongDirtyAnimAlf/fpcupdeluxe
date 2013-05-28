@@ -410,6 +410,7 @@ var
   BuildResult: integer;
   ExistingLCLHelp: string;
   FPDocExe: string;
+  FPDocExes: TStringList;
   GeneratedLCLHelp: string;
   LazbuildExe: string;
   LCLDate: TDateTime;
@@ -478,16 +479,26 @@ begin
       end;
 
       // Check for proper fpdoc
-      { Use the fpdoc in ./utils/fpdoc/, as the compiler directory
-      can be different between Unix+Windows }
+      { Preferably use the fpdoc in ./utils/fpdoc/ }
       FPDocExe:=IncludeTrailingPathDelimiter(FFPCDirectory)+
       'utils'+DirectorySeparator+
       'fpdoc'+DirectorySeparator+
       'fpdoc'+GetExeExt;
       if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
       begin
-        writelnlog(ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
-        OperationSucceeded := False;
+        // Try again, in bin directory; newer FPC releases may have migrated to this
+        FPDocExes:=FindAllFiles(IncludeTrailingPathDelimiter(FFPCDirectory)+'bin'+DirectorySeparator,
+          'fpdoc'+GetExeExt,true);
+        try
+          if FPDocExes.Count>0 then FPDocExe:=FPDocExes[0]; //take only the first
+          if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
+          begin
+            writelnlog(ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
+            OperationSucceeded := False;
+          end;
+        finally
+          FPDocExes.Free;
+        end;
       end;
 
       if OperationSucceeded then
@@ -556,7 +567,6 @@ begin
         infoln(ModuleName+': not building LCL.chm as it is read quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),etInfo);
     end;
   end;
-
   result:=OperationSucceeded;
 end;
 
