@@ -1067,9 +1067,9 @@ begin
       infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
       end;
     try
-     ProcessEx.Execute;
-     Sleep(100); //now do it again
-     ProcessEx.Execute;
+      ProcessEx.Execute;
+      Sleep(100); //now do it again
+      ProcessEx.Execute;
     except
       on E: Exception do
       begin
