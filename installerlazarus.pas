@@ -663,7 +663,7 @@ function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
 // Running it twice apparently can fix a lot of problems; see FPC ML message
 // by Jonas Maebe, 1 November 2012
 var
-  oldlog:TErrorMethod;
+  oldlog: TErrorMethod;
 begin
   result:=InitModule;
   if not result then exit;
@@ -695,7 +695,6 @@ begin
     ProcessEx.Execute;
     sleep(100); //now do it again:
     ProcessEx.Execute;
-    ProcessEx.OnErrorM:=oldlog;
     result:=true;
   except
     on E: Exception do
@@ -705,6 +704,7 @@ begin
         'Details: '+E.Message,true);
     end;
   end;
+  ProcessEx.OnErrorM:=oldlog; //restore previous logging
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;

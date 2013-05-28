@@ -935,7 +935,7 @@ begin
     begin
       ProcessEx.Executable := IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-      ProcessEx.Parameters.clear;
+      ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('-d');
       ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('-o');
@@ -985,13 +985,14 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 // by Jonas Maebe, 1 November 2012
 // On Windows, removing fpmake.exe, see Build FAQ (Nov 2011), 2.5
 var
-  oldlog:TErrorMethod;
+  oldlog: TErrorMethod;
   CrossCompiling: boolean;
   DeleteList: TStringList;
   CPU_OSSignature:string;
 begin
   result:=InitModule;
   if not result then exit;
+  oldlog:=ProcessEx.OnErrorM; //current error handler, if any
   CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
   if CrossCompiling then
     CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target
@@ -1043,31 +1044,43 @@ begin
   {$ENDIF}
 
   ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
-  ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('FPC='+FCompiler);
-  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-  ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-  if Self is TFPCCrossInstaller then
-    begin  // clean out the correct compiler
-    ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-    ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+  try
+    ProcessEx.Executable := Make;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('FPC='+FCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+    ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+    ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+    if Self is TFPCCrossInstaller then
+      begin  // clean out the correct compiler
+      ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+      ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+      end;
+    ProcessEx.Parameters.Add('distclean');
+    if (FCrossOS_Target='') and (FCrossCPU_Target='') then
+      begin
+      infoln('FPC: running make distclean:',etinfo);
+      end
+    else
+      begin
+      infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+      end;
+    try
+     ProcessEx.Execute;
+     Sleep(100); //now do it again
+     ProcessEx.Execute;
+    except
+      on E: Exception do
+      begin
+        result:=false;
+        WritelnLog('FPC: running make distclean failed with an exception!'+LineEnding+
+          'Details: '+E.Message,true);
+      end;
     end;
-  ProcessEx.Parameters.Add('distclean');
-  if (FCrossOS_Target='') and (FCrossCPU_Target='') then
-    begin
-    infoln('FPC: running make distclean:',etinfo);
-    end
-  else
-    begin
-    infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
-    end;
-  ProcessEx.Execute;
-  Sleep(100); //now do it again
-  ProcessEx.Execute;
-  ProcessEx.OnErrorM:=oldlog;
+  finally
+    ProcessEx.OnErrorM:=oldlog; //restore previous logging
+  end;
 
   // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
