@@ -831,6 +831,7 @@ end;
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   FPCCfg: string;
+  FPCMkCfg: string; //path+file of fpcmkcfg
   OperationSucceeded: boolean;
   SearchRec:TSearchRec;
   s:string;
@@ -926,6 +927,23 @@ begin
   end;
   {$ENDIF UNIX}
 
+  // Find out where fpcmkcfg lives - only if necessary.
+  if FileExists(FPCCfg) = False then
+  begin
+    fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
+    if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
+    begin
+      // Some 2.7 trunk dump fpcmkcfg in bin itself
+      fpcmkcfg:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+        'bin'+DirectorySeparator+'fpcmkcfg';
+      if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
+      begin
+        infoln('Could not find fpcmkcfg. Aborting.',etError);
+        OperationSucceeded:=false;
+      end;
+    end;
+  end;
+
   //todo: after fpcmkcfg create a config file for fpkpkg or something
   if OperationSucceeded then
   begin
@@ -933,7 +951,7 @@ begin
     FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
-      ProcessEx.Executable := IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
+      ProcessEx.Executable := fpcmkcfg;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('-d');

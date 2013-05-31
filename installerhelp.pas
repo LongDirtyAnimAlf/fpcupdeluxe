@@ -495,6 +495,10 @@ begin
           begin
             writelnlog(ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
             OperationSucceeded := False;
+          end
+          else
+          begin
+            infoln(ModuleName+': found valid fpdoc executable.',etInfo);
           end;
         finally
           FPDocExes.Free;
