@@ -349,7 +349,7 @@ begin
   try
     ExeName := ExtractFileName(Executable);
     ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, FVerbose);
-    if ResultCode = 0 then
+    if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
       if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
       begin
