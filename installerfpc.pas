@@ -940,6 +940,10 @@ begin
       begin
         infoln('Could not find fpcmkcfg. Aborting.',etError);
         OperationSucceeded:=false;
+      end
+      else
+      begin
+        infoln('Found valid fpcmkcfg executable: '+fpcmkcfg,etInfo);
       end;
     end;
   end;
