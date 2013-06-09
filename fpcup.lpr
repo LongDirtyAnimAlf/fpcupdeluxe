@@ -186,12 +186,19 @@ begin
   writeln('                       <name> has to be one of the following:');
   writeln('                       darwin,freebsd,linux,netbsd,openbsd,os2,');
   writeln('                       solaris,wince,win32,win64');
+  writeln(' patchcmd              Command to use to reapply local changes backed up with');
+  writeln('                       svn diff command. The diff file is passed as the only');
+  writeln('                       parameter. Add any extra paremeters needed.');
+  writeln('                       Default: "patch -p0 -i" ');
   writeln(' primary-config-path=<dir>');
   writeln('                       Analogous to Lazarus primary-config-path parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
   writeln('                       configuration path for the Lazarus it installs/updates.');
   writeln('                       Default: empty; then a OS dependent configuration');
   writeln('                       path is used; directory name lazarusdevsettings.');
+  writeln(' reapplylocalchanges   Back up locally modified files into .diff file and');
+  writeln('                       reapply the diff with patch or command specified in ');
+  writeln('                       parameter patchexe');
   writeln(' skip=<values>         Do not update/build or clean specified modules.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
@@ -323,7 +330,8 @@ begin
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
-      FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
+      FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','patch -p0 -i',false);
+      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','',false);
       // Deal with options coming from ini (e.g. Help=true)
       try
         bHelp:=Options.GetOption('h','help',false);
@@ -339,6 +347,14 @@ begin
         on E: ECommandLineError do begin
         // option did not have an argument
         FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
+        end;
+      end;
+      try
+        FInstaller.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
+      except
+        on E: ECommandLineError do begin
+        // option did not have an argument
+        FInstaller.reapplylocalchanges:=Options.GetOptionNoParam('','reapplylocalchanges');
         end;
       end;
       FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
@@ -635,4 +651,4 @@ begin
   end;
   if res<>-1 then
     halt(res);
-end.
+end.

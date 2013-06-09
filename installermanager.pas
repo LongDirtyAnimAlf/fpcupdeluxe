@@ -177,6 +177,8 @@ type
     FLazarusURL: string;
     FMakeDirectory: string;
     FOnlyModules: string;
+    FPatchCmd: string;
+    FReApplyLocalChanges: boolean;
     FShortCutNameLazarus: string;
     FShortCutNameFpcup: string;
     FSkipModules: string;
@@ -232,6 +234,10 @@ type
     property ModulePublishedList: TStringList read FModulePublishedList;
     // List of modules that must be processed in addition to the default ones
     property IncludeModules:string read FIncludeModules write FIncludeModules;
+    // Patch utility to use. Defaults to 'patch -p0 -i patchfile'
+    property PatchCmd:string read FPatchCmd write FPatchCmd;
+    // Whether or not to back up locale changes to .diff and reapply them before compiling
+    property ReApplyLocalChanges: boolean read FReApplyLocalChanges write FReApplyLocalChanges;
     // List of modules that must not be processed
     property SkipModules:string read FSkipModules write FSkipModules;
     // Exhaustive/exclusive list of modules that must be processed; no other
@@ -843,6 +849,8 @@ begin
     end;
 
   Installer.KeepLocalChanges:=FParent.KeepLocalChanges;
+  Installer.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
+  Installer.PatchCmd:=FParent.PatchCmd;
   Installer.Verbose:=FParent.Verbose;
   Installer.Log:=FParent.FLog;
   {$IFDEF MSWINDOWS}
@@ -1114,4 +1122,4 @@ begin
 end;
 
 end.
-
+

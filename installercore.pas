@@ -14,6 +14,8 @@ type
   TInstaller = class(TObject)
   private
     FKeepLocalChanges: boolean;
+    FPatchCmd: string;
+    FReApplyLocalChanges: boolean;
     function GetMake: string;
   protected
     FBaseDirectory: string; //Top directory for a product (FPC, Lazarus)
@@ -90,6 +92,10 @@ type
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     property Log: TLogger write FLog;
     property MakeDirectory: string write FMakeDir;
+    // Patch utility to use. Defaults to 'patch -p0 -i patchfile'
+    property PatchCmd:string write FPatchCmd;
+    // Whether or not to back up locale changes to .diff and reapply them before compiling
+    property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP,ftp or svn
     property URL: string write FURL;
     // display and log in temp log file all sub process output
@@ -715,6 +721,7 @@ function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, Afte
 var
   BeforeRevisionShort: string; //Basically the branch revision number
   CheckoutOrUpdateReturnCode: integer;
+  DiffFile: String;
 begin
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
@@ -737,12 +744,14 @@ begin
   end;
 
   FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
+  DiffFile:='';
   if UpdateWarnings.Count > 0 then
   begin
     UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
     if FKeepLocalChanges=false then
     begin
-      CreateStoreRepositoryDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings,FSVNClient);
+      DiffFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+      CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
       UpdateWarnings.Add(ModuleName + ': reverting before updating.');
       FSVNClient.Revert; //Remove local changes
     end
@@ -779,6 +788,19 @@ begin
       else
         FRepositoryUpdated := false;
       Result := (CheckoutOrUpdateReturnCode=0);
+      if Result and FReApplyLocalChanges and (DiffFile<>'') then
+        begin
+          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
+          if FPatchCmd='' then
+            FPatchCmd:='patch -p0 -i ';
+          if ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, FVerbose)<>0 then
+            begin
+              writelnlog('ERROR: Patching with ' + DiffFile + ' failed.', true);
+              writelnlog('  Verify the state of the source, correct and rebuild with make.', true);
+              Result := false;  //fail
+              exit;
+            end;
+        end;
     end;
   end;
 end;
@@ -1009,4 +1031,4 @@ end;
 
 
 end.
-
+
