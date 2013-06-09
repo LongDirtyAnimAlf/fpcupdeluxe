@@ -220,7 +220,7 @@ end;
 
 function TSVNClient.GetDiffAll:string;
 begin
-  FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' diff ' + LocalRepository,Result,Verbose);
+  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' diff .',LocalRepository,Result,Verbose);
 end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
