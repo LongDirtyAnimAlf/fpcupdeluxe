@@ -330,8 +330,8 @@ begin
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
-      FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','patch -p0 -i',false);
-      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','',false);
+      FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
+      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','patch -p0 -i',false);
       // Deal with options coming from ini (e.g. Help=true)
       try
         bHelp:=Options.GetOption('h','help',false);
@@ -651,4 +651,4 @@ begin
   end;
   if res<>-1 then
     halt(res);
-end.
+end.
