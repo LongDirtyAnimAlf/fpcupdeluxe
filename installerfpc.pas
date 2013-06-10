@@ -910,7 +910,7 @@ begin
   if FindFirst(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
     repeat
       s:=SearchRec.Name;
-      if (length(s)>4) and (pos(s,COMPILERNAMES) >0) then  //length(s)>4 skips ppc3
+      if (length(s)>4) and (pos(s,COMPILERNAMES)>0) then  //length(s)>4 skips ppc3
         begin
         OperationSucceeded:=OperationSucceeded and
           FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
@@ -920,6 +920,9 @@ begin
         end;
     until FindNext(SearchRec)<>0;
   FindClose(SearchRec);
+  if not (OperationSucceeded) then
+    infoln('Error copying over compiler to '+IncludeTrailingPathDelimiter(FBinPath),etError);
+
   // create link 'units' below FBaseDirectory to <somewhere>/lib/fpc/$fpcversion/units
   DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
   fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
