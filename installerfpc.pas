@@ -724,11 +724,11 @@ begin
     {$ELSE}
     {$IFDEF cpuarmel}
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTPPath+'arm-linux-ppcarm.bz2';
+      FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTPPath+'x86_64-linux-ppcx64.bz2';
+      FBootstrapCompilerURL := FTP262Path+'x86_64-linux-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
     {$ENDIF cpuarmel}
     {$ENDIF CPU386}
