@@ -284,6 +284,7 @@ var
   OperationSucceeded:boolean;
   FileCounter:integer;
 begin
+  OperationSucceeded:=true;
   // Make all/install, using bootstrap compiler.
   // Make all should use generated compiler internally for unit compilation
   {$IFDEF UNIX}
@@ -413,10 +414,8 @@ begin
       end;
     end
   else
-    begin
     FCompiler:='////\\\Error trying to compile FPC\|!';
-    OperationSucceeded:=false;
-    end;
+
 
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
@@ -900,7 +899,11 @@ begin
     fpChmod(FCompiler,&755);
     end;
   {$endif darwin}
+
   OperationSucceeded:=BuildModuleCustom(ModuleName);
+  if not (OperationSucceeded) then
+    infoln('Error running BuildModuleCustome for module '+ModuleName,etError);
+
 
   {$IFDEF UNIX}
   if OperationSucceeded then
