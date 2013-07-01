@@ -92,7 +92,7 @@ TUpdateLazConfig=class; //forward declaration
 TConfig = class(TObject)
 private
   bChanged:boolean;
-  Filename:string;
+  FFilename:string;
   FNew: boolean;
   Doc:TXMLDocument;
 protected
@@ -330,7 +330,7 @@ end;
 
 procedure TConfig.Save;
 begin
-  WriteXMLFile(Doc,Filename);
+  WriteXMLFile(Doc,FFilename);
 end;
 
 procedure TConfig.SetValue(const APath, AValue: String);
@@ -367,7 +367,7 @@ constructor TConfig.Create(const AFilename: String);
 var
   FileOnly: string;
 begin
-  Filename:=AFilename;
+  FFilename:=AFilename;
   FNew:=not(FileExistsUTF8(AFileName));
   if FNew then
     begin
@@ -383,7 +383,11 @@ end;
 destructor TConfig.Destroy;
 begin
   If bChanged then
+  begin
+    // Make sure path exists:
+    ForceDirectoriesUTF8(ExtractFilePath(FFilename));
     Save;
+  end;
   Doc.Free;
   inherited Destroy;
 end;
