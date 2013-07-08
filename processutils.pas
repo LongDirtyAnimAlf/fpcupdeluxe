@@ -266,6 +266,7 @@ begin
     except
       // Leave exitstatus as proc_internalerror
       // This should handle calling non-existing application etc.
+      // Note also bug 22055 TProcess ExitStatus is zero when the called process Seg Faults
     end;
 
     if (FExitStatus<>0) and (Assigned(OnError) or Assigned(OnErrorM))  then
