@@ -134,7 +134,7 @@ begin
   writeln('                       Default: fpcup_update');
   writeln('                         or <lazlinkname>_update if lazlinkname specified');
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
-  writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+  writeln('                       svn://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
   writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'fpcURL','list'));
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
@@ -172,7 +172,7 @@ begin
   writeln(' lazrevision=<number>  Revert to Lazarus SVN revision <number>');
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
-  writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
+  writeln('                       svn://svn.freepascal.org/svn/lazarus/trunk');
   writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'lazURL','list'));
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
@@ -454,8 +454,8 @@ begin
     //svn2 seems to lag behind a lot, so don't use that.
     //load URL's after LoadFPCUPConfig so that we have loaded the aliases
     try
-      FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
-      FInstaller.LazarusURL:=Options.GetOption('','lazURL','http://svn.freepascal.org/svn/lazarus/trunk');
+      FInstaller.FPCURL:=Options.GetOption('','fpcURL','svn://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
+      FInstaller.LazarusURL:=Options.GetOption('','lazURL','svn://svn.freepascal.org/svn/lazarus/trunk');
     except
       on E:Exception do
       begin
