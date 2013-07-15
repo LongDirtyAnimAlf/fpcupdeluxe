@@ -153,7 +153,7 @@ const
   MaxRetries = 3;
 var
   Command: string;
-  Output: string;
+  Output: string='';
   RetryAttempt: integer;
 begin
   // Invalidate our revision number cache
@@ -161,8 +161,8 @@ begin
   FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
 
   // Avoid
-  //svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
-  //by --trust-server-cert
+  // svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
+  // by --trust-server-cert
   if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
     Command := ' checkout --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
   else
@@ -184,6 +184,17 @@ begin
         ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
         // We probably ended up with a local repository where not all files were checked out.
         // Let's call update to do so.
+        Update;
+      end;
+      if Pos('E155036',Output)>0 then
+      {
+      svn: E155036: Please see the 'svn upgrade' command
+      svn: E155036: The working copy at 'C:\Development\fpctrunk' is too old (format 29) to work with client version '1.8.0-SlikSvn-1.8.0-X64 (SlikSvn/1.8.0) X64' (expects format 31). You need to upgrade the working copy first
+      }
+      begin
+        // Let's try one time upgrade to fix it (don't update FReturnCode here)
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' upgrade --non-interactive '+ LocalRepository,Verbose); //attempt again
+        // Now update again:
         Update;
       end;
       Sleep(500); //Give everybody a chance to relax ;)
@@ -218,8 +229,9 @@ begin
   end;
 end;
 
-function TSVNClient.GetDiffAll:string;
+function TSVNClient.GetDiffAll: string;
 begin
+  Result:=''; //fail by default
   FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' diff .',LocalRepository,Result,Verbose);
 end;
 
@@ -243,7 +255,7 @@ const
 var
   Command: string;
   FileList: TStringList;
-  Output: string;
+  Output: string='';
   AfterErrorRetry: integer; // Keeps track of retry attempts after error result
   UpdateRetry: integer; // Keeps track of retry attempts to get all files
 begin
@@ -404,9 +416,8 @@ const
   RevLength = Length('Revision:');
   RevExpression = '\:\s+(\d+)\s'; //regex to match revision in svn info
 var
-  LBranchRevision: string;
-  LRevision: string; // Revision of repository as a whole
-  Output: string;
+  LRevision: string = ''; // Revision of repository as a whole
+  Output: string = '';
   RevExtr: TRegExpr;
   RevCount: Integer;
 begin
