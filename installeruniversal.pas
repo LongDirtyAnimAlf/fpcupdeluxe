@@ -82,7 +82,7 @@ type
     // Filters (a module's) sl stringlist and runs all <Directive> commands:
     function RunCommands(Directive:string;sl:TStringList):boolean;
     // Uninstall a single package:
-    function UnInstallPackage(PackagePath,WorkingDir: string): boolean;
+    function UnInstallPackage(PackagePath: string): boolean;
   public
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
@@ -287,7 +287,9 @@ begin
     // Skip over missing numbers:
     if PackagePath='' then continue;
     // Try to uninstall everything, even if some of these fail.
-    if UnInstallPackage(PackagePath,WorkingDir)=false then Failure:=true;
+    // Note: UninstallPackage used to have a WorkingDir parameter but
+    // I'm wondering how to implement that as we have PackagePath already.
+    if UnInstallPackage(PackagePath)=false then Failure:=true;
     end;
   result:=Failure;
 end;
@@ -384,7 +386,8 @@ end;
 function TUniversalInstaller.RunCommands(Directive: string;sl:TStringList): boolean;
 var
   i:integer;
-  exec,output:string;
+  exec:string;
+  output:string='';
   Workingdir:string;
 begin
   result:=true; //not finding any instructions at all should not be a problem.
@@ -409,8 +412,7 @@ begin
     end;
 end;
 
-function TUniversalInstaller.UnInstallPackage(PackagePath,WorkingDir: string): boolean;
-// Todo: add support for workingdir
+function TUniversalInstaller.UnInstallPackage(PackagePath: string): boolean;
 var
   cnt, i: integer;
   key: string;
@@ -722,7 +724,8 @@ var
   idx:integer;
   sl:TStringList;
   RemoteURL,InstallDir:string;
-  BeforeRevision, AfterRevision: string;
+  BeforeRevision: string='';
+  AfterRevision: string='';
   UpdateWarnings: TStringList;
 begin
   result:=InitModule;
@@ -803,9 +806,9 @@ end;
 function TUniversalInstaller.GetModuleRequirements(ModuleName: string;
   var RequirementList: TStringList): boolean;
 begin
-result:=InitModule;
-if not result then exit;
-
+//todo: what are we supposed to do with Requirementslist?
+  result:=InitModule;
+  if not result then exit;
 end;
 
 // Runs all UnInstallExecute<n> commands inside a specified module
@@ -813,7 +816,7 @@ function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
 var
   idx,cnt,i:integer;
   sl:TStringList;
-  Directive,xmlfile,key,keyfrom:string;
+  Directive,xmlfile,key:string;
   LazarusConfig:TUpdateLazConfig;
 begin
   result:=InitModule;
@@ -930,12 +933,11 @@ function GetModuleList(ConfigFile: string): string;
 var
   ini:TMemIniFile;
   i,j,maxmodules:integer;
-  val,name,req:string;
+  val,name:string;
 
   function LoadModule(ModuleName:string):boolean;
   var
-    name,description,val:string;
-    i:integer;
+    name:string;
     sl:TStringList;
   begin
     name:=ini.ReadString(ModuleName,'Name','');
@@ -1040,8 +1042,10 @@ end;
 function GetModuleEnabledList(var ModuleList: TStringList): boolean;
 var i:integer;
 begin
+  result:=false;
   for i:=0 to UniModuleEnabledList.Count -1 do
     ModuleList.Add(UniModuleEnabledList[i]);
+  result:=true;
 end;
 
 

@@ -483,9 +483,9 @@ const
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw32/';
   // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
-  SourceURL_gdb = 'svn://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
-  SourceURL64 = 'svn://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw64/';
-  SourceURL64_gdb = 'svn://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
+  SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
+  SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw64/';
+  SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
   //todo: add Qt and Qt4Pas5.dll in http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/?
 var
   Counter: integer;
@@ -729,6 +729,13 @@ begin
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
 
+  if not(FSVNClient.LocalRepositoryExists) then
+  begin
+    writelnlog('ERROR: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
+    result := false;
+    exit;
+  end;
+
   if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
     BeforeRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
   else
@@ -739,7 +746,7 @@ begin
   begin
     writelnlog('ERROR: The working copy in ' + FBaseDirectory + ' was created with an older, incompatible version of svn.', true);
     writelnlog('  Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
-    Result := false;  //fail
+    result := false;  //fail
     exit;
   end;
 

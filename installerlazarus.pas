@@ -713,7 +713,8 @@ var
   BeforeRevision: string;
   UpdateWarnings: TStringList;
 begin
-  if not InitModule then exit;
+  result:=InitModule;
+  if not result then exit;
   infoln('Checking out/updating Lazarus sources:',etinfo);
   UpdateWarnings:=TStringList.Create;
   try
@@ -726,8 +727,8 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-
   infoln('Lazarus was at: '+BeforeRevision,etinfo);
+
   if FRepositoryUpdated then
   begin
     Revision:=AfterRevision;

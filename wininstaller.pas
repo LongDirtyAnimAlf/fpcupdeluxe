@@ -177,7 +177,7 @@ begin
   FSVNClient.LocalRepository:=FFPCBuildDir;
   // Using the fixes version of FPC hardcoded; probably we officially need latest stable FPC...
   //todo: perhaps link this to the actual version of FPC used in the regular install?
-  FSVNClient.Repository:='svn://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6';
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6';
   FSVNClient.CheckOutOrUpdate;
 
   //checkout laz binaries
@@ -185,7 +185,7 @@ begin
   ForceDirectories(FLazarusBinaryDir);
   FSVNClient.LocalRepository:=FLazarusBinaryDir;
   // Will have at least i386, x64 and arm-wince subfolders
-  FSVNClient.Repository:='svn://svn.freepascal.org/svn/lazarus/binaries/';
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/';
   FSVNClient.CheckOutOrUpdate;
 
   // Lazbuilddir may not exist (or should be empty) - so if it is there, remove it

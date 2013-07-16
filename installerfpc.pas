@@ -902,7 +902,7 @@ begin
 
   OperationSucceeded:=BuildModuleCustom(ModuleName);
   if not (OperationSucceeded) then
-    infoln('Error running BuildModuleCustome for module '+ModuleName,etError);
+    infoln('Error running BuildModuleCustom for module '+ModuleName,etError);
 
 
   {$IFDEF UNIX}
@@ -1155,6 +1155,7 @@ begin
   finally
     UpdateWarnings.Free;
   end;
+
   infoln('FPC was at: '+BeforeRevision,etinfo);
   if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etinfo) else infoln('No updates for FPC found.',etinfo);
 end;
