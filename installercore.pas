@@ -729,12 +729,9 @@ begin
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
 
+  // We could check for existence of a repository, but then we wouldn't be able to checkout
   if not(FSVNClient.LocalRepositoryExists) then
-  begin
-    writelnlog('ERROR: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
-    result := false;
-    exit;
-  end;
+    writelnlog('INFO: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
 
   if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
     BeforeRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
