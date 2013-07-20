@@ -442,8 +442,9 @@ var
   Commandline:=trim(Commandline);
   i:=1;
   InQuote:=false;
-  while (i<length(Commandline)) and (InQuote or (Commandline[i]>' ')) do
+  while (i<=length(Commandline)) and (InQuote or (Commandline[i]>' ')) do
     begin
+    // Check first and last quote:
     if Commandline[i] in QUOTES then
       if InQuote then
         begin
@@ -463,6 +464,7 @@ var
         end;
     i:=i+1;
     end;
+  // Copy found word and remove it from remaining command line
   result:=trim(copy(Commandline,1,i));
   delete(Commandline,1,i);
   end;
