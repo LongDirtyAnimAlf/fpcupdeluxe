@@ -114,8 +114,8 @@ type
       {%H-}procedure Execute;
       // Executable+parameters. Use Executable and Parameters/ParametersString to assign
       property ResultingCommand: string read GetResultingCommand;
-      property Environment:TProcessEnvironment read GetProcessEnvironment;
       // All environment variables, e.g. PATH
+      property Environment:TProcessEnvironment read GetProcessEnvironment;
       property ExceptionInfo:string read GetExceptionInfo;
       property ExceptionInfoStrings:TstringList read FExceptionInfoStrings;
       // Return code/exit status that the process returned with. Often 0 for success.
