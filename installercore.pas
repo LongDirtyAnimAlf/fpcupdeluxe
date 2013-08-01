@@ -603,6 +603,7 @@ var
   BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
 begin
+  //todo: check if we need to add forcedirectoriesutf8 to create local repo dir if it doesn't exist
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
@@ -662,6 +663,7 @@ var
   BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
 begin
+  //todo: check if forcedirectoriesutf8 for local repo is needed
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
@@ -743,6 +745,11 @@ begin
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
     writelnlog('INFO: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
+    if not(DirectoryExistsUTF8(FSVNClient.LocalRepository)) then
+    begin
+      writelnlog('INFO: creating directory '+FBaseDirectory+' for SVN checkout.');
+      ForceDirectoriesUTF8(FBaseDirectory);
+    end;
   end;
 
   if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
