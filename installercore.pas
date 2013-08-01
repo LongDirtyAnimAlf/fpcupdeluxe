@@ -722,6 +722,7 @@ var
   BeforeRevisionShort: string; //Basically the branch revision number
   CheckoutOrUpdateReturnCode: integer;
   DiffFile: String;
+  RepoExists: boolean;
 begin
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
@@ -730,7 +731,8 @@ begin
   FSVNClient.Repository := FURL;
 
   // We could check for existence of a repository, but then we wouldn't be able to checkout
-  if not(FSVNClient.LocalRepositoryExists) then
+  RepoExists:=FSVNClient.LocalRepositoryExists;
+  if not RepoExists then
     writelnlog('INFO: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
 
   if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
@@ -747,21 +749,24 @@ begin
     exit;
   end;
 
-  FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
-  DiffFile:='';
-  if UpdateWarnings.Count > 0 then
+  if RepoExists then
   begin
-    UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
-    if FKeepLocalChanges=false then
+    FSVNClient.LocalModifications(UpdateWarnings); //Get list of modified files
+    DiffFile:='';
+    if UpdateWarnings.Count > 0 then
     begin
-      DiffFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff';
-      CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
-      UpdateWarnings.Add(ModuleName + ': reverting before updating.');
-      FSVNClient.Revert; //Remove local changes
-    end
-    else
-    begin
-      UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
+      UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
+      if FKeepLocalChanges=false then
+      begin
+        DiffFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+        CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
+        UpdateWarnings.Add(ModuleName + ': reverting before updating.');
+        FSVNClient.Revert; //Remove local changes
+      end
+      else
+      begin
+        UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
+      end;
     end;
   end;
 

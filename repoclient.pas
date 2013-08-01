@@ -40,6 +40,7 @@ const
   // Custom return codes; note: keep separate from ProcessEx return codes (processutils.PROC_INTERNALERROR=-1)
   FRET_LOCAL_REMOTE_URL_NOMATCH = -10; //Return code that indicates remote and local repository URLs don't match
   FRET_WORKING_COPY_TOO_OLD = -11; //Return code for SVN problem with old client version used
+  FRET_NONEXISTING_REPO = -12; // Repo client could not detect a local repository/local copy of the remote repository
   FRET_UNKNOWN_REVISION = 'FRET_UNKNOWN_REVISION';
 
 type

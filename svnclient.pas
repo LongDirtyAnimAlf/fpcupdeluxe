@@ -56,6 +56,7 @@ type
     procedure CheckOut; override;
     function GetLocalRevision: string; override;
     function GetLocalRevisionWholeRepo: string;
+    // Figure out branch and whole repo revisions for local repository
     procedure GetLocalRevisions;
     function GetRepoExecutable: string; override;
     procedure Update; override;
@@ -378,7 +379,7 @@ var
 begin
   Result := false;
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + FLocalRepository, Output, Verbose);
-  //This is already covered by setting stuff to false first
+  // This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then
   begin
@@ -469,11 +470,14 @@ begin
         FLocalRevision := FLocalRevisionWholeRepo;
     end
     else
-    if Pos('E155036', LRevision) > 0 then
+    // Info call gave error, so we don't know the local revisions now
     begin
       FLocalRevision := FRET_UNKNOWN_REVISION;
       FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
-      FReturnCode := FRET_WORKING_COPY_TOO_OLD;
+      if Pos('E155036', LRevision) > 0 then
+        FReturnCode := FRET_WORKING_COPY_TOO_OLD
+      else
+        FReturnCode := FRET_NONEXISTING_REPO;
     end;
   end;
 end;
