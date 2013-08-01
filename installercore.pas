@@ -730,16 +730,20 @@ begin
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
 
-  // We could check for existence of a repository, but then we wouldn't be able to checkout
   RepoExists:=FSVNClient.LocalRepositoryExists;
-  if not RepoExists then
-    writelnlog('INFO: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
-
-  if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-    BeforeRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
+  if RepoExists then
+  begin
+    if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
+      BeforeRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
+    else
+      BeforeRevision := 'branch revision '+FSVNClient.LocalRevision+' (repository revision '+FSVNClient.LocalRevisionWholeRepo+')';
+    BeforeRevisionShort:=FSVNClient.LocalRevision;
+  end
   else
-    BeforeRevision := 'branch revision '+FSVNClient.LocalRevision+' (repository revision '+FSVNClient.LocalRevisionWholeRepo+')';
-  BeforeRevisionShort:=FSVNClient.LocalRevision;
+  begin
+    // We could insist on the repo existing, but then we wouldn't be able to checkout!!
+    writelnlog('INFO: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
+  end;
 
   if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
@@ -796,7 +800,12 @@ begin
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
+
+      // Only return success if svn returned return code 0
       Result := (CheckoutOrUpdateReturnCode=0);
+      if not Result then
+        writelnlog('DownloadFromSVN: SVN gave error code '+inttostr(CheckoutOrUpdateReturnCode));
+
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
         begin
           UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
