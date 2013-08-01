@@ -42,9 +42,9 @@ uses
 
 const
   // Custom return codes
-  FRET_LOCAL_REMOTE_URL_NOMATCH=repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
-  FRET_WORKING_COPY_TOO_OLD=repoclient.FRET_WORKING_COPY_TOO_OLD;
-  FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
+  FRET_LOCAL_REMOTE_URL_NOMATCH = repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
+  FRET_WORKING_COPY_TOO_OLD = repoclient.FRET_WORKING_COPY_TOO_OLD;
+  FRET_UNKNOWN_REVISION = repoclient.FRET_UNKNOWN_REVISION;
 
 type
   ESVNClientError = class(ERepoClientError);
@@ -62,7 +62,7 @@ type
   public
     procedure CheckOutOrUpdate; override;
     function FindRepoExecutable: string; override;
-    function GetDiffAll:string; override;
+    function GetDiffAll: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
     function LocalRepositoryExists: boolean; override;
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
@@ -76,6 +76,7 @@ type
 
 
 implementation
+
 uses strutils, regexpr;
 
 
@@ -114,15 +115,15 @@ begin
   if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
-    if FileExists(SVNName+'.exe') then
-      FRepoExecutable := SVNName+'.exe';
+    if FileExists(SVNName + '.exe') then
+      FRepoExecutable := SVNName + '.exe';
     if FileExists('svn') then
       FRepoExecutable := SVNName;
   end;
 
   if FileExists(FRepoExecutable) then
   begin
-    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+ ' --version',Verbose) <> 0 then
+    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
     begin
       // File exists, but is not a valid svn client
       FRepoExecutable := '';
@@ -139,9 +140,10 @@ end;
 
 function TSVNClient.GetRepoExecutable: string;
 begin
-  if not FileExists(FRepoExecutable) then FindRepoExecutable;
   if not FileExists(FRepoExecutable) then
-    Result:=''
+    FindRepoExecutable;
+  if not FileExists(FRepoExecutable) then
+    Result := ''
   else
     Result := FRepoExecutable;
 end;
@@ -153,52 +155,52 @@ const
   MaxRetries = 3;
 var
   Command: string;
-  Output: string='';
+  Output: string = '';
   RetryAttempt: integer;
 begin
   // Invalidate our revision number cache
-  FLocalRevision:=FRET_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
+  FLocalRevision := FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
 
   // Avoid
   // svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
   // by --trust-server-cert
-  if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
+  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
     Command := ' checkout --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := ' checkout --non-interactive --trust-server-cert -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+Command,Output,Verbose);
+    Command := ' checkout --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
-  if (ReturnCode<>0) then
+  if (ReturnCode <> 0) then
   begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
-      if Pos('E155004',Output)>0 then
+      if Pos('E155004', Output) > 0 then
       {
       E155004: Working copy '<directory>' locked.
       run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
       }
       begin
         // Let's try one time to fix it (don't update FReturnCode here)
-        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
         // We probably ended up with a local repository where not all files were checked out.
         // Let's call update to do so.
         Update;
       end;
-      if Pos('E155036',Output)>0 then
+      if Pos('E155036', Output) > 0 then
       {
       svn: E155036: Please see the 'svn upgrade' command
       svn: E155036: The working copy at 'C:\Development\fpctrunk' is too old (format 29) to work with client version '1.8.0-SlikSvn-1.8.0-X64 (SlikSvn/1.8.0) X64' (expects format 31). You need to upgrade the working copy first
       }
       begin
         // Let's try one time upgrade to fix it (don't update FReturnCode here)
-        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' upgrade --non-interactive '+ LocalRepository,Verbose); //attempt again
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade --non-interactive ' + LocalRepository, Verbose); //attempt again
         // Now update again:
         Update;
       end;
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+Command,Output,Verbose); //attempt again
+      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -206,9 +208,9 @@ end;
 
 procedure Tsvnclient.CheckOutOrUpdate;
 begin
-  if LocalRepositoryExists = False then
+  if LocalRepositoryExists = false then
   begin
-    if FReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH then
+    if FReturnCode = FRET_LOCAL_REMOTE_URL_NOMATCH then
     begin
       // We could delete the entire directory and checkout
       // but the user could take issue with that.
@@ -231,21 +233,21 @@ end;
 
 function TSVNClient.GetDiffAll: string;
 begin
-  Result:=''; //fail by default
-  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' diff .',LocalRepository,Result,Verbose);
+  Result := ''; //fail by default
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff .', LocalRepository, Result, Verbose);
 end;
 
 procedure Tsvnclient.Log(var Log: TStringList);
 var
-  s:string='';
+  s: string = '';
 begin
-  FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' log ' + LocalRepository,s,Verbose);
-  Log.Text:=s;
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ' + LocalRepository, s, Verbose);
+  Log.Text := s;
 end;
 
 procedure Tsvnclient.Revert;
 begin
-  FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' revert --recursive ' + LocalRepository,Verbose);
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --recursive ' + LocalRepository, Verbose);
 end;
 
 procedure Tsvnclient.Update;
@@ -255,48 +257,48 @@ const
 var
   Command: string;
   FileList: TStringList;
-  Output: string='';
+  Output: string = '';
   AfterErrorRetry: integer; // Keeps track of retry attempts after error result
-  UpdateRetry: integer; // Keeps track of retry attempts to get all files
+  UpdateRetry: integer;     // Keeps track of retry attempts to get all files
 begin
   AfterErrorRetry := 1;
   UpdateRetry := 1;
 
   // Invalidate our revision number cache
-  FLocalRevision:=FRET_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
+  FLocalRevision := FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
 
-  if (FDesiredRevision='') or (trim(FDesiredRevision)='HEAD') then
+  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
     Command := ' update --non-interactive --trust-server-cert ' + LocalRepository
   else
     Command := ' update --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
 
-  FileList:=TStringList.Create;
+  FileList := TStringList.Create;
   try
     // On Windows, at least certain SVN versions don't update everything.
     // So we try until there are no more files downloaded.
-    FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+command,Output,Verbose);
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
 
     FileList.Clear;
     ParseFileList(Output, FileList, []);
 
     // Detect when svn up cannot update any more files anymore.
-    while (FileList.Count>0) and (UpdateRetry < MaxUpdateRetries) do
+    while (FileList.Count > 0) and (UpdateRetry < MaxUpdateRetries) do
     begin
       // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
       while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
       begin
-        if Pos('E155004',Output)>0 then
+        if Pos('E155004', Output) > 0 then
         {
         E155004: Working copy '<directory>' locked.
         run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
         }
         begin
           // Let's try to release locks; don't update FReturnCode
-          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+'cleanup --non-interactive '+ LocalRepository,Verbose); //attempt again
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + 'cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
         end;
         Sleep(500); //Give everybody a chance to relax ;)
-        FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+command,Verbose); //attempt again
+        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Verbose); //attempt again
         AfterErrorRetry := AfterErrorRetry + 1;
       end;
       UpdateRetry := UpdateRetry + 1;
@@ -307,9 +309,9 @@ begin
 end;
 
 procedure TSVNClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
-// Parses file lists from svn update and svn status outputs
-// If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
-// Case-sensitive filter.
+ // Parses file lists from svn update and svn status outputs
+ // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
+ // Case-sensitive filter.
 var
   AllFilesRaw: TStringList;
   Counter: integer;
@@ -317,7 +319,7 @@ var
   SpaceAfterStatus: integer;
   StatusCode: string;
 begin
-  AllFilesRaw:=TStringList.Create;
+  AllFilesRaw := TStringList.Create;
   try
     AllFilesRaw.Text := CommandOutput;
     for Counter := 0 to AllFilesRaw.Count - 1 do
@@ -331,16 +333,17 @@ begin
       //123456789
       // Also accept space in first column and entry on second column
       // Get the first character after a space in the first 2 columns:
-      FileName:='';
-      StatusCode:=Copy(Trim(Copy(AllFilesRaw[Counter],1,2)),1,1);
-      SpaceAfterStatus:=PosEx(' ', AllFilesRaw[Counter], Pos(StatusCode, AllFilesRaw[Counter]));
+      FileName := '';
+      StatusCode := Copy(Trim(Copy(AllFilesRaw[Counter], 1, 2)), 1, 1);
+      SpaceAfterStatus := PosEx(' ', AllFilesRaw[Counter], Pos(StatusCode, AllFilesRaw[Counter]));
       // Process if there are two spaces after the status character, and
       // we're either not filtering or we have a filter match
-      if (Copy(AllFilesRaw[Counter], SpaceAfterStatus,2)='  ') and
-        ((High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes)) then
+      if (Copy(AllFilesRaw[Counter], SpaceAfterStatus, 2) = '  ') and ((High(FilterCodes) = 0) or
+        AnsiMatchStr(Statuscode, FilterCodes)) then
       begin
-        FileName:=(Trim(Copy(AllFilesRaw[Counter],SpaceAfterStatus,Length(AllFilesRaw[Counter]))));
-        if FileName<>'' then FileList.Add(FileName);
+        FileName := (Trim(Copy(AllFilesRaw[Counter], SpaceAfterStatus, Length(AllFilesRaw[Counter]))));
+        if FileName <> '' then
+          FileList.Add(FileName);
       end;
     end;
   finally
@@ -351,14 +354,14 @@ end;
 procedure TSVNClient.LocalModifications(var FileList: TStringList);
 var
   AllFiles: TStringList;
-  Output: string='';
+  Output: string = '';
 begin
-  FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' status --depth infinity '+FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --depth infinity ' + FLocalRepository, Output, Verbose);
   FileList.Clear;
-  AllFiles:=TStringList.Create;
+  AllFiles := TStringList.Create;
   try
     // Only return files that are (M)odified, (C)onflicting, mer(G)ed automatically
-    ParseFileList(Output, AllFiles, ['C','G','M']);
+    ParseFileList(Output, AllFiles, ['C', 'G', 'M']);
     FileList.AddStrings(AllFiles);
   finally
     AllFiles.Free;
@@ -367,14 +370,14 @@ end;
 
 function Tsvnclient.LocalRepositoryExists: boolean;
 const
-  URLLen=Length('URL: ');
+  URLLen = Length('URL: ');
 var
-  Output:string='';
+  Output: string = '';
   URL: string;
   URLPos: integer;
 begin
-  Result := False;
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' info ' + FLocalRepository,Output,Verbose);
+  Result := false;
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + FLocalRepository, Output, Verbose);
   //This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then
@@ -383,28 +386,27 @@ begin
     // Output from info command can include:
     // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
     // Repository URL might differ from the one we've set though
-    URLPos:=pos('URL: ', Output)+URLLen;
-    URL:= IncludeTrailingSlash(trim(copy(Output,
-      (URLPos), Posex(LineEnding,Output,URLPos)-URLPos )));
-    if FRepositoryURL='' then
+    URLPos := pos('URL: ', Output) + URLLen;
+    URL := IncludeTrailingSlash(trim(copy(Output, (URLPos), Posex(LineEnding, Output, URLPos) - URLPos)));
+    if FRepositoryURL = '' then
     begin
-      FRepositoryURL:=URL;
-      Result:=true;
+      FRepositoryURL := URL;
+      Result := true;
     end
     else
     begin
-      if FRepositoryURL=URL then
+      if FRepositoryURL = URL then
       begin
-        result:=true;
+        Result := true;
       end
       else
       begin
         // There is a repository here, but it was checked out
         // from a different URL...
         // Keep result false; show caller what's going on.
-        FLocalRevision:=FRET_UNKNOWN_REVISION;
-        FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
-        FReturnCode:=FRET_LOCAL_REMOTE_URL_NOMATCH;
+        FLocalRevision := FRET_UNKNOWN_REVISION;
+        FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+        FReturnCode := FRET_LOCAL_REMOTE_URL_NOMATCH;
       end;
     end;
   end;
@@ -419,72 +421,73 @@ var
   LRevision: string = ''; // Revision of repository as a whole
   Output: string = '';
   RevExtr: TRegExpr;
-  RevCount: Integer;
+  RevCount: integer;
 begin
   // Only update if we have invalid revision info, in order to minimize svn info calls
-  if (FLocalRevision=FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo=FRET_UNKNOWN_REVISION) then
+  if (FLocalRevision = FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) then
   begin
-    FReturnCode:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+' info ' + FLocalRepository,Output,Verbose);
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + FLocalRepository, Output, Verbose);
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision:"...
     // unless we're in a branch/tag where we need "Last Changed Rev: "
-    if FReturnCode=0 then
-      begin
-        // Use regex to try and extract from localized SVNs:
-        // match exactly 2 occurences of the revision regex.
-        RevCount:=0;
-        RevExtr:=TRegExpr.Create;
-        try
-          RevExtr.Expression:=RevExpression;
-          if RevExtr.Exec(Output) then begin
-             Inc(RevCount);
-             FLocalRevisionWholeRepo:=RevExtr.Match[1];
-             if FLocalRevisionWholeRepo='' then FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
-             if RevExtr.ExecNext then begin
-                Inc(RevCount); //we only have valid revision info when we get both repo and branch revision...
-                FLocalRevision:=RevExtr.Match[1];
-                if FLocalRevision='' then FLocalRevision:=FRET_UNKNOWN_REVISION;
-             end;
-          end;
-        finally
-          RevExtr.Free;
-        end;
-        if RevCount<>2 then
-          begin
-          // Regex failed; trying for English revision message (though this may be
-          // superfluous with the regex)
-          FLocalRevision:=FRET_UNKNOWN_REVISION;
-          FLocalRevision:=trim(copy(Output,
-            (pos('Last Changed Rev: ', Output) + BranchRevLength),
-            6));
-          FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
-          FLocalRevisionWholeRepo:=trim(copy(Output,
-            (pos('Revision: ', Output) + RevLength),
-            6));
-          end;
-      // If we happen to be in the root (no branch), cater for that:
-      if FLocalRevision=FRET_UNKNOWN_REVISION then FLocalRevision:=FLocalRevisionWholeRepo;
-      end
-    else
-      if Pos('E155036',LRevision)>0 then
+    if FReturnCode = 0 then
+    begin
+      // Use regex to try and extract from localized SVNs:
+      // match exactly 2 occurences of the revision regex.
+      RevCount := 0;
+      RevExtr := TRegExpr.Create;
+      try
+        RevExtr.Expression := RevExpression;
+        if RevExtr.Exec(Output) then
         begin
-        FLocalRevision:=FRET_UNKNOWN_REVISION;
-        FLocalRevisionWholeRepo:=FRET_UNKNOWN_REVISION;
-        FReturnCode:=FRET_WORKING_COPY_TOO_OLD;
+          Inc(RevCount);
+          FLocalRevisionWholeRepo := RevExtr.Match[1];
+          if FLocalRevisionWholeRepo = '' then
+            FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+          if RevExtr.ExecNext then
+          begin
+            Inc(RevCount); //we only have valid revision info when we get both repo and branch revision...
+            FLocalRevision := RevExtr.Match[1];
+            if FLocalRevision = '' then
+              FLocalRevision := FRET_UNKNOWN_REVISION;
+          end;
         end;
+      finally
+        RevExtr.Free;
+      end;
+      if RevCount <> 2 then
+      begin
+        // Regex failed; trying for English revision message (though this may be
+        // superfluous with the regex)
+        FLocalRevision := FRET_UNKNOWN_REVISION;
+        FLocalRevision := trim(copy(Output, (pos('Last Changed Rev: ', Output) + BranchRevLength), 6));
+        FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+        FLocalRevisionWholeRepo := trim(copy(Output, (pos('Revision: ', Output) + RevLength), 6));
+      end;
+      // If we happen to be in the root (no branch), cater for that:
+      if FLocalRevision = FRET_UNKNOWN_REVISION then
+        FLocalRevision := FLocalRevisionWholeRepo;
+    end
+    else
+    if Pos('E155036', LRevision) > 0 then
+    begin
+      FLocalRevision := FRET_UNKNOWN_REVISION;
+      FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+      FReturnCode := FRET_WORKING_COPY_TOO_OLD;
+    end;
   end;
 end;
 
 function TSVNClient.GetLocalRevision: string;
 begin
   GetLocalRevisions;
-  result:=FLocalRevision;
+  Result := FLocalRevision;
 end;
 
 function TSVNClient.GetLocalRevisionWholeRepo: string;
 begin
   GetLocalRevisions;
-  result:=FLocalRevisionWholeRepo;
+  Result := FLocalRevisionWholeRepo;
 end;
 
 
@@ -497,4 +500,5 @@ destructor Tsvnclient.Destroy;
 begin
   inherited Destroy;
 end;
+
 end.

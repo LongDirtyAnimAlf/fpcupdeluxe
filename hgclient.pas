@@ -40,9 +40,9 @@ uses
 
 const
   // Custom return codes
-  FRET_LOCAL_REMOTE_URL_NOMATCH=repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
-  FRET_WORKING_COPY_TOO_OLD=repoclient.FRET_WORKING_COPY_TOO_OLD;
-  FRET_UNKNOWN_REVISION=repoclient.FRET_UNKNOWN_REVISION;
+  FRET_LOCAL_REMOTE_URL_NOMATCH = repoclient.FRET_LOCAL_REMOTE_URL_NOMATCH;
+  FRET_WORKING_COPY_TOO_OLD = repoclient.FRET_WORKING_COPY_TOO_OLD;
+  FRET_UNKNOWN_REVISION = repoclient.FRET_UNKNOWN_REVISION;
 
 type
   EHGClientError = class(ERepoClientError);
@@ -56,7 +56,7 @@ type
     procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
-    function GetDiffAll:string; override;
+    function GetDiffAll: string; override;
     function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
     function LocalRepositoryExists: boolean; override;
@@ -69,6 +69,7 @@ type
 
 
 implementation
+
 uses strutils;
 
 
@@ -100,8 +101,8 @@ begin
   begin
     //current directory. Note: potential for misuse by malicious program.
   {$IFDEF MSWINDOWS}
-    if FileExists(hgName+'.exe') then
-      FRepoExecutable := hgName+'.exe';
+    if FileExists(hgName + '.exe') then
+      FRepoExecutable := hgName + '.exe';
   {$ENDIF MSWINDOWS}
     if FileExists('hg') then
       FRepoExecutable := hgName;
@@ -110,7 +111,7 @@ begin
   if FileExists(FRepoExecutable) then
   begin
     // Check for valid hg executable
-    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable)+ ' --version',Verbose) <> 0 then
+    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
     begin
       // File exists, but is not a valid hg client
       FRepoExecutable := '';
@@ -127,9 +128,10 @@ end;
 
 function ThgClient.GetRepoExecutable: string;
 begin
-  if not FileExists(FRepoExecutable) then FindRepoExecutable;
   if not FileExists(FRepoExecutable) then
-    Result:=''
+    FindRepoExecutable;
+  if not FileExists(FRepoExecutable) then
+    Result := ''
   else
     Result := FRepoExecutable;
 end;
@@ -139,27 +141,27 @@ const
   MaxRetries = 3;
 var
   Command: string;
-  Output: string='';
+  Output: string = '';
   RetryAttempt: integer;
 begin
   // Invalidate our revision number cache
-  FLocalRevision:=FRET_UNKNOWN_REVISION;
+  FLocalRevision := FRET_UNKNOWN_REVISION;
 
   //tip is similar to svn HEAD
   // Could add --insecure to ignore certificate problems, but rather not
-  if (FDesiredRevision='') or (trim(FDesiredRevision)='tip') then
+  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'tip') then
     Command := ' clone -r tip ' + Repository + ' ' + LocalRepository
   else
-    Command := ' clone -r '+ FDesiredRevision+ ' ' + Repository + ' ' + LocalRepository;
-  FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose);
+    Command := ' clone -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+  FReturnCode := ExecuteCommand(RepoExecutable + Command, Output, FVerbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
-  if (ReturnCode<>0) then
+  if (ReturnCode <> 0) then
   begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode:=ExecuteCommand(RepoExecutable+Command,Output,FVerbose); //attempt again
+      FReturnCode := ExecuteCommand(RepoExecutable + Command, Output, FVerbose); //attempt again
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -167,9 +169,9 @@ end;
 
 procedure Thgclient.CheckOutOrUpdate;
 begin
-  if LocalRepositoryExists = False then
+  if LocalRepositoryExists = false then
   begin
-    if FReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH then
+    if FReturnCode = FRET_LOCAL_REMOTE_URL_NOMATCH then
     begin
       // We could delete the entire directory and Clone
       // but the user could take issue with that.
@@ -190,22 +192,22 @@ begin
   end;
 end;
 
-function ThgClient.GetDiffAll:string;
+function ThgClient.GetDiffAll: string;
 begin
-  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' diff --git ',LocalRepository,Result,Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
 end;
 
 procedure Thgclient.Log(var Log: TStringList);
 var
-  s:string='';
+  s: string = '';
 begin
-  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' log ',LocalRepository,s,Verbose);
-  Log.Text:=s;
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
+  Log.Text := s;
 end;
 
 procedure Thgclient.Revert;
 begin
-  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' revert --all --no-backup ',LocalRepository,Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
 end;
 
 procedure Thgclient.Update;
@@ -213,21 +215,21 @@ var
   Command: string;
 begin
   // Invalidate our revision number cache
-  FLocalRevision:=FRET_UNKNOWN_REVISION;
+  FLocalRevision := FRET_UNKNOWN_REVISION;
 
   // Combined hg pull & hg update by specifying --update
-  if (FDesiredRevision='') or (trim(FDesiredRevision)='tip') then
+  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'tip') then
     Command := ' pull --update '
   else
     Command := ' pull --update -r ' + FDesiredRevision;
-//todo: check if this desired revision works
-  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+command,FLocalRepository,Verbose);
+  //todo: check if this desired revision works
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
 end;
 
 procedure ThgClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
-// Parses file lists from hg status outputs
-// If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
-// Case-sensitive filter.
+ // Parses file lists from hg status outputs
+ // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
+ // Case-sensitive filter.
 var
   AllFilesRaw: TStringList;
   Counter: integer;
@@ -235,7 +237,7 @@ var
   SpaceAfterStatus: integer;
   StatusCode: string;
 begin
-  AllFilesRaw:=TStringList.Create;
+  AllFilesRaw := TStringList.Create;
   try
     AllFilesRaw.Text := CommandOutput;
     for Counter := 0 to AllFilesRaw.Count - 1 do
@@ -245,16 +247,17 @@ begin
       //123456789
       // Also accept space in first column and entry on second column
       // Get the first character after a space in the first 2 columns:
-      FileName:='';
-      StatusCode:=Copy(Trim(Copy(AllFilesRaw[Counter],1,2)),1,1);
-      SpaceAfterStatus:=PosEx(' ', AllFilesRaw[Counter], Pos(StatusCode, AllFilesRaw[Counter]));
+      FileName := '';
+      StatusCode := Copy(Trim(Copy(AllFilesRaw[Counter], 1, 2)), 1, 1);
+      SpaceAfterStatus := PosEx(' ', AllFilesRaw[Counter], Pos(StatusCode, AllFilesRaw[Counter]));
       // Process if there is one space after the status character, and
       // we're either not filtering or we have a filter match
-      if (Copy(AllFilesRaw[Counter], SpaceAfterStatus,1)=' ') and
-        ((High(FilterCodes)=0) or AnsiMatchStr(Statuscode, FilterCodes)) then
+      if (Copy(AllFilesRaw[Counter], SpaceAfterStatus, 1) = ' ') and ((High(FilterCodes) = 0) or
+        AnsiMatchStr(Statuscode, FilterCodes)) then
       begin
-        FileName:=(Trim(Copy(AllFilesRaw[Counter],SpaceAfterStatus,Length(AllFilesRaw[Counter]))));
-        if FileName<>'' then FileList.Add(FileName);
+        FileName := (Trim(Copy(AllFilesRaw[Counter], SpaceAfterStatus, Length(AllFilesRaw[Counter]))));
+        if FileName <> '' then
+          FileList.Add(FileName);
       end;
     end;
   finally
@@ -265,12 +268,13 @@ end;
 procedure ThgClient.LocalModifications(var FileList: TStringList);
 var
   AllFiles: TStringList;
-  Output: string='';
+  Output: string = '';
 begin
   //quiet: hide untracked files; only show modified/added/removed/deleted files, not clean files
-  FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' status --modified --added --removed --deleted --quiet ',FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --modified --added --removed --deleted --quiet ',
+    FLocalRepository, Output, Verbose);
   FileList.Clear;
-  AllFiles:=TStringList.Create;
+  AllFiles := TStringList.Create;
   try
     // No filter necessary; command above already preselected relevant files
     ParseFileList(Output, AllFiles, []);
@@ -282,46 +286,46 @@ end;
 
 function Thgclient.LocalRepositoryExists: boolean;
 var
-  Output:string='';
+  Output: string = '';
   URL: string;
 begin
-  Result := False;
+  Result := false;
   //svn info=>hg summary;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' summary ',FLocalRepository,Output,Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' summary ', FLocalRepository, Output, Verbose);
   if Pos('branch:', Output) > 0 then
   begin
     // There is an hg repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo (could also have used hg paths, which gives default = https://bitbucket.org/reiniero/fpcup)
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' showconfig paths.default ',FLocalRepository,Output,Verbose);
-    if FReturnCode=0 then
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' showconfig paths.default ', FLocalRepository, Output, Verbose);
+    if FReturnCode = 0 then
     begin
-      URL:=IncludeTrailingSlash(trim(Output));
+      URL := IncludeTrailingSlash(trim(Output));
     end
     else
     begin
-      URL:=''; //explicitly fail
+      URL := ''; //explicitly fail
     end;
 
-    if FRepositoryURL='' then
+    if FRepositoryURL = '' then
     begin
-      FRepositoryURL:=URL;
-      Result:=true;
+      FRepositoryURL := URL;
+      Result := true;
     end
     else
     begin
-      if FRepositoryURL=URL then
+      if FRepositoryURL = URL then
       begin
-        result:=true;
+        Result := true;
       end
       else
       begin
         // There is a repository here, but it was checked out
         // from a different URL...
         // Keep result false; show caller what's going on.
-        FLocalRevision:=FRET_UNKNOWN_REVISION;
-        FReturnCode:=FRET_LOCAL_REMOTE_URL_NOMATCH;
+        FLocalRevision := FRET_UNKNOWN_REVISION;
+        FReturnCode := FRET_LOCAL_REMOTE_URL_NOMATCH;
       end;
     end;
   end;
@@ -329,24 +333,24 @@ end;
 
 function ThgClient.GetLocalRevision: string;
 const
-  HashLength=12; //12 characters in hg revision hash
+  HashLength = 12; //12 characters in hg revision hash
 var
-  Output: string='';
+  Output: string = '';
 begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
-  if FLocalRevision=FRET_UNKNOWN_REVISION then
+  if FLocalRevision = FRET_UNKNOWN_REVISION then
   begin
-    FReturnCode:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' identify --id ',FLocalRepository,Output,Verbose);
-    if FReturnCode=0 then
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' identify --id ', FLocalRepository, Output, Verbose);
+    if FReturnCode = 0 then
     begin
-      FLocalRevision:=copy(trim(Output),1,HashLength); //ignore any + - changed working copy - at the end of the revision
+      FLocalRevision := copy(trim(Output), 1, HashLength); //ignore any + - changed working copy - at the end of the revision
     end
     else
     begin
-      FLocalRevision:=FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
+      FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
     end;
   end;
-  result:=FLocalRevision;
+  Result := FLocalRevision;
 end;
 
 constructor Thgclient.Create;
@@ -358,4 +362,5 @@ destructor Thgclient.Destroy;
 begin
   inherited Destroy;
 end;
+
 end.
