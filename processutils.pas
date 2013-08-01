@@ -51,6 +51,7 @@ IN THE SOFTWARE.
 unit processutils;
 
 {$mode objfpc}{$H+}
+{not $DEFINE DEBUG} //define debug to get writeln output of commands called
 
 interface
 
@@ -484,6 +485,10 @@ begin
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;
+    {$IFDEF DEBUG}
+    writeln('ExecuteCommandInDir: executable '+PE.Executable);
+    writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
+    {$ENDIF}
     PE.Execute;
 
     Output:=PE.OutputString;
