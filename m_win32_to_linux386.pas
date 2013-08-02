@@ -67,14 +67,15 @@ begin
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
-    infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etDebug);
+    // Show path info etc so the user can fix his setup if errors occur
+    infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName;
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etDebug);
+      infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
-    infoln('TWin32_Linux386: found libspath '+FLibsPath,etDebug);
+    infoln('TWin32_Linux386: found libspath '+FLibsPath,etInfo);
 end;
 
 function TWin32_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -95,15 +96,16 @@ begin
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
   if not result then
   begin
-    infoln('TWin32_Linux386: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etDebug);
+    // Show path info etc so the user can fix his setup if errors occur
+    infoln('TWin32_Linux386: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TWin32_Linux386: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etDebug);
+      infoln('TWin32_Linux386: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
-    infoln('TWin32_Linux386: found binutil '+AsFile+' in directory '+FBinUtilsPath,etDebug);
+    infoln('TWin32_Linux386: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
 end;
 
 constructor TWin32_Linux386.Create;
