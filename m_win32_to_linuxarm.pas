@@ -1,5 +1,5 @@
-unit m_win32_to_linux386;
-{ Cross compiles from Windows 32 to Linux x86/32 bit
+unit m_win32_to_linuxarm;
+{ Cross compiles from Windows 32 to Linux ARM
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -57,8 +57,8 @@ uses
 implementation
 type
 
-{ TWin32_Linux386 }
-TWin32_Linux386 = class(TCrossInstaller)
+{ TWin32_Linuxarm }
+TWin32_Linuxarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -70,15 +70,15 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32_Linux386 }
-function TWin32_Linux386.TargetSignature: string;
+{ TWin32_Linuxarm }
+function TWin32_Linuxarm.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TWin32_Linux386.GetLibs(Basepath:string): boolean;
+function TWin32_Linuxarm.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-linux';
+  DirName='arm-linux';
 begin
 //todo add support for separate cross dire
   // Using crossfpc directory naming
@@ -87,25 +87,25 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName;
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
-    infoln('TWin32_Linux386: found libspath '+FLibsPath,etInfo);
+    infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
 end;
 
-function TWin32_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TWin32_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
   result:=true;
 end;
 
-function TWin32_Linux386.GetBinUtils(Basepath:string): boolean;
+function TWin32_Linuxarm.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='i386-linux';
+  DirName='arm-linux';
 var
   AsFile: string;
 begin
@@ -116,44 +116,44 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linux386: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TWin32_Linux386: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
-    infoln('TWin32_Linux386: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TWin32_Linuxarm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
 end;
 
-constructor TWin32_Linux386.Create;
+constructor TWin32_Linuxarm.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='i386-linux-'; //crossfpc nomenclature
+  FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
-  FLibsPath:='';;
-  FTargetCPU:='i386';
+  FLibsPath:='';
+  FTargetCPU:='arm';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TWin32_Linux386 crosscompiler loading',etDebug);
+  infoln('TWin32_Linuxarm crosscompiler loading',etDebug);
 end;
 
-destructor TWin32_Linux386.Destroy;
+destructor TWin32_Linuxarm.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Win32_Linux386:TWin32_Linux386;
+  Win32_Linuxarm:TWin32_Linuxarm;
 
 {$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
 // Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 initialization
-  Win32_Linux386:=TWin32_Linux386.Create;
-  RegisterExtension(Win32_Linux386.TargetCPU+'-'+Win32_Linux386.TargetOS,Win32_Linux386);
+  Win32_Linuxarm:=TWin32_Linuxarm.Create;
+  RegisterExtension(Win32_Linuxarm.TargetCPU+'-'+Win32_Linuxarm.TargetOS,Win32_Linuxarm);
 finalization
-  Win32_Linux386.Destroy;
+  Win32_Linuxarm.Destroy;
 {$ENDIF}
 end.
 

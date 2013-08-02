@@ -174,7 +174,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="26">
+    <Units Count="27">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -303,6 +303,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_win32_to_linux386"/>
       </Unit25>
+      <Unit26>
+        <Filename Value="m_win32_to_linuxarm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_arm"/>
+      </Unit26>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
