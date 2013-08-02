@@ -97,7 +97,7 @@ begin
   infoln('TFreeBSD_Linux64: Experimental, not finished. Stopping now.', etError);
   result:=false;
 
-  //todo: add hostcpu, hostos property in parent class!!? determine what to do depending on that
+  //todo: use conditional compilation for hostcpu, hostos; determine what to do depending on that
   FBinUtilsPrefix:='';
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'/cross/bin/'+TargetSignature; //these do not contain as etc though
   if not FileExists(FBinUtilsPath+'/as') then

@@ -54,6 +54,7 @@ uses {$IFDEF UNIX}
   m_crossinstaller, m_crosswin64, m_crosswin32,
   m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,
   m_win32_to_linux386, m_win32_to_linuxarm,
+  m_win64_to_linux64,
   m_anyinternallinker_to_win386,
   synacode, ftpsend, synafpc, synaip, synautil, synsock,
   blcksock, installerCore, installerfpc, installerLazarus, installerHelp,
