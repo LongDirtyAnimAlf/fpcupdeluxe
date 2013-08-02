@@ -88,7 +88,7 @@ begin
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName;
+    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
