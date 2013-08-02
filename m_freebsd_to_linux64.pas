@@ -78,6 +78,12 @@ function TFreeBSD_Linux64.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/compat/linux/lib';
   result:=DirectoryExists(FLibsPath);
+  if result then
+  begin
+    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
+  end;
 end;
 
 function TFreeBSD_Linux64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -129,10 +135,14 @@ begin
     -Tlinux
     #ENDIF
     }
-
-
   end;
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
+  if result then
+    // Configuration snippet for FPC
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
+    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
+    '-Tlinux'; {target operating system}
 end;
 
 constructor TFreeBSD_Linux64.Create;

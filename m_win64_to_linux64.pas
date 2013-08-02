@@ -93,7 +93,12 @@ begin
       infoln('Twin64_linux64: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
+  begin
+    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
     infoln('Twin64_linux64: found libspath '+FLibsPath,etInfo);
+  end;
 end;
 
 function Twin64_linux64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -124,7 +129,14 @@ begin
       infoln('Twin64_linux64: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
+  begin
+    // Configuration snippet for FPC
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
+    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
+    '-Tlinux'; {target operating system}
     infoln('Twin64_linux64: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end;
 end;
 
 constructor Twin64_linux64.Create;

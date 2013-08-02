@@ -36,6 +36,10 @@ function TFreeBSD64_FreeBSD386.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='/usr/lib32';
   result:=fileexists(FLibsPath+'/libc.so'); //let the c library be our coalmine canary
+  if result then
+    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
 end;
 
 function TFreeBSD64_FreeBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
@@ -51,6 +55,12 @@ begin
   FBinUtilsPath:='/usr/bin'; //try with regular binutils
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
+  if result then
+    // Configuration snippet for FPC
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
+    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
+    '-Tlinux'; {target operating system}
 end;
 
 constructor TFreeBSD64_FreeBSD386.Create;
