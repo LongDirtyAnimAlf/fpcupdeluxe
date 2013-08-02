@@ -56,7 +56,7 @@ end;
 function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
 begin
   //todo: remove once done
-  infoln('Experimental, not finished. Stopping now.',etError);
+  infoln('TFreeBSD_Linux386: Experimental, not finished. Stopping now.',etError);
   result:=false;
 
   FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though
@@ -67,8 +67,12 @@ end;
 constructor TFreeBSD_Linux386.Create;
 begin
   inherited Create;
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+  FLibsPath:='';
   FTargetCPU:='i386';
   FTargetOS:='linux';
+  infoln('TFreeBSD_Linux386 crosscompiler loading',etDebug);
 end;
 
 destructor TFreeBSD_Linux386.Destroy;
@@ -76,6 +80,7 @@ begin
   inherited Destroy;
 end;
 
+{$IFDEF FREEBSD}
 var
   FreeBSD_Linux386:TFreeBSD_Linux386;
 
@@ -84,5 +89,7 @@ initialization
   RegisterExtension(FreeBSD_Linux386.TargetCPU+'-'+FreeBSD_Linux386.TargetOS,FreeBSD_Linux386);
 finalization
   FreeBSD_Linux386.Destroy;
+{$ENDIF FREEBSD}
+
 end.
 

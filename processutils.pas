@@ -493,6 +493,9 @@ begin
 
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
+    {$IFDEF DEBUG}
+    writeln('ExecuteCommandInDir: exit status: '+inttostr(Result));
+    {$ENDIF}
   finally
     PE.Free;
   end;

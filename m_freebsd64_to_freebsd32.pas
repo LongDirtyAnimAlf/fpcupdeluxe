@@ -46,7 +46,7 @@ end;
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
   //todo: remove once done
-  infoln('Experimental, not finished. Stopping now.',etError);
+  infoln('TFreeBSD64_FreeBSD386: Experimental, not finished. Stopping now.',etError);
   result:=false;
   FBinUtilsPath:='/usr/bin'; //try with regular binutils
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
@@ -58,6 +58,10 @@ begin
   inherited Create;
   FTargetCPU:='i386';
   FTargetOS:='freebsd';
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+  FLibsPath:='';
+  infoln('TFreeBSD64_FreeBSD386 crosscompiler loading',etDebug);
 end;
 
 destructor TFreeBSD64_FreeBSD386.Destroy;
@@ -69,13 +73,15 @@ var
   FreeBSD64_FreeBSD386:TFreeBSD64_FreeBSD386;
 
 //todo: FreeBSD64_FreeBSD386: enable when working. For this, we'll probably need to pass -32 to ld etc. Perhaps do this with batch scripts
-{
+{$IFDEF FREEBSD}
+{$IFDEF CPUAMD64}
 initialization
   FreeBSD64_FreeBSD386:=TFreeBSD64_FreeBSD386.Create;
   RegisterExtension(FreeBSD64_FreeBSD386.TargetCPU+'-'+FreeBSD64_FreeBSD386.TargetOS,FreeBSD64_FreeBSD386);
 finalization
   FreeBSD64_FreeBSD386.Destroy;
-}
+{$ENDIF CPUAMD64}
+{$ENDIF FREEBSD}
 end.
 
 

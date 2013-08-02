@@ -94,7 +94,7 @@ const
   }
 begin
   //todo: remove once done
-  infoln('Experimental, not finished. Stopping now.', etError);
+  infoln('TFreeBSD_Linux64: Experimental, not finished. Stopping now.', etError);
   result:=false;
 
   //todo: add hostcpu, hostos property in parent class!!? determine what to do depending on that
@@ -138,9 +138,13 @@ end;
 constructor TFreeBSD_Linux64.Create;
 begin
   inherited Create;
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+  FLibsPath:='';
   FTargetCPU:='x86_64';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
+  infoln('TFreeBSD_Linux64 crosscompiler loading',etDebug);
 end;
 
 destructor TFreeBSD_Linux64.Destroy;
@@ -148,6 +152,7 @@ begin
   inherited Destroy;
 end;
 
+{$IFDEF FREEBSD}
 var
   FreeBSD_Linux64:TFreeBSD_Linux64;
 
@@ -156,5 +161,6 @@ initialization
   RegisterExtension(FreeBSD_Linux64.TargetCPU+'-'+FreeBSD_Linux64.TargetOS,FreeBSD_Linux64);
 finalization
   FreeBSD_Linux64.Destroy;
+{$ENDIF FREEBSD}
 end.
 

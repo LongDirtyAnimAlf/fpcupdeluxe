@@ -5,7 +5,9 @@ unit installerCore;
 interface
 
 uses
-  Classes, SysUtils, GitClient, HGClient, SvnClient, processutils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils,
+  GitClient, HGClient, SvnClient,
+  processutils, m_crossinstaller, fpcuputil;
 
 type
 

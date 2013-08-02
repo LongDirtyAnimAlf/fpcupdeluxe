@@ -174,7 +174,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="24">
+    <Units Count="26">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -293,6 +293,16 @@ end;"/>
         <Filename Value="settings.ini"/>
         <IsPartOfProject Value="True"/>
       </Unit23>
+      <Unit24>
+        <Filename Value="m_crossinstaller.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crossinstaller"/>
+      </Unit24>
+      <Unit25>
+        <Filename Value="m_win32_to_linux386.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_linux386"/>
+      </Unit25>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

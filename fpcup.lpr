@@ -48,13 +48,17 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 
 uses {$IFDEF UNIX}
   cthreads, {$ENDIF}
-  Classes, svnclient, updatelazconfig, ftpsend, sysutils, processutils,
-  fileutil, fpcuputil, m_crossinstaller, m_crosswin64, m_crosswin32,
+  Classes, sysutils,
+  updatelazconfig, processutils,
+  fileutil, fpcuputil,
+  m_crossinstaller, m_crosswin64, m_crosswin32,
   m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,
-  m_anyinternallinker_to_win386, synacode, synafpc, synaip, synautil, synsock,
+  m_win32_to_linux386,
+  m_anyinternallinker_to_win386,
+  synacode, ftpsend, synafpc, synaip, synautil, synsock,
   blcksock, installerCore, installerfpc, installerLazarus, installerHelp,
-  installerUniversal, installerManager, wininstaller, commandline, hgclient,
-  repoclient, gitclient;
+  installerUniversal, installerManager, wininstaller, commandline,
+  hgclient, svnclient, repoclient, gitclient;
 
 
 //{$R *.res} //Keep it simple, no resources
@@ -69,6 +73,10 @@ begin
   writeln('Build date: '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%});
   writeln('Compiled for CPU: '+lowercase({$INCLUDE %FPCTARGETCPU%})+' on '+lowercase({$INCLUDE %FPCTARGETOS%}));
   writeln('');
+  {$IFDEF DEBUG}
+  writeln('*** DEBUG BUILD ***');
+  writeln('');
+  {$ENDIF}
 end;
 
 procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList;ConfigFile:string);
