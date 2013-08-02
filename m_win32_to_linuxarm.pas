@@ -94,12 +94,19 @@ begin
       infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
+  begin
+    // -Xr: Set the linker's rlink-path to <x>
+    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath);
     infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
+  end;
 end;
 
 function TWin32_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  // todo: get gtk at least
+  // todo: get gtk at least, add to FFPCCFGSnippet
+  infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
   result:=true;
 end;
 
@@ -124,7 +131,14 @@ begin
       infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
+  begin
+    // Pass path, pass arm to linker and set target
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-XP'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+
+    'darm'+LineEnding+
+    'Tlinux';
     infoln('TWin32_Linuxarm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end;
 end;
 
 constructor TWin32_Linuxarm.Create;
@@ -132,6 +146,7 @@ begin
   inherited Create;
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
+  FFPCCFGSnippet:=''; //will be filled in in lib detection
   FLibsPath:='';
   FTargetCPU:='arm';
   FTargetOS:='linux';

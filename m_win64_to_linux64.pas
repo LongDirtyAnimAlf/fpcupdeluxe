@@ -98,7 +98,8 @@ end;
 
 function Twin64_linux64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  // todo: get gtk at least
+  // todo: get gtk at least, add to ffpccfgsnippet
+  // todo: perhaps move checkdevlibs routines here
   result:=true;
 end;
 

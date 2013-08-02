@@ -710,7 +710,7 @@ var
   CrossCompiling:boolean;
 begin
   result:=true;
-  CrossCompiling:= (FParent.CrossCPU_Target<>'') or (FParent.CrossOS_Target<>'');
+  CrossCompiling:=(FParent.CrossCPU_Target<>'') or (FParent.CrossOS_Target<>'');
   //check if this is a known module
 
   // FPC:
@@ -1122,4 +1122,4 @@ begin
 end;
 
 end.
-
+

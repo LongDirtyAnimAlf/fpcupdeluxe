@@ -76,6 +76,7 @@ begin
   inherited Create;
   FBinUtilsPath:=''; //override parent that has a warning text here
   FBinUtilsPrefix:=''; //override parent that has a warning text here
+  FFPCCFGSnippet:=''; //no need to change fpc.cfg
   FLibsPath:='';
   FTargetCPU:='i386';
   FTargetOS:='win32';

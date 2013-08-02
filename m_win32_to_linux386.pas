@@ -132,7 +132,7 @@ begin
   inherited Create;
   FBinUtilsPrefix:='i386-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
-  FLibsPath:='';;
+  FLibsPath:='';
   FTargetCPU:='i386';
   FTargetOS:='linux';
   FAlreadyWarned:=false;

@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
 type
@@ -76,6 +76,8 @@ begin
   inherited Create;
   FTargetCPU:='x86_64';
   FTargetOS:='win64';
+  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  infoln('TWin64 crosscompiler loading',etDebug);
 end;
 
 destructor TWin64.Destroy;

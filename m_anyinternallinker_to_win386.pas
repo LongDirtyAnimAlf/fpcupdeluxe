@@ -68,6 +68,8 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='win32';
   FAlreadyWarned:=false;
+  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  infoln('Tanyinternallinker_win386 crosscompiler loading',etDebug);
 end;
 
 destructor Tanyinternallinker_win386.Destroy;

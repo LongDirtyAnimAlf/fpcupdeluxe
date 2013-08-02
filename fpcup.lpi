@@ -306,7 +306,7 @@ end;"/>
       <Unit26>
         <Filename Value="m_win32_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_arm"/>
+        <UnitName Value="m_win32_to_linuxarm"/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
