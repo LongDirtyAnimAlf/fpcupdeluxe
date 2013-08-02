@@ -160,6 +160,7 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossInstaller:TCrossInstaller;
+  MagicLine:String; //use this to find fpcup-modified sections in fpc.cfg
   Options:String;
 begin
   result:=true;
@@ -281,10 +282,15 @@ begin
           FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
           //todo: check if fbinpath is correct
           //todo: is this enough - shouldn't we also check for target OS not only target CPU? What about arm linux and arm wince?
+          MagicLine:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
           InsertFPCCFGSnippet(FPCCfg,
-            '#IFDEF CPU'+uppercase(FCrossCPU_Target),
+            MagicLine,
+            MagicLine+LineEnding+
+            '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
             '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
+            '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
             CrossInstaller.FPCCFGSnippet+LineEnding+
+            '#ENDIF'+LineEnding+
             '#ENDIF');
         {$IFDEF UNIX}
           result:=CreateFPCScript;
