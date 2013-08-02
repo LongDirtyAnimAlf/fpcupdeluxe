@@ -174,7 +174,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="28">
+    <Units Count="29">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -313,6 +313,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_win64_to_linux64"/>
       </Unit27>
+      <Unit28>
+        <Filename Value="m_anyinternallinker_to_win64.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_anyinternallinker_to_win64"/>
+      </Unit28>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

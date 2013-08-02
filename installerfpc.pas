@@ -278,20 +278,24 @@ begin
           end
         else
           begin
-          // Modify fpc.cfg
-          FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-          //todo: check if fbinpath is correct
-          //todo: is this enough - shouldn't we also check for target OS not only target CPU? What about arm linux and arm wince?
-          MagicLine:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
-          InsertFPCCFGSnippet(FPCCfg,
-            MagicLine,
-            MagicLine+LineEnding+
-            '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
-            '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
-            '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
-            CrossInstaller.FPCCFGSnippet+LineEnding+
-            '#ENDIF'+LineEnding+
-            '#ENDIF');
+          if CrossInstaller.FPCCFGSnippet<>'' then
+            begin
+            // Modify fpc.cfg
+            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+            //todo: check if fbinpath is correct
+            //todo: is this enough - shouldn't we also check for target OS not only target CPU? What about arm linux and arm wince?
+            MagicLine:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
+            InsertFPCCFGSnippet(FPCCfg,
+              MagicLine,
+              MagicLine+LineEnding+
+              '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
+              '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
+              '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
+              '# Inserted by fpcup '+TimeToStr(Now)+LineEnding+
+              CrossInstaller.FPCCFGSnippet+LineEnding+
+              '#ENDIF'+LineEnding+
+              '#ENDIF');
+            end;
         {$IFDEF UNIX}
           result:=CreateFPCScript;
         {$ENDIF UNIX}

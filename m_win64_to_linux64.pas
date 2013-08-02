@@ -144,7 +144,7 @@ begin
   inherited Create;
   FBinUtilsPrefix:='x86_64-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
-  FFPCCFGSnippet:='# Inserted by fpcup '+TimeToStr(Now); //will be filled in further in lib detection
+  FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FTargetCPU:='x86_64';
   FTargetOS:='linux';

@@ -150,6 +150,7 @@ begin
   inherited Create;
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
+  FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='x86_64';
   FTargetOS:='linux';
