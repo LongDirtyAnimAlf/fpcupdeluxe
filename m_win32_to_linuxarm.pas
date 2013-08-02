@@ -95,10 +95,9 @@ begin
   end;
   if result then
   begin
-    // -Xr: Set the linker's rlink-path to <x>
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath);
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
     infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
   end;
 end;
@@ -132,11 +131,15 @@ begin
   end;
   if result then
   begin
-    // Pass path, pass arm to linker and set target
+    // Configuration snippet for FPC
+    //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-linux
+    //adjusted by
+    //http://wiki.freepascal.org/arm-wince
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-XP'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+
-    'darm'+LineEnding+
-    'Tlinux';
+    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
+    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
+    '-darm'+LineEnding+ {pass arm to linker}
+    '-Tlinux'; {target operating system}
     infoln('TWin32_Linuxarm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
@@ -146,7 +149,7 @@ begin
   inherited Create;
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in in lib detection
+  FFPCCFGSnippet:='# Inserted by fpcup '+TimeToStr(Now); //will be filled in further in lib detection
   FLibsPath:='';
   FTargetCPU:='arm';
   FTargetOS:='linux';

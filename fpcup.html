@@ -41,6 +41,7 @@ other modules.</P>
 <P>See above for how to add external modules without changing the fpcup code.</P>
 <H4 CLASS="western">Crosscompiling modules</H4>
 <P>To write a cross-compiler module, you have to inherit from m_crossinstaller.pas. That unit contains details about the minimum set of properties/methods you will need to provide. Once you're done, add the cross compiling module to fpcup.lpr's uses list so the unit gets loaded in and registers using the initialization section, making it available for fpcup.</P>
+<P>To ensure the wrong cross compiler is never loaded, IFDEF your unit's initialization/finalization code so it is only compiled for the right architecture.</P>
 <P>An example of a simple crosscompiler module that does not need to check for libraries etc is the Win64=>Win32 cross compiler in m_crosswin32.pas.</P>
 <H4 CLASS="western">Adding non-universal, non-crosscompiling modules</H4>
 <P>If you want to add modules to the FPC, Lazarus etc units, you will need to adjust both the sequences (instructions for the state machine) as well as the InstallerManager.GetInstaller so it knows what installer to get depending on the module.<P>

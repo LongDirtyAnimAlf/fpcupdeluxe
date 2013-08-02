@@ -131,8 +131,34 @@ uses fpcuputil,fileutil
 const
   Win64FallBackUsingCrossCompiler=false; //Set to true to download i386 boostrap compiler and cross compile. Leave to use native win x64 compiler
 
+function InsertFPCCFGSnippet(FPCCFG,FirstLine,Snippet: string): boolean;
+// Adds snippet to fpc.cfg file if firstline is not already there
+var
+  ConfigText: TStringList;
+begin
+  result:=false;
+  ConfigText:=TStringList.Create;
+  try
+    ConfigText.LoadFromFile(FPCCFG);
+    if pos(FirstLine+LineEnding,ConfigText.Text)>0 then
+    begin
+      infoln('fpc.cfg: not inserting snippet as '+FirstLine+' already exists in '+FPCCFG,etWarning);
+    end
+    else
+    begin
+      ConfigText.Add(LineEnding);
+      ConfigText.Add(Snippet);
+    end;
+    ConfigText.SaveToFile(FPCCFG);
+    result:=true;
+  finally
+    ConfigText.Free;
+  end;
+end;
+
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
+  FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossInstaller:TCrossInstaller;
   Options:String;
 begin
@@ -198,7 +224,6 @@ begin
           end;
       end;
 
-
       if ProcessEx.ExitStatus = 0 then
         begin
         // Install crosscompiler
@@ -252,6 +277,15 @@ begin
           end
         else
           begin
+          // Modify fpc.cfg
+          FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+          //todo: check if fbinpath is correct
+          //todo: is this enough - shouldn't we also check for target OS not only target CPU? What about arm linux and arm wince?
+          InsertFPCCFGSnippet(FPCCfg,
+            '#IFDEF CPU'+uppercase(FCrossCPU_Target),
+            '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
+            CrossInstaller.FPCCFGSnippet+LineEnding+
+            '#ENDIF');
         {$IFDEF UNIX}
           result:=CreateFPCScript;
         {$ENDIF UNIX}
