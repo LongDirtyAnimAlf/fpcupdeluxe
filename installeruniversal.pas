@@ -96,7 +96,7 @@ type
     function CleanModule(ModuleName:string): boolean; override;
     // Configure module
     function ConfigModule(ModuleName:string): boolean; override;
-    // Install update sources
+    // Install/update sources (e.g. via svn)
     function GetModule(ModuleName:string): boolean; override;
     // Gets the list of required modules for ModuleName
     function GetModuleRequirements(ModuleName:string; var RequirementList:TStringList): boolean;
@@ -724,6 +724,7 @@ var
   idx:integer;
   sl:TStringList;
   RemoteURL,InstallDir:string;
+  PinRevision: string=''; //Pin at a certain revision number
   BeforeRevision: string='';
   AfterRevision: string='';
   UpdateWarnings: TStringList;
@@ -739,6 +740,8 @@ begin
     InstallDir:=GetValue('InstallDir',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
+    // Common keywords for all repo methods
+    PinRevision:=GetValue('REVISION',sl);
     // Handle SVN urls
     RemoteURL:=GetValue('SVNURL',sl);
     if RemoteURL<>'' then
@@ -749,6 +752,8 @@ begin
           FSVNClient.Verbose:=FVerbose;
           FBaseDirectory:=InstallDir;
           FUrl:=RemoteURL;
+          if PinRevision<>'' then
+            FSVNClient.DesiredRevision:=PinRevision;
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           if UpdateWarnings.Count>0 then
           begin
@@ -768,6 +773,8 @@ begin
           FHGClient.Verbose:=FVerbose;
           FBaseDirectory:=InstallDir;
           FUrl:=RemoteURL;
+          if PinRevision<>'' then
+            FHGClient.DesiredRevision:=PinRevision;
           result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           if UpdateWarnings.Count>0 then
           begin
@@ -789,6 +796,8 @@ begin
           FGitClient.Verbose:=FVerbose;
           FBaseDirectory:=InstallDir;
           FUrl:=RemoteURL;
+          if PinRevision<>'' then
+            FGitClient.DesiredRevision:=PinRevision;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           if UpdateWarnings.Count>0 then
           begin
