@@ -50,6 +50,15 @@ arm-wince-pe-stub.exe
 arm-wince-pe-windres.exe
 
 Note: make sure cygwin1.dll is in your path or put it in the c:\development\cross\bin\arm-wince directory
+
+todo: fix fpc compile never finishing here:
+Start compiling package bzip2 for target arm-wince.
+Warning: Unable to determine the libgcc path.
+       Compiling bzip2\BuildUnit_bzip2.pp
+       Compiling .\bzip2\src\bzip2comn.pp
+       Compiling .\bzip2\src\bzip2.pas
+       Compiling .\bzip2\src\bzip2stream.pp
+perhaps this package should be disabled, too?
 }
 
 {$mode objfpc}{$H+}

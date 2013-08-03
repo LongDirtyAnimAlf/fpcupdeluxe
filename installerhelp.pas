@@ -521,19 +521,15 @@ begin
         // Let build_lcl_docs know which fpdoc application to use:
         ProcessEx.Parameters.Add('--fpdoc');
         ProcessEx.Parameters.Add(FPDocExe);
-        // todo: Newer versions of fpc mess up the .css file location;
+        // Newer versions of fpc mess up the .css file location;
         // Exception at 00441644: Exception:
         // Can't find CSS file "..\fpdoc.css".
         //
-        // need to specify location explicitly
-        // by passing the -css-file argument
-        // note: the application explicits a call like
-        // --arg "css-file=C:\development\fpctrunk\utils\fpdoc\fpdoc.css "
-        // note trailing space
-        {
-        ProcessEx.Parameters.Add('--arg "css-file='+IncludeTrailingPathDelimiter(FFPCDirectory)+
-          'utils'+DirectorySeparator+'fpdoc'+DirectorySeparator+'fpdoc.css" ');
-        }
+        // So specify path explicitly
+        // --css-file argument available since r42283
+        ProcessEx.Parameters.Add('--css-file='+IncludeTrailingPathDelimiter(FFPCDirectory)+
+          'utils'+DirectorySeparator+'fpdoc'+DirectorySeparator+'fpdoc.css');
+
         ProcessEx.Parameters.Add('--outfmt');
         ProcessEx.Parameters.Add('chm');
         // Show application output if desired:
