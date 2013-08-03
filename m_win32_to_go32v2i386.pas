@@ -35,8 +35,13 @@ ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
 Then place the binaries in c:\development\cross\bin\i386-go32v2
 Binaries include
+i386-go32v2-ar.exe
+i386-go32v2-as.exe
+i386-go32v2-ld.exe
+i386-go32v2-objdump.exe
+i386-go32v2-strip.exe
 
-//check Note: make sure cygwin1.dll is in your path or put it in the c:\development\cross\bin\arm-wince directory
+Remember to distribute cwsdpmi.exe with your programs.
 
 }
 
