@@ -1,5 +1,6 @@
 unit m_win32_to_wincearm;
-{ Cross compiles from Windows 32 to Windows CE (Windows Embedded/Windows CE) ARM
+{ Cross compiles from Windows 32 to Windows CE
+(Windows Embedded/Windows CE/Windows mobile) on the ARM processor
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it

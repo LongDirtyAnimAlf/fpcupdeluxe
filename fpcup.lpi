@@ -256,7 +256,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="32">
+    <Units Count="33">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -415,6 +415,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_win32_to_go32v2i386"/>
       </Unit31>
+      <Unit32>
+        <Filename Value="m_win32_to_wincearm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_wincearm"/>
+      </Unit32>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
