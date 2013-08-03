@@ -45,6 +45,9 @@ c:\development\cross\lib\arm-android\libc.so
 c:\development\cross\lib\x86_64-linux\libc.a
 c:\development\cross\lib\x86_64-linux\libc.so
 ...
+
+//todo: integrate/prefer fpc supplied binutils at
+ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.15-win32-i386-linux.zip
 }
 
 {$mode objfpc}{$H+}
@@ -97,7 +100,7 @@ begin
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
+    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 3.3.1:  the directory to look for the target  libraries};
     infoln('TWin32_Linux386: found libspath '+FLibsPath,etInfo);
   end;
 end;

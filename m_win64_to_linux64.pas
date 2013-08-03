@@ -96,7 +96,7 @@ begin
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
+    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 3.3.1:  the directory to look for the target  libraries};
     infoln('Twin64_linux64: found libspath '+FLibsPath,etInfo);
   end;
 end;

@@ -1,5 +1,5 @@
-unit m_win32_to_linuxarm;
-{ Cross compiles from Windows 32 to Linux ARM
+unit m_linux386_to_mipsel;
+{ Cross compiles from Linux 32 to mipsel 32 bit
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -29,26 +29,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Setup: currently aimed at using the crossfpc supplied binaries/libs
-Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the directory layout provided by the crossfpc project there, so you get
-
-c:\development\cross\bin\arm-android\arm-linux-androideabi-ar.exe
-c:\development\cross\bin\arm-android\arm-linux-androideabi-as.exe
-...
-c:\development\cross\bin\i386-linux\i386-linux-ar.exe
-c:\development\cross\bin\i386-linux\i386-linux-as.exe
-...
-c:\development\cross\lib\arm-android\libc.a
-c:\development\cross\lib\arm-android\libc.so
-...
-c:\development\cross\lib\x86_64-linux\libc.a
-c:\development\cross\lib\x86_64-linux\libc.so
-...
-
-//todo: integrate/prefer fpc supplied binutils at
-ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.15.94-win32-arm-linux.zip
-//todo: how to find out the difference between ARM and ARM android
+Written with openwrt buildroot tool with uclibc library in mind.
+Adapt (add) for other setups
 }
 
 {$mode objfpc}{$H+}
@@ -61,8 +43,8 @@ uses
 implementation
 type
 
-{ TWin32_Linuxarm }
-TWin32_Linuxarm = class(TCrossInstaller)
+{ TLinux386_mipsel }
+TLinux386_mipsel = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -74,108 +56,101 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32_Linuxarm }
-function TWin32_Linuxarm.TargetSignature: string;
+{ TLinux386_mipsel }
+function TLinux386_mipsel.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TWin32_Linuxarm.GetLibs(Basepath:string): boolean;
+function TLinux386_mipsel.GetLibs(Basepath:string): boolean;
 const
-  DirName='arm-linux';
+  DirName='mipsel-linux';
 begin
-//todo add support for separate cross dire
-  // Using crossfpc directory naming
+//todo add support for separate cross dire  
   FLibsPath:='lib\'+DirName;
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('TLinux386_mipsel: failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('TLinux386_mipsel: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 3.3.1:  the directory to look for the target  libraries};
-    infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
+    infoln('TLinux386_mipsel: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
-function TWin32_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TLinux386_mipsel.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
+  // todo: get gtk at least
   result:=true;
 end;
 
-function TWin32_Linuxarm.GetBinUtils(Basepath:string): boolean;
+function TLinux386_mipsel.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='arm-linux';
+  DirName='mipsel-linux';
 var
   AsFile: string;
 begin
-  AsFile:=FBinUtilsPrefix+'as.exe';
-  // Using crossfpc directory naming
+  AsFile:=FBinUtilsPrefix+'as.exe';  
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
   begin
     // Configuration snippet for FPC
-    //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-linux
-    //adjusted by
-    //http://wiki.freepascal.org/arm-wince
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-darm'+LineEnding+ {pass arm to linker}
     '-Tlinux'; {target operating system}
-    infoln('TWin32_Linuxarm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TLinux386_mipsel: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
-constructor TWin32_Linuxarm.Create;
+constructor TLinux386_mipsel.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature
+  FBinUtilsPrefix:='mipsel-linux-';
   FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
+  FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='arm';
+  FTargetCPU:='mipsel';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TWin32_Linuxarm crosscompiler loading',etDebug);
+  infoln('TLinux386_mipsel crosscompiler loading',etDebug);
 end;
 
-destructor TWin32_Linuxarm.Destroy;
+destructor TLinux386_mipsel.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Win32_Linuxarm:TWin32_Linuxarm;
+  Linux386_mipsel:TLinux386_mipsel;
 
-{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
-// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
+{$IFDEF LINUX)}
+// Even though it's officially for x86, x64 may work
 initialization
-  Win32_Linuxarm:=TWin32_Linuxarm.Create;
-  RegisterExtension(Win32_Linuxarm.TargetCPU+'-'+Win32_Linuxarm.TargetOS,Win32_Linuxarm);
+  Linux386_mipsel:=TLinux386_mipsel.Create;
+  RegisterExtension(Linux386_mipsel.TargetCPU+'-'+Linux386_mipsel.TargetOS,Linux386_mipsel);
 finalization
-  Win32_Linuxarm.Destroy;
+  Linux386_mipsel.Destroy;
 {$ENDIF}
 end.
 
