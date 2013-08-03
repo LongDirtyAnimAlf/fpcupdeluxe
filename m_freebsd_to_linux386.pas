@@ -49,7 +49,7 @@ begin
   if result then
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 3.3.1:  the directory to look for the target  libraries};
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
 end;
 
 function TFreeBSD_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
