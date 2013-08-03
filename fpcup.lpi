@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -23,7 +23,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="5">
+    <BuildModes Count="6">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -59,7 +59,6 @@
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
-          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item2>
       <Item3 Name="64bit">
@@ -106,7 +105,6 @@ end;"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
-          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item3>
       <Item4 Name="64bitDebug">
@@ -151,7 +149,6 @@ end;"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
-          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item4>
       <Item5 Name="linux_x64">
@@ -195,6 +192,50 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item5>
+      <Item6 Name="linux_i386">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="fpcup_linux_x64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <UseMsgFile Value="True"/>
+            </CompilerMessages>
+            <CompilerPath Value="$(CompPath)"/>
+            <ExecuteBefore>
+              <Command Value="hgversion$(ExeExt)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item6>
+      <SharedMatrixOptions Count="1">
+        <Item1 ID="115249638842" Modes="Default,Debug,64bit,64bitDebug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+      </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -409,7 +450,6 @@ end;"/>
         <CompileReasons Run="False"/>
       </ExecuteBefore>
     </Other>
-    <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="5">

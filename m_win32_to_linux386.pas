@@ -32,22 +32,21 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 Setup: currently aimed at using the crossfpc supplied binaries/libs
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
 Then place the directory layout provided by the crossfpc project there, so you get
-
-c:\development\cross\bin\arm-android\arm-linux-androideabi-ar.exe
-c:\development\cross\bin\arm-android\arm-linux-androideabi-as.exe
-...
 c:\development\cross\bin\i386-linux\i386-linux-ar.exe
 c:\development\cross\bin\i386-linux\i386-linux-as.exe
 ...
-c:\development\cross\lib\arm-android\libc.a
-c:\development\cross\lib\arm-android\libc.so
-...
-c:\development\cross\lib\x86_64-linux\libc.a
-c:\development\cross\lib\x86_64-linux\libc.so
+c:\development\cross\lib\i386-linux\libc.a
+c:\development\cross\lib\i386-linux\libc.so
 ...
 
-//todo: integrate/prefer fpc supplied binutils at
+NOTE: please check the libraries are compatible with those on your own system.
+
+todo: integrate/prefer fpc supplied binutils at
 ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.15-win32-i386-linux.zip
+
+todo: fix resource compilation error:
+Compiling resource fpcup.or
+Error: Unknown command-line parameter : -a
 }
 
 {$mode objfpc}{$H+}
@@ -85,7 +84,7 @@ const
 begin
 //todo add support for separate cross dire
   // Using crossfpc directory naming
-  FLibsPath:='lib\'+DirName;
+  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin

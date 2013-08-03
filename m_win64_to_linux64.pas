@@ -81,7 +81,7 @@ const
   DirName='x86_64-linux';
 begin
   // Using crossfpc directory naming
-  FLibsPath:='lib\'+DirName;
+  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin

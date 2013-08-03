@@ -67,7 +67,7 @@ const
   DirName='mipsel-linux';
 begin
 //todo add support for separate cross dire  
-  FLibsPath:='lib\'+DirName;
+  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin

@@ -86,7 +86,7 @@ const
   DirName='arm-wince';
 begin
   // Wince does not need libs by default, but user can add them.
-  FLibsPath:='lib\'+DirName;
+  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
