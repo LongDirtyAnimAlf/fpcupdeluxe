@@ -67,13 +67,16 @@ const
   DirName='mipsel-linux';
 begin
 //todo add support for separate cross dire  
-  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('TLinux386_mipsel: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
+      'cross'+DirectorySeparator+
+      'lib'+DirectorySeparator+
+      DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('TLinux386_mipsel: failed: searched libspath '+FLibsPath,etInfo);
