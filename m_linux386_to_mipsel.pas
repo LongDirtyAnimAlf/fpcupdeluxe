@@ -1,5 +1,5 @@
 unit m_linux386_to_mipsel;
-{ Cross compiles from Linux 32 to mipsel 32 bit
+{ Cross compiles from Linux 32 to mipsel 32 bit (Little Endian)
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it

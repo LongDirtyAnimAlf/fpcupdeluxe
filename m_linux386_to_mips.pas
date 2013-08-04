@@ -1,5 +1,5 @@
-unit m_win32_to_linuxmipsel;
-{ Cross compiles from Windows 32 to mipsel 32 bit (Little Endian)
+unit m_linux386_to_mips;
+{ Cross compiles from Linux 32 to mips 32 bit (Big Endian/mipseb)
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -29,27 +29,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-based on cross binaries from
-http://svn2.freepascal.org/svn/fpcbuild/binaries/i386-win32/
-
-Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\mips-linux
-Binaries include
-mipselel-linux-ar.exe
-mipselel-linux-as.exe
-mipselel-linux-ld.exe
-mipselel-linux-nm.exe
-mipselel-linux-objcopy.exe
-mipselel-linux-objdump.exe
-mipselel-linux-strip.exe
-
-Earlier tested with Sourcery CodeBench Lite GNU/Linux
-http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/mips-gnu-linux
-e.g. mips-2013.05-36-mips-linux-gnu.exe
-See page 15 of the getting started manual for the layout of lib and relation to architecture/gcc compiler options
-
-- Adapt (add) for other setups
-- Note that the libs may not match your actual system. If so, replace them
+Written with openwrt buildroot tool with uclibc library in mind.
+Adapt (add) for other setups
 }
 
 {$mode objfpc}{$H+}
@@ -62,8 +43,8 @@ uses
 implementation
 type
 
-{ Twin32_linuxmipsel }
-Twin32_linuxmipsel = class(TCrossInstaller)
+{ TLinux386_mips }
+TLinux386_mips = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -75,27 +56,30 @@ public
   destructor Destroy; override;
 end;
 
-{ Twin32_linuxmipsel }
-function Twin32_linuxmipsel.TargetSignature: string;
+{ TLinux386_mips }
+function TLinux386_mips.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function Twin32_linuxmipsel.GetLibs(Basepath:string): boolean;
+function TLinux386_mips.GetLibs(Basepath:string): boolean;
 const
-  DirName='mipsel-linux';
+  DirName='mips-linux';
 begin
 //todo add support for separate cross dire  
-  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('Twin32_linuxmipsel: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    infoln('TLinux386_mips: failed: searched libspath '+FLibsPath,etInfo);
+    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
+      'cross'+DirectorySeparator+
+      'lib'+DirectorySeparator+
+      DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('Twin32_linuxmipsel: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('TLinux386_mips: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
@@ -104,19 +88,19 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('Twin32_linuxmipsel: found libspath '+FLibsPath,etInfo);
+    infoln('TLinux386_mips: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
-function Twin32_linuxmipsel.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TLinux386_mips.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
   result:=true;
 end;
 
-function Twin32_linuxmipsel.GetBinUtils(Basepath:string): boolean;
+function TLinux386_mips.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='mipsel-linux';
+  DirName='mips-linux';
 var
   AsFile: string;
 begin
@@ -126,12 +110,12 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('Twin32_linuxmipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TLinux386_mips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('Twin32_linuxmipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln('TLinux386_mips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
   begin
@@ -140,38 +124,38 @@ begin
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-Tlinux'; {target operating system}
-    infoln('Twin32_linuxmipsel: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TLinux386_mips: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
-constructor Twin32_linuxmipsel.Create;
+constructor TLinux386_mips.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='mipsel-linux-';
+  FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='mipsel';
+  FTargetCPU:='mips';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Twin32_linuxmipsel crosscompiler loading',etDebug);
+  infoln('TLinux386_mips crosscompiler loading',etDebug);
 end;
 
-destructor Twin32_linuxmipsel.Destroy;
+destructor TLinux386_mips.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Win32_linuxmipsel:Twin32_linuxmipsel;
+  Linux386_mips:TLinux386_mips;
 
-{$IFDEF MSWINDOWS)}
+{$IFDEF LINUX)}
 // Even though it's officially for x86, x64 may work
 initialization
-  Win32_linuxmipsel:=Twin32_linuxmipsel.Create;
-  RegisterExtension(Win32_linuxmipsel.TargetCPU+'-'+Win32_linuxmipsel.TargetOS,Win32_linuxmipsel);
+  Linux386_mips:=TLinux386_mips.Create;
+  RegisterExtension(Linux386_mips.TargetCPU+'-'+Linux386_mips.TargetOS,Linux386_mips);
 finalization
-  Win32_linuxmipsel.Destroy;
+  Linux386_mips.Destroy;
 {$ENDIF}
 end.
 

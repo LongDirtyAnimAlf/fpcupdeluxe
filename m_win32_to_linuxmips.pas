@@ -1,6 +1,5 @@
-unit m_win32_to_wincearm;
-{ Cross compiles from Windows 32 to Windows CE
-(Windows Embedded/Windows CE/Windows mobile) on the ARM processor
+unit m_win32_to_linuxmips;
+{ Cross compiles from Windows 32 to mips 32 bit (Big Endian/mipseb)
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -30,26 +29,27 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Setup: based on cross binaries from
+based on cross binaries from
 http://svn2.freepascal.org/svn/fpcbuild/binaries/i386-win32/
-with binutils 2.22
-
-- superseding those from
-ftp://ftp.freepascal.org/pub/fpc/contrib/cross/binutils-2.15.94-win32-arm-wince.zip
-(ftp version: make sure cygwin1.dll is in your path or put it in the c:\development\cross\bin\arm-wince directory)
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\arm-wince
+Then place the binaries in c:\development\cross\bin\mips-linux
 Binaries include
-arm-wince-ar.exe
-arm-wince-as.exe
-arm-wince-dlltool.exe
-arm-wince-ld.exe
-arm-wince-nm.exe
-arm-wince-objcopy.exe
-arm-wince-objdump.exe
-arm-wince-strip.exe
-arm-wince-windres.exe
+mips-linux-ar.exe
+mips-linux-as.exe
+mips-linux-ld.exe
+mips-linux-nm.exe
+mips-linux-objcopy.exe
+mips-linux-objdump.exe
+mips-linux-strip.exe
+
+Earlier tested with Sourcery CodeBench Lite GNU/Linux
+http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/mips-gnu-linux
+e.g. mips-2013.05-36-mips-linux-gnu.exe
+See page 15 of the getting started manual for the layout of lib and relation to architecture/gcc compiler options
+
+- Adapt (add) for other setups
+- Note that the libs may not match your actual system. If so, replace them
 }
 
 {$mode objfpc}{$H+}
@@ -62,8 +62,8 @@ uses
 implementation
 type
 
-{ TWin32_wincearm }
-TWin32_wincearm = class(TCrossInstaller)
+{ Twin32_linuxmips }
+Twin32_linuxmips = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -75,133 +75,103 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32_wincearm }
-function TWin32_wincearm.TargetSignature: string;
+{ Twin32_linuxmips }
+function Twin32_linuxmips.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TWin32_wincearm.GetLibs(Basepath:string): boolean;
+function Twin32_linuxmips.GetLibs(Basepath:string): boolean;
 const
-  DirName='arm-wince';
+  DirName='mips-linux';
 begin
-  // Wince does not need libs by default, but user can add them.
+//todo add support for separate cross dire  
   FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_wincearm: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('Twin32_linuxmips: failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TWin32_wincearm: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('Twin32_linuxmips: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    infoln('TWin32_wincearm: found libspath '+FLibsPath,etInfo);
-  end;
-  if not result then
-  begin
-    //libs path is optional; it can be empty
-    infoln('TWin32_wincearm: libspath ignored; it is optional for this cross comipler.',etInfo);
-    FLibsPath:='';
-    result:=true;
+    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+    infoln('Twin32_linuxmips: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
-function TWin32_wincearm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function Twin32_linuxmips.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
+  // todo: get gtk at least
   result:=true;
 end;
 
-function TWin32_wincearm.GetBinUtils(Basepath:string): boolean;
+function Twin32_linuxmips.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='arm-wince';
+  DirName='mips-linux';
 var
   AsFile: string;
 begin
-  AsFile:=FBinUtilsPrefix+'as.exe';
-  // Using default naming (svn2 repo)
+  AsFile:=FBinUtilsPrefix+'as.exe';  
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_wincearm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('Twin32_linuxmips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TWin32_wincearm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln('Twin32_linuxmips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
-
-  // Search for FTP (old) version
-  if not result then
-  begin
-    FBinUtilsPrefix:='arm-wince-pe-';
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-  end;
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_wincearm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-    //todo: fix fallback to separate dir; use real argument from command line to control it
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-      infoln('TWin32_wincearm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-  end;
-
   if result then
   begin
     // Configuration snippet for FPC
-    //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-wince
-    //adjusted by
-    //http://wiki.freepascal.org/arm-wince
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-darm'+LineEnding+ {pass arm to linker}
-    '-Twince'; {target operating system}
-    infoln('TWin32_wincearm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    '-Tlinux'; {target operating system}
+    infoln('Twin32_linuxmips: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
-constructor TWin32_wincearm.Create;
+constructor Twin32_linuxmips.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='arm-wince-'; //search algorithm may modify this
+  FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
+  FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='arm';
-  FTargetOS:='wince';
+  FTargetCPU:='mips';
+  FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TWin32_wincearm crosscompiler loading',etDebug);
+  infoln('Twin32_linuxmips crosscompiler loading',etDebug);
 end;
 
-destructor TWin32_wincearm.Destroy;
+destructor Twin32_linuxmips.Destroy;
 begin
   inherited Destroy;
 end;
 
-{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
-// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 var
-  Win32_wincearm:TWin32_wincearm;
+  Win32_linuxmips:Twin32_linuxmips;
 
+{$IFDEF MSWINDOWS)}
+// Even though it's officially for x86, x64 may work
 initialization
-  Win32_wincearm:=TWin32_wincearm.Create;
-  RegisterExtension(Win32_wincearm.TargetCPU+'-'+Win32_wincearm.TargetOS,Win32_wincearm);
+  Win32_linuxmips:=Twin32_linuxmips.Create;
+  RegisterExtension(Win32_linuxmips.TargetCPU+'-'+Win32_linuxmips.TargetOS,Win32_linuxmips);
 finalization
-  Win32_wincearm.Destroy;
+  Win32_linuxmips.Destroy;
 {$ENDIF}
 end.
 
