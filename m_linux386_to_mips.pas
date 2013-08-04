@@ -104,7 +104,7 @@ const
 var
   AsFile: string;
 begin
-  AsFile:=FBinUtilsPrefix+'as.exe';  
+  AsFile:=FBinUtilsPrefix+'as';
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
   if not result then
@@ -146,10 +146,10 @@ begin
   inherited Destroy;
 end;
 
+{$IFDEF LINUX)}
 var
   Linux386_mips:TLinux386_mips;
 
-{$IFDEF LINUX)}
 // Even though it's officially for x86, x64 may work
 initialization
   Linux386_mips:=TLinux386_mips.Create;

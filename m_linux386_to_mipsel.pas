@@ -29,7 +29,48 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Written with openwrt buildroot tool with uclibc library in mind.
+Getting binutils:
+#following
+#http://wiki.freepascal.org/Native_MIPS_Systems#Mainline_MIPS_Port
+#on Debian linux x86, as regular user
+cd ~
+wget http://ftp.gnu.org/gnu/binutils/binutils-2.23.1.tar.bz2
+tar xjf binutils-2.23.1.tar.bz2
+cd ~/binutils-2.23.1
+./config.sub mipsel-linux-gnu
+./configure --prefix=/usr/local/mipsel-linux mipsel-linux-gnu
+make
+# make gives error compiling in bfd for binutils-2.20.1/2.20.1a
+sudo make install
+sudo ln -s /usr/local/mipsel-linux/bin/as /usr/local/bin/mipsel-linux-as
+sudo ln -s /usr/local/mipsel-linux/bin/ld /usr/local/bin/mipsel-linux-ld
+sudo ln -s /usr/local/mipsel-linux/bin/ar /usr/local/bin/mipsel-linux-ar
+sudo ln -s /usr/local/mipsel-linux/bin/objdump /usr/local/bin/mipsel-linux-objdump
+sudo ln -s /usr/local/mipsel-linux/bin/objcopy /usr/local/bin/mipsel-linux-objcopy
+sudo ln -s /usr/local/mipsel-linux/bin/strip /usr/local/bin/mipsel-linux-strip
+mipsel-linux-ld -V
+# GNU ld (GNU Binutils) 2.23.1
+#  Supported emulations:
+#   elf32ltsmip
+#   elf32btsmip
+#   elf32ltsmipn32
+#   elf64ltsmip
+#   elf32btsmipn32
+#   elf64btsmip
+
+# copy over for self-contained fpcup setup:
+mkdir -p ~/development/cross/bin/mipsel-linux
+cp /usr/local/bin/mipsel-linux-as ~/development/cross/bin/mipsel-linux
+cp /usr/local/bin/mipsel-linux-ld ~/development/cross/bin/mipsel-linux
+cp /usr/local/bin/mipsel-linux-ar ~/development/cross/bin/mipsel-linux
+cp /usr/local/bin/mipsel-linux-objdump ~/development/cross/bin/mipsel-linux
+cp /usr/local/bin/mipsel-linux-objcopy ~/development/cross/bin/mipsel-linux
+cp /usr/local/bin/mipsel-linux-strip ~/development/cross/bin/mipsel-linux
+
+Place
+
+Download your libraries into ~/development/cross/lib/mipsel-linux
+
 Adapt (add) for other setups
 }
 
@@ -104,7 +145,7 @@ const
 var
   AsFile: string;
 begin
-  AsFile:=FBinUtilsPrefix+'as.exe';  
+  AsFile:=FBinUtilsPrefix+'as';
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
   if not result then
@@ -117,6 +158,25 @@ begin
     if not result then
       infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
+
+  // Try /usr/local/bin/mipsel-linux
+  if not result then
+  begin
+    FBinUtilsPath:='/usr/local/bin/'+DirectorySeparator+DirName;
+    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+    if not result then
+      infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end;
+
+  // Try /usr/local/bin/
+  if not result then
+  begin
+    FBinUtilsPath:='/usr/local/bin';
+    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+    if not result then
+      infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end;
+
   if result then
   begin
     // Configuration snippet for FPC
@@ -146,10 +206,10 @@ begin
   inherited Destroy;
 end;
 
+{$IFDEF LINUX)}
 var
   Linux386_mipsel:TLinux386_mipsel;
 
-{$IFDEF LINUX)}
 // Even though it's officially for x86, x64 may work
 initialization
   Linux386_mipsel:=TLinux386_mipsel.Create;
