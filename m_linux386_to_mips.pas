@@ -29,7 +29,40 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Written with openwrt buildroot tool with uclibc library in mind.
+Written with gnu binutils in mind: getting binutils:
+#following
+#http://wiki.freepascal.org/Native_MIPS_Systems#Mainline_MIPS_Port
+#on Debian linux x86, as regular user
+cd ~
+# Replace with your desired version:
+wget http://ftp.gnu.org/gnu/binutils/binutils-2.23.1.tar.bz2
+tar xjf binutils-2.23.1.tar.bz2
+cd ~/binutils-2.23.1
+make distclean
+./config.sub mips-linux-gnu
+./configure --prefix=/usr/local/mips-linux mips-linux-gnu
+make
+# make gives error compiling in bfd for binutils-2.20.1/2.20.1a
+sudo make install
+sudo ln -s /usr/local/mips-linux/bin/as /usr/local/bin/mips-linux-as
+sudo ln -s /usr/local/mips-linux/bin/ld /usr/local/bin/mips-linux-ld
+sudo ln -s /usr/local/mips-linux/bin/ar /usr/local/bin/mips-linux-ar
+sudo ln -s /usr/local/mips-linux/bin/objdump /usr/local/bin/mips-linux-objdump
+sudo ln -s /usr/local/mips-linux/bin/objcopy /usr/local/bin/mips-linux-objcopy
+sudo ln -s /usr/local/mips-linux/bin/strip /usr/local/bin/mips-linux-strip
+mips-linux-ld -V
+
+# copy over for self-contained fpcup setup:
+mkdir -p ~/development/cross/bin/mips-linux
+cp /usr/local/bin/mips-linux-as ~/development/cross/bin/mips-linux
+cp /usr/local/bin/mips-linux-ld ~/development/cross/bin/mips-linux
+cp /usr/local/bin/mips-linux-ar ~/development/cross/bin/mips-linux
+cp /usr/local/bin/mips-linux-objdump ~/development/cross/bin/mips-linux
+cp /usr/local/bin/mips-linux-objcopy ~/development/cross/bin/mips-linux
+cp /usr/local/bin/mips-linux-strip ~/development/cross/bin/mips-linux
+
+Download your libraries into ~/development/cross/lib/mips-linux
+
 Adapt (add) for other setups
 }
 

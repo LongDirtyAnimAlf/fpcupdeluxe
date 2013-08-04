@@ -29,14 +29,16 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Getting binutils:
+Written with gnu binutils in mind: getting binutils:
 #following
 #http://wiki.freepascal.org/Native_MIPS_Systems#Mainline_MIPS_Port
 #on Debian linux x86, as regular user
 cd ~
+# Replace with your desired version:
 wget http://ftp.gnu.org/gnu/binutils/binutils-2.23.1.tar.bz2
 tar xjf binutils-2.23.1.tar.bz2
 cd ~/binutils-2.23.1
+make distclean
 ./config.sub mipsel-linux-gnu
 ./configure --prefix=/usr/local/mipsel-linux mipsel-linux-gnu
 make
@@ -58,8 +60,6 @@ cp /usr/local/bin/mipsel-linux-ar ~/development/cross/bin/mipsel-linux
 cp /usr/local/bin/mipsel-linux-objdump ~/development/cross/bin/mipsel-linux
 cp /usr/local/bin/mipsel-linux-objcopy ~/development/cross/bin/mipsel-linux
 cp /usr/local/bin/mipsel-linux-strip ~/development/cross/bin/mipsel-linux
-
-Place
 
 Download your libraries into ~/development/cross/lib/mipsel-linux
 
