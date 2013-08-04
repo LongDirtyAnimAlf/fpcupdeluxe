@@ -145,6 +145,7 @@ const
 var
   AsFile: string;
 begin
+  //todo: factor these path finding repetitions into a function (in the parent class?)
   AsFile:=FBinUtilsPrefix+'as';
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
