@@ -33,21 +33,34 @@ based on cross binaries from
 http://svn2.freepascal.org/svn/fpcbuild/binaries/i386-win32/
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\mips-linux
+Then place the binaries in c:\development\cross\bin\mipsel-linux
 Binaries include
-mipselel-linux-ar.exe
-mipselel-linux-as.exe
-mipselel-linux-ld.exe
-mipselel-linux-nm.exe
-mipselel-linux-objcopy.exe
-mipselel-linux-objdump.exe
-mipselel-linux-strip.exe
+mipsel-linux-ar.exe
+mipsel-linux-as.exe
+mipsel-linux-ld.exe
+mipsel-linux-nm.exe
+mipsel-linux-objcopy.exe
+mipsel-linux-objdump.exe
+mipsel-linux-strip.exe
+
+Also used codesourcery libs in
+c:\development\cross\bin\mipsel-linux
+crtbegin.o
+crtbeginS.o
+crtbeginT.o
+crtend.o
+crtendS.o
+crtfastmath.o
+libgcc.a
+libgcc_eh.a
+libgcov.a
+-->please replace/use the ones that work for your target machine
+
 
 Earlier tested with Sourcery CodeBench Lite GNU/Linux
 http://www.mentor.com/embedded-software/sourcery-tools/sourcery-codebench/editions/lite-edition/mips-gnu-linux
 e.g. mips-2013.05-36-mips-linux-gnu.exe
 See page 15 of the getting started manual for the layout of lib and relation to architecture/gcc compiler options
-
 - Adapt (add) for other setups
 - Note that the libs may not match your actual system. If so, replace them
 }
