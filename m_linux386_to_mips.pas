@@ -41,6 +41,9 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
+const
+  CrossModuleName='TLinux386_mips';
+
 type
 
 { TLinux386_mips }
@@ -104,27 +107,46 @@ const
 var
   AsFile: string;
 begin
+  //todo: factor these path finding repetitions into a function (in the parent class?)
   AsFile:=FBinUtilsPrefix+'as';
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TLinux386_mips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TLinux386_mips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
+
+  // Try /usr/local/bin/mipsel-linux
+  if not result then
+  begin
+    FBinUtilsPath:='/usr/local/bin/'+DirectorySeparator+DirName;
+    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+    if not result then
+      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end;
+
+  // Try /usr/local/bin/
+  if not result then
+  begin
+    FBinUtilsPath:='/usr/local/bin';
+    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+    if not result then
+      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end;
+
   if result then
   begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-Tlinux'; {target operating system}
-    infoln('TLinux386_mips: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    infoln(CrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 

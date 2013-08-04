@@ -49,14 +49,6 @@ sudo ln -s /usr/local/mipsel-linux/bin/objdump /usr/local/bin/mipsel-linux-objdu
 sudo ln -s /usr/local/mipsel-linux/bin/objcopy /usr/local/bin/mipsel-linux-objcopy
 sudo ln -s /usr/local/mipsel-linux/bin/strip /usr/local/bin/mipsel-linux-strip
 mipsel-linux-ld -V
-# GNU ld (GNU Binutils) 2.23.1
-#  Supported emulations:
-#   elf32ltsmip
-#   elf32btsmip
-#   elf32ltsmipn32
-#   elf64ltsmip
-#   elf32btsmipn32
-#   elf64btsmip
 
 # copy over for self-contained fpcup setup:
 mkdir -p ~/development/cross/bin/mipsel-linux
@@ -82,6 +74,9 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
+const
+  CrossModuleName='TLinux386_mipsel';
+
 type
 
 { TLinux386_mipsel }
@@ -113,14 +108,14 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TLinux386_mipsel: failed: searched libspath '+FLibsPath,etInfo);
+    infoln(CrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
       'cross'+DirectorySeparator+
       'lib'+DirectorySeparator+
       DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TLinux386_mipsel: failed: searched libspath '+FLibsPath,etInfo);
+      infoln(CrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
@@ -129,7 +124,7 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('TLinux386_mipsel: found libspath '+FLibsPath,etInfo);
+    infoln(CrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -152,12 +147,12 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 
   // Try /usr/local/bin/mipsel-linux
@@ -166,7 +161,7 @@ begin
     FBinUtilsPath:='/usr/local/bin/'+DirectorySeparator+DirName;
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 
   // Try /usr/local/bin/
@@ -175,7 +170,7 @@ begin
     FBinUtilsPath:='/usr/local/bin';
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TLinux386_mipsel: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 
   if result then
@@ -183,9 +178,8 @@ begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-Tlinux'; {target operating system}
-    infoln('TLinux386_mipsel: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    infoln(CrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
