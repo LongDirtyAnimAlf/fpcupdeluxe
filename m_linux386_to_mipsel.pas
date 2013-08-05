@@ -74,8 +74,7 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
-const
-  CrossModuleName='TLinux386_mipsel';
+
 
 type
 
@@ -108,14 +107,14 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln(CrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
+    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
       'cross'+DirectorySeparator+
       'lib'+DirectorySeparator+
       DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln(CrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
+      infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
@@ -124,7 +123,7 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln(CrossModuleName + ': found libspath '+FLibsPath,etInfo);
+    infoln(FCrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -142,36 +141,23 @@ var
 begin
   //todo: factor these path finding repetitions into a function (in the parent class?)
   AsFile:=FBinUtilsPrefix+'as';
-  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-    //todo: fix fallback to separate dir; use real argument from command line to control it
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-  end;
+  result:=false;
 
-  // Try /usr/local/bin/mipsel-linux
-  if not result then
-  begin
-    FBinUtilsPath:='/usr/local/bin/'+DirectorySeparator+DirName;
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-  end;
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
 
-  // Try /usr/local/bin/
-  if not result then
-  begin
-    FBinUtilsPath:='/usr/local/bin';
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-      infoln(CrossModuleName + ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-  end;
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/<dirprefix>/ }
+    result:=SearchBinUtil('/usr/local/bin/'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/ }
+    result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
 
   if result then
   begin
@@ -179,7 +165,7 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
-    infoln(CrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln(FCrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
@@ -188,6 +174,7 @@ begin
   inherited Create;
   FBinUtilsPrefix:='mipsel-linux-';
   FBinUtilsPath:='';
+  FCrossModuleName:='TLinux386_mipsel'; //used in messages to user
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='mipsel';

@@ -5,7 +5,7 @@ unit m_crossinstaller;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils,fpcuputil;
 
 type
 
@@ -14,10 +14,13 @@ type
   protected
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
+    FCrossModuleName: string; //used for identifying module to user in messages
     FFPCCFGSnippet: string;
     FLibsPath: string; //path for target environment libraries
     FTargetCPU: string; //cpu for the target environment. Follows FPC names
     FTargetOS: string; //operating system for the target environment. Follows FPC names
+    // Sets FBinutilspath if AsFile found in Directory. Returns true if found.
+    function SearchBinUtil(Directory, AsFile: string): boolean;
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
@@ -52,6 +55,15 @@ begin
   if not assigned(CrossInstallers) then
     CrossInstallers:=TStringList.Create;
   CrossInstallers.AddObject(Platform,TObject(Extension));
+end;
+
+function TCrossInstaller.SearchBinUtil(Directory, AsFile: string): boolean;
+begin
+  FBinUtilsPath:=ExcludeTrailingPathDelimiter(ExpandFileName(Directory));
+  result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+AsFile);
+  if not result then
+    infoln(FCrossModuleName + ': failed: searching binutil '+AsFile+
+      ' in directory '+FBinUtilsPath, etInfo);
 end;
 
 constructor TCrossInstaller.Create;
