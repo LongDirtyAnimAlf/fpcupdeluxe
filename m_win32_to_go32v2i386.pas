@@ -1,5 +1,5 @@
 unit m_win32_to_go32v2i386;
-{ Cross compiles from Windows 32 to Windows CE (Windows Embedded/Windows CE) ARM
+{ Cross compiles from Windows 32 to Go32V2 (DOS extender) on i386
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
