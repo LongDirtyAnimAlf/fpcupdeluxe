@@ -282,7 +282,6 @@ begin
             begin
             // Modify fpc.cfg
             FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-            //todo: check if fbinpath is correct
             //todo: is this enough - shouldn't we also check for target OS not only target CPU? What about arm linux and arm wince?
             MagicLine:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
             InsertFPCCFGSnippet(FPCCfg,
@@ -499,7 +498,7 @@ end;
 
 function TFPCInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
-result:=true;
+  result:=true;
 end;
 
 function TFPCInstaller.GetCompilerVersion(CompilerPath: string): string;
@@ -988,6 +987,7 @@ begin
         'bin'+DirectorySeparator+'fpcmkcfg';
       if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
       begin
+        fpcmkcfg:='';
         infoln('Could not find fpcmkcfg. Aborting.',etError);
         OperationSucceeded:=false;
       end

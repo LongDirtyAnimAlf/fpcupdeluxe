@@ -577,7 +577,7 @@ begin
       if FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp) then
         infoln(ModuleName+': not building LCL.chm as it is read only.',etInfo)
       else
-        infoln(ModuleName+': not building LCL.chm as it is read quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),etInfo);
+        infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),etInfo);
     end;
   end;
   result:=OperationSucceeded;
