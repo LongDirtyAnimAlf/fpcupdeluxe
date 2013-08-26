@@ -3,29 +3,42 @@ https://bitbucket.org/reiniero/fpcup/
 
 What is it?
 ===========
-fpcup is a tool that gets the current version of FreePascal Compiler (FPC) and Lazarus IDE from their subversion repositories and compiles/installs them.
+fpcup is a tool that gets the current version of FreePascal Compiler (FPC) and 
+Lazarus IDE from their subversion repositories and compiles/installs them.
 It adds CHM documentation and configure the Lazarus help for you.
 
-It also creates a shortcut on your desktop that points to the new Lazarus installation.
+It also creates a shortcut on your desktop that points to the new Lazarus 
+installation.
 
-Meant to be used side by side with other FPC/Lazarus installations. It creates a separate primary config path directory for the new Lazarus installation, so it doesn't interfere with existing Lazarus installs.
-It's open source software released under the LGPL with linking exception (same as FreePascal), and contains the Synapse libraries (BSD license). See source files for details.
+Meant to be used side by side with other FPC/Lazarus installations. It creates a
+separate primary config path directory for the new Lazarus installation, so it 
+doesn't interfere with existing Lazarus installs.
+
+It's open source software released under the LGPL with linking exception 
+(same as FreePascal), and contains the Synapse libraries (BSD license). 
+See source files for details.
 All use permitted, also commercial, but no warranties, express or implied.
 Run fpcup --help for command line options.
 
 Why yet another tool?
 =====================
-I was disappointed in LazUpdater, a GUI program that has similar goals as the code seems to be too complex.
-I also was tired of writing batch scripts and then having to press all kinds of buttons/fiddling with things to get it working.
+I was disappointed in LazUpdater, a GUI program that has similar goals as the 
+code seems to be too complex.
+
+I also was tired of writing batch scripts and then having to press all kinds of 
+buttons/fiddling with things to get it working.
 
 Prerequisites
 =============
 
 - Windows
 =========
-- none, but an svn installation in your path (e.g. TortoiseSVN) is recommended
-You can build Lazarus without an svn.exe in your path, but the Lazarus tool svn2revisioninc won't work and you won't get an SVN revision number in your Help/About box.
-If needed, the tool will download all needed binaries (bootstrap compiler, binutils, svn executable)
+- none, *but* an SVN installation in your path (e.g. TortoiseSVN) is recommended
+You can build Lazarus without an svn.exe in your path, but the Lazarus tool 
+svn2revisioninc won't work and you won't get an SVN revision number in your 
+Help/About box.
+If needed, the tool will download all needed binaries (bootstrap compiler, 
+binutils, svn executable)
 
 - Linux
 =======
@@ -42,7 +55,8 @@ sudo aptitude install build-essential subversion unzip
 
 - FreeBSD 9+
 =============
-- none, but *strongly recommended* to use a newer gdb than the 6.1 version supplied with the system, e .g. by
+- none, but *strongly recommended* to use a newer gdb than the 6.1 version 
+supplied with the system, e.g. by
 cd /usr/ports/devel/gdb
 make -DBATCH install clean
 Use gdb in /usr/local/bin/gdb
@@ -51,139 +65,237 @@ Use gdb in /usr/local/bin/gdb
 
 How does it work?
 =================
-FPCUp is a fancy batch script written in FPC/Lazarus that simply downloads FPC and Lazarus from SVN and compiles them ;)
-You run it, with options if necessary (see fpcup --help).
-When done, it should have created a Lazarus_trunk shortcut on your desktop (Windows) or shell script in your home directory (Unix/Linux).
-Start this to start your new Lazarus instance.
-fpcup sets up a separate primary config path to store Lazarus settings separate from other installs.
-You need to run the script/shortcut because it tells your Lazarus where to find that primary config path.
+FPCUp is a fancy batch script written in FPC/Lazarus that simply downloads FPC 
+and Lazarus from SVN and compiles them ;)
 
-Hint: after the first run, you can add/remove packages, set up your settings as wanted etc.
-You can then run fpcup --only=fpc,lazarus to only update FPC and Lazarus sources, which saves time, as you're not rebuilding help, installing packages, etc.
-Of course, you could run the full version e.g. once per day to make sure all external repositories etc are up to date.
+You run it, with options if necessary (see fpcup --help).
+When done, it should have 
+- created a Lazarus_trunk shortcut on your desktop (Windows/Linux) 
+- a shell script in your home directory (*nix) linking to the installed Lazarus.
+Start this to start your new Lazarus instance.
+
+fpcup sets up a separate primary config path to store Lazarus settings 
+separate from other installs.
+You need to run the script/shortcut because it tells your Lazarus 
+where to find that primary config path.
+
+Hint: after the first run, you can add/remove packages, set up your settings 
+as wanted etc.
+You can then run fpcup --only=fpc,lazarus to only update FPC and Lazarus sources
+which saves time, as you're not rebuilding help, installing packages, etc.
+Of course, you could run the full version e.g. once per day to make sure 
+all external repositories etc are up to date.
 
 
 Storing your settings
 =====================
-After running, fpcup creates a batch/shell script file by default to run it again with the same parameters.
+After running, fpcup creates a batch/shell script file by default to run it 
+again with the same parameters.
 
-Additionally, you can save the settings in an ini file and call fpcup --inifile=settings.ini
+Additionally, you can save the settings in an ini file and call 
+fpcup --inifile=settings.ini
 (see the settings.ini examle file)
-The parameters not specified are default settings and can be overruled when calling from the command line:
+The parameters not specified are default settings and can be overruled when 
+calling from the command line:
 
 [general]
 fpcurl=http://svn.freepascal.org/svn/fpc/trunk
 keeplocalchanges=true
 
-As you can see, parameters like --keeplocalchanges that have no arguments on the command line versions are represented like keeplocalchanges=true in the ini file.
+As you can see, parameters like --keeplocalchanges that have no extra arguments 
+on the command line versions are represented by adding =true to the parameter
+in the ini file.
+Parameters like fpcurl that do need an extra argument simply have it added.
 
 Compiling
 =========
-If you want to compile fpcup from source, please compile hgversion.pas first; this should give a hgversion executable, which is used by the fpcup project build action (Compilation/Execute Before command) to generate the current fpcup version info into revision.inc
-If you don't do this, you'll probably get incorrect version information in fpcup or compilation problems ("Can't open include file "revision.inc"").
+If you want to compile fpcup from source, please compile hgversion.pas first; 
+this should give a hgversion executable, which is used by the fpcup project 
+build action (Compilation/Execute Before command) to generate the current fpcup 
+version info into revision.inc
+If you don't do this, you'll probably get incorrect version information in 
+fpcup or compilation problems ("Can't open include file "revision.inc"").
 
 Technical explanation
 =====================
-If you want to improve or extend fpcup, here's a more detailed description of what it does.
+If you want to improve or extend fpcup, here's a more detailed description of 
+what it does.
 
-Note that some steps will not be executed depending on the modules chosen by the user.
-By default, all modules will be run; the help module is selected by default and pulls in bigide.
-fpcup for Windows is 32 bit, but the crosswin32-64 module will be run so users can compile 64 bit applications with Lazarus.
+Note that some steps will not be executed depending on the modules chosen by 
+the user.
+By default, all modules will be run; the help module is selected by default and 
+pulls in bigide.
+In the 32 bit fpcup for Windows version, the crosswin32-64 module will be run so 
+users can compile 64 bit applications with Lazarus.
 
 1. Setup, checking/downloading prerequisites:
-- fpcup creates a shortcut on your desktop (Windows) or home directory shell script to fpcup with all the options you chose, so you don't have to type it all again
-- On Windows, it checks whether make.exe and unzip.exe are present in the binutils directory (default or user-specified).
-If not, it downloads them.
+fpcup creates
+- a shortcut on your desktop (Windows, Linux) 
+- a home directory shell script to fpcup 
+with all the options you chose, so you don't have to type it all again
+
+- On Windows, it checks whether make.exe and unzip.exe are present in the 
+binutils directory (default or user-specified). If not, it downloads them.
+
 - It checks if make.exe is GNU make, and not e.g. Delphi/Borland make.
-- It checks whether a Subversion client is available. On Windows: if there isn't, it downloads one.
-- If bootstrap compilers need to be downloaded, a certain unarchiver utility is needed, depending on the way the compiler is compressed.
-fpcup checks unzip, gnutar, and bunzip2 depending on the file format.
-- It checks if there is a valid FPC compiler in the bootstrap directory the user specified (or default).
+
+- It checks whether a Subversion client is available. 
+On Windows: if there isn't, it downloads one.
+
+- If bootstrap compilers need to be downloaded, an unarchiver utility is needed.
+fpcup checks for existence of unzip, gnutar, or bunzip2 
+depending on the format the compiler archive uses.
+
+- It checks if there is a valid FPC compiler in the bootstrap directory 
+the user specified (or default). 
 If it doesn't exist, it downloads a bootstrap compiler.
 
 2. Getting and compiling FPC
 - It checks out or updates FPC using Subversion.
+
 - It compiles FPC using the bootstrap compiler.
+
 - It creates a valid fpc.cfg for the new compiler.
-- On FreeBSD/Linux/OSX: it creates a dummy fpc.sh designed to filter out existing system wide fpc.cfg (e.g. /etc/fpc.cfg) and places that in the FPC directory
+
+- On FreeBSD/Linux/OSX: it creates a dummy fpc.sh designed to filter out 
+existing system wide fpc.cfg (e.g. /etc/fpc.cfg) and places that 
+in the FPC directory
 
 3. Getting and compiling Lazarus
 - It checks out or updates Lazarus using Subversion.
-- It compiles Lazarus using the installed FPC compiler (FreeBSD/Linux/OSX: fpc.sh) and fpc.cfg
-- When done, it creates a shortcut on your desktop (Windows) or shell script in home directory to the newly installed Lazarus
-- It does the same using make bigide, in order to get as many .lpk files compiled and included as possible
-- It creates a minimum configuration (environmentoptions.xml) in a separate primary-config-path, or updates that config with: the compiler, the FPC source directory, make location, gdb location, help files location.
-- fpcup compiles the Lazarus documentation editor (LazDE) using lazbuild in the newly compiled Lazarus directory
-- fpcup compiles the Lazarus data desktop using lazbuild in the newly compiled Lazarus directory
+
+- It compiles Lazarus using the installed FPC compiler 
+(Unix/FreeBSD/Linux/OSX: fpc.sh) and fpc.cfg
+
+- When done, it creates a shortcut on your desktop (Windows, Linux), and
+a shell script in the home directory (*nix) to the newly installed Lazarus
+
+- It does the same using make bigide, in order to get a workable Lazarus with 
+e.g. the database .lpk files compiled and included.
+
+- It creates a minimum configuration (environmentoptions.xml) in a separate 
+primary-config-path directory, or updates that config with: 
+-- the compiler
+-- the FPC source directory
+-- make location
+-- gdb/debugger location
+
+- fpcup compiles the Lazarus documentation editor (LazDE) using 
+lazbuild in the newly compiled Lazarus directory
+
+- fpcup compiles the Lazarus data desktop using 
+lazbuild in the newly compiled Lazarus directory
 
 4. Getting help
-- It compiles the Lazarus lhelp CHM viewer (LazDE) using lazbuild in the newly compiled Lazarus directory
+- It compiles the Lazarus lhelp CHM viewer (LazDE) using 
+lazbuild in the newly compiled Lazarus directory
+
 - It gets the FPC chm documentation if not already present
-- It compiles the Lazarus CHM help
+
+- It compiles the Lazarus CHM help if it hasn't been compiled recently
+(reason: compiling this takes a long time)
 
 5. Getting and compiling external modules
 - It reads fpcup.ini and parses the items specified.
-- It can download from HTTP and FTP sites, and use SVN to keep repositories up to date.
+
+- It can download from HTTP and FTP sites, and use 
+SVN, mercurial or git (if installed) to keep repositories up to date.
+
 - It can register executables as external tools in Lazarus
-- It can add packages to the IDE (needs Lazarus SVN r37443 (Lazarus 1.1 branch) or later)
-- Please see fpcup.ini for details
+
+- It can add packages to the IDE 
+(needs Lazarus SVN r37443 (Lazarus 1.1 branch) or later)
+
+- Please see fpcup.ini for details on external modules
+(e.g. keywords that can be used)
 
 
 Cross compiler extensions
 =========================
-fpcup has a facility to extend its functionality using cross compiling modules. These are classes that inherit from the fpcup TCrossInstaller class defined in m_crossinstaller.pas
-An example is the Windows 32=>Windows 64 cross compile unit in m_crosswin64.pas. Note that this is a simple version, as there is no need for separate binutils and library paths.
-These modules get registered automatically when compiled into the fpcup code.
+fpcup has a facility to extend its functionality using cross compiling modules.
+These are classes that inherit from the fpcup TCrossInstaller class defined 
+in m_crossinstaller.pas
+
+An example is the Windows 32=>Windows 64 cross compile unit in m_crosswin64.pas.
+Note that this is a simple version, as there is no need for separate binutils and library paths.
+A similar module is the *nix=>Windows 32/64 modules in 
+m_anyinternallinker_to_win386.pas and m_anyinternallinker_to_win64.pas
+These modules get registered automatically (using the unit's initialization 
+section) when compiled into the fpcup code. 
+You do need to add the unit to the fpcup.lpr project uses clause though.
 
 To use them, you would specify 
 --cputarget= (e.g. i386, x86_64... the way FPC defines the CPU names)
+See fpcup -h for possible values
 --ostarget= (e.g. freebsd, win32,...... the way FPC defines the OS names)
+
 What you want to build e.g.
 --only=FPCBuildOnly,LazarusBuildOnly
-If there's a cross compiler available for the combination source+target OS/CPU, it will run. Otherwise you will get an error message.
+(or leave this parameter for building FPC and the Lazarus LCL)
 
-For any platform that as an internal linker in FPC (FreeBSD, Linux,..) you can run a Windows cross compiler:
+If there's a cross compiler available for the combination source+target OS/CPU, 
+it will run. Otherwise you will get an error message.
+
+For any platform that has an internal linker in FPC (FreeBSD, Linux,..) 
+you can run a Windows cross compiler: 32 bit:
 --cputarget=i386 --ostarget=win32 --only=FPCBuildOnly,LazarusBuildOnly
-When that is done, you can cross compile to Windows using Lazrus.
+or Windows 64 bit:
+--cputarget=x86_64 --ostarget=win32 --only=FPCBuildOnly,LazarusBuildOnly
+When that is done, you can cross compile to Windows using Lazarus.
 
-See fpcup.html for more details on implementing your own cross compilers and extensions.
+See fpcup.html for more details on implementing your own cross compilers and 
+other extensions to fpcup.
 
 LCL/FPC/Lazarus limitations
 ===========================
 - Multiple widgetsets
-The Lazarus LCL can be installed in different directories depending on architecture. This is very helpful when building cross compilers, as the compiled units and binutils do not interfere with each other.
+The Lazarus LCL can be installed in different directories depending on 
+architecture. This is very helpful when building cross compilers, as the 
+compiled units and binutils do not interfere with each other.
 fpcup uses this approach for building cross compilers.
 
-However, there is no provision for separating LCL units for multiple widgetsets. If you compile e.g. GTK2 and QT LCL widgetsets for the same platform, one will overwite the other. This means that fpcup cannot manage multiple widgetsets either.
-If you want to use multiple widgetsets, best practice is to use separated Lazarus directories (option --lazdir in fpcup).
+However, there is no provision for separating LCL units for multiple widgetsets.
+If you compile e.g. GTK2 and QT LCL widgetsets for the same platform, one will 
+overwite the other. This means that fpcup cannot manage multiple widgetsets.
+If you want to use multiple widgetsets, best practice is to use separated 
+Lazarus directories (option --lazdir in fpcup).
 
 - LCL documentation generation 
-Fpdoc from FPC 2.6 has known bugs, some of which are fixed in FPC 2.7.
-LCL .chm documentation generation on x64 Linux and x86 Windows may take a long time; fpcup takes a huge amount of CPU, but eventually finished.
+Fpdoc from FPC 2.6 has known bugs, (only) some of which are fixed in FPC 2.7.
+LCL .chm documentation generation on x64 Linux and x86 Windows may take a 
+long time; fpcup takes a huge amount of CPU, but eventually finished.
 
-Due to bugs in either the help sources or fpdoc, document generation may fail and generate 0 byte files, especially on FPC2.6.x. Fpcup checks for this and will not overwrite existing help files with empty files.
+Due to bugs in either the help sources or fpdoc, document generation may fail 
+and generate 0 byte files, especially on FPC2.6.x.
+Fpcup checks for this and will not overwrite existing files with empty files.
 
 Troubleshooting
 ===============
-A big problem in designing this utility was to keep systemwide fpc.cfg on Unix/Linux from interfering with our FPC install.
-It seems the only way around this is to write a fpc proxy (fpc.sh) that explicitly ignores any fpc.cfgs).
+A big problem in designing this utility was to keep systemwide fpc.cfg on 
+Unix/Linux from interfering with our FPC install.
+It seems the only way around this is to write a fpc proxy (fpc.sh) that 
+explicitly ignores any fpc.cfgs.
 
 To check whether this works:
 cd ~/<yourlazarusdirectory>
 #Check system wide settings (look for FPC, FPC version, FPCDIR and UnitsDir:
 make fpc_baseinfo | less
 #Check (look for FPC, FPC version, FPCDIR and UnitsDir:
-#this should pick up the proper unit path, fpcdir and version from the fpcup-installed fpc version
+#this should pick up the proper unit path, fpcdir and version from the 
+#fpcup-installed fpc version
 make fpc_baseinfo FPC=~/<yourfpcdirectory>/bin/fpc.sh
 ~/<yourfpcdirectory>/bin/fpc.sh -vut # or something?
 
-Additionally, on both Windows and Unix we add our own binutils directory to the beginning of the path when calling make.
-This ensures that e.g. existing Delphi or cygwin make.exe does not mess with our installation.
-This is probably a bigger problem on Windows than on Linux/Unix
+Additionally, on both Windows and Unix we add our own binutils directory to the 
+beginning of the path when calling make.
+This ensures that e.g. existing Delphi or cygwin make.exe does not mess with 
+our installation.
+This is probably a bigger problem on Windows than on Linux/Unix.
 
 Status
 ======
-Works for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux. Testing versions for FreeBSD 9+ x64 and OSX available.
+Works for me and others with e.g. FPC fixes_2.6 and Lazarus on Windows and Linux.
+Testing versions for FreeBSD 9+ x64 and OSX available.
 
 
 Contact
@@ -207,8 +319,8 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit 639611f10ea9+ (Wed Apr 10 08:13:31 2013 +0200)
-Build date: 2013/04/10 09:55:27
+Version: based on commit 754830e5b500+ (Mon Aug 26 09:24:06 2013 +0200)
+Build date: 2013/08/26 13:28:05
 Compiled for CPU: i386 on win32
 
 DON'T PANIC!
@@ -216,7 +328,7 @@ Everything below is optional...
 
 fpcup --<options>
 
-fpcup can work with modules - see "only", "skip" below
+fpcup can work with modules - see "only", "include", "skip" below
 List of all modules:
 bgracontrols
 bgracontrolsclean
@@ -321,24 +433,30 @@ lnetuninstall
 mupdf
 mupdfclean
 mupdfuninstall
+nxpascal
+nxpascalclean
+nxpascaluninstall
 OCRivist
 OCRivistclean
 OCRivistuninstall
 pascalsane
 pascalsaneclean
 pascalsaneuninstall
+patchwrangler
+patchwranglerclean
+patchwrangleruninstall
 rx
 rxclean
 rxuninstall
+simplegraph
+simplegraphclean
+simplegraphuninstall
 suggestedpackages
 suggestedpackagesclean
 suggestedpackagesuninstall
-synapse
-synapseclean
 synapsetrunk
 synapsetrunkclean
 synapsetrunkuninstall
-synapseuninstall
 tesseract
 tesseractclean
 tesseractuninstall
@@ -359,7 +477,6 @@ LAZDATADESKTOP
 DOCEDITOR
 FPCDOCS
 LAZRES
-LAZPACKAGER
 
 Options are not required; they include:
  help                  Show this text
@@ -375,8 +492,6 @@ Options are not required; they include:
                        Make sure it is not in the fpcdir directory
  clean                 Remove files created with build. 
                        Can be combined with skip and only options.
- configfile=<filename> Load module definition file from <filename>.
-                       Default: fpcup.ini in the program directory.
  cputarget=<name>      CPU target for cross_compiling.
                        <name> has to be one of the following:
                        i386,m68k,alpha,powerpc,powerpc64,
@@ -397,19 +512,18 @@ Options are not required; they include:
                          or <lazlinkname>_update if lazlinkname specified
  fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
                        http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
-                       Accepts shortcuts: 2.7.1,trunk,2.6.3,fixes,2.6.2,2.6.0
+                       Accepts shortcuts: 
+                       2.7.1,trunk,2.6.3,fixes,2.6.2,2.6.0
  fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
                        E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
  fpcrevision=<number>  Revert to FPC SVN revision <number>
- keeplocalchanges      Keep locally modified files (normally these would be
-                       backed up as .diff files before doing svn revert.
+ include=<values>      Update/build or clean the modules specified as well 
+                       as the default ones.
+                       The module list is separated by commas.
+                       See above for a list of modules.
  inifile=<file>        Reads in ini file with options.
-                       Example ini file:
-[General]
-help=true ; Use true for options that do not normally have arguments
-binutilsdir=c:\dev\binutils
+                       Example ini file: see settings.ini
                        Options can be overwritten by command line parameters.
-
  inisection=<sec>      Section name to be used if an ini file is specified.
                        If not given, use [General]
  installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,
@@ -421,6 +535,10 @@ binutilsdir=c:\dev\binutils
                        for the defaults when installdir is not specified.
                        You can also use these to override the defaults given
                        by installdir.
+ keeplocalchanges      Keep locally modified files (normally these would be
+                       backed up as .diff files before doing svn revert.
+ moduleconfig=<file>   Load external module definition file from <file>.
+                       Default: fpcup.ini in the program directory.
  lazdir=<dir>          Target Lazarus dir, default c:\development\lazarus\
                        or ~\lazarus\
  lazlinkname=<name>    Name of the shortcut to the Lazarus install.
@@ -433,7 +551,8 @@ binutilsdir=c:\dev\binutils
  lazURL=<URL>          SVN URL from which to download; default: 
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
-                       Accepts shortcuts: trunk,1.1,1.0.8,1.0.6,1.0
+                       Accepts shortcuts: 
+                       trunk,1.1,1.0.10,1.0.8,1.0.6,1.0.4,1.0.2,1.0
  lclplatform=<name>    LCL widget set. <name> has to be one of the following:
                        carbon,fpgui,gtk,gtk2,qt,win32,wince
  logfilename=<file>    Location of log file. If nothing specified,
@@ -446,13 +565,20 @@ binutilsdir=c:\dev\binutils
                        <name> has to be one of the following:
                        darwin,freebsd,linux,netbsd,openbsd,os2,
                        solaris,wince,win32,win64
+ patchcmd              Command to use to reapply local changes backed up with
+                       svn diff command. The diff file is passed as the only
+                       parameter. Add any extra paremeters needed.
+                       Default: "patch -p0 -i" 
  primary-config-path=<dir>
                        Analogous to Lazarus primary-config-path parameter.
                        Determines where fpcup will create or use as primary
                        configuration path for the Lazarus it installs/updates.
                        Default: empty; then a OS dependent configuration
                        path is used; directory name lazarusdevsettings.
- skip=<values>         Do not update/build or clean modules.
+ reapplylocalchanges   Back up locally modified files into .diff file and
+                       reapply the diff with patch or command specified in 
+                       parameter patchexe
+ skip=<values>         Do not update/build or clean specified modules.
                        The module list is separated by commas.
                        See above for a list of modules.
  uninstall             uninstall sources and all generated files
@@ -464,4 +590,4 @@ binutilsdir=c:\dev\binutils
 
 Share and enjoy!
 
-Info: 10-4-2013 9:56:18: fpcup finished.
+Info: 26/08/2013 13:28:24: fpcup finished.

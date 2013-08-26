@@ -147,7 +147,8 @@ begin
   writeln('                         or <lazlinkname>_update if lazlinkname specified');
   writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:');
   writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
-  writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'fpcURL','list'));
+  writeln('                       Accepts shortcuts: ');
+  writeln('                       '+installerUniversal.GetAlias(ConfigFile,'fpcURL','list'));
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
@@ -185,7 +186,8 @@ begin
   writeln(' lazURL=<URL>          SVN URL from which to download; default: ');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
-  writeln('                       Accepts shortcuts: '+installerUniversal.GetAlias(ConfigFile,'lazURL','list'));
+  writeln('                       Accepts shortcuts: ');
+  writeln('                       '+installerUniversal.GetAlias(ConfigFile,'lazURL','list'));
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
   writeln(' logfilename=<file>    Location of log file. If nothing specified,');
