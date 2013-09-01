@@ -250,11 +250,12 @@ begin
   try
     result:=-1; //no error
     try
-      // Get setting, converting relative paths (including e.g. ~/bla.ini) to
-      // absolute paths.
-      sIniFile:=ExpandFileNameUTF8(Options.GetOption('','inifile',''));
+      sIniFile:=(Options.GetOption('','inifile',''));
       if sIniFile<>'' then
       begin
+        // Get setting, converting relative paths (including e.g. ~/bla.ini) to
+        // absolute paths.
+        sIniFile:=ExpandFileNameUTF8(sIniFile);
         Options.IniFileSection:=Options.GetOption('','inisection','General');
         Options.CaseSensitive:=false; //easier when dealing with ini files
         // Setting this property loads the file:
