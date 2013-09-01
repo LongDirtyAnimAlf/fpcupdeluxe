@@ -250,7 +250,9 @@ begin
   try
     result:=-1; //no error
     try
-      sIniFile:=Options.GetOption('','inifile','');
+      // Get setting, converting relative paths (including e.g. ~/bla.ini) to
+      // absolute paths.
+      sIniFile:=ExpandFileNameUTF8(Options.GetOption('','inifile',''));
       if sIniFile<>'' then
       begin
         Options.IniFileSection:=Options.GetOption('','inisection','General');
@@ -272,7 +274,6 @@ begin
             halt(3);
           end;
         end;
-
       end;
 
       {$IFDEF MSWINDOWS}
