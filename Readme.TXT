@@ -46,8 +46,10 @@ binutils, svn executable)
 - bunzip2 (probably present in most distributions)
 - unzip
 - subversion client: svn
+- gdb is not needed for building FPC/Lazarus but needed for debugging 
+  your Lazarus programs 
 E.g. on Debian or Ubuntu, do something like:
-sudo aptitude install build-essential subversion unzip
+sudo aptitude install build-essential gdb subversion unzip
 
 - Apple OSX
 ===========
