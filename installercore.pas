@@ -57,10 +57,13 @@ type
     // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     // Clone/update using HG; use FBaseDirectory as local repository
+    // Any generated warnings will be added to UpdateWarnings
     function DownloadFromHG(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Clone/update using Git; use FBaseDirectory as local repository
+    // Any generated warnings will be added to UpdateWarnings
     function DownloadFromGit(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Checkout/update using SVN; use FBaseDirectory as local repository
+    // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
