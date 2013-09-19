@@ -62,6 +62,7 @@ type
     procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
+    function Commit(Message: string): boolean; override;
     function FindRepoExecutable: string; override;
     function GetDiffAll: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -152,7 +153,7 @@ end;
 
 
 
-procedure Tsvnclient.Checkout;
+procedure TSVNClient.CheckOut;
 const
   MaxRetries = 3;
 var
@@ -208,7 +209,7 @@ begin
   end;
 end;
 
-procedure Tsvnclient.CheckOutOrUpdate;
+procedure TSVNClient.CheckOutOrUpdate;
 begin
   if LocalRepositoryExists = false then
   begin
@@ -233,13 +234,20 @@ begin
   end;
 end;
 
+function TSVNClient.Commit(Message: string): boolean;
+begin
+  inherited Commit(Message);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
+  Result:=(FReturnCode=0);
+end;
+
 function TSVNClient.GetDiffAll: string;
 begin
   Result := ''; //fail by default
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff .', LocalRepository, Result, Verbose);
 end;
 
-procedure Tsvnclient.Log(var Log: TStringList);
+procedure TSVNClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
@@ -247,12 +255,12 @@ begin
   Log.Text := s;
 end;
 
-procedure Tsvnclient.Revert;
+procedure TSVNClient.Revert;
 begin
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --recursive ' + LocalRepository, Verbose);
 end;
 
-procedure Tsvnclient.Update;
+procedure TSVNClient.Update;
 const
   MaxErrorRetries = 3;
   MaxUpdateRetries = 9;
@@ -370,7 +378,7 @@ begin
   end;
 end;
 
-function Tsvnclient.LocalRepositoryExists: boolean;
+function TSVNClient.LocalRepositoryExists: boolean;
 const
   URLLen = Length('URL: ');
 var
@@ -496,12 +504,12 @@ begin
 end;
 
 
-constructor Tsvnclient.Create;
+constructor TSVNClient.Create;
 begin
   inherited Create;
 end;
 
-destructor Tsvnclient.Destroy;
+destructor TSVNClient.Destroy;
 begin
   inherited Destroy;
 end;

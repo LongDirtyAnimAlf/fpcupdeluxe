@@ -50,11 +50,12 @@ type
 
   TGitClient = class(TRepoClient)
   protected
+    procedure CheckOut; override;
     function GetLocalRevision: string; override;
     function GetRepoExecutable: string; override;
   public
-    procedure CheckOut; override;
     procedure CheckOutOrUpdate; override;
+    function Commit(Message: string): boolean; override;
     function GetDiffAll: string; override;
     function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -200,6 +201,14 @@ begin
     // Update
     Update;
   end;
+end;
+
+function TGitClient.Commit(Message: string): boolean;
+begin
+  inherited Commit(Message);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
+  //todo: do push to remote repo?
+  Result:=(FReturnCode=0);
 end;
 
 function TGitClient.GetDiffAll: string;

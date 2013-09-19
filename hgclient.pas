@@ -56,6 +56,7 @@ type
     procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
+    function Commit(Message: string): boolean; override;
     function GetDiffAll: string; override;
     function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -74,7 +75,7 @@ uses strutils;
 
 
 { ThgClient }
-function ThgClient.FindRepoExecutable: string;
+function THGClient.FindRepoExecutable: string;
 const
   // Application name:
   hgName = 'hg';
@@ -126,7 +127,7 @@ begin
   Result := FRepoExecutable;
 end;
 
-function ThgClient.GetRepoExecutable: string;
+function THGClient.GetRepoExecutable: string;
 begin
   if not FileExists(FRepoExecutable) then
     FindRepoExecutable;
@@ -136,7 +137,7 @@ begin
     Result := FRepoExecutable;
 end;
 
-procedure Thgclient.CheckOut;
+procedure THGClient.CheckOut;
 const
   MaxRetries = 3;
 var
@@ -167,7 +168,7 @@ begin
   end;
 end;
 
-procedure Thgclient.CheckOutOrUpdate;
+procedure THGClient.CheckOutOrUpdate;
 begin
   if LocalRepositoryExists = false then
   begin
@@ -192,12 +193,20 @@ begin
   end;
 end;
 
-function ThgClient.GetDiffAll: string;
+function THGClient.Commit(Message: string): boolean;
+begin
+  inherited Commit(Message);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message '+Message, LocalRepository, Verbose);
+  //todo: do pushafter to push to remote repo?
+  Result:=(FReturnCode=0);
+end;
+
+function THGClient.GetDiffAll: string;
 begin
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
 end;
 
-procedure Thgclient.Log(var Log: TStringList);
+procedure THGClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
@@ -205,12 +214,12 @@ begin
   Log.Text := s;
 end;
 
-procedure Thgclient.Revert;
+procedure THGClient.Revert;
 begin
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
 end;
 
-procedure Thgclient.Update;
+procedure THGClient.Update;
 var
   Command: string;
 begin
@@ -226,7 +235,8 @@ begin
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
 end;
 
-procedure ThgClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
+procedure THGClient.ParseFileList(const CommandOutput: string;
+  var FileList: TStringList; const FilterCodes: array of string);
  // Parses file lists from hg status outputs
  // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
  // Case-sensitive filter.
@@ -265,7 +275,7 @@ begin
   end;
 end;
 
-procedure ThgClient.LocalModifications(var FileList: TStringList);
+procedure THGClient.LocalModifications(var FileList: TStringList);
 var
   AllFiles: TStringList;
   Output: string = '';
@@ -284,7 +294,7 @@ begin
   end;
 end;
 
-function Thgclient.LocalRepositoryExists: boolean;
+function THGClient.LocalRepositoryExists: boolean;
 var
   Output: string = '';
   URL: string;
@@ -331,7 +341,7 @@ begin
   end;
 end;
 
-function ThgClient.GetLocalRevision: string;
+function THGClient.GetLocalRevision: string;
 const
   HashLength = 12; //12 characters in hg revision hash
 var
@@ -353,12 +363,12 @@ begin
   Result := FLocalRevision;
 end;
 
-constructor Thgclient.Create;
+constructor THGClient.Create;
 begin
   inherited Create;
 end;
 
-destructor Thgclient.Destroy;
+destructor THGClient.Destroy;
 begin
   inherited Destroy;
 end;

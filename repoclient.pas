@@ -77,6 +77,8 @@ type
   public
     // Downloads from remote repo: runs checkout if local repository doesn't exist, else does an update
     procedure CheckOutOrUpdate; virtual;
+    // Commits local changes to local and remote repository
+    function Commit(Message: string): boolean; virtual;
     // Search for installed version control client executable (might return just a filename if in the OS path)
     function FindRepoExecutable: string; virtual;
     // Creates diff of all changes in the local directory versus the remote version
@@ -200,6 +202,11 @@ begin
 end;
 
 procedure TRepoClient.CheckOutOrUpdate;
+begin
+  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+end;
+
+function TRepoClient.Commit(Message: string): boolean;
 begin
   raise Exception.Create('TRepoClient descendants must implement this themselves.');
 end;
