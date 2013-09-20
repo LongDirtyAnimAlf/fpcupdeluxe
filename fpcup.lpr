@@ -53,6 +53,7 @@ uses {$IFDEF UNIX}
   fileutil, fpcuputil,
   m_anyinternallinker_to_win386, m_anyinternallinker_to_win64,
   m_crossinstaller, m_crosswin64, m_crosswin32,
+  m_win32_to_dos8086,
   m_win32_to_go32v2i386,
   m_win32_to_wincearm,
   m_win32_to_linux386, m_win32_to_linuxarm,
