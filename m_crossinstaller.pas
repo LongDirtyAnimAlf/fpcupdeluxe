@@ -15,7 +15,7 @@ type
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FCrossModuleName: string; //used for identifying module to user in messages
-    FFPCCFGSnippet: string;
+    FFPCCFGSnippet: string; //snippet to be added to fpc.cfg in order to find binutils/libraries etc
     FLibsPath: string; //path for target environment libraries
     FTargetCPU: string; //cpu for the target environment. Follows FPC names
     FTargetOS: string; //operating system for the target environment. Follows FPC names

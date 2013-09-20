@@ -133,6 +133,7 @@ const
 
 function InsertFPCCFGSnippet(FPCCFG,FirstLine,Snippet: string): boolean;
 // Adds snippet to fpc.cfg file if firstline is not already there
+// Returns success (snippet inserted or already exists) or failure
 var
   ConfigText: TStringList;
 begin
@@ -184,6 +185,7 @@ begin
       infoln('Failed to get cross libraries', etError)
     else
       begin
+      // Make all
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
@@ -231,7 +233,7 @@ begin
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
-        infoln('Running Make crossinstall (FPC crosscompiler): '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS, etinfo);
+        infoln('Running Make crossinstall (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')', etinfo);
         ProcessEx.Parameters.Add('FPC='+FCompiler);
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
         {$IFDEF UNIX}
@@ -251,7 +253,6 @@ begin
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
           end;
 
-        // Note: consider this as an optional item, so don't fail the function if this breaks.
         try
           ProcessEx.Execute;
         except
@@ -265,16 +266,23 @@ begin
 
         if ProcessEx.ExitStatus<>0 then
           begin
-          infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etwarning);
-          FCompiler:='////\\\Error trying to compile FPC\|!';
-          {$ifndef win32}
+          // If anything else than crosswin32-64 or crosswin64-32, fail:
+          result:=false;
+          {$ifdef win32}
           //fail if this is not crosswin32-64
-          result:=false;
+          if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
+            result:=true;
           {$endif win32}
-          {$ifndef win64}
+          {$ifdef win64}
           //fail if this is not crosswin64-32
-          result:=false;
+          if (CrossInstaller.TargetCPU='i386') and (CrossInstaller.TargetOS='win32') then
+            result:=true;
           {$endif win64}
+          if result then
+            infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etWarning)
+          else
+            infoln('Problem compiling/installing crosscompiler.',etError);
+          FCompiler:='////\\\Error trying to compile FPC\|!';
           end
         else
           begin
