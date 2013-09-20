@@ -1,5 +1,5 @@
 unit m_win32_to_go32v2i386;
-{ Cross compiles from Windows 32 to Go32V2 (DOS extender) on i386
+{ Cross compiles from Windows 32/Windows 64 to Go32V2 (DOS extender) on i386
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -37,12 +37,14 @@ Then place the binaries in c:\development\cross\bin\i386-go32v2
 Binaries include
 i386-go32v2-ar.exe
 i386-go32v2-as.exe
-i386-go32v2-ld.exe
+i386-go32v2-ld.exe (note: not strictly needed if the internal linker is used)
 i386-go32v2-objdump.exe
 i386-go32v2-strip.exe
 
 Remember to distribute cwsdpmi.exe with your programs.
-
+http://homer.rice.edu/~sandmann/cwsdpmi/index.html
+download
+http://homer.rice.edu/~sandmann/cwsdpmi/csdpmi7b.zip
 }
 
 {$mode objfpc}{$H+}
@@ -77,8 +79,7 @@ end;
 function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-go32v2';
-begin
-  // Wince does not need libs by default, but user can add them.
+begin  
   FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
@@ -117,8 +118,7 @@ const
   DirName='i386-go32v2';
 var
   AsFile: string;
-begin
-  //todo: do ftp download from ftp repo; check executables (a la checklcl linux function)
+begin  
   AsFile:=FBinUtilsPrefix+'as.exe';
   // Using crossfpc directory naming
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;

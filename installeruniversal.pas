@@ -756,7 +756,7 @@ begin
             FSVNClient.DesiredRevision:=PinRevision;
           result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           if result=false then
-            WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless',true);
+            WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);
@@ -779,7 +779,7 @@ begin
             FHGClient.DesiredRevision:=PinRevision;
           result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           if result=false then
-            WritelnLog('hg error downloading from '+RemoteURL+'. Continuing regardless',true);
+            WritelnLog('hg error downloading from '+RemoteURL+'. Continuing regardless.',true);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);
@@ -804,7 +804,7 @@ begin
             FGitClient.DesiredRevision:=PinRevision;
           result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
           if result=false then
-            WritelnLog('git error downloading from '+RemoteURL+'. Continuing regardless',true);
+            WritelnLog('git error downloading from '+RemoteURL+'. Continuing regardless.',true);
           if UpdateWarnings.Count>0 then
           begin
             WritelnLog(UpdateWarnings.Text);
