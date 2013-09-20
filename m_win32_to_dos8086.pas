@@ -118,7 +118,7 @@ var
   AsFile: string;
 begin
   //todo: fix this when support is released
-  infoln('ERROR: TWin32_dos8086.GetBinUtils: there is no DOS support in the compiler yet. Aborting.');
+  infoln('ERROR: TWin32_dos8086.GetBinUtils: there is no DOS support in the compiler yet. Aborting.',etError);
   exit(false);
 
   //todo: do ftp download from ftp repo; check executables (a la checklcl linux function)

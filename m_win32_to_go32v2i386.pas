@@ -29,7 +29,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Setup: based on cross binaries from
+Setup:
+
+1) FPC 2.7.1 and later can use internal assembler and linker; no external files needed at all
+
+2) FPC 2.6.x:
+Based on cross binaries from
 ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
@@ -143,17 +148,17 @@ begin
   end
   else
   begin
-    infoln('TWin32_go32v2i386: binutil search failed. Try downloading binutils from '+
-      'ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',
-      etError);
-    FAlreadyWarned:=true;
+    FBinUtilsPrefix:='';
+    infoln('TWin32_go32v2i386: binutil path ignored; it is optional *IF* compiling with FPC 2.7.1+'+LineEnding+
+      'For earlier FPC, download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
+    result:=true; //success
   end;
 end;
 
 constructor TWin32_go32v2i386.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='i386-go32v2-';
+  FBinUtilsPrefix:='i386-go32v2-'; //will be removed if no binutils found
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';

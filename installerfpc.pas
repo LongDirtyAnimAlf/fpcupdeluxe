@@ -164,7 +164,6 @@ var
   MagicLine:String; //use this to find fpcup-modified sections in fpc.cfg
   Options:String;
 begin
-  result:=true;
   // Make crosscompiler using new compiler
   { Note: command line equivalents for Win32=>Win64 cross compiler:
   set path=c:\development\fpc\bin\i386-win32;c:\development\fpcbootstrap
@@ -217,7 +216,9 @@ begin
       if Options<>'' then
         ProcessEx.Parameters.Add('OPT='+Options);
       try
+        result:=false;
         ProcessEx.Execute;
+        result:=(ProcessEx.ExitStatus=0);
       except
         on E: Exception do
           begin
@@ -227,9 +228,14 @@ begin
           end;
       end;
 
-      if ProcessEx.ExitStatus = 0 then
+      if not(Result) then
         begin
-        // Install crosscompiler
+        infoln('FPC: Running fpc crossinstall make all failed with an error code.',etError);
+        exit(false);
+        end
+      else
+        begin
+        // Install crosscompiler: make crossinstall
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
