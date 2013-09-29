@@ -339,12 +339,15 @@ end;
 
 {$IFDEF MSWINDOWS}
 function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList;ModuleName:string): boolean;
+// Create installers
+// For now only support WINDOWS/WINDOWS32/WIN32/WINX86, and ignore others
 var
   i:integer;
   InstallDir,exec,output:string;
   Installer: TWinInstaller;
   Workingdir:string;
 begin
+  result:=true; //succeed by default
   Workingdir:=GetValue('Workingdir',sl);
   for i:=1 to MAXINSTRUCTIONS do
     begin
@@ -352,10 +355,10 @@ begin
     // Skip over missing numbers:
     if exec='' then continue;
     case uppercase(exec) of
-      'WINDOWS','WINDOWS32','WINX86': {good name};
+      'WINDOWS','WINDOWS32','WIN32','WINX86': {good name};
       else
         begin
-        writelnlog('TUniversalInstaller: unknown installer name '+exec+'. Ignoring',true);
+        writelnlog('TUniversalInstaller: ignoring unknown installer name '+exec+'.',true);
         continue;
         end;
     end;
@@ -378,7 +381,10 @@ begin
     end;
 
     if not result then
-      break;
+      begin
+      WritelnLog('TUniversalInstaller: CreateInstallers for '+exec+' failed. Stopping installer creation.',true);
+      break; //fail on first installer failure
+      end;
     end;
 end;
 {$ENDIF MSWINDOWS}
@@ -715,7 +721,11 @@ begin
       end;
     end
   else
+    begin
+    // Could not find module in module list
+    writelnlog('ERROR: Universal installer: could not find specified module '+ModuleName,true);
     result:=false;
+    end;
 end;
 
 // Download from SVN, hg, git for module

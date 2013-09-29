@@ -196,7 +196,6 @@ type
     procedure SetMakeDirectory(AValue: string);
   protected
     FLog:TLogger;
-    FVerboseLog:TLogger;
     FModuleList:TStringList;
     FModuleEnabledList:TStringList;
     FModulePublishedList:TStringList;

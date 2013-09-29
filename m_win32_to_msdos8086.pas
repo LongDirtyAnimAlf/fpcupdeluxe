@@ -1,4 +1,4 @@
-unit m_win32_to_dos8086;
+unit m_win32_to_msdos8086;
 { Cross compiles from Windows 32 to DOS on the Intel 8086 and higher processor
 Copyright (C) 2013 Reinier Olislagers
 
@@ -29,19 +29,24 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Setup: based on cross binaries from
-ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils....?!?!
-todo: fix this
+Setup: not quite ready yet.
+For now, uses binutils from Marco v.d. Voort's post at:
+http://www.bttr-software.de/forum/forum_entry.php?id=12985
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\8086-dos
+Then place the binaries in c:\development\cross\bin\8086-msdos
 Binaries include
-the NASM assembler
-the OpenWatcom linker WLINK 
-the OpenWatcom WLIB tool
+msdos-nasm.exe the NASM assembler
+nasme.exe the NASM assembler
+msdos-wlink.exe the OpenWatcom linker WLINK
+wlinkd.dll
+msdos-wlink.exe the OpenWatcom WLIB tool
+wlibd.dll
+wlsystem.lnk
 
 todo: figure out how to actually build the cross compiler!?
--Pi8086 -Tdos? -Tdos seems to be undefined
+-Pi8086 -Tmsdos=>yes, seems ok, see this from Marco's example:
+OS_TARGET=msdos CPU_TARGET=i8086
 }
 
 {$mode objfpc}{$H+}
@@ -54,8 +59,8 @@ uses
 implementation
 type
 
-{ TWin32_dos8086 }
-TWin32_dos8086 = class(TCrossInstaller)
+{ TWin32_msdos8086 }
+TWin32_msdos8086 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -67,13 +72,13 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32_dos8086 }
-function TWin32_dos8086.TargetSignature: string;
+{ TWin32_msdos8086 }
+function TWin32_msdos8086.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TWin32_dos8086.GetLibs(Basepath:string): boolean;
+function TWin32_msdos8086.GetLibs(Basepath:string): boolean;
 const
   DirName='8086-dos';
 begin
@@ -83,42 +88,42 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_dos8086: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('TWin32_msdos8086: failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TWin32_dos8086: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('TWin32_msdos8086: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    infoln('TWin32_dos8086: found libspath '+FLibsPath,etInfo);
+    infoln('TWin32_msdos8086: found libspath '+FLibsPath,etInfo);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    infoln('TWin32_dos8086: libspath ignored; it is optional for this cross comipler.',etInfo);
+    infoln('TWin32_msdos8086: libspath ignored; it is optional for this cross comipler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;
 end;
 
-function TWin32_dos8086.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TWin32_msdos8086.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  infoln('TWin32_dos8086: no support for LCL platform '+LCL_Platform,etInfo);
+  infoln('TWin32_msdos8086: no support for LCL platform '+LCL_Platform,etInfo);
   result:=true;
 end;
 
-function TWin32_dos8086.GetBinUtils(Basepath:string): boolean;
+function TWin32_msdos8086.GetBinUtils(Basepath:string): boolean;
 const
   DirName='8086-dos';
 var
   AsFile: string;
 begin
   //todo: fix this when support is released
-  infoln('ERROR: TWin32_dos8086.GetBinUtils: there is no DOS support in the compiler yet. Aborting.',etError);
+  infoln('ERROR: TWin32_msdos8086.GetBinUtils: there is no DOS support in the compiler yet. Aborting.',etError);
   exit(false);
 
   //todo: do ftp download from ftp repo; check executables (a la checklcl linux function)
@@ -129,37 +134,45 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_dos8086: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln('TWin32_msdos8086: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
-      infoln('TWin32_dos8086: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln('TWin32_msdos8086: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
   if result then
   begin
     // Configuration snippet for FPC
+    {this was in Marco's test fpc.cfg:
+    -Sgic
+    -Fud:\pp16/units/$fpctarget
+   -Fud:\pp16/units/$fpctarget/*
+   -Fud:\pp16/units/$fpctarget/rtl
+}
+    {
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding; {Prepend the binutils names}
-    infoln('TWin32_dos8086: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    }
+    infoln('TWin32_msdos8086: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
-constructor TWin32_dos8086.Create;
+constructor TWin32_msdos8086.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='8086-dos-';
+  FBinUtilsPrefix:='msdos-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FTargetCPU:='8086';
-  FTargetOS:='dos';
+  FTargetOS:='msdos';
   FAlreadyWarned:=false;
-  infoln('TWin32_dos8086 crosscompiler loading',etDebug);
+  infoln('TWin32_msdos8086 crosscompiler loading',etDebug);
 end;
 
-destructor TWin32_dos8086.Destroy;
+destructor TWin32_msdos8086.Destroy;
 begin
   inherited Destroy;
 end;
@@ -167,13 +180,13 @@ end;
 {$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
 // Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 var
-  Win32_dos8086:TWin32_dos8086;
+  Win32_msdos8086:TWin32_msdos8086;
 
 initialization
-  Win32_dos8086:=TWin32_dos8086.Create;
-  RegisterExtension(Win32_dos8086.TargetCPU+'-'+Win32_dos8086.TargetOS,Win32_dos8086);
+  Win32_msdos8086:=TWin32_msdos8086.Create;
+  RegisterExtension(Win32_msdos8086.TargetCPU+'-'+Win32_msdos8086.TargetOS,Win32_msdos8086);
 finalization
-  Win32_dos8086.Destroy;
+  Win32_msdos8086.Destroy;
 {$ENDIF}
 end.
 

@@ -40,7 +40,6 @@ uses
 type
 
   { TLogger }
-
   TLogger = class(TObject)
   private
     FLog: TEventLog; //Logging/debug output to file
@@ -762,13 +761,13 @@ begin
     end
   else
     begin
-      {$IFDEF DEBUG}
-      {DEBUG conditional symbol is defined using
-      Project Options/Other/Custom Options using -dDEBUG}
-      if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-      writeln(Seriousness+' '+ Message); //we misuse this for info output
-      sleep(200); //hopefully allow output to be written without interfering with other output
-      {$ENDIF DEBUG}
+    {$IFDEF DEBUG}
+    {DEBUG conditional symbol is defined using
+    Project Options/Other/Custom Options using -dDEBUG}
+    if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
+    writeln(Seriousness+' '+ Message); //we misuse this for info output
+    sleep(200); //hopefully allow output to be written without interfering with other output
+    {$ENDIF}
     end;
 end;
 

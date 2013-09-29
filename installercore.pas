@@ -268,7 +268,7 @@ begin
         ExecuteCommand(Make + ' -v', Output, FVerbose);
         if Ansipos('GNU Make', Output) = 0 then
         begin
-          infoln('Found make executable but it is not GNU Make.',etwarning);
+          infoln('Found make executable but it is not GNU Make.',etWarning);
           OperationSucceeded := false;
         end;
       except
