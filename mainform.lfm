@@ -1,14 +1,14 @@
 object Form1: TForm1
-  Left = 228
-  Height = 795
-  Top = 146
+  Left = 110
+  Height = 753
+  Top = 67
   Width = 899
   Caption = 'fpcup GUI'
-  ClientHeight = 795
+  ClientHeight = 753
   ClientWidth = 899
   OnCreate = FormCreate
   OnDestroy = FormDestroy
-  LCLVersion = '0.9.31'
+  LCLVersion = '1.3'
   object FPCOptionsGroup: TGroupBox
     Left = 7
     Height = 160
@@ -20,35 +20,35 @@ object Form1: TForm1
     TabOrder = 1
     object FPCDirectory: TDirectoryEdit
       Left = 142
-      Height = 23
+      Height = 21
       Top = 53
       Width = 96
       Directory = 'C:\development\fpc'
       ShowHidden = False
       ButtonWidth = 23
-      NumGlyphs = 0
+      NumGlyphs = 1
       MaxLength = 0
       TabOrder = 4
     end
     object Label1: TLabel
       Left = 16
-      Height = 16
+      Height = 13
       Top = 48
-      Width = 72
+      Width = 65
       Caption = 'FPC directory'
       ParentColor = False
     end
     object Label2: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 8
-      Width = 46
+      Width = 41
       Caption = 'FPC URL'
       ParentColor = False
     end
     object FPCRevision: TEdit
       Left = 399
-      Height = 23
+      Height = 21
       Top = 10
       Width = 80
       TabOrder = 1
@@ -56,9 +56,9 @@ object Form1: TForm1
     end
     object Label3: TLabel
       Left = 311
-      Height = 16
+      Height = 13
       Top = 10
-      Width = 45
+      Width = 40
       Caption = 'Revision'
       ParentColor = False
     end
@@ -73,10 +73,10 @@ object Form1: TForm1
     end
     object FPCURL: TComboBox
       Left = 142
-      Height = 23
+      Height = 21
       Top = 10
       Width = 120
-      ItemHeight = 15
+      ItemHeight = 13
       ItemIndex = 0
       Items.Strings = (
         'http://svn.freepascal.org/svn/fpc/branches/fixes_2_6'
@@ -88,15 +88,15 @@ object Form1: TForm1
     end
     object Label4: TLabel
       Left = 311
-      Height = 16
+      Height = 13
       Top = 50
-      Width = 43
+      Width = 37
       Caption = 'Options'
       ParentColor = False
     end
     object FPCOptions: TEdit
       Left = 399
-      Height = 23
+      Height = 21
       Top = 50
       Width = 80
       TabOrder = 5
@@ -112,15 +112,15 @@ object Form1: TForm1
         '-gl (Line numbers)'
         '-gw2 (Dwarf2 debug info)'
       )
-      ItemHeight = 15
+      ItemHeight = 13
       ScrollWidth = 174
       TabOrder = 6
     end
     object SkipFPC: TCheckBox
       Left = 651
-      Height = 19
+      Height = 17
       Top = 14
-      Width = 68
+      Width = 61
       Caption = 'Skip FPC'
       TabOrder = 3
     end
@@ -144,7 +144,7 @@ object Form1: TForm1
     TabOrder = 4
     object CommandTab: TTabSheet
       Caption = 'Command'
-      ClientHeight = 140
+      ClientHeight = 142
       ClientWidth = 659
       object CommandMemo: TMemo
         Left = 4
@@ -179,7 +179,7 @@ object Form1: TForm1
     TabOrder = 0
     object FPCUpScriptName: TEdit
       Left = 182
-      Height = 23
+      Height = 21
       Hint = 'Name of the shortcut to the fpcup script (--fpcuplinkname)'
       Top = 16
       Width = 98
@@ -188,9 +188,9 @@ object Form1: TForm1
     end
     object Label5: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 16
-      Width = 151
+      Width = 134
       Caption = 'FPCUp script/shortcut name'
       ParentColor = False
     end
@@ -205,43 +205,43 @@ object Form1: TForm1
     end
     object BinutilsDir: TDirectoryEdit
       Left = 182
-      Height = 23
+      Height = 21
       Hint = 'Directory where existing FPC compiler is or should be downloaded'
       Top = 48
       Width = 208
       Directory = 'C:\development\fpcbootstrap'
       ShowHidden = False
       ButtonWidth = 23
-      NumGlyphs = 0
+      NumGlyphs = 1
       MaxLength = 0
       TabOrder = 2
     end
     object BinutilsDirLabel: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 48
-      Width = 124
+      Width = 108
       Caption = 'Binutils/make directory'
       ParentColor = False
     end
     object FPCBootstrapDir: TDirectoryEdit
       Left = 182
-      Height = 23
+      Height = 21
       Hint = 'Directory where existing FPC compiler is or should be downloaded'
       Top = 80
       Width = 208
       Directory = 'C:\development\fpcbootstrap'
       ShowHidden = False
       ButtonWidth = 23
-      NumGlyphs = 0
+      NumGlyphs = 1
       MaxLength = 0
       TabOrder = 3
     end
     object Label13: TLabel
-      Left = 15
-      Height = 16
+      Left = 14
+      Height = 13
       Top = 80
-      Width = 154
+      Width = 137
       Caption = 'Compiler bootstrap directory'
       ParentColor = False
     end
@@ -257,35 +257,35 @@ object Form1: TForm1
     TabOrder = 3
     object LazarusDirectory: TDirectoryEdit
       Left = 141
-      Height = 23
+      Height = 21
       Top = 51
       Width = 96
       Directory = 'C:\development\lazarus'
       ShowHidden = False
       ButtonWidth = 23
-      NumGlyphs = 0
+      NumGlyphs = 1
       MaxLength = 0
       TabOrder = 4
     end
     object Label7: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 48
-      Width = 90
+      Width = 83
       Caption = 'Lazarus directory'
       ParentColor = False
     end
     object Label8: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 8
-      Width = 64
+      Width = 59
       Caption = 'Lazarus URL'
       ParentColor = False
     end
     object LazarusRevision: TEdit
       Left = 399
-      Height = 23
+      Height = 21
       Top = 10
       Width = 80
       TabOrder = 1
@@ -293,9 +293,9 @@ object Form1: TForm1
     end
     object Label9: TLabel
       Left = 311
-      Height = 16
+      Height = 13
       Top = 10
-      Width = 45
+      Width = 40
       Caption = 'Revision'
       ParentColor = False
     end
@@ -310,10 +310,10 @@ object Form1: TForm1
     end
     object LazarusURL: TComboBox
       Left = 141
-      Height = 23
+      Height = 21
       Top = 8
       Width = 120
-      ItemHeight = 15
+      ItemHeight = 13
       ItemIndex = 0
       Items.Strings = (
         'http://svn.freepascal.org/svn/lazarus/trunk'
@@ -323,15 +323,15 @@ object Form1: TForm1
     end
     object Label10: TLabel
       Left = 311
-      Height = 16
+      Height = 13
       Top = 50
-      Width = 43
+      Width = 37
       Caption = 'Options'
       ParentColor = False
     end
     object LazarusOptions: TEdit
       Left = 399
-      Height = 23
+      Height = 21
       Top = 50
       Width = 80
       TabOrder = 5
@@ -347,32 +347,32 @@ object Form1: TForm1
         '-gl (Line numbers)'
         '-gw2 (Dwarf2 debug info)'
       )
-      ItemHeight = 15
+      ItemHeight = 13
       ScrollWidth = 174
       TabOrder = 6
     end
     object Label11: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 96
-      Width = 64
+      Width = 56
       Caption = 'Config path'
       ParentColor = False
     end
     object LazarusPrimaryConfigPath: TDirectoryEdit
       Left = 141
-      Height = 23
+      Height = 21
       Top = 96
       Width = 96
       ShowHidden = False
       ButtonWidth = 23
-      NumGlyphs = 0
+      NumGlyphs = 1
       MaxLength = 0
       TabOrder = 7
     end
     object LazarusLinkName: TEdit
       Left = 141
-      Height = 23
+      Height = 21
       Top = 128
       Width = 120
       TabOrder = 8
@@ -380,17 +380,17 @@ object Form1: TForm1
     end
     object Label12: TLabel
       Left = 14
-      Height = 16
+      Height = 13
       Top = 128
-      Width = 95
+      Width = 84
       Caption = 'Lazarus link name'
       ParentColor = False
     end
     object SkipLazarus: TCheckBox
       Left = 650
-      Height = 19
+      Height = 17
       Top = 14
-      Width = 86
+      Width = 79
       Caption = 'Skip Lazarus'
       TabOrder = 3
     end

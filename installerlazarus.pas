@@ -462,8 +462,8 @@ begin
         begin
           writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
             'Details: '+FErrorLog.Text,true);
-          OperationSucceeded:= false;
-          FInstalledLazarus:= '//*\\error/ / \ \';
+          OperationSucceeded:=false;
+          FInstalledLazarus:='//*\\error/ / \ \';
         end
         else
         begin

@@ -177,8 +177,8 @@ begin
   inherited Destroy;
 end;
 
-{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
-// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
+{$IF (DEFINED (WIN32))}
+// Only usable from win32 as it uses a go32v2 crosscompiler
 var
   Win32_msdos8086:TWin32_msdos8086;
 

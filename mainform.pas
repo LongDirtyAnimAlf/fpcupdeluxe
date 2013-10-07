@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  EditBtn, ComCtrls, ExtCtrls, ValEdit, installer;
+  EditBtn, ComCtrls, ExtCtrls, ValEdit, installermanager;
 
 type
 
@@ -64,7 +64,7 @@ type
   private
     { private declarations }
     FFPCUPParams: TStringList;
-    FInstaller: TInstaller;
+    FManager: TFPCupManager;
     procedure UpdateCommand;
   public
     { public declarations }
@@ -93,7 +93,7 @@ begin
   //First update installer properties depending on options chosen
 
   FFPCUpParams.Clear;
-  //fill FFPCUPParms out using FInstaller settings
+  //fill FFPCUPParms out using FManager settings
   CommandMemo.Text:='fpcup '+FFPCUpParams.DelimitedText; //Show how fpcup cli would be invoked
 end;
 
@@ -104,12 +104,12 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  FFPCUPParams:=TStringList.Create;
+  FFPCUpParams:=TStringList.Create;
   FFPCUpParams.Delimiter:=' ';
   FFPCUpParams.StrictDelimiter:=false; //I believe this works best for output
-  FInstaller:=TInstaller.Create;
+  FManager:=TFPCupManager.Create;
 
-  LazarusPrimaryConfigPath.Directory:=FInstaller.LazarusPrimaryConfigPath; //Get a default primary config path
+  LazarusPrimaryConfigPath.Directory:=FManager.LazarusPrimaryConfigPath; //Get a default primary config path
   // Set up defaults depending on platform
   {$IFDEF WINDOWS}
   //Defaults already set up in design mode GUI or in code above
@@ -125,7 +125,7 @@ end;
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
   FFPCUpParams.Free;
-  FInstaller.Free;
+  FManager.Free;
 end;
 
 procedure TForm1.LazarusHeadButtonClick(Sender: TObject);
