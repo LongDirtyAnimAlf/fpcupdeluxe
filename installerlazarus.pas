@@ -621,6 +621,9 @@ begin
 
   if UpperCase(ModuleName)='BIGIDE' then
   begin
+    //todo: make bigide from scratch still doesn't seem to mark the required packages for install.
+    // check again and fix if needed.
+
     // We might need to add a default staticpackages if it doesn't exist yet.
     // Otherwise adding our own packages could be a mess.
     //todo: note: experimental; don't know if this actually is needed.

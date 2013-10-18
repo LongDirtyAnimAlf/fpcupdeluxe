@@ -259,8 +259,8 @@ begin
         sIniFile:=ExpandFileNameUTF8(sIniFile);
         Options.IniFileSection:=Options.GetOption('','inisection','General');
         Options.CaseSensitive:=false; //easier when dealing with ini files
-        // Setting this property loads the file:
         try
+          // Setting this property loads the file:
           Options.IniFile:=sIniFile;
         except
           on E:ECommandLineError do
