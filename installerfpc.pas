@@ -225,7 +225,7 @@ begin
       except
         on E: Exception do
           begin
-          WritelnLog('FPC: Running fpc crossinstall make all failed with an exception!'+LineEnding+
+          WritelnLog('FPC: Running cross compiler fpc make all failed with an exception!'+LineEnding+
             'Details: '+E.Message,true);
           exit(false);
           end;
@@ -233,8 +233,7 @@ begin
 
       if not(Result) then
         begin
-        // If anything else than crosswin32-64 or crosswin64-32, fail:
-        result:=false;
+        // If anything else than crosswin32-64 or crosswin64-32, fail...
         {$ifdef win32}
         // if this is crosswin32-64, ignore error as it is optional
         if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
@@ -247,9 +246,9 @@ begin
         {$endif win64}
         FCompiler:='////\\\Error trying to compile FPC\|!';
         if not(result) then
-          infoln('FPC: Running fpc crossinstall make all failed with an error code. Continuing regardless.', etWarning)
+          infoln('FPC: Running cross compiler fpc make all failed with an error code. Continuing regardless.', etWarning)
         else
-          infoln('FPC: Running fpc crossinstall make all failed with an error code.',etError);
+          infoln('FPC: Running cross compiler fpc make all failed with an error code.',etError);
         // No use in going on, but
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(result);
@@ -285,7 +284,7 @@ begin
         except
           on E: Exception do
             begin
-            WritelnLog('FPC: Running fpc crossinstall make crossinstall failed with an exception!'+LineEnding+
+            WritelnLog('FPC: Running cross compiler fpc make crossinstall failed with an exception!'+LineEnding+
               'Details: '+E.Message,true);
             result:=false;
             end;
@@ -306,9 +305,9 @@ begin
             result:=true;
           {$endif win64}
           if result then
-            infoln('Problem installing crosscompiler. Continuing regardless.', etWarning)
+            infoln('FPC: Problem installing crosscompiler. Continuing regardless.', etWarning)
           else
-            infoln('Problem installing crosscompiler.',etError);
+            infoln('FPC: Problem installing crosscompiler.',etError);
           FCompiler:='////\\\Error trying to compile FPC\|!';
           end
         else
@@ -339,7 +338,7 @@ begin
     end
   else
     begin
-    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
+    infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
     result:=false;
     end;
 end;
