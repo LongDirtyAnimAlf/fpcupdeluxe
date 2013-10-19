@@ -756,13 +756,9 @@ begin
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'lcl') and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FBaseDirectory)) then
   begin
-    if DeleteDirectoryEx(FBaseDirectory)=false then
-    begin
+    result:=DeleteDirectoryEx(FBaseDirectory);
+    if not(result) then
       WritelnLog('Error deleting Lazarus directory '+FBaseDirectory);
-      result:=false;
-    end
-    else
-      result:=true;
   end
   else
   begin
@@ -776,7 +772,7 @@ begin
     FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath)+LookForConfigFile) and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FPrimaryConfigPath)) then
   begin
-    result:=DeleteDirectoryEx(FPrimaryConfigPath)=false
+    result:=DeleteDirectoryEx(FPrimaryConfigPath)=false;
     if not(result) then
       WritelnLog('Error deleting Lazarus PrimaryConfigPath directory '+FPrimaryConfigPath);
   end
