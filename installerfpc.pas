@@ -246,7 +246,7 @@ begin
           result:=true;
         {$endif win64}
         FCompiler:='////\\\Error trying to compile FPC\|!';
-        if not(result) then
+        if result then
           infoln('FPC: Running cross compiler fpc make all for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed with an error code. Optional module; continuing regardless.', etWarning)
         else
           infoln('FPC: Running cross compiler fpc make all for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed with an error code.',etError);
@@ -306,9 +306,9 @@ begin
             result:=true;
           {$endif win64}
           if result then
-            infoln('FPC: Problem installing crosscompiler. Continuing regardless.', etWarning)
+            infoln('FPC: Problem installing crosscompiler for '+FCrossCPU_Target+'-'+FCrossOS_Target+'. Optional module; continuing regardless.', etWarning)
           else
-            infoln('FPC: Problem installing crosscompiler.',etError);
+            infoln('FPC: Problem installing crosscompiler for '+FCrossCPU_Target+'-'+FCrossOS_Target+'.', etError);
           FCompiler:='////\\\Error trying to compile FPC\|!';
           end
         else

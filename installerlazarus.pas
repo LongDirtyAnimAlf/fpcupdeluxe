@@ -299,7 +299,7 @@ begin
         if (CrossInstaller.TargetCPU='i386') and (CrossInstaller.TargetOS='win32') then
           result:=true;
         {$endif win64}
-        if not(result) then
+        if result then
           infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed. Optional module; continuing regardless.', etWarning)
         else
           infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed.', etError);
@@ -309,7 +309,7 @@ begin
       end;
     end //valid cross compile setup
   else
-    infoln('Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,eterror);
+    infoln('Lazarus: can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,eterror);
 end;
 
 constructor TLazarusCrossInstaller.Create;
