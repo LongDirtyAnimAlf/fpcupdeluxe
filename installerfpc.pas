@@ -233,7 +233,8 @@ begin
 
       if not(Result) then
         begin
-        // If anything else than crosswin32-64 or crosswin64-32, fail...
+        // Not an error but warning for optional modules: crosswin32-64 and crosswin64-32
+        // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
         {$ifdef win32}
         // if this is crosswin32-64, ignore error as it is optional
         if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
