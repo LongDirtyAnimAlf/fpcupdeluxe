@@ -981,7 +981,6 @@ begin
   if not (OperationSucceeded) then
     infoln('Error running BuildModuleCustom for module '+ModuleName,etError);
 
-
   {$IFDEF UNIX}
   if OperationSucceeded then
   begin
@@ -1011,7 +1010,8 @@ begin
   {$ENDIF UNIX}
 
   // Find out where fpcmkcfg lives - only if necessary.
-  if FileExists(FPCCfg) = False then
+  if OperationSucceeded and
+    (FileExists(FPCCfg)=false) then
   begin
     fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
