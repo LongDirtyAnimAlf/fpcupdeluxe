@@ -300,7 +300,7 @@ begin
           result:=true;
         {$endif win64}
         if result then
-          infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed. Optional module; continuing regardless.', etWarning)
+          infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed. Optional module; continuing regardless.', etInfo)
         else
           infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed.', etError);
         // No use in going on, but
