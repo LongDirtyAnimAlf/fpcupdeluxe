@@ -158,6 +158,9 @@ begin
 end;
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
+// Runs make/make install for crosss compiler.
+// Error out on problems; unless module considered optional, i.e. in
+// crosswin32-64 and crosswin64-32 steps.
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossInstaller:TCrossInstaller;
@@ -176,6 +179,7 @@ begin
   platform; see posting Jonas Maebe http://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
   make all install CROSSCOMPILE=1??? find out?
   }
+  result:=false; //fail by default
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
@@ -216,7 +220,6 @@ begin
       if Options<>'' then
         ProcessEx.Parameters.Add('OPT='+Options);
       try
-        result:=false;
         ProcessEx.Execute;
         result:=(ProcessEx.ExitStatus=0);
       except
@@ -230,8 +233,26 @@ begin
 
       if not(Result) then
         begin
-        infoln('FPC: Running fpc crossinstall make all failed with an error code.',etError);
-        exit(false);
+        // If anything else than crosswin32-64 or crosswin64-32, fail:
+        result:=false;
+        {$ifdef win32}
+        // if this is crosswin32-64, ignore error as it is optional
+        if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
+          result:=true;
+        {$endif win32}
+        {$ifdef win64}
+        // if this is crosswin64-32, ignore error as it is optional
+        if (CrossInstaller.TargetCPU='i386') and (CrossInstaller.TargetOS='win32') then
+          result:=true;
+        {$endif win64}
+        FCompiler:='////\\\Error trying to compile FPC\|!';
+        if not(result) then
+          infoln('FPC: Running fpc crossinstall make all failed with an error code. Continuing regardless.', etWarning)
+        else
+          infoln('FPC: Running fpc crossinstall make all failed with an error code.',etError);
+        // No use in going on, but
+        // do make sure installation continues if this happened with optional crosscompiler:
+        exit(result);
         end
       else
         begin
@@ -275,19 +296,19 @@ begin
           // If anything else than crosswin32-64 or crosswin64-32, fail:
           result:=false;
           {$ifdef win32}
-          //fail if this is not crosswin32-64
+          // if this is crosswin32-64, ignore error as it is optional
           if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
             result:=true;
           {$endif win32}
           {$ifdef win64}
-          //fail if this is not crosswin64-32
+          // if this is crosswin64-32, ignore error as it is optional
           if (CrossInstaller.TargetCPU='i386') and (CrossInstaller.TargetOS='win32') then
             result:=true;
           {$endif win64}
           if result then
-            infoln('Problem compiling/installing crosscompiler. Continuing regardless.', etWarning)
+            infoln('Problem installing crosscompiler. Continuing regardless.', etWarning)
           else
-            infoln('Problem compiling/installing crosscompiler.',etError);
+            infoln('Problem installing crosscompiler.',etError);
           FCompiler:='////\\\Error trying to compile FPC\|!';
           end
         else
