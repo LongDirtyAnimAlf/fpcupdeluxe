@@ -1265,11 +1265,11 @@ constructor TFPCInstaller.Create;
 begin
   inherited create;
 
-FCompiler := '';
-FSVNDirectory := '';
-FMakeDir :='';
+  FCompiler := '';
+  FSVNDirectory := '';
+  FMakeDir :='';
 
-InitDone:=false;
+  InitDone:=false;
 end;
 
 destructor TFPCInstaller.Destroy;
