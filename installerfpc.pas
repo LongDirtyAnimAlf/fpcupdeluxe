@@ -246,9 +246,9 @@ begin
         {$endif win64}
         FCompiler:='////\\\Error trying to compile FPC\|!';
         if not(result) then
-          infoln('FPC: Running cross compiler fpc make all failed with an error code. Continuing regardless.', etWarning)
+          infoln('FPC: Running cross compiler fpc make all for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed with an error code. Optional module; continuing regardless.', etWarning)
         else
-          infoln('FPC: Running cross compiler fpc make all failed with an error code.',etError);
+          infoln('FPC: Running cross compiler fpc make all for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed with an error code.',etError);
         // No use in going on, but
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(result);

@@ -245,8 +245,8 @@ begin
           end;
         if Options<>'' then
           ProcessEx.Parameters.Add('OPT='+Options);
-        //Per April 2012, LCL requires lazutils which requires registration
-        //http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+        // Since April 2012, LCL requires lazutils which requires registration
+        // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
         ProcessEx.Parameters.Add('registration');
         ProcessEx.Parameters.Add('lazutils');
         ProcessEx.Parameters.Add('lcl');
@@ -284,6 +284,27 @@ begin
           WritelnLog('Lazarus: exception compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+LineEnding+
             'Details: '+E.Message,true);
         end;
+      end;
+      if not(result) then
+      begin
+        // Not an error but warning for optional modules: crosswin32-64 and crosswin64-32
+        {$ifdef win32}
+        // if this is crosswin32-64, ignore error as it is optional
+        if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
+          result:=true;
+        {$endif win32}
+        {$ifdef win64}
+        // if this is crosswin64-32, ignore error as it is optional
+        if (CrossInstaller.TargetCPU='i386') and (CrossInstaller.TargetOS='win32') then
+          result:=true;
+        {$endif win64}
+        if not(result) then
+          infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed. Optional module; continuing regardless.', etWarning)
+        else
+          infoln('Lazarus: Cross compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed.', etError);
+        // No use in going on, but
+        // do make sure installation continues if this happened with optional crosscompiler:
+        exit(result);
       end;
     end //valid cross compile setup
   else
