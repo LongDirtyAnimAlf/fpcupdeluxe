@@ -29,24 +29,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Setup: not quite ready yet.
-For now, uses binutils from Marco v.d. Voort's post at:
-http://www.bttr-software.de/forum/forum_entry.php?id=12985
-
-Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\i8086-msdos
-Binaries include
-msdos-nasm.exe the NASM assembler
-nasm.exe the NASM assembler
-msdos-wlink.exe the OpenWatcom linker WLINK
-wlinkd.dll
-msdos-wlink.exe the OpenWatcom WLIB tool
-wlibd.dll
-wlsystem.lnk
-
-todo: figure out how to actually build the cross compiler!?
--Pi8086 -Tmsdos=>yes, seems ok, see this from Marco's example:
-OS_TARGET=msdos CPU_TARGET=i8086
+Setup: see help text in ShowInstallationInstructions below
 }
 
 {$mode objfpc}{$H+}
@@ -63,6 +46,7 @@ type
 TWin32_msdosi8086 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
+  procedure ShowInstallationInstructions;
   function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
@@ -76,6 +60,25 @@ end;
 function TWin32_msdosi8086.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
+end;
+
+procedure TWin32_msdosi8086.ShowInstallationInstructions;
+begin
+  infoln('TWin32-msdosi8086: binutils installation instructions:'+LineEnding+
+    'For now, uses binutils from Marco v.d. Voort''s post at:' + LineEnding +
+    'http://www.bttr-software.de/forum/forum_entry.php?id=12985' + LineEnding +
+    '' + LineEnding +
+    'Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)' + LineEnding +
+    'Then place the binaries in c:\development\cross\bin\i8086-msdos' + LineEnding +
+    'Binaries include' + LineEnding +
+    'msdos-nasm.exe the NASM assembler' + LineEnding +
+    'nasm.exe the NASM assembler' + LineEnding +
+    'msdos-wlink.exe the OpenWatcom linker WLINK' + LineEnding +
+    'wlinkd.dll' + LineEnding +
+    'msdos-wlink.exe the OpenWatcom WLIB tool' + LineEnding +
+    'wlibd.dll' + LineEnding +
+    'wlsystem.lnk',etInfo);
+  FAlreadyWarned:=true;
 end;
 
 function TWin32_msdosi8086.GetLibs(Basepath:string): boolean;
@@ -145,11 +148,14 @@ begin
    -Fud:\pp16/units/$fpctarget/*
    -Fud:\pp16/units/$fpctarget/rtl
 }
-
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding; {Prepend the binutils names}
     infoln('TWin32_msdosi8086: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+  end
+  else
+  begin
+    ShowInstallationInstructions;
   end;
 end;
 
