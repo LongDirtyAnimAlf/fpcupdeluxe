@@ -41,6 +41,11 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
+const
+  MediumMemOption='-WmMedium';
+  SmallMemOption='-WmSmall'; //default for dos compiler
+  TinyMemOption='-WmTiny';
+
 type
 
 { TWin32_msdosi8086 }
@@ -152,6 +157,12 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding; {Prepend the binutils names}
+    if FCrossOpts.IndexOf(MediumMemOption)>-1 then
+      FFPCCFGSnippet:=FFPCCFGSnippet+MediumMemOption+LineEnding;
+    if FCrossOpts.IndexOf(SmallMemOption)>-1 then
+      FFPCCFGSnippet:=FFPCCFGSnippet+SmallMemOption+LineEnding;
+    if FCrossOpts.IndexOf(TinyMemOption)>-1 then
+      FFPCCFGSnippet:=FFPCCFGSnippet+TinyMemOption+LineEnding;
     infoln('TWin32_msdosi8086: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end
   else
@@ -165,7 +176,8 @@ begin
   inherited Create;
   FBinUtilsPrefix:='msdos-';
   FBinUtilsPath:='';
-  FCrossOpts.Add('-WmMedium'); //Medium memory model (instead of default small)
+  FCrossOpts.Add(MediumMemOption); //Medium memory model (instead of default small)
+  // Note: memory model needs to be added to fpc.cfg snippet
   //todo: allow end user to specify memory model himself
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
