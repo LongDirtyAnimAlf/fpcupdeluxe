@@ -107,7 +107,7 @@ begin
   if not result then
   begin
     //libs path is optional; it can be empty
-    infoln('TWin32_wincearm: libspath ignored; it is optional for this cross comipler.',etInfo);
+    infoln('TWin32_wincearm: libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;

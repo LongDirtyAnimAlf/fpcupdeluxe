@@ -32,6 +32,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 Setup: see help text in ShowInstallationInstructions below
 }
 
+
 {$mode objfpc}{$H+}
 
 interface
@@ -107,7 +108,7 @@ begin
   if not result then
   begin
     //libs path is optional; it can be empty
-    infoln('TWin32_msdosi8086: libspath ignored; it is optional for this cross comipler.',etInfo);
+    infoln('TWin32_msdosi8086: libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;
@@ -164,6 +165,8 @@ begin
   inherited Create;
   FBinUtilsPrefix:='msdos-';
   FBinUtilsPath:='';
+  FCrossOpts.Add('-WmMedium'); //Medium memory model (instead of default small)
+  //todo: allow end user to specify memory model himself
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FTargetCPU:='i8086';

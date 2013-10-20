@@ -164,6 +164,8 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossInstaller:TCrossInstaller;
+  CrossOptions:String;
+  i:integer;
   MagicLine:String; //use this to find fpcup-modified sections in fpc.cfg
   Options:String;
 begin
@@ -210,11 +212,29 @@ begin
       ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
       ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
       Options:=FCompilerOptions;
+      // Error checking for some known problems with cross compilers
+      if (CrossInstaller.TargetCPU='i8086') and
+        (CrossInstaller.TargetOS='msdos') then
+        begin
+        if (pos('-g',Options)>0) or
+          (pos('-CX',Options)=0) or
+          (pos('-XX',Options)=0) then
+          begin
+          Options:='-CX -XXs'; //create smartlinked library; smartlink units
+          infoln('Cross compiler does not support debug symbols and needs smartlinking. Using default options: '+Options,etInfo);
+          end;
+        end;
       if CrossInstaller.LibsPath<>''then
         Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
       if CrossInstaller.BinUtilsPrefix<>'' then
         begin
-        Options:=Options+' -XP'+CrossInstaller.BinUtilsPrefix;
+        // Earlier, we used regular Options; using CROSSOPT is apparently more precise
+        CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
+        for i:=0 to CrossInstaller.CrossOpts.Count-1 do
+          begin
+          CrossOptions:=CrossOptions+' '+CrossInstaller.CrossOpts[i];
+          end;
+        ProcessEx.Parameters.Add(CrossOptions);
         ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
       if Options<>'' then
