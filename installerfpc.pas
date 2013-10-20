@@ -228,15 +228,18 @@ begin
         Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
       if CrossInstaller.BinUtilsPrefix<>'' then
         begin
-        // Earlier, we used regular Options; using CROSSOPT is apparently more precise
+        // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
         CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
-        for i:=0 to CrossInstaller.CrossOpts.Count-1 do
-          begin
-          CrossOptions:=CrossOptions+' '+CrossInstaller.CrossOpts[i];
-          end;
-        ProcessEx.Parameters.Add(CrossOptions);
         ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
+      if (CrossInstaller.CrossOpts.Count>0) and (CrossOptions='') then
+        CrossOptions:='CROSSOPT=';
+      for i:=0 to CrossInstaller.CrossOpts.Count-1 do
+        begin
+        CrossOptions:=CrossOptions+' '+CrossInstaller.CrossOpts[i];
+        end;
+      if CrossOptions<>'' then
+        ProcessEx.Parameters.Add(CrossOptions);
       if Options<>'' then
         ProcessEx.Parameters.Add('OPT='+Options);
       try
@@ -297,9 +300,18 @@ begin
         ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
         if CrossInstaller.BinUtilsPrefix<>'' then
           begin
+          // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
+          CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
           end;
-
+        if (CrossInstaller.CrossOpts.Count>0) and (CrossOptions='') then
+          CrossOptions:='CROSSOPT=';
+        for i:=0 to CrossInstaller.CrossOpts.Count-1 do
+          begin
+          CrossOptions:=CrossOptions+' '+CrossInstaller.CrossOpts[i];
+          end;
+        if CrossOptions<>'' then
+          ProcessEx.Parameters.Add(CrossOptions);
         try
           ProcessEx.Execute;
         except
