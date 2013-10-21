@@ -156,7 +156,9 @@ begin
 }
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding; {Prepend the binutils names}
+    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
+    '-XX'+LineEnding+ {Smartlink}
+    '-CX'+LineEnding; {Smartlink libraries}
     if FCrossOpts.IndexOf(MediumMemOption)>-1 then
       FFPCCFGSnippet:=FFPCCFGSnippet+MediumMemOption+LineEnding;
     if FCrossOpts.IndexOf(SmallMemOption)>-1 then

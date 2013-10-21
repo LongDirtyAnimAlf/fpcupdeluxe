@@ -219,7 +219,7 @@ begin
         if (pos('-g',Options)>0) or
           (pos('-CX',Options)=0) or
           (pos('-XX',Options)=0) then
-          begin
+          begin          
           Options:='-CX -XXs'; //create smartlinked library; smartlink units
           infoln('Cross compiler does not support debug symbols and needs smartlinking. Using default options: '+Options,etInfo);
           end;
@@ -280,6 +280,7 @@ begin
       else
         begin
         // Install crosscompiler: make crossinstall
+        // (apparently equivalent to make install CROSSINSTALL=1)
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
