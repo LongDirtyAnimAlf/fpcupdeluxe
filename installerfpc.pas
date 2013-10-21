@@ -50,7 +50,7 @@ type
 
   TFPCInstaller = class(TInstaller)
   private
-    FBinPath: string;
+    FBinPath: string; // path where generated compiler lives
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -165,6 +165,7 @@ var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossInstaller:TCrossInstaller;
   CrossOptions:String;
+  ChosenCompiler:String; //Compiler to be used for cross compiling
   i:integer;
   MagicLine:String; //use this to find fpcup-modified sections in fpc.cfg
   Options:String;
@@ -190,12 +191,19 @@ begin
       infoln('Failed to get cross libraries', etError)
     else
       begin
+      // Use bootstrap compiler, unless we generate the DOS cross compiler, which needs FPC 2.7.1:
+      if (CrossInstaller.TargetCPU='i8086') and
+        (CrossInstaller.TargetOS='msdos') then
+        ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'ppc386.exe'
+      else
+        ChosenCompiler:=FCompiler;
+
       // Make all
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etinfo);
-      ProcessEx.Parameters.Add('FPC='+FCompiler);
+      ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       // Tell make where to find the target binutils if cross-compiling:
@@ -219,7 +227,7 @@ begin
         if (pos('-g',Options)>0) or
           (pos('-CX',Options)=0) or
           (pos('-XX',Options)=0) then
-          begin          
+          begin
           Options:='-CX -XXs'; //create smartlinked library; smartlink units
           infoln('Cross compiler does not support debug symbols and needs smartlinking. Using default options: '+Options,etInfo);
           end;
@@ -236,7 +244,7 @@ begin
         CrossOptions:='CROSSOPT=';
       for i:=0 to CrossInstaller.CrossOpts.Count-1 do
         begin
-        CrossOptions:=CrossOptions+' '+CrossInstaller.CrossOpts[i];
+        CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpts[i]);
         end;
       if CrossOptions<>'' then
         ProcessEx.Parameters.Add(CrossOptions);
@@ -285,7 +293,7 @@ begin
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
         infoln('Running Make crossinstall (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')', etinfo);
-        ProcessEx.Parameters.Add('FPC='+FCompiler);
+        ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
         {$IFDEF UNIX}
         ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -309,7 +317,7 @@ begin
           CrossOptions:='CROSSOPT=';
         for i:=0 to CrossInstaller.CrossOpts.Count-1 do
           begin
-          CrossOptions:=CrossOptions+' '+CrossInstaller.CrossOpts[i];
+          CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpts[i]);
           end;
         if CrossOptions<>'' then
           ProcessEx.Parameters.Add(CrossOptions);
