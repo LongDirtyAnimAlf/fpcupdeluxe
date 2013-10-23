@@ -191,10 +191,9 @@ begin
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
       infoln('Failed to get cross libraries', etError)
     else
-      begin
-        //todo: change ppc386.exe to proper installed compiler using lookup tables etc!?!
+      begin        
       if CrossInstaller.CompilerUsed=ctInstalled then
-        ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc.exe' {ppc386.exe}
+        ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt {todo if this does not work use ppc386.exe etc}
       else //ctBootstrap
         ChosenCompiler:=FCompiler;
 
