@@ -178,6 +178,11 @@ begin
   inherited Create;
   FBinUtilsPrefix:='msdos-';
   FBinUtilsPath:='';
+  {Add binutils directory to path when cross compiling.
+  Works around faulty makefile in some versions of fpc that call nasm.exe without
+  specifying the directory it is in}
+  FBinutilsPathInPath:=true;
+  FCompilerUsed:=ctInstalled; //Should be trunk (2.7.1+) compiler.
   FCrossOpts.Add(MediumMemOption); //Medium memory model (instead of default small)
   // Note: memory model needs to be added to fpc.cfg snippet
   //todo: allow end user to specify memory model himself

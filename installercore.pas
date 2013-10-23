@@ -75,9 +75,11 @@ type
     function GetCrossInstaller: TCrossInstaller;
     // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
+    // Get currently set path
+    function GetPath: string;
     procedure LogError(Sender: TProcessEx; IsException: boolean);
-    // Sets the search/binary path to NewPath or adds NewPath to path:
-    procedure SetPath(NewPath: string; Prepend: boolean);
+    // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
+    procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
   public
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
@@ -955,6 +957,11 @@ begin
   Result := processorname + '-' + os;
 end;
 
+function TInstaller.GetPath: string;
+begin
+  result:=ProcessEx.Environment.GetVar(PATHVARNAME);
+end;
+
 procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);
 var
   TempFileName: string;
@@ -979,17 +986,26 @@ begin
   end;
 end;
 
-procedure TInstaller.SetPath(NewPath: string; Prepend: boolean);
+procedure TInstaller.SetPath(NewPath: string; Prepend: boolean; Append: boolean);
+var
+  OldPath: string;
+  ResultingPath: string;
 begin
-  if Prepend then
-    NewPath := NewPath + PathSeparator + ProcessEx.Environment.GetVar(PATHVARNAME);
-  ProcessEx.Environment.SetVar(PATHVARNAME, NewPath);
-  if NewPath <> EmptyStr then
+  OldPath := ProcessEx.Environment.GetVar(PATHVARNAME);
+  if Prepend and (OldPath<>'') then
+    ResultingPath := NewPath + PathSeparator + OldPath
+  else if Append and (OldPath<>'') then
+    ResultingPath := OldPath + PathSeparator + NewPath
+  else
+    ResultingPath := NewPath;
+
+  ProcessEx.Environment.SetVar(PATHVARNAME, ResultingPath);
+  if ResultingPath <> EmptyStr then
   begin
-    WritelnLog('External program path:  ' + NewPath, false);
+    WritelnLog('External program path:  ' + ResultingPath, false);
   end;
   if FVerbose then
-    infoln('Set path to: ' + NewPath,etdebug);
+    infoln('Set path to: ' + ResultingPath,etdebug);
 end;
 
 procedure TInstaller.ProcessError(Sender: TProcessEx; IsException: boolean);

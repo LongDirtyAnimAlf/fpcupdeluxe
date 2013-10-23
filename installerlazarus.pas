@@ -546,10 +546,10 @@ begin
   SetPath(FBinPath+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
-    FBaseDirectory,false);
+    FBaseDirectory,false,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  SetPath(FBinPath,true);
+  SetPath(FBinPath,true,false);
   {$ENDIF UNIX}
   InitDone:=result;
 end;

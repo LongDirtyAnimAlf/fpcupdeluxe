@@ -168,6 +168,7 @@ var
   ChosenCompiler:String; //Compiler to be used for cross compiling
   i:integer;
   MagicLine:String; //use this to find fpcup-modified sections in fpc.cfg
+  OldPath:String;
   Options:String;
 begin
   // Make crosscompiler using new compiler
@@ -191,12 +192,18 @@ begin
       infoln('Failed to get cross libraries', etError)
     else
       begin
-      // Use bootstrap compiler, unless we generate the DOS cross compiler, which needs FPC 2.7.1:
-      if (CrossInstaller.TargetCPU='i8086') and
-        (CrossInstaller.TargetOS='msdos') then
-        ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'ppc386.exe'
-      else
+        //todo: change ppc386.exe to proper installed compiler using lookup tables etc!?!
+      if CrossInstaller.CompilerUsed=ctInstalled then
+        ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc.exe' {ppc386.exe}
+      else //ctBootstrap
         ChosenCompiler:=FCompiler;
+
+      // Add binutils path to path if necessary
+      OldPath:=GetPath;
+      if CrossInstaller.BinUtilsPathInPath then
+        begin
+        SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
+        end;
 
       // Make all
       ProcessEx.Executable := Make;
@@ -221,6 +228,7 @@ begin
       ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
       Options:=FCompilerOptions;
       // Error checking for some known problems with cross compilers
+      //todo: this really should go to the cross compiler unit itself but would require a rewrite
       if (CrossInstaller.TargetCPU='i8086') and
         (CrossInstaller.TargetOS='msdos') then
         begin
@@ -261,6 +269,12 @@ begin
           exit(false);
           end;
       end;
+
+      // Return path to previous state
+      if CrossInstaller.BinUtilsPathInPath then
+        begin
+        SetPath(OldPath,false,false);
+        end;
 
       if not(Result) then
         begin
@@ -937,11 +951,11 @@ begin
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
     IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
-    FBinPath,false);
+    FBinPath,false,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(FBinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true);
+  SetPath(FBinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true,false);
   {$ENDIF UNIX}
   InitDone:=result;
 end;
@@ -956,7 +970,7 @@ var
   TxtFile:Text;  //cpuarmel
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
-    'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64';
+    'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64,ppcross8086';
 
 begin
   result:=InitModule;
