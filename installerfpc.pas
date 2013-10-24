@@ -235,8 +235,9 @@ begin
           (pos('-CX',Options)=0) or
           (pos('-XX',Options)=0) then
           begin
+          infoln('Your specified these options: '+Options+'...',etInfo);
           Options:='-CX -XXs'; //create smartlinked library; smartlink units
-          infoln('Cross compiler does not support debug symbols and needs smartlinking. Using default options: '+Options,etInfo);
+          infoln('... however, this cross compiler does not support debug symbols and needs smartlinking. Using these options instead: '+Options,etInfo);
           end;
         end;
       if CrossInstaller.LibsPath<>''then
