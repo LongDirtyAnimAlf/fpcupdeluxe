@@ -56,15 +56,15 @@ type
     procedure LoadParams;
     procedure SetIniFile(AValue: string);
   public
-    //lists all options retrieved with AppendToAllOptions=true in command line arg format.
+    // Lists all options retrieved with AppendToAllOptions=true in command line arg format.
     property AllOptions:string read FAllOptions;
     property CaseSensitive:boolean read FCaseSensitive write FCaseSensitive;
-    // specify inifile to load FParams from inifile
+    // Specify inifile to load FParams from inifile
     // these parameters can be overridden by command-line parameters
     property IniFile:string read FIniFile write SetIniFile ;
     // Section name (e.g. [General]) where parameters are if using ini files
     property IniFileSection: string read FIniFileSection write FIniFileSection;
-    // arguments left after getting all command line parameters
+    // Arguments left after getting all command line parameters
     property RestArguments:TStringList read FParams;
     function GetOption(shortname,name,defaultVal:string;AppendToAllOptions:boolean=true):string;
     function GetOption(shortname,name:string;defaultVal:integer;AppendToAllOptions:boolean=true):integer;
@@ -343,7 +343,7 @@ begin
       sCSParam:=UpperCase(sParam)
     else
       sCSParam:=sParam;
-    if sParam[1]='-'then
+    if sParam[1]='-' then
       begin
       if (Length(sParam)>1) and (sParam[2]='-') then
         begin     //long option

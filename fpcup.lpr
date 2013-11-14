@@ -441,7 +441,7 @@ begin
         FInstaller.Verbose:=Options.GetOption('','verbose',false,false);
       except
         on E: ECommandLineError do begin
-        // option did not have an argument
+        // option did not have an argument (e.g. not in .ini file)
         FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
         end;
       end;
@@ -585,6 +585,9 @@ begin
       end;
       writeln('Log file name:          '+FInstaller.LogFileName);
       writeln('Additional modules:     '+FInstaller.IncludeModules);
+			// As we're using the oddly named alloptions property, we're actually only showing 
+			// persistent options
+			//todo: rename alloptions in command line handling etc to make it clearer
       writeln('Parameter list:         '+FInstaller.AllOptions);
 
       // Show warnings to the user:
