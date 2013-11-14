@@ -242,7 +242,7 @@ var
   Options:TCommandLineOptions;
   sIniFile: string;
   sInstallDir,s: string; // Root installation directory
-  bHaveInstalldir: boolean; //Has user specified a non-standard install dir?
+  bHaveInstalldir: boolean; //Has user explicitly specified a non-standard install dir?
   sLogFile: string; //Filename for log
   LeftOverOptions: TStringList; //Options left over after processing; may contain module=0 options
 begin
@@ -474,7 +474,7 @@ begin
     end;
     FInstaller.LoadFPCUPConfig;
     //svn2 seems to lag behind a lot, so don't use that.
-    //load URL's after LoadFPCUPConfig so that we have loaded the aliases
+    //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
     try
       FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/branches/fixes_2_6');
       FInstaller.LazarusURL:=Options.GetOption('','lazURL','http://svn.freepascal.org/svn/lazarus/trunk');
@@ -543,6 +543,7 @@ begin
     else
       begin
       {$IFNDEF MSWINDOWS}
+      // Binutils should be in path on non-Windows, so warn user:
       if FInstaller.MakeDirectory<>'' then
         begin
         writeln('The "binutilsdir" parameter (currently set to '+FInstaller.MakeDirectory+') is not necessary or supported on this system.'+LineEnding+

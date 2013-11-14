@@ -1,6 +1,6 @@
 { Command line parsing unit
 
-Copyright (C) 2012 Ludo Brands
+Copyright (C) 2012-2013 Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -50,6 +50,7 @@ type
     FParams:TStringList;
     function GetOption(shortname,name:string;var param:string;bAppendToAllOptions,bHasParam:boolean):boolean;
     procedure LoadFile(fname:string);
+    // Loads ini file and sets parameters found in the file
     function LoadIniFile:boolean;
     //read all params in string list, load @filename at start to let command line options override file options
     procedure LoadParams;
@@ -59,7 +60,7 @@ type
     property AllOptions:string read FAllOptions;
     property CaseSensitive:boolean read FCaseSensitive write FCaseSensitive;
     // specify inifile to load FParams from inifile
-    // these parameters are overridden by command-line parameters
+    // these parameters can be overridden by command-line parameters
     property IniFile:string read FIniFile write SetIniFile ;
     // Section name (e.g. [General]) where parameters are if using ini files
     property IniFileSection: string read FIniFileSection write FIniFileSection;
@@ -74,8 +75,8 @@ type
     function ValidateOptions:string;
     // If IniFileSection specified, the @filename param will attempt to load filename as inifile first,
     // else @filename will always be interpreted as a series of command line arguments
-    constructor create(FileSection:string='');
-    destructor destroy;override;
+    constructor Create(FileSection:string='');
+    destructor Destroy;override;
   end;
 
 implementation
@@ -97,7 +98,7 @@ begin
       begin
       FIniFile:=fname;
       if LoadIniFile then
-        exit;
+        exit; //if errors occurred, we can try to load it as a regular file with arguments...
       end;
     cnt:=0;
     AssignFile(f,fname);
@@ -401,18 +402,18 @@ begin
     end;
 end;
 
-constructor TCommandLineOptions.create(FileSection: string);
+constructor TCommandLineOptions.Create(FileSection: string);
 begin
-  inherited create;
+  inherited Create;
   FParams:=TStringList.Create;
   FIniFileSection:=FileSection;
   LoadParams;
 end;
 
-destructor TCommandLineOptions.destroy;
+destructor TCommandLineOptions.Destroy;
 begin
   FParams.Free;
-  inherited destroy;
+  inherited Destroy;
 end;
 
 end.

@@ -645,6 +645,7 @@ begin
   begin
     //todo: make bigide from scratch still doesn't seem to mark the required packages for install.
     // check again and fix if needed.
+    //todo: October 2013, check this: on osx, we seem to getting a ~/~/trunk/lazarussettings/staticpackages.inc
 
     // We might need to add a default staticpackages if it doesn't exist yet.
     // Otherwise adding our own packages could be a mess.
