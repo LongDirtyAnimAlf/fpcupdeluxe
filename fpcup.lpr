@@ -404,12 +404,6 @@ begin
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib';
       end;
-      {
-      todo: when building linux cross compiler use these
--Fl/compat/linux/lib
--Fl/compat/linux/usr/lib
--Fl/compat/linux/usr/X11R6/lib
-      }
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
       FInstaller.CrossLCL_Platform:=Options.GetOption('','lclplatform','');
@@ -552,7 +546,7 @@ begin
         end;
       {$ENDIF MSWINDOWS}
 
-      FInstaller.AllOptions:=Options.AllOptions;
+      FInstaller.PersistentOptions:=Options.PersistentOptions;
 
       writeln('');
       writeln('Options:');
@@ -585,10 +579,7 @@ begin
       end;
       writeln('Log file name:          '+FInstaller.LogFileName);
       writeln('Additional modules:     '+FInstaller.IncludeModules);
-			// As we're using the oddly named alloptions property, we're actually only showing 
-			// persistent options
-			//todo: rename alloptions in command line handling etc to make it clearer
-      writeln('Parameter list:         '+FInstaller.AllOptions);
+      writeln('Persistent parameters:  '+FInstaller.PersistentOptions);
 
       // Show warnings to the user:
       writeln('');

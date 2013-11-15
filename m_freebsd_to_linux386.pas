@@ -15,6 +15,7 @@ make -DBATCH install distclean
 
 Another solution would be to get the relevant binutils/libs from a working Linux environment - which though? - to /cmpat/linux
 }
+
 //todo: replace paths below once we've got a working BSD Linux compat layer with dev tools.
 
 {$mode objfpc}{$H+}
@@ -50,6 +51,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
+  {
+  perhaps these?!? todo: check.
+  -Fl/compat/linux/lib
+  -Fl/compat/linux/usr/lib
+  -Fl/compat/linux/usr/X11R6/lib
+  }
 end;
 
 function TFreeBSD_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;

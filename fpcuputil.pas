@@ -433,6 +433,15 @@ var
   HTTPSender: THTTPSend;
   RetryAttempt: integer;
 begin
+  {todo: add support for http proxy, e.g. on *nix environment var
+  export http_proxy=http://my-proxy-server.com:8080/
+  for synapse http:
+  ProxyHost:=
+  ProxyPort:=
+  for subversion:
+  --config-option servers:global:http-proxy-host = ip.add.re.ss
+  --config-option servers:global:http-proxy-port = 3128
+  }
   result:=false;
   RetryAttempt:=1;
   URL:=SourceForgeURL(URL); //Deal with sourceforge URLs

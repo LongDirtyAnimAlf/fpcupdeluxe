@@ -161,6 +161,14 @@ var
   Output: string = '';
   RetryAttempt: integer;
 begin
+  {todo: add support for http proxy, e.g. on *nix environment var
+  export http_proxy=http://my-proxy-server.com:8080/
+  for subversion:
+  --config-option servers:global:http-proxy-host = ip.add.re.ss
+  --config-option servers:global:http-proxy-port = 3128
+  --config-option servers:global:http-proxy-user = bla
+  --config-option servers:global:http-proxy-password = bla
+  }
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
@@ -235,6 +243,14 @@ begin
 end;
 
 function TSVNClient.Commit(Message: string): boolean;
+{todo: add support for http proxy, e.g. on *nix environment var
+export http_proxy=http://my-proxy-server.com:8080/
+for subversion:
+--config-option servers:global:http-proxy-host = ip.add.re.ss
+--config-option servers:global:http-proxy-port = 3128
+--config-option servers:global:http-proxy-user = bla
+--config-option servers:global:http-proxy-password = bla
+}
 begin
   inherited Commit(Message);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
@@ -271,6 +287,14 @@ var
   AfterErrorRetry: integer; // Keeps track of retry attempts after error result
   UpdateRetry: integer;     // Keeps track of retry attempts to get all files
 begin
+  {todo: add support for http proxy, e.g. on *nix environment var
+  export http_proxy=http://my-proxy-server.com:8080/
+  for subversion:
+  --config-option servers:global:http-proxy-host = ip.add.re.ss
+  --config-option servers:global:http-proxy-port = 3128
+  --config-option servers:global:http-proxy-user = bla
+  --config-option servers:global:http-proxy-password = bla
+  }
   AfterErrorRetry := 1;
   UpdateRetry := 1;
 

@@ -154,7 +154,7 @@ type
 
   TFPCupManager=class(Tobject)
   private
-    FAllOptions: string;
+    FPersistentOptions: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -205,7 +205,9 @@ type
     property ShortCutNameLazarus: string read FShortCutNameLazarus write FShortCutNameLazarus; //Name of the shortcut that points to the fpcup-installed Lazarus
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup; //Name of the shortcut that points to fpcup
     property CompilerName: string read FCompilerName write FCompilerName;
-    property AllOptions:string read FAllOptions write FAllOptions;
+    // Options that are to be saved in shortcuts/batch file/shell scripts.
+    // Excludes temporary options like --verbose
+    property PersistentOptions:string read FPersistentOptions write FPersistentOptions;
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
     property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
@@ -546,10 +548,10 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     if FParent.ShortCutNameFpcup<>EmptyStr then
     begin
      {$IFDEF MSWINDOWS}
-      CreateDesktopShortCut(paramstr(0),FParent.AllOptions,FParent.ShortCutNameFpcup);
+      CreateDesktopShortCut(paramstr(0),FParent.PersistentOptions,FParent.ShortCutNameFpcup);
      {$ELSE}
-      FParent.AllOptions:=FParent.AllOptions+' $*';
-      CreateHomeStartLink('"'+paramstr(0)+'"',FParent.AllOptions,FParent.ShortCutNameFpcup);
+      FParent.PersistentOptions:=FParent.PersistentOptions+' $*';
+      CreateHomeStartLink('"'+paramstr(0)+'"',FParent.PersistentOptions,FParent.ShortCutNameFpcup);
      {$ENDIF MSWINDOWS}
     end;
   end;

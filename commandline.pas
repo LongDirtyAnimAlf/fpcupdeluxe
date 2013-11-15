@@ -43,34 +43,46 @@ type
 
   TCommandLineOptions=class(TObject)
   private
-    FAllOptions: string;
+    FPersistentOptions: string;
     FCaseSensitive: boolean;
     FIniFile: string;
     FIniFileSection: string;
+    // Parameters/options to be used/parsed.
+    // The associated object is used as a boolean:
+    // if true, option may be saved to persistentoptions. This includes
+    // options specified in @file as that is meant to function transparently
+    // if false, option is temporary, e.g. display-only options or
+    // options specified in an ini file.
+    // Items are deleted when the GetOption.. call is made
     FParams:TStringList;
-    function GetOption(shortname,name:string;var param:string;bAppendToAllOptions,bHasParam:boolean):boolean;
+    function GetOption(shortname,name:string;var param:string;bAppendToPersistentOptions,bHasParam:boolean):boolean;
+    // Load options specified in file. Should be just the same as specifying
+    // the same options directly on command line
     procedure LoadFile(fname:string);
     // Loads ini file and sets parameters found in the file
+    // Does not add these params to FPersistentOptions: the point is to reread the ini file each time
+    // and load the options specified there
     function LoadIniFile:boolean;
     //read all params in string list, load @filename at start to let command line options override file options
     procedure LoadParams;
     procedure SetIniFile(AValue: string);
   public
-    // Lists all options retrieved with AppendToAllOptions=true in command line arg format.
-    property AllOptions:string read FAllOptions;
     property CaseSensitive:boolean read FCaseSensitive write FCaseSensitive;
     // Specify inifile to load FParams from inifile
     // these parameters can be overridden by command-line parameters
     property IniFile:string read FIniFile write SetIniFile ;
     // Section name (e.g. [General]) where parameters are if using ini files
     property IniFileSection: string read FIniFileSection write FIniFileSection;
+    // Lists all options retrieved with AppendToPersistentOptions=true in command line arg format.
+    property PersistentOptions:string read FPersistentOptions;
     // Arguments left after getting all command line parameters
     property RestArguments:TStringList read FParams;
-    function GetOption(shortname,name,defaultVal:string;AppendToAllOptions:boolean=true):string;
-    function GetOption(shortname,name:string;defaultVal:integer;AppendToAllOptions:boolean=true):integer;
-    function GetOption(shortname,name:string;defaultVal:boolean;AppendToAllOptions:boolean=true):boolean;
-    function GetOption(shortname,name:string;defaultVal:double;AppendToAllOptions:boolean=true):double;
-    function GetOptionNoParam(shortname,name:string;AppendToAllOptions:boolean=true):boolean;
+    function GetOption(shortname,name,defaultVal:string;AppendToPersistentOptions:boolean=true):string;
+    function GetOption(shortname,name:string;defaultVal:integer;AppendToPersistentOptions:boolean=true):integer;
+    function GetOption(shortname,name:string;defaultVal:boolean;AppendToPersistentOptions:boolean=true):boolean;
+    function GetOption(shortname,name:string;defaultVal:double;AppendToPersistentOptions:boolean=true):double;
+    // Get option and do not expect any parameter added (e.g. --verbose, not --verbose=yes)
+    function GetOptionNoParam(shortname,name:string;AppendToPersistentOptions:boolean=true):boolean;
     // Results false if unknown parameters are left
     function ValidateOptions:string;
     // If IniFileSection specified, the @filename param will attempt to load filename as inifile first,
@@ -106,7 +118,7 @@ begin
     while not eof(f) do
       begin
       readln(f,s);
-      //split into parameters
+      // split into parameters
       while length(s)>0 do
         begin
         i:=1;
@@ -133,9 +145,12 @@ begin
                 begin
                 // Add param to begin of list
                 if cnt>=FParams.Count then
-                  FParams.Add(copy(s,1,i-1))
+                  FParams.AddObject(copy(s,1,i-1),TObject(true))
                 else
+                  begin
                   FParams.Insert(cnt,copy(s,1,i-1));
+                  FParams.Objects[cnt]:=TObject(true);
+                  end;
                 cnt:=cnt+1;
                 end;
               delete(s,1,i);
@@ -147,15 +162,18 @@ begin
           begin
           // Add param at start
           if cnt>=FParams.Count then
-            FParams.Add(copy(s,1,i-1))
+            FParams.AddObject(copy(s,1,i-1), TObject(true))
           else
+            begin
             FParams.Insert(cnt,copy(s,1,i-1));
+            FParams.Objects[cnt]:=TObject(true);
+            end;
           cnt:=cnt+1;
           delete(s,1,i);
           end;
         end;
       if length(s)>0 then
-        FParams.Add(s);
+        FParams.AddObject(s,TObject(false));
       end;
     CloseFile(f);
     end;
@@ -190,9 +208,12 @@ begin
             (copy(trim(SecVals[i]),1,1)<>'#')  then
               // Add param to begin of list
               if i>=FParams.Count then
-                FParams.Add('--'+SecVals[i])
+                FParams.AddObject('--'+SecVals[i],TObject(false))
               else
+                begin
                 FParams.Insert(i,'--'+SecVals[i]);
+                FParams.Objects[i]:=TObject(false);
+                end;
         end;
     finally
       SecVals.Free;
@@ -233,7 +254,7 @@ begin
     // First load in @file if specified
     // This lets us override with command line args later
     if sParam[1]<>'@' then
-      FParams.Add(ParamStr(i));
+      FParams.AddObject(ParamStr(i),TObject(true));
     i:=i+1;
     end;
 end;
@@ -252,52 +273,52 @@ begin
 end;
 
 function TCommandLineOptions.GetOption(shortname, name, defaultVal: string;
-  AppendToAllOptions: boolean): string;
+  AppendToPersistentOptions: boolean): string;
 var
   s:string='';
 begin
-  if GetOption(shortname, name,s,AppendToAllOptions,true) then
+  if GetOption(shortname, name,s,AppendToPersistentOptions,true) then
     result:=s
   else
     result:=defaultVal;
 end;
 
 function TCommandLineOptions.GetOption(shortname, name: string;
-  defaultVal: integer; AppendToAllOptions: boolean): integer;
+  defaultVal: integer; AppendToPersistentOptions: boolean): integer;
 var
   s:string='';
 begin
-  if GetOption(shortname, name,s,AppendToAllOptions,true) then
+  if GetOption(shortname, name,s,AppendToPersistentOptions,true) then
     result:=StrToIntDef(s,defaultVal)
   else
     result:=defaultVal;
 end;
 
 function TCommandLineOptions.GetOptionNoParam(shortname, name: string;
-  AppendToAllOptions: boolean): boolean;
+  AppendToPersistentOptions: boolean): boolean;
 var
   s:string='';
 begin
-  result:=GetOption(shortname, name,s,AppendToAllOptions,false);
+  result:=GetOption(shortname, name,s,AppendToPersistentOptions,false);
 end;
 
 function TCommandLineOptions.GetOption(shortname, name: string;
-  defaultVal: boolean; AppendToAllOptions: boolean): boolean;
+  defaultVal: boolean; AppendToPersistentOptions: boolean): boolean;
 var
   s:string='';
 begin
-  if GetOption(shortname, name,s,AppendToAllOptions,true) then
+  if GetOption(shortname, name,s,AppendToPersistentOptions,true) then
     result:=StrToBoolDef(s,defaultVal)
   else
     result:=defaultVal;
 end;
 
 function TCommandLineOptions.GetOption(shortname, name: string;
-  defaultVal: double; AppendToAllOptions: boolean): double;
+  defaultVal: double; AppendToPersistentOptions: boolean): double;
 var
   s:string='';
 begin
-  if GetOption(shortname, name,s,AppendToAllOptions,true) then
+  if GetOption(shortname, name,s,AppendToPersistentOptions,true) then
     result:=StrToFloatDef(s,defaultVal)
   else
     result:=defaultVal;
@@ -316,8 +337,9 @@ begin
 end;
 
 function TCommandLineOptions.GetOption(shortname, name: string;
-  var param: string; bAppendToAllOptions, bHasParam: boolean): boolean;
+  var param: string; bAppendToPersistentOptions, bHasParam: boolean): boolean;
 var
+  bPersistent:boolean; //add to persistent options or not
   i:integer;
   sParam,sCSParam:string;
   sCSshortname,sCSname:string;
@@ -354,6 +376,7 @@ begin
           if bHasParam and (pos('=',sParam)<=0) then
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(name));
+          bPersistent:=(FParams.Objects[i]=TObject(True));
           FParams.delete(i);
           i:=i-1;
           param:=sParam;
@@ -369,6 +392,7 @@ begin
           if bHasParam and (pos('=',sParam)<=0) then
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(shortname));
+          bPersistent:=(FParams.Objects[i]=TObject(True));
           FParams.delete(i);
           i:=i-1;
           param:=sParam;
@@ -384,20 +408,20 @@ begin
       begin
       if (param<>'') then //error, no argument for this option
         raise ECommandLineError.Create('Option -'+shortname+', --'+name+' does not allow an argument');
-      if bAppendToAllOptions then
+      if bPersistent and bAppendToPersistentOptions then
         if name<>'' then
-          FAllOptions:=trim(FAllOptions+' --'+name)
+          FPersistentOptions:=trim(FPersistentOptions+' --'+name)
         else
-          FAllOptions:=trim(FAllOptions+' -'+shortname);
+          FPersistentOptions:=trim(FPersistentOptions+' -'+shortname);
       end
     else
       begin //argument needed
       delete(param,1,pos('=',param));
-      if bAppendToAllOptions then
+      if bPersistent and bAppendToPersistentOptions then
         if name<>'' then
-          FAllOptions:=trim(FAllOptions+' --'+name+'="'+param+'"')
+          FPersistentOptions:=trim(FPersistentOptions+' --'+name+'="'+param+'"')
         else
-          FAllOptions:=trim(FAllOptions+' -'+shortname+'="'+param+'"');
+          FPersistentOptions:=trim(FPersistentOptions+' -'+shortname+'="'+param+'"');
       end;
     end;
 end;
@@ -406,6 +430,7 @@ constructor TCommandLineOptions.Create(FileSection: string);
 begin
   inherited Create;
   FParams:=TStringList.Create;
+  FParams.OwnsObjects:=false;
   FIniFileSection:=FileSection;
   LoadParams;
 end;
