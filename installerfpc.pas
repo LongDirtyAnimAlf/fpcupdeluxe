@@ -1291,7 +1291,8 @@ begin
   end;
 
   infoln('FPC was at: '+BeforeRevision,etinfo);
-  if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etinfo) else infoln('No updates for FPC found.',etinfo);
+  if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etinfo) else
+    infoln('No updates for FPC found.',etinfo);
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
