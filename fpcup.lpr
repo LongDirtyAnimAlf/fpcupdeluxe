@@ -507,14 +507,23 @@ begin
         FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
       // Specified option overrides
       // Split out single argument into multiple options
-      FInstaller.HTTPProxyHost:=Options.GetOption(FInstaller.HTTPProxyHost,'httpproxy','');
+      // Don't append to persistent options as the command line option HTTPProxy= is not
+      // used; instead split in HTTPProxyHost and HTTPProxyPort
+      FInstaller.HTTPProxyHost:=Options.GetOption(FInstaller.HTTPProxyHost,'httpproxy','',false);
       i:=pos(':',FInstaller.HTTPProxyHost);
       if i=0 then
         FInstaller.HTTPProxyPort:=8080
       else
       begin
         FInstaller.HTTPProxyPort:=strtointdef(copy(FInstaller.HTTPProxyHost,i+1,length(FInstaller.HTTPProxyHost)),8080);
-        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,i-1);
+        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,1,i-1);
+      end;
+      // Inject the proxy host/port back into persistent options so they get saved
+      if FInstaller.HTTPProxyHost<>'' then
+      begin
+        Options.PersistentOptions:=Options.PersistentOptions+' --httpproxyhost='+FInstaller.HTTPProxyHost;
+        if FInstaller.HTTPProxyPort<>0 then
+          Options.PersistentOptions:=Options.PersistentOptions+' --httpproxyport='+inttostr(FInstaller.HTTPProxyPort);
       end;
       FInstaller.HTTPProxyPassword:=Options.GetOption('','httpproxypassword','');
       FInstaller.HTTPProxyUser:=Options.GetOption('','httpproxyuser','');
@@ -626,7 +635,8 @@ begin
       writeln('Log file name:          '+FInstaller.LogFileName);
       writeln('Additional modules:     '+FInstaller.IncludeModules);
       writeln('');
-      writeln('Passed parameters:      '+sAllParameters);
+      writeln('Effective parameters:   ');
+      writeln(sAllParameters);
       writeln('Persistent parameters:  '+FInstaller.PersistentOptions);
 
       // Show warnings to the user:

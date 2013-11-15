@@ -245,7 +245,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--inifile=D:\Reinier\Documents\SourceCode\fpcup\rein.ini --inisection=dos --verbose"/>
+        <CommandLineParams Value="--httpproxy=127.0.0.1:445 --inifile=D:\Reinier\Documents\SourceCode\fpcup\rein.ini --inisection=win32full --only=fpcgetonly  --httpproxyuser=myuser --verbose"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>

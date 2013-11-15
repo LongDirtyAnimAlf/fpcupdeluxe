@@ -501,23 +501,16 @@ begin
 end;
 
 function TSVNClient.GetProxyCommand: string;
-const
-  {$ifdef unix}
-  QuoteChar='''';
-  {$else}
-  //windows
-  QuoteChar='"';
-  {$endif}
 begin
   if FHTTPProxyHost<>'' then
   begin
-    result:='--config-option '+QuoteChar+'servers:global:http-proxy-host='+FHTTPProxyHost+QuoteChar;
+    result:='--config-option servers:global:http-proxy-host='+FHTTPProxyHost;
     if FHTTPProxyPort<>0 then
       result:=result+' --config-option servers:global:http-proxy-port='+inttostr(FHTTPProxyPort);
     if FHTTPProxyUser<>'' then
-      result:=result+' --config-option '+QuoteChar+'servers:global:http-proxy-username='+FHTTPProxyUser+QuoteChar;
+      result:=result+' --config-option servers:global:http-proxy-username='+FHTTPProxyUser;
     if FHTTPProxyPassword<>'' then
-      result:=result+' --config-option '+QuoteChar+'servers:global:http-proxy-password='+FHTTPProxyPassword+QuoteChar;
+      result:=result+' --config-option servers:global:http-proxy-password='+FHTTPProxyPassword;
   end;
 end;
 

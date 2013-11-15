@@ -76,7 +76,8 @@ type
     // Raw parameters. Note that FParams will be deleted when calling GetOption
     property Params: TStringList read FParams;
     // Lists all options retrieved with AppendToPersistentOptions=true in command line arg format.
-    property PersistentOptions:string read FPersistentOptions;
+    // Writing to this is rather hacky
+    property PersistentOptions:string read FPersistentOptions write FPersistentOptions;
     // Arguments left after getting all command line parameters
     property RestArguments:TStringList read FParams;
     function GetOption(shortname,name,defaultVal:string;AppendToPersistentOptions:boolean=true):string;
@@ -343,6 +344,7 @@ function TCommandLineOptions.GetOption(shortname, name: string;
 var
   bPersistent:boolean; //add to persistent options or not
   i:integer;
+  iEqualPos: integer;
   sParam,sCSParam:string;
   sCSshortname,sCSname:string;
 begin
@@ -370,19 +372,24 @@ begin
     if sParam[1]='-' then
       begin
       if (Length(sParam)>1) and (sParam[2]='-') then
-        begin     //long option
+        begin //long option
         delete(sParam,1,2);
         delete(sCSParam,1,2);
+        // Check approximate match: name occurs in parameter:
         if (name<>'') and (sCSname=copy(sCSParam,1,length(name))) then
           begin
           if bHasParam and (pos('=',sParam)<=0) then
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(name));
-          bPersistent:=(FParams.Objects[i]=TObject(True));
-          FParams.delete(i);
-          i:=i-1;
-          param:=sParam;
-          Result:=true;
+          if (bHasParam=false) or (bHasParam and (copy(sParam,1,1)='=')) then
+            begin
+            // Exact match of parameter name
+            bPersistent:=(FParams.Objects[i]=TObject(True));
+            FParams.delete(i);
+            i:=i-1;
+            param:=sParam;
+            Result:=true;
+            end;
           end;
         end
       else
@@ -394,11 +401,15 @@ begin
           if bHasParam and (pos('=',sParam)<=0) then
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(shortname));
-          bPersistent:=(FParams.Objects[i]=TObject(True));
-          FParams.delete(i);
-          i:=i-1;
-          param:=sParam;
-          Result:=true;
+          if (bHasParam=false) or (bHasParam and (copy(sParam,1,1)='=')) then
+            begin
+            // Exact match of parameter name
+            bPersistent:=(FParams.Objects[i]=TObject(True));
+            FParams.delete(i);
+            i:=i-1;
+            param:=sParam;
+            Result:=true;
+            end;
           end;
         end;
       end;
