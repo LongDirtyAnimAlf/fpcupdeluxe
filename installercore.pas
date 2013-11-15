@@ -15,14 +15,14 @@ type
 
   TInstaller = class(TObject)
   private
-    FHTTPProxyHost: string;
-    FHTTPProxyPassword: string;
-    FHTTPProxyPort: integer;
-    FHTTPProxyUser: string;
     FKeepLocalChanges: boolean;
     FPatchCmd: string;
     FReApplyLocalChanges: boolean;
     function GetMake: string;
+    procedure SetHTTPProxyHost(AValue: string);
+    procedure SetHTTPProxyPassword(AValue: string);
+    procedure SetHTTPProxyPort(AValue: integer);
+    procedure SetHTTPProxyUser(AValue: string);
   protected
     FBaseDirectory: string; //Top directory for a product (FPC, Lazarus)
     FBinUtils: TStringList; //List of executables such as make.exe needed for compilation on Win32
@@ -36,6 +36,10 @@ type
     FErrorLog: TStringList;
     FGitClient: TGitClient;
     FHGClient: THGClient;
+    FHTTPProxyHost: string;
+    FHTTPProxyPassword: string;
+    FHTTPProxyPort: integer;
+    FHTTPProxyUser: string;
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
     FMake: string;
@@ -100,13 +104,13 @@ type
     // SVN revision override. Default is HEAD/latest revision
     property DesiredRevision: string write FDesiredRevision;
     // If using HTTP proxy: host
-    property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
+    property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
     // If using HTTP proxy: port (optional, default 8080)
-    property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
+    property HTTPProxyPort: integer read FHTTPProxyPort write SetHTTPProxyPort;
     // If using HTTP proxy: username (optional)
-    property HTTPProxyUser: string read FHTTPProxyUser write FHTTPProxyUser;
+    property HTTPProxyUser: string read FHTTPProxyUser write SetHTTPProxyUser;
     // If using HTTP proxy: password (optional)
-    property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
+    property HTTPProxyPassword: string read FHTTPProxyPassword write SetHTTPProxyPassword;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     property Log: TLogger write FLog;
@@ -191,6 +195,42 @@ begin
     {$ENDIF}
     {$ENDIF MSWINDOWS}
   Result := FMake;
+end;
+
+procedure TInstaller.SetHTTPProxyHost(AValue: string);
+begin
+  if FHTTPProxyHost=AValue then Exit;
+  FHTTPProxyHost:=AValue;
+  FGitClient.HTTPProxyHost:=FHTTPProxyHost;
+  FHGClient.HTTPProxyHost:=FHTTPProxyHost;
+  FSVNClient.HTTPProxyHost:=FHTTPProxyHost;
+end;
+
+procedure TInstaller.SetHTTPProxyPassword(AValue: string);
+begin
+  if FHTTPProxyPassword=AValue then Exit;
+  FHTTPProxyPassword:=AValue;
+  FGitClient.HTTPProxyPassword:=FHTTPProxyPassword;
+  FHGClient.HTTPProxyPassword:=FHTTPProxyPassword;
+  FSVNClient.HTTPProxyPassword:=FHTTPProxyPassword;
+end;
+
+procedure TInstaller.SetHTTPProxyPort(AValue: integer);
+begin
+  if FHTTPProxyPort=AValue then Exit;
+  FHTTPProxyPort:=AValue;
+  FGitClient.HTTPProxyPort:=FHTTPProxyPort;
+  FHGClient.HTTPProxyPort:=FHTTPProxyPort;
+  FSVNClient.HTTPProxyPort:=FHTTPProxyPort;
+end;
+
+procedure TInstaller.SetHTTPProxyUser(AValue: string);
+begin
+  if FHTTPProxyUser=AValue then Exit;
+  FHTTPProxyUser:=AValue;
+  FGitClient.HTTPProxyUser:=FHTTPProxyUser;
+  FHGClient.HTTPProxyUser:=FHTTPProxyUser;
+  FSVNClient.HTTPProxyUser:=FHTTPProxyUser;
 end;
 
 function TInstaller.CheckAndGetNeededExecutables: boolean;
@@ -1067,20 +1107,8 @@ begin
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
   FGitClient := TGitClient.Create;
-  FGitClient.HTTPProxyHost:=FHTTPProxyHost;
-  FGitClient.HTTPProxyPort:=FHTTPProxyPort;
-  FGitClient.HTTPProxyUser:=FHTTPProxyUser;
-  FGitClient.HTTPProxyPassword:=FHTTPProxyPassword;
   FHGClient := THGClient.Create;
-  FHGClient.HTTPProxyHost:=FHTTPProxyHost;
-  FHGClient.HTTPProxyPort:=FHTTPProxyPort;
-  FHGClient.HTTPProxyUser:=FHTTPProxyUser;
-  FHGClient.HTTPProxyPassword:=FHTTPProxyPassword;
   FSVNClient := TSVNClient.Create;
-  FSVNClient.HTTPProxyHost:=FHTTPProxyHost;
-  FSVNClient.HTTPProxyPort:=FHTTPProxyPort;
-  FSVNClient.HTTPProxyUser:=FHTTPProxyUser;
-  FSVNClient.HTTPProxyPassword:=FHTTPProxyPassword;
   // List of binutils that can be downloaded:
   CreateBinutilsList;
   FNeededExecutablesChecked:=false;
