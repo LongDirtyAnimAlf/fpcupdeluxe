@@ -154,6 +154,10 @@ type
 
   TFPCupManager=class(Tobject)
   private
+    FHTTPProxyHost: string;
+    FHTTPProxyPassword: string;
+    FHTTPProxyPort: integer;
+    FHTTPProxyUser: string;
     FPersistentOptions: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -219,7 +223,11 @@ type
     property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
-    property FPCDesiredRevision:string read FFPCDesiredRevision write FFPCDesiredRevision;
+    property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
+    property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
+    property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
+    property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
+    property HTTPProxyUser: string read FHTTPProxyUser write FHTTPProxyUser;
     property KeepLocalChanges: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
     property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
@@ -849,6 +857,10 @@ begin
         Installer.Compiler:=FParent.CompilerName;
     end;
 
+  Installer.HTTPProxyHost:=FParent.HTTPProxyHost;
+  Installer.HTTPProxyPort:=FParent.HTTPProxyPort;
+  Installer.HTTPProxyUser:=FParent.HTTPProxyUser;
+  Installer.HTTPProxyPassword:=FParent.HTTPProxyPassword;
   Installer.KeepLocalChanges:=FParent.KeepLocalChanges;
   Installer.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
   Installer.PatchCmd:=FParent.PatchCmd;

@@ -73,6 +73,8 @@ type
     property IniFile:string read FIniFile write SetIniFile ;
     // Section name (e.g. [General]) where parameters are if using ini files
     property IniFileSection: string read FIniFileSection write FIniFileSection;
+    // Raw parameters. Note that FParams will be deleted when calling GetOption
+    property Params: TStringList read FParams;
     // Lists all options retrieved with AppendToPersistentOptions=true in command line arg format.
     property PersistentOptions:string read FPersistentOptions;
     // Arguments left after getting all command line parameters
@@ -83,7 +85,7 @@ type
     function GetOption(shortname,name:string;defaultVal:double;AppendToPersistentOptions:boolean=true):double;
     // Get option and do not expect any parameter added (e.g. --verbose, not --verbose=yes)
     function GetOptionNoParam(shortname,name:string;AppendToPersistentOptions:boolean=true):boolean;
-    // Results false if unknown parameters are left
+    // Results non-empty if unknown parameters are left
     function ValidateOptions:string;
     // If IniFileSection specified, the @filename param will attempt to load filename as inifile first,
     // else @filename will always be interpreted as a series of command line arguments

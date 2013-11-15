@@ -58,6 +58,8 @@ type
     function GetLocalRevisionWholeRepo: string;
     // Figure out branch and whole repo revisions for local repository
     procedure GetLocalRevisions;
+    // Returns command snippet to set HTTP proxy config variables if needed
+    function GetProxyCommand: string;
     function GetRepoExecutable: string; override;
     procedure Update; override;
   public
@@ -118,8 +120,10 @@ begin
   if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
+    {$ifdef mswindows}
     if FileExists(SVNName + '.exe') then
       FRepoExecutable := SVNName + '.exe';
+    {$endif mswindows}
     if FileExists('svn') then
       FRepoExecutable := SVNName;
   end;
@@ -151,35 +155,28 @@ begin
     Result := FRepoExecutable;
 end;
 
-
-
 procedure TSVNClient.CheckOut;
 const
   MaxRetries = 3;
 var
   Command: string;
   Output: string = '';
+  ProxyCommand: string;
   RetryAttempt: integer;
 begin
-  {todo: add support for http proxy, e.g. on *nix environment var
-  export http_proxy=http://my-proxy-server.com:8080/
-  for subversion:
-  --config-option servers:global:http-proxy-host = ip.add.re.ss
-  --config-option servers:global:http-proxy-port = 3128
-  --config-option servers:global:http-proxy-user = bla
-  --config-option servers:global:http-proxy-password = bla
-  }
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+
+  ProxyCommand:=GetProxyCommand;
 
   // Avoid
   // svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
   // by --trust-server-cert
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' checkout --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
+    Command := ' checkout '+ProxyCommand+' --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := ' checkout --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+    Command := ' checkout '+ProxyCommand+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -194,7 +191,7 @@ begin
       }
       begin
         // Let's try one time to fix it (don't update FReturnCode here)
-        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
         // We probably ended up with a local repository where not all files were checked out.
         // Let's call update to do so.
         Update;
@@ -206,7 +203,7 @@ begin
       }
       begin
         // Let's try one time upgrade to fix it (don't update FReturnCode here)
-        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade --non-interactive ' + LocalRepository, Verbose); //attempt again
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
         // Now update again:
         Update;
       end;
@@ -243,37 +240,31 @@ begin
 end;
 
 function TSVNClient.Commit(Message: string): boolean;
-{todo: add support for http proxy, e.g. on *nix environment var
-export http_proxy=http://my-proxy-server.com:8080/
-for subversion:
---config-option servers:global:http-proxy-host = ip.add.re.ss
---config-option servers:global:http-proxy-port = 3128
---config-option servers:global:http-proxy-user = bla
---config-option servers:global:http-proxy-password = bla
-}
 begin
   inherited Commit(Message);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit '+GetProxyCommand+' --message='+Message, LocalRepository, Verbose);
   Result:=(FReturnCode=0);
 end;
 
 function TSVNClient.GetDiffAll: string;
 begin
   Result := ''; //fail by default
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff .', LocalRepository, Result, Verbose);
+  // Using proxy more for completeness here
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff '+GetProxyCommand+' .', LocalRepository, Result, Verbose);
 end;
 
 procedure TSVNClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ' + LocalRepository, s, Verbose);
+  // Using proxy more for completeness here
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ' + GetProxyCommand + ' ' + LocalRepository, s, Verbose);
   Log.Text := s;
 end;
 
 procedure TSVNClient.Revert;
 begin
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --recursive ' + LocalRepository, Verbose);
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert '+GetProxyCommand+' --recursive ' + LocalRepository, Verbose);
 end;
 
 procedure TSVNClient.Update;
@@ -284,28 +275,22 @@ var
   Command: string;
   FileList: TStringList;
   Output: string = '';
+  ProxyCommand: string;
   AfterErrorRetry: integer; // Keeps track of retry attempts after error result
   UpdateRetry: integer;     // Keeps track of retry attempts to get all files
 begin
-  {todo: add support for http proxy, e.g. on *nix environment var
-  export http_proxy=http://my-proxy-server.com:8080/
-  for subversion:
-  --config-option servers:global:http-proxy-host = ip.add.re.ss
-  --config-option servers:global:http-proxy-port = 3128
-  --config-option servers:global:http-proxy-user = bla
-  --config-option servers:global:http-proxy-password = bla
-  }
   AfterErrorRetry := 1;
   UpdateRetry := 1;
+  ProxyCommand:=GetProxyCommand;
 
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
 
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' update --non-interactive --trust-server-cert ' + LocalRepository
+    Command := ' update '+ProxyCommand+' --non-interactive --trust-server-cert ' + LocalRepository
   else
-    Command := ' update --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+    Command := ' update '+ProxyCommand+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
 
   FileList := TStringList.Create;
   try
@@ -329,7 +314,7 @@ begin
         }
         begin
           // Let's try to release locks; don't update FReturnCode
-          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + 'cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + 'cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
         end;
         Sleep(500); //Give everybody a chance to relax ;)
         FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Verbose); //attempt again
@@ -390,7 +375,7 @@ var
   AllFiles: TStringList;
   Output: string = '';
 begin
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --depth infinity ' + FLocalRepository, Output, Verbose);
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' status '+GetProxyCommand+' --depth infinity ' + FLocalRepository, Output, Verbose);
   FileList.Clear;
   AllFiles := TStringList.Create;
   try
@@ -411,7 +396,7 @@ var
   URLPos: integer;
 begin
   Result := false;
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + FLocalRepository, Output, Verbose);
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
   // This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then
@@ -460,7 +445,7 @@ begin
   // Only update if we have invalid revision info, in order to minimize svn info calls
   if (FLocalRevision = FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) then
   begin
-    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info ' + FLocalRepository, Output, Verbose);
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision:"...
     // unless we're in a branch/tag where we need "Last Changed Rev: "
@@ -512,6 +497,27 @@ begin
       else
         FReturnCode := FRET_NONEXISTING_REPO;
     end;
+  end;
+end;
+
+function TSVNClient.GetProxyCommand: string;
+const
+  {$ifdef unix}
+  QuoteChar='''';
+  {$else}
+  //windows
+  QuoteChar='"';
+  {$endif}
+begin
+  if FHTTPProxyHost<>'' then
+  begin
+    result:='--config-option '+QuoteChar+'servers:global:http-proxy-host='+FHTTPProxyHost+QuoteChar;
+    if FHTTPProxyPort<>0 then
+      result:=result+' --config-option servers:global:http-proxy-port='+inttostr(FHTTPProxyPort);
+    if FHTTPProxyUser<>'' then
+      result:=result+' --config-option '+QuoteChar+'servers:global:http-proxy-username='+FHTTPProxyUser+QuoteChar;
+    if FHTTPProxyPassword<>'' then
+      result:=result+' --config-option '+QuoteChar+'servers:global:http-proxy-password='+FHTTPProxyPassword+QuoteChar;
   end;
 end;
 

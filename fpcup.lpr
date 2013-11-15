@@ -153,6 +153,11 @@ begin
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
+  writeln(' httpproxy=<host:port> Use HTTP proxy for http downloads');
+  writeln('                       On Unix/Linux: if the http_proxy environment variable');
+  writeln('                       is set, this option is automatically filled in.');
+  writeln(' httpproxypassword=<p> Password for http proxy. Often not required.');
+  writeln(' httpproxyuser=<user>  Username for http proxy. Often not required.');
   writeln(' include=<values>      Update/build or clean the modules specified as well ');
   writeln('                       as the default ones.');
   writeln('                       The module list is separated by commas.');
@@ -235,9 +240,10 @@ end;
 
 function CheckOptions(FInstaller: TFPCupManager):integer;
 var
-  {$IFNDEF MSWINDOWS}AllOptions,FPCUpLink:string;{$ENDIF}
+  {$IFNDEF MSWINDOWS}PersistentOptions,FPCUpLink:string;{$ENDIF}
   bNoConfirm,bHelp,bVersion:boolean;
   i, iCurrentOption: integer;
+	sAllParameters:string;
   sConfirm:string;
   Options:TCommandLineOptions;
   sIniFile: string;
@@ -282,6 +288,10 @@ begin
           end;
         end;
       end;
+			
+      // Save all passwed parameters, including any in ini file
+      // before the params are removed again by Options.GetOption calls
+      sAllParameters:=Options.Params.Text;
 
       {$IFDEF MSWINDOWS}
       // All directories specified: absolute paths without trailing delimiter
@@ -482,6 +492,42 @@ begin
       end;
     end;
 
+    // HTTP proxy settings, including support for environment variables
+    try
+      FInstaller.HTTPProxyHost:='';
+      FInstaller.HTTPProxyHost:=GetEnvironmentVariable('http_proxy');
+      if pos('https://',FInstaller.HTTPProxyHost)>0 then
+      begin
+        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,length('https://')+1,length(FInstaller.HTTPProxyHost));
+        // Don't know if this port is normal or https is ever used but it can't hurt
+        if pos(':',FInstaller.HTTPProxyHost)>0 then
+          FInstaller.HTTPProxyHost:=FInstaller.HTTPProxyHost+':443';
+      end;
+      if pos('http://',FInstaller.HTTPProxyHost)>0 then
+        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
+      // Specified option overrides
+      // Split out single argument into multiple options
+      FInstaller.HTTPProxyHost:=Options.GetOption(FInstaller.HTTPProxyHost,'httpproxy','');
+      i:=pos(':',FInstaller.HTTPProxyHost);
+      if i=0 then
+        FInstaller.HTTPProxyPort:=8080
+      else
+      begin
+        FInstaller.HTTPProxyPort:=strtointdef(copy(FInstaller.HTTPProxyHost,i+1,length(FInstaller.HTTPProxyHost)),8080);
+        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,i-1);
+      end;
+      FInstaller.HTTPProxyPassword:=Options.GetOption('','httpproxypassword','');
+      FInstaller.HTTPProxyUser:=Options.GetOption('','httpproxyuser','');
+    except
+      on E:Exception do
+      begin
+      writeln('Error: wrong command line options given:');
+      writeln(E.Message);
+      result:=13; //Quit with error resultcode
+      exit;
+      end;
+    end;
+
     if Options.ValidateOptions<>'' then
       begin
       // settings.ini can contain include=fpspreadsheet,mupdf but also
@@ -579,6 +625,8 @@ begin
       end;
       writeln('Log file name:          '+FInstaller.LogFileName);
       writeln('Additional modules:     '+FInstaller.IncludeModules);
+      writeln('');
+      writeln('Passed parameters:      '+sAllParameters);
       writeln('Persistent parameters:  '+FInstaller.PersistentOptions);
 
       // Show warnings to the user:

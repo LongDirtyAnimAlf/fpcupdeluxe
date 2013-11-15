@@ -27,6 +27,11 @@
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
+// todo: add support for http proxy e.g. using
+// --config http_proxy.host=host:port
+// --config http_proxy.user=bla
+// --config http_proxy.passwd=bla
+
 unit hgclient;
 
 {$mode objfpc}{$H+}

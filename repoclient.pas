@@ -51,6 +51,10 @@ type
   TRepoClient = class(TObject)
   protected
     FDesiredRevision: string;
+    FHTTPProxyHost: string;
+    FHTTPProxyPassword: string;
+    FHTTPProxyPort: integer;
+    FHTTPProxyUser: string;
     FLocalRepository: string;
     FLocalRevision: string;
     FRepoExecutable: string;
@@ -91,6 +95,14 @@ type
     procedure Revert; virtual;
     // Get/set desired revision to checkout/pull to (if none given, use HEAD/tip/newest)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
+    // If using http transport, an http proxy can be used. Proxy hostname/ip address
+    property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
+    // If using http transport, an http proxy can be used. Proxy port
+    property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
+    // If using http transport, an http proxy can be used. Proxy username (optional)
+    property HTTPProxyUser: string read FHTTPProxyUser write FHTTPProxyUser;
+    // If using http transport, an http proxy can be used. Proxy password (optional)
+    property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     // Shows list of files that have been modified locally (and not committed)
     procedure LocalModifications(var FileList: TStringList); virtual;
     // Checks to see if local directory is a valid repository for the repository URL given (if any)

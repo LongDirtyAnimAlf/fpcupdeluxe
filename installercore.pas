@@ -15,6 +15,10 @@ type
 
   TInstaller = class(TObject)
   private
+    FHTTPProxyHost: string;
+    FHTTPProxyPassword: string;
+    FHTTPProxyPort: integer;
+    FHTTPProxyUser: string;
     FKeepLocalChanges: boolean;
     FPatchCmd: string;
     FReApplyLocalChanges: boolean;
@@ -95,6 +99,14 @@ type
     property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
     // SVN revision override. Default is HEAD/latest revision
     property DesiredRevision: string write FDesiredRevision;
+    // If using HTTP proxy: host
+    property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
+    // If using HTTP proxy: port (optional, default 8080)
+    property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
+    // If using HTTP proxy: username (optional)
+    property HTTPProxyUser: string read FHTTPProxyUser write FHTTPProxyUser;
+    // If using HTTP proxy: password (optional)
+    property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     property Log: TLogger write FLog;
@@ -103,7 +115,7 @@ type
     property PatchCmd:string write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
-    // URL for download. HTTP,ftp or svn
+    // URL for download. HTTP, ftp or svn
     property URL: string write FURL;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
@@ -573,7 +585,12 @@ begin
         else
           RootURL:=SourceURL;
         {$endif win64}
-        if Download(RootUrl + FBinUtils[Counter], IncludeTrailingPathDelimiter(FMakeDir) + FBinUtils[Counter]) = false then
+        if Download(RootUrl + FBinUtils[Counter],
+          IncludeTrailingPathDelimiter(FMakeDir) + FBinUtils[Counter],
+          FHTTPProxyHost,
+          inttostr(FHTTPProxyPort),
+          FHTTPProxyUser,
+          FHTTPProxyPassword) = false then
         begin
           Errors := Errors + 1;
           infoln('Error downloading binutils: ' + FBinUtils[Counter] + ' to ' + FMakeDir,eterror);
@@ -861,7 +878,13 @@ begin
   ForceDirectoriesUTF8(FSVNDirectory);
   SVNZip := SysUtils.GetTempFileName + '.zip';
   try
-    OperationSucceeded := Download(SourceURL, SVNZip);
+    OperationSucceeded := Download(
+      SourceURL,
+      SVNZip,
+      FHTTPProxyUser,
+      inttostr(FHTTPProxyPort),
+      FHTTPProxyUser,
+      FHTTPProxyPassword);
   except
     // Deal with timeouts, wrong URLs etc
     on E: Exception do
@@ -1044,8 +1067,20 @@ begin
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
   FGitClient := TGitClient.Create;
+  FGitClient.HTTPProxyHost:=FHTTPProxyHost;
+  FGitClient.HTTPProxyPort:=FHTTPProxyPort;
+  FGitClient.HTTPProxyUser:=FHTTPProxyUser;
+  FGitClient.HTTPProxyPassword:=FHTTPProxyPassword;
   FHGClient := THGClient.Create;
+  FHGClient.HTTPProxyHost:=FHTTPProxyHost;
+  FHGClient.HTTPProxyPort:=FHTTPProxyPort;
+  FHGClient.HTTPProxyUser:=FHTTPProxyUser;
+  FHGClient.HTTPProxyPassword:=FHTTPProxyPassword;
   FSVNClient := TSVNClient.Create;
+  FSVNClient.HTTPProxyHost:=FHTTPProxyHost;
+  FSVNClient.HTTPProxyPort:=FHTTPProxyPort;
+  FSVNClient.HTTPProxyUser:=FHTTPProxyUser;
+  FSVNClient.HTTPProxyPassword:=FHTTPProxyPassword;
   // List of binutils that can be downloaded:
   CreateBinutilsList;
   FNeededExecutablesChecked:=false;

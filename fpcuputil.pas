@@ -70,7 +70,8 @@ function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList
 // Recursively delete files with specified extension(s), only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
-function Download(URL, TargetFile: string): boolean;
+// HTTP download can work with http proxy
+function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 // File size; returns 0 if empty, non-existent or error.
 function FileSizeUTF8(FileName: string): int64;
 //check if there is at least one directory between Dir and root
@@ -306,7 +307,7 @@ begin
   result:=URL;
 end;
 
-function SourceForgeURL(URL: string): string;
+function SourceForgeURL(URL: string; HTTPSender: THTTPSend): string;
 // Detects sourceforge download and tries to deal with
 // redirection, and extracting direct download link.
 // Thanks to
@@ -316,7 +317,7 @@ const
   SFFilesPart = '/files/';
   SFDownloadPart ='/download';
 var
-  HTTPSender: THTTPSend;
+  ExistingUserAgent: string;
   i, j: integer;
   FoundCorrectURL: boolean;
   SFDirectory: string; //Sourceforge directory
@@ -366,62 +367,60 @@ begin
 
   if not FoundCorrectURL then
   begin
-    try
-      // Rewrite URL if needed for Sourceforge download redirection
-      // Detect direct link in HTML body and get URL from that
-      HTTPSender := THTTPSend.Create;
-      //Who knows, this might help:
-      HTTPSender.UserAgent:='curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18';
-      while not FoundCorrectURL do
-      begin
-        HTTPSender.HTTPMethod('GET', URL);
-        case HTTPSender.Resultcode of
-          301, 302, 307:
-            begin
-              for i := 0 to HTTPSender.Headers.Count - 1 do
-                if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
-                  (Pos('location: ', HTTPSender.Headers.Strings[i]) > 0) then
-                begin
-                  j := Pos('use_mirror=', HTTPSender.Headers.Strings[i]);
-                  if j > 0 then
-                    URL :=
-                      'http://' + RightStr(HTTPSender.Headers.Strings[i],
-                      length(HTTPSender.Headers.Strings[i]) - j - 10) +
-                      '.dl.sourceforge.net/project/' +
-                      SFProject + '/' + SFDirectory + SFFilename
-                  else
-                    URL:=StringReplace(
-                      HTTPSender.Headers.Strings[i], 'Location: ', '', []);
-                  HTTPSender.Clear;//httpsend
-                  FoundCorrectURL:=true;
-                  break; //out of rewriting loop
-              end;
-            end;
-          100..200:
-            begin
-              //Could be a sourceforge timer/direct link page, but...
-              if AnsiPos('Content-Type: text/html', HTTPSender.Headers.Text)>0 then
+    // Rewrite URL if needed for Sourceforge download redirection
+    // Detect direct link in HTML body and get URL from that
+
+    //Who knows, this might help:
+    ExistingUserAgent:=HTTPSender.UserAgent;
+    HTTPSender.UserAgent:='curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18';
+    while not FoundCorrectURL do
+    begin
+      HTTPSender.HTTPMethod('GET', URL);
+      case HTTPSender.Resultcode of
+        301, 302, 307:
+          begin
+            for i := 0 to HTTPSender.Headers.Count - 1 do
+              if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
+                (Pos('location: ', HTTPSender.Headers.Strings[i]) > 0) then
               begin
-                // find out... it's at least not a binary
-                URL:=SFDirectLinkURL(URL, HTTPSender.Document);
-              end;
-              FoundCorrectURL:=true; //We're done by now
+                j := Pos('use_mirror=', HTTPSender.Headers.Strings[i]);
+                if j > 0 then
+                  URL :=
+                    'http://' + RightStr(HTTPSender.Headers.Strings[i],
+                    length(HTTPSender.Headers.Strings[i]) - j - 10) +
+                    '.dl.sourceforge.net/project/' +
+                    SFProject + '/' + SFDirectory + SFFilename
+                else
+                  URL:=StringReplace(
+                    HTTPSender.Headers.Strings[i], 'Location: ', '', []);
+                HTTPSender.Clear;//httpsend
+                FoundCorrectURL:=true;
+                break; //out of rewriting loop
             end;
-          500: raise Exception.Create('Internal server error 500; perhaps no internet connection available');
-            //Internal Server Error ('+aURL+')');
-          else
-            raise Exception.Create('Download failed with error code ' +
-              IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
-        end;//case
-      end;//while
-    finally
-      HTTPSender.Free;
-    end;
+          end;
+        100..200:
+          begin
+            //Could be a sourceforge timer/direct link page, but...
+            if AnsiPos('Content-Type: text/html', HTTPSender.Headers.Text)>0 then
+            begin
+              // find out... it's at least not a binary
+              URL:=SFDirectLinkURL(URL, HTTPSender.Document);
+            end;
+            FoundCorrectURL:=true; //We're done by now
+          end;
+        500: raise Exception.Create('Internal server error 500; perhaps no internet connection available');
+          //Internal Server Error ('+aURL+')');
+        else
+          raise Exception.Create('Download failed with error code ' +
+            IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
+      end;//case
+    end;//while
+    HTTPSender.UserAgent:=ExistingUserAgent;
   end;
   result:=URL;
 end;
 
-function DownloadHTTP(URL, TargetFile: string): boolean;
+function DownloadHTTP(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 // Download file; retry if necessary.
 // Deals with SourceForge download links
 // Could use Synapse HttpGetBinary, but that doesn't deal
@@ -433,21 +432,25 @@ var
   HTTPSender: THTTPSend;
   RetryAttempt: integer;
 begin
-  {todo: add support for http proxy, e.g. on *nix environment var
-  export http_proxy=http://my-proxy-server.com:8080/
-  for synapse http:
-  ProxyHost:=
-  ProxyPort:=
-  for subversion:
-  --config-option servers:global:http-proxy-host = ip.add.re.ss
-  --config-option servers:global:http-proxy-port = 3128
-  }
   result:=false;
   RetryAttempt:=1;
-  URL:=SourceForgeURL(URL); //Deal with sourceforge URLs
   HTTPSender:=THTTPSend.Create;
   try
     try
+      if HTTPProxyHost<>'' then
+      begin
+        HTTPSender.ProxyHost:=HTTPProxyHost;
+        if HTTPProxyPort='' then
+          HTTPSender.ProxyPort:='8080'
+        else
+          HTTPSender.ProxyPort:=HTTPProxyPort;
+        HTTPSender.ProxyUser:=HTTPProxyUser;
+        HTTPSender.ProxyPass:=HTTPProxyPassword;
+      end;
+
+      // Follow URL if necessary
+      URL:=SourceForgeURL(URL,HTTPSender); //Deal with sourceforge URLs
+
       // Try to get the file
       HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
       while (HTTPGetResult=false) and (RetryAttempt<MaxRetries) do
@@ -682,7 +685,7 @@ begin
   Result:=true;
 end;
 
-function Download(URL, TargetFile: string): boolean;
+function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin
   result:=false;
   // Assume http if no ftp detected
@@ -695,7 +698,7 @@ begin
     end
     else
     begin
-      result:=DownloadHTTP(URL, TargetFile);
+      result:=DownloadHTTP(URL, TargetFile, HTTPProxyHost, HTTPProxyPort, HTTPProxyUser, HTTPProxyPassword);
     end;
   except
     on E: Exception do
