@@ -897,10 +897,12 @@ end;
 function TInstaller.DownloadSVN: boolean;
 const
   SourceURL = 'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip';
+  VC6URL = 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
   SVNZip: string;
+  VC6RedistExe: string;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
   { Alternative 1: sourceforge packaged
@@ -916,15 +918,48 @@ begin
   However, doesn't work on Windows 2K...}
   OperationSucceeded := true;
   ForceDirectoriesUTF8(FSVNDirectory);
+  VC6RedistExe := SysUtils.GetTempFileName + '.zip';
+  try
+    if OperationSucceeded then
+    begin
+      OperationSucceeded := Download(
+        VC6URL,
+        VC6RedistExe,
+        FHTTPProxyUser,
+        inttostr(FHTTPProxyPort),
+        FHTTPProxyUser,
+        FHTTPProxyPassword);
+    end;
+  except
+    // Deal with timeouts, wrong URLs etc
+    on E: Exception do
+    begin
+      OperationSucceeded := false;
+      writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading VC6 runtime from ' + SourceURL, true);
+    end;
+  end;
+
+  // Install VC6 redist. If it fails, don't abort as it may already be present but we're not
+  // running as admin etc
+  ResultCode:=ExecuteCommand(VC6RedistExe+' /q /r:n',FVerbose); //quiet, no reboot message
+  // could also try /q //semi-quiet mode, displays reboot message so user can choose, and no progress bar
+  if ResultCode<>0 then
+  begin
+    writelnlog('WARNING: apparent problem installing MS VC6 runtime installer needed for svn client (result code '+inttostr(ResultCode)+'. Continuing.', true);
+  end;
+
   SVNZip := SysUtils.GetTempFileName + '.zip';
   try
-    OperationSucceeded := Download(
-      SourceURL,
-      SVNZip,
-      FHTTPProxyUser,
-      inttostr(FHTTPProxyPort),
-      FHTTPProxyUser,
-      FHTTPProxyPassword);
+    if OperationSucceeded then
+    begin
+      OperationSucceeded := Download(
+        SourceURL,
+        SVNZip,
+        FHTTPProxyUser,
+        inttostr(FHTTPProxyPort),
+        FHTTPProxyUser,
+        FHTTPProxyPassword);
+    end;
   except
     // Deal with timeouts, wrong URLs etc
     on E: Exception do
@@ -950,9 +985,10 @@ begin
 
   if OperationSucceeded then
   begin
+    SysUtils.DeleteFile(VC6RedistExe);  //Get rid of temp zip if success.
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
-      SysUtils.deletefile(SVNZip); //Get rid of temp zip if success.
+      SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
   end;
   Result := OperationSucceeded;
 end;
