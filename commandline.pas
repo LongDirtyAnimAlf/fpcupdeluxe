@@ -379,7 +379,7 @@ begin
           if bHasParam and (sCSName=SCSParam) then {option names match but no = sign => no parameter}
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(name));
-          if bHasParam and (copy(sParam,1,1)='=') then
+          if (not bHasParam) or (bHasParam and (copy(sParam,1,1)='=')) then
             begin
             // Exact match of parameter name: now name is deleted, the = is left
             bPersistent:=(FParams.Objects[i]=TObject(True));
@@ -399,7 +399,7 @@ begin
           if bHasParam and (sCSName=SCSParam) then {option names match but no = sign => no parameter}
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(shortname));
-          if bHasParam and (copy(sParam,1,1)='=') then
+          if (not bHasParam) or (bHasParam and (copy(sParam,1,1)='=')) then
             begin
             // Exact match of parameter name: now shortname is deleted, the = is left
             bPersistent:=(FParams.Objects[i]=TObject(True));
