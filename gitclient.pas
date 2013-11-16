@@ -49,6 +49,10 @@ type
   { TGitClient }
 
   TGitClient = class(TRepoClient)
+  { Support for http proxy via git config, e.g.
+  git config --global http.proxy $http_proxy
+  however, we're not writing config changes for users, so
+  we don't provide http proxy support for git. }
   protected
     procedure CheckOut; override;
     function GetLocalRevision: string; override;
@@ -72,9 +76,6 @@ type
 implementation
 
 uses strutils;
-
-//todo: add support for http proxy if using http:// transport for git, see e.g.
-//http://stackoverflow.com/questions/128035/how-do-i-pull-from-a-git-repository-through-an-http-proxy
 
 { TGitClient }
 function TGitClient.FindRepoExecutable: string;
