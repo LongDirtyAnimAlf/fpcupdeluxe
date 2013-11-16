@@ -157,6 +157,7 @@ begin
   writeln('                       On Unix/Linux: if the http_proxy environment variable');
   writeln('                       is set, this option is automatically filled in.');
   writeln(' httpproxypassword=<p> Password for http proxy. Often not required.');
+  writeln('                       WARNING: will be shown if using --verbose');
   writeln(' httpproxyuser=<user>  Username for http proxy. Often not required.');
   writeln(' include=<values>      Update/build or clean the modules specified as well ');
   writeln('                       as the default ones.');
@@ -494,39 +495,38 @@ begin
 
     // HTTP proxy settings, including support for environment variables
     try
-      FInstaller.HTTPProxyHost:='';
-      FInstaller.HTTPProxyHost:=GetEnvironmentVariable('http_proxy');
-      if pos('https://',FInstaller.HTTPProxyHost)>0 then
+      // Get option from specified options
+      FInstaller.HTTPProxyHost:=Options.GetOption('','httpproxy','',true);
+
+      // If no option specified, try environment variable
+      // Note we don't save these options to persistent options -
+      // they should remain part of the environment
+      if (FInstaller.HTTPProxyHost='') and (GetEnvironmentVariable('http_proxy')<>'') then
       begin
-        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,length('https://')+1,length(FInstaller.HTTPProxyHost));
-        // Don't know if this port is normal or https is ever used but it can't hurt
-        if pos(':',FInstaller.HTTPProxyHost)>0 then
-          FInstaller.HTTPProxyHost:=FInstaller.HTTPProxyHost+':443';
+        FInstaller.HTTPProxyHost:=GetEnvironmentVariable('http_proxy');
       end;
-      if pos('http://',FInstaller.HTTPProxyHost)>0 then
-        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
-      // Specified option overrides
-      // Split out single argument into multiple options
-      // Don't append to persistent options as the command line option HTTPProxy= is not
-      // used; instead split in HTTPProxyHost and HTTPProxyPort
-      FInstaller.HTTPProxyHost:=Options.GetOption(FInstaller.HTTPProxyHost,'httpproxy','',false);
+
+      // Extract port:
       i:=pos(':',FInstaller.HTTPProxyHost);
       if i=0 then
-        FInstaller.HTTPProxyPort:=8080
+        if pos('https://',FInstaller.HTTPProxyHost)=1 then
+          FInstaller.HTTPProxyPort:=443
+        else
+          FInstaller.HTTPProxyPort:=8080 {seems like a good default}
       else
       begin
         FInstaller.HTTPProxyPort:=strtointdef(copy(FInstaller.HTTPProxyHost,i+1,length(FInstaller.HTTPProxyHost)),8080);
         FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,1,i-1);
       end;
-      // Inject the proxy host/port back into persistent options so they get saved
-      if FInstaller.HTTPProxyHost<>'' then
-      begin
-        Options.PersistentOptions:=Options.PersistentOptions+' --httpproxyhost='+FInstaller.HTTPProxyHost;
-        if FInstaller.HTTPProxyPort<>0 then
-          Options.PersistentOptions:=Options.PersistentOptions+' --httpproxyport='+inttostr(FInstaller.HTTPProxyPort);
-      end;
-      FInstaller.HTTPProxyPassword:=Options.GetOption('','httpproxypassword','');
-      FInstaller.HTTPProxyUser:=Options.GetOption('','httpproxyuser','');
+
+      // Strip out http/https
+      if pos('https://',FInstaller.HTTPProxyHost)=1 then
+        FInstaller.HTTPProxyHost:=copy(Finstaller.HTTPProxyHost,length('https://')+1,length(FInstaller.HTTPProxyHost));
+      if pos('http://',FInstaller.HTTPProxyHost)=1 then
+        FInstaller.HTTPProxyHost:=copy(Finstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
+
+      FInstaller.HTTPProxyPassword:=Options.GetOption('','httpproxypassword','',true);
+      FInstaller.HTTPProxyUser:=Options.GetOption('','httpproxyuser','',true);
     except
       on E:Exception do
       begin
@@ -636,7 +636,14 @@ begin
       writeln('Additional modules:     '+FInstaller.IncludeModules);
       writeln('');
       writeln('Effective parameters:   ');
-      writeln(sAllParameters);
+      // Remove password from output
+      if FInstaller.HTTPProxyPassword='' then
+        writeln(sAllParameters)
+      else
+        writeln(StringReplace(sAllParameters,
+        'httpproxypassword='+FInstaller.HTTPProxyPassword,
+        'httpproxypassword=<SECURITY:REDACTED>',
+        [rfReplaceAll,rfIgnoreCase]));
       writeln('Persistent parameters:  '+FInstaller.PersistentOptions);
 
       // Show warnings to the user:
