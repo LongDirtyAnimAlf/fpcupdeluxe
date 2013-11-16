@@ -511,6 +511,10 @@ begin
       result:=result+' --config-option servers:global:http-proxy-username='+FHTTPProxyUser;
     if FHTTPProxyPassword<>'' then
       result:=result+' --config-option servers:global:http-proxy-password='+FHTTPProxyPassword;
+  end
+  else
+  begin
+    result:='';
   end;
 end;
 

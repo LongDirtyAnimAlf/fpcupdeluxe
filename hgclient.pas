@@ -27,10 +27,7 @@
   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
-// todo: add support for http proxy e.g. using
-// --config http_proxy.host=host:port
-// --config http_proxy.user=bla
-// --config http_proxy.passwd=bla
+
 
 unit hgclient;
 
@@ -57,6 +54,8 @@ type
   protected
     procedure CheckOut; override;
     function GetLocalRevision: string; override;
+    // Returns command snippet to set HTTP proxy config variables if needed
+    function GetProxyCommand: string;
     function GetRepoExecutable: string; override;
     procedure Update; override;
   public
@@ -156,9 +155,9 @@ begin
   //tip is similar to svn HEAD
   // Could add --insecure to ignore certificate problems, but rather not
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'tip') then
-    Command := ' clone -r tip ' + Repository + ' ' + LocalRepository
+    Command := ' '+GetProxyCommand+' clone -r tip ' + Repository + ' ' + LocalRepository
   else
-    Command := ' clone -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+    Command := ' '+GetProxyCommand+' clone -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
   FReturnCode := ExecuteCommand(RepoExecutable + Command, Output, FVerbose);
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -201,27 +200,27 @@ end;
 function THGClient.Commit(Message: string): boolean;
 begin
   inherited Commit(Message);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message '+Message, LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+GetProxyCommand+' commit --message '+Message, LocalRepository, Verbose);
   //todo: do pushafter to push to remote repo?
   Result:=(FReturnCode=0);
 end;
 
 function THGClient.GetDiffAll: string;
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff --git ', LocalRepository, Result, Verbose);
 end;
 
 procedure THGClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' log ', LocalRepository, s, Verbose);
   Log.Text := s;
 end;
 
 procedure THGClient.Revert;
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' revert --all --no-backup ', LocalRepository, Verbose);
 end;
 
 procedure THGClient.Update;
@@ -233,11 +232,11 @@ begin
 
   // Combined hg pull & hg update by specifying --update
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'tip') then
-    Command := ' pull --update '
+    Command := ' '+GetProxyCommand+' pull --update '
   else
-    Command := ' pull --update -r ' + FDesiredRevision;
+    Command := ' '+GetProxyCommand+' pull --update -r ' + FDesiredRevision;
   //todo: check if this desired revision works
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+Command, FLocalRepository, Verbose);
 end;
 
 procedure THGClient.ParseFileList(const CommandOutput: string;
@@ -286,7 +285,7 @@ var
   Output: string = '';
 begin
   //quiet: hide untracked files; only show modified/added/removed/deleted files, not clean files
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --modified --added --removed --deleted --quiet ',
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' status --modified --added --removed --deleted --quiet ',
     FLocalRepository, Output, Verbose);
   FileList.Clear;
   AllFiles := TStringList.Create;
@@ -306,14 +305,14 @@ var
 begin
   Result := false;
   //svn info=>hg summary;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' summary ', FLocalRepository, Output, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' summary ', FLocalRepository, Output, Verbose);
   if Pos('branch:', Output) > 0 then
   begin
     // There is an hg repository here.
 
     // Now, repository URL might differ from the one we've set
     // Try to find out remote repo (could also have used hg paths, which gives default = https://bitbucket.org/reiniero/fpcup)
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' showconfig paths.default ', FLocalRepository, Output, Verbose);
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' showconfig paths.default ', FLocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
       URL := IncludeTrailingSlash(trim(Output));
@@ -355,7 +354,7 @@ begin
   // Only update if we have invalid revision info, in order to minimize hg info calls
   if FLocalRevision = FRET_UNKNOWN_REVISION then
   begin
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' identify --id ', FLocalRepository, Output, Verbose);
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' identify --id ', FLocalRepository, Output, Verbose);
     if FReturnCode = 0 then
     begin
       FLocalRevision := copy(trim(Output), 1, HashLength); //ignore any + - changed working copy - at the end of the revision
@@ -366,6 +365,22 @@ begin
     end;
   end;
   Result := FLocalRevision;
+end;
+
+function THGClient.GetProxyCommand: string;
+begin
+  if FHTTPProxyHost<>'' then
+  begin
+    result:='--config http_proxy.host='+FHTTPProxyHost+':'+inttostr(FHTTPProxyPort);
+    if FHTTPProxyUser<>'' then
+      result:=result+' --config http_proxy.user='+FHTTPProxyUser;
+    if FHTTPProxyPassword<>'' then
+      result:=result+' --config http_proxy.passwd='+FHTTPProxyPassword;
+  end
+  else
+  begin
+    result:='';
+  end;
 end;
 
 constructor THGClient.Create;
