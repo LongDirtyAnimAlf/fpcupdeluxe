@@ -525,6 +525,7 @@ begin
       if pos('http://',FInstaller.HTTPProxyHost)=1 then
         FInstaller.HTTPProxyHost:=copy(Finstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
 
+      //todo: pass username/password from httpproxy env var/httpproxy
       FInstaller.HTTPProxyPassword:=Options.GetOption('','httpproxypassword','',true);
       FInstaller.HTTPProxyUser:=Options.GetOption('','httpproxyuser','',true);
     except
@@ -640,13 +641,20 @@ begin
       if FInstaller.HTTPProxyPassword='' then
         writeln(sAllParameters)
       else
+      begin
         writeln(StringReplace(sAllParameters,
         'httpproxypassword='+FInstaller.HTTPProxyPassword,
         'httpproxypassword=<SECURITY:REDACTED>',
         [rfReplaceAll,rfIgnoreCase]));
+        if FInstaller.Verbose then
+        begin
+          writeln('');
+          writeln('WARNING: proxy password will appear in screen output!');
+          writeln('');
+        end;
+      end;
       writeln('Persistent parameters:  '+FInstaller.PersistentOptions);
 
-      // Show warnings to the user:
       writeln('');
 
       // Note: we don't have a unicode version of ExpandFileName; investigate consequences for Unicode paths!??!?
