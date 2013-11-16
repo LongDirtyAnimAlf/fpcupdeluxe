@@ -48,7 +48,7 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 
 uses {$IFDEF UNIX}
   cthreads, {$ENDIF}
-  Classes, sysutils,
+  Classes, sysutils, strings,
   updatelazconfig, processutils,
   fileutil, fpcuputil,
   m_anyinternallinker_to_win386, m_anyinternallinker_to_win64,
@@ -153,12 +153,12 @@ begin
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' fpcrevision=<number>  Revert to FPC SVN revision <number>');
-  writeln(' httpproxy=<host:port> Use HTTP proxy for http downloads');
+  writeln(' httpproxy=<username:password@host:port> username, password: optional');
+  writeln(' httpproxy=<http://username:password@host:port> username, password: optional');
+  writeln('                       Use HTTP proxy for http downloads,');
+  writeln('                       svn over http, hg over http (but not git over http)');
   writeln('                       On Unix/Linux: if the http_proxy environment variable');
   writeln('                       is set, this option is automatically filled in.');
-  writeln(' httpproxypassword=<p> Password for http proxy. Often not required.');
-  writeln('                       WARNING: will be shown if using --verbose');
-  writeln(' httpproxyuser=<user>  Username for http proxy. Often not required.');
   writeln(' include=<values>      Update/build or clean the modules specified as well ');
   writeln('                       as the default ones.');
   writeln('                       The module list is separated by commas.');
@@ -494,6 +494,10 @@ begin
     end;
 
     // HTTP proxy settings, including support for environment variables
+    // Environment variables like:
+    //http_proxy=http://username:password@myproxy.ril.com:port/
+    //https_proxy=https://username:password@myproxy.ril.com:port/
+    //ftp_proxy=ftp://username:password@myproxy.ril.com:port/
     try
       // Get option from specified options
       FInstaller.HTTPProxyHost:=Options.GetOption('','httpproxy','',true);
@@ -506,8 +510,12 @@ begin
         FInstaller.HTTPProxyHost:=GetEnvironmentVariable('http_proxy');
       end;
 
-      // Extract port:
-      i:=pos(':',FInstaller.HTTPProxyHost);
+      // Strip out trailing /
+      if copy(FInstaller.HTTPProxyHost,length(FInstaller.HTTPProxyHost),1)='/' then
+        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,1,length(FInstaller.HTTPProxyHost)-1);
+
+      // Extract port - search backwards to allow passwords with :
+      i:=rpos(':',FInstaller.HTTPProxyHost);
       if i=0 then
         if pos('https://',FInstaller.HTTPProxyHost)=1 then
           FInstaller.HTTPProxyPort:=443
@@ -525,9 +533,21 @@ begin
       if pos('http://',FInstaller.HTTPProxyHost)=1 then
         FInstaller.HTTPProxyHost:=copy(Finstaller.HTTPProxyHost,length('http://')+1,length(FInstaller.HTTPProxyHost));
 
-      //todo: pass username/password from httpproxy env var/httpproxy
-      FInstaller.HTTPProxyPassword:=Options.GetOption('','httpproxypassword','',true);
-      FInstaller.HTTPProxyUser:=Options.GetOption('','httpproxyuser','',true);
+      // Extract out username/password
+      // Search from ending of string to front to catch last @ in case password has @
+      i:=rpos('@',FInstaller.HTTPProxyHost);
+      if i>0 then
+      begin
+        FInstaller.HTTPProxyUser:=copy(FInstaller.HTTPProxyHost,1,i-1);
+        FInstaller.HTTPProxyHost:=copy(FInstaller.HTTPProxyHost,i+1,length(FInstaller.HTTPProxyHost));
+        // Extract out password
+        i:=pos(':',FInstaller.HTTPProxyUser);
+        if i>0 then
+        begin
+          FInstaller.HTTPProxyPassword:=copy(FInstaller.HTTPProxyUser,i+1,length(FInstaller.HTTPProxyUser));
+          FInstaller.HTTPProxyUser:=copy(FInstaller.HTTPProxyUser,1,i-1);
+        end;
+      end;
     except
       on E:Exception do
       begin

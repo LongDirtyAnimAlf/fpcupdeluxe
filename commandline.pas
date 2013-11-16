@@ -343,7 +343,6 @@ function TCommandLineOptions.GetOption(shortname, name: string;
 var
   bPersistent:boolean; //add to persistent options or not
   i:integer;
-  iEqualPos: integer;
   sParam,sCSParam:string;
   sCSshortname,sCSname:string;
 begin
