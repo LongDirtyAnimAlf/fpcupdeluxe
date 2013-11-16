@@ -377,12 +377,12 @@ begin
         // Check approximate match: name occurs in parameter:
         if (name<>'') and (sCSname=copy(sCSParam,1,length(name))) then
           begin
-          if bHasParam and (pos('=',sParam)<=0) then
+          if bHasParam and (sCSName=SCSParam) then {option names match but no = sign => no parameter}
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(name));
-          if (bHasParam=false) or (bHasParam and (copy(sParam,1,1)='=')) then
+          if bHasParam and (copy(sParam,1,1)='=') then
             begin
-            // Exact match of parameter name
+            // Exact match of parameter name: now name is deleted, the = is left
             bPersistent:=(FParams.Objects[i]=TObject(True));
             FParams.delete(i);
             i:=i-1;
@@ -397,12 +397,12 @@ begin
         delete(sCSParam,1,1);
         if (shortname<>'') and (sCSshortname=copy(sCSParam,1,length(shortname))) then
           begin
-          if bHasParam and (pos('=',sParam)<=0) then
+          if bHasParam and (sCSName=SCSParam) then {option names match but no = sign => no parameter}
             raise ECommandLineError.Create('Option -'+shortname+', --'+name+' needs an argument: '+ FParams[i]);
           delete(sParam,1,length(shortname));
-          if (bHasParam=false) or (bHasParam and (copy(sParam,1,1)='=')) then
+          if bHasParam and (copy(sParam,1,1)='=') then
             begin
-            // Exact match of parameter name
+            // Exact match of parameter name: now shortname is deleted, the = is left
             bPersistent:=(FParams.Objects[i]=TObject(True));
             FParams.delete(i);
             i:=i-1;
