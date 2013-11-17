@@ -516,7 +516,9 @@ begin
 
       // Extract port - search backwards to allow passwords with :
       i:=rpos(':',FInstaller.HTTPProxyHost);
-      if i=0 then
+      // Don't pick up : from any username:password segment
+      if (i=0) or
+        (rpos('@',FInstaller.HTTPProxyHost)>i) then
         if pos('https://',FInstaller.HTTPProxyHost)=1 then
           FInstaller.HTTPProxyPort:=443
         else

@@ -955,9 +955,10 @@ begin
   begin
     ResultCode:=ExecuteCommand(VC6RedistDir+'vcredist.exe /q /r:n',FVerbose); //quiet, no reboot message
     // could also try /q //semi-quiet mode, displays reboot message so user can choose, and no progress bar
-    if ResultCode<>0 then
+    if (ResultCode<>0) and (ResultCode<>43) then {43 taken from winetricks}
     begin
       writelnlog('WARNING: apparent problem installing MS VC6 runtime installer needed for svn client (result code '+inttostr(ResultCode)+'. Continuing.', true);
+      SysUtils.DeleteFile(VC6RedistDir+'vcredist.exe'); // not really necessary for troubleshooting
     end;
   end;
 
@@ -998,6 +999,7 @@ begin
 
   if OperationSucceeded then
   begin
+    SysUtils.DeleteFile(VC6RedistDir+'vcredist.exe');
     SysUtils.DeleteFile(VC6RedistWrapperExe);  //Get rid of temp zip if success.
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
