@@ -207,7 +207,7 @@ type
     property CompilerName: string read FCompilerName write FCompilerName;
     // Options that are to be saved in shortcuts/batch file/shell scripts.
     // Excludes temporary options like --verbose
-    property PersistentOptions:string read FPersistentOptions write FPersistentOptions;
+    property PersistentOptions: string read FPersistentOptions write FPersistentOptions;
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
     property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
@@ -420,7 +420,12 @@ result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
 function TFPCupManager.Run: boolean;
-
+{$IFDEF MSWINDOWS}
+var
+  Major:integer=0;
+  Minor:integer=0;
+  Build:integer=0;
+{$ENDIF}
 begin
   result:=false;
 
@@ -434,6 +439,19 @@ begin
     writeln('Aborting.');
     halt(2);
   end;
+
+  // Some diagnostic info
+  {$IFDEF MSWINDOWS}
+  if Verbose then
+    if GetWin32Version(Major,Minor,Build) then
+    begin
+      infoln('Windows major version: '+inttostr(Major),etInfo);
+      infoln('Windows minor version: '+inttostr(Minor),etInfo);
+      infoln('Windows build number:  '+inttostr(Build),etInfo);
+    end
+    else
+      infoln('Could not retrieve Windows version using GetWin32Version.',etWarning);
+  {$ENDIF}
 
   if SkipModules<>'' then begin
     Sequencer.SkipList:=TStringList.Create;
@@ -486,15 +504,14 @@ begin
 end;
 
 constructor TFPCupManager.Create;
-
 begin
-FModuleList:=TStringList.Create;
-FModuleEnabledList:=TStringList.Create;
-FModulePublishedList:=TStringList.Create;
-Sequencer:=TSequencer.create;
-Sequencer.Parent:=Self;
-FLog:=TLogger.Create;
-// Log filename will be set on first log write
+  FModuleList:=TStringList.Create;
+  FModuleEnabledList:=TStringList.Create;
+  FModulePublishedList:=TStringList.Create;
+  Sequencer:=TSequencer.create;
+  Sequencer.Parent:=Self;
+  FLog:=TLogger.Create;
+  // Log filename will be set on first log write
 end;
 
 destructor TFPCupManager.Destroy;

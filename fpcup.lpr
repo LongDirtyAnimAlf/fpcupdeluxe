@@ -241,7 +241,10 @@ end;
 
 function CheckOptions(FInstaller: TFPCupManager):integer;
 var
-  {$IFNDEF MSWINDOWS}PersistentOptions,FPCUpLink:string;{$ENDIF}
+  {$IFNDEF MSWINDOWS}
+  //Linux, Unix,...
+  FPCUpLink:string;
+  {$ENDIF}
   bNoConfirm,bHelp,bVersion:boolean;
   i, iCurrentOption: integer;
 	sAllParameters:string;
@@ -626,7 +629,6 @@ begin
 
       FInstaller.PersistentOptions:=Options.PersistentOptions;
 
-      writeln('');
       writeln('Options:');
       if FInstaller.Clean then
       begin
@@ -663,15 +665,20 @@ begin
         writeln('Keep local changes:     no');
       end;
       writeln('Log file name:          '+FInstaller.LogFileName);
-      writeln('Additional modules:     '+FInstaller.IncludeModules);
+      if FInstaller.IncludeModules<>'' then
+        writeln('Additional modules:     '+FInstaller.IncludeModules);
       writeln('');
       // Remove password from output
       if FInstaller.HTTPProxyPassword='' then
       begin
         writeln('Effective parameters:   ');
-        writeln(sAllParameters);
-        writeln('Persistent parameters:');
-        writeln(FInstaller.PersistentOptions);
+        writeln(trim(sAllParameters));
+        {$IFDEF MSWINDOWS}
+        writeln('Persistent parameters (can be saved in batch file):');
+        {$ELSE}
+        writeln('Persistent parameters (can be saved in shell script):');
+        {$ENDIF}
+        writeln(trim(FInstaller.PersistentOptions));
       end
       else
       begin
@@ -679,15 +686,15 @@ begin
         writeln('so output may be unreliable:');
         writeln('');
         writeln('Effective parameters:   ');
-        writeln(StringReplace(sAllParameters,
+        writeln(trim(StringReplace(sAllParameters,
           FInstaller.HTTPProxyPassword,
           '<SECURITY:REDACTED>',
-          [rfReplaceAll,rfIgnoreCase]));
+          [rfReplaceAll,rfIgnoreCase])));
         writeln('Persistent parameters:  ');
-        writeln(StringReplace(FInstaller.PersistentOptions,
+        writeln(trim(StringReplace(FInstaller.PersistentOptions,
           FInstaller.HTTPProxyPassword,
           '<SECURITY:REDACTED>',
-          [rfReplaceAll,rfIgnoreCase]));
+          [rfReplaceAll,rfIgnoreCase])));
         if FInstaller.Verbose then
         begin
           writeln('');
@@ -695,9 +702,6 @@ begin
           writeln('');
         end;
       end;
-
-
-      writeln('');
 
       // Note: we don't have a unicode version of ExpandFileName; investigate consequences for Unicode paths!??!?
       // User could have specified relative paths so we're normalizing them.
@@ -711,12 +715,19 @@ begin
         writeln('WARNING: Skipping installation/update of '+FInstaller.SkipModules);
       if FInstaller.OnlyModules<>'' then
         writeln('WARNING: Limiting installation/update to '+FInstaller.OnlyModules);
-      writeln('');
+
       if FInstaller.Uninstall then
-        writeln('WARNING: UNINSTALLING !!!')
+      begin
+        writeln('');
+        writeln('WARNING: UNINSTALLING !!!');
+        writeln('');
+      end
       else if FInstaller.Clean then
+      begin
+        writeln('');
         writeln('WARNING: CLEANING !!!');
-      writeln('');
+        writeln('');
+      end;
 
       // Get user confirmation unless otherwise specified
       if not bNoConfirm then
