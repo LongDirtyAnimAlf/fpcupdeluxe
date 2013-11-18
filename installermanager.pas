@@ -52,18 +52,14 @@ Const
     'Do USERIDE;'+
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     'End;'+
+
 //cross sequence for win32. Note: if changing this name,
     //also change checks for this in skipmodules etc.
     'Declare crosswin32-64;'+
-    'SetCPU x86_64;'+
-    'SetOS win64;'+
-    // Getmodule has already been done
-    'Cleanmodule fpc;'+
-    'Buildmodule fpc;'+
-    // Getmodule has already been done
-    'Cleanmodule LCL;'+
-    'Buildmodule LCL;'+
+    'Do FPCCrossWin32-64;'+
+    'Do LazarusCrossWin32-64;'+
     'End;'+
+
 //default sequence for win64
 {todo: win64 sequence currently not enabled; see
 $elseif defined(win64)

@@ -96,6 +96,16 @@ Const
 
     'Declare LazarusConfigOnly;'+
     'Configmodule lazarus;'+
+    'End;'+
+
+// Crosscompile build
+    'Declare LazarusCrossWin32-64;'+
+    // Needs to be run after regular compile because of CPU/OS switch
+    'SetCPU x86_64;'+
+    'SetOS win64;'+
+    // Getmodule has already been done
+    'Cleanmodule LCL;'+
+    'Buildmodule LCL;'+
     'End';
 
 type
