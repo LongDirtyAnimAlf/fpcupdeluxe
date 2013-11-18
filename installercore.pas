@@ -896,8 +896,7 @@ end;
 
 function TInstaller.DownloadSVN: boolean;
 const
-  SourceURL = 'http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip';
-  VC6URL = 'http://download.microsoft.com/download/vc60pro/update/2/w9xnt4/en-us/vc6redistsetup_deu.exe'; //this appears to be German but there's no English version?!?
+  SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
@@ -905,8 +904,6 @@ var
   OperationSucceeded: boolean;
   ResultCode: longint;
   SVNZip: string;
-  VC6RedistWrapperExe: string;
-  VC6RedistDir: string;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
   { Alternative 1: sourceforge packaged
@@ -932,46 +929,6 @@ begin
   end;
 
   ForceDirectoriesUTF8(FSVNDirectory);
-  VC6RedistWrapperExe := SysUtils.GetTempFileName + '.exe';
-  try
-    if OperationSucceeded then
-    begin
-      OperationSucceeded := Download(
-        VC6URL,
-        VC6RedistWrapperExe,
-        FHTTPProxyUser,
-        inttostr(FHTTPProxyPort),
-        FHTTPProxyUser,
-        FHTTPProxyPassword);
-    end;
-  except
-    // Deal with timeouts, wrong URLs etc
-    on E: Exception do
-    begin
-      OperationSucceeded := false;
-      writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading VC6 runtime from ' + SourceURL, true);
-    end;
-  end;
-
-  // Extract, install VC6 redist. If it fails, don't abort as it may already be present but we're not
-  // running as admin etc
-  // Yo dawg, I heard you liked wrapped installers so I wrapped your installer in an installer... sigh.
-  VC6RedistDir:=IncludeTrailingPathDelimiter(GetTempDir);
-  ResultCode:=ExecuteCommand(VC6RedistWrapperExe+' /q /t:'+VC6RedistDir,FVerbose); //quiet, extract vcredist.exe
-  if ResultCode<>0 then
-  begin
-    writelnlog('WARNING: apparent problem extracting MS VC6 runtime installer needed for svn client (result code '+inttostr(ResultCode)+'. Continuing.', true);
-  end
-  else
-  begin
-    ResultCode:=ExecuteCommand(VC6RedistDir+'vcredist.exe /q /r:n',FVerbose); //quiet, no reboot message
-    // could also try /q //semi-quiet mode, displays reboot message so user can choose, and no progress bar
-    if (ResultCode<>0) and (ResultCode<>43) then {43 taken from winetricks}
-    begin
-      writelnlog('WARNING: apparent problem installing MS VC6 runtime installer needed for svn client (result code '+inttostr(ResultCode)+'. Continuing.', true);
-      SysUtils.DeleteFile(VC6RedistDir+'vcredist.exe'); // not really necessary for troubleshooting
-    end;
-  end;
 
   SVNZip := SysUtils.GetTempFileName + '.zip';
   try
@@ -1010,8 +967,6 @@ begin
 
   if OperationSucceeded then
   begin
-    SysUtils.DeleteFile(VC6RedistDir+'vcredist.exe');
-    SysUtils.DeleteFile(VC6RedistWrapperExe);  //Get rid of temp zip if success.
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
