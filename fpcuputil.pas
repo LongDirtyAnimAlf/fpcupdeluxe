@@ -74,6 +74,10 @@ function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensi
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 // File size; returns 0 if empty, non-existent or error.
 function FileSizeUTF8(FileName: string): int64;
+{$IFDEF MSWINDOWS}
+// Get Windows major and minor version number (e.g. 5.0=Windows 2000)
+function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
+{$ENDIF}
 //check if there is at least one directory between Dir and root
 function ParentDirectoryIsNotRoot(Dir:string):boolean;
 {$IFDEF MSWINDOWS}
@@ -108,6 +112,28 @@ uses
   ,baseunix,processutils
   {$ENDIF UNIX}
   ;
+
+{$ifdef mswindows}
+function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
+var
+  Info: TOSVersionInfo;
+begin
+Info.dwOSVersionInfoSize := SizeOf(Info);
+if GetVersionEx(Info) then
+begin
+  with Info do
+    begin
+    Win32Platform:=dwPlatformId;
+    Major:=dwMajorVersion;
+    Minor:=dwMinorVersion;
+    Build:=dwBuildNumber;
+    result:=true
+    end;
+end
+else
+  result:=false;
+end;
+{$endif}
 
 procedure SaveInisFromResource(filename,resourcename:string);
 var fs:Tfilestream;

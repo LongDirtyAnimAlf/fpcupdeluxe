@@ -901,6 +901,7 @@ const
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
+  MajorVersion,MinorVersion,BuildNumber: integer;
   OperationSucceeded: boolean;
   ResultCode: longint;
   SVNZip: string;
@@ -913,13 +914,23 @@ begin
   http://sourceforge.net/projects/win32svn/files/latest/download?source=files
   We don't want msi/Windows installer - this way we can hopefully support Windows 2000, so use:
   http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip
+  This one requires msvcp60.dll which is horrific to install
   }
 
   {Alternative 2: use
-  http://www.visualsvn.com/files/Apache-Subversion-1.7.2.zip
+  http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip
   with subdirs bin and licenses. No further subdirs
-  However, doesn't work on Windows 2K...}
+  However, doesn't work on Windows 2K.
+  Decided to use this anyway.}
   OperationSucceeded := true;
+
+  // This svn version won't work on windows 2K
+  if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
+  begin
+    writelnlog('ERROR: it seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
+    exit(false);
+  end;
+
   ForceDirectoriesUTF8(FSVNDirectory);
   VC6RedistWrapperExe := SysUtils.GetTempFileName + '.exe';
   try

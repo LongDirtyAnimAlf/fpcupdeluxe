@@ -632,6 +632,13 @@ begin
       begin
         writeln('Running --clean: cleaning environment.');
       end;
+      if FInstaller.HTTPProxyHost<>'' then
+      begin
+        writeln('HTTP proxy host:        '+FInstaller.HTTPProxyHost);
+        writeln('HTTP proxy port:        '+inttostr(FInstaller.HTTPProxyPort));
+        writeln('HTTP proxy user:        '+FInstaller.HTTPProxyUser);
+        writeln('HTTP proxy password:    <SECURITY:REDACTED>');
+      end;
       {$IFDEF MSWINDOWS}
       // Makes no sense on other platforms
       writeln('Binutils/make dir:      '+FInstaller.MakeDirectory);
@@ -658,16 +665,29 @@ begin
       writeln('Log file name:          '+FInstaller.LogFileName);
       writeln('Additional modules:     '+FInstaller.IncludeModules);
       writeln('');
-      writeln('Effective parameters:   ');
       // Remove password from output
       if FInstaller.HTTPProxyPassword='' then
-        writeln(sAllParameters)
+      begin
+        writeln('Effective parameters:   ');
+        writeln(sAllParameters);
+        writeln('Persistent parameters:');
+        writeln(FInstaller.PersistentOptions);
+      end
       else
       begin
+        writeln('Note: replaced proxy password in all parameters, ');
+        writeln('so output may be unreliable:');
+        writeln('');
+        writeln('Effective parameters:   ');
         writeln(StringReplace(sAllParameters,
-        'httpproxypassword='+FInstaller.HTTPProxyPassword,
-        'httpproxypassword=<SECURITY:REDACTED>',
-        [rfReplaceAll,rfIgnoreCase]));
+          FInstaller.HTTPProxyPassword,
+          '<SECURITY:REDACTED>',
+          [rfReplaceAll,rfIgnoreCase]));
+        writeln('Persistent parameters:  ');
+        writeln(StringReplace(FInstaller.PersistentOptions,
+          FInstaller.HTTPProxyPassword,
+          '<SECURITY:REDACTED>',
+          [rfReplaceAll,rfIgnoreCase]));
         if FInstaller.Verbose then
         begin
           writeln('');
@@ -675,7 +695,7 @@ begin
           writeln('');
         end;
       end;
-      writeln('Persistent parameters:  '+FInstaller.PersistentOptions);
+
 
       writeln('');
 
