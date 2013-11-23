@@ -923,12 +923,14 @@ begin
   Decided to use this anyway.}
   OperationSucceeded := true;
 
+  {$IFDEF MSWINDOWS}
   // This svn version won't work on windows 2K
   if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
   begin
     writelnlog('ERROR: it seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
     exit(false);
   end;
+  {$ENDIF}
 
   ForceDirectoriesUTF8(FSVNDirectory);
 
