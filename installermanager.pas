@@ -142,6 +142,7 @@ below}
     'Do defaultuninstall;'+
     'End;';
 
+
 type
   TSequencer=class; //forward
 
@@ -317,6 +318,7 @@ implementation
 
 function TFPCupManager.GetLazarusPrimaryConfigPath: string;
 const
+  // This should be a last resort as FLazarusPrimaryConfigPath should be used really
   DefaultPCPSubdir='lazarusdevsettings'; //Include the name lazarus for easy searching Caution: shouldn't be the same name as Lazarus dir itself.
 begin
   if FLazarusPrimaryConfigPath='' then

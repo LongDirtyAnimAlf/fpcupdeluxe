@@ -542,10 +542,12 @@ const
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw32/';
   // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
+  // Nov 2013: GNU gdb (GDB) 7.2:
   SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw64/';
+  // Nov 2013: GNU gdb (GDB) 7.3.50.20110510-cvs:
   SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
-  //todo: add Qt and Qt4Pas5.dll in http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/?
+  //todo: add Qt and download Qt4Pas5.dll in http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/?
 var
   Counter: integer;
   {$ifdef win32}

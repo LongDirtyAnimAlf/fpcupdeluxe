@@ -169,10 +169,10 @@ begin
   writeln(' inisection=<sec>      Section name to be used if an ini file is specified.');
   writeln('                       If not given, use [General]');
   writeln(' installdir=<dir>      Base installation dir. Leads to these subdirs:');
-  writeln('                 <dir>\config\       Lazarus primary config path');
-  writeln('                 <dir>\cross\        crosscompiling bins/libs');
-  writeln('                 <dir>\extras\       extra modules');
-  writeln('                 <dir>\fpc\          FPC');
+  writeln('                 <dir>\config_lazarus\ Lazarus primary config path');
+  writeln('                 <dir>\cross\          crosscompiling bins/libs');
+  writeln('                 <dir>\extras\         extra modules');
+  writeln('                 <dir>\fpc\            FPC');
   writeln('                 <dir>\fpcbootstrap\ (Windows) bootstrap compiler+binutils');
   writeln('                 <dir>\installerlazwin (Windows) generated installer if');
   writeln('                       using module installerlazwin');
@@ -217,11 +217,12 @@ begin
   writeln('                       parameter. Add any extra paremeters needed.');
   writeln('                       Default: "patch -p0 -i" ');
   writeln(' primary-config-path=<dir>');
-  writeln('                       Analogous to Lazarus primary-config-path parameter.');
+  writeln('                       Analogous to Lazarus primary-config-path (pcp) parameter.');
   writeln('                       Determines where fpcup will create or use as primary');
   writeln('                       configuration path for the Lazarus it installs/updates.');
-  writeln('                       Default: empty (=a OS dependent configuration');
-  writeln('                       path is used).');
+  writeln('                       Default: empty (=an OS dependent configuration');
+  writeln('                       path is used). However, if installdir is specified,');
+  writeln('                       the pcp path will be below it.');
   writeln(' reapplylocalchanges   Back up locally modified files into .diff file and');
   writeln('                       reapply the diff with patch or command specified in ');
   writeln('                       parameter patchcmd.');
@@ -308,18 +309,19 @@ begin
         sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
         bHaveInstalldir:=true;
       end;
+      expandfilename
       FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap')));
       FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap')));
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
       {$ELSE} //*nix
-      //todo: don't expand home dirs here, do it if possible after we've saved the options to the shortcut so it can be used with other users as well
       sInstallDir:=Options.GetOption('','installdir','');
       if sInstallDir='' then begin
-        sInstallDir:=ExpandFileNameUTF8('~/development');
+        sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8('~/development')); //fallback default
         bHaveInstalldir:=false;
       end
       else begin
+        // Expand home dir etc
         sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
         bHaveInstalldir:=true;
       end;
