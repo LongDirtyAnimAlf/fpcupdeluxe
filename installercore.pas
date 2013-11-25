@@ -544,6 +544,10 @@ const
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
   // Nov 2013: GNU gdb (GDB) 7.2:
   SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
+  // Make 3.80 as distributed with Laz won't work with spaces in path
+  // Make 3.82 will balk on building fpc 2.6.x
+  // Make 3.81 hopefully has some fixes but not too many bugs=>in fpcbuild svn
+  // todo: give user choice or something? first redo this entire messy url exception stuff
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw64/';
   // Nov 2013: GNU gdb (GDB) 7.3.50.20110510-cvs:
   SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';

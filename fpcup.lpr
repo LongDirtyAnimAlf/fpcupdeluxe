@@ -309,7 +309,6 @@ begin
         sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      expandfilename
       FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap')));
       FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap')));
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
