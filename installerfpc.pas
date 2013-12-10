@@ -243,8 +243,12 @@ begin
           (pos('-CX',Options)=0) or
           (pos('-XX',Options)=0) then
           begin
-          infoln('Your specified these options: '+Options+'...',etInfo);
-          Options:='-CX -XXs'; //create smartlinked library; smartlink units
+          if Options='' then
+            infoln('You specified no FPC options...',etInfo)
+          else
+            infoln('You specified these FPC options: '+Options+'...',etInfo);
+          // Replacement options: create smartlinked library; smartlink units
+          Options:='-CX -XXs';
           infoln('... however, this cross compiler does not support debug symbols and needs smartlinking. Using these options instead: '+Options,etInfo);
           end;
         end;

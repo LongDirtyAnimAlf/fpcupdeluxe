@@ -573,10 +573,12 @@ end;
 
 function TLazarusInstaller.ConfigModule(ModuleName:string): boolean;
 const
+  LazarusCFG='lazarus.cfg'; //file to store primary config argument in
   StaticPackagesFile='staticpackages.inc';
 var
   DebuggerPath: string;
   LazarusConfig: TUpdateLazConfig;
+  PCPSnippet: TStringList;
   StaticPackages: TStringList;
 begin
   if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
@@ -588,6 +590,17 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
   try
     try
+      // Lazarus 1.2RC1+ and trunk support specifying the primary-config-path that should be used
+      // inside the lazarus directory itself.
+      PCPSnippet:=TStringList.Create;
+      try
+        PCPSnippet.Add('--primary-config-path='+ExcludeTrailingPathDelimiter(FPrimaryConfigPath));
+        PCPSnippet.Add(''); //empty line also occurs in my Laz 1.2RC1 install
+        if not(FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+LazarusCFG)) then
+          PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(FBaseDirectory)+LazarusCFG);
+      finally
+        PCPSnippet.Free;
+      end;
       // Force English language
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Language/ID', 'en');
       // Set Lazarus directory
