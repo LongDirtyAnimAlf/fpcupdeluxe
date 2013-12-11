@@ -407,7 +407,10 @@ begin
     try
       result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
       if not result then
+      begin
+        WritelnLog('InstallerUniversal: warning: running '+exec+' returned an error.',true);
         break;
+      end;
     except
       on E: Exception do
         begin
