@@ -337,6 +337,7 @@ end;
 function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   DebuggerPath: string;
+  ExitCode: integer;
   FileCounter: integer;
   LazBuildApp: string;
   OperationSucceeded: boolean;
@@ -396,7 +397,15 @@ begin
       end;
     end;
     try
-      ProcessEx.Execute; //check for exitcode takes place further below
+      ProcessEx.Execute;
+      ExitCode:=ProcessEx.ExitStatus;
+      if ExitCode<>0 then
+      begin
+        OperationSucceeded:=false;
+        result:=false;
+        WritelnLog('Lazarus: error running make!'+LineEnding+
+          'Details: exit code'+inttostr(ExitCode),true);
+      end;
     except
       on E: Exception do
       begin
@@ -406,6 +415,20 @@ begin
           'Details: '+E.Message,true);
       end;
     end;
+
+    //Special check for lazbuild as that is known to go wrong
+    if (OperationSucceeded) and (UpperCase(ModuleName)='LAZBUILD') then
+    begin
+      if CheckExecutable(IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbuild'+GetExeExt,
+        '--help', 'lazbuild')=false then
+      begin
+        writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.',true);
+        result:=false;
+        FInstalledLazarus:= '//*\\error/ / \ \ no valid lazbuild found';
+        exit;
+      end
+    end;
+
 
     // Set up debugger if building the IDE
     {$IFDEF MSWINDOWS}
@@ -481,6 +504,7 @@ begin
         // We can specify a build mode; otherwise probably the latest build mode will be used
         // which could well be a stripped IDE
         // Let's see how/if FCompilerOptions clashes with the settings in normal build mode
+        writelnlog('LazBuild: building UserIDE but falling back to --build-mode=Normal IDE',true);
         ProcessEx.Parameters.Add('--build-ide= '+FCompilerOptions);
         ProcessEx.Parameters.Add('--build-mode=Normal IDE');
       end;

@@ -275,7 +275,7 @@ Troubleshooting
 ===============
 A big problem in designing this utility was to keep systemwide fpc.cfg on 
 Unix/Linux from interfering with our FPC install.
-It seems the only way around this is to write a fpc proxy (fpc.sh) that 
+It seems the only way around this is to write an FPC proxy (fpc.sh) that 
 explicitly ignores any fpc.cfgs.
 
 To check whether this works:
@@ -321,8 +321,8 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit 754830e5b500+ (Mon Aug 26 09:24:06 2013 +0200)
-Build date: 2013/08/26 13:28:05
+Version: based on commit af5088b57ccf+ (Wed Dec 11 09:59:21 2013 +0100)
+Build date: 2013/12/21 10:11:31
 Compiled for CPU: i386 on win32
 
 DON'T PANIC!
@@ -343,6 +343,9 @@ bigidepackagesuninstall
 brookframework
 brookframeworkclean
 brookframeworkuninstall
+codelibrarian
+codelibrarianclean
+codelibrarianuninstall
 crosswin32-64
 crosswin32-64Clean
 crosswin64-32
@@ -365,6 +368,7 @@ FPC
 FPCBuildOnly
 FPCclean
 FPCCleanOnly
+FPCCrossWin32-64
 fpcdocs
 fpcdocsclean
 fpcdocsuninstall
@@ -405,6 +409,7 @@ LazarusBuildOnly
 lazarusclean
 LazarusCleanOnly
 LazarusConfigOnly
+LazarusCrossWin32-64
 LazarusGetOnly
 lazarusuninstall
 lazbuild
@@ -519,6 +524,12 @@ Options are not required; they include:
  fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
                        E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
  fpcrevision=<number>  Revert to FPC SVN revision <number>
+ httpproxy=<username:password@host:port> username, password: optional
+ httpproxy=<http://username:password@host:port> username, password: optional
+                       Use HTTP proxy for http downloads,
+                       svn over http, hg over http (but not git over http)
+                       On Unix/Linux: if the http_proxy environment variable
+                       is set, this option is automatically filled in.
  include=<values>      Update/build or clean the modules specified as well 
                        as the default ones.
                        The module list is separated by commas.
@@ -528,12 +539,17 @@ Options are not required; they include:
                        Options can be overwritten by command line parameters.
  inisection=<sec>      Section name to be used if an ini file is specified.
                        If not given, use [General]
- installdir=<dir>      Base installation dir. FPC will install in <dir>\fpc\,
-                       Lazarus in <dir>\lazarus\, bootstrap compiler in 
-                       <dir>\fpcbootstrap\, (Windows only) binutils in 
-                       <dir>\fpcbootstrap\, extra modules in <dir>\extras\ 
-                       and configuration in <dir>\config\. See fpcdir, lazdir,
-                       fpcbootstrapdir, binutilsdir, primary-config-path
+ installdir=<dir>      Base installation dir. Leads to these subdirs:
+                 <dir>\config_lazarus\ Lazarus primary config path
+                 <dir>\cross\          crosscompiling bins/libs
+                 <dir>\extras\         extra modules
+                 <dir>\fpc\            FPC
+                 <dir>\fpcbootstrap\ (Windows) bootstrap compiler+binutils
+                 <dir>\installerlazwin (Windows) generated installer if
+                       using module installerlazwin
+                 <dir>\lazarus\ Lazarus
+                       See fpcdir, lazdir, fpcbootstrapdir, binutilsdir
+                       primary-config-path
                        for the defaults when installdir is not specified.
                        You can also use these to override the defaults given
                        by installdir.
@@ -554,7 +570,7 @@ Options are not required; they include:
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
                        Accepts shortcuts: 
-                       trunk,1.1,1.0.10,1.0.8,1.0.6,1.0.4,1.0.2,1.0
+                       trunk,1.3,1.0.12,1.0.10,1.0.8,1.0.6,1.0.4,1.0.2,1.0
  lclplatform=<name>    LCL widget set. <name> has to be one of the following:
                        carbon,fpgui,gtk,gtk2,qt,win32,wince
  logfilename=<file>    Location of log file. If nothing specified,
@@ -563,7 +579,7 @@ Options are not required; they include:
  only=<values>         Update/build or clean only the modules specified.
                        The module list is separated by commas.
                        See above for a list of modules.
- ostarget=<name>       OS target for cross_compiling.
+ ostarget=<name>       OS target for cross-compiling.
                        <name> has to be one of the following:
                        darwin,freebsd,linux,netbsd,openbsd,os2,
                        solaris,wince,win32,win64
@@ -572,19 +588,20 @@ Options are not required; they include:
                        parameter. Add any extra paremeters needed.
                        Default: "patch -p0 -i" 
  primary-config-path=<dir>
-                       Analogous to Lazarus primary-config-path parameter.
+                       Analogous to Lazarus primary-config-path (pcp) parameter.
                        Determines where fpcup will create or use as primary
                        configuration path for the Lazarus it installs/updates.
-                       Default: empty; then a OS dependent configuration
-                       path is used; directory name lazarusdevsettings.
+                       Default: empty (=an OS dependent configuration
+                       path is used). However, if installdir is specified,
+                       the pcp path will be below it.
  reapplylocalchanges   Back up locally modified files into .diff file and
                        reapply the diff with patch or command specified in 
-                       parameter patchexe
+                       parameter patchcmd.
  skip=<values>         Do not update/build or clean specified modules.
                        The module list is separated by commas.
                        See above for a list of modules.
- uninstall             uninstall sources and all generated files
-                       If no skip and only options given:
+ uninstall             Uninstall sources and all generated files
+                       If no skip/only options given:
                        DELETE entire Lazarus/FPC directories
                        Else: uninstall only certain modules.
  verbose               Show output from svn and make.
@@ -592,4 +609,4 @@ Options are not required; they include:
 
 Share and enjoy!
 
-Info: 26/08/2013 13:28:24: fpcup finished.
+Info: 21/12/2013 16:22:50: fpcup finished.
