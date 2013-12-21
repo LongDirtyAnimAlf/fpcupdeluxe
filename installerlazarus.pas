@@ -689,52 +689,6 @@ begin
   finally
     LazarusConfig.Free;
   end;
-
-  // December 2013: we now use BIGIDE as an alias for USERIDE, so also do this fo rUSERIDE
-  if (UpperCase(ModuleName)='BIGIDE') then
-  begin
-    //todo: make bigide from scratch still doesn't seem to mark the required packages for install.
-    // check again and fix if needed.
-    //todo: Oct 2013, check this: on osx,       we seem to getting a ~/~/trunk/lazarussettings/staticpackages.inc
-    //todo: Nov 2013, check this: on linux x64, we seem to getting a ~/~/trunk/config_lazarus/staticpackages.inc
-    //see/debug fpcup.lpr line 318 sinstalldir
-
-    // We might need to add a default staticpackages if it doesn't exist yet.
-    // Otherwise adding our own packages could be a mess.
-    //todo: note: experimental; don't know if this actually is needed.
-    // todo: if possible, let Lazarus generate this somehow? Could be by registering a package, but that is not part of the Lazarus install
-    if FileSizeUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile)<=0 then
-    begin
-      // Alternative? Try to generate staticpackages list as a byproduct of registering a package that is in bigide anyway:: chmhelpkg
-      //infoln('TESTING: not writing static package list. please fix this before release.',eterror);
-      StaticPackages:=TStringList.Create;
-      try
-        // Based on list when adding a new package to a Lazarus SVN (1.1) BIGIDE (April 2012)
-        StaticPackages.Add('sqldblaz,');
-        StaticPackages.Add('runtimetypeinfocontrols,');
-        StaticPackages.Add('printers4lazide,');
-        StaticPackages.Add('leakview,');
-        StaticPackages.Add('memdslaz,');
-        StaticPackages.Add('instantfpclaz,');
-        StaticPackages.Add('externhelp,');
-        StaticPackages.Add('turbopoweripro,');
-        StaticPackages.Add('jcfidelazarus,');
-        StaticPackages.Add('chmhelppkg,');
-        StaticPackages.Add('fpcunitide,');
-        StaticPackages.Add('projtemplates,');
-        StaticPackages.Add('tachartlazaruspkg,');
-        StaticPackages.Add('todolistlaz,');
-        StaticPackages.Add('dbflaz,');
-        StaticPackages.Add('printer4lazarus,');
-        StaticPackages.Add('sdflaz,');
-        //to do: add pascalscript, macroscript etc in newer Laz releases
-        StaticPackages.Add(''); //empty line at end occurs in my installed Lazarus
-        StaticPackages.SaveToFile(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile);
-      finally
-        StaticPackages.Free;
-      end;
-    end;
-  end;
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
