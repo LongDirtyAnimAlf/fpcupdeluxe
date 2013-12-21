@@ -33,15 +33,17 @@ Const
     'End;'+
 
 //standard bigide build
+    // Note that this does not seem to correctly register bigide packages... AGAIN.
+    // In effect, change to useride content and left name for compatibility
     'Declare BIGIDE;'+
     //This requires Lazarus sources, but we're not
     //going to Require lazarus as that will run make etc. to compile the regular IDE+LCL
     //Instead, just get lazarus sources
     //'Cleanmodule lazarus;'+
     'Getmodule lazarus;'+
-    'Buildmodule BIGIDE;'+
-    // bigide config includes Lazarus config:
-    'ConfigModule BIGIDE;'+
+    //'Buildmodule BIGIDE;'+
+    'Buildmodule USERIDE;'+
+    'ConfigModule USERIDE;'+
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;'+
     'End;'+
@@ -688,7 +690,8 @@ begin
     LazarusConfig.Free;
   end;
 
-  if UpperCase(ModuleName)='BIGIDE' then
+  // December 2013: we now use BIGIDE as an alias for USERIDE, so also do this fo rUSERIDE
+  if (UpperCase(ModuleName)='BIGIDE') then
   begin
     //todo: make bigide from scratch still doesn't seem to mark the required packages for install.
     // check again and fix if needed.
@@ -724,6 +727,7 @@ begin
         StaticPackages.Add('dbflaz,');
         StaticPackages.Add('printer4lazarus,');
         StaticPackages.Add('sdflaz,');
+        //to do: add pascalscript, macroscript etc in newer Laz releases
         StaticPackages.Add(''); //empty line at end occurs in my installed Lazarus
         StaticPackages.SaveToFile(IncludeTrailingPathDelimiter(FPrimaryConfigPath)+StaticPackagesFile);
       finally

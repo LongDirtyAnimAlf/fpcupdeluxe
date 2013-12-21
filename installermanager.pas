@@ -26,7 +26,7 @@ Const
     'Exec CheckDevLibs;'+
     {$endif linux}
     'Do fpc;'+
-    //Get bigide so we at least have a compiler:
+    //Get bigide so we at least have a compiler.
     'Do BIGIDE;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
