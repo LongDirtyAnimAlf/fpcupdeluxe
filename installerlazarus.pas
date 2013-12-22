@@ -364,11 +364,6 @@ begin
     if FCompilerOptions<>'' then
       ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
     case UpperCase(ModuleName) of
-      'BIGIDE':
-      begin
-        ProcessEx.Parameters.Add('bigide');
-        infoln(ModuleName+': running make bigide:',etinfo);
-      end;
       'LAZARUS':
       begin
         ProcessEx.Parameters.Add('all');
@@ -434,11 +429,7 @@ begin
 
     // Set up debugger if building the IDE
     {$IFDEF MSWINDOWS}
-    if (
-      (UpperCase(ModuleName)='LAZARUS')
-      or (UpperCase(ModuleName)='BIGIDE')
-      or (UpperCase(ModuleName)='USERIDE')
-      )
+    if (UpperCase(ModuleName)='LAZARUS')
       and (FCrossLCL_Platform='')
       and (FCrossCPU_Target='')
       and (FCrossOS_Target='') then

@@ -70,7 +70,7 @@ Const
     {Recent Lazarus compiles lhelp
     on demand once F1 is pressed. So we can disable it}
     //'Requires lhelp;'+
-    'Requires BIGIDE;'+
+    'Requires USERIDE;'+
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
     redownload them}

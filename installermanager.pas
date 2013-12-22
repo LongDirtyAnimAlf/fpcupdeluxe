@@ -26,8 +26,8 @@ Const
     'Exec CheckDevLibs;'+
     {$endif linux}
     'Do fpc;'+
-    //Get bigide so we at least have a compiler.
-    'Do BIGIDE;'+
+    // Lazbuild: make sure we can at least compile LCL programs
+    'Do lazbuild;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
@@ -40,8 +40,8 @@ Const
 //default sequence for win32
     'Declare defaultwin32;'+
     'Do fpc;'+
-    //Get bigide so we at least have a working IDE:
-    'Do BIGIDE;'+
+    // Lazbuild: make sure we can at least compile LCL programs
+    'Do lazbuild;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
@@ -66,8 +66,8 @@ $elseif defined(win64)
 below}
     'Declare defaultwin64;'+
     'Do fpc;'+
-    //Get bigide so we at least have a compiler:
-    'Do BIGIDE;'+
+    // Lazbuild: make sure we can at least compile LCL programs
+    'Do lazbuild;'+
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
@@ -774,7 +774,7 @@ begin
 
   // Lazarus:
   else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LAZBUILD') or (uppercase(ModuleName)='LCL') or
-    (uppercase(ModuleName)='BIGIDE') or (uppercase(ModuleName)='USERIDE') then
+    (uppercase(ModuleName)='USERIDE') then
     begin
     if assigned(Installer) then
       begin
