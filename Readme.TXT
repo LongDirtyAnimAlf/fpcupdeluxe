@@ -126,7 +126,7 @@ what it does.
 Note that some steps will not be executed depending on the modules chosen by 
 the user.
 By default, all modules will be run; the help module is selected by default and 
-pulls in bigide.
+pulls in the useride module.
 In the 32 bit fpcup for Windows version, the crosswin32-64 module will be run so 
 users can compile 64 bit applications with Lazarus.
 
@@ -166,14 +166,15 @@ in the FPC directory
 3. Getting and compiling Lazarus
 - It checks out or updates Lazarus using Subversion.
 
-- It compiles Lazarus using the installed FPC compiler 
-(Unix/FreeBSD/Linux/OSX: fpc.sh) and fpc.cfg
+- It compiles lazbuild (the command line Lazarus builder) using the installed 
+FPC compiler (Unix/FreeBSD/Linux/OSX: fpc.sh) and fpc.cfg
 
 - When done, it creates a shortcut on your desktop (Windows, Linux), and
 a shell script in the home directory (*nix) to the newly installed Lazarus
 
-- It does the same using make bigide, in order to get a workable Lazarus with 
-e.g. the database .lpk files compiled and included.
+- It compiles Lazarus, adding packages from fpcup.ini using make useride 
+(or its lazbuild equivalent) in order to get a workable Lazarus with e.g. the 
+database .lpk files compiled and included.
 
 - It creates a minimum configuration (environmentoptions.xml) in a separate 
 primary-config-path directory, or updates that config with: 
@@ -194,8 +195,8 @@ lazbuild in the newly compiled Lazarus directory
 
 - It gets the FPC chm documentation if not already present
 
-- It compiles the Lazarus CHM help if it hasn't been compiled recently
-(reason: compiling this takes a long time)
+- It compiles the Lazarus CHM help if it hasn't been compiled recently and if it
+hasn't been marked read-only (reason: compiling this takes a long time)
 
 5. Getting and compiling external modules
 - It reads fpcup.ini and parses the items specified.
