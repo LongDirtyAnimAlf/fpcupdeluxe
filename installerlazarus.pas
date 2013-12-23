@@ -401,7 +401,7 @@ begin
         OperationSucceeded:=false;
         result:=false;
         WritelnLog('Lazarus: error running make!'+LineEnding+
-          'Details: exit code'+inttostr(ExitCode),true);
+          'Details: exit code '+inttostr(ExitCode),true);
       end;
     except
       on E: Exception do
