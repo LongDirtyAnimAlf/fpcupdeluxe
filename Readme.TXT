@@ -93,6 +93,7 @@ Storing your settings
 =====================
 After running, fpcup creates a batch/shell script file by default to run it 
 again with the same parameters.
+On Windows, it creates a shortcut on your desktop (e.g. fpcup_update) with those parameters.
 
 Additionally, you can save the settings in an ini file and call 
 fpcup --inifile=settings.ini
