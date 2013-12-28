@@ -1,5 +1,5 @@
 { FPC/Lazarus installer/updater
-Copyright (C) 2012 Reinier Olislagers, Ludo Brands
+Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -43,6 +43,7 @@ After conversion, probably quite a lot of default settings were filled in by the
 Therefore the difference listed below may be exaggerated.
 1. Environmentoptions.xml
 - Version 106=>107, add Lazarus="1.1" (or 1.0 or whatever) attribute to version
+- Version 108: Lazarus="1.3"
 - adds history count... list to LazarusDirectory, CompilerFilename, MakeFilename
 - adds a lot of new elements with children: Desktop, PseudoTerminal, Watches, BreakPoints, Locals, CallStack...
 - adds ObjectInspectorOptions section after EnvironmentOptions
@@ -78,7 +79,8 @@ const
   // Versions used when new config files are generated.
   // We can assume Lazarus SVN can parse this version:
   // Lazarus pre 1.0: 106
-  VersionNewEnvironmentConfig='107';
+  VersionNewEnvironmentConfig='108';
+  // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='2';
 
@@ -443,8 +445,9 @@ begin
           begin
           NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
           // If we don't add this, we trigger an upgrade process on first start on Lazarus 1.1+.
-          // We don't know what version we're downloading so just use 1.1
-          NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.1');
+          // We don't know what version we're downloading so just use 1.3
+          //todo: add provision for multiple Lazarus versions via a property
+          NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.3');
           end;
         HelpConfig: NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
         PackageConfig:

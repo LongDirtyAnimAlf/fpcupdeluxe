@@ -32,25 +32,9 @@ Const
     'Exec CreateLazarusScript;'+
     'End;'+
 
-//standard bigide build
-    // Note that this does not seem to correctly register bigide packages... AGAIN.
-    // In effect, change to useride content and left name for compatibility
-    'Declare BIGIDE;'+
-    //This requires Lazarus sources, but we're not
-    //going to Require lazarus as that will run make etc. to compile the regular IDE+LCL
-    //Instead, just get lazarus sources
-    //'Cleanmodule lazarus;'+
-    'Getmodule lazarus;'+
-    //'Buildmodule BIGIDE;'+
-    'Buildmodule USERIDE;'+
-    'ConfigModule USERIDE;'+
-    // Make sure the user can use the IDE:
-    'Exec CreateLazarusScript;'+
-    'End;'+
-
 //Nogui widgetset+Lazbuild:
     'Declare lazbuild;'+
-    //Same story as in BIGIDE
+    //Same story as in BIGIDE/USERIDE
     'Getmodule lazarus;'+
     'Buildmodule lazbuild;'+
     //config lazarus, so lazbuild will work:
@@ -76,10 +60,6 @@ Const
 //standard clean
     'Declare lazarusclean;'+
     'cleanmodule lazarus;'+
-    'End;'+
-
-    'Declare BIGIDEclean;'+
-    'cleanmodule BIGIDE;'+
     'End;'+
 
 
@@ -715,7 +695,7 @@ begin
   end;
   ProcessEx.Parameters.Add('distclean');
   try
-    // Note: apparently, you can't specify certain modules to clean, like lcl, bigide...
+    // Note: apparently, you can't specify certain modules to clean, like lcl.
     ProcessEx.Execute;
     sleep(100); //now do it again:
     ProcessEx.Execute;
