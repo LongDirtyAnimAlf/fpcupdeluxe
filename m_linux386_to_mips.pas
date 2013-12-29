@@ -152,6 +152,7 @@ begin
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
       AsFile);
 
+  {$IFDEF UNIX}
   if not result then { try /usr/local/bin/<dirprefix>/ }
     result:=SearchBinUtil('/usr/local/bin/'+DirName,
       AsFile);
@@ -159,6 +160,11 @@ begin
   if not result then { try /usr/local/bin/ }
     result:=SearchBinUtil('/usr/local/bin',
       AsFile);
+
+  if not result then { try /bin/ }
+    result:=SearchBinUtil('/bin',
+      AsFile);
+  {$ENDIF}
 
   if result then
   begin

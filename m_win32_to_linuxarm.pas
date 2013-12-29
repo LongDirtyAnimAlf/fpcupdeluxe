@@ -33,12 +33,6 @@ Setup: currently aimed at using the crossfpc supplied binaries/libs
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
 Then place the directory layout provided by the crossfpc project there, so you get
 ...
-c:\development\cross\bin\arm-android\arm-linux-androideabi-ar.exe
-c:\development\cross\bin\arm-android\arm-linux-androideabi-as.exe
-...
-c:\development\cross\lib\arm-android\libc.a
-c:\development\cross\lib\arm-android\libc.so
-...
 
 //todo: integrate/prefer fpc supplied binutils at
 ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.15.94-win32-arm-linux.zip

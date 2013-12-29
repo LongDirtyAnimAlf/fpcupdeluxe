@@ -328,7 +328,7 @@ begin
   infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',etinfo);
   if ModuleName<>'USERIDE' then
   begin
-    // Make all (should include lcl & ide)
+    // Make all (should include lcl & ide), lazbuild, lcl etc
     // distclean was already run; otherwise specify make clean all
     FErrorLog.Clear;
     ProcessEx.Executable := Make;
@@ -508,7 +508,6 @@ begin
       end;
     end;
   end;
-
   result:=OperationSucceeded;
 end;
 

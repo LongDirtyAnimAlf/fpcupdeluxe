@@ -24,8 +24,8 @@ type
     FLibsPath: string; //path for target environment libraries
     FTargetCPU: string; //cpu for the target environment. Follows FPC names
     FTargetOS: string; //operating system for the target environment. Follows FPC names
-    // Sets FBinutilspath if AsFile found in Directory. Returns true if found.
-    function SearchBinUtil(Directory, AsFile: string): boolean;
+    // Sets FBinutilspath if file LookFor found in Directory. Returns true if found.
+    function SearchBinUtil(Directory, LookFor: string): boolean;
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
@@ -79,12 +79,12 @@ begin
   CrossInstallers.AddObject(Platform,TObject(Extension));
 end;
 
-function TCrossInstaller.SearchBinUtil(Directory, AsFile: string): boolean;
+function TCrossInstaller.SearchBinUtil(Directory, LookFor: string): boolean;
 begin
   FBinUtilsPath:=ExcludeTrailingPathDelimiter(ExpandFileName(Directory));
-  result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+AsFile);
+  result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+LookFor);
   if not result then
-    infoln(FCrossModuleName + ': failed: searching binutil '+AsFile+
+    infoln(FCrossModuleName + ': failed: searching binutil '+LookFor+
       ' in directory '+FBinUtilsPath, etInfo);
 end;
 

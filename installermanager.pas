@@ -49,8 +49,10 @@ Const
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
-    'Do USERIDE;'+
+    'Do USERIDE;'+ //todo: this one does not seem to get executed, while useride *is* run in the lazbuild part?!?
+    {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
+    {$endif}
     'End;'+
 
 //cross sequence for win32. Note: if changing this name,

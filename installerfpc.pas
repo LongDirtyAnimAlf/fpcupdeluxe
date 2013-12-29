@@ -392,7 +392,7 @@ begin
               '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
               '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
-              '# Inserted by fpcup '+TimeToStr(Now)+LineEnding+
+              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               CrossInstaller.FPCCFGSnippet+LineEnding+
               '#ENDIF'+LineEnding+
               '#ENDIF');
