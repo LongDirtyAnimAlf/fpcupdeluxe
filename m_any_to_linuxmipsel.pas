@@ -56,7 +56,7 @@ mipsel-linux-objcopy.exe
 mipsel-linux-objdump.exe
 mipsel-linux-strip.exe
 
-Also used codesourcery libs in
+Also used codesourcery mipsel softfloat uclibc libs in
 c:\development\cross\bin\mipsel-linux
 crtbegin.o
 crtbeginS.o
@@ -167,6 +167,36 @@ begin
       AsFile);
   {$endif unix}
 
+  // Now also allow for empty binutilsprefix (e.g. using codesourcery files):
+  if not result then
+  begin
+    FBinutilsPrefix:='';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  end;
+
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
+  {$ifdef unix}
+  // User may also have placed them into their regular search path:
+  if not result then { try /usr/local/bin/<dirprefix>/ }
+    result:=SearchBinUtil('/usr/local/bin/'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/ }
+    result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
+
+  if not result then { try /bin/ }
+    result:=SearchBinUtil('/bin',
+      AsFile);
+  {$endif unix}
+
   if result then
   begin
     // Configuration snippet for FPC
@@ -190,6 +220,7 @@ end;
 constructor Tany_linuxmipsel.Create;
 begin
   inherited Create;
+  // binutilsprefix can be modified later in GetBinUtils
   FBinUtilsPrefix:='mipsel-linux-android-'; //Used in Android NDK
   FBinUtilsPath:='';
   { Use current trunk compiler to build, not stable bootstrap, e.g. in light of bug

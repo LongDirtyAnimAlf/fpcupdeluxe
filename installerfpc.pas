@@ -137,31 +137,61 @@ uses fpcuputil,fileutil
   ;
 { TFPCCrossInstaller }
 const
+  SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
+  SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
   Win64FallBackUsingCrossCompiler=false; //Set to true to download i386 boostrap compiler and cross compile. Leave to use native win x64 compiler
 
-function InsertFPCCFGSnippet(FPCCFG,FirstLine,Snippet: string): boolean;
-// Adds snippet to fpc.cfg file if firstline is not already there
+function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
+// Adds snippet to fpc.cfg file if first line of snippet is not already there
 // Returns success (snippet inserted or already exists) or failure
 var
   ConfigText: TStringList;
+  i:integer;
+  SnipBegin,SnipEnd: integer;
+  SnippetText: TStringList;
 begin
   result:=false;
+  SnipBegin:=-1;
+  SnipEnd:=maxint;
   ConfigText:=TStringList.Create;
+  SnippetText:=TStringList.Create;
   try
+    SnippetText.Text:=Snippet;
     ConfigText.LoadFromFile(FPCCFG);
-    if pos(FirstLine+LineEnding,ConfigText.Text)>0 then
+    // Look for exactly this string:
+    SnipBegin:=ConfigText.IndexOf(SnippetText.Strings[0]);
+    if SnipBegin>-1 then
     begin
-      infoln('fpc.cfg: not inserting snippet as '+FirstLine+' already exists in '+FPCCFG,etWarning);
-    end
-    else
-    begin
-      ConfigText.Add(LineEnding);
-      ConfigText.Add(Snippet);
+      infoln('fpc.cfg: found existing snippet in '+FPCCFG+'. Deleting it and writing new version.',etInfo);
+      for i:=SnipBegin to ConfigText.Count-1 do
+      begin
+        // Once again, look exactly for this text:
+        if ConfigText.Strings[i]=SnipMagicEnd then
+        begin
+          SnipEnd:=i;
+          break;
+        end;
+      end;
+      if SnipEnd=maxint then
+      begin
+        //apparently snippet was not closed
+        infoln('fpc.cfg: existing snippet was not closed. Replacing it anyway. Please check your fpc.cfg.',etWarning);
+        SnipEnd:=i;
+      end;
+      for i:=SnipEnd downto SnipBegin do
+      begin
+        ConfigText.Delete(i);
+      end;
     end;
+    // Add snippet at bottom
+    ConfigText.Add(LineEnding);
+    ConfigText.Add(Snippet);
+
     ConfigText.SaveToFile(FPCCFG);
     result:=true;
   finally
     ConfigText.Free;
+    SnippetText.Free;
   end;
 end;
 
@@ -175,7 +205,6 @@ var
   CrossOptions:String;
   ChosenCompiler:String; //Compiler to be used for cross compiling
   i:integer;
-  MagicBegin, MagicEnd:String; //use this to find fpcup-modified sections in fpc.cfg
   OldPath:String;
   Options:String;
 begin
@@ -384,11 +413,8 @@ begin
             begin
             // Modify fpc.cfg
             FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-            MagicBegin:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
-            MagicEnd:='# end fpcup do not remove';
             InsertFPCCFGSnippet(FPCCfg,
-              MagicBegin,
-              MagicBegin+LineEnding+
+              SnipMagicBegin+FCrossCPU_target+'-'+FCrossOS_target+LineEnding+
               '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
               '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
@@ -396,7 +422,7 @@ begin
               CrossInstaller.FPCCFGSnippet+LineEnding+
               '#ENDIF'+LineEnding+
               '#ENDIF'+LineEnding+
-              MagicEnd);
+              SnipMagicEnd);
             end;
         {$IFDEF UNIX}
           result:=CreateFPCScript;
