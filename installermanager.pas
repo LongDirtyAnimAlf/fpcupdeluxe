@@ -17,15 +17,16 @@ uses
 //Contains RevisionStr and versiondate constants
 
 // These sequences determine standard installation/uninstallation order/content:
+// Note that a single os/cpu/sequence combination will only be executed once (the state machine checks for this)
 Const
   Sequences=
 //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
-    'Declare default;'+
+    'Declare default;'+ //keyword Declare gives a name to a sequence of commands
     {$ifdef linux}
-    'Exec CheckDevLibs;'+
+    'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
     {$endif linux}
-    'Do fpc;'+
+    'Do fpc;'+ //keyword Do means run the specified declared sequence
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
@@ -36,7 +37,7 @@ Const
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
-    'End;'+
+    'End;'+ //keyword End specifies the end of the sequence
 //default sequence for win32
     'Declare defaultwin32;'+
     'Do fpc;'+
@@ -49,7 +50,7 @@ Const
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
-    'Do USERIDE;'+ //todo: this one does not seem to get executed, while useride *is* run in the lazbuild part?!?
+    'Do USERIDE;'+ //todo: this one seems to get parsed by the state machine but does not get executed, while useride *is* run in the helplazarus part?!?
     {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     {$endif}
@@ -262,6 +263,7 @@ type
   end;
 
 
+  // Was this sequence already executed before? Which result?
   TExecState=(ESNever,ESFailed,ESSucceeded);
 
   TSequenceAttributes=record
@@ -271,7 +273,7 @@ type
   PSequenceAttributes=^TSequenceAttributes;
 
   TKeyword=(SMdeclare, SMdeclareHidden, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
-    SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU,SMInvalid);
+    SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU, SMInvalid);
 
   TState=record
     instr:TKeyword;
@@ -581,7 +583,6 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     end;
   end;
 
-
   function CreateLazarusScript:boolean;
   //calculate InstalledLazarus. Don't use this function when lazarus is not installed.
   var
@@ -634,7 +635,6 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     end;
   end;
   end;
-
 
   {$ifdef linux}
   function CheckDevLibs(LCLPlatform: string): boolean;
@@ -1061,7 +1061,7 @@ begin
   if not assigned(FParent.FModuleList) then
     begin
     result:=false;
-    FParent.WritelnLog('Error: No sequences loaded when trying to find' + SequenceName);
+    FParent.WritelnLog('Error: No sequences loaded while trying to find sequence name ' + SequenceName);
     exit;
     end;
   // --clean or --install ??
@@ -1081,13 +1081,17 @@ begin
     begin
     result:=true;
     SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
-    // Don't run if already run
+    // Don't run sequence if already run
     case SeqAttr^.Executed of
-      ESFailed   : begin
-                     result:=false;
-                     exit;
-                   end;
-      ESSucceeded : exit;
+      ESFailed : begin
+        infoln('State machine: already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
+        result:=false;
+        exit;
+        end;
+      ESSucceeded : begin
+        infoln('State machine: already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
+        exit;
+        end;
       end;
     // Get entry point in statemachine
     InstructionPointer:=SeqAttr^.EntryPoint;
@@ -1095,6 +1099,11 @@ begin
     // run sequence until end or failure
     while true do
       begin
+      { For debugging state machine sequence:
+      writeln('State machine: ');
+      writeln(StateMachine[InstructionPointer].instr);
+      writeln(StateMachine[InstructionPointer].param);
+      }
       case StateMachine[InstructionPointer].instr of
         SMdeclare     :;
         SMdeclareHidden :;

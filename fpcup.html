@@ -27,7 +27,8 @@ other modules.</P>
 <P>For “external” modules, the parent class is TUniversalInstaller. You can specify what you want installed in fpcup.ini (see below in external modules)</P>
 <P>Module names may not conflict and must consist of alphanumeric characters, _ and - (hyphen).</P>
 <H3 CLASS="western">Dependency checking</H2>
-<P>Limited dependency checking is performed by the state machine: you can specify one sequence requires another; that other sequence is then executed, regardless of whether it was executed before. For external modules, you can specify one module requires another.</P>
+<P>Limited dependency checking is performed by the state machine: you can specify one sequence requires another; that other sequence is then executed, regardless of whether it was executed before (to do verify this given the checking code mentioned below). For external modules, you can specify one module requires another.</P>
+<P>A single sequence (actually sequence/OS/CPU combination) will only be executed once by the state machine. This means that you may have to take care with requiring sequence as only the first may run.</P>
 <H3 CLASS="western">External modules</H3>
 <P>External modules are modules where the installation/uninstall parameters are specified in an ini file.</P>
 <P>The ini file e.g. specifies what SVN repository to download from into what directory.</P>

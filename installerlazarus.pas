@@ -34,7 +34,6 @@ Const
 
 //Nogui widgetset+Lazbuild:
     'Declare lazbuild;'+
-    //Same story as in BIGIDE/USERIDE
     'Getmodule lazarus;'+
     'Buildmodule lazbuild;'+
     //config lazarus, so lazbuild will work:
@@ -42,10 +41,11 @@ Const
     'End;'+
 
 //standard IDE build with user-selected packages
+    // assumes/requires that Laz svn has already been updated
+    // also we need lazbuild, but we can check for it in our USERIDE code.
+    // If we Require it here, it will kick off a lazbuild build cycle that
+    // may already have been done.
     'Declare USERIDE;'+
-    //We need lazbuild, but we can check for it in our USERIDE code.
-    //If we Require it here, it will kick off a lazbuild build cycle that
-    //may already have been done.
     'Buildmodule USERIDE;'+
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;'+
