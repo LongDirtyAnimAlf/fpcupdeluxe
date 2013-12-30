@@ -452,9 +452,8 @@ begin
     if CheckExecutable(LazBuildApp, '--help', 'lazbuild')=false then
     begin
       writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.',true);
-      result:=false;
       FInstalledLazarus:= '//*\\error/ / \ \ no valid lazbuild found';
-      exit;
+      exit(false);
     end
     else
     begin
