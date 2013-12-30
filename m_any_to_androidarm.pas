@@ -66,20 +66,30 @@ end;
 function TAny_ARMAndroid.GetLibs(Basepath:string): boolean;
 { Example files in lib directory - may or may not match your requirements:
 crtbegin_dynamic.o
+crtbegin_so.o
+crtbegin_static.o
+crtend_android.o
+crtend_so.o
 libandroid.so
+libc.a
 libc.so
 libdl.so
 libEGL.so
 libGLESv1_CM.so
 libGLESv2.so
+libGLESv3.so
 libjnigraphics.so
 liblog.so
+libm.a
 libm.so
+libm_hard.a
 libOpenMAXAL.so
 libOpenSLES.so
+libstdc++.a
 libstdc++.so
 libthread_db.so
 libz.so
+rs
 e.g. from an Android NDK:
 android-ndk-r9c\platforms\android-19\arch-arm\usr\lib
 }
