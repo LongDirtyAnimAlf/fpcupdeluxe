@@ -44,8 +44,8 @@ implementation
 
 type
 
-{ TAny_armandroid }
-TAny_armandroid = class(TCrossInstaller)
+{ TAny_ARMAndroid }
+TAny_ARMAndroid = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -57,13 +57,13 @@ public
   destructor Destroy; override;
 end;
 
-{ TAny_armandroid }
-function TAny_armandroid.TargetSignature: string;
+{ TAny_ARMAndroid }
+function TAny_ARMAndroid.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TAny_armandroid.GetLibs(Basepath:string): boolean;
+function TAny_ARMAndroid.GetLibs(Basepath:string): boolean;
 { Example files in lib directory - may or may not match your requirements:
 crtbegin_dynamic.o
 libandroid.so
@@ -124,18 +124,20 @@ begin
   end;
 end;
 
-function TAny_armandroid.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TAny_ARMAndroid.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  // todo: get gtk at least
-  // Get these from Android SDK, e.g. r22 (no need for ADT), e.g.
-  // http://dl.google.com/android/android-sdk_r22.3-windows.zip
-  //todo: libs should go somewhere here
-  result:=true;
-  //todo: add ant tools etc?
-  //http://pascalgeek.blogspot.com/2013/10/android-programming-with-lazarus.html
+  // Android does not support Gtk/Qt. To do: how to figure out how to do custom drawn?
+  result:=false;
+  { Any libs from Android SDK, e.g. r22 (no need for ADT), e.g.
+  http://dl.google.com/android/android-sdk_r22.3-windows.zip
+  ?
+
+  todo: add ant tools etc?
+  http://pascalgeek.blogspot.com/2013/10/android-programming-with-lazarus.html
+  }
 end;
 
-function TAny_armandroid.GetBinUtils(Basepath:string): boolean;
+function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
 const
   DirName='arm-android';
 var
@@ -220,37 +222,39 @@ begin
   end;
 end;
 
-constructor TAny_armandroid.Create;
+constructor TAny_ARMAndroid.Create;
 begin
   inherited Create;
   // Invoke like
   // fpc -Parm -Tandroid
   // Note: the compiler does NOT define LINUX!
   // It defines UNIX and ANDROID though.
-  FBinUtilsPrefix:='';//none as in Android NDK 9 //could also be 'arm-linux-androideabi-' depnding
+
+  // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
+  FBinUtilsPrefix:='arm-linux-androideabi-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
-  FCrossModuleName:='TAny_armandroid'; //used in messages to user
+  FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
+  FCrossModuleName:='TAny_ARMAndroid'; //used in messages to user
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='arm';
   FTargetOS:='android';
   FAlreadyWarned:=false;
-  infoln('TAny_armandroid crosscompiler loading',etDebug);
+  infoln('TAny_ARMAndroid crosscompiler loading',etDebug);
 end;
 
-destructor TAny_armandroid.Destroy;
+destructor TAny_ARMAndroid.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_armandroid:TAny_armandroid;
+  Any_ARMAndroid:TAny_ARMAndroid;
 
-// Even though it's officially for x86, x64 may work
 initialization
-  Any_armandroid:=TAny_armandroid.Create;
-  RegisterExtension(Any_armandroid.TargetCPU+'-'+Any_armandroid.TargetOS,Any_armandroid);
+  Any_ARMAndroid:=TAny_ARMAndroid.Create;
+  RegisterExtension(Any_ARMAndroid.TargetCPU+'-'+Any_ARMAndroid.TargetOS,Any_ARMAndroid);
 finalization
-  Any_armandroid.Destroy;
+  Any_ARMAndroid.Destroy;
 end.
 

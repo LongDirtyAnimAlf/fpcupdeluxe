@@ -407,9 +407,9 @@ end;"/>
         <UnitName Value="m_any_to_androidarm"/>
       </Unit29>
       <Unit30>
-        <Filename Value="m_win32_to_linuxmipsel.pas"/>
+        <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_linuxmipsel"/>
+        <UnitName Value="m_any_to_linuxmipsel"/>
       </Unit30>
       <Unit31>
         <Filename Value="m_win32_to_go32v2i386.pas"/>

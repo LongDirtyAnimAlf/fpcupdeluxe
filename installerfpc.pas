@@ -175,7 +175,7 @@ var
   CrossOptions:String;
   ChosenCompiler:String; //Compiler to be used for cross compiling
   i:integer;
-  MagicLine:String; //use this to find fpcup-modified sections in fpc.cfg
+  MagicBegin, MagicEnd:String; //use this to find fpcup-modified sections in fpc.cfg
   OldPath:String;
   Options:String;
 begin
@@ -384,18 +384,19 @@ begin
             begin
             // Modify fpc.cfg
             FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-            //todo: is this enough - shouldn't we also check for target OS not only target CPU? What about arm linux and arm wince?
-            MagicLine:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
+            MagicBegin:='# fpcup do not remove '+FCrossCPU_target+'-'+FCrossOS_target;
+            MagicEnd:='# end fpcup do not remove';
             InsertFPCCFGSnippet(FPCCfg,
-              MagicLine,
-              MagicLine+LineEnding+
+              MagicBegin,
+              MagicBegin+LineEnding+
               '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
               '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
               '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               CrossInstaller.FPCCFGSnippet+LineEnding+
               '#ENDIF'+LineEnding+
-              '#ENDIF');
+              '#ENDIF'+LineEnding+
+              MagicEnd);
             end;
         {$IFDEF UNIX}
           result:=CreateFPCScript;
