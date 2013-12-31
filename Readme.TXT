@@ -323,9 +323,10 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit af5088b57ccf+ (Wed Dec 11 09:59:21 2013 +0100)
-Build date: 2013/12/21 10:11:31
+Version: based on commit 10e19d57d552+ (Tue Dec 31 09:15:08 2013 +0100)
+Build date: 2013/12/31 13:05:37
 Compiled for CPU: i386 on win32
+
 
 DON'T PANIC!
 Everything below is optional...
@@ -334,14 +335,12 @@ fpcup --<options>
 
 fpcup can work with modules - see "only", "include", "skip" below
 List of all modules:
+anchordocking
+anchordockingclean
+anchordockinguninstall
 bgracontrols
 bgracontrolsclean
 bgracontrolsuninstall
-BIGIDE
-BIGIDEclean
-bigidepackages
-bigidepackagesclean
-bigidepackagesuninstall
 brookframework
 brookframeworkclean
 brookframeworkuninstall
@@ -352,6 +351,9 @@ crosswin32-64
 crosswin32-64Clean
 crosswin64-32
 crosswin64-32Clean
+dcpcrypt
+dcpcryptclean
+dcpcryptuninstall
 default
 defaultclean
 defaultuninstall
@@ -501,6 +503,10 @@ Options are not required; they include:
                        Make sure it is not in the fpcdir directory
  clean                 Remove files created with build. 
                        Can be combined with skip and only options.
+ crossOPT=<options>    Options to be passed to the cross compiler.
+                       Corresponds to the CROSSOPT argument in make
+                       crosscompiler.
+                       E.g. --crossOPT="-CpARMV7 -CfVFPV3" for ARM
  cputarget=<name>      CPU target for cross_compiling.
                        <name> has to be one of the following:
                        i386,m68k,alpha,powerpc,powerpc64,
@@ -522,7 +528,7 @@ Options are not required; they include:
  fpcURL=<URL>          SVN URL from which to download; default: fixes_2.6:
                        http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
                        Accepts shortcuts: 
-                       2.7.1,trunk,2.6.3,fixes,2.6.2,2.6.0
+                       2.7.1,trunk,fixes,2.6.2,2.6.0
  fpcOPT=<options>      Options passed on to the FPC make as OPT=options.
                        E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"
  fpcrevision=<number>  Revert to FPC SVN revision <number>
@@ -611,4 +617,4 @@ Options are not required; they include:
 
 Share and enjoy!
 
-Info: 21/12/2013 16:22:50: fpcup finished.
+Info: 31/12/2013 13:08:04: fpcup finished.
