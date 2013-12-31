@@ -120,6 +120,7 @@ const
 var
   AsFile: string;
 begin
+  inherited;
   AsFile:=FBinUtilsPrefix+'as.exe';  
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
   result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);

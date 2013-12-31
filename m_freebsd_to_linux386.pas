@@ -48,9 +48,11 @@ begin
   FLibsPath:='/compat/linux/lib';
   result:=DirectoryExists(FLibsPath);
   if result then
+  begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
+  end;
   {
   perhaps these?!? todo: check.
   -Fl/compat/linux/lib
@@ -65,7 +67,10 @@ begin
 end;
 
 function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
+var
+  i:integer;
 begin
+  inherited;
   //todo: remove once done
   infoln('TFreeBSD_Linux386: Experimental, not finished. Stopping now.',etError);
   result:=false;
@@ -74,11 +79,13 @@ begin
   FBinUtilsPrefix:='';
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
   if result then
+  begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-Tlinux'; {target operating system}
+  end;
 end;
 
 constructor TFreeBSD_Linux386.Create;

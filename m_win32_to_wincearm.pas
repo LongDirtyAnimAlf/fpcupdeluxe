@@ -126,6 +126,7 @@ const
 var
   AsFile: string;
 begin
+  inherited;
   AsFile:=FBinUtilsPrefix+'as.exe';
   // Using default naming (svn2 repo)
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;

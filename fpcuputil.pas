@@ -91,6 +91,9 @@ function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
 // to application directory
 procedure SaveInisFromResource(filename,resourcename:string);
+// Searches for SearchFor in the stringlist and returns the index if found; -1 if not
+// Search optionally starts from position SearchFor
+function StringListStartsWith(SearchIn: TStringList; SearchFor: string; StartIndex: integer=0): integer;
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 {$ENDIF UNIX}
@@ -826,6 +829,25 @@ begin
   except
     result:=false;
   end;
+end;
+
+function StringListStartsWith(SearchIn: TStringList; SearchFor: string; StartIndex: integer): integer;
+var
+  Found:boolean=false;
+  i:integer;
+begin
+  for i:=StartIndex to SearchIn.Count-1 do
+  begin
+    if copy(SearchIn[i],1,length(SearchFor))=SearchFor then
+    begin
+      Found:=true;
+      break;
+    end;
+  end;
+  if Found then
+    result:=i
+  else
+    result:=-1;
 end;
 
 function Which(Executable: string): string;

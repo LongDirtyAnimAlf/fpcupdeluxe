@@ -30,6 +30,7 @@ type
     FCompiler: string; // Compiler executable
     FCompilerOptions: string;
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
+    FCrossOPT: string;
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FDesiredRevision: string;
     // Stores tprocessex exception info:
@@ -99,6 +100,8 @@ type
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
     property CrossCPU_Target: string read FCrossCPU_Target write FCrossCPU_Target;
+    // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
+    property CrossOPT: string read FCrossOPT write FCrossOPT;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
     property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
     // SVN revision override. Default is HEAD/latest revision

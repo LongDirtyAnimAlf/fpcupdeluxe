@@ -129,6 +129,10 @@ begin
   writeln('                       Make sure it is not in the fpcdir directory');
   writeln(' clean                 Remove files created with build. ');
   writeln('                       Can be combined with skip and only options.');
+  writeln(' crossOPT=<options>    Options to be passed to the cross compiler.');
+  writeln('                       Corresponds to the CROSSOPT argument in make');
+  writeln('                       crosscompiler.');
+  writeln('                       E.g. --crossOPT="-CpARMV7 -CfVFPV3" for ARM');
   writeln(' cputarget=<name>      CPU target for cross_compiling.');
   writeln('                       <name> has to be one of the following:');
   writeln('                       i386,m68k,alpha,powerpc,powerpc64,');
@@ -351,6 +355,7 @@ begin
       end;
       FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
+      FInstaller.CrossOPT:=Options.GetOption('','crossopt','');
       FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
       // Find out if the user specified --fpcuplinkname= to explicitly block creation of a link, or just didn't specify anything.
       if FInstaller.ShortcutNameFPCup=DirectorySeparator then

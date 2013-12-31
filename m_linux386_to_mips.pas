@@ -140,7 +140,7 @@ const
 var
   AsFile: string;
 begin
-  //todo: factor these path finding repetitions into a function (in the parent class?)
+  inherited;
   AsFile:=FBinUtilsPrefix+'as';
   result:=false;
 

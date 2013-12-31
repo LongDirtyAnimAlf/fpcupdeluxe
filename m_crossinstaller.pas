@@ -33,14 +33,15 @@ type
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual; abstract;
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
-    function GetBinUtils(Basepath:string):boolean;virtual; abstract;
+    function GetBinUtils(Basepath:string):boolean;virtual;
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
     property CompilerUsed: CompilerType read FCompilerUsed;
     // Represents arguments for CROSSOPT parameter
     // No need to add XP= (binutils prefix): calling code will do this
-    // CROSSOPT: Makefile of compiler/ allows to specify compiler options that are only used during the actual crosscompiling phase (i.e. not during the initial bootstrap cycle)
+    // CROSSOPT: Compiler makefile allows to specify compiler options that are only used during the actual crosscompiling phase (i.e. not during the initial bootstrap cycle)
+    // Also used in fpc.cfg snippet to set options when compiling for cross target
     property CrossOpts: TStringList read FCrossOpts;
     // Conditional define snippet for fpc.cfg used to specify library locations etc
     // Can be empty
@@ -86,6 +87,18 @@ begin
   if not result then
     infoln(FCrossModuleName + ': failed: searching binutil '+LookFor+
       ' in directory '+FBinUtilsPath, etInfo);
+end;
+
+function TCrossInstaller.GetBinUtils(Basepath: string): boolean;
+var
+  i:integer;
+begin
+  // Add user-selected CROSSOPT to fpc.cfg snippet
+  // Descendents can add more fpc.cfg snippets but shouldn't remove what the user chose
+  for i:=0 to FCrossOpts.Count-1 do
+  begin
+    FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i]+LineEnding;
+  end;
 end;
 
 constructor TCrossInstaller.Create;

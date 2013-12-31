@@ -167,6 +167,7 @@ type
     FConfigFile: string;
     FCrossCPU_Target: string;
     FCrossLCL_Platform: string;
+    FCrossOPT: string;
     FCrossOS_Target: string;
     FFPCDesiredRevision: string;
     FFPCDirectory: string;
@@ -219,6 +220,7 @@ type
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
+    property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
     property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
@@ -737,7 +739,8 @@ var
 begin
   result:=true;
   CrossCompiling:=(FParent.CrossCPU_Target<>'') or (FParent.CrossOS_Target<>'');
-  //check if this is a known module
+
+  //check if this is a known module:
 
   // FPC:
   if uppercase(ModuleName)='FPC' then
@@ -760,8 +763,9 @@ begin
     if CrossCompiling then
       begin
       Installer:=TFPCCrossInstaller.Create;
-      Installer.CrossOS_Target:=FParent.CrossOS_Target;
       Installer.CrossCPU_Target:=FParent.CrossCPU_Target;
+      Installer.CrossOPT:=FParent.CrossOPT;
+      Installer.CrossOS_Target:=FParent.CrossOS_Target;
       end
     else
       Installer:=TFPCNativeInstaller.Create;
@@ -791,8 +795,9 @@ begin
     if CrossCompiling then
       begin
       Installer:=TLazarusCrossInstaller.Create;
-      Installer.CrossOS_Target:=FParent.CrossOS_Target;
       Installer.CrossCPU_Target:=FParent.CrossCPU_Target;
+      Installer.CrossOPT:=FParent.CrossOPT;
+      Installer.CrossOS_Target:=FParent.CrossOS_Target;
       end
     else
       Installer:=TLazarusNativeInstaller.Create;

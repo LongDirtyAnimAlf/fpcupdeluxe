@@ -49,6 +49,7 @@ end;
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
+  inherited;
   //todo: remove once done
   infoln('TFreeBSD64_FreeBSD386: Experimental, not finished. Stopping now.',etError);
   result:=false;
@@ -56,11 +57,13 @@ begin
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
   if result then
+  begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-Tlinux'; {target operating system}
+  end;
 end;
 
 constructor TFreeBSD64_FreeBSD386.Create;

@@ -139,6 +139,7 @@ const
 var
   AsFile: string;
 begin
+  inherited;
   // You can copy the files from Android NDK, e.g.
   // android-ndk-r9c\toolchains\mipsel-linux-android-4.8\prebuilt\windows-x86_64\bin\mipsel-linux-android-as.exe
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
@@ -229,11 +230,17 @@ begin
 
   if result then
   begin
+    // Architecture etc:
+    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
+      FCrossOpts.Add('-CpMIPS32R2'); //Probably supported by most devices today
+    // Softfloat unless otherwise specified:
+    if StringListStartsWIth(FCrossOpts,'-Cf')=-1 then
+      FCrossOpts.Add('-CfSOFT');
+
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-fPIC'; {force PIC. Verify if this is actually required}
+    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
     infoln('Twin32_linuxmipsel: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end
   else

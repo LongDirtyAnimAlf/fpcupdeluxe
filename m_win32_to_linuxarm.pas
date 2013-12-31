@@ -109,6 +109,7 @@ const
 var
   AsFile: string;
 begin
+  inherited;
   AsFile:=FBinUtilsPrefix+'as.exe';
   // Using crossfpc directory naming
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;

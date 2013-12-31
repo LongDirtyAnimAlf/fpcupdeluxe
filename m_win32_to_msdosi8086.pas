@@ -131,6 +131,7 @@ const
 var
   AsFile: string;
 begin
+  inherited;
   AsFile:=FBinUtilsPrefix+'nasm.exe'; //nasm, not GNU as.exe
   // Using crossfpc directory naming
   FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
@@ -159,12 +160,6 @@ begin
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-XX'+LineEnding+ {Smartlink}
     '-CX'+LineEnding; {Smartlink libraries}
-    if FCrossOpts.IndexOf(MediumMemOption)>-1 then
-      FFPCCFGSnippet:=FFPCCFGSnippet+MediumMemOption+LineEnding;
-    if FCrossOpts.IndexOf(SmallMemOption)>-1 then
-      FFPCCFGSnippet:=FFPCCFGSnippet+SmallMemOption+LineEnding;
-    if FCrossOpts.IndexOf(TinyMemOption)>-1 then
-      FFPCCFGSnippet:=FFPCCFGSnippet+TinyMemOption+LineEnding;
     infoln('TWin32_msdosi8086: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end
   else

@@ -179,6 +179,8 @@ begin
   infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',etinfo);
   FErrorLog.Clear;
   if Assigned(CrossInstaller) then
+  begin
+    CrossInstaller.CrossOpts.Text:=CrossOPT; //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils',eterror)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
@@ -300,7 +302,8 @@ begin
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(result);
       end;
-    end //valid cross compile setup
+    end; //prereqs in place
+  end //valid cross compile setup
   else
     infoln('Lazarus: can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,eterror);
 end;

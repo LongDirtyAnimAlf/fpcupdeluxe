@@ -30,6 +30,9 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 { Following Leledumbo's tutorial:
 http://pascalgeek.blogspot.com/2013/10/android-programming-with-lazarus.html
+... and this bug report
+http://bugs.freepascal.org/view.php?id=25399
+that suggests android cross compilers can be used for mipsel linux
 
 }
 {$mode objfpc}{$H+}
@@ -153,6 +156,7 @@ const
 var
   AsFile: string;
 begin
+  inherited;
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   result:=false;
 
@@ -207,18 +211,16 @@ begin
 
   if result then
   begin
-    // Configuration snippet for FPC
+    // Set some defaults if user hasn't specified otherwise
     // Architecture: e.g. ARMv6, ARMv7,...
-    FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android
+    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
+      FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android
     // By default, use software FPU/softfloat for ARM.
     // Hardfloat: set CROSSOPT="-CfVFPV3"
-    //FCrossOpts.Add('-CfVFPV3');
-    //todo: if these are added, add them to the fpccfgsnippet as well...
-    //todo: really need a mechanism to pass options to crosscompile modules then set stuff like crossopts accordingly
+
+    // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+
-      '-CpARMV6'; {copied over from FCrossOpts above}
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-XP'+FBinUtilsPrefix; {Prepend the binutils names};
     infoln(FCrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end

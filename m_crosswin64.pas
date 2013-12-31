@@ -66,8 +66,9 @@ end;
 
 function TWin64.GetBinUtils(Basepath:string): boolean;
 begin
+  inherited;
   FBinUtilsPath:='';
-  FBinUtilsPrefix:='';
+  FBinUtilsPrefix:='';  
   result:=true;
 end;
 

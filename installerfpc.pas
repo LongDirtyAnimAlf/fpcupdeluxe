@@ -223,12 +223,14 @@ begin
   result:=false; //fail by default
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
+    begin
+    CrossInstaller.CrossOpts.Text:=CrossOPT; //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
       infoln('Failed to get cross libraries', etError)
     else
-      begin        
+      begin
       if CrossInstaller.CompilerUsed=ctInstalled then
         ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt {todo if this does not work use ppc386.exe etc}
       else //ctBootstrap
@@ -430,12 +432,13 @@ begin
           GetCompiler;
           end;
         end;
+      end
     end
-  else
-    begin
-    infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
-    result:=false;
-    end;
+    else
+      begin
+      infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
+      result:=false;
+      end;
 end;
 
 
