@@ -1089,12 +1089,12 @@ begin
     // Don't run sequence if already run
     case SeqAttr^.Executed of
       ESFailed : begin
-        infoln('State machine: already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
+        infoln('State machine: already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
         result:=false;
         exit;
         end;
       ESSucceeded : begin
-        infoln('State machine: already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
+        infoln('State machine: already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
         exit;
         end;
       end;
