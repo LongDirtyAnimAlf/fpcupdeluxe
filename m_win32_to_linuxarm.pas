@@ -92,7 +92,7 @@ begin
     // Set some defaults if user hasn't specified otherwise
     if StringListStartsWith(FCrossOpts,'-FL')=-1 then
     begin
-      infoln('TWin32_Linuxarm: you did not specify any -FL option in your crossopts. You may want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
+      infoln('TWin32_Linuxarm: you did not specify any -FL option in your crossopts. You MAY want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
       {
       Let's not get too zealous and leave choices up to the user. Perhaps the default is good, too.
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
@@ -110,7 +110,7 @@ end;
 function TWin32_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
+  infoln('todo: implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=true;
 end;
 

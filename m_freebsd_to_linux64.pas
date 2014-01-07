@@ -125,17 +125,6 @@ begin
     make
     }
     //todo: make install to fbinutilspath
-    {todo: check if fpc.cfg needs to be edited somewhere - in the main crossinstaller?!?
-    e.g. for arm
-    #IFDEF CPUARM
-    -XP/home/user/lazarus/fpc/binutils/
-    -Xr/usr/lib/fpc/2.5.1/units/arm-linux/rtl/
-    -Xr/home/user/lazarus/fpc/libcross
-    -XR/home/user/lazarus/fpc/
-    -darm
-    -Tlinux
-    #ENDIF
-    }
   end;
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
   if result then

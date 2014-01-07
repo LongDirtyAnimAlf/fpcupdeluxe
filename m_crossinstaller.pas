@@ -34,6 +34,8 @@ type
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual; abstract;
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
     function GetBinUtils(Basepath:string):boolean;virtual;
+    // Parses space-delimited crossopt parameters and sets the CrossOpt property
+    procedure SetCrossOpt(CrossOpts: string);
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
@@ -42,7 +44,7 @@ type
     // No need to add XP= (binutils prefix): calling code will do this
     // CROSSOPT: Compiler makefile allows to specify compiler options that are only used during the actual crosscompiling phase (i.e. not during the initial bootstrap cycle)
     // Also used in fpc.cfg snippet to set options when compiling for cross target
-    property CrossOpts: TStringList read FCrossOpts;
+    property CrossOpt: TStringList read FCrossOpts;
     // Conditional define snippet for fpc.cfg used to specify library locations etc
     // Can be empty
     // Does not include the #IFDEF CPU<x> and #ENDIF parts where the target cpu is filled in
@@ -98,6 +100,24 @@ begin
   for i:=0 to FCrossOpts.Count-1 do
   begin
     FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i]+LineEnding;
+  end;
+end;
+
+procedure TCrossInstaller.SetCrossOpt(CrossOpts: string);
+// A bit rough-and-ready but hopefully there won't be too many quoting etc problems
+var
+  Parser: TStringList;
+begin
+  Parser:=TStringList.Create;
+  try
+    Parser.Delimiter:=' ';
+    Parser.QuoteChar:=''''; //single '. Assume entire CROSSOPT argument is surround by double quotes; indifividual parameters by single.
+    Parser.StrictDelimiter:=false; //ignore quoting characters
+    Parser.DelimitedText:=CrossOpts;
+    FCrossOpts.Clear;
+    FCrossOpts.AddStrings(Parser);
+  finally
+    Parser.Free;
   end;
 end;
 

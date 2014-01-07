@@ -28,9 +28,9 @@ type
     FBinUtils: TStringList; //List of executables such as make.exe needed for compilation on Win32
     FBunzip2: string;
     FCompiler: string; // Compiler executable
-    FCompilerOptions: string;
+    FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
-    FCrossOPT: string;
+    FCrossOPT: string; //options passed (only) when cross-compiling
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FDesiredRevision: string;
     // Stores tprocessex exception info:

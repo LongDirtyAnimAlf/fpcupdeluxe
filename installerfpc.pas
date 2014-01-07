@@ -224,7 +224,8 @@ begin
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
     begin
-    CrossInstaller.CrossOpts.Text:=CrossOPT; //pass on user-requested cross compile options
+    //todo: parse this; split out all options into separate lines in crossopts
+    CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
@@ -291,11 +292,11 @@ begin
         CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
         ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
-      if (CrossInstaller.CrossOpts.Count>0) and (CrossOptions='') then
+      if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
         CrossOptions:='CROSSOPT=';
-      for i:=0 to CrossInstaller.CrossOpts.Count-1 do
+      for i:=0 to CrossInstaller.CrossOpt.Count-1 do
         begin
-        CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpts[i]);
+        CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
         end;
       if CrossOptions<>'' then
         ProcessEx.Parameters.Add(CrossOptions);
@@ -370,11 +371,11 @@ begin
           CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
           end;
-        if (CrossInstaller.CrossOpts.Count>0) and (CrossOptions='') then
+        if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
           CrossOptions:='CROSSOPT=';
-        for i:=0 to CrossInstaller.CrossOpts.Count-1 do
+        for i:=0 to CrossInstaller.CrossOpt.Count-1 do
           begin
-          CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpts[i]);
+          CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
           end;
         if CrossOptions<>'' then
           ProcessEx.Parameters.Add(CrossOptions);

@@ -180,7 +180,8 @@ begin
   FErrorLog.Clear;
   if Assigned(CrossInstaller) then
   begin
-    CrossInstaller.CrossOpts.Text:=CrossOPT; //pass on user-requested cross compile options
+    //todo: parse this so one parameter per line
+    CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils',eterror)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
@@ -673,6 +674,9 @@ var
 begin
   result:=InitModule;
   if not result then exit;
+  // If cleaning primary config:
+  if (FCrossLCL_Platform='') and (FCrossCPU_Target='') then
+    infoln('Lazarus: if your primary config dir has changed, you may want to remove '+IncludeTrailingPathDelimiter(FBaseDirectory)+'lazarus.cfg which points to the primary config path.',etInfo);
   // Make distclean; we don't care about failure (e.g. directory might be empty etc)
   oldlog:=ProcessEx.OnErrorM;
   ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
