@@ -99,7 +99,10 @@ begin
   // Descendents can add more fpc.cfg snippets but shouldn't remove what the user chose
   for i:=0 to FCrossOpts.Count-1 do
   begin
-    FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i]+LineEnding;
+    if i<FCrossOpts.Count-1 then
+      FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i]+LineEnding
+    else
+      FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i];
   end;
 end;
 

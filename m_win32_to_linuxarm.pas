@@ -69,7 +69,7 @@ function TWin32_Linuxarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-linux';
 begin
-//todo add support for separate cross dire
+
   // Using crossfpc directory naming
   FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
@@ -85,6 +85,7 @@ begin
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    //todo: implement -Xr for other platforms if this setup works
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
@@ -104,6 +105,10 @@ begin
 
     { Note: bug 21554 and checked on raspberry pi wheezy: uses armhf /lib/arm-linux-gnueabihf/ld-linux.so.3}
     infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
+  end
+  else
+  begin
+    infoln('TWin32_Linuxarm: you MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.',etInfo);
   end;
 end;
 
