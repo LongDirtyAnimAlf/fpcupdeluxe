@@ -87,21 +87,22 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     //todo: implement -Xr for other platforms if this setup works
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+      '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
 
-    // Set some defaults if user hasn't specified otherwise
+    {
+    Actually leaving this out seems to work ok on the target system.
     if StringListStartsWith(FCrossOpts,'-FL')=-1 then
     begin
       infoln('TWin32_Linuxarm: you did not specify any -FL option in your crossopts. You MAY want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
-      {
       Let's not get too zealous and leave choices up to the user. Perhaps the default is good, too.
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
         '-FL/usr/lib/ld-linux.so.3' //buildfaq 3.3.1: the name of the dynamic linker on the target
       maybe for older situation:
         '-FL/usr/lib/ld-linux.so.2'
-      }
     end;
+    }
 
     { Note: bug 21554 and checked on raspberry pi wheezy: uses armhf /lib/arm-linux-gnueabihf/ld-linux.so.3}
     infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
