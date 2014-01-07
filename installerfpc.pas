@@ -271,17 +271,10 @@ begin
       if (CrossInstaller.TargetCPU='i8086') and
         (CrossInstaller.TargetOS='msdos') then
         begin
-        if (pos('-g',Options)>0) or
-          (pos('-CX',Options)=0) or
-          (pos('-XX',Options)=0) then
+        if (pos('-g',Options)>0) then
           begin
-          if Options='' then
-            infoln('You specified no FPC options...',etInfo)
-          else
-            infoln('You specified these FPC options: '+Options+'...',etInfo);
-          // Replacement options: create smartlinked library; smartlink units
-          Options:='-CX -XXs';
-          infoln('... however, this cross compiler does not support debug symbols and needs smartlinking. Using these options instead: '+Options,etInfo);
+          infoln('You specified these FPC options: '+Options+'... however, this cross compiler does not support debug symbols. Aborting.',etError);
+          exit(false);
           end;
         end;
       if CrossInstaller.LibsPath<>''then

@@ -148,6 +148,18 @@ begin
   end;
   if result then
   begin
+
+    if StringListStartsWith(FCrossOpts,'-CX')=-1 then
+    begin
+      infoln('TWin32_msdosi8086: this compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etInfo);
+      FCrossOpts.Add('-CX');
+    end;
+    if StringListStartsWith(FCrossOpts,'-XXs')=-1 then
+    begin
+      infoln('TWin32_msdosi8086: this compiler requires -XXs (smartlinking). Added it to CROSSOPT.',etInfo);
+      FCrossOpts.Add('-CX');
+    end;
+
     // Configuration snippet for FPC
     {this was in Marco's test fpc.cfg:
     -Sgic
