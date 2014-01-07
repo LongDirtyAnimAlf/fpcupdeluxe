@@ -23,7 +23,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="6">
+    <BuildModes Count="7">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -233,6 +233,49 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item6>
+      <Item7 Name="linux_armelv6">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="fpcup_linux_armel"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetProcessor Value="ARMV6"/>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CompilerMessages>
+              <UseMsgFile Value="True"/>
+            </CompilerMessages>
+            <CustomOptions Value="-dFPC_ARMHF"/>
+            <CompilerPath Value="$(CompPath)"/>
+            <ExecuteBefore>
+              <Command Value="hgversion$(ExeExt)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item7>
       <SharedMatrixOptions Count="1">
         <Item1 ID="082647053431" Modes="Default,Debug,64bit,64bitDebug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>

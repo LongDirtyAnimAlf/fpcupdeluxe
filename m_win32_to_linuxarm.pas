@@ -30,13 +30,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {
 Setup: currently aimed at using the crossfpc supplied binaries/libs
-Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the directory layout provided by the crossfpc project there, so you get
-...
+For BeagleBone Black, the crossfpc binaries work (see fpcup site for a mirror)
 
-//todo: integrate/prefer fpc supplied binutils at
-ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.15.94-win32-arm-linux.zip
-//todo: how to find out the difference between ARM and ARM android
+Also looks for android cross compiler bin and bin without any prefix
+
 }
 
 {$mode objfpc}{$H+}
@@ -44,7 +41,7 @@ ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.15.94-win32-arm-
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
 
 implementation
 type
@@ -89,9 +86,23 @@ begin
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+      '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+
+    // Set some defaults if user hasn't specified otherwise
+    if StringListStartsWith(FCrossOpts,'-FL')=-1 then
+    begin
+      infoln('TWin32_Linuxarm: you did not specify any -FL option in your crossopts. You may want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
+      {
+      Let's not get too zealous and leave choices up to the user. Perhaps the default is good, too.
+      FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+        '-FL/usr/lib/ld-linux.so.3' //buildfaq 3.3.1: the name of the dynamic linker on the target
+      maybe for older situation:
+        '-FL/usr/lib/ld-linux.so.2'
+      }
+    end;
+
+    { Note: bug 21554 and checked on raspberry pi wheezy: uses armhf /lib/arm-linux-gnueabihf/ld-linux.so.3}
     infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
   end;
 end;
@@ -110,10 +121,67 @@ var
   AsFile: string;
 begin
   inherited;
-  AsFile:=FBinUtilsPrefix+'as.exe';
+  // Start with any names user may have given
+  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  result:=false;
+
   // Using crossfpc directory naming
-  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
+  // Also allow for crossfpc naming
+  if not result then
+  begin
+    FBinUtilsPrefix:='arm-linux-';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  end;
+
+  // Using crossfpc directory naming
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
+  // Also allow for crossbinutils without prefix
+  if not result then
+  begin
+    FBinUtilsPrefix:='';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  end;
+
+  // Using crossfpc directory naming
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
+  // Also allow for android crossbinutils
+  if not result then
+  begin
+    FBinUtilsPrefix:='arm-linux-androideabi-';//standard eg in Android NDK 9
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  end;
+
+  // Using crossfpc directory naming
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
@@ -126,15 +194,36 @@ begin
   end;
   if result then
   begin
+    // Warn user
+    if StringListStartsWith(FCrossOpts,'-dFPC_ARMHF')=-1 then
+    begin
+      // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
+      infoln('TWin32_Linuxarm: you MAY need to specify -dFPC_ARMHF in your CROSSOPTS to prevent access violation errors from scrollbars on arm in gtk2.',etInfo);
+    end;
+
+    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
+    begin
+      { for raspberry pi look into
+      instruction set
+      -CpARMV6Z (or 7?)
+      ABI
+      -CaEABI (versus DEFAULT)
+      FPU coprocessor
+      -CfVFPV2
+      if using android cross compiler binutils: EABI0
+      }
+      { for FPC 2.7.1, you can use -OoFASTMATH to enable faster floating point calcs for all architectures }
+      infoln('TWin32_Linuxarm: you did not specify an ARM instruction set in your CROSSOPTS. FYI: suitable values for BeagleBoard Black running hardfloat: -Caeabi -Cparmv7 -CfVFPv3; safe values for Raspberry Pi -Caeabi -Cparmv6 -CfVFPv2',etInfo);
+    end;
+
     // Configuration snippet for FPC
     //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-linux
-    //adjusted by
-    //http://wiki.freepascal.org/arm-wince
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
+    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    { don't know if this is still relevant for 2.7.x and for which linker
     '-darm'+LineEnding+ {pass arm to linker}
-    '-Tlinux'; {target operating system}
+    }
     infoln('TWin32_Linuxarm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
@@ -142,8 +231,9 @@ end;
 constructor TWin32_Linuxarm.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature
+  FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
+  FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FTargetCPU:='arm';
