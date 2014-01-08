@@ -180,7 +180,6 @@ begin
   FErrorLog.Clear;
   if Assigned(CrossInstaller) then
   begin
-    //todo: parse this so one parameter per line
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils',eterror)

@@ -224,7 +224,6 @@ begin
   CrossInstaller:=GetCrossInstaller;
   if assigned(CrossInstaller) then
     begin
-    //todo: parse this; split out all options into separate lines in crossopts
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils', etError)
@@ -248,7 +247,6 @@ begin
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
-      infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etinfo);
       ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -296,6 +294,10 @@ begin
       if Options<>'' then
         ProcessEx.Parameters.Add('OPT='+Options);
       try
+        if CrossOptions='' then
+          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etinfo)
+        else
+          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etinfo);
         ProcessEx.Execute;
         result:=(ProcessEx.ExitStatus=0);
       except
