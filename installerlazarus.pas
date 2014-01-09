@@ -10,7 +10,7 @@ uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils;
 //todo: use processex callback to report on errors like it's done in installerfpc
 
-
+// todo: add SETLCL call to enable e.g. qt compile on gtk systems/windows => in buildmodule lcl step?
 Const
   Sequences=
 //standard lazarus build
@@ -754,7 +754,6 @@ begin
 
   // Download Qt bindings if not present yet
   Errors:=0;
-  writeln('todo debug: fcrosslcl_platform ',FCrossLCL_Platform);
   if (result) and (Uppercase(FCrossLCL_Platform)='QT') then
   begin
     for Counter := low(FUtilFiles) to high(FUtilFiles) do

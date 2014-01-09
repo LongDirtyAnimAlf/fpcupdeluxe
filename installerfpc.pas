@@ -9,7 +9,7 @@ uses
 
 Const
   Sequences=
-// convention: FPC sequences start with 'FPC'. Used in SetLCL.
+// convention: FPC sequences start with 'FPC'.
 //standard fpc build
     'Declare FPC;'+
     'Cleanmodule FPC;'+
