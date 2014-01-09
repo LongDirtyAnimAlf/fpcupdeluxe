@@ -593,9 +593,11 @@ begin
     begin
     //Copy over binutils to new CompilerName bin directory
     try
-      for FileCounter:=0 to FBinUtils.Count-1 do
+      for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
         begin
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[FileCounter], IncludeTrailingPathDelimiter(FBinPath)+FBinUtils[FileCounter]);
+        if FUtilFiles[FileCounter].Category=ucBinutil then
+          FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
+            IncludeTrailingPathDelimiter(FBinPath)+FUtilFiles[FileCounter].FileName);
         end;
       // Also, we can change the make/binutils path to our new environment
       // Will modify fmake as well.

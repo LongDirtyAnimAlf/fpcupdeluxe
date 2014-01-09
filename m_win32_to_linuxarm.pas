@@ -196,30 +196,41 @@ begin
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
+    begin
       infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      {$ifdef mswindows}
+      infoln('TWin32_Linuxarm: suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
+      {$endif}
+      FAlreadyWarned:=true;
+    end;
   end;
   if result then
   begin
-    // Warn user
-    if StringListStartsWith(FCrossOpts,'-dFPC_ARMHF')=-1 then
-    begin
-      // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
-      infoln('TWin32_Linuxarm: you MAY need to specify -dFPC_ARMHF in your CROSSOPTS to prevent access violation errors from scrollbars on arm in gtk2.',etInfo);
-    end;
+    { for raspberry pi look into
+    instruction set
+    -CpARMV6Z (or 7?)
+    ABI
+    -CaEABI (versus DEFAULT)
+    FPU coprocessor
+    -CfVFPV2
+    if using android cross compiler binutils: EABI0
+    }
+    { for FPC 2.7.1, you can use -OoFASTMATH to enable faster floating point calcs for all architectures }
 
+    // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      { for raspberry pi look into
-      instruction set
-      -CpARMV6Z (or 7?)
-      ABI
-      -CaEABI (versus DEFAULT)
-      FPU coprocessor
-      -CfVFPV2
-      if using android cross compiler binutils: EABI0
-      }
-      { for FPC 2.7.1, you can use -OoFASTMATH to enable faster floating point calcs for all architectures }
-      infoln('TWin32_Linuxarm: you did not specify an ARM instruction set in your CROSSOPTS. FYI: suitable values for BeagleBoard Black running hardfloat: -Caeabi -Cparmv7 -CfVFPv3; safe values for Raspberry Pi -Caeabi -Cparmv6 -CfVFPv2',etInfo);
+      FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android
+      infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
+    end;
+
+    // Warn user to check things
+    if StringListStartsWith(FCrossOpts,'-CaEABIHF')=-1 then
+    begin
+      // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
+      // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
+      // -dFPC_ARMHF is only used for cross compiler generation, not useful when compiling end user
+      infoln(FCrossModuleName+ ': please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
     end;
 
     // Configuration snippet for FPC

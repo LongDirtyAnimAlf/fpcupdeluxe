@@ -219,6 +219,7 @@ type
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
+    // Platform for which the user wants to compile the LCL.
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;

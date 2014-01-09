@@ -7,7 +7,7 @@ unit installerLazarus;
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,dynlibs,processutils;
+  Classes, SysUtils, installerCore, m_crossinstaller,processutils;
 //todo: use processex callback to report on errors like it's done in installerfpc
 
 
@@ -141,6 +141,8 @@ type
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
+    // Install update sources
+    function GetModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -180,6 +182,9 @@ begin
   FErrorLog.Clear;
   if Assigned(CrossInstaller) then
   begin
+    // Actually not using crossopts - they're only for building an FPC compiler; the
+    // relevant options should have been written as a snippet to fpc.cfg and picked
+    // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FBaseDirectory) then
       infoln('Failed to get crossbinutils',eterror)
@@ -422,21 +427,19 @@ begin
       begin
         DebuggerPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'mingw\bin\'+GetFPCTarget(true)+'\';
         ForceDirectoriesUTF8(DebuggerPath);
-        //Copy over binutils, all dlls, all manifests to new Debuggerpath directory
-        //todo: we should really deal with the debuggerfiles here. Rather than using multiple stringlists, can't we use an array or object list with custom objects/records or something?
+        //Copy over debugger files to new Debuggerpath directory
         try
-          for FileCounter:=0 to FBinUtils.Count-1 do
+          for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
           begin
-            if (LowerCase(ExtractFileExt(FBinUtils[FileCounter]))='.dll') or
-              (LowerCase(ExtractFileExt(FBinUtils[FileCounter]))='.manifest') or
-              (LowerCase(FBinUtils[FileCounter])='gdb.exe') then
-              FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FBinUtils[FileCounter], IncludeTrailingPathDelimiter(DebuggerPath)+FBinUtils[FileCounter]);
+            if (FUtilFiles[FileCounter].Category=ucDebugger) then
+              FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
+                IncludeTrailingPathDelimiter(DebuggerPath)+FUtilFiles[FileCounter].FileName);
           end;
         except
           on E: Exception do
           begin
-            infoln('Error copying debugger files: '+E.Message,eterror);
-            infoln('Hint: perhaps you have gdb running at the moment - please kill it.',etwarning);
+            infoln('Error copying debugger files: '+E.Message,etError);
+            infoln('Hint: perhaps you have gdb running at the moment - please kill it.',etWarning);
             OperationSucceeded:=false;
           end;
         end;
@@ -512,6 +515,51 @@ begin
     end;
   end;
   result:=OperationSucceeded;
+end;
+
+function TLazarusNativeInstaller.GetModule(ModuleName: string): boolean;
+var
+  Counter, Errors: integer;
+begin
+  Result:=inherited GetModule(ModuleName);
+  // Download Qt bindings if not present yet
+  Errors:=0;
+  if (result) and (Uppercase(FCrossLCL_Platform)='QT') then
+  begin
+    for Counter := low(FUtilFiles) to high(FUtilFiles) do
+    begin
+      if (FUtilFiles[Counter].Category=ucQtFile) and
+        not(FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+FUtilFiles[Counter].FileName)) then
+      begin
+        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory,etinfo);
+        try
+          if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
+            IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName,
+            FHTTPProxyHost,
+            inttostr(FHTTPProxyPort),
+            FHTTPProxyUser,
+            FHTTPProxyPassword) = false then
+          begin
+            Errors := Errors + 1;
+            infoln('Error downloading binutils: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir,eterror);
+          end;
+        except
+          on E: Exception do
+          begin
+            Result := false;
+            infoln('Error downloading Qt-related files: ' + E.Message,etError);
+            exit; //out of function.
+          end;
+        end;
+      end;
+    end;
+
+    if Errors > 0 then
+    begin
+      Result := false;
+      WritelnLog('TLazarusNativeInstaller.GetModule('+ModuleName+'): ' + IntToStr(Errors) + ' errors downloading Qt-related files.', true);
+    end;
+  end;
 end;
 
 constructor TLazarusNativeInstaller.Create;

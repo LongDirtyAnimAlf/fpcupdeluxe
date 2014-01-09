@@ -214,9 +214,22 @@ begin
     // Set some defaults if user hasn't specified otherwise
     // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
+    begin
       FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android
+      infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
+    end;
+
     // By default, use software FPU/softfloat for ARM.
     // Hardfloat: set CROSSOPT="-CfVFPV3"
+    // Warn user to check things
+    if StringListStartsWith(FCrossOpts,'-CaEABIHF')=-1 then
+    begin
+      // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
+      // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
+      // -dFPC_ARMHF is only used for cross compiler generation, not useful when compiling end user
+      infoln(FCrossModuleName+ ': please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
+    end;
+
 
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
