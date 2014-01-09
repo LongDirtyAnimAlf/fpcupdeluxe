@@ -754,6 +754,7 @@ begin
 
   // Download Qt bindings if not present yet
   Errors:=0;
+  writeln('todo debug: fcrosslcl_platform ',FCrossLCL_Platform);
   if (result) and (Uppercase(FCrossLCL_Platform)='QT') then
   begin
     for Counter := low(FUtilFiles) to high(FUtilFiles) do
@@ -763,7 +764,7 @@ begin
       begin
         infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory,etinfo);
         try
-          if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
+          if Download(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,
             IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName,
             FHTTPProxyHost,
             inttostr(FHTTPProxyPort),
@@ -771,7 +772,7 @@ begin
             FHTTPProxyPassword) = false then
           begin
             Errors := Errors + 1;
-            infoln('Error downloading binutils: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir,eterror);
+            infoln('Error downloading Qt-related file to ' + IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName,eterror);
           end;
         except
           on E: Exception do
