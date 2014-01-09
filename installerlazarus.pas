@@ -124,7 +124,7 @@ type
     function ConfigModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
-    // Install update sources
+    // Install update sources, Qt bindings if needed
     function GetModule(ModuleName:string): boolean; override;
     // Uninstall module
     function UnInstallModule(ModuleName:string): boolean; override;
@@ -141,8 +141,6 @@ type
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
-    // Install update sources
-    function GetModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -517,51 +515,6 @@ begin
   result:=OperationSucceeded;
 end;
 
-function TLazarusNativeInstaller.GetModule(ModuleName: string): boolean;
-var
-  Counter, Errors: integer;
-begin
-  Result:=inherited GetModule(ModuleName);
-  // Download Qt bindings if not present yet
-  Errors:=0;
-  if (result) and (Uppercase(FCrossLCL_Platform)='QT') then
-  begin
-    for Counter := low(FUtilFiles) to high(FUtilFiles) do
-    begin
-      if (FUtilFiles[Counter].Category=ucQtFile) and
-        not(FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+FUtilFiles[Counter].FileName)) then
-      begin
-        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory,etinfo);
-        try
-          if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
-            IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName,
-            FHTTPProxyHost,
-            inttostr(FHTTPProxyPort),
-            FHTTPProxyUser,
-            FHTTPProxyPassword) = false then
-          begin
-            Errors := Errors + 1;
-            infoln('Error downloading binutils: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir,eterror);
-          end;
-        except
-          on E: Exception do
-          begin
-            Result := false;
-            infoln('Error downloading Qt-related files: ' + E.Message,etError);
-            exit; //out of function.
-          end;
-        end;
-      end;
-    end;
-
-    if Errors > 0 then
-    begin
-      Result := false;
-      WritelnLog('TLazarusNativeInstaller.GetModule('+ModuleName+'): ' + IntToStr(Errors) + ' errors downloading Qt-related files.', true);
-    end;
-  end;
-end;
-
 constructor TLazarusNativeInstaller.Create;
 begin
   inherited create;
@@ -768,6 +721,8 @@ function TLazarusInstaller.GetModule(ModuleName: string): boolean;
 var
   AfterRevision: string;
   BeforeRevision: string;
+  Counter: integer;
+  Errors: integer;
   UpdateWarnings: TStringList;
 begin
   result:=InitModule;
@@ -795,6 +750,45 @@ begin
   begin
     Revision:=BeforeRevision;
     infoln('No updates for Lazarus found.',etinfo);
+  end;
+
+  // Download Qt bindings if not present yet
+  Errors:=0;
+  if (result) and (Uppercase(FCrossLCL_Platform)='QT') then
+  begin
+    for Counter := low(FUtilFiles) to high(FUtilFiles) do
+    begin
+      if (FUtilFiles[Counter].Category=ucQtFile) and
+        not(FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+FUtilFiles[Counter].FileName)) then
+      begin
+        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory,etinfo);
+        try
+          if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
+            IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName,
+            FHTTPProxyHost,
+            inttostr(FHTTPProxyPort),
+            FHTTPProxyUser,
+            FHTTPProxyPassword) = false then
+          begin
+            Errors := Errors + 1;
+            infoln('Error downloading binutils: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir,eterror);
+          end;
+        except
+          on E: Exception do
+          begin
+            Result := false;
+            infoln('Error downloading Qt-related files: ' + E.Message,etError);
+            exit; //out of function.
+          end;
+        end;
+      end;
+    end;
+
+    if Errors > 0 then
+    begin
+      Result := false;
+      WritelnLog('TLazarusNativeInstaller.GetModule('+ModuleName+'): ' + IntToStr(Errors) + ' errors downloading Qt-related files.', true);
+    end;
   end;
 end;
 
