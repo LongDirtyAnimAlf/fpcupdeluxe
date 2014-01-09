@@ -625,13 +625,9 @@ begin
     else
       begin
       {$IFNDEF MSWINDOWS}
-      // Binutils should be in path on non-Windows, so warn user:
+      // Binutils should be in path on non-Windows...
       if FInstaller.MakeDirectory<>'' then
-        begin
-        writeln('The "binutilsdir" parameter (currently set to '+FInstaller.MakeDirectory+') is not necessary or supported on this system.'+LineEnding+
-          'The parameter will be ignored.');
         FInstaller.MakeDirectory:='';
-        end;
       {$ENDIF MSWINDOWS}
 
       FInstaller.PersistentOptions:=Options.PersistentOptions;

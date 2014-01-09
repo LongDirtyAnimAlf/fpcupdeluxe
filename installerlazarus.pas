@@ -110,7 +110,7 @@ type
     // and UnInstallModule but executed only once
     function InitModule:boolean;
   public
-    // LCL widget set to be built
+    // LCL widget set to be built (NOT OS/CPU combination)
     property CrossLCL_Platform:string write FCrossLCL_Platform;
     // FPC base directory
     property FPCDir:string write FFPCDir;
@@ -414,7 +414,7 @@ begin
     end;
 
 
-    // Set up debugger if building the IDE
+    // Set up debugger if building the IDE with native widgetset
     {$IFDEF MSWINDOWS}
     if (UpperCase(ModuleName)='LAZARUS')
       and (FCrossLCL_Platform='')
@@ -486,8 +486,8 @@ begin
         ProcessEx.Parameters.Add('--build-mode=Normal IDE');
       end;
 
-      if FCrossLCL_Platform <>'' then
-        ProcessEx.Parameters.Add('os='+FCrossLCL_Platform );
+      if FCrossLCL_Platform<>'' then
+        ProcessEx.Parameters.Add('--widgetset='+FCrossLCL_Platform );
       infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etinfo);
       try
         ProcessEx.Execute;
