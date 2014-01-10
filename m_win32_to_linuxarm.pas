@@ -250,7 +250,7 @@ begin
   inherited Create;
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
-  FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
+  FCompilerUsed:=ctBootstrap;
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FTargetCPU:='arm';

@@ -99,7 +99,6 @@ android-ndk-r9c\platforms\android-19\arch-arm\usr\lib
 const
   DirName='arm-android';
 begin
-//todo add support for separate cross dire  
   FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then

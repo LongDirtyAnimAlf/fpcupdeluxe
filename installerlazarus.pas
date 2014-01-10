@@ -594,8 +594,8 @@ begin
       // inside the lazarus directory itself.
       PCPSnippet:=TStringList.Create;
       try
-        PCPSnippet.Add('--primary-config-path='+ExcludeTrailingPathDelimiter(FPrimaryConfigPath));
-        PCPSnippet.Add(''); //empty line also occurs in my Laz 1.2RC1 install
+        // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
+        PCPSnippet.Add('--primary-config-path='+trim(ExcludeTrailingPathDelimiter(FPrimaryConfigPath)));
         if not(FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+LazarusCFG)) then
           PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(FBaseDirectory)+LazarusCFG);
       finally
