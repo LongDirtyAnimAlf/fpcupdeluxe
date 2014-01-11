@@ -117,14 +117,15 @@ begin
   begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    '-FLlibdl.so'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
     {
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     '-XR'+IncludeTrailingPathDelimiter(FLibsPath);
     }
-    //todo: possibly adapt these for android:
+    //todo: possibly adapt for android:
     {'-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};}
+    }
     infoln(FCrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end
   else

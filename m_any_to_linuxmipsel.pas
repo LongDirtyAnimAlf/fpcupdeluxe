@@ -29,7 +29,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-New version:
+Support for these binutils
+1. Android
 based on Android NDK=> apparently generates mipsel hardfloat
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
 Then place the directory layout provided by the crossfpc project there, so you get
@@ -41,7 +42,7 @@ android-ndk-r9c\toolchains\mipsel-linux-android-4.8\prebuilt\windows-x86_64\bin\
 c:\development\cross\lib\mipsel-linux
 => copy your libs here
 
-Old version:
+2. FPC-distributed GNU crossbinutils
 based on cross binaries from
 http://svn2.freepascal.org/svn/fpcbuild/binaries/i386-win32/
 
@@ -55,6 +56,8 @@ mipsel-linux-nm.exe
 mipsel-linux-objcopy.exe
 mipsel-linux-objdump.exe
 mipsel-linux-strip.exe
+
+3. CodeSourcery binutils
 
 Also used codesourcery mipsel softfloat uclibc libs in
 c:\development\cross\bin\mipsel-linux
