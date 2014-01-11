@@ -134,14 +134,16 @@ begin
 end;
 
 function Tany_linuxmipsel.GetBinUtils(Basepath:string): boolean;
+// You can copy the files from Android NDK, e.g.
+// android-ndk-r9c\toolchains\mipsel-linux-android-4.8\prebuilt\windows-x86_64\bin\mipsel-linux-android-as.exe
+
+// Also has support for codesourcery binutils
 const
   DirName='mipsel-linux';
 var
   AsFile: string;
 begin
   inherited;
-  // You can copy the files from Android NDK, e.g.
-  // android-ndk-r9c\toolchains\mipsel-linux-android-4.8\prebuilt\windows-x86_64\bin\mipsel-linux-android-as.exe
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   result:=false;
 
@@ -167,6 +169,37 @@ begin
     result:=SearchBinUtil('/bin',
       AsFile);
   {$endif unix}
+
+  // Now also allow for mips-linux-gnu- binutilsprefix (e.g. codesourcery)
+  if not result then
+  begin
+    FBinutilsPrefix:='mips-linux-gnu-';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  end;
+
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+      AsFile);
+
+  {$ifdef unix}
+  // User may also have placed them into their regular search path:
+  if not result then { try /usr/local/bin/<dirprefix>/ }
+    result:=SearchBinUtil('/usr/local/bin/'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/ }
+    result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
+
+  if not result then { try /bin/ }
+    result:=SearchBinUtil('/bin',
+      AsFile);
+  {$endif unix}
+
 
   // Now also allow for mipsel-linux- binutilsprefix (e.g. using standard GCC crossbinutils)
   if not result then
@@ -198,7 +231,7 @@ begin
       AsFile);
   {$endif unix}
 
-  // Now also allow for empty binutilsprefix (e.g. using codesourcery files):
+  // Now also allow for empty binutilsprefix:
   if not result then
   begin
     FBinutilsPrefix:='';

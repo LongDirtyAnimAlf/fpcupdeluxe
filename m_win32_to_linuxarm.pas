@@ -208,9 +208,9 @@ begin
   begin
     { for raspberry pi look into
     instruction set
-    -CpARMV6Z (or 7?)
+    -CpARMV6Z (not 7)
     ABI
-    -CaEABI (versus DEFAULT)
+    -CaEABI (versus DEFAULT) => not -caEABIHF/-dFPC_ARMHFhardfloat unless
     FPU coprocessor
     -CfVFPV2
     if using android cross compiler binutils: EABI0
