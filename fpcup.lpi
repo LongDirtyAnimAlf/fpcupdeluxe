@@ -471,9 +471,9 @@ end;"/>
         <UnitName Value="m_win32_to_linux386"/>
       </Unit25>
       <Unit26>
-        <Filename Value="m_win32_to_linuxarm.pas"/>
+        <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_linuxarm"/>
+        <UnitName Value="m_any_to_linuxarm"/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>

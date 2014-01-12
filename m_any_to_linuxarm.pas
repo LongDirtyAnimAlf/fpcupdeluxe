@@ -1,5 +1,5 @@
-unit m_win32_to_linuxarm;
-{ Cross compiles from Windows 32 to Linux ARM
+unit m_any_to_linuxarm;
+{ Cross compiles from any platform with correct binutils to Linux ARM
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -46,8 +46,8 @@ uses
 implementation
 type
 
-{ TWin32_Linuxarm }
-TWin32_Linuxarm = class(TCrossInstaller)
+{ TAny_Linuxarm }
+TAny_Linuxarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -59,13 +59,13 @@ public
   destructor Destroy; override;
 end;
 
-{ TWin32_Linuxarm }
-function TWin32_Linuxarm.TargetSignature: string;
+{ TAny_Linuxarm }
+function TAny_Linuxarm.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TWin32_Linuxarm.GetLibs(Basepath:string): boolean;
+function TAny_Linuxarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-linux';
 begin
@@ -76,11 +76,11 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
+    infoln(FCrossModuleName+ ': failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('TWin32_Linuxarm: failed: searched libspath '+FLibsPath,etInfo);
+      infoln(FCrossModuleName+ ': failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
@@ -95,7 +95,7 @@ begin
     Actually leaving this out seems to work ok on the target system.
     if StringListStartsWith(FCrossOpts,'-FL')=-1 then
     begin
-      infoln('TWin32_Linuxarm: you did not specify any -FL option in your crossopts. You MAY want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
+      infoln(FCrossModuleName+ ': you did not specify any -FL option in your crossopts. You MAY want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
       Let's not get too zealous and leave choices up to the user. Perhaps the default is good, too.
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
         '-FL/usr/lib/ld-linux.so.3' //buildfaq 3.3.1: the name of the dynamic linker on the target
@@ -105,22 +105,22 @@ begin
     }
 
     { Note: bug 21554 and checked on raspberry pi wheezy: uses armhf /lib/arm-linux-gnueabihf/ld-linux.so.3}
-    infoln('TWin32_Linuxarm: found libspath '+FLibsPath,etInfo);
+    infoln(FCrossModuleName+ ': found libspath '+FLibsPath,etInfo);
   end
   else
   begin
-    infoln('TWin32_Linuxarm: you MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.',etInfo);
+    infoln(FCrossModuleName+ ': you MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.',etInfo);
   end;
 end;
 
-function TWin32_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TAny_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln('todo: implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
+  infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=true;
 end;
 
-function TWin32_Linuxarm.GetBinUtils(Basepath:string): boolean;
+function TAny_Linuxarm.GetBinUtils(Basepath:string): boolean;
 const
   DirName='arm-linux';
 var
@@ -191,15 +191,15 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
     //todo: fix fallback to separate dir; use real argument from command line to control it
     FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
     result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
     if not result then
     begin
-      infoln('TWin32_Linuxarm: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+      infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
       {$ifdef mswindows}
-      infoln('TWin32_Linuxarm: suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
+      infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
       {$endif}
       FAlreadyWarned:=true;
     end;
@@ -241,11 +241,11 @@ begin
     { don't know if this is still relevant for 2.7.x and for which linker
     '-darm'+LineEnding+ {pass arm to linker}
     }
-    infoln('TWin32_Linuxarm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln(FCrossModuleName+ ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
-constructor TWin32_Linuxarm.Create;
+constructor TAny_Linuxarm.Create;
 begin
   inherited Create;
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature; module will also search for android crossbinutils
@@ -256,24 +256,21 @@ begin
   FTargetCPU:='arm';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TWin32_Linuxarm crosscompiler loading',etDebug);
+  infoln(FCrossModuleName+ ': crosscompiler loading',etDebug);
 end;
 
-destructor TWin32_Linuxarm.Destroy;
+destructor TAny_Linuxarm.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Win32_Linuxarm:TWin32_Linuxarm;
+  Any_Linuxarm:TAny_Linuxarm;
 
-{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
-// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 initialization
-  Win32_Linuxarm:=TWin32_Linuxarm.Create;
-  RegisterExtension(Win32_Linuxarm.TargetCPU+'-'+Win32_Linuxarm.TargetOS,Win32_Linuxarm);
+  Any_Linuxarm:=TAny_Linuxarm.Create;
+  RegisterExtension(Any_Linuxarm.TargetCPU+'-'+Any_Linuxarm.TargetOS,Any_Linuxarm);
 finalization
-  Win32_Linuxarm.Destroy;
-{$ENDIF}
+  Any_Linuxarm.Destroy;
 end.
 
