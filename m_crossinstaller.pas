@@ -87,7 +87,7 @@ begin
   FBinUtilsPath:=ExcludeTrailingPathDelimiter(ExpandFileName(Directory));
   result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+LookFor);
   if not result then
-    infoln(FCrossModuleName + ': failed: searching binutil '+LookFor+
+    infoln(FCrossModuleName + ': searched but did not find binutil '+LookFor+
       ' in directory '+FBinUtilsPath, etInfo);
 end;
 

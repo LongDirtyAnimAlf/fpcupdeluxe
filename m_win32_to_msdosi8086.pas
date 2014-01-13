@@ -133,22 +133,32 @@ var
 begin
   inherited;
   AsFile:=FBinUtilsPrefix+'nasm.exe'; //nasm, not GNU as.exe
+  result:=false;
+
+  if not result then
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
+      AsFile);
+
   // Using crossfpc directory naming
-  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+  if not result then
+    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
+  if not result then
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
+      AsFile);
+
+  if not result then
+    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
+  if not result then
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
+      AsFile);
+
   if not result then
   begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_msdosi8086: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-    //todo: fix fallback to separate dir; use real argument from command line to control it
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-      infoln('TWin32_msdosi8086: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
+    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
+    FAlreadyWarned:=true;
   end;
   if result then
   begin
-
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then
     begin
       infoln('TWin32_msdosi8086: this compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etInfo);

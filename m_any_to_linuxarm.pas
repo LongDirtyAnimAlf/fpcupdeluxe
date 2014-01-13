@@ -190,19 +190,11 @@ begin
 
   if not result then
   begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-    //todo: fix fallback to separate dir; use real argument from command line to control it
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-    begin
-      infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-      {$ifdef mswindows}
-      infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
-      {$endif}
-      FAlreadyWarned:=true;
-    end;
+    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
+    {$ifdef mswindows}
+    infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
+    {$endif}
+    FAlreadyWarned:=true;
   end;
   if result then
   begin

@@ -129,7 +129,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil((IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName),
       AsFile);
 
   // Also allow for crossfpc naming
@@ -138,6 +138,9 @@ begin
     FBinUtilsPrefix:='powerpc-aix-';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   end;
+
+  if not result then
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
 
   // Using crossfpc directory naming
   if not result then { try $(fpcdir)/bin/<dirprefix>/ }
@@ -154,8 +157,9 @@ begin
     FBinUtilsPrefix:='';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   end;
+  if not result then
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
 
-  // Using crossfpc directory naming
   if not result then { try $(fpcdir)/bin/<dirprefix>/ }
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
       AsFile);
@@ -166,17 +170,9 @@ begin
 
   if not result then
   begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-    //todo: fix fallback to separate dir; use real argument from command line to control it
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-    begin
-      infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-      infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
-      FAlreadyWarned:=true;
-    end;
+    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
+    infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
+    FAlreadyWarned:=true;
   end;
   if result then
   begin
