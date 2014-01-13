@@ -59,7 +59,7 @@ mipsel-linux-strip.exe
 
 3. CodeSourcery binutils
 
-Also used codesourcery mipsel softfloat uclibc libs in
+codesourcery libs: e.g. copy codesourcery mipsel softfloat uclibc libs in
 c:\development\cross\bin\mipsel-linux
 crtbegin.o
 crtbeginS.o

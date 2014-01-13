@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -59,6 +59,7 @@
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item2>
       <Item3 Name="64bit">
@@ -105,6 +106,7 @@ end;"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item3>
       <Item4 Name="64bitDebug">
@@ -149,6 +151,7 @@ end;"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
+          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item4>
       <Item5 Name="linux_x64">
@@ -248,12 +251,11 @@ end;"/>
   UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
 end;"/>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <TargetProcessor Value="ARMV6"/>
             <TargetCPU Value="arm"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="2"/>
+              <OptimizationLevel Value="0"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -261,13 +263,11 @@ end;"/>
               <GenerateDebugInfo Value="False"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
-            <LinkSmart Value="True"/>
           </Linking>
           <Other>
             <CompilerMessages>
               <UseMsgFile Value="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dFPC_ARMHF"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
@@ -308,7 +308,7 @@ end;"/>
             <CompilerMessages>
               <UseMsgFile Value="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-dFPC_ARMHF"/>
+            <CustomOptions Value="-O-"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
@@ -317,9 +317,6 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item8>
-      <SharedMatrixOptions Count="1">
-        <Item1 ID="082647053431" Modes="Default,Debug,64bit,64bitDebug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
-      </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -341,7 +338,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="35">
+    <Units Count="36">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -471,9 +468,9 @@ end;"/>
         <UnitName Value="m_win32_to_linux386"/>
       </Unit25>
       <Unit26>
-        <Filename Value="m_any_to_linuxarm.pas"/>
+        <Filename Value="m_any_to_aixpowerpc.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linuxarm"/>
+        <UnitName Value="m_any_to_aixpowerpc"/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
@@ -515,6 +512,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_win32_to_msdosi8086"/>
       </Unit34>
+      <Unit35>
+        <Filename Value="m_any_to_linuxarm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_any_to_linuxarm"/>
+      </Unit35>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -550,6 +552,7 @@ end;"/>
         <CompileReasons Run="False"/>
       </ExecuteBefore>
     </Other>
+    <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="5">
