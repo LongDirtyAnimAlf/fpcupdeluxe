@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
     <Version Value="9"/>
@@ -59,7 +59,6 @@
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
-          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item2>
       <Item3 Name="64bit">
@@ -106,7 +105,6 @@ end;"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
-          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item3>
       <Item4 Name="64bitDebug">
@@ -151,7 +149,6 @@ end;"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
-          <LCLWidgetType Value="nogui"/>
         </CompilerOptions>
       </Item4>
       <Item5 Name="linux_x64">
@@ -317,6 +314,9 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item8>
+      <SharedMatrixOptions Count="1">
+        <Item1 ID="233755810855" Modes="Default,Debug,64bit,64bitDebug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+      </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>
@@ -338,7 +338,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="36">
+    <Units Count="37">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -517,6 +517,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_any_to_linuxarm"/>
       </Unit35>
+      <Unit36>
+        <Filename Value="m_win32_to_linuxmips.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_linuxmips"/>
+      </Unit36>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -552,7 +557,6 @@ end;"/>
         <CompileReasons Run="False"/>
       </ExecuteBefore>
     </Other>
-    <LCLWidgetType Value="nogui"/>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="5">
