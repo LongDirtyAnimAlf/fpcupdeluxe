@@ -1,5 +1,5 @@
 unit installerUniversal;
-{ Universal installer unit driven by .ini file directives
+{ Universal (external) installer unit driven by .ini file directives
 Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it

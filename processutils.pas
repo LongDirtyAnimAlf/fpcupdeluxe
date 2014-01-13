@@ -1,5 +1,5 @@
 { Process utility unit
-Copyright (C) 2012 Ludo Brands
+Copyright (C) 2012-2013 Ludo Brands
 
 This unit is licensed as modified LGPL or MIT, at your choice. Licenses below
 }

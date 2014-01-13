@@ -1,5 +1,5 @@
 { Help installer/uninstaller unit for fpcup
-Copyright (C) 2012 Ludo Brands, Reinier Olislagers
+Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by

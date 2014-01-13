@@ -1,5 +1,5 @@
 unit installerFpc;
-{ FPC installer/updater/module
+{ FPC installer/updater module
 Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
