@@ -322,7 +322,7 @@ begin
       AllThere:=true;
       if DirectoryExists(FMakeDir) = false then
       begin
-        infoln('Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etinfo);
+        infoln('Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
         AllThere:=false;
       end
       else
@@ -335,7 +335,7 @@ begin
             if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
             begin
               AllThere:=false;
-              infoln('Make path ' + FMakeDir + ' does not have (all) binutils. Going to download binutils.',etinfo);
+              infoln('Make path ' + FMakeDir + ' does not have (all) binutils. Going to download binutils.',etInfo);
               break;
             end;
           end;
@@ -394,7 +394,7 @@ begin
         // If it still can't be found, download it
         if FSVNClient.RepoExecutable = '' then
         begin
-          infoln('Going to download SVN',etinfo);
+          infoln('Going to download SVN',etInfo);
           // Download will look in and below FSVNDirectory
           // and set FSVNClient.SVNExecutable if succesful
           OperationSucceeded := DownloadSVN;
@@ -467,7 +467,7 @@ begin
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
         infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',etinfo);
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',etInfo);
         OperationSucceeded := false;
       end
       else
@@ -478,7 +478,7 @@ begin
     else
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etinfo);
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etInfo);
       OperationSucceeded := false;
     end;
   except
@@ -645,7 +645,7 @@ begin
   begin
     if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger) then
     begin
-      infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir,etinfo);
+      infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir,etInfo);
       try
         if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
           IncludeTrailingPathDelimiter(FMakeDir) + FUtilFiles[Counter].FileName,
@@ -718,7 +718,7 @@ begin
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FHGClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etinfo);
+      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etInfo);
     end;
     else
     begin
@@ -781,7 +781,7 @@ begin
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FGitClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etinfo);
+      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etInfo);
     end;
     else
     begin
@@ -870,7 +870,7 @@ begin
       Result := false;
       writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FSVNClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etinfo);
+      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etInfo);
     end;
     else
     begin
@@ -1076,7 +1076,7 @@ begin
     writelnlog('Command current directory: ' + Sender.CurrentDirectory, true);
     writelnlog('Command output:', true);
     // Dump command output to screen and detailed log
-    infoln(Sender.OutputString,etinfo);
+    infoln(Sender.OutputString,etInfo);
     Sender.OutputStrings.SaveToFile(TempFileName);
     WritelnLog('  output logged in ' + TempFileName, false);
   end;

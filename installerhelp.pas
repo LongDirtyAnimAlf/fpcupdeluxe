@@ -260,7 +260,7 @@ begin
     FileExistsUTF8(FTargetDirectory+'rtl.chm') then
   begin
     OperationSucceeded:=true;
-    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory,etinfo);
+    infoln(ModuleName+': skipping docs download: FPC rtl.chm and fcl.chm already present in docs directory '+FTargetDirectory,etInfo);
   end
   else
   begin
@@ -343,7 +343,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
-    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,etinfo);
+    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,etInfo);
     result:=true;
   end;
 end;
@@ -466,7 +466,7 @@ begin
             ProcessEx.Parameters.Clear;
             ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
             ProcessEx.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
-            infoln(ModuleName+': compiling build_lcl_docs help compiler:',etinfo);
+            infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             ProcessEx.Execute;
             if ProcessEx.ExitStatus <> 0 then
             begin
@@ -533,7 +533,7 @@ begin
         ProcessEx.Parameters.Add('chm');
         // Show application output if desired:
         if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
-        infoln(ModuleName+': compiling chm help docs:',etinfo);
+        infoln(ModuleName+': compiling chm help docs:',etInfo);
         { The CHM file gets output into <lazarusdir>/docs/chm/lcl/lcl.chm
         Though that may work when adjusting the baseurl option in Lazarus for each
         CHM file, it's easier to move them to <lazarusdir>/docs/chm,
@@ -556,7 +556,7 @@ begin
         begin
           if FileSize(GeneratedLCLHelp)>0 then
           begin
-            infoln(ModuleName+': moving lcl.chm to docs directory',etinfo);
+            infoln(ModuleName+': moving lcl.chm to docs directory',etInfo);
             OperationSucceeded:=MoveFile(GeneratedLCLHelp,ExistingLCLHelp);
           end
           else

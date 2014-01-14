@@ -201,7 +201,7 @@ var
   Options:String;
 begin
   CrossInstaller:=GetCrossInstaller;
-  infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',etinfo);
+  infoln('TLazarusCrossInstaller: building module '+ModuleName+'...',etInfo);
   FErrorLog.Clear;
   if Assigned(CrossInstaller) then
   begin
@@ -289,9 +289,9 @@ begin
       end;
 
       if FCrossLCL_Platform='' then
-        infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' using '+BuildMethod,etinfo)
+        infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+' using '+BuildMethod,etInfo)
       else
-        infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform+' using '+BuildMethod,etinfo);
+        infoln('Lazarus: compiling LCL for '+FCrossCPU_Target+'-'+FCrossOS_Target+'/'+FCrossLCL_Platform+' using '+BuildMethod,etInfo);
 
       try
         ProcessEx.Execute;
@@ -356,7 +356,7 @@ var
   OperationSucceeded: boolean;
 begin
   OperationSucceeded:=true;
-  infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',etinfo);
+  infoln('TLazarusNativeInstaller: building module '+ModuleName+'...',etInfo);
   if ModuleName<>'USERIDE' then
   begin
     // Make all (should include lcl & ide), lazbuild, lcl etc
@@ -378,12 +378,12 @@ begin
       'LAZARUS':
       begin
         ProcessEx.Parameters.Add('all');
-        infoln(ModuleName+': running make all:',etinfo);
+        infoln(ModuleName+': running make all:',etInfo);
       end;
       'LAZBUILD':
       begin
         ProcessEx.Parameters.Add('lazbuild');
-        infoln(ModuleName+': running make lazbuild:',etinfo);
+        infoln(ModuleName+': running make lazbuild:',etInfo);
       end;
       'LCL':
       begin
@@ -512,7 +512,7 @@ begin
 
       if FCrossLCL_Platform<>'' then
         ProcessEx.Parameters.Add('--widgetset='+FCrossLCL_Platform );
-      infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etinfo);
+      infoln('Lazarus: running lazbuild to get IDE with user-specified packages:',etInfo);
       try
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
@@ -608,7 +608,7 @@ begin
   if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
   begin
     if ForceDirectoriesUTF8(FPrimaryConfigPath) then
-      infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath,etinfo);
+      infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath,etInfo);
   end;
   // Set up a minimal config so we can use LazBuild
   LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
@@ -717,11 +717,11 @@ begin
   begin  // clean out the correct compiler
     ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
     ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+    infoln('Lazarus: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etInfo);
   end
   else
   begin
-    infoln('Lazarus: running make distclean:',etinfo);
+    infoln('Lazarus: running make distclean:',etInfo);
   end;
   ProcessEx.Parameters.Add('distclean');
   try
@@ -751,7 +751,7 @@ var
 begin
   result:=InitModule;
   if not result then exit;
-  infoln('Checking out/updating Lazarus sources:',etinfo);
+  infoln('Checking out/updating Lazarus sources:',etInfo);
   UpdateWarnings:=TStringList.Create;
   try
    FSVNClient.Verbose:=FVerbose;
@@ -763,17 +763,17 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-  infoln('Lazarus was at: '+BeforeRevision,etinfo);
+  infoln('Lazarus was at: '+BeforeRevision,etInfo);
 
   if FRepositoryUpdated then
   begin
     Revision:=AfterRevision;
-    infoln('Lazarus is now at: '+AfterRevision,etinfo);
+    infoln('Lazarus is now at: '+AfterRevision,etInfo);
   end
   else
   begin
     Revision:=BeforeRevision;
-    infoln('No updates for Lazarus found.',etinfo);
+    infoln('No updates for Lazarus found.',etInfo);
   end;
 
   // Download Qt bindings if not present yet
@@ -785,7 +785,7 @@ begin
       if (FUtilFiles[Counter].Category=ucQtFile) and
         not(FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory)+FUtilFiles[Counter].FileName)) then
       begin
-        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory,etinfo);
+        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory,etInfo);
         try
           if Download(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,
             IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName,
@@ -821,7 +821,7 @@ const
   LookForConfigFile='environmentoptions.xml';
 begin
   if not InitModule then exit;
-  infoln('Module Lazarus: Uninstall...',etinfo);
+  infoln('Module Lazarus: Uninstall...',etInfo);
   //sanity check
   if FileExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'Makefile') and
     DirectoryExistsUTF8(IncludeTrailingBackslash(FBaseDirectory)+'ide') and

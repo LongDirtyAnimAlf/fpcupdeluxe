@@ -912,13 +912,13 @@ end;
 procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
 begin
   FLog.Log(etInfo, Message);
-  if ToConsole then infoln(Message,etinfo);
+  if ToConsole then infoln(Message,etInfo);
 end;
 
 procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
 begin
   FLog.Log(EventType, Message);
-  if ToConsole then infoln(Message,etinfo);
+  if ToConsole then infoln(Message,etInfo);
 end;
 
 constructor TLogger.Create;

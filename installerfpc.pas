@@ -322,9 +322,9 @@ begin
         ProcessEx.Parameters.Add('OPT='+Options);
       try
         if CrossOptions='' then
-          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etinfo)
+          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
         else
-          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etinfo);
+          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
         ProcessEx.Execute;
         result:=(ProcessEx.ExitStatus=0);
       except
@@ -499,7 +499,7 @@ begin
   if FCompilerOptions<>'' then
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
-  infoln('Running make all for FPC:',etinfo);
+  infoln('Running make all for FPC:',etInfo);
   try
     // At least on 2.7.1 we get access violations running fpc make
     // perhaps this try..except isolates that
@@ -528,7 +528,7 @@ begin
     ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
     ProcessEx.Parameters.Add('install');
-    infoln('Running make install for FPC:',etinfo);
+    infoln('Running make install for FPC:',etInfo);
     try
       // At least on 2.7.1 Windows we get access violations running fpc make
       // perhaps this try..except isolates that
@@ -567,7 +567,7 @@ begin
     ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
-  infoln('Running make all install for FPC:',etinfo);
+  infoln('Running make all install for FPC:',etInfo);
   try
     // At least on 2.7.1 we get access violations running fpc make
     // perhaps this try..except isolates that
@@ -682,7 +682,7 @@ begin
   FPCScript := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.sh';
   if FileExists(FPCScript) then
   begin
-    infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etinfo);
+    infoln('fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
     if not(sysutils.DeleteFile(FPCScript)) then
     begin
       infoln('Error deleting existing launcher script for FPC:'+FPCScript,eterror);
@@ -702,7 +702,7 @@ begin
   Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
   begin
-    infoln('Created launcher script for FPC:'+FPCScript,etinfo);
+    infoln('Created launcher script for FPC:'+FPCScript,etInfo);
   end
   else
   begin
@@ -772,7 +772,7 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etinfo);
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etInfo);
     OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
   end;
   if OperationSucceeded then
@@ -799,7 +799,7 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etinfo);
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etInfo);
     OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
   end;
   if OperationSucceeded then
@@ -986,7 +986,7 @@ begin
   // Only download bootstrap compiler if we can't find a valid one
   if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
     begin
-      infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler),etinfo);
+      infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler),etInfo);
       result:=CheckAndGetNeededExecutables;
     end
     else
@@ -1042,7 +1042,7 @@ const
 begin
   result:=InitModule;
   if not result then exit;
-  infoln('TFPCInstaller: building module '+ModuleName+'...',etinfo);
+  infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
   {$ifdef win64}
   // Deals dynamically with either ppc386.exe or native ppcx64.exe
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
@@ -1058,7 +1058,7 @@ begin
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
-    infoln('Running make cycle for FPC64:',etinfo);
+    infoln('Running make cycle for FPC64:',etInfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin
@@ -1085,7 +1085,7 @@ begin
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     ProcessEx.Parameters.Add('cycle');
-    infoln('Running make cycle for FPC i386:',etinfo);
+    infoln('Running make cycle for FPC i386:',etInfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin
@@ -1169,7 +1169,7 @@ begin
       ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('-o');
       ProcessEx.Parameters.Add('' + FPCCfg + '');
-      infoln('Creating fpc.cfg:',etinfo);
+      infoln('Creating fpc.cfg:',etInfo);
       try
         ProcessEx.Execute;
       except
@@ -1199,7 +1199,7 @@ begin
     end
     else
     begin
-      infoln('fpc.cfg already exists; leaving it alone.',etinfo);
+      infoln('fpc.cfg already exists; leaving it alone.',etInfo);
     end;
   end;
 
@@ -1289,11 +1289,11 @@ begin
     ProcessEx.Parameters.Add('distclean');
     if (FCrossOS_Target='') and (FCrossCPU_Target='') then
       begin
-      infoln('FPC: running make distclean:',etinfo);
+      infoln('FPC: running make distclean:',etInfo);
       end
     else
       begin
-      infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etinfo);
+      infoln('FPC: running make distclean (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+'):',etInfo);
       end;
     try
       ProcessEx.Execute;
@@ -1319,7 +1319,7 @@ begin
     // Only if we're using an i386 stable "bootstrap bootstrap" to create
     // the x64 bootstrap:
     // Delete bootstrap compiler; will be regenerated later with new version:
-    infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etinfo);
+    infoln('TFPCInstaller: deleting bootstrap x64 compiler (will be rebuilt using x86 compiler)',etInfo);
     Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
     end;
   {$ENDIF WIN64}
@@ -1344,7 +1344,7 @@ var
 begin
   result:=InitModule;
   if not result then exit;
-  infoln('Checking out/updating FPC sources...',etinfo);
+  infoln('Checking out/updating FPC sources...',etInfo);
   UpdateWarnings:=TStringList.Create;
   try
    FSVNClient.Verbose:=FVerbose;
@@ -1357,9 +1357,9 @@ begin
     UpdateWarnings.Free;
   end;
 
-  infoln('FPC was at: '+BeforeRevision,etinfo);
-  if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etinfo) else
-    infoln('No updates for FPC found.',etinfo);
+  infoln('FPC was at: '+BeforeRevision,etInfo);
+  if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etInfo) else
+    infoln('No updates for FPC found.',etInfo);
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;

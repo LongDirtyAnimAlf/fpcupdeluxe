@@ -628,7 +628,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
-    infoln('Lazarus: creating desktop shortcut:',etinfo);
+    infoln('Lazarus: creating desktop shortcut:',etInfo);
     try
       //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
