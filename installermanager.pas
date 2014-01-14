@@ -47,13 +47,13 @@ uses
 // These sequences determine standard installation/uninstallation order/content:
 // Note that a single os/cpu/sequence combination will only be executed once (the state machine checks for this)
 Const
+  //todo debug: update this sequence and the win64 one with changes in win32 sequence
   Sequences=
 //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
     'Declare default;'+ //keyword Declare gives a name to a sequence of commands
-    {$ifdef linux}
+    // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
-    {$endif linux}
     'Do fpc;'+ //keyword Do means run the specified declared sequence
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
@@ -66,8 +66,10 @@ Const
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
     'End;'+ //keyword End specifies the end of the sequence
+
 //default sequence for win32
     'Declare defaultwin32;'+
+    'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
     'Do fpc;'+
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
@@ -78,7 +80,7 @@ Const
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
-    'Do USERIDE;'+ //todo: this one seems to get parsed by the state machine but does not get executed, while useride *is* run in the helplazarus part?!?
+    'Do USERIDE;'+
     {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     {$endif}
@@ -96,6 +98,8 @@ Const
 $elseif defined(win64)
 below}
     'Declare defaultwin64;'+
+    // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
+    'Exec CheckDevLibs;'+
     'Do fpc;'+
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
@@ -194,7 +198,7 @@ type
     FCompilerName: string;
     FConfigFile: string;
     FCrossCPU_Target: string;
-    FCrossLCL_Platform: string;
+    FCrossLCL_Platform: string; //really LCL widgetset
     FCrossOPT: string;
     FCrossOS_Target: string;
     FFPCDesiredRevision: string;
@@ -247,7 +251,7 @@ type
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
-    // Platform for which the user wants to compile the LCL.
+    // Widgetset for which the user wants to compile the LCL. Empty if default LCL widgetset used for current platform
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
@@ -328,10 +332,12 @@ type
       function DoGetModule(ModuleName:string):boolean;
       function DoSetCPU(CPU:string):boolean;
       function DoSetOS(OS:string):boolean;
+      // Resets memory of executed steps and sets LCL widgetset(="platform")
       function DoSetLCL(LCL:string):boolean;
       function DoUnInstallModule(ModuleName:string):boolean;
       function GetInstaller(ModuleName:string):boolean;
       function IsSkipped(ModuleName:string):boolean;
+      // Reset memory of executed steps, allowing sequences with e.g. new OS to be rerun
       procedure ResetAllExecuted(SkipFPC:boolean=false);
     public
       property Parent:TFPCupManager write Fparent;
@@ -652,7 +658,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
-    infoln('Lazarus: deleting desktop shortcut:',etinfo);
+    infoln('Lazarus: deleting desktop shortcut:',etInfo);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       {$IFDEF MSWINDOWS}
@@ -709,6 +715,11 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         end;
       end;
   end;
+  {$else} //stub for other platforms for now
+  function CheckDevLibs(LCLPlatform: string): boolean;
+  begin
+    result:=true;
+  end;
   {$endif linux}
 
 begin
@@ -718,10 +729,8 @@ begin
     result:=CreateLazarusScript
   else if UpperCase(FunctionName)='DELETELAZARUSSCRIPT' then
     result:=DeleteLazarusScript
-  {$ifdef linux}
   else if UpperCase(FunctionName)='CHECKDEVLIBS' then
     result:=CheckDevLibs(FParent.CrossLCL_Platform)
-  {$endif linux}
   else
     begin
     result:=false;
@@ -814,7 +823,7 @@ begin
     if assigned(Installer) then
       begin
       if (not crosscompiling and (Installer is TLazarusNativeInstaller)) or
-        ( crosscompiling and (Installer is TLazarusCrossInstaller)) then
+        (crosscompiling and (Installer is TLazarusCrossInstaller)) then
         begin
         exit; //all fine, continue with current installer
         end
@@ -837,6 +846,8 @@ begin
       Installer.Compiler:=FParent.CompilerName;
     Installer.CompilerOptions:=FParent.LazarusOPT;
     Installer.DesiredRevision:=FParent.LazarusDesiredRevision;
+    // Don't do this - this will build the IDE with the CrossLCL_Platform widgetset.
+    //(Installer As TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
     (Installer As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
     (Installer As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     Installer.URL:=FParent.LazarusURL;

@@ -36,7 +36,6 @@ uses
   Classes, SysUtils, installerCore, m_crossinstaller,processutils;
 //todo: use processex callback to report on errors like it's done in installerfpc
 
-// todo: add SETLCL call to enable e.g. qt compile on gtk systems/windows => in buildmodule lcl step?
 Const
   Sequences=
 //standard lazarus build
@@ -214,7 +213,6 @@ begin
       infoln('Failed to get crossbinutils',eterror)
     else if not CrossInstaller.GetLibs(FBaseDirectory) then
       infoln('Failed to get cross libraries',eterror)
-      //todo: look into building nogui LCL for target os/cpu. Is that useful? Would allow console programs anyway
     else if not CrossInstaller.GetLibsLCL(FCrossLCL_Platform,FBaseDirectory) then
       infoln('Failed to get LCL cross libraries',eterror)
     else

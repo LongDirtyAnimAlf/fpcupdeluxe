@@ -753,8 +753,8 @@ procedure ShowErrorHints();
 begin
   writeln('Please check log for details. Possible troubleshooting steps:');
   writeln('- run again with --verbose and check for make, lazbuild errors etc.');
-  writeln('- make sure there''s a valid SVN executable in your path.');
   {$IFNDEF MSWINDOWS}
+  writeln('- make sure there''s a valid SVN executable in your path.');
   writeln('- make sure the GNU binutils (make etc), windres, subversion client are installed');
   writeln('  e.g. on Debian/Ubuntu: aptitude install build-essential mingw32-binutils subversion ');
   writeln('  ln -s /usr/bin/i586-mingw32msvc-windres /usr/bin/windres');
@@ -765,7 +765,7 @@ begin
   writeln('  and/or manually deleting all *.ppu/*.a/*.o followed by svn up');
   writeln('- if that does not work: use the --uninstall option to remove all files ');
   writeln('  including your FPC and Lazarus directories');
-  writeln('- remove the bootstrap compiler. fpcup will download it if required.');
+  writeln('- remove the files in the bootstrap directory. fpcup will redownload if required.');
 end;
 
 var
