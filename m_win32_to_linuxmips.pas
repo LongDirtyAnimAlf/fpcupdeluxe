@@ -152,7 +152,7 @@ begin
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='mips'; //fpc 2.7.x nomenclature; fpc 2.6.x calls it mipseb
+  FTargetCPU:='mips'; //mips: fpc 2.7+ only; FPC 2.6 does not support mips
   FTargetOS:='linux';
   FAlreadyWarned:=false;
   infoln('Twin32_linuxmips crosscompiler loading',etDebug);
