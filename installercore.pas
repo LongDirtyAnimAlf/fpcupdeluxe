@@ -499,19 +499,15 @@ procedure TInstaller.CreateBinutilsList;
 // can be used in Unixy systems anyway
 const
   {These would be the latest:
-  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
-  These might work but are development, too:
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
   but let's use a stable version:}
   SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw32/';
+  // newer than sourceurl, useful for e.g. make 3.82 as used in Lazarus 1.2RC2 (with FPC 2.6.2)
+  SourceUrl_FPCTrunk = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
   // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
   // Nov 2013: GNU gdb (GDB) 7.2:
   SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
-  // Make 3.80 as distributed with Laz, 2.6.2, fixes 2.6 won't work with spaces in path
-  // Make 3.82 will balk on building fpc 2.6.x
-  // Make 3.81 hopefully has some fixes but not too many bugs=>in fpcbuild svn
-  // todo: give user choice or something? first redo this entire messy url exception stuff
   SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_2_6_2/install/binw64/';
   // Nov 2013: GNU gdb (GDB) 7.3.50.20110510-cvs:
   SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
@@ -567,7 +563,11 @@ begin
   AddNewUtil('libintl-8.dll',SourceURL,'',ucBinutil);
   }
   AddNewUtil('ld' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('make' + GetExeExt,SourceURL,'',ucBinutil);
+  // Make 3.80 as distributed with Laz 1.x, FPC 2.6.2, fixes 2.6 won't work with spaces in path
+  // Make 3.81 hopefully has some fixes but not too many bugs=>in fpcbuild svn
+  // Make 3.82 will balk on building fpc 2.6.x but a version is distributed with Laz 1.2RC2
+  // Use make 3.82 as distributed by Laz 1.2RC2+FPC 2.6.2
+  AddNewUtil('make' + GetExeExt,SourceUrl_FPCTrunk,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('objdump' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('pwd' + GetExeExt,SourceURL,'',ucBinutil);
@@ -591,6 +591,7 @@ begin
   AddNewUtil('libexpat-1.dll',SourceURL64_gdb,'',ucDebugger);
   AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger);
   AddNewUtil('ld' + GetExeExt,SourceURL64,'',ucBinutil);
+  // even in fpcbuild trunk, still make 3.80
   AddNewUtil('make' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('objdump' + GetExeExt,SourceURL64,'',ucBinutil);
