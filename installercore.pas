@@ -861,6 +861,7 @@ begin
   end;
 
   FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
+  infoln('Running SVN checkout or update.',etInfo);
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
   CheckoutOrUpdateReturnCode := FSVNClient.ReturnCode;

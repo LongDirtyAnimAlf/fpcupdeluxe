@@ -922,7 +922,12 @@ begin
       FBootstrapCompilerURL := FTP262Path+'i386-linux-ppc386.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
     {$ELSE}
-    {$IFDEF cpuarmel}
+    {$IFDEF cpuarmel} //probably the 2.6.x name for arm
+    if FBootstrapCompilerURL='' then
+      FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
+    {$ENDIF cpuarmel}
+    {$IFDEF cpuarm} //includes armel on FPC 2.7.1
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
@@ -930,7 +935,7 @@ begin
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-linux-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
-    {$ENDIF cpuarmel}
+    {$ENDIF cpuarm}
     {$ENDIF CPU386}
     {$ENDIF Linux}
     {$IFDEF Darwin}
@@ -1187,14 +1192,16 @@ begin
         WritelnLog('FPC: Running fpcmkcfg failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
         end;
     {$IFDEF UNIX}
-    {$IFDEF cpuarmel}
+    {$IF DEFINED(cpuarmel) or DEFINED(cpuarm)}
       // Need to add multiarch library search path
+      // Probably also needed on raspbian armhf little endian
+      // where it is /usr/lib/arm-linux-gnueabihf...
       AssignFile(TxtFile,FPCCfg);
       Append(TxtFile);
       Writeln(TxtFile,'# multiarch library search path');
       Writeln(TxtFile,'-Fl/usr/lib/$fpctarget-*');
       CloseFile(TxtFile);
-    {$ENDIF armelcpu}
+    {$ENDIF DEFINED(cpuarmel) or DEFINED(cpuarm)}
     {$ENDIF UNIX}
     end
     else
