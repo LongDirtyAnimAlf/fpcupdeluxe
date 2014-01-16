@@ -247,6 +247,9 @@ begin
 end;
 
 function CheckOptions(FInstaller: TFPCupManager):integer;
+// Returns -1 for success and further execution of fpcup
+// 0 for success but fpcup should stop (after showing help etc)
+// other codes are error codes
 var
   {$IFNDEF MSWINDOWS}
   //Linux, Unix,...
@@ -783,6 +786,7 @@ begin
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
   writeln('');
   writeversion;
+
   try
     FPCupManager:=TFPCupManager.Create;
     res:=CheckOptions(FPCupManager); //Process command line arguments

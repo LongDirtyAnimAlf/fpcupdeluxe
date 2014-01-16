@@ -291,7 +291,7 @@ type
     property Verbose:boolean read FVerbose write FVerbose;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
-    // Stop talking. Do it!
+    // Stop talking. Do it! Returns success status
     function Run: boolean;
     constructor Create;
     destructor Destroy; override;
