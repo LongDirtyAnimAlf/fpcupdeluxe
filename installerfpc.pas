@@ -77,7 +77,8 @@ Const
     'SetOS win64;'+
     // Getmodule has already been done
     'Cleanmodule fpc;'+
-    'Buildmodule fpc';
+    'Buildmodule fpc;'+
+    'End';
 
 
 type

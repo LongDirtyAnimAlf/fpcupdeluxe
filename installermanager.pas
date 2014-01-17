@@ -47,7 +47,6 @@ uses
 // These sequences determine standard installation/uninstallation order/content:
 // Note that a single os/cpu/sequence combination will only be executed once (the state machine checks for this)
 Const
-  //todo debug: update this sequence and the win64 one with changes in win32 sequence
   Sequences=
 //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
@@ -65,6 +64,8 @@ Const
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    //Any cross compilation; must be at end because it resets state machine run memory
+    'Do LCLCross;'+
     'End;'+ //keyword End specifies the end of the sequence
 
 //default sequence for win32
@@ -84,6 +85,8 @@ Const
     {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     {$endif}
+    //Any cross compilation; must be at end because it resets state machine run memory
+    'Do LCLCross;'+
     'End;'+
 
 //cross sequence for win32. Note: if changing this name,
@@ -112,7 +115,10 @@ below}
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
     'Do crosswin64-32;'+  //this has to be the last. All TExecState reset!
+    //Any cross compilation; must be at end because it resets state machine run memory
+    'Do LCLCross;'+
     'End;'+
+
 //cross sequence for win32. Note: if changing this name,
     //also change checks for this in skipmodules etc.
     'Declare crosswin64-32;'+
@@ -251,7 +257,8 @@ type
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
-    // Widgetset for which the user wants to compile the LCL. Empty if default LCL widgetset used for current platform
+    // Widgetset for which the user wants to compile the LCL (not the IDE).
+    // Empty if default LCL widgetset used for current platform
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
@@ -308,7 +315,7 @@ type
   PSequenceAttributes=^TSequenceAttributes;
 
   TKeyword=(SMdeclare, SMdeclareHidden, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
-    SMuninstallmodule, SMconfigmodule, SMSetLCL, SMSetOS, SMSetCPU, SMInvalid);
+    SMuninstallmodule, SMconfigmodule, SMResetLCL, SMSetOS, SMSetCPU, SMInvalid);
 
   TState=record
     instr:TKeyword;
@@ -332,8 +339,9 @@ type
       function DoGetModule(ModuleName:string):boolean;
       function DoSetCPU(CPU:string):boolean;
       function DoSetOS(OS:string):boolean;
-      // Resets memory of executed steps and sets LCL widgetset(="platform")
-      function DoSetLCL(LCL:string):boolean;
+      // Resets memory of executed steps so LCL widgetset can be rebuild
+      // e.g. using different platform
+      function DoResetLCL:boolean;
       function DoUnInstallModule(ModuleName:string):boolean;
       function GetInstaller(ModuleName:string):boolean;
       function IsSkipped(ModuleName:string):boolean;
@@ -757,9 +765,8 @@ begin
   result:=true;
 end;
 
-function TSequencer.DoSetLCL(LCL: string): boolean;
+function TSequencer.DoResetLCL: boolean;
 begin
-  FParent.CrossLCL_Platform:=LCL;
   ResetAllExecuted(true);
   result:=true;
 end;
@@ -846,8 +853,9 @@ begin
       Installer.Compiler:=FParent.CompilerName;
     Installer.CompilerOptions:=FParent.LazarusOPT;
     Installer.DesiredRevision:=FParent.LazarusDesiredRevision;
-    // Don't do this - this will build the IDE with the CrossLCL_Platform widgetset.
-    //(Installer As TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
+    // CrossLCL_Platform is only used when building LCL, but the Lazarus module
+    // will take care of that.
+    (Installer As TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
     (Installer As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
     (Installer As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     Installer.URL:=FParent.LazarusURL;
@@ -971,7 +979,7 @@ var
     else if key='BUILDMODULE' then result:=SMbuildmodule
     else if key='UNINSTALLMODULE' then result:=SMuninstallmodule
     else if key='CONFIGMODULE' then result:=SMconfigmodule
-    else if key='SETLCL' then result:=SMSetLCL
+    else if key='RESETLCL' then result:=SMResetLCL
     else if key='SETOS' then result:=SMSetOS
     else if key='SETCPU' then result:=SMSetCPU
     else result:=SMInvalid;
@@ -1166,7 +1174,7 @@ begin
         SMbuildmodule : result:=DoBuildModule(StateMachine[InstructionPointer].param);
         SMuninstallmodule: result:=DoUnInstallModule(StateMachine[InstructionPointer].param);
         SMconfigmodule: result:=DoConfigModule(StateMachine[InstructionPointer].param);
-        SMSetLCL      : DoSetLCL(StateMachine[InstructionPointer].param);
+        SMResetLCL    : DoResetLCL;
         SMSetOS       : DoSetOS(StateMachine[InstructionPointer].param);
         SMSetCPU      : DoSetCPU(StateMachine[InstructionPointer].param);
         end;

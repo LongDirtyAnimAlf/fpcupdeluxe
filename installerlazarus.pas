@@ -113,6 +113,14 @@ Const
     // Getmodule has already been done
     'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
+    'End;'+
+
+// Crosscompile only LCL (needs to be run at end
+    'Declare LCLCross;'+
+    'ResetLCL;'+ //module code itself will select proper widgetset
+    // Getmodule must already have been done
+    'CleanModule LCL;'+
+    'Buildmodule LCL;'+
     'End';
 
 type
@@ -370,8 +378,11 @@ begin
     ProcessEx.Parameters.Add('FPCDIR='+FFPCDir); //Make sure our FPC units can be found by Lazarus
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
     ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-    if FCrossLCL_Platform <>'' then
+    { Do not do this - only allow useride to be built for native widgetset.
+    LCL /can/ be built using different widgetset
+    if FCrossLCL_Platform <> '' then
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
+    }
     if FCompilerOptions<>'' then
       ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
     case UpperCase(ModuleName) of
@@ -385,14 +396,25 @@ begin
         ProcessEx.Parameters.Add('lazbuild');
         infoln(ModuleName+': running make lazbuild:',etInfo);
       end;
-      'LCL':
+      'LCL', 'LCLCROSS':
       begin
         // April 2012: lcl now requires lazutils and registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
         ProcessEx.Parameters.Add('registration');
         ProcessEx.Parameters.Add('lazutils');
         ProcessEx.Parameters.Add('lcl');
-        infoln(ModuleName+': running make registration lazutils lcl:', etinfo);
+        if (Uppercase(ModuleName)='LCLCROSS') then
+          if FCrossLCL_Platform='' then
+          begin
+            // Nothing to be done as we're compiling natively. Gracefully exit
+            infoln(ModuleName+': empty LCL platform specified. No need to cross compile LCL. Stopping.',etInfo);
+            OperationSucceeded:=true; //belts and braces
+            result:=true;
+            exit;
+          end
+          else
+            ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
+        infoln(ModuleName+': running make registration lazutils lcl:', etInfo);
       end
     else //raise error;
       begin
@@ -436,7 +458,6 @@ begin
         exit;
       end
     end;
-
 
     // Set up debugger if building the IDE with native widgetset
     {$IFDEF MSWINDOWS}
