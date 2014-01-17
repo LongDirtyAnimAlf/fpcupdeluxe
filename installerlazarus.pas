@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller,processutils;
+  Classes, SysUtils, installerCore, m_crossinstaller,processutils, strutils;
 //todo: use processex callback to report on errors like it's done in installerfpc
 
 Const
@@ -602,8 +602,11 @@ const
 var
   DebuggerPath: string;
   LazarusConfig: TUpdateLazConfig;
+  MajorVersion, MinorVersion, ReleaseVersion: integer;
   PCPSnippet: TStringList;
   StaticPackages: TStringList;
+  VersionSnippet:string;
+  VersionList: TStringList;
 begin
   if DirectoryExistsUTF8(FPrimaryConfigPath)=false then
   begin
@@ -611,7 +614,42 @@ begin
       infoln('Created Lazarus primary config directory: '+FPrimaryConfigPath,etInfo);
   end;
   // Set up a minimal config so we can use LazBuild
-  LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
+  // Parse URLs; expect e.g. ..../lazarus_1_0_14.
+  // Doesn't take into account release candidates or trunk
+  MajorVersion:=-1;
+  MinorVersion:=-1;
+  ReleaseVersion:=-1;
+  if RPos('/',FURL)=Length(FURL) then
+    VersionSnippet:=Copy(FURL,1,Length(FURL)-1)
+  else
+    VersionSnippet:=Copy(FURL,1,MaxInt);
+  // Strip out release candidate markings (lazarus1.4.8RCxxx)
+  if (RPos('RC',FURL)>1) and (RPos('RC',FURL)>RPos('/',FURL)) then
+    VersionSnippet:=Copy(FURL,1,RPos('RC',FURL)-1);
+  // Now strip out solitary trailing _
+  if RPos('_',FURL)>1 then
+    VersionSnippet:=Copy(FURL,1,RPos('_',FURL)-1);
+  // Finally remove everything before the last /
+  if RPos('/',FURL)>0 then
+    VersionSnippet:=Copy(FURL,RPos('/',FURL),MaxInt);
+  VersionList:=TStringList.Create;
+  try
+    VersionList.Delimiter:='_';
+    VersionList.QuoteChar:='/'; //irrelevant here
+    VersionList.StrictDelimiter:=true;
+    VersionList.DelimitedText:=VersionSnippet;
+    // We now have lazarus_1_0_12 or similar
+    if VersionList.Count>3 then
+    begin
+      MajorVersion:=StrToIntDef(VersionList[1],-1);
+      MinorVersion:=StrToIntDef(VersionList[2],-1);
+      ReleaseVersion:=StrToIntDef(VersionList[3],-1);
+    end;
+  finally
+    VersionList.Free;
+  end;
+
+  LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath,MajorVersion,MinorVersion,ReleaseVersion);
   try
     try
       // Lazarus 1.2RC1+ and trunk support specifying the primary-config-path that should be used

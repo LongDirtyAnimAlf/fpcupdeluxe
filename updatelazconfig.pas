@@ -43,6 +43,7 @@ After conversion, probably quite a lot of default settings were filled in by the
 Therefore the difference listed below may be exaggerated.
 1. Environmentoptions.xml
 - Version 106=>107, add Lazarus="1.1" (or 1.0 or whatever) attribute to version
+- Version 108: Lazarus 1.2RC2
 - Version 108: Lazarus="1.3"
 - adds history count... list to LazarusDirectory, CompilerFilename, MakeFilename
 - adds a lot of new elements with children: Desktop, PseudoTerminal, Watches, BreakPoints, Locals, CallStack...
@@ -77,9 +78,9 @@ const
   // Packages:
   PackageConfig='packagefiles.xml';
   // Versions used when new config files are generated.
-  // We can assume Lazarus SVN can parse this version:
   // Lazarus pre 1.0: 106
-  VersionNewEnvironmentConfig='108';
+  // We can assume Lazarus SVN can parse this version:
+  TrunkVersionNewEnvironmentConfig='108';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='2';
@@ -127,6 +128,9 @@ private
   FConfigs: TStringList;
   // Place where config files stores if no path component given
   FDefaultConfigPath: string;
+  FLazarusMajorVer: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
+  FLazarusMinor: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
+  FLazarusRelease: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
   function GetConfig(const ConfigFile: string): TConfig;
   procedure WriteConfig;
 public
@@ -150,15 +154,21 @@ public
   procedure SetVariable(ConfigFile, Variable: string; Value: boolean);
   { Sets variable to a certain value, only if a config file is created for us.}
   procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
-  { Create object; specify path (primary config path) where option files should be created or updated:}
-  constructor Create(ConfigPath: string);
+  { Create object; specify
+  path (primary config path) where option files should be created or updated
+  Lazarus major, minor and release version that is downloaded (or -1 if unknown
+  in which case it's assumed to be latest trunk)}
+  constructor Create(ConfigPath: string;
+    LazarusMajorVersion: integer=-1;
+    LazarusMinorVersion: integer=-1;
+    LazarusReleaseVersion: integer=-1);
   destructor Destroy; override;
 end;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig); //Add a path to the LazDoc/fpcdoc list
 
 implementation
-uses FileUtil;
+uses FileUtil, math;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var
@@ -443,13 +453,51 @@ begin
       case (ExtractFileName(ConfigFile)) of
         EnvironmentConfig:
           begin
-          NewConfig.SetValue('EnvironmentOptions/Version/Value', VersionNewEnvironmentConfig);
-          // If we don't add this, we trigger an upgrade process on first start on Lazarus 1.1+.
-          // We don't know what version we're downloading so just use 1.3
-          //todo: add provision for multiple Lazarus versions via a property
-          NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.3');
+            // If we don't add these, we trigger an upgrade process on first start on Lazarus 1.1+.
+            NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',
+              inttostr(Max(FLazarusMajorVer,0))+'.'+
+              inttostr(Max(FLazarusMinor,0))+'.'+
+              inttostr(Max(FLazarusRelease,0)));
+            if FLazarusMajorVer=-1 then
+            begin // default to newest. Update this when new version appears
+              NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
+              NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.3');
+            end
+            else if FLazarusMajorVer=0 then
+            begin
+              if FLazarusMinor<=0 then
+                NewConfig.SetValue('EnvironmentOptions/Version/Lazarus','0.9.31');
+              NewConfig.SetValue('EnvironmentOptions/Version/Value', '106')
+            end
+            else if FLazarusMajorVer=1 then
+              case FLazarusMinor of
+                0:
+                begin //1.0.x
+                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0
+                end;
+                1:
+                begin //1.1.x
+                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0,1.1
+                end;
+                2:
+                begin //1.2.x
+                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.2
+                end;
+              else
+                begin //-1 or higher than 3 arbitrarily determine 1.3; currently set to trunk version
+                  NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
+                  NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.3');
+                end;
+              end
+            else { 2 or higher? keep latest known, we can leave lazarus version though }
+            begin
+              NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
+            end;
           end;
-        HelpConfig: NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
+
+        HelpConfig:
+          NewConfig.SetValue('HelpOptions/Version/Value', VersionNewHelpConfig);
+
         PackageConfig:
           begin
             // Note: Version= in this file is an attribute of UserPkgLinks; might not matter
@@ -548,8 +596,14 @@ begin
   if Config.New then Config.SetValue(Variable, Value);
 end;
 
-constructor TUpdateLazConfig.Create(ConfigPath: string);
+constructor TUpdateLazConfig.Create(ConfigPath: string;
+    LazarusMajorVersion: integer=-1;
+    LazarusMinorVersion: integer=-1;
+    LazarusReleaseVersion: integer=-1);
 begin
+  FLazarusMajorVer:=LazarusMajorVersion;
+  FLazarusMinor:=LazarusMinorVersion;
+  FLazarusRelease:=LazarusReleaseVersion;
   FConfigs:=TStringList.Create;
   FConfigs.Sorted:=true;
   FConfigs.Duplicates:=dupError;

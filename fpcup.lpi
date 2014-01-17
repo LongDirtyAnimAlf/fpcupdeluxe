@@ -326,7 +326,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--inifile=rein.ini --inisection=win32full --only=fpcgetonly"/>
+        <CommandLineParams Value="--inifile=rein.ini --inisection=win32full"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
