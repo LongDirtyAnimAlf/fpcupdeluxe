@@ -656,15 +656,29 @@ begin
   VersionList:=TStringList.Create;
   try
     VersionList.Delimiter:='_';
-    VersionList.QuoteChar:='/'; //irrelevant here
+    VersionList.QuoteChar:='/'; //quotechar irrelevant here
     VersionList.StrictDelimiter:=true;
     VersionList.DelimitedText:=VersionSnippet;
     // We now have lazarus_1_0_12 or similar
-    if VersionList.Count>3 then
-    begin
-      MajorVersion:=StrToIntDef(VersionList[1],-1);
-      MinorVersion:=StrToIntDef(VersionList[2],-1);
-      ReleaseVersion:=StrToIntDef(VersionList[3],-1);
+    case VersionList.Count of
+      2:
+      begin
+        MajorVersion:=StrToIntDef(VersionList[1],-1);
+        MinorVersion:=0;
+        ReleaseVersion:=0;
+      end;
+      3:
+      begin
+        MajorVersion:=StrToIntDef(VersionList[1],-1);
+        MinorVersion:=StrToIntDef(VersionList[2],-1);
+        ReleaseVersion:=0;
+      end;
+      >3:
+      begin
+        MajorVersion:=StrToIntDef(VersionList[1],-1);
+        MinorVersion:=StrToIntDef(VersionList[2],-1);
+        ReleaseVersion:=StrToIntDef(VersionList[3],-1);
+      end;
     end;
   finally
     VersionList.Free;

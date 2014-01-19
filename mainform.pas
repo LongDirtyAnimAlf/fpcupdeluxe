@@ -7,13 +7,14 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit,
-  inifiles;
+  inifiles, processutils;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    chkVerbose: TCheckBox;
     CommandMemo: TMemo;
     FileNameEdit: TFileNameEdit;
     INIFileLabel: TLabel;
@@ -27,16 +28,15 @@ type
     ProfileLabel: TLabel;
     ProfileSelect: TComboBox;
     SynIniHighlighter: TSynIniSyn;
-    SynMemo: TSynMemo;
-    UpdateButton: TButton;
+    IniMemo: TSynMemo;
+    btnRun: TButton;
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure UpdateButtonClick(Sender: TObject);
+    procedure btnRunClick(Sender: TObject);
   private
     { private declarations }
-    FFPCUPParams: TStringList;
-    procedure UpdateCommand;
+    procedure UpdateCommand(Inifile, IniProfile: string);
+  protected
+    procedure DumpOutput(Sender: TProcessEx; output: string);
   public
     { public declarations }
   end;
@@ -46,31 +46,60 @@ var
 
 implementation
 
+// Quote arguments if needed for processutils (e.g. on Windows)
+function DoubleQuoteIfNeeded(FileName: string): string;
+begin
+  {$IFDEF MSWINDOWS}
+  // Unfortunately, we need to double quote in case there's spaces in the path and it's e.g. a .cmd file
+  if Copy(FileName, 1, 1) <> '"' then
+    Result := '"' + FileName + '"';
+  {$ELSE}
+  Result := filename;
+  {$ENDIF}
+end;
+
 { TForm1 }
 
 
-procedure TForm1.UpdateButtonClick(Sender: TObject);
+procedure TForm1.btnRunClick(Sender: TObject);
 begin
-  Self.UpdateCommand;
-  //todo: perform actual call to installer, analogous to how fpcup would work
+  UpdateCommand(FileNameEdit.FileName, ProfileSelect.Text);
 end;
 
-procedure TForm1.UpdateCommand;
+procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
+var
+  UpProc: TProcessEx;
 begin
   //First update installer properties depending on options chosen
-
-  FFPCUpParams.Clear;
-  //fill FFPCUPParms out using FManager settings
-  CommandMemo.Text:='fpcup '+FFPCUpParams.DelimitedText; //Show how fpcup cli would be invoked
+  UpProc:=TProcessEx.Create(nil);
+  try
+    UpProc.Executable:='fpcup'+GetExeExt;
+    if chkVerbose.Checked then
+    begin
+      UpProc.Parameters.Add('--verbose');
+      UpProc.OnOutputM:=@DumpOutput;
+    end
+    else
+    begin
+      UpProc.OnOutputM:=nil;
+    end;
+    if IniFIle<>'' then
+      UpProc.Parameters.Add('--inifile='+IniFile);
+    if IniProfile<>'' then
+      UpProc.Parameters.Add('--inisection='+IniProfile);
+    CommandMemo.Text:=UpProc.ResultingCommand;
+    UpProc.Execute;
+    //todo: handle return code, verbose output
+  finally
+    UpProc.Free;
+  end;
 end;
 
-
-procedure TForm1.FormCreate(Sender: TObject);
+procedure TForm1.DumpOutput(Sender: TProcessEx; output: string);
 begin
-  FFPCUpParams:=TStringList.Create;
-  FFPCUpParams.Delimiter:=' ';
-  FFPCUpParams.StrictDelimiter:=false; //I believe this works best for output
+  OutputMemo.Append(output);
 end;
+
 
 procedure TForm1.FileNameEditAcceptFileName(Sender: TObject; var Value: String);
 var
@@ -78,8 +107,8 @@ var
   Sections: TStringList;
 begin
   // Load selected ini file
-  SynMemo.BeginUpdate(false);
-  SynMemo.Lines.LoadFromFile(Value);
+  IniMemo.BeginUpdate(false);
+  IniMemo.Lines.LoadFromFile(Value);
   MyIniFile:=TIniFile.Create(Value,true);
   Sections:=TStringList.Create;
   try
@@ -87,19 +116,13 @@ begin
     Sections.Sorted:=true;
     MyIniFile.ReadSections(Sections);
     ProfileSelect.Clear;
-    ProfileSelect.Items.AddStrings(Sections);
+    ProfileSelect.Items.Assign(Sections); //bug in .AddStrings LCL combobox handling
   finally
-    SynMemo.EndUpdate;
+    IniMemo.EndUpdate;
     Sections.Free;
     MyIniFile.Free;
   end;
 end;
-
-procedure TForm1.FormDestroy(Sender: TObject);
-begin
-  FFPCUpParams.Free;
-end;
-
 
 {$R *.lfm}
 

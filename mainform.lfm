@@ -1,27 +1,25 @@
 object Form1: TForm1
-  Left = 87
-  Height = 753
-  Top = 108
-  Width = 899
+  Left = 63
+  Height = 625
+  Top = 93
+  Width = 897
   Caption = 'fpcup GUI'
-  ClientHeight = 753
-  ClientWidth = 899
-  OnCreate = FormCreate
-  OnDestroy = FormDestroy
-  LCLVersion = '1.2.0.2'
-  object UpdateButton: TButton
-    Left = 700
+  ClientHeight = 625
+  ClientWidth = 897
+  LCLVersion = '1.3'
+  object btnRun: TButton
+    Left = 360
     Height = 25
-    Top = 560
+    Top = 392
     Width = 75
-    Caption = 'Update'
-    OnClick = UpdateButtonClick
+    Caption = 'Run fpcup'
+    OnClick = btnRunClick
     TabOrder = 0
   end
   object OutputTabs: TPageControl
     Left = 8
     Height = 168
-    Top = 592
+    Top = 432
     Width = 667
     ActivePage = CommandTab
     TabIndex = 0
@@ -31,21 +29,21 @@ object Form1: TForm1
       ClientHeight = 142
       ClientWidth = 659
       object CommandMemo: TMemo
-        Left = 4
-        Height = 114
-        Top = 8
+        Left = -4
+        Height = 224
+        Top = -86
         Width = 616
         TabOrder = 0
       end
     end
     object OutputTab: TTabSheet
       Caption = 'Output'
-      ClientHeight = 140
+      ClientHeight = 142
       ClientWidth = 659
       object OutputMemo: TMemo
-        Left = 4
+        Left = -4
         Height = 114
-        Top = 8
+        Top = -134
         Width = 616
         ScrollBars = ssAutoVertical
         TabOrder = 0
@@ -54,7 +52,7 @@ object Form1: TForm1
   end
   object EditTabs: TPageControl
     Left = 8
-    Height = 520
+    Height = 360
     Top = 16
     Width = 767
     ActivePage = IniEditorTab
@@ -62,16 +60,26 @@ object Form1: TForm1
     TabOrder = 2
     object OptionsTab: TTabSheet
       Caption = 'OptionsTab'
+      ClientHeight = 334
+      ClientWidth = 759
+      object chkVerbose: TCheckBox
+        Left = 12
+        Height = 17
+        Top = 26
+        Width = 59
+        Caption = 'Verbose'
+        TabOrder = 0
+      end
     end
     object IniEditorTab: TTabSheet
       Caption = 'IniEditorTab'
-      ClientHeight = 494
+      ClientHeight = 334
       ClientWidth = 759
-      inline SynMemo: TSynMemo
+      inline IniMemo: TSynMemo
         Cursor = crIBeam
         Left = 4
-        Height = 288
-        Top = 98
+        Height = 296
+        Top = 130
         Width = 736
         Font.Height = -13
         Font.Name = 'Courier New'
@@ -561,6 +569,7 @@ object Form1: TForm1
         Height = 21
         Top = 24
         Width = 368
+        FileName = 'settings.ini'
         OnAcceptFileName = FileNameEditAcceptFileName
         Filter = 'INI files (*.ini)|*.ini|All files|*'
         FilterIndex = 0
@@ -577,7 +586,6 @@ object Form1: TForm1
         Top = 61
         Width = 164
         ItemHeight = 13
-        Sorted = True
         TabOrder = 2
       end
       object INIFileLabel: TLabel
@@ -600,6 +608,7 @@ object Form1: TForm1
   end
   object SynIniHighlighter: TSynIniSyn
     DefaultFilter = 'INI Files (*.ini)|*.ini'
+    Enabled = False
     CommentAttri.FrameEdges = sfeAround
     TextAttri.FrameEdges = sfeAround
     SectionAttri.FrameEdges = sfeAround
@@ -608,7 +617,7 @@ object Form1: TForm1
     SpaceAttri.FrameEdges = sfeAround
     StringAttri.FrameEdges = sfeAround
     SymbolAttri.FrameEdges = sfeAround
-    left = 128
-    top = 544
+    left = 792
+    top = 376
   end
 end

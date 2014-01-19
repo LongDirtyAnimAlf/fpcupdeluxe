@@ -51,7 +51,7 @@ IN THE SOFTWARE.
 unit processutils;
 
 {$mode objfpc}{$H+}
-{not $DEFINE DEBUG} //define debug to get writeln output of commands called
+{not $DEFINE DEBUGCONSOLE} //define debug to get writeln output of commands called
 
 interface
 
@@ -139,6 +139,7 @@ function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload
 function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
+// Writes output to console
 procedure DumpConsole(Sender:TProcessEx; output:string);
 
 
@@ -176,7 +177,7 @@ function TProcessEx.GetResultingCommand: string;
 var i:integer;
 begin
   //this is not the command as executed. The quotes are surrounding individual params.
-  //the actual quoting is platform dependant
+  //the actual quoting is platform dependent
   //perhaps better to use another quoting character to make this clear to the user.
   result:=Executable;
   for i:=0 to Parameters.Count-1 do
@@ -485,17 +486,17 @@ begin
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;
-    {$IFDEF DEBUG}
+    {$IFDEF DEBUGCONSOLE}
     writeln('ExecuteCommandInDir: executable '+PE.Executable);
     writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
-    {$ENDIF}
+    {$ENDIF DEBUGCONSOLE}
     PE.Execute;
 
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
-    {$IFDEF DEBUG}
+    {$IFDEF DEBUGCONSOLE}
     writeln('ExecuteCommandInDir: exit status: '+inttostr(Result));
-    {$ENDIF}
+    {$ENDIF DEBUGCONSOLE}
   finally
     PE.Free;
   end;
