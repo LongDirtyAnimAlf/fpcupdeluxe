@@ -673,7 +673,7 @@ begin
         MinorVersion:=StrToIntDef(VersionList[2],-1);
         ReleaseVersion:=0;
       end;
-      >3:
+      4..maxint:
       begin
         MajorVersion:=StrToIntDef(VersionList[1],-1);
         MinorVersion:=StrToIntDef(VersionList[2],-1);
