@@ -68,28 +68,35 @@ end;
 
 procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
 var
+  ResultCode: integer;
   UpProc: TProcessEx;
 begin
   //First update installer properties depending on options chosen
   UpProc:=TProcessEx.Create(nil);
   try
     UpProc.Executable:='fpcup'+GetExeExt;
+    UpProc.OnOutputM:=@DumpOutput;
     if chkVerbose.Checked then
     begin
       UpProc.Parameters.Add('--verbose');
-      UpProc.OnOutputM:=@DumpOutput;
-    end
-    else
-    begin
-      UpProc.OnOutputM:=nil;
     end;
     if IniFIle<>'' then
       UpProc.Parameters.Add('--inifile='+IniFile);
     if IniProfile<>'' then
       UpProc.Parameters.Add('--inisection='+IniProfile);
     CommandMemo.Text:=UpProc.ResultingCommand;
-    UpProc.Execute;
-    //todo: handle return code, verbose output
+    try
+      Screen.Cursor:=crHourGlass;
+      UpProc.Execute;
+    finally
+      Screen.Cursor:=crDefault;
+    end;
+
+    ResultCode:=UpProc.ExitStatus;
+    if ResultCode<>0 then
+      CommandMemo.Append('Error running fpcup: result code: '+inttostr(ResultCode))
+    else
+      CommandMemo.Append('Succesfully ran fpcup');
   finally
     UpProc.Free;
   end;
