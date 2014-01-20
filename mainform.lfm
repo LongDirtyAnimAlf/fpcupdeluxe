@@ -4,8 +4,10 @@ object Form1: TForm1
   Top = 93
   Width = 897
   Caption = 'fpcup GUI'
-  ClientHeight = 625
+  ClientHeight = 606
   ClientWidth = 897
+  Menu = MainMenu1
+  OnCreate = FormCreate
   LCLVersion = '1.3'
   object EditTabs: TPageControl
     Left = 8
@@ -16,7 +18,7 @@ object Form1: TForm1
     TabIndex = 0
     TabOrder = 0
     object IniEditorTab: TTabSheet
-      Caption = 'IniEditorTab'
+      Caption = 'Options'
       ClientHeight = 510
       ClientWidth = 759
       inline IniMemo: TSynMemo
@@ -568,7 +570,7 @@ object Form1: TForm1
       end
     end
     object OutputTab: TTabSheet
-      Caption = 'OutputTab'
+      Caption = 'Output'
       ClientHeight = 510
       ClientWidth = 759
       object OutputMemo: TMemo
@@ -594,5 +596,23 @@ object Form1: TForm1
     SymbolAttri.FrameEdges = sfeAround
     left = 792
     top = 376
+  end
+  object MainMenu1: TMainMenu
+    left = 826
+    top = 103
+    object mnuFile: TMenuItem
+      Caption = '&File'
+      object mnuQuit: TMenuItem
+        Caption = '&Quit'
+        OnClick = mnuQuitClick
+      end
+    end
+    object mnuHelp: TMenuItem
+      Caption = '&Help'
+      object mnuShowFPCUPHelp: TMenuItem
+        Caption = '&FPCUP Help'
+        OnClick = mnuShowFPCUPHelpClick
+      end
+    end
   end
 end

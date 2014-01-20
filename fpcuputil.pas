@@ -32,6 +32,11 @@ unit fpcuputil;
 
 {$mode objfpc}{$H+}
 
+{Define NOCONSOLE e.g. if using Windows GUI {$APPTYPE GUI} or -WG
+this will disable writeln calls
+}
+{not $DEFINE NOCONSOLE}
+
 interface
 uses
   Classes, SysUtils, eventlog;
@@ -145,7 +150,7 @@ with TResourceStream.Create(hInstance, resourcename, 'file') do
 try
   try
     fs:=Tfilestream.Create(Filename,fmCreate);
-    savetostream(fs);
+    Savetostream(fs);
   finally
      fs.Free;
   end;
@@ -786,6 +791,7 @@ procedure infoln(Message: string; Level: TEventType);
 var
   Seriousness: string;
 begin
+{$IFNDEF NOCONSOLE}
   case Level of
     etCustom: Seriousness:='Custom:';
     etDebug: Seriousness:='Debug:';
@@ -810,6 +816,7 @@ begin
     sleep(200); //hopefully allow output to be written without interfering with other output
     {$ENDIF}
     end;
+{$ENDIF NOCONSOLE}
 end;
 
 function MoveFile(const SrcFilename, DestFilename: string): boolean;

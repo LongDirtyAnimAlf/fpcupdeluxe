@@ -2,12 +2,26 @@ unit mainform;
 
 {$mode objfpc}{$H+}
 
+{$DEFINE NOCONSOLE} //Please define this in project options so fpcuputil etc will not use writeln
+
 interface
 
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit,
-  inifiles, processutils;
+  Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
+  inifiles, processutils, fpcuputil;
+
+{$IFDEF MSWINDOWS}
+// On Windows, we can be certain a valid FPC install has
+// windres, so use it.
+{$R fpcup.rc}
+{$ELSE}
+// On other platforms we cannot be certain, so we trust/hope either
+// - a previous windows compile
+// - manual windres invocation
+// has updated fpcup.res
+{$R fpcup.res}
+{$ENDIF MSWINDOWS}
 
 type
 
@@ -18,6 +32,11 @@ type
     chkVerbose: TCheckBox;
     FileNameEdit: TFileNameEdit;
     INIFileLabel: TLabel;
+    MainMenu1: TMainMenu;
+    mnuFile: TMenuItem;
+    mnuHelp: TMenuItem;
+    mnuShowFPCUPHelp: TMenuItem;
+    mnuQuit: TMenuItem;
     OutputMemo: TMemo;
     EditTabs: TPageControl;
     OutputTab: TTabSheet;
@@ -28,6 +47,9 @@ type
     IniMemo: TSynMemo;
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure mnuQuitClick(Sender: TObject);
+    procedure mnuShowFPCUPHelpClick(Sender: TObject);
     procedure ProfileSelectGetItems(Sender: TObject);
   private
     procedure LoadProfilesFromFile(INIFile: string);
@@ -36,7 +58,7 @@ type
     procedure UpdateCommand(Inifile, IniProfile: string);
   protected
     // Callback that writes output received from TProcessEx to memo
-    procedure DumpOutput(Sender: TProcessEx; output: string);
+    procedure DumpOutput(Sender: TProcessEx; Output: string);
   public
     { public declarations }
   end;
@@ -64,6 +86,48 @@ end;
 procedure TForm1.btnRunClick(Sender: TObject);
 begin
   UpdateCommand(FileNameEdit.FileName, ProfileSelect.Text);
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  // Extract settings.ini if necessary
+  try
+    if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+'settings.ini') then
+      SaveInisFromResource('settings.ini','settings_ini');
+  except
+    //Ignore exceptions - file just won't exist.
+  end;
+end;
+
+procedure TForm1.mnuQuitClick(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+procedure TForm1.mnuShowFPCUPHelpClick(Sender: TObject);
+var
+  ResultCode: integer;
+  UpProc: TProcessEx;
+begin
+  UpProc:=TProcessEx.Create(nil);
+  try
+    UpProc.Executable:='fpcup'+GetExeExt;
+    UpProc.OnOutputM:=@DumpOutput;
+    UpProc.Parameters.Add('--help');
+    try
+      Screen.Cursor:=crHourGlass;
+      OutputMemo.Clear;
+      EditTabs.ActivePage:=OutputTab; //switch to output tab
+      Application.ProcessMessages;
+      UpProc.Execute;
+    finally
+      Screen.Cursor:=crDefault;
+    end;
+
+    ResultCode:=UpProc.ExitStatus;
+  finally
+    UpProc.Free;
+  end;
 end;
 
 procedure TForm1.ProfileSelectGetItems(Sender: TObject);
@@ -120,6 +184,8 @@ begin
     try
       Screen.Cursor:=crHourGlass;
       OutputMemo.Clear;
+      EditTabs.ActivePage:=OutputTab; //switch to output tab
+      Application.ProcessMessages;
       UpProc.Execute;
     finally
       Screen.Cursor:=crDefault;
@@ -135,9 +201,9 @@ begin
   end;
 end;
 
-procedure TForm1.DumpOutput(Sender: TProcessEx; output: string);
+procedure TForm1.DumpOutput(Sender: TProcessEx; Output: string);
 begin
-  OutputMemo.Append(output);
+  OutputMemo.Append(Output);
   // Give GUI chance to refresh so user doesn't think it hangs:
   Sleep(5);
   Application.ProcessMessages;

@@ -29,6 +29,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {$mode objfpc}{$H+}
+{Define NOCONSOLE e.g. if using Windows GUI {$APPTYPE GUI} or -WG
+this will disable writeln calls
+}
+{not $DEFINE NOCONSOLE}
 
 interface
 
@@ -484,10 +488,12 @@ begin
     WritelnLog(DateTimeToStr(now)+': fpcup '+RevisionStr+' ('+VersionDate+') started.',true);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
+    {$IFNDEF NOCONSOLE}
     writeln('***ERROR***');
     writeln('Could not open log file '+FLog.LogFile+' for writing.');
     writeln('Perhaps another fpcup is running?');
     writeln('Aborting.');
+    {$ENDIF}
     halt(2);
   end;
 
@@ -1153,9 +1159,9 @@ begin
     while true do
       begin
       { For debugging state machine sequence:
-      writeln('State machine: ');
-      writeln(StateMachine[InstructionPointer].instr);
-      writeln(StateMachine[InstructionPointer].param);
+      FParent.writelnlog('State machine: ',true);
+      FParent.writelnlog(StateMachine[InstructionPointer].instr,true);
+      FParent.writelnlog(StateMachine[InstructionPointer].param,true);
       }
       case StateMachine[InstructionPointer].instr of
         SMdeclare     :;
