@@ -14,28 +14,28 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    btnRun: TButton;
     chkVerbose: TCheckBox;
-    CommandMemo: TMemo;
     FileNameEdit: TFileNameEdit;
     INIFileLabel: TLabel;
     OutputMemo: TMemo;
-    OutputTabs: TPageControl;
-    OutputTab: TTabSheet;
-    CommandTab: TTabSheet;
     EditTabs: TPageControl;
-    OptionsTab: TTabSheet;
+    OutputTab: TTabSheet;
     IniEditorTab: TTabSheet;
     ProfileLabel: TLabel;
     ProfileSelect: TComboBox;
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynMemo;
-    btnRun: TButton;
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
+    procedure ProfileSelectGetItems(Sender: TObject);
   private
+    procedure LoadProfilesFromFile(INIFile: string);
     { private declarations }
+    // Run actual fpcup update
     procedure UpdateCommand(Inifile, IniProfile: string);
   protected
+    // Callback that writes output received from TProcessEx to memo
     procedure DumpOutput(Sender: TProcessEx; output: string);
   public
     { public declarations }
@@ -66,12 +66,44 @@ begin
   UpdateCommand(FileNameEdit.FileName, ProfileSelect.Text);
 end;
 
+procedure TForm1.ProfileSelectGetItems(Sender: TObject);
+begin
+  // Check for empty combobox but valid filename
+  if ProfileSelect.Items.Count=0 then
+  begin
+    if (FileNameEdit.FileName<>'') and (FileExistsUTF8(FileNameEdit.FileName)) then
+    begin
+      LoadProfilesFromFile(FileNameEdit.FileName);
+    end;
+  end;
+end;
+
+procedure TForm1.LoadProfilesFromFile(INIFile: string);
+var
+  Sections: TStringList;
+  MyIniFile: TIniFile;
+begin
+  // Load selected ini file
+  IniMemo.BeginUpdate(false);
+  IniMemo.Lines.LoadFromFile(INIFile);
+  MyIniFile:=TIniFile.Create(INIFile, true);
+  Sections:=TStringList.Create;
+  try
+    MyIniFile.ReadSections(Sections);
+    ProfileSelect.Clear;
+    ProfileSelect.Items.Assign(Sections); //bug in .AddStrings LCL combobox handling
+  finally
+    IniMemo.EndUpdate;
+    Sections.Free;
+    MyIniFile.Free;
+  end;
+end;
+
 procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
 var
   ResultCode: integer;
   UpProc: TProcessEx;
 begin
-  //First update installer properties depending on options chosen
   UpProc:=TProcessEx.Create(nil);
   try
     UpProc.Executable:='fpcup'+GetExeExt;
@@ -84,9 +116,10 @@ begin
       UpProc.Parameters.Add('--inifile='+IniFile);
     if IniProfile<>'' then
       UpProc.Parameters.Add('--inisection='+IniProfile);
-    CommandMemo.Text:=UpProc.ResultingCommand;
+    //CommandMemo.Text:=UpProc.ResultingCommand;
     try
       Screen.Cursor:=crHourGlass;
+      OutputMemo.Clear;
       UpProc.Execute;
     finally
       Screen.Cursor:=crDefault;
@@ -94,9 +127,9 @@ begin
 
     ResultCode:=UpProc.ExitStatus;
     if ResultCode<>0 then
-      CommandMemo.Append('Error running fpcup: result code: '+inttostr(ResultCode))
+      ShowMessage('Error running fpcup: result code: '+inttostr(ResultCode))
     else
-      CommandMemo.Append('Succesfully ran fpcup');
+      ShowMessage('Succesfully ran fpcup');
   finally
     UpProc.Free;
   end;
@@ -105,30 +138,15 @@ end;
 procedure TForm1.DumpOutput(Sender: TProcessEx; output: string);
 begin
   OutputMemo.Append(output);
+  // Give GUI chance to refresh so user doesn't think it hangs:
+  Sleep(5);
+  Application.ProcessMessages;
 end;
 
 
 procedure TForm1.FileNameEditAcceptFileName(Sender: TObject; var Value: String);
-var
-  MyIniFile : TIniFile;
-  Sections: TStringList;
 begin
-  // Load selected ini file
-  IniMemo.BeginUpdate(false);
-  IniMemo.Lines.LoadFromFile(Value);
-  MyIniFile:=TIniFile.Create(Value,true);
-  Sections:=TStringList.Create;
-  try
-    Sections.Duplicates:=dupIgnore; //just pick the first one or whatever
-    Sections.Sorted:=true;
-    MyIniFile.ReadSections(Sections);
-    ProfileSelect.Clear;
-    ProfileSelect.Items.Assign(Sections); //bug in .AddStrings LCL combobox handling
-  finally
-    IniMemo.EndUpdate;
-    Sections.Free;
-    MyIniFile.Free;
-  end;
+  LoadProfilesFromFile(Value);
 end;
 
 {$R *.lfm}
