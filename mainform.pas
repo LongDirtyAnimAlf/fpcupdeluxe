@@ -9,7 +9,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, fpcuputil, process;
+  inifiles, processutils, fpcuputil, process, strutils;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -106,7 +106,6 @@ end;
 
 procedure TForm1.mnuShowFPCUPHelpClick(Sender: TObject);
 var
-  ResultCode: integer;
   UpProc: TProcessEx;
 begin
   UpProc:=TProcessEx.Create(nil);
@@ -121,11 +120,11 @@ begin
       EditTabs.ActivePage:=OutputTab; //switch to output tab
       Application.ProcessMessages;
       UpProc.Execute;
+      OutputMemo.SelStart:=0; //move to beginning of output
+      OutputMemo.SelLength:=0;
     finally
       Screen.Cursor:=crDefault;
     end;
-
-    ResultCode:=UpProc.ExitStatus;
   finally
     UpProc.Free;
   end;
@@ -188,6 +187,8 @@ begin
       EditTabs.ActivePage:=OutputTab; //switch to output tab
       Application.ProcessMessages;
       UpProc.Execute;
+      OutputMemo.SelStart:=0; //move to beginning of output
+      OutputMemo.SelLength:=0;
     finally
       Screen.Cursor:=crDefault;
     end;
@@ -203,8 +204,15 @@ begin
 end;
 
 procedure TForm1.DumpOutput(Sender: TProcessEx; Output: string);
+var
+  LastEnd: integer;
 begin
-  OutputMemo.Append(Output);
+  // Avoid duplicate line endings
+  LastEnd:=RPos(LineEnding,Output);
+  if LastEnd=1+Length(Output)-Length(LineEnding) then
+    OutputMemo.Append(Copy(Output,1,LastEnd-1))
+  else
+    OutputMemo.Append(Output);
   // Give GUI chance to refresh so user doesn't think it hangs:
   Sleep(5);
   Application.ProcessMessages;
