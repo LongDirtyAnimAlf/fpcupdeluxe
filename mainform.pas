@@ -207,7 +207,7 @@ procedure TForm1.DumpOutput(Sender: TProcessEx; Output: string);
 var
   LastEnd: integer;
 begin
-  // Avoid duplicate line endings
+  // Avoid duplicate line endings leading to unintended vertical whitespace
   LastEnd:=RPos(LineEnding,Output);
   if LastEnd=1+Length(Output)-Length(LineEnding) then
     OutputMemo.Append(Copy(Output,1,LastEnd-1))
