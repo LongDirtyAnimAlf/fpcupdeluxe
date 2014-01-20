@@ -180,7 +180,8 @@ begin
       UpProc.Parameters.Add('--inifile='+IniFile);
     if IniProfile<>'' then
       UpProc.Parameters.Add('--inisection='+IniProfile);
-    UpProc.Options:=UpProc.Options+[poNoConsole];
+    //This will lead to lots of pop ups of make.exe which are actually more annoying
+    //UpProc.Options:=UpProc.Options+[poNoConsole];
     try
       Screen.Cursor:=crHourGlass;
       OutputMemo.Clear;
