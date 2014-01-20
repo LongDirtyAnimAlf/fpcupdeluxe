@@ -112,7 +112,7 @@ begin
     begin
       UpProc.Parameters.Add('--verbose');
     end;
-    if IniFIle<>'' then
+    if IniFile<>'' then
       UpProc.Parameters.Add('--inifile='+IniFile);
     if IniProfile<>'' then
       UpProc.Parameters.Add('--inisection='+IniProfile);

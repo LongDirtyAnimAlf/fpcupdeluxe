@@ -74,6 +74,11 @@ uses {$IFDEF UNIX}
 // If you have a file not found error for revision.inc, please make sure you compile hgversion.pas before compiling this project.
 {$i revision.inc}
 
+const
+  CHECKOPTIONS_SUCCESS=-1; //checkoptions ran ok
+  ERROR_WRONG_OPTIONS=13; //user specified incorrect command line options
+  ERROR_FPCUP_BUILD_FAILED=64; //fpcup ran but build failed
+
 procedure WriteVersion;
 begin
   writeln('Version: based on commit '+RevisionStr+' ('+versiondate+')');
@@ -274,7 +279,7 @@ begin
 
   Options:=TCommandLineOptions.Create;
   try
-    result:=-1; //no error
+    result:=CHECKOPTIONS_SUCCESS; //no error
     try
       sIniFile:=(Options.GetOption('','inifile',''));
       if sIniFile<>'' then
@@ -487,7 +492,7 @@ begin
       writeln('Error: wrong command line options given:');
       writeln(E.Message);
       WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
-      result:=13; //Quit with error resultcode
+      result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
       exit;
       end
     end;
@@ -502,7 +507,7 @@ begin
       begin
       writeln('Error: wrong command line options given:');
       writeln(E.Message);
-      result:=13; //Quit with error resultcode
+      result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
       exit;
       end;
     end;
@@ -569,7 +574,7 @@ begin
       begin
       writeln('Error: wrong command line options given:');
       writeln(E.Message);
-      result:=13; //Quit with error resultcode
+      result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
       exit;
       end;
     end;
@@ -608,7 +613,7 @@ begin
           writeln('Error: wrong command line options given:');
           writeln(LeftOverOptions.Text);
           WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
-          result:=13; //Quit with error resultcode
+          result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
           exit;
         end;
       finally
@@ -790,16 +795,17 @@ begin
   try
     FPCupManager:=TFPCupManager.Create;
     res:=CheckOptions(FPCupManager); //Process command line arguments
-    if res=-1 then
+    if res=CHECKOPTIONS_SUCCESS then
       // Get/update/compile selected modules
       if FPCupManager.Run=false then
       begin
         writeln('FPCUp failed.');
         ShowErrorHints;
+        res:=ERROR_FPCUP_BUILD_FAILED;
       end;
   finally
     FPCupManager.free;
   end;
-  if res<>-1 then
+  if res<>CHECKOPTIONS_SUCCESS then
     halt(res);
 end.
