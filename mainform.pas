@@ -9,7 +9,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, fpcuputil;
+  inifiles, processutils, fpcuputil, process;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -114,6 +114,7 @@ begin
     UpProc.Executable:='fpcup'+GetExeExt;
     UpProc.OnOutputM:=@DumpOutput;
     UpProc.Parameters.Add('--help');
+    UpProc.Options:=UpProc.Options+[poNoConsole];
     try
       Screen.Cursor:=crHourGlass;
       OutputMemo.Clear;
@@ -180,7 +181,7 @@ begin
       UpProc.Parameters.Add('--inifile='+IniFile);
     if IniProfile<>'' then
       UpProc.Parameters.Add('--inisection='+IniProfile);
-    //CommandMemo.Text:=UpProc.ResultingCommand;
+    UpProc.Options:=UpProc.Options+[poNoConsole];
     try
       Screen.Cursor:=crHourGlass;
       OutputMemo.Clear;
