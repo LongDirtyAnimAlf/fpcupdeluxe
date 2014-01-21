@@ -14,13 +14,16 @@ object Form1: TForm1
     Height = 536
     Top = 16
     Width = 767
-    ActivePage = OutputTab
-    TabIndex = 1
+    ActivePage = IniEditorTab
+    TabIndex = 0
     TabOrder = 0
     object IniEditorTab: TTabSheet
+      Hint = 'Options and button for running fpcup'
       Caption = 'Options'
       ClientHeight = 510
       ClientWidth = 759
+      ParentShowHint = False
+      ShowHint = True
       inline IniMemo: TSynMemo
         Cursor = crIBeam
         Left = 4
@@ -570,9 +573,12 @@ object Form1: TForm1
       end
     end
     object OutputTab: TTabSheet
+      Hint = 'fpcup output'
       Caption = 'Output'
       ClientHeight = 510
       ClientWidth = 759
+      ParentShowHint = False
+      ShowHint = True
       object OutputMemo: TMemo
         Left = 0
         Height = 498
@@ -583,16 +589,73 @@ object Form1: TForm1
       end
     end
     object TroubleshootingTab: TTabSheet
+      Hint = 'Troubleshooting tools for fpcup'
       Caption = 'Troubleshooting'
       ClientHeight = 510
       ClientWidth = 759
+      ParentShowHint = False
+      ShowHint = True
       object Label1: TLabel
         Left = 4
-        Height = 13
+        Height = 1
         Top = 10
-        Width = 1311
-        Caption = 'Note that fpcup depends on the underlying FPC and Lazarus SVN repositories. If there is a build failure because of faulty code in FPC or Lazarus, fpcup cannot correct this. Usually build failures happen with trunk builds and are solved within a day, so you can try again later.'
+        Width = 1
         ParentColor = False
+      end
+      object InfoMemo: TMemo
+        Left = 4
+        Height = 90
+        Hint = 'Troubleshooting information'
+        Top = 10
+        Width = 752
+        Lines.Strings = (
+          'Note that fpcup depends on the underlying FPC and Lazarus SVN repositories. '
+          'If there is a build failure because of faulty code in FPC or Lazarus, fpcup cannot correct this. Usually build failures happen with trunk builds and are solved '
+          'within a day, so you can try again later.'
+          ''
+          'For an explanation of troubleshooting and reporting steps, please see the fpcup wiki page (see Help menu).'
+        )
+        ReadOnly = True
+        TabOrder = 0
+      end
+      object gpbxDeletePPUs: TGroupBox
+        Left = 4
+        Height = 152
+        Top = 114
+        Width = 753
+        Caption = 'Delete .ppu, .a, .o files'
+        ClientHeight = 134
+        ClientWidth = 749
+        TabOrder = 1
+        object RepoDirectory: TDirectoryEdit
+          Left = 142
+          Height = 21
+          Top = 8
+          Width = 424
+          ShowHidden = False
+          ButtonWidth = 23
+          NumGlyphs = 1
+          MaxLength = 0
+          TabOrder = 0
+          OnChange = RepoDirectoryChange
+        end
+        object Label2: TLabel
+          Left = 9
+          Height = 13
+          Top = 10
+          Width = 118
+          Caption = 'Lazarus or FPC directory'
+          ParentColor = False
+        end
+        object btnDeletePPU: TButton
+          Left = 518
+          Height = 25
+          Top = 48
+          Width = 75
+          Caption = 'Delete files...'
+          OnClick = btnDeletePPUClick
+          TabOrder = 1
+        end
       end
     end
   end

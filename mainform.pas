@@ -9,7 +9,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, fpcuputil, process, strutils,LCLIntf;
+  inifiles, processutils, fpcuputil, process, strutils,LCLIntf,LCLType;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -29,11 +29,16 @@ type
 
   TForm1 = class(TForm)
     btnRun: TButton;
+    btnDeletePPU: TButton;
     chkVerbose: TCheckBox;
+    RepoDirectory: TDirectoryEdit;
     FileNameEdit: TFileNameEdit;
+    gpbxDeletePPUs: TGroupBox;
     INIFileLabel: TLabel;
     Label1: TLabel;
+    Label2: TLabel;
     MainMenu1: TMainMenu;
+    InfoMemo: TMemo;
     mnuFPCUPWiki: TMenuItem;
     mnuFPCUPDownload: TMenuItem;
     mnuFile: TMenuItem;
@@ -49,6 +54,8 @@ type
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynMemo;
     TroubleshootingTab: TTabSheet;
+    procedure btnDeletePPUClick(Sender: TObject);
+    procedure RepoDirectoryChange(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -100,6 +107,8 @@ begin
   try
     if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+'settings.ini') then
       SaveInisFromResource('settings.ini','settings_ini');
+    //Seems to be a bug in tpagecontrol: last tab is active?!?
+    EditTabs.ActivePage:=INiEditorTab;
   except
     //Ignore exceptions - file just won't exist.
   end;
@@ -153,6 +162,8 @@ begin
   begin
     if (FileNameEdit.FileName<>'') and (FileExistsUTF8(FileNameEdit.FileName)) then
     begin
+      if UpperCase((FileNameEdit.FileName))='FPCUP.INI' then
+        ShowMessage('Warning: fpcup.ini does not contain fpcup user profiles but external module definitions. Try settings.ini.');
       LoadProfilesFromFile(FileNameEdit.FileName);
     end;
   end;
@@ -180,13 +191,24 @@ begin
 end;
 
 procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
+const
+  FPCUPExe='fpcup';
 var
+  FPCUpLocation: string;
   ResultCode: integer;
   UpProc: TProcessEx;
 begin
+  FPCUPLocation:=ExtractFilePath(ParamStr(0))+FPCUPExe+GetExeExt;
+  if not(FileExistsUTF8(FPCUPLocation)) then
+  begin
+    ShowMessage('Could not find fpcup executable '+FPCUPLocation+LineEnding+
+    'Please make sure fpcup is present and has the proper permissions. Aborting.');
+    exit;
+  end;
+
   UpProc:=TProcessEx.Create(nil);
   try
-    UpProc.Executable:='fpcup'+GetExeExt;
+    UpProc.Executable:=FPCUPLocation;
     UpProc.OnOutputM:=@DumpOutput;
     if chkVerbose.Checked then
     begin
@@ -239,6 +261,41 @@ end;
 procedure TForm1.FileNameEditAcceptFileName(Sender: TObject; var Value: String);
 begin
   LoadProfilesFromFile(Value);
+end;
+
+procedure TForm1.RepoDirectoryChange(Sender: TObject);
+begin
+
+end;
+
+procedure TForm1.btnDeletePPUClick(Sender: TObject);
+var
+  Extensions: TStringList;
+  Reply: integer;
+begin
+  if not(DirectoryExistsUTF8(RepoDirectory.Directory)) then
+  begin
+    ShowMessage('No directory selected. Please select the directory where fpcup downloads the Lazarus or FPC sources from subversion.');
+    exit;
+  end;
+  Reply:=Application.MessageBox(PChar('Are you sure you want to delete these files from  '+
+    RepoDirectory.Directory + '?'),
+    'Deleting .ppu, .a, .o files',MB_ICONQUESTION+MB_YESNO);
+  if reply=IDYES then
+  begin
+    Extensions:=TStringList.Create;
+    try
+      Extensions.Add('.a');
+      Extensions.Add('.o');
+      Extensions.Add('.ppu');
+      if DeleteFilesExtensionsSubdirs(RepoDirectory.Directory,Extensions,'') then
+        ShowMessage('Deleted .ppu, .a, .o files. Please run fpcup again to get back all required files (or run svn up).')
+      else
+        ShowMessage('Error deleting .ppu, .a, .o files. Please run svn up to get back all required files.');
+    finally
+      Extensions.Free;
+    end;
+  end;
 end;
 
 {$R *.lfm}
