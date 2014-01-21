@@ -217,12 +217,12 @@ begin
     end;
 
     // Warn user to check things
-    if StringListStartsWith(FCrossOpts,'-CaEABIHF')=-1 then
+    if StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1 then
     begin
       // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
       // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
       // -dFPC_ARMHF is only used for (cross) compiler generation, not useful when compiling end user
-      infoln(FCrossModuleName+ ': please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
+      infoln(FCrossModuleName+ ': found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
     end;
 
     // Configuration snippet for FPC
