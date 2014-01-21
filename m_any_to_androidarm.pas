@@ -250,6 +250,7 @@ end;
 constructor TAny_ARMAndroid.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Any_ARMAndroid';
   // Invoke like
   // fpc -Parm -Tandroid
   // Note: the compiler does NOT define LINUX!

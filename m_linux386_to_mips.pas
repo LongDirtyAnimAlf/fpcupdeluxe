@@ -179,6 +179,7 @@ end;
 constructor TLinux386_mips.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Linux386_mips';
   FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

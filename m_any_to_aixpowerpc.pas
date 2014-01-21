@@ -187,6 +187,7 @@ end;
 constructor TAny_AIXPowerPC.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Any_AIXPowerPC';
   FBinUtilsPrefix:='powerpc-aix-'; //crossfpc nomenclature; module will also search for no prefix crossbinutils
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;

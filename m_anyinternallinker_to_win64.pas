@@ -66,6 +66,7 @@ end;
 constructor Tanyinternallinker_win64.Create;
 begin
   inherited Create;
+  FCrossModuleName:='anyinternallinker_win64';
   FTargetCPU:='x86_64';
   FTargetOS:='win32';
   FAlreadyWarned:=false;

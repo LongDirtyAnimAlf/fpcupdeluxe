@@ -193,6 +193,7 @@ end;
 constructor TWin32_msdosi8086.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Win32_msdosi8086';
   FBinUtilsPrefix:='msdos-';
   FBinUtilsPath:='';
   {Add binutils directory to path when cross compiling.

@@ -140,6 +140,7 @@ end;
 constructor TFreeBSD_Linux64.Create;
 begin
   inherited Create;
+  FCrossModuleName:='FreeBSD_Linux64';
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';

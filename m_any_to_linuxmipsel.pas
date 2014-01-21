@@ -293,7 +293,8 @@ end;
 constructor Tany_linuxmipsel.Create;
 begin
   inherited Create;
-  // binutilsprefix can be modified later in GetBinUtils
+  FCrossModuleName:='any_linuxmipsel';
+  // binutilsprefix can be modified later in GetBinUtils  
   FBinUtilsPrefix:='mipsel-linux-android-'; //Used in Android NDK
   FBinUtilsPath:='';
   { Use current trunk compiler to build, not stable bootstrap, e.g. in light of bug

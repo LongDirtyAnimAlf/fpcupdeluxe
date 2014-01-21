@@ -66,6 +66,7 @@ end;
 constructor Tanyinternallinker_win386.Create;
 begin
   inherited Create;
+  FCrossModuleName:='anyinternallinker_win386';
   FTargetCPU:='i386';
   FTargetOS:='win32';
   FAlreadyWarned:=false;

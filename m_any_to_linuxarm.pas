@@ -240,6 +240,7 @@ end;
 constructor TAny_Linuxarm.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Any_Linuxarm';
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;

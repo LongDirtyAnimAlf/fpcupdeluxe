@@ -157,6 +157,7 @@ end;
 constructor TWin32_Linux386.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Win32_Linux386';
   FBinUtilsPrefix:='i386-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

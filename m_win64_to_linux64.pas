@@ -151,6 +151,7 @@ end;
 constructor Twin64_linux64.Create;
 begin
   inherited Create;
+  FCrossModuleName:='win64_linux64';
   FBinUtilsPrefix:='x86_64-linux-'; //crossfpc nomenclature
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later

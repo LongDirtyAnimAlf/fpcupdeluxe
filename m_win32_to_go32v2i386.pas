@@ -180,6 +180,7 @@ end;
 constructor TWin32_go32v2i386.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Win32_go32v2i386';
   FBinUtilsPrefix:='i386-go32v2-'; //will be removed if no binutils found
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later

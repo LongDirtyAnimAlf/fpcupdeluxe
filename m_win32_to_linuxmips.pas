@@ -148,6 +148,7 @@ end;
 constructor Twin32_linuxmips.Create;
 begin
   inherited Create;
+  FCrossModuleName:='win32_linuxmips';
   FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

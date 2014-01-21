@@ -75,6 +75,7 @@ end;
 constructor TWin32.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Win32';
   FBinUtilsPath:=''; //override parent that has a warning text here
   FBinUtilsPrefix:=''; //override parent that has a warning text here
   FFPCCFGSnippet:=''; //no need to change fpc.cfg

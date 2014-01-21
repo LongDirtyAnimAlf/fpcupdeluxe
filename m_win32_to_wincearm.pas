@@ -192,6 +192,7 @@ end;
 constructor TWin32_wincearm.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Win32_wincearm';
   FBinUtilsPrefix:='arm-wince-'; //search algorithm may modify this
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later

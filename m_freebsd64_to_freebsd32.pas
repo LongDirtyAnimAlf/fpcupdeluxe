@@ -69,6 +69,7 @@ end;
 constructor TFreeBSD64_FreeBSD386.Create;
 begin
   inherited Create;
+  FCrossModuleName:='FreeBSD64_FreeBSD386';
   FTargetCPU:='i386';
   FTargetOS:='freebsd';
   FBinUtilsPath:='';

@@ -172,6 +172,7 @@ end;
 constructor TLinux386_mipsel.Create;
 begin
   inherited Create;
+  FCrossModuleName:='Linux386_mipsel';
   FBinUtilsPrefix:='mipsel-linux-';
   FBinUtilsPath:='';
   FCrossModuleName:='TLinux386_mipsel'; //used in messages to user

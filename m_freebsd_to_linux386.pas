@@ -91,6 +91,7 @@ end;
 constructor TFreeBSD_Linux386.Create;
 begin
   inherited Create;
+  FCrossModuleName:='FreeBSD_Linux386';
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';
