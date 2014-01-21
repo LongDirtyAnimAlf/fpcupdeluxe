@@ -1068,8 +1068,7 @@ begin
   ProcessEx.Parameters.Add('OS_TARGET=linux');
   ProcessEx.Parameters.Add('CPU_TARGET=arm');
   // Override makefile checks that checks for stable compiler in FPC trunk
-  if FBootstrapCompilerOverrideVersionCheck then
-    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+  ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   ProcessEx.Parameters.Add('cycle');
   infoln('Running make cycle for ARM compiler:',etInfo);
   ProcessEx.Execute;
