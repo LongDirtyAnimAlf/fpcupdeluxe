@@ -1046,7 +1046,7 @@ var
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64,ppcross8086';
-
+  IntermediateARM='ppcarm_intermediate'; //name for (trunk) intermediate compiler for ARM
 begin
   result:=InitModule;
   if not result then exit;
@@ -1068,6 +1068,7 @@ begin
   ProcessEx.Parameters.Add('OS_TARGET=linux');
   ProcessEx.Parameters.Add('CPU_TARGET=arm');
   // Override makefile checks that checks for stable compiler in FPC trunk
+  FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
   ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   ProcessEx.Parameters.Add('cycle');
   infoln('Running make cycle for ARM compiler:',etInfo);
@@ -1079,9 +1080,13 @@ begin
     exit;
   end;
   FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcarm',
-    ExtractFilePath(FCompiler)+'ppcarm');
+    ExtractFilePath(FCompiler)+IntermediateARM);
+  //Make executable
+  OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateARM, &700)=0); //rwx------
+  if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateARM,etError);
+
   // Now we can change the compiler from the stable one to the one in our FPC repo:
-  FCompiler:=ExtractFilePath(FCompiler)+'ppcarm';
+  FCompiler:=ExtractFilePath(FCompiler)+IntermediateARM;
   {$endif} //linux, arm
   {$ifdef win64}
   // Deals dynamically with either ppc386.exe or native ppcx64.exe
