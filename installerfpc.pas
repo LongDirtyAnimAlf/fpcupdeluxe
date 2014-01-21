@@ -934,6 +934,7 @@ begin
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
+    infoln('TFPCInstaller: getting bootstrap compiler - assuming this is a x64 processor on Linux',etWarning);
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-linux-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
@@ -1050,6 +1051,37 @@ begin
   result:=InitModule;
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
+  {$if defined(cpuarm) and defined(linux)}
+  // Always build an intermediate bootstrap compiler in target fpc dir. If that is
+  // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
+  // version-dependent: please review and modify when new FPC version is released
+  ProcessEx.Executable := Make;
+  ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add('FPC='+FCompiler);
+  ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
+  // Copy over user-specified instruction sets etc
+  if FCompilerOptions<>'' then
+    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
+  ProcessEx.Parameters.Add('OS_TARGET=linux');
+  ProcessEx.Parameters.Add('CPU_TARGET=arm');
+  // Override makefile checks that checks for stable compiler in FPC trunk
+  if FBootstrapCompilerOverrideVersionCheck then
+    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+  ProcessEx.Parameters.Add('cycle');
+  infoln('Running make cycle for ARM compiler:',etInfo);
+  ProcessEx.Execute;
+  if ProcessEx.ExitStatus <> 0 then
+    begin
+    result := False;
+    WritelnLog('FPC: Failed to build ARM intermediate bootstrap compiler ',true);
+    exit;
+  end;
+  FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcarm',
+    ExtractFilePath(FCompiler)+'ppcarm');
+  // Now we can change the compiler from the stable one to the one in our FPC repo:
+  FCompiler:=ExtractFilePath(FCompiler)+'ppcarm';
+  {$endif} //linux, arm
   {$ifdef win64}
   // Deals dynamically with either ppc386.exe or native ppcx64.exe
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
@@ -1074,7 +1106,7 @@ begin
       exit;
     end;
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcx64.exe',
-     ExtractFilePath(FCompiler)+'ppcx64.exe');
+      ExtractFilePath(FCompiler)+'ppcx64.exe');
     // Now we can change the compiler from the i386 to the x64 compiler:
     FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';
   end;
@@ -1322,7 +1354,9 @@ begin
 
   // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
+
   {$IFDEF WIN64}
+  // Delete possibly outdated trunk compilers used for compiling the compiler
   if Win64FallBackUsingCrossCompiler then
     begin
     // Only if we're using an i386 stable "bootstrap bootstrap" to create
@@ -1332,6 +1366,14 @@ begin
     Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcx64.exe');
     end;
   {$ENDIF WIN64}
+
+  {$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
+  // Delete possibly outdated trunk compilers used for compiling the compiler
+  // Delete bootstrap compiler; will be regenerated later with new version:
+  infoln('TFPCInstaller: deleting intermediate bootstrap compiler (will be rebuilt using stable bootstrap compiler)',etInfo);
+  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcarm');
+  {$ENDIF} //arm/linux
+
   {$IFDEF UNIX}
   // Delete any fpc.sh shell scripts
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');

@@ -255,8 +255,11 @@ type
     // Options that are to be saved in shortcuts/batch file/shell scripts.
     // Excludes temporary options like --verbose
     property PersistentOptions: string read FPersistentOptions write FPersistentOptions;
+    // Full path to bootstrap compiler
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
+    // Directory where bootstrap compiler is installed/downloaded
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
+    // URL to download the bootstrap compiler from
     property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
