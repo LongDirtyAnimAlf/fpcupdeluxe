@@ -1052,6 +1052,7 @@ begin
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
   {$if defined(cpuarm) and defined(linux)}
+  //todo: do the same for arm/android!?!
   // Always build an intermediate bootstrap compiler in target fpc dir. If that is
   // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
   // version-dependent: please review and modify when new FPC version is released
@@ -1060,9 +1061,10 @@ begin
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
-  // Copy over user-specified instruction sets etc
-  if FCompilerOptions<>'' then
-    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
+  // Do NOT copy over user-specified instruction sets... as the existing stable
+  // compiler likely will not understand them
+  {if FCompilerOptions<>'' then
+    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);}
   ProcessEx.Parameters.Add('OS_TARGET=linux');
   ProcessEx.Parameters.Add('CPU_TARGET=arm');
   // Override makefile checks that checks for stable compiler in FPC trunk
