@@ -9,7 +9,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, fpcuputil, process, strutils;
+  inifiles, processutils, fpcuputil, process, strutils,LCLIntf;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -32,7 +32,10 @@ type
     chkVerbose: TCheckBox;
     FileNameEdit: TFileNameEdit;
     INIFileLabel: TLabel;
+    Label1: TLabel;
     MainMenu1: TMainMenu;
+    mnuFPCUPWiki: TMenuItem;
+    mnuFPCUPDownload: TMenuItem;
     mnuFile: TMenuItem;
     mnuHelp: TMenuItem;
     mnuShowFPCUPHelp: TMenuItem;
@@ -45,9 +48,12 @@ type
     ProfileSelect: TComboBox;
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynMemo;
+    TroubleshootingTab: TTabSheet;
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure mnuFPCUPDownloadClick(Sender: TObject);
+    procedure mnuFPCUPWikiClick(Sender: TObject);
     procedure mnuQuitClick(Sender: TObject);
     procedure mnuShowFPCUPHelpClick(Sender: TObject);
     procedure ProfileSelectGetItems(Sender: TObject);
@@ -97,6 +103,16 @@ begin
   except
     //Ignore exceptions - file just won't exist.
   end;
+end;
+
+procedure TForm1.mnuFPCUPDownloadClick(Sender: TObject);
+begin
+  OpenURL('http://bitbucket.org/reiniero/fpcup/downloads');
+end;
+
+procedure TForm1.mnuFPCUPWikiClick(Sender: TObject);
+begin
+  OpenURL('http://wiki.lazarus.freepascal.org/fpcup');
 end;
 
 procedure TForm1.mnuQuitClick(Sender: TObject);

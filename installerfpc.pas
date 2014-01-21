@@ -120,8 +120,8 @@ type
     // Install update sources
     function GetModule(ModuleName:string): boolean; override;
     // If yes, an override option will be passed to make (OVERRIDEVERSIONCHECK=1)
-    // If no, latest stable FPC bootstrap compiler needs to be used.
-    // This is required information for setting make file optioins
+    // If no, the FPC make script enforces that the latest stable FPC bootstrap compiler is used.
+    // This is required information for setting make file options
     property CompilerOverrideVersionCheck: boolean read FBootstrapCompilerOverrideVersionCheck;
     // Uninstall module
     function UnInstallModule(ModuleName:string): boolean; override;
@@ -163,7 +163,6 @@ uses fpcuputil,fileutil
     ,baseunix
   {$ENDIF UNIX}
   ;
-{ TFPCCrossInstaller }
 const
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
@@ -223,8 +222,10 @@ begin
   end;
 end;
 
+{ TFPCCrossInstaller }
+
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
-// Runs make/make install for crosss compiler.
+// Runs make/make install for cross compiler.
 // Error out on problems; unless module considered optional, i.e. in
 // crosswin32-64 and crosswin64-32 steps.
 var
@@ -893,9 +894,9 @@ begin
     {$ifdef win64}
     if Win64FallBackUsingCrossCompiler then
       begin
-      //There is no win64 bootstrap compiler, yet
-      //Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
-      //This should eliminate issues with the wrong RTL etc.
+      // There is no win64 bootstrap compiler, yet
+      // Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
+      // This should eliminate issues with the wrong RTL etc (for trunk, only the exact same svn revision is supported)
       if FBootstrapCompilerURL='' then
         FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
@@ -903,7 +904,7 @@ begin
       end
       else
       begin
-      // Use regular x64 compiler
+      // Use regular x64 stable compiler
       if FBootstrapCompilerURL='' then
         FBootstrapCompilerURL := FTP262Path+'x86_64-win64-ppcx64.zip';
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
