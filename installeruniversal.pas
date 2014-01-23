@@ -210,6 +210,8 @@ begin
 end;
 
 function TUniversalInstaller.InitModule: boolean;
+var
+  PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   result:=true;
   infoln('TUniversalInstaller: initialising...',etDebug);
@@ -230,7 +232,13 @@ begin
     result:=false;
     infoln('Universalinstaller: missing lazbuild. Aborting.',etError);
   end;
-  FBinPath:=ExcludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
+
+  // Add fpc architecture bin and plain paths
+  FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  PlainBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin';
+  SetPath(FBinPath+PathSeparator+
+    PlainBinPath+PathSeparator
+    ,true,false);
   InitDone:=result;
 end;
 
