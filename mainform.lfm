@@ -14,8 +14,8 @@ object Form1: TForm1
     Height = 536
     Top = 16
     Width = 887
-    ActivePage = IniEditorTab
-    TabIndex = 0
+    ActivePage = TroubleshootingTab
+    TabIndex = 2
     TabOrder = 0
     object IniEditorTab: TTabSheet
       Hint = 'Options and button for running fpcup'
@@ -536,6 +536,7 @@ object Form1: TForm1
         Width = 164
         ItemHeight = 13
         OnGetItems = ProfileSelectGetItems
+        OnSelect = ProfileSelectSelect
         TabOrder = 2
       end
       object INIFileLabel: TLabel

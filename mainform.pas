@@ -61,6 +61,7 @@ type
     procedure btnDeletePPUClick(Sender: TObject);
     procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
+    procedure ProfileSelectSelect(Sender: TObject);
     procedure RepoDirectoryChange(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
@@ -368,6 +369,18 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TForm1.ProfileSelectSelect(Sender: TObject);
+var
+  i:integer;
+begin
+  // Move to proper y position in synedit to show just selected profile
+  IniMemo.BeginUpdate(false);
+  i:=IniMemo.Lines.IndexOf('['+ProfileSelect.Text+']');
+  if i>-1 then
+    IniMemo.CaretY:=i+1; //caret is 1-based
+  IniMemo.EndUpdate;
 end;
 
 {$R *.lfm}
