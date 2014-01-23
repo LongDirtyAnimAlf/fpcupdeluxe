@@ -789,14 +789,16 @@ end;
 {$ENDIF MSWINDOWS}
 
 procedure infoln(Message: string; Level: TEventType);
+const
+  BeginSnippet='fpcup: '; //helps identify messages as comfing from fpcup instead of make etc
 var
   Seriousness: string;
 begin
 {$IFNDEF NOCONSOLE}
   case Level of
-    etCustom: Seriousness:='Custom:';
-    etDebug: Seriousness:='Debug:';
-    etInfo: Seriousness:='Info:';
+    etCustom: Seriousness:='custom:';
+    etDebug: Seriousness:='debug:';
+    etInfo: Seriousness:='info:';
     etWarning: Seriousness:='WARNING:';
     etError: Seriousness:='ERROR:';
     else Seriousness:='UNKNOWN CATEGORY!!:'
@@ -804,7 +806,7 @@ begin
   if (Level<>etDebug) then
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-      writeln(Seriousness+' '+ Message); //we misuse this for info output
+      writeln(BeginSnippet+Seriousness+' '+ Message); //we misuse this for info output
       sleep(200); //hopefully allow output to be written without interfering with other output
     end
   else
@@ -813,7 +815,7 @@ begin
     {DEBUG conditional symbol is defined using
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-    writeln(Seriousness+' '+ Message); //we misuse this for info output
+    writeln(BeginSnippet+Seriousness+' '+ Message); //we misuse this for info output
     sleep(200); //hopefully allow output to be written without interfering with other output
     {$ENDIF}
     end;
