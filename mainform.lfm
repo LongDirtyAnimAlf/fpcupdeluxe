@@ -27,9 +27,9 @@ object Form1: TForm1
       inline IniMemo: TSynMemo
         Cursor = crIBeam
         Left = 4
-        Height = 336
+        Height = 408
         Top = 90
-        Width = 832
+        Width = 752
         Font.Height = -13
         Font.Name = 'Courier New'
         Font.Pitch = fpFixed
@@ -571,6 +571,15 @@ object Form1: TForm1
         OnClick = btnRunClick
         TabOrder = 3
       end
+      object btnSaveINI: TButton
+        Left = 788
+        Height = 25
+        Top = 473
+        Width = 75
+        Caption = 'Save'
+        OnClick = btnSaveINIClick
+        TabOrder = 5
+      end
     end
     object OutputTab: TTabSheet
       Hint = 'fpcup output'
@@ -679,11 +688,11 @@ object Form1: TForm1
     SpaceAttri.FrameEdges = sfeAround
     StringAttri.FrameEdges = sfeAround
     SymbolAttri.FrameEdges = sfeAround
-    left = 784
-    top = 560
+    left = 840
+    top = 568
   end
   object MainMenu1: TMainMenu
-    left = 704
+    left = 752
     top = 560
     object mnuFile: TMenuItem
       Caption = '&File'
@@ -708,7 +717,7 @@ object Form1: TForm1
       end
     end
   end
-  object LogSaveDialog: TSaveDialog
+  object SaveDialog: TSaveDialog
     DefaultExt = '.zip'
     Filter = 'Text file (*.txt)|*.txt|Zipped text file (*.zip)|*.zip'
     left = 632

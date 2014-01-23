@@ -32,6 +32,7 @@ type
     btnRun: TButton;
     btnDeletePPU: TButton;
     btnSaveLog: TButton;
+    btnSaveINI: TButton;
     chkVerbose: TCheckBox;
     RepoDirectory: TDirectoryEdit;
     FileNameEdit: TFileNameEdit;
@@ -53,11 +54,12 @@ type
     IniEditorTab: TTabSheet;
     ProfileLabel: TLabel;
     ProfileSelect: TComboBox;
-    LogSaveDialog: TSaveDialog;
+    SaveDialog: TSaveDialog;
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynMemo;
     TroubleshootingTab: TTabSheet;
     procedure btnDeletePPUClick(Sender: TObject);
+    procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
     procedure RepoDirectoryChange(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
@@ -69,6 +71,7 @@ type
     procedure mnuShowFPCUPHelpClick(Sender: TObject);
     procedure ProfileSelectGetItems(Sender: TObject);
   private
+    FCurrentINIFile: string; //currently loaded ini file
     procedure LoadProfilesFromFile(INIFile: string);
     { private declarations }
     // Run actual fpcup update
@@ -100,6 +103,7 @@ var
   FPCUPLocation: string;
   UpProc: TProcessEx;
 begin
+  SaveDialog.InitialDir:=ExtractFilePath(ParamStr(0)); //application directory
   // Extract settings.ini if necessary
   try
     // Run fpcup --help so it generates relevant ini files.
@@ -197,6 +201,7 @@ begin
   // Load selected ini file
   IniMemo.BeginUpdate(false);
   IniMemo.Lines.LoadFromFile(INIFile);
+  FCurrentINIFile:=INIFile;
   MyIniFile:=TIniFile.Create(INIFile, true);
   Sections:=TStringList.Create;
   try
@@ -316,23 +321,34 @@ begin
   end;
 end;
 
+procedure TForm1.btnSaveINIClick(Sender: TObject);
+begin
+  SaveDialog.Filter:='INI files (*.ini)|*.ini';
+  SaveDialog.FileName:=FCurrentINIFile;
+  if SaveDialog.Execute then
+  begin
+    FCurrentINIFile:=SaveDialog.FileName;
+    Inimemo.Lines.SaveToFile(FCurrentINIFile);
+  end;
+end;
+
 procedure TForm1.btnSaveLogClick(Sender: TObject);
 var
   TempStream: TMemoryStream;
   ZipMachine: TZipper;
   ZipEntry: TZipFileEntry;
 begin
-  LogSaveDialog.InitialDir:=ExtractFilePath(ParamStr(0)); //application directory
-  if LogSaveDialog.Execute then
+  SaveDialog.Filter:='Text file (*.txt)|*.txt|Zipped text file (*.zip)|*.zip';
+  if SaveDialog.Execute then
   begin
     try
-      case UpperCase(sysutils.ExtractFileExt(LogSaveDialog.FileName)) of
+      case UpperCase(sysutils.ExtractFileExt(SaveDialog.FileName)) of
       '.ZIP':
         begin
           TempStream:=TMemoryStream.Create;
           ZipMachine:=TZipper.Create;
           try
-            ZipMachine.FileName:=LogSaveDialog.FileName;
+            ZipMachine.FileName:=SaveDialog.FileName;
             OutputMemo.Lines.SaveToStream(TempStream);
             TempStream.Position:=0;
             ZipEntry:=ZipMachine.Entries.AddFileEntry(TempStream,'fpcupoutput.txt');
@@ -343,7 +359,7 @@ begin
           end;
         end
       else {.txt}
-        OutputMemo.Lines.SaveToFile(LogSaveDialog.FileName);
+        OutputMemo.Lines.SaveToFile(SaveDialog.FileName);
       end;
     except
       on E: Exception do
