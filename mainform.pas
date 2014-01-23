@@ -9,7 +9,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, fpcuputil, process, strutils,LCLIntf,LCLType,zipper;
+  inifiles, processutils, process, fpcuputil, strutils,
+  LCLIntf,LCLType,zipper;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -84,32 +85,48 @@ var
 
 implementation
 
-// Quote arguments if needed for processutils (e.g. on Windows)
-function DoubleQuoteIfNeeded(FileName: string): string;
-begin
-  {$IFDEF MSWINDOWS}
-  // Unfortunately, we need to double quote in case there's spaces in the path and it's e.g. a .cmd file
-  if Copy(FileName, 1, 1) <> '"' then
-    Result := '"' + FileName + '"';
-  {$ELSE}
-  Result := filename;
-  {$ENDIF}
-end;
+const
+  FPCUpExe='fpcup'; //fpcup executable filename (without .exe)
+
 
 { TForm1 }
-
-
 procedure TForm1.btnRunClick(Sender: TObject);
 begin
   UpdateCommand(FileNameEdit.FileName, ProfileSelect.Text);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  FPCUPLocation: string;
+  UpProc: TProcessEx;
 begin
   // Extract settings.ini if necessary
   try
+    // Run fpcup --help so it generates relevant ini files.
+    // Better than doing fpcuputil.SaveInisFromResource('settings.ini','settings_ini');
+    // as we can mix and match fpcup and fpcupgui versions
     if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+'settings.ini') then
-      SaveInisFromResource('settings.ini','settings_ini');
+    begin
+      FPCUPLocation:=ExtractFilePath(ParamStr(0))+FPCUpExe+GetExeExt;
+      if FileExistsUTF8(FPCUPLocation) then
+      begin
+        UpProc:=TProcessEx.Create(nil);
+        try
+          UpProc.Executable:=FPCUpExe+GetExeExt;
+          UpProc.OnOutputM:=nil; //ignore output
+          UpProc.Parameters.Add('--help');
+          UpProc.Options:=UpProc.Options+[poNoConsole];
+          try
+            UpProc.Execute;
+          except
+            // ignore exceptions; user should recreate .ini himself
+          end;
+        finally
+          UpProc.Free;
+        end;
+      end;
+    end;
+
     //Seems to be a bug in tpagecontrol: last tab is active?!?
     EditTabs.ActivePage:=INiEditorTab;
   except
@@ -138,7 +155,7 @@ var
 begin
   UpProc:=TProcessEx.Create(nil);
   try
-    UpProc.Executable:='fpcup'+GetExeExt;
+    UpProc.Executable:=FPCUpExe+GetExeExt;
     UpProc.OnOutputM:=@DumpOutput;
     UpProc.Parameters.Add('--help');
     UpProc.Options:=UpProc.Options+[poNoConsole];
@@ -194,14 +211,12 @@ begin
 end;
 
 procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
-const
-  FPCUPExe='fpcup';
 var
   FPCUpLocation: string;
   ResultCode: integer;
   UpProc: TProcessEx;
 begin
-  FPCUPLocation:=ExtractFilePath(ParamStr(0))+FPCUPExe+GetExeExt;
+  FPCUPLocation:=ExtractFilePath(ParamStr(0))+FPCUpExe+GetExeExt;
   if not(FileExistsUTF8(FPCUPLocation)) then
   begin
     ShowMessage('Could not find fpcup executable '+FPCUPLocation+LineEnding+
