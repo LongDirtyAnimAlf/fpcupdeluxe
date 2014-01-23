@@ -1,5 +1,5 @@
 { Process utility unit
-Copyright (C) 2012-2013 Ludo Brands
+Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This unit is licensed as modified LGPL or MIT, at your choice. Licenses below
 }
@@ -62,6 +62,12 @@ const
   // Internal error code/result codes:
   PROC_INTERNALERROR=-1; // error while running process code in this unit
   PROC_INTERNALEXCEPTION=-2; //exception while running process code in this unit
+  {$IFDEF MSWINDOWS}
+  PATHVARNAME = 'Path'; //Name for path environment variable
+  {$ELSE}
+  //Unix/Linux
+  PATHVARNAME = 'PATH';
+  {$ENDIF MSWINDOWS}
 
 type
   TProcessEx=class; //forward
@@ -69,8 +75,8 @@ type
   TDumpMethod = procedure (Sender:TProcessEx; output:string) of object;
   TErrorFunc = procedure (Sender:TProcessEx;IsException:boolean);
   TErrorMethod = procedure (Sender:TProcessEx;IsException:boolean) of object;
-  { TProcessEnvironment }
 
+  { TProcessEnvironment }
   TProcessEnvironment = class(TObject)
     private
       FEnvironmentList:TStringList;
@@ -139,6 +145,8 @@ function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload
 function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
+// If path is empty, keep current path
+function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean; Path: string): integer; overload;
 // Writes output to console
 procedure DumpConsole(Sender:TProcessEx; output:string);
 
@@ -400,7 +408,6 @@ begin
   inherited Destroy;
 end;
 
-
 procedure DumpConsole(Sender:TProcessEx; output:string);
 begin
   write(output);
@@ -429,6 +436,12 @@ end;
 
 function ExecuteCommandInDir(Commandline, Directory: string;
   var Output: string; Verbose: boolean): integer;
+begin
+  Result:=ExecuteCommandInDir(CommandLine,Directory,Output,Verbose,'');
+end;
+
+function ExecuteCommandInDir(Commandline, Directory: string;
+  var Output: string; Verbose: boolean; Path: string): integer;
 var
   PE:TProcessEx;
   s:string;
@@ -476,6 +489,8 @@ begin
   try
     if Directory<>'' then
       PE.CurrentDirectory:=Directory;
+    if Path<>'' then
+      PE.Environment.SetVar(PATHVARNAME, Path);
     PE.Executable:=GetFirstWord;
     s:=GetFirstWord;
     while s<>'' do

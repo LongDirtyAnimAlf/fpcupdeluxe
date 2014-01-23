@@ -191,13 +191,6 @@ implementation
 
 uses installerfpc, fileutil;
 
-const
-  {$IFDEF MSWINDOWS}
-  PATHVARNAME = 'Path';
-  {$ELSE}
-  //Unix/Linux
-  PATHVARNAME = 'PATH';
-  {$ENDIF MSWINDOWS}
 
 { TInstaller }
 

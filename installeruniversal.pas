@@ -52,13 +52,14 @@ type
 
   TUniversalInstaller = class(TInstaller)
   private
-    FBinPath:string;
+    FBinPath:string; //Path where compiler is
     //FPC base directory - directory where FPC is (to be) installed:
     FFPCDir:string;
     //Lazarus base directory - directory where Lazarus is (to be) installed:
     FLazarusDir:string;
     //Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
+    FPath:string; //Path to be used within this session (e.g. including compiler path)
     InitDone:boolean;
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
@@ -236,9 +237,10 @@ begin
   // Add fpc architecture bin and plain paths
   FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   PlainBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin';
-  SetPath(FBinPath+PathSeparator+
-    PlainBinPath+PathSeparator
-    ,true,false);
+  // Need to remember because we don't always use ProcessEx
+  FPath:=FBinPath+PathSeparator+
+    PlainBinPath+PathSeparator;
+  SetPath(FPath,true,false);
   InitDone:=result;
 end;
 
@@ -413,7 +415,7 @@ begin
     if exec='' then continue;
     if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
     try
-      result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose)=0;
+      result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose,FPath)=0;
       if not result then
       begin
         WritelnLog('InstallerUniversal: warning: running '+exec+' returned an error.',true);
