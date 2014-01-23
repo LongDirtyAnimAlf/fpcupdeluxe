@@ -1022,15 +1022,21 @@ begin
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(FBootstrapCompilerDirectory+PathSeparator+
-    FMakeDir+PathSeparator+
+  SetPath(
     FSVNDirectory+PathSeparator+
+    FBinPath+PathSeparator+ {compiler for current architecture}
+    IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
     IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
-    FBinPath,false,false);
+    FMakeDir+PathSeparator+
+    FBootstrapCompilerDirectory, {any missing utilities etc; put these last}
+    false,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(FBinPath+PathSeparator+IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',true,false);
+  SetPath(FBinPath+PathSeparator+
+  IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
+  IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',
+  true,false);
   {$ENDIF UNIX}
   InitDone:=result;
 end;

@@ -578,6 +578,8 @@ begin
 end;
 
 function TLazarusInstaller.InitModule: boolean;
+var
+  PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   result:=true;
   infoln('TLazarusInstaller: initialising...',etDebug);
@@ -592,6 +594,7 @@ begin
   result:=CheckAndGetNeededExecutables;
   // Look for make etc in the current compiler directory:
   FBinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
+  PlainBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
   {$IFDEF MSWINDOWS}
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -599,12 +602,15 @@ begin
   // can add PathSeparator without problems.
   // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
   SetPath(FBinPath+PathSeparator+
+    PlainBinPath+PathSeparator+
     FMakeDir+PathSeparator+
     FSVNDirectory+PathSeparator+
     FBaseDirectory,false,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  SetPath(FBinPath,true,false);
+  SetPath(FBinPath+PathSeparator+
+  PlainBinPath,
+  true,false);
   {$ENDIF UNIX}
   InitDone:=result;
 end;
