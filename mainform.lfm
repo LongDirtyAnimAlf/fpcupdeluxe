@@ -13,7 +13,7 @@ object Form1: TForm1
     Left = 8
     Height = 536
     Top = 16
-    Width = 767
+    Width = 887
     ActivePage = IniEditorTab
     TabIndex = 0
     TabOrder = 0
@@ -21,7 +21,7 @@ object Form1: TForm1
       Hint = 'Options and button for running fpcup'
       Caption = 'Options'
       ClientHeight = 510
-      ClientWidth = 759
+      ClientWidth = 879
       ParentShowHint = False
       ShowHint = True
       inline IniMemo: TSynMemo
@@ -29,7 +29,7 @@ object Form1: TForm1
         Left = 4
         Height = 336
         Top = 90
-        Width = 736
+        Width = 832
         Font.Height = -13
         Font.Name = 'Courier New'
         Font.Pitch = fpFixed
@@ -576,23 +576,32 @@ object Form1: TForm1
       Hint = 'fpcup output'
       Caption = 'Output'
       ClientHeight = 510
-      ClientWidth = 759
+      ClientWidth = 879
       ParentShowHint = False
       ShowHint = True
       object OutputMemo: TMemo
         Left = 0
         Height = 498
         Top = 0
-        Width = 740
+        Width = 764
         ScrollBars = ssAutoVertical
         TabOrder = 0
+      end
+      object btnSaveLog: TButton
+        Left = 788
+        Height = 25
+        Top = 473
+        Width = 75
+        Caption = 'Save as...'
+        OnClick = btnSaveLogClick
+        TabOrder = 1
       end
     end
     object TroubleshootingTab: TTabSheet
       Hint = 'Troubleshooting tools for fpcup'
       Caption = 'Troubleshooting'
       ClientHeight = 510
-      ClientWidth = 759
+      ClientWidth = 879
       ParentShowHint = False
       ShowHint = True
       object Label1: TLabel
@@ -607,7 +616,7 @@ object Form1: TForm1
         Height = 90
         Hint = 'Troubleshooting information'
         Top = 10
-        Width = 752
+        Width = 841
         Lines.Strings = (
           'Note that fpcup depends on the underlying FPC and Lazarus SVN repositories. '
           'If there is a build failure because of faulty code in FPC or Lazarus, fpcup cannot correct this. Usually build failures happen with trunk builds and are solved '
@@ -622,10 +631,10 @@ object Form1: TForm1
         Left = 4
         Height = 152
         Top = 114
-        Width = 753
+        Width = 841
         Caption = 'Delete .ppu, .a, .o files'
         ClientHeight = 134
-        ClientWidth = 749
+        ClientWidth = 837
         TabOrder = 1
         object RepoDirectory: TDirectoryEdit
           Left = 142
@@ -670,12 +679,12 @@ object Form1: TForm1
     SpaceAttri.FrameEdges = sfeAround
     StringAttri.FrameEdges = sfeAround
     SymbolAttri.FrameEdges = sfeAround
-    left = 792
-    top = 376
+    left = 784
+    top = 560
   end
   object MainMenu1: TMainMenu
-    left = 826
-    top = 103
+    left = 704
+    top = 560
     object mnuFile: TMenuItem
       Caption = '&File'
       object mnuQuit: TMenuItem
@@ -698,5 +707,11 @@ object Form1: TForm1
         OnClick = mnuShowFPCUPHelpClick
       end
     end
+  end
+  object LogSaveDialog: TSaveDialog
+    DefaultExt = '.zip'
+    Filter = 'Text file (*.txt)|*.txt|Zipped text file (*.zip)|*.zip'
+    left = 632
+    top = 560
   end
 end

@@ -9,7 +9,7 @@ interface
 uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, fpcuputil, process, strutils,LCLIntf,LCLType;
+  inifiles, processutils, fpcuputil, process, strutils,LCLIntf,LCLType,zipper;
 
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
@@ -30,6 +30,7 @@ type
   TForm1 = class(TForm)
     btnRun: TButton;
     btnDeletePPU: TButton;
+    btnSaveLog: TButton;
     chkVerbose: TCheckBox;
     RepoDirectory: TDirectoryEdit;
     FileNameEdit: TFileNameEdit;
@@ -51,10 +52,12 @@ type
     IniEditorTab: TTabSheet;
     ProfileLabel: TLabel;
     ProfileSelect: TComboBox;
+    LogSaveDialog: TSaveDialog;
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynMemo;
     TroubleshootingTab: TTabSheet;
     procedure btnDeletePPUClick(Sender: TObject);
+    procedure btnSaveLogClick(Sender: TObject);
     procedure RepoDirectoryChange(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
@@ -294,6 +297,44 @@ begin
         ShowMessage('Error deleting .ppu, .a, .o files. Please run svn up to get back all required files.');
     finally
       Extensions.Free;
+    end;
+  end;
+end;
+
+procedure TForm1.btnSaveLogClick(Sender: TObject);
+var
+  TempStream: TMemoryStream;
+  ZipMachine: TZipper;
+  ZipEntry: TZipFileEntry;
+begin
+  LogSaveDialog.InitialDir:=ExtractFilePath(ParamStr(0)); //application directory
+  if LogSaveDialog.Execute then
+  begin
+    try
+      case UpperCase(sysutils.ExtractFileExt(LogSaveDialog.FileName)) of
+      '.ZIP':
+        begin
+          TempStream:=TMemoryStream.Create;
+          ZipMachine:=TZipper.Create;
+          try
+            ZipMachine.FileName:=LogSaveDialog.FileName;
+            OutputMemo.Lines.SaveToStream(TempStream);
+            TempStream.Position:=0;
+            ZipEntry:=ZipMachine.Entries.AddFileEntry(TempStream,'fpcupoutput.txt');
+            ZipMachine.ZipAllFiles;
+          finally
+            TempStream.Free;
+            ZipMachine.Free;
+          end;
+        end
+      else {.txt}
+        OutputMemo.Lines.SaveToFile(LogSaveDialog.FileName);
+      end;
+    except
+      on E: Exception do
+      begin
+        ShowMessage('Error while trying to save file: '+E.Message);
+      end;
     end;
   end;
 end;

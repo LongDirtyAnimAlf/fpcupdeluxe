@@ -1061,10 +1061,13 @@ begin
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
-  // Do NOT copy over user-specified instruction sets... as the existing stable
-  // compiler likely will not understand them
-  {if FCompilerOptions<>'' then
-    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);}
+  // Copy over user-specified instruction sets e.g. for trunk compiler...
+  // in CROSSOPT though, as the stable compiler likely will not understand them
+  if FCompilerOptions<>'' then
+    ProcessEx.Parameters.Add('CROSSOPT='+FCompilerOptions);
+  // If we don't specify -dFPC_ARMHF, we will never get support for -CaEABIHF
+  if pos('-DFPC_ARMHF',UpperCase(FCompilerOptions))>0 then
+    ProcessEx.Parameters.Add('OPT=-dFPC_ARMHF');
   ProcessEx.Parameters.Add('OS_TARGET=linux');
   ProcessEx.Parameters.Add('CPU_TARGET=arm');
   // Override makefile checks that checks for stable compiler in FPC trunk
