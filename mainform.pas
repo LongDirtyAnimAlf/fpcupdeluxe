@@ -60,6 +60,8 @@ type
     procedure ProfileSelectGetItems(Sender: TObject);
   private
     FCurrentINIFile: string; //currently loaded ini file
+    // Gets fpcup executable full path if possible
+    function GetPFCUPLocation: string;
     procedure LoadProfilesFromFile(INIFile: string);
     { private declarations }
     // Run actual fpcup update
@@ -84,11 +86,11 @@ const
   FPCUpExe='fpcup'; //fpcup executable filename (without .exe)
   {$ENDIF}
   {$IFDEF LINUX}
-  {$IFDEF CPUARMEL}
-  FPCUpExe='fpcup_linux_armel';
+  {$IFDEF CPUARMEL} //2.6.x notation?
+  FPCUpExe='fpcup_linux_arm'; //use the 2.7.x fpcup name as that is more likely
   {$ENDIF}
   {$IFDEF CPUARM}
-  FPCUpExe='fpcup_linux_arm';
+  FPCUpExe='fpcup_linux_arm'; //See below; fpcup_linux_armhf will also be tried by program code
   {$ENDIF}
   {$IFDEF CPU386}
   FPCUpExe='fpcup_linux_x86';
@@ -136,12 +138,12 @@ begin
     // as we can mix and match fpcup and fpcupgui versions
     if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+'settings.ini') then
     begin
-      FPCUPLocation:=ExtractFilePath(ParamStr(0))+FPCUpExe+GetExeExt;
+      FPCUPLocation:=GetPFCUPLocation;
       if FileExistsUTF8(FPCUPLocation) then
       begin
         UpProc:=TProcessEx.Create(nil);
         try
-          UpProc.Executable:=FPCUpExe+GetExeExt;
+          UpProc.Executable:=FPCUPLocation;
           UpProc.OnOutputM:=nil; //ignore output
           UpProc.Parameters.Add('--help');
           UpProc.Options:=UpProc.Options+[poNoConsole];
@@ -184,7 +186,7 @@ var
 begin
   UpProc:=TProcessEx.Create(nil);
   try
-    UpProc.Executable:=FPCUpExe+GetExeExt;
+    UpProc.Executable:=GetPFCUPLocation;
     UpProc.OnOutputM:=@DumpOutput;
     UpProc.Parameters.Add('--help');
     UpProc.Options:=UpProc.Options+[poNoConsole];
@@ -240,13 +242,25 @@ begin
   end;
 end;
 
+function TForm1.GetPFCUPLocation: string;
+begin
+  Result:=ExtractFilePath(ParamStr(0))+FPCUpExe+GetExeExt;
+  {$IFDEF CPUARM}
+  {$IFDEF LINUX}
+  // Allow for hard float variant
+  if not(FileExistsUTF8(Result)) then
+    Result:=ExtractFilePath(ParamStr(0))+'fpcup_linux_armhf'+GetExeExt;
+  {$ENDIF LINUX}
+  {$ENDIF CPUARM}
+end;
+
 procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
 var
   FPCUpLocation: string;
   ResultCode: integer;
   UpProc: TProcessEx;
 begin
-  FPCUPLocation:=ExtractFilePath(ParamStr(0))+FPCUpExe+GetExeExt;
+  FPCUPLocation:=GetPFCUPLocation;
   if not(FileExistsUTF8(FPCUPLocation)) then
   begin
     ShowMessage('Could not find fpcup executable '+FPCUPLocation+LineEnding+
