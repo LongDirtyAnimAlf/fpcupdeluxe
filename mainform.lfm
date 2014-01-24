@@ -14,8 +14,8 @@ object Form1: TForm1
     Height = 536
     Top = 16
     Width = 887
-    ActivePage = IniEditorTab
-    TabIndex = 0
+    ActivePage = TroubleshootingTab
+    TabIndex = 2
     TabOrder = 0
     object IniEditorTab: TTabSheet
       Hint = 'Options and button for running fpcup'
@@ -564,19 +564,19 @@ object Form1: TForm1
         TabOrder = 0
       end
       object btnRun: TButton
-        Left = 436
+        Left = 428
         Height = 25
         Top = 58
-        Width = 75
+        Width = 99
         Caption = 'Run fpcup'
         OnClick = btnRunClick
         TabOrder = 3
       end
       object btnSaveINI: TButton
-        Left = 788
+        Left = 764
         Height = 25
         Top = 473
-        Width = 75
+        Width = 99
         Caption = 'Save'
         OnClick = btnSaveINIClick
         TabOrder = 5
@@ -598,10 +598,10 @@ object Form1: TForm1
         TabOrder = 0
       end
       object btnSaveLog: TButton
-        Left = 788
+        Left = 772
         Height = 25
         Top = 473
-        Width = 75
+        Width = 91
         Caption = 'Save as...'
         OnClick = btnSaveLogClick
         TabOrder = 1
@@ -629,7 +629,8 @@ object Form1: TForm1
         Width = 841
         Lines.Strings = (
           'Note that fpcup depends on the underlying FPC and Lazarus SVN repositories. '
-          'If there is a build failure because of faulty code in FPC or Lazarus, fpcup cannot correct this. Usually build failures happen with trunk builds and are solved '
+          'If there is a build failure because of faulty code in FPC or Lazarus, fpcup cannot correct this.'
+          'Usually build failures happen with trunk builds and are solved '
           'within a day, so you can try again later.'
           ''
           'For an explanation of troubleshooting and reporting steps, please see the fpcup wiki page (see Help menu).'
@@ -647,7 +648,7 @@ object Form1: TForm1
         ClientWidth = 837
         TabOrder = 1
         object RepoDirectory: TDirectoryEdit
-          Left = 142
+          Left = 174
           Height = 21
           Top = 8
           Width = 424
@@ -669,7 +670,7 @@ object Form1: TForm1
           Left = 518
           Height = 25
           Top = 48
-          Width = 75
+          Width = 107
           Caption = 'Delete files...'
           OnClick = btnDeletePPUClick
           TabOrder = 1
