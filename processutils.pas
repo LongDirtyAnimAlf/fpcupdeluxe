@@ -145,8 +145,8 @@ function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload
 function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
-// If path is empty, keep current path
-function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean; Path: string): integer; overload;
+// PrependPath is prepended to existing path. If empty, keep current path
+function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean; PrependPath: string): integer; overload;
 // Writes output to console
 procedure DumpConsole(Sender:TProcessEx; output:string);
 
@@ -441,8 +441,9 @@ begin
 end;
 
 function ExecuteCommandInDir(Commandline, Directory: string;
-  var Output: string; Verbose: boolean; Path: string): integer;
+  var Output: string; Verbose: boolean; PrependPath: string): integer;
 var
+  OldPath: string;
   PE:TProcessEx;
   s:string;
 
@@ -489,8 +490,15 @@ begin
   try
     if Directory<>'' then
       PE.CurrentDirectory:=Directory;
-    if Path<>'' then
-      PE.Environment.SetVar(PATHVARNAME, Path);
+    // Prepend specified PrependPath if needed:
+    if PrependPath<>'' then
+    begin
+      OldPath:=PE.Environment.GetVar(PATHVARNAME);
+      if OldPath<>'' then
+        PE.Environment.SetVar(PATHVARNAME, PrependPath+PathSeparator+OldPath)
+      else
+        PE.Environment.SetVar(PATHVARNAME, PrependPath);
+    end;
     PE.Executable:=GetFirstWord;
     s:=GetFirstWord;
     while s<>'' do

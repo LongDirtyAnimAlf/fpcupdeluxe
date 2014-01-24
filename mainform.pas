@@ -12,18 +12,6 @@ uses
   inifiles, processutils, process, fpcuputil, strutils,
   LCLIntf,LCLType,zipper;
 
-{$IFDEF MSWINDOWS}
-// On Windows, we can be certain a valid FPC install has
-// windres, so use it.
-{$R fpcup.rc}
-{$ELSE}
-// On other platforms we cannot be certain, so we trust/hope either
-// - a previous windows compile
-// - manual windres invocation
-// has updated fpcup.res
-{$R fpcup.res}
-{$ENDIF MSWINDOWS}
-
 type
 
   { TForm1 }
@@ -62,7 +50,6 @@ type
     procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
     procedure ProfileSelectSelect(Sender: TObject);
-    procedure RepoDirectoryChange(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -90,8 +77,45 @@ var
 implementation
 
 const
+  {$IFDEF WIN64}
+  FPCUpExe='fpcup64';//fpcup executable filename (without .exe)
+  {$ENDIF}
+  {$IFDEF WIN32}
   FPCUpExe='fpcup'; //fpcup executable filename (without .exe)
-
+  {$ENDIF}
+  {$IFDEF LINUX}
+  {$IFDEF CPUARMEL}
+  FPCUpExe='fpcup_linux_armel';
+  {$ENDIF}
+  {$IFDEF CPUARM}
+  FPCUpExe='fpcup_linux_arm';
+  {$ENDIF}
+  {$IFDEF CPU386}
+  FPCUpExe='fpcup_linux_x86';
+  {$ENDIF}
+  {$IFDEF CPUX86_64}
+  FPCUpExe='fpcup_linux_x64';
+  {$ENDIF} //CPU
+  {$ENDIF} //Linux
+  {$IFDEF FREEBSD}
+  {$IFDEF CPUX86_64}
+  FPCUpExe='fpcup_freebsd9_x64';
+  {$ENDIF}
+  {$IFDEF CPU386}
+  FPCUpExe='fpcup_freebsd9_x86';
+  {$ENDIF}
+  {$ENDIF}
+  {$IFDEF OPENBSD}
+  {$IFDEF CPUX86_64}
+  FPCUpExe='fpcup_openbsd_x64';
+  {$ENDIF}
+  {$IFDEF CPU386}
+  FPCUpExe='fpcup_openbsd_x86';
+  {$ENDIF}
+  {$ENDIF}
+  {$IFDEF DARWIN} //OSX; at end to let it override
+  FPCUpExe='fpcup_osx_x86'; //for now x86 only
+  {$ENDIF}
 
 { TForm1 }
 procedure TForm1.btnRunClick(Sender: TObject);
@@ -285,11 +309,6 @@ end;
 procedure TForm1.FileNameEditAcceptFileName(Sender: TObject; var Value: String);
 begin
   LoadProfilesFromFile(Value);
-end;
-
-procedure TForm1.RepoDirectoryChange(Sender: TObject);
-begin
-
 end;
 
 procedure TForm1.btnDeletePPUClick(Sender: TObject);
