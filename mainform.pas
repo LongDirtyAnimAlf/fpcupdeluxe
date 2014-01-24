@@ -327,6 +327,7 @@ end;
 
 procedure TForm1.btnDeletePPUClick(Sender: TObject);
 var
+  DeleteResult: boolean;
   Extensions: TStringList;
   Reply: integer;
 begin
@@ -345,7 +346,18 @@ begin
       Extensions.Add('.a');
       Extensions.Add('.o');
       Extensions.Add('.ppu');
-      if DeleteFilesExtensionsSubdirs(RepoDirectory.Directory,Extensions,'') then
+      Screen.Cursor:=crHourGlass;
+      try
+        try
+          DeleteResult:=DeleteFilesExtensionsSubdirs(RepoDirectory.Directory,Extensions,'');
+        except
+          // ignore errors
+          DeleteResult:=false;
+        end;
+      finally
+        Screen.Cursor:=crDefault;
+      end;
+      if DeleteResult then
         ShowMessage('Deleted .ppu, .a, .o files. Please run fpcup again to get back all required files (or run svn up).')
       else
         ShowMessage('Error deleting .ppu, .a, .o files. Please run svn up to get back all required files.');
