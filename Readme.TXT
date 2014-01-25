@@ -158,7 +158,9 @@ If it doesn't exist, it downloads a bootstrap compiler.
 
 - It compiles FPC using the bootstrap compiler.
 
-- It creates a valid fpc.cfg for the new compiler.
+- It creates a valid fpc.cfg for the new compiler. It adds the compiler bin 
+path and the one above it so tools like the fpcres resource compiler can be 
+found.
 
 - On FreeBSD/Linux/OSX: it creates a dummy fpc.sh designed to filter out 
 existing system wide fpc.cfg (e.g. /etc/fpc.cfg) and places that 
@@ -194,7 +196,7 @@ lazbuild in the newly compiled Lazarus directory
 - It compiles the Lazarus lhelp CHM viewer (LazDE) using 
 lazbuild in the newly compiled Lazarus directory
 
-- It gets the FPC chm documentation if not already present
+- It g2ets the FPC chm documentation if not already present
 
 - It compiles the Lazarus CHM help if it hasn't been compiled recently and if it
 hasn't been marked read-only (reason: compiling this takes a long time)
