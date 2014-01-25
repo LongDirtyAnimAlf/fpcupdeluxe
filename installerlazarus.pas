@@ -129,7 +129,7 @@ type
 
   TLazarusInstaller = class(TInstaller)
   private
-    FBinPath:string;
+    FBinPath:string; //path where compiler lives
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
     FRevision: string;
@@ -592,26 +592,29 @@ begin
   WritelnLog('Lazarus URL:            '+FURL,false);
   WritelnLog('Lazarus options:        '+FCompilerOptions,false);
   result:=CheckAndGetNeededExecutables;
-  // Look for make etc in the current compiler directory:
-  FBinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-  PlainBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
-  {$IFDEF MSWINDOWS}
-  // Try to ignore existing make.exe, fpc.exe by setting our own path:
-  // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
-  // at least one ; to be present in the path. If you only have one entry, you
-  // can add PathSeparator without problems.
-  // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
-  SetPath(FBinPath+PathSeparator+
-    PlainBinPath+PathSeparator+
-    FMakeDir+PathSeparator+
-    FSVNDirectory+PathSeparator+
-    FBaseDirectory,false,false);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF UNIX}
-  SetPath(FBinPath+PathSeparator+
-  PlainBinPath,
-  true,false);
-  {$ENDIF UNIX}
+  if result then
+  begin
+    // Look for make etc in the current compiler directory:
+    FBinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
+    PlainBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
+    {$IFDEF MSWINDOWS}
+    // Try to ignore existing make.exe, fpc.exe by setting our own path:
+    // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
+    // at least one ; to be present in the path. If you only have one entry, you
+    // can add PathSeparator without problems.
+    // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
+    SetPath(FBinPath+PathSeparator+
+      PlainBinPath+PathSeparator+
+      FMakeDir+PathSeparator+
+      FSVNDirectory+PathSeparator+
+      FBaseDirectory,false,false);
+    {$ENDIF MSWINDOWS}
+    {$IFDEF UNIX}
+    SetPath(FBinPath+PathSeparator+
+    PlainBinPath,
+    true,false);
+    {$ENDIF UNIX}
+  end;
   InitDone:=result;
 end;
 

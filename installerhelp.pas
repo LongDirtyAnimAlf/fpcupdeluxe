@@ -209,8 +209,34 @@ begin
 end;
 
 function THelpInstaller.InitModule: boolean;
+var
+  BinPath: string; //path where compiler is
+  PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   result:=CheckAndGetNeededExecutables;
+  if result then
+  begin
+    // Look for make etc in the current compiler directory:
+    BinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
+    PlainBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(BinPath)+'..');
+    {$IFDEF MSWINDOWS}
+    // Try to ignore existing make.exe, fpc.exe by setting our own path:
+    // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
+    // at least one ; to be present in the path. If you only have one entry, you
+    // can add PathSeparator without problems.
+    // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
+    SetPath(BinPath+PathSeparator+
+      PlainBinPath+PathSeparator+
+      FMakeDir+PathSeparator+
+      FSVNDirectory+PathSeparator+
+      FBaseDirectory,false,false);
+    {$ENDIF MSWINDOWS}
+    {$IFDEF UNIX}
+    SetPath(BinPath+PathSeparator+
+    PlainBinPath,
+    true,false);
+    {$ENDIF UNIX}
+  end;
 end;
 
 function THelpInstaller.BuildModule(ModuleName: string): boolean;
