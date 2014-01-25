@@ -169,8 +169,8 @@ const
   Win64FallBackUsingCrossCompiler=false; //Set to true to download i386 boostrap compiler and cross compile. Leave to use native win x64 compiler
 
 function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
-// Adds snippet to fpc.cfg file if first line of snippet is not already there
-// Returns success (snippet inserted or already exists) or failure
+// Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
+// Returns success (snippet inserted or added) or failure
 var
   ConfigText: TStringList;
   i:integer;
@@ -698,8 +698,8 @@ begin
   writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
   writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
   writeln(TxtFile,IncludeTrailingPathDelimiter(FBinPath),'fpc  -n @',
-       IncludeTrailingPathDelimiter(FBinPath),'fpc.cfg -FD'+
-       IncludeTrailingPathDelimiter(FBinPath)+' "$@"');
+       IncludeTrailingPathDelimiter(FBinPath),'fpc.cfg '+
+       '"$@"');
   CloseFile(TxtFile);
   Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
   if Result then
@@ -1046,6 +1046,7 @@ var
   FPCCfg: string;
   FPCMkCfg: string; //path+file of fpcmkcfg
   OperationSucceeded: boolean;
+  PlainBinPath: string; //directory above the architecture-dependent FBinDir
   SearchRec:TSearchRec;
   s:string;
   TxtFile:Text;  //cpuarmel
@@ -1193,7 +1194,7 @@ begin
     fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
     begin
-      // Some 2.7 trunk dump fpcmkcfg in bin itself
+      // Some 2.7 trunk put fpcmkcfg in bin itself
       fpcmkcfg:=IncludeTrailingPathDelimiter(FBaseDirectory)+
         'bin'+DirectorySeparator+'fpcmkcfg';
       if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
@@ -1240,6 +1241,19 @@ begin
         OperationSucceeded := False;
         WritelnLog('FPC: Running fpcmkcfg failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
         end;
+
+      // On *nix FPC 2.7.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
+      // Adding this won't hurt on Windows.
+      // Adjust for that
+      PlainBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
+      AssignFile(TxtFile,FPCCfg);
+      Append(TxtFile);
+      Writeln(TxtFile,'# fpcup:');
+      Writeln(TxtFile,'# Adding binary tools paths to');
+      Writeln(TxtFile,'# plain bin dir and architecture bin dir so');
+      Writeln(TxtFile,'# fpc 2.7+ fpcres etc can be found.');
+      Writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath));
+      CloseFile(TxtFile);
     {$IFDEF UNIX}
     {$IF DEFINED(cpuarmel) or DEFINED(cpuarm)}
       // Need to add multiarch library search path
