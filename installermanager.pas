@@ -1,6 +1,6 @@
 unit installerManager;
 { Installer state machine
-Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
+Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -607,16 +607,19 @@ end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
 begin
+  infoln('TSequencer: DoBuildModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and Installer.BuildModule(ModuleName);
 end;
 
 function TSequencer.DoCleanModule(ModuleName: string): boolean;
 begin
+  infoln('TSequencer: DoCleanModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and Installer.CleanModule(ModuleName);
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
 begin
+  infoln('TSequencer: DoConfigModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and Installer.ConfigModule(ModuleName);
 end;
 
@@ -740,6 +743,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   {$endif linux}
 
 begin
+  infoln('TSequencer: DoExec for function '+FunctionName+' called.',etDebug);
   if UpperCase(FunctionName)='CREATEFPCUPSCRIPT' then
     result:=CreateFpcupScript
   else if UpperCase(FunctionName)='CREATELAZARUSSCRIPT' then
@@ -757,11 +761,13 @@ end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;
 begin
+  infoln('TSequencer: DoGetModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and Installer.GetModule(ModuleName);
 end;
 
 function TSequencer.DoSetCPU(CPU: string): boolean;
 begin
+  infoln('TSequencer: DoSetCPU for CPU '+CPU+' called.',etDebug);
   FParent.CrossCPU_Target:=CPU;
   ResetAllExecuted;
   result:=true;
@@ -769,6 +775,7 @@ end;
 
 function TSequencer.DoSetOS(OS: string): boolean;
 begin
+  infoln('TSequencer: called DoSetOS for OS '+OS,etDebug);
   FParent.CrossOS_Target:=OS;
   ResetAllExecuted;
   result:=true;
@@ -776,12 +783,14 @@ end;
 
 function TSequencer.DoResetLCL: boolean;
 begin
+  infoln('TSequencer: called DoReSetLCL',etDebug);
   ResetAllExecuted(true);
   result:=true;
 end;
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
 begin
+  infoln('TSequencer: DoUninstallModule for module '+ModuleName+' called.',etDebug);
   result:= GetInstaller(ModuleName) and Installer.UnInstallModule(ModuleName);
 end;
 
