@@ -7,10 +7,10 @@ unit mainform;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
-  Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
-  inifiles, processutils, process, fpcuputil, strutils,
-  LCLIntf,LCLType,zipper, svnclient;
+  Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, SynEdit, Forms,
+  Controls, Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit,
+  Menus, inifiles, processutils, process, fpcuputil, strutils, LCLIntf, LCLType,
+  zipper, svnclient;
 
 type
 
@@ -23,6 +23,7 @@ type
     btnSaveLog: TButton;
     btnSaveINI: TButton;
     chkVerbose: TCheckBox;
+    OutputMemo: TSynEdit;
     SVNRepoSwitchTo: TEdit;
     gpbxSwitch: TGroupBox;
     Label3: TLabel;
@@ -41,7 +42,6 @@ type
     mnuHelp: TMenuItem;
     mnuShowFPCUPHelp: TMenuItem;
     mnuQuit: TMenuItem;
-    OutputMemo: TMemo;
     EditTabs: TPageControl;
     OutputTab: TTabSheet;
     IniEditorTab: TTabSheet;
@@ -201,12 +201,11 @@ begin
     UpProc.Options:=UpProc.Options+[poNoConsole];
     try
       Screen.Cursor:=crHourGlass;
-      OutputMemo.Clear;
+      OutputMemo.Lines.Clear;
       EditTabs.ActivePage:=OutputTab; //switch to output tab
       Application.ProcessMessages;
       UpProc.Execute;
       OutputMemo.SelStart:=0; //move to beginning of output
-      OutputMemo.SelLength:=0;
     finally
       Screen.Cursor:=crDefault;
     end;
@@ -319,12 +318,11 @@ begin
     //UpProc.Options:=UpProc.Options+[poNoConsole];
     try
       Screen.Cursor:=crHourGlass;
-      OutputMemo.Clear;
+      OutputMemo.Lines.Clear;
       EditTabs.ActivePage:=OutputTab; //switch to output tab
       Application.ProcessMessages;
       UpProc.Execute;
       OutputMemo.SelStart:=0; //move to beginning of output
-      OutputMemo.SelLength:=0;
     finally
       Screen.Cursor:=crDefault;
     end;
@@ -341,14 +339,21 @@ end;
 
 procedure TForm1.DumpOutput(Sender: TProcessEx; Output: string);
 var
-  LastEnd: integer;
+  i:integer;
+  OutputList: TStringList;
 begin
-  // Avoid duplicate line endings leading to unintended vertical whitespace
-  LastEnd:=RPos(LineEnding,Output);
-  if LastEnd=1+Length(Output)-Length(LineEnding) then
-    OutputMemo.Append(Copy(Output,1,LastEnd-1))
-  else
-    OutputMemo.Append(Output);
+  // Synedit does not support line breaks...
+  OutputList:=TStringList.Create;
+  try
+    OutputList.Text:=Output;
+    for i:=0 to OutputList.Count-1 do
+    begin
+      OutputMemo.Lines.Append(OutputList[i]);
+    end;
+  finally
+    OutputList.Free;
+  end;
+
   // Give GUI chance to refresh so user doesn't think it hangs:
   Sleep(5);
   Application.ProcessMessages;

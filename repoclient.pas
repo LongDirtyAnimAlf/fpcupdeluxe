@@ -84,6 +84,7 @@ type
     // Commits local changes to local and remote repository
     function Commit(Message: string): boolean; virtual;
     // Executes command and returns result code
+    //todo: override for hg to use proxy as well. To do: check for spaces/quoting etc
     function Execute(Command: string): integer; virtual;
     // Search for installed version control client executable (might return just a filename if in the OS path)
     function FindRepoExecutable: string; virtual;
