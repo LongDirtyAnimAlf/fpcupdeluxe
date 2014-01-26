@@ -14,8 +14,8 @@ object Form1: TForm1
     Height = 536
     Top = 16
     Width = 887
-    ActivePage = IniEditorTab
-    TabIndex = 0
+    ActivePage = OutputTab
+    TabIndex = 1
     TabOrder = 0
     object IniEditorTab: TTabSheet
       Hint = 'Options and button for running fpcup'
@@ -25,7 +25,6 @@ object Form1: TForm1
       ParentShowHint = False
       ShowHint = True
       inline IniMemo: TSynEdit
-        Cursor = crIBeam
         Left = 4
         Height = 408
         Top = 90
@@ -37,8 +36,11 @@ object Form1: TForm1
         ParentColor = False
         ParentFont = False
         TabOrder = 4
+        OnKeyDown = IniMemoKeyDown
         Gutter.Width = 57
         Gutter.MouseActions = <>
+        RightGutter.Width = 0
+        RightGutter.MouseActions = <>
         Highlighter = SynIniHighlighter
         Keystrokes = <        
           item
@@ -466,6 +468,7 @@ object Form1: TForm1
         Lines.Strings = (
           ''
         )
+        VisibleSpecialChars = [vscSpace, vscTabAtLast]
         SelectedColor.FrameEdges = sfeAround
         SelectedColor.BackPriority = 50
         SelectedColor.ForePriority = 50
@@ -474,6 +477,23 @@ object Form1: TForm1
         SelectedColor.ItalicPriority = 50
         SelectedColor.UnderlinePriority = 50
         SelectedColor.StrikeOutPriority = 50
+        IncrementColor.FrameEdges = sfeAround
+        HighlightAllColor.FrameEdges = sfeAround
+        BracketHighlightStyle = sbhsBoth
+        BracketMatchColor.Background = clNone
+        BracketMatchColor.Foreground = clNone
+        BracketMatchColor.FrameEdges = sfeAround
+        BracketMatchColor.Style = [fsBold]
+        FoldedCodeColor.Background = clNone
+        FoldedCodeColor.Foreground = clGray
+        FoldedCodeColor.FrameColor = clGray
+        FoldedCodeColor.FrameEdges = sfeAround
+        MouseLinkColor.Background = clNone
+        MouseLinkColor.Foreground = clBlue
+        MouseLinkColor.FrameEdges = sfeAround
+        LineHighlightColor.Background = clNone
+        LineHighlightColor.Foreground = clNone
+        LineHighlightColor.FrameEdges = sfeAround
         inline SynLeftGutterPartList1: TSynGutterPartList
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
@@ -610,6 +630,7 @@ object Form1: TForm1
         ParentColor = False
         ParentFont = False
         TabOrder = 1
+        OnKeyDown = OutputMemoKeyDown
         Gutter.Width = 57
         Gutter.MouseActions = <>
         RightGutter.Width = 0
