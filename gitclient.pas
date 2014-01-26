@@ -60,6 +60,7 @@ type
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
+    function Execute(Command: string): integer; override;
     function GetDiffAll: string; override;
     function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -213,6 +214,12 @@ begin
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
   //todo: do push to remote repo?
   Result:=(FReturnCode=0);
+end;
+
+function TGitClient.Execute(Command: string): integer;
+begin
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command, LocalRepository, Verbose);
+  Result:= FReturnCode;
 end;
 
 function TGitClient.GetDiffAll: string;
