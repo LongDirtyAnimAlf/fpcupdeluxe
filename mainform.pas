@@ -10,18 +10,23 @@ uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, Forms, Controls,
   Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit, Menus,
   inifiles, processutils, process, fpcuputil, strutils,
-  LCLIntf,LCLType,zipper;
+  LCLIntf,LCLType,zipper, svnclient;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    btnSwitch: TButton;
     btnRun: TButton;
     btnDeletePPU: TButton;
     btnSaveLog: TButton;
     btnSaveINI: TButton;
     chkVerbose: TCheckBox;
+    SVNRepoSwitchTo: TEdit;
+    gpbxSwitch: TGroupBox;
+    Label3: TLabel;
+    Label4: TLabel;
     RepoDirectory: TDirectoryEdit;
     FileNameEdit: TFileNameEdit;
     gpbxDeletePPUs: TGroupBox;
@@ -42,6 +47,7 @@ type
     IniEditorTab: TTabSheet;
     ProfileLabel: TLabel;
     ProfileSelect: TComboBox;
+    RepoDirectorySwitch: TDirectoryEdit;
     SaveDialog: TSaveDialog;
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynMemo;
@@ -49,6 +55,7 @@ type
     procedure btnDeletePPUClick(Sender: TObject);
     procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
+    procedure btnSwitchClick(Sender: TObject);
     procedure ProfileSelectSelect(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
@@ -60,6 +67,8 @@ type
     procedure ProfileSelectGetItems(Sender: TObject);
   private
     FCurrentINIFile: string; //currently loaded ini file
+    // Delete .ppu, .a., .o files recursively from RootDirectory without warning
+    function DeletePPUs(RootDirectory: string): boolean;
     // Gets fpcup executable full path if possible
     function GetPFCUPLocation: string;
     procedure LoadProfilesFromFile(INIFile: string);
@@ -254,6 +263,32 @@ begin
   {$ENDIF CPUARM}
 end;
 
+function TForm1.DeletePPUs(RootDirectory: string): boolean;
+var
+  Extensions: TStringList;
+begin
+  Extensions:=TStringList.Create;
+  try
+    Extensions.Add('.a');
+    Extensions.Add('.o');
+    Extensions.Add('.ppu');
+    Screen.Cursor:=crHourGlass;
+    try
+      try
+        Result:=DeleteFilesExtensionsSubdirs(RootDirectory,
+          Extensions, '');
+      except
+        // ignore errors
+        Result:=false;
+      end;
+    finally
+      Screen.Cursor:=crDefault;
+    end;
+  finally
+    Extensions.Free;
+  end;
+end;
+
 procedure TForm1.UpdateCommand(Inifile, IniProfile: string);
 var
   FPCUpLocation: string;
@@ -328,7 +363,6 @@ end;
 procedure TForm1.btnDeletePPUClick(Sender: TObject);
 var
   DeleteResult: boolean;
-  Extensions: TStringList;
   Reply: integer;
 begin
   if not(DirectoryExistsUTF8(RepoDirectory.Directory)) then
@@ -341,29 +375,11 @@ begin
     'Deleting .ppu, .a, .o files',MB_ICONQUESTION+MB_YESNO);
   if reply=IDYES then
   begin
-    Extensions:=TStringList.Create;
-    try
-      Extensions.Add('.a');
-      Extensions.Add('.o');
-      Extensions.Add('.ppu');
-      Screen.Cursor:=crHourGlass;
-      try
-        try
-          DeleteResult:=DeleteFilesExtensionsSubdirs(RepoDirectory.Directory,Extensions,'');
-        except
-          // ignore errors
-          DeleteResult:=false;
-        end;
-      finally
-        Screen.Cursor:=crDefault;
-      end;
-      if DeleteResult then
-        ShowMessage('Deleted .ppu, .a, .o files. Please run fpcup again to get back all required files (or run svn up).')
-      else
-        ShowMessage('Error deleting .ppu, .a, .o files. Please run svn up to get back all required files.');
-    finally
-      Extensions.Free;
-    end;
+    DeleteResult:=DeletePPUs(RepoDirectory.Directory);
+    if DeleteResult then
+      ShowMessage('Deleted .ppu, .a, .o files. Please run fpcup again to get back all required files (or run svn up).')
+    else
+      ShowMessage('Error deleting .ppu, .a, .o files. Please run svn up to get back all required files.');
   end;
 end;
 
@@ -382,7 +398,6 @@ procedure TForm1.btnSaveLogClick(Sender: TObject);
 var
   TempStream: TMemoryStream;
   ZipMachine: TZipper;
-  ZipEntry: TZipFileEntry;
 begin
   SaveDialog.Filter:='Text file (*.txt)|*.txt|Zipped text file (*.zip)|*.zip';
   if SaveDialog.Execute then
@@ -397,7 +412,7 @@ begin
             ZipMachine.FileName:=SaveDialog.FileName;
             OutputMemo.Lines.SaveToStream(TempStream);
             TempStream.Position:=0;
-            ZipEntry:=ZipMachine.Entries.AddFileEntry(TempStream,'fpcupoutput.txt');
+            ZipMachine.Entries.AddFileEntry(TempStream,'fpcupoutput.txt');
             ZipMachine.ZipAllFiles;
           finally
             TempStream.Free;
@@ -414,6 +429,38 @@ begin
       end;
     end;
   end;
+end;
+
+procedure TForm1.btnSwitchClick(Sender: TObject);
+var
+  Reply: integer;
+  ResultCode:integer;
+  SVN: TSVNClient;
+begin
+  if not(DirectoryExistsUTF8(RepoDirectorySwitch.Directory)) then
+  begin
+    ShowMessage('No directory selected. Please select the directory where fpcup downloads the Lazarus or FPC sources from subversion.');
+    exit;
+  end;
+  Reply:=Application.MessageBox(PChar('Are you really sure you want to delete .ppu etc files and switch '+LineEnding+
+    RepoDirectorySwitch.Directory+
+    'to SVN repository '+LineEnding+
+    SVNRepoSwitchTo.Text +'?'),
+    'SVN Switch: are you sure you know what you are doing?',MB_ICONQUESTION+MB_YESNO);
+  if reply=IDYES then
+  begin
+    DeletePPUs(RepoDirectorySwitch.Directory);
+    SVN:=TSVNClient.Create;
+    try
+      ResultCode:=SVN.Execute('switch '+SVNRepoSwitchTo.Text);
+    finally
+      SVN.Free;
+    end;
+  end;
+  if ResultCode=0 then
+    ShowMessage('Switch succeeded. Please run fpcup with the new SVN repository URL.')
+  else
+    ShowMessage('Switch failed. SVN switch gave result code:'+inttostr(ResultCode));
 end;
 
 procedure TForm1.ProfileSelectSelect(Sender: TObject);

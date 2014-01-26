@@ -34,7 +34,7 @@ unit repoclient;
 interface
 
 uses
-  Classes, SysUtils;
+  Classes, SysUtils, processutils;
 
 const
   // Custom return codes; note: keep separate from ProcessEx return codes (processutils.PROC_INTERNALERROR=-1)
@@ -83,6 +83,8 @@ type
     procedure CheckOutOrUpdate; virtual;
     // Commits local changes to local and remote repository
     function Commit(Message: string): boolean; virtual;
+    // Executes command and returns result code
+    function Execute(Command: string): integer; virtual;
     // Search for installed version control client executable (might return just a filename if in the OS path)
     function FindRepoExecutable: string; virtual;
     // Creates diff of all changes in the local directory versus the remote version
@@ -221,6 +223,11 @@ end;
 function TRepoClient.Commit(Message: string): boolean;
 begin
   raise Exception.Create('TRepoClient descendants must implement this themselves.');
+end;
+
+function TRepoClient.Execute(Command: string): integer;
+begin
+  result:=ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command, LocalRepository, Verbose);
 end;
 
 function TRepoClient.GetDiffAll: string;

@@ -473,6 +473,7 @@ object Form1: TForm1
         SelectedColor.BoldPriority = 50
         SelectedColor.ItalicPriority = 50
         SelectedColor.UnderlinePriority = 50
+        SelectedColor.StrikeOutPriority = 50
         inline SynLeftGutterPartList1: TSynGutterPartList
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
@@ -637,13 +638,69 @@ object Form1: TForm1
         ReadOnly = True
         TabOrder = 0
       end
-      object gpbxDeletePPUs: TGroupBox
+      object gpbxSwitch: TGroupBox
         Left = 4
         Height = 152
+        Top = 230
+        Width = 841
+        Caption = 'Switch SVN repo URL, delete .ppu etc'
+        ClientHeight = 134
+        ClientWidth = 837
+        TabOrder = 2
+        object RepoDirectorySwitch: TDirectoryEdit
+          Left = 174
+          Height = 21
+          Top = 8
+          Width = 424
+          ShowHidden = False
+          ButtonWidth = 23
+          NumGlyphs = 1
+          MaxLength = 0
+          TabOrder = 0
+        end
+        object Label3: TLabel
+          Left = 9
+          Height = 13
+          Top = 10
+          Width = 118
+          Caption = 'Lazarus or FPC directory'
+          ParentColor = False
+        end
+        object btnSwitch: TButton
+          Left = 518
+          Height = 25
+          Top = 84
+          Width = 107
+          Caption = 'Switch repo...'
+          OnClick = btnSwitchClick
+          TabOrder = 2
+        end
+        object SVNRepoSwitchTo: TEdit
+          Left = 174
+          Height = 21
+          Hint = 'The URL of the SVN repository you want to switch to'
+          Top = 44
+          Width = 294
+          TabOrder = 1
+          Text = 'http://svn.freepascal.org/svn/fpc/trunk'
+        end
+        object Label4: TLabel
+          Left = 9
+          Height = 13
+          Hint = 'The URL of the SVN repository you want to switch to'
+          Top = 44
+          Width = 41
+          Caption = 'SVN URL'
+          ParentColor = False
+        end
+      end
+      object gpbxDeletePPUs: TGroupBox
+        Left = 4
+        Height = 112
         Top = 114
         Width = 841
         Caption = 'Delete .ppu, .a, .o files'
-        ClientHeight = 134
+        ClientHeight = 94
         ClientWidth = 837
         TabOrder = 1
         object RepoDirectory: TDirectoryEdit

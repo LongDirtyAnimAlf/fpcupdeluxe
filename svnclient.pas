@@ -65,6 +65,7 @@ type
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
+    function Execute(Command: string): integer; override;
     function FindRepoExecutable: string; override;
     function GetDiffAll: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -244,6 +245,12 @@ begin
   inherited Commit(Message);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit '+GetProxyCommand+' --message='+Message, LocalRepository, Verbose);
   Result:=(FReturnCode=0);
+end;
+
+function TSVNClient.Execute(Command: string): integer;
+begin
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand+' .', LocalRepository, Verbose);
+  Result := FReturnCode;
 end;
 
 function TSVNClient.GetDiffAll: string;
