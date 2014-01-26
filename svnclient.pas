@@ -249,7 +249,7 @@ end;
 
 function TSVNClient.Execute(Command: string): integer;
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand+' .', LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand+' ', LocalRepository, Verbose);
   Result := FReturnCode;
 end;
 

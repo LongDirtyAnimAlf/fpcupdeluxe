@@ -61,6 +61,7 @@ type
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
+    procedure Execute(Command: string): integer; override;
     function GetDiffAll: string; override;
     function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
@@ -203,6 +204,12 @@ begin
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+GetProxyCommand+' commit --message '+Message, LocalRepository, Verbose);
   //todo: do pushafter to push to remote repo?
   Result:=(FReturnCode=0);
+end;
+
+function TSVNClient.Execute(Command: string): integer;
+begin
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand+' ', LocalRepository, Verbose);
+  Result := FReturnCode;
 end;
 
 function THGClient.GetDiffAll: string;
