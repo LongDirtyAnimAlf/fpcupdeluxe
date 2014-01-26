@@ -233,7 +233,6 @@ begin
     { don't know if this is still relevant for 2.7.x and for which linker
     '-darm'+LineEnding+ {pass arm to linker}
     }
-    infoln(FCrossModuleName+ ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 

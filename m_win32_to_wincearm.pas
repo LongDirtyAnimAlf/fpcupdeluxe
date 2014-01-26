@@ -168,12 +168,6 @@ begin
     FAlreadyWarned:=true;
   end;
 
-  if not result then
-  begin
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
-    FAlreadyWarned:=true;
-  end;
-
   if result then
   begin
     // Configuration snippet for FPC
@@ -185,7 +179,6 @@ begin
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-darm'+LineEnding+ {pass arm to linker}
     '-Twince'; {target operating system}
-    infoln('TWin32_wincearm: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 

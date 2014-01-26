@@ -277,7 +277,6 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
-    infoln('Twin32_linuxmipsel: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end
   else
   begin

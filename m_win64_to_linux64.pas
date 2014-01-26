@@ -144,7 +144,6 @@ begin
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-Tlinux'; {target operating system}
-    infoln('Twin64_linux64: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 

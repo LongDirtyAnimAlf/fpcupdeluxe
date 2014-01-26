@@ -235,7 +235,6 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+
       '-XP'+FBinUtilsPrefix; {Prepend the binutils names};
-    infoln(FCrossModuleName + ': found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end
   else
   begin

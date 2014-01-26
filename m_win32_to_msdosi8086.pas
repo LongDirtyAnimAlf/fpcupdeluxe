@@ -182,7 +182,6 @@ begin
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-XX'+LineEnding+ {Smartlink}
     '-CX'+LineEnding; {Smartlink libraries}
-    infoln('TWin32_msdosi8086: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end
   else
   begin

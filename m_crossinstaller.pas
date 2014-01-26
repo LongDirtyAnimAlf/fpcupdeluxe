@@ -114,7 +114,13 @@ function TCrossInstaller.SearchBinUtil(Directory, LookFor: string): boolean;
 begin
   FBinUtilsPath:=ExcludeTrailingPathDelimiter(ExpandFileName(Directory));
   result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+LookFor);
-  if not result then
+  // Report results to user. SearchBinUtil will probably only be called until
+  // its result is true; if it's called more times, it still ok to keep the
+  // user informed about succesful searches.
+  if result then
+    infoln(FCrossModuleName + ': found binutil '+LookFor+
+      ' in directory '+FBinUtilsPath, etInfo)
+  else
     infoln(FCrossModuleName + ': searched but did not find binutil '+LookFor+
       ' in directory '+FBinUtilsPath, etInfo);
 end;

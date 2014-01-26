@@ -121,19 +121,15 @@ var
   AsFile: string;
 begin
   inherited;
-  AsFile:=FBinUtilsPrefix+'as.exe';  
-  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
+  AsFile:=FBinUtilsPrefix+'as.exe';
+  result:=false;
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
   if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('Twin32_linuxmips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-    //todo: fix fallback to separate dir; use real argument from command line to control it
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
-    result:=FileExists(FBinUtilsPath+DirectorySeparator+AsFile);
-    if not result then
-      infoln('Twin32_linuxmips: failed: searched binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
-  end;
+    result:=SearchBinUtil(ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName),
+      AsFile);
+
   if result then
   begin
     // Configuration snippet for FPC
@@ -141,7 +137,6 @@ begin
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-Tlinux'; {target operating system}
-    infoln('Twin32_linuxmips: found binutil '+AsFile+' in directory '+FBinUtilsPath,etInfo);
   end;
 end;
 
