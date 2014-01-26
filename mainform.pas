@@ -4,6 +4,20 @@ unit mainform;
 
 {$DEFINE NOCONSOLE} //Please define this in project options so fpcuputil etc will not use writeln
 
+//to do: highlighting log
+(*
+  Highlights:
+  - fpcup: debug => gray
+  - fpcup: info => green
+  - fpcup: warning => orange
+  - fpcup: error => red
+  - error: => red
+
+  Folds at:
+  - fpcup: statements
+
+
+*)
 interface
 
 uses
@@ -50,7 +64,7 @@ type
     RepoDirectorySwitch: TDirectoryEdit;
     SaveDialog: TSaveDialog;
     SynIniHighlighter: TSynIniSyn;
-    IniMemo: TSynMemo;
+    IniMemo: TSynEdit;
     TroubleshootingTab: TTabSheet;
     procedure btnDeletePPUClick(Sender: TObject);
     procedure btnSaveINIClick(Sender: TObject);
