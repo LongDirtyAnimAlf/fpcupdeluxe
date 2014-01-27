@@ -3,6 +3,9 @@ https://bitbucket.org/reiniero/fpcup/
 
 What is it?
 ===========
+fpcup is basically a wrapper around svn/make on steroids. It tries to use the 
+FPC/Lazarus build process as much as possible.
+
 fpcup is a tool that gets the current version of FreePascal Compiler (FPC) and 
 Lazarus IDE from their subversion repositories and compiles/installs them.
 It adds CHM documentation and configure the Lazarus help for you.
