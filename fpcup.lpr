@@ -300,18 +300,18 @@ begin
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
           try
-            for i:=0 to Options.Params.Count-1 do
+            for i:=Options.Params.Count-1 downto 0 do
             begin
+            // Found the parameter
               for iCurrentOption:=0 to LeftOverOptions.Count-1 do
               begin
-                // Found the parameter
-                if copy(lowercase(Options.Params[i]),1,length(LeftOverOptions[iCurrentOption]))=
-                  lowercase(LeftOverOptions[iCurrentOption]) then
+                if pos('--'+lowercase(LeftOverOptions[iCurrentOption]),
+                  lowercase(Options.Params[i]))=1 then
                 begin
                   case (uppercase(Options.Params.ValueFromIndex[i])) of
                     '-1','1','TRUE','YES','INSTALL','ENABLE', 'ON': begin
                       // Rewrite without option
-                      Options.Params[i]:=LeftOverOptions[iCurrentOption];
+                      Options.Params[i]:='--'+LeftOverOptions[iCurrentOption];
                     end;
                     '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE', 'OFF': begin
                       // Silently remove false option
@@ -482,12 +482,12 @@ begin
       else
         FInstaller.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
 
-      FInstaller.Uninstall:=Options.GetOption('','uninstall',false);
+      FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
       // do not add to default options:
-      FInstaller.Verbose:=Options.GetOption('','verbose',false,false);
+      FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
       // do not add to default options:
-      bVersion:=Options.GetOption('','version',false,false);
-      bNoConfirm:=Options.GetOption('','noconfirm',false);
+      bVersion:=Options.GetOptionNoParam('','version',false);
+      bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
     except
       on E:Exception do
       begin

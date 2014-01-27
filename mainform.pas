@@ -22,7 +22,7 @@ uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, SynEdit, Forms,
   Controls, Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit,
   Menus, inifiles, processutils, process, fpcuputil, strutils, LCLIntf, LCLType,
-  zipper, svnclient, SynEditKeyCmds;
+  zipper, svnclient, SynEditKeyCmds, fpcuploghighlighter;
 
 type
 
@@ -82,7 +82,10 @@ type
     procedure mnuShowFPCUPHelpClick(Sender: TObject);
     procedure ProfileSelectGetItems(Sender: TObject);
   private
-    FCurrentINIFile: string; //currently loaded ini file
+    // Currently loaded ini file:
+    FCurrentINIFile: string;
+    // Highlighter for fpcup log output
+    FSynFPCupLogHL: TSynfpcuplogFold;
     // Delete .ppu, .a., .o files recursively from RootDirectory without warning
     function DeletePPUs(RootDirectory: string): boolean;
     // Gets fpcup executable full path if possible
@@ -155,6 +158,9 @@ var
   FPCUPLocation: string;
   UpProc: TProcessEx;
 begin
+  FSynFPCupLogHL:=TSynfpcuplogFold.Create(Self);
+  OutputMemo.Highlighter:=FSynFPCupLogHL;
+
   SaveDialog.InitialDir:=ExtractFilePath(ParamStr(0)); //application directory
   // Extract settings.ini if necessary
   try
@@ -485,6 +491,7 @@ begin
   else
     ShowMessage('Switch failed. SVN switch gave result code:'+inttostr(ResultCode));
 end;
+
 
 procedure TForm1.IniMemoKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
