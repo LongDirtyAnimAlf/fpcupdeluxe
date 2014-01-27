@@ -15,8 +15,6 @@ unit mainform;
 
   Folds at:
   - fpcup: statements
-
-
 *)
 interface
 
@@ -332,6 +330,8 @@ begin
       UpProc.Parameters.Add('--inifile='+IniFile);
     if IniProfile<>'' then
       UpProc.Parameters.Add('--inisection='+IniProfile);
+    // Always add --noconfirm so you don't get a prompt we cannot answer
+    UpProc.Parameters.Add('--noconfirm');
     //This will lead to lots of pop ups of make.exe which are actually more annoying
     //UpProc.Options:=UpProc.Options+[poNoConsole];
     try
