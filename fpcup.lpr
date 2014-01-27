@@ -292,6 +292,38 @@ begin
         try
           // Setting this property loads the file:
           Options.IniFile:=sIniFile;
+
+          // Strip arguments from options that normally don't take an argument:
+          LeftOverOptions:=TStringList.Create;
+          LeftOverOptions.Add('noconfirm');
+          LeftOverOptions.Add('uninstall');
+          LeftOverOptions.Add('verbose');
+          LeftOverOptions.Add('version');
+          try
+            for i:=0 to Options.Params.Count-1 do
+            begin
+              for iCurrentOption:=0 to LeftOverOptions.Count-1 do
+              begin
+                // Found the parameter
+                if copy(lowercase(Options.Params[i]),1,length(LeftOverOptions[iCurrentOption]))=
+                  lowercase(LeftOverOptions[iCurrentOption]) then
+                begin
+                  case (uppercase(Options.Params.ValueFromIndex[i])) of
+                    '-1','1','TRUE','YES','INSTALL','ENABLE', 'ON': begin
+                      // Rewrite without option
+                      Options.Params[i]:=LeftOverOptions[iCurrentOption];
+                    end;
+                    '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE', 'OFF': begin
+                      // Silently remove false option
+                      Options.Params.Delete(i);
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          finally
+            LeftOverOptions.Free;
+          end;
         except
           on E:ECommandLineError do
           begin
@@ -450,45 +482,12 @@ begin
       else
         FInstaller.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
 
-      // Deal with options coming from ini (e.g. Help=true)
-      // todo: this won't work if user also specifies the same option without
-      // argument as the exception
-      // code will still pick up the first one with argument and bomb
-      try
-        FInstaller.Uninstall:=Options.GetOption('','uninstall',false);
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument
-        FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall');
-        end;
-      end;
-
-      try
-        // do not add to default options
-        FInstaller.Verbose:=Options.GetOption('','verbose',false,false);
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument (e.g. not in .ini file)
-        FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
-        end;
-      end;
-      try
-        //do not add to default options
-        bVersion:=Options.GetOption('','version',false,false);
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument, so try without:
-        bVersion:=Options.GetOptionNoParam('','version',false);
-        end;
-      end;
-      try
-        bNoConfirm:=Options.GetOption('','noconfirm',false);
-      except
-        on E: ECommandLineError do begin
-        // option did not have an argument, so try without:
-        bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
-        end;
-      end;
+      FInstaller.Uninstall:=Options.GetOption('','uninstall',false);
+      // do not add to default options:
+      FInstaller.Verbose:=Options.GetOption('','verbose',false,false);
+      // do not add to default options:
+      bVersion:=Options.GetOption('','version',false,false);
+      bNoConfirm:=Options.GetOption('','noconfirm',false);
     except
       on E:Exception do
       begin

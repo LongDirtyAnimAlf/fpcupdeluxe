@@ -65,6 +65,7 @@ type
     function LoadIniFile:boolean;
     //read all params in string list, load @filename at start to let command line options override file options
     procedure LoadParams;
+    // This also loads ini file
     procedure SetIniFile(AValue: string);
   public
     property CaseSensitive:boolean read FCaseSensitive write FCaseSensitive;
