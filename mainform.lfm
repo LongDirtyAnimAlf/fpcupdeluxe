@@ -8,7 +8,7 @@ object Form1: TForm1
   ClientWidth = 897
   Menu = MainMenu1
   OnCreate = FormCreate
-  LCLVersion = '1.2.0.2'
+  LCLVersion = '1.3'
   object EditTabs: TPageControl
     Left = 8
     Height = 536
