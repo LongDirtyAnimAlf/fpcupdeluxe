@@ -48,10 +48,10 @@ Const
     'ConfigModule lazarus;'+
     // Cross compile support at least requires lazbuild.
     // we're building it here directly to avoid circular
-    // dependencies (don't know if these are a problem)
+    // dependencies
     'Buildmodule lazbuild;'+
     'Buildmodule lazarus;'+
-    //Config again to fix any wrong settings introduced:
+    //Config again to (possibly) fix any wrong settings introduced:
     'ConfigModule lazarus;'+
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;'+

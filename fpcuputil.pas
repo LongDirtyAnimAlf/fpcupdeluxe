@@ -795,6 +795,7 @@ var
   Seriousness: string;
 begin
 {$IFNDEF NOCONSOLE}
+  // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
   case Level of
     etCustom: Seriousness:='custom:';
     etDebug: Seriousness:='debug:';

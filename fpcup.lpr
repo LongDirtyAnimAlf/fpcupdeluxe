@@ -308,7 +308,7 @@ begin
         end;
       end;
 			
-      // Save all passwed parameters, including any in ini file
+      // Save all passed parameters, including any in ini file
       // before the params are removed again by Options.GetOption calls
       sAllParameters:=Options.Params.Text;
 
@@ -451,6 +451,9 @@ begin
         FInstaller.LazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(s);
 
       // Deal with options coming from ini (e.g. Help=true)
+      // todo: this won't work if user also specifies the same option without
+      // argument as the exception
+      // code will still pick up the first one with argument and bomb
       try
         FInstaller.Uninstall:=Options.GetOption('','uninstall',false);
       except
@@ -474,7 +477,7 @@ begin
         bVersion:=Options.GetOption('','version',false,false);
       except
         on E: ECommandLineError do begin
-        // option did not have an argument
+        // option did not have an argument, so try without:
         bVersion:=Options.GetOptionNoParam('','version',false);
         end;
       end;
@@ -482,7 +485,7 @@ begin
         bNoConfirm:=Options.GetOption('','noconfirm',false);
       except
         on E: ECommandLineError do begin
-        // option did not have an argument
+        // option did not have an argument, so try without:
         bNoConfirm:=Options.GetOptionNoParam('','noconfirm');
         end;
       end;
