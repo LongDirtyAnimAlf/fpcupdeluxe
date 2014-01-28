@@ -54,9 +54,9 @@ const
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
 
-    //Nogui widgetset+Lazbuild:
+    // Nogui widgetset+Lazbuild:
     'Declare lazbuild;' + 'Getmodule lazarus;' + 'Buildmodule lazbuild;' +
-    //config lazarus, so lazbuild will work:
+    // config lazarus, so lazbuild will work:
     'ConfigModule lazarus;' + 'End;' +
 
     //standard IDE build with user-selected packages
@@ -67,6 +67,19 @@ const
     'Declare USERIDE;' + 'Buildmodule USERIDE;' +
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
+
+    // Forced IDE build with user-selected packages
+    // This resets the state machine so it should be run at the end of
+    // the sequence
+    //
+    // assumes/requires that Laz svn has already been updated
+    // also we need lazbuild, but we can check for it in our USERIDE code.
+    // This build is executed regardless of previous steps as ResetLCL is used
+    'Declare USERIDEFORCE;' +
+    'ResetLCL;' +
+    'Buildmodule USERIDE;' +
+    'Exec CreateLazarusScript;' + 'End;' +
+
 
     //standard uninstall
     'Declare lazarusuninstall;' + 'Uninstallmodule lazarus;' + 'Exec DeleteLazarusScript;' + 'End;' +
