@@ -63,7 +63,7 @@ Const
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
-    //Get external packages/universal modules
+    //Get default external packages/universal modules
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
@@ -81,7 +81,7 @@ Const
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
-    //Get external packages/universal modules
+    //Get default external packages/universal modules
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
@@ -113,7 +113,7 @@ below}
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
-    //Get external packages/universal modules
+    //Get default external packages/universal modules
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
