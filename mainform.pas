@@ -17,6 +17,8 @@ unit mainform;
 
   Folds at:
   - fpcup: statements
+  => see
+  http://forum.lazarus.freepascal.org/index.php/topic,23411.0.html
 *)
 interface
 
