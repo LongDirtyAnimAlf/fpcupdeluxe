@@ -558,9 +558,9 @@ begin
   AddNewUtil('ld' + GetExeExt,SourceURL,'',ucBinutil);
   // Make 3.80 as distributed with Laz 1.x, FPC 2.6.2, fixes 2.6 won't work with spaces in path
   // Make 3.81 hopefully has some fixes but not too many bugs=>in fpcbuild svn
-  // Make 3.82 will balk on building fpc 2.6.x but a version is distributed with Laz 1.2RC2
-  // Use make 3.82 as distributed by Laz 1.2RC2+FPC 2.6.2
-  AddNewUtil('make' + GetExeExt,SourceUrl_FPCTrunk,'',ucBinutil);
+  // Make 3.82 will balk on building fpc 2.6.x (still a version is distributed with Laz 1.2RC2)
+  // Use make 3.80
+  AddNewUtil('make' + GetExeExt,SourceUrl,'',ucBinutil);
   AddNewUtil('mv' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('objdump' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('pwd' + GetExeExt,SourceURL,'',ucBinutil);
