@@ -581,7 +581,6 @@ begin
   AddNewUtil('ginstall.exe.manifest',SourceURL64,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('GoRC' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('libexpat-1.dll',SourceURL64_gdb,'',ucDebugger);
   AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger);
   AddNewUtil('ld' + GetExeExt,SourceURL64,'',ucBinutil);
   // even in fpcbuild trunk, still make 3.80
