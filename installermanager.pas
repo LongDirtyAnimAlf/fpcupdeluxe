@@ -70,9 +70,6 @@ Const
     'Do USERIDE;'+
     //Any cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
-    // Workaround for packages not being installed (Jan 2014), only marked for installation.
-    // Solution: another lazarus IDE build
-    'Do USERIDEFORCE;'+
     'End;'+ //keyword End specifies the end of the sequence
 
 //default sequence for win32
@@ -94,9 +91,6 @@ Const
     {$endif}
     //Any cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
-    // Workaround for packages not being installed (Jan 2014), only marked for installation.
-    // Solution: another lazarus IDE build
-    'Do USERIDEFORCE;'+
     'End;'+
 
 //cross sequence for win32. Note: if changing this name,
@@ -127,9 +121,6 @@ below}
     'Do crosswin64-32;'+  //this has to be the last. All TExecState reset!
     //Any cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
-    // Workaround for packages not being installed (Jan 2014), only marked for installation.
-    // Solution: another lazarus IDE build
-    'Do USERIDEFORCE;'+
     'End;'+
 
 //cross sequence for win32. Note: if changing this name,

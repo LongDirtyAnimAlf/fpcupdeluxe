@@ -54,9 +54,9 @@ const
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
 
-    // Nogui widgetset+Lazbuild:
+    //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' + 'Getmodule lazarus;' + 'Buildmodule lazbuild;' +
-    // config lazarus, so lazbuild will work:
+    //config lazarus, so lazbuild will work:
     'ConfigModule lazarus;' + 'End;' +
 
     //standard IDE build with user-selected packages
@@ -67,19 +67,6 @@ const
     'Declare USERIDE;' + 'Buildmodule USERIDE;' +
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
-
-    // Forced IDE build with user-selected packages
-    // This resets the state machine so it should be run at the end of
-    // the sequence
-    //
-    // assumes/requires that Laz svn has already been updated
-    // also we need lazbuild, but we can check for it in our USERIDE code.
-    // This build is executed regardless of previous steps as ResetLCL is used
-    'Declare USERIDEFORCE;' +
-    'ResetLCL;' +
-    'Buildmodule USERIDE;' +
-    'Exec CreateLazarusScript;' + 'End;' +
-
 
     //standard uninstall
     'Declare lazarusuninstall;' + 'Uninstallmodule lazarus;' + 'Exec DeleteLazarusScript;' + 'End;' +
@@ -511,26 +498,53 @@ begin
 
       if FCrossLCL_Platform <> '' then
         ProcessEx.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
-      infoln('Lazarus: running lazbuild to get IDE with user-specified packages:', etInfo);
-      try
-        ProcessEx.Execute;
-        if ProcessEx.ExitStatus <> 0 then
-        begin
-          writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code ' + IntToStr(ProcessEx.ExitStatus) + LineEnding +
-            'Details: ' + FErrorLog.Text, true);
-          OperationSucceeded := false;
-          FInstalledLazarus := '//*\\error/ / \ \';
-        end
-        else
-        begin
-          FInstalledLazarus := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazarus' + GetExeExt;
+      // Run first time...
+      if OperationSucceeded then
+      begin
+        infoln('Lazarus: running lazbuild to get IDE with user-specified packages:', etInfo);
+        try
+          ProcessEx.Execute;
+          if ProcessEx.ExitStatus <> 0 then
+          begin
+            writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code ' + IntToStr(ProcessEx.ExitStatus) + LineEnding +
+              'Details: ' + FErrorLog.Text, true);
+            OperationSucceeded := false;
+            FInstalledLazarus := '//*\\error/ / \ \';
+          end
+          else
+          begin
+            FInstalledLazarus := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazarus' + GetExeExt;
+          end;
+        except
+          on E: Exception do
+          begin
+            OperationSucceeded := false;
+            WritelnLog('Lazarus: exception running lazbuild to get IDE with user-specified packages!' + LineEnding +
+              'Details: ' + E.Message, true);
+          end;
         end;
-      except
-        on E: Exception do
-        begin
-          OperationSucceeded := false;
-          WritelnLog('Lazarus: exception running lazbuild to get IDE with user-specified packages!' + LineEnding +
-            'Details: ' + E.Message, true);
+      end;
+
+      // ... and another time to fix an apparent bug that does not install packages
+      // marked for installation
+      if OperationSucceeded then
+      begin
+        infoln('Lazarus: running lazbuild again to install user-specified packages:', etInfo);
+        try
+          ProcessEx.Execute;
+          if ProcessEx.ExitStatus <> 0 then
+          begin
+            writelnlog('Lazarus: buildmodulecustom: lazbuild returned error code ' + IntToStr(ProcessEx.ExitStatus) + LineEnding +
+              'Details: ' + FErrorLog.Text, true);
+            OperationSucceeded := false;
+          end;
+        except
+          on E: Exception do
+          begin
+            OperationSucceeded := false;
+            WritelnLog('Lazarus: exception running lazbuild to install user-specified packages!' + LineEnding +
+              'Details: ' + E.Message, true);
+          end;
         end;
       end;
 
