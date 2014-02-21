@@ -306,7 +306,7 @@ end;"/>
             <CompilerMessages>
               <UseMsgFile Value="True"/>
             </CompilerMessages>
-            <CustomOptions Value="-O-"/>
+            <CustomOptions Value="-O- -dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
