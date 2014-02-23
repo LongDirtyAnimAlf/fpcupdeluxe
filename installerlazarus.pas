@@ -90,7 +90,9 @@ const
     // Crosscompile only LCL (needs to be run at end
     'Declare LCLCross;' + 'ResetLCL;' + //module code itself will select proper widgetset
     // Getmodule must already have been done
-    'CleanModule LCL;' + 'Buildmodule LCL;' + 'End';
+    // If we call CleanModule, currently Lazbuild.exe etc will also be removed!?!?!, so do not do that
+    // 'CleanModule LCL;'+
+    'Buildmodule LCL;' + 'End';
 
 type
 
