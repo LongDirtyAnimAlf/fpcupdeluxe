@@ -153,6 +153,9 @@ end;"/>
         </CompilerOptions>
       </Item4>
       <Item5 Name="linux_x64">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -194,6 +197,9 @@ end;"/>
         </CompilerOptions>
       </Item5>
       <Item6 Name="linux_i386">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -235,6 +241,9 @@ end;"/>
         </CompilerOptions>
       </Item6>
       <Item7 Name="linux_armelv6">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -275,6 +284,9 @@ end;"/>
         </CompilerOptions>
       </Item7>
       <Item8 Name="linux_armelv6debug">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="nogui"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -316,7 +328,7 @@ end;"/>
         </CompilerOptions>
       </Item8>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="233755810855" Modes="Default,Debug,64bit,64bitDebug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+        <Item1 ID="233755810855" Modes="Default,Debug,64bit,64bitDebug,linux_x64,linux_i386,linux_armelv6,linux_armelv6debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
