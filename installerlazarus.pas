@@ -74,7 +74,6 @@ const
     //standard clean
     'Declare lazarusclean;' + 'cleanmodule lazarus;' + 'End;' +
 
-
     //selective actions triggered with --only=SequenceName
     'Declare LazarusCleanOnly;' + 'Cleanmodule lazarus;' + 'End;' + 'Declare LazarusGetOnly;' +
     'Getmodule lazarus;' + 'End;' + 'Declare LazarusBuildOnly;' + 'Buildmodule lazarus;' + 'End;' +
@@ -85,7 +84,9 @@ const
     // Needs to be run after regular compile because of CPU/OS switch
     'SetCPU x86_64;' + 'SetOS win64;' +
     // Getmodule has already been done
-    'Cleanmodule LCL;' + 'Buildmodule LCL;' + 'End;' +
+    // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
+    //'Cleanmodule LCL;' +
+    'Buildmodule LCL;' + 'End;' +
 
     // Crosscompile only LCL (needs to be run at end
     'Declare LCLCross;' + 'ResetLCL;' + //module code itself will select proper widgetset

@@ -81,15 +81,15 @@ Const
     'Do helplazarus;'+
     'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
-    //Get default external packages/universal modules
+    // Get default external packages/universal modules
     'Do UniversalDefault;'+
-    //Recompile user IDE so any packages selected by the
-    //universal installer are compiled into the IDE:
+    // Recompile user IDE so any packages selected by the
+    // universal installer are compiled into the IDE:
     'Do USERIDE;'+
     {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     {$endif}
-    //Any cross compilation; must be at end because it resets state machine run memory
+    // Any further cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
     'End;'+
 
@@ -132,7 +132,8 @@ below}
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
     //Getmodule has already been done
-    'Cleanmodule LCL;'+
+    // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
+    //'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
     'End;'+
 //default clean sequence
@@ -144,6 +145,11 @@ below}
     'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
     'End;'+
+    {
+// Currently, make distclean LCL removes lazbuild.exe/lazarus.exe as well
+// Then, universal installer won't work because of missing lazbuild, and of
+// course Lazarus won't work either.
+// Workaround: don't clean up.
 //default clean sequence for win32
     'Declare defaultwin32clean;'+
     'Do fpcclean;'+
@@ -168,6 +174,7 @@ below}
     'Cleanmodule fpc;'+
     'Cleanmodule lazarus;'+
     'End;'+
+    }
 
 //default uninstall sequence
     'Declare defaultuninstall;'+
