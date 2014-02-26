@@ -944,6 +944,10 @@ begin
       CurrentModule:=ModuleName;
       //assign properties
       (Installer as TUniversalInstaller).FPCDir:=FParent.FFPCDirectory;
+      // Use compileroptions for chosen FPC compile options...
+      Installer.CompilerOptions:=FParent.FPCOPT;
+      // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
+      (Installer as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
       (Installer as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
       (Installer as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       if FParent.CompilerName='' then

@@ -41,7 +41,7 @@ uses
 // windres, so use it.
 {$R fpcup.rc}
 {$ELSE}
-// On other platforms we cannot be certain, so we trust either
+// On other platforms we cannot be certain, so we hope either
 // - a previous windows compile
 // - manual windres invocation
 // has updated fpcup.res
@@ -54,11 +54,17 @@ type
   TUniversalInstaller = class(TInstaller)
   private
     FBinPath:string; //Path where compiler is
-    //FPC base directory - directory where FPC is (to be) installed:
+    // FPC base directory - directory where FPC is (to be) installed:
     FFPCDir:string;
-    //Lazarus base directory - directory where Lazarus is (to be) installed:
+    // Compiler options chosen by user to build Lazarus. There is a CompilerOptions property,
+    // but let's leave that for use with FPC.
+    FLazarusCompilerOptions:string;
+    // Lazarus base directory - directory where Lazarus is (to be) installed:
     FLazarusDir:string;
-    //Directory where configuration for Lazarus is stored:
+    // Keep track of whether Lazarus needs to be rebuilt after package installation
+    // or running lazbuild with an .lpk
+    FLazarusNeedsRebuild:boolean;
+    // Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
     FPath:string; //Path to be used within this session (e.g. including compiler path)
     InitDone:boolean;
@@ -88,6 +94,8 @@ type
   public
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
+    // Compiler options user chose to compile Lazarus with (coming from fpcup).
+    property LazarusCompilerOptions: string write FLazarusCompilerOptions;
     // Lazarus primary config path
     property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
     // Lazarus base directory
@@ -242,6 +250,10 @@ begin
   FPath:=FBinPath+PathSeparator+
     PlainBinPath+PathSeparator;
   SetPath(FPath,true,false);
+  // No need to build Lazarus IDE again right now; will
+  // be changed by buildmodule/configmodule installexecute/
+  // installpackage
+  FLazarusNeedsRebuild:=false;
   InitDone:=result;
 end;
 
@@ -267,7 +279,12 @@ begin
   try
     ProcessEx.Execute;
     result := ProcessEx.ExitStatus=0;
-    if not result then
+    if result then
+    begin
+      infoln('Marking Lazarus for rebuild based on package install for '+PackageAbsolutePath,etDebug);
+      FLazarusNeedsRebuild:=true; //Mark IDE for rebuild
+    end
+    else
       WritelnLog('InstallerUniversal: error trying to add package '+PackagePath+LineEnding+
         'Details: '+FErrorLog.Text,true);
   except
@@ -417,7 +434,18 @@ begin
     if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
     try
       result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose,FPath)=0;
-      if not result then
+      if result then
+      begin
+        // If it is likely user used lazbuid to compile a package, assume
+        // it is design-time (no way to check) and mark IDE for rebuild
+        if (pos('lazbuild',lowerCase(exec))>0) and
+          (pos('.lpk',lowercase(exec))>0) then
+        begin
+          infoln('Marking Lazarus for rebuild based on exec line '+exec,etDebug);
+          FLazarusNeedsRebuild:=true;
+        end;
+      end
+      else
       begin
         WritelnLog('InstallerUniversal: warning: running '+exec+' returned an error.',true);
         break;
@@ -462,6 +490,7 @@ begin
       end;
     if i>1 then // found
       begin
+      FLazarusNeedsRebuild:=true;
       LazarusConfig.SetVariable(xmlfile, key, cnt-1);
       key:='UserPkgLinks/Item'+IntToStr(cnt)+'/';
       while i<cnt do
@@ -490,6 +519,7 @@ begin
       end;
     if i>1 then // found
       begin
+      FLazarusNeedsRebuild:=true;
       LazarusConfig.SetVariable(xmlfile, key, cnt-1);
       key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages'
         +'/Item'+IntToStr(cnt)+'/';
@@ -513,6 +543,8 @@ begin
 end;
 
 // Runs all InstallExecute<n> commands inside a specified module
+{ todo: Note that for some reason the installpackage etc commands are processed in configmodule.
+Shouldn't this be changed? }
 function TUniversalInstaller.BuildModule(ModuleName: string): boolean;
 var
   idx:integer;
@@ -651,7 +683,7 @@ begin
           AddToLazXML('miscellaneousoptions'); //e.g. list of packages to be installed on recompile
           AddToLazXML('packagefiles'); //e.g. list of available packages
 
-          // Process specials
+          // Process special directives
           Directive:=GetValue('RegisterExternalTool',sl);
           if Directive<>'' then
             begin
@@ -732,6 +764,38 @@ begin
         end;
       finally
         LazarusConfig.Destroy;
+      end;
+
+      // If Lazarus was marked for rebuild, do so:
+      if FLazarusNeedsRebuild then
+      begin
+        infoln('InstallerUniversal: going to rebuild Lazarus because packages were installed.',etInfo);
+        ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+        FErrorLog.Clear;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
+        ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+        ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
+        ProcessEx.Parameters.Add('--build-mode=');
+        try
+          ProcessEx.Execute;
+          result := ProcessEx.ExitStatus=0;
+          if result then
+          begin
+            infoln('InstallerUniversal: Lazarus rebuild succeeded',etDebug);
+            FLazarusNeedsRebuild:=false;
+          end
+          else
+            WritelnLog('InstallerUniversal: error trying to rebuild Lazarus. '+LineEnding+
+              'Details: '+FErrorLog.Text,true);
+        except
+          on E: Exception do
+            begin
+            WritelnLog('InstallerUniversal: exception trying to rebuild Lazarus '+LineEnding+
+              'Details: '+E.Message,true);
+            result:=false;
+            end;
+        end;
       end;
     end
   else
@@ -862,7 +926,7 @@ begin
   if not result then exit;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
-    begin
+  begin
     sl:=TStringList(UniModuleList.Objects[idx]);
     WritelnLog('UnInstalling module '+ModuleName);
     result:=RunCommands('UnInstallExecute',sl);
@@ -874,49 +938,80 @@ begin
 
     LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
     try
-
-    // Process specials
-    Directive:=GetValue('RegisterExternalTool',sl);
-    if Directive<>'' then
+      // Process specials
+      Directive:=GetValue('RegisterExternalTool',sl);
+      if Directive<>'' then
       begin
-      xmlfile:=EnvironmentConfig;
-      key:='EnvironmentOptions/ExternalTools/Count';
-      cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
-      // check if tool is registered
-      i:=cnt;
-      while i>0 do
+        xmlfile:=EnvironmentConfig;
+        key:='EnvironmentOptions/ExternalTools/Count';
+        cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
+        // check if tool is registered
+        i:=cnt;
+        while i>0 do
         begin
-        if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')
-          =ModuleName then
-            break;
-        i:=i-1;
+          if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')
+            =ModuleName then
+              break;
+          i:=i-1;
         end;
-      if i>=1 then // found
+        if i>=1 then // found
         begin
-        LazarusConfig.SetVariable(xmlfile,key,cnt-1);
-        key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/';
-        while i<cnt do
+          LazarusConfig.SetVariable(xmlfile,key,cnt-1);
+          key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/';
+          while i<cnt do
           begin
-          LazarusConfig.MovePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i+1)+'/',
-             'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/');
-          i:=i+1;
+            LazarusConfig.MovePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i+1)+'/',
+               'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/');
+            i:=i+1;
           end;
-        LazarusConfig.DeletePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/');
+          LazarusConfig.DeletePath(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/');
         end;
       end;
 
-    Directive:=GetValue('RegisterHelpViewer',sl);
-    if Directive<>'' then
+      Directive:=GetValue('RegisterHelpViewer',sl);
+      if Directive<>'' then
       begin
-      xmlfile:=HelpConfig;
-      key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
-      // Setting the variable to empty should be enough to disable the help viewer.
-      LazarusConfig.SetVariable(xmlfile,key,'');
+        xmlfile:=HelpConfig;
+        key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
+        // Setting the variable to empty should be enough to disable the help viewer.
+        LazarusConfig.SetVariable(xmlfile,key,'');
       end;
     finally
       LazarusConfig.Destroy;
     end;
-    end
+
+    // If Lazarus was marked for rebuild, do so:
+    if FLazarusNeedsRebuild then
+    begin
+      infoln('InstallerUniversal: going to rebuild Lazarus because packages were uninstalled.',etInfo);
+      ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+      FErrorLog.Clear;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+      ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
+      ProcessEx.Parameters.Add('--build-mode=');
+      try
+        ProcessEx.Execute;
+        result := ProcessEx.ExitStatus=0;
+        if result then
+        begin
+          infoln('InstallerUniversal: Lazarus rebuild succeeded',etDebug);
+          FLazarusNeedsRebuild:=false;
+        end
+        else
+          WritelnLog('InstallerUniversal: error trying to rebuild Lazarus. '+LineEnding+
+            'Details: '+FErrorLog.Text,true);
+      except
+        on E: Exception do
+          begin
+          WritelnLog('InstallerUniversal: exception trying to rebuild Lazarus '+LineEnding+
+            'Details: '+E.Message,true);
+          result:=false;
+          end;
+      end;
+    end;
+  end
   else
     result:=false;
 end;

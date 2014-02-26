@@ -35,6 +35,11 @@ http://bugs.freepascal.org/view.php?id=25399
 that suggests android cross compilers can be used for mipsel linux
 
 }
+{
+Another build script from bug report:
+http://bugs.freepascal.org/view.php?id=25574
+make clean crossall crossinstall OS_TARGET=android CPU_TARGET=arm CROSSOPT="-CfVFPV3 -OoFASTMATH -CpARMV6" INSTALL_PREFIX=C:\Develop\fpc\fpctrunk PP=C:\Develop\fpc\fpctrunk\bin\i386-win32\fpc.exe BINDIR=C:\Android\android-ndk-r9\toolchains\arm-linux-androideabi-4.8\prebuilt\windows-x86_64\arm-linux-androideabi\bin CROSSBINDIR=C:\Android\android-ndk-r9\toolchains\arm-linux-androideabi-4.8\prebuilt\windows-x86_64\bin BINUTILSPREFIX=arm-linux-androideabi-
+}
 {$mode objfpc}{$H+}
 
 interface
