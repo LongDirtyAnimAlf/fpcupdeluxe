@@ -555,33 +555,39 @@ begin
       }
 
       // ... build startlazarus if it doesn't exist
-      // (even an old version left over by make distaclean is probably ok)
-      if OperationSucceeded and
-        (not (FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'startlazarus' + GetExeExt))) then
+      // (even an old version left over by make distclean is probably ok)
+      if OperationSucceeded then
       begin
-        ProcessEx.Executable := LazBuildApp;
-        FErrorLog.Clear;
-        ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
-        ProcessEx.Parameters.Clear;
-        ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
-        ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FBaseDirectory)+
-          'ide'+DirectorySeparator+'startlazarus.lpi');
+        if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'startlazarus' + GetExeExt) then
+        begin
+          infoln('Lazarus: startlazarus exists already. Not compiling again.', etdebug);
+        end
+        else
+        begin
+          ProcessEx.Executable := LazBuildApp;
+          FErrorLog.Clear;
+          ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+          ProcessEx.Parameters.Clear;
+          ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
+          ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FBaseDirectory)+
+            'ide'+DirectorySeparator+'startlazarus.lpi');
 
-        infoln('Lazarus: compiling startlazarus to make sure it is present:', etInfo);
-        try
-          ProcessEx.Execute;
-          if ProcessEx.ExitStatus <> 0 then
-          begin
-            writelnlog('Lazarus: buildmodulecustom: lazbuild startlazarus returned error code ' + IntToStr(ProcessEx.ExitStatus) + LineEnding +
-              'Details: ' + FErrorLog.Text, true);
-            OperationSucceeded := false;
-          end;
-        except
-          on E: Exception do
-          begin
-            OperationSucceeded := false;
-            WritelnLog('Lazarus: exception running lazbuild to get startlazarus!' + LineEnding +
-              'Details: ' + E.Message, true);
+          infoln('Lazarus: compiling startlazarus to make sure it is present:', etInfo);
+          try
+            ProcessEx.Execute;
+            if ProcessEx.ExitStatus <> 0 then
+            begin
+              Writelnlog('Lazarus: buildmodulecustom: lazbuild startlazarus returned error code ' + IntToStr(ProcessEx.ExitStatus) + LineEnding +
+                'Details: ' + FErrorLog.Text, true);
+              OperationSucceeded := false;
+            end;
+          except
+            on E: Exception do
+            begin
+              OperationSucceeded := false;
+              WritelnLog('Lazarus: exception running lazbuild to get startlazarus!' + LineEnding +
+                'Details: ' + E.Message, true);
+            end;
           end;
         end;
       end;
