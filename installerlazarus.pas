@@ -528,6 +528,8 @@ begin
         end;
       end;
 
+      //todo: debug: test without this fix (without external modules to see if this workaround is still needed
+      {
       // ... and another time to fix an apparent bug that does not install packages
       // marked for installation
       if OperationSucceeded then
@@ -550,9 +552,12 @@ begin
           end;
         end;
       end;
+      }
 
-      // ... build startlazarus in case it doesn't exist
-      if OperationSucceeded then
+      // ... build startlazarus if it doesn't exist
+      // (even an old version left over by make distaclean is probably ok)
+      if OperationSucceeded and
+        (not (FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'startlazarus' + GetExeExt))) then
       begin
         ProcessEx.Executable := LazBuildApp;
         FErrorLog.Clear;
