@@ -564,7 +564,7 @@ object Form1: TForm1
         Height = 13
         Top = 24
         Width = 32
-        Caption = 'INI file'
+        Caption = '&INI file'
         ParentColor = False
       end
       object ProfileLabel: TLabel
@@ -572,7 +572,7 @@ object Form1: TForm1
         Height = 13
         Top = 64
         Width = 30
-        Caption = 'Profile'
+        Caption = '&Profile'
         ParentColor = False
       end
       object chkVerbose: TCheckBox
@@ -580,7 +580,7 @@ object Form1: TForm1
         Height = 17
         Top = 65
         Width = 59
-        Caption = 'Verbose'
+        Caption = '&Verbose'
         TabOrder = 0
       end
       object btnRun: TButton

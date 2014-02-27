@@ -291,7 +291,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="fpcup_linux_armel"/>
+            <Filename Value="fpcup_linux_armhf"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>

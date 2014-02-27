@@ -562,7 +562,7 @@ begin
         ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FBaseDirectory)+
           'ide'+DirectorySeparator+'startlazarus.lpi');
 
-        infoln('Lazarus: running lazbuild to make sure startlazarus is present:', etInfo);
+        infoln('Lazarus: compiling startlazarus to make sure it is present:', etInfo);
         try
           ProcessEx.Execute;
           if ProcessEx.ExitStatus <> 0 then
