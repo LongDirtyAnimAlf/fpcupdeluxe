@@ -238,7 +238,7 @@ type
     FSkipModules: string;
     FUninstall:boolean;
     FVerbose: boolean;
-    Sequencer: TSequencer;
+    FSequencer: TSequencer;
     function GetLazarusPrimaryConfigPath: string;
     function GetLogFileName: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
@@ -341,10 +341,10 @@ type
   TSequencer=class(TObject)
     protected
       FParent:TFPCupManager;
-      CurrentModule:String;
-      Installer:TInstaller;  //current installer
-      SkipList:TStringList;
-      StateMachine:array of TState;
+      FCurrentModule:String;
+      FInstaller:TInstaller;  //current installer
+      FSkipList:TStringList;
+      FStateMachine:array of TState;
       procedure AddToModuleList(ModuleName:string;EntryPoint:integer);
       function DoBuildModule(ModuleName:string):boolean;
       function DoCleanModule(ModuleName:string):boolean;
@@ -358,18 +358,21 @@ type
       function DoResetLCL:boolean;
       function DoUnInstallModule(ModuleName:string):boolean;
       function GetInstaller(ModuleName:string):boolean;
+      function GetText:string;
       function IsSkipped(ModuleName:string):boolean;
       // Reset memory of executed steps, allowing sequences with e.g. new OS to be rerun
       procedure ResetAllExecuted(SkipFPC:boolean=false);
     public
       property Parent:TFPCupManager write Fparent;
-      // parse a sequence source code and append to the statemachine
+      // Text representation of sequence; for diagnostic purposes
+      property Text:String read GetText;
+      // parse a sequence source code and append to the FStateMachine
       function AddSequence(Sequence:string):boolean;
-      // Add the "only" sequence from the statemachine based on the --only list
+      // Add the "only" sequence from the FStateMachine based on the --only list
       function CreateOnly(OnlyModules:string):boolean;
-      // deletes the "only" sequence from the statemachine
+      // deletes the "only" sequence from the FStateMachine
       function DeleteOnly:boolean;
-      // run the statemachine starting at SequenceName
+      // run the FStateMachine starting at SequenceName
       function Run(SequenceName:string):boolean;
       constructor Create;
       destructor Destroy; override;
@@ -474,14 +477,16 @@ end;
 
 function TFPCupManager.LoadFPCUPConfig: boolean;
 begin
-Sequencer.AddSequence(Sequences);
-Sequencer.AddSequence(installerFPC.Sequences);
-Sequencer.AddSequence(installerLazarus.Sequences);
-Sequencer.AddSequence(installerHelp.Sequences);
-Sequencer.AddSequence(installerUniversal.Sequences);
-//append universal modules to the lists
-Sequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
-result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
+  FSequencer.AddSequence(Sequences);
+  FSequencer.AddSequence(installerFPC.Sequences);
+  FSequencer.AddSequence(installerLazarus.Sequences);
+  FSequencer.AddSequence(installerHelp.Sequences);
+  FSequencer.AddSequence(installerUniversal.Sequences);
+  // append universal modules to the lists
+  FSequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
+  infoln('InstallerManager: LoadFPCUPConfig: loaded sequence: '+LineEnding+
+    FSequencer.Text,etDebug);
+  result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
 function TFPCupManager.Run: boolean;
@@ -507,6 +512,9 @@ begin
     halt(2);
   end;
 
+  infoln('InstallerManager: current sequence: '+LineEnding+
+    FSequencer.Text,etDebug);
+
   // Some diagnostic info
   {$IFDEF MSWINDOWS}
   if Verbose then
@@ -521,25 +529,25 @@ begin
   {$ENDIF}
 
   if SkipModules<>'' then begin
-    Sequencer.SkipList:=TStringList.Create;
-    Sequencer.SkipList.Delimiter:=',';
-    Sequencer.SkipList.DelimitedText:=SkipModules;
+    FSequencer.FSkipList:=TStringList.Create;
+    FSequencer.FSkipList.Delimiter:=',';
+    FSequencer.FSkipList.DelimitedText:=SkipModules;
     end;
   if FOnlyModules<>'' then begin
-    Sequencer.CreateOnly(FOnlyModules);
-    result:=Sequencer.Run('Only');
-    Sequencer.DeleteOnly;
+    FSequencer.CreateOnly(FOnlyModules);
+    result:=FSequencer.Run('Only');
+    FSequencer.DeleteOnly;
     end
   else begin
     {$if defined(win32)}
     // Run Windows specific cross compiler or regular version
     if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then begin
       infoln('InstallerManager: going to run sequencer for sequence: Default.',etDebug);
-      result:=Sequencer.Run('Default');
+      result:=FSequencer.Run('Default');
     end
     else begin
       infoln('InstallerManager: going to run sequencer for sequence: DefaultWin32.',etDebug);
-      result:=Sequencer.Run('DefaultWin32');
+      result:=FSequencer.Run('DefaultWin32');
     end;
     // We would like to have a win64=>win32 crosscompiler, but at least with current
     // FPC trunk that won't work due to errors like
@@ -549,25 +557,25 @@ begin
     //{$elseif defined(win64)}
     {
     if pos('CROSSWIN64-32',UpperCase(SkipModules))>0 then
-      result:=Sequencer.Run('Default')
+      result:=FSequencer.Run('Default')
     else
-      result:=Sequencer.Run('DefaultWin64');
+      result:=FSequencer.Run('DefaultWin64');
     }
     {$else}
     // Linux, OSX
     infoln('InstallerManager: going to run sequencer for sequence Default.',etDebug);
-    result:=Sequencer.Run('Default');
+    result:=FSequencer.Run('Default');
     {$endif}
     if (FIncludeModules<>'') and (result) then begin
       // run specified additional modules using the only mechanism
       infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
-      Sequencer.CreateOnly(FIncludeModules);
-      result:=Sequencer.Run('Only');
-      Sequencer.DeleteOnly;
+      FSequencer.CreateOnly(FIncludeModules);
+      result:=FSequencer.Run('Only');
+      FSequencer.DeleteOnly;
     end;
     end;
-  if assigned(Sequencer.SkipList) then
-    Sequencer.SkipList.Free;
+  if assigned(FSequencer.FSkipList) then
+    FSequencer.FSkipList.Free;
 end;
 
 constructor TFPCupManager.Create;
@@ -575,8 +583,8 @@ begin
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
   FModulePublishedList:=TStringList.Create;
-  Sequencer:=TSequencer.create;
-  Sequencer.Parent:=Self;
+  FSequencer:=TSequencer.create;
+  FSequencer.Parent:=Self;
   FLog:=TLogger.Create;
   // Log filename will be set on first log write
 end;
@@ -589,7 +597,7 @@ begin
   FModuleList.Free;
   FModulePublishedList.Free;
   FModuleEnabledList.Free;
-  Sequencer.free;
+  FSequencer.free;
   try
     WritelnLog(DateTimeToStr(now)+': fpcup finished.',true);
     WritelnLog('------------------------------------------------',false);
@@ -606,28 +614,28 @@ procedure TSequencer.AddToModuleList(ModuleName: string; EntryPoint: integer);
 var
   SeqAttr:PSequenceAttributes;
 begin
-getmem(SeqAttr,sizeof(TSequenceAttributes));
-SeqAttr^.EntryPoint:=EntryPoint;
-SeqAttr^.Executed:=ESNever;
-FParent.FModuleList.AddObject(ModuleName,TObject(SeqAttr));
+  getmem(SeqAttr,sizeof(TSequenceAttributes));
+  SeqAttr^.EntryPoint:=EntryPoint;
+  SeqAttr^.Executed:=ESNever;
+  FParent.FModuleList.AddObject(ModuleName,TObject(SeqAttr));
 end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
 begin
   infoln('TSequencer: DoBuildModule for module '+ModuleName+' called.',etDebug);
-  result:= GetInstaller(ModuleName) and Installer.BuildModule(ModuleName);
+  result:= GetInstaller(ModuleName) and FInstaller.BuildModule(ModuleName);
 end;
 
 function TSequencer.DoCleanModule(ModuleName: string): boolean;
 begin
   infoln('TSequencer: DoCleanModule for module '+ModuleName+' called.',etDebug);
-  result:= GetInstaller(ModuleName) and Installer.CleanModule(ModuleName);
+  result:= GetInstaller(ModuleName) and FInstaller.CleanModule(ModuleName);
 end;
 
 function TSequencer.DoConfigModule(ModuleName: string): boolean;
 begin
   infoln('TSequencer: DoConfigModule for module '+ModuleName+' called.',etDebug);
-  result:= GetInstaller(ModuleName) and Installer.ConfigModule(ModuleName);
+  result:= GetInstaller(ModuleName) and FInstaller.ConfigModule(ModuleName);
 end;
 
 function TSequencer.DoExec(FunctionName: string): boolean;
@@ -769,7 +777,7 @@ end;
 function TSequencer.DoGetModule(ModuleName: string): boolean;
 begin
   infoln('TSequencer: DoGetModule for module '+ModuleName+' called.',etDebug);
-  result:= GetInstaller(ModuleName) and Installer.GetModule(ModuleName);
+  result:= GetInstaller(ModuleName) and FInstaller.GetModule(ModuleName);
 end;
 
 function TSequencer.DoSetCPU(CPU: string): boolean;
@@ -798,7 +806,7 @@ end;
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
 begin
   infoln('TSequencer: DoUninstallModule for module '+ModuleName+' called.',etDebug);
-  result:= GetInstaller(ModuleName) and Installer.UnInstallModule(ModuleName);
+  result:= GetInstaller(ModuleName) and FInstaller.UnInstallModule(ModuleName);
 end;
 
 {GetInstaller gets a new installer for ModuleName and initialises parameters unless one exist already.}
@@ -815,164 +823,179 @@ begin
   // FPC:
   if uppercase(ModuleName)='FPC' then
     begin
-    if assigned(Installer) then
+    if assigned(FInstaller) then
       begin
       // Check for existing normal compiler, or exact same cross compiler
-      if (not crosscompiling and (Installer is TFPCNativeInstaller)) or
+      if (not crosscompiling and (FInstaller is TFPCNativeInstaller)) or
         ( crosscompiling and
-        (Installer is TFPCCrossInstaller) and
-        (Installer.CrossOS_Target=FParent.CrossOS_Target) and
-        (Installer.CrossCPU_Target=FParent.CrossCPU_Target)
+        (FInstaller is TFPCCrossInstaller) and
+        (FInstaller.CrossOS_Target=FParent.CrossOS_Target) and
+        (FInstaller.CrossCPU_Target=FParent.CrossCPU_Target)
         ) then
         begin
-        exit; //all fine, continue with current installer
+        exit; //all fine, continue with current FInstaller
         end
       else
-        Installer.free; // get rid of old installer
+        FInstaller.free; // get rid of old FInstaller
       end;
     if CrossCompiling then
       begin
-      Installer:=TFPCCrossInstaller.Create;
-      Installer.CrossCPU_Target:=FParent.CrossCPU_Target;
-      Installer.CrossOPT:=FParent.CrossOPT;
-      Installer.CrossOS_Target:=FParent.CrossOS_Target;
+      FInstaller:=TFPCCrossInstaller.Create;
+      FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
+      FInstaller.CrossOPT:=FParent.CrossOPT;
+      FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
       end
     else
-      Installer:=TFPCNativeInstaller.Create;
-    Installer.BaseDirectory:=FParent.FPCDirectory;
-    (Installer as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
-    (Installer as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
-    Installer.Compiler:='';  //bootstrap used
-    Installer.CompilerOptions:=FParent.FPCOPT;
-    Installer.DesiredRevision:=FParent.FPCDesiredRevision;
-    Installer.URL:=FParent.FPCURL;
+      FInstaller:=TFPCNativeInstaller.Create;
+    FInstaller.BaseDirectory:=FParent.FPCDirectory;
+    (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
+    (FInstaller as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
+    FInstaller.Compiler:='';  //bootstrap used
+    FInstaller.CompilerOptions:=FParent.FPCOPT;
+    FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
+    FInstaller.URL:=FParent.FPCURL;
     end
 
   // Lazarus:
   else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LAZBUILD') or (uppercase(ModuleName)='LCL') or
     (uppercase(ModuleName)='USERIDE') then
     begin
-    if assigned(Installer) then
+    if assigned(FInstaller) then
       begin
-      if (not crosscompiling and (Installer is TLazarusNativeInstaller)) or
-        (crosscompiling and (Installer is TLazarusCrossInstaller)) then
+      if (not crosscompiling and (FInstaller is TLazarusNativeInstaller)) or
+        (crosscompiling and (FInstaller is TLazarusCrossInstaller)) then
         begin
-        exit; //all fine, continue with current installer
+        exit; //all fine, continue with current FInstaller
         end
       else
-        Installer.free; // get rid of old installer
+        FInstaller.free; // get rid of old FInstaller
       end;
     if CrossCompiling then
       begin
-      Installer:=TLazarusCrossInstaller.Create;
-      Installer.CrossCPU_Target:=FParent.CrossCPU_Target;
-      Installer.CrossOPT:=FParent.CrossOPT;
-      Installer.CrossOS_Target:=FParent.CrossOS_Target;
+      FInstaller:=TLazarusCrossInstaller.Create;
+      FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
+      FInstaller.CrossOPT:=FParent.CrossOPT;
+      FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
       end
     else
-      Installer:=TLazarusNativeInstaller.Create;
-    Installer.BaseDirectory:=FParent.LazarusDirectory ;
+      FInstaller:=TLazarusNativeInstaller.Create;
+    FInstaller.BaseDirectory:=FParent.LazarusDirectory ;
     if FParent.CompilerName='' then
-      Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+      FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
     else
-      Installer.Compiler:=FParent.CompilerName;
-    Installer.CompilerOptions:=FParent.LazarusOPT;
-    Installer.DesiredRevision:=FParent.LazarusDesiredRevision;
+      FInstaller.Compiler:=FParent.CompilerName;
+    FInstaller.CompilerOptions:=FParent.LazarusOPT;
+    FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     // CrossLCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
-    (Installer As TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
-    (Installer As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
-    (Installer As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-    Installer.URL:=FParent.LazarusURL;
+    (FInstaller As TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
+    (FInstaller As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
+    (FInstaller As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+    FInstaller.URL:=FParent.LazarusURL;
     end
 
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
   else if uppercase(ModuleName)='HELPFPC' then
       begin
-      if assigned(Installer) then
+      if assigned(FInstaller) then
         begin
-        if (Installer is THelpFPCInstaller) then
+        if (FInstaller is THelpFPCInstaller) then
           begin
-          exit; //all fine, continue with current installer
+          exit; //all fine, continue with current FInstaller
           end
         else
-          Installer.free; // get rid of old installer
+          FInstaller.free; // get rid of old FInstaller
         end;
-      Installer:=THelpFPCInstaller.Create;
-      Installer.BaseDirectory:=FParent.FPCDirectory;
+      FInstaller:=THelpFPCInstaller.Create;
+      FInstaller.BaseDirectory:=FParent.FPCDirectory;
       if FParent.CompilerName='' then
-        Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
       else
-        Installer.Compiler:=FParent.CompilerName;
+        FInstaller.Compiler:=FParent.CompilerName;
       end
 
   else if uppercase(ModuleName)='HELPLAZARUS' then
       begin
-      if assigned(Installer) then
+      if assigned(FInstaller) then
         begin
-       if (Installer is THelpLazarusInstaller) then
+       if (FInstaller is THelpLazarusInstaller) then
           begin
-          exit; //all fine, continue with current installer
+          exit; //all fine, continue with current FInstaller
           end
         else
-          Installer.free; // get rid of old installer
+          FInstaller.free; // get rid of old FInstaller
         end;
-      Installer:=THelpLazarusInstaller.Create;
-      Installer.BaseDirectory:=FParent.LazarusDirectory ;
+      FInstaller:=THelpLazarusInstaller.Create;
+      FInstaller.BaseDirectory:=FParent.LazarusDirectory ;
       if FParent.CompilerName='' then
-        Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
       else
-        Installer.Compiler:=FParent.CompilerName;
-      (Installer as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
-      (Installer as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+        FInstaller.Compiler:=FParent.CompilerName;
+      (FInstaller as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
+      (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       end
 
   else       // this is a universal module
     begin
-      if assigned(Installer) then
+      if assigned(FInstaller) then
         begin
-        if (Installer is TUniversalInstaller) and
-          (CurrentModule= ModuleName) then
+        if (FInstaller is TUniversalInstaller) and
+          (FCurrentModule= ModuleName) then
           begin
-          exit; //all fine, continue with current installer
+          exit; //all fine, continue with current FInstaller
           end
         else
-          Installer.free; // get rid of old installer
+          FInstaller.free; // get rid of old FInstaller
         end;
-      Installer:=TUniversalInstaller.Create;
-      CurrentModule:=ModuleName;
+      FInstaller:=TUniversalInstaller.Create;
+      FCurrentModule:=ModuleName;
       //assign properties
-      (Installer as TUniversalInstaller).FPCDir:=FParent.FFPCDirectory;
+      (FInstaller as TUniversalInstaller).FPCDir:=FParent.FFPCDirectory;
       // Use compileroptions for chosen FPC compile options...
-      Installer.CompilerOptions:=FParent.FPCOPT;
+      FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
-      (Installer as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
-      (Installer as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
-      (Installer as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
+      (FInstaller as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
+      (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       if FParent.CompilerName='' then
-        Installer.Compiler:=Installer.GetCompilerInDir(FParent.FPCDirectory)
+        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
       else
-        Installer.Compiler:=FParent.CompilerName;
+        FInstaller.Compiler:=FParent.CompilerName;
     end;
 
-  Installer.HTTPProxyHost:=FParent.HTTPProxyHost;
-  Installer.HTTPProxyPort:=FParent.HTTPProxyPort;
-  Installer.HTTPProxyUser:=FParent.HTTPProxyUser;
-  Installer.HTTPProxyPassword:=FParent.HTTPProxyPassword;
-  Installer.KeepLocalChanges:=FParent.KeepLocalChanges;
-  Installer.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
-  Installer.PatchCmd:=FParent.PatchCmd;
-  Installer.Verbose:=FParent.Verbose;
-  Installer.Log:=FParent.FLog;
+  FInstaller.HTTPProxyHost:=FParent.HTTPProxyHost;
+  FInstaller.HTTPProxyPort:=FParent.HTTPProxyPort;
+  FInstaller.HTTPProxyUser:=FParent.HTTPProxyUser;
+  FInstaller.HTTPProxyPassword:=FParent.HTTPProxyPassword;
+  FInstaller.KeepLocalChanges:=FParent.KeepLocalChanges;
+  FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
+  FInstaller.PatchCmd:=FParent.PatchCmd;
+  FInstaller.Verbose:=FParent.Verbose;
+  FInstaller.Log:=FParent.FLog;
   {$IFDEF MSWINDOWS}
-  Installer.MakeDirectory:=FParent.MakeDirectory;
+  FInstaller.MakeDirectory:=FParent.MakeDirectory;
   {$ENDIF}
+end;
+
+function TSequencer.GetText: string;
+var
+  i:integer;
+begin
+  for i:=Low(FStateMachine) to High(FStateMachine) do
+  begin
+    // todo: add translation of instr
+    result:=result+
+      'Instruction number: '+inttostr(ord(FStateMachine[i].instr))+' '+
+      FStateMachine[i].param;
+    if i<High(FStateMachine) then
+      result:=result+LineEnding;
+  end;
 end;
 
 function TSequencer.IsSkipped(ModuleName: string): boolean;
 begin
-  result:=assigned(SkipList) and (SkipList.IndexOf(Uppercase(ModuleName))>=0);
+  result:=assigned(FSkipList) and (FSkipList.IndexOf(Uppercase(ModuleName))>=0);
 end;
 
 procedure TSequencer.ResetAllExecuted(SkipFPC: boolean);
@@ -1048,13 +1071,13 @@ while Sequence<>'' do
     key:=NoWhite(key);
     if key<>'' then
       begin
-      i:=Length(StateMachine);
-      SetLength(StateMachine,i+1);
+      i:=Length(FStateMachine);
+      SetLength(FStateMachine,i+1);
       instr:=KeyStringToKeyword(Uppercase(Key));
-      StateMachine[i].instr:=instr;
+      FStateMachine[i].instr:=instr;
       if instr=SMInvalid then
         FParent.WritelnLog('Invalid instruction '+Key+' in sequence '+sequencename);
-      StateMachine[i].param:=param;
+      FStateMachine[i].param:=param;
       if instr in [SMdeclare,SMdeclareHidden] then
         begin
         AddToModuleList(uppercase(param),i);
@@ -1076,7 +1099,7 @@ var
   seq:string;
 
 begin
-AddToModuleList('ONLY',Length(StateMachine));
+AddToModuleList('ONLY',Length(FStateMachine));
 while Onlymodules<>'' do
   begin
   i:=pos(',',Onlymodules);
@@ -1086,20 +1109,20 @@ while Onlymodules<>'' do
     seq:=Onlymodules;
   delete(Onlymodules,1,length(seq)+1);
   // We could build a sequence string and have it parsed by AddSequence.
-  // Pro: no dependency on statemachine structure
+  // Pro: no dependency on FStateMachine structure
   // Con: dependency on sequence format; double parsing
   if seq<>'' then
     begin
-    i:=Length(StateMachine);
-    SetLength(StateMachine,i+1);
-    StateMachine[i].instr:=SMdo;
-    StateMachine[i].param:=seq;
+    i:=Length(FStateMachine);
+    SetLength(FStateMachine,i+1);
+    FStateMachine[i].instr:=SMdo;
+    FStateMachine[i].param:=seq;
     end;
   end;
-i:=Length(StateMachine);
-SetLength(StateMachine,i+1);
-StateMachine[i].instr:=SMend;
-StateMachine[i].param:='';
+i:=Length(FStateMachine);
+SetLength(FStateMachine,i+1);
+FStateMachine[i].instr:=SMend;
+FStateMachine[i].param:='';
 result:=true;
 end;
 
@@ -1112,12 +1135,12 @@ if (idx >0) then
   begin
   SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
   i:=SeqAttr^.EntryPoint;
-  while i<length(StateMachine) do
+  while i<length(FStateMachine) do
     begin
-    StateMachine[i].param:='';
+    FStateMachine[i].param:='';
     i:=i+1;
     end;
-  SetLength(StateMachine,SeqAttr^.EntryPoint);
+  SetLength(FStateMachine,SeqAttr^.EntryPoint);
   Freemem(FParent.FModuleList.Objects[idx]);
   FParent.FModuleList.Delete(idx);
   end;
@@ -1132,10 +1155,10 @@ var
 
   Procedure CleanUpInstaller;
   begin
-    if assigned(Installer) then
+    if assigned(FInstaller) then
       begin
-      Installer.Free;
-      Installer:=nil;
+      FInstaller.Free;
+      FInstaller:=nil;
       end;
   end;
 
@@ -1175,7 +1198,7 @@ begin
         exit;
         end;
       end;
-    // Get entry point in statemachine
+    // Get entry point in FStateMachine
     InstructionPointer:=SeqAttr^.EntryPoint;
     EntryPoint:=InstructionPointer;
     // run sequence until end or failure
@@ -1183,41 +1206,41 @@ begin
       begin
       { For debugging state machine sequence:
       FParent.writelnlog('State machine: ',true);
-      FParent.writelnlog(StateMachine[InstructionPointer].instr,true);
-      FParent.writelnlog(StateMachine[InstructionPointer].param,true);
+      FParent.writelnlog(FStateMachine[InstructionPointer].instr,true);
+      FParent.writelnlog(FStateMachine[InstructionPointer].param,true);
       }
-      case StateMachine[InstructionPointer].instr of
+      case FStateMachine[InstructionPointer].instr of
         SMdeclare     :;
         SMdeclareHidden :;
-        SMdo          : if not IsSkipped(StateMachine[InstructionPointer].param) then
-                          result:=Run(StateMachine[InstructionPointer].param);
-        SMrequire     : result:=Run(StateMachine[InstructionPointer].param);
-        SMexec        : result:=DoExec(StateMachine[InstructionPointer].param);
+        SMdo          : if not IsSkipped(FStateMachine[InstructionPointer].param) then
+                          result:=Run(FStateMachine[InstructionPointer].param);
+        SMrequire     : result:=Run(FStateMachine[InstructionPointer].param);
+        SMexec        : result:=DoExec(FStateMachine[InstructionPointer].param);
         SMend         : begin
                           SeqAttr^.Executed:=ESSucceeded;
                           CleanUpInstaller;
                           exit; //success
                         end;
-        SMcleanmodule : result:=DoCleanModule(StateMachine[InstructionPointer].param);
-        SMgetmodule   : result:=DoGetModule(StateMachine[InstructionPointer].param);
-        SMbuildmodule : result:=DoBuildModule(StateMachine[InstructionPointer].param);
-        SMuninstallmodule: result:=DoUnInstallModule(StateMachine[InstructionPointer].param);
-        SMconfigmodule: result:=DoConfigModule(StateMachine[InstructionPointer].param);
+        SMcleanmodule : result:=DoCleanModule(FStateMachine[InstructionPointer].param);
+        SMgetmodule   : result:=DoGetModule(FStateMachine[InstructionPointer].param);
+        SMbuildmodule : result:=DoBuildModule(FStateMachine[InstructionPointer].param);
+        SMuninstallmodule: result:=DoUnInstallModule(FStateMachine[InstructionPointer].param);
+        SMconfigmodule: result:=DoConfigModule(FStateMachine[InstructionPointer].param);
         SMResetLCL    : DoResetLCL;
-        SMSetOS       : DoSetOS(StateMachine[InstructionPointer].param);
-        SMSetCPU      : DoSetCPU(StateMachine[InstructionPointer].param);
+        SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
+        SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
         end;
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
         FParent.WritelnLog('Error running fpcup. Technical details: error executing sequence '+SequenceName+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
-          ', param: '+StateMachine[InstructionPointer].param);
+          ', param: '+FStateMachine[InstructionPointer].param);
         CleanUpInstaller;
         exit; //failure, bail out
         end;
       InstructionPointer:=InstructionPointer+1;
-      if InstructionPointer>=length(StateMachine) then  //somebody forgot end
+      if InstructionPointer>=length(FStateMachine) then  //somebody forgot end
         begin
         SeqAttr^.Executed:=ESSucceeded;
         CleanUpInstaller;
