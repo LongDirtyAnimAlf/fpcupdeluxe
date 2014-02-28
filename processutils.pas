@@ -141,10 +141,15 @@ type
 
 // Convenience functions
 
+// Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload;
+// Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
+// Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
+// Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
+// Runs command, returns result code. Negative codes are processutils internal error codes
 // PrependPath is prepended to existing path. If empty, keep current path
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean; PrependPath: string): integer; overload;
 // Writes output to console

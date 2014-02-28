@@ -98,7 +98,8 @@ type
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
-    // Check executable is the right one: run Executable with Parameters and look for ExpectOutput. Returns false if no match.
+    // Check executable is the right one: run Executable with Parameters
+    // and look for ExpectOutput. Returns false if no match.
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     // Make a list of all binutils that can be downloaded
     procedure CreateBinutilsList;
@@ -465,6 +466,7 @@ begin
       end
       else
       begin
+        // We're not looking for any specific output so we're happy
         OperationSucceeded := true;
       end;
     end
@@ -483,7 +485,7 @@ begin
     end;
   end;
   if OperationSucceeded then
-    infoln('Found valid ' + ExeName + ' application.',etdebug);
+    infoln('Found valid ' + ExeName + ' application.',etDebug);
   Result := OperationSucceeded;
 end;
 

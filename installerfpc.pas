@@ -1182,10 +1182,11 @@ begin
   if not (OperationSucceeded) then
     infoln('Error copying over compiler to '+IncludeTrailingPathDelimiter(FBinPath),etError);
 
-  // create link 'units' below FBaseDirectory to <somewhere>/lib/fpc/$fpcversion/units
+  // create link 'units' below FBaseDirectory to
+  // <somewhere>/lib/fpc/$fpcversion/units
   DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
   fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
-  pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
+    pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
   end;
   {$ENDIF UNIX}
 
