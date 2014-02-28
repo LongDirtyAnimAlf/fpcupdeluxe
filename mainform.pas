@@ -74,6 +74,7 @@ type
     procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
     procedure btnSwitchClick(Sender: TObject);
+    procedure FileNameEditExit(Sender: TObject);
     procedure IniMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
       );
     procedure OutputMemoKeyDown(Sender: TObject; var Key: Word;
@@ -265,7 +266,7 @@ var
   Sections: TStringList;
   MyIniFile: TIniFile;
 begin
-  // Load selected ini file
+  // (re)load selected ini file
   IniMemo.BeginUpdate(false);
   IniMemo.Lines.LoadFromFile(INIFile);
   FCurrentINIFile:=INIFile;
@@ -500,6 +501,11 @@ begin
     ShowMessage('Switch succeeded. Please run fpcup with the new SVN repository URL.')
   else
     ShowMessage('Switch failed. SVN switch gave result code:'+inttostr(ResultCode));
+end;
+
+procedure TForm1.FileNameEditExit(Sender: TObject);
+begin
+  LoadProfilesFromFile(FileNameEdit.FileName);
 end;
 
 

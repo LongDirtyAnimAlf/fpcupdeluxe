@@ -547,6 +547,7 @@ object Form1: TForm1
         NumGlyphs = 1
         MaxLength = 0
         TabOrder = 1
+        OnExit = FileNameEditExit
       end
       object ProfileSelect: TComboBox
         Left = 56
@@ -554,6 +555,9 @@ object Form1: TForm1
         Hint = 'Choose the profile you want to enable'
         Top = 61
         Width = 164
+        AutoComplete = True
+        AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
+        AutoDropDown = True
         ItemHeight = 13
         OnGetItems = ProfileSelectGetItems
         OnSelect = ProfileSelectSelect
