@@ -484,8 +484,6 @@ begin
   FSequencer.AddSequence(installerUniversal.Sequences);
   // append universal modules to the lists
   FSequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
-  infoln('InstallerManager: LoadFPCUPConfig: loaded sequence: '+LineEnding+
-    FSequencer.Text,etDebug);
   result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 
