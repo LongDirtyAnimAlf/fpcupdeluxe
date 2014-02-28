@@ -462,12 +462,12 @@ begin
     end;
 
     // Only consider building if lcl.chm is not read-only.
-    // Then it should be old or empty.
+    // Then it should be old (> 7 days) or empty.
     // We assume that readonly means the user doesn't want to
     // overwrite.
     if (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
       and
-      ((DaysBetween(Now,LCLDate)>1)
+      ((DaysBetween(Now,LCLDate)>7)
       or (FileSize(ExistingLCLHelp)=0)) then
     begin
       BuildLCLDocsExe:=FBuildLCLDocsExeDirectory+'build_lcl_docs'+GetExeExt;
@@ -538,7 +538,6 @@ begin
         ProcessEx.Executable := BuildLCLDocsExe;
         // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
-        //todo: check: perhaps this needs to be FBuildLCLDocsExeDirectory
         ProcessEx.CurrentDirectory:=FTargetDirectory;
         ProcessEx.Parameters.Clear;
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
