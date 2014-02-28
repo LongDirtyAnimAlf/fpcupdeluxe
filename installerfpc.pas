@@ -614,8 +614,10 @@ begin
       end;
     end
   else
+    begin
+    infoln(ModuleName+': Error trying to compile FPC.',etDebug);
     FCompiler:='////\\\Error trying to compile FPC\|!';
-
+    end;
 
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
