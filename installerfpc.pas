@@ -1197,12 +1197,14 @@ begin
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
     begin
       // Some 2.7 trunk put fpcmkcfg in bin itself
+      infoln(ModuleName+': did not find '+fpcmkcfg+'. Now looking in '+
+        FBaseDirectory+DirectorySeparator+'bin.',etDebug);
       fpcmkcfg:=IncludeTrailingPathDelimiter(FBaseDirectory)+
         'bin'+DirectorySeparator+'fpcmkcfg';
       if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
       begin
+        infoln('Could not find fpcmkcfg in '+fpcmkcfg+'. Aborting.',etError);
         fpcmkcfg:='';
-        infoln('Could not find fpcmkcfg. Aborting.',etError);
         OperationSucceeded:=false;
       end
       else
