@@ -99,8 +99,6 @@ begin
   writeln('DON''T PANIC!');
   writeln('Everything below is optional...');
   writeln('');
-  writeln('fpcup --<options>');
-  writeln('');
   writeln('fpcup can work with modules - see "only", "include", "skip" below');
   writeln('List of all modules:');
   SortedModules:=TStringList.Create;
@@ -120,6 +118,8 @@ begin
     begin
     writeln(ModuleEnabledList[i]);
     end;
+  writeln('');
+  writeln('fpcup --<option> --<option>...');
   writeln('');
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
