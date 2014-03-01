@@ -1197,7 +1197,7 @@ begin
     fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
     begin
-      // Some 2.7 trunk put fpcmkcfg in bin itself
+      // Newer 2.7 trunk versions put fpcmkcfg in bin itself
       infoln(ModuleName+': did not find '+fpcmkcfg+'. Now looking in '+
         FBaseDirectory+DirectorySeparator+'bin.',etDebug);
       fpcmkcfg:=IncludeTrailingPathDelimiter(FBaseDirectory)+
