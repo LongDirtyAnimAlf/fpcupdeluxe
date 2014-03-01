@@ -328,8 +328,8 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit 9dd5738547df+ (Fri Feb 28 16:37:58 2014 +0100)
-Build date: 2014/03/01 09:42:20
+Version: based on commit ade0c88604b8 (Sat Mar 01 10:08:01 2014 +0100)
+Build date: 2014/03/01 10:08:26
 Compiled for CPU: i386 on win32
 
 DON'T PANIC!
@@ -622,4 +622,4 @@ Options are not required; they include:
 
 Share and enjoy!
 
-fpcup: info: 01/03/2014 10:06:58: fpcup finished.
+fpcup: info: 01/03/2014 10:08:36: fpcup finished.
