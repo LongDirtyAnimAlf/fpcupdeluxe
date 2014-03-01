@@ -1063,7 +1063,7 @@ object Form1: TForm1
         MouseActions = <>
         MouseSelActions = <>
         VisibleSpecialChars = [vscSpace, vscTabAtLast]
-        ScrollBars = ssAutoVertical
+        ScrollBars = ssAutoBoth
         SelectedColor.FrameEdges = sfeAround
         SelectedColor.BackPriority = 50
         SelectedColor.ForePriority = 50

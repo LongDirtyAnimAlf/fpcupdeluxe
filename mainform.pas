@@ -266,20 +266,28 @@ var
   Sections: TStringList;
   MyIniFile: TIniFile;
 begin
-  // (re)load selected ini file
-  IniMemo.BeginUpdate(false);
-  IniMemo.Lines.LoadFromFile(INIFile);
-  FCurrentINIFile:=INIFile;
-  MyIniFile:=TIniFile.Create(INIFile, true);
-  Sections:=TStringList.Create;
-  try
-    MyIniFile.ReadSections(Sections);
-    ProfileSelect.Clear;
-    ProfileSelect.Items.Assign(Sections); //bug in .AddStrings LCL combobox handling
-  finally
-    IniMemo.EndUpdate;
-    Sections.Free;
-    MyIniFile.Free;
+  if FileExistsUTF8(INIFile) then
+  begin
+    // (re)load selected ini file
+    IniMemo.BeginUpdate(false);
+    IniMemo.Lines.LoadFromFile(INIFile);
+    FCurrentINIFile:=INIFile;
+    MyIniFile:=TIniFile.Create(INIFile, true);
+    Sections:=TStringList.Create;
+    try
+      MyIniFile.ReadSections(Sections);
+      ProfileSelect.Clear;
+      ProfileSelect.Items.Assign(Sections); //bug in .AddStrings LCL combobox handling
+    finally
+      IniMemo.EndUpdate;
+      Sections.Free;
+      MyIniFile.Free;
+    end;
+  end
+  else
+  begin
+    IniMemo.Lines.Clear;
+    ShowMessage('File '+INIFile+' does not exist.');
   end;
 end;
 
