@@ -328,15 +328,12 @@ from the source Subversion/SVN repositories,
 compile, and install.
 Result: you get a fresh, up-to-date Lazarus/FPC installation.
 
-Version: based on commit 10e19d57d552+ (Tue Dec 31 09:15:08 2013 +0100)
-Build date: 2013/12/31 13:05:37
+Version: based on commit 9dd5738547df+ (Fri Feb 28 16:37:58 2014 +0100)
+Build date: 2014/03/01 09:42:20
 Compiled for CPU: i386 on win32
-
 
 DON'T PANIC!
 Everything below is optional...
-
-fpcup --<options>
 
 fpcup can work with modules - see "only", "include", "skip" below
 List of all modules:
@@ -353,9 +350,7 @@ codelibrarian
 codelibrarianclean
 codelibrarianuninstall
 crosswin32-64
-crosswin32-64Clean
 crosswin64-32
-crosswin64-32Clean
 dcpcrypt
 dcpcryptclean
 dcpcryptuninstall
@@ -363,7 +358,6 @@ default
 defaultclean
 defaultuninstall
 defaultwin32
-defaultwin32clean
 defaultwin32uninstall
 defaultwin64
 defaultwin64uninstall
@@ -389,6 +383,9 @@ fpcupuninstall
 fpspreadsheet
 fpspreadsheetclean
 fpspreadsheetuninstall
+glscene
+glsceneclean
+glsceneuninstall
 greyhound
 greyhoundclean
 greyhounduninstall
@@ -434,6 +431,7 @@ lazpaintuninstall
 lazres
 lazresclean
 lazresuninstall
+LCLCross
 leptonica
 leptonicaclean
 leptonicauninstall
@@ -493,6 +491,8 @@ LAZDATADESKTOP
 DOCEDITOR
 FPCDOCS
 LAZRES
+
+fpcup --<option> --<option>...
 
 Options are not required; they include:
  help                  Show this text
@@ -583,7 +583,7 @@ Options are not required; they include:
                        trunk (newest version):
                        http://svn.freepascal.org/svn/lazarus/trunk
                        Accepts shortcuts: 
-                       trunk,1.3,1.0.12,1.0.10,1.0.8,1.0.6,1.0.4,1.0.2,1.0
+                       trunk,1.3,1.0.14,1.0.12
  lclplatform=<name>    LCL widget set. <name> has to be one of the following:
                        carbon,fpgui,gtk,gtk2,qt,win32,wince
  logfilename=<file>    Location of log file. If nothing specified,
@@ -622,4 +622,4 @@ Options are not required; they include:
 
 Share and enjoy!
 
-Info: 31/12/2013 13:08:04: fpcup finished.
+fpcup: info: 01/03/2014 10:06:58: fpcup finished.
