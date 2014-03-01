@@ -91,6 +91,7 @@ end;"/>
           </CodeGeneration>
           <Linking>
             <Debugging>
+              <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -180,6 +181,7 @@ end;"/>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -224,6 +226,7 @@ end;"/>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -268,6 +271,7 @@ end;"/>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
           </Linking>
@@ -556,6 +560,7 @@ end;"/>
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <StripSymbols Value="True"/>
         <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <LinkSmart Value="True"/>
