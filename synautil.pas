@@ -1,5 +1,5 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 004.015.005 |
+| Project : Ararat Synapse                                       | 004.015.006 |
 |==============================================================================|
 | Content: support procedures and functions                                    |
 |==============================================================================|
@@ -336,7 +336,7 @@ procedure WriteStrToStream(const Stream: TStream; Value: AnsiString);
 
 {:Return filename of new temporary file in Dir (if empty, then default temporary
  directory is used) and with optional filename prefix.}
-function GetTempFile(const Dir, prefix: AnsiString): AnsiString;
+function GetTempFile(const Dir, prefix: String): String;
 
 {:Return padded string. If length is greater, string is truncated. If length is
  smaller, string is padded by Pad character.}
@@ -1822,11 +1822,11 @@ function tempnam(const Path: PAnsiChar; const Prefix: PAnsiChar): PAnsiChar; cde
   external libc name _PU + 'tempnam';
 {$ENDIF}
 
-function GetTempFile(const Dir, prefix: AnsiString): AnsiString;
+function GetTempFile(const Dir, prefix: String): String;
 {$IFNDEF FPC}
 {$IFDEF MSWINDOWS}
 var
-  Path: AnsiString;
+  Path: String;
   x: integer;
 {$ENDIF}
 {$ENDIF}
