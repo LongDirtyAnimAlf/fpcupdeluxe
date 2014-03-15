@@ -654,7 +654,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   end;
 
   function CreateLazarusScript:boolean;
-  //calculate InstalledLazarus. Don't use this function when lazarus is not installed.
+  // Find out InstalledLazarus location, create desktop shortcuts etc
+  // Don't use this function when lazarus is not installed.
   var
     InstalledLazarus:string;
   begin
@@ -663,7 +664,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   begin
     infoln('Lazarus: creating desktop shortcut:',etInfo);
     try
-      //Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+      // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
       {$IFDEF MSWINDOWS}
       CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
@@ -680,8 +681,9 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ENDIF (defined(LINUX)) or (defined(BSD))}
       {$ENDIF UNIX}
-    finally
-      //Ignore problems creating shortcut
+    except
+      // Ignore problems creating shortcut
+      infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
     end;
   end;
   end;
@@ -701,7 +703,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       DeleteFileUTF8(FParent.ShortcutNameLazarus);
       {$ENDIF UNIX}
     finally
-      //Ignore problems creating shortcut
+      //Ignore problems deleting shortcut
     end;
   end;
   end;
