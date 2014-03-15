@@ -275,6 +275,7 @@ const
   // ftp://freepascal.dfmk.hu/pub/lazarus/snapshots/fpc-lazarus-doc-chm-20120622.tar.bz2
   //Laz 1.0 version
   //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0/fpc-lazarus-doc-chm-1.0.zip/download';
+  // Laz 1.2 version:
   FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0.12/fpc-lazarus-doc-chm-1.0.12.zip/download';
 var
   DocsZip: string;

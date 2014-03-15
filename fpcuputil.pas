@@ -212,10 +212,10 @@ begin
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments);
     XdgDesktopContent.Add('Name='+ShortcutName);
-    XdgDesktopContent.SaveToFile(XdgDesktopFile);
     // We're going to try and call xdg-desktop-icon
     // this may fail if shortcut exists already
     try
+      XdgDesktopContent.SaveToFile(XdgDesktopFile);
       OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon install ' + XdgDesktopFile,false)=0);
     except
       OperationSucceeded:=false;

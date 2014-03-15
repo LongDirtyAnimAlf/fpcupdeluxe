@@ -1073,7 +1073,15 @@ begin
     writelnlog('Command output:', true);
     // Dump command output to screen and detailed log
     infoln(Sender.OutputString,etInfo);
-    Sender.OutputStrings.SaveToFile(TempFileName);
+    try
+      Sender.OutputStrings.SaveToFile(TempFileName);
+    except
+      on E: Exception do
+      begin
+        // Preferably continue if we can but do inform user of problems
+        infoln('LogError: Error writing verbose output to '+TempFileName+': '+E.Message,etError);
+      end;
+    end;
     WritelnLog('  output logged in ' + TempFileName, false);
   end;
 end;
