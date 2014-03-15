@@ -8,7 +8,7 @@ FPC/Lazarus build process as much as possible.
 
 fpcup is a tool that gets the current version of FreePascal Compiler (FPC) and 
 Lazarus IDE from their subversion repositories and compiles/installs them.
-It adds CHM documentation and configure the Lazarus help for you.
+It adds CHM documentation and configures the Lazarus help for you.
 
 It also creates a shortcut on your desktop that points to the new Lazarus 
 installation.
