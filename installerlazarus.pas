@@ -31,6 +31,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+{not $define lazarus_parallel_make} {for make --jobs= support; for now Lazarus does not seem to support parallel make -> error 512}
+
 interface
 
 uses
@@ -226,9 +228,7 @@ begin
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
-        {$IFNDEF windows}
-        { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
-        Re-enable when changed to make 3.82 }
+        {$IFDEF lazarus_parallel_make}
         if FCPUCount>1 then
           ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
         {$ENDIF}
@@ -352,9 +352,7 @@ begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
-    {$IFNDEF windows}
-    { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
-    Re-enable when changed to make 3.82 }
+    {$IFDEF lazarus_parallel_make}
     if FCPUCount>1 then
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     {$ENDIF}
@@ -840,9 +838,7 @@ begin
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
-  {$IFNDEF windows}
-  { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
-  Re-enable when changed to make 3.82 }
+  {$IFDEF lazarus_parallel_make}
   if FCPUCount>1 then
     ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
   {$ENDIF}
