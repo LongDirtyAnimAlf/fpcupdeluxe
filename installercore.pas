@@ -35,7 +35,7 @@ interface
 uses
   Classes, SysUtils,
   GitClient, HGClient, SvnClient,
-  processutils, m_crossinstaller, fpcuputil;
+  processutils, m_crossinstaller, fpcuputil, cpucount;
 
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
@@ -69,6 +69,7 @@ type
     FBunzip2: string;
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
+    FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOPT: string; //options passed (only) when cross-compiling
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
@@ -1143,6 +1144,7 @@ begin
   inherited Create;
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
+  FCPUCount := GetLogicalCpuCount;
   FGitClient := TGitClient.Create;
   FHGClient := THGClient.Create;
   FSVNClient := TSVNClient.Create;

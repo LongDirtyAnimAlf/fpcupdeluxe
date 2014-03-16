@@ -226,6 +226,12 @@ begin
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
+        {$IFNDEF windows}
+        { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+        Re-enable when changed to make 3.82 }
+        if FCPUCount>1 then
+          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+        {$ENDIF}
         ProcessEx.Parameters.Add('FPC=' + FCompiler);
         ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
         ProcessEx.Parameters.Add('FPCDIR=' + FFPCDir); //Make sure our FPC units can be found by Lazarus
@@ -346,6 +352,12 @@ begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
+    {$IFNDEF windows}
+    { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+    Re-enable when changed to make 3.82 }
+    if FCPUCount>1 then
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    {$ENDIF}
     ProcessEx.Parameters.Add('FPC=' + FCompiler);
     ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('FPCDIR=' + FFPCDir); //Make sure our FPC units can be found by Lazarus
@@ -828,6 +840,12 @@ begin
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
+  {$IFNDEF windows}
+  { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+  Re-enable when changed to make 3.82 }
+  if FCPUCount>1 then
+    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+  {$ENDIF}
   ProcessEx.Parameters.Add('FPC=' + FCompiler + '');
   ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('UPXPROG=echo');  //Don't use UPX

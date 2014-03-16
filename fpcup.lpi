@@ -355,7 +355,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="37">
+    <Units Count="38">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -539,6 +539,11 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_win32_to_linuxmips"/>
       </Unit36>
+      <Unit37>
+        <Filename Value="cpucount.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="cpucount"/>
+      </Unit37>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

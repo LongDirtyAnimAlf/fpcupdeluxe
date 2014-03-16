@@ -276,6 +276,12 @@ begin
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
+      {$IFNDEF windows}
+      { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+      Re-enable when changed to make 3.82 }
+      if FCPUCount>1 then
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)+' FPMAKEOPT=--threads='+inttostr(FCPUCount)); // parallel processing
+      {$ENDIF}
       ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -375,6 +381,12 @@ begin
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
         infoln('Running Make crossinstall (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')', etinfo);
+        {$IFNDEF windows}
+        { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+        Re-enable when changed to make 3.82 }
+        if FCPUCount>1 then
+          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+        {$ENDIF}
         ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
         {$IFDEF UNIX}
@@ -493,6 +505,8 @@ begin
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
+  if FCPUCount>1 then
+    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   // Override makefile checks that checks for stable compiler in FPC trunk
@@ -557,6 +571,12 @@ begin
   FErrorLog.Clear;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
+  {$IFNDEF windows}
+  { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+  Re-enable when changed to make 3.82 }
+  if FCPUCount>1 then
+    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+  {$ENDIF}
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -1068,6 +1088,8 @@ begin
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
   ProcessEx.Parameters.Clear;
+  if FCPUCount>1 then
+    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
   // Copy over user-specified instruction sets e.g. for trunk compiler...
@@ -1107,6 +1129,12 @@ begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
     ProcessEx.Parameters.Clear;
+    {$IFNDEF windows}
+    { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+    Re-enable when changed to make 3.82 }
+    if FCPUCount>1 then
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    {$ENDIF}
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('OS_TARGET=win64');
@@ -1135,6 +1163,8 @@ begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
     ProcessEx.Parameters.Clear;
+    if FCPUCount>1 then
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
@@ -1352,6 +1382,12 @@ begin
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
+    {$IFNDEF windows}
+    { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
+    Re-enable when changed to make 3.82 }
+    if FCPUCount>1 then
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    {$ENDIF}
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX

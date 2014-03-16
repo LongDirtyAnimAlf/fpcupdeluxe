@@ -65,7 +65,7 @@ uses {$IFDEF UNIX}
   synacode, ftpsend, synafpc, synaip, synautil, synsock,
   blcksock, installerCore, installerfpc, installerLazarus, installerHelp,
   installerUniversal, installerManager, wininstaller, commandline,
-  hgclient, svnclient, repoclient, gitclient;
+  hgclient, svnclient, repoclient, gitclient, cpucount;
 
 
 //{$R *.res} //Keep it simple, no resources
