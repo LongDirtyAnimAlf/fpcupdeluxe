@@ -17,6 +17,9 @@ function sysconf(i: cint): clong; cdecl; external name 'sysconf';
 {$IF defined(windows)}
 uses windows;
 {$endif}
+{$IF defined(darwin)}
+uses ctypes, sysctl;
+{$endif}
 
 function GetLogicalCpuCount: integer;
 // returns a good default for the number of threads on this system
