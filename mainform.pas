@@ -75,10 +75,6 @@ type
     procedure btnSaveLogClick(Sender: TObject);
     procedure btnSwitchClick(Sender: TObject);
     procedure FileNameEditExit(Sender: TObject);
-    procedure IniMemoKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState
-      );
-    procedure OutputMemoKeyDown(Sender: TObject; var Key: Word;
-      Shift: TShiftState);
     procedure ProfileSelectSelect(Sender: TObject);
     procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
@@ -516,32 +512,6 @@ begin
   LoadProfilesFromFile(FileNameEdit.FileName);
 end;
 
-
-procedure TForm1.IniMemoKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  if (Shift = [ssCtrl]) then
-  begin
-    case Key of
-    VK_C: IniMemo.CommandProcessor(TSynEditorCommand(ecCopy), ' ', nil);
-    VK_V: IniMemo.CommandProcessor(TSynEditorCommand(ecPaste), ' ', nil);
-    VK_X: IniMemo.CommandProcessor(TSynEditorCommand(ecCut), ' ', nil);
-    end;
-  end;
-end;
-
-procedure TForm1.OutputMemoKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
-begin
-  if (Shift = [ssCtrl]) then
-  begin
-    case Key of
-    VK_C: OutputMemo.CommandProcessor(TSynEditorCommand(ecCopy), ' ', nil);
-    VK_V: OutputMemo.CommandProcessor(TSynEditorCommand(ecPaste), ' ', nil);
-    VK_X: OutputMemo.CommandProcessor(TSynEditorCommand(ecCut), ' ', nil);
-    end;
-  end;
-end;
 
 procedure TForm1.ProfileSelectSelect(Sender: TObject);
 var

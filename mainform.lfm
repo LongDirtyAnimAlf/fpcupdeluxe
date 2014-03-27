@@ -36,7 +36,6 @@ object Form1: TForm1
         ParentColor = False
         ParentFont = False
         TabOrder = 4
-        OnKeyDown = IniMemoKeyDown
         Gutter.Width = 57
         Gutter.MouseActions = <>
         RightGutter.Width = 0
@@ -464,6 +463,7 @@ object Form1: TForm1
             ShortCut = 57379
           end>
         MouseActions = <>
+        MouseTextActions = <>
         MouseSelActions = <>
         Lines.Strings = (
           ''
@@ -634,7 +634,6 @@ object Form1: TForm1
         ParentColor = False
         ParentFont = False
         TabOrder = 1
-        OnKeyDown = OutputMemoKeyDown
         Gutter.Width = 57
         Gutter.MouseActions = <>
         RightGutter.Width = 0
@@ -1061,6 +1060,7 @@ object Form1: TForm1
             ShortCut = 57379
           end>
         MouseActions = <>
+        MouseTextActions = <>
         MouseSelActions = <>
         VisibleSpecialChars = [vscSpace, vscTabAtLast]
         ScrollBars = ssAutoBoth
