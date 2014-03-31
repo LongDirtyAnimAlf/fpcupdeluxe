@@ -26,7 +26,7 @@ uses
   Classes, SysUtils, FileUtil, SynMemo, SynHighlighterIni, SynEdit, Forms,
   Controls, Graphics, Dialogs, StdCtrls, EditBtn, ComCtrls, ExtCtrls, ValEdit,
   Menus, inifiles, processutils, process, fpcuputil, strutils, LCLIntf, LCLType,
-  zipper, svnclient, SynEditKeyCmds
+  XMLPropStorage, zipper, svnclient, SynEditKeyCmds
   {$IFDEF HLREADY}, fpcuploghighlighter {$ENDIF}
   ;
 
@@ -47,7 +47,7 @@ type
     Label3: TLabel;
     Label4: TLabel;
     RepoDirectory: TDirectoryEdit;
-    FileNameEdit: TFileNameEdit;
+    INIFileSelectEdit: TFileNameEdit;
     gpbxDeletePPUs: TGroupBox;
     INIFileLabel: TLabel;
     Label1: TLabel;
@@ -70,13 +70,14 @@ type
     SynIniHighlighter: TSynIniSyn;
     IniMemo: TSynEdit;
     TroubleshootingTab: TTabSheet;
+    XMLPropStorage: TXMLPropStorage;
     procedure btnDeletePPUClick(Sender: TObject);
     procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
     procedure btnSwitchClick(Sender: TObject);
-    procedure FileNameEditExit(Sender: TObject);
+    procedure INIFileSelectEditExit(Sender: TObject);
     procedure ProfileSelectSelect(Sender: TObject);
-    procedure FileNameEditAcceptFileName(Sender: TObject; var Value: String);
+    procedure INIFileSelectEditAcceptFileName(Sender: TObject; var Value: String);
     procedure btnRunClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure mnuFPCUPDownloadClick(Sender: TObject);
@@ -155,7 +156,7 @@ const
 { TForm1 }
 procedure TForm1.btnRunClick(Sender: TObject);
 begin
-  UpdateCommand(FileNameEdit.FileName, ProfileSelect.Text);
+  UpdateCommand(INIFileSelectEdit.FileName, ProfileSelect.Text);
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -195,6 +196,14 @@ begin
         end;
       end;
     end;
+
+    // Default location for cleaning up
+    {$IFDEF MSWINDOWS}
+    RepoDirectory.Directory:='c:\development\';
+    {$ENDIF}
+    {$IFDEF UNIX}
+    RepoDirectory.Directory:='~/development';
+    {$ENDIF}
 
     //Seems to be a bug in tpagecontrol: last tab is active?!?
     EditTabs.ActivePage:=INiEditorTab;
@@ -248,11 +257,12 @@ begin
   // Check for empty combobox but valid filename
   if ProfileSelect.Items.Count=0 then
   begin
-    if (FileNameEdit.FileName<>'') and (FileExistsUTF8(FileNameEdit.FileName)) then
+    if (INIFileSelectEdit.FileName<>'') and (FileExistsUTF8(INIFileSelectEdit.FileName)) then
     begin
-      if UpperCase((FileNameEdit.FileName))='FPCUP.INI' then
+      if UpperCase((INIFileSelectEdit.FileName))='FPCUP.INI' then
         ShowMessage('Warning: fpcup.ini does not contain fpcup user profiles but external module definitions. Try settings.ini.');
-      LoadProfilesFromFile(FileNameEdit.FileName);
+      LoadProfilesFromFile(INIFileSelectEdit.FileName);
+      ProfileSelect.ItemIndex:=0; //go to first item
     end;
   end;
 end;
@@ -399,7 +409,7 @@ begin
 end;
 
 
-procedure TForm1.FileNameEditAcceptFileName(Sender: TObject; var Value: String);
+procedure TForm1.INIFileSelectEditAcceptFileName(Sender: TObject; var Value: String);
 begin
   LoadProfilesFromFile(Value);
 end;
@@ -507,9 +517,9 @@ begin
     ShowMessage('Switch failed. SVN switch gave result code:'+inttostr(ResultCode));
 end;
 
-procedure TForm1.FileNameEditExit(Sender: TObject);
+procedure TForm1.INIFileSelectEditExit(Sender: TObject);
 begin
-  LoadProfilesFromFile(FileNameEdit.FileName);
+  LoadProfilesFromFile(INIFileSelectEdit.FileName);
 end;
 
 
