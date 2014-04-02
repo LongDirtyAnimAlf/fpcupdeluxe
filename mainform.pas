@@ -75,6 +75,7 @@ type
     procedure btnSaveINIClick(Sender: TObject);
     procedure btnSaveLogClick(Sender: TObject);
     procedure btnSwitchClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
     procedure INIFileSelectEditExit(Sender: TObject);
     procedure ProfileSelectSelect(Sender: TObject);
     procedure INIFileSelectEditAcceptFileName(Sender: TObject; var Value: String);
@@ -88,6 +89,7 @@ type
   private
     // Currently loaded ini file:
     FCurrentINIFile: string;
+    FOneTimeSetup: boolean;
     { wip
     // Highlighter for fpcup log output
     FSynFPCupLogHL: TSynfpcuplogFold;
@@ -168,6 +170,7 @@ begin
   FSynFPCupLogHL:=TSynfpcuplogFold.Create(Self);
   OutputMemo.Highlighter:=FSynFPCupLogHL;
   {$ENDIF}
+  FOneTimeSetup:=true;
 
   SaveDialog.InitialDir:=ExtractFilePath(ParamStr(0)); //application directory
   // Extract settings.ini if necessary
@@ -205,8 +208,8 @@ begin
     RepoDirectory.Directory:='~/development';
     {$ENDIF}
 
-    //Seems to be a bug in tpagecontrol: last tab is active?!?
-    EditTabs.ActivePage:=INiEditorTab;
+    //Negate design-time tab selection:
+    EditTabs.ActivePage:=INIEditorTab;
   except
     //Ignore exceptions - file just won't exist.
   end;
@@ -271,12 +274,14 @@ procedure TForm1.LoadProfilesFromFile(INIFile: string);
 var
   Sections: TStringList;
   MyIniFile: TIniFile;
+  FileChanged: boolean;
 begin
   if FileExistsUTF8(INIFile) then
   begin
     // (re)load selected ini file
     IniMemo.BeginUpdate(false);
     IniMemo.Lines.LoadFromFile(INIFile);
+    FileChanged:=not(INIFile=FCurrentIniFile); //todo: proper compare including unicode?
     FCurrentINIFile:=INIFile;
     MyIniFile:=TIniFile.Create(INIFile, true);
     Sections:=TStringList.Create;
@@ -289,6 +294,8 @@ begin
       Sections.Free;
       MyIniFile.Free;
     end;
+    if FileChanged then
+      ProfileSelect.ItemIndex:=0;
   end
   else
   begin
@@ -515,6 +522,18 @@ begin
     ShowMessage('Switch succeeded. Please run fpcup with the new SVN repository URL.')
   else
     ShowMessage('Switch failed. SVN switch gave result code:'+inttostr(ResultCode));
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  // Load any stored file specified with propsettings
+  if FOneTimeSetup and
+    (INIFileSelectEdit.FileName<>'') and
+    FileExistsUTF8(INIFileSelectEdit.FileName) then
+  begin
+    FOneTimeSetup:=false;
+    LoadProfilesFromFile(INIFileSelectEdit.FileName);
+  end;
 end;
 
 procedure TForm1.INIFileSelectEditExit(Sender: TObject);
