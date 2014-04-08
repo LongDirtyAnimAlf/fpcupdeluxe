@@ -282,7 +282,7 @@ begin
       if FCPUCount>1 then
       begin
         // parallel processing
-        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount);
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
         ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
       end;
       {$ENDIF}

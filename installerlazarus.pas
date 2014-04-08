@@ -230,7 +230,11 @@ begin
         ProcessEx.Parameters.Clear;
         {$IFDEF lazarus_parallel_make}
         if FCPUCount>1 then
-          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+        begin
+          // parallel processing
+          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+          ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
+        end;
         {$ENDIF}
         ProcessEx.Parameters.Add('FPC=' + FCompiler);
         ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -354,7 +358,11 @@ begin
     ProcessEx.Parameters.Clear;
     {$IFDEF lazarus_parallel_make}
     if FCPUCount>1 then
-      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    begin
+      // parallel processing
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
+    end;
     {$ENDIF}
     ProcessEx.Parameters.Add('FPC=' + FCompiler);
     ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -840,7 +848,11 @@ begin
   ProcessEx.Parameters.Clear;
   {$IFDEF lazarus_parallel_make}
   if FCPUCount>1 then
-    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+  begin
+    // parallel processing
+    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+    ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
+  end;
   {$ENDIF}
   ProcessEx.Parameters.Add('FPC=' + FCompiler + '');
   ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
