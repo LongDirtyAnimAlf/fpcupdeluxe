@@ -1,6 +1,6 @@
 unit installerFpc;
 { FPC installer/updater module
-Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
+Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -280,7 +280,11 @@ begin
       { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
       Re-enable when changed to make 3.82 }
       if FCPUCount>1 then
-        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)+' FPMAKEOPT=--threads='+inttostr(FCPUCount)); // parallel processing
+      begin
+        // parallel processing
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount);
+        ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
+      end;
       {$ENDIF}
       ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
