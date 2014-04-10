@@ -310,9 +310,7 @@ Testing versions for FreeBSD 9+ x64 and OSX available.
 Contact
 =======
 For reporting bugs, suggestions, patches.
-- Lazarus forum thread:
-http://lazarus.freepascal.org/index.php/topic,15701fpcup
-- Bitbucket issue tracker
+- Bitbucket issue tracker (please only post if you attach a --verbose output log)
 https://bitbucket.org/reiniero/fpcup/issues
 
 Help output:
