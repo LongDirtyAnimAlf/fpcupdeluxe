@@ -1,5 +1,5 @@
 { Utility unit for FPCUp
-Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
+Copyright (C) 2012-2014 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -131,13 +131,13 @@ Info.dwOSVersionInfoSize := SizeOf(Info);
 if GetVersionEx(Info) then
 begin
   with Info do
-    begin
+  begin
     Win32Platform:=dwPlatformId;
     Major:=dwMajorVersion;
     Minor:=dwMinorVersion;
     Build:=dwBuildNumber;
     result:=true
-    end;
+  end;
 end
 else
   result:=false;
@@ -153,7 +153,7 @@ try
     fs:=Tfilestream.Create(Filename,fmCreate);
     Savetostream(fs);
   finally
-     fs.Free;
+    fs.Free;
   end;
 finally
   Free;
@@ -270,7 +270,7 @@ end;
 
 function DownloadFTP(URL, TargetFile: string): boolean;
 const
-  FTPPort=21;
+  FTPPort=21; //default ftp server port
   FTPScheme='ftp://'; //URI scheme name for FTP URLs
 var
   Host: string;
@@ -279,7 +279,8 @@ var
   FoundPos: integer;
 begin
   // Strip out scheme info:
-  if LeftStr(URL, length(FTPScheme))=FTPScheme then URL:=Copy(URL, length(FTPScheme)+1, length(URL));
+  if LeftStr(URL, length(FTPScheme))=FTPScheme then
+    URL:=Copy(URL, length(FTPScheme)+1, length(URL));
 
   // Crude parsing; could have used URI parsing code in FPC packages...
   FoundPos:=pos('/', URL);
