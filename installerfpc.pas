@@ -900,6 +900,7 @@ const
   //todo: replace when enough compilers are available via 2.6.2
   FTPPath='ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
   FTP262Path='ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
+  FTP264Path='ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
 var
   BootstrapVersion: string;
   Output: string;
@@ -974,7 +975,7 @@ begin
     //If we made it already pick it up here
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTPPath+'universal-darwin-ppcuniversal.tar.bz2';
+      FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
     // If we're using an old compiler to build trunk, we need this:
     FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF Darwin}
@@ -982,13 +983,13 @@ begin
     {$IFDEF CPU386}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTP262Path+'i386-freebsd9-ppc386.bz2';
+      FBootstrapCompilerURL := FTP264Path+'i386-freebsd9-ppc386.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-freebsd9-ppc386';
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTP262Path+'x86_64-freebsd9.ppcx64.bz2';
+      FBootstrapCompilerURL := FTP264Path+'x86_64-freebsd9-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-freebsd9.ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF FREEBSD}
