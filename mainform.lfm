@@ -550,6 +550,7 @@ object Form1: TForm1
         MaxLength = 0
         TabOrder = 1
         OnExit = INIFileSelectEditExit
+        Text = 'settings.ini'
       end
       object ProfileSelect: TComboBox
         Left = 56

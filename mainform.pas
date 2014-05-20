@@ -90,10 +90,10 @@ type
     // Currently loaded ini file:
     FCurrentINIFile: string;
     FOneTimeSetup: boolean;
-    { wip
+    {$IFDEF HLREADY}
     // Highlighter for fpcup log output
     FSynFPCupLogHL: TSynfpcuplogFold;
-    }
+    {$ENDIF}
     // Delete .ppu, .a., .o files recursively from RootDirectory without warning
     function DeletePPUs(RootDirectory: string): boolean;
     // Gets fpcup executable full path if possible
