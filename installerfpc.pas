@@ -1354,7 +1354,9 @@ begin
   try
     DeleteList.Add('.a');
     DeleteList.Add('.o');
-    DeleteList.Add('.ppu');
+    DeleteList.Add('.ppu'); //compiled pascal unit
+    //todo: include rsj as well?
+    //DeleteList.Add('.rsj'); //javascript format resource file
     //todo: check if all these dirs are required - probably the units one is not needed
     // For some reason base has no cpu subdir - what is this used for!?!?
     // is this only done by the test framework!?!?

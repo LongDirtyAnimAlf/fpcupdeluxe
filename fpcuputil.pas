@@ -212,6 +212,8 @@ begin
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments);
     XdgDesktopContent.Add('Name='+ShortcutName);
+    XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;');
+    XdgDesktopContent.Add('Keywords=editor;Pascal;IDE;FreePascal;fpc;Design;Designer;');
     // We're going to try and call xdg-desktop-icon
     // this may fail if shortcut exists already
     try

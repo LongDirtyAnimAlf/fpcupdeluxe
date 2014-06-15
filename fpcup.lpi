@@ -49,9 +49,6 @@
             </Debugging>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
@@ -97,9 +94,6 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
@@ -141,9 +135,6 @@ end;"/>
             </Debugging>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CustomOptions Value="-dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
@@ -187,9 +178,6 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
@@ -232,9 +220,6 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
@@ -276,9 +261,6 @@ end;"/>
             </Debugging>
           </Linking>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
@@ -319,9 +301,6 @@ end;"/>
             </Optimizations>
           </CodeGeneration>
           <Other>
-            <CompilerMessages>
-              <UseMsgFile Value="True"/>
-            </CompilerMessages>
             <CustomOptions Value="-O- -dDEBUG"/>
             <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
@@ -571,9 +550,6 @@ end;"/>
       <LinkSmart Value="True"/>
     </Linking>
     <Other>
-      <CompilerMessages>
-        <UseMsgFile Value="True"/>
-      </CompilerMessages>
       <CompilerPath Value="$(CompPath)"/>
       <ExecuteBefore>
         <Command Value="hgversion$(ExeExt)"/>
