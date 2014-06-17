@@ -50,7 +50,6 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG"/>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -94,7 +93,6 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -136,7 +134,6 @@ end;"/>
           </Linking>
           <Other>
             <CustomOptions Value="-dDEBUG"/>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -178,7 +175,6 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -220,7 +216,6 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -261,7 +256,6 @@ end;"/>
             </Debugging>
           </Linking>
           <Other>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -302,7 +296,6 @@ end;"/>
           </CodeGeneration>
           <Other>
             <CustomOptions Value="-O- -dDEBUG"/>
-            <CompilerPath Value="$(CompPath)"/>
             <ExecuteBefore>
               <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
@@ -338,22 +331,21 @@ end;"/>
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcup"/>
+        <UnitName Value=""/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="svnclient"/>
+        <UnitName Value=""/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="updatelazconfig"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="processutils"/>
+        <UnitName Value=""/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
@@ -378,11 +370,12 @@ end;"/>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerUniversal"/>
+        <UnitName Value=""/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value=""/>
       </Unit9>
       <Unit10>
         <Filename Value="installermanager.pas"/>
@@ -392,136 +385,136 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crosswin64"/>
+        <UnitName Value=""/>
       </Unit12>
       <Unit13>
         <Filename Value="m_crosswin32.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crosswin32"/>
+        <UnitName Value=""/>
       </Unit13>
       <Unit14>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="winInstaller"/>
+        <UnitName Value=""/>
       </Unit14>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="commandline"/>
+        <UnitName Value=""/>
       </Unit15>
       <Unit16>
         <Filename Value="hgclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="hgclient"/>
+        <UnitName Value=""/>
       </Unit16>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="repoclient"/>
+        <UnitName Value=""/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="gitclient"/>
+        <UnitName Value=""/>
       </Unit18>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_freebsd_to_linux386"/>
+        <UnitName Value=""/>
       </Unit19>
       <Unit20>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_freebsd64_to_freebsd32"/>
+        <UnitName Value=""/>
       </Unit20>
       <Unit21>
         <Filename Value="m_freebsd_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_freebsd_to_linux64"/>
+        <UnitName Value=""/>
       </Unit21>
       <Unit22>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_anyinternallinker_to_win386"/>
+        <UnitName Value=""/>
       </Unit22>
       <Unit23>
         <Filename Value="settings.ini"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value=""/>
       </Unit23>
       <Unit24>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crossinstaller"/>
+        <UnitName Value=""/>
       </Unit24>
       <Unit25>
         <Filename Value="m_win32_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_linux386"/>
+        <UnitName Value=""/>
       </Unit25>
       <Unit26>
         <Filename Value="m_any_to_aixpowerpc.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_aixpowerpc"/>
+        <UnitName Value=""/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win64_to_linux64"/>
+        <UnitName Value=""/>
       </Unit27>
       <Unit28>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_anyinternallinker_to_win64"/>
+        <UnitName Value=""/>
       </Unit28>
       <Unit29>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_androidarm"/>
+        <UnitName Value=""/>
       </Unit29>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linuxmipsel"/>
+        <UnitName Value=""/>
       </Unit30>
       <Unit31>
         <Filename Value="m_win32_to_go32v2i386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_go32v2i386"/>
+        <UnitName Value=""/>
       </Unit31>
       <Unit32>
         <Filename Value="m_win32_to_wincearm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_wincearm"/>
+        <UnitName Value=""/>
       </Unit32>
       <Unit33>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_linux386_to_mips"/>
+        <UnitName Value=""/>
       </Unit33>
       <Unit34>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_msdosi8086"/>
+        <UnitName Value=""/>
       </Unit34>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linuxarm"/>
+        <UnitName Value=""/>
       </Unit35>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_linuxmips"/>
+        <UnitName Value=""/>
       </Unit36>
       <Unit37>
         <Filename Value="cpucount.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="cpucount"/>
+        <UnitName Value=""/>
       </Unit37>
     </Units>
   </ProjectOptions>
@@ -550,7 +543,6 @@ end;"/>
       <LinkSmart Value="True"/>
     </Linking>
     <Other>
-      <CompilerPath Value="$(CompPath)"/>
       <ExecuteBefore>
         <Command Value="hgversion$(ExeExt)"/>
         <CompileReasons Run="False"/>

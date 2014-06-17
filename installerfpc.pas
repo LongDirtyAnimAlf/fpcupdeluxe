@@ -961,7 +961,7 @@ begin
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
-    infoln('TFPCInstaller: getting bootstrap compiler - assuming this is a x64 processor on Linux',etWarning);
+    infoln('TFPCInstaller: bootstrap compiler detection: assuming this is a x64 processor on Linux',etWarning);
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-linux-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
@@ -1355,6 +1355,7 @@ begin
     DeleteList.Add('.a');
     DeleteList.Add('.o');
     DeleteList.Add('.ppu'); //compiled pascal unit
+    DeleteList.Add('.rst'); //delp removes .rst files
     //todo: include rsj as well?
     //DeleteList.Add('.rsj'); //javascript format resource file
     //todo: check if all these dirs are required - probably the units one is not needed
