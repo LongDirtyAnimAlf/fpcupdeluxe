@@ -100,7 +100,7 @@ On Windows, it creates a shortcut on your desktop (e.g. fpcup_update) with those
 
 Additionally, you can save the settings in an ini file and call 
 fpcup --inifile=settings.ini
-(see the settings.ini examle file)
+(see the settings.ini example file)
 The parameters not specified are default settings and can be overruled when 
 calling from the command line:
 
