@@ -300,7 +300,7 @@ begin
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
     FBunzip2 := ''; //not really necessary now
-    FTar := 'gnutar'; //gnutar can decompress as well; bsd tar can't
+    FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';

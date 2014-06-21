@@ -742,11 +742,11 @@ end;
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;
 // Should be done after we have unzip executable (on Windows: in FMakePath)
 var
-ArchiveDir: string;
-BootstrapArchive: string;
-CompilerName:string; // File name of compiler in bootstrap archive
-ExtractedCompiler: string;
-OperationSucceeded: boolean;
+  ArchiveDir: string;
+  BootstrapArchive: string;
+  CompilerName:string; // File name of compiler in bootstrap archive
+  ExtractedCompiler: string;
+  OperationSucceeded: boolean;
 begin
 
 OperationSucceeded:=true;
@@ -768,7 +768,7 @@ begin
   {$IFDEF MSWINDOWS}
   ArchiveDir := ExtractFilePath(BootstrapArchive);
   CompilerName:=ExtractFileName(FBootstrapCompiler);
-  //Extract zip, overwriting without prompting
+  // Extract zip, overwriting without prompting
   if ExecuteCommand(FUnzip+' -o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
     begin
       infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
@@ -786,7 +786,7 @@ begin
   end;
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
-  //Extract bz2, overwriting without prompting
+  // Extract bz2, overwriting without prompting
   if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
     begin
       infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
@@ -805,7 +805,7 @@ begin
   end;
   if OperationSucceeded then
   begin
-    //Make executable
+    // Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
   end;
@@ -832,15 +832,17 @@ begin
   end;
   if OperationSucceeded then
   begin
-    //Make executable
+    // Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,etwarning);
   end;
   {$ENDIF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   {$IFDEF DARWIN}
-  //Extract .tar.bz2, overwriting without prompting
+  // Extract .tar.bz2, overwriting without prompting
   CompilerName:=ExtractFileName(FBootstrapCompiler);
-  if ExecuteCommand(FTar+' -x -v -j -f '+BootstrapArchive,FVerbose) <> 0 then
+  // GNU tar: -x -v -j -f
+  // BSD tar:
+  if ExecuteCommand(FTar+' -xf '+BootstrapArchive,FVerbose) <> 0 then
   begin
     infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
     OperationSucceeded := False;
@@ -1028,7 +1030,7 @@ begin
     begin
       {$ifdef darwin}
       // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
-      //doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
+      // doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
       // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
       FBootstrapCompilerOverrideVersionCheck:=true;
