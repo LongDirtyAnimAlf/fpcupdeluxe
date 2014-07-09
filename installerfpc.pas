@@ -854,8 +854,8 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    //todo: currently tar spits out uncompressed file in current dir...
-    //which might not have proper permissions to actually create file...!?
+    // todo: currently tar spits out uncompressed file in current dir...
+    // which might not have proper permissions to actually create file...!?
     infoln('Going to rename/move '+CompilerName+' to '+FBootStrapCompiler,etwarning);
     sysutils.DeleteFile(FBootStrapCompiler); //ignore errors
     // We might be moving files across partitions so we cannot use renamefile
@@ -864,7 +864,7 @@ begin
   end;
   if OperationSucceeded then
   begin
-    //Make executable
+    // Make executable
     OperationSucceeded:=(fpChmod(FBootStrapCompiler, &700)=0); //rwx------
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootStrapCompiler,eterror);
   end;
