@@ -377,7 +377,9 @@ begin
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
       {$ENDIF MSWINDOWS}
-      FInstaller.SVNExecutable:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','svnexe','')));
+      FInstaller.SVNExecutable := Options.GetOption('','svnexe','');
+      if (FInstaller.SVNExecutable <> '') then // Otherwise it is set to application path
+        FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(FInstaller.SVNExecutable));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
@@ -407,7 +409,6 @@ begin
           FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
           FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
-      FInstaller.SVNExecutable:=Options.GetOption('','svnexe','');
       FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs

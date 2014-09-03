@@ -967,7 +967,8 @@ begin
         FInstaller.Compiler:=FParent.CompilerName;
     end;
 
-  FInstaller.SVNDirectory:=FParent.SVNExecutable;
+  if Assigned(FInstaller.SVNClient) then
+    FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
   FInstaller.HTTPProxyHost:=FParent.HTTPProxyHost;
   FInstaller.HTTPProxyPort:=FParent.HTTPProxyPort;
   FInstaller.HTTPProxyUser:=FParent.HTTPProxyUser;
