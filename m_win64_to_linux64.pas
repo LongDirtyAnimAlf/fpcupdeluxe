@@ -93,7 +93,7 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-FL/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+    '-FL/lib64/ld-linux-x86-64.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
     infoln('Twin64_linux64: found libspath '+FLibsPath,etInfo);
   end;
 end;
