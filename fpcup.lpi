@@ -335,6 +335,7 @@ end;"/>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="svnclient"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
@@ -344,6 +345,7 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="processutils"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
@@ -406,6 +408,7 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>

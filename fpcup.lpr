@@ -124,7 +124,6 @@ begin
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
   writeln('');
-  writeln(' svndir=<dir>          Subversion directory to use.');
   writeln(' binutilsdir=<dir>     Windows only:');
   writeln('                       Directory where make, patch etc');
   writeln('                       (the binutils) are located. If make does not');
@@ -241,6 +240,8 @@ begin
   writeln(' skip=<values>         Do not update/build or clean specified modules.');
   writeln('                       The module list is separated by commas.');
   writeln('                       See above for a list of modules.');
+  writeln(' svnexe=<path>         Full path to svn executable (handy if you have');
+  writeln('                       multiple versions.');
   writeln(' uninstall             Uninstall sources and all generated files');
   writeln('                       If no skip/only options given:');
   writeln('                       DELETE entire Lazarus/FPC directories');
@@ -376,9 +377,7 @@ begin
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
       {$ENDIF MSWINDOWS}
-      FInstaller.SVNDirectory:=Options.GetOption('','svndir','');
-      if (FInstaller.SVNDirectory <> '') then
-        FInstaller.SVNDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(FInstaller.SVNDirectory));
+      FInstaller.SVNExecutable:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','svnexe','')));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
@@ -408,6 +407,7 @@ begin
           FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
           FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
+      FInstaller.SVNExecutable:=Options.GetOption('','svnexe','');
       FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
@@ -664,8 +664,8 @@ begin
       writeln('Binutils/make dir:      '+FInstaller.MakeDirectory);
       {$ENDIF MSWINDOWS}
       writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
-      if (FInstaller.SVNDirectory <> '') then
-        writeln('Subverion directory:    '+FInstaller.SVNDirectory);
+      if (FInstaller.SVNExecutable <> '') then
+        writeln('Subverion directory:    '+FInstaller.SVNExecutable);
       writeln('Lazarus shortcut name:  '+FInstaller.ShortCutNameLazarus);
       writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
       writeln('FPC URL:                '+FInstaller.FPCURL);
