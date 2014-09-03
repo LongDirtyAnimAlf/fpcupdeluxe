@@ -129,11 +129,11 @@ begin
       FRepoExecutable := SVNName;
   end;
 
+  // If file exists, check for valid svn executable
   if FileExists(FRepoExecutable) then
   begin
     if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
     begin
-      // File exists, but is not a valid svn client
       FRepoExecutable := '';
     end;
   end
