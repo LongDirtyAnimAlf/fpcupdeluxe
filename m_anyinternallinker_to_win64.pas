@@ -1,6 +1,6 @@
 unit m_anyinternallinker_to_win64;
 
-{ Cross compiles from Linux, FreeBSD,... to Windows x86_64 code (win32)
+{ Cross compiles from Linux, FreeBSD,... to Windows x86_64 code (win64)
 Requirements: FPC should have an internal linker
 }
 
@@ -68,7 +68,7 @@ begin
   inherited Create;
   FCrossModuleName:='anyinternallinker_win64';
   FTargetCPU:='x86_64';
-  FTargetOS:='win32';
+  FTargetOS:='win64';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
   infoln('Tanyinternallinker_win64 crosscompiler loading',etDebug);
@@ -81,12 +81,12 @@ end;
 
 
 var
-  Anyinternallinker_win386:Tanyinternallinker_win64;
+  Anyinternallinker_win64:Tanyinternallinker_win64;
 
 initialization
-  Anyinternallinker_win386:=Tanyinternallinker_win64.Create;
-  RegisterExtension(Anyinternallinker_win386.TargetCPU+'-'+Anyinternallinker_win386.TargetOS,Anyinternallinker_win386);
+  Anyinternallinker_win64:=Tanyinternallinker_win64.Create;
+  RegisterExtension(Anyinternallinker_win64.TargetCPU+'-'+Anyinternallinker_win64.TargetOS,Anyinternallinker_win64);
 finalization
-  Anyinternallinker_win386.Destroy;
+  Anyinternallinker_win64.Destroy;
 end.
 
