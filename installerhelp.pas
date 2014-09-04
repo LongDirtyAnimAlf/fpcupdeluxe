@@ -68,7 +68,7 @@ Const
     }
     'Declare helplazarus;'+
     {Recent Lazarus compiles lhelp
-    on demand once F1 is pressed. So we can disable it}
+    on demand once F1 is pressed. So we could disable it}
     'Requires lazbuild;'+
     {Not using cleanmodule as we're downloading;
     getmodule will detect existing docs and not
@@ -445,7 +445,7 @@ var
   LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
-  // We need lhelp viewer but that should already have been taken care of by a previous step (Requires lhelp)
+  // We need lhelp viewer but Lazarus builds that on demand (if needed see fpcup.ini, lhelp section+warning)
   OperationSucceeded:=true;
   // The locations of the LCL.chm we generate and the existing one we can overwrite:
   ExistingLCLHelp:=FTargetDirectory+'lcl.chm';
