@@ -347,6 +347,7 @@ end;"/>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
@@ -361,6 +362,7 @@ end;"/>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerHelp"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
@@ -374,6 +376,7 @@ end;"/>
       <Unit10>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerManager"/>
       </Unit10>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>

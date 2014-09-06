@@ -136,9 +136,9 @@ type
     property SVNClient: TSVNClient read FSVNClient;
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
-    // base directory for installation (fpcdir, lazdir,... option)
+    // Base directory for installation (fpcdir, lazdir,... option)
     property BaseDirectory: string write FBaseDirectory;
-    // compiler to use for building. Specify empty string when using bootstrap compiler.
+    // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string read GetCompiler write FCompiler;
     // Compiler options passed on to make as OPT=
     property CompilerOptions: string write FCompilerOptions;
@@ -161,6 +161,7 @@ type
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     property Log: TLogger write FLog;
+    // Directory where make is located
     property MakeDirectory: string write FMakeDir;
     // Patch utility to use. Defaults to 'patch -p0 -i patchfile'
     property PatchCmd:string write FPatchCmd;
