@@ -85,7 +85,7 @@ type
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
     FMake: string;
-    FMakeDir: string;
+    FMakeDir: string; //Binutils/make directory
     FNeededExecutablesChecked: boolean;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
@@ -102,7 +102,7 @@ type
     // Check executable is the right one: run Executable with Parameters
     // and look for ExpectOutput. Returns false if no match.
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
-    // Make a list of all binutils that can be downloaded
+    // Make a list (in FUtilFiles) of all binutils that can be downloaded
     procedure CreateBinutilsList;
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
@@ -161,7 +161,7 @@ type
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     property Log: TLogger write FLog;
-    // Directory where make is located
+    // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
     // Patch utility to use. Defaults to 'patch -p0 -i patchfile'
     property PatchCmd:string write FPatchCmd;

@@ -295,10 +295,12 @@ type
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
     // Location where fpcup log will be written to.
     property LogFileName: string read GetLogFileName write SetLogFileName;
+    // Directory where make is. Can be empty.
+    // On Windows, also a directory where the binutils can be found.
     property MakeDirectory: string read FMakeDirectory write SetMakeDirectory;
-    //List of all default enabled sequences available
+    // List of all default enabled sequences available
     property ModuleEnabledList: TStringList read FModuleEnabledList;
-    //List of all publicly visible sequences
+    // List of all publicly visible sequences
     property ModulePublishedList: TStringList read FModulePublishedList;
     // List of modules that must be processed in addition to the default ones
     property IncludeModules:string read FIncludeModules write FIncludeModules;

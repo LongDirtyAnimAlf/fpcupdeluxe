@@ -199,13 +199,23 @@ begin
         len:=length(macro)+3; // the brackets
         // For the directory macros, the user expects to add path separators himself in fpcup.ini,
         // so strip them out if they are there.
-        //$(FPCDIR)
-        if macro='FPCDIR' then
+        if macro='FPCDIR' then //$(FPCDIR)
           macro:=ExcludeTrailingPathDelimiter(FFPCDir)
+        else if macro='GETEXEEXT' then //$(GETEXEEXT)
+          macro:=GetExeExt
         else if macro='LAZARUSDIR' then //$(LAZARUSDIR)
           macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
         else if macro='LAZARUSPRIMARYCONFIGPATH' then //$(LAZARUSPRIMARYCONFIGPATH)
           macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
+        else if macro='STRIPDIR' then //$(STRIPDIR)
+          {$IFDEF MSWINDOWS}
+          // Strip is a binutil and should be located in the make dir
+          macro:=ExcludeTrailingPathDelimiter(FMakeDir)
+          {$ENDIF}
+          {$IFDEF UNIX}
+          // Strip can be anywhere in the path
+          macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('strip')));
+          {$ENDIF}
         else macro:=GetValue(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
         if pos(' ',macro)>0 then
