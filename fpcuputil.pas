@@ -111,7 +111,7 @@ implementation
 uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
-  FileUtil {lazutils, for utf8 functions},
+  FileUtil {lazutils, for utf8 functions?!?},
   strutils
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code

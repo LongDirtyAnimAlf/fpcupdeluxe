@@ -445,7 +445,8 @@ var
   LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
-  // We need lhelp viewer but Lazarus builds that on demand (if needed see fpcup.ini, lhelp section+warning)
+  // lhelp viewer is needed which Lazarus builds that on first run
+  // However, it can be prebuilt by enabling it as an external module in fpcup.ini
   OperationSucceeded:=true;
   // The locations of the LCL.chm we generate and the existing one we can overwrite:
   ExistingLCLHelp:=FTargetDirectory+'lcl.chm';

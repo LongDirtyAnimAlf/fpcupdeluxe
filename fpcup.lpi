@@ -335,22 +335,18 @@ end;"/>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="svnclient"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="updatelazconfig"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="processutils"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
@@ -365,11 +361,11 @@ end;"/>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerHelp"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerUniversal"/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcup.ini"/>
@@ -378,7 +374,6 @@ end;"/>
       <Unit10>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerManager"/>
       </Unit10>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
@@ -388,6 +383,7 @@ end;"/>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crosswin64"/>
       </Unit12>
       <Unit13>
         <Filename Value="m_crosswin32.pas"/>
@@ -408,7 +404,6 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
@@ -453,7 +448,6 @@ end;"/>
       <Unit28>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_anyinternallinker_to_win64"/>
       </Unit28>
       <Unit29>
         <Filename Value="m_any_to_androidarm.pas"/>

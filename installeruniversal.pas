@@ -177,7 +177,8 @@ begin
     for i:=0 to IniGeneralSection.Count-1 do
       begin
       s:=IniGeneralSection[i];
-      if (copy(UpperCase(s),1, length(Key))=Key) and ((s[length(Key)+1]='=') or (s[length(Key)+1]=' ')) then
+      if (copy(UpperCase(s),1, length(Key))=Key) and ((s[length(Key)+1]='=') or
+        (s[length(Key)+1]=' ')) then
         begin
         if pos('=',s)>0 then
           s:=trim(copy(s,pos('=',s)+1,length(s)));
@@ -196,11 +197,15 @@ begin
         delete(macro,pos(')',macro),length(macro));
         macro:=UpperCase(macro);
         len:=length(macro)+3; // the brackets
-        // For the directory macros, the user expects to add path separators himself in fpcup.ini, so strip them
-        // out if they are there.
-        if macro='FPCDIR' then macro:=ExcludeTrailingPathDelimiter(FFPCDir)
-        else if macro='LAZARUSDIR' then macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
-        else if macro='LAZARUSPRIMARYCONFIGPATH' then macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
+        // For the directory macros, the user expects to add path separators himself in fpcup.ini,
+        // so strip them out if they are there.
+        //$(FPCDIR)
+        if macro='FPCDIR' then
+          macro:=ExcludeTrailingPathDelimiter(FFPCDir)
+        else if macro='LAZARUSDIR' then //$(LAZARUSDIR)
+          macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
+        else if macro='LAZARUSPRIMARYCONFIGPATH' then //$(LAZARUSPRIMARYCONFIGPATH)
+          macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
         else macro:=GetValue(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
         if pos(' ',macro)>0 then

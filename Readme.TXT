@@ -196,7 +196,7 @@ lazbuild in the newly compiled Lazarus directory
 lazbuild in the newly compiled Lazarus directory
 
 4. Getting help
-- If enabled in fpcup.ini, it compiles the Lazarus lhelp CHM viewer using 
+- It compiles the Lazarus lhelp CHM viewer using 
 lazbuild in the newly compiled Lazarus directory
 
 - It gets the FPC chm documentation if not already present

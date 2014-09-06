@@ -169,7 +169,9 @@ type
 
 implementation
 
-uses fpcuputil, fileutil, updatelazconfig
+uses fpcuputil, fileutil,
+  lazfileutils {utf8 file functions},
+  updatelazconfig
   {$IFDEF UNIX}
   , baseunix
   {$ENDIF UNIX}  ;
@@ -831,15 +833,46 @@ function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
   // Running it twice apparently can fix a lot of problems; see FPC ML message
   // by Jonas Maebe, 1 November 2012
 var
+  CrossInstaller: TCrossInstaller;
+  CrossWin: boolean;
+  LHelpTemp: string; // LHelp gets copied to this temp file
   oldlog: TErrorMethod;
 begin
   Result := InitModule;
   if not Result then
     exit;
+  CrossInstaller := GetCrossInstaller;
   // If cleaning primary config:
   if (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') then
     infoln('Lazarus: if your primary config dir has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
       FBaseDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
+
+  // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL
+  // but also existing lhelp.exe if present. Temporarily copy that so we can restore it later.
+  // failure here does not influence result
+  LHelpTemp:='';
+  CrossWin:=false;
+  {$ifdef win32}
+  if (CrossInstaller.TargetCPU = 'x86_64') and ((CrossInstaller.TargetOS = 'win64') or (CrossInstaller.TargetOS = 'win32')) then
+    CrossWin := true;
+  {$endif win32}
+  {$ifdef win64}
+  // if this is crosswin64-32, ignore error as it is optional
+  if (CrossInstaller.TargetCPU = 'i386') and (CrossInstaller.TargetOS = 'win32') then
+    CrossWin := true;
+  {$endif win64}
+  if CrossWin then
+  begin
+    LHelpTemp:=GetTempFileNameUTF8('','');
+    try
+      CopyFile(
+        IncludeTrailingPathDelimiter(FBaseDirectory)+'components\chmhelp\lhelp\lhelp'+GetExeExt,
+        LHelpTemp,[cffOverWriteFile]);
+    except
+      infoln('Lazarus CleanModule: non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
+    end;
+  end;
+
   // Make distclean; we don't care about failure (e.g. directory might be empty etc)
   oldlog := ProcessEx.OnErrorM;
   ProcessEx.OnErrorM := nil;  //don't want to log errors in distclean
@@ -885,6 +918,19 @@ begin
     end;
   end;
   ProcessEx.OnErrorM := oldlog; //restore previous logging
+
+  // Now try to restore lhelp
+  if LHelpTemp<>'' then
+  begin
+    try
+      CopyFile(
+        LHelpTemp,
+        IncludeTrailingPathDelimiter(FBaseDirectory)+'components\chmhelp\lhelp\lhelp'+GetExeExt,
+        [cffOverWriteFile]);
+    except
+      infoln('Lazarus CleanModule: non-fatal error restoring lhelp from temp file '+LHelpTemp,etInfo);
+    end;
+  end;
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
