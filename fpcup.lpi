@@ -339,6 +339,7 @@ end;"/>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="updatelazconfig"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
@@ -386,7 +387,6 @@ end;"/>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crosswin64"/>
       </Unit12>
       <Unit13>
         <Filename Value="m_crosswin32.pas"/>

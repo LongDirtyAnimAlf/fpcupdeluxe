@@ -440,6 +440,8 @@ begin
   else
   begin
     // Normalize
+    if ConfigFile='' then
+      raise Exception.Create('GetConfig: ConfigFile may not be empty');
     FileName:=ExpandFileName(ConfigFile);
   end;
   ConfigIndex:=FConfigs.IndexOf(FileName);
@@ -607,6 +609,8 @@ begin
   FConfigs:=TStringList.Create;
   FConfigs.Sorted:=true;
   FConfigs.Duplicates:=dupError;
+  if ConfigPath='' then
+    raise Exception.Create('TUpdateLazConfig: ConfigPath may not be empty');
   FDefaultConfigPath:=IncludeTrailingPathDelimiter(ExpandFileName(ConfigPath));
 end;
 
