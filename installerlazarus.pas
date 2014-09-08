@@ -844,7 +844,7 @@ begin
   CrossInstaller := GetCrossInstaller;
   // If cleaning primary config:
   if (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') then
-    infoln('Lazarus: if your primary config dir has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
+    infoln('Lazarus: if your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
       FBaseDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
 
   // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL

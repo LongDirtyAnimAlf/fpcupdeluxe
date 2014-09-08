@@ -126,7 +126,7 @@ TUpdateLazConfig = class(TObject)
 private
   //List of TConfigs, with absolute file names
   FConfigs: TStringList;
-  // Place where config files stores if no path component given
+  // Place where config files are stored if no path component given
   FDefaultConfigPath: string;
   FLazarusMajorVer: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
   FLazarusMinor: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
@@ -612,6 +612,9 @@ begin
   if ConfigPath='' then
     raise Exception.Create('TUpdateLazConfig: ConfigPath may not be empty');
   FDefaultConfigPath:=IncludeTrailingPathDelimiter(SafeExpandFileName(ConfigPath));
+  //todo: debug
+  infoln('todo: debug: tupdatelazonfig.create: got configpath:   '+ConfigPath);
+  infoln('todo: debug: tupdatelazonfig.create: got def confpath: '+FDefaultConfigPath);
 end;
 
 destructor TUpdateLazConfig.Destroy;
