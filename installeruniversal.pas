@@ -214,7 +214,7 @@ begin
           {$ENDIF}
           {$IFDEF UNIX}
           // Strip can be anywhere in the path
-          macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('strip')));
+          macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('strip')))
           {$ENDIF}
         else macro:=GetValue(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
