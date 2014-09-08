@@ -94,9 +94,9 @@ function GetLocalAppDataPath: string;
 procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
-// Like ExpandFilename but does not expand an empty string to ~ on *nix systems
+// Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
-// Like ExpandFilenameUTF8 but does not expand an empty string to ~ on *nix systems
+// Like ExpandFilenameUTF8 but does not expand an empty string to current directory
 function SafeExpandFileNameUTF8 (Const FileName : String): String;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
 // to application directory
