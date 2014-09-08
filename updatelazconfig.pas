@@ -94,10 +94,10 @@ TUpdateLazConfig=class; //forward declaration
 
 TConfig = class(TObject)
 private
-  bChanged:boolean;
-  FFilename:string;
+  bChanged: boolean;
+  FFilename: string;
   FNew: boolean;
-  Doc:TXMLDocument;
+  Doc: TXMLDocument;
 protected
   // Did the config file exist before using it?
   property New: boolean read FNew;
