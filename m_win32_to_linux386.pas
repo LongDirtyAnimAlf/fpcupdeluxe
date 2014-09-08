@@ -84,13 +84,13 @@ const
 begin
 //todo add support for separate cross dire
   // Using crossfpc directory naming
-  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
@@ -132,7 +132,7 @@ begin
 
   // cross\bin
   if not result then
-    FBinUtilsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
+    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
   if not result then
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
       AsFile);

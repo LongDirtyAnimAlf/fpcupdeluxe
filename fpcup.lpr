@@ -288,7 +288,7 @@ begin
       begin
         // Get setting, converting relative paths (including e.g. ~/bla.ini) to
         // absolute paths.
-        sIniFile:=ExpandFileNameUTF8(sIniFile);
+        sIniFile:=SafeExpandFileNameUTF8(sIniFile);
         Options.IniFileSection:=Options.GetOption('','inisection','General');
         Options.CaseSensitive:=false; //easier when dealing with ini files
         try
@@ -354,39 +354,39 @@ begin
         bHaveInstalldir:=false;
       end
       else begin
-        sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap')));
-      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap')));
-      FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
-      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
+      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','binutilsdir',sInstallDir+'\fpcbootstrap')));
+      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'\fpcbootstrap')));
+      FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'\fpc')));
+      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'\lazarus')));
       {$ELSE} //*nix
       sInstallDir:=Options.GetOption('','installdir','');
       if sInstallDir='' then begin
-        sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8('~/development')); //fallback default
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8('~/development')); //fallback default
         bHaveInstalldir:=false;
       end
       else begin
         // Expand home dir etc
-        sInstallDir:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(sInstallDir));
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','binutilsdir','')));
-      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap')));
-      FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
-      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
+      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','binutilsdir','')));
+      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',sInstallDir+'/fpcbootstrap')));
+      FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
+      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
       {$ENDIF MSWINDOWS}
       FInstaller.SVNExecutable := Options.GetOption('','svnexe','');
       if (FInstaller.SVNExecutable <> '') then // Otherwise it is set to application path
-        FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(ExpandFileNameUTF8(FInstaller.SVNExecutable));
+        FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(FInstaller.SVNExecutable));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
         {$IFDEF MSWINDOWS}
         FInstaller.LogFileName:='fpcup.log'
         {$ELSE}
-        FInstaller.LogFileName:=ExpandFileNameUTF8('~/fpcup.log')
+        FInstaller.LogFileName:=SafeExpandFileNameUTF8('~/fpcup.log')
         {$ENDIF MSWINDOWS}
       else
         FInstaller.LogFileName:=sLogFile;
@@ -724,9 +724,9 @@ begin
         end;
       end;
 
-      // Note: we don't have a unicode version of ExpandFileName; investigate consequences for Unicode paths!??!?
+      // Note: we don't have a unicode version of SafeExpandFileName; investigate consequences for Unicode paths!??!?
       // User could have specified relative paths so we're normalizing them.
-      if ExpandFileName(FInstaller.LazarusDirectory)=ExpandFileName(FInstaller.FPCDirectory) then
+      if SafeExpandFileName(FInstaller.LazarusDirectory)=SafeExpandFileName(FInstaller.FPCDirectory) then
         writeln('WARNING: FPC and Lazarus directories are the same ('+FInstaller.FPCDirectory+'). This will not work!');
       if (FInstaller.FPCDesiredRevision<>'') then
         writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);

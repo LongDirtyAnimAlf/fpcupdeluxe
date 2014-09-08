@@ -652,7 +652,7 @@ begin
   begin
     // Look for make etc in the current compiler directory:
     FBinPath := ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    PlainBinPath := ExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..');
+    PlainBinPath := SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..');
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect

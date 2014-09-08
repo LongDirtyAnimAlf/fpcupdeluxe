@@ -1287,7 +1287,7 @@ begin
       // On *nix FPC 2.7.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
       // Adding this won't hurt on Windows.
       // Adjust for that
-      PlainBinPath:=ExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
+      PlainBinPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
       AssignFile(TxtFile,FPCCfg);
       Append(TxtFile);
       Writeln(TxtFile,'# fpcup:');

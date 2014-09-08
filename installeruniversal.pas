@@ -281,7 +281,7 @@ begin
   if ExtractFileName(PackagePath)=PackagePath then
     PackageAbsolutePath:=PackagePath
   else
-    PackageAbsolutePath:=ExpandFilename(PackagePath);
+    PackageAbsolutePath:=SafeExpandFileName(PackagePath);
   infoln('InstallPackage: packageabsolutepath: '+PackageAbsolutePath,etDebug);
   ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   FErrorLog.Clear;
@@ -408,7 +408,7 @@ begin
 
     if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
     // Convert any relative path to absolute path:
-    InstallDir:=IncludeTrailingPathDelimiter(ExpandFileName(GetValue('InstallDir',sl)));
+    InstallDir:=IncludeTrailingPathDelimiter(SafeExpandFileName(GetValue('InstallDir',sl)));
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
     Installer:=TWinInstaller.Create(InstallDir,FCompiler,FVerbose);

@@ -112,7 +112,7 @@ end;
 
 function TCrossInstaller.SearchBinUtil(Directory, LookFor: string): boolean;
 begin
-  FBinUtilsPath:=ExcludeTrailingPathDelimiter(ExpandFileName(Directory));
+  FBinUtilsPath:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Directory));
   result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+LookFor);
   // Report results to user. SearchBinUtil will probably only be called until
   // its result is true; if it's called more times, it still ok to keep the

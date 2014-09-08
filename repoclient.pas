@@ -129,7 +129,8 @@ type
 
 
 implementation
-
+uses
+  fpcuputil;
 { TRepoClient }
 
 function TRepoClient.GetLocalRevision: string;
@@ -170,7 +171,7 @@ procedure TRepoClient.SetLocalRepository(AValue: string);
 begin
   if FLocalRepository = AValue then
     Exit;
-  FLocalRepository := ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
+  FLocalRepository := ExcludeTrailingPathDelimiter(SafeExpandFileName(AValue));
 end;
 
 procedure TRepoClient.SetRepositoryURL(AValue: string);

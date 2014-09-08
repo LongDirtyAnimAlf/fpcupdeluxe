@@ -168,7 +168,7 @@ end;
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig); //Add a path to the LazDoc/fpcdoc list
 
 implementation
-uses FileUtil, math;
+uses FileUtil, math, fpcuputil;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var
@@ -181,7 +181,7 @@ begin
   if PathToAdd<>'' then
   begin
     // Normalize path so we can compare:
-    CleanedPath:=ExcludeTrailingPathDelimiter(ExpandFileName(PathToAdd));
+    CleanedPath:=ExcludeTrailingPathDelimiter(SafeExpandFileName(PathToAdd));
     FoundIt:=false;
     xmlfile:=EnvironmentConfig;
     key:='EnvironmentOptions/LazDoc/Paths';
@@ -199,7 +199,7 @@ begin
         // Normalize all paths stored in setting and look for our value:
         for i := 0 to TempList.Count - 1 do
         begin
-          TempList[i]:=ExcludeLeadingPathDelimiter(ExpandFileName(TempList[i]));
+          TempList[i]:=ExcludeLeadingPathDelimiter(SafeExpandFileName(TempList[i]));
           if TempList[i]=CleanedPath then
             begin
               // Settings already include this dir
@@ -434,7 +434,7 @@ begin
   if ExtractFileName(ConfigFile)=Configfile then
   begin
     // No directory given, place in config path
-    FileName:=ExpandFileName(IncludeTrailingPathDelimiter(FDefaultConfigPath)+
+    FileName:=SafeExpandFileName(IncludeTrailingPathDelimiter(FDefaultConfigPath)+
       ConfigFile);
   end
   else
@@ -442,7 +442,7 @@ begin
     // Normalize
     if ConfigFile='' then
       raise Exception.Create('GetConfig: ConfigFile may not be empty');
-    FileName:=ExpandFileName(ConfigFile);
+    FileName:=SafeExpandFileName(ConfigFile);
   end;
   ConfigIndex:=FConfigs.IndexOf(FileName);
   if ConfigIndex=-1 then
@@ -611,7 +611,7 @@ begin
   FConfigs.Duplicates:=dupError;
   if ConfigPath='' then
     raise Exception.Create('TUpdateLazConfig: ConfigPath may not be empty');
-  FDefaultConfigPath:=IncludeTrailingPathDelimiter(ExpandFileName(ConfigPath));
+  FDefaultConfigPath:=IncludeTrailingPathDelimiter(SafeExpandFileName(ConfigPath));
 end;
 
 destructor TUpdateLazConfig.Destroy;

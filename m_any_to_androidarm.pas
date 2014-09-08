@@ -104,13 +104,13 @@ android-ndk-r9c\platforms\android-19\arch-arm\usr\lib
 const
   DirName='arm-android';
 begin
-  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
       'cross'+DirectorySeparator+
       'lib'+DirectorySeparator+
       DirName);
@@ -135,7 +135,7 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName + ': could not find libspath. Please fill '+ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
+    infoln(FCrossModuleName + ': could not find libspath. Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
     ' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
     ,etError);
     FAlreadyWarned:=true;

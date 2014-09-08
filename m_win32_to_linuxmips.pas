@@ -86,13 +86,13 @@ const
   DirName='mips-linux';
 begin
 //todo add support for separate cross dire  
-  FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('Twin32_linuxmips: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('Twin32_linuxmips: failed: searched libspath '+FLibsPath,etInfo);
@@ -127,7 +127,7 @@ begin
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
       AsFile);
   if not result then
-    result:=SearchBinUtil(ExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName),
+    result:=SearchBinUtil(SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName),
       AsFile);
 
   if result then

@@ -414,12 +414,12 @@ end;
 
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
 begin
-FBootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(ExpandFileName(AValue));
+  FBootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(AValue));
 end;
 
 procedure TFPCupManager.SetFPCDirectory(AValue: string);
-begin
-  FFPCDirectory:=ExpandFileName(AValue);
+begin  
+  FFPCDirectory:=SafeExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.SetFPCURL(AValue: string);
@@ -433,7 +433,7 @@ end;
 
 procedure TFPCupManager.SetLazarusDirectory(AValue: string);
 begin
-  FLazarusDirectory:=ExpandFileName(AValue);
+  FLazarusDirectory:=SafeExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.SetLazarusURL(AValue: string);
@@ -455,7 +455,7 @@ begin
     {$IFDEF MSWINDOWS}
     FLog.LogFile:='fpcup.log'; //current directory
     {$ELSE}
-    FLog.LogFile:=ExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
+    FLog.LogFile:=SafeExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
     {$ENDIF MSWINDOWS}
     end
   else
@@ -466,12 +466,7 @@ end;
 
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
 begin
-  // Make directory can be empty (e.g. in Linux). In this case
-  // expanding '' gives the user's home directory, which is not what we want.
-  if AValue='' then
-    FMakeDirectory:=''
-  else
-    FMakeDirectory:=ExpandFileName(AValue);
+  FMakeDirectory:=SafeExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
