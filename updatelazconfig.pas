@@ -612,9 +612,6 @@ begin
   if ConfigPath='' then
     raise Exception.Create('TUpdateLazConfig: ConfigPath may not be empty');
   FDefaultConfigPath:=IncludeTrailingPathDelimiter(SafeExpandFileName(ConfigPath));
-  //todo: debug
-  infoln('todo: debug: tupdatelazonfig.create: got configpath:   '+ConfigPath,etInfo);
-  infoln('todo: debug: tupdatelazonfig.create: got def confpath: '+FDefaultConfigPath,etInfo);
 end;
 
 destructor TUpdateLazConfig.Destroy;
