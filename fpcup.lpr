@@ -377,9 +377,7 @@ begin
       FInstaller.FPCDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcdir',sInstallDir+'/fpc')));
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
       {$ENDIF MSWINDOWS}
-      FInstaller.SVNExecutable := Options.GetOption('','svnexe','');
-      if (FInstaller.SVNExecutable <> '') then // Otherwise it is set to application path
-        FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(FInstaller.SVNExecutable));
+      FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','svnexe','')));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
