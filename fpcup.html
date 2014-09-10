@@ -1,0 +1,52 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>fpcup</TITLE>
+	<STYLE TYPE="text/css">
+	<!--
+		@page { margin: 2cm }
+		P { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 0; orphans: 0 }
+		P.western { font-family: "Times New Roman", serif; font-size: 12pt; so-language: nl-NL }
+		H1 { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 0; orphans: 0 }
+		H1.western { font-family: "Arial", sans-serif; font-size: 16pt; so-language: nl-NL }
+		H2 { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 0; orphans: 0 }
+		H2.western { font-family: "Arial", sans-serif; font-size: 14pt; so-language: nl-NL; font-style: italic }
+	-->
+	</STYLE>
+</HEAD>
+<BODY DIR="LTR">
+<H1 CLASS="western">Architecture</H1>
+<H2 CLASS="western">Modules</H2>
+<P>A thing that can be installed/updated/uninstalled
+in fpcup is called a module. Modules can specify dependencies on
+other modules.</P>
+<P>Any installation tasks in fpcup are performed by TInstaller descendants, and driven by a state machine in the installerManager unit.</P>
+<P>FPC and Lazarus installers are implemented using TFPCInstaller and TLazarusInstaller descendants (native and cross compiler).</P>
+<P>Help content is installed using THelpInstaller descendents - FPC and Lazarus help content for Lazarus is installed by default; FPC help for the FPC IDE has been more or less setup but not run by default.</P>
+<P>For “external” modules, the parent class is TUniversalInstaller. You can specify what you want installed in fpcup.ini (see below in external modules)</P>
+<P>Module names may not conflict and must consist of alphanumeric characters, _ and - (hyphen).</P>
+<H3 CLASS="western">Dependency checking</H2>
+<P>Limited dependency checking is performed by the state machine: you can specify one sequence requires another; that other sequence is then executed, regardless of whether it was executed before (note exception below). For external modules, you can specify one module requires another.</P>
+<P>A single sequence (actually sequence/OS/CPU combination) will only be executed once by the state machine. When another identical sequence is encountered, fpcup prints an informational message to let you know. This means that you may have to take care with requiring sequence as only the first may run.</P>
+<H3 CLASS="western">External modules</H3>
+<P>External modules are modules where the installation/uninstall parameters are specified in an ini file.</P>
+<P>The ini file e.g. specifies what SVN repository to download from into what directory.</P>
+<P>A core fpcup ini file is maintained by the fpcup team. Users can enable/disable units in this ini file at will.</P>
+<P>As the ini file is designed for easy customization, users can add their own modules and submit them to the team for inclusion in the next release, making it easy to extend fpcup functionality for new repositories (e.g. Lazarus CCR, synapse, tiopf, vampyre imaging library).</P>
+<H3 CLASS="western">Cleaning and uninstall</H3>
+<P>By default, running fpcup will install/update components. You can specify --clean to remove intermediate files, which is useful when troubleshooting.</P>
+<P>To remove components, you can specify --uninstall, which will remove entire installation directories.</P>
+<H3 CLASS="western">Customization</H3>
+<P>The two major ways to extend fpcup are writing your own crossinstaller (that checks/downloads required binutils and libraries, and compiles the cross-compiler/LCL), and external modules.</P>
+<P>See above for how to add external modules without changing the fpcup code.</P>
+<H4 CLASS="western">Crosscompiling modules</H4>
+<P>To write a cross-compiler module, you have to inherit from m_crossinstaller.pas. That unit contains details about the minimum set of properties/methods you will need to provide. Once you're done, add the cross compiling module to fpcup.lpr's uses list so the unit gets loaded in and registers using the initialization section, making it available for fpcup.</P>
+<P>To ensure the wrong cross compiler is never loaded, IFDEF your unit's initialization/finalization code so it is only compiled for the right architecture.</P>
+<P>An example of a simple crosscompiler module that does not need to check for libraries etc is the Win64=>Win32 cross compiler in m_crosswin32.pas.</P>
+<H4 CLASS="western">Adding non-universal, non-crosscompiling modules</H4>
+<P>If you want to add modules to the FPC, Lazarus etc units, you will need to adjust both the sequences (instructions for the state machine) as well as the InstallerManager.GetInstaller so it knows what installer to get depending on the module.<P>
+<P>If you don't do the latter, you will get cryptic error messages like: Info: Error running fpcup. Technical details: error executing sequence USERIDE;</P>
+<P>line: 7, param: USERIDE</P>
+</BODY>
+</HTML>
