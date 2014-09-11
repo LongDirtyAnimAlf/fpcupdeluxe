@@ -274,7 +274,7 @@ begin
 
       // Make all
       ProcessEx.Executable := Make;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+      ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Clear;
       {$IFNDEF windows}
       { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
@@ -382,7 +382,7 @@ begin
         // Install crosscompiler: make crossinstall
         // (apparently equivalent to make install CROSSINSTALL=1)
         ProcessEx.Executable := Make;
-        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+        ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
         ProcessEx.Parameters.Clear;
         infoln('Running Make crossinstall (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')', etinfo);
         {$IFNDEF windows}
@@ -507,7 +507,7 @@ begin
   // the long way: make all, see where to install, install
   FErrorLog.Clear;
   ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+  ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Clear;
   if FCPUCount>1 then
     ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
@@ -573,7 +573,7 @@ begin
 
   ProcessEx.Executable := Make;
   FErrorLog.Clear;
-  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+  ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Clear;
   {$IFNDEF windows}
   { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
@@ -1093,7 +1093,7 @@ begin
   // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
   // version-dependent: please review and modify when new FPC version is released
   ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+  ProcessEx.SetCurrentDirectory(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
   ProcessEx.Parameters.Clear;
   if FCPUCount>1 then
     ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
@@ -1134,7 +1134,7 @@ begin
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.SetCurrentDirectory(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Clear;
     {$IFNDEF windows}
     { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
@@ -1168,7 +1168,7 @@ begin
   if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
     begin
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.SetCurrentDirectory(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
     ProcessEx.Parameters.Clear;
     if FCPUCount>1 then
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
@@ -1260,7 +1260,7 @@ begin
     if FileExists(FPCCfg) = False then
     begin
       ProcessEx.Executable := fpcmkcfg;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+      ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('-d');
       ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -1390,7 +1390,7 @@ begin
   ProcessEx.OnErrorM:=nil;  //don't want to log errors in distclean
   try
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+    ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Clear;
     {$IFNDEF windows}
     { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.

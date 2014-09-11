@@ -540,7 +540,7 @@ begin
         ProcessEx.Executable := BuildLCLDocsExe;
         // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
-        ProcessEx.CurrentDirectory:=FTargetDirectory;
+        ProcessEx.SetCurrentDirectory(FTargetDirectory);
         ProcessEx.Parameters.Clear;
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
         // the directory that contains the fcl and rtl .xct files:

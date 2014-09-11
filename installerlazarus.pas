@@ -228,7 +228,7 @@ begin
         }
         BuildMethod := 'make';
         ProcessEx.Executable := Make;
-        ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+        ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
         ProcessEx.Parameters.Clear;
         {$IFDEF lazarus_parallel_make}
         if FCPUCount>1 then
@@ -270,7 +270,7 @@ begin
         // Use lazbuild for cross compiling lite:
         BuildMethod := 'lazbuild';
         ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild' + GetExeExt;
-        ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+        ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
         ProcessEx.Parameters.Clear;
         ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
         ProcessEx.Parameters.Add('--cpu=' + FCrossCPU_Target);
@@ -356,7 +356,7 @@ begin
     // distclean was already run; otherwise specify make clean all
     FErrorLog.Clear;
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+    ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Clear;
     {$IFDEF lazarus_parallel_make}
     if FCPUCount>1 then
@@ -497,7 +497,7 @@ begin
       // First build IDE using lazbuild... then...
       ProcessEx.Executable := LazBuildApp;
       FErrorLog.Clear;
-      ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+      ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
       // Support keeping userdefined installed packages when building.
@@ -586,7 +586,7 @@ begin
         begin
           ProcessEx.Executable := LazBuildApp;
           FErrorLog.Clear;
-          ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+          ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
           ProcessEx.Parameters.Clear;
           ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
           ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FBaseDirectory)+
@@ -877,7 +877,7 @@ begin
   oldlog := ProcessEx.OnErrorM;
   ProcessEx.OnErrorM := nil;  //don't want to log errors in distclean
   ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+  ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Clear;
   {$IFDEF lazarus_parallel_make}
   if FCPUCount>1 then

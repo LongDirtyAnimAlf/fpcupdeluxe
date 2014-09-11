@@ -227,7 +227,7 @@ begin
   }
   ProcessEx.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
   // MUST be set to create_installer.bat otherwise it can't find the fpcbuild/lazbuild scripts
-  ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
+  ProcessEx.SetCurrentDirectory(IncludeTrailingPathDelimiter(InstallerBatchDir));
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCBuildDir)); //FPCSVNDIR
   ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR

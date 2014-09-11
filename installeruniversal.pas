@@ -286,7 +286,7 @@ begin
   ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   FErrorLog.Clear;
   if WorkingDir<>'' then
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
+    ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(WorkingDir));
   ProcessEx.Parameters.Clear;
   ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
   ProcessEx.Parameters.Add('--add-package');
@@ -787,7 +787,7 @@ begin
         infoln('InstallerUniversal: going to rebuild Lazarus because packages were installed.',etInfo);
         ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
         FErrorLog.Clear;
-        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
+        ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(LazarusDir));
         ProcessEx.Parameters.Clear;
         ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
         ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
@@ -1001,7 +1001,7 @@ begin
       infoln('InstallerUniversal: going to rebuild Lazarus because packages were uninstalled.',etInfo);
       ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
       FErrorLog.Clear;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
+      ProcessEx.SetCurrentDirectory(ExcludeTrailingPathDelimiter(LazarusDir));
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
       ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
