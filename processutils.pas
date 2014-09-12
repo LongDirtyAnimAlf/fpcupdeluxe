@@ -119,8 +119,6 @@ type
     public
       // Run executable with parameters etc. Comes in place of inherited execute.
       {%H-}procedure Execute;
-      // Set CurrentDir with check since non-existing path breaks TProcess under Mac OS (Issue #0026706)
-      procedure SetCurrentDirectory(NewCurrentDirectory: string);
       // Executable+parameters. Use Executable and Parameters/ParametersString to assign
       property ResultingCommand: string read GetResultingCommand;
       // All environment variables, e.g. PATH
@@ -160,9 +158,6 @@ procedure DumpConsole(Sender:TProcessEx; output:string);
 
 
 implementation
-
-uses
-  FileUtil{DirectoryExistsUTF8};
 
 { TProcessEx }
 
@@ -306,12 +301,6 @@ begin
       OnErrorM(Self,false);
     end;
   end;
-end;
-
-procedure TProcessEx.SetCurrentDirectory(NewCurrentDirectory: string);
-begin
-  if (CurrentDirectory <> NewCurrentDirectory) and DirectoryExistsUTF8(NewCurrentDirectory) then
-    CurrentDirectory := NewCurrentDirectory;
 end;
 
 constructor TProcessEx.Create(AOwner : TComponent);
