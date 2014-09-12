@@ -1,4 +1,4 @@
-{ Process utility unit
+{ Process utility unit. Extends TProcess. Not unicode-aware.
 Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This unit is licensed as modified LGPL or MIT, at your choice. Licenses below
@@ -70,7 +70,7 @@ const
   {$ENDIF MSWINDOWS}
 
 type
-  TProcessEx=class; //forward
+  TProcessEx = class; //forward
   TDumpFunc = procedure (Sender:TProcessEx; output:string);
   TDumpMethod = procedure (Sender:TProcessEx; output:string) of object;
   TErrorFunc = procedure (Sender:TProcessEx;IsException:boolean);
@@ -269,6 +269,22 @@ begin
       FOnOutputM(Self,'Executing : '+ResultingCommand+' (working dir: '+ CurrentDirectory +')'+ LineEnding);
 
     try
+      if CurrentDirectory<>'' then
+      begin
+        // Avoid unpredictable behaviour as well as
+        // OSX bug 26706
+        if not(DirectoryExists(CurrentDirectory)) then
+        begin
+          FExitStatus:=PROC_INTERNALEXCEPTION;
+          FExceptionInfoStrings.Add('Invalid directory: '+CurrentDirectory);
+          FExitStatus:=PROC_INTERNALEXCEPTION;
+          if (Assigned(OnError) or Assigned(OnErrorM)) then
+            OnError(Self,false)
+          else
+            OnErrorM(Self,false);
+          exit;
+        end;
+      end;
       inherited Execute;
       while Running do
       begin
@@ -495,6 +511,7 @@ begin
   try
     if Directory<>'' then
       PE.CurrentDirectory:=Directory;
+
     // Prepend specified PrependPath if needed:
     if PrependPath<>'' then
     begin

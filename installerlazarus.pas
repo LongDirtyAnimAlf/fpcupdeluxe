@@ -841,6 +841,15 @@ begin
   Result := InitModule;
   if not Result then
     exit;
+  // Check for valid basedirectory to avoid deleting in random locations or
+  // hitting bug 26706: OSX TProcess.Execute fails on next call with invalid
+  // current directory
+  if not DirectoryExistsUTF8(FBaseDirectory) then
+  begin
+    infoln('Lazarus CleanModule: directory '+FBaseDirectory+' does not exist. Exiting CleanModule.',etWarning);
+    exit;
+  end;
+
   CrossInstaller := GetCrossInstaller;
   // If cleaning primary config:
   if (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') then

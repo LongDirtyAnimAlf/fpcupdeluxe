@@ -311,7 +311,7 @@ begin
         // Deal with timeouts, wrong URLs etc
         OperationSucceeded:=false;
         infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
-          'Exception: '+E.ClassName+'/'+E.Message, etwarning);
+          'Exception: '+E.ClassName+'/'+E.Message, etWarning);
       end;
     end;
 
@@ -380,6 +380,12 @@ end;
 function THelpFPCInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=inherited CleanModule(ModuleName);
+  // Check for valid directory
+  if not DirectoryExistsUTF8(FTargetDirectory) then
+  begin
+    infoln('HelpFPCInstaller CleanModule: directory '+FTargetDirectory+' does not exist. Exiting CleanModule.',etInfo);
+    exit;
+  end;
   if result then
   try
     { Delete .chm files and .xct (cross reference) files
@@ -634,6 +640,12 @@ end;
 function THelpLazarusInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=inherited CleanModule(ModuleName);
+  // Check for valid directory
+  if not DirectoryExistsUTF8(FTargetDirectory) then
+  begin
+    infoln('HelpLazarusInstaller CleanModule: directory '+FTargetDirectory+' does not exist. Exiting CleanModule.',etInfo);
+    exit;
+  end;
   if result then
   try
     { Delete .chm files and .xct (cross reference) files
