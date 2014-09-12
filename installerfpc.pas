@@ -1333,6 +1333,15 @@ var
 begin
   result:=InitModule;
   if not result then exit;
+  // Check for valid basedirectory to avoid deleting in random locations or
+  // hitting bug 26706: OSX TProcess.Execute fails on next call with invalid
+  // current directory
+  if not DirectoryExistsUTF8(FBaseDirectory) then
+  begin
+    infoln('FPC: CleanModule: directory '+FBaseDirectory+' does not exist. Exiting CleanModule.',etWarning);
+    exit;
+  end;
+
   oldlog:=ProcessEx.OnErrorM; //current error handler, if any
   CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
   if CrossCompiling then
