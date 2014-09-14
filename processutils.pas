@@ -1,4 +1,6 @@
-{ Process utility unit. Extends TProcess. Not unicode-aware.
+{ Process utility unit. Extends TProcess.
+Not unicode-aware (change this when FPC becomes so).
+
 Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This unit is licensed as modified LGPL or MIT, at your choice. Licenses below
