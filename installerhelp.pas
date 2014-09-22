@@ -469,14 +469,19 @@ begin
       // Ignore exceptions, leave old date as is
     end;
 
-    // Only consider building if lcl.chm is not read-only.
+    // Only consider building if lcl.chm does not exist
+    // or is not read-only.
     // Then it should be old (> 7 days) or empty.
     // We assume that readonly means the user doesn't want to
     // overwrite.
-    if (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
+    if (FileExistsUTF8(ExistingLCLHelp)=false) or
+      (
+      (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
       and
       ((DaysBetween(Now,LCLDate)>7)
-      or (FileSize(ExistingLCLHelp)=0)) then
+      or (FileSize(ExistingLCLHelp)=0))
+      )
+      then
     begin
       BuildLCLDocsExe:=FBuildLCLDocsExeDirectory+'build_lcl_docs'+GetExeExt;
       if OperationSucceeded then
@@ -516,9 +521,9 @@ begin
       // Check for proper fpdoc
       { Preferably use the fpdoc in ./utils/fpdoc/ }
       FPDocExe:=IncludeTrailingPathDelimiter(FFPCDirectory)+
-      'utils'+DirectorySeparator+
-      'fpdoc'+DirectorySeparator+
-      'fpdoc'+GetExeExt;
+        'utils'+DirectorySeparator+
+        'fpdoc'+DirectorySeparator+
+        'fpdoc'+GetExeExt;
       if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
       begin
         // Try again, in bin directory; newer FPC releases may have migrated to this
@@ -549,7 +554,8 @@ begin
         ProcessEx.CurrentDirectory:=FTargetDirectory;
         ProcessEx.Parameters.Clear;
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
-        // the directory that contains the fcl and rtl .xct files:
+        // the directory that contains the fcl and rtl .xct files.
+        // If those .xct files are not present, FPC 2.7.1 fpdoc will throw an exception
         ProcessEx.Parameters.Add('--fpcdocs');
         ProcessEx.Parameters.Add(FTargetDirectory);
         // Let build_lcl_docs know which fpdoc application to use:
