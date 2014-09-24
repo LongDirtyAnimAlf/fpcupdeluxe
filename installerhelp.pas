@@ -572,6 +572,10 @@ begin
 
         ProcessEx.Parameters.Add('--outfmt');
         ProcessEx.Parameters.Add('chm');
+        { this will give a huge amount of warnings which should be fixed by
+        fpdoc and/or the .chm files so are rather useless
+        ProcessEx.Parameters.Add('--warnings'); //let tool show warnings as well
+        }
         // Show application output if desired:
         if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
         infoln(ModuleName+': compiling chm help docs:',etInfo);

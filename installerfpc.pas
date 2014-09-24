@@ -210,8 +210,9 @@ begin
         ConfigText.Delete(i);
       end;
     end;
-    // Add snippet at bottom
-    ConfigText.Add(LineEnding);
+    // Add snippet at bottom after blank line
+    if ConfigText[ConfigText.Count-1]<>'' then
+      ConfigText.Add(LineEnding);
     ConfigText.Add(Snippet);
 
     ConfigText.SaveToFile(FPCCFG);
