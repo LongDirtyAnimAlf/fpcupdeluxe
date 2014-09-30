@@ -474,6 +474,12 @@ begin
     // Then it should be old (> 7 days) or empty.
     // We assume that readonly means the user doesn't want to
     // overwrite.
+    // Note: this still does not seem to go right. On Linux
+    // without lcl.chm it detects the file as readonly...
+    if FileExistsUTF8(ExistingLCLHelp) then
+      infoln('Check if '+ExistingLCLHelp+' exists? Yes.',etInfo)
+    else
+      infoln('Check if '+ExistingLCLHelp+' exists? No.',etInfo);
     if (FileExistsUTF8(ExistingLCLHelp)=false) or
       (
       (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
