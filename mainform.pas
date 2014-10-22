@@ -6,6 +6,7 @@ unit mainform;
 
 //working on highlighter
 {.$DEFINE HLREADY}
+
 //to do: highlighting log
 (*
   Highlights:
@@ -28,7 +29,7 @@ uses
   Menus, inifiles, processutils, process, fpcuputil, strutils, LCLIntf, LCLType,
   XMLPropStorage, zipper, svnclient, SynEditKeyCmds
   {$IFDEF HLREADY}, fpcuploghighlighter {$ENDIF}
-  ;
+  , types;
 
 type
 
@@ -378,7 +379,11 @@ begin
       EditTabs.ActivePage:=OutputTab; //switch to output tab
       Application.ProcessMessages;
       UpProc.Execute;
+      { For TMemo/TEdit:
       OutputMemo.SelStart:=0; //move to beginning of output
+      }
+      // For unpatched TSynEdit/TSynMemo which insists on starting at 1
+      OutputMemo.SelStart:=1; //move to beginning of output
     finally
       Screen.Cursor:=crDefault;
     end;
@@ -540,7 +545,6 @@ procedure TForm1.INIFileSelectEditExit(Sender: TObject);
 begin
   LoadProfilesFromFile(INIFileSelectEdit.FileName);
 end;
-
 
 procedure TForm1.ProfileSelectSelect(Sender: TObject);
 var
