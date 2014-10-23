@@ -5,7 +5,7 @@ unit mainform;
 {$DEFINE NOCONSOLE} //Please define this in project options so fpcuputil etc will not use writeln
 
 //working on highlighter
-{$DEFINE HLREADY}
+{.$DEFINE HLREADY}
 
 //to do: highlighting log
 (*

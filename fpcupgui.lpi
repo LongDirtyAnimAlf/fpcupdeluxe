@@ -138,6 +138,7 @@
       <IncludeFiles Value="$(ProjOutDir)"/>
     </SearchPaths>
     <CodeGeneration>
+      <SmartLinkUnit Value="True"/>
       <Optimizations>
         <OptimizationLevel Value="3"/>
       </Optimizations>
