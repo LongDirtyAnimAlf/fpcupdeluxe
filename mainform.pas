@@ -5,7 +5,7 @@ unit mainform;
 {$DEFINE NOCONSOLE} //Please define this in project options so fpcuputil etc will not use writeln
 
 //working on highlighter
-{.$DEFINE HLREADY}
+{$DEFINE HLREADY}
 
 //to do: highlighting log
 (*
@@ -382,7 +382,7 @@ begin
       { For TMemo/TEdit:
       OutputMemo.SelStart:=0; //move to beginning of output
       }
-      // For unpatched TSynEdit/TSynMemo which insists on starting at 1
+      // For TSynEdit/TSynMemo which insists on starting at 1
       OutputMemo.SelStart:=1; //move to beginning of output
     finally
       Screen.Cursor:=crDefault;
