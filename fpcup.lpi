@@ -328,7 +328,7 @@ end;"/>
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="38">
+    <Units Count="39">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -340,7 +340,6 @@ end;"/>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="updatelazconfig"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
@@ -349,7 +348,6 @@ end;"/>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
@@ -359,7 +357,6 @@ end;"/>
       <Unit6>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerLazarus"/>
       </Unit6>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
@@ -378,12 +375,10 @@ end;"/>
       <Unit10>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerManager"/>
       </Unit10>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -408,7 +403,6 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
@@ -490,6 +484,11 @@ end;"/>
         <Filename Value="cpucount.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit37>
+      <Unit38>
+        <Filename Value="m_linuxx64_to_linux386.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="m_linuxx64_to_linux386"/>
+      </Unit38>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

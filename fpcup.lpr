@@ -55,7 +55,7 @@ uses {$IFDEF UNIX}
   m_anyinternallinker_to_win386, m_anyinternallinker_to_win64,
   m_crossinstaller, m_crosswin32, m_crosswin64,
   m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,
-  m_linux386_to_mips,
+  m_linux386_to_mips, m_linuxx64_to_linux386,
   m_win32_to_linuxmips,
   m_win32_to_msdosi8086,
   m_win32_to_go32v2i386,
