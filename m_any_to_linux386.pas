@@ -1,6 +1,6 @@
-unit m_linuxx64_to_linux386;
-//todo: rework into any to linux386, conditional compilation for linux/unix-specific search paths
-{ Cross compiles from Linux 64 bit to Linux 32 bit
+unit m_any_to_linux386;
+
+{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to Linux 32 bit
 Copyright (C) 2014 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -30,9 +30,8 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {
-Written with gnu binutils in mind: getting binutils:
+Debian: adding i386 libs/architecture support on e.g. x64 system
 dpkg --add-architecture i386
-apt-get install binutils:i386
 
 Adapt (add) for other setups
 }
@@ -46,12 +45,12 @@ uses
 
 implementation
 const
-  CrossModuleName='Tlinuxx64_linux386';
+  CrossModuleName='Tany_linux386';
 
 type
 
-{ Tlinuxx64_linux386 }
-Tlinuxx64_linux386 = class(TCrossInstaller)
+{ Tany_linux386 }
+Tany_linux386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -63,13 +62,13 @@ public
   destructor Destroy; override;
 end;
 
-{ Tlinuxx64_linux386 }
-function Tlinuxx64_linux386.TargetSignature: string;
+{ Tany_linux386 }
+function Tany_linux386.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function Tlinuxx64_linux386.GetLibs(Basepath:string): boolean;
+function Tany_linux386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-linux';
 begin
@@ -79,18 +78,20 @@ begin
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
-    infoln('Tlinuxx64_linux386: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
     FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
       'cross'+DirectorySeparator+
       'lib'+DirectorySeparator+
       DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('Tlinuxx64_linux386: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
+    {$IFDEF UNIX}
     FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-      infoln('Tlinuxx64_linux386: failed: searched libspath '+FLibsPath,etInfo);
+      infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
+    {$ENDIF}
   end;
   if result then
   begin
@@ -99,17 +100,17 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     '-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('Tlinuxx64_linux386: found libspath '+FLibsPath,etInfo);
+    infoln('Tany_linux386: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
-function Tlinuxx64_linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function Tany_linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
   result:=true;
 end;
 
-function Tlinuxx64_linux386.GetBinUtils(Basepath:string): boolean;
+function Tany_linux386.GetBinUtils(Basepath:string): boolean;
 const
   DirName='i386-linux';
 var
@@ -154,10 +155,10 @@ begin
   end;
 end;
 
-constructor Tlinuxx64_linux386.Create;
+constructor Tany_linux386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='linuxx64_linux386';
+  FCrossModuleName:='any_linux386';
   FBinUtilsPrefix:=''; //try with none
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
@@ -165,24 +166,22 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Tlinuxx64_linux386 crosscompiler loading',etDebug);
+  infoln('Tany_linux386 crosscompiler loading',etDebug);
 end;
 
-destructor Tlinuxx64_linux386.Destroy;
+destructor Tany_linux386.Destroy;
 begin
   inherited Destroy;
 end;
 
-{$IFDEF LINUX)}
 var
-  linuxx64_linux386:Tlinuxx64_linux386;
+  any_linux386:Tany_linux386;
 
-// Even though it's officially for x64, other architectures may work
 initialization
-  linuxx64_linux386:=Tlinuxx64_linux386.Create;
-  RegisterExtension(linuxx64_linux386.TargetCPU+'-'+linuxx64_linux386.TargetOS,linuxx64_linux386);
+  any_linux386:=Tany_linux386.Create;
+  RegisterExtension(any_linux386.TargetCPU+'-'+any_linux386.TargetOS,any_linux386);
 finalization
-  linuxx64_linux386.Destroy;
-{$ENDIF}
+  any_linux386.Destroy;
+
 end.
 
