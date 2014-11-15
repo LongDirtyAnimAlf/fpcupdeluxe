@@ -209,6 +209,10 @@ begin
     result:=SearchBinUtil('/usr/local/bin',
       AsFile);
 
+  if not result then { try /usr/bin/ }
+    result:=SearchBinUtil('/usr/bin',
+      AsFile);
+
   if not result then { try /bin/ }
     result:=SearchBinUtil('/bin',
       AsFile);
