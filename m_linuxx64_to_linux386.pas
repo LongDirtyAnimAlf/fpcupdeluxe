@@ -86,6 +86,10 @@ begin
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('Tlinuxx64_linux386: failed: searched libspath '+FLibsPath,etInfo);
+    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
+    result:=DirectoryExists(FLibsPath);
+    if not result then
+      infoln('Tlinuxx64_linux386: failed: searched libspath '+FLibsPath,etInfo);
   end;
   if result then
   begin
