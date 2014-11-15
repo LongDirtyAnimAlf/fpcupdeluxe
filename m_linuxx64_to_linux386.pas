@@ -1,4 +1,5 @@
 unit m_linuxx64_to_linux386;
+//todo: rework into any to linux386, conditional compilation for linux/unix-specific search paths
 { Cross compiles from Linux 64 bit to Linux 32 bit
 Copyright (C) 2014 Reinier Olislagers
 
