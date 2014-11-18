@@ -320,13 +320,10 @@ end;"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="2">
+    <RequiredPackages Count="1">
       <Item1>
         <PackageName Value="LazUtils"/>
       </Item1>
-      <Item2>
-        <PackageName Value="LCL"/>
-      </Item2>
     </RequiredPackages>
     <Units Count="39">
       <Unit0>
@@ -348,6 +345,7 @@ end;"/>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
@@ -361,7 +359,6 @@ end;"/>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerHelp"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
@@ -411,6 +408,7 @@ end;"/>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_freebsd_to_linux386"/>
       </Unit19>
       <Unit20>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
@@ -431,6 +429,7 @@ end;"/>
       <Unit24>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_crossinstaller"/>
       </Unit24>
       <Unit25>
         <Filename Value="m_win32_to_linux386.pas"/>
@@ -467,6 +466,7 @@ end;"/>
       <Unit33>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_linux386_to_mips"/>
       </Unit33>
       <Unit34>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
@@ -487,7 +487,6 @@ end;"/>
       <Unit38>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linux386"/>
       </Unit38>
     </Units>
   </ProjectOptions>
