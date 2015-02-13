@@ -320,20 +320,23 @@ end;"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LazUtils"/>
+        <PackageName Value="LCLBase"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LazUtils"/>
+      </Item2>
     </RequiredPackages>
     <Units Count="39">
       <Unit0>
         <Filename Value="fpcupwin32.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcupwin32"/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="svnclient"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
@@ -342,26 +345,32 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="processutils"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerFpc"/>
       </Unit5>
       <Unit6>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerLazarus"/>
       </Unit6>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerHelp"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerUniversal"/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcup.ini"/>
@@ -370,10 +379,12 @@ end;"/>
       <Unit10>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerManager"/>
       </Unit10>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -386,6 +397,7 @@ end;"/>
       <Unit14>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="winInstaller"/>
       </Unit14>
       <Unit15>
         <Filename Value="commandline.pas"/>
@@ -398,6 +410,7 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
@@ -490,6 +503,7 @@ end;"/>
     <PathDelim Value="\"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="synaser"/>
       <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if TargetOS = 'darwin' then begin
@@ -498,6 +512,7 @@ end;"/>
 end;"/>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
+      <TargetCPU Value="i386"/>
       <TargetOS Value="win32"/>
     </CodeGeneration>
     <Linking>

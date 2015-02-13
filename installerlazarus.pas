@@ -74,7 +74,7 @@ const
     'Declare lazarusuninstall;' + 'Uninstallmodule lazarus;' + 'Exec DeleteLazarusScript;' + 'End;' +
 
     //standard clean
-    'Declare lazarusclean;' + 'cleanmodule lazarus;' + 'End;' +
+    'Declare lazarusclean;' + 'Cleanmodule lazarus;' + 'End;' +
 
     //selective actions triggered with --only=SequenceName
     'Declare LazarusCleanOnly;' + 'Cleanmodule lazarus;' + 'End;' + 'Declare LazarusGetOnly;' +
@@ -286,6 +286,7 @@ begin
         infoln('Lazarus: compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + '/' + FCrossLCL_Platform + ' using ' + BuildMethod, etInfo);
 
       try
+        writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
         ProcessEx.Execute;
         Result := ProcessEx.ExitStatus = 0;
         if not Result then
@@ -420,6 +421,7 @@ begin
       end;
     end;
     try
+      writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
       ProcessEx.Execute;
       ExitCode := ProcessEx.ExitStatus;
       if ExitCode <> 0 then
@@ -526,6 +528,7 @@ begin
       begin
         infoln('Lazarus: running lazbuild to get IDE with user-specified packages:', etInfo);
         try
+          writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
           ProcessEx.Execute;
           if ProcessEx.ExitStatus <> 0 then
           begin
@@ -556,6 +559,7 @@ begin
       begin
         infoln('Lazarus: running lazbuild again to install user-specified packages:', etInfo);
         try
+          writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
           ProcessEx.Execute;
           if ProcessEx.ExitStatus <> 0 then
           begin
@@ -594,6 +598,7 @@ begin
 
           infoln('Lazarus: compiling startlazarus to make sure it is present:', etInfo);
           try
+            writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
             ProcessEx.Execute;
             if ProcessEx.ExitStatus <> 0 then
             begin
@@ -915,8 +920,10 @@ begin
   ProcessEx.Parameters.Add('distclean');
   try
     // Note: apparently, you can't specify certain modules to clean, like lcl.
+    writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
     ProcessEx.Execute;
     sleep(100); //now do it again:
+    writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
     ProcessEx.Execute;
     Result := true;
   except

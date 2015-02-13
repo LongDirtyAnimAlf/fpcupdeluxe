@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="fpcuparmhf"/>
+      <Title Value="fpcupwin64"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -330,7 +330,7 @@ end;"/>
     </RequiredPackages>
     <Units Count="39">
       <Unit0>
-        <Filename Value="fpcuparmhf.lpr"/>
+        <Filename Value="fpcupwin64.lpr"/>
         <IsPartOfProject Value="True"/>
       </Unit0>
       <Unit1>
@@ -410,6 +410,7 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
@@ -482,7 +483,6 @@ end;"/>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linuxarm"/>
       </Unit35>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
@@ -512,8 +512,8 @@ end;"/>
 end;"/>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
-      <TargetCPU Value="arm"/>
-      <TargetOS Value="linux"/>
+      <TargetCPU Value="x86_64"/>
+      <TargetOS Value="win64"/>
     </CodeGeneration>
     <Linking>
       <Debugging>
@@ -525,7 +525,6 @@ end;"/>
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
-      <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF"/>
       <ExecuteBefore>
         <CompileReasons Run="False"/>
       </ExecuteBefore>

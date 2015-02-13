@@ -410,7 +410,7 @@ begin
   begin
     // There is an SVN repository here.
     // Output from info command can include:
-    // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_2_6
+    // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_3_0
     // Repository URL might differ from the one we've set though
     URLPos := pos('URL: ', Output) + URLLen;
     URL := IncludeTrailingSlash(trim(copy(Output, (URLPos), Posex(LineEnding, Output, URLPos) - URLPos)));

@@ -6,7 +6,7 @@
     <BuildModes Active="Default"/>
     <Units Count="39">
       <Unit0>
-        <Filename Value="fpcupwin32.lpr"/>
+        <Filename Value="fpcupwin64.lpr"/>
         <IsPartOfProject Value="True"/>
         <TopLine Value="286"/>
         <CursorPos Y="286"/>
@@ -113,7 +113,7 @@
         <UnitName Value="fpcuputil"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <CursorPos X="13" Y="233"/>
+        <CursorPos X="42" Y="21"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>
       </Unit11>

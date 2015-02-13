@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="fpcuparmhf"/>
+      <Title Value="fpcuplinuxi386"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -330,8 +330,9 @@ end;"/>
     </RequiredPackages>
     <Units Count="39">
       <Unit0>
-        <Filename Value="fpcuparmhf.lpr"/>
+        <Filename Value="fpcuplinuxi386.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcuplinuxi386"/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>
@@ -512,7 +513,7 @@ end;"/>
 end;"/>
     <CodeGeneration>
       <SmartLinkUnit Value="True"/>
-      <TargetCPU Value="arm"/>
+      <TargetCPU Value="i386"/>
       <TargetOS Value="linux"/>
     </CodeGeneration>
     <Linking>
@@ -525,7 +526,6 @@ end;"/>
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
-      <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF"/>
       <ExecuteBefore>
         <CompileReasons Run="False"/>
       </ExecuteBefore>

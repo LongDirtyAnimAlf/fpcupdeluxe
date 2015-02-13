@@ -52,7 +52,6 @@ Temporary Items
 *.res
 
 *.dcu
-*.exe
 *.identcache
 
 *.bak

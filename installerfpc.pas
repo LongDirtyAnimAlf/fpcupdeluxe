@@ -54,7 +54,7 @@ Const
 
 //standard clean
     'Declare FPCclean;'+
-    'cleanmodule FPC;'+
+    'Cleanmodule FPC;'+
     'End;'+
 
 //selective actions triggered with --only=SequenceName
@@ -959,7 +959,7 @@ begin
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ENDIF cpuarmel}
-    {$IFDEF cpuarm} //includes armel on FPC 2.7.1
+    {$IFDEF cpuarm} //includes armel on FPC 3.1.1
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
@@ -1022,7 +1022,7 @@ begin
     end;
 
   // Only download bootstrap compiler if we can't find a valid one
-  if CheckExecutable(FBootstrapCompiler, '-h', 'Free Pascal Compiler') then
+  if CheckExecutable(FBootstrapCompiler, '-i', 'Free Pascal Compiler') then
     begin
       infoln('Found bootstrap compiler version '+GetCompilerVersion(FBootstrapCompiler),etInfo);
       result:=CheckAndGetNeededExecutables;
@@ -1094,12 +1094,13 @@ begin
   // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
   // version-dependent: please review and modify when new FPC version is released
   ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add('compiler_cycle');
   if FCPUCount>1 then
     ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
   ProcessEx.Parameters.Add('FPC='+FCompiler);
-  ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
+  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   // Copy over user-specified instruction sets e.g. for trunk compiler...
   // in CROSSOPT though, as the stable compiler likely will not understand them
   if FCompilerOptions<>'' then
@@ -1112,7 +1113,6 @@ begin
   // Override makefile checks that checks for stable compiler in FPC trunk
   FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
   ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  ProcessEx.Parameters.Add('cycle');
   infoln('Running make cycle for ARM compiler:',etInfo);
   ProcessEx.Execute;
   if ProcessEx.ExitStatus <> 0 then
@@ -1135,8 +1135,9 @@ begin
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('compiler_cycle');
     {$IFNDEF windows}
     { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
     Re-enable when changed to make 3.82 }
@@ -1144,13 +1145,12 @@ begin
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     {$ENDIF}
     ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('OS_TARGET=win64');
     ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
     // Override makefile checks that checks for stable compiler in FPC trunk
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-    ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC64:',etInfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
@@ -1169,17 +1169,17 @@ begin
   if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
     begin
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('compiler_cycle');
     if FCPUCount>1 then
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler');
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
     // Override makefile checks that checks for stable compiler in FPC trunk
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-    ProcessEx.Parameters.Add('cycle');
     infoln('Running make cycle for FPC i386:',etInfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
@@ -1235,7 +1235,7 @@ begin
     fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
     begin
-      // Newer 2.7 trunk versions put fpcmkcfg in bin itself
+      // Newer 3.1 trunk versions put fpcmkcfg in bin itself
       infoln(ModuleName+': did not find '+fpcmkcfg+'. Now looking in '+
         FBaseDirectory+DirectorySeparator+'bin.',etDebug);
       fpcmkcfg:=IncludeTrailingPathDelimiter(FBaseDirectory)+
@@ -1285,7 +1285,7 @@ begin
         WritelnLog('FPC: Running fpcmkcfg failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
         end;
 
-      // On *nix FPC 2.7.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
+      // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
       // Adding this won't hurt on Windows.
       // Adjust for that
       PlainBinPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..');
@@ -1294,7 +1294,7 @@ begin
       Writeln(TxtFile,'# fpcup:');
       Writeln(TxtFile,'# Adding binary tools paths to');
       Writeln(TxtFile,'# plain bin dir and architecture bin dir so');
-      Writeln(TxtFile,'# fpc 2.7+ fpcres etc can be found.');
+      Writeln(TxtFile,'# fpc 3.1+ fpcres etc can be found.');
       Writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath));
       CloseFile(TxtFile);
     {$IFDEF UNIX}
@@ -1329,8 +1329,10 @@ function TFPCInstaller.CleanModule(ModuleName: string): boolean;
 var
   oldlog: TErrorMethod;
   CrossCompiling: boolean;
+  FileCounter:word;
   DeleteList: TStringList;
   CPU_OSSignature:string;
+  S : string;
 begin
   result:=InitModule;
   if not result then exit;
@@ -1467,7 +1469,26 @@ begin
   {$IFDEF UNIX}
   // Delete any fpc.sh shell scripts
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
+  // Delete units
+  DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
+  DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units');
   {$ENDIF UNIX}
+
+  // if something is still floating around ... delete it !!
+  DeleteList := FindAllFiles(FBaseDirectory, '*.ppu; *.a; *.o', True);
+  try
+    if DeleteList.Count > 0 then
+    begin
+      for FileCounter := 0 to (DeleteList.Count-1) do
+      begin
+        S:=IncludeTrailingPathDelimiter(FBaseDirectory) + DeleteList.Strings[FileCounter];
+        if Pos(CPU_OSSignature,S)>0 then DeleteFile(S);
+      end;
+    end;
+  finally
+    DeleteList.Free;
+  end;
+
 
   result:=true;
 end;

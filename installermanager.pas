@@ -136,6 +136,23 @@ below}
     //'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
     'End;'+
+
+    //default sequence for ARM
+    'Declare defaultARM;'+
+    'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
+    'Do fpc;'+
+    // Lazbuild: make sure we can at least compile LCL programs
+    'Do lazbuild;'+
+    //'Do helplazarus;'+ // do not include help: takes a lot of time and does not compile at the moment on ARM (not enough memory) :-(
+    'Do LAZDATADESKTOP;'+
+    'Do DOCEDITOR;'+ // do not include doceditor: does not compile at the moment on ARM :-(
+    // Get default external packages/universal modules
+    'Do UniversalDefault;'+
+    // Recompile user IDE so any packages selected by the
+    // universal installer are compiled into the IDE:
+    'Do USERIDE;'+
+    'End;'+
+
 //default clean sequence
     'Declare defaultclean;'+
     'Do fpcclean;'+
@@ -193,6 +210,7 @@ below}
     'Declare defaultwin64uninstall;'+
     'Do defaultuninstall;'+
     'End;';
+
 
 
 type
@@ -561,8 +579,13 @@ begin
     }
     {$else}
     // Linux, OSX
+    {$ifdef cpuarm}
+    infoln('InstallerManager: going to run sequencer for sequence ARM (without help files)',etDebug);
+    result:=FSequencer.Run('defaultARM');
+    {$else}
     infoln('InstallerManager: going to run sequencer for sequence Default.',etDebug);
     result:=FSequencer.Run('Default');
+    {$endif}
     {$endif}
     if (FIncludeModules<>'') and (result) then begin
       // run specified additional modules using the only mechanism

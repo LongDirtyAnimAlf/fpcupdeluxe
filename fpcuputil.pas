@@ -113,6 +113,7 @@ function Which(Executable: string): string;
 
 implementation
 uses
+  ssl_openssl,
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil {lazutils, for utf8 functions?!?},

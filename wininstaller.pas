@@ -177,7 +177,7 @@ begin
   FSVNClient.LocalRepository:=FFPCBuildDir;
   // Using the fixes version of FPC hardcoded; probably we officially need latest stable FPC...
   //todo: perhaps link this to the actual version of FPC used in the regular install?
-  FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6';
+  FSVNClient.Repository:='http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_0';
   FSVNClient.CheckOutOrUpdate;
 
   //checkout laz binaries

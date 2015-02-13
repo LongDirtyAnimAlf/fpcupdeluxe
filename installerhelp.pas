@@ -275,8 +275,10 @@ const
   // ftp://freepascal.dfmk.hu/pub/lazarus/snapshots/fpc-lazarus-doc-chm-20120622.tar.bz2
   //Laz 1.0 version
   //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0/fpc-lazarus-doc-chm-1.0.zip/download';
+  //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0.12/fpc-lazarus-doc-chm-1.0.12.zip/download';
   // Laz 1.2 version:
-  FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0.12/fpc-lazarus-doc-chm-1.0.12.zip/download';
+  FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
+
 var
   DocsZip: string;
   OperationSucceeded: boolean;
@@ -514,7 +516,10 @@ begin
             ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
             ProcessEx.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
+            writelnlog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
+            writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
             ProcessEx.Execute;
+            writelnlog('Execute: '+ProcessEx.Executable+' exit code: '+InttoStr(ProcessEx.ExitStatus), true);
             if ProcessEx.ExitStatus <> 0 then
             begin
               writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Aborting.', true);
@@ -591,6 +596,7 @@ begin
         which is picked up by the default Lazarus settings.
         The generated .xct file is an index file for fpdoc cross file links,
         used if you want to link to the chm from other chms.}
+        writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
         ProcessEx.Execute;
         BuildResult:=ProcessEx.ExitStatus;
         if BuildResult <> 0 then
@@ -647,7 +653,7 @@ begin
     infoln('helplazarus: documentation directory: '+FTargetDirectory,etInfo);
     FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
       'docs'+DirectorySeparator+
-      'html'+DirectorySeparator;;
+      'html'+DirectorySeparator;
     infoln('helplazarus: FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
     result:=true;
   end;

@@ -193,7 +193,7 @@ type
 
 implementation
 
-uses installerfpc, fileutil;
+uses installerfpc, fileutil, openssl;
 
 
 { TInstaller }
@@ -403,7 +403,15 @@ begin
         begin
           infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
           OperationSucceeded := false;
+        end
+        else
+        begin
+          WritelnLog('New SVN client found: ' + FSVNClient.RepoExecutable, true);
         end;
+      end
+      else
+      begin
+        WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
       end;
     end;
 
@@ -497,7 +505,7 @@ procedure TInstaller.CreateBinutilsList;
 // can be used in Unixy systems anyway
 const
   {These would be the latest:
-  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_2_6/install/binw32/';
+  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_06/install/binw32/';
   but let's use a stable version:}
   SourceURL = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_2_6_4/install/binw32/';
   // newer than sourceurl, useful for e.g. make 3.82 as used in Lazarus 1.2RC2 (with FPC 2.6.2)
@@ -909,7 +917,9 @@ end;
 
 function TInstaller.DownloadSVN: boolean;
 const
-  SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
+  //SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
+  // Changed to https
+  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
@@ -1010,7 +1020,6 @@ var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
-  //SVNFiles:=TStringList.Create; //No, Findallfiles does that for you!?!?
   SVNFiles := FindAllFiles(FSVNDirectory, 'svn' + GetExeExt, true);
   try
     if SVNFiles.Count > 0 then
