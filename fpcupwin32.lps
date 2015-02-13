@@ -101,9 +101,10 @@
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="692"/>
-        <CursorPos Y="702"/>
+        <TopLine Value="134"/>
+        <CursorPos Y="147"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -111,7 +112,6 @@
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <CursorPos X="13" Y="233"/>
         <UsageCount Value="91"/>

@@ -145,7 +145,7 @@ below}
     'Do lazbuild;'+
     //'Do helplazarus;'+ // do not include help: takes a lot of time and does not compile at the moment on ARM (not enough memory) :-(
     'Do LAZDATADESKTOP;'+
-    'Do DOCEDITOR;'+ // do not include doceditor: does not compile at the moment on ARM :-(
+    'Do DOCEDITOR;'+
     // Get default external packages/universal modules
     'Do UniversalDefault;'+
     // Recompile user IDE so any packages selected by the
