@@ -44,6 +44,7 @@ Temporary Items
 
 *.ppu
 *.o
+*.obj
 *.s
 *.or
 *.compiled
@@ -65,3 +66,4 @@ backup/
 bin/*/*.ppu
 bin/*/*.s
 bin/*/*.o
+bin/*/*.obj
