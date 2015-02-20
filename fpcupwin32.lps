@@ -8,8 +8,9 @@
       <Unit0>
         <Filename Value="fpcupwin32.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="286"/>
-        <CursorPos Y="286"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="793"/>
+        <CursorPos X="17" Y="808"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -91,8 +92,8 @@
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="185"/>
-        <CursorPos X="15" Y="172"/>
+        <TopLine Value="20"/>
+        <CursorPos X="48" Y="24"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -101,9 +102,7 @@
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="10"/>
-        <TopLine Value="134"/>
         <CursorPos Y="147"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>

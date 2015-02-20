@@ -26,7 +26,12 @@
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="updatelazconfig"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="58"/>
+        <CursorPos X="22" Y="71"/>
         <UsageCount Value="91"/>
+        <Loaded Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
@@ -81,7 +86,7 @@
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="13"/>
         <TopLine Value="598"/>
         <CursorPos X="43" Y="639"/>
         <UsageCount Value="91"/>
@@ -90,7 +95,7 @@
       <Unit9>
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="11"/>
         <TopLine Value="185"/>
         <CursorPos X="15" Y="172"/>
         <UsageCount Value="91"/>
@@ -101,7 +106,7 @@
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="12"/>
         <TopLine Value="692"/>
         <CursorPos Y="702"/>
         <UsageCount Value="91"/>
@@ -111,7 +116,6 @@
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
         <CursorPos X="42" Y="21"/>
         <UsageCount Value="91"/>
@@ -131,7 +135,7 @@
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="winInstaller"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="14"/>
         <CursorPos X="26" Y="12"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>
@@ -151,7 +155,7 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="repoclient"/>
         <EditorIndex Value="7"/>
-        <TopLine Value="275"/>
+        <TopLine Value="270"/>
         <CursorPos X="3" Y="287"/>
         <UsageCount Value="91"/>
         <Loaded Value="True"/>
