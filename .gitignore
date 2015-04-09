@@ -50,7 +50,6 @@ Temporary Items
 *.compiled
 *.rst
 !docs/*.rst
-*.res
 
 *.dcu
 *.identcache
