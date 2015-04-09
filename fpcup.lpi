@@ -11,7 +11,7 @@
       </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
-      <Title Value="FPCUp"/>
+      <Title Value="fpcup"/>
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
@@ -33,127 +33,60 @@
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dDEBUG"/>
-            <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
-          </Other>
-        </CompilerOptions>
-      </Item2>
-      <Item3 Name="64bit">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
           <Target>
-            <Filename Value="fpcup64"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
   UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
 end;"/>
+          <Parsing>
+            <SyntaxOptions>
+              <IncludeAssertionCode Value="True"/>
+            </SyntaxOptions>
+          </Parsing>
           <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
             <Checks>
               <IOChecks Value="True"/>
               <RangeChecks Value="True"/>
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
               <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
-            <LinkSmart Value="True"/>
           </Linking>
           <Other>
-            <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
-          </Other>
-        </CompilerOptions>
-      </Item3>
-      <Item4 Name="64bitDebug">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="fpcup64"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-          </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
-          <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <DebugInfoType Value="dsDwarf2Set"/>
-            </Debugging>
-          </Linking>
-          <Other>
+            <WriteFPCLogo Value="False"/>
             <CustomOptions Value="-dDEBUG"/>
             <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="linux_x64">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
+      </Item2>
+      <Item3 Name="win32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="fpcup_linux_x64"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -161,8 +94,8 @@ end;"/>
 end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="linux"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="win32"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -176,25 +109,65 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
+            <WriteFPCLogo Value="False"/>
             <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="linux_i386">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
+      </Item3>
+      <Item4 Name="win64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="fpcup_linux_x64"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="win64"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="linuxi386">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="C:\development\cross\lib\i386-linux\"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -217,36 +190,42 @@ end;"/>
             <LinkSmart Value="True"/>
           </Linking>
           <Other>
+            <Verbosity>
+              <ShowAll Value="True"/>
+            </Verbosity>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-FLC:\development\cross\lib\i386-linux\ld-linux.so.2
+ -FlC:\development\cross\lib\i386-linux
+ -XrC:\development\cross\lib\i386-linux"/>
             <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="linux_armelv6">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
+      </Item5>
+      <Item6 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="fpcup_linux_armhf"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="C:\development\cross\lib\x86_64-linux\"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
   UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
 end;"/>
           <CodeGeneration>
-            <TargetProcessor Value="ARMV6"/>
-            <TargetCPU Value="arm"/>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="0"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
           <Linking>
@@ -255,57 +234,103 @@ end;"/>
               <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
+            <LinkSmart Value="True"/>
           </Linking>
           <Other>
+            <WriteFPCLogo Value="False"/>
             <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="linux_armelv6debug">
-        <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="nogui"/>
-        </MacroValues>
+      </Item6>
+      <Item7 Name="linuxarm">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="fpcup_linux_armhf"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="C:\development\cross\lib\arm-linux\"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
   UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
 end;"/>
           <CodeGeneration>
-            <Checks>
-              <IOChecks Value="True"/>
-              <RangeChecks Value="True"/>
-              <OverflowChecks Value="True"/>
-              <StackChecks Value="True"/>
-            </Checks>
+            <SmartLinkUnit Value="True"/>
             <TargetProcessor Value="ARMV6"/>
             <TargetCPU Value="arm"/>
             <TargetOS Value="linux"/>
             <Optimizations>
-              <OptimizationLevel Value="0"/>
+              <OptimizationLevel Value="2"/>
             </Optimizations>
           </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
           <Other>
-            <CustomOptions Value="-O- -dDEBUG"/>
+            <WriteFPCLogo Value="False"/>
             <ExecuteBefore>
-              <Command Value="hgversion$(ExeExt)"/>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item7>
+      <Item8 Name="linuxarmhf">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcuphf"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="C:\development\cross\lib\arm-linux\"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetProcessor Value="ARMV7A"/>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF"/>
+            <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
       </Item8>
       <SharedMatrixOptions Count="1">
-        <Item1 ID="233755810855" Modes="Default,Debug,64bit,64bitDebug,linux_x64,linux_i386,linux_armelv6,linux_armelv6debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
+        <Item1 ID="233755810855" Modes="Default,Debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -320,10 +345,13 @@ end;"/>
         <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
-    <RequiredPackages Count="1">
+    <RequiredPackages Count="2">
       <Item1>
-        <PackageName Value="LazUtils"/>
+        <PackageName Value="LCLBase"/>
       </Item1>
+      <Item2>
+        <PackageName Value="LazUtils"/>
+      </Item2>
     </RequiredPackages>
     <Units Count="39">
       <Unit0>
@@ -345,7 +373,6 @@ end;"/>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
@@ -372,10 +399,12 @@ end;"/>
       <Unit10>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerManager"/>
       </Unit10>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -408,7 +437,6 @@ end;"/>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_freebsd_to_linux386"/>
       </Unit19>
       <Unit20>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
@@ -438,6 +466,7 @@ end;"/>
       <Unit26>
         <Filename Value="m_any_to_aixpowerpc.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_any_to_aixpowerpc"/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
@@ -450,6 +479,7 @@ end;"/>
       <Unit29>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_any_to_androidarm"/>
       </Unit29>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
@@ -466,7 +496,6 @@ end;"/>
       <Unit33>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_linux386_to_mips"/>
       </Unit33>
       <Unit34>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
@@ -475,6 +504,7 @@ end;"/>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_any_to_linuxarm"/>
       </Unit35>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
@@ -487,14 +517,20 @@ end;"/>
       <Unit38>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_any_to_linux386"/>
       </Unit38>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
     <Version Value="11"/>
     <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
+    </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
+      <OtherUnitFiles Value="synaser"/>
+      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -515,8 +551,8 @@ end;"/>
       <LinkSmart Value="True"/>
     </Linking>
     <Other>
+      <WriteFPCLogo Value="False"/>
       <ExecuteBefore>
-        <Command Value="hgversion$(ExeExt)"/>
         <CompileReasons Run="False"/>
       </ExecuteBefore>
     </Other>

@@ -289,6 +289,7 @@ begin
       {$ENDIF}
       ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
       ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
+      // this installs everything in the source directory : has consequences for cleaning up !!
       ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
       // Tell make where to find the target binutils if cross-compiling:
       if CrossInstaller.BinUtilsPath<>'' then
@@ -393,6 +394,7 @@ begin
           ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
         {$ENDIF}
         ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
+        // this installs everything in the source directory : has consequences for cleaning up !!
         ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
         {$IFDEF UNIX}
         ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -584,6 +586,7 @@ begin
   {$ENDIF}
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+  // this installs everything in the source directory : has consequences for cleaning up !!
   ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
@@ -1474,7 +1477,13 @@ begin
   DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units');
   {$ENDIF UNIX}
 
-  // if something is still floating around ... delete it !!
+  {$IFDEF MSWINDOWS}
+  // delete the units directory !!
+  // this is needed due to the fact that make distclean will not cleanout this units directory
+  // make distclean will only remove the results of a make, not a make install
+  DeleteDirectoryEx(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'+DirectorySeparator+CPU_OSSignature);
+  {$ENDIF}
+  // finally ... if something is still still still floating around ... delete it !!
   DeleteList := FindAllFiles(FBaseDirectory, '*.ppu; *.a; *.o', True);
   try
     if DeleteList.Count > 0 then
@@ -1488,7 +1497,6 @@ begin
   finally
     DeleteList.Free;
   end;
-
 
   result:=true;
 end;

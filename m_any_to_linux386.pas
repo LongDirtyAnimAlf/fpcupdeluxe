@@ -41,7 +41,7 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
 
 implementation
 const
@@ -117,7 +117,7 @@ var
   AsFile: string;
 begin
   inherited;
-  AsFile:=FBinUtilsPrefix+'as';
+  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   result:=false;
 
   if not result then { try $(fpcdir)/bin/<dirprefix>/ }
@@ -125,8 +125,24 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
       AsFile);
+
+  // Also allow for (cross)binutils without prefix
+  if not result then
+  begin
+    FBinUtilsPrefix:='';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+  end;
+
+  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
+  if not result then { try cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
+      AsFile);
+
 
   {$IFDEF UNIX}
   if not result then { try /usr/local/bin/<dirprefix>/ }
@@ -159,7 +175,7 @@ constructor Tany_linux386.Create;
 begin
   inherited Create;
   FCrossModuleName:='any_linux386';
-  FBinUtilsPrefix:=''; //try with none
+  FBinUtilsPrefix:='i386-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
