@@ -203,7 +203,7 @@ begin
   { Get the desktop location }
   SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, PIDL);
   SHGetPathFromIDList(PIDL, InFolder);
-  LinkName := InFolder + PathDelim + ShortcutName+'.lnk';
+  LinkName := InFolder + DirectorySeparator + ShortcutName+'.lnk';
 
   { Get rid of any existing shortcut first }
   SysUtils.DeleteFile(LinkName);
@@ -556,7 +556,7 @@ begin
   { Get the desktop location }
   SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, PIDL);
   SHGetPathFromIDList(PIDL, InFolder);
-  LinkName := InFolder + PathDelim + ShortcutName+'.lnk';
+  LinkName := InFolder + DirectorySeparator + ShortcutName+'.lnk';
   SysUtils.DeleteFile(LinkName);
 end;
 {$ENDIF MSWINDOWS}

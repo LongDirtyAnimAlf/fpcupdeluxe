@@ -107,13 +107,13 @@ const
   DirName='mipsel-linux';
 begin
 //todo add support for separate cross dire  
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('Twin32_linuxmipsel: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('Twin32_linuxmipsel: failed: searched libspath '+FLibsPath,etInfo);
@@ -155,7 +155,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
       AsFile);
 
   {$ifdef unix}
@@ -185,7 +185,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
       AsFile);
 
   {$ifdef unix}
@@ -216,7 +216,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
       AsFile);
 
   {$ifdef unix}
@@ -246,7 +246,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
       AsFile);
 
   {$ifdef unix}

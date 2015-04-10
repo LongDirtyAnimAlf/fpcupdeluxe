@@ -92,13 +92,13 @@ const
   DirName='i8086-msdos';
 begin
   // DOS8086 does not need libs by default, but user can add them.
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('TWin32_msdosi8086: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('TWin32_msdosi8086: failed: searched libspath '+FLibsPath,etInfo);
@@ -147,7 +147,7 @@ begin
       AsFile);
 
   if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
+    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
   if not result then
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
       AsFile);

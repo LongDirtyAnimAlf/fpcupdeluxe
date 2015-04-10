@@ -820,7 +820,7 @@ begin
       // Debugger type needs to be specified at least since Lazarus 1.1
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TGDBMIDebugger');
       // Add <lazarus>\docs\xml to fpdoc editor paths
-      LazDocPathAdd(IncludeTrailingPathDelimiter(FBaseDirectory) + 'docs\xml', LazarusConfig);
+      LazDocPathAdd(IncludeTrailingPathDelimiter(FBaseDirectory) + 'docs'+DirectorySeparator+'xml', LazarusConfig);
     except
       on E: Exception do
       begin
@@ -941,7 +941,7 @@ begin
     try
       CopyFile(
         LHelpTemp,
-        IncludeTrailingPathDelimiter(FBaseDirectory)+'components\chmhelp\lhelp\lhelp'+GetExeExt,
+        IncludeTrailingPathDelimiter(FBaseDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
         [cffOverWriteFile]);
     except
       infoln('Lazarus CleanModule: non-fatal error restoring lhelp from temp file '+LHelpTemp,etInfo);

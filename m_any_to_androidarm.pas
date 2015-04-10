@@ -170,7 +170,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+''+DirName,
       AsFile);
 
   {$IFDEF MSWINDOWS}
@@ -247,7 +247,7 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName + ': could not find bin path. Please fill '+IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName+
+    infoln(FCrossModuleName + ': could not find bin path. Please fill '+IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName+
     ' with cross binutils for Android ARM, e.g. from the Android NDK.'+LineEnding+
     'See http://wiki.lazarus.freepascal.org/Android.'
     ,etError);

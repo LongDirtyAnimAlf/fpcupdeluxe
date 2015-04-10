@@ -8,74 +8,81 @@
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="786"/>
-        <CursorPos X="33" Y="793"/>
-        <UsageCount Value="25"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="installerCore"/>
+        <EditorIndex Value="16"/>
+        <TopLine Value="214"/>
+        <CursorPos X="66" Y="229"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="44"/>
-        <CursorPos X="37" Y="64"/>
-        <UsageCount Value="25"/>
+        <EditorIndex Value="19"/>
+        <TopLine Value="1263"/>
+        <CursorPos X="18" Y="1275"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="installerLazarus"/>
+        <EditorIndex Value="20"/>
+        <TopLine Value="770"/>
+        <CursorPos X="103" Y="777"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="270"/>
-        <CursorPos X="53" Y="268"/>
-        <UsageCount Value="25"/>
+        <TopLine Value="260"/>
+        <CursorPos X="11" Y="282"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="30"/>
         <CursorPos X="14" Y="52"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="17"/>
         <TopLine Value="13"/>
         <CursorPos X="34" Y="28"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit9>
@@ -83,84 +90,84 @@
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="11"/>
-        <TopLine Value="82"/>
-        <CursorPos X="9" Y="99"/>
-        <UsageCount Value="25"/>
+        <EditorIndex Value="21"/>
+        <TopLine Value="681"/>
+        <CursorPos X="22" Y="696"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit10>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
-        <EditorIndex Value="12"/>
-        <TopLine Value="554"/>
-        <CursorPos X="34" Y="567"/>
-        <UsageCount Value="25"/>
+        <EditorIndex Value="22"/>
+        <TopLine Value="542"/>
+        <CursorPos Y="559"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit12>
       <Unit13>
         <Filename Value="m_crosswin32.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit13>
       <Unit14>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit14>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit15>
       <Unit16>
         <Filename Value="hgclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit16>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit18>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit19>
       <Unit20>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit20>
       <Unit21>
         <Filename Value="m_freebsd_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit21>
       <Unit22>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit22>
       <Unit23>
         <Filename Value="settings.ini"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="18"/>
         <TopLine Value="10"/>
         <CursorPos X="20" Y="30"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit23>
@@ -171,95 +178,135 @@
         <EditorIndex Value="3"/>
         <TopLine Value="97"/>
         <CursorPos X="53" Y="116"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="m_win32_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_win32_to_linux386"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="46"/>
+        <CursorPos X="57" Y="57"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit25>
       <Unit26>
         <Filename Value="m_any_to_aixpowerpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_any_to_aixpowerpc"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="135"/>
-        <CursorPos Y="162"/>
-        <UsageCount Value="25"/>
+        <EditorIndex Value="15"/>
+        <TopLine Value="171"/>
+        <CursorPos X="11" Y="182"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_win64_to_linux64"/>
+        <EditorIndex Value="14"/>
+        <TopLine Value="90"/>
+        <CursorPos Y="114"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit27>
       <Unit28>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit28>
       <Unit29>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_any_to_androidarm"/>
-        <EditorIndex Value="6"/>
-        <TopLine Value="20"/>
-        <CursorPos X="57" Y="48"/>
-        <UsageCount Value="25"/>
+        <EditorIndex Value="13"/>
+        <TopLine Value="103"/>
+        <CursorPos X="12" Y="115"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_any_to_linuxmipsel"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="97"/>
+        <CursorPos Y="110"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="m_win32_to_go32v2i386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_win32_to_go32v2i386"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="132"/>
+        <CursorPos Y="143"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit31>
       <Unit32>
         <Filename Value="m_win32_to_wincearm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_win32_to_wincearm"/>
+        <EditorIndex Value="12"/>
+        <TopLine Value="150"/>
+        <CursorPos Y="162"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit32>
       <Unit33>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_linux386_to_mips"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="141"/>
+        <CursorPos Y="152"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit33>
       <Unit34>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_win32_to_msdosi8086"/>
+        <EditorIndex Value="11"/>
+        <TopLine Value="139"/>
+        <CursorPos Y="150"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit34>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_any_to_linuxarm"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="146"/>
-        <CursorPos X="38" Y="163"/>
-        <UsageCount Value="25"/>
+        <TopLine Value="61"/>
+        <CursorPos X="97" Y="74"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit35>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UnitName Value="m_win32_to_linuxmips"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="82"/>
+        <CursorPos X="75" Y="95"/>
+        <UsageCount Value="28"/>
+        <Loaded Value="True"/>
       </Unit36>
       <Unit37>
         <Filename Value="cpucount.pas"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
       </Unit37>
       <Unit38>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="m_any_to_linux386"/>
         <EditorIndex Value="4"/>
-        <UsageCount Value="25"/>
+        <UsageCount Value="28"/>
         <Loaded Value="True"/>
       </Unit38>
     </Units>

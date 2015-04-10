@@ -85,13 +85,13 @@ function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-go32v2';
 begin  
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('TWin32_go32v2i386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('TWin32_go32v2i386: failed: searched libspath '+FLibsPath,etInfo);
@@ -140,7 +140,7 @@ begin
 
   // cross\bin\
   if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
+    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
   if not result then
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
       AsFile);

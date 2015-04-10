@@ -54,7 +54,7 @@ Error: Unknown command-line parameter : -a
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller,fpcuputil,FileUtil;
 
 implementation
 type
@@ -84,13 +84,13 @@ const
 begin
 //todo add support for separate cross dire
   // Using crossfpc directory naming
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib\'+DirName);
+  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
   result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
     infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\lib\'+DirName);
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
       infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
@@ -120,7 +120,7 @@ var
 begin
   inherited;
   result:=false;
-  AsFile:=FBinUtilsPrefix+'as.exe';
+  AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   if not result then
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),AsFile);
 
@@ -132,7 +132,7 @@ begin
 
   // cross\bin
   if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName);
+    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
   if not result then
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
       AsFile);

@@ -1162,7 +1162,7 @@ begin
       WritelnLog('FPC: Failed to build ppcx64 bootstrap compiler ');
       exit;
     end;
-    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcx64.exe',
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler\ppcx64.exe',
       ExtractFilePath(FCompiler)+'ppcx64.exe');
     // Now we can change the compiler from the i386 to the x64 compiler:
     FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';

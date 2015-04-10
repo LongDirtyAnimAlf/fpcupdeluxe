@@ -24,7 +24,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="8">
+    <BuildModes Count="9">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -121,7 +121,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -161,7 +161,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_linux_x86"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -208,7 +208,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_linux_x64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -249,7 +249,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_linux_arm"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -291,7 +291,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcuphf"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_linux_armhf"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -329,6 +329,46 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item8>
+      <Item9 Name="darwin">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item9>
       <SharedMatrixOptions Count="1">
         <Item1 ID="233755810855" Modes="Default,Debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
@@ -373,6 +413,7 @@ end;"/>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerCore"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
@@ -382,6 +423,7 @@ end;"/>
       <Unit6>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerLazarus"/>
       </Unit6>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
@@ -463,6 +505,7 @@ end;"/>
       <Unit25>
         <Filename Value="m_win32_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_linux386"/>
       </Unit25>
       <Unit26>
         <Filename Value="m_any_to_aixpowerpc.pas"/>
@@ -472,6 +515,7 @@ end;"/>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win64_to_linux64"/>
       </Unit27>
       <Unit28>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
@@ -485,22 +529,27 @@ end;"/>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_any_to_linuxmipsel"/>
       </Unit30>
       <Unit31>
         <Filename Value="m_win32_to_go32v2i386.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_go32v2i386"/>
       </Unit31>
       <Unit32>
         <Filename Value="m_win32_to_wincearm.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_wincearm"/>
       </Unit32>
       <Unit33>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_linux386_to_mips"/>
       </Unit33>
       <Unit34>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_msdosi8086"/>
       </Unit34>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
@@ -510,6 +559,7 @@ end;"/>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="m_win32_to_linuxmips"/>
       </Unit36>
       <Unit37>
         <Filename Value="cpucount.pas"/>

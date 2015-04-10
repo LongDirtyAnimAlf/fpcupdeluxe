@@ -149,7 +149,7 @@ begin
       AsFile);
 
   if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName,
+    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
       AsFile);
 
   {$IFDEF UNIX}
