@@ -79,7 +79,7 @@ function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensi
 // HTTP download can work with http proxy
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 // File size; returns 0 if empty, non-existent or error.
-function FileSizeUTF8(FileName: string): int64;
+//function FileSizeUTF8(FileName: string): int64;
 {$IFDEF MSWINDOWS}
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
@@ -770,6 +770,7 @@ begin
   end;
 end;
 
+{
 // returns file size in bytes or 0 if not found.
 function FileSizeUTF8(FileName: string) : Int64;
 var
@@ -785,6 +786,7 @@ begin
   FindCloseUTF8(sr);
 {$endif}
 end;
+}
 
 function ParentDirectoryIsNotRoot(Dir: string): boolean;
 var s:string;

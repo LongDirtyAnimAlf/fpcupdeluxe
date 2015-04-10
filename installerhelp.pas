@@ -199,7 +199,7 @@ end;
 
 implementation
 
-uses fpcuputil, processutils, FileUtil, updatelazconfig, dateutils;
+uses fpcuputil, processutils, FileUtil, LazFileUtils, updatelazconfig, dateutils;
 
 { THelpInstaller }
 
@@ -277,7 +277,7 @@ const
   //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0/fpc-lazarus-doc-chm-1.0.zip/download';
   //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0.12/fpc-lazarus-doc-chm-1.0.12.zip/download';
   // Laz 1.2 version:
-  //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
+  FPC_CHM_URL_LASTRESORT='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
   // Laz 1.4 version:
   FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.4/doc-chm_fpc2014_laz2015.zip/download';
 var
@@ -303,9 +303,12 @@ begin
     c:\development\fpc\utils\fpdoc\fpdoc.exe --content=rtl.xct --package=rtl --descr=rtl.xml --output=rtl.chm --auto-toc --auto-index --make-searchable --css-file=C:\Development\fpc\utils\fpdoc\fpdoc.css  --format=chm
     ... but we'd need to include the input files extracted from the Make file.
     }
-    OperationSucceeded:=true;
+
     ForceDirectoriesUTF8(FTargetDirectory);
     DocsZip := SysUtils.GetTempFileName + '.zip';
+
+    OperationSucceeded:=true;
+
     try
       OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
     except
@@ -313,8 +316,40 @@ begin
       begin
         // Deal with timeouts, wrong URLs etc
         OperationSucceeded:=false;
-        infoln(ModuleName+': Download failed. URL: '+FPC_CHM_URL+LineEnding+
+        infoln(ModuleName+': Download documents failed. URL: '+FPC_CHM_URL+LineEnding+
           'Exception: '+E.ClassName+'/'+E.Message, etWarning);
+      end;
+    end;
+
+    if NOT OperationSucceeded then
+    begin
+      // try a second time
+      try
+        OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
+      except
+        on E: Exception do
+        begin
+          // Deal with timeouts, wrong URLs etc
+          OperationSucceeded:=false;
+          infoln(ModuleName+': Download documents failed. URL: '+FPC_CHM_URL+LineEnding+
+            'Exception: '+E.ClassName+'/'+E.Message, etWarning);
+        end;
+      end;
+    end;
+
+    if NOT OperationSucceeded then
+    begin
+      // try one last time with older docs !!
+      try
+        OperationSucceeded:=Download(FPC_CHM_URL_LASTRESORT,DocsZip);
+      except
+        on E: Exception do
+        begin
+          // Deal with timeouts, wrong URLs etc
+          OperationSucceeded:=false;
+          infoln(ModuleName+': Download documents failed. URL: '+FPC_CHM_URL_LASTRESORT+LineEnding+
+            'Exception: '+E.ClassName+'/'+E.Message, etWarning);
+        end;
       end;
     end;
 
@@ -332,10 +367,6 @@ begin
         OperationSucceeded := False;
         infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
-    end
-    else
-    begin
-      infoln(ModuleName+': download failed. FPC_CHM_URL: '+FPC_CHM_URL,eterror);
     end;
   end;
   Result := OperationSucceeded;
@@ -488,7 +519,7 @@ begin
       (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
       and
       ((DaysBetween(Now,LCLDate)>7)
-      or (FileSize(ExistingLCLHelp)=0))
+      or (FileSizeUTF8(ExistingLCLHelp)=0))
       )
       then
     begin
@@ -612,7 +643,7 @@ begin
         // Move files if required
         if FileExistsUTF8(GeneratedLCLHelp) then
         begin
-          if FileSize(GeneratedLCLHelp)>0 then
+          if FileSizeUTF8(GeneratedLCLHelp)>0 then
           begin
             infoln(ModuleName+': moving lcl.chm to docs directory',etInfo);
             OperationSucceeded:=MoveFile(GeneratedLCLHelp,ExistingLCLHelp);
