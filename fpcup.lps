@@ -8,8 +8,7 @@
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="785"/>
-        <CursorPos Y="796"/>
+        <IsVisibleTab Value="True"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -87,8 +86,8 @@
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="18"/>
-        <TopLine Value="16"/>
-        <CursorPos X="54" Y="24"/>
+        <TopLine Value="4"/>
+        <CursorPos X="81" Y="13"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -127,10 +126,9 @@
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="winInstaller"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="21"/>
         <TopLine Value="166"/>
-        <CursorPos X="39" Y="176"/>
+        <CursorPos X="95" Y="167"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
       </Unit14>
@@ -183,7 +181,6 @@
         <Filename Value="settings.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="19"/>
-        <TopLine Value="211"/>
         <CursorPos X="60" Y="225"/>
         <UsageCount Value="33"/>
         <Loaded Value="True"/>
