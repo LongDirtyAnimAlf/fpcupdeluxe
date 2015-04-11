@@ -419,7 +419,7 @@ begin
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
-      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','patch -p0 -i',false);
+      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','',false);
       // Deal with options coming from ini (e.g. Help=true)
       try
         bHelp:=Options.GetOption('h','help',false);
@@ -429,6 +429,7 @@ begin
         bHelp:=Options.GetOptionNoParam('h','help',false);
         end;
       end;
+
       try
         FInstaller.KeepLocalChanges:=Options.GetOption('','keeplocalchanges',false);
       except
@@ -437,14 +438,19 @@ begin
         FInstaller.KeepLocalChanges:=Options.GetOptionNoParam('','keeplocalchanges');
         end;
       end;
+
       try
-        FInstaller.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
+        FInstaller.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',true);
       except
         on E: ECommandLineError do begin
         // option did not have an argument
         FInstaller.reapplylocalchanges:=Options.GetOptionNoParam('','reapplylocalchanges');
         end;
       end;
+
+      // changes can only be reapplied (true) when they are stored in a diff when KeepLocalChanges=false
+      if FInstaller.KeepLocalChanges then FInstaller.reapplylocalchanges:=False;
+
       FInstaller.ShortCutNameLazarus:=Options.GetOption('','lazlinkname',DirectorySeparator);
       // Find out if the user specified --shortcutnamelazarus= to explicitly block creation of a link, or just didn't specify anything.
       if (FInstaller.ShortCutNameLazarus=DirectorySeparator) then
@@ -684,6 +690,14 @@ begin
       begin
         writeln('Keep local changes:     no');
       end;
+      if FInstaller.ReApplyLocalChanges then
+      begin
+        writeln('Re-apply local changes: yes');
+      end
+      else
+      begin
+        writeln('Re-apply local changes: no');
+      end;
       writeln('Log file name:          '+FInstaller.LogFileName);
       if FInstaller.IncludeModules<>'' then
         writeln('Additional modules:     '+FInstaller.IncludeModules);
@@ -790,8 +804,9 @@ var
 begin
   writeln('fpcup');
   writeln('An FPC/Lazarus downloader/updater/installer');
-  writeln('Open source freeware (modified LGPL/BSD), see:');
-  writeln('https://bitbucket.org/reiniero/fpcup');
+  writeln('Open source freeware (modified LGPL/BSD)');
+  writeln('Original by BigChimp: https://bitbucket.org/reiniero/fpcup');
+  writeln('This version: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup');
   writeln('');
   writeln('This program will download the FPC and Lazarus sources');
   writeln('from the source Subversion/SVN repositories,');

@@ -89,6 +89,8 @@ type
     FNeededExecutablesChecked: boolean;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
+    FPatchDirectory: string;
+    FPatch: string;
     FRepositoryUpdated: boolean;
     FURL: string;
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
@@ -119,9 +121,11 @@ type
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
+    // Download patch utility and set FPatch if succesful.
+    function DownloadPatch: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
-    function FindSVNSubDirs(): boolean;
+    function FindSubDirs(const whattofind:string='svn'): boolean;
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
     function GetCrossInstaller: TCrossInstaller;
@@ -386,7 +390,7 @@ begin
           FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + 'svn' + DirectorySeparator;
         {$ENDIF MSWINDOWS}
         // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
-        FindSVNSubDirs;
+        FindSubDirs;
         {$IFDEF MSWINDOWS}
         // If it still can't be found, download it
         if FSVNClient.RepoExecutable = '' then
@@ -413,6 +417,64 @@ begin
       begin
         WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
       end;
+    end;
+
+    if OperationSucceeded then
+    begin
+
+      // Look for Patch executable in patch and set it if found:
+      if FPatch = '' then
+      begin
+        FPatch := 'patch' + GetExeExt;
+        if ExecuteCommand(FPatch + ' --version', False) <> 0 then
+        begin
+          // patch not found in path
+          FPatch := '';
+        end;
+      end;
+
+      if FPatch = '' then
+      begin
+
+        // first search for default patch utility in make dir
+        FPatchDirectory := IncludeTrailingPathDelimiter(FMakeDir);
+        FindSubDirs('patch');
+
+        {$IFDEF MSWINDOWS}
+        // still no patch found ... search further ... only on Windows
+        if FPatch = '' then
+        begin
+          // Make sure we have a sensible default.
+          // Set it here so multiple calls will not redownload patch all the time
+          FPatchDirectory := IncludeTrailingPathDelimiter(FMakeDir) + 'patch' + DirectorySeparator;
+          // Look in or below FPatchDirectory; will set FPatch
+          FindSubDirs('patch');
+          // If it still can't be found, download it
+          if FPatch = '' then
+          begin
+            infoln('Going to download patch utility',etInfo);
+            // Download will look in and below FPatchDirectory
+            // and set FPatch if succesful
+            OperationSucceeded := DownloadPatch;
+            // however, still could fail due to admin rights needed for patching ... get a manifest file !!
+            // this is todo
+          end;
+        end;
+        {$ENDIF}
+        // Regardless of platform, patch should now be either set up correctly or we should give up.
+      end;
+
+      if FPatch = '' then
+      begin
+        infoln('Could not find patch executable. Please make sure it is installed.',eterror);
+        OperationSucceeded := false;
+      end
+      else
+      begin
+        FPatchCmd:=FPatch + ' -p0 -i ';
+        WritelnLog('Patch utility found: ' + FPatch, true);
+      end;
+
     end;
 
     if OperationSucceeded then
@@ -992,12 +1054,62 @@ begin
 
   if OperationSucceeded then
   begin
-    OperationSucceeded := FindSVNSubDirs;
+    OperationSucceeded := FindSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
   end;
   Result := OperationSucceeded;
 end;
+
+function TInstaller.DownloadPatch: boolean;
+const
+  PATCH_URL = 'http://sourceforge.net/projects/gnuwin32/files/patch/2.5.9-7/patch-2.5.9-7-bin.zip/download';
+var
+  OperationSucceeded: boolean;
+  ResultCode: longint;
+  PatchZip: string;
+begin
+  OperationSucceeded := true;
+
+  ForceDirectoriesUTF8(FPatchDirectory);
+  PatchZip := SysUtils.GetTempFileName + '.zip';
+
+  try
+    OperationSucceeded:=Download(PATCH_URL,PatchZip);
+  except
+    on E: Exception do
+    begin
+      // Deal with timeouts, wrong URLs etc
+      OperationSucceeded:=false;
+      infoln('Download patch utility failed. URL: '+PATCH_URL+LineEnding+
+         'Exception: '+E.ClassName+'/'+E.Message, etWarning);
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Extract, overwrite
+    if ExecuteCommand(FUnzip + ' -o -d ' + FPatchDirectory + ' ' + PatchZip, FVerbose) <> 0 then
+    begin
+      OperationSucceeded := false;
+      writelnlog('DownloadPatch: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+    end;
+  end
+  else
+  begin
+    writelnlog('ERROR downloading patch utility from ' + PATCH_URL, true);
+  end;
+
+  if OperationSucceeded then
+  begin
+    // find patch executable
+    OperationSucceeded := FindSubDirs('patch');
+    if OperationSucceeded then
+      SysUtils.Deletefile(PatchZip); //Get rid of temp zip if success.
+  end;
+  Result := OperationSucceeded;
+end;
+
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
 begin
@@ -1015,26 +1127,32 @@ begin
   DumpConsole(Sender, output);
 end;
 
-function TInstaller.FindSVNSubDirs: boolean;
+function TInstaller.FindSubDirs(const whattofind:string='svn'): boolean;
 var
-  SVNFiles: TStringList;
+  LocalFiles: TStringList;
   OperationSucceeded: boolean;
+  LocalDirectory:string;
 begin
-  SVNFiles := FindAllFiles(FSVNDirectory, 'svn' + GetExeExt, true);
+
+  if whattofind='svn' then LocalDirectory:=FSVNDirectory;
+  if whattofind='patch' then LocalDirectory:=FPatchDirectory;
+
+  LocalFiles := FindAllFiles(LocalDirectory, whattofind + GetExeExt, true);
   try
-    if SVNFiles.Count > 0 then
+    if LocalFiles.Count > 0 then
     begin
       // Just get first result.
-      FSVNClient.RepoExecutable := SVNFiles.Strings[0];
+      if whattofind='svn' then FSVNClient.RepoExecutable := LocalFiles.Strings[0];
+      if whattofind='patch' then FPatch := LocalFiles.Strings[0];
       OperationSucceeded := true;
     end
     else
     begin
-      infoln('Could not find svn executable in or under ' + FSVNDirectory,etwarning);
+      infoln('Could not find '+whattofind+' executable in or under ' + LocalDirectory,etwarning);
       OperationSucceeded := false;
     end;
   finally
-    SVNFiles.Free;
+    LocalFiles.Free;
   end;
   Result := OperationSucceeded;
 end;

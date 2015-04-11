@@ -410,6 +410,7 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="processutils"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
@@ -448,7 +449,6 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -474,6 +474,7 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
@@ -494,7 +495,6 @@ end;"/>
       <Unit22>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_anyinternallinker_to_win386"/>
       </Unit22>
       <Unit23>
         <Filename Value="settings.ini"/>
@@ -503,22 +503,18 @@ end;"/>
       <Unit24>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_crossinstaller"/>
       </Unit24>
       <Unit25>
         <Filename Value="m_win32_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_linux386"/>
       </Unit25>
       <Unit26>
         <Filename Value="m_any_to_aixpowerpc.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_aixpowerpc"/>
       </Unit26>
       <Unit27>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win64_to_linux64"/>
       </Unit27>
       <Unit28>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
@@ -527,42 +523,34 @@ end;"/>
       <Unit29>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_androidarm"/>
       </Unit29>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linuxmipsel"/>
       </Unit30>
       <Unit31>
         <Filename Value="m_win32_to_go32v2i386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_go32v2i386"/>
       </Unit31>
       <Unit32>
         <Filename Value="m_win32_to_wincearm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_wincearm"/>
       </Unit32>
       <Unit33>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_linux386_to_mips"/>
       </Unit33>
       <Unit34>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_msdosi8086"/>
       </Unit34>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linuxarm"/>
       </Unit35>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_win32_to_linuxmips"/>
       </Unit36>
       <Unit37>
         <Filename Value="cpucount.pas"/>
@@ -571,7 +559,6 @@ end;"/>
       <Unit38>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="m_any_to_linux386"/>
       </Unit38>
     </Units>
   </ProjectOptions>
