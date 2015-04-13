@@ -425,11 +425,10 @@ begin
       // Look for Patch executable in patch and set it if found:
       if FPatch = '' then
       begin
-        FPatch := 'patch' + GetExeExt;
-        if ExecuteCommand(FPatch + ' --version', False) <> 0 then
+        FPatch:=FindDefaultExecutablePath('patch');
+        if FPatch <> '' then
         begin
-          // patch not found in path
-          FPatch := '';
+          if NOT CheckExecutable(FPatch, '--version', '') then FPatch := '';
         end;
       end;
 
