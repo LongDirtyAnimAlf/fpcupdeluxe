@@ -512,8 +512,8 @@ begin
     //svn2 seems to lag behind a lot, so don't use that.
     //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
     try
-      FInstaller.FPCURL:=Options.GetOption('','fpcURL','http://svn.freepascal.org/svn/fpc/branches/fixes_3_0');
-      FInstaller.LazarusURL:=Options.GetOption('','lazURL','http://svn.freepascal.org/svn/lazarus/branches/fixes_1_4');
+      FInstaller.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias(FInstaller.ConfigFile,'fpcURL','default'));
+      FInstaller.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias(FInstaller.ConfigFile,'lazURL','default'));
     except
       on E:Exception do
       begin

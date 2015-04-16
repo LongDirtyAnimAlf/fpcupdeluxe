@@ -1068,8 +1068,18 @@ try
     result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
     if result='' then
       begin
-      e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[Dictionary,KeyWord,sl.CommaText]);
-      raise e;
+        // added because older fpc.ini may not have the default keyword !!
+        if Uppercase(KeyWord)='DEFAULT' then
+        begin
+          infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
+          if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/branches/fixes_3_0';
+          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/branches/fixes_1_4';
+        end;
+        if result='' then
+        begin
+          e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[Dictionary,KeyWord,sl.CommaText]);
+          raise e;
+        end;
       end;
     end;
 finally

@@ -449,6 +449,7 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
