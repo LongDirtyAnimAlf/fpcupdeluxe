@@ -8,8 +8,8 @@
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="199"/>
-        <CursorPos X="56" Y="214"/>
+        <IsVisibleTab Value="True"/>
+        <CursorPos X="36" Y="27"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -78,10 +78,9 @@
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="1056"/>
-        <CursorPos X="23" Y="1072"/>
+        <TopLine Value="1053"/>
+        <CursorPos Y="1082"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit8>
@@ -89,8 +88,8 @@
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="10"/>
-        <CursorPos X="13" Y="24"/>
+        <TopLine Value="25"/>
+        <CursorPos Y="42"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -110,6 +109,8 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="fpcuputil"/>
         <EditorIndex Value="13"/>
+        <TopLine Value="307"/>
+        <CursorPos X="14" Y="321"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
       </Unit11>
@@ -187,7 +188,6 @@
         <Filename Value="settings.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="6"/>
-        <TopLine Value="232"/>
         <CursorPos X="127" Y="238"/>
         <UsageCount Value="42"/>
         <Loaded Value="True"/>
