@@ -81,6 +81,7 @@ const
   // Lazarus pre 1.0: 106
   // We can assume Lazarus SVN can parse this version:
   TrunkVersionNewEnvironmentConfig='108';
+  TrunkLazarusNewEnvironmentConfig='1.5';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='2';
@@ -98,7 +99,9 @@ private
   FFilename: string;
   FNew: boolean;
   Doc: TXMLDocument;
-protected
+public
+  constructor Create(const AFilename: String); overload; // create and load
+  destructor Destroy; override;
   // Did the config file exist before using it?
   property New: boolean read FNew;
   // Delete a child from a different part of the tree
@@ -115,10 +118,6 @@ protected
   procedure SetValue(const APath, AValue: String);
   procedure SetValue(const APath: String; AValue: Integer);
   procedure SetValue(const APath: String; AValue: Boolean);
-
-public
-  constructor Create(const AFilename: String); overload; // create and load
-  destructor Destroy; override;
 end;
 
 { TUpdateLazConfig }
@@ -463,7 +462,7 @@ begin
             if FLazarusMajorVer=-1 then
             begin // default to newest. Update this when new version appears
               NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
-              NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.3');
+              NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
             end
             else if FLazarusMajorVer=0 then
             begin
@@ -485,10 +484,18 @@ begin
                 begin //1.2.x
                   NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.2
                 end;
+                3:
+                begin //1.3.x
+                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.3
+                end;
+                4:
+                begin //1.4.x
+                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.4
+                end;
               else
-                begin //-1 or higher than 3 arbitrarily determine 1.3; currently set to trunk version
+                begin //-1 or higher than 4 set to trunk version
                   NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
-                  NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', '1.3');
+                  NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
                 end;
               end
             else { 2 or higher? keep latest known, we can leave lazarus version though }

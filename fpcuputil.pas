@@ -30,6 +30,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 unit fpcuputil;
 { Utility functions that might be needed by fpcup core and plugin units }
 
+//{$mode DELPHI}{$H+}
 {$mode objfpc}{$H+}
 
 {Define NOCONSOLE e.g. if using Windows GUI {$APPTYPE GUI} or -WG
@@ -38,11 +39,16 @@ this will disable writeln calls
 {not $DEFINE NOCONSOLE}
 
 interface
-uses
-  Classes, SysUtils, eventlog;
 
+uses
+  Classes, SysUtils,
+  //blcksock,typinfo {for status info},
+  eventlog;
 
 type
+  //callback = class
+  //  class procedure Status (Sender: TObject; Reason: THookSocketReason; const Value: String);
+  //end;
 
   { TLogger }
   TLogger = class(TObject)
@@ -52,9 +58,9 @@ type
     procedure SetLogFile(AValue: string);
   public
     // Write to log and optionally console with seriousness etInfo
-    procedure WriteLog(Message: string; ToConsole: Boolean=true);
+    procedure WriteLog(Message: string; ToConsole: Boolean=true);overload;
     // Write to log and optionally console with specified seriousness
-    procedure WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
+    procedure WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);overload;
     property LogFile: string read GetLogFile write SetLogFile ;
     constructor Create;
     destructor Destroy; override;
@@ -75,6 +81,7 @@ function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList
 // Recursively delete files with specified extension(s),
 // only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
+function GetFileNameFromURL(URL:string):string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
@@ -110,10 +117,9 @@ function XdgConfigHome: String;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 
-
 implementation
 uses
-  ssl_openssl,
+  ssl_openssl {for downloading from https},
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil {lazutils, for utf8 functions?!?},
@@ -426,6 +432,13 @@ begin
 
   if not FoundCorrectURL then
   begin
+
+    if HTTPSender=nil then
+    begin
+      result:=SFFilename;
+      exit;
+    end;
+
     // Rewrite URL if needed for Sourceforge download redirection
     // Detect direct link in HTML body and get URL from that
 
@@ -479,6 +492,16 @@ begin
   result:=URL;
 end;
 
+
+//class procedure callback.Status(Sender: TObject; Reason: THookSocketReason;
+//  const Value: String);
+//var
+//  V: String;
+//Begin
+//  V := GetEnumName(TypeInfo(THookSocketReason), Integer(Reason)) + ' ' + Value;
+//  writeln(V)
+//end;
+
 function DownloadHTTP(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 // Download file; retry if necessary.
 // Deals with SourceForge download links
@@ -511,6 +534,7 @@ begin
       URL:=SourceForgeURL(URL,HTTPSender); //Deal with sourceforge URLs
 
       // Try to get the file
+      //HTTPSender.Sock.OnStatus := callback.Status;
       HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
       while (HTTPGetResult=false) and (RetryAttempt<MaxRetries) do
       begin
@@ -545,6 +569,20 @@ begin
     HTTPSender.Free;
   end;
 end;
+
+function GetFileNameFromURL(URL:string):string;
+var
+  i:integer;
+begin
+  if Length(URL)=0 then exit;
+  // handle sourgeforge URL
+  result:=SourceForgeURL(URL,nil);
+  i:=Length(result);
+  if i=0 then exit;
+  while (i>0) AND (result[i]<>'/') do Dec(i);
+  result:=RightStr(result,Length(result)-i+1);
+end;
+
 
 {$IFDEF MSWINDOWS}
 procedure DeleteDesktopShortcut(ShortcutName: string);
@@ -770,7 +808,6 @@ begin
   end;
 end;
 
-{
 // returns file size in bytes or 0 if not found.
 function FileSizeUTF8(FileName: string) : Int64;
 var
@@ -786,7 +823,6 @@ begin
   FindCloseUTF8(sr);
 {$endif}
 end;
-}
 
 function ParentDirectoryIsNotRoot(Dir: string): boolean;
 var s:string;

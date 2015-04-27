@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 007.005.006 |
+| Project : Ararat Synapse                                       | 007.006.000 |
 |==============================================================================|
 | Content: Serial port support                                                 |
 |==============================================================================|
-| Copyright (c)2001-2014, Lukas Gebauer                                        |
+| Copyright (c)2001-2015, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c)2001-2014.                |
+| Portions created by Lukas Gebauer are Copyright (c)2001-2015.                |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -782,7 +782,7 @@ end;
 
 class function TBlockSerial.GetVersion: string;
 begin
-	Result := 'SynaSer 7.5.4';
+	Result := 'SynaSer 7.6.0';
 end;
 
 procedure TBlockSerial.CloseSocket;
@@ -1043,6 +1043,7 @@ begin
   end
   else
     SetSynaError(y);
+  err := 0;
   ClearCommError(FHandle, err, nil);
   if err <> 0 then
     DecodeCommError(err);
@@ -1158,6 +1159,7 @@ begin
   end
   else
     SetSynaError(y);
+  err := 0;
   ClearCommError(FHandle, err, nil);
   if err <> 0 then
     DecodeCommError(err);
@@ -1464,6 +1466,7 @@ var
   stat: TComStat;
   err: DWORD;
 begin
+  err := 0;
   if ClearCommError(FHandle, err, @stat) then
   begin
     SetSynaError(sOK);
@@ -1499,6 +1502,7 @@ var
   err: DWORD;
 begin
   SetSynaError(sOK);
+  err := 0;
   if not ClearCommError(FHandle, err, @stat) then
     serialcheck(sErr);
   ExceptCheck;
@@ -1774,6 +1778,7 @@ begin
     else
     begin
       y := 0;
+      ex := 0;
       if not WaitCommEvent(FHandle, ex, @Overlapped) then
         y := GetLastError;
       if y = ERROR_IO_PENDING then
@@ -1942,7 +1947,7 @@ begin
   SerialCheck(ioctl(FHandle, TCFLSH, TCIOFLUSH));
   {$ELSE}
     {$IFDEF DARWIN}
-    SerialCheck(fpioctl(FHandle, TCIOflush, Pointer(TCIOFLUSH)));
+    SerialCheck(fpioctl(FHandle, TCIOflush, Pointer(PtrInt(TCIOFLUSH))));
     {$ELSE}
     SerialCheck(fpioctl(FHandle, {$IFDEF FreeBSD}TCIOFLUSH{$ELSE}TCFLSH{$ENDIF}, Pointer(PtrInt(TCIOFLUSH))));
     {$ENDIF}
@@ -2319,13 +2324,29 @@ var
 begin
   Result := '';
   if FindFirst('/dev/ttyS*', $FFFFFFFF, sr) = 0 then
-  begin
     repeat
       if (sr.Attr and $FFFFFFFF) = Sr.Attr then
       begin
         if Result <> '' then
           Result := Result + ',';
-        Result := Result + sr.Name;
+        Result := Result + '/dev/' + sr.Name;
+      end;
+    until FindNext(sr) <> 0;
+  FindClose(sr);
+  if FindFirst('/dev/ttyUSB*', $FFFFFFFF, sr) = 0 then begin
+    repeat
+      if (sr.Attr and $FFFFFFFF) = Sr.Attr then begin
+        if Result <> '' then Result := Result + ',';
+        Result := Result + '/dev/' + sr.Name;
+      end;
+    until FindNext(sr) <> 0;
+  end;
+  FindClose(sr);
+  if FindFirst('/dev/ttyAM*', $FFFFFFFF, sr) = 0 then begin
+    repeat
+      if (sr.Attr and $FFFFFFFF) = Sr.Attr then begin
+        if Result <> '' then Result := Result + ',';
+        Result := Result + '/dev/' + sr.Name;
       end;
     until FindNext(sr) <> 0;
   end;

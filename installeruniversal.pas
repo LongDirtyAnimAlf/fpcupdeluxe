@@ -29,6 +29,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {$mode objfpc}{$H+}
+{$modeswitch advancedrecords}
 
 interface
 
@@ -49,6 +50,24 @@ uses
 {$ENDIF MSWINDOWS}
 
 type
+  TAPkgVersion = record
+  private
+    FName:string;
+    FFileVersion:longint;
+    FMajor: integer;
+    FMinor: integer;
+    FRelease: integer;
+  FBuild: integer;
+  public
+    function AsString: string;
+    procedure GetVersion(alpkdoc:TConfig;key:string);
+    property Name: string read FName write FName;
+    property FileVersion: longint read FFileVersion write FFileVersion;
+    //property Major: integer read FMajor;
+    //property Minor: integer read FMinor;
+    //property Release: integer read FRelease;
+    //property Build: integer read FBuild;
+  end;
   { TUniversalInstaller }
 
   TUniversalInstaller = class(TInstaller)
@@ -148,6 +167,28 @@ var
   UniModuleList:TStringList=nil;
   UniModuleEnabledList:TStringlist=nil;
 
+
+function TAPkgVersion.AsString: string;
+var
+  AddValues:boolean;
+begin
+  result:='';
+  AddValues:=(FBuild>0);
+  if AddValues then Result:='.'+IntToStr(FBuild)+Result else AddValues:=(FRelease>0);
+  if AddValues then Result:='.'+IntToStr(FRelease)+Result else AddValues:=(FMinor>0);
+  if AddValues then Result:='.'+IntToStr(FMinor)+Result;
+  Result:=IntToStr(FMajor)+Result;
+end;
+
+procedure TAPkgVersion.GetVersion(alpkdoc:TConfig;key:string);
+begin
+  FMajor:=alpkdoc.GetValue(key+'Major',0);
+  FMinor:=alpkdoc.GetValue(key+'Minor',0);
+  FRelease:=alpkdoc.GetValue(key+'Release',0);
+  FBuild:=alpkdoc.GetValue(key+'Build',0);
+end;
+
+
 { TUniversalInstaller }
 
 
@@ -201,6 +242,17 @@ begin
         // so strip them out if they are there.
         if macro='FPCDIR' then //$(FPCDIR)
           macro:=ExcludeTrailingPathDelimiter(FFPCDir)
+        else if macro='FPCBINDIR' then //$(FPCBINDIR)
+            macro:=ExcludeTrailingPathDelimiter(FBinPath)
+        else if macro='TOOLDIR' then //$(TOOLDIR)
+          {$IFDEF MSWINDOWS}
+          // make is a binutil and should be located in the make dir
+          macro:=ExcludeTrailingPathDelimiter(FMakeDir)
+          {$ENDIF}
+          {$IFDEF UNIX}
+          // Strip can be anywhere in the path
+          macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('make')))
+          {$ENDIF}
         else if macro='GETEXEEXT' then //$(GETEXEEXT)
           macro:=GetExeExt
         else if macro='LAZARUSDIR' then //$(LAZARUSDIR)
@@ -274,15 +326,43 @@ end;
 
 function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string): boolean;
 var
-  PackageAbsolutePath: string;
+  PackageName,PackageAbsolutePath: string;
+  Path: String;
+  lpkdoc:TConfig;
+  lpkversion:TAPkgVersion;
+  TxtFile:TextFile;
 begin
   result:=false;
+  PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
   // Convert any relative path to absolute path, if it's not just a file/package name:
   if ExtractFileName(PackagePath)=PackagePath then
     PackageAbsolutePath:=PackagePath
   else
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
-  infoln('InstallPackage: packageabsolutepath: '+PackageAbsolutePath,etDebug);
+
+  // if only a filename (without path) is given, then lazarus will handle everything by itself
+  // set lpkversion.Name to 'unknown' to flag this case
+  // if not, get some extra info from package file !!
+  lpkversion.Name:='unknown';
+  if (ExtractFileName(PackagePath)<>PackagePath) then
+  begin
+    lpkdoc:=TConfig.Create(PackageAbsolutePath);
+    try
+      Path:='Package/';
+      lpkversion.FileVersion:=lpkdoc.GetValue(Path+'Version',0);
+      Path:='Package/Name/';
+      lpkversion.Name:=lpkdoc.GetValue(Path+'Value','unknown');
+      Path:='Package/Version/';
+      lpkversion.GetVersion(lpkdoc,Path);
+    finally
+      lpkdoc.Free;
+    end;
+  end;
+
+  if lpkversion.Name='unknown'
+     then WritelnLog('Installing '+PackageName,True)
+     else WritelnLog('Installing '+PackageName+' version '+lpkversion.AsString,True);
+
   ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   FErrorLog.Clear;
   if WorkingDir<>'' then
@@ -294,20 +374,49 @@ begin
   try
     ProcessEx.Execute;
     result := ProcessEx.ExitStatus=0;
+    // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
     begin
       infoln('Marking Lazarus for rebuild based on package install for '+PackageAbsolutePath,etDebug);
       FLazarusNeedsRebuild:=true; //Mark IDE for rebuild
     end
     else
-      WritelnLog('InstallerUniversal: error trying to add package '+PackagePath+LineEnding+
-        'Details: '+FErrorLog.Text,true);
+    begin
+      // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
+      if Pos('only for runtime',ProcessEx.OutputString)>0
+         then result:=True
+         else WritelnLog('InstallerUniversal: error trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
+    end;
   except
     on E: Exception do
       begin
-      WritelnLog('InstallerUniversal: exception trying to add package '+PackagePath+LineEnding+
+      WritelnLog('InstallerUniversal: exception trying to add package '+PackageName+LineEnding+
         'Details: '+E.Message,true);
       end;
+  end;
+
+  // all ok AND a filepath is given --> check / add lpl file to inform Lazarus of package excistence and location
+  // if only a filename (without path) is given, then lazarus will handle everything (including lpl) by itself
+  // in fact, we cannot do anything in that case : we do not know anything about the package !
+  if (result) AND (lpkversion.Name<>'unknown') then
+  begin
+    if FVerbose then WritelnLog('TUniversalInstaller: checking lpl file for '+PackageName,true);
+    Path := IncludeTrailingPathDelimiter(LazarusDir)+
+            'packager'+DirectorySeparator+
+            'globallinks'+DirectorySeparator+
+            lpkversion.Name+'-'+lpkversion.AsString+'.lpl';
+
+    if NOT FileExists(Path) then
+    begin
+      AssignFile(TxtFile,Path);
+      try
+        Rewrite(TxtFile);
+        writeln(TxtFile,PackageAbsolutePath);
+      finally
+        CloseFile(TxtFile);
+      end;
+      if FVerbose then WritelnLog('Created lpl file ('+Path+') with contents: '+PackageAbsolutePath,true);
+    end;
   end;
 end;
 
@@ -320,15 +429,20 @@ var
   i:integer;
   PackagePath:string;
   Workingdir:string;
+  BaseWorkingdir:string;
 begin
   Failure:=false;
-  Workingdir:=GetValue('Workingdir',sl);
+  BaseWorkingdir:=GetValue('Workingdir',sl);
   // Go backward; reverse order to deal with any dependencies
-  for i:=MAXINSTRUCTIONS downto 1 do
+  for i:=MAXINSTRUCTIONS downto 0 do
     begin
-    PackagePath:=GetValue(Directive+IntToStr(i),sl);
+    if i=0
+       then PackagePath:=GetValue(Directive,sl)
+       else PackagePath:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if PackagePath='' then continue;
+    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
+    if Workingdir='' then Workingdir:=BaseWorkingdir;
     // Try to uninstall everything, even if some of these fail.
     // Note: UninstallPackage used to have a WorkingDir parameter but
     // I'm wondering how to implement that as we have PackagePath already.
@@ -363,13 +477,18 @@ var
   i:integer;
   PackagePath:string;
   Workingdir:string;
+  BaseWorkingdir:string;
 begin
-  Workingdir:=GetValue('Workingdir',sl);
-  for i:=1 to MAXINSTRUCTIONS do
+  BaseWorkingdir:=GetValue('Workingdir',sl);
+  for i:=0 to MAXINSTRUCTIONS do
     begin
-    PackagePath:=GetValue(Directive+IntToStr(i),sl);
+    if i=0
+       then PackagePath:=GetValue(Directive,sl)
+       else PackagePath:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if PackagePath='' then continue;
+    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
+    if Workingdir='' then Workingdir:=BaseWorkingdir;
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
       begin
@@ -389,14 +508,19 @@ var
   InstallDir,exec,output:string;
   Installer: TWinInstaller;
   Workingdir:string;
+  BaseWorkingdir:string;
 begin
   result:=true; //succeed by default
-  Workingdir:=GetValue('Workingdir',sl);
-  for i:=1 to MAXINSTRUCTIONS do
+  BaseWorkingdir:=GetValue('Workingdir',sl);
+  for i:=0 to MAXINSTRUCTIONS do
     begin
-    exec:=GetValue(Directive+IntToStr(i),sl);
+    if i=0
+       then exec:=GetValue(Directive,sl)
+       else exec:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
+    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
+    if Workingdir='' then Workingdir:=BaseWorkingdir;
     case uppercase(exec) of
       'WINDOWS','WINDOWS32','WIN32','WINX86': {good name};
       else
@@ -437,24 +561,31 @@ var
   i:integer;
   exec:string;
   output:string='';
+  BaseWorkingdir:string;
   Workingdir:string;
 begin
   result:=true; //not finding any instructions at all should not be a problem.
-  Workingdir:=GetValue('Workingdir',sl);
-  for i:=1 to MAXINSTRUCTIONS do
+  BaseWorkingdir:=GetValue('Workingdir',sl);
+  for i:=0 to MAXINSTRUCTIONS do
     begin
-    exec:=GetValue(Directive+IntToStr(i),sl);
+    if i=0
+       then exec:=GetValue(Directive,sl)
+       else exec:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
+    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
+    if Workingdir='' then Workingdir:=BaseWorkingdir;
     if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
     try
       result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose,FPath)=0;
       if result then
       begin
         // If it is likely user used lazbuid to compile a package, assume
-        // it is design-time (no way to check) and mark IDE for rebuild
+        // it is design-time (except when returning an runtime message) and mark IDE for rebuild
         if (pos('lazbuild',lowerCase(exec))>0) and
-          (pos('.lpk',lowercase(exec))>0) then
+          (pos('.lpk',lowercase(exec))>0) and
+          (pos('only for runtime',lowercase(exec))=0)
+        then
         begin
           infoln('Marking Lazarus for rebuild based on exec line '+exec,etDebug);
           FLazarusNeedsRebuild:=true;
@@ -480,12 +611,18 @@ var
   cnt, i: integer;
   key: string;
   LazarusConfig: TUpdateLazConfig;
-  PackageName: string;
+  PackageName,PackageAbsolutePath: string;
   xmlfile: string;
+  lpkdoc:TConfig;
+  lpkversion:TAPkgVersion;
 begin
   result:=false;
-
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+  // Convert any relative path to absolute path, if it's not just a file/package name:
+  if ExtractFileName(PackagePath)=PackagePath then
+    PackageAbsolutePath:=PackagePath
+  else
+    PackageAbsolutePath:=SafeExpandFileName(PackagePath);
   if FVerbose then WritelnLog('TUniversalInstaller: going to uninstall package '+PackageName,true);
   xmlfile:=PackageConfig;
   key:='UserPkgLinks/Count';
@@ -554,6 +691,35 @@ begin
   finally
     LazarusConfig.Free;
   end;
+
+  if (ExtractFileName(PackagePath)<>PackagePath) then
+  begin
+    if FVerbose then WritelnLog('TUniversalInstaller: removing lpl file for '+ExtractFileName(PackagePath),true);
+    lpkdoc:=TConfig.Create(PackageAbsolutePath);
+    key:='Package/';
+    try
+      lpkversion.FileVersion:=lpkdoc.GetValue(key+'Version',0);
+    except
+      lpkversion.FileVersion:=2;// On error assume version 2.
+    end;
+    key:='Package/Name/';
+    lpkversion.Name:=lpkdoc.GetValue(key+'Value','');
+    if (length(lpkversion.Name)>0) then
+    begin
+      key:='Package/Version/';
+      lpkversion.GetVersion(lpkdoc,key);
+      PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusDir)+
+                             'packager'+DirectorySeparator+
+                             'globallinks'+DirectorySeparator+
+                             lpkversion.Name+'-'+lpkversion.AsString+'.lpl';
+
+      if FileExists(PackageAbsolutePath) then
+      begin
+        SysUtils.DeleteFile(PackageAbsolutePath);
+      end;
+    end;
+  end;
+
   result:=true;
 end;
 
@@ -614,11 +780,13 @@ var
   begin
   filename:=xmlfile+'.xml';
   oldcounter:='';
-  for i:=1 to MAXINSTRUCTIONS do
+  for i:=0 to MAXINSTRUCTIONS do
     begin
     // Read command, e.g. AddToHelpOptions1
     // and deduce which XML settings file to update
-    exec:=GetValue('AddTo'+xmlfile+IntToStr(i),sl);
+    if i=0
+       then exec:=GetValue('AddTo'+xmlfile,sl)
+       else exec:=GetValue('AddTo'+xmlfile+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
     //split off key and value
@@ -831,6 +999,9 @@ var
   BeforeRevision: string='';
   AfterRevision: string='';
   UpdateWarnings: TStringList;
+  TempArchive:string;
+  ResultCode: longint;
+  User,Pass:string;
 begin
   result:=InitModule;
   if not result then exit;
@@ -839,12 +1010,13 @@ begin
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
-    WritelnLog('Getting module '+ModuleName);
+    WritelnLog('Getting module '+ModuleName,True);
     InstallDir:=GetValue('InstallDir',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
     // Common keywords for all repo methods
     PinRevision:=GetValue('REVISION',sl);
+
     // Handle SVN urls
     RemoteURL:=GetValue('SVNURL',sl);
     if RemoteURL<>'' then
@@ -855,9 +1027,11 @@ begin
           FSVNClient.Verbose:=FVerbose;
           FBaseDirectory:=InstallDir;
           FUrl:=RemoteURL;
+          User:=GetValue('UserName',sl);
+          Pass:=GetValue('Password',sl);
           if PinRevision<>'' then
             FSVNClient.DesiredRevision:=PinRevision;
-          result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
           if result=false then
             WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
           if UpdateWarnings.Count>0 then
@@ -897,7 +1071,7 @@ begin
     {todo: handle branches (e.g. tiopf doesn't use master branch), perhaps a space after the url and then branch name?
     Similar construction could be used for hg. Suggest leaving svn as is}
     if RemoteURL<>'' then
-      begin
+    begin
       UpdateWarnings:=TStringList.Create;
         try
           FGitClient.Verbose:=FVerbose;
@@ -915,6 +1089,42 @@ begin
         finally
           UpdateWarnings.Free;
         end;
+      end;
+
+      RemoteURL:=GetValue('ArchiveURL',sl);
+      if RemoteURL<>'' then
+      begin
+        TempArchive := SysUtils.GetTempFileName+sysutils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
+        WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
+        try
+          result:=Download(RemoteURL,TempArchive);
+        except
+          on E: Exception do
+          begin
+           result:=false;
+          end;
+        end;
+
+        if result=false then
+           WritelnLog('Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+
+        if result then
+        begin
+          WritelnLog('Download ok',True);
+          // Extract, overwrite, flatten path/junk paths
+          case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
+             '.ZIP':
+                ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+             else {.tar and all others}
+                ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
+             end;
+          if ResultCode <> 0 then
+          begin
+            result := False;
+            infoln(ModuleName+': unpack failed with resultcode: '+IntToStr(ResultCode),etwarning);
+          end;
+        end;
+        SysUtils.Deletefile(TempArchive); //Get rid of temp file.
       end;
     end
   else
@@ -1073,7 +1283,7 @@ try
         begin
           infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
           if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/branches/fixes_3_0';
-          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/branches/fixes_1_4';
+          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_1_4';
         end;
         if result='' then
         begin
@@ -1098,6 +1308,7 @@ var
   var
     name:string;
     sl:TStringList;
+    li:integer;
   begin
     name:=ini.ReadString(ModuleName,'Name','');
     result:=name<>'';
@@ -1109,6 +1320,10 @@ var
       // TstringList cleared in finalization
       sl:=TstringList.Create;
       ini.ReadSectionRaw(ModuleName,sl);
+      for li:=sl.Count-1 downto 0 do
+        begin
+          if (TrimLeft(sl.Strings[li])[1]=';') OR (TrimLeft(sl.Strings[li])[1]='#') then sl.Delete(li);
+        end;
       UniModuleList.AddObject(name,TObject(sl));
       end;
   end;
@@ -1183,7 +1398,7 @@ begin
     // create the sequences for default modules
     result:=result+'DeclareHidden UniversalDefault;';
     for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+'Do '+UniModuleEnabledList[i]+';';
+        result:=result+'Do '+UniModuleEnabledList[i]+';';
     result:=result+'End;';
     result:=result+'DeclareHidden UniversalDefaultClean;';
     for i:=0 to UniModuleEnabledList.Count-1 do

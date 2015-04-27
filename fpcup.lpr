@@ -699,8 +699,14 @@ begin
         writeln('Re-apply local changes: no');
       end;
       writeln('Log file name:          '+FInstaller.LogFileName);
+
+      For i:=0 to FInstaller.ModuleEnabledList.Count-1 do
+        begin
+        writeln('Enabled modules:        '+FInstaller.ModuleEnabledList[i]);
+        end;
       if FInstaller.IncludeModules<>'' then
         writeln('Additional modules:     '+FInstaller.IncludeModules);
+
       writeln('');
       // Remove password from output
       if FInstaller.HTTPProxyPassword='' then

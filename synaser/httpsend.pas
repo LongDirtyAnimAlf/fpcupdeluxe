@@ -1,9 +1,9 @@
 {==============================================================================|
-| Project : Ararat Synapse                                       | 003.012.008 |
+| Project : Ararat Synapse                                       | 003.012.009 |
 |==============================================================================|
 | Content: HTTP client                                                         |
 |==============================================================================|
-| Copyright (c)1999-2012, Lukas Gebauer                                        |
+| Copyright (c)1999-2015, Lukas Gebauer                                        |
 | All rights reserved.                                                         |
 |                                                                              |
 | Redistribution and use in source and binary forms, with or without           |
@@ -33,7 +33,7 @@
 | DAMAGE.                                                                      |
 |==============================================================================|
 | The Initial Developer of the Original Code is Lukas Gebauer (Czech Republic).|
-| Portions created by Lukas Gebauer are Copyright (c) 1999-2012.               |
+| Portions created by Lukas Gebauer are Copyright (c) 1999-2015.               |
 | All Rights Reserved.                                                         |
 |==============================================================================|
 | Contributor(s):                                                              |
@@ -107,8 +107,8 @@ type
     FRangeEnd: integer;
     FAddPortNumberToHost: Boolean;
     function ReadUnknown: Boolean; virtual;
-    function ReadIdentity(Size: Integer): Boolean;
-    function ReadChunked: Boolean;
+    function ReadIdentity(Size: Integer): Boolean; virtual;
+    function ReadChunked: Boolean; virtual;
     procedure ParseCookies;
     function PrepareHeaders: AnsiString;
     function InternalDoConnect(needssl: Boolean): Boolean;
@@ -650,7 +650,12 @@ begin
 
   Result := FSock.LastError = 0;
   if not Result then
+  begin
+    FSock.CloseSocket;
+    FAliveHost := '';
+    FAlivePort := '';
     Exit;
+  end;
 
   {if need receive response body, read it}
   Receiving := Method <> 'HEAD';

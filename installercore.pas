@@ -118,7 +118,7 @@ type
     function DownloadFromGit(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Checkout/update using SVN; use FBaseDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
-    function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+    function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
     // Download patch utility and set FPatch if succesful.
@@ -864,7 +864,7 @@ begin
   end;
 end;
 
-function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
 var
   BeforeRevisionShort: string; //Basically the branch revision number
   CheckoutOrUpdateReturnCode: integer;
@@ -876,7 +876,8 @@ begin
   AfterRevision := 'failure';
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
-
+  FSVNClient.UserName:=aUserName;
+  FSVNClient.Password:=aPassword;
   RepoExists:=FSVNClient.LocalRepositoryExists;
   if RepoExists then
   begin

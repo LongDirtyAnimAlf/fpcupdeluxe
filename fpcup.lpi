@@ -406,6 +406,7 @@ end;"/>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="updatelazconfig"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
@@ -471,6 +472,7 @@ end;"/>
       <Unit16>
         <Filename Value="hgclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="hgclient"/>
       </Unit16>
       <Unit17>
         <Filename Value="repoclient.pas"/>
@@ -480,6 +482,7 @@ end;"/>
       <Unit18>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="gitclient"/>
       </Unit18>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>

@@ -298,6 +298,16 @@ var
 
   [DllImport(DLLSSLName, CharSet = CharSet.Ansi,
     SetLastError = False, CallingConvention= CallingConvention.cdecl,
+    EntryPoint = 'TLSv1_1_method')]
+    function SslMethodTLSV11:PSSL_METHOD;  external;
+
+  [DllImport(DLLSSLName, CharSet = CharSet.Ansi,
+    SetLastError = False, CallingConvention= CallingConvention.cdecl,
+    EntryPoint = 'TLSv1_2_method')]
+    function SslMethodTLSV12:PSSL_METHOD;  external;
+
+  [DllImport(DLLSSLName, CharSet = CharSet.Ansi,
+    SetLastError = False, CallingConvention= CallingConvention.cdecl,
     EntryPoint = 'SSLv23_method')]
     function SslMethodV23 : PSSL_METHOD; external;
 
@@ -706,6 +716,8 @@ var
   function SslMethodV2:PSSL_METHOD;
   function SslMethodV3:PSSL_METHOD;
   function SslMethodTLSV1:PSSL_METHOD;
+  function SslMethodTLSV11:PSSL_METHOD;
+  function SslMethodTLSV12:PSSL_METHOD;
   function SslMethodV23:PSSL_METHOD;
   function SslCtxUsePrivateKey(ctx: PSSL_CTX; pkey: SslPtr):Integer;
   function SslCtxUsePrivateKeyASN1(pk: integer; ctx: PSSL_CTX; d: AnsiString; len: integer):Integer;
@@ -832,6 +844,8 @@ type
   TSslMethodV2 = function:PSSL_METHOD; cdecl;
   TSslMethodV3 = function:PSSL_METHOD; cdecl;
   TSslMethodTLSV1 = function:PSSL_METHOD; cdecl;
+  TSslMethodTLSV11 = function:PSSL_METHOD; cdecl;
+  TSslMethodTLSV12 = function:PSSL_METHOD; cdecl;
   TSslMethodV23 = function:PSSL_METHOD; cdecl;
   TSslCtxUsePrivateKey = function(ctx: PSSL_CTX; pkey: sslptr):Integer; cdecl;
   TSslCtxUsePrivateKeyASN1 = function(pk: integer; ctx: PSSL_CTX; d: sslptr; len: integer):Integer; cdecl;
@@ -937,6 +951,8 @@ var
   _SslMethodV2: TSslMethodV2 = nil;
   _SslMethodV3: TSslMethodV3 = nil;
   _SslMethodTLSV1: TSslMethodTLSV1 = nil;
+  _SslMethodTLSV11: TSslMethodTLSV11 = nil;
+  _SslMethodTLSV12: TSslMethodTLSV12 = nil;
   _SslMethodV23: TSslMethodV23 = nil;
   _SslCtxUsePrivateKey: TSslCtxUsePrivateKey = nil;
   _SslCtxUsePrivateKeyASN1: TSslCtxUsePrivateKeyASN1 = nil;
@@ -1110,6 +1126,22 @@ function SslMethodTLSV1:PSSL_METHOD;
 begin
   if InitSSLInterface and Assigned(_SslMethodTLSV1) then
     Result := _SslMethodTLSV1
+  else
+    Result := nil;
+end;
+
+function SslMethodTLSV11:PSSL_METHOD;
+begin
+  if InitSSLInterface and Assigned(_SslMethodTLSV11) then
+    Result := _SslMethodTLSV11
+  else
+    Result := nil;
+end;
+
+function SslMethodTLSV12:PSSL_METHOD;
+begin
+  if InitSSLInterface and Assigned(_SslMethodTLSV12) then
+    Result := _SslMethodTLSV12
   else
     Result := nil;
 end;
@@ -1850,6 +1882,8 @@ begin
         _SslMethodV2 := GetProcAddr(SSLLibHandle, 'SSLv2_method');
         _SslMethodV3 := GetProcAddr(SSLLibHandle, 'SSLv3_method');
         _SslMethodTLSV1 := GetProcAddr(SSLLibHandle, 'TLSv1_method');
+        _SslMethodTLSV11 := GetProcAddr(SSLLibHandle, 'TLSv1_1_method');
+        _SslMethodTLSV12 := GetProcAddr(SSLLibHandle, 'TLSv1_2_method');
         _SslMethodV23 := GetProcAddr(SSLLibHandle, 'SSLv23_method');
         _SslCtxUsePrivateKey := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_PrivateKey');
         _SslCtxUsePrivateKeyASN1 := GetProcAddr(SSLLibHandle, 'SSL_CTX_use_PrivateKey_ASN1');
@@ -2045,6 +2079,8 @@ begin
     _SslMethodV2 := nil;
     _SslMethodV3 := nil;
     _SslMethodTLSV1 := nil;
+    _SslMethodTLSV11 := nil;
+    _SslMethodTLSV12 := nil;
     _SslMethodV23 := nil;
     _SslCtxUsePrivateKey := nil;
     _SslCtxUsePrivateKeyASN1 := nil;

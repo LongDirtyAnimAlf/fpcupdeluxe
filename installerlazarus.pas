@@ -277,7 +277,7 @@ begin
         ProcessEx.Parameters.Add('--os=' + FCrossOS_Target);
         if FCrossLCL_Platform <> '' then
           ProcessEx.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
-        ProcessEx.Parameters.Add('lcl\interfaces\lcl.lpk');
+        ProcessEx.Parameters.Add('lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+'lcl.lpk');
       end;
 
       if FCrossLCL_Platform = '' then
@@ -880,7 +880,7 @@ begin
     LHelpTemp:=GetTempFileNameUTF8('','');
     try
       CopyFile(
-        IncludeTrailingPathDelimiter(FBaseDirectory)+'components\chmhelp\lhelp\lhelp'+GetExeExt,
+        IncludeTrailingPathDelimiter(FBaseDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
         LHelpTemp,[cffOverWriteFile]);
     except
       infoln('Lazarus CleanModule: non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);

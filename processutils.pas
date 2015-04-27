@@ -527,16 +527,18 @@ begin
     s:=GetFirstWord;
     while s<>'' do
       begin
-      PE.Parameters.Add(s);
+      if s<>'emptystring'
+         then PE.Parameters.Add(s)
+         else PE.Parameters.Add('""');
       s:=GetFirstWord;
       end;
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;
-    {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: executable '+PE.Executable);
-    writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
-    {$ENDIF DEBUGCONSOLE}
+    //{$IFDEF DEBUGCONSOLE}
+    //writeln('ExecuteCommandInDir: executable '+PE.Executable);
+    //writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
+    //{$ENDIF DEBUGCONSOLE}
     PE.Execute;
 
     Output:=PE.OutputString;

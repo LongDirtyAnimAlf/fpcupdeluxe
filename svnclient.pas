@@ -51,6 +51,9 @@ type
   { TSVNClient }
 
   TSVNClient = class(TRepoClient)
+  private
+    FUserName: string;
+    FPassword: string;
   protected
     FLocalRevisionWholeRepo: string;
     procedure CheckOut; override;
@@ -72,6 +75,8 @@ type
     function LocalRepositoryExists: boolean; override;
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
     property LocalRevisionWholeRepo: string read GetLocalRevisionWholeRepo;
+    property UserName: string read FUserName write FUserName;
+    property Password: string read FPassword write FPassword;
     // Run SVN log command for repository and put results into Log
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
@@ -174,11 +179,24 @@ begin
   // Avoid
   // svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
   // by --trust-server-cert
+
+  Command := '';
+
+  if Length(UserName)>0 then
+  begin
+    // svn quirk : even if no password is needed, it needs an empty password.
+    // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
+    if Length(Password)=0 then Password:='emptystring';
+    Command := ' --username '+UserName + ' --password '+Password;
+  end;
+
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' checkout '+ProxyCommand+' --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
+    Command := ' checkout '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := ' checkout '+ProxyCommand+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+    Command := ' checkout '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (ReturnCode <> 0) then
