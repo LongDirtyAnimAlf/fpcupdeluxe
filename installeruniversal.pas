@@ -404,7 +404,7 @@ begin
     Path := IncludeTrailingPathDelimiter(LazarusDir)+
             'packager'+DirectorySeparator+
             'globallinks'+DirectorySeparator+
-            lpkversion.Name+'-'+lpkversion.AsString+'.lpl';
+            LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
 
     if NOT FileExists(Path) then
     begin
@@ -711,7 +711,7 @@ begin
       PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusDir)+
                              'packager'+DirectorySeparator+
                              'globallinks'+DirectorySeparator+
-                             lpkversion.Name+'-'+lpkversion.AsString+'.lpl';
+                             LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
 
       if FileExists(PackageAbsolutePath) then
       begin
