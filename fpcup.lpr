@@ -444,7 +444,7 @@ begin
       except
         on E: ECommandLineError do begin
         // option did not have an argument
-        FInstaller.reapplylocalchanges:=Options.GetOptionNoParam('','reapplylocalchanges');
+        FInstaller.ReApplyLocalChanges:=Options.GetOptionNoParam('','reapplylocalchanges');
         end;
       end;
 

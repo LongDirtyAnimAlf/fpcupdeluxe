@@ -468,6 +468,7 @@ end;"/>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="commandline"/>
       </Unit15>
       <Unit16>
         <Filename Value="hgclient.pas"/>

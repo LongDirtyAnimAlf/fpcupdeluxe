@@ -1002,9 +1002,20 @@ var
   TempArchive:string;
   ResultCode: longint;
   User,Pass:string;
+  GotLocation:boolean;
+
+  function CheckLocation:boolean;
+  begin
+    result:=GotLocation;
+    if GotLocation
+      then infoln('Warning !! Duplicate location !! Ignoring module location: '+RemoteURL,etInfo)
+      else GotLocation:=True;
+  end;
+
 begin
   result:=InitModule;
   if not result then exit;
+  GotLocation:=False;
   result:=true;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
@@ -1020,51 +1031,53 @@ begin
     // Handle SVN urls
     RemoteURL:=GetValue('SVNURL',sl);
     if RemoteURL<>'' then
-      begin
+    begin
+      if CheckLocation then exit;
       infoln('Going to download/update from SVN repository '+RemoteURL,etDebug);
       UpdateWarnings:=TStringList.Create;
-        try
-          FSVNClient.Verbose:=FVerbose;
-          FBaseDirectory:=InstallDir;
-          FUrl:=RemoteURL;
-          User:=GetValue('UserName',sl);
-          Pass:=GetValue('Password',sl);
-          if PinRevision<>'' then
-            FSVNClient.DesiredRevision:=PinRevision;
-          result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
-          if result=false then
-            WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
-          if UpdateWarnings.Count>0 then
-          begin
-            WritelnLog(UpdateWarnings.Text);
-          end;
-        finally
-          UpdateWarnings.Free;
+      try
+        FSVNClient.Verbose:=FVerbose;
+        FBaseDirectory:=InstallDir;
+        FUrl:=RemoteURL;
+        User:=GetValue('UserName',sl);
+        Pass:=GetValue('Password',sl);
+        if PinRevision<>'' then
+          FSVNClient.DesiredRevision:=PinRevision;
+        result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
+        if result=false then
+          WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
+        if UpdateWarnings.Count>0 then
+        begin
+          WritelnLog(UpdateWarnings.Text);
         end;
+      finally
+        UpdateWarnings.Free;
       end;
+    end;
 
     // Handle HG URLs
     RemoteURL:=GetValue('HGURL',sl);
     if RemoteURL<>'' then
-      begin
+    begin
+      if CheckLocation then exit;
       UpdateWarnings:=TStringList.Create;
-        try
-          FHGClient.Verbose:=FVerbose;
-          FBaseDirectory:=InstallDir;
-          FUrl:=RemoteURL;
-          if PinRevision<>'' then
-            FHGClient.DesiredRevision:=PinRevision;
-          result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-          if result=false then
-            WritelnLog('hg error downloading from '+RemoteURL+'. Continuing regardless.',true);
-          if UpdateWarnings.Count>0 then
-          begin
-            WritelnLog(UpdateWarnings.Text);
-          end;
-        finally
-          UpdateWarnings.Free;
+      try
+        FHGClient.Verbose:=FVerbose;
+        FBaseDirectory:=InstallDir;
+        FUrl:=RemoteURL;
+        if PinRevision<>'' then
+          FHGClient.DesiredRevision:=PinRevision;
+        result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        if result=false then
+          WritelnLog('hg error downloading from '+RemoteURL+'. Continuing regardless.',true);
+        if UpdateWarnings.Count>0 then
+        begin
+          WritelnLog(UpdateWarnings.Text);
         end;
+      finally
+        UpdateWarnings.Free;
       end;
+    end;
 
     // Handle Git URLs
     RemoteURL:=GetValue('GITURL',sl);
@@ -1072,61 +1085,83 @@ begin
     Similar construction could be used for hg. Suggest leaving svn as is}
     if RemoteURL<>'' then
     begin
+      if CheckLocation then exit;
       UpdateWarnings:=TStringList.Create;
-        try
-          FGitClient.Verbose:=FVerbose;
-          FBaseDirectory:=InstallDir;
-          FUrl:=RemoteURL;
-          if PinRevision<>'' then
-            FGitClient.DesiredRevision:=PinRevision;
-          result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-          if result=false then
-            WritelnLog('git error downloading from '+RemoteURL+'. Continuing regardless.',true);
-          if UpdateWarnings.Count>0 then
-          begin
-            WritelnLog(UpdateWarnings.Text);
-          end;
-        finally
-          UpdateWarnings.Free;
-        end;
-      end;
-
-      RemoteURL:=GetValue('ArchiveURL',sl);
-      if RemoteURL<>'' then
-      begin
-        TempArchive := SysUtils.GetTempFileName+sysutils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
-        WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
-        try
-          result:=Download(RemoteURL,TempArchive);
-        except
-          on E: Exception do
-          begin
-           result:=false;
-          end;
-        end;
-
+      try
+        FGitClient.Verbose:=FVerbose;
+        FBaseDirectory:=InstallDir;
+        FUrl:=RemoteURL;
+        if PinRevision<>'' then
+          FGitClient.DesiredRevision:=PinRevision;
+        result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         if result=false then
-           WritelnLog('Error downloading from '+RemoteURL+'. Continuing regardless.',True);
-
-        if result then
+          WritelnLog('git error downloading from '+RemoteURL+'. Continuing regardless.',true);
+        if UpdateWarnings.Count>0 then
         begin
-          WritelnLog('Download ok',True);
-          // Extract, overwrite, flatten path/junk paths
-          case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
-             '.ZIP':
-                ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
-             else {.tar and all others}
-                ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
-             end;
-          if ResultCode <> 0 then
-          begin
-            result := False;
-            infoln(ModuleName+': unpack failed with resultcode: '+IntToStr(ResultCode),etwarning);
-          end;
+          WritelnLog(UpdateWarnings.Text);
         end;
-        SysUtils.Deletefile(TempArchive); //Get rid of temp file.
+      finally
+        UpdateWarnings.Free;
       end;
-    end
+    end;
+
+    RemoteURL:=GetValue('ArchiveURL',sl);
+    if RemoteURL<>'' then
+    begin
+      if CheckLocation then exit;
+      TempArchive := SysUtils.GetTempFileName+sysutils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
+      WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
+      try
+        result:=Download(RemoteURL,TempArchive);
+      except
+        on E: Exception do
+        begin
+         result:=false;
+        end;
+      end;
+
+      if result=false then
+         WritelnLog('Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+
+      if result then
+      begin
+        WritelnLog('Download ok',True);
+        // Extract, overwrite, flatten path/junk paths
+        case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
+           '.ZIP':
+              ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+           else {.tar and all others}
+              ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
+           end;
+        if ResultCode <> 0 then
+        begin
+          result := False;
+          infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+        end;
+      end;
+      SysUtils.Deletefile(TempArchive); //Get rid of temp file.
+    end;
+
+    RemoteURL:=GetValue('ArchivePATH',sl);
+    if RemoteURL<>'' then
+    begin
+      if CheckLocation then exit;
+      TempArchive := RemoteURL;
+      case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
+         '.ZIP':
+            ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+         else {.tar and all others}
+            ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
+         end;
+      if ResultCode <> 0 then
+      begin
+        result := False;
+        infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+      end;
+
+    end;
+
+  end
   else
     result:=false;
 end;
