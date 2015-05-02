@@ -401,17 +401,14 @@ end;"/>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="svnclient"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="updatelazconfig"/>
       </Unit2>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="processutils"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
@@ -450,7 +447,6 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcuputil"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -468,22 +464,18 @@ end;"/>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="commandline"/>
       </Unit15>
       <Unit16>
         <Filename Value="hgclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="hgclient"/>
       </Unit16>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="repoclient"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="gitclient"/>
       </Unit18>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>

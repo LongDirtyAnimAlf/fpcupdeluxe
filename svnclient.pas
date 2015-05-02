@@ -64,6 +64,7 @@ type
     // Returns command snippet to set HTTP proxy config variables if needed
     function GetProxyCommand: string;
     function GetRepoExecutable: string; override;
+    function GetRepoExecutableName: string; override;
     procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
@@ -88,50 +89,59 @@ type
 
 implementation
 
-uses strutils, regexpr;
+uses
+  Process,
+  {$IFDEF UNIX}
+  Unix,
+  {$ENDIF}
+  strutils, regexpr;
 
 
 { TSVNClient }
-function TSVNClient.FindRepoExecutable: string;
-const
+function TSVNClient.GetRepoExecutableName: string;
+begin
   // Application name:
-  SVNName = 'svn';
+  result := 'svn';
+end;
+
+function TSVNClient.FindRepoExecutable: string;
 begin
   Result := FRepoExecutable;
   // Look in path
   // Windows: will also look for <SVNName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(SVNName);
+    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
 
 {$IFDEF MSWINDOWS}
   // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
   // Covers both 32 bit and 64 bit Windows.
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\svn.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\svn.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\svn.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\svn.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\svn.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\svn.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\' + RepoExecutableName + '.exe');
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + 'svn');
+    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + RepoExecutableName + '.exe');
 {$ENDIF MSWINDOWS}
 
   if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
     {$ifdef mswindows}
-    if FileExists(SVNName + '.exe') then
-      FRepoExecutable := SVNName + '.exe';
+    if FileExists(RepoExecutableName + '.exe') then
+      FRepoExecutable := RepoExecutableName + '.exe';
+    {$else}
+    if FileExists(RepoExecutableName) then
+      FRepoExecutable := RepoExecutableName;
     {$endif mswindows}
-    if FileExists('svn') then
-      FRepoExecutable := SVNName;
   end;
 
   // If file exists, check for valid svn executable
@@ -169,12 +179,18 @@ var
   Output: string = '';
   ProxyCommand: string;
   RetryAttempt: integer;
+  ExecuteSpecialDue2EmptyString:boolean;
+  TempOutputFile:string;
+  TempOutputSL:TStringList;
 begin
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
 
   ProxyCommand:=GetProxyCommand;
+
+  // flag used to signal the need of a special command due to some TProcess specialities (see comments below)
+  ExecuteSpecialDue2EmptyString:=False;
 
   // Avoid
   // svn: E175002: OPTIONS of 'https://lazarus-ccr.svn.sourceforge.net/svnroot/lazarus-ccr/components/fpspreadsheet': Server certificate verification failed: issuer is not trusted (https://lazarus-ccr.svn.sourceforge.net)
@@ -195,6 +211,40 @@ begin
   else
     Command := ' checkout '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
 
+
+  {$IFNDEF MSWINDOWS}
+  // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems
+  // see this [Function StringsToPCharList(List : TStrings) : PPChar] inside process.inc for Unix
+  if Pos('emptystring',Command)>0 then
+  begin
+    Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
+    TempOutputFile := SysUtils.GetTempFileName+'.svn';
+    Command:=Command + ' &> '+TempOutputFile;
+    ExecuteSpecialDue2EmptyString:=True;
+  end;
+  {$ENDIF}
+
+  {$IFNDEF MSWINDOWS}
+  if ExecuteSpecialDue2EmptyString then
+  begin
+    //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
+    FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+    //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
+
+    if FileExists(TempOutputFile) then
+    begin
+      TempOutputSL:=TStringList.Create();
+      try
+        TempOutputSL.LoadFromFile(TempOutputFile);
+        Output:=TempOutputSL.ToString;
+      finally
+        TempOutputSL.Free();
+      end;
+      SysUtils.DeleteFile(TempOutputFile);
+    end;
+  end
+  else
+  {$ENDIF}
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
@@ -203,11 +253,9 @@ begin
   begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
+      //E155004: Working copy '<directory>' locked.
+      //run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
       if Pos('E155004', Output) > 0 then
-      {
-      E155004: Working copy '<directory>' locked.
-      run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
-      }
       begin
         // Let's try one time to fix it (don't update FReturnCode here)
         ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
@@ -215,22 +263,48 @@ begin
         // Let's call update to do so.
         Update;
       end;
+      // svn: E155036: Please see the 'svn upgrade' command
+      // svn: E155036: The working copy is too old to work with client. You need to upgrade the working copy first
       if Pos('E155036', Output) > 0 then
-      {
-      svn: E155036: Please see the 'svn upgrade' command
-      svn: E155036: The working copy at 'C:\Development\fpctrunk' is too old (format 29) to work with client version '1.8.0-SlikSvn-1.8.0-X64 (SlikSvn/1.8.0) X64' (expects format 31). You need to upgrade the working copy first
-      }
       begin
         // Let's try one time upgrade to fix it (don't update FReturnCode here)
         ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
         // Now update again:
         Update;
       end;
-      Sleep(500); //Give everybody a chance to relax ;)
-      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose); //attempt again
+      //Give everybody a chance to relax ;)
+      Sleep(500);
+      //attempt again
+      {$IFNDEF MSWINDOWS}
+      if ExecuteSpecialDue2EmptyString then
+      begin
+        //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
+        FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+        //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
+        if FileExists(TempOutputFile) then
+        begin
+          TempOutputSL:=TStringList.Create();
+          try
+            TempOutputSL.LoadFromFile(TempOutputFile);
+            Output:=TempOutputSL.ToString;
+          finally
+            TempOutputSL.Free();
+          end;
+          SysUtils.DeleteFile(TempOutputFile);
+        end;
+      end
+      else
+      {$ENDIF}
+      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
+
+  //ExecuteCommand('find . ! -path "./.svn/*" \( -name "*.pas" -o -name "*.pp" -o -name "*.lpk" -o -name "*.lpr" -name "*.lpi" \) -type f -exec sed -i "+''''+"s/\r//"+''''+" {} \;', Output, Verbose);
+  //writeln('SED: ' +Output);
+
+  //find . ! -path "./.svn/*" \( -name "*.pas" -o -name "*.pp" -o -name "*.lpk" -o -name "*.lpr" \) -type f -exec sed -i 's/\r//' {} \;
+
 end;
 
 procedure TSVNClient.CheckOutOrUpdate;
@@ -275,7 +349,11 @@ function TSVNClient.GetDiffAll: string;
 begin
   Result := ''; //fail by default
   // Using proxy more for completeness here
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff '+GetProxyCommand+' .', LocalRepository, Result, Verbose);
+  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff '+' .', LocalRepository, Result, Verbose);
+  // with external diff program
+  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff --diff-cmd diff --extensions "--binary -wbua"'+' .', LocalRepository, Result, Verbose);
+  // ignoring whitespaces
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x -w'+' .', LocalRepository, Result, Verbose);
 end;
 
 procedure TSVNClient.Log(var Log: TStringList);
@@ -303,24 +381,73 @@ var
   ProxyCommand: string;
   AfterErrorRetry: integer; // Keeps track of retry attempts after error result
   UpdateRetry: integer;     // Keeps track of retry attempts to get all files
+  ExecuteSpecialDue2EmptyString:boolean;
+  TempOutputFile:string;
+  TempOutputSL:TStringList;
 begin
   AfterErrorRetry := 1;
   UpdateRetry := 1;
   ProxyCommand:=GetProxyCommand;
 
+  ExecuteSpecialDue2EmptyString:=false;
+
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
 
+  Command := '';
+
+  if Length(UserName)>0 then
+  begin
+    // svn quirk : even if no password is needed, it needs an empty password.
+    // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
+    if Length(Password)=0 then Password:='emptystring';
+    Command := ' --username '+UserName + ' --password '+Password;
+  end;
+
+
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' update '+ProxyCommand+' --non-interactive --trust-server-cert ' + LocalRepository
+    Command := ' update '+ProxyCommand+Command+' --non-interactive --trust-server-cert ' + LocalRepository
   else
-    Command := ' update '+ProxyCommand+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+    Command := ' update '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+
+  {$IFNDEF MSWINDOWS}
+  // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems
+  // see this [Function StringsToPCharList(List : TStrings) : PPChar] inside process.inc for Unix
+  if Pos('emptystring',Command)>0 then
+  begin
+    Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
+    TempOutputFile := SysUtils.GetTempFileName+'.svn';
+    Command:=Command + ' &> '+TempOutputFile;
+    ExecuteSpecialDue2EmptyString:=True;
+  end;
+  {$ENDIF}
 
   FileList := TStringList.Create;
   try
     // On Windows, at least certain SVN versions don't update everything.
     // So we try until there are no more files downloaded.
+
+    {$IFNDEF MSWINDOWS}
+    if ExecuteSpecialDue2EmptyString then
+    begin
+      //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
+      FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+      //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
+      if FileExists(TempOutputFile) then
+      begin
+        TempOutputSL:=TStringList.Create();
+        try
+          TempOutputSL.LoadFromFile(TempOutputFile);
+          Output:=TempOutputSL.ToString;
+        finally
+          TempOutputSL.Free();
+        end;
+        SysUtils.DeleteFile(TempOutputFile);
+      end;
+    end
+    else
+    {$ENDIF}
     FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
 
     FileList.Clear;
@@ -341,8 +468,30 @@ begin
           // Let's try to release locks; don't update FReturnCode
           ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + 'cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
         end;
-        Sleep(500); //Give everybody a chance to relax ;)
-        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Verbose); //attempt again
+        //Give everybody a chance to relax ;)
+        Sleep(500);
+        // attempt again !!
+        {$IFNDEF MSWINDOWS}
+        if ExecuteSpecialDue2EmptyString then
+        begin
+          //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
+          FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+          //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
+          if FileExists(TempOutputFile) then
+          begin
+            TempOutputSL:=TStringList.Create();
+            try
+              TempOutputSL.LoadFromFile(TempOutputFile);
+              Output:=TempOutputSL.ToString;
+            finally
+              TempOutputSL.Free();
+            end;
+            SysUtils.DeleteFile(TempOutputFile);
+          end;
+        end
+        else
+        {$ENDIF}
+        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Verbose);
         AfterErrorRetry := AfterErrorRetry + 1;
       end;
       UpdateRetry := UpdateRetry + 1;
@@ -422,6 +571,20 @@ var
 begin
   Result := false;
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+
+  // If command fails due to wrong version, try again
+  if (ReturnCode <> 0) then
+  begin
+    // svn: E155036: Please see the 'svn upgrade' command
+    // svn: E155036: The working copy is too old to work with client. You need to upgrade the working copy first
+    // Let's try one time upgrade to fix it (don't update FReturnCode here)
+    if Pos('E155036', Output) > 0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' upgrade '+GetProxyCommand+' --non-interactive ' + FLocalRepository, Verbose);
+    //Give everybody a chance to relax ;)
+    Sleep(500);
+    //attempt again
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+  end;
+
   // This is already covered by setting stuff to false first
   //if Pos('is not a working copy', Output.Text) > 0 then result:=false;
   if Pos('Path', Output) > 0 then

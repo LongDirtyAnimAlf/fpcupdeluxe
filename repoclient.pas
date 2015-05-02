@@ -58,6 +58,7 @@ type
     FLocalRepository: string;
     FLocalRevision: string;
     FRepoExecutable: string;
+    FRepoExecutableName: string;
     FRepositoryURL: string;
     FReturnCode: integer;
     FVerbose: boolean;
@@ -75,6 +76,8 @@ type
     procedure SetRepositoryURL(AValue: string); virtual;
     procedure SetRepoExecutable(AValue: string); virtual;
     procedure SetVerbose(AValue: boolean); virtual;
+    function GetValidClient:boolean;
+    function GetRepoExecutableName:string;virtual;
     //Performs an update (pull)
     //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
     procedure Update; virtual;
@@ -123,6 +126,8 @@ type
     property RepoExecutable: string read GetRepoExecutable write SetRepoExecutable;
     // Show additional console/log output?
     property Verbose: boolean read FVerbose write SetVerbose;
+    property ValidClient: boolean read GetValidClient;
+    property RepoExecutableName: string read GetRepoExecutableName;
     constructor Create;
     destructor Destroy; virtual;
   end;
@@ -204,6 +209,11 @@ begin
   FVerbose := AValue;
 end;
 
+function TRepoClient.GetValidClient:boolean;
+begin
+  result:=FileExists(FRepoExecutable);
+end;
+
 function TRepoClient.DoubleQuoteIfNeeded(FileName: string): string;
 begin
   {$IFDEF MSWINDOWS}
@@ -226,6 +236,11 @@ begin
 end;
 
 function TRepoClient.Commit(Message: string): boolean;
+begin
+  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+end;
+
+function TRepoClient.GetRepoExecutableName:string;
 begin
   raise Exception.Create('TRepoClient descendants must implement this themselves.');
 end;

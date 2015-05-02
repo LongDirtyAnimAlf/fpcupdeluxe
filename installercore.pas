@@ -125,7 +125,7 @@ type
     function DownloadPatch: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
-    function FindSubDirs(const whattofind:string='svn'): boolean;
+    function FindSubDirs(const whattofind:string=''): boolean;
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
     function GetCrossInstaller: TCrossInstaller;
@@ -381,13 +381,14 @@ begin
     if OperationSucceeded then
     begin
       // Look for SVN executable and set it if found:
+      AllThere:=FSVNClient.ValidClient;
       if FSVNClient.FindRepoExecutable = '' then
       begin
         {$IFDEF MSWINDOWS}
         // Make sure we have a sensible default.
         // Set it here so multiple calls will not redownload SVN all the time
         if FSVNDirectory = '' then
-          FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + 'svn' + DirectorySeparator;
+          FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
         {$ENDIF MSWINDOWS}
         // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
         FindSubDirs;
@@ -407,13 +408,9 @@ begin
         begin
           infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
           OperationSucceeded := false;
-        end
-        else
-        begin
-          WritelnLog('New SVN client found: ' + FSVNClient.RepoExecutable, true);
         end;
-      end
-      else
+      end;
+      if (NOT AllThere) AND (FSVNClient.ValidClient) then
       begin
         WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
       end;
@@ -421,6 +418,8 @@ begin
 
     if OperationSucceeded then
     begin
+
+      AllThere:=(Length(FPatch)>0);
 
       // Look for Patch executable in patch and set it if found:
       if FPatch = '' then
@@ -468,9 +467,10 @@ begin
         infoln('Could not find patch executable. Please make sure it is installed.',eterror);
         OperationSucceeded := false;
       end
-      else
+      else FPatchCmd:=FPatch;
+
+      if (NOT AllThere) AND ((Length(FPatch)>0)) then
       begin
-        FPatchCmd:=FPatch + ' -p0 -i ';
         WritelnLog('Patch utility found: ' + FPatch, true);
       end;
 
@@ -870,6 +870,8 @@ var
   CheckoutOrUpdateReturnCode: integer;
   DiffFile: String;
   RepoExists: boolean;
+  Output: string = '';
+  DiffFileSL:TStringList;
 begin
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
@@ -961,18 +963,52 @@ begin
         writelnlog('DownloadFromSVN: SVN gave error code '+inttostr(CheckoutOrUpdateReturnCode));
 
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
+      begin
+        UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
+        if FPatchCmd='' then FPatchCmd:='patch';
+        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+        {$IFNDEF MWINDOWS}
+        if CheckoutOrUpdateReturnCode<>0 then
         begin
-          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-          if FPatchCmd='' then
-            FPatchCmd:='patch -p0 -i ';
-          if ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, FVerbose)<>0 then
+          // patching can go wrong when line endings are not compatible
+          // this happens with bgra controls that have CRLF in the source files
+          // try to circumvent this problem by trick below (replacing line enddings)
+          if Pos('different line endings',Output)>0 then
+          begin
+            CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FBaseDirectory, FVerbose);
+            if CheckoutOrUpdateReturnCode<>0 then
             begin
-              writelnlog('ERROR: Patching with ' + DiffFile + ' failed.', true);
-              writelnlog('  Verify the state of the source, correct and rebuild with make.', true);
-              Result := false;  //fail
-              exit;
+              DiffFileSL:=TStringList.Create();
+              try
+                DiffFileSL.LoadFromFile(DiffFile);
+                {$IFDEF DARWIN}
+                DiffFileSL.TextLineBreakStyle:=tlbsCRLF;
+                {$ELSE}
+                DiffFileSL.LineBreak:=#13#10;
+                {$ENDIF}
+                DiffFileSL.SaveToFile(DiffFile);
+                CheckoutOrUpdateReturnCode:=0;
+              finally
+                DiffFileSL.Free();
+              end;
+              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FBaseDirectory, FVerbose);
+              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
             end;
+            if CheckoutOrUpdateReturnCode=0 then
+               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
+          end;
         end;
+        {$ENDIF}
+              finally
+              end;
+        if CheckoutOrUpdateReturnCode<>0 then
+        begin
+          writelnlog('ERROR: Patching with ' + DiffFile + ' failed.', true);
+          writelnlog('  Verify the state of the source, correct and rebuild with make.', true);
+          Result := false;  //fail
+          exit;
+        end;
+      end;
     end;
   end;
 end;
@@ -981,7 +1017,9 @@ function TInstaller.DownloadSVN: boolean;
 const
   //SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
   // Changed to https
-  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
+  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
+  //SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.4/apache24/svn-win32-1.8.4-ap24.zip/download';
+  SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.13/apache24/svn-win32-1.8.13-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
@@ -1127,28 +1165,32 @@ begin
   DumpConsole(Sender, output);
 end;
 
-function TInstaller.FindSubDirs(const whattofind:string='svn'): boolean;
+function TInstaller.FindSubDirs(const whattofind:string=''): boolean;
 var
   LocalFiles: TStringList;
   OperationSucceeded: boolean;
   LocalDirectory:string;
+  localwhattofind:string;
 begin
 
-  if whattofind='svn' then LocalDirectory:=FSVNDirectory;
-  if whattofind='patch' then LocalDirectory:=FPatchDirectory;
+  localwhattofind:=whattofind;
+  if whattofind='' then localwhattofind:=FSVNClient.RepoExecutableName;
 
-  LocalFiles := FindAllFiles(LocalDirectory, whattofind + GetExeExt, true);
+  if localwhattofind=FSVNClient.RepoExecutableName then LocalDirectory:=FSVNDirectory;
+  if localwhattofind='patch' then LocalDirectory:=FPatchDirectory;
+
+  LocalFiles := FindAllFiles(LocalDirectory, localwhattofind + GetExeExt, true);
   try
-    if LocalFiles.Count > 0 then
+    if (LocalFiles.Count > 0) then
     begin
       // Just get first result.
-      if whattofind='svn' then FSVNClient.RepoExecutable := LocalFiles.Strings[0];
-      if whattofind='patch' then FPatch := LocalFiles.Strings[0];
+      if localwhattofind=FSVNClient.RepoExecutableName then FSVNClient.RepoExecutable := LocalFiles.Strings[0];
+      if localwhattofind='patch' then FPatch := LocalFiles.Strings[0];
       OperationSucceeded := true;
     end
     else
     begin
-      infoln('Could not find '+whattofind+' executable in or under ' + LocalDirectory,etwarning);
+      infoln('Could not find '+localwhattofind+' executable in or under ' + LocalDirectory,etwarning);
       OperationSucceeded := false;
     end;
   finally

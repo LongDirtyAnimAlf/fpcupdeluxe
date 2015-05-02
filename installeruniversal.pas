@@ -1069,7 +1069,7 @@ begin
           FHGClient.DesiredRevision:=PinRevision;
         result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         if result=false then
-          WritelnLog('hg error downloading from '+RemoteURL+'. Continuing regardless.',true);
+          WritelnLog('HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1095,7 +1095,7 @@ begin
           FGitClient.DesiredRevision:=PinRevision;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         if result=false then
-          WritelnLog('git error downloading from '+RemoteURL+'. Continuing regardless.',true);
+          WritelnLog('GIT error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);

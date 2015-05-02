@@ -57,6 +57,7 @@ type
     // Returns command snippet to set HTTP proxy config variables if needed
     function GetProxyCommand: string;
     function GetRepoExecutable: string; override;
+    function GetRepoExecutableName: string; override;
     procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
@@ -80,38 +81,42 @@ uses strutils;
 
 
 { ThgClient }
-function THGClient.FindRepoExecutable: string;
-const
+function THGClient.GetRepoExecutableName: string;
+begin
   // Application name:
-  hgName = 'hg';
+  result := 'hg';
+end;
+
+function THGClient.FindRepoExecutable: string;
 begin
   Result := FRepoExecutable;
   // Look in path
   // Windows: will also look for <hgName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(hgName);
+    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
 
 {$IFDEF MSWINDOWS}
   // Some popular locations for Tortoisehg:
   // Covers both 32 bit and 64 bit Windows.
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToisehg\hg.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToisehg\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisehg\hg.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisehg\' + RepoExecutableName + '.exe');
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + 'hg');
+    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + RepoExecutableName + '.exe');
 {$ENDIF MSWINDOWS}
 
   if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
-  {$IFDEF MSWINDOWS}
-    if FileExists(hgName + '.exe') then
-      FRepoExecutable := hgName + '.exe';
-  {$ENDIF MSWINDOWS}
-    if FileExists('hg') then
-      FRepoExecutable := hgName;
+    {$IFDEF MSWINDOWS}
+    if FileExists(RepoExecutableName + '.exe') then
+      FRepoExecutable := RepoExecutableName + '.exe';
+    {$ELSE}
+    if FileExists(RepoExecutableName) then
+      FRepoExecutable := RepoExecutableName;
+    {$ENDIF MSWINDOWS}
   end;
 
   if FileExists(FRepoExecutable) then

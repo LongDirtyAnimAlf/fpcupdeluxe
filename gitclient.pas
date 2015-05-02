@@ -57,6 +57,7 @@ type
     procedure CheckOut; override;
     function GetLocalRevision: string; override;
     function GetRepoExecutable: string; override;
+    function GetRepoExecutableName: string; override;
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
@@ -79,51 +80,55 @@ implementation
 uses strutils;
 
 { TGitClient }
-function TGitClient.FindRepoExecutable: string;
-const
+function TGitClient.GetRepoExecutableName: string;
+begin
   // Application name:
-  gitName = 'git';
+  result := 'git';
+end;
+
+
+function TGitClient.FindRepoExecutable: string;
 begin
   Result := FRepoExecutable;
   // Look in path
   // Windows: will also look for <gitName>.exe
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(gitName);
+    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
 
 
 {$IFDEF MSWINDOWS}
   // Git on Windows can be a .cmd file
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(gitName + '.cmd');
+    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName + '.cmd');
   // Git installed via msyswin
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := 'C:\msysgit\bin\' + gitname + '.exe';
+    FRepoExecutable := 'C:\msysgit\bin\' + RepoExecutableName + '.exe';
   // Some popular locations for Tortoisegit:
   // Covers both 32 bit and 64 bit Windows.
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TortoiseGit\bin\git.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TortoiseGit\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TortoiseGit\bin\git.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TortoiseGit\bin\' + RepoExecutableName + '.exe');
   // Commandline git tools
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Git\bin\git.exe');
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Git\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Git\bin\git.exe');
-
+    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Git\bin\' + RepoExecutableName + '.exe');
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + 'git');
+    FRepoExecutable := (ExtractFilePath(ParamStr(0))  + RepoExecutableName + '.exe');
 {$ENDIF MSWINDOWS}
 
   if not FileExists(FRepoExecutable) then
   begin
     //current directory. Note: potential for misuse by malicious program.
   {$IFDEF MSWINDOWS}
-    if FileExists(gitName + '.exe') then
-      FRepoExecutable := gitName + '.exe';
+    if FileExists(RepoExecutableName + '.exe') then
+      FRepoExecutable := RepoExecutableName + '.exe';
+  {$ELSE}
+    if FileExists(RepoExecutableName) then
+      FRepoExecutable := RepoExecutableName;
   {$ENDIF MSWINDOWS}
-    if FileExists('git') then
-      FRepoExecutable := gitName;
   end;
 
   if FileExists(FRepoExecutable) then
@@ -163,6 +168,8 @@ var
   Output: string = '';
   RetryAttempt: integer;
 begin
+  if NOT ValidClient then exit;
+
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
@@ -210,6 +217,8 @@ end;
 
 function TGitClient.Commit(Message: string): boolean;
 begin
+  result:=false;
+  if NOT ValidClient then exit;
   inherited Commit(Message);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
   //todo: do push to remote repo?
@@ -218,12 +227,16 @@ end;
 
 function TGitClient.Execute(Command: string): integer;
 begin
+  Result:=-1;
+  if NOT ValidClient then exit;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command, LocalRepository, Verbose);
   Result:= FReturnCode;
 end;
 
 function TGitClient.GetDiffAll: string;
 begin
+  result:='';
+  if NOT ValidClient then exit;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
 end;
 
@@ -231,12 +244,15 @@ procedure TGitClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
+  Log.Text := s;
+  if NOT ValidClient then exit;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
   Log.Text := s;
 end;
 
 procedure TGitClient.Revert;
 begin
+  if NOT ValidClient then exit;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
 end;
 
@@ -244,6 +260,7 @@ procedure TGitClient.Update;
 var
   Command: string;
 begin
+  if NOT ValidClient then exit;
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
@@ -316,11 +333,12 @@ var
   AllFiles: TStringList;
   Output: string = '';
 begin
+  FileList.Clear;
+  if NOT ValidClient then exit;
   // --porcelain indicate stable output;
   // -z would indicate machine-parsable output but uses ascii 0 to terminate strings, which doesn't match ParseFileList;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain --untracked-files=no ',
     FLocalRepository, Output, Verbose);
-  FileList.Clear;
   AllFiles := TStringList.Create;
   try
     // Modified, Added, Deleted, Renamed
@@ -337,6 +355,7 @@ var
   URL: string;
 begin
   Result := false;
+  if NOT ValidClient then exit;
   // This will output nothing to stdout and
   // fatal: Not a git repository (or any of the parent directories): .git
   // to std err
@@ -384,6 +403,8 @@ function TGitClient.GetLocalRevision: string;
 var
   Output: string = '';
 begin
+  Result := Output;
+  if NOT ValidClient then exit;
   // Only update if we have invalid revision info, in order to minimize git info calls
   if FLocalRevision = FRET_UNKNOWN_REVISION then
   begin
