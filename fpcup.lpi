@@ -88,10 +88,6 @@ end;"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="i386"/>
@@ -128,10 +124,6 @@ end;"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -169,10 +161,6 @@ end;"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="i386"/>
@@ -194,9 +182,6 @@ end;"/>
               <ShowAll Value="True"/>
             </Verbosity>
             <WriteFPCLogo Value="False"/>
-            <CustomOptions Value="-FLC:\development\cross\lib\i386-linux\ld-linux.so.2
- -FlC:\development\cross\lib\i386-linux
- -XrC:\development\cross\lib\i386-linux"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -216,10 +201,6 @@ end;"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetCPU Value="x86_64"/>
@@ -257,10 +238,6 @@ end;"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetProcessor Value="ARMV6"/>
@@ -299,10 +276,6 @@ end;"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
             <TargetProcessor Value="ARMV7A"/>

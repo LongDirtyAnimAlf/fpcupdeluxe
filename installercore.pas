@@ -999,8 +999,6 @@ begin
           end;
         end;
         {$ENDIF}
-              finally
-              end;
         if CheckoutOrUpdateReturnCode<>0 then
         begin
           writelnlog('ERROR: Patching with ' + DiffFile + ' failed.', true);
@@ -1079,7 +1077,8 @@ begin
   if OperationSucceeded then
   begin
     // Extract, overwrite
-    if ExecuteCommand(FUnzip + ' -o -d ' + FSVNDirectory + ' ' + SVNZip, FVerbose) <> 0 then
+    resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + FSVNDirectory + ' ' + SVNZip, FVerbose);
+    if resultcode <> 0 then
     begin
       OperationSucceeded := false;
       writelnlog('DownloadSVN: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
