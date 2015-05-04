@@ -24,7 +24,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="9">
+    <BuildModes Count="10">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -302,7 +302,46 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item8>
-      <Item9 Name="darwin">
+      <Item9 Name="androidarm">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_linux_arm"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="C:\development\cross\lib\arm-android\"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetProcessor Value="ARMV6"/>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="android"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item9>
+      <Item10 Name="darwin">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -341,7 +380,7 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item9>
+      </Item10>
       <SharedMatrixOptions Count="1">
         <Item1 ID="233755810855" Modes="Default,Debug" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>

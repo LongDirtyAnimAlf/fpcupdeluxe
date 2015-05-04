@@ -3,12 +3,13 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Active="Debug"/>
+    <BuildModes Active="Default"/>
     <Units Count="39">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
+        <CursorPos X="25" Y="14"/>
         <UsageCount Value="141"/>
         <Loaded Value="True"/>
       </Unit0>
