@@ -605,7 +605,9 @@ begin
           if (FInstaller.ModulePublishedList.IndexOf(LeftOverOptions.Names[iCurrentOption])<>-1) then
             case (uppercase(LeftOverOptions.ValueFromIndex[iCurrentOption])) of
               '-1','1','TRUE','YES','INSTALL','ENABLE', 'ON': begin
-                FInstaller.IncludeModules:=FInstaller.IncludeModules+','+LeftOverOptions.Names[iCurrentOption];
+                if CheckIncludeModule(LeftOverOptions.Names[iCurrentOption])
+                   then FInstaller.IncludeModules:=FInstaller.IncludeModules+','+LeftOverOptions.Names[iCurrentOption]
+                   else FInstaller.SkipModules:=FInstaller.SkipModules+','+LeftOverOptions.Names[iCurrentOption];
                 LeftOverOptions.Delete(iCurrentOption);
               end;
               '0','FALSE','NO','UNINSTALL','REMOVE','DISABLE', 'OFF': begin
@@ -621,6 +623,7 @@ begin
           FInstaller.IncludeModules:=copy(FInstaller.IncludeModules,2,Length(FInstaller.IncludeModules));
         if copy(FInstaller.SkipModules,1,1)=',' then
           FInstaller.SkipModules:=copy(FInstaller.SkipModules,2,Length(FInstaller.SkipModules));
+
         if LeftOverOptions.Count>0 then begin
           writeln('Error: wrong command line options given:');
           writeln(LeftOverOptions.Text);
@@ -702,7 +705,7 @@ begin
 
       For i:=0 to FInstaller.ModuleEnabledList.Count-1 do
         begin
-        writeln('Enabled modules:        '+FInstaller.ModuleEnabledList[i]);
+        writeln('Standard modules:       '+FInstaller.ModuleEnabledList[i]);
         end;
       if FInstaller.IncludeModules<>'' then
         writeln('Additional modules:     '+FInstaller.IncludeModules);

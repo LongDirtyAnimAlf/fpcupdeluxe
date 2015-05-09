@@ -34,7 +34,7 @@ interface
 
 uses
   Classes, SysUtils,
-  GitClient, HGClient, SvnClient,
+  repoclient, GitClient, HGClient, SvnClient,
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
 type
@@ -64,6 +64,7 @@ type
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
     procedure SetHTTPProxyUser(AValue: string);
+    function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
   protected
     FBaseDirectory: string; //Top directory for a product (FPC, Lazarus)
     FBunzip2: string;
@@ -684,6 +685,10 @@ begin
     begin
       Write(DiffFile, FHGClient.GetDiffAll);
     end
+    else if RepoClass is TGitClient then
+    begin
+      Write(DiffFile, FGitClient.GetDiffAll);
+    end
     else if RepoClass is TSVNClient then
     begin
       Write(DiffFile, FSVNClient.GetDiffAll);
@@ -742,126 +747,129 @@ begin
   end;
 end;
 
-function TInstaller.DownloadFromHG(ModuleName: string; var BeforeRevision,
-  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision,
+  AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
 var
   BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
+  aClientName:string;
+  DiffFile: String;
+  DiffFileSL:TStringList;
+  Output: string = '';
 begin
+
+  aClientName:=Copy(aClient.ClassName,2,200);
+
   //todo: check if we need to add forcedirectoriesutf8 to create local repo dir if it doesn't exist
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
-  FHGClient.LocalRepository := FBaseDirectory;
-  FHGClient.Repository := FURL;
+  aClient.LocalRepository := FBaseDirectory;
+  aClient.Repository := FURL;
 
-  BeforeRevision := 'revision '+FHGClient.LocalRevision;
-  BeforeRevisionShort:=FHGClient.LocalRevision;
-
-  FHGClient.LocalModifications(UpdateWarnings); //Get list of modified files
-  if UpdateWarnings.Count > 0 then
-  begin
-    UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
-    if FKeepLocalChanges=false then
-    begin
-      CreateStoreRepositoryDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings,FHGClient);
-      UpdateWarnings.Add(ModuleName + ': reverting before updating.');
-      FHGClient.Revert; //Remove local changes
-    end
-    else
-    begin
-      UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
-    end;
-  end;
-
-  FHGClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
-  // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
-  FHGClient.CheckOutOrUpdate;
-  ReturnCode := FHGClient.ReturnCode;
-  case ReturnCode of
-    FRET_LOCAL_REMOTE_URL_NOMATCH:
-    begin
-      FRepositoryUpdated := false;
-      Result := false;
-      writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
-      writelnlog('Local directory: ' + FHGClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etInfo);
-    end;
-    else
-    begin
-      // For now, assume it worked even with non-zero result code. We can because
-      // we do the AfterRevision check as well.
-      AfterRevision := 'revision '+FHGClient.LocalRevision;
-      if (FHGClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FHGClient.LocalRevision) then
-        FRepositoryUpdated := true
-      else
-        FRepositoryUpdated := false;
-      Result := true;
-    end;
-  end;
-end;
-
-function TInstaller.DownloadFromGit(ModuleName: string; var BeforeRevision,
-  AfterRevision: string; UpdateWarnings: TStringList): boolean;
-//todo: look into merging this with DownloadFromHG, DownloadFromSVN, passing a repoclient object
-var
-  BeforeRevisionShort: string; //Basically the branch revision number
-  ReturnCode: integer;
-begin
-  //todo: check if forcedirectoriesutf8 for local repo is needed
-  BeforeRevision := 'failure';
-  BeforeRevisionShort:='unknown';
-  AfterRevision := 'failure';
-  FGitClient.LocalRepository := FBaseDirectory;
-  FGitClient.Repository := FURL;
-
-  BeforeRevision := 'revision '+FGitClient.LocalRevision;
-  BeforeRevisionShort:=FGitClient.LocalRevision;
+  BeforeRevision := 'revision '+aClient.LocalRevision;
+  BeforeRevisionShort:=aClient.LocalRevision;
 
   if BeforeRevisionShort<>FRET_UNKNOWN_REVISION then
   begin
-    FGitClient.LocalModifications(UpdateWarnings); //Get list of modified files
+    aClient.LocalModifications(UpdateWarnings); //Get list of modified files
     if UpdateWarnings.Count > 0 then
     begin
       UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        CreateStoreRepositoryDiff(IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff', UpdateWarnings,FGitClient);
-        UpdateWarnings.Add(ModuleName + ': reverting before updating.');
-        FGitClient.Revert; //Remove local changes
-      end
-      else
-      begin
-        UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
-      end;
+        DiffFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+        CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
+        UpdateWarnings.Add(ModuleName + ': reverting to original before updating.');
+        aClient.Revert; //Remove local changes
+      end else UpdateWarnings.Add(ModuleName + ': leaving modified files as is before updating.');
     end;
   end;
 
-  FGitClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
+  aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
-  FGitClient.CheckOutOrUpdate;
-  ReturnCode := FGitClient.ReturnCode;
+  aClient.CheckOutOrUpdate;
+  ReturnCode := aClient.ReturnCode;
   case ReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:
     begin
       FRepositoryUpdated := false;
       Result := false;
-      writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
-      writelnlog('Local directory: ' + FGitClient.LocalRepository, true);
+      writelnlog(aClientName+' ERROR: repository URL in local directory and remote repository don''t match.', true);
+      writelnlog('Local directory: ' + aClient.LocalRepository, true);
       infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etInfo);
     end;
     else
     begin
       // For now, assume it worked even with non-zero result code. We can because
       // we do the AfterRevision check as well.
-      AfterRevision := 'revision '+FGitClient.LocalRevision;
-      if (FGitClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FGitClient.LocalRevision) then
+      Result := true;
+
+      AfterRevision := 'revision '+aClient.LocalRevision;
+      if (aClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> aClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
-      Result := true;
+
+      if FReApplyLocalChanges and (DiffFile<>'') then
+      begin
+         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
+         if FPatchCmd='' then FPatchCmd:='patch';
+         // patch with -p1
+         ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p1 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+         {$IFNDEF MWINDOWS}
+         if ReturnCode<>0 then
+         begin
+           // Patching can go wrong when line endings are not compatible
+           // This happens e.g. with bgracontrols that have CRLF in the source files
+           // Try to circumvent this problem by trick below (replacing line enddings)
+           if Pos('different line endings',Output)>0 then
+           begin
+             ReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FBaseDirectory, FVerbose);
+             if ReturnCode<>0 then
+             begin
+               DiffFileSL:=TStringList.Create();
+               try
+                 DiffFileSL.LoadFromFile(DiffFile);
+                 {$IFDEF DARWIN}
+                 DiffFileSL.TextLineBreakStyle:=tlbsCRLF;
+                 {$ELSE}
+                 DiffFileSL.LineBreak:=#13#10;
+                 {$ENDIF}
+                 DiffFileSL.SaveToFile(DiffFile);
+                 ReturnCode:=0;
+               finally
+                 DiffFileSL.Free();
+               end;
+               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FBaseDirectory, FVerbose);
+               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
+             end;
+             if ReturnCode=0 then
+                ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
+           end;
+         end;
+         {$ENDIF}
+         // Report error, but continue !
+         if ReturnCode<>0 then
+         begin
+           writelnlog(aClientName+' ERROR: Patching with ' + DiffFile + ' failed.', true);
+           writelnlog('Verify the state of the source, correct and rebuild with make.', true);
+         end;
+       end;
     end;
   end;
+end;
+
+function TInstaller.DownloadFromHG(ModuleName: string; var BeforeRevision,
+  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+begin
+  result:=DownloadFromBase(FHGClient,ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+end;
+
+function TInstaller.DownloadFromGit(ModuleName: string; var BeforeRevision,
+  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+begin
+  result:=DownloadFromBase(FGitClient,ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
 end;
 
 function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
@@ -970,9 +978,9 @@ begin
         {$IFNDEF MWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
         begin
-          // patching can go wrong when line endings are not compatible
-          // this happens with bgra controls that have CRLF in the source files
-          // try to circumvent this problem by trick below (replacing line enddings)
+          // Patching can go wrong when line endings are not compatible
+          // This happens e.g. with bgracontrols that have CRLF in the source files
+          // Try to circumvent this problem by trick below (replacing line enddings)
           if Pos('different line endings',Output)>0 then
           begin
             CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FBaseDirectory, FVerbose);
@@ -999,12 +1007,11 @@ begin
           end;
         end;
         {$ENDIF}
+        // Report error, but continue !
         if CheckoutOrUpdateReturnCode<>0 then
         begin
-          writelnlog('ERROR: Patching with ' + DiffFile + ' failed.', true);
-          writelnlog('  Verify the state of the source, correct and rebuild with make.', true);
-          Result := false;  //fail
-          exit;
+          writelnlog('SVNClient ERROR: Patching with ' + DiffFile + ' failed.', true);
+          writelnlog('Verify the state of the source, correct and rebuild with make.', true);
         end;
       end;
     end;

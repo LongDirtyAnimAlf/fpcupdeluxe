@@ -117,6 +117,7 @@ function XdgConfigHome: String;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 
+
 implementation
 uses
   ssl_openssl {for downloading from https},
@@ -932,6 +933,8 @@ begin
   // FindDefaultExecutablePath
   // doesn't check if the user has execute permission
   // on the found file.
+  // however
+  // ExeSearch(Executable) ... if fpAccess (Executable,X_OK)=0 then ..... see http://www.freepascal.org/docs-html/rtl/baseunix/fpaccess.html
   ExecuteCommand('which '+Executable,Output,false);
   // Remove trailing LF(s) and other control codes:
   while (length(output)>0) and (ord(output[length(output)])<$20) do

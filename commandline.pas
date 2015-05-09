@@ -207,8 +207,8 @@ begin
         result:=true;
         for i:=0 to SecVals.Count-1 do
           // Ignore comments; convert rest to parameters
-          if (copy(trim(SecVals[i]),1,1)<>';') and
-            (copy(trim(SecVals[i]),1,1)<>'#')  then
+          if (copy(trimleft(SecVals[i]),1,1)<>';') and
+            (copy(trimleft(SecVals[i]),1,1)<>'#')  then
               // Add param to begin of list
               if i>=FParams.Count then
                 FParams.AddObject('--'+SecVals[i],TObject(false))

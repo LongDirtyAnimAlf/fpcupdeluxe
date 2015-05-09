@@ -144,7 +144,8 @@ type
   // gets alias for keywords in Dictionary.
   //The keyword 'list' is reserved and returns the list of keywords as commatext
   function GetAlias(ConfigFile,Dictionary,keyword: string): string;
-
+  // check if enabled modules are allowed !
+  function CheckIncludeModule(ModuleName: string):boolean;
 
 var sequences:string;
 
@@ -156,7 +157,7 @@ implementation
 uses inifiles,fileutil,fpcuputil;
 
 Const
-  MAXSYSMODULES=100;
+  MAXSYSMODULES=200;
   MAXUSERMODULES=20;
   // Allow enough instructions per module:
   MAXINSTRUCTIONS=200;
@@ -584,7 +585,7 @@ begin
         // it is design-time (except when returning an runtime message) and mark IDE for rebuild
         if (pos('lazbuild',lowerCase(exec))>0) and
           (pos('.lpk',lowercase(exec))>0) and
-          (pos('only for runtime',lowercase(exec))=0)
+          (pos('only for runtime',lowercase(output))=0)
         then
         begin
           infoln('Marking Lazarus for rebuild based on exec line '+exec,etDebug);
@@ -1159,6 +1160,8 @@ begin
         infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
 
+      // todo patch package if patch is available
+
     end;
 
   end
@@ -1349,8 +1352,9 @@ var
     result:=name<>'';
     if result then
       begin
-      if ini.ReadString(ModuleName,'Enabled','')='1' then
-        UniModuleEnabledList.Add(uppercase(name));
+      //if StrToBoolDef(ini.ReadString(ModuleName,'Enabled',''),false) then
+      if ini.ReadBool(ModuleName,'Enabled',False) then
+         UniModuleEnabledList.Add(name);
       // store the section as is and attach as object to UniModuleList
       // TstringList cleared in finalization
       sl:=TstringList.Create;
@@ -1430,6 +1434,14 @@ begin
           UniModuleEnabledList.Delete(j);
         end;
       end;
+
+    for i:=UniModuleEnabledList.Count-1 downto 0 do
+      begin
+      name:=UniModuleEnabledList[i];
+      if NOT CheckIncludeModule(name) then
+          UniModuleEnabledList.Delete(i);
+      end;
+
     // create the sequences for default modules
     result:=result+'DeclareHidden UniversalDefault;';
     for i:=0 to UniModuleEnabledList.Count-1 do
@@ -1447,6 +1459,157 @@ begin
     ini.Free;
   end;
 end;
+
+function CheckIncludeModule(ModuleName: string):boolean;
+var
+  ini:TMemIniFile;
+  j:integer;
+  os,cpu:string;
+  AddModule,NegativeList:boolean;
+  sl:TStringList;
+  e:Exception;
+
+  function GetValueSimple(Key: string; sl: TStringList): string;
+  var
+    i:integer;
+    s:string;
+  begin
+    Key:=UpperCase(Key);
+    s:='';
+    for i:=0 to sl.Count-1 do
+      begin
+      s:=sl[i];
+      if (copy(UpperCase(s),1, length(Key))=Key) and ((s[length(Key)+1]='=') or (s[length(Key)+1]=' ')) then
+        begin
+        if pos('=',s)>0 then
+          s:=trim(copy(s,pos('=',s)+1,length(s)));
+        break;
+        end;
+      s:='';
+      end;
+    result:=s;
+  end;
+
+  function AND_OR_Values(V1,V2:boolean;setting:boolean):boolean;
+  begin
+    if setting
+       then result:=(V1 AND V2)
+       else result:=(V1 OR V2);
+  end;
+
+  function OccurrencesOfChar(const ContentString: string;
+    const CharToCount: char): integer;
+  var
+    C: Char;
+  begin
+    result := 0;
+    for C in ContentString do
+      if C = CharToCount then
+        Inc(result);
+  end;
+
+begin
+  result:=False;
+
+  // Create fpcup.ini from resource if it doesn't exist yet
+  if not FileExistsUTF8(CONFIGFILENAME) then SaveInisFromResource(CONFIGFILENAME,'fpcup_ini');
+  ini:=TMemIniFile.Create(CONFIGFILENAME);
+  try
+    ini.CaseSensitive:=false;
+    ini.StripQuotes:=true; //helps read description lines
+
+    AddModule:=True;
+
+    j:=UniModuleList.IndexOf(ModuleName);
+    sl:=TStringList(UniModuleList.Objects[j]);
+
+    os:=GetValueSimple('OS_OK',sl);
+    if (os<>'') AND (AddModule) then
+    begin
+         NegativeList:=(Pos('-',os)>0);
+
+         // simmple check of list
+         // number of negative signs [-] must be one more than the number of list separators [,]
+         if NegativeList AND (OccurrencesOfChar(os,'-')<>(OccurrencesOfChar(os,',')+1)) then
+         begin
+           e:=Exception.Create('Invalid os list. Check os definition of module '+ModuleName+' inside fpcup.ini');
+           raise e;
+         end;
+
+         // if we have a negative define list, then default to true until a negative setting is encountered
+         // if we have a positive define list, then default to false until a positive setting is encountered
+         AddModule:=NegativeList;
+
+         {$ifdef windows}
+         if (Pos('mswindows',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-mswindows',os)=0),NegativeList) else
+         begin
+           if (Pos('windows',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-windows',os)=0),NegativeList) else
+           begin
+             {$ifdef win32}
+             if (Pos('win32',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-win32',os)=0),NegativeList);
+             {$endif}
+             {$ifdef win64}
+             if (Pos('win64',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-win64',os)=0),NegativeList);
+             {$endif}
+           end;
+         end;
+         {$else}
+         if (Pos('unix',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-unix',os)=0),NegativeList);
+         {$endif}
+
+         {$ifdef linux}
+         if (Pos('linux',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-linux',os)=0),NegativeList);
+         {$endif}
+         {$ifdef Darwin}
+         if (Pos('darwin',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-darwin',os)=0),NegativeList);
+         {$endif}
+    end;
+
+    cpu:=GetValueSimple('CPU_OK',sl);
+    if (cpu<>'') AND (AddModule) then
+    begin
+         NegativeList:=(Pos('-',cpu)>0);
+
+         // simmple check of list
+         // number of negative signs [-] must be one more than the number of list separators [,]
+         if NegativeList AND (OccurrencesOfChar(cpu,'-')<>(OccurrencesOfChar(cpu,',')+1)) then
+         begin
+           e:=Exception.Create('Invalid cpu list. Check cpu definition of module '+ModuleName+' inside fpcup.ini');
+           raise e;
+         end;
+
+         // if we have a negative define list, then default to true until an negative setting is encountered
+         // if we have a positive define list, then default to false until a positive setting is encountered
+         AddModule:=NegativeList;
+
+         {$ifdef CPU32}
+         if (Pos('cpu32',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpu32',cpu)=0),NegativeList);
+         {$endif}
+         {$ifdef CPUI386}
+         if (Pos('i386',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-i386',cpu)=0),NegativeList);
+         {$endif}
+         {$ifdef CPU64}
+         if (Pos('cpu64',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpu64',cpu)=0),NegativeList);
+         {$endif}
+         {$ifdef CPUX86_64 }
+         if (Pos('x86_64',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-x86_64',cpu)=0),NegativeList);
+         {$endif}
+         {$ifdef CPUARM}
+         if (Pos('cpuarm',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpuarm',cpu)=0),NegativeList) else
+         begin
+           if (Pos('arm',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-arm',cpu)=0),NegativeList);
+         end;
+         {$endif}
+    end;
+
+    result:=AddModule;
+
+  finally
+    ini.Free;
+  end;
+end;
+
+
 
 function GetModuleEnabledList(var ModuleList: TStringList): boolean;
 var i:integer;

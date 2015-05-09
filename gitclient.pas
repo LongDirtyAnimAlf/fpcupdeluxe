@@ -237,7 +237,8 @@ function TGitClient.GetDiffAll: string;
 begin
   result:='';
   if NOT ValidClient then exit;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
+  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff -p ', LocalRepository, Result, Verbose);
 end;
 
 procedure TGitClient.Log(var Log: TStringList);
@@ -253,7 +254,8 @@ end;
 procedure TGitClient.Revert;
 begin
   if NOT ValidClient then exit;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
+  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard ', LocalRepository, Verbose);
 end;
 
 procedure TGitClient.Update;
@@ -316,7 +318,7 @@ begin
       if (Copy(AllFilesRaw[Counter], SpaceAfterStatus, 1) = ' ') and ((High(FilterCodes) = 0) or
         AnsiMatchStr(Statuscode, FilterCodes)) then
       begin
-        // Replace / with \ if on Windows:
+        // Replace / with \ for Windows:
         FileName := (Trim(Copy(AllFilesRaw[Counter], SpaceAfterStatus, Length(AllFilesRaw[Counter]))));
         FileName := StringReplace(FileName, '/', DirectorySeparator, [rfReplaceAll]);
         if FileName <> '' then

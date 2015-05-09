@@ -220,6 +220,7 @@ end;
 function THGClient.GetDiffAll: string;
 begin
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff --git ', LocalRepository, Result, Verbose);
+  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable)+' '+GetProxyCommand+' diff ', LocalRepository, Result, Verbose);
 end;
 
 procedure THGClient.Log(var Log: TStringList);

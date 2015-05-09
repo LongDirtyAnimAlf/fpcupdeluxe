@@ -535,10 +535,10 @@ begin
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;
-    //{$IFDEF DEBUGCONSOLE}
-    //writeln('ExecuteCommandInDir: executable '+PE.Executable);
-    //writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
-    //{$ENDIF DEBUGCONSOLE}
+    {$IFDEF DEBUGCONSOLE}
+    writeln('ExecuteCommandInDir: executable '+PE.Executable);
+    writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
+    {$ENDIF DEBUGCONSOLE}
     PE.Execute;
 
     Output:=PE.OutputString;
