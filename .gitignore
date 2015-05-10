@@ -57,8 +57,6 @@ Temporary Items
 *.bak
 *.local
 
-*.patch
-*.diff
 *.log
 backup/
 lib/

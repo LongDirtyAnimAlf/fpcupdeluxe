@@ -177,9 +177,9 @@ begin
   // Extract settings.ini if necessary
   try
     // Run fpcup --help so it generates relevant ini files.
-    // Better than doing fpcuputil.SaveInisFromResource('settings.ini','settings_ini');
+    // Better than doing fpcuputil.SaveInisFromResource;
     // as we can mix and match fpcup and fpcupgui versions
-    if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+'settings.ini') then
+    if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+SETTTINGSFILENAME) then
     begin
       FPCUPLocation:=GetPFCUPLocation;
       if FileExistsUTF8(FPCUPLocation) then
@@ -263,8 +263,8 @@ begin
   begin
     if (INIFileSelectEdit.FileName<>'') and (FileExistsUTF8(INIFileSelectEdit.FileName)) then
     begin
-      if UpperCase((INIFileSelectEdit.FileName))='FPCUP.INI' then
-        ShowMessage('Warning: fpcup.ini does not contain fpcup user profiles but external module definitions. Try settings.ini.');
+      if UpperCase((INIFileSelectEdit.FileName))=UpperCase(CONFIGFILENAME) then
+        ShowMessage('Warning: '+CONFIGFILENAME+' does not contain fpcup user profiles but external module definitions. Try '+SETTTINGSFILENAME+'.');
       LoadProfilesFromFile(INIFileSelectEdit.FileName);
       ProfileSelect.ItemIndex:=0; //go to first item
     end;

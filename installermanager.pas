@@ -446,7 +446,7 @@ begin
   if pos('//',AValue)>0 then
     FFPCURL:=AValue
   else
-    FFPCURL:=installerUniversal.GetAlias(FConfigFile,'fpcURL',AValue);
+    FFPCURL:=installerUniversal.GetAlias('fpcURL',AValue);
 end;
 
 procedure TFPCupManager.SetLazarusDirectory(AValue: string);
@@ -460,7 +460,7 @@ begin
   if pos('//',AValue)>0 then
     FLazarusURL:=AValue
   else
-    FLazarusURL:=installerUniversal.GetAlias(FConfigFile,'lazURL',AValue);
+    FLazarusURL:=installerUniversal.GetAlias('lazURL',AValue);
 end;
 
 procedure TFPCupManager.SetLogFileName(AValue: string);
@@ -495,13 +495,14 @@ end;
 
 function TFPCupManager.LoadFPCUPConfig: boolean;
 begin
+  installerUniversal.SetConfigFile(FConfigFile);
   FSequencer.AddSequence(Sequences);
   FSequencer.AddSequence(installerFPC.Sequences);
   FSequencer.AddSequence(installerLazarus.Sequences);
   FSequencer.AddSequence(installerHelp.Sequences);
   FSequencer.AddSequence(installerUniversal.Sequences);
   // append universal modules to the lists
-  FSequencer.AddSequence(installerUniversal.GetModuleList(FConfigFile));
+  FSequencer.AddSequence(installerUniversal.GetModuleList);
   result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
 

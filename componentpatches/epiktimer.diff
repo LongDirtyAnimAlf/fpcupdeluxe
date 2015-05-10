@@ -1,0 +1,26 @@
+Index: components/epiktimer/etpackage.lpk
+===================================================================
+--- components/epiktimer/etpackage.lpk	(revision 4120)
++++ components/epiktimer/etpackage.lpk	(working copy)
+@@ -2,7 +2,7 @@
+ <CONFIG>
+   <Package Version="3">
+     <Name Value="etpackage"/>
+-    <Author Value="Tom Lisjac <netdxr@gmail.com>"/>
++    <Author Value="Tom Lisjac netdxr@gmail.com"/>
+     <CompilerOptions>
+       <Version Value="8"/>
+       <SearchPaths>
+Index: components/epiktimer/etpackage_dsgn.lpk
+===================================================================
+--- components/epiktimer/etpackage_dsgn.lpk	(revision 4120)
++++ components/epiktimer/etpackage_dsgn.lpk	(working copy)
+@@ -2,7 +2,7 @@
+ <CONFIG>
+   <Package Version="3">
+     <Name Value="etpackage_dsgn"/>
+-    <Author Value="Tom Lisjac <netdxr@gmail.com>"/>
++    <Author Value="Tom Lisjac netdxr@gmail.com"/>
+     <CompilerOptions>
+       <Version Value="8"/>
+       <SearchPaths>

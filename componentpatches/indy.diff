@@ -1,0 +1,12 @@
+Index: Lib/indylaz.lpk
+===================================================================
+--- Lib/indylaz.lpk	(revision 5273)
++++ Lib/indylaz.lpk	(working copy)
+@@ -20,6 +20,7 @@
+       </Parsing>
+       <Other>
+         <CompilerPath Value="$(CompPath)"/>
++        <CompilerOptions Value="-Ur"/>
+       </Other>
+     </CompilerOptions>
+     <License Value="Duel License

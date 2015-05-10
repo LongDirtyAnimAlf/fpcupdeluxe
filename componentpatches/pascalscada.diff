@@ -1,0 +1,2827 @@
+Index: pascalscada_common.lpk
+===================================================================
+--- pascalscada_common.lpk	(revision 928)
++++ pascalscada_common.lpk	(working copy)
+@@ -12,43 +12,39 @@
+       </SearchPaths>
+     </CompilerOptions>
+     <Version Minor="7" Release="3"/>
+-    <Files Count="9">
++    <Files Count="8">
+       <Item1>
+-        <Filename Value="src/common/pscada_constants.pas"/>
+-        <UnitName Value="pscada_constants"/>
++        <Filename Value="src/common/pscada_cpu_utils.pas"/>
++        <UnitName Value="pSCADA_cpu_utils"/>
+       </Item1>
+       <Item2>
+-        <Filename Value="src/common/pscada_cpu_utils.pas"/>
+-        <UnitName Value="pSCADA_cpu_utils"/>
++        <Filename Value="src/common/pscada_crc16utils.pas"/>
++        <UnitName Value="crc16utils"/>
+       </Item2>
+       <Item3>
+-        <Filename Value="src/common/pscada_crc16utils.pas"/>
+-        <UnitName Value="crc16utils"/>
++        <Filename Value="src/common/pscada_crossdatetime.pas"/>
++        <UnitName Value="pSCADA_crossdatetime"/>
+       </Item3>
+       <Item4>
+-        <Filename Value="src/common/pscada_crossdatetime.pas"/>
+-        <UnitName Value="pSCADA_crossdatetime"/>
++        <Filename Value="src/common/pscada_crossevent.pas"/>
++        <UnitName Value="pSCADA_CrossEvent"/>
+       </Item4>
+       <Item5>
+-        <Filename Value="src/common/pscada_crossevent.pas"/>
+-        <UnitName Value="pSCADA_CrossEvent"/>
++        <Filename Value="src/common/pscada_messagequeue.pas"/>
++        <UnitName Value="pSCADA_MessageQueue"/>
+       </Item5>
+       <Item6>
+-        <Filename Value="src/common/pscada_messagequeue.pas"/>
+-        <UnitName Value="pSCADA_MessageQueue"/>
++        <Filename Value="src/common/pscada_strings.pas"/>
++        <UnitName Value="pSCADA_strings"/>
+       </Item6>
+       <Item7>
+-        <Filename Value="src/common/pscada_strings.pas"/>
+-        <UnitName Value="pSCADA_strings"/>
++        <Filename Value="src/common/pscada_types.pas"/>
++        <UnitName Value="pSCADA_Types"/>
+       </Item7>
+       <Item8>
+-        <Filename Value="src/common/pscada_types.pas"/>
+-        <UnitName Value="pSCADA_Types"/>
+-      </Item8>
+-      <Item9>
+         <Filename Value="src/common/pscada_utils.pas"/>
+         <UnitName Value="pSCADA_utils"/>
+-      </Item9>
++      </Item8>
+     </Files>
+     <RequiredPkgs Count="2">
+       <Item1>
+Index: pascalscada_common.pas
+===================================================================
+--- pascalscada_common.pas	(revision 928)
++++ pascalscada_common.pas	(working copy)
+@@ -7,7 +7,7 @@
+ interface
+ 
+ uses
+-  pscada_constants, pSCADA_cpu_utils, pscada_crc16utils, pSCADA_crossdatetime, 
++  pSCADA_cpu_utils, pscada_crc16utils, pSCADA_crossdatetime,
+   pSCADA_CrossEvent, pSCADA_MessageQueue, pSCADA_strings, pSCADA_Types, 
+   pSCADA_utils, LazarusPackageIntf;
+ 
+Index: pascalscada_hmi.lpk
+===================================================================
+--- pascalscada_hmi.lpk	(revision 928)
++++ pascalscada_hmi.lpk	(working copy)
+@@ -1,213 +1,218 @@
+-<?xml version="1.0" encoding="UTF-8"?>
+-<CONFIG>
+-  <Package Version="4">
+-    <Name Value="pascalscada_hmi"/>
+-    <Type Value="RunAndDesignTime"/>
+-    <CompilerOptions>
+-      <Version Value="11"/>
+-      <SearchPaths>
+-        <IncludeFiles Value="src/hmi"/>
+-        <OtherUnitFiles Value="src/hmi"/>
+-        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+-      </SearchPaths>
+-      <Parsing>
+-        <SyntaxOptions>
+-          <SyntaxMode Value="Delphi"/>
+-        </SyntaxOptions>
+-      </Parsing>
+-    </CompilerOptions>
+-    <Version Minor="7" Release="3"/>
+-    <Files Count="40">
+-      <Item1>
+-        <Filename Value="src/hmi/hmialfakeyboard.pas"/>
+-        <UnitName Value="ualfakeyboard"/>
+-      </Item1>
+-      <Item2>
+-        <Filename Value="src/hmi/hmianimation.pas"/>
+-        <Type Value="Include"/>
+-      </Item2>
+-      <Item3>
+-        <Filename Value="src/hmi/hmibasiccolletion.pas"/>
+-        <UnitName Value="hmibasiccolletion"/>
+-      </Item3>
+-      <Item4>
+-        <Filename Value="src/hmi/hmibasicusermanagement.pas"/>
+-        <UnitName Value="BasicUserManagement"/>
+-      </Item4>
+-      <Item5>
+-        <Filename Value="src/hmi/hmibooleanpropertyconnector.pas"/>
+-        <UnitName Value="hmibooleanpropertyconnector"/>
+-      </Item5>
+-      <Item6>
+-        <Filename Value="src/hmi/hmibutton.pas"/>
+-        <Type Value="Include"/>
+-      </Item6>
+-      <Item7>
+-        <Filename Value="src/hmi/hmicheckbox.pas"/>
+-        <Type Value="Include"/>
+-      </Item7>
+-      <Item8>
+-        <Filename Value="src/hmi/hmicolorpropertyconnector.pas"/>
+-        <UnitName Value="hmicolorpropertyconnector"/>
+-      </Item8>
+-      <Item9>
+-        <Filename Value="src/hmi/hmicombobox.pas"/>
+-        <UnitName Value="HMIComboBox"/>
+-      </Item9>
+-      <Item10>
+-        <Filename Value="src/hmi/hmicontroldislocatoranimation.pas"/>
+-        <Type Value="Include"/>
+-      </Item10>
+-      <Item11>
+-        <Filename Value="src/hmi/hmicontrolsecuritymanager.pas"/>
+-        <UnitName Value="ControlSecurityManager"/>
+-      </Item11>
+-      <Item12>
+-        <Filename Value="src/hmi/hmicrosskeyevents.pas"/>
+-        <Type Value="Include"/>
+-      </Item12>
+-      <Item13>
+-        <Filename Value="src/hmi/hmicustomizedusermanagement.pas"/>
+-        <UnitName Value="CustomizedUserManagement"/>
+-      </Item13>
+-      <Item14>
+-        <Filename Value="src/hmi/hmi_draw_basiccontrol.pas"/>
+-        <UnitName Value="hmi_draw_basiccontrol"/>
+-      </Item14>
+-      <Item15>
+-        <Filename Value="src/hmi/hmi_draw_basic_horizontal_control.pas"/>
+-        <UnitName Value="hmi_draw_basic_horizontal_control"/>
+-      </Item15>
+-      <Item16>
+-        <Filename Value="src/hmi/hmi_draw_elevador.pas"/>
+-        <UnitName Value="hmi_draw_elevador"/>
+-      </Item16>
+-      <Item17>
+-        <Filename Value="src/hmi/hmi_draw_fita.pas"/>
+-        <UnitName Value="hmi_draw_fita"/>
+-      </Item17>
+-      <Item18>
+-        <Filename Value="src/hmi/hmi_draw_redler.pas"/>
+-        <UnitName Value="hmi_draw_redler"/>
+-      </Item18>
+-      <Item19>
+-        <Filename Value="src/hmi/hmi_draw_rosca.pas"/>
+-        <UnitName Value="hmi_draw_rosca"/>
+-      </Item19>
+-      <Item20>
+-        <Filename Value="src/hmi/hmiedit.pas"/>
+-        <Type Value="Include"/>
+-      </Item20>
+-      <Item21>
+-        <Filename Value="src/hmi/hmikeyboardmanager.pas"/>
+-        <UnitName Value="HMIKeyboardManager"/>
+-      </Item21>
+-      <Item22>
+-        <Filename Value="src/hmi/hmilabel.pas"/>
+-        <Type Value="Include"/>
+-      </Item22>
+-      <Item23>
+-        <Filename Value="src/hmi/hminumerickeyboard.pas"/>
+-        <Type Value="Include"/>
+-      </Item23>
+-      <Item24>
+-        <Filename Value="src/hmi/hmiobjectcolletion.pas"/>
+-        <UnitName Value="hmiobjectcolletion"/>
+-      </Item24>
+-      <Item25>
+-        <Filename Value="src/hmi/hmi_polyline.pas"/>
+-        <UnitName Value="hmi_polyline"/>
+-      </Item25>
+-      <Item26>
+-        <Filename Value="src/hmi/hmiprogressbar.pas"/>
+-        <Type Value="Include"/>
+-      </Item26>
+-      <Item27>
+-        <Filename Value="src/hmi/hmipropeditor.pas"/>
+-        <Type Value="Include"/>
+-      </Item27>
+-      <Item28>
+-        <Filename Value="src/hmi/hmiradiobutton.pas"/>
+-        <Type Value="Include"/>
+-      </Item28>
+-      <Item29>
+-        <Filename Value="src/hmi/hmiradiogroup.pas"/>
+-        <Type Value="Include"/>
+-      </Item29>
+-      <Item30>
+-        <Filename Value="src/hmi/hmiregister.pas"/>
+-        <Type Value="Include"/>
+-      </Item30>
+-      <Item31>
+-        <Filename Value="src/hmi/hmiscrollbar.pas"/>
+-        <Type Value="Include"/>
+-      </Item31>
+-      <Item32>
+-        <Filename Value="src/hmi/hmitext.pas"/>
+-        <Type Value="Include"/>
+-      </Item32>
+-      <Item33>
+-        <Filename Value="src/hmi/hmitextstrings.pas"/>
+-        <UnitName Value="hmitextstrings"/>
+-      </Item33>
+-      <Item34>
+-        <Filename Value="src/hmi/hmitrackbar.pas"/>
+-        <Type Value="Include"/>
+-      </Item34>
+-      <Item35>
+-        <Filename Value="src/hmi/hmitransparentbutton.pas"/>
+-        <UnitName Value="HMITransparentButton"/>
+-      </Item35>
+-      <Item36>
+-        <Filename Value="src/hmi/hmitypes.pas"/>
+-        <Type Value="Include"/>
+-      </Item36>
+-      <Item37>
+-        <Filename Value="src/hmi/hmiupdown.pas"/>
+-        <Type Value="Include"/>
+-      </Item37>
+-      <Item38>
+-        <Filename Value="src/hmi/hmiusermgnt_login.pas"/>
+-        <Type Value="Include"/>
+-      </Item38>
+-      <Item39>
+-        <Filename Value="src/hmi/hmiwinccusermanagement.pas"/>
+-        <Type Value="Include"/>
+-      </Item39>
+-      <Item40>
+-        <Filename Value="src/hmi/hmizones.pas"/>
+-        <Type Value="Include"/>
+-      </Item40>
+-    </Files>
+-    <RequiredPkgs Count="5">
+-      <Item1>
+-        <PackageName Value="BGRABitmapPack"/>
+-      </Item1>
+-      <Item2>
+-        <PackageName Value="pascalscada"/>
+-        <MinVersion Minor="7" Release="3" Valid="True"/>
+-        <DefaultFilename Value="pascalscada.lpk" Prefer="True"/>
+-      </Item2>
+-      <Item3>
+-        <PackageName Value="pascalscada_common"/>
+-        <MinVersion Minor="7" Release="3" Valid="True"/>
+-        <DefaultFilename Value="pascalscada_common.lpk" Prefer="True"/>
+-      </Item3>
+-      <Item4>
+-        <PackageName Value="IDEIntf"/>
+-      </Item4>
+-      <Item5>
+-        <PackageName Value="LCL"/>
+-      </Item5>
+-    </RequiredPkgs>
+-    <UsageOptions>
+-      <UnitPath Value="$(PkgOutDir)"/>
+-    </UsageOptions>
+-    <PublishOptions>
+-      <Version Value="2"/>
+-    </PublishOptions>
+-    <CustomOptions Items="ExternHelp" Version="2">
+-      <_ExternHelp Items="Count"/>
+-    </CustomOptions>
+-  </Package>
+-</CONFIG>
++<?xml version="1.0" encoding="UTF-8"?>
++<CONFIG>
++  <Package Version="4">
++    <Name Value="pascalscada_hmi"/>
++    <Type Value="RunAndDesignTime"/>
++    <CompilerOptions>
++      <Version Value="11"/>
++      <SearchPaths>
++        <IncludeFiles Value="src/hmi"/>
++        <OtherUnitFiles Value="src/hmi"/>
++        <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
++      </SearchPaths>
++      <Parsing>
++        <SyntaxOptions>
++          <SyntaxMode Value="Delphi"/>
++        </SyntaxOptions>
++      </Parsing>
++    </CompilerOptions>
++    <Version Minor="7" Release="3"/>
++    <Files Count="41">
++      <Item1>
++        <Filename Value="src/hmi/hmialfakeyboard.pas"/>
++        <UnitName Value="ualfakeyboard"/>
++      </Item1>
++      <Item2>
++        <Filename Value="src/hmi/hmianimation.pas"/>
++        <Type Value="Include"/>
++      </Item2>
++      <Item3>
++        <Filename Value="src/hmi/hmibasiccolletion.pas"/>
++        <UnitName Value="hmibasiccolletion"/>
++      </Item3>
++      <Item4>
++        <Filename Value="src/hmi/hmibasicusermanagement.pas"/>
++        <UnitName Value="BasicUserManagement"/>
++      </Item4>
++      <Item5>
++        <Filename Value="src/hmi/hmibooleanpropertyconnector.pas"/>
++        <UnitName Value="hmibooleanpropertyconnector"/>
++      </Item5>
++      <Item6>
++        <Filename Value="src/hmi/hmibutton.pas"/>
++        <Type Value="Include"/>
++      </Item6>
++      <Item7>
++        <Filename Value="src/hmi/hmicheckbox.pas"/>
++        <Type Value="Include"/>
++      </Item7>
++      <Item8>
++        <Filename Value="src/hmi/hmicolorpropertyconnector.pas"/>
++        <UnitName Value="hmicolorpropertyconnector"/>
++      </Item8>
++      <Item9>
++        <Filename Value="src/hmi/hmicombobox.pas"/>
++        <UnitName Value="HMIComboBox"/>
++      </Item9>
++      <Item10>
++        <Filename Value="src/hmi/hmicontroldislocatoranimation.pas"/>
++        <Type Value="Include"/>
++      </Item10>
++      <Item11>
++        <Filename Value="src/hmi/hmicontrolsecuritymanager.pas"/>
++        <UnitName Value="ControlSecurityManager"/>
++      </Item11>
++      <Item12>
++        <Filename Value="src/hmi/hmicrosskeyevents.pas"/>
++        <Type Value="Include"/>
++      </Item12>
++      <Item13>
++        <Filename Value="src/hmi/hmicustomizedusermanagement.pas"/>
++        <UnitName Value="CustomizedUserManagement"/>
++      </Item13>
++      <Item14>
++        <Filename Value="src/hmi/hmi_draw_basiccontrol.pas"/>
++        <UnitName Value="hmi_draw_basiccontrol"/>
++      </Item14>
++      <Item15>
++        <Filename Value="src/hmi/hmi_draw_basic_horizontal_control.pas"/>
++        <UnitName Value="hmi_draw_basic_horizontal_control"/>
++      </Item15>
++      <Item16>
++        <Filename Value="src/hmi/hmi_draw_elevador.pas"/>
++        <UnitName Value="hmi_draw_elevador"/>
++      </Item16>
++      <Item17>
++        <Filename Value="src/hmi/hmi_draw_fita.pas"/>
++        <UnitName Value="hmi_draw_fita"/>
++      </Item17>
++      <Item18>
++        <Filename Value="src/hmi/hmi_draw_redler.pas"/>
++        <UnitName Value="hmi_draw_redler"/>
++      </Item18>
++      <Item19>
++        <Filename Value="src/hmi/hmi_draw_rosca.pas"/>
++        <UnitName Value="hmi_draw_rosca"/>
++      </Item19>
++      <Item20>
++        <Filename Value="src/hmi/hmiedit.pas"/>
++        <Type Value="Include"/>
++      </Item20>
++      <Item21>
++        <Filename Value="src/hmi/hmikeyboardmanager.pas"/>
++        <UnitName Value="HMIKeyboardManager"/>
++      </Item21>
++      <Item22>
++        <Filename Value="src/hmi/hmilabel.pas"/>
++        <Type Value="Include"/>
++      </Item22>
++      <Item23>
++        <Filename Value="src/hmi/hminumerickeyboard.pas"/>
++        <Type Value="Include"/>
++      </Item23>
++      <Item24>
++        <Filename Value="src/hmi/hmiobjectcolletion.pas"/>
++        <UnitName Value="hmiobjectcolletion"/>
++      </Item24>
++      <Item25>
++        <Filename Value="src/hmi/hmi_polyline.pas"/>
++        <UnitName Value="hmi_polyline"/>
++      </Item25>
++      <Item26>
++        <Filename Value="src/hmi/hmiprogressbar.pas"/>
++        <Type Value="Include"/>
++      </Item26>
++      <Item27>
++        <Filename Value="src/hmi/hmipropeditor.pas"/>
++        <Type Value="Include"/>
++      </Item27>
++      <Item28>
++        <Filename Value="src/hmi/hmiradiobutton.pas"/>
++        <Type Value="Include"/>
++      </Item28>
++      <Item29>
++        <Filename Value="src/hmi/hmiradiogroup.pas"/>
++        <Type Value="Include"/>
++      </Item29>
++      <Item30>
++        <Filename Value="src/hmi/hmiregister.pas"/>
++        <Type Value="Include"/>
++      </Item30>
++      <Item31>
++        <Filename Value="src/hmi/hmiscrollbar.pas"/>
++        <Type Value="Include"/>
++      </Item31>
++      <Item32>
++        <Filename Value="src/hmi/hmitext.pas"/>
++        <Type Value="Include"/>
++      </Item32>
++      <Item33>
++        <Filename Value="src/hmi/hmitextstrings.pas"/>
++        <UnitName Value="hmitextstrings"/>
++      </Item33>
++      <Item34>
++        <Filename Value="src/hmi/hmitrackbar.pas"/>
++        <Type Value="Include"/>
++      </Item34>
++      <Item35>
++        <Filename Value="src/hmi/hmitransparentbutton.pas"/>
++        <UnitName Value="HMITransparentButton"/>
++      </Item35>
++      <Item36>
++        <Filename Value="src/hmi/hmitypes.pas"/>
++        <Type Value="Include"/>
++      </Item36>
++      <Item37>
++        <Filename Value="src/hmi/hmiupdown.pas"/>
++        <Type Value="Include"/>
++      </Item37>
++      <Item38>
++        <Filename Value="src/hmi/hmiusermgnt_login.pas"/>
++        <Type Value="Include"/>
++      </Item38>
++      <Item39>
++        <Filename Value="src/hmi/hmiwinccusermanagement.pas"/>
++        <Type Value="Include"/>
++      </Item39>
++      <Item40>
++        <Filename Value="src/hmi/hmizones.pas"/>
++        <Type Value="Include"/>
++      </Item40>
++      <Item41>
++        <Filename Value="src\hmi\hmiregister.pas"/>
++        <HasRegisterProc Value="True"/>
++        <UnitName Value="hmiregister"/>
++      </Item41>
++    </Files>
++    <RequiredPkgs Count="5">
++      <Item1>
++        <PackageName Value="BGRABitmapPack"/>
++      </Item1>
++      <Item2>
++        <PackageName Value="pascalscada"/>
++        <MinVersion Minor="7" Release="3" Valid="True"/>
++        <DefaultFilename Value="pascalscada.lpk" Prefer="True"/>
++      </Item2>
++      <Item3>
++        <PackageName Value="pascalscada_common"/>
++        <MinVersion Minor="7" Release="3" Valid="True"/>
++        <DefaultFilename Value="pascalscada_common.lpk" Prefer="True"/>
++      </Item3>
++      <Item4>
++        <PackageName Value="IDEIntf"/>
++      </Item4>
++      <Item5>
++        <PackageName Value="LCL"/>
++      </Item5>
++    </RequiredPkgs>
++    <UsageOptions>
++      <UnitPath Value="$(PkgOutDir)"/>
++    </UsageOptions>
++    <PublishOptions>
++      <Version Value="2"/>
++    </PublishOptions>
++    <CustomOptions Items="ExternHelp" Version="2">
++      <_ExternHelp Items="Count"/>
++    </CustomOptions>
++  </Package>
++</CONFIG>
+Index: pascalscada_hmi.pas
+===================================================================
+--- pascalscada_hmi.pas	(revision 928)
++++ pascalscada_hmi.pas	(working copy)
+@@ -1,26 +1,27 @@
+-{ This file was automatically created by Lazarus. Do not edit!
+-  This source is only used to compile and install the package.
+- }
+-
+-unit pascalscada_hmi;
+-
+-interface
+-
+-uses
+-  hmialfakeyboard, hmibasiccolletion, hmibasicusermanagement, 
+-  hmibooleanpropertyconnector, hmicolorpropertyconnector, HMIComboBox, 
+-  hmicontrolsecuritymanager, hmicustomizedusermanagement, 
+-  hmi_draw_basiccontrol, hmi_draw_basic_horizontal_control, hmi_draw_elevador, 
+-  hmi_draw_fita, hmi_draw_redler, hmi_draw_rosca, HMIKeyboardManager, 
+-  hmiobjectcolletion, hmi_polyline, hmitextstrings, HMITransparentButton, 
+-  LazarusPackageIntf;
+-
+-implementation
+-
+-procedure Register;
+-begin
+-end;
+-
+-initialization
+-  RegisterPackage('pascalscada_hmi', @Register);
+-end.
++{ This file was automatically created by Lazarus. Do not edit!
++  This source is only used to compile and install the package.
++ }
++
++unit pascalscada_hmi;
++
++interface
++
++uses
++  hmialfakeyboard, hmibasiccolletion, HMIBasicUserManagement, 
++  hmibooleanpropertyconnector, hmicolorpropertyconnector, HMIComboBox, 
++  HMIControlSecurityManager, HMICustomizedUserManagement, 
++  hmi_draw_basiccontrol, hmi_draw_basic_horizontal_control, hmi_draw_elevador, 
++  hmi_draw_fita, hmi_draw_redler, hmi_draw_rosca, HMIKeyboardManager, 
++  hmiobjectcolletion, hmi_polyline, hmitextstrings, HMITransparentButton, 
++  hmiregister, LazarusPackageIntf;
++
++implementation
++
++procedure Register;
++begin
++  RegisterUnit('hmiregister', @hmiregister.Register);
++end;
++
++initialization
++  RegisterPackage('pascalscada_hmi', @Register);
++end.
+Index: src/database/hmidbconnection.pas
+===================================================================
+--- src/database/hmidbconnection.pas	(revision 928)
++++ src/database/hmidbconnection.pas	(working copy)
+@@ -1,4 +1,4 @@
+-{$i ../common/language.inc}
++{.$i ../common/language.inc}
+ {$IFDEF PORTUGUES}
+ {:
+   Unit que implementa a classe de conexão a vários sistemas gerenciadores de
+@@ -20,7 +20,7 @@
+ interface
+ 
+ uses
+-  Classes, sysutils, ZConnection, ZPropertyEditor, pSCADAMessageQueue, CrossEvent,
++  Classes, sysutils, ZConnection, ZPropertyEditor, pSCADA_MessageQueue, pSCADA_CrossEvent,
+   syncobjs, ZDataset, psbufdataset;
+ 
+ type
+Index: src/database/pscada_dbreg.pas
+===================================================================
+--- src/database/pscada_dbreg.pas	(revision 928)
++++ src/database/pscada_dbreg.pas	(working copy)
+@@ -1,7 +1,7 @@
+-{$i ../common/language.inc}
++{.$i ../common/language.inc}
+ unit pscada_dbreg;
+ 
+-{$I ../../src/common/delphiver.inc}
++{.$I ../../src/common/delphiver.inc}
+ 
+ {$IFDEF FPC}
+ {$mode delphi}
+@@ -15,9 +15,9 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIDBConnection, psbufdataset,
++uses pSCADA_strings, HMIDBConnection, psbufdataset,
+   {$IFDEF FPC}
+-    LResources, lazlclversion, PropEdits, ComponentEditors;
++    LResources, PropEdits, ComponentEditors;
+   {$ELSE}
+     Types,
+     {$IFDEF DELPHI2009_UP}
+Index: src/hmi/hmianimation.pas
+===================================================================
+--- src/hmi/hmianimation.pas	(revision 928)
++++ src/hmi/hmianimation.pas	(working copy)
+@@ -165,7 +165,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMIAnimation.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmicheckbox.pas
+===================================================================
+--- src/hmi/hmicheckbox.pas	(revision 928)
++++ src/hmi/hmicheckbox.pas	(working copy)
+@@ -472,7 +472,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMICheckBox.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmicontroldislocatoranimation.pas
+===================================================================
+--- src/hmi/hmicontroldislocatoranimation.pas	(revision 928)
++++ src/hmi/hmicontroldislocatoranimation.pas	(working copy)
+@@ -231,7 +231,7 @@
+ 
+ implementation
+ 
+-uses hsstrings;
++uses pSCADA_strings;
+ 
+ constructor THMIControlDislocatorAnimation.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmiedit.pas
+===================================================================
+--- src/hmi/hmiedit.pas	(revision 928)
++++ src/hmi/hmiedit.pas	(working copy)
+@@ -21,7 +21,7 @@
+ uses
+   SysUtils, Classes, Controls, StdCtrls, PLCTag, HMITypes, Graphics, Dialogs,
+   {$IFDEF FPC}LCLIntf, LCLType,{$ELSE}Windows,{$ENDIF} ProtocolTypes, Tag,
+-  unumerickeyboard, Forms;
++  HMINumericKeyboard, Forms;
+ 
+ type
+   {$IFDEF PORTUGUES}
+@@ -378,7 +378,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMIEdit.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmilabel.pas
+===================================================================
+--- src/hmi/hmilabel.pas	(revision 928)
++++ src/hmi/hmilabel.pas	(working copy)
+@@ -183,7 +183,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMILabel.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmiprogressbar.pas
+===================================================================
+--- src/hmi/hmiprogressbar.pas	(revision 928)
++++ src/hmi/hmiprogressbar.pas	(working copy)
+@@ -116,7 +116,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMIProgressBar.Create(AOwner: TComponent);
+ begin
+Index: src/hmi/hmipropeditor.pas
+===================================================================
+--- src/hmi/hmipropeditor.pas	(revision 928)
++++ src/hmi/hmipropeditor.pas	(working copy)
+@@ -19,7 +19,7 @@
+ {$MACRO ON}
+ {$ENDIF}
+ 
+-{$I ../common/delphiver.inc}
++{.$I ../common/delphiver.inc}
+ 
+ interface
+ 
+@@ -28,7 +28,7 @@
+   typinfo, HMIControlDislocatorAnimation, hmiobjectcolletion,
+   HMIControlSecurityManager, Graphics,
+   {$IFDEF FPC}
+-    PropEdits, ComponentEditors, lazlclversion, GraphPropEdits, ImgList,
++    PropEdits, ComponentEditors, GraphPropEdits, ImgList,
+     hmibooleanpropertyconnector, hmicolorpropertyconnector;
+   {$ELSE}
+     Types,
+Index: src/hmi/hmiradiogroup.pas
+===================================================================
+--- src/hmi/hmiradiogroup.pas	(revision 928)
++++ src/hmi/hmiradiogroup.pas	(working copy)
+@@ -139,7 +139,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMIRadioGroup.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmiregister.pas
+===================================================================
+--- src/hmi/hmiregister.pas	(revision 928)
++++ src/hmi/hmiregister.pas	(working copy)
+@@ -20,13 +20,13 @@
+ implementation
+ 
+ uses
+-  Classes, hsstrings, HMIEdit, HMILabel, HMICheckBox, HMIRadioButton,
++  Classes, pSCADA_strings, HMIEdit, HMILabel, HMICheckBox, HMIRadioButton,
+   HMITrackBar, HMIProgressBar, HMIRadioGroup, HMIUpDown, HMIScrollBar,
+   HMIAnimation, HMIText, HMIZones, hmipropeditor, HMIControlDislocatorAnimation,
+-  HMIControlSecurityManager, ActnList, CustomizedUserManagement, Controls,
++  HMIControlSecurityManager, HMICustomizedUserManagement, ActnList, Controls,
+ 
+   {$IF defined(WINDOWS) or defined(WIN32) or defined(WIN64)}
+-  WinCCUserManagement,
++  HMIWinCCUserManagement,
+   {$IFEND}
+ 
+   {$IF defined(FPC) AND (not defined(DELPHI4_UP))}
+@@ -36,7 +36,7 @@
+   {$IFEND}
+ 
+   {$IFDEF FPC}
+-    LResources, lazlclversion, PropEdits, ComponentEditors;
++    LResources, PropEdits, ComponentEditors;
+   {$ELSE}
+     {$IFDEF DELPHI2009_UP}
+       //demais versoes do delphi
+@@ -81,7 +81,7 @@
+   //RegisterComponents(strControlsPallete,  [THMIButton]);
+ 
+   {$IF defined(WINDOWS) or defined(WIN32) or defined(WIN64)}
+-  RegisterComponents(strUserManagement,   [TWinCCUserManagement]);
++  RegisterComponents(strUserManagement,   [THMIWinCCUserManagement]);
+   {$IFEND}
+   RegisterComponents(strUserManagement,   [TCustomizedUserManagement]);
+ 
+Index: src/hmi/hmiscrollbar.pas
+===================================================================
+--- src/hmi/hmiscrollbar.pas	(revision 928)
++++ src/hmi/hmiscrollbar.pas	(working copy)
+@@ -130,7 +130,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMIScrollBar.Create(AOwner: TComponent);
+ begin
+Index: src/hmi/hmitext.pas
+===================================================================
+--- src/hmi/hmitext.pas	(revision 928)
++++ src/hmi/hmitext.pas	(working copy)
+@@ -1,4 +1,4 @@
+-{$i ../common/language.inc}
++{.$i ../common/language.inc}
+ {$IFDEF PORTUGUES}
+ {:
+   @abstract(Implementa o controle responsável por mostrar textos pré-definidos
+@@ -140,7 +140,7 @@
+ 
+ implementation
+ 
+-uses hsstrings;
++uses pSCADA_strings;
+ 
+ constructor THMIText.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmitrackbar.pas
+===================================================================
+--- src/hmi/hmitrackbar.pas	(revision 928)
++++ src/hmi/hmitrackbar.pas	(working copy)
+@@ -144,7 +144,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMITrackBar.Create(AOwner: TComponent);
+ begin
+Index: src/hmi/hmiupdown.pas
+===================================================================
+--- src/hmi/hmiupdown.pas	(revision 928)
++++ src/hmi/hmiupdown.pas	(working copy)
+@@ -161,7 +161,7 @@
+ 
+ implementation
+ 
+-uses hsstrings, HMIControlSecurityManager;
++uses pSCADA_strings, HMIControlSecurityManager;
+ 
+ constructor THMIUpDown.Create(AOwner:TComponent);
+ begin
+Index: src/hmi/hmiwinccusermanagement.pas
+===================================================================
+--- src/hmi/hmiwinccusermanagement.pas	(revision 928)
++++ src/hmi/hmiwinccusermanagement.pas	(working copy)
+@@ -28,11 +28,11 @@
+     Valid:Boolean;
+   end;
+ 
+-  THMIAuthorizations = array of TAuthorization;
++  THMIAuthorizations = array of THMIWCCAuthorization;
+ 
+   { TWinCCUserManagement }
+ 
+-  THMIWinCCUserManagement = class(THMIBasicUserManagement)
++  THMIWinCCUserManagement = class(TBasicUserManagement)
+   private
+     FCheckTimer                :TTimer;
+     FInLoginProcess            :Boolean;
+@@ -87,7 +87,7 @@
+ 
+ implementation
+ 
+-uses HMIControlSecurityManager, hsstrings, StrUtils, StdCtrls
++uses HMIControlSecurityManager, pSCADA_strings, StrUtils, StdCtrls
+      {$IFDEF FPC}
+      , TextStrings
+      {$ELSE}
+@@ -134,15 +134,15 @@
+   end;
+ 
+   //load UseAdmin functions...
+-  PWRTLogin                  :=TPWRTLogin(GetProcAddress(hUseAdmin,'PWRTLogin'));
+-  PWRTLogout                 :=TPWRTLogout(GetProcAddress(hUseAdmin,'PWRTLogout'));
+-  PWRTGetCurrentUser         :=TPWRTGetCurrentUser(GetProcAddress(hUseAdmin,'PWRTGetCurrentUser'));
+-  PWRTGetLoginPriority       :=TPWRTGetLoginPriority(GetProcAddress(hUseAdmin,'PWRTGetLoginPriority'));
+-  PWRTPermissionToString     :=TPWRTPermissionToString(GetProcAddress(hUseAdmin,'PWRTPermissionToString'));
+-  PWRTCheckPermission        :=TPWRTCheckPermission(GetProcAddress(hUseAdmin,'PWRTCheckPermission'));
+-  PWRTCheckPermissionOnArea  :=TPWRTCheckPermissionOnArea(GetProcAddress(hUseAdmin,'PWRTCheckPermissionOnArea'));
+-  PWRTCheckPermissionOnAreaID:=TPWRTCheckPermissionOnAreaID(GetProcAddress(hUseAdmin,'PWRTCheckPermissionOnAreaID'));
+-  PWRTSilentLogin            :=TPWRTSilentLogin(GetProcAddress(hUseAdmin,'PWRTSilentLogin'));
++  PWRTLogin                  :=THMIWCCPWRTLogin(GetProcAddress(hUseAdmin,'PWRTLogin'));
++  PWRTLogout                 :=THMIWCCPWRTLogout(GetProcAddress(hUseAdmin,'PWRTLogout'));
++  PWRTGetCurrentUser         :=THMIWCCPWRTGetCurrentUser(GetProcAddress(hUseAdmin,'PWRTGetCurrentUser'));
++  PWRTGetLoginPriority       :=THMIWCCPWRTGetLoginPriority(GetProcAddress(hUseAdmin,'PWRTGetLoginPriority'));
++  PWRTPermissionToString     :=THMIWCCPWRTPermissionToString(GetProcAddress(hUseAdmin,'PWRTPermissionToString'));
++  PWRTCheckPermission        :=THMIWCCPWRTCheckPermission(GetProcAddress(hUseAdmin,'PWRTCheckPermission'));
++  PWRTCheckPermissionOnArea  :=THMIWCCPWRTCheckPermissionOnArea(GetProcAddress(hUseAdmin,'PWRTCheckPermissionOnArea'));
++  PWRTCheckPermissionOnAreaID:=THMIWCCPWRTCheckPermissionOnAreaID(GetProcAddress(hUseAdmin,'PWRTCheckPermissionOnAreaID'));
++  PWRTSilentLogin            :=THMIWCCPWRTSilentLogin(GetProcAddress(hUseAdmin,'PWRTSilentLogin'));
+ 
+   fUseAdminLoaded:=true;
+ end;
+Index: src/scada/commport.pas
+===================================================================
+--- src/scada/commport.pas	(revision 928)
++++ src/scada/commport.pas	(working copy)
+@@ -996,8 +996,7 @@
+     ProtocolDriver,
+     pSCADA_Strings,
+     pSCADA_CrossDatetime,
+-    pSCADA_CPU_Utils,
+-    pSCADA_Constants;
++    pSCADA_CPU_Utils;
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+ ////////////////////////////////////////////////////////////////////////////////
+Index: src/scada/commtypes.pas
+===================================================================
+--- src/scada/commtypes.pas	(revision 928)
++++ src/scada/commtypes.pas	(working copy)
+@@ -1,107 +1,111 @@
+-{$i ../common/pscada_settings.inc}
+-{$IFDEF PORTUGUES}
+-{:
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @abstract(Unit com os tipos que são usados frequentemente em drivers de portas de comunicação.)
+-}
+-{$ELSE}
+-{:
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @abstract(Unit with types/definitions commonly used on communication ports.)
+-}
+-{$ENDIF}
+-
+-unit commtypes;
+-
+-{$IFDEF FPC}
+-{$mode delphi}
+-{$ENDIF}
+-
+-interface
+-
+-uses Classes, pSCADA_Types;
+-
+-type
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-    Interface de notificações de eventos para os drivers de protocolo.
+-  }
+-  {$ELSE}
+-  {:
+-    Event notification interface for protocol drivers.
+-  }
+-  {$ENDIF}
+-  IPortDriverEventNotification = interface
+-  ['{26B0F551-5B46-49D9-BCA1-AD621B3775CF}']
+-    {$IFDEF PORTUGUES}
+-    //: Retorna o evento a ser chamado quando a porta é aberta.
+-    {$ELSE}
+-    //: Returns the event to be called when communication port opens.
+-    {$ENDIF}
+-    function  GetPortOpenedEvent:TNotifyEvent;
+-
+-    {$IFDEF PORTUGUES}
+-    //: Retorna o evento a ser chamado quando a porta é fechada.
+-    {$ELSE}
+-    //: Returns the event to be called when communication port closed.
+-    {$ENDIF}
+-    function  GetPortClosedEvent:TNotifyEvent;
+-
+-    {$IFDEF PORTUGUES}
+-    //: Retorna o evento a ser chamado quando a porta é disconectada.
+-    {$ELSE}
+-    //: Returns the event to be called when communication port is disconnected.
+-    {$ENDIF}
+-    function  GetPortDisconnectedEvent:TNotifyEvent;
+-
+-    {$IFDEF PORTUGUES}
+-    {:
+-    Conjunto de eventos da porta de comunicação que o protocolo deseja ser
+-    notificado.
+-    @seealso(TPortEvents)
+-    @seealso(TNotifyThisEvents)
+-    }
+-    {$ELSE}
+-    {:
+-    Set of events that the protocol driver wants be notified.
+-    @seealso(TPortEvents)
+-    @seealso(TNotifyThisEvents)
+-    }
+-    {$ENDIF}
+-    function  NotifyThisEvents:TNotifyThisEvents;
+-
+-    {$IFDEF PORTUGUES}
+-    //: Método que vai ser chamado quando a porta for aberta.
+-    {$ELSE}
+-    //: Procedure called when the communication port opens.
+-    {$ENDIF}
+-    procedure DoPortOpened(Sender: TObject);
+-
+-    {$IFDEF PORTUGUES}
+-    //: Método que vai ser chamado quando a porta for fechada.
+-    {$ELSE}
+-    //: Procedure called when the communication port was closed.
+-    {$ENDIF}
+-    procedure DoPortClosed(Sender: TObject);
+-
+-    {$IFDEF PORTUGUES}
+-    //: Método que vai ser chamado quando a porta for desconectada.
+-    {$ELSE}
+-    //: Procedure called when the communication port was disconnected.
+-    {$ENDIF}
+-    procedure DoPortDisconnected(Sender: TObject);
+-
+-    {$IFDEF PORTUGUES}
+-    //: Método que vai ser chamado quando a porta for destruida.
+-    {$ELSE}
+-    //: Procedure called when the communication port has been destroied.
+-    {$ENDIF}
+-    procedure DoPortRemoved(Sender:TObject);
+-  end;
+-
+-  IPortDriverEventNotificationArray = array of IPortDriverEventNotification;
+-
+-implementation
+-
+-end.
++{$i ../common/pscada_settings.inc}
++{$IFDEF PORTUGUES}
++{:
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @abstract(Unit com os tipos que são usados frequentemente em drivers de portas de comunicação.)
++}
++{$ELSE}
++{:
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @abstract(Unit with types/definitions commonly used on communication ports.)
++}
++{$ENDIF}
++
++unit commtypes;
++
++{$IFDEF FPC}
++{$mode delphi}
++{$ENDIF}
++
++interface
++
++uses Classes, pSCADA_Types;
++
++type
++
++  {$IFDEF PORTUGUES}
++  {:
++    Interface de notificações de eventos para os drivers de protocolo.
++  }
++  {$ELSE}
++  {:
++    Event notification interface for protocol drivers.
++  }
++  {$ENDIF}
++  IPortDriverEventNotification = interface
++  ['{26B0F551-5B46-49D9-BCA1-AD621B3775CF}']
++    {$IFDEF PORTUGUES}
++    //: Retorna o evento a ser chamado quando a porta é aberta.
++    {$ELSE}
++    //: Returns the event to be called when communication port opens.
++    {$ENDIF}
++    function  GetPortOpenedEvent:TNotifyEvent;
++
++    {$IFDEF PORTUGUES}
++    //: Retorna o evento a ser chamado quando a porta é fechada.
++    {$ELSE}
++    //: Returns the event to be called when communication port closed.
++    {$ENDIF}
++    function  GetPortClosedEvent:TNotifyEvent;
++
++    {$IFDEF PORTUGUES}
++    //: Retorna o evento a ser chamado quando a porta é disconectada.
++    {$ELSE}
++    //: Returns the event to be called when communication port is disconnected.
++    {$ENDIF}
++    function  GetPortDisconnectedEvent:TNotifyEvent;
++
++    {$IFDEF PORTUGUES}
++    {:
++    Conjunto de eventos da porta de comunicação que o protocolo deseja ser
++    notificado.
++    @seealso(TPortEvents)
++    @seealso(TNotifyThisEvents)
++    }
++    {$ELSE}
++    {:
++    Set of events that the protocol driver wants be notified.
++    @seealso(TPortEvents)
++    @seealso(TNotifyThisEvents)
++    }
++    {$ENDIF}
++    function  NotifyThisEvents:TNotifyThisEvents;
++
++    {$IFDEF PORTUGUES}
++    //: Método que vai ser chamado quando a porta for aberta.
++    {$ELSE}
++    //: Procedure called when the communication port opens.
++    {$ENDIF}
++    procedure DoPortOpened(Sender: TObject);
++
++    {$IFDEF PORTUGUES}
++    //: Método que vai ser chamado quando a porta for fechada.
++    {$ELSE}
++    //: Procedure called when the communication port was closed.
++    {$ENDIF}
++    procedure DoPortClosed(Sender: TObject);
++
++    {$IFDEF PORTUGUES}
++    //: Método que vai ser chamado quando a porta for desconectada.
++    {$ELSE}
++    //: Procedure called when the communication port was disconnected.
++    {$ENDIF}
++    procedure DoPortDisconnected(Sender: TObject);
++
++    {$IFDEF PORTUGUES}
++    //: Método que vai ser chamado quando a porta for destruida.
++    {$ELSE}
++    //: Procedure called when the communication port has been destroied.
++    {$ENDIF}
++    procedure DoPortRemoved(Sender:TObject);
++  end;
++
++  IPortDriverEventNotificationArray = array of IPortDriverEventNotification;
++
++  const
++    PSM_COMMERROR        = 4;
++    PSM_PORT_EVENT       = 5;
++
++implementation
++
++end.
+Index: src/scada/scadapropeditor.pas
+===================================================================
+--- src/scada/scadapropeditor.pas	(revision 928)
++++ src/scada/scadapropeditor.pas	(working copy)
+@@ -1,442 +1,442 @@
+-{$i ../common/pscada_settings.inc}
+-{$I ../common/pscada_compiler_versions.inc}
+-{$IFDEF PORTUGUES}
+-{:
+-  @abstract(Implementação dos editores de algumas propriedades de componentes
+-            do PascalSCADA.)
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-}
+-{$ELSE}
+-{:
+-  @abstract(Implements some property editors of PascalSCADA.)
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-
+-  ****************************** History  *******************************
+-  ***********************************************************************
+-  07/2013 - Replaced ProtocolDriver with TagAssistant. (unit, properties and classes)
+-  07/2013 - Implemented Double-Click for the assistants.
+-  07/2013 - Replaced PlcNumber with BitMapTagAssistant. (unit, properties and classes)
+-  07/2013 - Replaced PlcBlock with BLockTagAssistant. (unit, properties and classes)
+-  @author(Juanjo Montero <juanjo.montero@gmail.com>)
+-  ***********************************************************************
+-}
+-{$ENDIF}
+-unit scadapropeditor;
+-
+-interface
+-
+-uses
+-  Classes, SysUtils, SerialPort, PLCBlockElement, PLCStruct, Tag,
+-  bitmappertagassistant, blockstructtagassistant, ProtocolDriver,
+-  PLCNumber, ProtocolTypes,
+-
+-  {$IF defined(WIN32) or defined(WIN64) OR defined(WINCE)}
+-  Windows,
+-  {$ELSE}
+-  Unix,
+-  {$IFEND}
+-  
+-  {$IFDEF FPC}
+-    PropEdits, ComponentEditors, pSCADA_Constants;
+-  {$ELSE}
+-    Types,
+-    //Delphi 6 ou superior
+-    {$IF defined(DELPHI6_UP)}
+-      DesignIntf, DesignEditors;
+-    {$ELSE}
+-      //demais versoes do delphi
+-      DsgnIntf;
+-    {$IFEND}
+-  {$ENDIF}
+-
+-type
+-  {$IFDEF PORTUGUES}
+-  //: Editor da propriedade TSerialPortDriver.COMPort
+-  {$ELSE}
+-  //: Property editor of TSerialPortDriver.COMPort property.
+-  {$ENDIF}
+-  TPortPropertyEditor = class(TStringProperty)
+-  public
+-    function  GetAttributes: TPropertyAttributes; override;
+-    function  GetValue: string; override;
+-    procedure GetValues(Proc: TGetStrProc); override;
+-    procedure SetValue(const Value: string); override;
+-  end;
+-
+-  {$IFDEF PORTUGUES}
+-  //: Editor da propriedade TPLCBlockElement.Index
+-  {$ELSE}
+-  //: Property editor of TPLCBlockElement.Index property.
+-  {$ENDIF}
+-  TElementIndexPropertyEditor = class(TIntegerProperty)
+-  public
+-    function  GetAttributes: TPropertyAttributes; override;
+-    procedure GetValues(Proc: TGetStrProc); override;
+-  end;
+-
+-  {$IFNDEF FPC}
+-  //: @exclude
+-  TDefaultComponentEditor = class(TComponentEditor);
+-  {$ENDIF}
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-    Editor de componente base para todos os demais editores que irão inserir
+-    componentes na aplicação.
+-    @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  }
+-  {$ELSE}
+-  {:
+-    Base class of Component editor for all component editors that will insert
+-    others componentes in application.
+-    @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  }
+-  {$ENDIF}
+-  TInsertTagsOnFormComponentEditor = class(TDefaultComponentEditor)
+-  protected
+-    procedure AddTagInEditor(Tag:TTag);
+-    function  CreateComponent(tagclass:TComponentClass):TComponent;
+-    function  GetTheOwner:TComponent; virtual;
+-  end;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Editor de componente TagBuilder.
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @seealso(TInsertTagsOnFormComponentEditor)
+-  }
+-  {$ELSE}
+-  {:
+-  TagBuilder component editor tool.
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @seealso(TInsertTagsOnFormComponentEditor)
+-  }
+-  {$ENDIF}
+-  TProtocolDriverComponentEditor = class(TInsertTagsOnFormComponentEditor)
+-  private
+-    procedure OpenTagBuilder;
+-  protected
+-    function GetTheOwner: TComponent; override;
+-  public
+-    procedure ExecuteVerb(Index: LongInt); override;
+-    function  GetVerb(Index: LongInt): string; override;
+-    function  GetVerbCount: LongInt; override;
+-    procedure Edit; override;
+-    function  ProtocolDriver: TProtocolDriver; virtual;
+-  end;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Editor de componente BitMapper. Mapeia bits de um tag.
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @seealso(TInsertTagsOnFormComponentEditor)
+-  }
+-  {$ELSE}
+-  {:
+-  BitMapper component editor tool. Map bits of a tag.
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @seealso(TInsertTagsOnFormComponentEditor)
+-  }
+-  {$ENDIF}
+-  TTagBitMapperComponentEditor = class(TInsertTagsOnFormComponentEditor)
+-  private
+-    procedure OpenBitMapper;
+-  protected
+-    function GetTheOwner: TComponent; override;
+-  public
+-    procedure ExecuteVerb(Index: LongInt); override;
+-    function GetVerb(Index: LongInt): string; override;
+-    function GetVerbCount: LongInt; override;
+-    procedure Edit; override;
+-  end;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Editor de componente BlockElementMapper. Mapeia elementos de um tag bloco.
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @seealso(TInsertTagsOnFormComponentEditor)
+-  }
+-  {$ELSE}
+-  {:
+-  BlockElementMapper component editor tool. Map elements of a tag block.
+-  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
+-  @seealso(TInsertTagsOnFormComponentEditor)
+-  }
+-  {$ENDIF}
+-  TBlockElementMapperComponentEditor = class(TInsertTagsOnFormComponentEditor)
+-  private
+-    procedure OpenElementMapper;
+-  public
+-    procedure ExecuteVerb(Index: LongInt); override;
+-    {$if declared(has_customhints)}
+-    function GetCustomHint: String; override;
+-    {$ifend}
+-    function GetVerb(Index: LongInt): string; override;
+-    function GetVerbCount: LongInt; override;
+-    procedure Edit; override;
+-  end;
+-
+-implementation
+-
+-uses PLCBlock;
+-
+-function  TPortPropertyEditor.GetAttributes: TPropertyAttributes;
+-begin
+-   if GetComponent(0) is TSerialPortDriver then
+-      Result := [paValueList{$IFDEF FPC}, paPickList{$ELSE}
+-                 {$IFDEF DELPHI2005_UP}, paReadOnly,
+-                 paValueEditable{$ENDIF}{$ENDIF}];
+-end;
+-
+-function  TPortPropertyEditor.GetValue: string;
+-begin
+-   Result := GetStrValue;
+-end;
+-
+-procedure TPortPropertyEditor.GetValues(Proc: TGetStrProc);
+-{$IF defined(WIN32) or defined(WIN64)}
+-var
+-  c:LongInt;
+-  dcbstring, comname:String;
+-  d:DCB;
+-begin
+-  Proc('(none)');
+-  for c:=1 to 255 do begin
+-     comname := 'COM'+IntToStr(c);
+-     dcbstring := comname+': baud=1200 parity=N data=8 stop=1';
+-     if BuildCommDCB(PChar(dcbstring),d) then
+-        Proc(comname);
+-  end;
+-{$IFEND}
+-{$IFDEF UNIX}
+-var
+-   c, d:LongInt;
+-   pname:String;
+-begin
+-   Proc('(none)');
+-   for d:=0 to High(PortPrefix) do
+-      {$IFDEF SunOS}
+-      for c:=Ord('a') to ord('z') do begin
+-         pname:=PortPrefix[d]+Char(c);
+-      {$ELSE}
+-      for c:=0 to 255 do begin
+-         pname:=PortPrefix[d]+IntToStr(c);
+-      {$ENDIF}
+-         if FileExists('/dev/'+pname) then
+-            Proc(pname);
+-      end;
+-{$ENDIF}
+-{$IFDEF WINCE}
+-begin
+-  //ToDo
+-{$ENDIF}
+-end;
+-
+-procedure TPortPropertyEditor.SetValue(const Value: string);
+-begin
+-   SetStrValue(Value);
+-   if GetComponent(0) is TSerialPortDriver then
+-      TSerialPortDriver(GetComponent(0)).Active := false;
+-end;
+-
+-//editores de propriedades de BlinkWith
+-function  TElementIndexPropertyEditor.GetAttributes: TPropertyAttributes;
+-begin
+-   if GetComponent(0) is TPLCBlockElement then
+-      Result := [paValueList{$IFNDEF FPC}{$IFDEF DELPHI2005_UP}, paReadOnly,
+-                 paValueEditable{$ENDIF}{$ENDIF}];
+-end;
+-
+-procedure TElementIndexPropertyEditor.GetValues(Proc: TGetStrProc);
+-var
+-   i:LongInt;
+-begin
+-   if (GetComponent(0) is TPLCBlockElement) and (TPLCBlockElement(GetComponent(0)).PLCBlock <> nil) then
+-      for i := 0 to LongInt(TPLCBlockElement(GetComponent(0)).PLCBlock.Size)-1 do begin
+-          Proc(IntToStr(i));
+-      end;
+-end;
+-
+-
+-{function  TComponentNameEditorEx.GetAttributes: TPropertyAttributes;
+-begin
+-  Result := [paMultiSelect];
+-end;}
+-
+-///////////////////////////////////////
+-//editor base para os demais editores.
+-///////////////////////////////////////
+-procedure TInsertTagsOnFormComponentEditor.AddTagInEditor(Tag:TTag);
+-{$IFDEF FPC}
+-var
+-  Hook: TPropertyEditorHook;
+-{$ENDIF}
+-begin
+-{$IFDEF FPC}
+-  Hook:=nil;
+-  if not GetHook(Hook) then exit;
+-  Hook.PersistentAdded(Tag,false);
+-  Modified;
+-{$ELSE}
+-  Designer.Modified;
+-{$ENDIF}
+-end;
+-
+-function  TInsertTagsOnFormComponentEditor.CreateComponent(tagclass:TComponentClass):TComponent;
+-begin
+-  {$IFDEF FPC}
+-    Result := tagclass.Create(GetTheOwner);
+-  {$ELSE}
+-    Result := Designer.CreateComponent(tagclass,GetTheOwner,0,0,0,0);
+-  {$ENDIF}
+-end;
+-
+-function TInsertTagsOnFormComponentEditor.GetTheOwner:TComponent;
+-begin
+-  Result:=nil;
+-end;
+-
+-///////////////////////////////////////
+-//editor TAG BUILDER
+-///////////////////////////////////////
+-
+-function  TProtocolDriverComponentEditor.GetTheOwner: TComponent;
+-begin
+-  Result:=ProtocolDriver.Owner;
+-end;
+-
+-procedure TProtocolDriverComponentEditor.OpenTagBuilder;
+-begin
+-  ProtocolDriver.OpenTagEditor(AddTagInEditor, CreateComponent);
+-end;
+-
+-procedure TProtocolDriverComponentEditor.ExecuteVerb(Index: LongInt);
+-begin
+-  if Index=0 then
+-    OpenTagBuilder();
+-end;
+-
+-function TProtocolDriverComponentEditor.GetVerb(Index: LongInt): string;
+-begin
+-  if Index=0 then
+-    Result:='Tag Builder';
+-end;
+-
+-function TProtocolDriverComponentEditor.GetVerbCount: LongInt;
+-begin
+-  if ProtocolDriver.HasTabBuilderEditor then
+-    Result:=1
+-  else
+-    Result:=0;;
+-end;
+-
+-procedure TProtocolDriverComponentEditor.Edit;
+-begin
+-  inherited Edit;
+-  OpenTagBuilder();
+-end;
+-
+-function TProtocolDriverComponentEditor.ProtocolDriver: TProtocolDriver;
+-begin
+-  Result:=TProtocolDriver(GetComponent);
+-end;
+-
+-///////////////////////////////////////////////////////////////////////////////
+-// BIT MAPPER
+-///////////////////////////////////////////////////////////////////////////////
+-
+-function TTagBitMapperComponentEditor.GetTheOwner: TComponent;
+-begin
+-  Result:=GetComponent().Owner;
+-end;
+-
+-procedure TTagBitMapperComponentEditor.OpenBitMapper;
+-begin
+-  if (GetComponent is TPLCNumberMappable) then
+-    TPLCNumberMappable(GetComponent).OpenBitMapper(AddTagInEditor, CreateComponent);
+-end;
+-
+-procedure TTagBitMapperComponentEditor.ExecuteVerb(Index: LongInt);
+-begin
+-  if Index=0 then
+-    OpenBitMapper();
+-end;
+-
+-function  TTagBitMapperComponentEditor.GetVerb(Index: LongInt): string;
+-begin
+-  if Index=0 then
+-    Result:='Map bits';
+-end;
+-
+-function  TTagBitMapperComponentEditor.GetVerbCount: LongInt;
+-begin
+-  Result:=1;
+-end;
+-
+-procedure TTagBitMapperComponentEditor.Edit;
+-begin
+-  inherited Edit;
+-  OpenBitMapper();
+-end;
+-
+-///////////////////////////////////////////////////////////////////////////////
+-// ELEMENT BLOCK MAPPER
+-///////////////////////////////////////////////////////////////////////////////
+-
+-procedure TBlockElementMapperComponentEditor.OpenElementMapper;
+-begin
+-  if (GetComponent is TPLCBlock) then
+-    TPLCBlock(GetComponent).MapElements(AddTagInEditor, CreateComponent);
+-end;
+-
+-procedure TBlockElementMapperComponentEditor.ExecuteVerb(Index: LongInt);
+-begin
+-  if Index=0 then
+-    OpenElementMapper();
+-end;
+-
+-{$if declared(has_customhints)}
+-function TBlockElementMapperComponentEditor.GetCustomHint: String;
+-begin
+-  if GetComponent is TPLCStruct then begin
+-    Result:=Result+'Structure size in bytes:'+IntToStr(TPLCStruct(GetComponent).Size);
+-    exit;
+-  end;
+-
+-  if GetComponent is TPLCBlock then begin
+-    Result:=Result+'Number of elements: '+IntToStr(TPLCBlock(GetComponent).Size);
+-    exit;
+-  end;
+-end;
+-{$ifend}
+-
+-function  TBlockElementMapperComponentEditor.GetVerb(Index: LongInt): string;
+-begin
+-  Result:='Unknow option...';
+-  if Index=0 then begin
+-    if GetComponent is TPLCStruct then begin
+-      Result:='Map structure items...';
+-      exit;
+-    end;
+-    if GetComponent is TPLCBlock then begin
+-      Result:='Map block elements...';
+-      exit;
+-    end;
+-  end;
+-end;
+-
+-function  TBlockElementMapperComponentEditor.GetVerbCount: LongInt;
+-begin
+-  Result:=0;
+-  if GetComponent is TPLCBlock then
+-   Result:=1;
+-end;
+-
+-procedure TBlockElementMapperComponentEditor.Edit;
+-begin
+-  inherited Edit;
+-  OpenElementMapper();
+-end;
+-
+-end.
+-
++{$i ../common/pscada_settings.inc}
++{$I ../common/pscada_compiler_versions.inc}
++{$IFDEF PORTUGUES}
++{:
++  @abstract(Implementação dos editores de algumas propriedades de componentes
++            do PascalSCADA.)
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++}
++{$ELSE}
++{:
++  @abstract(Implements some property editors of PascalSCADA.)
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++
++  ****************************** History  *******************************
++  ***********************************************************************
++  07/2013 - Replaced ProtocolDriver with TagAssistant. (unit, properties and classes)
++  07/2013 - Implemented Double-Click for the assistants.
++  07/2013 - Replaced PlcNumber with BitMapTagAssistant. (unit, properties and classes)
++  07/2013 - Replaced PlcBlock with BLockTagAssistant. (unit, properties and classes)
++  @author(Juanjo Montero <juanjo.montero@gmail.com>)
++  ***********************************************************************
++}
++{$ENDIF}
++unit scadapropeditor;
++
++interface
++
++uses
++  Classes, SysUtils, SerialPort, PLCBlockElement, PLCStruct, Tag,
++  bitmappertagassistant, blockstructtagassistant, ProtocolDriver,
++  PLCNumber, ProtocolTypes,
++
++  {$IF defined(WIN32) or defined(WIN64) OR defined(WINCE)}
++  Windows,
++  {$ELSE}
++  Unix,
++  {$IFEND}
++  
++  {$IFDEF FPC}
++    PropEdits, ComponentEditors;
++  {$ELSE}
++    Types,
++    //Delphi 6 ou superior
++    {$IF defined(DELPHI6_UP)}
++      DesignIntf, DesignEditors;
++    {$ELSE}
++      //demais versoes do delphi
++      DsgnIntf;
++    {$IFEND}
++  {$ENDIF}
++
++type
++  {$IFDEF PORTUGUES}
++  //: Editor da propriedade TSerialPortDriver.COMPort
++  {$ELSE}
++  //: Property editor of TSerialPortDriver.COMPort property.
++  {$ENDIF}
++  TPortPropertyEditor = class(TStringProperty)
++  public
++    function  GetAttributes: TPropertyAttributes; override;
++    function  GetValue: string; override;
++    procedure GetValues(Proc: TGetStrProc); override;
++    procedure SetValue(const Value: string); override;
++  end;
++
++  {$IFDEF PORTUGUES}
++  //: Editor da propriedade TPLCBlockElement.Index
++  {$ELSE}
++  //: Property editor of TPLCBlockElement.Index property.
++  {$ENDIF}
++  TElementIndexPropertyEditor = class(TIntegerProperty)
++  public
++    function  GetAttributes: TPropertyAttributes; override;
++    procedure GetValues(Proc: TGetStrProc); override;
++  end;
++
++  {$IFNDEF FPC}
++  //: @exclude
++  TDefaultComponentEditor = class(TComponentEditor);
++  {$ENDIF}
++
++  {$IFDEF PORTUGUES}
++  {:
++    Editor de componente base para todos os demais editores que irão inserir
++    componentes na aplicação.
++    @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  }
++  {$ELSE}
++  {:
++    Base class of Component editor for all component editors that will insert
++    others componentes in application.
++    @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  }
++  {$ENDIF}
++  TInsertTagsOnFormComponentEditor = class(TDefaultComponentEditor)
++  protected
++    procedure AddTagInEditor(Tag:TTag);
++    function  CreateComponent(tagclass:TComponentClass):TComponent;
++    function  GetTheOwner:TComponent; virtual;
++  end;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Editor de componente TagBuilder.
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @seealso(TInsertTagsOnFormComponentEditor)
++  }
++  {$ELSE}
++  {:
++  TagBuilder component editor tool.
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @seealso(TInsertTagsOnFormComponentEditor)
++  }
++  {$ENDIF}
++  TProtocolDriverComponentEditor = class(TInsertTagsOnFormComponentEditor)
++  private
++    procedure OpenTagBuilder;
++  protected
++    function GetTheOwner: TComponent; override;
++  public
++    procedure ExecuteVerb(Index: LongInt); override;
++    function  GetVerb(Index: LongInt): string; override;
++    function  GetVerbCount: LongInt; override;
++    procedure Edit; override;
++    function  ProtocolDriver: TProtocolDriver; virtual;
++  end;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Editor de componente BitMapper. Mapeia bits de um tag.
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @seealso(TInsertTagsOnFormComponentEditor)
++  }
++  {$ELSE}
++  {:
++  BitMapper component editor tool. Map bits of a tag.
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @seealso(TInsertTagsOnFormComponentEditor)
++  }
++  {$ENDIF}
++  TTagBitMapperComponentEditor = class(TInsertTagsOnFormComponentEditor)
++  private
++    procedure OpenBitMapper;
++  protected
++    function GetTheOwner: TComponent; override;
++  public
++    procedure ExecuteVerb(Index: LongInt); override;
++    function GetVerb(Index: LongInt): string; override;
++    function GetVerbCount: LongInt; override;
++    procedure Edit; override;
++  end;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Editor de componente BlockElementMapper. Mapeia elementos de um tag bloco.
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @seealso(TInsertTagsOnFormComponentEditor)
++  }
++  {$ELSE}
++  {:
++  BlockElementMapper component editor tool. Map elements of a tag block.
++  @author(Fabio Luis Girardi <fabio@pascalscada.com>)
++  @seealso(TInsertTagsOnFormComponentEditor)
++  }
++  {$ENDIF}
++  TBlockElementMapperComponentEditor = class(TInsertTagsOnFormComponentEditor)
++  private
++    procedure OpenElementMapper;
++  public
++    procedure ExecuteVerb(Index: LongInt); override;
++    {$if declared(has_customhints)}
++    function GetCustomHint: String; override;
++    {$ifend}
++    function GetVerb(Index: LongInt): string; override;
++    function GetVerbCount: LongInt; override;
++    procedure Edit; override;
++  end;
++
++implementation
++
++uses PLCBlock;
++
++function  TPortPropertyEditor.GetAttributes: TPropertyAttributes;
++begin
++   if GetComponent(0) is TSerialPortDriver then
++      Result := [paValueList{$IFDEF FPC}, paPickList{$ELSE}
++                 {$IFDEF DELPHI2005_UP}, paReadOnly,
++                 paValueEditable{$ENDIF}{$ENDIF}];
++end;
++
++function  TPortPropertyEditor.GetValue: string;
++begin
++   Result := GetStrValue;
++end;
++
++procedure TPortPropertyEditor.GetValues(Proc: TGetStrProc);
++{$IF defined(WIN32) or defined(WIN64)}
++var
++  c:LongInt;
++  dcbstring, comname:String;
++  d:DCB;
++begin
++  Proc('(none)');
++  for c:=1 to 255 do begin
++     comname := 'COM'+IntToStr(c);
++     dcbstring := comname+': baud=1200 parity=N data=8 stop=1';
++     if BuildCommDCB(PChar(dcbstring),d) then
++        Proc(comname);
++  end;
++{$IFEND}
++{$IFDEF UNIX}
++var
++   c, d:LongInt;
++   pname:String;
++begin
++   Proc('(none)');
++   for d:=0 to High(PortPrefix) do
++      {$IFDEF SunOS}
++      for c:=Ord('a') to ord('z') do begin
++         pname:=PortPrefix[d]+Char(c);
++      {$ELSE}
++      for c:=0 to 255 do begin
++         pname:=PortPrefix[d]+IntToStr(c);
++      {$ENDIF}
++         if FileExists('/dev/'+pname) then
++            Proc(pname);
++      end;
++{$ENDIF}
++{$IFDEF WINCE}
++begin
++  //ToDo
++{$ENDIF}
++end;
++
++procedure TPortPropertyEditor.SetValue(const Value: string);
++begin
++   SetStrValue(Value);
++   if GetComponent(0) is TSerialPortDriver then
++      TSerialPortDriver(GetComponent(0)).Active := false;
++end;
++
++//editores de propriedades de BlinkWith
++function  TElementIndexPropertyEditor.GetAttributes: TPropertyAttributes;
++begin
++   if GetComponent(0) is TPLCBlockElement then
++      Result := [paValueList{$IFNDEF FPC}{$IFDEF DELPHI2005_UP}, paReadOnly,
++                 paValueEditable{$ENDIF}{$ENDIF}];
++end;
++
++procedure TElementIndexPropertyEditor.GetValues(Proc: TGetStrProc);
++var
++   i:LongInt;
++begin
++   if (GetComponent(0) is TPLCBlockElement) and (TPLCBlockElement(GetComponent(0)).PLCBlock <> nil) then
++      for i := 0 to LongInt(TPLCBlockElement(GetComponent(0)).PLCBlock.Size)-1 do begin
++          Proc(IntToStr(i));
++      end;
++end;
++
++
++{function  TComponentNameEditorEx.GetAttributes: TPropertyAttributes;
++begin
++  Result := [paMultiSelect];
++end;}
++
++///////////////////////////////////////
++//editor base para os demais editores.
++///////////////////////////////////////
++procedure TInsertTagsOnFormComponentEditor.AddTagInEditor(Tag:TTag);
++{$IFDEF FPC}
++var
++  Hook: TPropertyEditorHook;
++{$ENDIF}
++begin
++{$IFDEF FPC}
++  Hook:=nil;
++  if not GetHook(Hook) then exit;
++  Hook.PersistentAdded(Tag,false);
++  Modified;
++{$ELSE}
++  Designer.Modified;
++{$ENDIF}
++end;
++
++function  TInsertTagsOnFormComponentEditor.CreateComponent(tagclass:TComponentClass):TComponent;
++begin
++  {$IFDEF FPC}
++    Result := tagclass.Create(GetTheOwner);
++  {$ELSE}
++    Result := Designer.CreateComponent(tagclass,GetTheOwner,0,0,0,0);
++  {$ENDIF}
++end;
++
++function TInsertTagsOnFormComponentEditor.GetTheOwner:TComponent;
++begin
++  Result:=nil;
++end;
++
++///////////////////////////////////////
++//editor TAG BUILDER
++///////////////////////////////////////
++
++function  TProtocolDriverComponentEditor.GetTheOwner: TComponent;
++begin
++  Result:=ProtocolDriver.Owner;
++end;
++
++procedure TProtocolDriverComponentEditor.OpenTagBuilder;
++begin
++  ProtocolDriver.OpenTagEditor(AddTagInEditor, CreateComponent);
++end;
++
++procedure TProtocolDriverComponentEditor.ExecuteVerb(Index: LongInt);
++begin
++  if Index=0 then
++    OpenTagBuilder();
++end;
++
++function TProtocolDriverComponentEditor.GetVerb(Index: LongInt): string;
++begin
++  if Index=0 then
++    Result:='Tag Builder';
++end;
++
++function TProtocolDriverComponentEditor.GetVerbCount: LongInt;
++begin
++  if ProtocolDriver.HasTabBuilderEditor then
++    Result:=1
++  else
++    Result:=0;;
++end;
++
++procedure TProtocolDriverComponentEditor.Edit;
++begin
++  inherited Edit;
++  OpenTagBuilder();
++end;
++
++function TProtocolDriverComponentEditor.ProtocolDriver: TProtocolDriver;
++begin
++  Result:=TProtocolDriver(GetComponent);
++end;
++
++///////////////////////////////////////////////////////////////////////////////
++// BIT MAPPER
++///////////////////////////////////////////////////////////////////////////////
++
++function TTagBitMapperComponentEditor.GetTheOwner: TComponent;
++begin
++  Result:=GetComponent().Owner;
++end;
++
++procedure TTagBitMapperComponentEditor.OpenBitMapper;
++begin
++  if (GetComponent is TPLCNumberMappable) then
++    TPLCNumberMappable(GetComponent).OpenBitMapper(AddTagInEditor, CreateComponent);
++end;
++
++procedure TTagBitMapperComponentEditor.ExecuteVerb(Index: LongInt);
++begin
++  if Index=0 then
++    OpenBitMapper();
++end;
++
++function  TTagBitMapperComponentEditor.GetVerb(Index: LongInt): string;
++begin
++  if Index=0 then
++    Result:='Map bits';
++end;
++
++function  TTagBitMapperComponentEditor.GetVerbCount: LongInt;
++begin
++  Result:=1;
++end;
++
++procedure TTagBitMapperComponentEditor.Edit;
++begin
++  inherited Edit;
++  OpenBitMapper();
++end;
++
++///////////////////////////////////////////////////////////////////////////////
++// ELEMENT BLOCK MAPPER
++///////////////////////////////////////////////////////////////////////////////
++
++procedure TBlockElementMapperComponentEditor.OpenElementMapper;
++begin
++  if (GetComponent is TPLCBlock) then
++    TPLCBlock(GetComponent).MapElements(AddTagInEditor, CreateComponent);
++end;
++
++procedure TBlockElementMapperComponentEditor.ExecuteVerb(Index: LongInt);
++begin
++  if Index=0 then
++    OpenElementMapper();
++end;
++
++{$if declared(has_customhints)}
++function TBlockElementMapperComponentEditor.GetCustomHint: String;
++begin
++  if GetComponent is TPLCStruct then begin
++    Result:=Result+'Structure size in bytes:'+IntToStr(TPLCStruct(GetComponent).Size);
++    exit;
++  end;
++
++  if GetComponent is TPLCBlock then begin
++    Result:=Result+'Number of elements: '+IntToStr(TPLCBlock(GetComponent).Size);
++    exit;
++  end;
++end;
++{$ifend}
++
++function  TBlockElementMapperComponentEditor.GetVerb(Index: LongInt): string;
++begin
++  Result:='Unknow option...';
++  if Index=0 then begin
++    if GetComponent is TPLCStruct then begin
++      Result:='Map structure items...';
++      exit;
++    end;
++    if GetComponent is TPLCBlock then begin
++      Result:='Map block elements...';
++      exit;
++    end;
++  end;
++end;
++
++function  TBlockElementMapperComponentEditor.GetVerbCount: LongInt;
++begin
++  Result:=0;
++  if GetComponent is TPLCBlock then
++   Result:=1;
++end;
++
++procedure TBlockElementMapperComponentEditor.Edit;
++begin
++  inherited Edit;
++  OpenElementMapper();
++end;
++
++end.
++
+Index: src/scada/scadareg.pas
+===================================================================
+--- src/scada/scadareg.pas	(revision 928)
++++ src/scada/scadareg.pas	(working copy)
+@@ -33,7 +33,7 @@
+   mutexserver, MutexClient, siemenstagassistant, modbustagassistant,
+   westasciitagassistant, bitmappertagassistant, blockstructtagassistant,
+   {$IFDEF FPC}
+-    LResources, pSCADA_Constants, PropEdits, ComponentEditors;
++    LResources, PropEdits, ComponentEditors;
+   {$ELSE}
+     Types, 
+     {$IFDEF DELPHI2009_UP}
+Index: src/scada/sockets_w32_w64.pas
+===================================================================
+--- src/scada/sockets_w32_w64.pas	(revision 928)
++++ src/scada/sockets_w32_w64.pas	(working copy)
+@@ -1,398 +1,398 @@
+-{$i ../common/language.inc}
+-{$IFDEF PORTUGUES}
+-//: Implementa funções de socket para Windows.
+-{$ELSE}
+-//: Windows socket functions.
+-{$ENDIF}
+-unit sockets_w32_w64;
+-
+-{$IFDEF FPC}
+-{$mode delphi}
+-{$ENDIF}
+-
+-interface
+-
+-uses
+-  windows, {$IFDEF FPC}WinSock2, {$ELSE} WinSock, {$ENDIF}socket_types, hsstrings, sysutils, commtypes;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Função que recebe dados do socket. Seus parametros são identicos a da função
+-  recv/fprecv, adicionado do parametro timeout, que diz o tempo máximo para
+-  receber todos os dados solicitados.
+-  }
+-  {$ELSE}
+-  {:
+-  Function that receive data of a socket. Their parameters are the same of the
+-  function recv/fprecv, with a extra parameter that is the maximum timout to
+-  receive all requested data on socket.
+-  }
+-  {$ENDIF}
+-  function socket_recv(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Função que envia dados ao socket. Seus parametros são identicos a da função
+-  send/fpsend, adicionado do parametro timeout, que diz o tempo máximo para
+-  enviar todos os dados.
+-  }
+-  {$ELSE}
+-  {:
+-  Function that sends data through the socket. Their parameters are the same of
+-  the function send/fpsend, with a extra parameter that is the maximum timout to
+-  send all requested data.
+-  }
+-  {$ENDIF}
+-  function socket_send(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
+-
+-  {$IFDEF PORTUGUES}
+-  //: Seta o modo de operação de socket.
+-  {$ELSE}
+-  //: Sets the socket operation mode.
+-  {$ENDIF}
+-  function setblockingmode(fd:TSocket; mode:u_long):LongInt;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Função de conexão com timeout. Seus parametros são identicos a função
+-  connect/fpconnect, porem adicionado o tempo máximo de espera pelo estabelecimento
+-  da conexão em milisegundos.
+-  @returns(0 se a conexão foi estabelecida com sucesso.)
+-  }
+-  {$ELSE}
+-  {:
+-  Connect function with timeout. Their parameters are the same of the functions
+-  connect/fpconnect, with a extra parameter that is the maximum timeout of the
+-  connection establishment in milliseconds.
+-  @returns(0 if the connection was estabilished successful.)
+-  }
+-  {$ENDIF}
+-  function connect_with_timeout(sock:Tsocket; address:PSockAddr; address_len:t_socklen; timeout:LongInt):LongInt;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Verifica o estado da conexão e atualiza o estado da porta da comunicação.
+-  @returns(@True se ainda está conectado)
+-  }
+-  {$ELSE}
+-  {:
+-  Check the current connection state and updates the state of the communication port.
+-  @returns(@True if stills connected.)
+-  }
+-  {$ENDIF}
+-  function CheckConnection(var CommResult:TIOResult; var incRetries:Boolean; var PActive:Boolean; var FSocket:TSocket; DoCommPortDisconected:TDisconnectNotifierProc):Boolean;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Espera por uma conexao de entrada
+-  @returns(@True se uma conexao de entrada foi realizada)
+-  }
+-  {$ELSE}
+-  {:
+-  Waits for a incoming connection.
+-  @returns(@True if a incoming connection was done.)
+-  }
+-  {$ENDIF}
+-  function WaitForConnection(FListenerSocket:TSocket; timeout:LongInt):Boolean;
+-
+-  {$IFDEF PORTUGUES}
+-  {:
+-  Função que informa quantos bytes estão disponíveis para serem lidos.
+-  @returns(Um valor maior que zero caso existir dados disponíveis no buffer,
+-           zero caso não exista ou -1 em caso de erro.)
+-  }
+-  {$ELSE}
+-  {:
+-  Rerturn how many bytes are available on receive buffer.
+-  @returns(A value bigger than zero if data are available on the receive
+-           buffer, zero if no data on the receive buffer and -1 on error.)
+-  }
+-  {$ENDIF}
+-  function GetNumberOfBytesInReceiveBuffer(socket:Tsocket):LongInt;
+-
+-implementation
+-
+-function setblockingmode(fd:TSocket; mode:u_long):LongInt;
+-begin
+-  if ioctlsocket(fd, FIONBIO, mode)=SOCKET_ERROR then
+-    Result:=-1
+-  else
+-    Result:=0;
+-end;
+-
+-function connect_with_timeout(sock:Tsocket; address:PSockAddr; address_len:t_socklen; timeout:LongInt):LongInt;
+-var
+-  sel:TFDSet;
+-  mode:u_long;
+-  tv : TTimeVal;
+-  p:ptimeval;
+-begin
+-
+-  if timeout=-1 then
+-    p:=nil
+-  else begin
+-    tv.tv_Sec:=Timeout div 1000;
+-    tv.tv_Usec:=(Timeout mod 1000)*1000;
+-    p:=@tv;
+-  end;
+-
+-  Result:=0;
+-
+-  if connect(sock, address^, address_len) <> 0 then begin
+-    if WSAGetLastError=WSAEWOULDBLOCK then begin
+-      FD_ZERO(sel);
+-      FD_SET(sock, sel);
+-      mode := select(sock, nil, @sel, nil, p);
+-
+-      if (mode < 0) then begin
+-        Result := -1;
+-      end else begin
+-        if (mode > 0) then begin
+-          Result := 0;
+-        end else begin
+-          if (mode = 0) then begin
+-            Result := -2;
+-          end;
+-        end;
+-      end;
+-    end else
+-      Result := -1;
+-  end;
+-end;
+-
+-function socket_recv(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
+-var
+-  sel:TFDSet;
+-  mode:u_long;
+-  tv : TTimeVal;
+-  p:ptimeval;
+-begin
+-
+-  if timeout=-1 then
+-    p:=nil
+-  else begin
+-    tv.tv_Sec:=Timeout div 1000;
+-    tv.tv_Usec:=(Timeout mod 1000)*1000;
+-    p:=@tv;
+-  end;
+-
+-  Result:=recv(sock, buf^, len, flags);
+-
+-  if Result = SOCKET_ERROR then begin
+-    if (WSAGetLastError=WSAEWOULDBLOCK) then begin
+-      FD_ZERO(sel);
+-      FD_SET(sock, sel);
+-      mode := select(sock, @sel, nil, nil, p);
+-
+-      if (mode < 0) then begin
+-        Result := -1;
+-      end else begin
+-        if (mode > 0) then begin
+-          Result := recv(sock, buf^, len, flags);
+-        end else begin
+-          if (mode = 0) then begin
+-            Result := -2;
+-          end;
+-        end;
+-      end;
+-    end else
+-      Result := -1;
+-  end;
+-end;
+-
+-function socket_send(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
+-var
+-  sel:TFDSet;
+-  mode:u_long;
+-  tv : TTimeVal;
+-  p:ptimeval;
+-begin
+-
+-  if timeout=-1 then
+-    p:=nil
+-  else begin
+-    tv.tv_Sec:=Timeout div 1000;
+-    tv.tv_Usec:=(Timeout mod 1000)*1000;
+-    p:=@tv;
+-  end;
+-
+-  Result:=send(sock, buf^, len, flags);
+-
+-  if Result = SOCKET_ERROR then begin
+-    if WSAGetLastError=WSAEWOULDBLOCK then begin
+-      FD_ZERO(sel);
+-      FD_SET(sock, sel);
+-      mode := select(sock, nil, @sel, nil, p);
+-
+-      if (mode < 0) then begin
+-        Result := -1;
+-      end else begin
+-        if (mode > 0) then begin
+-          Result := send(sock, buf^, len, flags);
+-        end else begin
+-          if (mode = 0) then begin
+-            Result := -2;
+-          end;
+-        end;
+-      end;
+-    end else
+-      Result := -1;
+-  end;
+-end;
+-
+-function CheckConnection(var CommResult:TIOResult; var incRetries:Boolean; var PActive:Boolean; var FSocket:TSocket; DoCommPortDisconected:TDisconnectNotifierProc):Boolean;
+-var
+-  retval, nbytes:LongInt;
+-  t:TTimeVal;
+-  readset:TFDSet;
+-begin
+-  Result:=true;
+-
+-  retval:=0;
+-  nbytes:=0;
+-  {$IFDEF FPC}
+-  retval:=ioctlsocket(FSocket,FIONREAD,@nbytes);
+-  {$ELSE}
+-  retval:=ioctlsocket(FSocket,FIONREAD,nbytes);
+-  {$ENDIF}
+-  if retval<>0 then begin
+-    if Assigned(DoCommPortDisconected) then
+-      DoCommPortDisconected();
+-    CommResult:=iorPortError;
+-    PActive:=false;
+-    Result:=false;
+-    exit;
+-  end;
+-
+-  if (nbytes>0) then begin   // there is something in receive buffer, it doesn't seem the socket has been closed
+-    Result:=true;
+-    exit;
+-  end;
+-
+-  t.tv_usec:=1;
+-  t.tv_sec:=0;
+-
+-  FD_ZERO(readset);
+-  FD_SET(FSocket,readset);
+-  retval:=Select(FSocket,@readset,nil,nil,@t);
+-
+-  if (retval=0) then begin   //timeout, appears to be ok...
+-    Result:=true;
+-    CommResult:=iorTimeOut;
+-    incRetries:=true;
+-    exit;
+-  end;
+-
+-  if (retval<0) then begin //error on socket...
+-    if Assigned(DoCommPortDisconected) then
+-      DoCommPortDisconected();
+-    CommResult:=iorPortError;
+-    PActive:=false;
+-    Result:=false;
+-    exit;
+-  end;
+-
+-  if (retval=1) then begin  // seems there is something in our receive buffer!!
+-    // now we check how many bytes are in receive buffer
+-    {$IFDEF FPC}
+-    retval:=ioctlsocket(FSocket,FIONREAD,@nbytes);
+-    {$ELSE}
+-    retval:=ioctlsocket(FSocket,FIONREAD,nbytes);
+-    {$ENDIF};
+-
+-    if (retval<>0) then begin  // some error occured
+-      if Assigned(DoCommPortDisconected) then
+-        DoCommPortDisconected();
+-      CommResult:=iorPortError;
+-      PActive:=false;
+-      Result:=false;
+-      exit;
+-    end;
+-
+-    if (nbytes=0) then begin
+-      if Assigned(DoCommPortDisconected) then
+-        DoCommPortDisconected();
+-      CommResult:=iorNotReady;
+-      PActive:=false;
+-      Result:=false;
+-      exit;
+-    end;
+-
+-    incRetries:=true;
+-  end;
+-end;
+-
+-function WaitForConnection(FListenerSocket:TSocket; timeout:LongInt):Boolean;
+-var
+-  sel:TFDSet;
+-  mode:u_long;
+-  tv : TTimeVal;
+-  p:ptimeval;
+-begin
+-
+-  if timeout=-1 then
+-    p:=nil
+-  else begin
+-    tv.tv_Sec:=Timeout div 1000;
+-    tv.tv_Usec:=(Timeout mod 1000)*1000;
+-    p:=@tv;
+-  end;
+-
+-
+-  FD_ZERO(sel);
+-  FD_SET(FListenerSocket, sel);
+-  mode := select(FListenerSocket, @sel, nil, nil, p);
+-
+-  if (mode <= 0) then begin
+-    Result := false;
+-  end else
+-    if (mode > 0) then begin
+-      Result := true;
+-    end;
+-end;
+-
+-function GetNumberOfBytesInReceiveBuffer(socket: Tsocket): LongInt;
+-var
+-  retval, nbytes:LongInt;
+-begin
+-  Result:=0;
+-
+-  {$IFDEF FPC}
+-  retval:=ioctlsocket(socket,FIONREAD,@nbytes);
+-  {$ELSE}
+-  retval:=ioctlsocket(socket,FIONREAD,nbytes);
+-  {$ENDIF}
+-
+-  if retval<>0 then begin
+-    Result:=-1;
+-    exit;
+-  end;
+-
+-  if (nbytes>0) then
+-    Result:=nbytes;
+-end;
+-
+-{$IF defined(WIN32) or defined(WIN64)}
+-var
+-  wsaData:TWSAData;
+-  version:WORD;
+-initialization
+-
+-  //inicialização Winsock
+-  version := MAKEWORD( 2, 0 );
+-
+-  //check for error
+-  if WSAStartup( version, wsaData ) <> 0 then
+-    raise Exception.Create(SerrorInitializingWinsock);
+-
+-  //check for correct version
+-  if (LOBYTE(wsaData.wVersion) <> 2) or (HIBYTE(wsaData.wVersion)<>0) then begin
+-    //incorrect WinSock version
+-    WSACleanup();
+-    raise Exception.Create(SinvalidWinSockVersion);
+-  end;
+-finalization
+-  WSACleanup;
+-{$IFEND}
+-end.
+-
++{.$i ../common/language.inc}
++{$IFDEF PORTUGUES}
++//: Implementa funções de socket para Windows.
++{$ELSE}
++//: Windows socket functions.
++{$ENDIF}
++unit sockets_w32_w64;
++
++{$IFDEF FPC}
++{$mode delphi}
++{$ENDIF}
++
++interface
++
++uses
++  windows, {$IFDEF FPC}WinSock2, {$ELSE} WinSock, {$ENDIF}socket_types, pSCADA_strings, sysutils, commtypes, pSCADA_Types;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Função que recebe dados do socket. Seus parametros são identicos a da função
++  recv/fprecv, adicionado do parametro timeout, que diz o tempo máximo para
++  receber todos os dados solicitados.
++  }
++  {$ELSE}
++  {:
++  Function that receive data of a socket. Their parameters are the same of the
++  function recv/fprecv, with a extra parameter that is the maximum timout to
++  receive all requested data on socket.
++  }
++  {$ENDIF}
++  function socket_recv(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Função que envia dados ao socket. Seus parametros são identicos a da função
++  send/fpsend, adicionado do parametro timeout, que diz o tempo máximo para
++  enviar todos os dados.
++  }
++  {$ELSE}
++  {:
++  Function that sends data through the socket. Their parameters are the same of
++  the function send/fpsend, with a extra parameter that is the maximum timout to
++  send all requested data.
++  }
++  {$ENDIF}
++  function socket_send(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
++
++  {$IFDEF PORTUGUES}
++  //: Seta o modo de operação de socket.
++  {$ELSE}
++  //: Sets the socket operation mode.
++  {$ENDIF}
++  function setblockingmode(fd:TSocket; mode:u_long):LongInt;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Função de conexão com timeout. Seus parametros são identicos a função
++  connect/fpconnect, porem adicionado o tempo máximo de espera pelo estabelecimento
++  da conexão em milisegundos.
++  @returns(0 se a conexão foi estabelecida com sucesso.)
++  }
++  {$ELSE}
++  {:
++  Connect function with timeout. Their parameters are the same of the functions
++  connect/fpconnect, with a extra parameter that is the maximum timeout of the
++  connection establishment in milliseconds.
++  @returns(0 if the connection was estabilished successful.)
++  }
++  {$ENDIF}
++  function connect_with_timeout(sock:Tsocket; address:PSockAddr; address_len:t_socklen; timeout:LongInt):LongInt;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Verifica o estado da conexão e atualiza o estado da porta da comunicação.
++  @returns(@True se ainda está conectado)
++  }
++  {$ELSE}
++  {:
++  Check the current connection state and updates the state of the communication port.
++  @returns(@True if stills connected.)
++  }
++  {$ENDIF}
++  function CheckConnection(var CommResult:TIOResult; var incRetries:Boolean; var PActive:Boolean; var FSocket:TSocket; DoCommPortDisconected:TDisconnectNotifierProc):Boolean;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Espera por uma conexao de entrada
++  @returns(@True se uma conexao de entrada foi realizada)
++  }
++  {$ELSE}
++  {:
++  Waits for a incoming connection.
++  @returns(@True if a incoming connection was done.)
++  }
++  {$ENDIF}
++  function WaitForConnection(FListenerSocket:TSocket; timeout:LongInt):Boolean;
++
++  {$IFDEF PORTUGUES}
++  {:
++  Função que informa quantos bytes estão disponíveis para serem lidos.
++  @returns(Um valor maior que zero caso existir dados disponíveis no buffer,
++           zero caso não exista ou -1 em caso de erro.)
++  }
++  {$ELSE}
++  {:
++  Rerturn how many bytes are available on receive buffer.
++  @returns(A value bigger than zero if data are available on the receive
++           buffer, zero if no data on the receive buffer and -1 on error.)
++  }
++  {$ENDIF}
++  function GetNumberOfBytesInReceiveBuffer(socket:Tsocket):LongInt;
++
++implementation
++
++function setblockingmode(fd:TSocket; mode:u_long):LongInt;
++begin
++  if ioctlsocket(fd, FIONBIO, mode)=SOCKET_ERROR then
++    Result:=-1
++  else
++    Result:=0;
++end;
++
++function connect_with_timeout(sock:Tsocket; address:PSockAddr; address_len:t_socklen; timeout:LongInt):LongInt;
++var
++  sel:TFDSet;
++  mode:u_long;
++  tv : TTimeVal;
++  p:ptimeval;
++begin
++
++  if timeout=-1 then
++    p:=nil
++  else begin
++    tv.tv_Sec:=Timeout div 1000;
++    tv.tv_Usec:=(Timeout mod 1000)*1000;
++    p:=@tv;
++  end;
++
++  Result:=0;
++
++  if connect(sock, address^, address_len) <> 0 then begin
++    if WSAGetLastError=WSAEWOULDBLOCK then begin
++      FD_ZERO(sel);
++      FD_SET(sock, sel);
++      mode := select(sock, nil, @sel, nil, p);
++
++      if (mode < 0) then begin
++        Result := -1;
++      end else begin
++        if (mode > 0) then begin
++          Result := 0;
++        end else begin
++          if (mode = 0) then begin
++            Result := -2;
++          end;
++        end;
++      end;
++    end else
++      Result := -1;
++  end;
++end;
++
++function socket_recv(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
++var
++  sel:TFDSet;
++  mode:u_long;
++  tv : TTimeVal;
++  p:ptimeval;
++begin
++
++  if timeout=-1 then
++    p:=nil
++  else begin
++    tv.tv_Sec:=Timeout div 1000;
++    tv.tv_Usec:=(Timeout mod 1000)*1000;
++    p:=@tv;
++  end;
++
++  Result:=recv(sock, buf^, len, flags);
++
++  if Result = SOCKET_ERROR then begin
++    if (WSAGetLastError=WSAEWOULDBLOCK) then begin
++      FD_ZERO(sel);
++      FD_SET(sock, sel);
++      mode := select(sock, @sel, nil, nil, p);
++
++      if (mode < 0) then begin
++        Result := -1;
++      end else begin
++        if (mode > 0) then begin
++          Result := recv(sock, buf^, len, flags);
++        end else begin
++          if (mode = 0) then begin
++            Result := -2;
++          end;
++        end;
++      end;
++    end else
++      Result := -1;
++  end;
++end;
++
++function socket_send(sock:Tsocket; buf:PByte; len: Cardinal; flags, timeout: LongInt):LongInt;
++var
++  sel:TFDSet;
++  mode:u_long;
++  tv : TTimeVal;
++  p:ptimeval;
++begin
++
++  if timeout=-1 then
++    p:=nil
++  else begin
++    tv.tv_Sec:=Timeout div 1000;
++    tv.tv_Usec:=(Timeout mod 1000)*1000;
++    p:=@tv;
++  end;
++
++  Result:=send(sock, buf^, len, flags);
++
++  if Result = SOCKET_ERROR then begin
++    if WSAGetLastError=WSAEWOULDBLOCK then begin
++      FD_ZERO(sel);
++      FD_SET(sock, sel);
++      mode := select(sock, nil, @sel, nil, p);
++
++      if (mode < 0) then begin
++        Result := -1;
++      end else begin
++        if (mode > 0) then begin
++          Result := send(sock, buf^, len, flags);
++        end else begin
++          if (mode = 0) then begin
++            Result := -2;
++          end;
++        end;
++      end;
++    end else
++      Result := -1;
++  end;
++end;
++
++function CheckConnection(var CommResult:TIOResult; var incRetries:Boolean; var PActive:Boolean; var FSocket:TSocket; DoCommPortDisconected:TDisconnectNotifierProc):Boolean;
++var
++  retval, nbytes:LongInt;
++  t:TTimeVal;
++  readset:TFDSet;
++begin
++  Result:=true;
++
++  retval:=0;
++  nbytes:=0;
++  {$IFDEF FPC}
++  retval:=ioctlsocket(FSocket,FIONREAD,@nbytes);
++  {$ELSE}
++  retval:=ioctlsocket(FSocket,FIONREAD,nbytes);
++  {$ENDIF}
++  if retval<>0 then begin
++    if Assigned(DoCommPortDisconected) then
++      DoCommPortDisconected();
++    CommResult:=iorPortError;
++    PActive:=false;
++    Result:=false;
++    exit;
++  end;
++
++  if (nbytes>0) then begin   // there is something in receive buffer, it doesn't seem the socket has been closed
++    Result:=true;
++    exit;
++  end;
++
++  t.tv_usec:=1;
++  t.tv_sec:=0;
++
++  FD_ZERO(readset);
++  FD_SET(FSocket,readset);
++  retval:=Select(FSocket,@readset,nil,nil,@t);
++
++  if (retval=0) then begin   //timeout, appears to be ok...
++    Result:=true;
++    CommResult:=iorTimeOut;
++    incRetries:=true;
++    exit;
++  end;
++
++  if (retval<0) then begin //error on socket...
++    if Assigned(DoCommPortDisconected) then
++      DoCommPortDisconected();
++    CommResult:=iorPortError;
++    PActive:=false;
++    Result:=false;
++    exit;
++  end;
++
++  if (retval=1) then begin  // seems there is something in our receive buffer!!
++    // now we check how many bytes are in receive buffer
++    {$IFDEF FPC}
++    retval:=ioctlsocket(FSocket,FIONREAD,@nbytes);
++    {$ELSE}
++    retval:=ioctlsocket(FSocket,FIONREAD,nbytes);
++    {$ENDIF};
++
++    if (retval<>0) then begin  // some error occured
++      if Assigned(DoCommPortDisconected) then
++        DoCommPortDisconected();
++      CommResult:=iorPortError;
++      PActive:=false;
++      Result:=false;
++      exit;
++    end;
++
++    if (nbytes=0) then begin
++      if Assigned(DoCommPortDisconected) then
++        DoCommPortDisconected();
++      CommResult:=iorNotReady;
++      PActive:=false;
++      Result:=false;
++      exit;
++    end;
++
++    incRetries:=true;
++  end;
++end;
++
++function WaitForConnection(FListenerSocket:TSocket; timeout:LongInt):Boolean;
++var
++  sel:TFDSet;
++  mode:u_long;
++  tv : TTimeVal;
++  p:ptimeval;
++begin
++
++  if timeout=-1 then
++    p:=nil
++  else begin
++    tv.tv_Sec:=Timeout div 1000;
++    tv.tv_Usec:=(Timeout mod 1000)*1000;
++    p:=@tv;
++  end;
++
++
++  FD_ZERO(sel);
++  FD_SET(FListenerSocket, sel);
++  mode := select(FListenerSocket, @sel, nil, nil, p);
++
++  if (mode <= 0) then begin
++    Result := false;
++  end else
++    if (mode > 0) then begin
++      Result := true;
++    end;
++end;
++
++function GetNumberOfBytesInReceiveBuffer(socket: Tsocket): LongInt;
++var
++  retval, nbytes:LongInt;
++begin
++  Result:=0;
++
++  {$IFDEF FPC}
++  retval:=ioctlsocket(socket,FIONREAD,@nbytes);
++  {$ELSE}
++  retval:=ioctlsocket(socket,FIONREAD,nbytes);
++  {$ENDIF}
++
++  if retval<>0 then begin
++    Result:=-1;
++    exit;
++  end;
++
++  if (nbytes>0) then
++    Result:=nbytes;
++end;
++
++{$IF defined(WIN32) or defined(WIN64)}
++var
++  wsaData:TWSAData;
++  version:WORD;
++initialization
++
++  //inicialização Winsock
++  version := MAKEWORD( 2, 0 );
++
++  //check for error
++  if WSAStartup( version, wsaData ) <> 0 then
++    raise Exception.Create(SerrorInitializingWinsock);
++
++  //check for correct version
++  if (LOBYTE(wsaData.wVersion) <> 2) or (HIBYTE(wsaData.wVersion)<>0) then begin
++    //incorrect WinSock version
++    WSACleanup();
++    raise Exception.Create(SinvalidWinSockVersion);
++  end;
++finalization
++  WSACleanup;
++{$IFEND}
++end.
++

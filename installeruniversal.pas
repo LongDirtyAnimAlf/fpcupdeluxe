@@ -140,17 +140,20 @@ type
   // Gets the sequence representation for all modules in the ini file
   // Used to pass on to higher level code for selection, display etc.
   //todo: get Description field into module list
-  function GetModuleList(ConfigFile:string):string;
+  function GetModuleList:string;
   // gets alias for keywords in Dictionary.
   //The keyword 'list' is reserved and returns the list of keywords as commatext
-  function GetAlias(ConfigFile,Dictionary,keyword: string): string;
+  function GetAlias(Dictionary,keyword: string): string;
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
+  procedure SetConfigFile(aConfigFile: string);
 
-var sequences:string;
+var
+  sequences:string;
 
 Const
   CONFIGFILENAME='fpcup.ini';
+  SETTTINGSFILENAME='settings.ini';
 
 implementation
 
@@ -164,6 +167,7 @@ Const
   MAXRECURSIONS=10;
 
 var
+  CurrentConfigFile:string;
   IniGeneralSection:TStringList=nil;
   UniModuleList:TStringList=nil;
   UniModuleEnabledList:TStringlist=nil;
@@ -1298,14 +1302,14 @@ begin
     TStringList(UniModuleList.Objects[i]).free;
 end;
 
-function GetAlias(ConfigFile,Dictionary,KeyWord: string): string;
+function GetAlias(Dictionary,KeyWord: string): string;
 var
   ini:TMemIniFile;
   sl:TStringList;
   e:Exception;
 begin
 sl:=TStringList.Create;
-ini:=TMemIniFile.Create(ConfigFile);
+ini:=TMemIniFile.Create(CurrentConfigFile);
 ini.CaseSensitive:=false;
 try
   ini.ReadSection('ALIAS'+Dictionary,sl);
@@ -1316,7 +1320,7 @@ try
     result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
     if result='' then
       begin
-        // added because older fpc.ini may not have the default keyword !!
+        // added because older fpc.ini or equivalent may not have the default keyword !!
         if Uppercase(KeyWord)='DEFAULT' then
         begin
           infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
@@ -1336,7 +1340,7 @@ finally
 end;
 end;
 
-function GetModuleList(ConfigFile: string): string;
+function GetModuleList: string;
 var
   ini:TMemIniFile;
   i,j,maxmodules:integer;
@@ -1398,11 +1402,7 @@ var
 
 begin
   result:='';
-  // Create fpcup.ini from resource if it doesn't exist yet
-  if (ConfigFile=ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME)
-    and not FileExistsUTF8(CONFIGFILENAME) then
-    SaveInisFromResource(CONFIGFILENAME,'fpcup_ini');
-  ini:=TMemIniFile.Create(ConfigFile);
+  ini:=TMemIniFile.Create(CurrentConfigFile);
   ini.CaseSensitive:=false;
   ini.StripQuotes:=true; //helps read description lines
 
@@ -1511,8 +1511,6 @@ var
 begin
   result:=False;
 
-  // Create fpcup.ini from resource if it doesn't exist yet
-  if not FileExistsUTF8(CONFIGFILENAME) then SaveInisFromResource(CONFIGFILENAME,'fpcup_ini');
   ini:=TMemIniFile.Create(CONFIGFILENAME);
   try
     ini.CaseSensitive:=false;
@@ -1532,7 +1530,7 @@ begin
          // number of negative signs [-] must be one more than the number of list separators [,]
          if NegativeList AND (OccurrencesOfChar(os,'-')<>(OccurrencesOfChar(os,',')+1)) then
          begin
-           e:=Exception.Create('Invalid os list. Check os definition of module '+ModuleName+' inside fpcup.ini');
+           e:=Exception.Create('Invalid os list. Check os definition of module '+ModuleName+' inside '+CONFIGFILENAME+'.');
            raise e;
          end;
 
@@ -1574,7 +1572,7 @@ begin
          // number of negative signs [-] must be one more than the number of list separators [,]
          if NegativeList AND (OccurrencesOfChar(cpu,'-')<>(OccurrencesOfChar(cpu,',')+1)) then
          begin
-           e:=Exception.Create('Invalid cpu list. Check cpu definition of module '+ModuleName+' inside fpcup.ini');
+           e:=Exception.Create('Invalid cpu list. Check cpu definition of module '+ModuleName+' inside '+CONFIGFILENAME+'.');
            raise e;
          end;
 
@@ -1618,6 +1616,15 @@ begin
   for i:=0 to UniModuleEnabledList.Count -1 do
     ModuleList.Add(UniModuleEnabledList[i]);
   result:=true;
+end;
+
+procedure SetConfigFile(aConfigFile: string);
+begin
+  CurrentConfigFile:=aConfigFile;
+  // Create fpcup.ini from resource if it doesn't exist yet
+  if (CurrentConfigFile=ExtractFilePath(ParamStr(0))+CONFIGFILENAME)
+    and not FileExistsUTF8(CONFIGFILENAME) then
+    SaveInisFromResource(CONFIGFILENAME,'fpcup_ini');
 end;
 
 
