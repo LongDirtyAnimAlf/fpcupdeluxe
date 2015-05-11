@@ -2,7 +2,15 @@ Index: Lib/indylaz.lpk
 ===================================================================
 --- Lib/indylaz.lpk	(revision 5273)
 +++ Lib/indylaz.lpk	(working copy)
-@@ -20,6 +20,7 @@
+@@ -10,6 +10,7 @@
+       <PathDelim Value="\"/>
+       <SearchPaths>
+         <OtherUnitFiles Value=".;Core\;Design\;FCL\;Protocols\;Security\;SuperCore\;System\"/>
++        <IncludeFiles Value="$(ProjOutDir);FCL\"/>
+         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+       </SearchPaths>
+       <Parsing>
+@@ -20,6 +21,7 @@
        </Parsing>
        <Other>
          <CompilerPath Value="$(CompPath)"/>
