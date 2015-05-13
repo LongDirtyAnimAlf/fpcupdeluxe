@@ -695,6 +695,10 @@ var
   StaticPackages: TStringList;
   VersionSnippet: string;
   VersionList: TStringList;
+  i:integer;
+  LazBuildApp:string;
+  Output:string;
+  FReturnCode: integer;
 begin
   if DirectoryExistsUTF8(FPrimaryConfigPath) = false then
   begin
@@ -707,48 +711,70 @@ begin
   MajorVersion := -1;
   MinorVersion := -1;
   ReleaseVersion := -1;
-  if RPos('/', FURL) = Length(FURL) then
-    VersionSnippet := Copy(FURL, 1, Length(FURL) - 1)
-  else
-    VersionSnippet := Copy(FURL, 1, MaxInt);
-  // Strip out release candidate markings (lazarus1.4.8RCxxx)
-  if (RPos('RC', FURL) > 1) and (RPos('RC', FURL) > RPos('/', FURL)) then
-    VersionSnippet := Copy(FURL, 1, RPos('RC', FURL) - 1);
-  // Now strip out solitary trailing _
-  if RPos('_', FURL) > 1 then
-    VersionSnippet := Copy(FURL, 1, RPos('_', FURL) - 1);
-  // Finally remove everything before the last /
-  if RPos('/', FURL) > 0 then
-    VersionSnippet := Copy(FURL, RPos('/', FURL), MaxInt);
-  VersionList := TStringList.Create;
-  try
-    VersionList.Delimiter := '_';
-    VersionList.QuoteChar := '/'; //quotechar irrelevant here
-    VersionList.StrictDelimiter := true;
-    VersionList.DelimitedText := VersionSnippet;
-    // We now have lazarus_1_0_12 or similar
-    case VersionList.Count of
-      2:
-      begin
-        MajorVersion := StrToIntDef(VersionList[1], -1);
-        MinorVersion := 0;
-        ReleaseVersion := 0;
-      end;
-      3:
-      begin
-        MajorVersion := StrToIntDef(VersionList[1], -1);
-        MinorVersion := StrToIntDef(VersionList[2], -1);
-        ReleaseVersion := 0;
-      end;
-      4..maxint:
-      begin
-        MajorVersion := StrToIntDef(VersionList[1], -1);
-        MinorVersion := StrToIntDef(VersionList[2], -1);
-        ReleaseVersion := StrToIntDef(VersionList[3], -1);
-      end;
+
+  VersionSnippet:='';
+
+  LazBuildApp := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild' + GetExeExt;
+  ProcessEx.Executable := LazBuildApp;
+  ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
+  ProcessEx.Parameters.Clear;
+  ProcessEx.Parameters.Add('--version');
+  ProcessEx.Execute;
+  if ProcessEx.ExitStatus = 0 then
+  begin
+    i:=ProcessEx.OutputStrings.Count;
+    if i>1 then
+    begin
+      // second line of lazbuild outputs version info
+      VersionSnippet:=ProcessEx.OutputStrings.Strings[1];
+      VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
     end;
-  finally
-    VersionList.Free;
+  end;
+
+  if Length(VersionSnippet)=0 then
+  begin
+    VersionSnippet:=UpperCase(FURL);
+    // find first occurence of _ and delete everything before it
+    // if lazarus url contains a version, this version always starts with _
+    i := Pos('_',VersionSnippet);
+    if i>0 then
+    begin
+      Delete(VersionSnippet,1,i);
+      // ignore release candidate numbering
+      i := Pos('_RC',VersionSnippet);
+      if i>0 then Delete(VersionSnippet,i,200);
+      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
+    end;
+  end;
+
+  if Length(VersionSnippet)>0 then
+  begin
+    VersionList := TStringList.Create;
+    try
+      VersionList.CommaText := VersionSnippet;
+      case VersionList.Count of
+        1:
+        begin
+          MajorVersion := StrToIntDef(VersionList[0], -1);
+          //MinorVersion := 0;
+          //ReleaseVersion := 0;
+        end;
+        2:
+        begin
+          MajorVersion := StrToIntDef(VersionList[0], -1);
+          MinorVersion := StrToIntDef(VersionList[1], -1);
+          //ReleaseVersion := 0;
+        end;
+        3..maxint:
+        begin
+          MajorVersion := StrToIntDef(VersionList[0], -1);
+          MinorVersion := StrToIntDef(VersionList[1], -1);
+          ReleaseVersion := StrToIntDef(VersionList[2], -1);
+        end;
+      end;
+    finally
+      VersionList.Free;
+    end;
   end;
 
   LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, MajorVersion, MinorVersion, ReleaseVersion);

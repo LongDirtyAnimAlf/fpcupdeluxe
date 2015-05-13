@@ -429,6 +429,7 @@ var
   ConfigIndex: integer;
   FileName: string;
   NewConfig: TConfig;
+  Version:string;
 begin
   if ExtractFileName(ConfigFile)=Configfile then
   begin
@@ -454,11 +455,18 @@ begin
       case (ExtractFileName(ConfigFile)) of
         EnvironmentConfig:
           begin
+            Version:='';
+            if FLazarusMajorVer<>-1 then
+            begin
+              Version:=Version+inttostr(FLazarusMajorVer);
+              if FLazarusMinor<>-1 then
+              begin
+                Version:=Version+'.'+inttostr(FLazarusMinor);
+                if FLazarusRelease<>-1 then Version:=Version+'.'+inttostr(FLazarusRelease);
+              end;
+            end;
             // If we don't add these, we trigger an upgrade process on first start on Lazarus 1.1+.
-            NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',
-              inttostr(Max(FLazarusMajorVer,0))+'.'+
-              inttostr(Max(FLazarusMinor,0))+'.'+
-              inttostr(Max(FLazarusRelease,0)));
+            NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',Version);
             if FLazarusMajorVer=-1 then
             begin // default to newest. Update this when new version appears
               NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
@@ -472,26 +480,11 @@ begin
             end
             else if FLazarusMajorVer=1 then
               case FLazarusMinor of
-                0:
-                begin //1.0.x
-                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0
-                end;
-                1:
-                begin //1.1.x
-                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0,1.1
-                end;
-                2:
-                begin //1.2.x
-                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.2
-                end;
-                3:
-                begin //1.3.x
-                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.3
-                end;
-                4:
-                begin //1.4.x
-                  NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.4
-                end;
+                0 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0
+                1 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '107'); //for version 1.0,1.1
+                2 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.2
+                3 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.3
+                4 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.4
               else
                 begin //-1 or higher than 4 set to trunk version
                   NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
