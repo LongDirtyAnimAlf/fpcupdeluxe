@@ -1,5 +1,6 @@
 fpcup
-https://bitbucket.org/reiniero/fpcup/
+Original: https://bitbucket.org/reiniero/fpcup/
+New (this) : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup
 
 What is it?
 ===========
