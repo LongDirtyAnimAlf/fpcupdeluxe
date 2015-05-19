@@ -831,11 +831,7 @@ begin
                DiffFileSL:=TStringList.Create();
                try
                  DiffFileSL.LoadFromFile(DiffFile);
-                 {$IFDEF DARWIN}
                  DiffFileSL.TextLineBreakStyle:=tlbsCRLF;
-                 {$ELSE}
-                 DiffFileSL.LineBreak:=#13#10;
-                 {$ENDIF}
                  DiffFileSL.SaveToFile(DiffFile);
                  ReturnCode:=0;
                finally
