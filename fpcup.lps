@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Active="Default"/>
+    <BuildModes Active="linuxi386"/>
     <Units Count="39">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
@@ -16,8 +16,6 @@
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="440"/>
-        <CursorPos X="41" Y="451"/>
         <UsageCount Value="183"/>
         <Loaded Value="True"/>
       </Unit1>
@@ -120,8 +118,6 @@
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="19"/>
-        <TopLine Value="181"/>
-        <CursorPos X="9" Y="196"/>
         <UsageCount Value="183"/>
         <Loaded Value="True"/>
       </Unit15>
@@ -136,8 +132,6 @@
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="12"/>
-        <TopLine Value="199"/>
-        <CursorPos X="21" Y="219"/>
         <UsageCount Value="183"/>
         <Loaded Value="True"/>
       </Unit17>

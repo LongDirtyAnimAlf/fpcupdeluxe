@@ -904,9 +904,9 @@ function TFPCInstaller.InitModule:boolean;
 const
   // Common path used to get bootstrap compilers.
   //todo: replace when enough compilers are available via 2.6.2
-  FTPPath='ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
-  FTP262Path='ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
-  FTP264Path='ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
+  FTPPath='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
+  FTP262Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
+  FTP264Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
 var
   BootstrapVersion: string;
   Output: string;
