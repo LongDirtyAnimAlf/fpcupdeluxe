@@ -1,5 +1,8 @@
 { FPC/Lazarus installer/updater
-Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
+Copyright (C) 2012-2014 Reinier Olislagers, Ludo Brands
+
+Recent updates by Alfred, with the help of the fpc / lazarus community
+Icon by Taazz
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -810,6 +813,7 @@ end;
 var
   FPCupManager:TFPCupManager;
   res:integer;
+
 begin
   writeln('fpcup');
   writeln('An FPC/Lazarus downloader/updater/installer');
