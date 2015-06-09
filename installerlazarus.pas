@@ -723,10 +723,10 @@ begin
   if ProcessEx.ExitStatus = 0 then
   begin
     i:=ProcessEx.OutputStrings.Count;
-    if i>1 then
+    if i>0 then
     begin
-      // second line of lazbuild outputs version info
-      VersionSnippet:=ProcessEx.OutputStrings.Strings[1];
+      // lazbuild outputs version info
+      VersionSnippet:=ProcessEx.OutputStrings.Strings[i-1];
       VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
     end;
   end;

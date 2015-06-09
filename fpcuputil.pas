@@ -173,19 +173,24 @@ begin
 end;
 
 procedure SaveInisFromResource(filename,resourcename:string);
-var fs:Tfilestream;
+var
+  fs:Tfilestream;
 begin
-with TResourceStream.Create(hInstance, resourcename, 'file') do
-try
+  // See InstallerUniversal : the use of fpcup.rc and fpcup.res !!!!
+  // the two resouce files are now added via lazarus
+  with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+  //with TResourceStream.Create(hInstance, resourcename, 'file') do
   try
-    fs:=Tfilestream.Create(Filename,fmCreate);
-    Savetostream(fs);
+    try
+      fs:=Tfilestream.Create(Filename,fmCreate);
+      Savetostream(fs);
+    finally
+      fs.Free;
+    end;
   finally
-    fs.Free;
+    Free;
   end;
-finally
-  Free;
-end;
+
 end;
 
 {$IFDEF MSWINDOWS}

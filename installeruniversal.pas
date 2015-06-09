@@ -1135,6 +1135,14 @@ begin
         case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
            '.ZIP':
               ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+           '.7Z':
+           begin
+             ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+             if ResultCode <> 0 then
+             begin
+               ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+             end;
+           end;
            else {.tar and all others}
               ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
            end;
@@ -1155,6 +1163,14 @@ begin
       case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
          '.ZIP':
             ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+         '.7Z':
+         begin
+           ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+           if ResultCode <> 0 then
+           begin
+             ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+           end;
+         end;
          else {.tar and all others}
             ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
          end;

@@ -1,2 +1,2 @@
-fpcup_ini file "fpcup.ini"
-settings_ini file "settings.ini"
+fpcup_ini RCDATA "fpcup.ini"
+settings_ini RCDATA "settings.ini"

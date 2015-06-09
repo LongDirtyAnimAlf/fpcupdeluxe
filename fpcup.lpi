@@ -15,6 +15,10 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
       <Icon Value="0"/>
+      <Resources Count="2">
+        <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
+        <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
+      </Resources>
     </General>
     <i18n>
       <EnableI18N LFM="False"/>
@@ -258,6 +262,7 @@ end;"/>
           </Linking>
           <Other>
             <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-CpARMV6 -CfVFPV2 -OoFASTMATH"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -342,12 +347,12 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item9>
-      <Item10 Name="darwin">
+      <Item10 Name="darwin64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86_64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -360,7 +365,7 @@ end;"/>
 end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="i386"/>
+            <TargetCPU Value="x86_64"/>
             <TargetOS Value="darwin"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>

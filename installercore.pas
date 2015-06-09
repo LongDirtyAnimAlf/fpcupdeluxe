@@ -480,7 +480,7 @@ begin
     if OperationSucceeded then
     begin
       // Check for valid unzip executable, if it is needed
-      if FUnzip <> '' then
+      if FUnzip <> EmptyStr then
       begin
         {$IF (defined(BSD)) and (not defined(Darwin))}
         // FreeBSD doesn't have an unzip applicationt that responds without needing a zip file
@@ -513,6 +513,7 @@ begin
         OperationSucceeded := CheckExecutable(FTar, '--version', '');
       end;
     end;
+
     FNeededExecutablesChecked:=OperationSucceeded;
   end;
   Result := OperationSucceeded;
