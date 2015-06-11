@@ -700,6 +700,10 @@ var
   Output:string;
   FReturnCode: integer;
 begin
+
+  Result := true;
+
+
   if DirectoryExistsUTF8(FPrimaryConfigPath) = false then
   begin
     if ForceDirectoriesUTF8(FPrimaryConfigPath) then
@@ -857,6 +861,7 @@ begin
   finally
     LazarusConfig.Free;
   end;
+
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
