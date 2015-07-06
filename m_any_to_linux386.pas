@@ -85,13 +85,15 @@ begin
       DirName);
     result:=DirectoryExists(FLibsPath);
     if not result then
+    begin
       infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
-    {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
-    {$ENDIF}
+      {$IFDEF UNIX}
+      FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
+      result:=DirectoryExists(FLibsPath);
+      if not result then
+        infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
+      {$ENDIF}
+    end;
   end;
   if result then
   begin
