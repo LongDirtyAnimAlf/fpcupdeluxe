@@ -2,6 +2,12 @@ fpcup
 Original: https://bitbucket.org/reiniero/fpcup/
 New (this) : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup
 
+Acknowledgement
+===========
+As of August 28, 2015, this new repo contains all previous commits by Reinier.
+Many thanks towards user "Arvur" (see forum) for making this possible.
+Follow the fpcup development on http://forum.lazarus.freepascal.org/index.php/topic,27211.0.html
+
 What is it?
 ===========
 fpcup is basically a wrapper around svn/make on steroids. It tries to use the 
