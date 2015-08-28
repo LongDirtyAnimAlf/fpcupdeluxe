@@ -931,27 +931,33 @@ begin
       // Each time we build, we'll make our own starting with the ppc386.exe bootstrap compiler
       // This should eliminate issues with the wrong RTL etc (for trunk, only the exact same svn revision is supported)
       if FBootstrapCompilerURL='' then
-        FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
+        //FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
+        FBootstrapCompilerURL := FTP264Path+'i386-win32-ppc386.zip';
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
-      FBootstrapCompilerOverrideVersionCheck:=true;
       end
       else
       begin
       // Use regular x64 stable compiler
       if FBootstrapCompilerURL='' then
+      begin
         FBootstrapCompilerURL := FTP262Path+'x86_64-win64-ppcx64.zip';
+        FBootstrapCompilerOverrideVersionCheck:=true;
+      end;
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
       end;
     {$ELSE}
     // Win32
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
+      //FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
+      FBootstrapCompilerURL := FTP264Path+'i386-win32-ppc386.zip';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     {$endif win64}
     {$ENDIF MSWINDOWS}
     {$IFDEF Linux}
     //If compiled for x86 32 bit, install 32 bit
     //If compiled for x64, install x64 only.
+    // If we're using an old compiler to build >= fpc 3.0, we need this:
+    FBootstrapCompilerOverrideVersionCheck:=true;
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-linux-ppc386.bz2';
@@ -980,22 +986,31 @@ begin
     //We'll make our own ppc386 starting with the ppcuniversal bootstrap compiler
     //If we made it already pick it up here
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
-    if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
-    // If we're using an old compiler to build trunk, we need this:
+    // If we're using an old compiler to build >= fpc 3.0, we need this:
     FBootstrapCompilerOverrideVersionCheck:=true;
+    if FBootstrapCompilerURL='' then
+    begin
+      FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
+      FBootstrapCompilerOverrideVersionCheck:=false;
+    end;
     {$ENDIF Darwin}
     {$IFDEF FREEBSD}
     {$IFDEF CPU386}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP264Path+'i386-freebsd9-ppc386.bz2';
+      FBootstrapCompilerOverrideVersionCheck:=false;
+    end;
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-freebsd9-ppc386';
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP264Path+'x86_64-freebsd9-ppcx64.bz2';
+      FBootstrapCompilerOverrideVersionCheck:=false;
+    end;
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-freebsd9.ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF FREEBSD}

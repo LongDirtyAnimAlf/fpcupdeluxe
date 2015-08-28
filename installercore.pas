@@ -1017,6 +1017,9 @@ const
   // Changed to https
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
   //SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.4/apache24/svn-win32-1.8.4-ap24.zip/download';
+  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.13.zip';
+  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.14.zip';
+  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.0.zip';
   SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.13/apache24/svn-win32-1.8.13-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
