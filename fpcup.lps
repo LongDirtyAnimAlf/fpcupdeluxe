@@ -49,6 +49,7 @@ end;"/>
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -69,7 +70,7 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="18"/>
+        <EditorIndex Value="17"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
       </Unit3>
@@ -97,7 +98,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -136,7 +137,7 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="16"/>
+        <EditorIndex Value="15"/>
         <TopLine Value="783"/>
         <CursorPos X="5" Y="798"/>
         <UsageCount Value="192"/>
@@ -169,7 +170,7 @@ end;"/>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="17"/>
+        <EditorIndex Value="16"/>
         <UsageCount Value="192"/>
         <Loaded Value="True"/>
       </Unit15>
