@@ -443,7 +443,7 @@ begin
       end;
 
       try
-        FInstaller.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',true);
+        FInstaller.ReApplyLocalChanges:=Options.GetOption('','reapplylocalchanges',false);
       except
         on E: ECommandLineError do begin
         // option did not have an argument

@@ -478,30 +478,36 @@ function TUniversalInstaller.AddPackages(sl:TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
+  Location='Workingdir';
 var
   i:integer;
   PackagePath:string;
   Workingdir:string;
   BaseWorkingdir:string;
 begin
-  BaseWorkingdir:=GetValue('Workingdir',sl);
-  for i:=0 to MAXINSTRUCTIONS do
+
+  BaseWorkingdir:=GetValue(Location,sl);
+  PackagePath:=GetValue(Directive,sl);
+
+  // trick: run from -1 to allow the above basic statements to be processed first
+  for i:=-1 to MAXINSTRUCTIONS do
+  begin
+    if i>=0 then
     begin
-    if i=0
-       then PackagePath:=GetValue(Directive,sl)
-       else PackagePath:=GetValue(Directive+IntToStr(i),sl);
+      PackagePath:=GetValue(Directive+IntToStr(i),sl);
+      Workingdir:=GetValue(Location+IntToStr(i),sl);
+    end;
     // Skip over missing numbers:
     if PackagePath='' then continue;
-    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
-      begin
+    begin
       infoln('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',eterror);
       if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',false);
       break;
-      end;
     end;
+  end;
 end;
 
 {$IFDEF MSWINDOWS}
@@ -1426,11 +1432,11 @@ begin
   try
     maxmodules:=ini.ReadInteger('General','MaxSysModules',MAXSYSMODULES);
     ini.ReadSectionRaw('General',IniGeneralSection);
-    for i:=1 to maxmodules do
+    for i:=0 to maxmodules do
       if LoadModule('FPCUPModule'+IntToStr(i)) then
         result:=result+CreateModuleSequence('FPCUPModule'+IntToStr(i));
     maxmodules:=ini.ReadInteger('General','MaxUserModules',MAXUSERMODULES);
-    for i:=1 to maxmodules do
+    for i:=0 to maxmodules do
       if LoadModule('UserModule'+IntToStr(i))then
         result:=result+CreateModuleSequence('UserModule'+IntToStr(i));
     // the overrides in the [general] section
