@@ -1186,7 +1186,7 @@ begin
         infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
 
-      // todo patch package if patch is available
+      // todo patch package if correct patch is available in patch directory
 
     end;
 

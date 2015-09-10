@@ -1097,7 +1097,7 @@ var
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
   SearchRec:TSearchRec;
   s:string;
-  TxtFile:Text;  //cpuarmel
+  TxtFile:Text;
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64,ppcross8086';
@@ -1314,19 +1314,21 @@ begin
       Writeln(TxtFile,'# plain bin dir and architecture bin dir so');
       Writeln(TxtFile,'# fpc 3.1+ fpcres etc can be found.');
       Writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath));
+      {$IFDEF UNIX}
+      // Need to add appropriate library search path
+      // where it is e.g /usr/lib/arm-linux-gnueabihf...
+      Writeln(TxtFile,'# library search path');
+      Write(TxtFile,'-Fl/usr/lib/$fpctarget'+';'+'/usr/lib/$fpctarget-gnu');
+      {$IFDEF cpuarm}
+      {$IFDEF cpuarmhf}
+      Write(TxtFile,';'+'/usr/lib/$fpctarget-gnueabihf');
+      {$ELSE}
+      Write(TxtFile,';'+'/usr/lib/$fpctarget-gnueabi');
+      {$ENDIF cpuarmhf}
+      {$ENDIF cpuarm}
+      Writeln;
+      {$ENDIF UNIX}
       CloseFile(TxtFile);
-    {$IFDEF UNIX}
-    {$IF DEFINED(cpuarmel) or DEFINED(cpuarm)}
-      // Need to add multiarch library search path
-      // Probably also needed on raspbian armhf little endian
-      // where it is /usr/lib/arm-linux-gnueabihf...
-      AssignFile(TxtFile,FPCCfg);
-      Append(TxtFile);
-      Writeln(TxtFile,'# multiarch library search path');
-      Writeln(TxtFile,'-Fl/usr/lib/$fpctarget-*');
-      CloseFile(TxtFile);
-    {$ENDIF DEFINED(cpuarmel) or DEFINED(cpuarm)}
-    {$ENDIF UNIX}
     end
     else
     begin

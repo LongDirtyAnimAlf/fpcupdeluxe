@@ -212,7 +212,7 @@ begin
     // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android
+      FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android and Raspberry Pi
       infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
     end;
 

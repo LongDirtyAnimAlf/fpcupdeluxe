@@ -57,9 +57,9 @@ type
   TInstaller = class(TObject)
   private
     FKeepLocalChanges: boolean;
-    FPatchCmd: string;
     FReApplyLocalChanges: boolean;
     function GetMake: string;
+    function GetPatch: string;
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
@@ -86,12 +86,11 @@ type
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
     FMake: string;
-    FMakeDir: string; //Binutils/make directory
+    FMakeDir: string; //Binutils/make/patch directory
+    FPatch: string;
     FNeededExecutablesChecked: boolean;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
-    FPatchDirectory: string;
-    FPatch: string;
     FRepositoryUpdated: boolean;
     FURL: string;
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
@@ -100,6 +99,7 @@ type
     FUnzip: string;
     ProcessEx: TProcessEx;
     property Make: string read GetMake;
+    property Patch: string read GetPatch;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
     // Check executable is the right one: run Executable with Parameters
@@ -109,7 +109,7 @@ type
     procedure CreateBinutilsList;
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
-    // Download make.exe, unzip.exe etc into the make directory (only implemented for Windows):
+    // Download make.exe, unzip.exe patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     // Clone/update using HG; use FBaseDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
@@ -122,11 +122,9 @@ type
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadSVN: boolean;
-    // Download patch utility and set FPatch if succesful.
-    function DownloadPatch: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
-    function FindSubDirs(const whattofind:string=''): boolean;
+    function FindSVNSubDirs: boolean;
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
     function GetCrossInstaller: TCrossInstaller;
@@ -168,8 +166,6 @@ type
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
-    // Patch utility to use. Defaults to 'patch -p0 -i patchfile'
-    property PatchCmd:string write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn
@@ -241,6 +237,17 @@ begin
     {$ENDIF}
     {$ENDIF MSWINDOWS}
   Result := FMake;
+end;
+
+function TInstaller.GetPatch: string;
+begin
+  if FPatch = '' then
+    {$IFDEF MSWINDOWS}
+    FPatch := IncludeTrailingPathDelimiter(FMakeDir) + 'patch' + GetExeExt;
+    {$ELSE}
+    FPatch := 'patch';
+    {$ENDIF MSWINDOWS}
+  Result := FPatch;
 end;
 
 procedure TInstaller.SetHTTPProxyHost(AValue: string);
@@ -371,8 +378,24 @@ begin
         ExecuteCommand(Make + ' -v', Output, FVerbose);
         if Ansipos('GNU Make', Output) = 0 then
         begin
-          infoln('Found make executable but it is not GNU Make.',etWarning);
+          infoln('Found make executable but it is not GNU Make.',etError);
           OperationSucceeded := false;
+        end;
+      except
+        // ignore errors, this is only an extra check
+      end;
+    end;
+
+    if OperationSucceeded then
+    begin
+      // Check for proper patch executable
+      try
+        ExecuteCommand(Patch + ' -v', Output, FVerbose);
+        // a good patch has the name of its original autor in its version info !!
+        if Ansipos('Larry Wall', Output) = 0 then
+        begin
+          infoln('Found no patch executable but I will continue.',etWarning);
+          //OperationSucceeded := false;
         end;
       except
         // ignore errors, this is only an extra check
@@ -383,17 +406,15 @@ begin
     begin
       // Look for SVN executable and set it if found:
       AllThere:=FSVNClient.ValidClient;
-      if FSVNClient.FindRepoExecutable = '' then
+      if Length(FSVNClient.FindRepoExecutable)=0 then
       begin
         {$IFDEF MSWINDOWS}
         // Make sure we have a sensible default.
         // Set it here so multiple calls will not redownload SVN all the time
         if FSVNDirectory = '' then
           FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
-        {$ENDIF MSWINDOWS}
         // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
-        FindSubDirs;
-        {$IFDEF MSWINDOWS}
+        FindSVNSubDirs;
         // If it still can't be found, download it
         if FSVNClient.RepoExecutable = '' then
         begin
@@ -415,66 +436,6 @@ begin
       begin
         WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
       end;
-    end;
-
-    if OperationSucceeded then
-    begin
-
-      AllThere:=(Length(FPatch)>0);
-
-      // Look for Patch executable in patch and set it if found:
-      if FPatch = '' then
-      begin
-        FPatch:=FindDefaultExecutablePath('patch');
-        if FPatch <> '' then
-        begin
-          if NOT CheckExecutable(FPatch, '--version', '') then FPatch := '';
-        end;
-      end;
-
-      if FPatch = '' then
-      begin
-
-        // first search for default patch utility in make dir
-        FPatchDirectory := IncludeTrailingPathDelimiter(FMakeDir);
-        FindSubDirs('patch');
-
-        {$IFDEF MSWINDOWS}
-        // still no patch found ... search further ... only on Windows
-        if FPatch = '' then
-        begin
-          // Make sure we have a sensible default.
-          // Set it here so multiple calls will not redownload patch all the time
-          FPatchDirectory := IncludeTrailingPathDelimiter(FMakeDir) + 'patch' + DirectorySeparator;
-          // Look in or below FPatchDirectory; will set FPatch
-          FindSubDirs('patch');
-          // If it still can't be found, download it
-          if FPatch = '' then
-          begin
-            infoln('Going to download patch utility',etInfo);
-            // Download will look in and below FPatchDirectory
-            // and set FPatch if succesful
-            OperationSucceeded := DownloadPatch;
-            // however, still could fail due to admin rights needed for patching ... get a manifest file !!
-            // this is todo
-          end;
-        end;
-        {$ENDIF}
-        // Regardless of platform, patch should now be either set up correctly or we should give up.
-      end;
-
-      if FPatch = '' then
-      begin
-        infoln('Could not find patch executable. Please make sure it is installed.',eterror);
-        OperationSucceeded := false;
-      end
-      else FPatchCmd:=FPatch;
-
-      if (NOT AllThere) AND ((Length(FPatch)>0)) then
-      begin
-        WritelnLog('Patch utility found: ' + FPatch, true);
-      end;
-
     end;
 
     if OperationSucceeded then
@@ -605,7 +566,7 @@ begin
   AddNewUtil('gcc' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('grep' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('patch' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('patch.exe.manifest',SourceURL,'',ucBinutil);
+  AddNewUtil('patch' + GetExeExt + '.manifest',SourceURL,'',ucBinutil);
   AddNewUtil('unzip' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('windres' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('windres.h',SourceURL,'',ucBinutil);
@@ -620,7 +581,7 @@ begin
   AddNewUtil('gdb' + GetExeExt,SourceURL,'',ucDebugger);
   AddNewUtil('gecho' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('ginstall.exe.manifest',SourceURL,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt + '.manifest',SourceURL,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('GoRC' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('libexpat-1.dll',SourceURL_gdb,'',ucDebugger);
@@ -815,9 +776,7 @@ begin
       if FReApplyLocalChanges and (DiffFile<>'') then
       begin
          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-         if FPatchCmd='' then FPatchCmd:='patch';
-         // patch with -p1
-         ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p1 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+         ReturnCode:=ExecuteCommandInDir(Patch+' -p1 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
          {$IFNDEF MWINDOWS}
          if ReturnCode<>0 then
          begin
@@ -842,7 +801,7 @@ begin
                //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
              end;
              if ReturnCode=0 then
-                ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
+                ReturnCode:=ExecuteCommandInDir(Patch+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
            end;
          end;
          {$ENDIF}
@@ -970,8 +929,7 @@ begin
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
       begin
         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-        if FPatchCmd='' then FPatchCmd:='patch';
-        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
         {$IFNDEF MWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
         begin
@@ -996,7 +954,7 @@ begin
               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
             end;
             if CheckoutOrUpdateReturnCode=0 then
-               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
+               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(Patch+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
           end;
         end;
         {$ENDIF}
@@ -1094,62 +1052,12 @@ begin
 
   if OperationSucceeded then
   begin
-    OperationSucceeded := FindSubDirs;
+    OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
   end;
   Result := OperationSucceeded;
 end;
-
-function TInstaller.DownloadPatch: boolean;
-const
-  PATCH_URL = 'http://sourceforge.net/projects/gnuwin32/files/patch/2.5.9-7/patch-2.5.9-7-bin.zip/download';
-var
-  OperationSucceeded: boolean;
-  ResultCode: longint;
-  PatchZip: string;
-begin
-  OperationSucceeded := true;
-
-  ForceDirectoriesUTF8(FPatchDirectory);
-  PatchZip := SysUtils.GetTempFileName + '.zip';
-
-  try
-    OperationSucceeded:=Download(PATCH_URL,PatchZip);
-  except
-    on E: Exception do
-    begin
-      // Deal with timeouts, wrong URLs etc
-      OperationSucceeded:=false;
-      infoln('Download patch utility failed. URL: '+PATCH_URL+LineEnding+
-         'Exception: '+E.ClassName+'/'+E.Message, etWarning);
-    end;
-  end;
-
-  if OperationSucceeded then
-  begin
-    // Extract, overwrite
-    if ExecuteCommand(FUnzip + ' -o -d ' + FPatchDirectory + ' ' + PatchZip, FVerbose) <> 0 then
-    begin
-      OperationSucceeded := false;
-      writelnlog('DownloadPatch: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
-    end;
-  end
-  else
-  begin
-    writelnlog('ERROR downloading patch utility from ' + PATCH_URL, true);
-  end;
-
-  if OperationSucceeded then
-  begin
-    // find patch executable
-    OperationSucceeded := FindSubDirs('patch');
-    if OperationSucceeded then
-      SysUtils.Deletefile(PatchZip); //Get rid of temp zip if success.
-  end;
-  Result := OperationSucceeded;
-end;
-
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
 begin
@@ -1167,36 +1075,26 @@ begin
   DumpConsole(Sender, output);
 end;
 
-function TInstaller.FindSubDirs(const whattofind:string=''): boolean;
+function TInstaller.FindSVNSubDirs: boolean;
 var
-  LocalFiles: TStringList;
+  SVNFiles: TStringList;
   OperationSucceeded: boolean;
-  LocalDirectory:string;
-  localwhattofind:string;
 begin
-
-  localwhattofind:=whattofind;
-  if whattofind='' then localwhattofind:=FSVNClient.RepoExecutableName;
-
-  if localwhattofind=FSVNClient.RepoExecutableName then LocalDirectory:=FSVNDirectory;
-  if localwhattofind='patch' then LocalDirectory:=FPatchDirectory;
-
-  LocalFiles := FindAllFiles(LocalDirectory, localwhattofind + GetExeExt, true);
+  SVNFiles := FindAllFiles(FSVNDirectory, 'svn' + GetExeExt, true);
   try
-    if (LocalFiles.Count > 0) then
+    if SVNFiles.Count > 0 then
     begin
       // Just get first result.
-      if localwhattofind=FSVNClient.RepoExecutableName then FSVNClient.RepoExecutable := LocalFiles.Strings[0];
-      if localwhattofind='patch' then FPatch := LocalFiles.Strings[0];
+      FSVNClient.RepoExecutable := SVNFiles.Strings[0];
       OperationSucceeded := true;
     end
     else
     begin
-      infoln('Could not find '+localwhattofind+' executable in or under ' + LocalDirectory,etwarning);
+      infoln('Could not find svn executable in or under ' + FSVNDirectory,etwarning);
       OperationSucceeded := false;
     end;
   finally
-    LocalFiles.Free;
+    SVNFiles.Free;
   end;
   Result := OperationSucceeded;
 end;

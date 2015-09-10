@@ -211,7 +211,7 @@ end;
 
 function TRepoClient.GetValidClient:boolean;
 begin
-  result:=FileExists(FRepoExecutable);
+  result:=( (Length(FRepoExecutable)<>0) AND (FileExists(FRepoExecutable)) );
 end;
 
 function TRepoClient.DoubleQuoteIfNeeded(FileName: string): string;

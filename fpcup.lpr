@@ -422,7 +422,6 @@ begin
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
-      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','',false);
       // Deal with options coming from ini (e.g. Help=true)
       try
         bHelp:=Options.GetOption('h','help',false);
