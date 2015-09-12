@@ -120,9 +120,6 @@ function Which(Executable: string): string;
 
 implementation
 uses
-  ssl_openssl {for downloading from https},
-  //ssl_openssl_lib {for IsSSLloaded to check for availability of ssl library},
-  //blcksock {for SSLImplementation = TSSLNone to check for availability of ssl library},
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil {lazutils, for utf8 functions?!?},
@@ -217,7 +214,7 @@ begin
   { Get the desktop location }
   SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, PIDL);
   SHGetPathFromIDList(PIDL, InFolder);
-  LinkName := InFolder + DirectorySeparator + ShortcutName+'.lnk';
+  LinkName := IncludeTrailingPathDelimiter(InFolder) + ShortcutName+'.lnk';
 
   { Get rid of any existing shortcut first }
   SysUtils.DeleteFile(LinkName);
@@ -602,7 +599,7 @@ begin
   { Get the desktop location }
   SHGetSpecialFolderLocation(0, CSIDL_DESKTOPDIRECTORY, PIDL);
   SHGetPathFromIDList(PIDL, InFolder);
-  LinkName := InFolder + DirectorySeparator + ShortcutName+'.lnk';
+  LinkName := IncludeTrailingPathDelimiter(InFolder) + ShortcutName+'.lnk';
   SysUtils.DeleteFile(LinkName);
 end;
 {$ENDIF MSWINDOWS}
@@ -793,12 +790,6 @@ end;
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin
   result:=false;
-
-  //if ( ( (Copy(URL, 1, Length('https://'))='https://') OR ((Copy(URL, 1, Length('ftps://'))='ftps://')) ) AND (SSLImplementation = TSSLNone) ) then
-  //begin
-  //  infoln('Download: error downloading from '+URL+': Missing ssl libraries. Get them from e.g. http://indy.fulgan.com/SSL', eterror);
-  //  exit;
-  //end;
 
   // Assume http if no ftp detected
   try

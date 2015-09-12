@@ -218,8 +218,10 @@ function TRepoClient.DoubleQuoteIfNeeded(FileName: string): string;
 begin
   {$IFDEF MSWINDOWS}
   // Unfortunately, we need to double quote in case there's spaces in the path and it's e.g. a .cmd file
-  if Copy(FileName, 1, 1) <> '"' then
-    Result := '"' + FileName + '"';
+  result:=Trim(FileName);
+  if Pos(' ',result)>0 then
+  //if Copy(FileName, 1, 1) <> '"' then
+     Result := '"' + Result + '"';
   {$ELSE}
   Result := filename;
   {$ENDIF}

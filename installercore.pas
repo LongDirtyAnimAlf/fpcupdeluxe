@@ -121,10 +121,15 @@ type
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
+    {$IFDEF MSWINDOWS}
     function DownloadSVN: boolean;
+    function DownloadOpenSSL: boolean;
+    {$ENDIF}
     procedure DumpOutput(Sender: TProcessEx; output: string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
+    {$IFDEF MSWINDOWS}
     function FindSVNSubDirs: boolean;
+    {$ENDIF}
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
     function GetCrossInstaller: TCrossInstaller;
@@ -194,8 +199,13 @@ type
 
 implementation
 
-uses installerfpc, fileutil, openssl;
-
+uses
+  installerfpc, fileutil
+  // for runtime init of openssl
+  {$IFDEF MSWINDOWS}
+  ,blcksock, ssl_openssl_lib, ssl_openssl
+  {$ENDIF}
+  ;
 
 { TInstaller }
 
@@ -394,47 +404,11 @@ begin
         // a good patch has the name of its original autor in its version info !!
         if Ansipos('Larry Wall', Output) = 0 then
         begin
-          infoln('Found no patch executable but I will continue.',etWarning);
+          infoln('Found no patch executable but I will continue without it.',etWarning);
           //OperationSucceeded := false;
         end;
       except
         // ignore errors, this is only an extra check
-      end;
-    end;
-
-    if OperationSucceeded then
-    begin
-      // Look for SVN executable and set it if found:
-      AllThere:=FSVNClient.ValidClient;
-      if Length(FSVNClient.FindRepoExecutable)=0 then
-      begin
-        {$IFDEF MSWINDOWS}
-        // Make sure we have a sensible default.
-        // Set it here so multiple calls will not redownload SVN all the time
-        if FSVNDirectory = '' then
-          FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
-        // Look in or below FSVNDirectory; will set FSVNClient.SVNExecutable
-        FindSVNSubDirs;
-        // If it still can't be found, download it
-        if FSVNClient.RepoExecutable = '' then
-        begin
-          infoln('Going to download SVN',etInfo);
-          // Download will look in and below FSVNDirectory
-          // and set FSVNClient.SVNExecutable if succesful
-          OperationSucceeded := DownloadSVN;
-        end;
-        {$ENDIF}
-
-        // Regardless of platform, SVN should now be either set up correctly or we should give up.
-        if FSVNClient.RepoExecutable = '' then
-        begin
-          infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
-          OperationSucceeded := false;
-        end;
-      end;
-      if (NOT AllThere) AND (FSVNClient.ValidClient) then
-      begin
-        WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
       end;
     end;
 
@@ -452,6 +426,65 @@ begin
         OperationSucceeded := CheckExecutable(FUnzip, '-v', '');
         {$ENDIF (defined(BSD)) and (not defined(Darwin))}
       end;
+    end;
+
+    {$IFDEF MSWINDOWS}
+    if OperationSucceeded then
+    begin
+      // check availability of OpenSSL libraries. Just continue in case oof error
+      if FileExists(ExtractFilePath(ParamStr(0))+'libeay32.dll') AND FileExists(ExtractFilePath(ParamStr(0))+'ssleay32.dll') then
+      begin
+        infoln('Found OpenSLL library files.',etInfo);
+      end
+      else
+      begin
+        infoln('No OpenSLL library files available. Going to download them',etWarning);
+        DownloadOpenSSL;
+      end;
+    end;
+    {$ENDIF}
+
+
+    if OperationSucceeded then
+    begin
+      // Look for (ini-file) default SVN executable
+      AllThere:=FSVNClient.ValidClient;
+
+      {$IFDEF MSWINDOWS}
+      if NOT AllThere then
+      begin
+        // look local (only for Windows: we could have downloaded a SVN client earlier)
+        // will look in and below FSVNDirectory
+        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
+        AllThere:=FindSVNSubDirs;
+      end;
+      {$ENDIF}
+
+      if NOT AllThere then
+      begin
+        // look system default
+        FSVNDirectory := '';
+        AllThere:=Length(FSVNClient.FindRepoExecutable)<>0;
+        //AllThere:=Length(FSVNClient.RepoExecutable)<>0;
+      end;
+
+      {$IFDEF MSWINDOWS}
+      if NOT AllThere then
+      begin
+        infoln('Going to download SVN',etInfo);
+        // Download will look in and below FSVNDirectory
+        // and set FSVNClient.SVNExecutable if succesful
+        FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
+        AllThere := DownloadSVN;
+      end;
+      {$ENDIF}
+
+      // Regardless of platform, SVN should now be either set up correctly or we should give up.
+      if NOT AllThere then
+      begin
+        OperationSucceeded := false;
+        infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
+      end else WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
     end;
 
     if OperationSucceeded then
@@ -969,6 +1002,7 @@ begin
   end;
 end;
 
+{$IFDEF MSWINDOWS}
 function TInstaller.DownloadSVN: boolean;
 const
   //SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
@@ -978,7 +1012,8 @@ const
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.13.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.14.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.0.zip';
-  SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.13/apache24/svn-win32-1.8.13-ap24.zip/download';
+  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
+  //SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.13/apache24/svn-win32-1.8.13-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
@@ -1003,14 +1038,14 @@ begin
   Decided to use this anyway.}
   OperationSucceeded := true;
 
-  {$IFDEF MSWINDOWS}
   // This svn version won't work on windows 2K
   if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
   begin
     writelnlog('ERROR: it seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
     exit(false);
   end;
-  {$ENDIF}
+
+
 
   ForceDirectoriesUTF8(FSVNDirectory);
 
@@ -1052,12 +1087,77 @@ begin
 
   if OperationSucceeded then
   begin
+    WritelnLog('SVN download and unpacking ok. Not going to search SVN client itself in ' + FSVNDirectory, true);
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
   end;
   Result := OperationSucceeded;
 end;
+
+function TInstaller.DownloadOpenSSL: boolean;
+const
+  {$ifdef win64}
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2d-x64_86-win64.zip';
+  {$endif}
+  {$ifdef win32}
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2d-i386-win32.zip';
+  {$endif}
+var
+  OperationSucceeded: boolean;
+  ResultCode: longint;
+  OpenSSLZip: string;
+begin
+  OperationSucceeded := true;
+
+  ForceDirectoriesUTF8(ExtractFilePath(ParamStr(0)));
+
+  OpenSSLZip := SysUtils.GetTempFileName + '.zip';
+  try
+    if OperationSucceeded then
+    begin
+      OperationSucceeded := Download(
+        SourceURL,
+        OpenSSLZip,
+        FHTTPProxyUser,
+        inttostr(FHTTPProxyPort),
+        FHTTPProxyUser,
+        FHTTPProxyPassword);
+    end;
+  except
+    // Deal with timeouts, wrong URLs etc
+    on E: Exception do
+    begin
+      OperationSucceeded := false;
+      writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library from ' + SourceURL, true);
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Extract, overwrite
+    resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + ExtractFilePath(ParamStr(0)) + ' ' + OpenSSLZip + ' libeay32.dll ssleay32.dll' , FVerbose);
+    if resultcode <> 0 then
+    begin
+      OperationSucceeded := false;
+      writelnlog('Download OpenSSL: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    WritelnLog('OpenSLL download and unpacking ok.', true);
+    SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
+  end;
+  Result := OperationSucceeded;
+
+  //SslLibraryInit;
+  if InitSSLInterface then
+      SSLImplementation := TSSLOpenSSL;
+end;
+
+{$ENDIF}
+
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
 begin
@@ -1075,12 +1175,13 @@ begin
   DumpConsole(Sender, output);
 end;
 
+{$IFDEF MSWINDOWS}
 function TInstaller.FindSVNSubDirs: boolean;
 var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
-  SVNFiles := FindAllFiles(FSVNDirectory, 'svn' + GetExeExt, true);
+  SVNFiles := FindAllFiles(FSVNDirectory, FSVNClient.RepoExecutableName + GetExeExt, true);
   try
     if SVNFiles.Count > 0 then
     begin
@@ -1098,7 +1199,46 @@ begin
   end;
   Result := OperationSucceeded;
 end;
-
+{
+// experiments
+function TInstaller.FindSVNSubDirs: boolean;
+procedure FileSearch(const dirName:string);
+var
+  searchResult: TSearchRec;
+begin
+  result:='';
+  WritelnLog('Going to search for SVN client in ' + IncludeTrailingBackSlash(dirName)+'*');
+  if FindFirst(IncludeTrailingBackSlash(dirName)+'*', faAnyFile, searchResult)=0 then
+  begin
+    try
+      repeat
+        if (searchResult.Attr and faDirectory)=0 then
+        begin
+          if SameText(searchResult.Name, FSVNClient.RepoExecutableName + GetExeExt) then
+          begin
+            FSVNClient.RepoExecutable:=IncludeTrailingBackSlash(dirName)+searchResult.Name;
+          end;
+        end else if (searchResult.Name<>'.') and (searchResult.Name<>'..') then
+        begin
+          FileSearch(IncludeTrailingBackSlash(dirName)+searchResult.Name);
+        end;
+      until ( (FindNext(searchResult)<>0) OR (Length(FSVNClient.RepoExecutable)<>0) );
+    finally
+      FindClose(searchResult);
+    end;
+  end;
+end;
+begin
+  FSVNClient.RepoExecutable := '';
+  FSVNClient.RepoExecutable := FileSearch(FSVNDirectory);
+  WritelnLog('SVN search finished. Found: ' + FSVNClient.RepoExecutable);
+  result:=Length(FSVNClient.RepoExecutable)>0;
+  if result
+     then WritelnLog('SVN search finished. Found: ' + FSVNClient.RepoExecutable)
+     else WritelnLog('SVN search failed');
+end;
+}
+{$ENDIF}
 
 function TInstaller.GetFPCTarget(Native: boolean): string;
 var

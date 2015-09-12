@@ -38,7 +38,8 @@ interface
 uses
   Classes, SysUtils,
   processutils,
-  FileUtil {Requires LCL}, repoclient;
+  FileUtil {Requires LCL},
+  repoclient;
 
 const
   // Custom return codes
@@ -105,32 +106,49 @@ begin
 end;
 
 function TSVNClient.FindRepoExecutable: string;
+var
+  //Output: string;
+  rv:integer;
 begin
   Result := FRepoExecutable;
-  // Look in path
-  // Windows: will also look for <SVNName>.exe
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
 
-{$IFDEF MSWINDOWS}
-  // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
-  // Covers both 32 bit and 64 bit Windows.
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\' + RepoExecutableName + '.exe');
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\' + RepoExecutableName + '.exe');
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\' + RepoExecutableName + '.exe');
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\' + RepoExecutableName + '.exe');
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\' + RepoExecutableName + '.exe');
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\' + RepoExecutableName + '.exe');
-  //Directory where current executable is:
-  if not FileExists(FRepoExecutable) then
-    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + RepoExecutableName + '.exe');
-{$ENDIF MSWINDOWS}
+  while True do
+  begin
+
+    // Look in path
+    // Windows: will also look for <SVNName>.exe
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName)
+       else break;
+
+    {$IFDEF MSWINDOWS}
+    // Some popular locations for SlikSVN, Subversion, and TortoiseSVN:
+    // Covers both 32 bit and 64 bit Windows.
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Subversion\bin\' + RepoExecutableName + '.exe')
+       else break;
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Subversion\bin\' + RepoExecutableName + '.exe')
+       else break;
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := GetEnvironmentVariable('ProgramFiles\SlikSvn\bin\' + RepoExecutableName + '.exe')
+       else break;
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\SlikSvn\bin\' + RepoExecutableName + '.exe')
+       else break;
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := GetEnvironmentVariable('ProgramFiles\TorToiseSVN\bin\' + RepoExecutableName + '.exe')
+       else break;
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToiseSVN\bin\' + RepoExecutableName + '.exe')
+       else break;
+    //Directory where current executable is:
+    if not FileExists(FRepoExecutable)
+       then FRepoExecutable := (ExtractFilePath(ParamStr(0)) + RepoExecutableName + '.exe')
+       else break;
+   {$ENDIF MSWINDOWS}
+    break;
+  end;
 
   if not FileExists(FRepoExecutable) then
   begin
@@ -147,10 +165,19 @@ begin
   // If file exists, check for valid svn executable
   if FileExists(FRepoExecutable) then
   begin
-    if ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose) <> 0 then
+    rv:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Verbose);
+    if rv<>0 then
     begin
       FRepoExecutable := '';
     end;
+    {
+    rv:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Output, Verbose);
+    // a good SVN has version info. If not : error !!
+    if Ansipos('version', Output) = 0 then
+    begin
+      FRepoExecutable := '';
+    end;
+    }
   end
   else
   begin

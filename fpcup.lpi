@@ -73,6 +73,9 @@ end;"/>
             </Debugging>
           </Linking>
           <Other>
+            <Verbosity>
+              <ShowAll Value="True"/>
+            </Verbosity>
             <WriteFPCLogo Value="False"/>
             <CustomOptions Value="-dDEBUG"/>
             <ExecuteBefore>

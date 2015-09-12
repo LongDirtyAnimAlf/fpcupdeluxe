@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="2" Active="linux64">
+    <BuildModes Count="2" Active="win32">
       <Item1 Name="darwin32">
         <CompilerOptions>
           <Version Value="11"/>
@@ -95,13 +95,14 @@ end;"/>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="11"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit2>
@@ -123,7 +124,7 @@ end;"/>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="13"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -131,7 +132,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -139,7 +140,7 @@ end;"/>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit7>
@@ -170,8 +171,9 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -192,15 +194,16 @@ end;"/>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="winInstaller"/>
-        <EditorIndex Value="9"/>
+        <EditorIndex Value="12"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit14>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit15>
       <Unit16>
         <Filename Value="hgclient.pas"/>
@@ -211,15 +214,16 @@ end;"/>
       <Unit17>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit17>
       <Unit18>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit18>
       <Unit19>
         <Filename Value="m_freebsd_to_linux386.pas"/>
@@ -287,8 +291,6 @@ end;"/>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="69"/>
-        <CursorPos X="32" Y="87"/>
         <UsageCount Value="200"/>
       </Unit27>
       <Unit28>
@@ -300,9 +302,8 @@ end;"/>
       <Unit29>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit29>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
@@ -347,9 +348,8 @@ end;"/>
       <Unit35>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit35>
       <Unit36>
         <Filename Value="m_win32_to_linuxmips.pas"/>
@@ -362,6 +362,7 @@ end;"/>
       <Unit37>
         <Filename Value="cpucount.pas"/>
         <IsPartOfProject Value="True"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
       </Unit37>
       <Unit38>
@@ -375,7 +376,7 @@ end;"/>
     </Units>
   </ProjectSession>
   <Debugging>
-    <BreakPoints Count="6">
+    <BreakPoints Count="10">
       <Item1>
         <Kind Value="bpkSource"/>
         <WatchScope Value="wpsLocal"/>
@@ -418,6 +419,34 @@ end;"/>
         <Source Value="installermanager.pas"/>
         <Line Value="569"/>
       </Item6>
+      <Item7>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="repoclient.pas"/>
+        <Line Value="130"/>
+      </Item7>
+      <Item8>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="installercore.pas"/>
+        <Line Value="631"/>
+      </Item8>
+      <Item9>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="installercore.pas"/>
+        <Line Value="187"/>
+      </Item9>
+      <Item10>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="fpcuputil.pas"/>
+        <Line Value="865"/>
+      </Item10>
     </BreakPoints>
   </Debugging>
 </CONFIG>
