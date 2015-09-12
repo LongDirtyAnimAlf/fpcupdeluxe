@@ -203,7 +203,7 @@ uses
   installerfpc, fileutil
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
-  ,blcksock, ssl_openssl_lib, ssl_openssl
+  ,blcksock, ssl_openssl, ssl_openssl_lib
   {$ENDIF}
   ;
 

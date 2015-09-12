@@ -518,6 +518,24 @@ var
   HTTPGetResult: boolean;
   HTTPSender: THTTPSend;
   RetryAttempt: integer;
+  fs:TFileStream;
+function GetRedirectUrl: string;
+var
+  i: integer;
+  Line: string;
+begin
+  Result:='';
+  for i := 0 to HTTPSender.Headers.Count-1 do
+  begin
+    Line:=LowerCase(HTTPSender.Headers[i]);
+    if Pos('location:',Line)>0 then
+    begin
+      Result:=Trim(StringReplace(Line,'Location:','',[rfIgnoreCase]));
+      Exit;
+    end;
+  end;
+end;
+
 begin
   result:=false;
   RetryAttempt:=1;
@@ -561,7 +579,20 @@ begin
             end;
             result:=true;
           end; //informational, success
-        300..399: result:=false; //redirection. Not implemented, but could be.
+        300..301: result:=false; //Other redirection. Not implemented, but could be.
+        302:
+        begin
+          URL:=GetRedirectUrl;
+          // do we have a redirect from github for a direct download of a file ?
+          if Pos('codeload.github.com',URL)>0 then
+          begin
+            fs:=TFileStream.Create(TargetFile,fmCreate or fmOpenWrite);
+            HTTPGetBinary(URL, fs);
+            fs.free;
+            result:=true;
+          end else result:=false;
+        end;
+        303..399: result:=false; //Other redirection. Not implemented, but could be.
         400..499: result:=false; //client error; 404 not found etc
         500..599: result:=false; //internal server error
         else result:=false; //unknown code

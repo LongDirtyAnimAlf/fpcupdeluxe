@@ -65,8 +65,8 @@ uses {$IFDEF UNIX}
   m_win32_to_wincearm,
   m_win32_to_linux386,
   m_win64_to_linux64,
-  synacode, ftpsend, synafpc, synaip, synautil, synsock,
-  blcksock, installerCore, installerfpc, installerLazarus, installerHelp,
+  synacode, ftpsend, synafpc, synaip, synautil, synsock,  blcksock, ssl_openssl,
+  installerCore, installerfpc, installerLazarus, installerHelp,
   installerUniversal, installerManager, wininstaller, commandline,
   hgclient, svnclient, repoclient, gitclient, cpucount;
 

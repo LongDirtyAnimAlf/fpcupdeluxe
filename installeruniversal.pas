@@ -1120,7 +1120,7 @@ begin
     if RemoteURL<>'' then
     begin
       if CheckLocation then exit;
-      TempArchive := SysUtils.GetTempFileName+sysutils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
+      TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
       WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
       try
         result:=Download(RemoteURL,TempArchive);
