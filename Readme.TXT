@@ -517,6 +517,12 @@ Options are not required; they include:
                        Corresponds to the CROSSOPT argument in make
                        crosscompiler.
                        E.g. --crossOPT="-CpARMV7 -CfVFPV3" for ARM
+ crossbindir=<dir>     Directory where crosscompile toolchain can be found.
+                       fpcup will look for as inside this directory
+                       If not defined, fpcup tries to find the corect chain.
+ crosslibdir=<dir>     Directory where crosscompile libraries can be found.
+                       fpcup will look for libc.so inside this directory
+                       If not defined, fpcup tries to find the correct library.
  cputarget=<name>      CPU target for cross_compiling.
                        <name> has to be one of the following:
                        i386,m68k,alpha,powerpc,powerpc64,
@@ -604,7 +610,7 @@ Options are not required; they include:
  patchcmd              Command to use to reapply local changes backed up with
                        svn diff command. The diff file is passed as the only
                        parameter. Add any extra paremeters needed.
-                       Default: "patch -p0 -i" 
+                       Default: "patch" 
  primary-config-path=<dir>
                        Analogous to Lazarus primary-config-path (pcp) parameter.
                        Determines where fpcup will create or use as primary

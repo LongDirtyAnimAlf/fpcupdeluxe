@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="2" Active="win32">
+    <BuildModes Count="2" Active="linuxi386">
       <Item1 Name="darwin32">
         <CompilerOptions>
           <Version Value="11"/>
@@ -132,7 +132,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="15"/>
+        <EditorIndex Value="16"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -171,7 +171,7 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="15"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit11>
@@ -179,7 +179,7 @@ end;"/>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="45"/>
+        <TopLine Value="51"/>
         <CursorPos X="17" Y="62"/>
         <UsageCount Value="200"/>
       </Unit12>
@@ -267,8 +267,8 @@ end;"/>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="46"/>
-        <CursorPos X="14" Y="62"/>
+        <TopLine Value="88"/>
+        <CursorPos X="5" Y="50"/>
         <UsageCount Value="200"/>
       </Unit24>
       <Unit25>
@@ -297,6 +297,7 @@ end;"/>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="15"/>
         <UsageCount Value="200"/>
       </Unit28>
       <Unit29>
@@ -308,10 +309,9 @@ end;"/>
       <Unit30>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="111"/>
-        <CursorPos X="21" Y="127"/>
+        <EditorIndex Value="14"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit30>
       <Unit31>
         <Filename Value="m_win32_to_go32v2i386.pas"/>
@@ -369,8 +369,6 @@ end;"/>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
-        <CursorPos X="34" Y="92"/>
         <UsageCount Value="200"/>
       </Unit38>
     </Units>

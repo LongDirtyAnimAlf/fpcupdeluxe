@@ -45,9 +45,21 @@ make clean crossall crossinstall OS_TARGET=android CPU_TARGET=arm CROSSOPT="-CfV
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils,
+  {$IFDEF UNIX}
+  baseunix,
+  {$ENDIF}
+  m_crossinstaller,fpcuputil,fileutil;
 
 implementation
+
+const
+  NDKVERSIONBASENAME='android-ndk-r';
+  NDKVERSIONNAMES:array[0..16] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e');
+  NDKTOOLCHAINVERSIONS:array[0..3] of string = ('arm-linux-androideabi-4.4.7','arm-linux-androideabi-4.6','arm-linux-androideabi-4.8','arm-linux-androideabi-4.9');
+  NDKARCHDIRNAME='arch-arm';
+  PLATFORMVERSIONBASENAME='android-';
+  PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
 
 
 type
@@ -103,9 +115,50 @@ android-ndk-r9c\platforms\android-19\arch-arm\usr\lib
 }
 const
   DirName='arm-android';
+var
+  delphiversion,ndkversion,platform:byte;
+  PresetLibPath:string;
+  AsFile: string;
 begin
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+
+  // we presume, libc.so has to be present in a cross-library for arm
+  AsFile:='libc.so';
+
+  // we presume, libandroid.so has to be present in a cross-library for arm
+  //AsFile:='libandroid.so';
+
+  result:=SearchLibrary(Basepath,AsFile);
+
+  // if binaries already found, search for library belonging to these binaries !!
+  if (not result) AND (Length(FBinUtilsPath)>0) then
+  begin
+    ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
+    if ndkversion>0 then
+    begin
+      ndkversion:=Pos(DirectorySeparator,FBinUtilsPath,ndkversion);
+      if ndkversion>0 then
+      begin
+        PresetLibPath:=LeftStr(FBinUtilsPath,ndkversion);
+        for platform:=High(PLATFORMVERSIONSNUMBERS) downto Low(PLATFORMVERSIONSNUMBERS) do
+        begin
+          FLibsPath := IncludeTrailingPathDelimiter(PresetLibPath)+'platforms'+DirectorySeparator+
+                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          result:=DirectoryExists(FLibsPath);
+          if not result
+             then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+             else break;
+        end;
+      end;
+    end;
+  end;
+
+
+  // first search local paths based on libbraries provided for or adviced by fpc itself
+  if not result then
+  begin
+    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
+    result:=DirectoryExists(FLibsPath);
+  end;
   if not result then
   begin
     // Show path info etc so the user can fix his setup if errors occur
@@ -115,15 +168,88 @@ begin
       'lib'+DirectorySeparator+
       DirName);
     result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
   end;
+  if not result then
+  begin
+    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
+    FLibsPath:=SafeExpandFileName(ExtractFilePath(ParamStr(0))+DirectorySeparator+
+      'cross'+DirectorySeparator+
+      'lib'+DirectorySeparator+
+      DirName);
+    result:=DirectoryExists(FLibsPath);
+  end;
+
+
+  // search for a library provide by a standard android libraries install
+  if not result then
+  begin
+    for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
+    begin
+      if not result then
+      begin
+        for platform:=High(PLATFORMVERSIONSNUMBERS) downto Low(PLATFORMVERSIONSNUMBERS) do
+        begin
+          // check libs in userdir\
+          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
+                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          result:=DirectoryExists(FLibsPath);
+          if not result then
+          begin
+            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+          end else break;
+          // check libs in userdir\Andoid
+          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
+                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          result:=DirectoryExists(FLibsPath);
+          if not result then
+          begin
+            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+          end else break;
+        end;
+      end else break;
+    end;
+  end;
+
+  {$IFDEF MSWINDOWS}
+  // find Delphi android libs
+
+  if not result then
+  begin
+    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
+    for delphiversion:=17 downto 12 do
+    begin
+      if not result then
+      begin
+        for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
+        begin
+          if not result then
+          begin
+            for platform:=High(PLATFORMVERSIONSNUMBERS) downto Low(PLATFORMVERSIONSNUMBERS) do
+            begin
+              FLibsPath:='C:\Users\Public\Documents\Embarcadero\Studio\'+InttoStr(delphiversion)+
+              '.0\PlatformSDKs\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\platforms\'+PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+'\'+NDKARCHDIRNAME+'\usr\lib';
+              result:=DirectoryExists(FLibsPath);
+              if not result
+                 then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+                 else break;
+            end;
+          end else break;
+        end;
+      end else break;
+    end;
+  end;
+ {$ENDIF}
+
+
   if result then
   begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
     '-FLlibdl.so'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
+    //'-FLlibandroid.so'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
+
     {
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     '-XR'+IncludeTrailingPathDelimiter(FLibsPath);
@@ -158,14 +284,70 @@ end;
 function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
 const
   DirName='arm-android';
+  {
+  NDKVERSIONBASENAME='android-ndk-r';
+  NDKVERSIONNAMES:array[0..16] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e');
+  NDKTOOLCHAINVERSIONS:array[0..2] of string = ('arm-linux-androideabi-4.6','arm-linux-androideabi-4.8','arm-linux-androideabi-4.9');
+  NDKARCHDIRNAME='arch-arm';
+  PLATFORMVERSIONBASENAME='android-';
+  PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
+  }
+
 var
   AsFile: string;
+  PresetBinPath:string;
+  ndkversion,delphiversion,toolchain:byte;
 begin
   inherited;
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
   result:=false;
 
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
+  result:=SearchBinUtil(Basepath,AsFile);
+
+  // if libs already found, search for binutils belonging to this lib !!
+  if (not result) AND (Length(FLibsPath)>0) then
+  begin
+    ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
+    if ndkversion>0 then
+    begin
+      ndkversion:=Pos(DirectorySeparator,FLibsPath,ndkversion);
+      if ndkversion>0 then
+      begin
+        PresetBinPath:=LeftStr(FLibsPath,ndkversion);
+        for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
+        begin
+          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
+          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
+          {$IFDEF MSWINDOWS}
+          {$IFDEF CPU64}
+          'windows-x86_64'+
+          {$ELSE}
+          'windows'+
+          {$ENDIF}
+          {$ENDIF}
+          {$IFDEF LINUX}
+          {$IFDEF CPU64}
+          'linux-x86_64'+
+          {$ELSE}
+          'linux-x86'+
+          {$ENDIF}
+          {$ENDIF}
+          {$IFDEF DARWIN}
+          {$IFDEF CPU64}
+          'darwin-x86_64'+
+          {$ELSE}
+          'darwin-x86'+
+          {$ENDIF}
+          {$ENDIF}
+          DirectorySeparator+'bin';
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+          if result then break;
+        end;
+      end;
+    end;
+  end;
+
+  if not result then { try bin/<dirprefix>/ }
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
       AsFile);
 
@@ -173,33 +355,118 @@ begin
     result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+''+DirName,
       AsFile);
 
+  if not result then { try $(fpcdir)cross/bin/<dirprefix>/ }
+    result:=SearchBinUtil(ExtractFilePath(ParamStr(0))+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+''+DirName,
+      AsFile);
+
+  if not result then
+  begin
+    for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
+    begin
+      if not result then
+      begin
+        for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
+        begin
+          PresetBinPath:=IncludeTrailingPathDelimiter(GetUserDir);
+          {$IFDEF LINUX}
+          if FpGetEUid=0 then PresetBinPath:='/usr/local/';
+          {$ENDIF}
+          PresetBinPath:=NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'toolchains'+DirectorySeparator+NDKTOOLCHAINVERSIONS[toolchain]+DirectorySeparator+'prebuilt'+DirectorySeparator;
+          PresetBinPath:=IncludeTrailingPathDelimiter(PresetBinPath)+
+          {$IFDEF MSWINDOWS}
+          {$IFDEF CPU64}
+          'windows-x86_64'+
+          {$ELSE}
+          'windows'+
+          {$ENDIF}
+          {$ENDIF}
+          {$IFDEF LINUX}
+          {$IFDEF CPU64}
+          'linux-x86_64'+
+          {$ELSE}
+          'linux-x86'+
+          {$ENDIF}
+          {$ENDIF}
+          {$IFDEF DARWIN}
+          {$IFDEF CPU64}
+          'darwin-x86_64'+
+          {$ELSE}
+          'darwin-x86'+
+          {$ENDIF}
+          {$ENDIF}
+          DirectorySeparator+'bin';
+          result:=SearchBinUtil(PresetBinPath,AsFile);
+          if result then break;
+        end;
+      end else break;
+    end;
+  end;
+
+
   {$IFDEF MSWINDOWS}
-  // Try some NDK paths; note: androideabi-4.7 can be 4.4.3 or 4.6 or 4.8 as well
+  // Try some SDK/NDK paths; note: androideabi-4.7 can be 4.4.3 or 4.6 or 4.8 as well
   //http://dl.google.com/android/ndk/android-ndk-r9c-windows-x86_64.zip
   //also windows may be windows-x86_64...
-  if not result then
-    result:=SearchBinUtil('C:\Program Files\Android SDK\android-ndk-r9c\toolchains\arm-linux-androideabi-4.8\prebuilt\windows\bin',AsFile);
 
   if not result then
-    result:=SearchBinUtil('C:\Program Files\Android SDK\android-ndk-r8e\toolchains\arm-linux-androideabi-4.7\prebuilt\windows\bin',AsFile);
+  begin
+    for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
+    begin
+      if not result then
+      begin
+        for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
+        begin
+          if not result then
+          begin
+            {$IFDEF CPU64}
+            result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles(x86)'))+
+            'Android\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
+            '\prebuilt\windows\bin',AsFile);
+            if result then break else
+            {$ENDIF}
+            begin
+              result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles'))+
+              'Android\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
+              '\prebuilt\windows\bin',AsFile);
+              if result then break;
+            end;
+          end else break;
+        end;
+      end else break;
+    end;
+  end;
 
+  // check Delphi auto installed android libraries
   if not result then
-    result:=SearchBinUtil('C:\Program Files\Android SDK\android-ndk-r8d\toolchains\arm-linux-androideabi-4.7\prebuilt\windows\bin',AsFile);
+  begin
+    for delphiversion:=17 downto 12 do
+    begin
+      if not result then
+      begin
+        for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
+        begin
+          if not result then
+          begin
+            for toolchain:=High(NDKTOOLCHAINVERSIONS) downto Low(NDKTOOLCHAINVERSIONS) do
+            begin
+              if not result then
+              begin
+                result:=SearchBinUtil(
+                'C:\Users\Public\Documents\Embarcadero\Studio\'+InttoStr(delphiversion)+
+                '.0\PlatformSDKs\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+
+                '\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+'\prebuilt\windows\bin',AsFile);
+                if result then break;
+              end else break;
+            end;
+          end else break;
+        end;
+      end else break;
+    end;
+  end;
   {$ENDIF}
 
   {$IFDEF UNIX}
-  // Try some NDK paths first; note: androideabi-4.7 can be 4.4.3 or 4.6 as well
-  // Also, the NDK can be installed basically anywhere... including in the user's dir
-  if not result then
-    result:=SearchBinUtil('/usr/local/android-ndk-r9c/toolchains/arm-linux-androideabi-4.4.7/prebuilt/linux-x86/bin',AsFile);
-
-  if not result then
-    result:=SearchBinUtil('/usr/local/android-ndk-r8d/toolchains/arm-linux-androideabi-4.4.7/prebuilt/linux-x86/bin',AsFile);
-
-  if not result then
-    result:=SearchBinUtil('/usr/local/android-ndk-r8e/toolchains/arm-linux-androideabi-4.4.7/prebuilt/linux-x86/bin',AsFile);
-
-
+  // Also, the NDK can be installed basically anywhere...
   // User may also have placed them into their regular search path:
   if not result then { try /usr/local/bin/<dirprefix>/ }
     result:=SearchBinUtil('/usr/local/bin/'+DirName,
@@ -224,21 +491,12 @@ begin
     // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android
-      infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
+      AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH';
+      FCrossOpts.Add(AsFile); //apparently earlier instruction sets unsupported by Android
+      infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using '+AsFile+'.',etInfo);
+      AsFile:=StringReplace(AsFile,' ',LineEnding,[rfReplaceAll]);
+      FFPCCFGSnippet:=FFPCCFGSnippet+AsFile;
     end;
-
-    // By default, use software FPU/softfloat for ARM.
-    // Hardfloat: set CROSSOPT="-CfVFPV3"
-    // Warn user to check things
-    if StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1 then
-    begin
-      // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
-      // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
-      // -dFPC_ARMHF is only used for cross compiler generation, not useful when compiling end user
-      infoln(FCrossModuleName+ ': found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
-    end;
-
 
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+

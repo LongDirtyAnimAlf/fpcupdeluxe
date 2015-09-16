@@ -248,6 +248,8 @@ type
     FLazarusOPT: string;
     FLazarusPrimaryConfigPath: string;
     FLazarusURL: string;
+    FCrossToolsDirectory: string;
+    FCrossLibraryDirectory: string;
     FMakeDirectory: string;
     FOnlyModules: string;
     FReApplyLocalChanges: boolean;
@@ -264,6 +266,8 @@ type
     procedure SetFPCURL(AValue: string);
     procedure SetLazarusDirectory(AValue: string);
     procedure SetLazarusURL(AValue: string);
+    procedure SetCrossToolsDirectory(AValue: string);
+    procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
   protected
@@ -296,6 +300,8 @@ type
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
+    property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
+    property CrossLibraryDirectory:string read FCrossLibraryDirectory write SetCrossLibraryDirectory;
     property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
@@ -310,6 +316,7 @@ type
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
+
     // Location where fpcup log will be written to.
     property LogFileName: string read GetLogFileName write SetLogFileName;
     // Directory where make is. Can be empty.
@@ -449,6 +456,16 @@ end;
 procedure TFPCupManager.SetLazarusDirectory(AValue: string);
 begin
   FLazarusDirectory:=SafeExpandFileName(AValue);
+end;
+
+procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
+begin
+  FCrossToolsDirectory:=SafeExpandFileName(AValue);
+end;
+
+procedure TFPCupManager.SetCrossLibraryDirectory(AValue: string);
+begin
+  FCrossLibraryDirectory:=SafeExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.SetLazarusURL(AValue: string);
@@ -860,12 +877,14 @@ begin
         FInstaller.free; // get rid of old FInstaller
       end;
     if CrossCompiling then
-      begin
+    begin
       FInstaller:=TFPCCrossInstaller.Create;
       FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
       FInstaller.CrossOPT:=FParent.CrossOPT;
       FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
-      end
+      FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
+      FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
+    end
     else
       FInstaller:=TFPCNativeInstaller.Create;
     FInstaller.BaseDirectory:=FParent.FPCDirectory;

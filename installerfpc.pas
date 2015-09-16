@@ -250,17 +250,36 @@ begin
   platform; see posting Jonas Maebe http://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
   make all install CROSSCOMPILE=1??? find out?
   }
+
   result:=false; //fail by default
+
   CrossInstaller:=GetCrossInstaller;
+
   if assigned(CrossInstaller) then
     begin
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
-    if not CrossInstaller.GetBinUtils(FBaseDirectory) then
-      infoln('Failed to get crossbinutils', etError)
-    else if not CrossInstaller.GetLibs(FBaseDirectory) then
-      infoln('Failed to get cross libraries', etError)
-    else
-      begin
+
+    if Length(CrossToolsDirectory)=0
+       then result:=CrossInstaller.GetBinUtils(FBaseDirectory)
+       else result:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
+    if not result then infoln('Failed to get crossbinutils', etError);
+
+    if result then
+    begin
+      if Length(CrossLibraryDirectory)=0
+         then result:=CrossInstaller.GetLibs(FBaseDirectory)
+         else result:=CrossInstaller.GetLibs(CrossLibraryDirectory);
+      if not result then infoln('Failed to get crosslibrariy', etError)
+    end;
+
+    if result then
+    begin
+      result:=false;
+      writeln('YES !!!!!!!!');
+      writeln(CrossInstaller.BinUtilsPath);
+      writeln(CrossInstaller.BinUtilsPathInPath);
+      writeln(CrossInstaller.LibsPath);
+      readln;
       if CrossInstaller.CompilerUsed=ctInstalled then
         ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt {todo if this does not work use ppc386.exe etc}
       else //ctBootstrap
@@ -318,6 +337,12 @@ begin
         end;
       if CrossInstaller.LibsPath<>''then
         Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+
+      if (CrossInstaller.TargetOS='android') then
+      begin
+       if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
+      end;
+
       if CrossInstaller.BinUtilsPrefix<>'' then
         begin
         // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
@@ -348,13 +373,13 @@ begin
             'Details: '+E.Message,true);
           exit(false);
           end;
-      end;
+    end;
 
       // Return path to previous state
       if CrossInstaller.BinUtilsPathInPath then
-        begin
+      begin
         SetPath(OldPath,false,false);
-        end;
+      end;
 
       if not(Result) then
         begin

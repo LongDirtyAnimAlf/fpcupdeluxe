@@ -151,6 +151,12 @@ begin
   writeln('                       Corresponds to the CROSSOPT argument in make');
   writeln('                       crosscompiler.');
   writeln('                       E.g. --crossOPT="-CpARMV7 -CfVFPV3" for ARM');
+  writeln(' crossbindir=<dir>     Directory where crosscompile toolchain can be found.');
+  writeln('                       If target is non-win, fpcup will look for as.');
+  writeln('                       If not defined, fpcup tries to find the corect chain.');
+  writeln(' crosslibdir=<dir>     Directory where crosscompile libraries can be found.');
+  writeln('                       If target is non-win, fpcup will look for libc.so.');
+  writeln('                       If not defined, fpcup tries to find the correct library.');
   writeln(' lazOPT=<options>      Options passed on to the Lazarus make as OPT=options.');
   writeln(' lclplatform=<name>    LCL widget set. <name> has to be one of the following:');
   writeln('                       carbon,fpgui,gtk,gtk2,qt,win32,wince');
@@ -382,6 +388,9 @@ begin
       FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','lazdir',sInstallDir+'/lazarus')));
       {$ENDIF MSWINDOWS}
       FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','svnexe','')));
+
+      FInstaller.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','crossbindir','')));
+      FInstaller.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','crosslibdir','')));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then

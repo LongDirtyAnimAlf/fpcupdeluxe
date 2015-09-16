@@ -74,6 +74,8 @@ type
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOPT: string; //options passed (only) when cross-compiling
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
+    FCrossToolsDirectory: string;
+    FCrossLibraryDirectory: string;
     FDesiredRevision: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
@@ -156,6 +158,8 @@ type
     property CrossOPT: string read FCrossOPT write FCrossOPT;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
     property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
+    property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
+    property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision
     property DesiredRevision: string write FDesiredRevision;
     // If using HTTP proxy: host
