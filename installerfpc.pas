@@ -275,11 +275,6 @@ begin
     if result then
     begin
       result:=false;
-      writeln('YES !!!!!!!!');
-      writeln(CrossInstaller.BinUtilsPath);
-      writeln(CrossInstaller.BinUtilsPathInPath);
-      writeln(CrossInstaller.LibsPath);
-      readln;
       if CrossInstaller.CompilerUsed=ctInstalled then
         ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt {todo if this does not work use ppc386.exe etc}
       else //ctBootstrap
