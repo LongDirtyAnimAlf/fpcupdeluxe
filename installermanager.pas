@@ -237,6 +237,7 @@ type
     FCrossLCL_Platform: string; //really LCL widgetset
     FCrossOPT: string;
     FCrossOS_Target: string;
+    FCrossOS_SubArch: string;
     FFPCDesiredRevision: string;
     FFPCDirectory: string;
     FFPCOPT: string;
@@ -258,6 +259,8 @@ type
     FSkipModules: string;
     FUninstall:boolean;
     FVerbose: boolean;
+    FExportOnly:boolean;
+    FUseGitClient:boolean;
     FSequencer: TSequencer;
     function GetLazarusPrimaryConfigPath: string;
     function GetLogFileName: string;
@@ -300,6 +303,7 @@ type
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
+    property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
     property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write SetCrossLibraryDirectory;
     property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
@@ -337,6 +341,8 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
+    property ExportOnly:boolean read FExportOnly write FExportOnly;
+    property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     // Stop talking. Do it! Returns success status
@@ -754,6 +760,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     TLibList=array[1..LIBSCNT] of string;
   const
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so');
+    //libx11-dev libgdk-pixbuf2.0-dev libcairo2-dev libpangox-1.0-dev xorg-dev libgtk2.0-dev libpango1.0-dev
     QTLIBS:TLibList = ('libQt4Pas.so','','','');
   var
     i:integer;
@@ -882,6 +889,7 @@ begin
       FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
       FInstaller.CrossOPT:=FParent.CrossOPT;
       FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
+      FInstaller.CrossOS_SubArch:=FParent.CrossOS_SubArch;
       FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
       FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
     end
@@ -916,6 +924,7 @@ begin
       FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
       FInstaller.CrossOPT:=FParent.CrossOPT;
       FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
+      FInstaller.CrossOS_SubArch:=FParent.CrossOS_SubArch;
       end
     else
       FInstaller:=TLazarusNativeInstaller.Create;

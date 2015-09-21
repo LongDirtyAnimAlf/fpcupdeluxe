@@ -318,6 +318,7 @@ begin
       ProcessEx.Parameters.Add('all');
       ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
       ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+      if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
       Options:=FCompilerOptions;
       // Error checking for some known problems with cross compilers
       //todo: this really should go to the cross compiler unit itself but would require a rewrite
@@ -428,6 +429,7 @@ begin
         ProcessEx.Parameters.Add('crossinstall');
         ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
         ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+        if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
         if CrossInstaller.BinUtilsPrefix<>'' then
           begin
           // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
@@ -1458,6 +1460,7 @@ begin
       begin  // clean out the correct compiler
       ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
       ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+      if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
       end;
     ProcessEx.Parameters.Add('distclean');
     if (FCrossOS_Target='') and (FCrossCPU_Target='') then

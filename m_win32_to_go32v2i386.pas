@@ -84,18 +84,11 @@ end;
 function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-go32v2';
-begin  
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_go32v2i386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('TWin32_go32v2i386: failed: searched libspath '+FLibsPath,etInfo);
-  end;
+begin
+
+  // first search local paths based on libbraries provided for or adviced by fpc itself
+  result:=SimpleSearchLibrary(BasePath,DirName);
+
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -126,24 +119,10 @@ var
 begin  
   inherited;
   AsFile:=FBinUtilsPrefix+'as.exe';
-  result:=false;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
 
-  // Using crossfpc directory naming
+  result:=SearchBinUtil(BasePath,AsFile);
   if not result then
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
-
-  // cross\bin\
-  if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   if not result then
   begin

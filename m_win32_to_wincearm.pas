@@ -86,17 +86,10 @@ const
   DirName='arm-wince';
 begin
   // Wince does not need libs by default, but user can add them.
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_wincearm: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('TWin32_wincearm: failed: searched libspath '+FLibsPath,etInfo);
-  end;
+
+  // search local paths based on libbraries provided for or adviced by fpc itself
+  result:=SimpleSearchLibrary(BasePath,DirName);
+
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -127,49 +120,28 @@ var
   AsFile: string;
 begin
   inherited;
+
   AsFile:=FBinUtilsPrefix+'as.exe';
-  result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-    AsFile);
 
-  // Using default naming (svn2 repo)
-  if not result then
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
+  result:=SearchBinUtil(BasePath,AsFile);
 
-  // cross\bin
   if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Search for FTP (old) version
   if not result then
   begin
     FBinUtilsPrefix:='arm-wince-pe-';
     AsFile:=FBinUtilsPrefix+'as.exe';
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  end;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
-
-  //todo: remove all fbinutilspath assignments before searchbinutil as searchbinutil changes fbinutilspath anyway
-  // cross\bin
-  if not result then
-    result:=SearchBinUtil(SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName),
-      AsFile);
-
-  if not result then
-  begin
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
-    FAlreadyWarned:=true;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
+  SearchBinUtilsInfo(result);
   if result then
   begin
+    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-wince
     //adjusted by
@@ -179,7 +151,7 @@ begin
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
     '-darm'+LineEnding+ {pass arm to linker}
     '-Twince'; {target operating system}
-  end;
+  end else FAlreadyWarned:=true;
 end;
 
 constructor TWin32_wincearm.Create;

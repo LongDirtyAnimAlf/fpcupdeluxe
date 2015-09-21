@@ -92,17 +92,9 @@ const
   DirName='i8086-msdos';
 begin
   // DOS8086 does not need libs by default, but user can add them.
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_msdosi8086: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('TWin32_msdosi8086: failed: searched libspath '+FLibsPath,etInfo);
-  end;
+  // first search local paths based on libbraries provided for or adviced by fpc itself
+  result:=SimpleSearchLibrary(BasePath,DirName);
+
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -133,32 +125,21 @@ var
 begin
   inherited;
   AsFile:=FBinUtilsPrefix+'nasm.exe'; //nasm, not GNU as.exe
-  result:=false;
 
+  result:=SearchBinUtil(BasePath,AsFile);
   if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
-
-  // Using crossfpc directory naming
-  if not result then
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
-
-  if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   if not result then
   begin
     infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
     FAlreadyWarned:=true;
   end;
+
   if result then
   begin
+    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then
     begin
       infoln('TWin32_msdosi8086: this compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etInfo);

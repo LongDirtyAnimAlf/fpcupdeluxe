@@ -84,50 +84,19 @@ begin
 end;
 
 function TAny_ARMAndroid.GetLibs(Basepath:string): boolean;
-{ Example files in lib directory - may or may not match your requirements:
-crtbegin_dynamic.o
-crtbegin_so.o
-crtbegin_static.o
-crtend_android.o
-crtend_so.o
-libandroid.so
-libc.a
-libc.so
-libdl.so
-libEGL.so
-libGLESv1_CM.so
-libGLESv2.so
-libGLESv3.so
-libjnigraphics.so
-liblog.so
-libm.a
-libm.so
-libm_hard.a
-libOpenMAXAL.so
-libOpenSLES.so
-libstdc++.a
-libstdc++.so
-libthread_db.so
-libz.so
-rs
-e.g. from an Android NDK:
-android-ndk-r9c\platforms\android-19\arch-arm\usr\lib
-}
 const
   DirName='arm-android';
+  // we presume, libc.so has to be present in a cross-library for arm
+  LibName='libc.so';
+  // we presume, libandroid.so has to be present in a cross-library for arm
+  //LibName='libandroid.so';
 var
   delphiversion,ndkversion,platform:byte;
   PresetLibPath:string;
   AsFile: string;
 begin
-
-  // we presume, libc.so has to be present in a cross-library for arm
-  AsFile:='libc.so';
-
-  // we presume, libandroid.so has to be present in a cross-library for arm
-  //AsFile:='libandroid.so';
-
-  result:=SearchLibrary(Basepath,AsFile);
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
 
   // if binaries already found, search for library belonging to these binaries !!
   if (not result) AND (Length(FBinUtilsPath)>0) then
@@ -145,40 +114,16 @@ begin
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
           result:=DirectoryExists(FLibsPath);
           if not result
-             then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+             then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
              else break;
         end;
       end;
     end;
   end;
 
-
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-  begin
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-  end;
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
-      'cross'+DirectorySeparator+
-      'lib'+DirectorySeparator+
-      DirName);
-    result:=DirectoryExists(FLibsPath);
-  end;
-  if not result then
-  begin
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(ExtractFilePath(ParamStr(0))+DirectorySeparator+
-      'cross'+DirectorySeparator+
-      'lib'+DirectorySeparator+
-      DirName);
-    result:=DirectoryExists(FLibsPath);
-  end;
-
+    result:=SimpleSearchLibrary(BasePath,DirName);
 
   // search for a library provide by a standard android libraries install
   if not result then
@@ -195,7 +140,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
@@ -203,7 +148,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
         end;
       end else break;
@@ -215,7 +160,7 @@ begin
 
   if not result then
   begin
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo);
+    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
     for delphiversion:=17 downto 12 do
     begin
       if not result then
@@ -230,7 +175,7 @@ begin
               '.0\PlatformSDKs\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\platforms\'+PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+'\'+NDKARCHDIRNAME+'\usr\lib';
               result:=DirectoryExists(FLibsPath);
               if not result
-                 then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etInfo)
+                 then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
                  else break;
             end;
           end else break;
@@ -238,9 +183,9 @@ begin
       end else break;
     end;
   end;
- {$ENDIF}
+  {$ENDIF}
 
-
+  SearchLibraryInfo(result);
   if result then
   begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
@@ -257,11 +202,10 @@ begin
     //todo: possibly adapt for android:
     {'-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     }
-    infoln(FCrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end
   else
   begin
-    infoln(FCrossModuleName + ': could not find libspath. Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
+    infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
     ' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
     ,etError);
     FAlreadyWarned:=true;
@@ -299,8 +243,8 @@ var
   ndkversion,delphiversion,toolchain:byte;
 begin
   inherited;
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-  result:=false;
 
   result:=SearchBinUtil(Basepath,AsFile);
 
@@ -347,17 +291,8 @@ begin
     end;
   end;
 
-  if not result then { try bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+''+DirName,
-      AsFile);
-
-  if not result then { try $(fpcdir)cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(ExtractFilePath(ParamStr(0))+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+''+DirName,
-      AsFile);
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   if not result then
   begin
@@ -485,6 +420,7 @@ begin
       AsFile);
   {$ENDIF}
 
+  SearchBinUtilsInfo(result);
   if result then
   begin
     // Set some defaults if user hasn't specified otherwise
@@ -505,7 +441,7 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName + ': could not find bin path. Please fill '+IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName+
+    infoln(FCrossModuleName + ': Please fill '+IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName+
     ' with cross binutils for Android ARM, e.g. from the Android NDK.'+LineEnding+
     'See http://wiki.lazarus.freepascal.org/Android.'
     ,etError);

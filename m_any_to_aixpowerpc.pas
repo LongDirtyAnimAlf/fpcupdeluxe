@@ -74,20 +74,16 @@ end;
 function TAny_AIXPowerPC.GetLibs(Basepath:string): boolean;
 const
   DirName='powerpc-aix';
+  LibName='libc.so';
 begin
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
 
-  // Using crossfpc directory naming
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+  // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName+ ': failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln(FCrossModuleName+ ': failed: searched libspath '+FLibsPath,etInfo);
-  end;
+    result:=SimpleSearchLibrary(BasePath,DirName);
+
+  SearchLibraryInfo(result);
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -96,11 +92,10 @@ begin
       '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    infoln(FCrossModuleName+ ': found libspath '+FLibsPath,etInfo);
   end
   else
   begin
-    infoln(FCrossModuleName+ ': no libspath found. For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
+    infoln(FCrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
   end;
   result:=true; //this step is optional at least for simple hello world programs
 end;
@@ -119,62 +114,42 @@ var
   AsFile: string;
 begin
   inherited;
+
   // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-  result:=false;
 
-  // Using crossfpc directory naming
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil((IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName),
-      AsFile);
+  result:=SearchBinUtil(BasePath,AsFile);
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for crossfpc naming
   if not result then
   begin
     FBinUtilsPrefix:='powerpc-aix-';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    if not result then
+      result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  if not result then
-    result:=SearchBinUtil(FBinUtilsPath,AsFile);
-
-  // Using crossfpc directory naming
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
 
   // Also allow for crossbinutils without prefix
   if not result then
   begin
     FBinUtilsPrefix:='';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    if not result then
+      result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-  if not result then
-    result:=SearchBinUtil(FBinUtilsPath,AsFile);
 
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
+  SearchBinUtilsInfo(result);
   if not result then
   begin
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
     infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
     FAlreadyWarned:=true;
-  end;
-  if result then
+  end
+  else
   begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+

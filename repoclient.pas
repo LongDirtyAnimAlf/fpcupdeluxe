@@ -62,6 +62,7 @@ type
     FRepositoryURL: string;
     FReturnCode: integer;
     FVerbose: boolean;
+    FExportOnly: boolean;
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut; virtual;
@@ -76,6 +77,7 @@ type
     procedure SetRepositoryURL(AValue: string); virtual;
     procedure SetRepoExecutable(AValue: string); virtual;
     procedure SetVerbose(AValue: boolean); virtual;
+    procedure SetExportOnly(AValue: boolean); virtual;
     function GetValidClient:boolean;
     function GetRepoExecutableName:string;virtual;
     //Performs an update (pull)
@@ -84,6 +86,8 @@ type
   public
     // Downloads from remote repo: runs checkout if local repository doesn't exist, else does an update
     procedure CheckOutOrUpdate; virtual;
+    // Downloads only the whole tree from remote repo ... do not include .svn or .git
+    procedure ExportRepo; virtual;
     // Commits local changes to local and remote repository
     function Commit(Message: string): boolean; virtual;
     // Executes command and returns result code
@@ -126,6 +130,7 @@ type
     property RepoExecutable: string read GetRepoExecutable write SetRepoExecutable;
     // Show additional console/log output?
     property Verbose: boolean read FVerbose write SetVerbose;
+    property ExportOnly: boolean read FExportOnly write SetExportOnly;
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
     constructor Create;
@@ -209,6 +214,14 @@ begin
   FVerbose := AValue;
 end;
 
+procedure TRepoClient.SetExportOnly(AValue: boolean);
+begin
+  if FExportOnly = AValue then
+    Exit;
+  FExportOnly := AValue;
+end;
+
+
 function TRepoClient.GetValidClient:boolean;
 begin
   result:=( (Length(FRepoExecutable)<>0) AND (FileExists(FRepoExecutable)) );
@@ -229,22 +242,28 @@ end;
 
 procedure TRepoClient.CheckOut;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement CheckOut by themselves.');
 end;
 
 procedure TRepoClient.CheckOutOrUpdate;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement CheckOutOrUpdate by themselves.');
 end;
+
+procedure TRepoClient.ExportRepo;
+begin
+  raise Exception.Create('TRepoClient descendants must implement ExportRepo by themselves.');
+end;
+
 
 function TRepoClient.Commit(Message: string): boolean;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement Commit by themselves.');
 end;
 
 function TRepoClient.GetRepoExecutableName:string;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement GetRepoExecutableName by themselves.');
 end;
 
 function TRepoClient.Execute(Command: string): integer;
@@ -254,42 +273,42 @@ end;
 
 function TRepoClient.GetDiffAll: string;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement GetDiffAll by themselves.');
 end;
 
 function TRepoClient.FindRepoExecutable: string;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement FindRepoExecutable by themselves.');
 end;
 
 procedure TRepoClient.Log(var Log: TStringList);
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement Log by themselves.');
 end;
 
 procedure TRepoClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement ParseFileList by themselves.');
 end;
 
 procedure TRepoClient.Revert;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement Revert by themselves.');
 end;
 
 procedure TRepoClient.Update;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement Update by themselves.');
 end;
 
 procedure TRepoClient.LocalModifications(var FileList: TStringList);
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement LocalModifications by themselves.');
 end;
 
 function TRepoClient.LocalRepositoryExists: boolean;
 begin
-  raise Exception.Create('TRepoClient descendants must implement this themselves.');
+  raise Exception.Create('TRepoClient descendants must implement LocalRepositoryExists by themselves.');
 end;
 
 constructor TRepoClient.Create;
@@ -301,6 +320,7 @@ begin
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FReturnCode := 0;
   FRepoExecutable := '';
+  FExportOnly := true;
   FindRepoExecutable; //Do this now so hopefully the hgExecutable property is valid.
 end;
 

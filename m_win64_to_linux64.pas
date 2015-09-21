@@ -74,27 +74,24 @@ end;
 function Twin64_linux64.GetLibs(Basepath:string): boolean;
 const
   DirName='x86_64-linux';
+  LibName='libc.so';
 begin
-  // Using crossfpc directory naming
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+
+  // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('Twin64_linux64: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('Twin64_linux64: failed: searched libspath '+FLibsPath,etInfo);
-  end;
+    result:=SimpleSearchLibrary(BasePath,DirName);
+
   if result then
   begin
+    infoln('Twin64_linux64: found libspath '+FLibsPath,etInfo);
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib'+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     '-FL/lib64/ld-linux-x86-64.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('Twin64_linux64: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -112,25 +109,12 @@ var
   AsFile: string;
 begin
   inherited;
+
   AsFile:=FBinUtilsPrefix+'as.exe';
-  result:=false;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
 
-  // Using crossfpc directory naming
+  result:=SearchBinUtil(BasePath,AsFile);
   if not result then
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
-
-  // cross\bin
-  if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   if not result then
   begin

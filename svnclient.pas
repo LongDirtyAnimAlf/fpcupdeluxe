@@ -233,11 +233,14 @@ begin
     Command := ' --username '+UserName + ' --password '+Password;
   end;
 
-  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' checkout '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
-  else
-    Command := ' checkout '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+  if ExportOnly
+     then Command := ' export --force ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert -r '
+     else Command := ' checkout ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert -r ';
 
+  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
+    Command := Command + 'HEAD ' + Repository + ' ' + LocalRepository
+  else
+    Command := Command + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
 
   {$IFNDEF MSWINDOWS}
   // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems
@@ -362,6 +365,11 @@ end;
 function TSVNClient.Commit(Message: string): boolean;
 begin
   inherited Commit(Message);
+  if ExportOnly then
+  begin
+    Result:=True;
+    exit;
+  end;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit '+GetProxyCommand+' --message='+Message, LocalRepository, Verbose);
   Result:=(FReturnCode=0);
 end;
@@ -375,6 +383,11 @@ end;
 function TSVNClient.GetDiffAll: string;
 begin
   Result := ''; //fail by default
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
   // Using proxy more for completeness here
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff '+' .', LocalRepository, Result, Verbose);
   // with external diff program
@@ -394,6 +407,11 @@ end;
 
 procedure TSVNClient.Revert;
 begin
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert '+GetProxyCommand+' --recursive ' + LocalRepository, Verbose);
 end;
 
@@ -412,6 +430,13 @@ var
   TempOutputFile:string;
   TempOutputSL:TStringList;
 begin
+
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
+
   AfterErrorRetry := 1;
   UpdateRetry := 1;
   ProxyCommand:=GetProxyCommand;
@@ -576,6 +601,12 @@ var
   AllFiles: TStringList;
   Output: string = '';
 begin
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
+
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' status '+GetProxyCommand+' --depth infinity ' + FLocalRepository, Output, Verbose);
   FileList.Clear;
   AllFiles := TStringList.Create;
@@ -596,7 +627,15 @@ var
   URL: string;
   URLPos: integer;
 begin
+
   Result := false;
+
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
+
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
 
   // If command fails due to wrong version, try again
@@ -657,6 +696,13 @@ var
   RevExtr: TRegExpr;
   RevCount: integer;
 begin
+
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
+
   // Only update if we have invalid revision info, in order to minimize svn info calls
   if (FLocalRevision = FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) then
   begin

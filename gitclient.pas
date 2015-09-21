@@ -173,8 +173,20 @@ begin
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
+  //if ExportOnly then
+  //begin
+  //  Result:=True;
+  //  exit;
+  //end;
+  //git archive --format zip --output /path/to/file.zip --prefix=newdir/ master
+  //git checkout-index -a -f --prefix=/destination/path/
+  //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+  //ExecuteCommand(FUnzip);
+
   // Actual clone/checkout
-  Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
+  if ExportOnly
+     then Command := ' checkout-index -a -f --recurse-submodules ' + Repository + ' --prefix=' + IncludeTrailingPathDelimiter(LocalRepository)
+     else Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
@@ -218,6 +230,8 @@ end;
 function TGitClient.Commit(Message: string): boolean;
 begin
   result:=false;
+  FReturnCode := 0;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
   inherited Commit(Message);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit --message='+Message, LocalRepository, Verbose);
@@ -228,7 +242,9 @@ end;
 function TGitClient.Execute(Command: string): integer;
 begin
   Result:=-1;
+  FReturnCode := 0;
   if NOT ValidClient then exit;
+  if ExportOnly then exit;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command, LocalRepository, Verbose);
   Result:= FReturnCode;
 end;
@@ -236,6 +252,8 @@ end;
 function TGitClient.GetDiffAll: string;
 begin
   result:='';
+  FReturnCode := 0;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff -p ', LocalRepository, Result, Verbose);
@@ -245,7 +263,9 @@ procedure TGitClient.Log(var Log: TStringList);
 var
   s: string = '';
 begin
+  FReturnCode := 0;
   Log.Text := s;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ', LocalRepository, s, Verbose);
   Log.Text := s;
@@ -253,6 +273,8 @@ end;
 
 procedure TGitClient.Revert;
 begin
+  FReturnCode := 0;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert --all --no-backup ', LocalRepository, Verbose);
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard ', LocalRepository, Verbose);
@@ -262,7 +284,10 @@ procedure TGitClient.Update;
 var
   Command: string;
 begin
+  FReturnCode := 0;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
+
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
@@ -335,6 +360,10 @@ var
   AllFiles: TStringList;
   Output: string = '';
 begin
+  FReturnCode := 0;
+  if ExportOnly then exit;
+  if NOT ValidClient then exit;
+
   FileList.Clear;
   if NOT ValidClient then exit;
   // --porcelain indicate stable output;
@@ -357,7 +386,10 @@ var
   URL: string;
 begin
   Result := false;
+  FReturnCode := 0;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
+
   // This will output nothing to stdout and
   // fatal: Not a git repository (or any of the parent directories): .git
   // to std err
@@ -406,7 +438,10 @@ var
   Output: string = '';
 begin
   Result := Output;
+  FReturnCode := 0;
+  if ExportOnly then exit;
   if NOT ValidClient then exit;
+
   // Only update if we have invalid revision info, in order to minimize git info calls
   if FLocalRevision = FRET_UNKNOWN_REVISION then
   begin

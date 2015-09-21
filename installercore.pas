@@ -74,6 +74,7 @@ type
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOPT: string; //options passed (only) when cross-compiling
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
+    FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=armv7em
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
     FDesiredRevision: string;
@@ -158,6 +159,8 @@ type
     property CrossOPT: string read FCrossOPT write FCrossOPT;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
     property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
+    // SubArch for target embedded
+    property CrossOS_SubArch: string read FCrossOS_SubArch write FCrossOS_SubArch;
     property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision

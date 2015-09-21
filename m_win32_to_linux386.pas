@@ -81,20 +81,16 @@ end;
 function TWin32_Linux386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-linux';
+  LibName='libc.so';
 begin
-//todo add support for separate cross dire
-  // Using crossfpc directory naming
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+
+  // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('TWin32_Linux386: failed: searched libspath '+FLibsPath,etInfo);
-  end;
+    result:=SimpleSearchLibrary(BasePath,DirName);
+
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -119,23 +115,12 @@ var
   AsFile: string;
 begin
   inherited;
-  result:=false;
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),AsFile);
 
-  // Using crossfpc directory naming
+  result:=SearchBinUtil(BasePath,AsFile);
   if not result then
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName;
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),AsFile);
-
-  // cross\bin
-  if not result then
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName);
-  if not result then
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(FBinUtilsPath),
-      AsFile);
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   if not result then
   begin

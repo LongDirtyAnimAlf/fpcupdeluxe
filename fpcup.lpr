@@ -54,7 +54,8 @@ uses {$IFDEF UNIX}
   Classes, sysutils, strings,
   updatelazconfig, processutils,
   fileutil, fpcuputil,
-  m_any_to_aixpowerpc, m_any_to_androidarm, m_any_to_linuxarm, m_any_to_linuxmipsel, m_any_to_linux386,
+  m_any_to_aixpowerpc, m_any_to_androidarm,
+  m_any_to_embeddedarm, m_any_to_linuxmipsel, m_any_to_linux386,
   m_anyinternallinker_to_win386, m_anyinternallinker_to_win64,
   m_crossinstaller, m_crosswin32, m_crosswin64,
   m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,
@@ -145,6 +146,9 @@ begin
   writeln('                       <name> has to be one of the following:');
   writeln('                       darwin,freebsd,linux,netbsd,openbsd,os2,');
   writeln('                       solaris,wince,win32,win64');
+  writeln(' subarch=<name>        Subarch target for cross-compiling embedded target.');
+  writeln('                       <name> has to be one of the following:');
+  writeln('                       armv7m (for Cortex M3),armv7em (for Teensy),armv4,');
   writeln(' fpcOPT=<options>      Options passed on to the FPC make as OPT=options.');
   writeln('                       E.g.: --fpcOPT="-gl -dSAX_HTML_DEBUG -dUSE_MINGW_GDB"');
   writeln(' crossOPT=<options>    Options to be passed to the cross compiler.');
@@ -255,6 +259,7 @@ begin
   writeln('                       Else: uninstall only certain modules.');
   writeln(' logfilename=<file>    Location of log file. If nothing specified,');
   writeln('                       fpcup.log in the current directory.');
+  writeln(' getfullrepo           Get full repositories. If not set, just get files.');
   writeln(' noconfirm             No confirmation asked. For batch operation.');
   writeln(' verbose               Show output from svn and make.');
   writeln(' version               Show version info and quit.');
@@ -309,6 +314,7 @@ begin
           LeftOverOptions:=TStringList.Create;
           LeftOverOptions.Add('noconfirm');
           LeftOverOptions.Add('uninstall');
+          LeftOverOptions.Add('getfullrepo');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
           try
@@ -412,6 +418,7 @@ begin
       end;
       FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
+      FInstaller.CrossOS_SubArch:=Options.GetOption('','subarch','');
       FInstaller.CrossOPT:=Options.GetOption('','crossopt','');
       FInstaller.ShortCutNameFpcup:=Options.GetOption('','fpcuplinkname',DirectorySeparator);
       // Find out if the user specified --fpcuplinkname= to explicitly block creation of a link, or just didn't specify anything.
@@ -506,6 +513,8 @@ begin
       FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
       // do not add to default options:
       FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
+      FInstaller.ExportOnly:=(NOT Options.GetOptionNoParam('','getfullrepo',false));
+      FInstaller.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
       // do not add to default options:
       bVersion:=Options.GetOptionNoParam('','version',false);
       bNoConfirm:=Options.GetOptionNoParam('','noconfirm',true);
@@ -753,6 +762,12 @@ begin
         begin
           writeln('');
           writeln('WARNING: proxy password will appear in screen output!');
+          writeln('');
+        end;
+        if NOT FInstaller.ExportOnly then
+        begin
+          writeln('');
+          writeln('WARNING: FPCUP will download full repositories !!!');
           writeln('');
         end;
       end;

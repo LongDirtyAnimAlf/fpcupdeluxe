@@ -68,20 +68,17 @@ end;
 function TAny_Linuxarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-linux';
+  LibName='libc.so';
 begin
 
-  // Using crossfpc directory naming
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+
+  // local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName+ ': failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln(FCrossModuleName+ ': failed: searched libspath '+FLibsPath,etInfo);
-  end;
+    result:=SimpleSearchLibrary(BasePath,DirName);
+
+  SearchLibraryInfo(result);
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -105,11 +102,10 @@ begin
     }
 
     { Note: bug 21554 and checked on raspberry pi wheezy: uses armhf /lib/arm-linux-gnueabihf/ld-linux.so.3}
-    infoln(FCrossModuleName+ ': found libspath '+FLibsPath,etInfo);
   end
   else
   begin
-    infoln(FCrossModuleName+ ': you MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.',etInfo);
+    infoln(FCrossModuleName+ ': You MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.',etInfo);
   end;
 end;
 
@@ -127,76 +123,50 @@ var
   AsFile: string;
 begin
   inherited;
+
   // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-  result:=false;
 
-  // Using crossfpc directory naming
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
+  result:=SearchBinUtil(BasePath,AsFile);
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for crossfpc naming
   if not result then
   begin
     FBinUtilsPrefix:='arm-linux-';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  // Using crossfpc directory naming
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
 
   // Also allow for crossbinutils without prefix
   if not result then
   begin
     FBinUtilsPrefix:='';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  // Using crossfpc directory naming
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
 
   // Also allow for android crossbinutils
   if not result then
   begin
     FBinUtilsPrefix:='arm-linux-androideabi-';//standard eg in Android NDK 9
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
-  // Using crossfpc directory naming
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
+  SearchBinUtilsInfo(result);
   if not result then
   begin
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
     {$ifdef mswindows}
     infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
     {$endif}
     FAlreadyWarned:=true;
-  end;
-  if result then
+  end
+  else
   begin
     { for raspberry pi look into
     instruction set

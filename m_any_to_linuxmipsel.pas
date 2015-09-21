@@ -105,19 +105,16 @@ end;
 function Tany_linuxmipsel.GetLibs(Basepath:string): boolean;
 const
   DirName='mipsel-linux';
+  LibName='libc.so';
 begin
-//todo add support for separate cross dire  
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+
+  // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('Twin32_linuxmipsel: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+DirName);
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-      infoln('Twin32_linuxmipsel: failed: searched libspath '+FLibsPath,etInfo);
-  end;
+    result:=SimpleSearchLibrary(BasePath,DirName);
+
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -147,16 +144,12 @@ var
   AsFile: string;
 begin
   inherited;
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-  result:=false;
 
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
+  result:=SearchBinUtil(BasePath,AsFile);
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
@@ -178,15 +171,10 @@ begin
   begin
     FBinutilsPrefix:='mips-linux-gnu-';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
@@ -209,15 +197,10 @@ begin
   begin
     FBinutilsPrefix:='mipsel-linux-';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
@@ -239,15 +222,10 @@ begin
   begin
     FBinutilsPrefix:='';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
@@ -270,6 +248,7 @@ begin
 
   if result then
   begin
+    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Architecture etc:
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
       FCrossOpts.Add('-CpMIPS32R2'); //Probably supported by most devices today

@@ -71,30 +71,26 @@ end;
 function Tany_linux386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-linux';
+  LibName='libc.so';
 begin
-//todo add support for separate cross dire  
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  result:=DirectoryExists(IncludeTrailingPathDelimiter(BasePath)+FLibsPath);
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+
+  // first search local paths based on libbraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName);
+
   if not result then
   begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
-      'cross'+DirectorySeparator+
-      'lib'+DirectorySeparator+
-      DirName);
+    {$IFDEF UNIX}
+    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    begin
-      infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
-      {$IFDEF UNIX}
-      FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
-      result:=DirectoryExists(FLibsPath);
-      if not result then
-        infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
-      {$ENDIF}
-    end;
+    infoln('Tany_linux386: failed: searched libspath '+FLibsPath,etInfo);
+    {$ENDIF}
   end;
+
+  SearchLibraryInfo(result);
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -102,7 +98,6 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('Tany_linux386: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -119,32 +114,22 @@ var
   AsFile: string;
 begin
   inherited;
+
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-  result:=false;
 
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
+  result:=SearchBinUtil(BasePath,AsFile);
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Also allow for (cross)binutils without prefix
   if not result then
   begin
     FBinUtilsPrefix:='';
     AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
-
-  if not result then { try $(fpcdir)/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
-  if not result then { try cross/bin/<dirprefix>/ }
-    result:=SearchBinUtil(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName,
-      AsFile);
-
 
   {$IFDEF UNIX}
   if not result then { try /usr/local/bin/<dirprefix>/ }
@@ -164,6 +149,7 @@ begin
       AsFile);
   {$ENDIF}
 
+  SearchBinUtilsInfo(result);
   if result then
   begin
     // Configuration snippet for FPC
