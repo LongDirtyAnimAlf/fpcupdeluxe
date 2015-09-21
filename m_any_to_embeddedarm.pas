@@ -121,11 +121,82 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
+  {$ifdef unix}
+  // User may also have placed them into their regular search path:
+  if not result then { try /usr/local/bin/<dirprefix>/ }
+    result:=SearchBinUtil('/usr/local/bin/'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/ }
+    result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
+
+  if not result then { try /bin/ }
+    result:=SearchBinUtil('/bin',
+      AsFile);
+  {$endif unix}
+
+  // Now also allow for arm-none-eabi- binutilsprefix (e.g. launchpadlibrarian)
+  if not result then
+  begin
+    FBinutilsPrefix:='arm-none-eabi-';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  {$ifdef unix}
+  // User may also have placed them into their regular search path:
+  if not result then { try /usr/local/bin/<dirprefix>/ }
+    result:=SearchBinUtil('/usr/local/bin/'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/ }
+    result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
+
+  if not result then { try /bin/ }
+    result:=SearchBinUtil('/bin',
+      AsFile);
+  {$endif unix}
+
+  // Now also allow for empty binutilsprefix:
+  if not result then
+  begin
+    FBinutilsPrefix:='';
+    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  end;
+
+  {$ifdef unix}
+  // User may also have placed them into their regular search path:
+  if not result then { try /usr/local/bin/<dirprefix>/ }
+    result:=SearchBinUtil('/usr/local/bin/'+DirName,
+      AsFile);
+
+  if not result then { try /usr/local/bin/ }
+    result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
+
+  if not result then { try /usr/bin/ }
+    result:=SearchBinUtil('/usr/bin',
+      AsFile);
+
+  if not result then { try /bin/ }
+    result:=SearchBinUtil('/bin',
+      AsFile);
+  {$endif unix}
+
   SearchBinUtilsInfo(result);
   if not result then
   begin
     {$ifdef mswindows}
     infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.',etInfo);
+    {$else}
+    infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at https://launchpad.net/gcc-arm-embedded.',etInfo);
     {$endif}
     FAlreadyWarned:=true;
   end
