@@ -115,6 +115,9 @@ var
 
 implementation
 
+uses
+  installeruniversal;
+
 const
   {$IFDEF WIN64}
   FPCUpExe='fpcup64';//fpcup executable filename (without .exe)
@@ -218,7 +221,7 @@ end;
 
 procedure TForm1.mnuFPCUPDownloadClick(Sender: TObject);
 begin
-  OpenURL('http://bitbucket.org/reiniero/fpcup/downloads');
+  OpenURL('https://github.com/LongDirtyAnimAlf/Reiniero-fpcup');
 end;
 
 procedure TForm1.mnuFPCUPWikiClick(Sender: TObject);

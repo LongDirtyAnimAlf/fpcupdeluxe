@@ -203,7 +203,7 @@ begin
   else
   begin
     { for Teensy 3.0 and 3.1 and 3.2 add
-    -Cparmv7em
+    -Cparmv7em ... -Wpmk20dx256XXX7
 
     for NXP LPC 2124 add
     -Cparmv4
@@ -229,7 +229,7 @@ end;
 constructor TAny_Embeddedarm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Win32_embeddedarm';
+  FCrossModuleName:='TAny_EmbeddedArm';
   FBinUtilsPrefix:='arm-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later

@@ -4,13 +4,13 @@ object Form1: TForm1
   Top = 88
   Width = 897
   Caption = 'fpcup GUI'
-  ClientHeight = 606
+  ClientHeight = 605
   ClientWidth = 897
   Menu = MainMenu1
   OnCreate = FormCreate
   OnShow = FormShow
   SessionProperties = 'INIFileSelectEdit.FileName;ProfileSelect.ItemIndex'
-  LCLVersion = '1.3'
+  LCLVersion = '1.4.2.0'
   object EditTabs: TPageControl
     Left = 8
     Height = 536
@@ -22,7 +22,7 @@ object Form1: TForm1
     object IniEditorTab: TTabSheet
       Hint = 'Options and button for running fpcup'
       Caption = 'Options'
-      ClientHeight = 510
+      ClientHeight = 508
       ClientWidth = 879
       ParentShowHint = False
       ShowHint = True
@@ -471,7 +471,6 @@ object Form1: TForm1
           ''
         )
         VisibleSpecialChars = [vscSpace, vscTabAtLast]
-        SelectedColor.FrameEdges = sfeAround
         SelectedColor.BackPriority = 50
         SelectedColor.ForePriority = 50
         SelectedColor.FramePriority = 50
@@ -479,23 +478,17 @@ object Form1: TForm1
         SelectedColor.ItalicPriority = 50
         SelectedColor.UnderlinePriority = 50
         SelectedColor.StrikeOutPriority = 50
-        IncrementColor.FrameEdges = sfeAround
-        HighlightAllColor.FrameEdges = sfeAround
         BracketHighlightStyle = sbhsBoth
         BracketMatchColor.Background = clNone
         BracketMatchColor.Foreground = clNone
-        BracketMatchColor.FrameEdges = sfeAround
         BracketMatchColor.Style = [fsBold]
         FoldedCodeColor.Background = clNone
         FoldedCodeColor.Foreground = clGray
         FoldedCodeColor.FrameColor = clGray
-        FoldedCodeColor.FrameEdges = sfeAround
         MouseLinkColor.Background = clNone
         MouseLinkColor.Foreground = clBlue
-        MouseLinkColor.FrameEdges = sfeAround
         LineHighlightColor.Background = clNone
         LineHighlightColor.Foreground = clNone
-        LineHighlightColor.FrameEdges = sfeAround
         inline SynLeftGutterPartList1: TSynGutterPartList
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
@@ -506,7 +499,6 @@ object Form1: TForm1
             MouseActions = <>
             MarkupInfo.Background = clBtnFace
             MarkupInfo.Foreground = clNone
-            MarkupInfo.FrameEdges = sfeAround
             DigitCount = 2
             ShowOnlyLineNumbersMultiplesOf = 1
             ZeroStart = False
@@ -523,13 +515,11 @@ object Form1: TForm1
             MouseActions = <>
             MarkupInfo.Background = clWhite
             MarkupInfo.Foreground = clGray
-            MarkupInfo.FrameEdges = sfeAround
           end
           object SynGutterCodeFolding1: TSynGutterCodeFolding
             MouseActions = <>
             MarkupInfo.Background = clNone
             MarkupInfo.Foreground = clGray
-            MarkupInfo.FrameEdges = sfeAround
             MouseActionsExpanded = <>
             MouseActionsCollapsed = <>
           end
@@ -537,7 +527,7 @@ object Form1: TForm1
       end
       object INIFileSelectEdit: TFileNameEdit
         Left = 56
-        Height = 21
+        Height = 23
         Top = 24
         Width = 368
         FileName = 'settings.ini'
@@ -554,39 +544,39 @@ object Form1: TForm1
       end
       object ProfileSelect: TComboBox
         Left = 56
-        Height = 21
+        Height = 23
         Hint = 'Choose the profile you want to enable'
         Top = 61
         Width = 164
         AutoComplete = True
         AutoCompleteText = [cbactEnabled, cbactEndOfLineComplete, cbactSearchAscending]
         AutoDropDown = True
-        ItemHeight = 13
+        ItemHeight = 15
         OnGetItems = ProfileSelectGetItems
         OnSelect = ProfileSelectSelect
         TabOrder = 2
       end
       object INIFileLabel: TLabel
         Left = 8
-        Height = 13
+        Height = 15
         Top = 24
-        Width = 32
+        Width = 34
         Caption = '&INI file'
         ParentColor = False
       end
       object ProfileLabel: TLabel
         Left = 8
-        Height = 13
+        Height = 15
         Top = 64
-        Width = 30
+        Width = 34
         Caption = '&Profile'
         ParentColor = False
       end
       object chkVerbose: TCheckBox
         Left = 260
-        Height = 17
+        Height = 19
         Top = 65
-        Width = 59
+        Width = 62
         Caption = '&Verbose'
         TabOrder = 0
       end
@@ -1067,7 +1057,6 @@ object Form1: TForm1
         MouseSelActions = <>
         VisibleSpecialChars = [vscSpace, vscTabAtLast]
         ScrollBars = ssAutoBoth
-        SelectedColor.FrameEdges = sfeAround
         SelectedColor.BackPriority = 50
         SelectedColor.ForePriority = 50
         SelectedColor.FramePriority = 50
@@ -1075,23 +1064,17 @@ object Form1: TForm1
         SelectedColor.ItalicPriority = 50
         SelectedColor.UnderlinePriority = 50
         SelectedColor.StrikeOutPriority = 50
-        IncrementColor.FrameEdges = sfeAround
-        HighlightAllColor.FrameEdges = sfeAround
         BracketHighlightStyle = sbhsBoth
         BracketMatchColor.Background = clNone
         BracketMatchColor.Foreground = clNone
-        BracketMatchColor.FrameEdges = sfeAround
         BracketMatchColor.Style = [fsBold]
         FoldedCodeColor.Background = clNone
         FoldedCodeColor.Foreground = clGray
         FoldedCodeColor.FrameColor = clGray
-        FoldedCodeColor.FrameEdges = sfeAround
         MouseLinkColor.Background = clNone
         MouseLinkColor.Foreground = clBlue
-        MouseLinkColor.FrameEdges = sfeAround
         LineHighlightColor.Background = clNone
         LineHighlightColor.Foreground = clNone
-        LineHighlightColor.FrameEdges = sfeAround
         inline SynLeftGutterPartList1: TSynGutterPartList
           object SynGutterMarks1: TSynGutterMarks
             Width = 24
@@ -1102,7 +1085,6 @@ object Form1: TForm1
             MouseActions = <>
             MarkupInfo.Background = clBtnFace
             MarkupInfo.Foreground = clNone
-            MarkupInfo.FrameEdges = sfeAround
             DigitCount = 2
             ShowOnlyLineNumbersMultiplesOf = 1
             ZeroStart = False
@@ -1119,13 +1101,11 @@ object Form1: TForm1
             MouseActions = <>
             MarkupInfo.Background = clWhite
             MarkupInfo.Foreground = clGray
-            MarkupInfo.FrameEdges = sfeAround
           end
           object SynGutterCodeFolding1: TSynGutterCodeFolding
             MouseActions = <>
             MarkupInfo.Background = clNone
             MarkupInfo.Foreground = clGray
-            MarkupInfo.FrameEdges = sfeAround
             MouseActionsExpanded = <>
             MouseActionsCollapsed = <>
           end
@@ -1169,7 +1149,7 @@ object Form1: TForm1
         Top = 230
         Width = 841
         Caption = 'Switch SVN repo URL, delete .ppu etc'
-        ClientHeight = 134
+        ClientHeight = 132
         ClientWidth = 837
         TabOrder = 2
         object RepoDirectorySwitch: TDirectoryEdit
@@ -1225,7 +1205,7 @@ object Form1: TForm1
         Top = 114
         Width = 841
         Caption = 'Delete .ppu, .a, .o files'
-        ClientHeight = 94
+        ClientHeight = 92
         ClientWidth = 837
         TabOrder = 1
         object RepoDirectory: TDirectoryEdit
@@ -1262,14 +1242,6 @@ object Form1: TForm1
   object SynIniHighlighter: TSynIniSyn
     DefaultFilter = 'INI Files (*.ini)|*.ini'
     Enabled = False
-    CommentAttri.FrameEdges = sfeAround
-    TextAttri.FrameEdges = sfeAround
-    SectionAttri.FrameEdges = sfeAround
-    KeyAttri.FrameEdges = sfeAround
-    NumberAttri.FrameEdges = sfeAround
-    SpaceAttri.FrameEdges = sfeAround
-    StringAttri.FrameEdges = sfeAround
-    SymbolAttri.FrameEdges = sfeAround
     left = 840
     top = 568
   end

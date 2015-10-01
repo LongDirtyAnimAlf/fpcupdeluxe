@@ -468,7 +468,7 @@ begin
   FTargetCPU:='arm';
   FTargetOS:='android';
   FAlreadyWarned:=false;
-  infoln('TAny_ARMAndroid crosscompiler loading',etDebug);
+  infoln(FCrossModuleName+': crosscompiler loading',etDebug);
 end;
 
 destructor TAny_ARMAndroid.Destroy;
