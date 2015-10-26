@@ -320,7 +320,6 @@ begin
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FReturnCode := 0;
   FRepoExecutable := '';
-  FExportOnly := true;
   FindRepoExecutable; //Do this now so hopefully the hgExecutable property is valid.
 end;
 

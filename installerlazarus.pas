@@ -994,7 +994,8 @@ begin
   infoln('Checking out/updating Lazarus sources:', etInfo);
   UpdateWarnings := TStringList.Create;
   try
-    FSVNClient.Verbose := FVerbose;
+    FSVNClient.Verbose:=FVerbose;
+    FSVNClient.ExportOnly:=FExportOnly;
     Result := DownloadFromSVN(ModuleName, BeforeRevision, AfterRevision, UpdateWarnings);
     if UpdateWarnings.Count > 0 then
     begin

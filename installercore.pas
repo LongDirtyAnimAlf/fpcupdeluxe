@@ -97,6 +97,7 @@ type
     FRepositoryUpdated: boolean;
     FURL: string;
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
+    FExportOnly: boolean;
     FVerbose: boolean;
     FTar: string;
     FUnzip: string;
@@ -182,6 +183,8 @@ type
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn
     property URL: string write FURL;
+    // do not download the repo itself, but only get the files (of master)
+    property ExportOnly: boolean write FExportOnly;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
     // append line ending and write to log and, if specified, to console
@@ -1363,9 +1366,11 @@ begin
   ProcessEx := TProcessEx.Create(nil);
   ProcessEx.OnErrorM := @LogError;
   FCPUCount := GetLogicalCpuCount;
+
   FGitClient := TGitClient.Create;
   FHGClient := THGClient.Create;
   FSVNClient := TSVNClient.Create;
+
   // List of binutils that can be downloaded:
   CreateBinutilsList;
   FNeededExecutablesChecked:=false;

@@ -730,7 +730,19 @@ begin
       if FInstaller.IncludeModules<>'' then
         writeln('Additional modules:     '+FInstaller.IncludeModules);
 
-      writeln('');
+      if FInstaller.ExportOnly then
+      begin
+        writeln('');
+        writeln('INFO: FPCUP will not download repos. It will only get the files !!!');
+        writeln('');
+      end
+      else
+      begin
+        writeln('');
+        writeln('WARNING: FPCUP will download full repositories !!!');
+        writeln('');
+      end;
+
       // Remove password from output
       if FInstaller.HTTPProxyPassword='' then
       begin
@@ -762,12 +774,6 @@ begin
         begin
           writeln('');
           writeln('WARNING: proxy password will appear in screen output!');
-          writeln('');
-        end;
-        if NOT FInstaller.ExportOnly then
-        begin
-          writeln('');
-          writeln('WARNING: FPCUP will download full repositories !!!');
           writeln('');
         end;
       end;

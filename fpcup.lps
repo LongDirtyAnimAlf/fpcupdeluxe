@@ -116,8 +116,6 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="9"/>
-        <TopLine Value="40"/>
-        <CursorPos X="14" Y="190"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -125,7 +123,7 @@ end;"/>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="11"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -133,7 +131,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="14"/>
+        <EditorIndex Value="12"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -141,9 +139,8 @@ end;"/>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
@@ -194,16 +191,13 @@ end;"/>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="winInstaller"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit14>
       <Unit15>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="293"/>
-        <CursorPos X="45" Y="322"/>
         <UsageCount Value="200"/>
       </Unit15>
       <Unit16>
@@ -335,8 +329,6 @@ end;"/>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="152"/>
-        <CursorPos X="73" Y="165"/>
         <UsageCount Value="200"/>
       </Unit33>
       <Unit34>
@@ -371,8 +363,6 @@ end;"/>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="74"/>
-        <CursorPos Y="93"/>
         <UsageCount Value="200"/>
       </Unit38>
       <Unit39>
@@ -382,7 +372,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="39"/>
       </Unit39>
       <Unit40>
         <Filename Value="jedi.inc"/>
@@ -391,7 +381,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="39"/>
       </Unit40>
       <Unit41>
         <Filename Value="mainform.pas"/>
@@ -401,15 +391,13 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="39"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_linux386_to_mipsel.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="143"/>
-        <CursorPos X="34" Y="120"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="39"/>
       </Unit42>
       <Unit43>
         <Filename Value="revision.inc"/>
@@ -418,13 +406,13 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="35"/>
+        <UsageCount Value="39"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="28"/>
+        <UsageCount Value="32"/>
       </Unit44>
     </Units>
   </ProjectSession>

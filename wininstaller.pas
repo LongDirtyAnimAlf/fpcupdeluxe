@@ -159,6 +159,7 @@ begin
   if FVerbose then
     ProcessEx.OnOutputM:=@DumpOutput;
   FSVNClient.Verbose:=FVerbose;
+  FSVNClient.ExportOnly:=FExportOnly;
   infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
 
   // Basedirectory = install directory from fpcup.ini/universal module.

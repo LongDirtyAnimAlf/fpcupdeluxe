@@ -1558,6 +1558,7 @@ begin
   UpdateWarnings:=TStringList.Create;
   try
    FSVNClient.Verbose:=FVerbose;
+   FSVNClient.ExportOnly:=FExportOnly;
    result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
    if UpdateWarnings.Count>0 then
    begin

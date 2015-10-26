@@ -1022,6 +1022,7 @@ begin
   FInstaller.KeepLocalChanges:=FParent.KeepLocalChanges;
   FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
   FInstaller.Verbose:=FParent.Verbose;
+  FInstaller.ExportOnly:=FParent.ExportOnly;
   FInstaller.Log:=FParent.FLog;
   {$IFDEF MSWINDOWS}
   FInstaller.MakeDirectory:=FParent.MakeDirectory;

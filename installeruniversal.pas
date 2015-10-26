@@ -1047,13 +1047,14 @@ begin
       infoln('Going to download/update from SVN repository '+RemoteURL,etDebug);
       UpdateWarnings:=TStringList.Create;
       try
-        FSVNClient.Verbose:=FVerbose;
         FBaseDirectory:=InstallDir;
         FUrl:=RemoteURL;
         User:=GetValue('UserName',sl);
         Pass:=GetValue('Password',sl);
         if PinRevision<>'' then
           FSVNClient.DesiredRevision:=PinRevision;
+        FSVNClient.Verbose:=FVerbose;
+        FSVNClient.ExportOnly:=FExportOnly;
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
         if result=false then
           WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
@@ -1073,11 +1074,12 @@ begin
       if CheckLocation then exit;
       UpdateWarnings:=TStringList.Create;
       try
-        FHGClient.Verbose:=FVerbose;
         FBaseDirectory:=InstallDir;
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FHGClient.DesiredRevision:=PinRevision;
+        FHGClient.Verbose:=FVerbose;
+        FHGClient.ExportOnly:=FExportOnly;
         result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         if result=false then
           WritelnLog('HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
@@ -1099,11 +1101,12 @@ begin
       if CheckLocation then exit;
       UpdateWarnings:=TStringList.Create;
       try
-        FGitClient.Verbose:=FVerbose;
         FBaseDirectory:=InstallDir;
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FGitClient.DesiredRevision:=PinRevision;
+        FGitClient.Verbose:=FVerbose;
+        FGitClient.ExportOnly:=FExportOnly;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         if result=false then
           WritelnLog('GIT error downloading from '+RemoteURL+'. Continuing regardless.',true);

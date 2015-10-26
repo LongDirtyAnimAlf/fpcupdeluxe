@@ -131,6 +131,10 @@ begin
     result:=SearchBinUtil('/usr/local/bin',
       AsFile);
 
+  if not result then { try /usr/bin/ }
+    result:=SearchBinUtil('/usr/bin',
+      AsFile);
+
   if not result then { try /bin/ }
     result:=SearchBinUtil('/bin',
       AsFile);
@@ -146,6 +150,7 @@ begin
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
+
   {$ifdef unix}
   // User may also have placed them into their regular search path:
   if not result then { try /usr/local/bin/<dirprefix>/ }
@@ -154,6 +159,10 @@ begin
 
   if not result then { try /usr/local/bin/ }
     result:=SearchBinUtil('/usr/local/bin',
+      AsFile);
+
+  if not result then { try /usr/bin/ }
+    result:=SearchBinUtil('/usr/bin',
       AsFile);
 
   if not result then { try /bin/ }
