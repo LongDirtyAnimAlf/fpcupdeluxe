@@ -46,6 +46,7 @@ interface
 
 uses
   Classes, SysUtils,
+  StrUtils,
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF}
@@ -104,7 +105,7 @@ begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
     if ndkversion>0 then
     begin
-      ndkversion:=Pos(DirectorySeparator,FBinUtilsPath,ndkversion);
+      ndkversion:=PosEx(DirectorySeparator,FBinUtilsPath,ndkversion);
       if ndkversion>0 then
       begin
         PresetLibPath:=LeftStr(FBinUtilsPath,ndkversion);
@@ -254,7 +255,7 @@ begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
     if ndkversion>0 then
     begin
-      ndkversion:=Pos(DirectorySeparator,FLibsPath,ndkversion);
+      ndkversion:=PosEx(DirectorySeparator,FLibsPath,ndkversion);
       if ndkversion>0 then
       begin
         PresetBinPath:=LeftStr(FLibsPath,ndkversion);
