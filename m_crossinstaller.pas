@@ -109,6 +109,9 @@ Var
 
 implementation
 
+uses
+  fileutil;
+
 { TCrossInstaller }
 procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
 begin
@@ -177,7 +180,7 @@ begin
   if not result then
   begin
     infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
-    FLibsPath:=SafeExpandFileName(ExtractFilePath(ParamStr(0))+DirectorySeparator+
+    FLibsPath:=SafeExpandFileName(SafeGetApplicationPath+
       'cross'+DirectorySeparator+
       'lib'+DirectorySeparator+
       DirName);
@@ -226,7 +229,7 @@ begin
   if not result then
   begin
     infoln(FCrossModuleName + ': failed: searched binutil '+FBinUtilsPath,etDebug);
-    FBinUtilsPath:=SafeExpandFileName(ExtractFilePath(ParamStr(0))+DirectorySeparator+
+    FBinUtilsPath:=SafeExpandFileName(SafeGetApplicationPath+
       'cross'+DirectorySeparator+
       'bin'+DirectorySeparator+
       DirName);

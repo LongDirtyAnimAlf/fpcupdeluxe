@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 63
+  Left = 252
   Height = 625
-  Top = 88
+  Top = 66
   Width = 897
   Caption = 'fpcup GUI'
   ClientHeight = 605
@@ -10,7 +10,7 @@ object Form1: TForm1
   OnCreate = FormCreate
   OnShow = FormShow
   SessionProperties = 'INIFileSelectEdit.FileName;ProfileSelect.ItemIndex'
-  LCLVersion = '1.4.2.0'
+  LCLVersion = '1.5'
   object EditTabs: TPageControl
     Left = 8
     Height = 536

@@ -29,7 +29,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="8">
+    <BuildModes Count="7">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -237,47 +237,7 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item6>
-      <Item7 Name="darwin64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86_64"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="darwin"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
-              <UseExternalDbgSyms Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-          </Linking>
-          <Other>
-            <WriteFPCLogo Value="False"/>
-            <ExecuteBefore>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
-          </Other>
-        </CompilerOptions>
-      </Item7>
-      <Item8 Name="linux64">
+      <Item7 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -316,7 +276,7 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item8>
+      </Item7>
       <SharedMatrixOptions Count="1">
         <Item1 ID="233755810855" Modes="Default,Debug,win32" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
@@ -330,7 +290,6 @@ end;"/>
       <local>
         <FormatVersion Value="1"/>
         <CommandLineParams Value="--inifile=rein.ini --inisection=linuxarm --noconfirm"/>
-        <LaunchingApplication PathPlusParams="\usr\bin\xterm -T 'Lazarus Run Output' -e $(LazarusDir)\tools\runwait.sh $(TargetCmdLine)"/>
       </local>
     </RunParams>
     <RequiredPackages Count="2">
@@ -341,7 +300,7 @@ end;"/>
         <PackageName Value="LazUtils"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="45">
+    <Units Count="44">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -376,7 +335,6 @@ end;"/>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerHelp"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
@@ -407,7 +365,6 @@ end;"/>
       <Unit14>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="winInstaller"/>
       </Unit14>
       <Unit15>
         <Filename Value="commandline.pas"/>
@@ -514,22 +471,17 @@ end;"/>
         <IsPartOfProject Value="True"/>
       </Unit40>
       <Unit41>
-        <Filename Value="mainform.pas"/>
+        <Filename Value="m_linux386_to_mipsel.pas"/>
         <IsPartOfProject Value="True"/>
-        <HasResources Value="True"/>
       </Unit41>
       <Unit42>
-        <Filename Value="m_linux386_to_mipsel.pas"/>
+        <Filename Value="revision.inc"/>
         <IsPartOfProject Value="True"/>
       </Unit42>
       <Unit43>
-        <Filename Value="revision.inc"/>
-        <IsPartOfProject Value="True"/>
-      </Unit43>
-      <Unit44>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
-      </Unit44>
+      </Unit43>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

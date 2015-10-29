@@ -56,6 +56,8 @@ const
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
 
+    'Declare lazscripttest;' + 'Exec CreateLazarusScript;' + 'End;' +
+
     //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' + 'Getmodule lazarus;' + 'Buildmodule lazbuild;' +
     //config lazarus, so lazbuild will work:

@@ -47,6 +47,10 @@ Const
     'Buildmodule FPC;'+
     'End;'+
 
+    'Declare FPCscripttest;'+
+    'Exec CreateFpcupScript;'+
+    'End;'+
+
 //standard uninstall
     'Declare FPCuninstall;'+
     'Uninstallmodule FPC;'+

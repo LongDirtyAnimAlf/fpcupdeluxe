@@ -38,9 +38,9 @@ interface
 
 uses
   Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerHelp,installerUniversal,fpcuputil,fileutil
-  {$ifdef linux}
-  ,dynlibs
-  {$endif linux}
+  {$ifdef UNIX}
+  ,dynlibs,Unix
+  {$endif UNIX}
   ;
 
 // Get revision from our source code repository:
@@ -413,6 +413,9 @@ type
 
 implementation
 
+uses
+  processutils;
+
 { TFPCupManager }
 
 function TFPCupManager.GetLazarusPrimaryConfigPath: string;
@@ -491,9 +494,9 @@ begin
   if AValue='' then
     begin
     {$IFDEF MSWINDOWS}
-    FLog.LogFile:='fpcup.log'; //current directory
+    FLog.LogFile:=SafeGetApplicationPath+'fpcup.log'; //exe directory
     {$ELSE}
-    FLog.LogFile:=SafeExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //In home directory
+    FLog.LogFile:=SafeExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //home directory
     {$ENDIF MSWINDOWS}
     end
   else
@@ -689,10 +692,10 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     if FParent.ShortCutNameFpcup<>EmptyStr then
     begin
      {$IFDEF MSWINDOWS}
-      CreateDesktopShortCut(paramstr(0),FParent.PersistentOptions,FParent.ShortCutNameFpcup);
+      CreateDesktopShortCut(SafeGetApplicationPath+ExtractFileName(paramstr(0)),FParent.PersistentOptions,FParent.ShortCutNameFpcup);
      {$ELSE}
       FParent.PersistentOptions:=FParent.PersistentOptions+' $*';
-      CreateHomeStartLink('"'+paramstr(0)+'"',FParent.PersistentOptions,FParent.ShortCutNameFpcup);
+      CreateHomeStartLink('"'+SafeGetApplicationPath+ExtractFileName(paramstr(0))+'"',FParent.PersistentOptions,FParent.ShortCutNameFpcup);
      {$ENDIF MSWINDOWS}
     end;
   end;
@@ -716,13 +719,22 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       {$IFDEF UNIX}
       {$IFDEF DARWIN}
       CreateHomeStartLink(InstalledLazarus+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
+      // Create shortcut on Desktop and in Applications
+      fpSystem('/usr/bin/osascript << EOF'+#10+
+               'tell application "Finder"'+#10+
+               'make new alias to POSIX file "/Users/superdad/development/lazarus/lazarus.app" at (path to desktop folder as text)'+#10+
+	       'set name of result to "lazarus_fpcup"'+#10+
+               'make new alias to POSIX file "/Users/superdad/development/lazarus/lazarus.app" at (path to applications folder as text)'+#10+
+	       'set name of result to "lazarus_fpcup"'+#10+
+               'end tell'+#10+
+               'EOF');
       {$ELSE}
       CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ENDIF DARWIN}
       {$IF (defined(LINUX)) or (defined(BSD))}
       // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
       CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
-      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
+      CreateHomeStartLink('"'+InstalledLazarus+'"','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       {$ENDIF (defined(LINUX)) or (defined(BSD))}
       {$ENDIF UNIX}
     except

@@ -105,6 +105,8 @@ function MoveFile(const SrcFilename, DestFilename: string): boolean;
 function SafeExpandFileName (Const FileName : String): String;
 // Like ExpandFilenameUTF8 but does not expand an empty string to current directory
 function SafeExpandFileNameUTF8 (Const FileName : String): String;
+// Get application path
+function SafeGetApplicationPath: String;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
 // to application directory
 procedure SaveInisFromResource(filename,resourcename:string);
@@ -124,6 +126,7 @@ uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil {lazutils, for utf8 functions?!?},
+  LazFileUtils,
   strutils
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
@@ -170,6 +173,19 @@ begin
     result:=''
   else
     result:=ExpandFileNameUTF8(FileName);
+end;
+
+function SafeGetApplicationPath: String;
+var
+  StartPath: String;
+begin
+ StartPath:=ExpandFileNameUTF8(ParamStrUTF8(0));
+ if FileIsSymlink(StartPath) then
+    StartPath:=GetPhysicalFilename(StartPath,pfeException);
+ result:=ExtractFilePath(StartPath);
+    if DirectoryExistsUTF8(result) then
+       result:=GetPhysicalFilename(result,pfeException);
+ result:=AppendPathDelim(result);
 end;
 
 procedure SaveInisFromResource(filename,resourcename:string);

@@ -91,6 +91,7 @@ type
 implementation
 
 uses
+  fpcuputil,
   Process,
   {$IFDEF UNIX}
   Unix,
@@ -144,7 +145,7 @@ begin
        else break;
     //Directory where current executable is:
     if not FileExists(FRepoExecutable)
-       then FRepoExecutable := (ExtractFilePath(ParamStr(0)) + RepoExecutableName + '.exe')
+       then FRepoExecutable := (SafeGetApplicationPath + RepoExecutableName + '.exe')
        else break;
    {$ENDIF MSWINDOWS}
     break;

@@ -156,7 +156,12 @@ const
   {$ENDIF}
   {$ENDIF}
   {$IFDEF DARWIN} //OSX; at end to let it override
-  FPCUpExe='fpcup_osx_x86'; //for now x86 only
+  {$IFDEF CPUX86_64}
+  FPCUpExe='fpcup_osx_x64';
+  {$ENDIF}
+  {$IFDEF CPU386}
+  FPCUpExe='fpcup_osx_x86';
+  {$ENDIF}
   {$ENDIF}
 
 { TForm1 }
@@ -176,13 +181,13 @@ begin
   {$ENDIF}
   FOneTimeSetup:=true;
 
-  SaveDialog.InitialDir:=ExtractFilePath(ParamStr(0)); //application directory
+  SaveDialog.InitialDir:=SafeGetApplicationPath; //application directory
   // Extract settings.ini if necessary
   try
     // Run fpcup --help so it generates relevant ini files.
     // Better than doing fpcuputil.SaveInisFromResource;
     // as we can mix and match fpcup and fpcupgui versions
-    if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+SETTTINGSFILENAME) then
+    if not FileExistsUTF8(SafeGetApplicationPath+SETTTINGSFILENAME) then
     begin
       FPCUPLocation:=GetPFCUPLocation;
       if FileExistsUTF8(FPCUPLocation) then
@@ -310,12 +315,12 @@ end;
 
 function TForm1.GetPFCUPLocation: string;
 begin
-  Result:=ExtractFilePath(ParamStr(0))+FPCUpExe+GetExeExt;
+  Result:=SafeGetApplicationPath+FPCUpExe+GetExeExt;
   {$IFDEF CPUARM}
   {$IFDEF LINUX}
   // Allow for hard float variant
   if not(FileExistsUTF8(Result)) then
-    Result:=ExtractFilePath(ParamStr(0))+'fpcup_linux_armhf'+GetExeExt;
+    Result:=SafeGetApplicationPath+'fpcup_linux_armhf'+GetExeExt;
   {$ENDIF LINUX}
   {$ENDIF CPUARM}
 end;

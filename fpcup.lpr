@@ -291,8 +291,8 @@ begin
   // First check for settings.ini; it might not be present but specified anyway.
   // In any case, we need to extract it from the resource sometime unless we
   // want to create an installer for each platform.
-  if not FileExistsUTF8(ExtractFilePath(ParamStr(0))+SETTTINGSFILENAME) then
-    SaveInisFromResource(SETTTINGSFILENAME,'settings_ini');
+  if not FileExistsUTF8(SafeGetApplicationPath+SETTTINGSFILENAME) then
+    SaveInisFromResource(SafeGetApplicationPath+SETTTINGSFILENAME,'settings_ini');
 
   Options:=TCommandLineOptions.Create;
   try
@@ -416,7 +416,7 @@ begin
           FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
         end;
       end;
-      FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ExtractFilePath(ParamStr(0))+installerUniversal.CONFIGFILENAME);
+      FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ProgramDirectory+installerUniversal.CONFIGFILENAME);
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
       FInstaller.CrossOS_SubArch:=Options.GetOption('','subarch','');
       FInstaller.CrossOPT:=Options.GetOption('','crossopt','');

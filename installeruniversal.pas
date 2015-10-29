@@ -1536,7 +1536,7 @@ var
 begin
   result:=False;
 
-  ini:=TMemIniFile.Create(CONFIGFILENAME);
+  ini:=TMemIniFile.Create(SafeGetApplicationPath+CONFIGFILENAME);
   try
     ini.CaseSensitive:=false;
     ini.StripQuotes:=true; //helps read description lines
@@ -1647,20 +1647,22 @@ procedure SetConfigFile(aConfigFile: string);
 begin
   CurrentConfigFile:=aConfigFile;
   // Create fpcup.ini from resource if it doesn't exist yet
-  if (CurrentConfigFile=ExtractFilePath(ParamStr(0))+CONFIGFILENAME)
-    and not FileExistsUTF8(CONFIGFILENAME) then
-    SaveInisFromResource(CONFIGFILENAME,'fpcup_ini');
+  if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME)
+    and not FileExistsUTF8(SafeGetApplicationPath+CONFIGFILENAME) then
+    SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
 end;
 
 
 initialization
- IniGeneralSection:=TStringList.create;
- UniModuleList:=TStringList.create;
- UniModuleEnabledList:=TStringList.create;
+  IniGeneralSection:=TStringList.create;
+  UniModuleList:=TStringList.create;
+  UniModuleEnabledList:=TStringList.create;
+
 finalization
-ClearUniModuleList;
-UniModuleList.free;
-UniModuleEnabledList.free;
-IniGeneralSection.Free;
+  ClearUniModuleList;
+  UniModuleList.free;
+  UniModuleEnabledList.free;
+  IniGeneralSection.Free;
+
 end.
 

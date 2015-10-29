@@ -442,7 +442,7 @@ begin
     if OperationSucceeded then
     begin
       // check availability of OpenSSL libraries. Just continue in case oof error
-      if FileExists(ExtractFilePath(ParamStr(0))+'libeay32.dll') AND FileExists(ExtractFilePath(ParamStr(0))+'ssleay32.dll') then
+      if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(ExtractFilePath(ParamStr(0))+'ssleay32.dll') then
       begin
         infoln('Found OpenSLL library files.',etInfo);
       end
@@ -1120,7 +1120,7 @@ var
 begin
   OperationSucceeded := true;
 
-  ForceDirectoriesUTF8(ExtractFilePath(ParamStr(0)));
+  ForceDirectoriesUTF8(SafeGetApplicationPath);
 
   OpenSSLZip := SysUtils.GetTempFileName + '.zip';
   try
@@ -1146,7 +1146,7 @@ begin
   if OperationSucceeded then
   begin
     // Extract, overwrite
-    resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + ExtractFilePath(ParamStr(0)) + ' ' + OpenSSLZip + ' libeay32.dll ssleay32.dll' , FVerbose);
+    resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + SafeGetApplicationPath + ' ' + OpenSSLZip + ' libeay32.dll ssleay32.dll' , FVerbose);
     if resultcode <> 0 then
     begin
       OperationSucceeded := false;

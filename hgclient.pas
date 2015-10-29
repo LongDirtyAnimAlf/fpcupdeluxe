@@ -77,7 +77,9 @@ type
 
 implementation
 
-uses strutils;
+uses
+  fpcuputil,
+  strutils;
 
 
 { ThgClient }
@@ -104,7 +106,7 @@ begin
     FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\TorToisehg\' + RepoExecutableName + '.exe');
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
-    FRepoExecutable := (ExtractFilePath(ParamStr(0)) + RepoExecutableName + '.exe');
+    FRepoExecutable := (SafeGetApplicationPath + RepoExecutableName + '.exe');
 {$ENDIF MSWINDOWS}
 
   if not FileExists(FRepoExecutable) then

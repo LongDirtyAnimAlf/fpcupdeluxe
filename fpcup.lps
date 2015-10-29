@@ -3,45 +3,15 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="2" Active="Default">
-      <Item1 Name="darwin32">
+    <BuildModes Count="3" Active="win32">
+      <Item1 Name="darwin64">
         <CompilerOptions>
           <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <Conditionals Value="if TargetOS = 'darwin' then begin
-  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
-  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
-end;"/>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="darwin"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
-              <UseExternalDbgSyms Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-          </Linking>
-          <Other>
-            <WriteFPCLogo Value="False"/>
-            <ExecuteBefore>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
-          </Other>
+          <Parsing>
+            <SyntaxOptions>
+              <UseAnsiStrings Value="False"/>
+            </SyntaxOptions>
+          </Parsing>
         </CompilerOptions>
       </Item1>
       <Item2 Name="linuxarmhf">
@@ -83,13 +53,51 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item2>
+      <Item3 Name="darwin32">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item3>
     </BuildModes>
-    <Units Count="45">
+    <Units Count="44">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <CursorPos X="35" Y="7"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -110,6 +118,8 @@ end;"/>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="139"/>
+        <CursorPos X="29" Y="153"/>
         <UsageCount Value="200"/>
       </Unit3>
       <Unit4>
@@ -139,7 +149,6 @@ end;"/>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
       </Unit7>
@@ -171,6 +180,8 @@ end;"/>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="172"/>
+        <CursorPos X="71" Y="176"/>
         <UsageCount Value="200"/>
       </Unit11>
       <Unit12>
@@ -191,7 +202,6 @@ end;"/>
       <Unit14>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="winInstaller"/>
         <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
       </Unit14>
@@ -374,7 +384,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="40"/>
+        <UsageCount Value="49"/>
       </Unit39>
       <Unit40>
         <Filename Value="jedi.inc"/>
@@ -383,39 +393,31 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="40"/>
+        <UsageCount Value="49"/>
       </Unit40>
       <Unit41>
-        <Filename Value="mainform.pas"/>
-        <IsPartOfProject Value="True"/>
-        <HasResources Value="True"/>
-        <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="40"/>
-      </Unit41>
-      <Unit42>
         <Filename Value="m_linux386_to_mipsel.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="40"/>
-      </Unit42>
-      <Unit43>
+        <TopLine Value="34"/>
+        <CursorPos X="5" Y="47"/>
+        <UsageCount Value="49"/>
+      </Unit41>
+      <Unit42>
         <Filename Value="revision.inc"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="40"/>
-      </Unit43>
-      <Unit44>
+        <UsageCount Value="49"/>
+      </Unit42>
+      <Unit43>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="33"/>
-      </Unit44>
+        <UsageCount Value="42"/>
+      </Unit43>
     </Units>
   </ProjectSession>
 </CONFIG>
