@@ -530,7 +530,14 @@ var
   ExeName: string;
   Output: string;
 begin
+  if NOT FileExists(Executable) then
+  begin
+    infoln('Could not find ' + Executable + ' in path.', etinfo);
+    OperationSucceeded := false;
+  end
+  else
   try
+
     ExeName := ExtractFileName(Executable);
     ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, FVerbose);
     if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really

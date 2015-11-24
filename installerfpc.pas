@@ -959,7 +959,10 @@ begin
       if FBootstrapCompilerURL='' then
         //FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
         FBootstrapCompilerURL := FTP264Path+'i386-win32-ppc386.zip';
-      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
+      //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
+      if CheckExecutable('ppc386.exe', '-i', 'Free Pascal Compiler')
+         then FBootstrapCompiler := Which('ppc386.exe')
+         else FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
       end
       else
       begin
@@ -969,14 +972,20 @@ begin
         FBootstrapCompilerURL := FTP262Path+'x86_64-win64-ppcx64.zip';
         FBootstrapCompilerOverrideVersionCheck:=true;
       end;
-      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
+      //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
+      if CheckExecutable('ppcx64.exe', '-i', 'Free Pascal Compiler')
+         then FBootstrapCompiler := Which('ppcx64.exe')
+         else FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
       end;
     {$ELSE}
     // Win32
     if FBootstrapCompilerURL='' then
       //FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
       FBootstrapCompilerURL := FTP264Path+'i386-win32-ppc386.zip';
-    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
+    //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
+    if CheckExecutable('ppc386.exe', '-i', 'Free Pascal Compiler')
+       then FBootstrapCompiler := Which('ppc386.exe')
+       else FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     {$endif win64}
     {$ENDIF MSWINDOWS}
     {$IFDEF Linux}
@@ -987,7 +996,10 @@ begin
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'i386-linux-ppc386.bz2';
-    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
+    //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
+    if CheckExecutable('ppc386', '-i', 'Free Pascal Compiler')
+       then FBootstrapCompiler := Which('ppc386')
+       else FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
     {$ELSE}
     {$IFDEF cpuarmel} //probably the 2.6.x name for arm
     if FBootstrapCompilerURL='' then
@@ -997,12 +1009,18 @@ begin
     {$IFDEF cpuarm} //includes armel on FPC 3.1.1
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
-    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
+    //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
+    if CheckExecutable('ppcarm', '-i', 'Free Pascal Compiler')
+       then FBootstrapCompiler := Which('ppcarm')
+       else FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
     infoln('TFPCInstaller: bootstrap compiler detection: assuming this is a x64 processor on Linux',etWarning);
     if FBootstrapCompilerURL='' then
       FBootstrapCompilerURL := FTP262Path+'x86_64-linux-ppcx64.bz2';
-    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
+    //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
+    if CheckExecutable('ppcx64', '-i', 'Free Pascal Compiler')
+       then FBootstrapCompiler := Which('ppcx64')
+       else FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
     {$ENDIF cpuarm}
     {$ENDIF CPU386}
     {$ENDIF Linux}
@@ -1064,6 +1082,9 @@ begin
     {$ENDIF CPUX86_64}
     {$ENDIF OPENBSD}
     end;
+
+
+  //Which(ppcx64): string;
 
   // Only download bootstrap compiler if we can't find a valid one
   if CheckExecutable(FBootstrapCompiler, '-i', 'Free Pascal Compiler') then

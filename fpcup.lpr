@@ -48,13 +48,18 @@ Command: tfplist or something containing log records with timestamp, sequence de
 Add something like fpcup.config in the settings or installed fpc/lazarus dir so we know for which fpc/laz combo this dir is used
 }
 
+{$IFDEF LINUX}
+{$IFDEF CPUX86_64}
+{$linklib libc_nonshared.a}
+{$ENDIF}
+{$ENDIF}
 
 uses {$IFDEF UNIX}
   cthreads, {$ENDIF}
   Classes, sysutils, strings,
   updatelazconfig, processutils,
   fileutil, fpcuputil,
-  m_any_to_aixpowerpc, m_any_to_androidarm,
+  m_any_to_aixpowerpc, m_any_to_androidarm, m_any_to_linuxarm,
   m_any_to_embeddedarm, m_any_to_linuxmipsel, m_any_to_linux386,
   m_anyinternallinker_to_win386, m_anyinternallinker_to_win64,
   m_crossinstaller, m_crosswin32, m_crosswin64,

@@ -1,5 +1,5 @@
 unit m_any_to_linuxarm;
-{ Cross compiles from any platform with correct binutils to Linux ARM
+{ Cross compiles from any platform with correct binutils to linux ARM
 Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -46,8 +46,8 @@ uses
 implementation
 type
 
-{ TAny_Linuxarm }
-TAny_Linuxarm = class(TCrossInstaller)
+{ Tany_linuxarm }
+Tany_linuxarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -59,13 +59,13 @@ public
   destructor Destroy; override;
 end;
 
-{ TAny_Linuxarm }
-function TAny_Linuxarm.TargetSignature: string;
+{ Tany_linuxarm }
+function Tany_linuxarm.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function TAny_Linuxarm.GetLibs(Basepath:string): boolean;
+function Tany_linuxarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-linux';
   LibName='libc.so';
@@ -109,14 +109,14 @@ begin
   end;
 end;
 
-function TAny_Linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function Tany_linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=true;
 end;
 
-function TAny_Linuxarm.GetBinUtils(Basepath:string): boolean;
+function Tany_linuxarm.GetBinUtils(Basepath:string): boolean;
 const
   DirName='arm-linux';
 var
@@ -206,10 +206,10 @@ begin
   end;
 end;
 
-constructor TAny_Linuxarm.Create;
+constructor Tany_linuxarm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Any_Linuxarm';
+  FCrossModuleName:='any_linuxarm';
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;
@@ -221,18 +221,18 @@ begin
   infoln(FCrossModuleName+ ': crosscompiler loading',etDebug);
 end;
 
-destructor TAny_Linuxarm.Destroy;
+destructor Tany_linuxarm.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_Linuxarm:TAny_Linuxarm;
+  any_linuxarm:Tany_linuxarm;
 
 initialization
-  Any_Linuxarm:=TAny_Linuxarm.Create;
-  RegisterExtension(Any_Linuxarm.TargetCPU+'-'+Any_Linuxarm.TargetOS,Any_Linuxarm);
+  any_linuxarm:=Tany_linuxarm.Create;
+  RegisterExtension(any_linuxarm.TargetCPU+'-'+any_linuxarm.TargetOS,any_linuxarm);
 finalization
-  Any_Linuxarm.Destroy;
+  any_linuxarm.Destroy;
 end.
 

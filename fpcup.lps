@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="win32">
+    <BuildModes Count="3" Active="Default">
       <Item1 Name="darwin64">
         <CompilerOptions>
           <Version Value="11"/>
@@ -117,10 +117,9 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="139"/>
-        <CursorPos X="29" Y="153"/>
+        <EditorIndex Value="10"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
@@ -142,7 +141,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="13"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -179,10 +178,10 @@ end;"/>
       <Unit11>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="172"/>
-        <CursorPos X="71" Y="176"/>
+        <EditorIndex Value="12"/>
+        <CursorPos X="103" Y="6"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit11>
       <Unit12>
         <Filename Value="m_crosswin64.pas"/>
@@ -273,9 +272,10 @@ end;"/>
       <Unit24>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="100"/>
+        <CursorPos X="28" Y="116"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit24>
       <Unit25>
         <Filename Value="m_win32_to_linux386.pas"/>
@@ -297,8 +297,6 @@ end;"/>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="80"/>
-        <CursorPos X="23" Y="85"/>
         <UsageCount Value="200"/>
       </Unit27>
       <Unit28>
@@ -361,8 +359,6 @@ end;"/>
         <Filename Value="m_win32_to_linuxmips.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="118"/>
-        <CursorPos Y="130"/>
         <UsageCount Value="200"/>
       </Unit36>
       <Unit37>
@@ -384,7 +380,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="52"/>
       </Unit39>
       <Unit40>
         <Filename Value="jedi.inc"/>
@@ -393,7 +389,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="52"/>
       </Unit40>
       <Unit41>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -401,7 +397,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="34"/>
         <CursorPos X="5" Y="47"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="52"/>
       </Unit41>
       <Unit42>
         <Filename Value="revision.inc"/>
@@ -410,13 +406,13 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="52"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="42"/>
+        <UsageCount Value="45"/>
       </Unit43>
     </Units>
   </ProjectSession>
