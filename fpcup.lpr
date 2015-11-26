@@ -432,7 +432,7 @@ begin
           FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
           FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
-      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','-g -gl -O2 -Xs -CX -XX');
+      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','-g -gl -O1 -Xs -CX -XX');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
       if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
@@ -484,7 +484,7 @@ begin
         else
           FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FInstaller.LazarusDirectory);
 
-      FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','-g -gl -O2 -Xs -CX -XX');
+      FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','-g -gl -O1 -Xs -CX -XX');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
       if (pos('-Fl/usr/local/lib/',FInstaller.LazarusOPT)=0) then
@@ -688,65 +688,79 @@ begin
       end;
       if FInstaller.HTTPProxyHost<>'' then
       begin
-        writeln('HTTP proxy host:        '+FInstaller.HTTPProxyHost);
-        writeln('HTTP proxy port:        '+inttostr(FInstaller.HTTPProxyPort));
-        writeln('HTTP proxy user:        '+FInstaller.HTTPProxyUser);
-        writeln('HTTP proxy password:    <SECURITY:REDACTED>');
+        writeln('HTTP proxy host:  '+FInstaller.HTTPProxyHost);
+        writeln('HTTP proxy port:  '+inttostr(FInstaller.HTTPProxyPort));
+        writeln('HTTP proxy user:  '+FInstaller.HTTPProxyUser);
+        writeln('HTTP proxy pass:  <SECURITY:REDACTED>');
       end;
       {$IFDEF MSWINDOWS}
       // Makes no sense on other platforms
-      writeln('Binutils/make dir:      '+FInstaller.MakeDirectory);
+      writeln('Binutils/make dir:  '+FInstaller.MakeDirectory);
       {$ENDIF MSWINDOWS}
-      writeln('Bootstrap compiler dir: '+FInstaller.BootstrapCompilerDirectory);
-      if (FInstaller.SVNExecutable <> '') then
-        writeln('Subverion directory:    '+FInstaller.SVNExecutable);
-      writeln('Lazarus shortcut name:  '+FInstaller.ShortCutNameLazarus);
-      writeln('Shortcut fpcup name:    '+FInstaller.ShortCutNameFpcup);
-      writeln('FPC URL:                '+FInstaller.FPCURL);
-      writeln('FPC options:            '+FInstaller.FPCOPT);
-      writeln('FPC directory:          '+FInstaller.FPCDirectory);
-      writeln('Lazarus directory:      '+FInstaller.LazarusDirectory);
-      writeln('Lazarus primary config path:');
-      writeln('(Lazarus settings path) '+FInstaller.LazarusPrimaryConfigPath);
-      writeln('Lazarus URL:            '+FInstaller.LazarusURL);
-      writeln('Lazarus options:        '+FInstaller.LazarusOPT);
+      writeln('Bootstrap dir:      '+FInstaller.BootstrapCompilerDirectory);
+      writeln('FPC URL:            '+FInstaller.FPCURL);
+      writeln('FPC options:        '+FInstaller.FPCOPT);
+      writeln('FPC directory:      '+FInstaller.FPCDirectory);
+      writeln('Lazarus URL:        '+FInstaller.LazarusURL);
+      writeln('Lazarus options:    '+FInstaller.LazarusOPT);
+      writeln('Lazarus directory:  '+FInstaller.LazarusDirectory);
+
       if FInstaller.KeepLocalChanges then
       begin
-        writeln('Keep local changes:     yes');
+        writeln('Keep changes:       yes');
       end
       else
       begin
-        writeln('Keep local changes:     no');
+        writeln('Keep changes:       no');
       end;
       if FInstaller.ReApplyLocalChanges then
       begin
-        writeln('Re-apply local changes: yes');
+        writeln('Re-apply changes:   yes');
       end
       else
       begin
-        writeln('Re-apply local changes: no');
+        writeln('Re-apply changes:   no');
       end;
-      writeln('Log file name:          '+FInstaller.LogFileName);
+      writeln('Log file name:      '+FInstaller.LogFileName);
 
       For i:=0 to FInstaller.ModuleEnabledList.Count-1 do
         begin
-        writeln('Standard modules:       '+FInstaller.ModuleEnabledList[i]);
+        writeln('Standard modules:   '+FInstaller.ModuleEnabledList[i]);
         end;
       if FInstaller.IncludeModules<>'' then
-        writeln('Additional modules:     '+FInstaller.IncludeModules);
+        writeln('Add. modules:       '+FInstaller.IncludeModules);
 
       if FInstaller.ExportOnly then
       begin
         writeln('');
         writeln('INFO: FPCUP will not download repos. It will only get the files !!!');
-        writeln('');
       end
       else
       begin
         writeln('');
         writeln('WARNING: FPCUP will download full repositories !!!');
+      end;
+
+      if (Pos('trunk',FInstaller.FPCURL)>0) OR (Pos('trunk',FInstaller.LazarusURL)>0) then
+      begin
+        writeln('');
+        writeln('******************************************************************');
+        writeln(' You are now installing a bleeding edge version of [FPC/Lazarus].');
+        writeln(' Please be forewarned that things might not function,');
+        writeln(' as you would expect from a stable release.');
+        writeln(' Installing a stable release,');
+        writeln(' will give you a stable development environment,');
+        writeln(' and is the preferred way of using [FPC/Lazarus].');
+        writeln('******************************************************************');
         writeln('');
       end;
+
+      if (Pos('-g ',FInstaller.FPCOPT)>0)
+         then writeln('FPC is compiled with debug (-g) !');
+      if (Pos('-g ',FInstaller.LazarusOPT)>0)
+         then writeln('Lazarus is compiled with debug (-g) !');
+
+      writeln('');
 
       // Remove password from output
       if FInstaller.HTTPProxyPassword='' then
@@ -849,15 +863,12 @@ var
   res:integer;
 
 begin
-  writeln('fpcup');
-  writeln('An FPC/Lazarus downloader/updater/installer');
-  writeln('Open source freeware (modified LGPL/BSD)');
+  writeln('Fpcup, a FPC/Lazarus downloader/updater/installer');
   writeln('Original by BigChimp: https://bitbucket.org/reiniero/fpcup');
   writeln('This version: https://github.com/LongDirtyAnimAlf/Reiniero-fpcup');
   writeln('');
-  writeln('This program will download the FPC and Lazarus sources');
-  writeln('from the source Subversion/SVN repositories,');
-  writeln('compile, and install.');
+  writeln('Fpcup will download the FPC and Lazarus sources');
+  writeln('from the source SVN repositories, and compile, and install.');
   writeln('Result: you get a fresh, up-to-date Lazarus/FPC installation.');
   writeln('');
   writeversion;

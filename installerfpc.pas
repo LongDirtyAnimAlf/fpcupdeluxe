@@ -933,6 +933,7 @@ const
   FTPPath='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
   FTP262Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
   FTP264Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
+  //FTP300Path='ftp://ftp.freepascal.org/pub/fpc/dist/3.0.0/bootstrap/';
 var
   BootstrapVersion: string;
   Output: string;
@@ -980,7 +981,6 @@ begin
     {$ELSE}
     // Win32
     if FBootstrapCompilerURL='' then
-      //FBootstrapCompilerURL := FTP262Path+'i386-win32-ppc386.zip';
       FBootstrapCompilerURL := FTP264Path+'i386-win32-ppc386.zip';
     //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     if CheckExecutable('ppc386.exe', '-i', 'Free Pascal Compiler')
@@ -991,11 +991,9 @@ begin
     {$IFDEF Linux}
     //If compiled for x86 32 bit, install 32 bit
     //If compiled for x64, install x64 only.
-    // If we're using an old compiler to build >= fpc 3.0, we need this:
-    FBootstrapCompilerOverrideVersionCheck:=true;
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
-      FBootstrapCompilerURL := FTP262Path+'i386-linux-ppc386.bz2';
+      FBootstrapCompilerURL := FTP264Path+'i386-linux-ppc386.bz2';
     //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-linux-ppc386-1';
     if CheckExecutable('ppc386', '-i', 'Free Pascal Compiler')
        then FBootstrapCompiler := Which('ppc386')
@@ -1003,12 +1001,20 @@ begin
     {$ELSE}
     {$IFDEF cpuarmel} //probably the 2.6.x name for arm
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
+      // If we're using an old compiler to build >= fpc 3.0, we need this:
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     {$ENDIF cpuarmel}
     {$IFDEF cpuarm} //includes armel on FPC 3.1.1
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP262Path+'arm-linux-ppcarm.bz2';
+      // If we're using an old compiler to build >= fpc 3.0, we need this:
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
     //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'arm-linux-ppcarm';
     if CheckExecutable('ppcarm', '-i', 'Free Pascal Compiler')
        then FBootstrapCompiler := Which('ppcarm')
@@ -1016,7 +1022,11 @@ begin
     {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
     infoln('TFPCInstaller: bootstrap compiler detection: assuming this is a x64 processor on Linux',etWarning);
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP262Path+'x86_64-linux-ppcx64.bz2';
+      // If we're using an old compiler to build >= fpc 3.0, we need this:
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
     //FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-linux-ppcx64';
     if CheckExecutable('ppcx64', '-i', 'Free Pascal Compiler')
        then FBootstrapCompiler := Which('ppcx64')
@@ -1030,43 +1040,40 @@ begin
     //We'll make our own ppc386 starting with the ppcuniversal bootstrap compiler
     //If we made it already pick it up here
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
-    // If we're using an old compiler to build >= fpc 3.0, we need this:
-    FBootstrapCompilerOverrideVersionCheck:=true;
     if FBootstrapCompilerURL='' then
-    begin
-      FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
-      FBootstrapCompilerOverrideVersionCheck:=false;
-    end;
+       FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
     {$ENDIF Darwin}
     {$IFDEF FREEBSD}
     {$IFDEF CPU386}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
-    begin
-      FBootstrapCompilerURL := FTP264Path+'i386-freebsd9-ppc386.bz2';
-      FBootstrapCompilerOverrideVersionCheck:=false;
-    end;
+       FBootstrapCompilerURL := FTP264Path+'i386-freebsd9-ppc386.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-freebsd9-ppc386';
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     // Assuming user has FreeBSD 9...
     if FBootstrapCompilerURL='' then
-    begin
-      FBootstrapCompilerURL := FTP264Path+'x86_64-freebsd9-ppcx64.bz2';
-      FBootstrapCompilerOverrideVersionCheck:=false;
-    end;
+       FBootstrapCompilerURL := FTP264Path+'x86_64-freebsd9-ppcx64.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-freebsd9.ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF FREEBSD}
     {$IFDEF NETBSD}
     {$IFDEF CPU386}
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP262Path+'i386-netbsd-ppc386.bz2';
+      // If we're using an old compiler to build >= fpc 3.0, we need this:
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'i386-netbsd-ppc386';
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP262Path+'x86_64-netbsd-ppcx64.bz2';
+      // If we're using an old compiler to build >= fpc 3.0, we need this:
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-netbsd-ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF NETBSD}
@@ -1077,14 +1084,15 @@ begin
     {$ENDIF CPU386}
     {$IFDEF CPUX86_64}
     if FBootstrapCompilerURL='' then
+    begin
       FBootstrapCompilerURL := FTP262Path+'x86_64-openbsd-ppcx64.bz2';
+      // If we're using an old compiler to build >= fpc 3.0, we need this:
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'x86_64-openbsd-ppcx64';
     {$ENDIF CPUX86_64}
     {$ENDIF OPENBSD}
     end;
-
-
-  //Which(ppcx64): string;
 
   // Only download bootstrap compiler if we can't find a valid one
   if CheckExecutable(FBootstrapCompiler, '-i', 'Free Pascal Compiler') then
@@ -1297,14 +1305,14 @@ begin
   if OperationSucceeded and
     (FileExists(FPCCfg)=false) then
   begin
-    fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg';
+    fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg'+GetExeExt;
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
     begin
       // Newer 3.1 trunk versions put fpcmkcfg in bin itself
       infoln(ModuleName+': did not find '+fpcmkcfg+'. Now looking in '+
         IncludeTrailingPathDelimiter(FBaseDirectory)+'bin.',etDebug);
       fpcmkcfg:=IncludeTrailingPathDelimiter(FBaseDirectory)+
-        'bin'+DirectorySeparator+'fpcmkcfg';
+        'bin'+DirectorySeparator+'fpcmkcfg'+GetExeExt;
       if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
       begin
         infoln('Could not find fpcmkcfg in '+fpcmkcfg+'. Aborting.',etError);

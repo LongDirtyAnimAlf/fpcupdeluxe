@@ -1349,8 +1349,8 @@ try
         if Uppercase(KeyWord)='DEFAULT' then
         begin
           infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
-          if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/branches/fixes_3_0';
-          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/branches/fixes_1_4';
+          if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/tags/release_3_0_0';
+          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_1_4_4';
         end;
         if result='' then
         begin
