@@ -129,6 +129,7 @@ type
     function DownloadSVN: boolean;
     function DownloadOpenSSL: boolean;
     {$ENDIF}
+    function DownloadJasmin: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
     // Looks for SVN client in subdirectories and sets FSVNClient.SVNExecutable if found.
     {$IFDEF MSWINDOWS}
@@ -1171,6 +1172,78 @@ end;
 
 {$ENDIF}
 
+function TInstaller.DownloadJasmin: boolean;
+const
+  SourceURL = 'http://sourceforge.net/projects/jasmin/files/jasmin/jasmin-2.4/jasmin-2.4.zip/download';
+var
+  OperationSucceeded: boolean;
+  ResultCode: longint;
+  JasminZip,JasminDir: string;
+begin
+  JasminDir:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+  if NOT FileExists(JasminDir+'jasmin.jar') then
+  begin
+    OperationSucceeded := true;
+    JasminZip := SysUtils.GetTempFileName + '.zip';
+    try
+      if OperationSucceeded then
+      begin
+        OperationSucceeded := Download(
+          SourceURL,
+          JasminZip,
+          FHTTPProxyUser,
+          inttostr(FHTTPProxyPort),
+          FHTTPProxyUser,
+          FHTTPProxyPassword);
+      end;
+    except
+      // Deal with timeouts, wrong URLs etc
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading Jasmin assembler from ' + SourceURL, true);
+      end;
+    end;
+
+    // for now, just put jasmin.jar in bin directory ... easy and simple and working
+    JasminDir:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+
+    if OperationSucceeded then
+    begin
+      // Extract, overwrite
+      resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + SysUtils.GetTempDir + ' ' + JasminZip, FVerbose);
+      if resultcode = 0 then
+      begin
+        OperationSucceeded := MoveFile(IncludeTrailingPathDelimiter(SysUtils.GetTempDir)+IncludeTrailingPathDelimiter(fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(SourceURL)))+'jasmin.jar',JasminDir+'jasmin.jar');
+        if NOT OperationSucceeded then
+        begin
+          writelnlog('Could not move jasmin.jar into '+JasminDir);
+        end;
+      end
+      else
+      begin
+        OperationSucceeded := false;
+        writelnlog('DownloadJasmin: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+      end;
+    end
+    else
+    begin
+      writelnlog('ERROR downloading Jasmin assembler from ' + SourceURL, true);
+    end;
+
+    if OperationSucceeded then
+    begin
+      WritelnLog('Jasmin assembler download and unpacking ok.', true);
+      if OperationSucceeded then
+      begin
+        //Get rid of temp zip and dir if success.
+        SysUtils.Deletefile(JasminZip);
+        DeleteDirectoryEx(IncludeTrailingPathDelimiter(SysUtils.GetTempDir)+IncludeTrailingPathDelimiter(fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(SourceURL))));
+      end;
+    end;
+    Result := OperationSucceeded;
+  end else Result:=True;
+end;
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
 begin
@@ -1353,7 +1426,7 @@ var
   ExeName: string;
 begin
   ExeName := 'fpc' + GetExeExt;
-  Result := IncludeTrailingBackslash(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc';
+  Result := IncludeTrailingBackslash(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + ExeName;
   {$IFDEF UNIX}
   if FileExistsUTF8(Result + '.sh') then
   begin

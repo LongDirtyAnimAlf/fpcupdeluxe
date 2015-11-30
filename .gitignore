@@ -60,3 +60,4 @@ Temporary Items
 *.log
 backup/
 lib/
+lib*/

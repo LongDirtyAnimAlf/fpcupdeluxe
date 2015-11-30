@@ -44,7 +44,7 @@
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -76,7 +76,7 @@ end;"/>
               <ShowAll Value="True"/>
             </Verbosity>
             <WriteFPCLogo Value="False"/>
-            <CustomOptions Value="-dDEBUG"/>
+            <CustomOptions Value="-dDEBUG -dFPCONLY"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -96,7 +96,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -116,6 +116,7 @@ end;"/>
           </Linking>
           <Other>
             <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -132,7 +133,7 @@ end;"/>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -152,6 +153,7 @@ end;"/>
           </Linking>
           <Other>
             <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -169,7 +171,7 @@ end;"/>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <Libraries Value="C:\development\cross\lib\i386-linux\"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -192,6 +194,7 @@ end;"/>
               <ShowAll Value="True"/>
             </Verbosity>
             <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -209,7 +212,7 @@ end;"/>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <Libraries Value="C:\development\cross\lib\arm-android\"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -230,7 +233,7 @@ end;"/>
           </Linking>
           <Other>
             <WriteFPCLogo Value="False"/>
-            <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH"/>
+            <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH -dFPCONLY"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -248,7 +251,7 @@ end;"/>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <Libraries Value="C:\development\cross\lib\x86_64-linux\"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
@@ -271,6 +274,7 @@ end;"/>
               <ShowAll Value="True"/>
             </Verbosity>
             <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>
@@ -300,7 +304,7 @@ end;"/>
         <PackageName Value="LazUtils"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="44">
+    <Units Count="46">
       <Unit0>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -335,6 +339,7 @@ end;"/>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="installerHelp"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
@@ -482,6 +487,14 @@ end;"/>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit43>
+      <Unit44>
+        <Filename Value="m_any_to_androidjvm.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit44>
+      <Unit45>
+        <Filename Value="m_any_to_javajvm.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit45>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -493,7 +506,7 @@ end;"/>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <OtherUnitFiles Value="synaser"/>
-      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+      <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -514,6 +527,7 @@ end;"/>
     </Linking>
     <Other>
       <WriteFPCLogo Value="False"/>
+      <CustomOptions Value="-dFPCONLY"/>
       <ExecuteBefore>
         <CompileReasons Run="False"/>
       </ExecuteBefore>

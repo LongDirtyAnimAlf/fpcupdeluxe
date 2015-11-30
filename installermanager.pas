@@ -37,7 +37,11 @@ this will disable writeln calls
 interface
 
 uses
-  Classes, SysUtils,installerCore,installerFpc,installerLazarus,installerHelp,installerUniversal,fpcuputil,fileutil
+  Classes, SysUtils,installerCore,installerFpc,
+  {$ifndef FPCONLY}
+  installerLazarus,
+  {$endif}
+  installerHelp,installerUniversal,fpcuputil,fileutil
   {$ifdef UNIX}
   ,dynlibs,Unix
   {$endif UNIX}
@@ -55,9 +59,12 @@ Const
 //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
     'Declare default;'+ //keyword Declare gives a name to a sequence of commands
+    {$ifndef FPCONLY}
     // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
+    {$endif}
     'Do fpc;'+ //keyword Do means run the specified declared sequence
+    {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
@@ -70,12 +77,16 @@ Const
     'Do USERIDE;'+
     //Any cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
+    {$endif}
     'End;'+ //keyword End specifies the end of the sequence
 
 //default sequence for win32
     'Declare defaultwin32;'+
+    {$ifndef FPCONLY}
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
+    {$endif}
     'Do fpc;'+
+    {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
@@ -86,18 +97,23 @@ Const
     // Recompile user IDE so any packages selected by the
     // universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    {$endif}
     {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     {$endif}
+    {$ifndef FPCONLY}
     // Any further cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
+    {$endif}
     'End;'+
 
 //cross sequence for win32. Note: if changing this name,
     //also change checks for this in skipmodules etc.
     'Declare crosswin32-64;'+
     'Do FPCCrossWin32-64;'+
+    {$ifndef FPCONLY}
     'Do LazarusCrossWin32-64;'+
+    {$endif}
     'End;'+
 
 //default sequence for win64
@@ -105,9 +121,12 @@ Const
 $elseif defined(win64)
 below}
     'Declare defaultwin64;'+
+    {$ifndef FPCONLY}
     // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
     'Exec CheckDevLibs;'+
+    {$endif}
     'Do fpc;'+
+    {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
@@ -118,9 +137,12 @@ below}
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    {$endif}
     'Do crosswin64-32;'+  //this has to be the last. All TExecState reset!
+    {$ifndef FPCONLY}
     //Any cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
+    {$endif}
     'End;'+
 
 //cross sequence for win32. Note: if changing this name,
@@ -131,16 +153,21 @@ below}
     //Getmodule has already been done
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
+    {$ifndef FPCONLY}
     //Getmodule has already been done
     // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
     //'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
+    {$endif}
     'End;'+
 
     //default sequence for ARM
     'Declare defaultARM;'+
+    {$ifndef FPCONLY}
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
+    {$endif}
     'Do fpc;'+
+    {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     //'Do helplazarus;'+ // do not include help: takes a lot of time and does not compile at the moment on ARM (not enough memory) :-(
@@ -151,16 +178,19 @@ below}
     // Recompile user IDE so any packages selected by the
     // universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    {$endif}
     'End;'+
 
 //default clean sequence
     'Declare defaultclean;'+
     'Do fpcclean;'+
+    {$ifndef FPCONLY}
     'Do lazarusclean;'+
     'Do helplazarusclean;'+
     'CleanModule LAZDATADESKTOP;'+
     'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
+    {$endif}
     'End;'+
     {
 // Currently, make distclean LCL removes lazbuild.exe/lazarus.exe as well
@@ -170,11 +200,13 @@ below}
 //default clean sequence for win32
     'Declare defaultwin32clean;'+
     'Do fpcclean;'+
+    {$ifndef FPCONLY}
     'Do lazarusclean;'+
     'Do helplazarusclean;'+
     'CleanModule LAZDATADESKTOP;'+
     'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
+    {$endif}
     'Do crosswin32-64Clean;'+   //this has to be the last. All TExecState reset!
     'End;'+
 //default cross clean sequence for win32
@@ -182,25 +214,31 @@ below}
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
+    {$ifndef FPCONLY}
     'Cleanmodule lazarus;'+
+    {$endif}
     'End;'+
 //default cross clean sequence for win64
     'Declare crosswin64-32Clean;'+
     'SetCPU i386;'+
     'SetOS win32;'+
     'Cleanmodule fpc;'+
+    {$ifndef FPCONLY}
     'Cleanmodule lazarus;'+
+    {$endif}
     'End;'+
     }
 
 //default uninstall sequence
     'Declare defaultuninstall;'+
     'Do fpcuninstall;'+
+    {$ifndef FPCONLY}
     'Do lazarusuninstall;'+
     'Do helpuninstall;'+
     'UninstallModule LAZDATADESKTOP;'+
     'UninstallModule DOCEDITOR;'+
     'Do UniversalDefaultUnInstall;'+
+    {$endif}
     'End;'+
 //default uninstall sequence for win32
     'Declare defaultwin32uninstall;'+
@@ -234,7 +272,9 @@ type
     FCompilerName: string;
     FConfigFile: string;
     FCrossCPU_Target: string;
+    {$ifndef FPCONLY}
     FCrossLCL_Platform: string; //really LCL widgetset
+    {$endif}
     FCrossOPT: string;
     FCrossOS_Target: string;
     FCrossOS_SubArch: string;
@@ -244,17 +284,21 @@ type
     FFPCURL: string;
     FIncludeModules: string;
     FKeepLocalDiffs: boolean;
+    {$ifndef FPCONLY}
     FLazarusDesiredRevision: string;
     FLazarusDirectory: string;
     FLazarusOPT: string;
     FLazarusPrimaryConfigPath: string;
     FLazarusURL: string;
+    {$endif}
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
     FMakeDirectory: string;
     FOnlyModules: string;
     FReApplyLocalChanges: boolean;
+    {$ifndef FPCONLY}
     FShortCutNameLazarus: string;
+    {$endif}
     FShortCutNameFpcup: string;
     FSkipModules: string;
     FUninstall:boolean;
@@ -262,13 +306,15 @@ type
     FExportOnly:boolean;
     FUseGitClient:boolean;
     FSequencer: TSequencer;
+    {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
+    procedure SetLazarusDirectory(AValue: string);
+    procedure SetLazarusURL(AValue: string);
+    {$endif}
     function GetLogFileName: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetFPCDirectory(AValue: string);
     procedure SetFPCURL(AValue: string);
-    procedure SetLazarusDirectory(AValue: string);
-    procedure SetLazarusURL(AValue: string);
     procedure SetCrossToolsDirectory(AValue: string);
     procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
@@ -281,7 +327,9 @@ type
     // Write msg to log with line ending. Can also write to console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
  public
+   {$ifndef FPCONLY}
     property ShortCutNameLazarus: string read FShortCutNameLazarus write FShortCutNameLazarus; //Name of the shortcut that points to the fpcup-installed Lazarus
+    {$endif}
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup; //Name of the shortcut that points to fpcup
     // Full path+filename of SVN executable. Use empty to search for default locations.
     property SVNExecutable: string read FSVNExecutable write FSVNExecutable;
@@ -300,7 +348,9 @@ type
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
+    {$ifndef FPCONLY}
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
+    {$endif}
     property CrossOPT:string read FCrossOPT write FCrossOPT;
     property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
     property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
@@ -315,12 +365,13 @@ type
     property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
     property HTTPProxyUser: string read FHTTPProxyUser write FHTTPProxyUser;
     property KeepLocalChanges: boolean read FKeepLocalDiffs write FKeepLocalDiffs;
+   {$ifndef FPCONLY}
     property LazarusDirectory: string read FLazarusDirectory write SetLazarusDirectory;
     property LazarusPrimaryConfigPath: string read GetLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath ;
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
-
+    {$endif}
     // Location where fpcup log will be written to.
     property LogFileName: string read GetLogFileName write SetLogFileName;
     // Directory where make is. Can be empty.
@@ -362,7 +413,7 @@ type
   PSequenceAttributes=^TSequenceAttributes;
 
   TKeyword=(SMdeclare, SMdeclareHidden, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
-    SMuninstallmodule, SMconfigmodule, SMResetLCL, SMSetOS, SMSetCPU, SMInvalid);
+    SMuninstallmodule, SMconfigmodule{$ifndef FPCONLY}, SMResetLCL{$endif}, SMSetOS, SMSetCPU, SMInvalid);
 
   TState=record
     instr:TKeyword;
@@ -388,7 +439,9 @@ type
       function DoSetOS(OS:string):boolean;
       // Resets memory of executed steps so LCL widgetset can be rebuild
       // e.g. using different platform
+      {$ifndef FPCONLY}
       function DoResetLCL:boolean;
+      {$endif}
       function DoUnInstallModule(ModuleName:string):boolean;
       function GetInstaller(ModuleName:string):boolean;
       function GetText:string;
@@ -418,6 +471,7 @@ uses
 
 { TFPCupManager }
 
+{$ifndef FPCONLY}
 function TFPCupManager.GetLazarusPrimaryConfigPath: string;
 const
   // This should be a last resort as FLazarusPrimaryConfigPath should be used really
@@ -437,6 +491,7 @@ begin
   end;
   result:=FLazarusPrimaryConfigPath;
 end;
+{$endif}
 
 function TFPCupManager.GetLogFileName: string;
 begin
@@ -462,10 +517,6 @@ begin
     FFPCURL:=installerUniversal.GetAlias('fpcURL',AValue);
 end;
 
-procedure TFPCupManager.SetLazarusDirectory(AValue: string);
-begin
-  FLazarusDirectory:=SafeExpandFileName(AValue);
-end;
 
 procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
 begin
@@ -477,6 +528,12 @@ begin
   FCrossLibraryDirectory:=SafeExpandFileName(AValue);
 end;
 
+{$ifndef FPCONLY}
+procedure TFPCupManager.SetLazarusDirectory(AValue: string);
+begin
+  FLazarusDirectory:=SafeExpandFileName(AValue);
+end;
+
 procedure TFPCupManager.SetLazarusURL(AValue: string);
 begin
   if FLazarusURL=AValue then Exit;
@@ -485,6 +542,7 @@ begin
   else
     FLazarusURL:=installerUniversal.GetAlias('lazURL',AValue);
 end;
+{$endif}
 
 procedure TFPCupManager.SetLogFileName(AValue: string);
 begin
@@ -521,7 +579,9 @@ begin
   installerUniversal.SetConfigFile(FConfigFile);
   FSequencer.AddSequence(Sequences);
   FSequencer.AddSequence(installerFPC.Sequences);
+  {$ifndef FPCONLY}
   FSequencer.AddSequence(installerLazarus.Sequences);
+  {$endif}
   FSequencer.AddSequence(installerHelp.Sequences);
   FSequencer.AddSequence(installerUniversal.Sequences);
   // append universal modules to the lists
@@ -700,6 +760,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     end;
   end;
 
+  {$ifndef FPCONLY}
   function CreateLazarusScript:boolean;
   // Find out InstalledLazarus location, create desktop shortcuts etc
   // Don't use this function when lazarus is not installed.
@@ -813,17 +874,19 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
   end;
   {$endif linux}
-
+  {$endif}
 begin
   infoln('TSequencer: DoExec for function '+FunctionName+' called.',etDebug);
   if UpperCase(FunctionName)='CREATEFPCUPSCRIPT' then
     result:=CreateFpcupScript
+  {$ifndef FPCONLY}
   else if UpperCase(FunctionName)='CREATELAZARUSSCRIPT' then
     result:=CreateLazarusScript
   else if UpperCase(FunctionName)='DELETELAZARUSSCRIPT' then
     result:=DeleteLazarusScript
   else if UpperCase(FunctionName)='CHECKDEVLIBS' then
     result:=CheckDevLibs(FParent.CrossLCL_Platform)
+  {$endif}
   else
     begin
     result:=false;
@@ -853,12 +916,14 @@ begin
   result:=true;
 end;
 
+{$ifndef FPCONLY}
 function TSequencer.DoResetLCL: boolean;
 begin
   infoln('TSequencer: called DoReSetLCL',etDebug);
   ResetAllExecuted(true);
   result:=true;
 end;
+{$endif}
 
 function TSequencer.DoUnInstallModule(ModuleName: string): boolean;
 begin
@@ -916,6 +981,8 @@ begin
     FInstaller.URL:=FParent.FPCURL;
     end
 
+
+  {$ifndef FPCONLY}
   // Lazarus:
   else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LAZBUILD') or (uppercase(ModuleName)='LCL') or
     (uppercase(ModuleName)='USERIDE') then
@@ -957,6 +1024,7 @@ begin
 
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
+  {$endif}
   else if uppercase(ModuleName)='HELPFPC' then
       begin
       if assigned(FInstaller) then
@@ -975,7 +1043,7 @@ begin
       else
         FInstaller.Compiler:=FParent.CompilerName;
       end
-
+  {$ifndef FPCONLY}
   else if uppercase(ModuleName)='HELPLAZARUS' then
       begin
       if assigned(FInstaller) then
@@ -996,7 +1064,7 @@ begin
       (FInstaller as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
       (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       end
-
+  {$endif}
   else       // this is a universal module
     begin
       if assigned(FInstaller) then
@@ -1016,9 +1084,11 @@ begin
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
+      {$ifndef FPCONLY}
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
       (FInstaller as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      {$endif}
       if FParent.CompilerName='' then
         FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
       else
@@ -1094,7 +1164,9 @@ var
     else if key='BUILDMODULE' then result:=SMbuildmodule
     else if key='UNINSTALLMODULE' then result:=SMuninstallmodule
     else if key='CONFIGMODULE' then result:=SMconfigmodule
+    {$ifndef FPCONLY}
     else if key='RESETLCL' then result:=SMResetLCL
+    {$endif}
     else if key='SETOS' then result:=SMSetOS
     else if key='SETCPU' then result:=SMSetCPU
     else result:=SMInvalid;
@@ -1289,7 +1361,9 @@ begin
         SMbuildmodule : result:=DoBuildModule(FStateMachine[InstructionPointer].param);
         SMuninstallmodule: result:=DoUnInstallModule(FStateMachine[InstructionPointer].param);
         SMconfigmodule: result:=DoConfigModule(FStateMachine[InstructionPointer].param);
+        {$ifndef FPCONLY}
         SMResetLCL    : DoResetLCL;
+        {$endif}
         SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
         SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
         end;

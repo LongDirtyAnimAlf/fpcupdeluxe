@@ -53,7 +53,9 @@ private
   function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
+  {$ifndef FPCONLY}
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
+  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -109,12 +111,14 @@ begin
   end;
 end;
 
+{$ifndef FPCONLY}
 function Tany_linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=true;
 end;
+{$endif}
 
 function Tany_linuxarm.GetBinUtils(Basepath:string): boolean;
 const

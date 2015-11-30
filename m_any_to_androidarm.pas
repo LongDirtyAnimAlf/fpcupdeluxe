@@ -72,7 +72,9 @@ private
   function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
+  {$ifndef FPCONLY}
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
+  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -213,6 +215,7 @@ begin
   end;
 end;
 
+{$ifndef FPCONLY}
 function TAny_ARMAndroid.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // Android does not support Gtk/Qt. To do: how to figure out how to do custom drawn?
@@ -225,6 +228,7 @@ begin
   http://pascalgeek.blogspot.com/2013/10/android-programming-with-lazarus.html
   }
 end;
+{$endif}
 
 function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
 const

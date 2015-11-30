@@ -69,7 +69,9 @@ private
   function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
+  {$ifndef FPCONLY}
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
+  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -105,11 +107,13 @@ begin
   end;
 end;
 
+{$ifndef FPCONLY}
 function TWin32_go32v2i386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   infoln('TWin32_go32v2i386: no support for LCL platform '+LCL_Platform,etInfo);
   result:=true;
 end;
+{$endif}
 
 function TWin32_go32v2i386.GetBinUtils(Basepath:string): boolean;
 const

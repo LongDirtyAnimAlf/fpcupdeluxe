@@ -63,9 +63,11 @@ type
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
+    {$ifndef FPCONLY}
     // In your descendent, implement this function: you can download libraries or check for their existence for Lazarus LCL cross compile libs:
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual; abstract;
+    {$endif}
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
     function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property

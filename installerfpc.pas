@@ -259,6 +259,11 @@ begin
 
   CrossInstaller:=GetCrossInstaller;
 
+  if CrossInstaller.TargetCPU='jvm' then
+  begin
+    DownloadJasmin;
+  end;
+
   if assigned(CrossInstaller) then
     begin
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
@@ -1392,7 +1397,9 @@ begin
   end;
 
   if OperationSucceeded then
+  begin
     WritelnLog('FPC: update succeeded.',false);
+  end;
   Result := OperationSucceeded;
 end;
 

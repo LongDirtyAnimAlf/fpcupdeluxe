@@ -118,7 +118,7 @@ function XdgConfigHome: String;
 {$ENDIF UNIX}
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
-
+function ExtractFileNameOnly(const AFilename: string): string;
 
 implementation
 
@@ -906,7 +906,11 @@ end;
 
 procedure infoln(Message: string; Level: TEventType);
 const
+  {$ifndef FPCONLY}
+  BeginSnippet='fpclazup: '; //helps identify messages as comfing from fpclazup instead of make etc
+  {$else}
   BeginSnippet='fpcup: '; //helps identify messages as comfing from fpcup instead of make etc
+  {$endif}
 var
   Seriousness: string;
 begin
@@ -1021,6 +1025,24 @@ begin
     Result:=IncludeTrailingPathDelimiter(Result);
 end;
 {$ENDIF UNIX}
+
+function ExtractFileNameOnly(const AFilename: string): string;
+var
+  StartPos: Integer;
+  ExtPos: Integer;
+begin
+  StartPos:=length(AFilename)+1;
+  while (StartPos>1)
+  and not (AFilename[StartPos-1] in AllowDirectorySeparators)
+  {$IFDEF Windows}and (AFilename[StartPos-1]<>':'){$ENDIF}
+  do
+    dec(StartPos);
+  ExtPos:=length(AFilename);
+  while (ExtPos>=StartPos) and (AFilename[ExtPos]<>'.') do
+    dec(ExtPos);
+  if (ExtPos<StartPos) then ExtPos:=length(AFilename)+1;
+  Result:=copy(AFilename,StartPos,ExtPos-StartPos);
+end;
 
 { TLogger }
 

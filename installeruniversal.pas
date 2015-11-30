@@ -34,7 +34,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, installerCore, m_crossinstaller, processutils, updatelazconfig
+  Classes, SysUtils, installerCore, m_crossinstaller, processutils
+  {$ifndef FPCONLY}
+  ,updatelazconfig
+  {$endif}
   {$IFDEF MSWINDOWS}, wininstaller{$ENDIF};
 
 {$IFDEF MSWINDOWS}
@@ -49,7 +52,9 @@ uses
 {$R fpcup.res}
 {$ENDIF MSWINDOWS}
 
+
 type
+  {$ifndef FPCONLY}
   TAPkgVersion = record
   private
     FName:string;
@@ -68,6 +73,8 @@ type
     //property Release: integer read FRelease;
     //property Build: integer read FBuild;
   end;
+{$endif}
+
   { TUniversalInstaller }
 
   TUniversalInstaller = class(TInstaller)
@@ -75,6 +82,7 @@ type
     FBinPath:string; //Path where compiler is
     // FPC base directory - directory where FPC is (to be) installed:
     FFPCDir:string;
+    {$ifndef FPCONLY}
     // Compiler options chosen by user to build Lazarus. There is a CompilerOptions property,
     // but let's leave that for use with FPC.
     FLazarusCompilerOptions:string;
@@ -85,6 +93,7 @@ type
     FLazarusNeedsRebuild:boolean;
     // Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
+    {$endif}
     FPath:string; //Path to be used within this session (e.g. including compiler path)
     InitDone:boolean;
   protected
@@ -102,17 +111,20 @@ type
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
+    {$ifndef FPCONLY}
     // Installs a single package:
     function InstallPackage(PackagePath, WorkingDir: string): boolean;
     // Scans for and removes all packages specfied in a (module's) stringlist with commands:
     function RemovePackages(sl:TStringList): boolean;
-    // Filters (a module's) sl stringlist and runs all <Directive> commands:
-    function RunCommands(Directive:string;sl:TStringList):boolean;
     // Uninstall a single package:
     function UnInstallPackage(PackagePath: string): boolean;
+    {$endif}
+    // Filters (a module's) sl stringlist and runs all <Directive> commands:
+    function RunCommands(Directive:string;sl:TStringList):boolean;
   public
     // FPC base directory
     property FPCDir:string read FFPCDir write FFPCDir;
+    {$ifndef FPCONLY}
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
     // Lazarus primary config path
@@ -120,6 +132,7 @@ type
     // Lazarus base directory
     property LazarusDir:string read FLazarusDir write FLazarusDir;
     // Build module
+    {$endif}
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
@@ -172,7 +185,7 @@ var
   UniModuleList:TStringList=nil;
   UniModuleEnabledList:TStringlist=nil;
 
-
+{$ifndef FPCONLY}
 function TAPkgVersion.AsString: string;
 var
   AddValues:boolean;
@@ -192,7 +205,7 @@ begin
   FRelease:=alpkdoc.GetValue(key+'Release',0);
   FBuild:=alpkdoc.GetValue(key+'Build',0);
 end;
-
+{$endif}
 
 { TUniversalInstaller }
 
@@ -260,10 +273,12 @@ begin
           {$ENDIF}
         else if macro='GETEXEEXT' then //$(GETEXEEXT)
           macro:=GetExeExt
+        {$ifndef FPCONLY}
         else if macro='LAZARUSDIR' then //$(LAZARUSDIR)
           macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
         else if macro='LAZARUSPRIMARYCONFIGPATH' then //$(LAZARUSPRIMARYCONFIGPATH)
           macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
+        {$endif}
         else if macro='STRIPDIR' then //$(STRIPDIR)
           {$IFDEF MSWINDOWS}
           // Strip is a binutil and should be located in the make dir
@@ -309,11 +324,14 @@ begin
   result:=CheckAndGetNeededExecutables;
   if not(result) then
     infoln('Universalinstaller: missing required executables. Aborting.',etError);
+
+  {$ifndef FPCONLY}
   if not(FileExistsUTF8(IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt)) then
   begin
     result:=false;
     infoln('Universalinstaller: missing lazbuild. Aborting.',etError);
   end;
+  {$endif}
 
   // Add fpc architecture bin and plain paths
   FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
@@ -325,10 +343,13 @@ begin
   // No need to build Lazarus IDE again right now; will
   // be changed by buildmodule/configmodule installexecute/
   // installpackage
+  {$ifndef FPCONLY}
   FLazarusNeedsRebuild:=false;
+  {$endif}
   InitDone:=result;
 end;
 
+{$ifndef FPCONLY}
 function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string): boolean;
 var
   PackageName,PackageAbsolutePath: string;
@@ -455,6 +476,7 @@ begin
     end;
   result:=Failure;
 end;
+{$endif}
 
 function TUniversalInstaller.FirstSpaceAfterCommand(CommandLine: string): integer;
   var
@@ -500,6 +522,7 @@ begin
     // Skip over missing numbers:
     if PackagePath='' then continue;
     if Workingdir='' then Workingdir:=BaseWorkingdir;
+    {$ifndef FPCONLY}
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
     begin
@@ -507,6 +530,7 @@ begin
       if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',false);
       break;
     end;
+    {$endif}
   end;
 end;
 
@@ -550,9 +574,11 @@ begin
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
       Installer.FPCDir:=FPCDir;
+      {$ifndef FPCONLY}
       Installer.LazarusDir:=FLazarusDir;
       // todo: following not strictly needed:?!?
       Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
+      {$endif}
       result:=Installer.BuildModuleCustom(ModuleName);
     finally
       Installer.Free;
@@ -591,6 +617,7 @@ begin
       result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose,FPath)=0;
       if result then
       begin
+        {$ifndef FPCONLY}
         // If it is likely user used lazbuid to compile a package, assume
         // it is design-time (except when returning an runtime message) and mark IDE for rebuild
         if (pos('lazbuild',lowerCase(exec))>0) and
@@ -601,6 +628,7 @@ begin
           infoln('Marking Lazarus for rebuild based on exec line '+exec,etDebug);
           FLazarusNeedsRebuild:=true;
         end;
+        {$endif}
       end
       else
       begin
@@ -617,6 +645,7 @@ begin
     end;
 end;
 
+{$ifndef FPCONLY}
 function TUniversalInstaller.UnInstallPackage(PackagePath: string): boolean;
 var
   cnt, i: integer;
@@ -733,6 +762,7 @@ begin
 
   result:=true;
 end;
+{$endif}
 
 // Runs all InstallExecute<n> commands inside a specified module
 { todo: Note that for some reason the installpackage etc commands are processed in configmodule.
@@ -777,6 +807,7 @@ end;
 
 // Processes a single module (i.e. section in fpcup.ini)
 function TUniversalInstaller.ConfigModule(ModuleName: string): boolean;
+{$ifndef FPCONLY}
 var
   idx,cnt,i:integer;
   sl:TStringList;
@@ -845,7 +876,7 @@ var
       break;
     end;
   end;
-
+{$endif}
 begin
 // Add values to lazarus config files. Syntax:
 // AddTo<filename><number>=key[@counter]:value
@@ -857,6 +888,7 @@ begin
 // value:  the string value to store in <key>.
   result:=InitModule;
   if not result then exit;
+  {$ifndef FPCONLY}
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
@@ -998,6 +1030,7 @@ begin
     writelnlog('ERROR: Universal installer: could not find specified module '+ModuleName,true);
     result:=false;
     end;
+  {$endif}
 end;
 
 // Download from SVN, hg, git for module
@@ -1208,14 +1241,17 @@ end;
 
 // Runs all UnInstallExecute<n> commands inside a specified module
 function TUniversalInstaller.UnInstallModule(ModuleName: string): boolean;
+{$ifndef FPCONLY}
 var
   idx,cnt,i:integer;
   sl:TStringList;
   Directive,xmlfile,key:string;
   LazarusConfig:TUpdateLazConfig;
+{$endif}
 begin
   result:=InitModule;
   if not result then exit;
+  {$ifndef FPCONLY}
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
   begin
@@ -1306,6 +1342,7 @@ begin
   end
   else
     result:=false;
+  {$endif}
 end;
 
 constructor TUniversalInstaller.Create;
@@ -1350,7 +1387,9 @@ try
         begin
           infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
           if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/tags/release_3_0_0';
+          {$ifndef FPCONLY}
           if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_1_4_4';
+          {$endif}
         end;
         if result='' then
         begin
@@ -1382,8 +1421,11 @@ var
     if result then
       begin
       //if StrToBoolDef(ini.ReadString(ModuleName,'Enabled',''),false) then
+      // skip all default modules when only installing FPC ... tricky but ok for now.
+      {$ifndef FPCONLY}
       if ini.ReadBool(ModuleName,'Enabled',False) then
          UniModuleEnabledList.Add(name);
+      {$endif}
       // store the section as is and attach as object to UniModuleList
       // TstringList cleared in finalization
       sl:=TstringList.Create;

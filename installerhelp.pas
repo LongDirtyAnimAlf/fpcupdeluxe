@@ -61,6 +61,7 @@ Const
     'CleanModule helpfpc;'+
     'UninstallModule helpfpc;'+
     'End;'+
+    {$ifndef FPCONLY}
     //Lazarus help
     {Note: we don't use helpfpc because that will put the
     help files in the FPC base directory, not in the
@@ -92,15 +93,16 @@ Const
     // This cleaning sequence will be called by --clean
     'Cleanmodule helplazarus;'+
     'End;'+
+    {$endif}
 
     'Declare HelpFPCGetOnly;'+
     'Getmodule helpfpc;'+
     'End;'+
-
+    {$ifndef FPCONLY}
     'Declare HelpLazarusGetOnly;'+
     'Getmodule helplazarus;'+
     'End;'+
-
+    {$endif}
     'Declare HelpFPCBuildOnly;'+
     'Buildmodule helpfpc;'+
     'End;'+
@@ -108,18 +110,21 @@ Const
     'Declare HelpFPCBuildOnly;'+
     'Buildmodule helpfpc;'+
     'End;'+
-
+    {$ifndef FPCONLY}
     'Declare HelpLazarusBuildOnly;'+
     'Buildmodule helplazarus;'+
     'End;'+
-
+    {$endif}
     'Declare HelpFPCConfigOnly;'+
     'Configmodule helpfpc;'+
-    'End;'+
-
+    'End;'
+    {$ifndef FPCONLY}
+    +
     'Declare HelpLazarusConfigOnly;'+
     'Configmodule helplazarus;'+
-    'End';
+    'End'
+    {$endif}
+    ;
 type
 
 { THelpInstaller }
@@ -129,8 +134,10 @@ private
   InitDone:boolean;
   // Directory where help files are placed
   FTargetDirectory: string;
+  {$ifndef FPCONLY}
   // Directory where build_lcl_docs.exe is placed
   FBuildLCLDocsExeDirectory: string;
+  {$endif}
 protected
   // Build module descendant customisation
   function BuildModuleCustom(ModuleName:string): boolean; virtual;
@@ -172,6 +179,8 @@ public
   destructor Destroy; override;
 end;
 
+{$ifndef FPCONLY}
+
 { THelpLazarusInstaller }
 
 THelpLazarusInstaller = class(THelpInstaller)
@@ -196,10 +205,16 @@ public
   constructor Create;
   destructor Destroy; override;
 end;
+{$endif}
 
 implementation
 
-uses fpcuputil, processutils, FileUtil, LazFileUtils, updatelazconfig, dateutils;
+uses
+  fpcuputil, processutils, FileUtil, LazFileUtils,
+  {$ifndef FPCONLY}
+  updatelazconfig,
+  {$endif}
+  dateutils;
 
 { THelpInstaller }
 
@@ -469,6 +484,8 @@ destructor THelpFPCInstaller.Destroy;
 begin
   inherited Destroy;
 end;
+
+{$ifndef FPCONLY}
 
 { THelpLazarusInstaller }
 
@@ -790,6 +807,8 @@ destructor THelpLazarusInstaller.Destroy;
 begin
   inherited Destroy;
 end;
+{$endif}
+
 
 end.
 

@@ -35,7 +35,9 @@ private
 
 public
   function GetLibs(Basepath:string):boolean;override;
+  {$ifndef FPCONLY}
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
+  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -61,10 +63,12 @@ begin
   }
 end;
 
+{$ifndef FPCONLY}
 function TFreeBSD_Linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   result:=true;
 end;
+{$endif}
 
 function TFreeBSD_Linux386.GetBinUtils(Basepath:string): boolean;
 var

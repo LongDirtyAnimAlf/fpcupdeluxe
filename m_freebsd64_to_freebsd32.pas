@@ -24,7 +24,9 @@ private
 
 public
   function GetLibs(Basepath:string):boolean;override;
+  {$ifndef FPCONLY}
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
+  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -42,10 +44,12 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
 end;
 
+{$ifndef FPCONLY}
 function TFreeBSD64_FreeBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   result:=true;
 end;
+{$endif}
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
