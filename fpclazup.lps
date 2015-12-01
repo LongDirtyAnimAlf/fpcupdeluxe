@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="linuxarmhf">
+    <BuildModes Count="3" Active="Default">
       <Item1 Name="darwin64">
         <CompilerOptions>
           <Version Value="11"/>
@@ -97,7 +97,6 @@ end;"/>
       <Unit0>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="fpcup"/>
         <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
