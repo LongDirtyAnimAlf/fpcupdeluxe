@@ -76,6 +76,7 @@ type
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
     property CompilerUsed: CompilerType read FCompilerUsed;
+    property CrossModuleName: string read FCrossModuleName;
     // Represents arguments for CROSSOPT parameter
     // No need to add XP= (binutils prefix): calling code will do this
     // CROSSOPT: Compiler makefile allows to specify compiler options that are only used during the actual crosscompiling phase (i.e. not during the initial bootstrap cycle)
