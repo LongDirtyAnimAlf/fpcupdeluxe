@@ -936,7 +936,7 @@ const
   FTPPath='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
   FTP262Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
   FTP264Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
-  //FTP300Path='ftp://ftp.freepascal.org/pub/fpc/dist/3.0.0/bootstrap/';
+  FTP300Path='ftp://ftp.freepascal.org/pub/fpc/dist/3.0.0/bootstrap/';
 var
   BootstrapVersion: string;
   Output: string;
@@ -1059,27 +1059,27 @@ begin
     //ppcuniversal is not a good bootstrap compiler since it creates a compiler that doesn't handle generics !?!?!?
     //We'll make our own ppc386 starting with the ppcuniversal bootstrap compiler
     //If we made it already pick it up here
-    {$IFDEF i386}
+    {$IFDEF CPUX86_64}
     if FBootstrapCompilerURL='' then
-       FBootstrapCompilerURL := FTP264Path+'i386%26powerpc-macosx-10.4-ppcuniversal.tar.bz2';
+       FBootstrapCompilerURL := FTP300Path+'x86_64-macosx-10.7-ppcx64.tar.bz2';
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64';
+    if NOT FileExists(FBootstrapCompiler) then
+    begin
+      //FBootstrapCompiler := Which('ppcx64');
+      //if Length(FBootstrapCompiler)=0 then
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64';
+    end;
+    {$ELSE}
+    if FBootstrapCompilerURL='' then
+       FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
     if NOT FileExists(FBootstrapCompiler) then
     begin
       //FBootstrapCompiler := Which('ppc386');
       //if Length(FBootstrapCompiler)=0 then
-      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386';
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
     end;
-    {$ELSE}
-    if FBootstrapCompilerURL='' then
-       FBootstrapCompilerURL := FTP264Path+'universal-macosx-10.5-ppcuniversal.tar.bz2';
-    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcppc';
-    if NOT FileExists(FBootstrapCompiler) then
-    begin
-      //FBootstrapCompiler := Which('ppc386');
-      //if Length(FBootstrapCompiler)=0 then
-      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcppc';
-    end;
-    {$ENDIF i386}
+    {$ENDIF CPUX86_64}
     {$ENDIF Darwin}
     {$IFDEF FREEBSD}
     {$IFDEF CPU386}
@@ -1143,9 +1143,9 @@ begin
       {$ifdef darwin}
       // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
       // doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
-      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
+      // FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
       // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
-      FBootstrapCompilerOverrideVersionCheck:=true;
+      // FBootstrapCompilerOverrideVersionCheck:=true;
       {$endif darwin}
       result:=CheckAndGetNeededExecutables and DownloadBootstrapCompiler;
     end;
