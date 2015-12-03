@@ -304,6 +304,7 @@ end;"/>
       <Unit0>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcup"/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>

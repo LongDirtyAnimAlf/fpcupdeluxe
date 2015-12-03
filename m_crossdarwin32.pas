@@ -1,7 +1,6 @@
-unit m_anyinternallinker_to_darwin32;
+unit m_crossdarwin32;
 
-{ Cross compiles to Darwin x86 code
-Requirements: FPC should have an internal linker
+{ Cross compiles from Darwin x86_64 code to Darwin x86/32 bit
 }
 
 
@@ -19,9 +18,9 @@ const
 
 type
 
-{ Tanyinternallinker_darwin32 }
+{ TDarwin32 }
 
-Tanyinternallinker_darwin32 = class(TCrossInstaller)
+TDarwin32 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -34,9 +33,9 @@ public
   destructor Destroy; override;
 end;
 
-{ Tanyinternallinker_darwin32 }
+{ TDarwin32 }
 
-function Tanyinternallinker_darwin32.GetLibs(Basepath:string): boolean;
+function TDarwin32.GetLibs(Basepath:string): boolean;
 begin
   FLibsPath:='';
   result:=true;
@@ -48,13 +47,13 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function Tanyinternallinker_darwin32.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TDarwin32.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   result:=true;
 end;
 {$endif}
 
-function Tanyinternallinker_darwin32.GetBinUtils(Basepath:string): boolean;
+function TDarwin32.GetBinUtils(Basepath:string): boolean;
 begin
   inherited;
   FBinUtilsPath:='';
@@ -67,30 +66,34 @@ begin
   end;
 end;
 
-constructor Tanyinternallinker_darwin32.Create;
+constructor TDarwin32.Create;
 begin
   inherited Create;
-  FCrossModuleName:='anyinternallinker_darwin32';
+  FCrossModuleName:='Darwin32';
   FTargetCPU:='i386';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('Tanyinternallinker_darwin32 crosscompiler loading',etDebug);
+  infoln('TDarwin32 crosscompiler loading',etDebug);
 end;
 
-destructor Tanyinternallinker_darwin32.Destroy;
+destructor TDarwin32.Destroy;
 begin
   inherited Destroy;
 end;
 
+{$IFDEF Darwin}
+{$IFDEF CPUX86_64}
 
 var
-  Anyinternallinker_darwin32:Tanyinternallinker_darwin32;
+  Darwin32:TDarwin32;
 
 initialization
-  Anyinternallinker_darwin32:=Tanyinternallinker_darwin32.Create;
-  RegisterExtension(Anyinternallinker_darwin32.TargetCPU+'-'+Anyinternallinker_darwin32.TargetOS,Anyinternallinker_darwin32);
+  Darwin32:=TDarwin32.Create;
+  RegisterExtension(Darwin32.TargetCPU+'-'+Darwin32.TargetOS,Darwin32);
 finalization
-  Anyinternallinker_darwin32.Destroy;
+  Darwin32.Destroy;
+{$ENDIF}
+{$ENDIF}
 end.
 

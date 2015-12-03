@@ -4,20 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Count="3" Active="Default">
-      <Item1 Name="darwin64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Parsing>
-            <SyntaxOptions>
-              <UseAnsiStrings Value="False"/>
-            </SyntaxOptions>
-          </Parsing>
-          <Other>
-            <CustomOptions Value="-dFPCONLY"/>
-          </Other>
-        </CompilerOptions>
-      </Item1>
-      <Item2 Name="linuxarmhf">
+      <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -55,18 +42,18 @@
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item2>
-      <Item3 Name="darwin32">
+      </Item1>
+      <Item2 Name="darwin32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_osx_x86"/>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/fpcup_osx_x86"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -74,6 +61,47 @@
 end;"/>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="darwin64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/fpcup_osx_x64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
             <TargetOS Value="darwin"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
@@ -136,6 +164,8 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="5"/>
+        <TopLine Value="1042"/>
+        <CursorPos Y="1063"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -193,16 +223,14 @@ end;"/>
         <Filename Value="m_crosswin64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="65"/>
-        <CursorPos X="20" Y="72"/>
+        <TopLine Value="71"/>
         <UsageCount Value="200"/>
       </Unit12>
       <Unit13>
         <Filename Value="m_crosswin32.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="35"/>
-        <CursorPos Y="69"/>
+        <TopLine Value="40"/>
         <UsageCount Value="200"/>
       </Unit13>
       <Unit14>
@@ -308,8 +336,6 @@ end;"/>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="62"/>
-        <CursorPos X="18" Y="66"/>
         <UsageCount Value="200"/>
       </Unit28>
       <Unit29>
@@ -348,8 +374,7 @@ end;"/>
         <Filename Value="m_linux386_to_mips.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="108"/>
-        <CursorPos Y="133"/>
+        <TopLine Value="3"/>
         <UsageCount Value="200"/>
       </Unit33>
       <Unit34>
@@ -395,7 +420,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="72"/>
+        <UsageCount Value="73"/>
       </Unit39>
       <Unit40>
         <Filename Value="jedi.inc"/>
@@ -404,7 +429,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="72"/>
+        <UsageCount Value="73"/>
       </Unit40>
       <Unit41>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -412,7 +437,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="72"/>
+        <UsageCount Value="73"/>
       </Unit41>
       <Unit42>
         <Filename Value="revision.inc"/>
@@ -421,7 +446,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="72"/>
+        <UsageCount Value="73"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_linuxarm.pas"/>
@@ -429,19 +454,19 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="19" Y="81"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="66"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="29"/>
+        <UsageCount Value="30"/>
       </Unit44>
       <Unit45>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="29"/>
+        <UsageCount Value="30"/>
       </Unit45>
     </Units>
   </ProjectSession>

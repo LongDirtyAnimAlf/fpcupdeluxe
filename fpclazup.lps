@@ -4,17 +4,7 @@
     <PathDelim Value="\"/>
     <Version Value="9"/>
     <BuildModes Count="3" Active="Default">
-      <Item1 Name="darwin64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <Parsing>
-            <SyntaxOptions>
-              <UseAnsiStrings Value="False"/>
-            </SyntaxOptions>
-          </Parsing>
-        </CompilerOptions>
-      </Item1>
-      <Item2 Name="linuxarmhf">
+      <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -52,18 +42,18 @@
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item2>
-      <Item3 Name="darwin32">
+      </Item1>
+      <Item2 Name="darwin32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpclazup_osx_x86"/>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/fpclazup_osx_x86"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
   UsageCustomOptions += ' -k-macosx_version_min -k10.6';
@@ -91,12 +81,53 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
+      </Item2>
+      <Item3 Name="darwin64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/fpclazup_osx_x64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="lib/$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS = 'darwin' then begin
+  UsageCustomOptions += ' -k-macosx_version_min -k10.6';
+  UsageCustomOptions += ' -XR/Developer/SDKs/MacOSX10.6.sdk/';
+end;"/>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <WriteFPCLogo Value="False"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
       </Item3>
     </BuildModes>
     <Units Count="46">
       <Unit0>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="fpcup"/>
         <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
