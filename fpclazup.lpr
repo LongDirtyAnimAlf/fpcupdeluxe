@@ -1,4 +1,4 @@
-{ FPC installer/updater
+{ FPC and Lazarus installer/updater
 Copyright (C) 2012-2014 Reinier Olislagers, Ludo Brands
 
 Recent updates by Alfred, with the help of the fpc / lazarus community
@@ -29,7 +29,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
-program fpcup;
+program fpclazup;
 
 { Command line interface to installing/updating FPC/Lazarus instances }
 { Code conventions in this project:
