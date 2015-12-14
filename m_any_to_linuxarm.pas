@@ -81,6 +81,7 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName);
 
   SearchLibraryInfo(result);
+
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
@@ -89,7 +90,6 @@ begin
       '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-
     {
     Actually leaving this out seems to work ok on the target system.
     if StringListStartsWith(FCrossOpts,'-FL')=-1 then

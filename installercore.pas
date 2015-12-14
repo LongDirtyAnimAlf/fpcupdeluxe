@@ -58,6 +58,7 @@ type
   private
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
+    procedure SetURL(value:string);
     function GetMake: string;
     function GetPatch: string;
     procedure SetHTTPProxyHost(AValue: string);
@@ -96,6 +97,10 @@ type
     FSVNDirectory: string;
     FRepositoryUpdated: boolean;
     FURL: string;
+    FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
+    FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
+    FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
+    FCandidateVersion: integer; //RC part of the version number, e.g. 2 for 1.0.8RC2, or -1 if unknown
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
     FVerbose: boolean;
@@ -183,7 +188,7 @@ type
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn
-    property URL: string write FURL;
+    property URL: string write SetURL;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     // display and log in temp log file all sub process output
@@ -242,6 +247,77 @@ begin
         Result := TCrossInstaller(CrossInstallers.Objects[idx]);
         break;
       end;
+end;
+
+procedure TInstaller.SetURL(value:string);
+var
+  VersionSnippet:string;
+  VersionList: TStringList;
+  i:integer;
+begin
+  FURL:=value;
+
+  FMajorVersion := -1;
+  FMinorVersion := -1;
+  FReleaseVersion := -1;
+  FCandidateVersion := -1;
+
+  //inside fpc source (dir:compiler), there is version.pas with:
+  //version_nr = '3';
+  //release_nr = '0';
+  //patch_nr   = '1';
+  //minorpatch = 'rc1';
+  //inside lazarus source( dir: ide), there is version.inc, with a single line and a single string with version
+  // '1.5'
+
+  // for now, get version from URL
+
+  VersionSnippet:=UpperCase(FURL);
+  // find first occurence of _ and delete everything before it
+  // if URL contains a version, this version always starts with _
+  i := Pos('_',VersionSnippet);
+  if i>0 then
+  begin
+    Delete(VersionSnippet,1,i);
+    // release candidate numbering
+    i := Pos('_RC',VersionSnippet);
+    if i>0 then
+    begin
+      FCandidateVersion := StrToIntDef(Copy(VersionSnippet,i+3,1), -1);
+      Delete(VersionSnippet,i,10);
+    end;
+    VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
+  end;
+  if Length(VersionSnippet)>0 then
+  begin
+    VersionList := TStringList.Create;
+    try
+      VersionList.CommaText := VersionSnippet;
+      case VersionList.Count of
+        1:
+        begin
+          FMajorVersion := StrToIntDef(VersionList[0], -1);
+          FMinorVersion := 0;
+          FReleaseVersion := 0;
+        end;
+        2:
+        begin
+          FMajorVersion := StrToIntDef(VersionList[0], -1);
+          FMinorVersion := StrToIntDef(VersionList[1], -1);
+          FReleaseVersion := 0;
+        end;
+        3..maxint:
+        begin
+          FMajorVersion := StrToIntDef(VersionList[0], -1);
+          FMinorVersion := StrToIntDef(VersionList[1], -1);
+          FReleaseVersion := StrToIntDef(VersionList[2], -1);
+        end;
+      end;
+    finally
+      VersionList.Free;
+    end;
+  end;
+
 end;
 
 function TInstaller.GetMake: string;
@@ -625,13 +701,14 @@ begin
   AddNewUtil('cp' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('diff' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,SourceURL,'',ucBinutil);
+  //AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger);
   AddNewUtil('gdb' + GetExeExt,SourceURL,'',ucDebugger);
+  AddNewUtil('libexpat-1.dll',SourceURL,'',ucDebugger);
   AddNewUtil('gecho' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,SourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt + '.manifest',SourceURL,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,SourceURL,'',ucBinutil);
   //AddNewUtil('GoRC' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('libexpat-1.dll',SourceURL_gdb,'',ucDebugger);
   {
   http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
   only has libexpat-1, so no need for these:
@@ -660,12 +737,13 @@ begin
   AddNewUtil('diff' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger);
+  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger);
   AddNewUtil('gecho' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,SourceURL64,'',ucBinutil);
   AddNewUtil('ginstall.exe.manifest',SourceURL64,'',ucBinutil);
   AddNewUtil('gmkdir' + GetExeExt,SourceURL64,'',ucBinutil);
   //AddNewUtil('GoRC' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger);
+
   AddNewUtil('ld' + GetExeExt,SourceURL64,'',ucBinutil);
   // even in fpcbuild trunk, still make 3.80
   AddNewUtil('make' + GetExeExt,SourceURL64,'',ucBinutil);
@@ -1112,10 +1190,10 @@ end;
 function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2d-x64_86-win64.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2e-x64_86-win64.zip';
   {$endif}
   {$ifdef win32}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2d-i386-win32.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2e-i386-win32.zip';
   {$endif}
 var
   OperationSucceeded: boolean;

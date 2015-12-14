@@ -101,6 +101,7 @@ type
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
     function GetCompilerVersion(CompilerPath: string): string;
+    function GetCompilerMajorVersion(CompilerPath: string): integer;
     // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
@@ -491,10 +492,12 @@ begin
             InsertFPCCFGSnippet(FPCCfg,
               SnipMagicBegin+FCrossCPU_target+'-'+FCrossOS_target+LineEnding+
               '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
+              '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
               '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
               '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
               '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               CrossInstaller.FPCCFGSnippet+LineEnding+
+              '#ENDIF'+LineEnding+
               '#ENDIF'+LineEnding+
               '#ENDIF'+LineEnding+
               SnipMagicEnd);
@@ -531,6 +534,7 @@ function TFPCNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
   OperationSucceeded:boolean;
   FileCounter:integer;
+  s:string;
 begin
   OperationSucceeded:=true;
   // Make all/install, using bootstrap compiler.
@@ -548,8 +552,10 @@ begin
   // Override makefile checks that checks for stable compiler in FPC trunk
   if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  if FCompilerOptions<>'' then
-    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
+  s:='-Sg '+FCompilerOptions;
+  ProcessEx.Parameters.Add('OPT='+s);
+  //if FCompilerOptions<>'' then
+  //  ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   infoln('Running make all for FPC:',etInfo);
   try
@@ -728,6 +734,26 @@ begin
   ResultCode:=ExecuteCommand(CompilerPath+ ' -iW', Output, FVerbose);
   Output:=StringReplace(Output,LineEnding,'',[rfReplaceAll,rfIgnoreCase]);
   Result:=Output;
+end;
+
+function TFPCInstaller.GetCompilerMajorVersion(CompilerPath: string): integer;
+var
+  VersionSnippet:string;
+  VersionList : TStringList;
+begin
+  result:=-1;
+  VersionSnippet:=GetCompilerVersion(CompilerPath);
+  VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
+  if Length(VersionSnippet)>0 then
+  begin
+    VersionList := TStringList.Create;
+    try
+      VersionList.CommaText := VersionSnippet;
+      if VersionList.Count>0 then result := StrToIntDef(VersionList[0], -1);
+    finally
+      VersionList.Free;
+    end;
+  end;
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
@@ -1182,6 +1208,8 @@ begin
   InitDone:=result;
 end;
 
+
+{.$DEFINE MANUALBUILD}
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   FPCCfg: string;
@@ -1190,56 +1218,150 @@ var
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
   SearchRec:TSearchRec;
   s:string;
+  {$IFDEF MANUALBUILD}
+  aOS,aCPU:string;
+  {$ENDIF}
   TxtFile:Text;
 const
   COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
     'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64,ppcross8086';
-  IntermediateARM='ppcarm_intermediate'; //name for (trunk) intermediate compiler for ARM
+  IntermediateARM='ppcarm_intermediate'; // name for (major version >= 3) intermediate compiler for ARM
 begin
   result:=InitModule;
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
   {$if defined(cpuarm) and defined(linux)}
-  //todo: do the same for arm/android!?!
-  // Always build an intermediate bootstrap compiler in target fpc dir. If that is
-  // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
-  // version-dependent: please review and modify when new FPC version is released
-  ProcessEx.Executable := Make;
-  ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('compiler_cycle');
-  if FCPUCount>1 then
-    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
-  ProcessEx.Parameters.Add('FPC='+FCompiler);
-  ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-  // Copy over user-specified instruction sets e.g. for trunk compiler...
-  // in CROSSOPT though, as the stable compiler likely will not understand them
-  if FCompilerOptions<>'' then
-    ProcessEx.Parameters.Add('CROSSOPT='+FCompilerOptions);
-  // If we don't specify -dFPC_ARMHF, we will never get support for -CaEABIHF
-  if pos('-DFPC_ARMHF',UpperCase(FCompilerOptions))>0 then
-    ProcessEx.Parameters.Add('OPT=-dFPC_ARMHF');
-  ProcessEx.Parameters.Add('OS_TARGET=linux');
-  ProcessEx.Parameters.Add('CPU_TARGET=arm');
-  // Override makefile checks that checks for stable compiler in FPC trunk
-  FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
-  ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  infoln('Running make cycle for ARM compiler:',etInfo);
-  ProcessEx.Execute;
-  if ProcessEx.ExitStatus <> 0 then
-    begin
-    result := False;
-    WritelnLog('FPC: Failed to build ARM intermediate bootstrap compiler ',true);
-    exit;
-  end;
-  FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcarm',
-    ExtractFilePath(FCompiler)+IntermediateARM);
-  //Make executable
-  OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateARM, &700)=0); //rwx------
-  if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateARM,etError);
 
-  // Now we can change the compiler from the stable one to the one in our FPC repo:
-  FCompiler:=ExtractFilePath(FCompiler)+IntermediateARM;
+  // rough check if an intermediate compiler is needed because of hardfloat support !!
+  if (GetCompilerMajorVersion(FCompiler)<3) then
+  //if (GetCompilerMajorVersion(FCompiler)<FMajorVersion) OR (FMajorVersion=-1) then
+  begin
+
+    //todo: do the same for arm/android!?!
+    // Build an intermediate bootstrap compiler in target fpc dir. If that is
+    // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
+    // version-dependent: please review and modify when new FPC version is released
+
+
+    {$IFDEF MANUALBUILD}
+    // manual compile ... just a try to speed things up !!
+    // for testing purpose only .. just use automated compiler build !!
+
+    aCPU := {$i %FPCTARGETCPU%};
+    aOS  := {$i %FPCTARGETOS%};
+
+    ProcessEx.Executable:='as';
+    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl'+DirectorySeparator+aOS+DirectorySeparator+aCPU;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('-o');
+    ProcessEx.Parameters.Add('prt0.o');
+    ProcessEx.Parameters.Add('prt0.as');
+    ProcessEx.Execute;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('-o');
+    ProcessEx.Parameters.Add('cprt0.o');
+    ProcessEx.Parameters.Add('cprt0.as');
+    ProcessEx.Execute;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('-o');
+    ProcessEx.Parameters.Add('dllprt0.o');
+    ProcessEx.Parameters.Add('dllprt0.as');
+    ProcessEx.Execute;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('-o');
+    ProcessEx.Parameters.Add('gprt0.o');
+    ProcessEx.Parameters.Add('gprt0.as');
+    ProcessEx.Execute;
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('-o');
+    ProcessEx.Parameters.Add('ucprt0.o');
+    ProcessEx.Parameters.Add('ucprt0.as');
+    ProcessEx.Execute;
+
+    ProcessEx.Executable:=FCompiler;
+    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('-darm');
+    ProcessEx.Parameters.Add('-Tlinux');
+    ProcessEx.Parameters.Add('-O1');
+    ProcessEx.Parameters.Add('-Sg');
+
+    ProcessEx.Parameters.Add('-Fu.'+DirectorySeparator+aCPU);
+    ProcessEx.Parameters.Add('-Fu.'+DirectorySeparator+'utils');
+    ProcessEx.Parameters.Add('-Fu.'+DirectorySeparator+'systems');
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS);
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS+DirectorySeparator+aCPU);
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+aCPU);
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+'unix');
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas');
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl');
+    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+'*');
+
+    ProcessEx.Parameters.Add('-Fi.'+DirectorySeparator+aCPU);
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'inc');
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS);
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS+DirectorySeparator+aCPU);
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+aCPU);
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'unix');
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas');
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas'+DirectorySeparator+'classes');
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas'+DirectorySeparator+'sysutils');
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl');
+    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'*');
+    ProcessEx.Parameters.Add('-dGDB');
+    ProcessEx.Parameters.Add('pp.pas');
+
+    infoln('Running manual compile for very bare ARM compiler:',etInfo);
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      result := False;
+      WritelnLog('FPC: Failed to build ARM intermediate bootstrap compiler ',true);
+      exit;
+    end;
+
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/pp',
+      ExtractFilePath(FCompiler)+IntermediateARM);
+
+    FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
+
+    {$ELSE}
+
+    ProcessEx.Executable := Make;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('compiler_cycle');
+    if FCPUCount>1 then
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    ProcessEx.Parameters.Add('FPC='+FCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+
+    ProcessEx.Parameters.Add('OS_TARGET=linux');
+    ProcessEx.Parameters.Add('CPU_TARGET=arm');
+    // Override makefile checks that checks for stable compiler in FPC trunk
+    FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
+    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+    infoln('Running make cycle for ARM compiler:',etInfo);
+    ProcessEx.Execute;
+    if ProcessEx.ExitStatus <> 0 then
+      begin
+      result := False;
+      WritelnLog('FPC: Failed to build ARM intermediate bootstrap compiler ',true);
+      exit;
+    end;
+
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcarm',
+      ExtractFilePath(FCompiler)+IntermediateARM);
+
+    {$ENDIF}
+
+    //Make executable
+    OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateARM, &700)=0); //rwx------
+    if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateARM,etError);
+
+    // Now we can change the compiler from the stable one to the one in our FPC repo:
+    FCompiler:=ExtractFilePath(FCompiler)+IntermediateARM;
+  end;
   {$endif} //linux, arm
   {$ifdef win64}
   // Deals dynamically with either ppc386.exe or native ppcx64.exe

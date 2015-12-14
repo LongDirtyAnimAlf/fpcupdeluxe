@@ -818,8 +818,10 @@ begin
       else
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
           IncludeTrailingPathDelimiter(FMakeDir) + 'gdb' + GetExeExt);
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', IncludeTrailingPathDelimiter(
-        FMakeDir) + 'make' + GetExeExt);
+
+      if FileExists(ExtractFilePath(FCompiler) + 'make' + GetExeExt)
+         then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', ExtractFilePath(FCompiler) + 'make' + GetExeExt)
+         else LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed

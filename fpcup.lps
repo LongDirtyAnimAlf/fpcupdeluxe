@@ -155,17 +155,15 @@ end;"/>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1445"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="5"/>
-        <TopLine Value="1042"/>
-        <CursorPos Y="1063"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -420,7 +418,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="75"/>
       </Unit39>
       <Unit40>
         <Filename Value="jedi.inc"/>
@@ -429,7 +427,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="75"/>
       </Unit40>
       <Unit41>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -437,7 +435,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="75"/>
       </Unit41>
       <Unit42>
         <Filename Value="revision.inc"/>
@@ -446,7 +444,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="73"/>
+        <UsageCount Value="75"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_linuxarm.pas"/>
@@ -454,19 +452,19 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="19" Y="81"/>
-        <UsageCount Value="66"/>
+        <UsageCount Value="68"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="32"/>
       </Unit44>
       <Unit45>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="30"/>
+        <UsageCount Value="32"/>
       </Unit45>
     </Units>
   </ProjectSession>

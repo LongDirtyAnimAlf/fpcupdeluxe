@@ -294,7 +294,9 @@ const
   // Laz 1.2 version:
   FPC_CHM_URL_LASTRESORT='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
   // Laz 1.4 version:
-  FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.4/doc-chm_fpc2014_laz2015.zip/download';
+  // FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.4/doc-chm_fpc2014_laz2015.zip/download';
+  // Laz 1.6 version:
+  FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip/download';
 var
   DocsZip: string;
   OperationSucceeded: boolean;
@@ -571,7 +573,7 @@ begin
             writelnlog('Execute: '+ProcessEx.Executable+' exit code: '+InttoStr(ProcessEx.ExitStatus), true);
             if ProcessEx.ExitStatus <> 0 then
             begin
-              writelnlog(ModuleName+': error compiling build_lcl_docs docs builder. Aborting.', true);
+              writelnlog(ModuleName+': error compiling build_lcl_docs docs builder.', true);
               OperationSucceeded := False;
             end;
           end;
@@ -685,7 +687,11 @@ begin
         infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),etInfo);
     end;
   end;
-  result:=OperationSucceeded;
+
+  if NOT OperationSucceeded then writelnlog(ModuleName+': Fatal error. But I will continue !!', true);
+  //result:=OperationSucceeded;
+  // always continue,  even when docs were not build !!
+  result:=True;
 end;
 
 function THelpLazarusInstaller.InitModule: boolean;
