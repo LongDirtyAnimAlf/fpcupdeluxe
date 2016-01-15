@@ -991,6 +991,8 @@ var
   Counter: integer;
   Errors: integer;
   UpdateWarnings: TStringList;
+  PatchFilePath:string;
+  ReturnCode,i: integer;
 begin
   Result := InitModule;
   if not Result then
@@ -1008,17 +1010,21 @@ begin
   finally
     UpdateWarnings.Free;
   end;
-  infoln('Lazarus was at: ' + BeforeRevision, etInfo);
 
-  if FRepositoryUpdated then
+  if NOT FSVNClient.ExportOnly then
   begin
-    Revision := AfterRevision;
-    infoln('Lazarus is now at: ' + AfterRevision, etInfo);
-  end
-  else
-  begin
-    Revision := BeforeRevision;
-    infoln('No updates for Lazarus found.', etInfo);
+    infoln('Lazarus was at: ' + BeforeRevision, etInfo);
+
+    if FRepositoryUpdated then
+    begin
+      Revision := AfterRevision;
+      infoln('Lazarus is now at: ' + AfterRevision, etInfo);
+    end
+    else
+    begin
+      Revision := BeforeRevision;
+      infoln('No updates for Lazarus found.', etInfo);
+    end;
   end;
 
   // Download Qt bindings if not present yet
@@ -1057,6 +1063,32 @@ begin
       WritelnLog('TLazarusNativeInstaller.GetModule(' + ModuleName + '): ' + IntToStr(Errors) + ' errors downloading Qt-related files.', true);
     end;
   end;
+
+  if result then
+  begin
+    if Length(FSourcePatches)>0 then
+    begin
+      UpdateWarnings:=TStringList.Create;
+      try
+        UpdateWarnings.CommaText := FSourcePatches;
+        for i:=0 to (UpdateWarnings.Count-1) do
+        begin
+          PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          if FileExists(PatchFilePath) then
+          begin
+            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i  '+PatchFilePath, FBaseDirectory, True);
+            if ReturnCode=0
+               then infoln('Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
+               else writelnlog(ModuleName+' ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
+          end;
+        end;
+      finally
+        UpdateWarnings.Free;
+      end;
+    end;
+  end;
+
 end;
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;

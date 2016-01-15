@@ -97,6 +97,7 @@ type
     FSVNDirectory: string;
     FRepositoryUpdated: boolean;
     FURL: string;
+    FSourcePatches: string;
     FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
     FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
@@ -189,6 +190,8 @@ type
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn
     property URL: string write SetURL;
+    // patches
+    property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     // display and log in temp log file all sub process output

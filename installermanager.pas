@@ -301,6 +301,8 @@ type
     {$endif}
     FShortCutNameFpcup: string;
     FSkipModules: string;
+    FFPCPatches:string;
+    FLazarusPatches:string;
     FUninstall:boolean;
     FVerbose: boolean;
     FExportOnly:boolean;
@@ -387,6 +389,8 @@ type
     property ReApplyLocalChanges: boolean read FReApplyLocalChanges write FReApplyLocalChanges;
     // List of modules that must not be processed
     property SkipModules:string read FSkipModules write FSkipModules;
+    property FPCPatches:string read FFPCPatches write FFPCPatches;
+    property LazarusPatches:string read FLazarusPatches write FLazarusPatches;
     // Exhaustive/exclusive list of modules that must be processed; no other
     // modules may be processed.
     property OnlyModules:string read FOnlyModules write FOnlyModules;
@@ -975,6 +979,10 @@ begin
     FInstaller.BaseDirectory:=FParent.FPCDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
+    if (FInstaller is TFPCInstaller) then FInstaller.SourcePatches:=FParent.FFPCPatches;
+    {$ifndef FPCONLY}
+    if (FInstaller is TLazarusInstaller) then FInstaller.SourcePatches:=FParent.FLazarusPatches;
+    {$endif}
     FInstaller.Compiler:='';  //bootstrap used
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;

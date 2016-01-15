@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="Default">
+    <BuildModes Count="3" Active="win32">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -155,7 +155,9 @@ end;"/>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="915"/>
+        <CursorPos X="91" Y="939"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -163,7 +165,9 @@ end;"/>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="1768"/>
+        <CursorPos X="49" Y="1787"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -171,10 +175,11 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="693"/>
-        <CursorPos X="7" Y="713"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="100"/>
+        <CursorPos X="33" Y="106"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="installerhelp.pas"/>
@@ -206,6 +211,8 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="4"/>
+        <TopLine Value="967"/>
+        <CursorPos X="60" Y="982"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -307,6 +314,8 @@ end;"/>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="163"/>
+        <CursorPos X="17" Y="189"/>
         <UsageCount Value="200"/>
       </Unit24>
       <Unit25>
@@ -340,8 +349,8 @@ end;"/>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="199"/>
-        <CursorPos Y="232"/>
+        <TopLine Value="110"/>
+        <CursorPos X="20" Y="129"/>
         <UsageCount Value="200"/>
       </Unit29>
       <Unit30>
@@ -418,7 +427,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
       </Unit39>
       <Unit40>
         <Filename Value="jedi.inc"/>
@@ -427,7 +436,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
       </Unit40>
       <Unit41>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -435,7 +444,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
       </Unit41>
       <Unit42>
         <Filename Value="revision.inc"/>
@@ -444,7 +453,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="75"/>
+        <UsageCount Value="76"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_linuxarm.pas"/>
@@ -452,19 +461,19 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="19" Y="81"/>
-        <UsageCount Value="68"/>
+        <UsageCount Value="69"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="33"/>
       </Unit44>
       <Unit45>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="32"/>
+        <UsageCount Value="33"/>
       </Unit45>
     </Units>
   </ProjectSession>

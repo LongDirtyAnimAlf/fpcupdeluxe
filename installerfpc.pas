@@ -1745,7 +1745,9 @@ function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
   AfterRevision: string;
   BeforeRevision: string;
+  PatchFilePath:string;
   UpdateWarnings: TStringList;
+  ReturnCode,i: integer;
 begin
   result:=InitModule;
   if not result then exit;
@@ -1763,9 +1765,38 @@ begin
     UpdateWarnings.Free;
   end;
 
-  infoln('FPC was at: '+BeforeRevision,etInfo);
-  if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etInfo) else
-    infoln('No updates for FPC found.',etInfo);
+  if NOT FSVNClient.ExportOnly then
+  begin
+    infoln('FPC was at: '+BeforeRevision,etInfo);
+    if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etInfo) else
+      infoln('No updates for FPC found.',etInfo);
+  end;
+
+  if result then
+  begin
+    if Length(FSourcePatches)>0 then
+    begin
+      UpdateWarnings:=TStringList.Create;
+      try
+        UpdateWarnings.CommaText := FSourcePatches;
+        for i:=0 to (UpdateWarnings.Count-1) do
+        begin
+          PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          if FileExists(PatchFilePath) then
+          begin
+            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i  '+PatchFilePath, FBaseDirectory, True);
+            if ReturnCode=0
+               then infoln('FPC has been patched successfully with '+UpdateWarnings[i],etInfo)
+               else writelnlog(ModuleName+' ERROR: Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
+          end;
+        end;
+      finally
+        UpdateWarnings.Free;
+      end;
+    end;
+  end;
+  readln;
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
