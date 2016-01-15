@@ -127,6 +127,7 @@ end;"/>
       <Unit0>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
+        <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -168,7 +169,6 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="7"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>

@@ -1796,7 +1796,6 @@ begin
       end;
     end;
   end;
-  readln;
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
