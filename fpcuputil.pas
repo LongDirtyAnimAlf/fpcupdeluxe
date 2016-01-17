@@ -120,6 +120,7 @@ function XdgConfigHome: String;
 function Which(Executable: string): string;
 function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
+function GetCrossCompilerName(Cpu_Target:string):string;
 
 implementation
 
@@ -1057,15 +1058,19 @@ begin
   if Cpu_Target='armeb' then result:='arm';
   if Cpu_Target='i8086' then result:='8086';
   if Cpu_Target='aarch64' then result:='a64';
-  {$IFDEF FPC_CROSSCOMPILING}
-  if Cpu_Target='jvm'
-     then result:='ppc'+result
-     else result:='ppcross'+result;
-  {$ELSE}
-  result:='ppc'+result;
-  {$ENDIF}
-  result:=result+GetExeExt;
+  result:='ppc'+result+GetExeExt;
 end;
+
+function GetCrossCompilerName(Cpu_Target:string):string;
+begin
+  result:=GetCompilerName(Cpu_Target);
+  if Cpu_Target<>'jvm' then
+  begin
+    result:=Copy(result,4,MaxInt);
+    result:='ppcross'+result;
+  end;
+end;
+
 
 { TLogger }
 

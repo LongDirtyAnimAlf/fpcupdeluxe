@@ -175,7 +175,7 @@ uses fpcuputil,fileutil
 const
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
-  Win64FallBackUsingCrossCompiler=true; //Set to true to download i386 boostrap compiler and cross compile. Leave to use native win x64 compiler
+  Win64FallBackUsingCrossCompiler=false; //Set to true to download i386 boostrap compiler and cross compile. Leave to use native win x64 compiler
 
 function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
@@ -1324,11 +1324,9 @@ begin
 
     // Now we can change the compiler from the stable one to the one in our FPC repo:
     FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
-  end else infoln('Using standard bootstrap compiler.',etInfo);;
+  end;
 
   {$ifdef win64}
-  aCPU := 'x86_64';
-  aOS  := 'win64';
   // Deals dynamically with either ppc386.exe or native ppcx64.exe
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
@@ -1336,16 +1334,12 @@ begin
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('compiler_cycle');
-    {$IFNDEF windows}
-    { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
-    Re-enable when changed to make 3.82 }
     if FCPUCount>1 then
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
-    {$ENDIF}
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('OS_TARGET='+aOS);
-    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+    ProcessEx.Parameters.Add('OS_TARGET=win64');
+    ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
     // Override makefile checks that checks for stable compiler in FPC trunk
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
@@ -1364,8 +1358,6 @@ begin
   end;
   {$endif win64}
   {$ifdef darwin}
-  aCPU := i386;
-  aOS  := darwin;
   if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
     begin
     ProcessEx.Executable := Make;
@@ -1376,7 +1368,7 @@ begin
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+    ProcessEx.Parameters.Add('CPU_TARGET=i386');
     // Override makefile checks that checks for stable compiler in FPC trunk
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
@@ -1402,30 +1394,23 @@ begin
   {$IFDEF UNIX}
   if OperationSucceeded then
   begin
-  // copy the freshly created compiler to the bin/$fpctarget directory so that
-  // fpc can find it
-  if FindFirst(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
-    repeat
-      s:=SearchRec.Name;
-      if (length(s)>4) and (s=GetCompilerName(aCPU)) then  //length(s)>4 skips ppc3
-      begin
-        OperationSucceeded:=OperationSucceeded and
-          FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
-           IncludeTrailingPathDelimiter(FBinPath)+s);
-        OperationSucceeded:=OperationSucceeded and
-          (0=fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755));
-        break;
-      end;
-    until FindNext(SearchRec)<>0;
-  FindClose(SearchRec);
-  if not (OperationSucceeded) then
-    infoln('Error copying over compiler to '+IncludeTrailingPathDelimiter(FBinPath),etError);
+    // copy the freshly created compiler to the bin/$fpctarget directory so that
+    // fpc can find it
+    s:=GetCompilerName(aCPU);
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
+      ExtractFilePath(FCompiler)+s);
+    fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
 
-  // create link 'units' below FBaseDirectory to
-  // <somewhere>/lib/fpc/$fpcversion/units
-  DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
-  fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
-    pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
+    s:=GetCrossCompilerName(aCPU);
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
+      ExtractFilePath(FCompiler)+s);
+    fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
+
+    // create link 'units' below FBaseDirectory to
+    // <somewhere>/lib/fpc/$fpcversion/units
+    DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'units');
+    fpSymlink(pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
+      pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
   end;
   {$ENDIF UNIX}
 

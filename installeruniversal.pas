@@ -1686,14 +1686,33 @@ begin
 end;
 
 procedure SetConfigFile(aConfigFile: string);
+var
+  ConfigFile: Text;
+  CurrentConfigFileName:string;
 begin
   CurrentConfigFile:=aConfigFile;
   // Create fpcup.ini from resource if it doesn't exist yet
   if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME)
     and not FileExistsUTF8(SafeGetApplicationPath+CONFIGFILENAME) then
     SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
+  {
+  // Create fpcup.ini from resource
+  // Save old version if existing
+  if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
+  begin
+    if FileExists(CurrentConfigFile) then
+    begin
+      CurrentConfigFileName:=CurrentConfigFile;
+      while FileExists(CurrentConfigFileName) do
+        CurrentConfigFileName := CurrentConfigFileName + 'i';
+      FileUtil.CopyFile(CurrentConfigFile,CurrentConfigFileName);
+      infoln('Old configfile('+CurrentConfigFile+') saved as '+CurrentConfigFileName+ '!!',etInfo);
+    end;
+    SysUtils.Deletefile(CurrentConfigFile);
+    SaveInisFromResource(CurrentConfigFile,'fpcup_ini');
+  end;
+  }
 end;
-
 
 initialization
   IniGeneralSection:=TStringList.create;
