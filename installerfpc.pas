@@ -1250,7 +1250,6 @@ begin
   result:=InitModule;
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
-  {$ifndef win64}
 
   // only check trunk and/or arm for now !!
   // arm needs >= 3.0.0 for ARMHF
@@ -1301,7 +1300,7 @@ begin
 
     ProcessEx.Parameters.Add('OS_TARGET='+aOS);
     ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
-    // neeeded if we only have a 2.6.2 or lower bootstrapper
+    // needed if we only have a 2.6.2 or lower bootstrapper
     if (GetCompilerReleaseVersion(FCompiler)<4) then
        ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     infoln('Running make cycle for intermediate compiler:',etInfo);
@@ -1326,7 +1325,7 @@ begin
     // Now we can change the compiler from the stable one to the one in our FPC repo:
     FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
   end else infoln('Using standard bootstrap compiler.',etInfo);;
-  {$endif}
+
   {$ifdef win64}
   aCPU := 'x86_64';
   aOS  := 'win64';
