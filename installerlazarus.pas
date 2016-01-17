@@ -259,8 +259,7 @@ begin
           Options := Options + ' -XP' + CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX=' + CrossInstaller.BinUtilsPrefix);
         end;
-        if Options <> '' then
-          ProcessEx.Parameters.Add('OPT=' + Options);
+        ProcessEx.Parameters.Add('OPT=-vh- ' + Options);
         // Since April 2012, LCL requires lazutils which requires registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
         ProcessEx.Parameters.Add('registration');
@@ -379,8 +378,7 @@ begin
     if FCrossLCL_Platform <> '' then
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     }
-    if FCompilerOptions <> '' then
-      ProcessEx.Parameters.Add('OPT=' + FCompilerOptions);
+    ProcessEx.Parameters.Add('OPT=-vh- ' + FCompilerOptions);
     case UpperCase(ModuleName) of
       'LAZARUS':
       begin
@@ -1077,7 +1075,7 @@ begin
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
-            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i  '+PatchFilePath, FBaseDirectory, True);
+            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -N --no-backup-if-mismatch -i  '+PatchFilePath, FBaseDirectory, True);
             if ReturnCode=0
                then infoln('Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
                else writelnlog(ModuleName+' ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);

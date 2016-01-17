@@ -904,8 +904,8 @@ begin
       if FReApplyLocalChanges and (DiffFile<>'') then
       begin
          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-         ReturnCode:=ExecuteCommandInDir(Patch+' -p1 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
-         {$IFNDEF MWINDOWS}
+         ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+         {$IFNDEF MSWINDOWS}
          if ReturnCode<>0 then
          begin
            // Patching can go wrong when line endings are not compatible
@@ -1058,7 +1058,7 @@ begin
       begin
         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
         CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
-        {$IFNDEF MWINDOWS}
+        {$IFNDEF MSWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
         begin
           // Patching can go wrong when line endings are not compatible

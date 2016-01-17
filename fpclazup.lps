@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="win32">
+    <BuildModes Count="3" Active="Default">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -135,6 +135,8 @@ end;"/>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="199"/>
+        <CursorPos X="59" Y="279"/>
         <UsageCount Value="200"/>
       </Unit1>
       <Unit2>
@@ -223,7 +225,10 @@ end;"/>
       <Unit13>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="winInstaller"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="243"/>
+        <CursorPos X="19" Y="263"/>
         <UsageCount Value="200"/>
       </Unit13>
       <Unit14>
@@ -242,6 +247,8 @@ end;"/>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="43"/>
+        <CursorPos X="5" Y="60"/>
         <UsageCount Value="200"/>
       </Unit16>
       <Unit17>
@@ -339,8 +346,8 @@ end;"/>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="116"/>
-        <CursorPos X="27" Y="133"/>
+        <TopLine Value="265"/>
+        <CursorPos X="127" Y="282"/>
         <UsageCount Value="200"/>
       </Unit29>
       <Unit30>
@@ -410,7 +417,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="88"/>
       </Unit38>
       <Unit39>
         <Filename Value="jedi.inc"/>
@@ -419,7 +426,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="88"/>
       </Unit39>
       <Unit40>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -427,7 +434,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="88"/>
       </Unit40>
       <Unit41>
         <Filename Value="revision.inc"/>
@@ -436,34 +443,31 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="76"/>
+        <UsageCount Value="88"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="69"/>
+        <UsageCount Value="81"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="45"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="45"/>
       </Unit44>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="31"/>
+        <UsageCount Value="43"/>
       </Unit45>
     </Units>
   </ProjectSession>

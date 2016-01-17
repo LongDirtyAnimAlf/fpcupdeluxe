@@ -119,6 +119,7 @@ function XdgConfigHome: String;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 function ExtractFileNameOnly(const AFilename: string): string;
+function GetCompilerName(Cpu_Target:string):string;
 
 implementation
 
@@ -1042,6 +1043,28 @@ begin
     dec(ExtPos);
   if (ExtPos<StartPos) then ExtPos:=length(AFilename)+1;
   Result:=copy(AFilename,StartPos,ExtPos-StartPos);
+end;
+
+function GetCompilerName(Cpu_Target:string):string;
+begin
+  result:=Cpu_Target;
+  if Cpu_Target='m68k' then result:='68k';
+  if Cpu_Target='i386' then result:='386';
+  if Cpu_Target='x86_64' then result:='x64';
+  if Cpu_Target='powerpc' then result:='ppc';
+  if Cpu_Target='powerpc64' then result:='ppc64';
+  if Cpu_Target='alpha' then result:='axp';
+  if Cpu_Target='armeb' then result:='arm';
+  if Cpu_Target='i8086' then result:='8086';
+  if Cpu_Target='aarch64' then result:='a64';
+  {$IFDEF FPC_CROSSCOMPILING}
+  if Cpu_Target='jvm'
+     then result:='ppc'+result
+     else result:='ppcross'+result;
+  {$ELSE}
+  result:='ppc'+result;
+  {$ENDIF}
+  result:=result+GetExeExt;
 end;
 
 { TLogger }

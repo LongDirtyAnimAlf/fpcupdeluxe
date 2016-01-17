@@ -362,6 +362,7 @@ end;"/>
       <Unit13>
         <Filename Value="wininstaller.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="winInstaller"/>
       </Unit13>
       <Unit14>
         <Filename Value="commandline.pas"/>

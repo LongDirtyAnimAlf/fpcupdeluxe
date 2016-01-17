@@ -96,12 +96,16 @@ type
     FBootstrapCompilerURL: string;
     FBootstrapCompilerOverrideVersionCheck: boolean; //Indicate to make we really want to compile with this version (e.g. trunk compiler), even if it is not the latest stable version
     InitDone: boolean;
+    function GetCompilerVersionNumber(CompilerPath: string; const index:byte=0): integer;
   protected
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
     function GetCompilerVersion(CompilerPath: string): string;
     function GetCompilerMajorVersion(CompilerPath: string): integer;
+    function GetCompilerMinorVersion(CompilerPath: string): integer;
+    function GetCompilerReleaseVersion(CompilerPath: string): integer;
+
     // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
@@ -361,8 +365,8 @@ begin
         end;
       if CrossOptions<>'' then
         ProcessEx.Parameters.Add(CrossOptions);
-      if Options<>'' then
-        ProcessEx.Parameters.Add('OPT='+Options);
+      // suppress hints
+      ProcessEx.Parameters.Add('OPT=-vh- '+Options);
       try
         if CrossOptions='' then
           infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
@@ -552,7 +556,7 @@ begin
   // Override makefile checks that checks for stable compiler in FPC trunk
   if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  s:='-Sg '+FCompilerOptions;
+  s:='-Sg -vh- '+FCompilerOptions;
   ProcessEx.Parameters.Add('OPT='+s);
   //if FCompilerOptions<>'' then
   //  ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
@@ -628,8 +632,7 @@ begin
   // Override makefile checks that checks for stable compiler in FPC trunk
   if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  if FCompilerOptions <>'' then
-    ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
+  ProcessEx.Parameters.Add('OPT=-vh- '+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
   infoln('Running make all install for FPC:',etInfo);
@@ -736,7 +739,7 @@ begin
   Result:=Output;
 end;
 
-function TFPCInstaller.GetCompilerMajorVersion(CompilerPath: string): integer;
+function TFPCInstaller.GetCompilerVersionNumber(CompilerPath: string; const index:byte=0): integer;
 var
   VersionSnippet:string;
   VersionList : TStringList;
@@ -749,11 +752,25 @@ begin
     VersionList := TStringList.Create;
     try
       VersionList.CommaText := VersionSnippet;
-      if VersionList.Count>0 then result := StrToIntDef(VersionList[0], -1);
+      if VersionList.Count>index then result := StrToIntDef(VersionList[index], -1);
     finally
       VersionList.Free;
     end;
   end;
+end;
+
+
+function TFPCInstaller.GetCompilerMajorVersion(CompilerPath: string): integer;
+begin
+  result:=GetCompilerVersionNumber(CompilerPath,0);
+end;
+function TFPCInstaller.GetCompilerMinorVersion(CompilerPath: string): integer;
+begin
+  result:=GetCompilerVersionNumber(CompilerPath,1);
+end;
+function TFPCInstaller.GetCompilerReleaseVersion(CompilerPath: string): integer;
+begin
+  result:=GetCompilerVersionNumber(CompilerPath,2);
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
@@ -1209,161 +1226,110 @@ begin
 end;
 
 
-{.$DEFINE MANUALBUILD}
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
+  bIntermediateNeeded:boolean;
+  IntermediateCompiler:string;
   FPCCfg: string;
   FPCMkCfg: string; //path+file of fpcmkcfg
   OperationSucceeded: boolean;
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
   SearchRec:TSearchRec;
   s:string;
-  {$IFDEF MANUALBUILD}
   aOS,aCPU:string;
-  {$ENDIF}
   TxtFile:Text;
-const
-  COMPILERNAMES='ppc386,ppcm68k,ppcalpha,ppcpowerpc,ppcpowerpc64,ppcarm,ppcsparc,ppcia64,ppcx64'+
-    'ppcross386,ppcrossm68k,ppcrossalpha,ppcrosspowerpc,ppcrosspowerpc64,ppcrossarm,ppcrosssparc,ppcrossia64,ppcrossx64,ppcross8086';
-  IntermediateARM='ppcarm_intermediate'; // name for (major version >= 3) intermediate compiler for ARM
+
+  AfterRevision: string;
+  BeforeRevision: string;
+  BootstrapDirectory :string;
 begin
+  bIntermediateNeeded:=false;
+  aCPU := lowercase({$i %FPCTARGETCPU%});
+  aOS  := lowercase({$i %FPCTARGETOS%});
+  IntermediateCompiler:='intermediate_'+GetCompilerName(aCPU);
   result:=InitModule;
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
-  {$if defined(cpuarm) and defined(linux)}
+  {$ifndef win64}
 
-  // rough check if an intermediate compiler is needed because of hardfloat support !!
-  if (GetCompilerMajorVersion(FCompiler)<3) then
-  //if (GetCompilerMajorVersion(FCompiler)<FMajorVersion) OR (FMajorVersion=-1) then
+  // only check trunk and/or arm for now !!
+  // arm needs >= 3.0.0 for ARMHF
+  // trunk needs >= 3.0.0
+  if (GetCompilerMajorVersion(FCompiler)<3) AND ( {$if defined(cpuarm) and defined(linux)}True{$else}Pos('trunk',FURL)>0{$endif} ) then
   begin
-
-    //todo: do the same for arm/android!?!
-    // Build an intermediate bootstrap compiler in target fpc dir. If that is
-    // fpc trunk, it will support options like -dARM_HF which FPC 2.6.x does not
-    // version-dependent: please review and modify when new FPC version is released
-
-
-    {$IFDEF MANUALBUILD}
-    // manual compile ... just a try to speed things up !!
-    // for testing purpose only .. just use automated compiler build !!
-
-    aCPU := {$i %FPCTARGETCPU%};
-    aOS  := {$i %FPCTARGETOS%};
-
-    ProcessEx.Executable:='as';
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl'+DirectorySeparator+aOS+DirectorySeparator+aCPU;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('-o');
-    ProcessEx.Parameters.Add('prt0.o');
-    ProcessEx.Parameters.Add('prt0.as');
-    ProcessEx.Execute;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('-o');
-    ProcessEx.Parameters.Add('cprt0.o');
-    ProcessEx.Parameters.Add('cprt0.as');
-    ProcessEx.Execute;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('-o');
-    ProcessEx.Parameters.Add('dllprt0.o');
-    ProcessEx.Parameters.Add('dllprt0.as');
-    ProcessEx.Execute;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('-o');
-    ProcessEx.Parameters.Add('gprt0.o');
-    ProcessEx.Parameters.Add('gprt0.as');
-    ProcessEx.Execute;
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('-o');
-    ProcessEx.Parameters.Add('ucprt0.o');
-    ProcessEx.Parameters.Add('ucprt0.as');
-    ProcessEx.Execute;
-
-    ProcessEx.Executable:=FCompiler;
-    ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler';
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('-darm');
-    ProcessEx.Parameters.Add('-Tlinux');
-    ProcessEx.Parameters.Add('-O1');
-    ProcessEx.Parameters.Add('-Sg');
-
-    ProcessEx.Parameters.Add('-Fu.'+DirectorySeparator+aCPU);
-    ProcessEx.Parameters.Add('-Fu.'+DirectorySeparator+'utils');
-    ProcessEx.Parameters.Add('-Fu.'+DirectorySeparator+'systems');
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS);
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS+DirectorySeparator+aCPU);
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+aCPU);
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+'unix');
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas');
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl');
-    ProcessEx.Parameters.Add('-Fu..'+DirectorySeparator+'rtl'+DirectorySeparator+'*');
-
-    ProcessEx.Parameters.Add('-Fi.'+DirectorySeparator+aCPU);
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'inc');
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS);
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+aOS+DirectorySeparator+aCPU);
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+aCPU);
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'unix');
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas');
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas'+DirectorySeparator+'classes');
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'objpas'+DirectorySeparator+'sysutils');
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl');
-    ProcessEx.Parameters.Add('-Fi..'+DirectorySeparator+'rtl'+DirectorySeparator+'*');
-    ProcessEx.Parameters.Add('-dGDB');
-    ProcessEx.Parameters.Add('pp.pas');
-
-    infoln('Running manual compile for very bare ARM compiler:',etInfo);
-    ProcessEx.Execute;
-    if ProcessEx.ExitStatus <> 0 then
+    if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompiler) then
+    begin
+      bIntermediateNeeded:=true;
+    end
+    else
+    begin
+      if (GetCompilerMajorVersion(ExtractFilePath(FCompiler)+IntermediateCompiler)<3) then
       begin
-      result := False;
-      WritelnLog('FPC: Failed to build ARM intermediate bootstrap compiler ',true);
-      exit;
+        bIntermediateNeeded:=true;
+      end
+      else
+      begin
+        infoln('Using available intermediate compiler.',etInfo);
+        FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
+      end;
     end;
+  end;
 
-    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/pp',
-      ExtractFilePath(FCompiler)+IntermediateARM);
+  if (bIntermediateNeeded) then
+  begin
+    infoln('Checking out/updating FPC 3.0.0 sources for intermediate bootstrap compiler ...',etInfo);
+    BootstrapDirectory := ExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory) + '..');
+    BootstrapDirectory:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'fpc300bootstrap';
 
-    FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
+    ExecuteCommand(FSVNClient.RepoExecutable + ' checkout --depth=files http://svn.freepascal.org/svn/fpc/tags/release_3_0_0 ' + BootstrapDirectory, FVerbose);
+    ExecuteCommand(FSVNClient.RepoExecutable + ' update compiler ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+    ExecuteCommand(FSVNClient.RepoExecutable + ' update rtl ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
 
-    {$ELSE}
+    infoln('Checking out/updating FPC 3.0.0 sources for intermediate bootstrap compiler done.',etInfo);
 
+    // Build an intermediate bootstrap compiler in target fpc300bootstrap dir.
+    // Version-dependent: please review and modify when new FPC version is released
     ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
+
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('compiler_cycle');
     if FCPUCount>1 then
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
 
-    ProcessEx.Parameters.Add('OS_TARGET=linux');
-    ProcessEx.Parameters.Add('CPU_TARGET=arm');
-    // Override makefile checks that checks for stable compiler in FPC trunk
-    FBootstrapCompilerOverrideVersionCheck:=true; //pass on to the "compile the compiler" pass
-    ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-    infoln('Running make cycle for ARM compiler:',etInfo);
+    ProcessEx.Parameters.Add('OS_TARGET='+aOS);
+    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+    // neeeded if we only have a 2.6.2 or lower bootstrapper
+    if (GetCompilerReleaseVersion(FCompiler)<4) then
+       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+    infoln('Running make cycle for intermediate compiler:',etInfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin
       result := False;
-      WritelnLog('FPC: Failed to build ARM intermediate bootstrap compiler ',true);
+      WritelnLog('FPC: Failed to build intermediate bootstrap compiler ',true);
       exit;
     end;
+    infoln('Successfully build intermediate bootstrap compiler.',etInfo);
 
-    FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppcarm',
-      ExtractFilePath(FCompiler)+IntermediateARM);
-
-    {$ENDIF}
+    FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(aCPU),
+      ExtractFilePath(FCompiler)+IntermediateCompiler);
 
     //Make executable
-    OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateARM, &700)=0); //rwx------
-    if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateARM,etError);
+    {$ifdef unix}
+    OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateCompiler, &700)=0); //rwx------
+    if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateCompiler,etError);
+    {$endif}
 
     // Now we can change the compiler from the stable one to the one in our FPC repo:
-    FCompiler:=ExtractFilePath(FCompiler)+IntermediateARM;
-  end;
-  {$endif} //linux, arm
+    FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
+  end else infoln('Using standard bootstrap compiler.',etInfo);;
+  {$endif}
   {$ifdef win64}
+  aCPU := 'x86_64';
+  aOS  := 'win64';
   // Deals dynamically with either ppc386.exe or native ppcx64.exe
   if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
     begin
@@ -1379,8 +1345,8 @@ begin
     {$ENDIF}
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('OS_TARGET=win64');
-    ProcessEx.Parameters.Add('CPU_TARGET=x86_64');
+    ProcessEx.Parameters.Add('OS_TARGET='+aOS);
+    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
     // Override makefile checks that checks for stable compiler in FPC trunk
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
@@ -1399,6 +1365,8 @@ begin
   end;
   {$endif win64}
   {$ifdef darwin}
+  aCPU := i386;
+  aOS  := darwin;
   if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
     begin
     ProcessEx.Executable := Make;
@@ -1409,7 +1377,7 @@ begin
       ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('CPU_TARGET=i386');
+    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
     // Override makefile checks that checks for stable compiler in FPC trunk
     if FBootstrapCompilerOverrideVersionCheck then
       ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
@@ -1440,14 +1408,15 @@ begin
   if FindFirst(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/ppc*',faAnyFile,SearchRec)=0 then
     repeat
       s:=SearchRec.Name;
-      if (length(s)>4) and (pos(s,COMPILERNAMES)>0) then  //length(s)>4 skips ppc3
-        begin
+      if (length(s)>4) and (s=GetCompilerName(aCPU)) then  //length(s)>4 skips ppc3
+      begin
         OperationSucceeded:=OperationSucceeded and
           FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
            IncludeTrailingPathDelimiter(FBinPath)+s);
         OperationSucceeded:=OperationSucceeded and
           (0=fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755));
-        end;
+        break;
+      end;
     until FindNext(SearchRec)<>0;
   FindClose(SearchRec);
   if not (OperationSucceeded) then
@@ -1460,6 +1429,8 @@ begin
     pchar(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'));
   end;
   {$ENDIF UNIX}
+
+  FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
 
   // Find out where fpcmkcfg lives - only if necessary.
   if OperationSucceeded and
@@ -1490,7 +1461,6 @@ begin
   if OperationSucceeded then
   begin
     // Create fpc.cfg if needed
-    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
     if FileExists(FPCCfg) = False then
     begin
       ProcessEx.Executable := fpcmkcfg;
@@ -1785,7 +1755,7 @@ begin
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
-            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i  '+PatchFilePath, FBaseDirectory, True);
+            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -N --no-backup-if-mismatch -i  '+PatchFilePath, FBaseDirectory, True);
             if ReturnCode=0
                then infoln('FPC has been patched successfully with '+UpdateWarnings[i],etInfo)
                else writelnlog(ModuleName+' ERROR: Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
