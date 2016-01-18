@@ -235,6 +235,8 @@ end;"/>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="10"/>
+        <CursorPos X="52" Y="423"/>
         <UsageCount Value="200"/>
       </Unit14>
       <Unit15>

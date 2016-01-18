@@ -470,7 +470,7 @@ begin
       FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
       // do not add to default options:
       FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
-      FInstaller.ExportOnly:=(NOT Options.GetOptionNoParam('','getfullrepo',false));
+      FInstaller.ExportOnly:=(NOT Options.GetOptionNoParam('','getfullrepo',true));
       FInstaller.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
       // do not add to default options:
       bVersion:=Options.GetOptionNoParam('','version',false);
