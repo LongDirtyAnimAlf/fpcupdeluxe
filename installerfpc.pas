@@ -243,6 +243,7 @@ var
   CrossInstaller:TCrossInstaller;
   CrossOptions:String;
   ChosenCompiler:String; //Compiler to be used for cross compiling
+  IntermediateCompiler:string;
   i:integer;
   OldPath:String;
   Options:String;
@@ -259,6 +260,8 @@ begin
   platform; see posting Jonas Maebe http://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
   make all install CROSSCOMPILE=1??? find out?
   }
+
+  IntermediateCompiler:='intermediate_'+GetCompilerName(lowercase({$i %FPCTARGETCPU%}));
 
   result:=false; //fail by default
 
@@ -290,7 +293,11 @@ begin
       if CrossInstaller.CompilerUsed=ctInstalled then
         ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt {todo if this does not work use ppc386.exe etc}
       else //ctBootstrap
-        ChosenCompiler:=FCompiler;
+      begin
+        if FileExists(ExtractFilePath(FCompiler)+IntermediateCompiler)
+           then ChosenCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler
+           else ChosenCompiler:=FCompiler;
+      end;
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
