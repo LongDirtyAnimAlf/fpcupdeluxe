@@ -306,6 +306,7 @@ type
     FUninstall:boolean;
     FVerbose: boolean;
     FExportOnly:boolean;
+    FNoJobs:boolean;
     FUseGitClient:boolean;
     FSequencer: TSequencer;
     {$ifndef FPCONLY}
@@ -397,6 +398,7 @@ type
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
+    property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
@@ -1113,6 +1115,7 @@ begin
   FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
   FInstaller.Verbose:=FParent.Verbose;
   FInstaller.ExportOnly:=FParent.ExportOnly;
+  FInstaller.NoJobs:=FParent.NoJobs;
   FInstaller.Log:=FParent.FLog;
   {$IFDEF MSWINDOWS}
   FInstaller.MakeDirectory:=FParent.MakeDirectory;

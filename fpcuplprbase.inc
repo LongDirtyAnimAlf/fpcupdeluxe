@@ -202,6 +202,7 @@ begin
   writeln(' logfilename=<file>    Location of log file. If nothing specified,');
   writeln('                       fpcup.log in the current directory.');
   writeln(' getfullrepo           Get full repositories. If not set, just get files.');
+  writeln(' disablejobs           Do not use (parallel) jobs when building FPC.');
   writeln(' noconfirm             No confirmation asked. For batch operation.');
   writeln(' verbose               Show output from svn and make.');
   writeln(' version               Show version info and quit.');
@@ -260,6 +261,7 @@ begin
           LeftOverOptions.Add('noconfirm');
           LeftOverOptions.Add('uninstall');
           LeftOverOptions.Add('getfullrepo');
+          LeftOverOptions.Add('disablejobs');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
           try
@@ -471,6 +473,7 @@ begin
       // do not add to default options:
       FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
       FInstaller.ExportOnly:=(NOT Options.GetOptionNoParam('','getfullrepo',true));
+      FInstaller.NoJobs:=Options.GetOptionNoParam('','disablejobs',true);
       FInstaller.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
       // do not add to default options:
       bVersion:=Options.GetOptionNoParam('','version',false);

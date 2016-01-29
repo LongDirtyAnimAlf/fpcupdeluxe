@@ -104,6 +104,7 @@ type
     FCandidateVersion: integer; //RC part of the version number, e.g. 2 for 1.0.8RC2, or -1 if unknown
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
+    FNoJobs: boolean;
     FVerbose: boolean;
     FTar: string;
     FUnzip: string;
@@ -194,6 +195,7 @@ type
     property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
+    property NoJobs: boolean write FNoJobs;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
     // append line ending and write to log and, if specified, to console
