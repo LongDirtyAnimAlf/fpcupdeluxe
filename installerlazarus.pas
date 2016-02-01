@@ -259,7 +259,7 @@ begin
           Options := Options + ' -XP' + CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX=' + CrossInstaller.BinUtilsPrefix);
         end;
-        ProcessEx.Parameters.Add('OPT=-vh- ' + Options);
+        ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + Options);
         // Since April 2012, LCL requires lazutils which requires registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
         ProcessEx.Parameters.Add('registration');
@@ -371,6 +371,8 @@ begin
     ProcessEx.Parameters.Add('FPC=' + FCompiler);
     ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('FPCDIR=' + FFPCDir); //Make sure our FPC units can be found by Lazarus
+    //ProcessEx.Parameters.Add('CPU_TARGET=' + lowercase({$i %FPCTARGETCPU%}));
+    //ProcessEx.Parameters.Add('OS_TARGET=' + lowercase({$i %FPCTARGETOS%}));
     ProcessEx.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     ProcessEx.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
     { Do not do this - only allow useride to be built for native widgetset.
@@ -378,7 +380,7 @@ begin
     if FCrossLCL_Platform <> '' then
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     }
-    ProcessEx.Parameters.Add('OPT=-vh- ' + FCompilerOptions);
+    ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + FCompilerOptions);
     case UpperCase(ModuleName) of
       'LAZARUS':
       begin

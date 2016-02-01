@@ -313,11 +313,14 @@ begin
       {$IFNDEF windows}
       { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
       Re-enable when changed to make 3.82 }
-      if ((FCPUCount>1) AND (NOT FNoJobs)) then
+      if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
       begin
-        // parallel processing
-        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-        ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
+        if (FCPUCount>1) then
+        begin
+          // parallel processing
+          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+          ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
+        end;
       end;
       {$ENDIF}
       ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
@@ -430,8 +433,14 @@ begin
         {$IFNDEF windows}
         { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
         Re-enable when changed to make 3.82 }
-        if ((FCPUCount>1) AND (NOT FNoJobs)) then
-          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+        if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+        begin
+          if (FCPUCount>1) then
+          begin
+            // parallel processing
+            ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+          end;
+        end;
         {$ENDIF}
         ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
         // this installs everything in the source directory : has consequences for cleaning up !!
@@ -556,18 +565,27 @@ begin
   ProcessEx.Executable := Make;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
-  if ((FCPUCount>1) AND (NOT FNoJobs)) then
-    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+  if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+  begin
+    if (FCPUCount>1) then
+    begin
+      // parallel processing
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+    end;
+  end;
   ProcessEx.Parameters.Add('FPC='+FCompiler);
+  ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+  ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
   // Override makefile checks that checks for stable compiler in FPC trunk
   if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  s:='-Sg -vh- '+FCompilerOptions;
+  s:='-Sg -vi-n-h- '+FCompilerOptions;
   ProcessEx.Parameters.Add('OPT='+s);
   //if FCompilerOptions<>'' then
   //  ProcessEx.Parameters.Add('OPT='+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
+  ProcessEx.Parameters.Add('install');
   infoln('Running make all for FPC:',etInfo);
   try
     // At least on 2.7.1 we get access violations running fpc make
@@ -588,36 +606,6 @@ begin
       end;
   end;
 
-  if OperationSucceeded then
-  begin
-    ProcessEx.Parameters.Clear;
-    FErrorLog.Clear;
-    ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-    ProcessEx.Parameters.Add('INSTALL_BINDIR='+FBinPath);
-    ProcessEx.Parameters.Add('install');
-    infoln('Running make install for FPC:',etInfo);
-    try
-      // At least on 2.7.1 Windows we get access violations running fpc make
-      // perhaps this try..except isolates that
-      ProcessEx.Execute;
-      if ProcessEx.ExitStatus <> 0 then
-        begin
-        OperationSucceeded := False;
-        WritelnLog('FPC: Running fpc make install failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+
-          'Details: '+FErrorLog.Text,true);
-        end;
-    except
-      on E: Exception do
-        begin
-        OperationSucceeded := False;
-        WritelnLog('FPC: Running fpc make install failed with an exception!'+LineEnding+
-          'Details: '+E.Message,true);
-        end;
-    end;
-  end;
-
   {$ELSE UNIX} // Windows
 
   ProcessEx.Executable := Make;
@@ -627,8 +615,14 @@ begin
   {$IFNDEF windows}
   { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
   Re-enable when changed to make 3.82 }
-  if ((FCPUCount>1) AND (NOT FNoJobs)) then
-    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+  if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+  begin
+    if (FCPUCount>1) then
+    begin
+      // parallel processing
+      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+    end;
+  end;
   {$ENDIF}
   ProcessEx.Parameters.Add('FPC='+FCompiler);
   ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -639,7 +633,7 @@ begin
   // Override makefile checks that checks for stable compiler in FPC trunk
   if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  ProcessEx.Parameters.Add('OPT=-vh- '+FCompilerOptions);
+  ProcessEx.Parameters.Add('OPT=-vi-n-h- '+FCompilerOptions);
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
   infoln('Running make all install for FPC:',etInfo);
@@ -1277,6 +1271,7 @@ begin
       begin
         infoln('Using available intermediate compiler.',etInfo);
         FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
+        FBootstrapCompilerOverrideVersionCheck:=False;
       end;
     end;
   end;
@@ -1300,13 +1295,20 @@ begin
 
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('compiler_cycle');
-    if ((FCPUCount>1) AND (NOT FNoJobs)) then
-      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+    begin
+      if (FCPUCount>1) then
+      begin
+        // parallel processing
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      end;
+    end;
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
 
-    ProcessEx.Parameters.Add('OS_TARGET='+aOS);
-    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+    //ProcessEx.Parameters.Add('OS_TARGET='+aOS);
+    //ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+
     // needed if we only have a 2.6.2 or lower bootstrapper
     if (GetCompilerReleaseVersion(FCompiler)<4) then
        ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
@@ -1331,6 +1333,7 @@ begin
 
     // Now we can change the compiler from the stable one to the one in our FPC repo:
     FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
+    FBootstrapCompilerOverrideVersionCheck:=False;
   end;
 
   {$ifdef win64}
@@ -1341,8 +1344,14 @@ begin
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('compiler_cycle');
-    if ((FCPUCount>1) AND (NOT FNoJobs)) then
-      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+    begin
+      if (FCPUCount>1) then
+      begin
+        // parallel processing
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      end;
+    end;
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('OS_TARGET=win64');
@@ -1371,8 +1380,14 @@ begin
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
     ProcessEx.Parameters.Add('compiler_cycle');
-    if ((FCPUCount>1) AND (NOT FNoJobs)) then
-      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+    begin
+      if (FCPUCount>1) then
+      begin
+        // parallel processing
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      end;
+    end;
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('CPU_TARGET=i386');
@@ -1395,6 +1410,7 @@ begin
   {$endif darwin}
 
   OperationSucceeded:=BuildModuleCustom(ModuleName);
+
   if not (OperationSucceeded) then
     infoln('Error running BuildModuleCustom for module '+ModuleName,etError);
 
@@ -1405,12 +1421,12 @@ begin
     // fpc can find it
     s:=GetCompilerName(aCPU);
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
-      ExtractFilePath(FCompiler)+s);
+      IncludeTrailingPathDelimiter(FBinPath)+s);
     fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
 
     s:=GetCrossCompilerName(aCPU);
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
-      ExtractFilePath(FCompiler)+s);
+      IncludeTrailingPathDelimiter(FBinPath)+s);
     fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
 
     // create link 'units' below FBaseDirectory to
@@ -1605,8 +1621,14 @@ begin
     {$IFNDEF windows}
     { todo: disabled because make 3.80 is unreliable with multiple jobs on Windows.
     Re-enable when changed to make 3.82 }
-    if ((FCPUCount>1) AND (NOT FNoJobs)) then
-      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount)); // parallel processing
+    if (FNoJobs) then ProcessEx.Parameters.Add('--disablejobs') else
+    begin
+      if (FCPUCount>1) then
+      begin
+        // parallel processing
+        ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      end;
+    end;
     {$ENDIF}
     ProcessEx.Parameters.Add('FPC='+FCompiler);
     ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FBaseDirectory));
