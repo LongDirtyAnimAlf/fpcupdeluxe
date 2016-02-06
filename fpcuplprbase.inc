@@ -378,7 +378,7 @@ begin
           FInstaller.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update'  // sInstallDir has no terminating pathdelimiter!!
         else
           FInstaller.ShortCutNameFpcup:='fpcup_update'; //Nothing to go on, so use default
-      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','-g -gl -O1 -Xs -CX -XX');
+      FInstaller.FPCOPT:=Options.GetOption('','fpcOPT','');
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs
       if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
@@ -430,7 +430,7 @@ begin
         else
           FInstaller.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(FInstaller.LazarusDirectory);
 
-      FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','-g -gl -O1 -Xs -CX -XX');
+      FInstaller.LazarusOPT:=Options.GetOption('','lazOPT','');
       {$endif}
       {$IF (defined(BSD)) and (not defined(Darwin))}
       //todo: check for other BSDs

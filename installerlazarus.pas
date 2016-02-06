@@ -31,7 +31,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{not $define lazarus_parallel_make} {for make --jobs= support; for now Lazarus does not seem to support parallel make -> error 512}
+{.$define lazarus_parallel_make} {for make --jobs= support; for now Lazarus does not seem to support parallel make -> error 512}
 
 interface
 
@@ -233,12 +233,7 @@ begin
         ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
         {$IFDEF lazarus_parallel_make}
-        if FCPUCount>1 then
-        begin
-          // parallel processing
-          ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-          ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
-        end;
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
         {$ENDIF}
         ProcessEx.Parameters.Add('FPC=' + FCompiler);
         ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -349,6 +344,7 @@ var
   FileCounter: integer;
   LazBuildApp: string;
   OperationSucceeded: boolean;
+  sCmpOpt: string;
 begin
   OperationSucceeded := true;
   infoln('TLazarusNativeInstaller: building module ' + ModuleName + '...', etInfo);
@@ -361,12 +357,7 @@ begin
     ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
     ProcessEx.Parameters.Clear;
     {$IFDEF lazarus_parallel_make}
-    if FCPUCount>1 then
-    begin
-      // parallel processing
-      ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-      ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
-    end;
+    if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
     {$ENDIF}
     ProcessEx.Parameters.Add('FPC=' + FCompiler);
     ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
@@ -380,7 +371,10 @@ begin
     if FCrossLCL_Platform <> '' then
       ProcessEx.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
     }
-    ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + FCompilerOptions);
+    // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
+    sCmpOpt:=StringReplace(FCompilerOptions,'-g ','-gw ',[]);
+    ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + sCmpOpt);
+
     case UpperCase(ModuleName) of
       'LAZARUS':
       begin
@@ -929,12 +923,7 @@ begin
   ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
   ProcessEx.Parameters.Clear;
   {$IFDEF lazarus_parallel_make}
-  if FCPUCount>1 then
-  begin
-    // parallel processing
-    ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-    ProcessEx.Parameters.Add('FPMAKEOPT=--threads='+inttostr(FCPUCount));
-  end;
+  if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
   {$ENDIF}
   ProcessEx.Parameters.Add('FPC=' + FCompiler + '');
   ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));

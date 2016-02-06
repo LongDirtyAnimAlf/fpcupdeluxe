@@ -169,7 +169,7 @@ end;"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\i386-linux\"/>
+            <Libraries Value="C:\development\cross\lib\i386-linux"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -210,7 +210,7 @@ end;"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\arm-android\"/>
+            <Libraries Value="C:\development\cross\lib\arm-android"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -249,7 +249,7 @@ end;"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\x86_64-linux\"/>
+            <Libraries Value="C:\development\cross\lib\x86_64-linux"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>

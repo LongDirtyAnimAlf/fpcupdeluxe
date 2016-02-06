@@ -48,7 +48,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/fpclazup_osx_x86"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpclazup_osx_x86"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -87,7 +87,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin/$(TargetCPU)-$(TargetOS)/fpclazup_osx_x64"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpclazup_osx_x64"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -171,7 +171,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -186,8 +186,9 @@ end;"/>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcup.ini"/>
@@ -201,8 +202,9 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit10>
       <Unit11>
         <Filename Value="m_crosswin64.pas"/>
@@ -233,8 +235,8 @@ end;"/>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="10"/>
-        <CursorPos X="52" Y="423"/>
+        <TopLine Value="67"/>
+        <CursorPos X="14" Y="83"/>
         <UsageCount Value="200"/>
       </Unit14>
       <Unit15>
@@ -301,6 +303,8 @@ end;"/>
         <Filename Value="m_crossinstaller.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="22"/>
+        <CursorPos X="40" Y="40"/>
         <UsageCount Value="200"/>
       </Unit23>
       <Unit24>
@@ -415,7 +419,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="102"/>
       </Unit38>
       <Unit39>
         <Filename Value="jedi.inc"/>
@@ -424,7 +428,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="102"/>
       </Unit39>
       <Unit40>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -432,7 +436,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="102"/>
       </Unit40>
       <Unit41>
         <Filename Value="revision.inc"/>
@@ -441,31 +445,33 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="94"/>
+        <UsageCount Value="102"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="87"/>
+        <UsageCount Value="95"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="59"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="51"/>
+        <UsageCount Value="59"/>
       </Unit44>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="49"/>
+        <TopLine Value="246"/>
+        <CursorPos X="8" Y="264"/>
+        <UsageCount Value="57"/>
       </Unit45>
     </Units>
   </ProjectSession>

@@ -68,7 +68,6 @@ Const
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
-    'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
     //Get default external packages/universal modules
     'Do UniversalDefault;'+
@@ -90,7 +89,6 @@ Const
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
-    'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
     // Get default external packages/universal modules
     'Do UniversalDefault;'+
@@ -130,7 +128,6 @@ below}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
-    'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
     //Get default external packages/universal modules
     'Do UniversalDefault;'+
@@ -171,7 +168,6 @@ below}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     //'Do helplazarus;'+ // do not include help: takes a lot of time and does not compile at the moment on ARM (not enough memory) :-(
-    'Do LAZDATADESKTOP;'+
     'Do DOCEDITOR;'+
     // Get default external packages/universal modules
     'Do UniversalDefault;'+
@@ -187,7 +183,6 @@ below}
     {$ifndef FPCONLY}
     'Do lazarusclean;'+
     'Do helplazarusclean;'+
-    'CleanModule LAZDATADESKTOP;'+
     'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
     {$endif}
@@ -203,7 +198,6 @@ below}
     {$ifndef FPCONLY}
     'Do lazarusclean;'+
     'Do helplazarusclean;'+
-    'CleanModule LAZDATADESKTOP;'+
     'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
     {$endif}
@@ -235,7 +229,6 @@ below}
     {$ifndef FPCONLY}
     'Do lazarusuninstall;'+
     'Do helpuninstall;'+
-    'UninstallModule LAZDATADESKTOP;'+
     'UninstallModule DOCEDITOR;'+
     'Do UniversalDefaultUnInstall;'+
     {$endif}
