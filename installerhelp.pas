@@ -292,11 +292,14 @@ const
   //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0/fpc-lazarus-doc-chm-1.0.zip/download';
   //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.0.12/fpc-lazarus-doc-chm-1.0.12.zip/download';
   // Laz 1.2 version:
-  FPC_CHM_URL_LASTRESORT='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
+  //FPC_CHM_URL_LASTRESORT='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
   // Laz 1.4 version:
   // FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.4/doc-chm_fpc2014_laz2015.zip/download';
   // Laz 1.6 version:
-  FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip/download';
+  //FPC_CHM_URL='http://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip/download';
+  FPC_CHM_URL='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip/download';
+  FPC_CHM_URL_LASTRESORT='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip';
+
 var
   DocsZip: string;
   OperationSucceeded: boolean;
@@ -354,9 +357,26 @@ begin
       end;
     end;
 
+    if OperationSucceeded then
+    begin
+      // Extract, overwrite, flatten path/junk paths
+      // todo: test with spaces in path
+      ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
+      if ResultCode <> 0 then
+      begin
+        OperationSucceeded := False;
+        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
+      end;
+    end;
+
+    SysUtils.deletefile(DocsZip); //Get rid of temp zip
+
     if NOT OperationSucceeded then
     begin
-      // try one last time with older docs !!
+      // try one last time with anoher URL !!
+
+      DocsZip := SysUtils.GetTempFileName + '.zip';
+
       try
         OperationSucceeded:=Download(FPC_CHM_URL_LASTRESORT,DocsZip);
       except
@@ -368,25 +388,29 @@ begin
             'Exception: '+E.ClassName+'/'+E.Message, etWarning);
         end;
       end;
+
+      if OperationSucceeded then
+      begin
+        // Extract, overwrite, flatten path/junk paths
+        // todo: test with spaces in path
+        ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
+        if ResultCode <> 0 then
+        begin
+          OperationSucceeded := False;
+          infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
+        end;
+      end;
+
+      SysUtils.deletefile(DocsZip); //Get rid of temp zip
+
     end;
 
-    if OperationSucceeded then
-    begin
-      // Extract, overwrite, flatten path/junk paths
-      // todo: test with spaces in path
-      ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
-      if ResultCode = 0 then
-      begin
-        SysUtils.deletefile(DocsZip); //Get rid of temp zip if not more needed for troubleshooting.
-      end
-      else
-      begin
-        OperationSucceeded := False;
-        infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
-      end;
-    end;
   end;
-  Result := OperationSucceeded;
+
+  if NOT OperationSucceeded then writelnlog(ModuleName+': Fatal error. Could not download help docs ! But I will continue !!', true);
+  //result:=OperationSucceeded;
+  // always continue,  even when docs were not build !!
+  result:=True;
 end;
 
 function THelpInstaller.UnInstallModule(ModuleName: string): boolean;
