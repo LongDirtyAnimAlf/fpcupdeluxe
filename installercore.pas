@@ -221,10 +221,11 @@ type
 implementation
 
 uses
-  installerfpc, fileutil
+  installerfpc, fileutil,
+  ssl_openssl
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
-  ,blcksock, ssl_openssl, ssl_openssl_lib
+  ,blcksock, ssl_openssl_lib
   {$ENDIF}
   ;
 
