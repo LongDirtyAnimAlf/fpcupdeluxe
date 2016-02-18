@@ -143,6 +143,7 @@ end;"/>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <CursorPos X="37" Y="83"/>
         <UsageCount Value="200"/>
       </Unit2>
       <Unit3>
@@ -190,6 +191,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="229"/>
         <UsageCount Value="200"/>
       </Unit8>
       <Unit9>
@@ -205,7 +207,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="972"/>
+        <TopLine Value="385"/>
         <CursorPos X="24" Y="969"/>
         <UsageCount Value="200"/>
       </Unit10>
