@@ -115,9 +115,6 @@ type
     function GetCompilerMinorVersionFromSource(CompilerSourcePath: string): integer;
     function GetCompilerReleaseVersionFromSource(CompilerSourcePath: string): integer;
 
-
-
-
     // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.

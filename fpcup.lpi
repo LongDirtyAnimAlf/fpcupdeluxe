@@ -29,7 +29,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="7">
+    <BuildModes Count="8">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -169,7 +169,7 @@ end;"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\i386-linux"/>
+            <Libraries Value="C:\development\cross\lib\i386-linux\"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -210,7 +210,7 @@ end;"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\arm-android"/>
+            <Libraries Value="C:\development\cross\lib\arm-android\"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -249,7 +249,7 @@ end;"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\x86_64-linux"/>
+            <Libraries Value="C:\development\cross\lib\x86_64-linux\"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -281,6 +281,47 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item7>
+      <Item8 Name="linuxaarch64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpcup_linux_aarch64"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="C:\development\cross\lib\aarch64-linux\"/>
+            <OtherUnitFiles Value="synaser"/>
+            <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <Verbosity>
+              <ShowAll Value="True"/>
+            </Verbosity>
+            <WriteFPCLogo Value="False"/>
+            <CustomOptions Value="-dFPCONLY"/>
+            <ExecuteBefore>
+              <CompileReasons Run="False"/>
+            </ExecuteBefore>
+          </Other>
+        </CompilerOptions>
+      </Item8>
       <SharedMatrixOptions Count="1">
         <Item1 ID="233755810855" Modes="Default,Debug,win32" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
