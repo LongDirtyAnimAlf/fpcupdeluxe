@@ -1,6 +1,6 @@
 Index: compiler/arm/cpupara.pas
 ===================================================================
---- compiler/arm/cpupara.pas	(revision 33173)
+--- compiler/arm/cpupara.pas	(revision 33207)
 +++ compiler/arm/cpupara.pas	(working copy)
 @@ -37,6 +37,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -58,7 +58,7 @@ Index: compiler/arm/cpupara.pas
          result:=VOLATILE_MMREGISTERS;
 Index: compiler/i386/cpupara.pas
 ===================================================================
---- compiler/i386/cpupara.pas	(revision 33173)
+--- compiler/i386/cpupara.pas	(revision 33207)
 +++ compiler/i386/cpupara.pas	(working copy)
 @@ -40,6 +40,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -100,7 +100,7 @@ Index: compiler/i386/cpupara.pas
        var
 Index: compiler/ncgrtti.pas
 ===================================================================
---- compiler/ncgrtti.pas	(revision 33173)
+--- compiler/ncgrtti.pas	(revision 33207)
 +++ compiler/ncgrtti.pas	(working copy)
 @@ -28,7 +28,7 @@
      uses
@@ -134,7 +134,7 @@ Index: compiler/ncgrtti.pas
         ;
  
  
-@@ -91,6 +94,23 @@
+@@ -91,6 +94,24 @@
           symconst.ds_none,symconst.ds_none,
           symconst.ds_none,symconst.ds_none);
  
@@ -152,13 +152,14 @@ Index: compiler/ncgrtti.pas
 +        { pocall_stdcall    } 3,
 +        { pocall_softfloat  } 10,
 +        { pocall_mwpascal   } 11,
-+        { pocall_interrupt  } 12
++        { pocall_interrupt  } 12,
++        { pocall_hardfloat  } 13
 +       );
 +
      type
         TPropNameListItem = class(TFPHashObject)
           propindex : longint;
-@@ -506,9 +526,117 @@
+@@ -506,9 +527,117 @@
          tcb.end_anonymous_record;
        end;
  
@@ -277,7 +278,7 @@ Index: compiler/ncgrtti.pas
          procedure unknown_rtti(def:tstoreddef);
          begin
            tcb.emit_ord_const(tkUnknown,u8inttype);
-@@ -855,56 +983,7 @@
+@@ -855,57 +984,7 @@
  
  
          procedure procvardef_rtti(def:tprocvardef);
@@ -296,7 +297,8 @@ Index: compiler/ncgrtti.pas
 -              { pocall_stdcall    } 3,
 -              { pocall_softfloat  } 10,
 -              { pocall_mwpascal   } 11,
--              { pocall_interrupt  } 12
+-              { pocall_interrupt  } 12,
+-              { pocall_hardfloat  } 13
 -             );
  
 -           procedure write_param_flag(parasym:tparavarsym);
@@ -334,7 +336,7 @@ Index: compiler/ncgrtti.pas
             procedure write_para(parasym:tparavarsym);
               begin
                 { only store user visible parameters }
-@@ -911,7 +990,7 @@
+@@ -912,7 +991,7 @@
                 if not(vo_is_hidden_para in parasym.varoptions) then
                   begin
                     { write flags for current parameter }
@@ -343,7 +345,7 @@ Index: compiler/ncgrtti.pas
                     { write name of current parameter }
                     tcb.emit_shortstring_const(parasym.realname);
                     { write name of type of current parameter }
-@@ -931,7 +1010,7 @@
+@@ -932,7 +1011,7 @@
                       targetinfos[target_info.system]^.alignment.recordalignmin,
                       targetinfos[target_info.system]^.alignment.maxCrecordalign);
                     { write flags for current parameter }
@@ -352,7 +354,7 @@ Index: compiler/ncgrtti.pas
                     { write param type }
                     write_rtti_reference(tcb,parasym.vardef,fullrtti);
                     { write name of current parameter }
-@@ -1124,15 +1203,18 @@
+@@ -1125,15 +1204,18 @@
              { write iidstr }
              if def.objecttype=odt_interfacecorba then
                begin
@@ -374,7 +376,7 @@ Index: compiler/ncgrtti.pas
              tcb.end_anonymous_record;
              tcb.end_anonymous_record;
  
-@@ -1460,6 +1542,8 @@
+@@ -1461,6 +1543,8 @@
      end;
  
      procedure TRTTIWriter.write_child_rtti_data(def:tdef;rt:trttitype);
@@ -383,7 +385,7 @@ Index: compiler/ncgrtti.pas
        begin
          case def.typ of
            enumdef :
-@@ -1481,8 +1565,21 @@
+@@ -1482,8 +1566,21 @@
                if (rt=initrtti) or (tobjectdef(def).objecttype=odt_object) then
                  fields_write_rtti(tobjectdef(def).symtable,rt)
                else
@@ -407,7 +409,7 @@ Index: compiler/ncgrtti.pas
              if not is_objc_class_or_protocol(tabstractpointerdef(def).pointeddef) then
 Index: compiler/options.pas
 ===================================================================
---- compiler/options.pas	(revision 33173)
+--- compiler/options.pas	(revision 33207)
 +++ compiler/options.pas	(working copy)
 @@ -3280,6 +3280,7 @@
    def_system_macro('FPC_HAS_INTERNAL_ABS_INT64');
@@ -419,7 +421,7 @@ Index: compiler/options.pas
    def_system_macro('FPC_HAS_CPSTRING');
 Index: compiler/paramgr.pas
 ===================================================================
---- compiler/paramgr.pas	(revision 33173)
+--- compiler/paramgr.pas	(revision 33207)
 +++ compiler/paramgr.pas	(working copy)
 @@ -81,6 +81,8 @@
            function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
@@ -445,7 +447,7 @@ Index: compiler/paramgr.pas
  {$endif}
 Index: compiler/x86_64/cpupara.pas
 ===================================================================
---- compiler/x86_64/cpupara.pas	(revision 33173)
+--- compiler/x86_64/cpupara.pas	(revision 33207)
 +++ compiler/x86_64/cpupara.pas	(working copy)
 @@ -44,6 +44,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -531,7 +533,7 @@ Index: compiler/x86_64/cpupara.pas
          intretregs: array[0..1] of tregister = (NR_FUNCTION_RETURN_REG,NR_FUNCTION_RETURN_REG_HIGH);
 Index: rtl/objpas/typinfo.pp
 ===================================================================
---- rtl/objpas/typinfo.pp	(revision 33173)
+--- rtl/objpas/typinfo.pp	(revision 33207)
 +++ rtl/objpas/typinfo.pp	(working copy)
 @@ -54,7 +54,7 @@
         TMethodKind = (mkProcedure,mkFunction,mkConstructor,mkDestructor,
