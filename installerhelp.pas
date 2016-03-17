@@ -210,7 +210,7 @@ end;
 implementation
 
 uses
-  fpcuputil, processutils, FileUtil, LazFileUtils,
+  fpcuputil, processutils, FileUtil, LazFileUtils, LazUTF8,
   {$ifndef FPCONLY}
   updatelazconfig,
   {$endif}
@@ -559,7 +559,7 @@ begin
       infoln('Check if '+ExistingLCLHelp+' exists? No.',etInfo);
     if (FileExistsUTF8(ExistingLCLHelp)=false) or
       (
-      (FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
+      (LazFileUtils.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
       and
       ((DaysBetween(Now,LCLDate)>7)
       or (FileSizeUTF8(ExistingLCLHelp)=0))
@@ -705,7 +705,7 @@ begin
     else
     begin
       // Indicate reason for not creating lcl.chm
-      if FileUtil.FileIsReadOnlyUTF8(ExistingLCLHelp) then
+      if LazFileUtils.FileIsReadOnlyUTF8(ExistingLCLHelp) then
         infoln(ModuleName+': not building LCL.chm as it is read only.',etInfo)
       else
         infoln(ModuleName+': not building LCL.chm as it is quite recent: '+FormatDateTime('YYYYMMDD',LCLDate),etInfo);

@@ -62,7 +62,7 @@ interface
 {$IFDEF MSWINDOWS}
 // for now, keep this Windows-only (should still run on Wine)
 uses
-  Classes, SysUtils, installerCore,registry, FileUtil {Requires LCL}, fpcuputil;
+  Classes, SysUtils, installerCore,registry {Requires LCL}, fpcuputil;
 
 type
 
@@ -99,6 +99,8 @@ type
 
 implementation
 {$IFDEF MSWINDOWS}
+uses
+  FileUtil, LazFileUtils, LazUTF8;
 
 const
   ClassName = 'TWinInstaller';

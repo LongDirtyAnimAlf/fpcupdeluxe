@@ -127,8 +127,7 @@ implementation
 uses
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
-  FileUtil {lazutils, for utf8 functions?!?},
-  LazFileUtils,
+  FileUtil, LazFileUtils, LazUTF8,
   strutils
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
@@ -584,6 +583,7 @@ begin
         HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
         RetryAttempt:=RetryAttempt+1;
       end;
+      infoln('Download http(s) result: '+InttoStr(HTTPSender.Resultcode),etInfo);
       // If we have an answer from the server, check if the file
       // was sent to us.
       case HTTPSender.Resultcode of
@@ -1046,31 +1046,64 @@ begin
   Result:=copy(AFilename,StartPos,ExtPos-StartPos);
 end;
 
+// from Lazarus: unit DefineTemplates;
+function GetDefaultCompilerFilename(const TargetCPU: string;
+  Cross: boolean): string;
+begin
+  if Cross then
+    {$ifdef darwin}
+    Result:='ppc' // the mach-o format supports "fat" binaries whereby
+                  // a single executable contains machine code for several architectures
+    {$else}
+    Result:='ppcross'
+    {$endif}
+  else
+    Result:='ppc';
+  if TargetCPU='' then
+    Result:='fpc'
+  else if SysUtils.CompareText(TargetCPU,'i386')=0 then
+    Result:=Result+'386'
+  else if SysUtils.CompareText(TargetCPU,'m68k')=0 then
+    Result:=Result+'86k'
+  else if SysUtils.CompareText(TargetCPU,'alpha')=0 then
+    Result:=Result+'apx'
+  else if SysUtils.CompareText(TargetCPU,'powerpc')=0 then
+    Result:=Result+'ppc'
+  else if SysUtils.CompareText(TargetCPU,'powerpc64')=0 then
+    Result:=Result+'ppc64'
+  else if SysUtils.CompareText(TargetCPU,'arm')=0 then
+    Result:=Result+'arm'
+  else if SysUtils.CompareText(TargetCPU,'armeb')=0 then
+    Result:=Result+'arm'
+  else if SysUtils.CompareText(TargetCPU,'avr')=0 then
+    Result:=Result+'avr'
+  else if SysUtils.CompareText(TargetCPU,'sparc')=0 then
+    Result:=Result+'sparc'
+  else if SysUtils.CompareText(TargetCPU,'x86_64')=0 then
+    Result:=Result+'x64'
+  else if SysUtils.CompareText(TargetCPU,'ia64')=0 then
+    Result:=Result+'ia64'
+  else if SysUtils.CompareText(TargetCPU,'aarch64')=0 then
+    //Result:=Result+'a64'
+    Result:=Result+'aarch64'
+  else if SysUtils.CompareText(TargetCPU,'i8086')=0 then
+    Result:=Result+'8086'
+  else
+    Result:='fpc';
+  Result:=Result+GetExeExt;
+end;
+
 function GetCompilerName(Cpu_Target:string):string;
 begin
-  result:=Cpu_Target;
-  if Cpu_Target='m68k' then result:='68k';
-  if Cpu_Target='i386' then result:='386';
-  if Cpu_Target='x86_64' then result:='x64';
-  if Cpu_Target='powerpc' then result:='ppc';
-  if Cpu_Target='powerpc64' then result:='ppc64';
-  if Cpu_Target='alpha' then result:='axp';
-  if Cpu_Target='armeb' then result:='arm';
-  if Cpu_Target='i8086' then result:='8086';
-  if Cpu_Target='aarch64' then result:='a64';
-  result:='ppc'+result+GetExeExt;
+  result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
 
 function GetCrossCompilerName(Cpu_Target:string):string;
 begin
-  result:=GetCompilerName(Cpu_Target);
-  if Cpu_Target<>'jvm' then
-  begin
-    result:=Copy(result,4,MaxInt);
-    result:='ppcross'+result;
-  end;
+  if Cpu_Target<>'jvm'
+     then result:=GetDefaultCompilerFilename(Cpu_Target,true)
+     else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
-
 
 { TLogger }
 

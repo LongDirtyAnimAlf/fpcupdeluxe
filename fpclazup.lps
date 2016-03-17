@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="linuxaarch64">
+    <BuildModes Count="3" Active="Default">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -135,15 +135,14 @@ end;"/>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="199"/>
-        <CursorPos X="59" Y="279"/>
         <UsageCount Value="200"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="37" Y="83"/>
+        <TopLine Value="150"/>
+        <CursorPos X="2" Y="172"/>
         <UsageCount Value="200"/>
       </Unit2>
       <Unit3>
@@ -156,16 +155,17 @@ end;"/>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="213"/>
-        <CursorPos X="10" Y="222"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit4>
       <Unit5>
         <Filename Value="installerfpc.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="3"/>
+        <TopLine Value="169"/>
+        <CursorPos X="25" Y="181"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -182,17 +182,17 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="314"/>
-        <CursorPos X="47" Y="333"/>
+        <TopLine Value="692"/>
+        <CursorPos X="23" Y="708"/>
         <UsageCount Value="200"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="229"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcup.ini"/>
@@ -206,9 +206,8 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit10>
       <Unit11>
         <Filename Value="m_crosswin64.pas"/>
@@ -231,8 +230,8 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="winInstaller"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="243"/>
-        <CursorPos X="19" Y="263"/>
+        <TopLine Value="97"/>
+        <CursorPos X="35" Y="103"/>
         <UsageCount Value="200"/>
       </Unit13>
       <Unit14>
@@ -253,8 +252,6 @@ end;"/>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="117"/>
-        <CursorPos X="14" Y="133"/>
         <UsageCount Value="200"/>
       </Unit16>
       <Unit17>
@@ -291,8 +288,8 @@ end;"/>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="31"/>
-        <CursorPos Y="55"/>
+        <TopLine Value="15"/>
+        <CursorPos X="44" Y="30"/>
         <UsageCount Value="200"/>
       </Unit21>
       <Unit22>
@@ -423,7 +420,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="106"/>
+        <UsageCount Value="117"/>
       </Unit38>
       <Unit39>
         <Filename Value="jedi.inc"/>
@@ -432,7 +429,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="106"/>
+        <UsageCount Value="117"/>
       </Unit39>
       <Unit40>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -440,7 +437,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="106"/>
+        <UsageCount Value="117"/>
       </Unit40>
       <Unit41>
         <Filename Value="revision.inc"/>
@@ -449,38 +446,40 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="106"/>
+        <UsageCount Value="117"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="99"/>
+        <UsageCount Value="110"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="63"/>
+        <UsageCount Value="74"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="63"/>
+        <UsageCount Value="74"/>
       </Unit44>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="61"/>
+        <TopLine Value="130"/>
+        <CursorPos X="18" Y="137"/>
+        <UsageCount Value="72"/>
       </Unit45>
       <Unit46>
         <Filename Value="m_any_to_linuxaarch64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="4"/>
-        <UsageCount Value="22"/>
+        <UsageCount Value="33"/>
       </Unit46>
     </Units>
   </ProjectSession>

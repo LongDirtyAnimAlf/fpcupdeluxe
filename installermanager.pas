@@ -41,7 +41,7 @@ uses
   {$ifndef FPCONLY}
   installerLazarus,
   {$endif}
-  installerHelp,installerUniversal,fpcuputil,fileutil
+  installerHelp, installerUniversal, fpcuputil, FileUtil, LazFileUtils
   {$ifdef UNIX}
   ,dynlibs,Unix
   {$endif UNIX}
@@ -288,6 +288,7 @@ type
     FCrossLibraryDirectory: string;
     FMakeDirectory: string;
     FOnlyModules: string;
+    FPatchCmd: string;
     FReApplyLocalChanges: boolean;
     {$ifndef FPCONLY}
     FShortCutNameLazarus: string;
@@ -379,6 +380,8 @@ type
     property ModulePublishedList: TStringList read FModulePublishedList;
     // List of modules that must be processed in addition to the default ones
     property IncludeModules:string read FIncludeModules write FIncludeModules;
+    // Patch utility to use. Defaults to '(g)patch'
+    property PatchCmd:string read FPatchCmd write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean read FReApplyLocalChanges write FReApplyLocalChanges;
     // List of modules that must not be processed
@@ -1106,6 +1109,7 @@ begin
   FInstaller.HTTPProxyPassword:=FParent.HTTPProxyPassword;
   FInstaller.KeepLocalChanges:=FParent.KeepLocalChanges;
   FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
+  FInstaller.PatchCmd:=FParent.PatchCmd;
   FInstaller.Verbose:=FParent.Verbose;
   FInstaller.ExportOnly:=FParent.ExportOnly;
   FInstaller.NoJobs:=FParent.NoJobs;

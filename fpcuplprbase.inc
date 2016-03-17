@@ -389,6 +389,13 @@ begin
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
+
+      {$IF defined(BSD) and not defined(DARWIN)}
+      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','gpatch',false);
+      {$ELSE}
+      FInstaller.PatchCmd:=Options.GetOption('','patchcmd','patch',false);
+      {$ENDIF MSWINDOWS}
+
       // Deal with options coming from ini (e.g. Help=true)
       try
         bHelp:=Options.GetOption('h','help',false);

@@ -236,6 +236,7 @@ begin
         if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
         {$ENDIF}
         ProcessEx.Parameters.Add('FPC=' + FCompiler);
+        ProcessEx.Parameters.Add('USESVN2REVISIONINC=0');
         ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
         ProcessEx.Parameters.Add('FPCDIR=' + FFPCDir); //Make sure our FPC units can be found by Lazarus
         // Tell make where to find the target binutils if cross-compiling:
@@ -360,6 +361,7 @@ begin
     if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
     {$ENDIF}
     ProcessEx.Parameters.Add('FPC=' + FCompiler);
+    ProcessEx.Parameters.Add('USESVN2REVISIONINC=0');
     ProcessEx.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FBaseDirectory));
     ProcessEx.Parameters.Add('FPCDIR=' + FFPCDir); //Make sure our FPC units can be found by Lazarus
     //ProcessEx.Parameters.Add('CPU_TARGET=' + lowercase({$i %FPCTARGETCPU%}));
@@ -661,7 +663,7 @@ begin
     // can add PathSeparator without problems.
     // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
     SetPath(FBinPath + PathSeparator + PlainBinPath + PathSeparator + FMakeDir + PathSeparator +
-      FSVNDirectory + PathSeparator + FBaseDirectory, false, false);
+      ExcludeTrailingPathDelimiter(FSVNDirectory) + PathSeparator + FBaseDirectory, false, false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
     SetPath(FBinPath + PathSeparator + PlainBinPath,
@@ -974,6 +976,12 @@ begin
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
+const
+  // needs to be exactly the same as used by Lazarus !!!
+  //RevisionIncComment = '// Created by FPCLAZUP';
+  RevisionIncComment = '// Created by Svn2RevisionInc';
+  ConstName = 'RevisionStr';
+  RevisionIncFileName = 'revision.inc';
 var
   AfterRevision: string;
   BeforeRevision: string;
@@ -981,7 +989,10 @@ var
   Errors: integer;
   UpdateWarnings: TStringList;
   PatchFilePath:string;
+  Output: string = '';
   ReturnCode,i: integer;
+  RevisionIncText: Text;
+  ConstStart: string;
 begin
   Result := InitModule;
   if not Result then
@@ -1014,6 +1025,23 @@ begin
       Revision := BeforeRevision;
       infoln('No updates for Lazarus found.', etInfo);
     end;
+  end
+  else
+  begin
+    Revision := AfterRevision;
+    infoln('Lazarus is now at: ' + AfterRevision, etInfo);
+  end;
+
+  // update revision.inc;
+  infoln('Updating Lazarus version info.', etInfo);
+  AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FBaseDirectory)+'ide'+PathDelim+RevisionIncFileName);
+  try
+    Rewrite(RevisionIncText);
+    writeln(RevisionIncText, RevisionIncComment);
+    ConstStart := Format('const %s = ''', [ConstName]);
+    writeln(RevisionIncText, ConstStart, FSVNClient.LocalRevision, ''';');
+  finally
+    CloseFile(RevisionIncText);
   end;
 
   // Download Qt bindings if not present yet
@@ -1066,10 +1094,22 @@ begin
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
-            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -N --no-backup-if-mismatch -i  '+PatchFilePath, FBaseDirectory, True);
+            {$IFDEF MSWINDOWS}
+            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + 'patch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+            {$ELSE}
+              {$IF defined(BSD) AND NOT defined(DARWIN)}
+              ReturnCode:=ExecuteCommandInDir('gpatch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+              {$ELSE}
+              ReturnCode:=ExecuteCommandInDir('patch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+              {$ENDIF}
+            {$ENDIF}
             if ReturnCode=0
                then infoln('Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
-               else writelnlog(ModuleName+' ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
+               else
+               begin
+                 writelnlog(ModuleName+' ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
+                 writelnlog(ModuleName+' patch output: ' + Output, true);
+               end;
           end;
         end;
       finally

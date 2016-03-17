@@ -176,7 +176,9 @@ type
 
 implementation
 
-uses fpcuputil,fileutil
+uses
+  fpcuputil,
+  FileUtil, LazFileUtils
   {$IFDEF UNIX}
     ,baseunix
   {$ENDIF UNIX}
@@ -448,6 +450,8 @@ begin
         ProcessEx.Parameters.Add('crossinstall');
         ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
         ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+        // suppress hints
+        ProcessEx.Parameters.Add('OPT=-vi-n-h-');
         if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
         if CrossInstaller.BinUtilsPrefix<>'' then
           begin
@@ -1251,7 +1255,7 @@ begin
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // add fpc/utils to solve data2inc not found by fpcmkcfg
   SetPath(
-    FSVNDirectory+PathSeparator+
+    ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator+
     FBinPath+PathSeparator+ {compiler for current architecture}
     IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
     IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
@@ -1761,6 +1765,7 @@ var
   AfterRevision: string;
   BeforeRevision: string;
   PatchFilePath:string;
+  Output: string = '';
   UpdateWarnings: TStringList;
   ReturnCode,i: integer;
 begin
@@ -1800,10 +1805,22 @@ begin
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
-            ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -N --no-backup-if-mismatch -i  '+PatchFilePath, FBaseDirectory, True);
+            {$IFDEF MSWINDOWS}
+            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + 'patch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+            {$ELSE}
+              {$IF defined(BSD) AND NOT defined(DARWIN)}
+              ReturnCode:=ExecuteCommandInDir('gpatch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+              {$ELSE}
+              ReturnCode:=ExecuteCommandInDir('patch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+              {$ENDIF}
+            {$ENDIF}
             if ReturnCode=0
                then infoln('FPC has been patched successfully with '+UpdateWarnings[i],etInfo)
-               else writelnlog(ModuleName+' ERROR: Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
+               else
+               begin
+                 writelnlog(ModuleName+' ERROR: Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
+                 writelnlog(ModuleName+' patch output: ' + Output, true);
+               end;
           end;
         end;
       finally

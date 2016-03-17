@@ -60,7 +60,6 @@ type
     FReApplyLocalChanges: boolean;
     procedure SetURL(value:string);
     function GetMake: string;
-    function GetPatch: string;
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
@@ -91,7 +90,7 @@ type
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
     FMake: string;
     FMakeDir: string; //Binutils/make/patch directory
-    FPatch: string;
+    FPatchCmd: string;
     FNeededExecutablesChecked: boolean;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
@@ -110,7 +109,6 @@ type
     FUnzip: string;
     ProcessEx: TProcessEx;
     property Make: string read GetMake;
-    property Patch: string read GetPatch;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
     // Check executable is the right one: run Executable with Parameters
@@ -187,6 +185,8 @@ type
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
+    // Patch utility to use. Defaults to 'patch'
+    property PatchCmd:string write FPatchCmd;
     // Whether or not to back up locale changes to .diff and reapply them before compiling
     property ReApplyLocalChanges: boolean write FReApplyLocalChanges;
     // URL for download. HTTP, ftp or svn
@@ -221,7 +221,8 @@ type
 implementation
 
 uses
-  installerfpc, fileutil,
+  installerfpc,
+  FileUtil, LazFileUtils, LazUTF8,
   ssl_openssl
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
@@ -340,17 +341,6 @@ begin
     {$ENDIF}
     {$ENDIF MSWINDOWS}
   Result := FMake;
-end;
-
-function TInstaller.GetPatch: string;
-begin
-  if FPatch = '' then
-    {$IFDEF MSWINDOWS}
-    FPatch := IncludeTrailingPathDelimiter(FMakeDir) + 'patch' + GetExeExt;
-    {$ELSE}
-    FPatch := 'patch';
-    {$ENDIF MSWINDOWS}
-  Result := FPatch;
 end;
 
 procedure TInstaller.SetHTTPProxyHost(AValue: string);
@@ -483,22 +473,6 @@ begin
         begin
           infoln('Found make executable but it is not GNU Make.',etError);
           OperationSucceeded := false;
-        end;
-      except
-        // ignore errors, this is only an extra check
-      end;
-    end;
-
-    if OperationSucceeded then
-    begin
-      // Check for proper patch executable
-      try
-        ExecuteCommand(Patch + ' -v', Output, FVerbose);
-        // a good patch has the name of its original autor in its version info !!
-        if Ansipos('Larry Wall', Output) = 0 then
-        begin
-          infoln('Found no patch executable but I will continue without it.',etWarning);
-          //OperationSucceeded := false;
         end;
       except
         // ignore errors, this is only an extra check
@@ -907,7 +881,10 @@ begin
       if FReApplyLocalChanges and (DiffFile<>'') then
       begin
          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-         ReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+         // check for default values
+         if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+            then ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose)
+            else ReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
          {$IFNDEF MSWINDOWS}
          if ReturnCode<>0 then
          begin
@@ -932,7 +909,12 @@ begin
                //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
              end;
              if ReturnCode=0 then
-                ReturnCode:=ExecuteCommandInDir(Patch+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
+             begin
+               // check for default values
+               if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+                  then ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i '+DiffFile, FBaseDirectory, Output, FVerbose)
+                  else ReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
+             end;
            end;
          end;
          {$ENDIF}
@@ -940,6 +922,7 @@ begin
          if ReturnCode<>0 then
          begin
            writelnlog(aClientName+' ERROR: Patching with ' + DiffFile + ' failed.', true);
+           writelnlog(aClientName+' output: ' + Output, true);
            writelnlog('Verify the state of the source, correct and rebuild with make.', true);
          end;
        end;
@@ -1060,7 +1043,10 @@ begin
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
       begin
         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(Patch+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose);
+        // check for default values
+        if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+           then CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose)
+           else CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
         {$IFNDEF MSWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
         begin
@@ -1085,7 +1071,11 @@ begin
               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
             end;
             if CheckoutOrUpdateReturnCode=0 then
-               CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(Patch+' -p0 --binary -i  '+DiffFile, FBaseDirectory, FVerbose);
+            begin
+              if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+                 then CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i '+DiffFile, FBaseDirectory, Output, FVerbose)
+                 else CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
+            end;
           end;
         end;
         {$ENDIF}
@@ -1093,6 +1083,7 @@ begin
         if CheckoutOrUpdateReturnCode<>0 then
         begin
           writelnlog('SVNClient ERROR: Patching with ' + DiffFile + ' failed.', true);
+          writelnlog('SVNClient output: ' + Output, true);
           writelnlog('Verify the state of the source, correct and rebuild with make.', true);
         end;
       end;
@@ -1111,7 +1102,7 @@ const
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.14.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.0.zip';
   SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
-  //SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.13/apache24/svn-win32-1.8.13-ap24.zip/download';
+  //SourceURL = 'https://sourceforge.net/projects/win32svn/files/1.8.15/apache24/svn-win32-1.8.15-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
@@ -1142,8 +1133,6 @@ begin
     writelnlog('ERROR: it seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
     exit(false);
   end;
-
-
 
   ForceDirectoriesUTF8(FSVNDirectory);
 

@@ -167,7 +167,9 @@ end;
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig); //Add a path to the LazDoc/fpcdoc list
 
 implementation
-uses FileUtil, math, fpcuputil;
+
+uses
+  FileUtil, LazFileUtils, LazUTF8, math, fpcuputil;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var

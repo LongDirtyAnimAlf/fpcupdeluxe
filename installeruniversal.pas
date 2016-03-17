@@ -170,7 +170,8 @@ Const
 
 implementation
 
-uses inifiles,fileutil,fpcuputil;
+uses
+  inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil;
 
 Const
   MAXSYSMODULES=200;

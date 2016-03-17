@@ -61,7 +61,7 @@ uses
   cthreads,
   {$ENDIF}
   Classes, sysutils, strings,
-  fileutil,
+  FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
