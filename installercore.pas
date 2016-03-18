@@ -821,6 +821,7 @@ var
   ReturnCode: integer;
   aClientName:string;
   DiffFile: String;
+  LocalPatchCmd : string;
   DiffFileSL:TStringList;
   Output: string = '';
 begin
@@ -881,10 +882,14 @@ begin
       if FReApplyLocalChanges and (DiffFile<>'') then
       begin
          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
+
          // check for default values
          if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-            then ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose)
-            else ReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
+            then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
+            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+
+         ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
+
          {$IFNDEF MSWINDOWS}
          if ReturnCode<>0 then
          begin
@@ -912,8 +917,9 @@ begin
              begin
                // check for default values
                if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-                  then ReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i '+DiffFile, FBaseDirectory, Output, FVerbose)
-                  else ReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
+                  then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
+                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+               ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
              end;
            end;
          end;
@@ -948,6 +954,7 @@ var
   CheckoutOrUpdateReturnCode: integer;
   DiffFile: String;
   RepoExists: boolean;
+  LocalPatchCmd : string;
   Output: string = '';
   DiffFileSL:TStringList;
 begin
@@ -1043,10 +1050,12 @@ begin
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
       begin
         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
-        // check for default values
+
         if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-           then CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 -i '+DiffFile, FBaseDirectory, Output, FVerbose)
-           else CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
+           then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
+           else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
+
         {$IFNDEF MSWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
         begin
@@ -1073,8 +1082,9 @@ begin
             if CheckoutOrUpdateReturnCode=0 then
             begin
               if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-                 then CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' -p0 --binary -i '+DiffFile, FBaseDirectory, Output, FVerbose)
-                 else CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(FPatchCmd+' '+DiffFile, FBaseDirectory, Output, FVerbose);
+                 then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
+                 else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+              CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
             end;
           end;
         end;

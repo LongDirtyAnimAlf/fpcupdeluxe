@@ -989,6 +989,7 @@ var
   Errors: integer;
   UpdateWarnings: TStringList;
   PatchFilePath:string;
+  LocalPatchCmd:string;
   Output: string = '';
   ReturnCode,i: integer;
   RevisionIncText: Text;
@@ -1094,14 +1095,14 @@ begin
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
+            // check for default values
+            if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+               then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
+               else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
             {$IFDEF MSWINDOWS}
-            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + 'patch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
+            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FBaseDirectory, Output, True);
             {$ELSE}
-              {$IF defined(BSD) AND NOT defined(DARWIN)}
-              ReturnCode:=ExecuteCommandInDir('gpatch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
-              {$ELSE}
-              ReturnCode:=ExecuteCommandInDir('patch -p0 -N --no-backup-if-mismatch -i  ' + PatchFilePath, FBaseDirectory, Output, True);
-              {$ENDIF}
+            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FBaseDirectory, Output, True);
             {$ENDIF}
             if ReturnCode=0
                then infoln('Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
