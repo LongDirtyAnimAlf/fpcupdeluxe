@@ -56,7 +56,18 @@ const
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
 
-    'Declare lazscripttest;' + 'Exec CreateLazarusScript;' + 'End;' +
+    'Declare lazscripttest;' +
+    'Exec CreateLazarusScript;' +
+    'End;' +
+
+    'Declare LazCleanAndBuildOnly;' +
+    'Cleanmodule lazarus;' +
+    'ConfigModule lazarus;' +
+    'Buildmodule lazbuild;' +
+    'Buildmodule lazarus;' +
+    'ConfigModule lazarus;' +
+    'Exec CreateLazarusScript;' +
+    'End;' +
 
     //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' + 'Getmodule lazarus;' + 'Buildmodule lazbuild;' +
@@ -269,6 +280,8 @@ begin
         ProcessEx.Executable := IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild' + GetExeExt;
         ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
+        ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--quiet');
         ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
         ProcessEx.Parameters.Add('--cpu=' + FCrossCPU_Target);
         ProcessEx.Parameters.Add('--os=' + FCrossOS_Target);
@@ -499,6 +512,8 @@ begin
       FErrorLog.Clear;
       ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--quiet');
       ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
@@ -590,6 +605,8 @@ begin
           FErrorLog.Clear;
           ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FBaseDirectory);
           ProcessEx.Parameters.Clear;
+          ProcessEx.Parameters.Add('--quiet');
+          ProcessEx.Parameters.Add('--quiet');
           ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
           ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FBaseDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi');
@@ -1045,6 +1062,10 @@ begin
     CloseFile(RevisionIncText);
   end;
 
+  if Result
+     then infoln('Result true', etInfo)
+     else infoln('Result false', etInfo);
+
   // Download Qt bindings if not present yet
   Errors := 0;
   if (Result) and (Uppercase(FCrossLCL_Platform) = 'QT') then
@@ -1086,13 +1107,20 @@ begin
   begin
     if Length(FSourcePatches)>0 then
     begin
+      infoln('Found Lazarus patch file(s).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         UpdateWarnings.CommaText := FSourcePatches;
         for i:=0 to (UpdateWarnings.Count-1) do
         begin
+          infoln('Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
           PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then
+          begin
+            infoln('Could not find patchfile '+PatchFilePath,etInfo);
+            infoln('Trying current app directory.',etInfo);
+            PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          end;
           if FileExists(PatchFilePath) then
           begin
             // check for default values
@@ -1111,12 +1139,16 @@ begin
                  writelnlog(ModuleName+' ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
                  writelnlog(ModuleName+' patch output: ' + Output, true);
                end;
+          end
+          else
+          begin
+            infoln('Strange error: could not find patchfile '+PatchFilePath,etInfo);
           end;
         end;
       finally
         UpdateWarnings.Free;
       end;
-    end;
+    end else infoln('No Lazarus patches defined.',etInfo);
   end;
 
 end;

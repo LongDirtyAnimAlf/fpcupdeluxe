@@ -80,7 +80,7 @@ const
   // Versions used when new config files are generated.
   // Lazarus pre 1.0: 106
   // We can assume Lazarus SVN can parse this version:
-  TrunkVersionNewEnvironmentConfig='109';
+  TrunkVersionNewEnvironmentConfig='110';
   TrunkLazarusNewEnvironmentConfig='1.7';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
@@ -498,6 +498,12 @@ begin
             begin
               NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
             end;
+
+            {$ifdef CPUAARCH64}
+            // IDE does not size correctly when set to auto
+            NewConfig.SetValue('Desktops/Desktop1/AutoAdjustIDEHeight/Value', 'False');
+            {$endif}
+
           end;
 
         HelpConfig:

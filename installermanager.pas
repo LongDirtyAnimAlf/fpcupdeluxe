@@ -158,22 +158,14 @@ below}
     {$endif}
     'End;'+
 
-    //default sequence for ARM
+    //default sequence for ARM: some packages give errors and memory is limited, so keep it simple
     'Declare defaultARM;'+
     {$ifndef FPCONLY}
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
     {$endif}
     'Do fpc;'+
     {$ifndef FPCONLY}
-    // Lazbuild: make sure we can at least compile LCL programs
-    'Do lazbuild;'+
-    //'Do helplazarus;'+ // do not include help: takes a lot of time and does not compile at the moment on ARM (not enough memory) :-(
-    'Do DOCEDITOR;'+
-    // Get default external packages/universal modules
-    'Do UniversalDefault;'+
-    // Recompile user IDE so any packages selected by the
-    // universal installer are compiled into the IDE:
-    'Do USERIDE;'+
+    'Do lazarus;'+
     {$endif}
     'End;'+
 
@@ -296,7 +288,9 @@ type
     FShortCutNameFpcup: string;
     FSkipModules: string;
     FFPCPatches:string;
+    {$ifndef FPCONLY}
     FLazarusPatches:string;
+    {$endif}
     FUninstall:boolean;
     FVerbose: boolean;
     FExportOnly:boolean;
@@ -387,7 +381,9 @@ type
     // List of modules that must not be processed
     property SkipModules:string read FSkipModules write FSkipModules;
     property FPCPatches:string read FFPCPatches write FFPCPatches;
+    {$ifndef FPCONLY}
     property LazarusPatches:string read FLazarusPatches write FLazarusPatches;
+    {$endif}
     // Exhaustive/exclusive list of modules that must be processed; no other
     // modules may be processed.
     property OnlyModules:string read FOnlyModules write FOnlyModules;
@@ -664,14 +660,22 @@ begin
       result:=FSequencer.Run('DefaultWin64');
     }
     {$else}
+
     // Linux, OSX
-    {$ifdef cpuarm}
-    infoln('InstallerManager: going to run sequencer for sequence ARM (without help files)',etDebug);
+    {$ifdef CPUAARCH64}
+    // some default packages do not work yet on aarch64 (03-2016)
+    infoln('InstallerManager: going to run fpc+lazarus sequencer for sequence ARM64 (just plain Lazarus)',etDebug);
     result:=FSequencer.Run('defaultARM');
     {$else}
-    infoln('InstallerManager: going to run sequencer for sequence Default.',etDebug);
-    result:=FSequencer.Run('Default');
+      {$ifdef cpuarm}
+      infoln('InstallerManager: going to run sequencer for sequence ARM (without help files)',etDebug);
+      result:=FSequencer.Run('defaultARM');
+      {$else}
+      infoln('InstallerManager: going to run sequencer for sequence Default.',etDebug);
+      result:=FSequencer.Run('Default');
+      {$endif}
     {$endif}
+
     {$endif}
     if (FIncludeModules<>'') and (result) then begin
       // run specified additional modules using the only mechanism
@@ -977,16 +981,12 @@ begin
     FInstaller.BaseDirectory:=FParent.FPCDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
-    if (FInstaller is TFPCInstaller) then FInstaller.SourcePatches:=FParent.FFPCPatches;
-    {$ifndef FPCONLY}
-    if (FInstaller is TLazarusInstaller) then FInstaller.SourcePatches:=FParent.FLazarusPatches;
-    {$endif}
+    (FInstaller as TFPCInstaller).SourcePatches:=FParent.FFPCPatches;
     FInstaller.Compiler:='';  //bootstrap used
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.URL:=FParent.FPCURL;
     end
-
 
   {$ifndef FPCONLY}
   // Lazarus:
@@ -1022,9 +1022,10 @@ begin
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     // CrossLCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
-    (FInstaller As TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
-    (FInstaller As TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
-    (FInstaller As TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+    (FInstaller as TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
+    (FInstaller as TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
+    (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+    (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
     FInstaller.URL:=FParent.LazarusURL;
     end
 

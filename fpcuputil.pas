@@ -115,6 +115,7 @@ procedure SaveInisFromResource(filename,resourcename:string);
 function StringListStartsWith(SearchIn: TStringList; SearchFor: string; StartIndex: integer=0): integer;
 {$IFDEF UNIX}
 function XdgConfigHome: String;
+function GetGCCDirectory:string;
 {$ENDIF UNIX}
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
@@ -536,6 +537,7 @@ var
   HTTPGetResult: boolean;
   HTTPSender: THTTPSend;
   RetryAttempt: integer;
+  ResultCode: integer;
   fs:TFileStream;
 function GetRedirectUrl: string;
 var
@@ -549,7 +551,7 @@ begin
     if Pos('location:',Line)>0 then
     begin
       Result:=Trim(StringReplace(Line,'Location:','',[rfIgnoreCase]));
-      Exit;
+      break;
     end;
   end;
 end;
@@ -583,11 +585,37 @@ begin
         HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
         RetryAttempt:=RetryAttempt+1;
       end;
-      infoln('Download http(s) result: '+InttoStr(HTTPSender.Resultcode),etInfo);
+      ResultCode:=HTTPSender.Resultcode;
+      infoln('Download http(s) result: '+InttoStr(Resultcode),etInfo);
       // If we have an answer from the server, check if the file
       // was sent to us.
-      case HTTPSender.Resultcode of
+      case Resultcode of
         100..299:
+        begin
+          with TFileStream.Create(TargetFile,fmCreate or fmOpenWrite) do
+          try
+            Seek(0, soFromBeginning);
+            CopyFrom(HTTPSender.Document, 0);
+          finally
+            Free;
+          end;
+          result:=true;
+        end; //informational, success
+        300,301: result:=false; //Other redirection. Not implemented, but could be.
+        302:
+        begin
+          infoln('Download: got redirect.', etInfo);
+          URL:=GetRedirectUrl;
+          infoln('Download: got redirect towards URL: '+URL, etInfo);
+          // do we have a redirect from github for a direct download of a file ?
+          if (Pos('codeload.github.com',URL)>0) OR (Pos('raw.githubusercontent.com',URL)>0) then
+          begin
+            fs:=TFileStream.Create(TargetFile,fmCreate or fmOpenWrite);
+            HTTPGetBinary(URL, fs);
+            fs.free;
+            result:=true;
+          end
+          else
           begin
             with TFileStream.Create(TargetFile,fmCreate or fmOpenWrite) do
             try
@@ -597,19 +625,7 @@ begin
               Free;
             end;
             result:=true;
-          end; //informational, success
-        300..301: result:=false; //Other redirection. Not implemented, but could be.
-        302:
-        begin
-          URL:=GetRedirectUrl;
-          // do we have a redirect from github for a direct download of a file ?
-          if Pos('codeload.github.com',URL)>0 then
-          begin
-            fs:=TFileStream.Create(TargetFile,fmCreate or fmOpenWrite);
-            HTTPGetBinary(URL, fs);
-            fs.free;
-            result:=true;
-          end else result:=false;
+          end;
         end;
         303..399: result:=false; //Other redirection. Not implemented, but could be.
         400..499: result:=false; //client error; 404 not found etc
@@ -983,6 +999,42 @@ begin
     result:=-1;
 end;
 
+{$IFDEF UNIX}
+function GetGCCDirectory:string;
+var
+  output,s1,s2:string;
+  i:integer;
+begin
+
+  result:='/usr/lib/gcc/';
+  output:='';
+
+  try
+    ExecuteCommand('gcc -v', Output, false);
+    s1:=' --build=';
+    i:=Ansipos(s1, Output);
+    if i > 0 then
+    begin
+      s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+      i:=Ansipos(' ', s2);
+      if i > 0 then delete(s2,i,MaxInt);
+      result:=result+s2+'/';
+    end;
+    s1:='gcc version ';
+    i:=Ansipos(s1, Output);
+    if i > 0 then
+    begin
+      s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+      i:=Ansipos(' ', s2);
+      if i > 0 then delete(s2,i,MaxInt);
+      result:=result+s2;
+    end;
+  except
+    // ignore errors
+  end;
+end;
+{$ENDIF UNIX}
+
 function Which(Executable: string): string;
 var
   Output: string;
@@ -1084,8 +1136,7 @@ begin
   else if SysUtils.CompareText(TargetCPU,'ia64')=0 then
     Result:=Result+'ia64'
   else if SysUtils.CompareText(TargetCPU,'aarch64')=0 then
-    //Result:=Result+'a64'
-    Result:=Result+'aarch64'
+    Result:=Result+'a64'
   else if SysUtils.CompareText(TargetCPU,'i8086')=0 then
     Result:=Result+'8086'
   else

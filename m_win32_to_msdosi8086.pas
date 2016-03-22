@@ -158,9 +158,9 @@ begin
     // Configuration snippet for FPC
     {this was in Marco's test fpc.cfg:
     -Sgic
-    -Fud:\pp16/units/$fpctarget
-   -Fud:\pp16/units/$fpctarget/*
-   -Fud:\pp16/units/$fpctarget/rtl
+    -Fud:\pp16/units/$FPCTARGET
+   -Fud:\pp16/units/$FPCTARGET/*
+   -Fud:\pp16/units/$FPCTARGET/rtl
 }
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}

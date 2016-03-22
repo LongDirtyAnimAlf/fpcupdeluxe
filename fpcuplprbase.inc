@@ -180,9 +180,11 @@ begin
   writeln(' fpcPATCH=<values>     Patch the FPC source with the specified patches.');
   writeln('                       The patch list is separated by commas.');
   writeln('                       E.g. --patch="fpcrtti.patch".');
+  {$ifndef FPCONLY}
   writeln(' lazPATCH=<values>     Patch the Lazarus source with the specified patches.');
   writeln('                       The patch list is separated by commas.');
   writeln('                       E.g. --patch="docmanager.patch".');
+  {$endif}
   writeln(' clean                 Remove files created with build. ');
   writeln('                       Can be combined with skip and only options.');
   writeln(' svnexe=<path>         Full path to svn executable (handy if you have');
@@ -462,9 +464,10 @@ begin
       FInstaller.SkipModules:=Options.GetOption('','skip','',false);
       FInstaller.OnlyModules:=Options.GetOption('','only','',false);
 
-      FInstaller.FPCPatches:=Options.GetOption('','fpcPATCH','',false);
-      FInstaller.LazarusPatches:=Options.GetOption('','lazPATCH','',false);
-
+      FInstaller.FPCPatches:=Options.GetOption('','fpcpatch','',false);
+      {$ifndef FPCONLY}
+      FInstaller.LazarusPatches:=Options.GetOption('','lazpatch','',false);
+      {$endif}
       FInstaller.CrossOS_Target:=Options.GetOption('','ostarget','');
       {$ifndef FPCONLY}
       s:=Options.GetOption('','primary-config-path','');

@@ -1028,6 +1028,8 @@ const
   FTP262Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
   FTP264Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
   FTP300Path='ftp://ftp.freepascal.org/pub/fpc/dist/3.0.0/bootstrap/';
+  FpcupBootsTrappersPath='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/raw/master/bin/';
+
 var
   BootstrapVersion: string;
   Output: string;
@@ -1127,7 +1129,25 @@ begin
       //if Length(FBootstrapCompiler)=0 then
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcarm';
     end;
-    {$ELSE} // Assume x64 (could also be PowerPC, SPARC I suppose)
+    {$ELSE}
+    {$IFDEF CPUAARCH64}
+    infoln('TFPCInstaller: bootstrap compiler detection for linux aarch64',etWarning);
+    if FBootstrapCompilerURL='' then
+    begin
+      //FBootstrapCompilerURL := FTP300Path+'aarch64-linux-ppca64.bz2';
+      FBootstrapCompilerURL := FpcupBootsTrappersPath+'aarch64-linux/aarch64-linux-ppca64';
+      // this bootstrap is 3.1.1: disable versioncheck
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end;
+    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'aarch64-linux-ppca64';
+    if NOT FileExists(FBootstrapCompiler) then
+    begin
+      //FBootstrapCompiler := Which('ppca64');
+      //if Length(FBootstrapCompiler)=0 then
+      FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppca64';
+    end;
+    {$ELSE}
+    // Assume x64
     infoln('TFPCInstaller: bootstrap compiler detection: assuming this is a x64 processor on Linux',etWarning);
     if FBootstrapCompilerURL='' then
     begin
@@ -1142,6 +1162,7 @@ begin
       //if Length(FBootstrapCompiler)=0 then
       FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64';
     end;
+    {$ENDIF}
     {$ENDIF cpuarm}
     {$ENDIF CPU386}
     {$ENDIF Linux}
@@ -1555,12 +1576,12 @@ begin
       // Need to add appropriate library search path
       // where it is e.g /usr/lib/arm-linux-gnueabihf...
       Writeln(TxtFile,'# library search path');
-      Write(TxtFile,'-Fl/usr/lib/$fpctarget'+';'+'/usr/lib/$fpctarget-gnu');
+      Write(TxtFile,'-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu'+';'+GetGCCDirectory);
       {$IFDEF cpuarm}
       {$IFDEF cpuarmhf}
-      Write(TxtFile,';'+'/usr/lib/$fpctarget-gnueabihf');
+      Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabihf');
       {$ELSE}
-      Write(TxtFile,';'+'/usr/lib/$fpctarget-gnueabi');
+      Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabi');
       {$ENDIF cpuarmhf}
       {$ENDIF cpuarm}
       Writeln;

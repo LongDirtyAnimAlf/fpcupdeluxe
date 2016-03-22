@@ -192,7 +192,7 @@ type
     // URL for download. HTTP, ftp or svn
     property URL: string write SetURL;
     // patches
-    property SourcePatches: string write FSourcePatches;
+    property SourcePatches: string read FSourcePatches write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;
@@ -958,6 +958,8 @@ var
   Output: string = '';
   DiffFileSL:TStringList;
 begin
+  result:=true;
+
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
