@@ -153,6 +153,20 @@ begin
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
   end;
 
+  // Also allow for hardfloat crossbinutils
+  if not result then
+  begin
+    if StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1 then
+    begin
+      FBinUtilsPrefix:='arm-linux-gnueabihf-';
+      AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+      result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
+      // also check in the normal directory
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    end;
+  end;
+
   // Also allow for android crossbinutils
   if not result then
   begin

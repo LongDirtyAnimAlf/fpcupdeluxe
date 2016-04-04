@@ -56,6 +56,8 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 {$ENDIF}
 {$ENDIF}
 
+{$warn 5023 off : no warning about unused units} 
+
 uses
   {$IFDEF UNIX}
   cthreads,

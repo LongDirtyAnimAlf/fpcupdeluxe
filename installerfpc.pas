@@ -63,6 +63,11 @@ Const
     'Cleanmodule FPC;'+
     'End;'+
 
+    'Declare FPCCleanAndBuildOnly;'+
+    'Cleanmodule FPC;'+
+    'Buildmodule FPC;'+
+    'End;'+
+
 //selective actions triggered with --only=SequenceName
     'Declare FPCCleanOnly;'+
     'Cleanmodule FPC;'+

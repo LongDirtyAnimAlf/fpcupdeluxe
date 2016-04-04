@@ -112,7 +112,7 @@ function SafeGetApplicationPath: String;
 procedure SaveInisFromResource(filename,resourcename:string);
 // Searches for SearchFor in the stringlist and returns the index if found; -1 if not
 // Search optionally starts from position SearchFor
-function StringListStartsWith(SearchIn: TStringList; SearchFor: string; StartIndex: integer=0): integer;
+function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 function GetGCCDirectory:string;
@@ -980,17 +980,28 @@ begin
   end;
 end;
 
-function StringListStartsWith(SearchIn: TStringList; SearchFor: string; StartIndex: integer): integer;
+function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
 var
   Found:boolean=false;
   i:integer;
 begin
   for i:=StartIndex to SearchIn.Count-1 do
   begin
-    if copy(SearchIn[i],1,length(SearchFor))=SearchFor then
+    if CS then
     begin
-      Found:=true;
-      break;
+      if copy(SearchIn[i],1,length(SearchFor))=SearchFor then
+      begin
+        Found:=true;
+        break;
+      end;
+    end
+    else
+    begin
+      if UpperCase(copy(SearchIn[i],1,length(SearchFor)))=UpperCase(SearchFor) then
+      begin
+        Found:=true;
+        break;
+      end;
     end;
   end;
   if Found then
