@@ -1046,8 +1046,12 @@ begin
 
       // Only return success if svn returned return code 0
       Result := (CheckoutOrUpdateReturnCode=0);
+
       if not Result then
-        writelnlog('DownloadFromSVN: SVN gave error code '+inttostr(CheckoutOrUpdateReturnCode));
+      begin
+        writelnlog('DownloadFromSVN: SVN gave error code: '+inttostr(CheckoutOrUpdateReturnCode));
+        writelnlog('DownloadFromSVN: SVN gave error message: '+FSVNClient.ReturnOutput);
+      end;
 
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
       begin

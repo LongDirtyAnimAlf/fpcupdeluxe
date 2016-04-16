@@ -61,6 +61,7 @@ type
     FRepoExecutableName: string;
     FRepositoryURL: string;
     FReturnCode: integer;
+    FReturnOutput: string;
     FVerbose: boolean;
     FExportOnly: boolean;
     //Performs a checkout/initial download
@@ -126,6 +127,8 @@ type
     property Repository: string read FRepositoryURL write SetRepositoryURL;
     // Exit code returned by last client command; 0 for success. Useful for troubleshooting
     property ReturnCode: integer read FReturnCode;
+    // Output returned by last client command. Useful for troubleshooting
+    property ReturnOutput: string read FReturnOutput;
     // Version control client executable. Can be set to explicitly determine which executable to use.
     property RepoExecutable: string read GetRepoExecutable write SetRepoExecutable;
     // Show additional console/log output?
@@ -319,6 +322,7 @@ begin
   FDesiredRevision := '';
   FLocalRevision := FRET_UNKNOWN_REVISION;
   FReturnCode := 0;
+  FReturnOutput := '';
   FRepoExecutable := '';
   FindRepoExecutable; //Do this now so hopefully the hgExecutable property is valid.
 end;

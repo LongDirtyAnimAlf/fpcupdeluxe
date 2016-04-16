@@ -277,6 +277,7 @@ begin
   else
   {$ENDIF}
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+  FReturnOutput := Output;
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
@@ -327,6 +328,7 @@ begin
       else
       {$ENDIF}
       FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+      FReturnOutput := Output;
       RetryAttempt := RetryAttempt + 1;
     end;
   end;
@@ -371,13 +373,13 @@ begin
     Result:=True;
     exit;
   end;
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit '+GetProxyCommand+' --message='+Message, LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' commit '+GetProxyCommand+' --message='+Message, LocalRepository, FReturnOutput, Verbose);
   Result:=(FReturnCode=0);
 end;
 
 function TSVNClient.Execute(Command: string): integer;
 begin
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand, LocalRepository, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' '+Command+' '+GetProxyCommand, LocalRepository, FReturnOutput, Verbose);
   Result := FReturnCode;
 end;
 
@@ -395,6 +397,7 @@ begin
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff --diff-cmd diff --extensions "--binary -wbua"'+' .', LocalRepository, Result, Verbose);
   // ignoring whitespaces
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x -w'+' .', LocalRepository, Result, Verbose);
+  FReturnOutput := Result;
 end;
 
 procedure TSVNClient.Log(var Log: TStringList);
@@ -403,6 +406,7 @@ var
 begin
   // Using proxy more for completeness here
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' log ' + GetProxyCommand + ' ' + LocalRepository, s, Verbose);
+  FReturnOutput := s;
   Log.Text := s;
 end;
 
@@ -413,7 +417,7 @@ begin
     FReturnCode := 0;
     exit;
   end;
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert '+GetProxyCommand+' --recursive ' + LocalRepository, Verbose);
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert '+GetProxyCommand+' --recursive ' + LocalRepository, FReturnOutput, Verbose);
 end;
 
 procedure TSVNClient.Update;
@@ -502,6 +506,7 @@ begin
     else
     {$ENDIF}
     FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
+    FReturnOutput := Output;
 
     FileList.Clear;
     ParseFileList(Output, FileList, []);
@@ -544,7 +549,7 @@ begin
         end
         else
         {$ENDIF}
-        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Verbose);
+        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, FReturnOutput, Verbose);
         AfterErrorRetry := AfterErrorRetry + 1;
       end;
       UpdateRetry := UpdateRetry + 1;
@@ -609,6 +614,7 @@ begin
   end;
 
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' status '+GetProxyCommand+' --depth infinity ' + FLocalRepository, Output, Verbose);
+  FReturnOutput := Output;
   FileList.Clear;
   AllFiles := TStringList.Create;
   try
@@ -638,6 +644,7 @@ begin
   end;
 
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+  FReturnOutput := Output;
 
   // If command fails due to wrong version, try again
   if (ReturnCode <> 0) then
@@ -650,6 +657,7 @@ begin
     Sleep(500);
     //attempt again
     FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+    FReturnOutput := Output;
   end;
 
   // This is already covered by setting stuff to false first
@@ -708,6 +716,7 @@ begin
   if (FLocalRevision = FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) then
   begin
     FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+    FReturnOutput := Output;
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision:"...
     // unless we're in a branch/tag where we need "Last Changed Rev: "
