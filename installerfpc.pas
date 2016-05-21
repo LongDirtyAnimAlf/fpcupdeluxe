@@ -1087,7 +1087,7 @@ begin
     {$ELSE}
     // Win32
     if FBootstrapCompilerURL='' then
-       FBootstrapCompilerURL := FTP264Path+'i386-win32-ppc386.zip';
+       FBootstrapCompilerURL := FTP300Path+'i386-win32-ppc386.zip';
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     if NOT FileExists(FBootstrapCompiler) then
     begin

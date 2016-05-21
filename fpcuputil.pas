@@ -586,7 +586,7 @@ begin
         RetryAttempt:=RetryAttempt+1;
       end;
       ResultCode:=HTTPSender.Resultcode;
-      infoln('Download http(s) result: '+InttoStr(Resultcode),etInfo);
+      infoln('Download http(s) result: '+InttoStr(Resultcode)+'; for URL: '+URL,etInfo);
       // If we have an answer from the server, check if the file
       // was sent to us.
       case Resultcode of
