@@ -13,7 +13,6 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\arm-linux-pi\"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpclazup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -128,6 +127,8 @@ end;"/>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="115"/>
+        <CursorPos X="32" Y="119"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -157,7 +158,7 @@ end;"/>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -166,6 +167,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="3"/>
+        <CursorPos X="30" Y="12"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -173,7 +175,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -190,7 +192,7 @@ end;"/>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit8>
@@ -206,7 +208,7 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -468,8 +470,9 @@ end;"/>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="82"/>
+        <Loaded Value="True"/>
       </Unit45>
       <Unit46>
         <Filename Value="m_any_to_linuxaarch64.pas"/>

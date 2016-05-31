@@ -13,7 +13,6 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <Libraries Value="C:\development\cross\lib\arm-linux-pi\"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpcup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
@@ -130,6 +129,8 @@ end;"/>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
+        <TopLine Value="36"/>
+        <CursorPos Y="54"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>

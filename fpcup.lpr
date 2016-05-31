@@ -49,10 +49,8 @@ Add something like fpcup.config in the settings or installed fpc/lazarus dir so 
 }
 
 {$IFDEF LINUX}
-{$IFDEF CPU64}
 {$IFDEF FPC_CROSSCOMPILING}
 {$linklib libc_nonshared.a}
-{$ENDIF}
 {$ENDIF}
 {$ENDIF}
 
