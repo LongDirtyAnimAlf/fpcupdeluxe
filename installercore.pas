@@ -633,18 +633,18 @@ const
   SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_06/install/binw32/';
   but let's use a stable version:}
   //SourceURL = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_2_6_4/install/binw32/';
-  SourceURL = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_3_0_0/install/binw32/';
+  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_3_0_0/install/binw32/';
   // newer than sourceurl, useful for e.g. make 3.82 as used in Lazarus 1.2RC2 (with FPC 2.6.2)
-  SourceUrl_FPCTrunk = 'http://svn2.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
+  SourceUrl_FPCTrunk = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
   // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
   // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
   // Nov 2013: GNU gdb (GDB) 7.2:
-  SourceURL_gdb = 'http://svn2.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
+  SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
   //SourceURL64 = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_2_6_4/install/binw64/';
-  SourceURL64 = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_3_0_0/install/binw64/';
+  SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_3_0_0/install/binw64/';
   // Nov 2013: GNU gdb (GDB) 7.3.50.20110510-cvs:
-  SourceURL64_gdb = 'http://svn2.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
-  SourceURL_Qt = 'http://svn2.freepascal.org/svn/lazarus/binaries/i386-win32/qt/';
+  SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
+  SourceURL_Qt = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/';
   // No equivalent for Win64
   //SourceURL64_Qt = '';
 

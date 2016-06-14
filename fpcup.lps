@@ -129,8 +129,6 @@ end;"/>
         <Filename Value="fpcup.lpr"/>
         <IsPartOfProject Value="True"/>
         <IsVisibleTab Value="True"/>
-        <TopLine Value="36"/>
-        <CursorPos Y="54"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>

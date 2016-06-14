@@ -30,7 +30,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {
 Setup: based on cross binaries from
-http://svn2.freepascal.org/svn/fpcbuild/binaries/i386-win32/
+http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/
 with binutils 2.22
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)

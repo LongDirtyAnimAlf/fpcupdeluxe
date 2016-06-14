@@ -30,7 +30,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {
 based on cross binaries from
-http://svn2.freepascal.org/svn/fpcbuild/binaries/i386-win32/
+http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
 Then place the binaries in c:\development\cross\bin\mips-linux
