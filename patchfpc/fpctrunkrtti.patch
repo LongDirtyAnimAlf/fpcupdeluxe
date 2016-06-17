@@ -1,6 +1,6 @@
 Index: compiler/aarch64/cpupara.pas
 ===================================================================
---- compiler/aarch64/cpupara.pas	(revision 33855)
+--- compiler/aarch64/cpupara.pas	(revision 33998)
 +++ compiler/aarch64/cpupara.pas	(working copy)
 @@ -36,6 +36,7 @@
         tcpuparamanager = class(tparamanager)
@@ -41,7 +41,7 @@ Index: compiler/aarch64/cpupara.pas
        begin
 Index: compiler/arm/cpupara.pas
 ===================================================================
---- compiler/arm/cpupara.pas	(revision 33855)
+--- compiler/arm/cpupara.pas	(revision 33998)
 +++ compiler/arm/cpupara.pas	(working copy)
 @@ -37,6 +37,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -99,7 +99,7 @@ Index: compiler/arm/cpupara.pas
          result:=VOLATILE_MMREGISTERS;
 Index: compiler/i386/cpupara.pas
 ===================================================================
---- compiler/i386/cpupara.pas	(revision 33855)
+--- compiler/i386/cpupara.pas	(revision 33998)
 +++ compiler/i386/cpupara.pas	(working copy)
 @@ -40,6 +40,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -141,7 +141,7 @@ Index: compiler/i386/cpupara.pas
        var
 Index: compiler/ncgrtti.pas
 ===================================================================
---- compiler/ncgrtti.pas	(revision 33855)
+--- compiler/ncgrtti.pas	(revision 33998)
 +++ compiler/ncgrtti.pas	(working copy)
 @@ -28,7 +28,7 @@
      uses
@@ -471,7 +471,7 @@ Index: compiler/ncgrtti.pas
              if not is_objc_class_or_protocol(tabstractpointerdef(def).pointeddef) then
 Index: compiler/options.pas
 ===================================================================
---- compiler/options.pas	(revision 33855)
+--- compiler/options.pas	(revision 33998)
 +++ compiler/options.pas	(working copy)
 @@ -3308,6 +3308,10 @@
    def_system_macro('FPC_HAS_INTERNAL_ABS_INT64');
@@ -486,7 +486,7 @@ Index: compiler/options.pas
    def_system_macro('FPC_HAS_CPSTRING');
 Index: compiler/paramgr.pas
 ===================================================================
---- compiler/paramgr.pas	(revision 33855)
+--- compiler/paramgr.pas	(revision 33998)
 +++ compiler/paramgr.pas	(working copy)
 @@ -81,6 +81,8 @@
            function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
@@ -512,7 +512,7 @@ Index: compiler/paramgr.pas
  {$endif}
 Index: compiler/x86_64/cpupara.pas
 ===================================================================
---- compiler/x86_64/cpupara.pas	(revision 33855)
+--- compiler/x86_64/cpupara.pas	(revision 33998)
 +++ compiler/x86_64/cpupara.pas	(working copy)
 @@ -44,6 +44,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -598,9 +598,9 @@ Index: compiler/x86_64/cpupara.pas
          intretregs: array[0..1] of tregister = (NR_FUNCTION_RETURN_REG,NR_FUNCTION_RETURN_REG_HIGH);
 Index: rtl/objpas/typinfo.pp
 ===================================================================
---- rtl/objpas/typinfo.pp	(revision 33855)
+--- rtl/objpas/typinfo.pp	(revision 33998)
 +++ rtl/objpas/typinfo.pp	(working copy)
-@@ -54,7 +54,7 @@
+@@ -55,7 +55,7 @@
         TMethodKind = (mkProcedure,mkFunction,mkConstructor,mkDestructor,
                        mkClassProcedure,mkClassFunction,mkClassConstructor,
                        mkClassDestructor,mkOperatorOverload);
@@ -609,7 +609,7 @@ Index: rtl/objpas/typinfo.pp
         TParamFlags    = set of TParamFlag;
         TIntfFlag      = (ifHasGuid,ifDispInterface,ifDispatch,ifHasStrGUID);
         TIntfFlags     = set of TIntfFlag;
-@@ -63,6 +63,7 @@
+@@ -64,6 +64,7 @@
         // don't rely on integer values of TCallConv since it includes all conventions
         // which both delphi and fpc support. In the future delphi can support more and
         // fpc own conventions will be shifted/reordered accordinly
@@ -617,7 +617,7 @@ Index: rtl/objpas/typinfo.pp
         TCallConv = (ccReg, ccCdecl, ccPascal, ccStdCall, ccSafeCall,
                      ccCppdecl, ccFar16, ccOldFPCCall, ccInternProc,
                      ccSysCall, ccSoftFloat, ccMWPascal);
-@@ -161,6 +162,49 @@
+@@ -192,6 +193,49 @@
          function GetParam(ParamIndex: Integer): PProcedureParam;
        end;
  
@@ -628,7 +628,7 @@ Index: rtl/objpas/typinfo.pp
 +      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
 +      record
 +        Flags: TParamFlags;
-+        ParamType: PTypeInfo;
++        ParamType: TypeInfoPtr;
 +        ParReg: Byte;
 +        ParOff: LongInt;
 +        Name: ShortString;
@@ -645,7 +645,7 @@ Index: rtl/objpas/typinfo.pp
 +        {
 +        Version: Byte;
 +        CC: TCallConv;
-+        ResultType: PTypeInfo;
++        ResultType: TypeInfoPtr;
 +        StackSize: Word;
 +        ParamCount: Byte;
 +        Params: array[0..ParamCount - 1] of TVmtMethodParam;
@@ -667,7 +667,7 @@ Index: rtl/objpas/typinfo.pp
        PTypeData = ^TTypeData;
        TTypeData =
  {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
-@@ -241,7 +285,11 @@
+@@ -306,7 +350,11 @@
                 IntfFlags : TIntfFlagsBase;
                 GUID: TGUID;
                 IntfUnit: ShortString;
@@ -680,7 +680,7 @@ Index: rtl/objpas/typinfo.pp
                );
              tkInterfaceRaw:
                (
-@@ -250,7 +298,11 @@
+@@ -315,7 +363,11 @@
                 IID: TGUID;
                 RawIntfUnit: ShortString;
                 IIDStr: ShortString;
