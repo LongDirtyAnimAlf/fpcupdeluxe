@@ -757,58 +757,65 @@ var
 begin
 
   //cheap (or expensive) coding ... but effective ... ;-)
-  version_nr:='';
-  release_nr:='';
-  patch_nr:='';
+  version_nr:='0';
+  release_nr:='0';
+  patch_nr:='0';
 
-  AssignFile(TxtFile,IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas');
-  Reset(TxtFile);
-  while NOT EOF (TxtFile) do
+  s:=IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas';
+
+  if FileExists(s) then
   begin
-    Readln(TxtFile,s);
-    x:=Pos('version_nr',s);
-    if x>0 then
+
+    AssignFile(TxtFile,s);
+    Reset(TxtFile);
+    while NOT EOF (TxtFile) do
     begin
-      for y:=x+Length('version_nr') to Length(s) do
+      Readln(TxtFile,s);
+      x:=Pos('version_nr',s);
+      if x>0 then
       begin
-        if Ord(s[y]) in [ord('0')..ord('9')] then
+        for y:=x+Length('version_nr') to Length(s) do
         begin
-          version_nr:=s[y];
-          break;
+          if Ord(s[y]) in [ord('0')..ord('9')] then
+          begin
+            version_nr:=s[y];
+            break;
+          end;
         end;
       end;
-    end;
 
-    x:=Pos('release_nr',s);
-    if x>0 then
-    begin
-      for y:=x+Length('release_nr') to Length(s) do
+      x:=Pos('release_nr',s);
+      if x>0 then
       begin
-        if Ord(s[y]) in [ord('0')..ord('9')] then
+        for y:=x+Length('release_nr') to Length(s) do
         begin
-          release_nr:=s[y];
-          break;
+          if Ord(s[y]) in [ord('0')..ord('9')] then
+          begin
+            release_nr:=s[y];
+            break;
+          end;
         end;
       end;
-    end;
 
-    x:=Pos('patch_nr',s);
-    if x>0 then
-    begin
-      for y:=x+Length('patch_nr') to Length(s) do
+      x:=Pos('patch_nr',s);
+      if x>0 then
       begin
-        if Ord(s[y]) in [ord('0')..ord('9')] then
+        for y:=x+Length('patch_nr') to Length(s) do
         begin
-          patch_nr:=s[y];
-          break;
+          if Ord(s[y]) in [ord('0')..ord('9')] then
+          begin
+            patch_nr:=s[y];
+            break;
+          end;
         end;
       end;
-    end;
 
-    if (Length(version_nr)>0) AND (Length(release_nr)>0) AND (Length(patch_nr)>0) then break;
+      if (Length(version_nr)>0) AND (Length(release_nr)>0) AND (Length(patch_nr)>0) then break;
+
+    end;
+    CloseFile(TxtFile);
 
   end;
-  CloseFile(TxtFile);
   result:=version_nr+'.'+release_nr+'.'+patch_nr;
 end;
 

@@ -1,5 +1,4 @@
 unit installerLazarus;
-
 { Lazarus/LCL installer/updater module
 Copyright (C) 2012-2014 Reinier Olislagers, Ludo Brands
 
