@@ -752,6 +752,9 @@ var
   version_nr:string;
   release_nr:string;
   patch_nr:string;
+  found_version_nr:boolean;
+  found_release_nr:boolean;
+  found_patch_nr:boolean;
   s:string;
   x,y:integer;
 begin
@@ -761,16 +764,23 @@ begin
   release_nr:='0';
   patch_nr:='0';
 
+  found_version_nr:=false;
+  found_release_nr:=false;
+  found_patch_nr:=false;
+
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas';
 
   if FileExists(s) then
   begin
+
+    infoln('Get FPC version from version.pas',etInfo);
 
     AssignFile(TxtFile,s);
     Reset(TxtFile);
     while NOT EOF (TxtFile) do
     begin
       Readln(TxtFile,s);
+
       x:=Pos('version_nr',s);
       if x>0 then
       begin
@@ -779,6 +789,7 @@ begin
           if Ord(s[y]) in [ord('0')..ord('9')] then
           begin
             version_nr:=s[y];
+            found_version_nr:=true;
             break;
           end;
         end;
@@ -792,6 +803,7 @@ begin
           if Ord(s[y]) in [ord('0')..ord('9')] then
           begin
             release_nr:=s[y];
+            found_release_nr:=true;
             break;
           end;
         end;
@@ -805,17 +817,21 @@ begin
           if Ord(s[y]) in [ord('0')..ord('9')] then
           begin
             patch_nr:=s[y];
+            found_patch_nr:=true;
             break;
           end;
         end;
       end;
 
-      if (Length(version_nr)>0) AND (Length(release_nr)>0) AND (Length(patch_nr)>0) then break;
+      // check if ready
+      if found_version_nr AND found_release_nr AND found_patch_nr then break;
 
     end;
+
     CloseFile(TxtFile);
 
-  end;
+  end else infoln('No version.pas found',etError);
+
   result:=version_nr+'.'+release_nr+'.'+patch_nr;
 end;
 

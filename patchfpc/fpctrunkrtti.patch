@@ -1,6 +1,6 @@
 Index: compiler/aarch64/cpupara.pas
 ===================================================================
---- compiler/aarch64/cpupara.pas	(revision 33998)
+--- compiler/aarch64/cpupara.pas	(revision 34022)
 +++ compiler/aarch64/cpupara.pas	(working copy)
 @@ -36,6 +36,7 @@
         tcpuparamanager = class(tparamanager)
@@ -41,7 +41,7 @@ Index: compiler/aarch64/cpupara.pas
        begin
 Index: compiler/arm/cpupara.pas
 ===================================================================
---- compiler/arm/cpupara.pas	(revision 33998)
+--- compiler/arm/cpupara.pas	(revision 34022)
 +++ compiler/arm/cpupara.pas	(working copy)
 @@ -37,6 +37,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -99,7 +99,7 @@ Index: compiler/arm/cpupara.pas
          result:=VOLATILE_MMREGISTERS;
 Index: compiler/i386/cpupara.pas
 ===================================================================
---- compiler/i386/cpupara.pas	(revision 33998)
+--- compiler/i386/cpupara.pas	(revision 34022)
 +++ compiler/i386/cpupara.pas	(working copy)
 @@ -40,6 +40,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -141,7 +141,7 @@ Index: compiler/i386/cpupara.pas
        var
 Index: compiler/ncgrtti.pas
 ===================================================================
---- compiler/ncgrtti.pas	(revision 33998)
+--- compiler/ncgrtti.pas	(revision 34022)
 +++ compiler/ncgrtti.pas	(working copy)
 @@ -28,7 +28,7 @@
      uses
@@ -471,9 +471,9 @@ Index: compiler/ncgrtti.pas
              if not is_objc_class_or_protocol(tabstractpointerdef(def).pointeddef) then
 Index: compiler/options.pas
 ===================================================================
---- compiler/options.pas	(revision 33998)
+--- compiler/options.pas	(revision 34022)
 +++ compiler/options.pas	(working copy)
-@@ -3308,6 +3308,10 @@
+@@ -3309,6 +3309,10 @@
    def_system_macro('FPC_HAS_INTERNAL_ABS_INT64');
  {$endif x86_64 or powerpc64 or aarch64}
  
@@ -486,7 +486,7 @@ Index: compiler/options.pas
    def_system_macro('FPC_HAS_CPSTRING');
 Index: compiler/paramgr.pas
 ===================================================================
---- compiler/paramgr.pas	(revision 33998)
+--- compiler/paramgr.pas	(revision 34022)
 +++ compiler/paramgr.pas	(working copy)
 @@ -81,6 +81,8 @@
            function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
@@ -512,7 +512,7 @@ Index: compiler/paramgr.pas
  {$endif}
 Index: compiler/x86_64/cpupara.pas
 ===================================================================
---- compiler/x86_64/cpupara.pas	(revision 33998)
+--- compiler/x86_64/cpupara.pas	(revision 34022)
 +++ compiler/x86_64/cpupara.pas	(working copy)
 @@ -44,6 +44,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -598,7 +598,7 @@ Index: compiler/x86_64/cpupara.pas
          intretregs: array[0..1] of tregister = (NR_FUNCTION_RETURN_REG,NR_FUNCTION_RETURN_REG_HIGH);
 Index: rtl/objpas/typinfo.pp
 ===================================================================
---- rtl/objpas/typinfo.pp	(revision 33998)
+--- rtl/objpas/typinfo.pp	(revision 34022)
 +++ rtl/objpas/typinfo.pp	(working copy)
 @@ -55,7 +55,7 @@
         TMethodKind = (mkProcedure,mkFunction,mkConstructor,mkDestructor,
