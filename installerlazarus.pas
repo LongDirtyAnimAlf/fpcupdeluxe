@@ -704,7 +704,6 @@ const
 var
   DebuggerPath: string;
   LazarusConfig: TUpdateLazConfig;
-  MajorVersion, MinorVersion, ReleaseVersion: integer;
   PCPSnippet: TStringList;
   StaticPackages: TStringList;
   VersionSnippet: string;
@@ -726,9 +725,9 @@ begin
   // Set up a minimal config so we can use LazBuild
   // Parse URLs; expect e.g. ..../lazarus_1_0_14.
   // Doesn't take into account release candidates or trunk
-  MajorVersion := -1;
-  MinorVersion := -1;
-  ReleaseVersion := -1;
+  FMajorVersion := -1;
+  FMinorVersion := -1;
+  FReleaseVersion := -1;
 
   VersionSnippet:='';
 
@@ -773,21 +772,21 @@ begin
       case VersionList.Count of
         1:
         begin
-          MajorVersion := StrToIntDef(VersionList[0], -1);
-          //MinorVersion := 0;
-          //ReleaseVersion := 0;
+          FMajorVersion := StrToIntDef(VersionList[0], -1);
+          //FMinorVersion := 0;
+          //FReleaseVersion := 0;
         end;
         2:
         begin
-          MajorVersion := StrToIntDef(VersionList[0], -1);
-          MinorVersion := StrToIntDef(VersionList[1], -1);
-          //ReleaseVersion := 0;
+          FMajorVersion := StrToIntDef(VersionList[0], -1);
+          FMinorVersion := StrToIntDef(VersionList[1], -1);
+          //FReleaseVersion := 0;
         end;
         3..maxint:
         begin
-          MajorVersion := StrToIntDef(VersionList[0], -1);
-          MinorVersion := StrToIntDef(VersionList[1], -1);
-          ReleaseVersion := StrToIntDef(VersionList[2], -1);
+          FMajorVersion := StrToIntDef(VersionList[0], -1);
+          FMinorVersion := StrToIntDef(VersionList[1], -1);
+          FReleaseVersion := StrToIntDef(VersionList[2], -1);
         end;
       end;
     finally
@@ -795,7 +794,7 @@ begin
     end;
   end;
 
-  LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, MajorVersion, MinorVersion, ReleaseVersion);
+  LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, FMajorVersion, FMinorVersion, FReleaseVersion);
   try
     try
       // Lazarus 1.2RC1+ and trunk support specifying the primary-config-path that should be used

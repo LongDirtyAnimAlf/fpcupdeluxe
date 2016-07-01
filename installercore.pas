@@ -257,74 +257,12 @@ begin
 end;
 
 procedure TInstaller.SetURL(value:string);
-var
-  VersionSnippet:string;
-  VersionList: TStringList;
-  i:integer;
 begin
   FURL:=value;
-
   FMajorVersion := -1;
   FMinorVersion := -1;
   FReleaseVersion := -1;
   FCandidateVersion := -1;
-
-  //inside fpc source (dir:compiler), there is version.pas with:
-  //version_nr = '3';
-  //release_nr = '0';
-  //patch_nr   = '1';
-  //minorpatch = 'rc1';
-  //inside lazarus source( dir: ide), there is version.inc, with a single line and a single string with version
-  // '1.5'
-
-  // for now, get version from URL
-
-  VersionSnippet:=UpperCase(FURL);
-  // find first occurence of _ and delete everything before it
-  // if URL contains a version, this version always starts with _
-  i := Pos('_',VersionSnippet);
-  if i>0 then
-  begin
-    Delete(VersionSnippet,1,i);
-    // release candidate numbering
-    i := Pos('_RC',VersionSnippet);
-    if i>0 then
-    begin
-      FCandidateVersion := StrToIntDef(Copy(VersionSnippet,i+3,1), -1);
-      Delete(VersionSnippet,i,10);
-    end;
-    VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
-  end;
-  if Length(VersionSnippet)>0 then
-  begin
-    VersionList := TStringList.Create;
-    try
-      VersionList.CommaText := VersionSnippet;
-      case VersionList.Count of
-        1:
-        begin
-          FMajorVersion := StrToIntDef(VersionList[0], -1);
-          FMinorVersion := 0;
-          FReleaseVersion := 0;
-        end;
-        2:
-        begin
-          FMajorVersion := StrToIntDef(VersionList[0], -1);
-          FMinorVersion := StrToIntDef(VersionList[1], -1);
-          FReleaseVersion := 0;
-        end;
-        3..maxint:
-        begin
-          FMajorVersion := StrToIntDef(VersionList[0], -1);
-          FMinorVersion := StrToIntDef(VersionList[1], -1);
-          FReleaseVersion := StrToIntDef(VersionList[2], -1);
-        end;
-      end;
-    finally
-      VersionList.Free;
-    end;
-  end;
-
 end;
 
 function TInstaller.GetMake: string;
