@@ -834,13 +834,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   {$ifdef linux}
   function CheckDevLibs(LCLPlatform: string): boolean;
   const
-    LIBSCNT=7;
+    LIBSCNT=4;
   type
     TLibList=array[1..LIBSCNT] of string;
   const
-    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so','libgtk2.0-dev','libgdk-pixbuf2.0-dev','libpango1.0-dev');
+    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so');
     //libx11-dev libgdk-pixbuf2.0-dev libcairo2-dev libpangox-1.0-dev xorg-dev libgtk2.0-dev libpango1.0-dev
-    QTLIBS:TLibList = ('libQt4Pas.so','','','','','','');
+    QTLIBS:TLibList = ('libQt4Pas.so','','','');
   var
     i:integer;
     pll:^TLibList;
