@@ -844,6 +844,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   var
     i:integer;
     pll:^TLibList;
+    Output: string;
+    AllOutput:TStringList;
 
     function TestLib(LibName:string):boolean;
     var
@@ -861,6 +863,32 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
   begin
     result:=true;
+
+    ExecuteCommand('cat /etc/*-release',Output,false);
+    AllOutput:=TStringList.Create;
+    try
+      AllOutput.Text := Output;
+      Output := AllOutput.Values['DISTRIB_ID'];
+      if Output='Arch' then
+      begin
+        Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
+      end
+      else
+      if (Output='Ubuntu') OR (Output='Debian') then
+      begin
+        Output:='libx11-dev libgtk2.0-dev gtk2-engines-pixbuf libcairo2-dev libpango1.0-0';
+      end
+      else
+      if (Output='RHEL') OR (Output='CentOS') OR (Output='Scientific') OR (Output='Fedora')  then
+      begin
+        Output:='libX11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
+      end
+      else Output:=' the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so';
+
+    finally
+      AllOutput.Free;
+    end;
+
     if (LCLPlatform='') or (Uppercase(LCLPlatform)='GTK2') then
       pll:=@LCLLIBS
     else if Uppercase(LCLPlatform)='QT' then
@@ -869,10 +897,12 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       begin
       if not TestLib(pll^[i]) then
         begin
-        FParent.WritelnLog('Required -dev packages are not installed for Lazarus: '+pll^[i], true);
+        FParent.WritelnLog('Required packages are not installed for Lazarus: '+pll^[i], true);
         result:=false;
         end;
       end;
+    if (NOT result) AND (Length(Output)>0) then FParent.WritelnLog('You need to install at least '+Output+' !', true);
+
   end;
   {$else} //stub for other platforms for now
   function CheckDevLibs(LCLPlatform: string): boolean;
