@@ -60,7 +60,7 @@ binutils, svn executable)
   your Lazarus programs 
 - libX11, libgdk_pixbuf-2.0, libpango-1.0, libgdk-x11-2.0
 E.g. on Debian or Ubuntu, do something like:
-sudo aptitude install make binutils build-essential gdb subversion zip unzip libx11-dev libgtk2.0-dev gtk2-engines-pixbuf libcairo2-dev libpango1.0-0
+sudo aptitude install make binutils build-essential gdb subversion zip unzip libx11-dev libgtk2.0-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev
 
 - Apple OSX
 ===========
