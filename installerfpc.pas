@@ -36,6 +36,7 @@ uses
 
 Const
   FPCTRUNKVERSION='3.1.1';
+  FPCTRUNKCOMPILER = '3.0.0';
 
   Sequences=
 // convention: FPC sequences start with 'FPC'.
@@ -119,6 +120,8 @@ type
     function GetCompilerMajorVersionFromSource(CompilerSourcePath: string): integer;
     function GetCompilerMinorVersionFromSource(CompilerSourcePath: string): integer;
     function GetCompilerReleaseVersionFromSource(CompilerSourcePath: string): integer;
+
+    function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
 
     // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
@@ -696,10 +699,9 @@ end;
 function TFPCInstaller.GetCompilerVersion(CompilerPath: string): string;
 var
   Output: string;
-  ResultCode: longint;
 begin
   Output:='';
-  ResultCode:=ExecuteCommand(CompilerPath+ ' -iW', Output, FVerbose);
+  ExecuteCommand(CompilerPath+ ' -iW', Output, FVerbose);
   Output:=StringReplace(Output,LineEnding,'',[rfReplaceAll,rfIgnoreCase]);
   Result:=Output;
 end;
@@ -738,12 +740,10 @@ end;
 
 function TFPCInstaller.GetCompilerVersionFromUrl(aUrl: string): string;
 var
-  Output: string;
-begin
-  if Pos('trunk',aUrl)>0 then result:=FPCTRUNKVERSION else
+  aVersion: string;
   begin
-    // todo : process end of furl to get version !!
-  end;
+  aVersion:=GetVersionFromUrl(aUrl);
+  if aVersion='trunk' then result:=FPCTRUNKVERSION else result:=aVersion;
 end;
 
 function TFPCInstaller.GetCompilerVersionFromSource(aSourcePath: string): string;
@@ -846,6 +846,24 @@ end;
 function TFPCInstaller.GetCompilerReleaseVersionFromSource(CompilerSourcePath: string): integer;
 begin
   result:=GetCompilerVersionNumber(GetCompilerVersionFromSource(CompilerSourcePath),2);
+end;
+
+function TFPCInstaller.GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
+var
+  s:string;
+begin
+  s:=aVersion;
+
+  // set default to latest stable compiler
+  result:=FPCTRUNKCOMPILER;
+
+  if (s='3.0.0') OR (s='3.0.1') or (s='3.0.2') then result:='2.6.4'
+  else if s='2.6.4' then result:='2.6.2'
+  else if s='2.6.2' then result:='2.6.0'
+  else if s='2.6.0' then result:='2.4.4'
+  else if s='2.4.4' then result:='2.4.2'
+  else if s='2.4.2' then result:='2.4.0';
+
 end;
 
 
@@ -1051,14 +1069,17 @@ end;
 function TFPCInstaller.InitModule:boolean;
 const
   // Common path used to get bootstrap compilers.
-  //todo: replace when enough compilers are available via 2.6.2
-  FTPPath='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
+  FTP242Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.2/bootstrap/';
+  FTP244Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.4.4/bootstrap/';
+  FTP260Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.0/bootstrap/';
   FTP262Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.2/bootstrap/';
   FTP264Path='ftp://ftp.freepascal.org/pub/fpc/dist/2.6.4/bootstrap/';
   FTP300Path='ftp://ftp.freepascal.org/pub/fpc/dist/3.0.0/bootstrap/';
   FpcupBootsTrappersPath='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/raw/master/bin/';
 
 var
+  aCompilerList:TStringList;
+  i:integer;
   BootstrapVersion: string;
   Output: string;
 begin
@@ -1069,8 +1090,29 @@ begin
     ProcessEx.OnOutputM:=@DumpOutput;
   infoln('TFPCInstaller: initialising...',etDebug);
   if FBootstrapCompiler='' then
-    begin  // may need to download it
-    // We assume we're using the regular latest stable compiler, so don't
+    begin
+
+    {
+    writeln(GetVersionFromUrl(FURL));
+    writeln(GetCompilerVersionFromUrl(FURL));
+    BootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromUrl(FURL));
+    writeln(BootstrapVersion);
+
+    aCompilerList:=TStringList.Create;
+    try
+      FtpGetFileList('ftp.freepascal.org', 'pub/fpc/dist/'+BootstrapVersion+'/bootstrap', aCompilerList);
+      for i:=0 to Pred(aCompilerList.Count) do
+      begin
+      writeln(aCompilerList[i]);
+      end;
+    finally
+      aCompilerList.Free;
+    end;
+    readln;
+    }
+
+    // may need to download it
+    // We assume we're using the right bootstrap compiler, so don't
     // suggest to make to override version checks.
     // Useful if we forget to update compiler versions when a new stable is released.
     FBootstrapCompilerOverrideVersionCheck:=false;
@@ -1109,8 +1151,22 @@ begin
       end;
     {$ELSE}
     // Win32
+    {
+    if aCompilerList.IndexOf('i386-win32-ppc386.zip')=-1 then
+    begin
+      // no correct bootstrapper found
+      FBootstrapCompilerOverrideVersionCheck:=true;
+    end
+    else
+    begin
+    if FBootstrapCompilerURL='' then
+         FBootstrapCompilerURL :='ftp://ftp.freepascal.org/pub/fpc/dist/'+BootstrapVersion+'/bootstrap/i386-win32-ppc386.zip';
+    end;
+    }
+
     if FBootstrapCompilerURL='' then
        FBootstrapCompilerURL := FTP300Path+'i386-win32-ppc386.zip';
+
     FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppc386.exe';
     if NOT FileExists(FBootstrapCompiler) then
     begin

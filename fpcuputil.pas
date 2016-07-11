@@ -82,11 +82,13 @@ function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList
 // only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
 function GetFileNameFromURL(URL:string):string;
+function GetVersionFromUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 // File size; returns 0 if empty, non-existent or error.
 //function FileSizeUTF8(FileName: string): int64;
+function FtpGetFileList(const URL, Path: string; DirList: TStringList): Boolean;
 {$IFDEF MSWINDOWS}
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
@@ -641,6 +643,33 @@ begin
   end;
 end;
 
+
+function FtpGetFileList(const URL, Path: string; DirList: TStringList): Boolean;
+var
+  i: Integer;
+  s: string;
+begin
+  Result := False;
+  with TFTPSend.Create do
+  try
+    //Username := 'anonymous';
+    //Password := '';
+    TargetHost := URL;
+    if not Login then
+      Exit;
+    Result := List(Path, False);
+    for i := 0 to FtpList.Count -1 do
+    begin
+      s := FTPList[i].FileName;
+      DirList.Add(s);
+    end;
+    Logout;
+  finally
+    Free;
+  end;
+end;
+
+
 function GetFileNameFromURL(URL:string):string;
 var
   i:integer;
@@ -652,6 +681,51 @@ begin
   if i=0 then exit;
   while (i>0) AND (result[i]<>'/') do Dec(i);
   result:=RightStr(result,Length(result)-i+1);
+end;
+
+function GetVersionFromUrl(URL:string): string;
+var
+  VersionSnippet:string;
+  i:integer;
+  VersionList : TStringList;
+  MajorVersion,MinorVersion,ReleaseVersion : string;
+begin
+  if Pos('trunk',URL)>0 then result:='trunk' else
+  begin
+    MajorVersion := '0';
+    MinorVersion := '0';
+    ReleaseVersion := '0';
+
+    VersionSnippet:=UpperCase(URL);
+
+    // find first occurence of _ and delete everything before it
+    // if url contains a version, this version always starts with first _
+
+    i := Pos('_',VersionSnippet);
+    if i>0 then
+    begin
+      Delete(VersionSnippet,1,i);
+      // ignore release candidate numbering
+      i := Pos('_RC',VersionSnippet);
+      if i>0 then Delete(VersionSnippet,i,200);
+      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
+    end;
+
+    if Length(VersionSnippet)>0 then
+    begin
+      VersionList := TStringList.Create;
+      try
+        VersionList.CommaText := VersionSnippet;
+        if VersionList.Count>0 then MajorVersion := VersionList[0];
+        if VersionList.Count>1 then MinorVersion := VersionList[1];
+        if VersionList.Count>2 then ReleaseVersion := VersionList[2];
+      finally
+        VersionList.Free;
+      end;
+    end;
+    result:=MajorVersion+'.'+MinorVersion+'.'+ReleaseVersion;
+
+  end;
 end;
 
 

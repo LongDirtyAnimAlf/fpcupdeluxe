@@ -43,13 +43,17 @@ uses
 {$IFDEF MSWINDOWS}
 // On Windows, we can be certain a valid FPC install has
 // windres, so use it.
-{$R fpcup.rc}
+{.$R fpcup.rc}
 {$ELSE}
 // On other platforms we cannot be certain, so we hope either
 // - a previous windows compile
 // - manual windres invocation
 // has updated fpcup.res
+{$ifndef FPCONLY}
+{$R fpclazup.res}
+{$else}
 {$R fpcup.res}
+{$endif}
 {$ENDIF MSWINDOWS}
 
 

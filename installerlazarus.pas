@@ -1048,21 +1048,24 @@ begin
     infoln('Lazarus is now at: ' + AfterRevision, etInfo);
   end;
 
-  // update revision.inc;
-  infoln('Updating Lazarus version info.', etInfo);
-  AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FBaseDirectory)+'ide'+PathDelim+RevisionIncFileName);
-  try
-    Rewrite(RevisionIncText);
-    writeln(RevisionIncText, RevisionIncComment);
-    ConstStart := Format('const %s = ''', [ConstName]);
-    writeln(RevisionIncText, ConstStart, FSVNClient.LocalRevision, ''';');
-  finally
-    CloseFile(RevisionIncText);
+  if (Result) then
+  begin
+    // update revision.inc;
+    infoln('Updating Lazarus version info.', etInfo);
+    AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FBaseDirectory)+'ide'+PathDelim+RevisionIncFileName);
+    try
+      Rewrite(RevisionIncText);
+      writeln(RevisionIncText, RevisionIncComment);
+      ConstStart := Format('const %s = ''', [ConstName]);
+      writeln(RevisionIncText, ConstStart, FSVNClient.LocalRevision, ''';');
+    finally
+      CloseFile(RevisionIncText);
+    end;
   end;
 
   if Result
-     then infoln('Result true', etInfo)
-     else infoln('Result false', etInfo);
+     then infoln('Checking out/updating Lazarus sources failure', etError)
+     else infoln('Checking out/updating Lazarus sources ok', etInfo);
 
   // Download Qt bindings if not present yet
   Errors := 0;
