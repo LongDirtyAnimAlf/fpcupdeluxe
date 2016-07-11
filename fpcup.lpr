@@ -104,6 +104,12 @@ var
   FPCupManager:TFPCupManager;
   res:integer;
 
+{$ifndef FPCONLY}
+{$R fpclazup.res}
+{$else}
+{$R fpcup.res}
+{$endif}
+
 begin
   {$ifndef FPCONLY}
   writeln('Fpclazup, a FPC/Lazarus downloader/updater/installer');
