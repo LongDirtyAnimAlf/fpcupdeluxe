@@ -140,8 +140,6 @@ end;"/>
         <Filename Value="updatelazconfig.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="480"/>
-        <CursorPos X="41" Y="504"/>
         <UsageCount Value="200"/>
       </Unit2>
       <Unit3>
@@ -173,7 +171,6 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="4"/>
-        <CursorPos Y="2"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -182,13 +179,15 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="861"/>
+        <CursorPos X="14" Y="883"/>
         <UsageCount Value="200"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit8>
@@ -204,7 +203,7 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -237,6 +236,8 @@ end;"/>
         <Filename Value="commandline.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="182"/>
+        <CursorPos X="11" Y="190"/>
         <UsageCount Value="200"/>
       </Unit14>
       <Unit15>
@@ -248,13 +249,16 @@ end;"/>
       <Unit16>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="315"/>
+        <CursorPos X="39" Y="331"/>
         <UsageCount Value="200"/>
       </Unit17>
       <Unit18>
@@ -417,7 +421,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="31" Y="19"/>
-        <UsageCount Value="129"/>
+        <UsageCount Value="144"/>
       </Unit38>
       <Unit39>
         <Filename Value="jedi.inc"/>
@@ -426,7 +430,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="129"/>
+        <UsageCount Value="144"/>
       </Unit39>
       <Unit40>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -434,7 +438,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="129"/>
+        <UsageCount Value="144"/>
       </Unit40>
       <Unit41>
         <Filename Value="revision.inc"/>
@@ -443,38 +447,40 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="129"/>
+        <UsageCount Value="144"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="122"/>
+        <UsageCount Value="137"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="86"/>
+        <UsageCount Value="101"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="86"/>
+        <UsageCount Value="101"/>
       </Unit44>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="84"/>
+        <TopLine Value="684"/>
+        <CursorPos X="19" Y="686"/>
+        <UsageCount Value="99"/>
       </Unit45>
       <Unit46>
         <Filename Value="m_any_to_linuxaarch64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="19" Y="4"/>
-        <UsageCount Value="45"/>
+        <UsageCount Value="60"/>
       </Unit46>
     </Units>
   </ProjectSession>

@@ -706,16 +706,23 @@ var
   RevCount: integer;
 begin
 
-  if ExportOnly then
-  begin
-    FReturnCode := 0;
-    exit;
-  end;
-
   // Only update if we have invalid revision info, in order to minimize svn info calls
   if (FLocalRevision = FRET_UNKNOWN_REVISION) or (FLocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) then
   begin
-    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+    if ExportOnly then
+       begin
+         if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD')
+            then FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FRepositoryURL, Output, Verbose)
+            else
+            begin
+              FLocalRevision := FDesiredRevision;
+              FLocalRevisionWholeRepo := FDesiredRevision;
+              FReturnCode := 0;
+              exit;
+            end;
+       end
+       else FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' info '+GetProxyCommand+' '+FLocalRepository, Output, Verbose);
+
     FReturnOutput := Output;
     // Could have used svnversion but that would have meant calling yet another command...
     // Get the part after "Revision:"...

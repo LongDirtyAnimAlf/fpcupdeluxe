@@ -722,6 +722,7 @@ begin
   begin
     if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger) then
     begin
+      if (FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[Counter].FileName)) then continue;
       infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir,etInfo);
       try
         if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
