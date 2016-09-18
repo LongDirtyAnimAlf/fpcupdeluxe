@@ -77,6 +77,9 @@ const
   HelpConfig='helpoptions.xml';
   // Packages:
   PackageConfig='packagefiles.xml';
+  // FPC defines (source cache):
+  FPCDefines='fpcdefines.xml';
+
   // Versions used when new config files are generated.
   // Lazarus pre 1.0: 106
   // We can assume Lazarus SVN can parse this version:

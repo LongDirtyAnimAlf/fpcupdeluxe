@@ -868,21 +868,26 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     AllOutput:=TStringList.Create;
     try
       AllOutput.Text := Output;
-      Output := AllOutput.Values['DISTRIB_ID'];
-      if Output='Arch' then
+      Output := lowercase(AllOutput.Values['DISTRIB_ID']);
+      if Output='arch' then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
       end
       else
-      if (Output='Ubuntu') OR (Output='Debian') then
+      if (Output='ubuntu') then
       begin
         Output:='libx11-dev libgtk2.0-dev gtk2-engines-pixbuf libcairo2-dev libpango1.0-0';
       end
+      else if (Output='debian') then
+      begin
+        Output:='libgtk2.0-dev libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
+      end
       else
-      if (Output='RHEL') OR (Output='CentOS') OR (Output='Scientific') OR (Output='Fedora')  then
+      if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
       begin
         Output:='libX11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
       end
+
       else Output:=' the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so';
 
     finally

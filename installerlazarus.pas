@@ -1064,8 +1064,8 @@ begin
   end;
 
   if Result
-     then infoln('Checking out/updating Lazarus sources failure', etError)
-     else infoln('Checking out/updating Lazarus sources ok', etInfo);
+     then infoln('Checking out/updating Lazarus sources ok', etInfo)
+     else infoln('Checking out/updating Lazarus sources failure', etError);
 
   // Download Qt bindings if not present yet
   Errors := 0;

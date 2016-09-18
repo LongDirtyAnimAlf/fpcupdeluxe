@@ -773,8 +773,6 @@ begin
   if FileExists(s) then
   begin
 
-    infoln('Get FPC version from version.pas',etInfo);
-
     AssignFile(TxtFile,s);
     Reset(TxtFile);
     while NOT EOF (TxtFile) do
@@ -830,7 +828,7 @@ begin
 
     CloseFile(TxtFile);
 
-  end else infoln('No version.pas found',etError);
+  end else infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
 
   result:=version_nr+'.'+release_nr+'.'+patch_nr;
 end;
@@ -856,8 +854,8 @@ begin
 
   // set default to latest stable compiler
   result:=FPCTRUNKCOMPILER;
-
-  if (s='3.0.0') OR (s='3.0.1') or (s='3.0.2') then result:='2.6.4'
+  if (s='3.0.1') or (s='3.0.2') then result:='3.0.0'
+  else if s='3.0.0' then result:='2.6.4'
   else if s='2.6.4' then result:='2.6.2'
   else if s='2.6.2' then result:='2.6.0'
   else if s='2.6.0' then result:='2.4.4'
@@ -1383,6 +1381,7 @@ function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   bIntermediateNeeded:boolean;
   IntermediateCompiler:string;
+  RequiredBootstrapVersion:string;
   FPCCfg: string;
   FPCMkCfg: string; //path+file of fpcmkcfg
   OperationSucceeded: boolean;
@@ -1393,6 +1392,7 @@ var
   BootstrapDirectory :string;
   x:integer;
 begin
+
   bIntermediateNeeded:=false;
   aCPU := lowercase({$i %FPCTARGETCPU%});
   aOS  := lowercase({$i %FPCTARGETOS%});
@@ -1401,60 +1401,55 @@ begin
   if not result then exit;
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
 
-  // only check trunk and/or arm for now !!
   // arm needs >= 3.0.0 for ARMHF
   // trunk needs >= 3.0.0
 
   infoln('We have a FPC source (@ '+FBaseDirectory+') with version: '+GetCompilerVersionFromSource(FBaseDirectory),etInfo);
+  RequiredBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(FBaseDirectory));
+  infoln('To compile this FPC, we need a compiler with version : '+RequiredBootstrapVersion,etInfo);
 
-  if GetCompilerMajorVersion(FCompiler)<3 then
+  if (
+  {$if defined(cpuarm) and defined(unix)}(True) OR {$endif}
+  (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersion)
+  ) then
   begin
-    if (
-       {$if defined(cpuarm) and defined(unix)}(True) OR {$endif}
-       ((GetCompilerMajorVersionFromSource(FBaseDirectory)>=3) AND (GetCompilerMinorVersionFromSource(FBaseDirectory)>=1))
-    )
-    then
-    begin
+      // we need an intermediate compiler !!
+
       if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompiler) then
       begin
         bIntermediateNeeded:=true;
       end
       else
       begin
-        if (GetCompilerMajorVersion(ExtractFilePath(FCompiler)+IntermediateCompiler)<3) then
+        if (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompiler)<>RequiredBootstrapVersion) then
         begin
           bIntermediateNeeded:=true;
         end
         else
         begin
-          infoln('Using available intermediate compiler.',etInfo);
+          infoln('Using available FPC '+GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompiler)+' intermediate compiler.',etInfo);
           FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
           FBootstrapCompilerOverrideVersionCheck:=False;
         end;
       end;
-    end;
   end;
 
   if (bIntermediateNeeded) then
   begin
-    infoln('Checking out/updating FPC 3.0.0 sources for intermediate bootstrap compiler ...',etInfo);
+    infoln('We need to build an FPC ' + RequiredBootstrapVersion + ' intermediate compiler.',etInfo);
+    infoln('Checking out/updating sources for intermediate bootstrap compiler.',etInfo);
     BootstrapDirectory := ExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory) + '..');
-    BootstrapDirectory := IncludeTrailingPathDelimiter(BootstrapDirectory)+'fpc300bootstrap';
-    //no 3.0 fixes allowed: only 3.0.0 is allowed for current trunk (3.1.1) see: http://lists.freepascal.org/pipermail/fpc-devel/2016-February/036645.html
-    {$ifdef darwin}
-    //s:='http://svn.freepascal.org/svn/fpc/branches/fixes_3_0_ios';
-    {$else}
-    //s:='http://svn.freepascal.org/svn/fpc/branches/fixes_3_0';
-    {$endif}
-    s:='http://svn.freepascal.org/svn/fpc/tags/release_3_0_0';
+    BootstrapDirectory := IncludeTrailingPathDelimiter(BootstrapDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
+    s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
     ExecuteCommand(FSVNClient.RepoExecutable + ' checkout --depth=files ' + s + ' ' + BootstrapDirectory, FVerbose);
     ExecuteCommand(FSVNClient.RepoExecutable + ' update compiler ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
     ExecuteCommand(FSVNClient.RepoExecutable + ' update rtl ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
 
-    infoln('Checking out/updating FPC 3.0.0 sources for intermediate bootstrap compiler done.',etInfo);
+    infoln('Checking out/updating FPC ' + RequiredBootstrapVersion + ' sources for intermediate bootstrap compiler done.',etInfo);
 
-    // Build an intermediate bootstrap compiler in target fpc300bootstrap dir.
+    // Build an intermediate bootstrap compiler in target fpc[version]bootstrap dir.
     // Version-dependent: please review and modify when new FPC version is released
+
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
 
@@ -1470,7 +1465,7 @@ begin
 
     // needed if we only have a 2.6.2 or lower bootstrapper
     // we could also build a 2.6.4 intermediate when a 2.6.2 bootstrap is encountered ... but we don't !!
-    if (GetCompilerReleaseVersion(FCompiler)<4) then
+    if (GetCompilerMajorVersion(FCompiler)=2) AND (GetCompilerMinorVersion(FCompiler)=6) AND (GetCompilerReleaseVersion(FCompiler)<4) then
        ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
     infoln('Running make cycle for intermediate compiler:',etInfo);
     ProcessEx.Execute;
@@ -1480,7 +1475,7 @@ begin
       WritelnLog('FPC: Failed to build intermediate bootstrap compiler ',true);
       exit;
     end;
-    infoln('Successfully build intermediate bootstrap compiler.',etInfo);
+    infoln('Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
 
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(aCPU),
       ExtractFilePath(FCompiler)+IntermediateCompiler);
