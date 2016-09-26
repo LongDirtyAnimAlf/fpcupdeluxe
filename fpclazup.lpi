@@ -23,9 +23,6 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <VersionInfo>
-      <StringTable ProductVersion=""/>
-    </VersionInfo>
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
@@ -202,7 +199,7 @@ end;"/>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpclazup_linux_arm"/>
+            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpclazup_android_arm"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
@@ -211,7 +208,6 @@ end;"/>
           </SearchPaths>
           <CodeGeneration>
             <SmartLinkUnit Value="True"/>
-            <TargetProcessor Value="ARMV6"/>
             <TargetCPU Value="arm"/>
             <TargetOS Value="android"/>
             <Optimizations>
@@ -228,7 +224,6 @@ end;"/>
           </Linking>
           <Other>
             <WriteFPCLogo Value="False"/>
-            <CustomOptions Value="-CpARMV7A -CfVFPV3 -OoFASTMATH"/>
             <ExecuteBefore>
               <CompileReasons Run="False"/>
             </ExecuteBefore>

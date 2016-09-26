@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="Default">
+    <BuildModes Count="3" Active="androidarm">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -134,8 +134,8 @@ end;"/>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="457"/>
-        <CursorPos Y="471"/>
+        <TopLine Value="272"/>
+        <CursorPos X="38" Y="343"/>
         <UsageCount Value="200"/>
       </Unit1>
       <Unit2>
@@ -158,7 +158,7 @@ end;"/>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -174,7 +174,7 @@ end;"/>
         <Filename Value="installerlazarus.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>
@@ -183,15 +183,13 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="861"/>
-        <CursorPos X="14" Y="883"/>
         <UsageCount Value="200"/>
       </Unit7>
       <Unit8>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="6"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit8>
@@ -207,7 +205,7 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="7"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -316,8 +314,8 @@ end;"/>
         <Filename Value="m_win32_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="88"/>
-        <CursorPos Y="113"/>
+        <TopLine Value="89"/>
+        <CursorPos X="144" Y="101"/>
         <UsageCount Value="200"/>
       </Unit24>
       <Unit25>
@@ -330,7 +328,8 @@ end;"/>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="32" Y="11"/>
+        <TopLine Value="88"/>
+        <CursorPos X="21" Y="143"/>
         <UsageCount Value="200"/>
       </Unit26>
       <Unit27>
@@ -345,8 +344,8 @@ end;"/>
         <Filename Value="m_any_to_androidarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="236"/>
-        <CursorPos X="4" Y="467"/>
+        <TopLine Value="272"/>
+        <CursorPos X="20" Y="272"/>
         <UsageCount Value="200"/>
       </Unit28>
       <Unit29>
@@ -415,8 +414,8 @@ end;"/>
         <Filename Value="m_any_to_linux386.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="110"/>
-        <CursorPos X="5" Y="131"/>
+        <TopLine Value="86"/>
+        <CursorPos Y="101"/>
         <UsageCount Value="200"/>
       </Unit37>
       <Unit38>
@@ -424,7 +423,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="31" Y="19"/>
-        <UsageCount Value="149"/>
+        <UsageCount Value="152"/>
       </Unit38>
       <Unit39>
         <Filename Value="jedi.inc"/>
@@ -433,7 +432,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="149"/>
+        <UsageCount Value="152"/>
       </Unit39>
       <Unit40>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -441,7 +440,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="149"/>
+        <UsageCount Value="152"/>
       </Unit40>
       <Unit41>
         <Filename Value="revision.inc"/>
@@ -450,39 +449,42 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="149"/>
+        <UsageCount Value="152"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="142"/>
+        <TopLine Value="77"/>
+        <CursorPos Y="92"/>
+        <UsageCount Value="145"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="106"/>
+        <UsageCount Value="109"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="106"/>
+        <UsageCount Value="109"/>
       </Unit44>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="4"/>
-        <UsageCount Value="104"/>
+        <EditorIndex Value="8"/>
+        <UsageCount Value="107"/>
         <Loaded Value="True"/>
       </Unit45>
       <Unit46>
         <Filename Value="m_any_to_linuxaarch64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="19" Y="4"/>
-        <UsageCount Value="65"/>
+        <TopLine Value="77"/>
+        <CursorPos X="144" Y="94"/>
+        <UsageCount Value="68"/>
       </Unit46>
     </Units>
   </ProjectSession>

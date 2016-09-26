@@ -1076,7 +1076,7 @@ begin
       if (FUtilFiles[Counter].Category = ucQtFile) and not
         (FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + FUtilFiles[Counter].FileName)) then
       begin
-        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory, etInfo);
+        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FBaseDirectory, etDebug);
         try
           if Download(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(FBaseDirectory) +
             FUtilFiles[Counter].FileName, FHTTPProxyHost, IntToStr(FHTTPProxyPort), FHTTPProxyUser,

@@ -122,6 +122,7 @@ type
     function GetCompilerReleaseVersionFromSource(CompilerSourcePath: string): integer;
 
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
+    function GetBootstrapCompilerVersionFromSource(aSourcePath: string): string;
 
     // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
@@ -249,6 +250,55 @@ begin
     ConfigText.Free;
     SnippetText.Free;
   end;
+end;
+
+// remove stale compiled files
+procedure RemoveStaleBuildDirectories(aBaseDir,aArch:string);
+var
+  OldPath:string;
+  FileInfo: TSearchRec;
+begin
+  DeleteDirectoryEx(IncludeTrailingPathDelimiter(aBaseDir)+'rtl'+DirectorySeparator+'units'+DirectorySeparator+aArch);
+  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'rtl'+DirectorySeparator+'units');
+
+  DeleteDirectoryEx(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'units'+DirectorySeparator+aArch);
+  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'units');
+
+  DeleteDirectoryEx(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'bin'+DirectorySeparator+aArch);
+  RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'bin');
+
+  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages'+DirectorySeparator;
+  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        if (FileInfo.Attr and faDirectory) = faDirectory then
+        begin
+          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
+          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+    FindCloseUTF8(FileInfo);
+  end;
+
+  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'compiler'+DirectorySeparator;
+  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        if (FileInfo.Attr and faDirectory) = faDirectory then
+        begin
+          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
+          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+    FindCloseUTF8(FileInfo);
+  end;
+
 end;
 
 { TFPCCrossInstaller }
@@ -550,13 +600,17 @@ begin
           GetCompiler;
           end;
         end;
-      end
+      end;
+
+    RemoveStaleBuildDirectories(FBaseDirectory,FCrossCPU_Target+'-'+FCrossOS_Target);
+
     end
     else
       begin
       infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
       result:=false;
       end;
+
 end;
 
 
@@ -864,6 +918,61 @@ begin
 
 end;
 
+function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string): string;
+var
+  TxtFile:Text;
+  version_nr:string;
+  release_nr:string;
+  patch_nr:string;
+  s:string;
+  x:integer;
+begin
+
+  //cheap (or expensive) coding ... but effective ... ;-)
+  version_nr:='0';
+  release_nr:='0';
+  patch_nr:='0';
+
+  s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
+
+  if FileExists(s) then
+  begin
+
+    AssignFile(TxtFile,s);
+    Reset(TxtFile);
+    while NOT EOF (TxtFile) do
+    begin
+      Readln(TxtFile,s);
+
+      x:=Pos('REQUIREDVERSION',s);
+
+      if x>0 then
+      begin
+        x:=x+Length('REQUIREDVERSION');
+
+        while ( (x<Length(s)) AND (NOT (Ord(s[x]) in [ord('0')..ord('9')])) ) do Inc(x);
+        if (x<Length(s)) then version_nr:=s[x];
+        Inc(x);
+
+        while ( (x<Length(s)) AND (NOT (Ord(s[x]) in [ord('0')..ord('9')])) ) do Inc(x);
+        if (x<Length(s)) then release_nr:=s[x];
+        Inc(x);
+
+        while ( (x<Length(s)) AND (NOT (Ord(s[x]) in [ord('0')..ord('9')])) ) do Inc(x);
+        if (x<Length(s)) then patch_nr:=s[x];
+
+        break;
+      end;
+
+    end;
+
+    CloseFile(TxtFile);
+
+  end else infoln('Tried to get required bootstrap compiler version from Makefile.fpc, but no Makefile.fpc found',etError);
+
+  result:=version_nr+'.'+release_nr+'.'+patch_nr;
+end;
+
 
 function TFPCInstaller.CreateFPCScript: boolean;
   {$IFDEF UNIX}
@@ -949,7 +1058,7 @@ begin
   // Move CompilerName to proper directory
   if OperationSucceeded = True then
   begin
-    infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, etinfo);
+    infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, etDebug);
     renamefile(ArchiveDir + CompilerName, FBootstrapCompiler);
   end;
   {$ENDIF MSWINDOWS}
@@ -968,7 +1077,7 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etInfo);
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
     OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
   end;
   if OperationSucceeded then
@@ -995,7 +1104,7 @@ begin
   // Move compiler to proper directory; note bzip2 will append .out to file
   if OperationSucceeded = True then
   begin
-    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etInfo);
+    infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
     OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
   end;
   if OperationSucceeded then
@@ -1094,6 +1203,16 @@ begin
     writeln(GetVersionFromUrl(FURL));
     writeln(GetCompilerVersionFromUrl(FURL));
     BootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromUrl(FURL));
+
+
+    //BootstrapVersion:=GetBootstrapCompilerVersionFromSource(FBaseDirectory);
+    //if RequiredBootstrapVersion='0.0.0' then
+    //begin
+    //  BootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(FBaseDirectory));
+    //  infoln('To compile this FPC, we use a compiler with version : '+BootstrapVersion,etInfo);
+    //end else infoln('To compile this FPC, we need (required) a compiler with version : '+BootstrapVersion,etInfo);
+
+
     writeln(BootstrapVersion);
 
     aCompilerList:=TStringList.Create;
@@ -1382,6 +1501,7 @@ var
   bIntermediateNeeded:boolean;
   IntermediateCompiler:string;
   RequiredBootstrapVersion:string;
+  RequiredBootstrapBootstrapVersion:string;
   FPCCfg: string;
   FPCMkCfg: string; //path+file of fpcmkcfg
   OperationSucceeded: boolean;
@@ -1405,8 +1525,12 @@ begin
   // trunk needs >= 3.0.0
 
   infoln('We have a FPC source (@ '+FBaseDirectory+') with version: '+GetCompilerVersionFromSource(FBaseDirectory),etInfo);
-  RequiredBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(FBaseDirectory));
-  infoln('To compile this FPC, we need a compiler with version : '+RequiredBootstrapVersion,etInfo);
+  RequiredBootstrapVersion:=GetBootstrapCompilerVersionFromSource(FBaseDirectory);
+  if RequiredBootstrapVersion='0.0.0' then
+  begin
+    RequiredBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(FBaseDirectory));
+    infoln('To compile this FPC, we use a compiler with version : '+RequiredBootstrapVersion,etInfo);
+  end else infoln('To compile this FPC, we need (required) a compiler with version : '+RequiredBootstrapVersion,etInfo);
 
   if (
   {$if defined(cpuarm) and defined(unix)}(True) OR {$endif}
@@ -1432,7 +1556,7 @@ begin
           FBootstrapCompilerOverrideVersionCheck:=False;
         end;
       end;
-  end;
+  end else infoln('Available bootstrapper has correct version !',etInfo);;
 
   if (bIntermediateNeeded) then
   begin
@@ -1450,6 +1574,14 @@ begin
     // Build an intermediate bootstrap compiler in target fpc[version]bootstrap dir.
     // Version-dependent: please review and modify when new FPC version is released
 
+    infoln('We have a FPC bootstrap source (@ '+BootstrapDirectory+') with version: '+RequiredBootstrapVersion,etInfo);
+    RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory);
+    if RequiredBootstrapBootstrapVersion='0.0.0' then
+    begin
+      RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(BootstrapDirectory));
+      infoln('To compile this bootstrap FPC, we should use a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
+    end else infoln('To compile this bootstrap FPC, we need (required) a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
+
     ProcessEx.Executable := Make;
     ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
 
@@ -1465,9 +1597,13 @@ begin
 
     // needed if we only have a 2.6.2 or lower bootstrapper
     // we could also build a 2.6.4 intermediate when a 2.6.2 bootstrap is encountered ... but we don't !!
-    if (GetCompilerMajorVersion(FCompiler)=2) AND (GetCompilerMinorVersion(FCompiler)=6) AND (GetCompilerReleaseVersion(FCompiler)<4) then
+    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
+    begin
+       infoln('Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
        ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-    infoln('Running make cycle for intermediate compiler:',etInfo);
+    end;
+
+    infoln('Running make cycle for intermediate bootstrap compiler:',etInfo);
     ProcessEx.Execute;
     if ProcessEx.ExitStatus <> 0 then
       begin
@@ -1568,7 +1704,7 @@ begin
     s:=GetCompilerName(aCPU);
     if FileExists(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s) then
     begin
-      infoln('Copy compiler ('+s+') into: '+FBinPath,etInfo);
+      infoln('Copy compiler ('+s+') into: '+FBinPath,etDebug);
       FileUtil.CopyFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s,
         IncludeTrailingPathDelimiter(FBinPath)+s);
       fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
@@ -1672,6 +1808,8 @@ begin
       infoln('fpc.cfg already exists; leaving it alone.',etInfo);
     end;
   end;
+
+  RemoveStaleBuildDirectories(FBaseDirectory,aCPU+'-'+aOS);
 
   if OperationSucceeded then
   begin

@@ -588,7 +588,7 @@ begin
         RetryAttempt:=RetryAttempt+1;
       end;
       ResultCode:=HTTPSender.Resultcode;
-      infoln('Download http(s) result: '+InttoStr(Resultcode)+'; for URL: '+URL,etInfo);
+      infoln('Download http(s) result: '+InttoStr(Resultcode)+'; for URL: '+URL,etDebug);
       // If we have an answer from the server, check if the file
       // was sent to us.
       case Resultcode of
@@ -606,9 +606,9 @@ begin
         300,301: result:=false; //Other redirection. Not implemented, but could be.
         302:
         begin
-          infoln('Download: got redirect.', etInfo);
+          infoln('Download: got redirect.', etDebug);
           URL:=GetRedirectUrl;
-          infoln('Download: got redirect towards URL: '+URL, etInfo);
+          infoln('Download: got redirect towards URL: '+URL, etDebug);
           // do we have a redirect from github for a direct download of a file ?
           if (Pos('codeload.github.com',URL)>0) OR (Pos('raw.githubusercontent.com',URL)>0) then
           begin
@@ -933,7 +933,7 @@ begin
 
   // Assume http if no ftp detected
   try
-    infoln('Going to download '+TargetFile+' from URL: ' + URL, etinfo);
+    infoln('Going to download '+TargetFile+' from URL: ' + URL, etDebug);
     if (Copy(URL, 1, Length('ftp://'))='ftp://') or
     (Copy(URL,1,Length('ftp.'))='ftp.') then
     begin
