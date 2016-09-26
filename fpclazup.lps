@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="androidarm">
+    <BuildModes Count="3" Active="Default">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -315,7 +315,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="89"/>
-        <CursorPos X="144" Y="101"/>
+        <CursorPos Y="101"/>
         <UsageCount Value="200"/>
       </Unit24>
       <Unit25>
@@ -328,8 +328,8 @@ end;"/>
         <Filename Value="m_win64_to_linux64.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="88"/>
-        <CursorPos X="21" Y="143"/>
+        <TopLine Value="89"/>
+        <CursorPos Y="95"/>
         <UsageCount Value="200"/>
       </Unit26>
       <Unit27>
@@ -415,7 +415,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="86"/>
-        <CursorPos Y="101"/>
+        <CursorPos Y="100"/>
         <UsageCount Value="200"/>
       </Unit37>
       <Unit38>
@@ -483,7 +483,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
-        <CursorPos X="144" Y="94"/>
+        <CursorPos Y="93"/>
         <UsageCount Value="68"/>
       </Unit46>
     </Units>

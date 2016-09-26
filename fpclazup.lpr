@@ -48,6 +48,16 @@ Command: tfplist or something containing log records with timestamp, sequence de
 Add something like fpcup.config in the settings or installed fpc/lazarus dir so we know for which fpc/laz combo this dir is used
 }
 
+{$IFDEF LINUX}
+  {$IFDEF FPC_CROSSCOMPILING}
+    {$linklib libc_nonshared.a}
+    {$IFDEF CPUARM}
+      // if we have a GUI, uncomment
+      // {$linklib GLESv2}
+    {$ENDIF}
+  {$ENDIF}
+{$ENDIF}
+
 {$warn 5023 off : no warning about unused units}
 
 uses
