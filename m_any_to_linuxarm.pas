@@ -89,7 +89,6 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-      '-k-lGLESv2'+LineEnding+  {fpc[laz]up is using Arch Linux libraries : this is needed for them; could be removed for other libraries like raspbian}
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     {
     Actually leaving this out seems to work ok on the target system.

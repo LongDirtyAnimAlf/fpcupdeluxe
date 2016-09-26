@@ -820,6 +820,9 @@ begin
       // Post r38092, Lazarus supports this path: $(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb.exe
       // or perhaps $(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb.exe
       // check for this and fallback to make/binutils directory
+
+      //$(LazarusDir)\..\fpcbootstrap\mingw-$(TargetCPU)-$(TargetOS)\bin\gdb.exe
+
       if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'mingw\bin\' + GetFPCTarget(true) + '\gdb' + GetExeExt) then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
           '$(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb' + GetExeExt)
