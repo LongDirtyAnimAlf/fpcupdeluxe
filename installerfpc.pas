@@ -921,19 +921,16 @@ end;
 function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string): string;
 var
   TxtFile:Text;
-  version_nr:string;
-  release_nr:string;
-  patch_nr:string;
   s:string;
   x:integer;
+  FinalVersion,RequiredVersion,RequiredVersion2:integer;
 begin
-
-  //cheap (or expensive) coding ... but effective ... ;-)
-  version_nr:='0';
-  release_nr:='0';
-  patch_nr:='0';
+  result:='0.0.0';
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
+
+  RequiredVersion:=0;
+  RequiredVersion2:=0;
 
   if FileExists(s) then
   begin
@@ -944,33 +941,58 @@ begin
     begin
       Readln(TxtFile,s);
 
-      x:=Pos('REQUIREDVERSION',s);
-
+      x:=Pos('REQUIREDVERSION=',s);
       if x>0 then
       begin
-        x:=x+Length('REQUIREDVERSION');
-
-        while ( (x<Length(s)) AND (NOT (Ord(s[x]) in [ord('0')..ord('9')])) ) do Inc(x);
-        if (x<Length(s)) then version_nr:=s[x];
-        Inc(x);
-
-        while ( (x<Length(s)) AND (NOT (Ord(s[x]) in [ord('0')..ord('9')])) ) do Inc(x);
-        if (x<Length(s)) then release_nr:=s[x];
-        Inc(x);
-
-        while ( (x<Length(s)) AND (NOT (Ord(s[x]) in [ord('0')..ord('9')])) ) do Inc(x);
-        if (x<Length(s)) then patch_nr:=s[x];
-
-        break;
+        x:=x+Length('REQUIREDVERSION=');
+        if (x<=Length(s)) then
+        begin
+          RequiredVersion:=RequiredVersion+(Ord(s[x])-Ord('0'))*100;
+          inc(x,2);
+          if (x<=Length(s)) then
+          begin
+            RequiredVersion:=RequiredVersion+(Ord(s[x])-Ord('0'))*10;
+            inc(x,2);
+            if (x<=Length(s)) then RequiredVersion:=RequiredVersion+(Ord(s[x])-Ord('0'))*1;
+          end;
+        end;
       end;
+
+      x:=Pos('REQUIREDVERSION2=',s);
+      if x>0 then
+      begin
+        x:=x+Length('REQUIREDVERSION2=');
+        if (x<=Length(s)) then
+        begin
+          RequiredVersion2:=RequiredVersion2+(Ord(s[x])-Ord('0'))*100;
+          inc(x,2);
+          if (x<=Length(s)) then
+          begin
+            RequiredVersion2:=RequiredVersion2+(Ord(s[x])-Ord('0'))*10;
+            inc(x,2);
+            if (x<=Length(s)) then RequiredVersion2:=RequiredVersion2+(Ord(s[x])-Ord('0'))*1;
+          end;
+        end;
+      end;
+
+      if ((RequiredVersion>0) AND (RequiredVersion2>0)) then break;
 
     end;
 
+    if (RequiredVersion2>RequiredVersion)
+        then FinalVersion:=RequiredVersion2
+        else FinalVersion:=RequiredVersion;
+
     CloseFile(TxtFile);
+
+    result:=InttoStr(FinalVersion DIV 100);
+    FinalVersion:=FinalVersion MOD 100;
+    result:=result+'.'+InttoStr(FinalVersion DIV 10);
+    FinalVersion:=FinalVersion MOD 10;
+    result:=result+'.'+InttoStr(FinalVersion);
 
   end else infoln('Tried to get required bootstrap compiler version from Makefile.fpc, but no Makefile.fpc found',etError);
 
-  result:=version_nr+'.'+release_nr+'.'+patch_nr;
 end;
 
 
