@@ -869,6 +869,9 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TGDBMIDebugger');
       // Add <lazarus>\docs\xml to fpdoc editor paths
       LazDocPathAdd(IncludeTrailingPathDelimiter(FBaseDirectory) + 'docs'+DirectorySeparator+'xml', LazarusConfig);
+      // Enable IDE Coolbar for default docked desktop for NewPascal Lazarus
+      if LazarusConfig.GetVariable(EnvironmentConfig,'Desktops/Desktop2/Name')='default docked' then
+         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Visible/Value', 'True');
     except
       on E: Exception do
       begin
