@@ -1574,11 +1574,15 @@ begin
     AddModule:=True;
 
     j:=UniModuleList.IndexOf(ModuleName);
-    sl:=TStringList(UniModuleList.Objects[j]);
 
-    os:=GetValueSimple('OS_OK',sl);
-    if (os<>'') AND (AddModule) then
+    if j=-1 then AddModule:=false else
     begin
+
+      sl:=TStringList(UniModuleList.Objects[j]);
+
+      os:=GetValueSimple('OS_OK',sl);
+      if (os<>'') AND (AddModule) then
+      begin
          NegativeList:=(Pos('-',os)>0);
 
          // simmple check of list
@@ -1616,11 +1620,11 @@ begin
          {$ifdef Darwin}
          if (Pos('darwin',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-darwin',os)=0),NegativeList);
          {$endif}
-    end;
+      end;
 
-    cpu:=GetValueSimple('CPU_OK',sl);
-    if (cpu<>'') AND (AddModule) then
-    begin
+      cpu:=GetValueSimple('CPU_OK',sl);
+      if (cpu<>'') AND (AddModule) then
+      begin
          NegativeList:=(Pos('-',cpu)>0);
 
          // simmple check of list
@@ -1653,6 +1657,8 @@ begin
            if (Pos('arm',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-arm',cpu)=0),NegativeList);
          end;
          {$endif}
+      end;
+
     end;
 
     result:=AddModule;

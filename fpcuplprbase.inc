@@ -493,6 +493,8 @@ begin
       begin
       writeln('Error: wrong command line options given:');
       writeln(E.Message);
+      writeln('Press enter to see a list of all available command line options.');
+      readln;
       WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
       result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
       exit;
@@ -619,6 +621,8 @@ begin
         if LeftOverOptions.Count>0 then begin
           writeln('Error: wrong command line options given:');
           writeln(LeftOverOptions.Text);
+          writeln('Press enter to see a list of all available command line options.');
+          readln;
           WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
           result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
           exit;
