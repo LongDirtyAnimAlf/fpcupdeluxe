@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="Default">
+    <BuildModes Count="3" Active="linuxaarch64">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -175,8 +175,6 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="809"/>
-        <CursorPos X="9" Y="824"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit6>

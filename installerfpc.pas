@@ -906,6 +906,12 @@ var
 begin
   s:=aVersion;
 
+  {$IFDEF CPUAARCH64}
+  result:='3.1.1';
+  exit;
+  {$ENDIF}
+
+
   // set default to latest stable compiler
   result:=FPCTRUNKCOMPILER;
   if (s='3.0.1') or (s='3.0.2') then result:='3.0.0'
@@ -926,6 +932,11 @@ var
   FinalVersion,RequiredVersion,RequiredVersion2:integer;
 begin
   result:='0.0.0';
+
+  {$IFDEF CPUAARCH64}
+  result:='3.1.1';
+  exit;
+  {$ENDIF}
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
 
