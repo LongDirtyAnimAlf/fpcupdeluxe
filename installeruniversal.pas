@@ -309,7 +309,7 @@ begin
   // However, in theory, we could run only external modules and
   // only download some SVN repositories
   // So.. enable this.
-  result:=CheckAndGetNeededExecutables;
+  result:=(CheckAndGetNeededExecutables) AND (CheckAndGetNeededBinUtils);
   if not(result) then
     infoln('Universalinstaller: missing required executables. Aborting.',etError);
 

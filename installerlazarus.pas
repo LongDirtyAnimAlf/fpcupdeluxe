@@ -666,7 +666,7 @@ begin
   WritelnLog('Lazarus directory:      ' + FBaseDirectory, false);
   WritelnLog('Lazarus URL:            ' + FURL, false);
   WritelnLog('Lazarus options:        ' + FCompilerOptions, false);
-  Result := CheckAndGetNeededExecutables;
+  result:=(CheckAndGetNeededExecutables) AND (CheckAndGetNeededBinUtils);
   if Result then
   begin
     // Look for make etc in the current compiler directory:

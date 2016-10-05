@@ -276,6 +276,10 @@ begin
   end
   else
   {$ENDIF}
+
+  // always perform a cleaup before doing anything else ... just to be sure !
+  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose);
+
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
   FReturnOutput := Output;
 
@@ -480,6 +484,9 @@ begin
   end;
   {$ENDIF}
 
+  // always perform a cleaup before doing anything else ... just to be sure !
+  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose);
+
   FileList := TStringList.Create;
   try
     // On Windows, at least certain SVN versions don't update everything.
@@ -524,7 +531,7 @@ begin
         }
         begin
           // Let's try to release locks; don't update FReturnCode
-          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + 'cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
         end;
         //Give everybody a chance to relax ;)
         Sleep(500);

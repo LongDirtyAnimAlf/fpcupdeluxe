@@ -124,6 +124,7 @@ function Which(Executable: string): string;
 function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
+function DoubleQuoteIfNeeded(FileName: string): string;
 
 implementation
 
@@ -332,6 +333,7 @@ var
   Port: integer;
   Source: string;
   FoundPos: integer;
+  RetryAttempt:integer;
 begin
   // Strip out scheme info:
   if LeftStr(URL, length(FTPScheme))=FTPScheme then
@@ -350,7 +352,15 @@ begin
     Host:=LeftStr(Host, FoundPos-1);
     Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
   end;
-  Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
+  RetryAttempt:=0;
+  repeat
+    Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
+    if NOT Result then
+    begin
+      Inc(RetryAttempt);
+      sleep(200*RetryAttempt);
+    end;
+  until (Result) OR (RetryAttempt>5);
   if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile, eterror);
 end;
 
@@ -533,8 +543,6 @@ function DownloadHTTP(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPPro
 // Deals with SourceForge download links
 // Could use Synapse HttpGetBinary, but that doesn't deal
 // with result codes (i.e. it happily downloads a 404 error document)
-const
-  MaxRetries=3;
 var
   HTTPGetResult: boolean;
   HTTPSender: THTTPSend;
@@ -560,7 +568,9 @@ end;
 
 begin
   result:=false;
-  RetryAttempt:=1;
+
+  RetryAttempt:=0;
+
   HTTPSender:=THTTPSend.Create;
   try
     try
@@ -580,13 +590,18 @@ begin
 
       // Try to get the file
       //HTTPSender.Sock.OnStatus := callback.Status;
-      HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
-      while (HTTPGetResult=false) and (RetryAttempt<MaxRetries) do
-      begin
-        sleep(500*RetryAttempt);
+      repeat
         HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
-        RetryAttempt:=RetryAttempt+1;
-      end;
+        if (NOT HTTPGetResult) then
+        begin
+          Inc(RetryAttempt);
+          sleep(100*RetryAttempt);
+        end;
+      until (HTTPGetResult) OR (RetryAttempt>3);
+
+      // still no valid result : exit;
+      if (NOT HTTPGetResult) then exit;
+
       ResultCode:=HTTPSender.Resultcode;
       infoln('Download http(s) result: '+InttoStr(Resultcode)+'; for URL: '+URL,etDebug);
       // If we have an answer from the server, check if the file
@@ -1240,6 +1255,20 @@ begin
      then result:=GetDefaultCompilerFilename(Cpu_Target,true)
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
+
+function DoubleQuoteIfNeeded(FileName: string): string;
+begin
+  {$IFDEF MSWINDOWS}
+  // Unfortunately, we need to double quote in case there's spaces in the path and it's e.g. a .cmd file
+  result:=Trim(FileName);
+  if Pos(' ',result)>0 then
+  //if Copy(FileName, 1, 1) <> '"' then
+     Result := '"' + Result + '"';
+  {$ELSE}
+  Result := filename;
+  {$ENDIF}
+end;
+
 
 { TLogger }
 

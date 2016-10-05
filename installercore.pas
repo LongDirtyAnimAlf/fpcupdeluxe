@@ -37,6 +37,11 @@ uses
   repoclient, GitClient, HGClient, SvnClient,
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
+const
+  FPCSVNURL = 'http://svn.freepascal.org/svn';
+  BINUTILSURL = FPCSVNURL + '/fpcbuild';
+  DEFAULTBINUTILSVERSION = '3.0.0';
+
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
     ucDebugger {Debugger (support) files},
@@ -111,14 +116,16 @@ type
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
+    // Check for existence of required binutils; if not there, get them if possible
+    function CheckAndGetNeededBinUtils: boolean;
     // Check executable is the right one: run Executable with Parameters
     // and look for ExpectOutput. Returns false if no match.
     function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
     // Make a list (in FUtilFiles) of all binutils that can be downloaded
-    procedure CreateBinutilsList;
+    procedure CreateBinutilsList(aVersion:string='');
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
-    // Download make.exe, unzip.exe patch.exe etc into the make directory (only implemented for Windows):
+    // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
     // Clone/update using HG; use FBaseDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
@@ -323,6 +330,38 @@ var
   i: integer;
   OperationSucceeded: boolean;
   Output: string;
+{$IFDEF MSWINDOWS}
+function GetFile(aFile:string):boolean;
+var
+  aFilename:string;
+begin
+  result:=true;
+  aFilename:=ExtractFileName(aFile);
+  if (NOT FileExists(aFile)) then
+  begin
+    infoln('Downloading ' + aFilename + ' into ' + FMakeDir,etDebug);
+    try
+      if Download(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+aFilename,
+            aFile,
+            FHTTPProxyHost,
+            inttostr(FHTTPProxyPort),
+            FHTTPProxyUser,
+            FHTTPProxyPassword) = false then
+          begin
+            Result := false;
+            infoln('Error downloading '  + aFilename + ' to ' + FMakeDir,eterror);
+          end;
+    except
+      on E: Exception do
+      begin
+        Result := false;
+        infoln('Error downloading '  + aFilename + ' : ' + E.Message,eterror);
+        exit; //out of function.
+      end;
+    end;
+  end;
+end;
+{$ENDIF}
 begin
   OperationSucceeded := true;
   if not FNeededExecutablesChecked then
@@ -333,9 +372,6 @@ begin
     // Need to do it here so we can pick up make path.
     FBunzip2 := '';
     FTar := '';
-    // By doing this, we expect unzip.exe to be in the binutils dir.
-    // This is safe to do because it is included in the FPC binutils.
-    FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip' + GetExeExt;
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
@@ -355,35 +391,17 @@ begin
     {$ENDIF BSD}
 
     {$IFDEF MSWINDOWS}
-    if OperationSucceeded then
-    begin
-      // Download if needed, including unzip - needed for SVN download
-      // Check for binutils directory
-      AllThere:=true;
-      if DirectoryExists(FMakeDir) = false then
-      begin
-        infoln('Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
-        AllThere:=false;
-      end
-      else
-      begin
-        // Check all binutils in directory
-        for i:=low(FUtilFiles) to high(FUtilFiles) do
-        begin
-          if FUtilFiles[i].Category=ucBinutil then
-          begin
-            if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
-            begin
-              AllThere:=false;
-              infoln('Make path ' + FMakeDir + ' does not have (all) binutils. Going to download binutils.',etInfo);
-              break;
-            end;
-          end;
-        end;
-      end;
-      if not(AllThere) then OperationSucceeded := DownloadBinUtils;
-    end;
-    {$ENDIF MSWINDOWS}
+    ForceDirectoriesUTF8(FMakeDir);
+
+    // Get unzip binary from default binutils URL
+    FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
+    GetFile(FUnzip);
+
+    // Get patch binary from default binutils URL
+    GetFile(IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+    GetFile(IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+    {$ENDIF}
+
     {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
     //todo: check if we need as on OSX as well
     if OperationSucceeded then
@@ -401,21 +419,6 @@ begin
       end;
     end;
     {$ENDIF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))}
-
-    if OperationSucceeded then
-    begin
-      // Check for proper make executable
-      try
-        ExecuteCommand(Make + ' -v', Output, FVerbose);
-        if Ansipos('GNU Make', Output) = 0 then
-        begin
-          infoln('Found make executable but it is not GNU Make.',etError);
-          OperationSucceeded := false;
-        end;
-      except
-        // ignore errors, this is only an extra check
-      end;
-    end;
 
     if OperationSucceeded then
     begin
@@ -518,6 +521,65 @@ begin
   Result := OperationSucceeded;
 end;
 
+function TInstaller.CheckAndGetNeededBinUtils: boolean;
+var
+  AllThere: boolean;
+  i: integer;
+  OperationSucceeded: boolean;
+  Output: string;
+begin
+  OperationSucceeded := true;
+
+  {$IFDEF MSWINDOWS}
+  if OperationSucceeded then
+  begin
+    // Download if needed, including unzip - needed for SVN download
+    // Check for binutils directory
+    AllThere:=true;
+    if DirectoryExists(FMakeDir) = false then
+    begin
+      infoln('Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
+      AllThere:=false;
+    end
+    else
+    begin
+      // Check all binutils in directory
+      for i:=low(FUtilFiles) to high(FUtilFiles) do
+      begin
+        if FUtilFiles[i].Category=ucBinutil then
+        begin
+          if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
+          begin
+            AllThere:=false;
+            infoln('Make path ' + FMakeDir + ' does not have (all) binutils. Going to download needed binutils.',etInfo);
+            break;
+          end;
+        end;
+      end;
+    end;
+    if not(AllThere) then OperationSucceeded := DownloadBinUtils;
+  end;
+  {$ENDIF MSWINDOWS}
+
+  if OperationSucceeded then
+  begin
+    // Check for proper make executable
+    try
+      ExecuteCommand(Make + ' -v', Output, FVerbose);
+      if Ansipos('GNU Make', Output) = 0 then
+      begin
+        infoln('Found make executable, but it is not GNU Make.',etError);
+        OperationSucceeded := false;
+      end;
+    except
+      // ignore errors, this is only an extra check
+    end;
+  end;
+
+  Result := OperationSucceeded;
+end;
+
+
 function TInstaller.CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 var
   ResultCode: longint;
@@ -563,28 +625,13 @@ begin
   Result := OperationSucceeded;
 end;
 
-procedure TInstaller.CreateBinutilsList;
+procedure TInstaller.CreateBinutilsList(aVersion:string);
 // Windows-centric for now; doubt if it
 // can be used in Unixy systems anyway
 const
-  {These would be the latest:
-  SourceUrl = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_06/install/binw32/';
-  but let's use a stable version:}
-  //SourceURL = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_2_6_4/install/binw32/';
-  SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_3_0_0/install/binw32/';
-  // newer than sourceurl, useful for e.g. make 3.82 as used in Lazarus 1.2RC2 (with FPC 2.6.2)
-  SourceUrl_FPCTrunk = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/binw32/';
-  // For gdb (x64 and x86), we use the Lazarus supplied ones rather than the FPC supplied ones.
-  // Lazarus is tightly coupled to gdb versions thanks to Martin Friebe's work with bug fixes
-  // Nov 2013: GNU gdb (GDB) 7.2:
-  SourceURL_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/';
-  //SourceURL64 = 'http://svn2.freepascal.org/svn/fpcbuild/tags/release_2_6_4/install/binw64/';
-  SourceURL64 = 'http://svn.freepascal.org/svn/fpcbuild/tags/release_3_0_0/install/binw64/';
-  // Nov 2013: GNU gdb (GDB) 7.3.50.20110510-cvs:
-  SourceURL64_gdb = 'http://svn.freepascal.org/svn/lazarus/binaries/x86_64-win64/gdb/bin/';
-  SourceURL_Qt = 'http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/qt/';
-  // No equivalent for Win64
-  //SourceURL64_Qt = '';
+  SourceURL_gdb = FPCSVNURL+'/lazarus/binaries/i386-win32/gdb/bin/';
+  SourceURL64_gdb = FPCSVNURL+'/lazarus/binaries/x86_64-win64/gdb/bin/';
+  SourceURL_Qt = FPCSVNURL+'/lazarus/binaries/i386-win32/qt/';
 
   procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
   var
@@ -597,79 +644,93 @@ const
     FUtilFiles[i].OS:=OS;
     FUtilFiles[i].Category:=Category;
   end;
+var
+  aSourceURL:string;
+  {$ifdef win64}
+  aSourceURL64:string;
+  {$endif}
+  aTag:string;
 begin
+
+
   SetLength(FUtilFiles,0); //clean out any cruft
+
   {$IFDEF MSWINDOWS}
+
+  // default
+  if aVersion='' then aVersion:=DEFAULTBINUTILSVERSION;
+
+  //trunk
+  if aVersion='3.1.1'
+     then aTag:='trunk'
+     else aTag:='tags/release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
+
+  aSourceURL:=BINUTILSURL+'/'+aTag+'/install/binw32/';
+  {$ifdef win64}
+  aSourceURL64:=BINUTILSURL+'/'+aTag+'/install/binw64/';
+  {$endif}
+
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
-  AddNewUtil('cpp' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('dlltool' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('fp32.ico',SourceURL,'',ucBinutil);
-  AddNewUtil('gcc' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('grep' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('patch' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('patch' + GetExeExt + '.manifest',SourceURL,'',ucBinutil);
-  AddNewUtil('unzip' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('windres' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('windres.h',SourceURL,'',ucBinutil);
-  AddNewUtil('zip' + GetExeExt,SourceURL,'',ucBinutil);
+  AddNewUtil('cpp' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('dlltool' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('fp32.ico',aSourceURL,'',ucBinutil);
+  AddNewUtil('gcc' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('grep' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('windres' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('windres.h',aSourceURL,'',ucBinutil);
   {$ifdef win32}
-  AddNewUtil('ar' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('as' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('cmp' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('cp' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('diff' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('gdate' + GetExeExt,SourceURL,'',ucBinutil);
-  //AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger);
-  AddNewUtil('gdb' + GetExeExt,SourceURL,'',ucDebugger);
-  AddNewUtil('libexpat-1.dll',SourceURL,'',ucDebugger);
-  AddNewUtil('gecho' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt + '.manifest',SourceURL,'',ucBinutil);
-  AddNewUtil('gmkdir' + GetExeExt,SourceURL,'',ucBinutil);
-  //AddNewUtil('GoRC' + GetExeExt,SourceURL,'',ucBinutil);
+  AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('cmp' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('cp' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('diff' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
+  //AddNewUtil('gdb' + GetExeExt,aSourceURL_gdb,'',ucDebugger);
+  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucDebugger);
+  AddNewUtil('libexpat-1.dll',aSourceURL,'',ucDebugger);
+  AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
+  AddNewUtil('gmkdir' + GetExeExt,aSourceURL,'',ucBinutil);
+  //AddNewUtil('GoRC' + GetExeExt,aSourceURL,'',ucBinutil);
   {
   http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
   only has libexpat-1, so no need for these:
-  AddNewUtil('libgcc_s_dw2-1.dll',SourceURL,'',ucBinutil);
-  AddNewUtil('libiconv-2.dll',SourceURL,'',ucBinutil);
-  AddNewUtil('libintl-8.dll',SourceURL,'',ucBinutil);
+  AddNewUtil('libgcc_s_dw2-1.dll',aSourceURL,'',ucBinutil);
+  AddNewUtil('libiconv-2.dll',aSourceURL,'',ucBinutil);
+  AddNewUtil('libintl-8.dll',aSourceURL,'',ucBinutil);
   }
-  AddNewUtil('ld' + GetExeExt,SourceURL,'',ucBinutil);
-  // Make 3.80 as distributed with Laz 1.x, FPC 2.6.2, fixes 2.6 won't work with spaces in path
-  // Make 3.81 hopefully has some fixes but not too many bugs=>in fpcbuild svn (still won't build fpc 2.6.x)
-  // Make 3.82 will balk on building fpc 2.6.x (still a version is distributed with Laz 1.2RC2)
-  // Use make 3.80
-  AddNewUtil('make' + GetExeExt,SourceUrl,'',ucBinutil);
-  AddNewUtil('mv' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('objdump' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('pwd' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('rm' + GetExeExt,SourceURL,'',ucBinutil);
-  AddNewUtil('strip' + GetExeExt,SourceURL,'',ucBinutil);
+  AddNewUtil('ld' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('make' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('mv' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('objdump' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('pwd' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('rm' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('strip' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('Qt4Pas5.dll',SourceURL_Qt,'',ucQtFile);
   {$endif win32}
   {$ifdef win64}
-  AddNewUtil('ar' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('as' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('cmp' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('cp' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('diff' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('gdate' + GetExeExt,SourceURL64,'',ucBinutil);
+  AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('as' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('cmp' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('cp' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('diff' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger);
   AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger);
-  AddNewUtil('gecho' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('ginstall' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('ginstall.exe.manifest',SourceURL64,'',ucBinutil);
-  AddNewUtil('gmkdir' + GetExeExt,SourceURL64,'',ucBinutil);
-  //AddNewUtil('GoRC' + GetExeExt,SourceURL64,'',ucBinutil);
+  AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);
+  AddNewUtil('gmkdir' + GetExeExt,aSourceURL64,'',ucBinutil);
+  //AddNewUtil('GoRC' + GetExeExt,aSourceURL64,'',ucBinutil);
 
-  AddNewUtil('ld' + GetExeExt,SourceURL64,'',ucBinutil);
-  // even in fpcbuild trunk, still make 3.80
-  AddNewUtil('make' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('mv' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('objdump' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('pwd' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('rm' + GetExeExt,SourceURL64,'',ucBinutil);
-  AddNewUtil('strip' + GetExeExt,SourceURL64,'',ucBinutil);
+  AddNewUtil('ld' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('make' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('mv' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('objdump' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('pwd' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('rm' + GetExeExt,aSourceURL64,'',ucBinutil);
+  AddNewUtil('strip' + GetExeExt,aSourceURL64,'',ucBinutil);
   //No equivalent for Win64...
   //AddNewUtil('Qt4Pas5.dll',SourceURL64_Qt,'',ucBinding);
   {$endif win64}
@@ -713,7 +774,8 @@ function TInstaller.DownloadBinUtils: boolean;
 var
   Counter: integer;
   Errors: integer = 0;
-  RootURL: string;
+  RetryAttempt:integer;
+  DownloadSuccess:boolean;
 begin
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesUTF8(FMakeDir);
@@ -724,32 +786,41 @@ begin
     begin
       if (FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[Counter].FileName)) then continue;
       infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir,etDebug);
-      try
-        if Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
-          IncludeTrailingPathDelimiter(FMakeDir) + FUtilFiles[Counter].FileName,
-          FHTTPProxyHost,
-          inttostr(FHTTPProxyPort),
-          FHTTPProxyUser,
-          FHTTPProxyPassword) = false then
-        begin
-          Errors := Errors + 1;
-          infoln('Error downloading binutils: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir,eterror);
+      RetryAttempt:=0;
+      repeat
+        try
+          if (RetryAttempt>0) then infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir + '. Retrying.',etError);
+          DownloadSuccess:=Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
+            IncludeTrailingPathDelimiter(FMakeDir) + FUtilFiles[Counter].FileName,
+            FHTTPProxyHost,
+            inttostr(FHTTPProxyPort),
+            FHTTPProxyUser,
+            FHTTPProxyPassword);
+          if NOT DownloadSuccess then
+          begin
+            Inc(RetryAttempt);
+            sleep(100*RetryAttempt);
+          end;
+        except
+          on E: Exception do
+          begin
+            Result := false;
+            infoln('Fatal error downloading binutils: ' + E.Message+'. Exit.',etError);
+            exit; //out of function.
+          end;
         end;
-      except
-        on E: Exception do
-        begin
-          Result := false;
-          infoln('Error downloading binutils: ' + E.Message,eterror);
-          exit; //out of function.
-        end;
-      end;
+
+      until ( (DownloadSuccess) OR (RetryAttempt>5) );
+
+      if NOT DownloadSuccess then Errors := Errors + 1;
+
     end;
   end;
 
   if Errors > 0 then
   begin
     Result := false;
-    WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' errors downloading binutils.', true);
+    WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' error(s) downloading binutils.', true);
   end;
 end;
 
@@ -1476,7 +1547,7 @@ begin
   FSVNClient := TSVNClient.Create;
 
   // List of binutils that can be downloaded:
-  CreateBinutilsList;
+  // CreateBinutilsList;
   FNeededExecutablesChecked:=false;
   // Set up verbose log: will be done in dumpoutput
   // as it depends on verbosity etc

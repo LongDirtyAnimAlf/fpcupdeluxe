@@ -230,7 +230,8 @@ var
   BinPath: string; //path where compiler is
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
-  result:=CheckAndGetNeededExecutables;
+  result:=(CheckAndGetNeededExecutables) AND (CheckAndGetNeededBinUtils);
+
   if result then
   begin
     // Look for make etc in the current compiler directory:
