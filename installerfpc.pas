@@ -1566,6 +1566,19 @@ begin
         infoln('To compile this bootstrap FPC, we should use a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
       end else infoln('To compile this bootstrap FPC, we need (required) a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
 
+      // check if we have a lower acceptable requirement for the bootstrapbootstrapper
+      if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
+      begin
+        // get lower requirement for the bootstrapper
+        s:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory,True);
+        // if so, set bootstrapper to lower one !!
+        if (GetCompilerVersion(FCompiler)=s) then
+        begin
+          RequiredBootstrapBootstrapVersion:=s;
+          infoln('To compile this bootstrap FPC, we can also (and will) use (required) a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
+        end;
+      end;
+
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
 
