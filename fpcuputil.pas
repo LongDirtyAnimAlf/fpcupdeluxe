@@ -125,6 +125,7 @@ function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
 function DoubleQuoteIfNeeded(FileName: string): string;
+function GetNumericalVersion(aVersion: string): word;
 
 implementation
 
@@ -1269,6 +1270,16 @@ begin
   {$ENDIF}
 end;
 
+function GetNumericalVersion(aVersion: string): word;
+begin
+  result := 0;
+  if length(aVersion)=5 then
+  begin
+    result := ((ord(aVersion[1])-ord('0')) * 10000)+
+                ((ord(aVersion[3])-ord('0')) * 100)+
+                (ord(aVersion[5])-ord('0'));
+  end;
+end;
 
 { TLogger }
 

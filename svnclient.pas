@@ -337,6 +337,9 @@ begin
     end;
   end;
 
+  //FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' update --set-depth exclude ide', Output, Verbose);
+  //DeleteDirectoryEx(IncludeTrailingPathDelimiter(LocalRepository)+'ide');
+
   //ExecuteCommand('find . ! -path "./.svn/*" \( -name "*.pas" -o -name "*.pp" -o -name "*.lpk" -o -name "*.lpr" -name "*.lpi" \) -type f -exec sed -i "+''''+"s/\r//"+''''+" {} \;', Output, Verbose);
   //writeln('SED: ' +Output);
 

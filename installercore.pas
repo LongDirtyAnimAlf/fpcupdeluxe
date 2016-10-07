@@ -334,31 +334,38 @@ var
 function GetFile(aFile:string):boolean;
 var
   aFilename:string;
+  RetryAttempt:integer;
+  DownloadSuccess:boolean;
 begin
   result:=true;
   aFilename:=ExtractFileName(aFile);
   if (NOT FileExists(aFile)) then
   begin
     infoln('Downloading ' + aFilename + ' into ' + FMakeDir,etDebug);
-    try
-      if Download(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+aFilename,
+    RetryAttempt:=0;
+    repeat
+      try
+        DownloadSuccess:=Download(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+aFilename,
             aFile,
             FHTTPProxyHost,
             inttostr(FHTTPProxyPort),
             FHTTPProxyUser,
-            FHTTPProxyPassword) = false then
-          begin
-            Result := false;
-            infoln('Error downloading '  + aFilename + ' to ' + FMakeDir,eterror);
-          end;
-    except
-      on E: Exception do
-      begin
-        Result := false;
-        infoln('Error downloading '  + aFilename + ' : ' + E.Message,eterror);
-        exit; //out of function.
+            FHTTPProxyPassword);
+        if NOT DownloadSuccess then
+        begin
+          Inc(RetryAttempt);
+          sleep(100*RetryAttempt);
+        end;
+      except
+        on E: Exception do
+        begin
+          Result := false;
+          infoln('Error downloading '  + aFilename + ' : ' + E.Message,eterror);
+          exit; //out of function.
+        end;
       end;
-    end;
+    until ( (DownloadSuccess) OR (RetryAttempt>5) );
+    Result:=DownloadSuccess;
   end;
 end;
 {$ENDIF}
@@ -531,6 +538,7 @@ begin
   OperationSucceeded := true;
 
   {$IFDEF MSWINDOWS}
+  infoln('Get the right binutils for intermediate bootstrap compiler.',etInfo);
   if OperationSucceeded then
   begin
     // Download if needed, including unzip - needed for SVN download
@@ -650,6 +658,7 @@ var
   aSourceURL64:string;
   {$endif}
   aTag:string;
+  aMajor,aMinor,aBuild : Integer;
 begin
 
 
@@ -660,7 +669,15 @@ begin
   // default
   if aVersion='' then aVersion:=DEFAULTBINUTILSVERSION;
 
-  //trunk
+  GetWin32Version(aMajor,aMinor,aBuild);
+  // if Win7 or higher: use modern (2.4.0 and higher) binutils
+  if aMajor>5 then
+  begin
+    if (GetNumericalVersion(aVersion)<(2*10000+4*100+0)) then
+       aVersion:='2.4.0';
+  end;
+
+  //trunk (3.1.1) is special
   if aVersion='3.1.1'
      then aTag:='trunk'
      else aTag:='tags/release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
@@ -785,11 +802,9 @@ begin
     if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger) then
     begin
       if (FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[Counter].FileName)) then continue;
-      infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir,etDebug);
       RetryAttempt:=0;
       repeat
         try
-          if (RetryAttempt>0) then infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir + '. Retrying.',etError);
           DownloadSuccess:=Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
             IncludeTrailingPathDelimiter(FMakeDir) + FUtilFiles[Counter].FileName,
             FHTTPProxyHost,
@@ -812,7 +827,11 @@ begin
 
       until ( (DownloadSuccess) OR (RetryAttempt>5) );
 
-      if NOT DownloadSuccess then Errors := Errors + 1;
+      if NOT DownloadSuccess then
+      begin
+        infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir + '. Retrying.',etError);
+        Errors := Errors + 1;
+      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir + ' success.',etDebug);
 
     end;
   end;
