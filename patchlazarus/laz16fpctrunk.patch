@@ -1,6 +1,23 @@
+Index: designer/jitforms.pp
+===================================================================
+--- designer/jitforms.pp	(revision 53196)
++++ designer/jitforms.pp	(working copy)
+@@ -1506,7 +1506,12 @@
+ 
+   // set TypeData (PropCount is the total number of properties, including ancestors)
+   NewTypeData^.ClassType:=TClass(NewVMT);
++  {$IFDEF HasVMTParent}
+   NewTypeData^.ParentInfo:=AncestorClass.ClassInfo;
++  {$ELSE}
++  GetMem(NewTypeData^.ParentInfoRef,SizeOf(Pointer));
++  NewTypeData^.ParentInfoRef^:=AncestorClass.ClassInfo;
++  {$ENDIF}
+   NewTypeData^.PropCount:=GetTypeData(NewTypeData^.ParentInfo)^.PropCount;
+   NewTypeData^.UnitName:=NewUnitName;
+   AddedPropCount:=GetTypeDataPropCountAddr(NewTypeData);
 Index: lcl/lclproc.pas
 ===================================================================
---- lcl/lclproc.pas	(revision 52799)
+--- lcl/lclproc.pas	(revision 53196)
 +++ lcl/lclproc.pas	(working copy)
 @@ -27,7 +27,7 @@
  uses
