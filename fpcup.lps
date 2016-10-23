@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="4" Active="linuxaarch64">
+    <BuildModes Count="4" Active="linuxarmhf">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>

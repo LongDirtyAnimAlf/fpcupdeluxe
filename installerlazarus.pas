@@ -817,11 +817,6 @@ begin
       // the platform specific compiler. In order to be able to cross compile
       // we'd rather use fpc
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', ExtractFilePath(FCompiler) + 'fpc' + GetExeExt);
-      // Post r38092, Lazarus supports this path: $(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb.exe
-      // or perhaps $(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb.exe
-      // check for this and fallback to make/binutils directory
-
-      //$(LazarusDir)\..\fpcbootstrap\mingw-$(TargetCPU)-$(TargetOS)\bin\gdb.exe
 
       if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'mingw\bin\' + GetFPCTarget(true) + '\gdb' + GetExeExt) then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
@@ -829,9 +824,17 @@ begin
       else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
           '$(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb' + GetExeExt)
+      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
+        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
+          '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb' + GetExeExt)
       else
+      begin
+        // if no debugger found, just set some default paths
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
           IncludeTrailingPathDelimiter(FMakeDir) + 'gdb' + GetExeExt);
+        LazarusConfig.SetVariable(EnvironmentConfig, 'DebuggerSearchPath/Value',
+          '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin');
+      end;
 
       if FileExists(ExtractFilePath(FCompiler) + 'make' + GetExeExt)
          then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', ExtractFilePath(FCompiler) + 'make' + GetExeExt)
@@ -869,9 +872,25 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TGDBMIDebugger');
       // Add <lazarus>\docs\xml to fpdoc editor paths
       LazDocPathAdd(IncludeTrailingPathDelimiter(FBaseDirectory) + 'docs'+DirectorySeparator+'xml', LazarusConfig);
-      // Enable IDE Coolbar for default docked desktop for NewPascal Lazarus
+
+      // Enable IDE Coolbar for default docked desktop for (NewPascal) Lazarus with docking
       if LazarusConfig.GetVariable(EnvironmentConfig,'Desktops/Desktop2/Name')='default docked' then
          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Visible/Value', 'True');
+
+      // add default projects path
+      DebuggerPath := ExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory) + '..');
+      DebuggerPath := IncludeTrailingPathDelimiter(DebuggerPath)+'projects';
+      ForceDirectoriesUTF8(DebuggerPath);
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
+
+      {$IFDEF MSWINDOWS}
+      // needed while running Lazarus adds a personal directory that is not valid for other users.
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Count', '2');
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Item1/Value', 'C:\Windows\Temp\');
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Item2/Value', 'C:\Users\Public\Documents');
+      {$ENDIF MSWINDOWS}
+
     except
       on E: Exception do
       begin

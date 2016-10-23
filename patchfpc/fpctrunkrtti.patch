@@ -1,147 +1,32 @@
-Index: compiler/aarch64/cpupara.pas
+Index: compiler/paramgr.pas
 ===================================================================
---- compiler/aarch64/cpupara.pas	(revision 34022)
-+++ compiler/aarch64/cpupara.pas	(working copy)
-@@ -36,6 +36,7 @@
-        tcpuparamanager = class(tparamanager)
-           function get_volatile_registers_int(calloption: tproccalloption): tcpuregisterset; override;
-           function get_volatile_registers_fpu(calloption: tproccalloption): tcpuregisterset; override;
-+          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt); override;
-           function get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset; override;
-           function push_addr_param(varspez: tvarspez; def: tdef; calloption: tproccalloption): boolean; override;
-           function ret_in_param(def: tdef; pd: tabstractprocdef):boolean;override;
-@@ -80,6 +81,28 @@
+--- compiler/paramgr.pas	(revision 34703)
++++ compiler/paramgr.pas	(working copy)
+@@ -81,6 +81,8 @@
+           function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
+           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;virtual;
+ 
++          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);virtual;
++
+           procedure getintparaloc(list: TAsmList; pd: tabstractprocdef; nr : longint; var cgpara: tcgpara);virtual;
+ 
+           {# allocate an individual pcgparalocation that's part of a tcgpara
+@@ -278,6 +280,12 @@
          result:=[];
        end;
  
-+    procedure tcpuparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
-+    var
-+      I : SizeInt;
++    procedure tparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
 +    begin
-+      with paraloc^ do
-+        case loc of
-+          LOC_REGISTER:
-+            begin
-+              reg:=getsupreg(register)-RS_X0;
-+              off:=0;
-+            end;
-+          LOC_MMREGISTER:
-+            begin
-+              reg:=getsupreg(register)-RS_D0;
-+            end;
-+          LOC_REFERENCE:
-+            begin
-+              reg:=255;
-+              off:=reference.offset;
-+            end;
-+        end;
++      reg:=0;
++      off:=0;
 +    end;
- 
-     function tcpuparamanager.get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset;
-       begin
-Index: compiler/arm/cpupara.pas
-===================================================================
---- compiler/arm/cpupara.pas	(revision 34022)
-+++ compiler/arm/cpupara.pas	(working copy)
-@@ -37,6 +37,7 @@
-           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
-+          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
-           function push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;override;
-           function ret_in_param(def:tdef;pd:tabstractprocdef):boolean;override;
-           procedure getintparaloc(list: TAsmList; pd : tabstractprocdef; nr : longint; var cgpara : tcgpara);override;
-@@ -74,7 +75,45 @@
-         result:=VOLATILE_FPUREGISTERS;
-       end;
- 
-+    procedure tcpuparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
-+    var
-+      I : SizeInt;
-+    begin
-+      with paraloc^ do
-+        case loc of
-+          LOC_REGISTER:
-+            begin
-+              reg:=getsupreg(register)-RS_R0;
-+              off:=0;
-+            end;
-+          LOC_FPUREGISTER:
-+            begin
-+              reg:=getsupreg(register)-RS_F0;
-+              off:=0;
-+            end;
-+          LOC_MMREGISTER:
-+            begin
-+              reg:=getsupreg(register);
-+              if reg < RS_S1 then
-+                begin
-+                  reg:=reg-RS_D0;
-+                  off:=0;
-+                end
-+              else
-+                begin
-+                  reg:=reg-RS_S1;
-+                  off:=4;
-+                end;
-+            end;
-+          LOC_REFERENCE:
-+            begin
-+              reg:=255;
-+              off:=reference.offset;
-+            end;
-+        end;
-+    end;
- 
 +
-     function tcpuparamanager.get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset;
-       begin
-         result:=VOLATILE_MMREGISTERS;
-Index: compiler/i386/cpupara.pas
-===================================================================
---- compiler/i386/cpupara.pas	(revision 34022)
-+++ compiler/i386/cpupara.pas	(working copy)
-@@ -40,6 +40,7 @@
-           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
-+          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
-           function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
-           function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
-           procedure createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);override;
-@@ -285,6 +286,29 @@
-         result:=[0..first_mm_imreg-1];
-       end;
- 
-+    procedure tcpuparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
-+    var
-+      I : SizeInt;
-+    begin
-+      with paraloc^ do
-+        case loc of
-+          LOC_REGISTER:
-+            begin
-+              for I := 0 to high(parasupregs) do
-+                if getsupreg(register)=parasupregs[I] then
-+                  begin
-+                    reg:=I;
-+                    break;
-+                  end;
-+              off:=0;
-+            end;
-+          LOC_REFERENCE:
-+            begin
-+              reg:=255;
-+              off:=reference.offset;
-+            end;
-+        end;
-+    end;
- 
-     function  tcpuparamanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): TCGPara;
-       var
+ {$if first_mm_imreg = 0}
+   {$WARN 4044 OFF} { Comparison might be always false ... }
+ {$endif}
 Index: compiler/ncgrtti.pas
 ===================================================================
---- compiler/ncgrtti.pas	(revision 34022)
+--- compiler/ncgrtti.pas	(revision 34703)
 +++ compiler/ncgrtti.pas	(working copy)
 @@ -28,7 +28,7 @@
      uses
@@ -319,7 +204,7 @@ Index: compiler/ncgrtti.pas
          procedure unknown_rtti(def:tstoreddef);
          begin
            tcb.emit_ord_const(tkUnknown,u8inttype);
-@@ -855,57 +984,7 @@
+@@ -858,64 +987,14 @@
  
  
          procedure procvardef_rtti(def:tprocvardef);
@@ -377,7 +262,6 @@ Index: compiler/ncgrtti.pas
             procedure write_para(parasym:tparavarsym);
               begin
                 { only store user visible parameters }
-@@ -912,7 +991,7 @@
                 if not(vo_is_hidden_para in parasym.varoptions) then
                   begin
                     { write flags for current parameter }
@@ -386,7 +270,7 @@ Index: compiler/ncgrtti.pas
                     { write name of current parameter }
                     tcb.emit_shortstring_const(parasym.realname);
                     { write name of type of current parameter }
-@@ -932,7 +1011,7 @@
+@@ -935,7 +1014,7 @@
                       targetinfos[target_info.system]^.alignment.recordalignmin,
                       targetinfos[target_info.system]^.alignment.maxCrecordalign);
                     { write flags for current parameter }
@@ -395,28 +279,7 @@ Index: compiler/ncgrtti.pas
                     { write param type }
                     write_rtti_reference(tcb,parasym.vardef,fullrtti);
                     { write name of current parameter }
-@@ -1093,6 +1172,10 @@
-             propnamelist:=TFPHashObjectList.Create;
-             collect_propnamelist(propnamelist,def);
- 
-+            tcb.begin_anonymous_record('',defaultpacking,reqalign,
-+              targetinfos[target_info.system]^.alignment.recordalignmin,
-+              targetinfos[target_info.system]^.alignment.maxCrecordalign);
-+
-             { write parent typeinfo }
-             write_rtti_reference(tcb,def.childof,fullrtti);
- 
-@@ -1109,9 +1192,6 @@
-               {
-               ifDispatch, }
-             tcb.emit_ord_const(IntfFlags,u8inttype);
--            tcb.begin_anonymous_record('',defaultpacking,reqalign,
--              targetinfos[target_info.system]^.alignment.recordalignmin,
--              targetinfos[target_info.system]^.alignment.maxCrecordalign);
- 
-             tcb.emit_guid_const(def.iidguid^);
- 
-@@ -1125,15 +1205,18 @@
+@@ -1130,15 +1209,18 @@
              { write iidstr }
              if def.objecttype=odt_interfacecorba then
                begin
@@ -438,7 +301,7 @@ Index: compiler/ncgrtti.pas
              tcb.end_anonymous_record;
              tcb.end_anonymous_record;
  
-@@ -1477,6 +1560,8 @@
+@@ -1474,6 +1556,8 @@
      end;
  
      procedure TRTTIWriter.write_child_rtti_data(def:tdef;rt:trttitype);
@@ -447,7 +310,7 @@ Index: compiler/ncgrtti.pas
        begin
          case def.typ of
            enumdef :
-@@ -1498,8 +1583,21 @@
+@@ -1495,8 +1579,21 @@
                if (rt=initrtti) or (tobjectdef(def).objecttype=odt_object) then
                  fields_write_rtti(tobjectdef(def).symtable,rt)
                else
@@ -469,11 +332,152 @@ Index: compiler/ncgrtti.pas
            classrefdef,
            pointerdef:
              if not is_objc_class_or_protocol(tabstractpointerdef(def).pointeddef) then
+Index: compiler/aarch64/cpupara.pas
+===================================================================
+--- compiler/aarch64/cpupara.pas	(revision 34703)
++++ compiler/aarch64/cpupara.pas	(working copy)
+@@ -36,6 +36,7 @@
+        tcpuparamanager = class(tparamanager)
+           function get_volatile_registers_int(calloption: tproccalloption): tcpuregisterset; override;
+           function get_volatile_registers_fpu(calloption: tproccalloption): tcpuregisterset; override;
++          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt); override;
+           function get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset; override;
+           function push_addr_param(varspez: tvarspez; def: tdef; calloption: tproccalloption): boolean; override;
+           function ret_in_param(def: tdef; pd: tabstractprocdef):boolean;override;
+@@ -80,6 +81,28 @@
+         result:=[];
+       end;
+ 
++    procedure tcpuparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
++    var
++      I : SizeInt;
++    begin
++      with paraloc^ do
++        case loc of
++          LOC_REGISTER:
++            begin
++              reg:=getsupreg(register)-RS_X0;
++              off:=0;
++            end;
++          LOC_MMREGISTER:
++            begin
++              reg:=getsupreg(register)-RS_D0;
++            end;
++          LOC_REFERENCE:
++            begin
++              reg:=255;
++              off:=reference.offset;
++            end;
++        end;
++    end;
+ 
+     function tcpuparamanager.get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset;
+       begin
+Index: compiler/arm/cpupara.pas
+===================================================================
+--- compiler/arm/cpupara.pas	(revision 34703)
++++ compiler/arm/cpupara.pas	(working copy)
+@@ -37,6 +37,7 @@
+           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
++          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
+           function push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;override;
+           function ret_in_param(def:tdef;pd:tabstractprocdef):boolean;override;
+           procedure getintparaloc(list: TAsmList; pd : tabstractprocdef; nr : longint; var cgpara : tcgpara);override;
+@@ -74,7 +75,45 @@
+         result:=VOLATILE_FPUREGISTERS;
+       end;
+ 
++    procedure tcpuparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
++    var
++      I : SizeInt;
++    begin
++      with paraloc^ do
++        case loc of
++          LOC_REGISTER:
++            begin
++              reg:=getsupreg(register)-RS_R0;
++              off:=0;
++            end;
++          LOC_FPUREGISTER:
++            begin
++              reg:=getsupreg(register)-RS_F0;
++              off:=0;
++            end;
++          LOC_MMREGISTER:
++            begin
++              reg:=getsupreg(register);
++              if reg < RS_S1 then
++                begin
++                  reg:=reg-RS_D0;
++                  off:=0;
++                end
++              else
++                begin
++                  reg:=reg-RS_S1;
++                  off:=4;
++                end;
++            end;
++          LOC_REFERENCE:
++            begin
++              reg:=255;
++              off:=reference.offset;
++            end;
++        end;
++    end;
+ 
++
+     function tcpuparamanager.get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset;
+       begin
+         result:=VOLATILE_MMREGISTERS;
+Index: compiler/i386/cpupara.pas
+===================================================================
+--- compiler/i386/cpupara.pas	(revision 34703)
++++ compiler/i386/cpupara.pas	(working copy)
+@@ -40,6 +40,7 @@
+           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
++          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
+           function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
+           function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
+           procedure createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);override;
+@@ -286,6 +287,29 @@
+         result:=[0..first_mm_imreg-1];
+       end;
+ 
++    procedure tcpuparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
++    var
++      I : SizeInt;
++    begin
++      with paraloc^ do
++        case loc of
++          LOC_REGISTER:
++            begin
++              for I := 0 to high(parasupregs) do
++                if getsupreg(register)=parasupregs[I] then
++                  begin
++                    reg:=I;
++                    break;
++                  end;
++              off:=0;
++            end;
++          LOC_REFERENCE:
++            begin
++              reg:=255;
++              off:=reference.offset;
++            end;
++        end;
++    end;
+ 
+     function tcpuparamanager.parseparaloc(p : tparavarsym;const s : string) : boolean;
+       var
 Index: compiler/options.pas
 ===================================================================
---- compiler/options.pas	(revision 34022)
+--- compiler/options.pas	(revision 34703)
 +++ compiler/options.pas	(working copy)
-@@ -3309,6 +3309,10 @@
+@@ -3321,6 +3321,10 @@
    def_system_macro('FPC_HAS_INTERNAL_ABS_INT64');
  {$endif x86_64 or powerpc64 or aarch64}
  
@@ -484,35 +488,9 @@ Index: compiler/options.pas
    def_system_macro('FPC_HAS_UNICODESTRING');
    def_system_macro('FPC_RTTI_PACKSET1');
    def_system_macro('FPC_HAS_CPSTRING');
-Index: compiler/paramgr.pas
-===================================================================
---- compiler/paramgr.pas	(revision 34022)
-+++ compiler/paramgr.pas	(working copy)
-@@ -81,6 +81,8 @@
-           function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
-           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;virtual;
- 
-+          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);virtual;
-+
-           procedure getintparaloc(list: TAsmList; pd: tabstractprocdef; nr : longint; var cgpara: tcgpara);virtual;
- 
-           {# allocate an individual pcgparalocation that's part of a tcgpara
-@@ -278,6 +280,12 @@
-         result:=[];
-       end;
- 
-+    procedure tparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
-+    begin
-+      reg:=0;
-+      off:=0;
-+    end;
-+
- {$if first_mm_imreg = 0}
-   {$WARN 4044 OFF} { Comparison might be always false ... }
- {$endif}
 Index: compiler/x86_64/cpupara.pas
 ===================================================================
---- compiler/x86_64/cpupara.pas	(revision 34022)
+--- compiler/x86_64/cpupara.pas	(revision 34703)
 +++ compiler/x86_64/cpupara.pas	(working copy)
 @@ -44,6 +44,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -522,7 +500,7 @@ Index: compiler/x86_64/cpupara.pas
            function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
            function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
            function get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;override;
-@@ -906,7 +907,6 @@
+@@ -906,13 +907,71 @@
            result:=[RS_XMM0..RS_XMM15];
        end;
  
@@ -530,7 +508,6 @@ Index: compiler/x86_64/cpupara.pas
      function tcpuparamanager.get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;
        begin
          result:=[RS_ST0..RS_ST7];
-@@ -913,6 +913,65 @@
        end;
  
  
@@ -598,7 +575,7 @@ Index: compiler/x86_64/cpupara.pas
          intretregs: array[0..1] of tregister = (NR_FUNCTION_RETURN_REG,NR_FUNCTION_RETURN_REG_HIGH);
 Index: rtl/objpas/typinfo.pp
 ===================================================================
---- rtl/objpas/typinfo.pp	(revision 34022)
+--- rtl/objpas/typinfo.pp	(revision 34703)
 +++ rtl/objpas/typinfo.pp	(working copy)
 @@ -55,7 +55,7 @@
         TMethodKind = (mkProcedure,mkFunction,mkConstructor,mkDestructor,

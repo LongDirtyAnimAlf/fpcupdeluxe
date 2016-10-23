@@ -682,23 +682,6 @@ var
 begin
   OperationSucceeded:=true;
 
-  {
-  // try to prevent the building o the FPC IDE
-  // not enabled (yet)
-  MakefileSL:=TStringList.Create;
-  try
-    MakefileSL.LoadFromFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile');
-    for i:=0 to Pred(MakefileSL.Count) do
-    begin
-      if MakefileSL.Strings[i]='IDE=1' then MakefileSL.Strings[i]:='# IDE=1';
-      if MakefileSL.Strings[i]='TARGET_DIRS_IDE=1' then MakefileSL.Strings[i]:='# TARGET_DIRS_IDE=1';
-    end;
-    MakefileSL.SaveToFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile');
-  finally
-    MakefileSL.free;
-  end;
-  }
-
   ProcessEx.Executable := Make;
   FErrorLog.Clear;
   ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -986,7 +969,7 @@ begin
   s:=aVersion;
 
   {$IFDEF CPUAARCH64}
-  if (s='3.1.1') then result:='3.1.1'
+  if (s=FPCTRUNKVERSION) then result:=FPCTRUNKVERSION
   else result:='0.0.0';
   exit;
   {$ENDIF}
@@ -994,7 +977,8 @@ begin
   // set default to latest stable compiler
   result:=FPCTRUNKCOMPILER;
 
-  if (s='3.1.1') or (s='3.0.2') or (s='3.0.1') then result:='3.0.0'
+  if s=FPCTRUNKVERSION then result:='3.0.0'
+  else if (s='3.0.2') or (s='3.0.1') then result:='3.0.0'
   else if s='3.0.0' then result:='2.6.4'
   else if s='2.6.4' then result:='2.6.2'
   else if s='2.6.2' then result:='2.6.0'
@@ -1028,7 +1012,7 @@ begin
   result:='0.0.0';
 
   {$IFDEF CPUAARCH64}
-  result:='3.1.1';
+  result:=FPCTRUNKVERSION;
   exit;
   {$ENDIF}
 
@@ -1343,6 +1327,7 @@ var
   s:string;
   ReturnCode:integer;
   aLocalBootstrapVersion:string;
+  aIntermediateBootstrapCompiler:string;
 begin
   result:=true;
 
@@ -1360,6 +1345,11 @@ begin
   // set standard bootstrap compilername
   FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
   if NOT FileExists(FBootstrapCompiler) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(aCPU);
+
+  // if we have previously build an intermediate compiler, use that !
+  aIntermediateBootstrapCompiler:=ExtractFilePath(FBootstrapCompiler)+'intermediate_'+GetCompilerName(aCPU);
+  if FileExists(aIntermediateBootstrapCompiler) then FBootstrapCompiler:=aIntermediateBootstrapCompiler;
+
   {$IFDEF Darwin}
     {$IFDEF CPU32}
       if NOT FileExists(FBootstrapCompiler) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
@@ -1645,6 +1635,8 @@ var
   Output: string = '';
   ReturnCode: integer;
 begin
+  result:=InitModule;
+  if not result then exit;
 
   bIntermediateNeeded:=false;
   aCPU := lowercase({$i %FPCTARGETCPU%});
@@ -1679,6 +1671,7 @@ begin
     end;
   end;
 
+  {
   if NOT OperationSucceeded then
   begin
     // do we already have a suitable intermediate compiler somewhere ?
@@ -1695,6 +1688,7 @@ begin
       if OperationSucceeded then FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
     end;
   end;
+  }
 
   if OperationSucceeded then
   begin
@@ -1717,9 +1711,7 @@ begin
         infoln('To compile this FPC, we can also (and will) use (required) a compiler with version : '+RequiredBootstrapVersion,etInfo);
       end;
     end;
-  // bootstrapper ok, get some other things (binutils)
-  end else result:=InitModule;
-  if not result then exit;
+  end;
 
   // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
   // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
@@ -2234,17 +2226,14 @@ begin
       ProcessEx.OnErrorM:=oldlog; //restore previous logging
     end;
 
+  end
+  else
+  begin
+    infoln('FPC: running make distclean failed: could not find compiler ('+FCompiler+')',etError);
   end;
 
   // Delete any existing fpc.cfg files
   Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
-
-  {$IF DEFINED(CPUARM) AND DEFINED(LINUX)}
-  // Delete possibly outdated trunk compilers used for compiling the compiler
-  // Delete bootstrap compiler; will be regenerated later with new version:
-  infoln('TFPCInstaller: deleting intermediate bootstrap compiler (will be rebuilt using stable bootstrap compiler)',etInfo);
-  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'ppcarm');
-  {$ENDIF} //arm/linux
 
   {$IFDEF UNIX}
   // Delete any fpc.sh shell scripts
@@ -2260,6 +2249,7 @@ begin
   // make distclean will only remove the results of a make, not a make install
   DeleteDirectoryEx(IncludeTrailingPathDelimiter(FBaseDirectory)+'units'+DirectorySeparator+CPU_OSSignature);
   {$ENDIF}
+
   // finally ... if something is still still still floating around ... delete it !!
   DeleteList := FindAllFiles(FBaseDirectory, '*.ppu; *.a; *.o', True);
   try
@@ -2292,9 +2282,32 @@ var
   LocalPatchCmd : string;
   UpdateWarnings: TStringList;
   ReturnCode,i: integer;
+  MakefileSL:TStringList;
 begin
   result:=InitModule;
   if not result then exit;
+
+  if FileExists(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile') then
+  begin
+    // try to prevent the building o the FPC IDE
+    // reset makefile
+    MakefileSL:=TStringList.Create;
+    MakefileSL.TextLineBreakStyle:=tlbsLF;
+    //DefaultTextLineBreakStyle
+    //sLineBreak
+    //MakefileSL.SkipLastLineBreak:=;
+    try
+      MakefileSL.LoadFromFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile');
+      for i:=0 to Pred(MakefileSL.Count) do
+      begin
+        if MakefileSL.Strings[i]='# FPCUPCHANGE IDE=1' then MakefileSL.Strings[i]:='IDE=1';
+      end;
+      MakefileSL.SaveToFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile');
+    finally
+      MakefileSL.free;
+    end;
+  end;
+
   infoln('Checking out/updating FPC sources...',etInfo);
   UpdateWarnings:=TStringList.Create;
   try
@@ -2314,6 +2327,23 @@ begin
     infoln('FPC was at: '+BeforeRevision,etInfo);
     if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etInfo) else
       infoln('No updates for FPC found.',etInfo);
+  end;
+
+  if result AND FileExists(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile') then
+  begin
+    // try to prevent the building o the FPC IDE
+    MakefileSL:=TStringList.Create;
+    MakefileSL.TextLineBreakStyle:=tlbsLF;
+    try
+      MakefileSL.LoadFromFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile');
+      for i:=0 to Pred(MakefileSL.Count) do
+      begin
+        if MakefileSL.Strings[i]='IDE=1' then MakefileSL.Strings[i]:='# FPCUPCHANGE IDE=1';
+      end;
+      MakefileSL.SaveToFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'Makefile');
+    finally
+      MakefileSL.free;
+    end;
   end;
 
   if result then

@@ -677,8 +677,8 @@ begin
        aVersion:='2.4.0';
   end;
 
-  //trunk (3.1.1) is special
-  if aVersion='3.1.1'
+  //trunk is special
+  if aVersion=FPCTRUNKVERSION
      then aTag:='trunk'
      else aTag:='tags/release_'+StringReplace(aVersion,'.','_',[rfReplaceAll]);
 
@@ -693,8 +693,12 @@ begin
   AddNewUtil('fp32.ico',aSourceURL,'',ucBinutil);
   AddNewUtil('gcc' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('grep' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('patch' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('patch' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
+  AddNewUtil('unzip' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('windres' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('windres.h',aSourceURL,'',ucBinutil);
+  AddNewUtil('zip' + GetExeExt,aSourceURL,'',ucBinutil);
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1047,8 +1051,10 @@ begin
 
   FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   infoln('Running SVN checkout or update.',etInfo);
+
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
+
   CheckoutOrUpdateReturnCode := FSVNClient.ReturnCode;
   case CheckoutOrUpdateReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:

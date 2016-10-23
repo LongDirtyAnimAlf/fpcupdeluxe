@@ -872,6 +872,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       if Output='arch' then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
+        //Output:='make gdb binutils unzip patch libx11 gtk2 gdk-pixbuf2 pango cairo xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
       end
       else
       if (Output='ubuntu') then

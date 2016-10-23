@@ -82,7 +82,7 @@ const
 
   // Versions used when new config files are generated.
   // Lazarus pre 1.0: 106
-  // We can assume Lazarus SVN can parse this version:
+  // We can assume Lazarus trunk can parse this version:
   TrunkVersionNewEnvironmentConfig='110';
   TrunkLazarusNewEnvironmentConfig='1.7';
   // We use a hardcoded version for Lazarus below
