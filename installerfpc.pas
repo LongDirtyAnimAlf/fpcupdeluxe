@@ -857,7 +857,7 @@ end;
 function TFPCInstaller.GetCompilerVersionFromUrl(aUrl: string): string;
 var
   aVersion: string;
-  begin
+begin
   aVersion:=GetVersionFromUrl(aUrl);
   if aVersion='trunk' then result:=FPCTRUNKVERSION else result:=aVersion;
 end;
@@ -1849,7 +1849,9 @@ begin
   else
   begin
     // get the correct binutils (Windows only)
-    CreateBinutilsList(GetCompilerVersionFromSource(FBaseDirectory));
+    //CreateBinutilsList(GetBootstrapCompilerVersionFromSource(FBaseDirectory));
+    //CreateBinutilsList(GetCompilerVersionFromSource(FBaseDirectory));
+    CreateBinutilsList(RequiredBootstrapVersion);
     result:=CheckAndGetNeededBinUtils;
     //if not result then exit;
   end;

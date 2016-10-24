@@ -493,7 +493,7 @@ begin
                 5 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.5
                 6 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.6
               else
-                begin //-1 or higher than 5 set to trunk version
+                begin //-1 or higher than 6 set to trunk version
                   NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
                   NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
                 end;

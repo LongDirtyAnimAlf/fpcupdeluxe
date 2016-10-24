@@ -361,6 +361,7 @@ var
 begin
   OperationSucceeded := true;
   infoln('TLazarusNativeInstaller: building module ' + ModuleName + '...', etInfo);
+
   if ModuleName <> 'USERIDE' then
   begin
     // Make all (should include lcl & ide), lazbuild, lcl etc
@@ -461,33 +462,6 @@ begin
       end;
     end;
 
-    // Set up debugger if building the IDE with native widgetset
-    {$IFDEF MSWINDOWS}
-    if (UpperCase(ModuleName) = 'LAZARUS') and (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') and (FCrossOS_Target = '') then
-    begin
-      if OperationSucceeded then
-      begin
-        DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'mingw\bin\' + GetFPCTarget(true) + '\';
-        ForceDirectoriesUTF8(DebuggerPath);
-        //Copy over debugger files to new Debuggerpath directory
-        try
-          for FileCounter := low(FUtilFiles) to high(FUtilFiles) do
-          begin
-            if (FUtilFiles[FileCounter].Category = ucDebugger) then
-              FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir) + FUtilFiles[FileCounter].FileName,
-                IncludeTrailingPathDelimiter(DebuggerPath) + FUtilFiles[FileCounter].FileName);
-          end;
-        except
-          on E: Exception do
-          begin
-            infoln('Error copying debugger files: ' + E.Message, etError);
-            infoln('Hint: perhaps you have gdb running at the moment - please kill it.', etWarning);
-            OperationSucceeded := false;
-          end;
-        end;
-      end;
-    end;
-    {$ENDIF MSWINDOWS}
   end
   else
   begin
@@ -712,6 +686,8 @@ var
   LazBuildApp:string;
   Output:string;
   FReturnCode: integer;
+  TxtFile:Text;
+  VersionFile:string;
 begin
 
   Result := true;
@@ -748,20 +724,20 @@ begin
     end;
   end;
 
+  VersionFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+  if FileExists(VersionFile) then
+  begin
+    AssignFile(TxtFile,VersionFile);
+    Reset(TxtFile);
+    Readln(TxtFile,VersionSnippet);
+    VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
+    CloseFile(TxtFile);
+  end;
+
   if Length(VersionSnippet)=0 then
   begin
-    VersionSnippet:=UpperCase(FURL);
-    // find first occurence of _ and delete everything before it
-    // if lazarus url contains a version, this version always starts with _
-    i := Pos('_',VersionSnippet);
-    if i>0 then
-    begin
-      Delete(VersionSnippet,1,i);
-      // ignore release candidate numbering
-      i := Pos('_RC',VersionSnippet);
-      if i>0 then Delete(VersionSnippet,i,200);
-      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
-    end;
+    VersionSnippet:=GetVersionFromUrl(FURL);
+    VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
   end;
 
   if Length(VersionSnippet)>0 then
@@ -818,22 +794,23 @@ begin
       // we'd rather use fpc
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', ExtractFilePath(FCompiler) + 'fpc' + GetExeExt);
 
-      if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'mingw\bin\' + GetFPCTarget(true) + '\gdb' + GetExeExt) then
+      // do we supply GDB in the installdir from mingw for win32 and/or win64
+      if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          '$(LazarusDir)\mingw\bin\$(TargetCPU)-$(TargetOS)\gdb' + GetExeExt)
-      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + 'mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
+          '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb.exe')
+
+      // have we downloaded GDB in the makedir for win32 and/or win64
+      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + GetFPCTarget(true) + '\gdb.exe') then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          '$(LazarusDir)\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb' + GetExeExt)
-      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FBaseDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb' + GetExeExt)
+          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + '$(TargetCPU)-$(TargetOS)\gdb.exe')
       else
       begin
         // if no debugger found, just set some default paths
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
-          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb' + GetExeExt);
-        LazarusConfig.SetVariable(EnvironmentConfig, 'DebuggerSearchPath/Value',
-          '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin');
+          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb.exe');
+        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerSearchPath/Value',
+          //'$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin');
+          IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + '$(TargetCPU)-$(TargetOS)');
       end;
 
       if FileExists(ExtractFilePath(FCompiler) + 'make' + GetExeExt)
@@ -881,7 +858,7 @@ begin
       DebuggerPath := ExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory) + '..');
       DebuggerPath := IncludeTrailingPathDelimiter(DebuggerPath)+'projects';
       ForceDirectoriesUTF8(DebuggerPath);
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
+      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
 
       {$IFDEF MSWINDOWS}

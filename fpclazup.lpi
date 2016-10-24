@@ -59,6 +59,7 @@ end;"/>
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
+            <VerifyObjMethodCallValidity Value="True"/>
             <Optimizations>
               <OptimizationLevel Value="0"/>
             </Optimizations>
@@ -66,6 +67,7 @@ end;"/>
           <Linking>
             <Debugging>
               <StripSymbols Value="True"/>
+              <UseExternalDbgSyms Value="True"/>
             </Debugging>
           </Linking>
           <Other>
@@ -106,7 +108,6 @@ end;"/>
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
               <UseExternalDbgSyms Value="True"/>
             </Debugging>
             <LinkSmart Value="True"/>
@@ -320,7 +321,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--inifile=rein.ini --inisection=linuxarm --noconfirm"/>
+        <CommandLineParams Value="--installdir=&quot;C:\NewPascal2\&quot; --fpcURL=&quot;trunk&quot; --lazURL=&quot;trunk&quot; --verbose"/>
       </local>
     </RunParams>
     <RequiredPackages Count="2">

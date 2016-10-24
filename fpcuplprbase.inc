@@ -203,7 +203,9 @@ begin
   writeln('                       Else: uninstall only certain modules.');
   writeln(' logfilename=<file>    Location of log file. If nothing specified,');
   writeln('                       fpcup.log in the current directory.');
-  writeln(' getfullrepo           Get full repositories. If not set, just get files.');
+  writeln(' getfullrepo           Get full repositories (enabled by default, so a dummy).');
+  writeln('                       Depreciated, still here for backward compatibility');
+  writeln(' getfilesonly          Just get files. No repos. Uses "svn export"');
   writeln(' disablejobs           Do not use (parallel) jobs when building FPC.');
   writeln(' noconfirm             No confirmation asked. For batch operation.');
   writeln(' verbose               Show output from svn and make.');
@@ -263,6 +265,7 @@ begin
           LeftOverOptions.Add('noconfirm');
           LeftOverOptions.Add('uninstall');
           LeftOverOptions.Add('getfullrepo');
+          LeftOverOptions.Add('getfilesonly');
           LeftOverOptions.Add('disablejobs');
           LeftOverOptions.Add('verbose');
           LeftOverOptions.Add('version');
@@ -482,8 +485,10 @@ begin
       FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
       // do not add to default options:
       FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
-      FInstaller.ExportOnly:=(NOT Options.GetOptionNoParam('','getfullrepo',true));
-      FInstaller.NoJobs:=Options.GetOptionNoParam('','disablejobs',true);
+      // getfullrepo is a depreciated option ... left here for compatibility only
+      Options.GetOptionNoParam('','getfullrepo',false);
+      FInstaller.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
+      FInstaller.NoJobs:=Options.GetOptionNoParam('','disablejobs');
       FInstaller.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
       // do not add to default options:
       bVersion:=Options.GetOptionNoParam('','version',false);

@@ -44,7 +44,8 @@ const
 
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
-    ucDebugger {Debugger (support) files},
+    ucDebugger32 {Debugger (support) files 32bit},
+    ucDebugger64 {Debugger (support) files 64bit},
     ucQtFile {e.g. Qt binding},
     ucOther {unknown});
 
@@ -407,6 +408,10 @@ begin
     // Get patch binary from default binutils URL
     GetFile(IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
     GetFile(IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+
+    // Get make from default binutils URL
+    // GetFile(Make);
+
     {$ENDIF}
 
     {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
@@ -634,8 +639,7 @@ begin
 end;
 
 procedure TInstaller.CreateBinutilsList(aVersion:string);
-// Windows-centric for now; doubt if it
-// can be used in Unixy systems anyway
+// Windows-centric
 const
   SourceURL_gdb = FPCSVNURL+'/lazarus/binaries/i386-win32/gdb/bin/';
   SourceURL64_gdb = FPCSVNURL+'/lazarus/binaries/x86_64-win64/gdb/bin/';
@@ -687,6 +691,11 @@ begin
   aSourceURL64:=BINUTILSURL+'/'+aTag+'/install/binw64/';
   {$endif}
 
+  infoln('Getting binutils from URL: '+aSourceURL+'.',etInfo);
+  {$ifdef win64}
+  infoln('Getting 64bit binutils from URL: '+aSourceURL64+'.',etInfo);
+  {$endif}
+
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
   AddNewUtil('cpp' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('dlltool' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -699,6 +708,13 @@ begin
   AddNewUtil('windres' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('windres.h',aSourceURL,'',ucBinutil);
   AddNewUtil('zip' + GetExeExt,aSourceURL,'',ucBinutil);
+
+  // add win32/64 gdb from lazarus
+  AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger32);
+  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger64);
+  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
+
+
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -707,8 +723,9 @@ begin
   AddNewUtil('diff' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,aSourceURL,'',ucBinutil);
   //AddNewUtil('gdb' + GetExeExt,aSourceURL_gdb,'',ucDebugger);
-  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucDebugger);
-  AddNewUtil('libexpat-1.dll',aSourceURL,'',ucDebugger);
+  // just add default 32 bit debugger for all usercases as a binutil !
+  AddNewUtil('gdb' + GetExeExt,aSourceURL,'',ucBinutil);
+  AddNewUtil('libexpat-1.dll',aSourceURL,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt + '.manifest',aSourceURL,'',ucBinutil);
@@ -737,8 +754,9 @@ begin
   AddNewUtil('cp' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('diff' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
-  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger);
-  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger);
+  // just add default 64 bit debugger for all usercases as a binutil !
+  AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucBinutil);
+  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);
@@ -797,20 +815,32 @@ var
   Errors: integer = 0;
   RetryAttempt:integer;
   DownloadSuccess:boolean;
+  InstallPath:string;
 begin
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesUTF8(FMakeDir);
   Result := true;
   for Counter := low(FUtilFiles) to high(FUtilFiles) do
   begin
-    if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger) then
+    if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
     begin
-      if (FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[Counter].FileName)) then continue;
+      InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
+
+      if (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
+      begin
+        if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
+        if (FUtilFiles[Counter].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
+        ForceDirectoriesUTF8(InstallPath);
+      end;
+
+      InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
+
+      if (FileExists(InstallPath)) then continue;
       RetryAttempt:=0;
       repeat
         try
           DownloadSuccess:=Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
-            IncludeTrailingPathDelimiter(FMakeDir) + FUtilFiles[Counter].FileName,
+            InstallPath,
             FHTTPProxyHost,
             inttostr(FHTTPProxyPort),
             FHTTPProxyUser,
@@ -833,11 +863,12 @@ begin
 
       if NOT DownloadSuccess then
       begin
-        infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + FMakeDir + '. Retrying.',etError);
+        infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
         Errors := Errors + 1;
-      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FMakeDir + ' success.',etDebug);
+      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etDebug);
 
     end;
+
   end;
 
   if Errors > 0 then

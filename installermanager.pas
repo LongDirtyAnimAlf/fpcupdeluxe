@@ -785,14 +785,14 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
       {$IFDEF DARWIN}
-      CreateHomeStartLink(InstalledLazarus+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
+      CreateHomeStartLink(IncludeLeadingPathDelimiter(InstalledLazarus)+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
       // Create shortcut on Desktop and in Applications
       fpSystem('/usr/bin/osascript << EOF'+#10+
                'tell application "Finder"'+#10+
-               'make new alias to POSIX file "/Users/superdad/development/lazarus/lazarus.app" at (path to desktop folder as text)'+#10+
-	       'set name of result to "lazarus_fpcup"'+#10+
-               'make new alias to POSIX file "/Users/superdad/development/lazarus/lazarus.app" at (path to applications folder as text)'+#10+
-	       'set name of result to "lazarus_fpcup"'+#10+
+               'make new alias to POSIX file "'+IncludeLeadingPathDelimiter(InstalledLazarus)+'.app" at (path to desktop folder as text)'+#10+
+	       'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
+               'make new alias to POSIX file "'+IncludeLeadingPathDelimiter(InstalledLazarus)+'.app" at (path to applications folder as text)'+#10+
+	       'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
                'end tell'+#10+
                'EOF');
       {$ELSE}
@@ -845,6 +845,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     i:integer;
     pll:^TLibList;
     Output: string;
+    AdvicedLibs:string;
     AllOutput:TStringList;
 
     function TestLib(LibName:string):boolean;
@@ -864,6 +865,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   begin
     result:=true;
 
+    AdvicedLibs:='make gdb binutils unzip patch ';
+
     ExecuteCommand('cat /etc/*-release',Output,false);
     AllOutput:=TStringList.Create;
     try
@@ -872,7 +875,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       if Output='arch' then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
-        //Output:='make gdb binutils unzip patch libx11 gtk2 gdk-pixbuf2 pango cairo xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
+        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
       end
       else
       if (Output='ubuntu') then
@@ -882,6 +885,10 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       else if (Output='debian') then
       begin
         Output:='libgtk2.0-dev libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
+        AdvicedLibs:=AdvicedLibs+
+                     'build-essential gcc devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
+                     'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
+                     'libx11-dev libxft2 libfontconfig1 xfonts-scalable libgtk2.0-dev gtk2-engines-pixbuf libcairo2-dev';
       end
       else
       if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
