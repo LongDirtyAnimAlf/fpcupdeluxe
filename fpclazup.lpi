@@ -321,7 +321,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--installdir=&quot;C:\NewPascal2\&quot; --fpcURL=&quot;trunk&quot; --lazURL=&quot;trunk&quot; --verbose"/>
+        <CommandLineParams Value="--installdir=&quot;C:\NewPascal2\&quot; --fpcURL=&quot;fixes&quot; --lazURL=&quot;fixes&quot; --verbose --only=&quot;lazarus&quot;"/>
       </local>
     </RunParams>
     <RequiredPackages Count="2">

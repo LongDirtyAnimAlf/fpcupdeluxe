@@ -724,14 +724,20 @@ begin
     end;
   end;
 
-  VersionFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'ide' + DirectorySeparator + 'version.inc';
-  if FileExists(VersionFile) then
+  if Length(VersionSnippet)=0 then
   begin
-    AssignFile(TxtFile,VersionFile);
-    Reset(TxtFile);
-    Readln(TxtFile,VersionSnippet);
-    VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
-    CloseFile(TxtFile);
+    VersionFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+    if FileExists(VersionFile) then
+    begin
+      AssignFile(TxtFile,VersionFile);
+      Reset(TxtFile);
+      Readln(TxtFile,VersionSnippet);
+      // remove quotes from string
+      //VersionSnippet:=DelChars(VersionSnippet, '''');
+      VersionSnippet:=TrimSet(VersionSnippet, [#39]);
+      VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
+      CloseFile(TxtFile);
+    end;
   end;
 
   if Length(VersionSnippet)=0 then
