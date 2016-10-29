@@ -22,15 +22,20 @@ type
   TForm1 = class(TForm)
     Button1: TButton;
     Button2: TButton;
+    Button3: TButton;
     CheckVerbosity: TCheckBox;
+    Edit1: TEdit;
     Label1: TLabel;
     Label2: TLabel;
     ListBox1: TListBox;
     ListBox2: TListBox;
     ListBox3: TListBox;
+    SelectDirectoryDialog1: TSelectDirectoryDialog;
     SynAnySyn1: TSynAnySyn;
     SynEdit1: TSynEdit;
     procedure Button1Click(Sender: TObject);
+    procedure Button3Click(Sender: TObject);
+    procedure Edit1Change(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
   private
@@ -80,10 +85,19 @@ begin
   {$IFDEF MSWINDOWS}
   sInstallDir:='C:\fpcupdeluxe';
   {$ELSE}
-  sInstallDir:='~/development';
+  sInstallDir:='~/fpcupdeluxe';
   {$ENDIF}
 
+  with TIniFile.Create('deluxe.ini') do
+  try
+    sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
+  finally
+    Free;
+  end;
+
   sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
+
+  Edit1.Text:=sInstallDir;
 
   FPCupManager.ConfigFile:=installerUniversal.CONFIGFILENAME;
 
@@ -173,6 +187,21 @@ begin
   end;
 end;
 
+procedure TForm1.Button3Click(Sender: TObject);
+begin
+  SelectDirectoryDialog1.InitialDir:=sInstallDir;
+  if SelectDirectoryDialog1.Execute then
+  begin
+    sInstallDir:=SelectDirectoryDialog1.FileName;
+    Edit1.Text:=sInstallDir;
+  end;
+end;
+
+procedure TForm1.Edit1Change(Sender: TObject);
+begin
+  sInstallDir:=Edit1.Text;
+end;
+
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   with TIniFile.Create('deluxe.ini') do
@@ -180,6 +209,7 @@ begin
     WriteInteger('URL','fpcURL',listbox1.ItemIndex);
     WriteInteger('URL','lazURL',listbox2.ItemIndex);
     WriteBool('General','Verbose',CheckVerbosity.Checked);
+    WriteString('General','InstallDirectory',sInstallDir);
     if Self.WindowState=wsNormal then
     begin
       WriteInteger('General','Top',Self.Top);
@@ -234,6 +264,8 @@ begin
   except
     FPCupManager.free;
   end;
+  writeln;
+  writeln('Please come back when needed !!');
 end;
 
 end.

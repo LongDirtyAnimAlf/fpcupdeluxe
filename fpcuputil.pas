@@ -44,6 +44,7 @@ uses
   Classes, SysUtils,
   fphttpclient,
   sslsockets, fpopenssl,
+  //fpftpclient,
   eventlog;
 
 Const

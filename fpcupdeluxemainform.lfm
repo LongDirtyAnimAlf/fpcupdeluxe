@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 223
+  Left = 225
   Height = 408
-  Top = 577
+  Top = 265
   Width = 1043
   Anchors = []
   Caption = 'Form1'
@@ -20,8 +20,8 @@ object Form1: TForm1
   end
   object Button1: TButton
     Left = 16
-    Height = 44
-    Top = 360
+    Height = 36
+    Top = 368
     Width = 110
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Start fpcup'
@@ -595,7 +595,7 @@ object Form1: TForm1
     Left = 136
     Height = 296
     Top = 32
-    Width = 192
+    Width = 193
     ItemHeight = 0
     MultiSelect = True
     Sorted = True
@@ -603,12 +603,29 @@ object Form1: TForm1
   end
   object Button2: TButton
     Left = 135
-    Height = 44
-    Top = 360
-    Width = 193
+    Height = 36
+    Top = 368
+    Width = 194
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Install module(s)'
     TabOrder = 6
+  end
+  object Edit1: TEdit
+    Left = 136
+    Height = 23
+    Top = 336
+    Width = 144
+    OnChange = Edit1Change
+    TabOrder = 7
+  end
+  object Button3: TButton
+    Left = 288
+    Height = 23
+    Top = 336
+    Width = 41
+    Caption = 'DirSel'
+    OnClick = Button3Click
+    TabOrder = 8
   end
   object SynAnySyn1: TSynAnySyn
     Enabled = False
@@ -636,5 +653,9 @@ object Form1: TForm1
     DollarVariables = False
     ActiveDot = False
     left = 216
+  end
+  object SelectDirectoryDialog1: TSelectDirectoryDialog
+    Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
+    left = 288
   end
 end
