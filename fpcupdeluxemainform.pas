@@ -113,7 +113,7 @@ begin
   FPCupManager.FPCURL:='default';
   FPCupManager.LazarusURL:='default';
   FPCupManager.Verbose:=true;
-  FPCupManager.SkipModules:='fpc';
+  //FPCupManager.SkipModules:='fpc';
 
   SortedModules:=TStringList.Create;
   try
