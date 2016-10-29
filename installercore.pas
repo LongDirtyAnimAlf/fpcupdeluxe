@@ -113,6 +113,7 @@ type
     FVerbose: boolean;
     FTar: string;
     FUnzip: string;
+    F7zip: string;
     ProcessEx: TProcessEx;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
@@ -158,6 +159,7 @@ type
     procedure LogError(Sender: TProcessEx; IsException: boolean);
     // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
+    function GetFile(aURL,aFile:string):boolean;
   public
     property SVNClient: TSVNClient read FSVNClient;
     // Get processerrors and put them into FErrorLog
@@ -331,45 +333,6 @@ var
   i: integer;
   OperationSucceeded: boolean;
   Output: string;
-{$IFDEF MSWINDOWS}
-function GetFile(aFile:string):boolean;
-var
-  aFilename:string;
-  RetryAttempt:integer;
-  DownloadSuccess:boolean;
-begin
-  result:=true;
-  aFilename:=ExtractFileName(aFile);
-  if (NOT FileExists(aFile)) then
-  begin
-    infoln('Downloading ' + aFilename + ' into ' + FMakeDir,etDebug);
-    RetryAttempt:=0;
-    repeat
-      try
-        DownloadSuccess:=Download(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+aFilename,
-            aFile,
-            FHTTPProxyHost,
-            inttostr(FHTTPProxyPort),
-            FHTTPProxyUser,
-            FHTTPProxyPassword);
-        if NOT DownloadSuccess then
-        begin
-          Inc(RetryAttempt);
-          sleep(100*RetryAttempt);
-        end;
-      except
-        on E: Exception do
-        begin
-          Result := false;
-          infoln('Error downloading '  + aFilename + ' : ' + E.Message,eterror);
-          exit; //out of function.
-        end;
-      end;
-    until ( (DownloadSuccess) OR (RetryAttempt>5) );
-    Result:=DownloadSuccess;
-  end;
-end;
-{$ENDIF}
 begin
   OperationSucceeded := true;
   if not FNeededExecutablesChecked then
@@ -385,16 +348,19 @@ begin
     FBunzip2 := 'bunzip2';
     FTar := 'tar';
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    F7zip := '7za';
     {$ENDIF LINUX}
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
     FBunzip2 := ''; //not really necessary now
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    F7zip := '7za';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
+    F7zip := '7za';
     {$ENDIF DARWIN}
     {$ENDIF BSD}
 
@@ -403,14 +369,15 @@ begin
 
     // Get unzip binary from default binutils URL
     FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
-    GetFile(FUnzip);
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
 
     // Get patch binary from default binutils URL
-    GetFile(IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
-    GetFile(IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
 
-    // Get make from default binutils URL
-    // GetFile(Make);
+    // Get 7zip binary from 7zip URL for unpacking of 7zip archives
+    F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '7z1604'{$ifdef win64} + '-x64' + {$endif} + '.exe';
+    GetFile('http://www.7-zip.org/a/'+ExtractFileName(F7zip),F7zip);
 
     {$ENDIF}
 
@@ -576,6 +543,13 @@ begin
 
   if OperationSucceeded then
   begin
+
+    {$IFDEF MSWINDOWS}
+    // check if we have make ... otherwise get it from standard URL
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+
+            '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
+    {$ENDIF MSWINDOWS}
+
     // Check for proper make executable
     try
       ExecuteCommand(Make + ' -v', Output, FVerbose);
@@ -813,9 +787,9 @@ function TInstaller.DownloadBinUtils: boolean;
 var
   Counter: integer;
   Errors: integer = 0;
-  RetryAttempt:integer;
   DownloadSuccess:boolean;
   InstallPath:string;
+
 begin
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesUTF8(FMakeDir);
@@ -836,30 +810,8 @@ begin
       InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
 
       if (FileExists(InstallPath)) then continue;
-      RetryAttempt:=0;
-      repeat
-        try
-          DownloadSuccess:=Download(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,
-            InstallPath,
-            FHTTPProxyHost,
-            inttostr(FHTTPProxyPort),
-            FHTTPProxyUser,
-            FHTTPProxyPassword);
-          if NOT DownloadSuccess then
-          begin
-            Inc(RetryAttempt);
-            sleep(100*RetryAttempt);
-          end;
-        except
-          on E: Exception do
-          begin
-            Result := false;
-            infoln('Fatal error downloading binutils: ' + E.Message+'. Exit.',etError);
-            exit; //out of function.
-          end;
-        end;
 
-      until ( (DownloadSuccess) OR (RetryAttempt>5) );
+      DownloadSuccess:=GetFile(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
 
       if NOT DownloadSuccess then
       begin
@@ -1611,6 +1563,32 @@ begin
   FErrorLog := TStringList.Create;
   ProcessEx.OnErrorM:=@(ProcessError);
 end;
+
+function TInstaller.GetFile(aURL,aFile:string):boolean;
+var
+  aDownLoader:TDownLoader;
+begin
+  result:=false;
+  if (NOT FileExists(aFile)) then
+  begin
+    infoln('Downloading ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etDebug);
+    //aDownLoader:=TDownLoader.Create(FVerbose);
+    aDownLoader:=TDownLoader.Create;
+    try
+      if FHTTPProxyHost<>'' then aDownLoader.setProxy(FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
+      result:=aDownLoader.getFile(aURL,aFile);
+      if (NOT result) then // try only once again in case of error
+      begin
+        infoln('Error while trying to download '+aURL+'. Trying again.',etDebug);
+        SysUtils.DeleteFile(aFile); // delete stale targetfile
+        result:=aDownLoader.getFile(aURL,aFile);
+      end;
+    finally
+      aDownLoader.Destroy;
+    end;
+  end;
+end;
+
 
 destructor TInstaller.Destroy;
 begin

@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Count="3" Active="Default">
+    <BuildModes Count="3" Active="Debug">
       <Item1 Name="linuxarmhf">
         <CompilerOptions>
           <Version Value="11"/>
@@ -126,17 +126,18 @@ end;"/>
       <Unit0>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
+        <TopLine Value="64"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="222"/>
-        <CursorPos Y="241"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="276"/>
+        <CursorPos X="33" Y="294"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
@@ -147,16 +148,20 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="136"/>
-        <CursorPos X="10" Y="151"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="248"/>
+        <CursorPos Y="246"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="5"/>
+        <TopLine Value="1033"/>
+        <CursorPos X="19" Y="1039"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit4>
@@ -165,6 +170,8 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="3"/>
+        <TopLine Value="2302"/>
+        <CursorPos X="18" Y="2312"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit5>
@@ -187,7 +194,9 @@ end;"/>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="9"/>
+        <TopLine Value="1296"/>
+        <CursorPos X="73" Y="1324"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit8>
@@ -195,6 +204,8 @@ end;"/>
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
+        <TopLine Value="753"/>
+        <CursorPos X="3" Y="776"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -203,7 +214,9 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="10"/>
+        <TopLine Value="1387"/>
+        <CursorPos X="18" Y="1394"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -247,15 +260,18 @@ end;"/>
       <Unit16>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="24"/>
+        <CursorPos X="3" Y="41"/>
         <UsageCount Value="200"/>
+        <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="gitclient.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="315"/>
-        <CursorPos X="39" Y="331"/>
+        <TopLine Value="89"/>
+        <CursorPos Y="120"/>
         <UsageCount Value="200"/>
       </Unit17>
       <Unit18>
@@ -419,7 +435,7 @@ end;"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="31" Y="19"/>
-        <UsageCount Value="173"/>
+        <UsageCount Value="200"/>
       </Unit38>
       <Unit39>
         <Filename Value="jedi.inc"/>
@@ -428,7 +444,7 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="173"/>
+        <UsageCount Value="200"/>
       </Unit39>
       <Unit40>
         <Filename Value="m_linux386_to_mipsel.pas"/>
@@ -436,7 +452,7 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="107"/>
         <CursorPos Y="132"/>
-        <UsageCount Value="173"/>
+        <UsageCount Value="200"/>
       </Unit40>
       <Unit41>
         <Filename Value="revision.inc"/>
@@ -445,33 +461,34 @@ end;"/>
         <WindowIndex Value="-1"/>
         <TopLine Value="-1"/>
         <CursorPos X="-1" Y="-1"/>
-        <UsageCount Value="173"/>
+        <UsageCount Value="200"/>
       </Unit41>
       <Unit42>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="166"/>
+        <UsageCount Value="193"/>
       </Unit42>
       <Unit43>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="157"/>
       </Unit43>
       <Unit44>
         <Filename Value="m_any_to_javajvm.pas"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="130"/>
+        <UsageCount Value="157"/>
       </Unit44>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="690"/>
-        <CursorPos X="27" Y="702"/>
-        <UsageCount Value="128"/>
+        <EditorIndex Value="11"/>
+        <TopLine Value="1083"/>
+        <CursorPos X="5" Y="1085"/>
+        <UsageCount Value="155"/>
+        <Loaded Value="True"/>
       </Unit45>
       <Unit46>
         <Filename Value="m_any_to_linuxaarch64.pas"/>
@@ -479,8 +496,19 @@ end;"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
         <CursorPos Y="93"/>
-        <UsageCount Value="89"/>
+        <UsageCount Value="116"/>
       </Unit46>
     </Units>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="1">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="installerfpc.pas"/>
+        <Line Value="1448"/>
+      </Item1>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

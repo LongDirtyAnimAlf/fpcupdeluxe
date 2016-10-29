@@ -158,7 +158,7 @@ Const
 implementation
 
 uses
-  inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil;
+  StrUtils,inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil;
 
 Const
   MAXSYSMODULES=200;
@@ -348,6 +348,7 @@ var
 begin
   result:=false;
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+
   // Convert any relative path to absolute path, if it's not just a file/package name:
   if ExtractFileName(PackagePath)=PackagePath then
     PackageAbsolutePath:=PackagePath
@@ -449,19 +450,20 @@ begin
   BaseWorkingdir:=GetValue('Workingdir',sl);
   // Go backward; reverse order to deal with any dependencies
   for i:=MAXINSTRUCTIONS downto 0 do
-    begin
+  begin
     if i=0
        then PackagePath:=GetValue(Directive,sl)
        else PackagePath:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if PackagePath='' then continue;
+    if NOT FileExists(PackagePath) then continue;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
     // Try to uninstall everything, even if some of these fail.
     // Note: UninstallPackage used to have a WorkingDir parameter but
     // I'm wondering how to implement that as we have PackagePath already.
     if UnInstallPackage(PackagePath)=false then Failure:=true;
-    end;
+  end;
   result:=Failure;
 end;
 {$endif}
@@ -490,26 +492,41 @@ const
   Directive='AddPackage';
   Location='Workingdir';
 var
-  i:integer;
+  i,j:integer;
   PackagePath:string;
   Workingdir:string;
   BaseWorkingdir:string;
+  RealDirective:string;
 begin
 
+  RealDirective:=Directive;
+  PackagePath:=GetValue(RealDirective,sl);
   BaseWorkingdir:=GetValue(Location,sl);
-  PackagePath:=GetValue(Directive,sl);
 
   // trick: run from -1 to allow the above basic statements to be processed first
   for i:=-1 to MAXINSTRUCTIONS do
   begin
     if i>=0 then
     begin
-      PackagePath:=GetValue(Directive+IntToStr(i),sl);
+      RealDirective:=Directive+IntToStr(i);
+      PackagePath:=GetValue(RealDirective,sl);
       Workingdir:=GetValue(Location+IntToStr(i),sl);
     end;
-    // Skip over missing numbers:
-    if PackagePath='' then continue;
+    // Skip over missing data:
+    if (NOT FileExists(PackagePath)) OR (PackagePath='') then
+    begin
+      for j:=0 to sl.Count-1 do
+      begin
+        if (Pos(RealDirective+'=',StrUtils.DelSpace(sl[j]))>0) then
+        begin
+          sl.Delete(j);
+          break;
+        end;
+      end;
+      continue;
+    end;
     if Workingdir='' then Workingdir:=BaseWorkingdir;
+
     {$ifndef FPCONLY}
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
@@ -880,13 +897,13 @@ begin
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
-      sl:=TStringList(UniModuleList.Objects[idx]);
       // Process AddPackage
       // Compile a package and add it to the list of user-installed packages.
       // Usage:
       // AddPackage<n>=<path to package>\<package.lpk>
       // As this will modify config values, we keep it out the section below.
-      AddPackages(sl);
+      AddPackages(TStringList(UniModuleList.Objects[idx]));
+      sl:=TStringList(UniModuleList.Objects[idx]);
 
       LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
       try
@@ -1035,6 +1052,7 @@ var
   ResultCode: longint;
   User,Pass:string;
   GotLocation:boolean;
+  SourceOK:boolean;
 
   function CheckLocation:boolean;
   begin
@@ -1049,6 +1067,7 @@ begin
   if not result then exit;
   GotLocation:=False;
   result:=true;
+  SourceOK:=false;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
@@ -1077,6 +1096,7 @@ begin
         FSVNClient.Verbose:=FVerbose;
         FSVNClient.ExportOnly:=FExportOnly;
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
+        SourceOK:=result;
         if result=false then
           WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
@@ -1090,7 +1110,7 @@ begin
 
     // Handle HG URLs
     RemoteURL:=GetValue('HGURL',sl);
-    if RemoteURL<>'' then
+    if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       if CheckLocation then exit;
       UpdateWarnings:=TStringList.Create;
@@ -1102,6 +1122,7 @@ begin
         FHGClient.Verbose:=FVerbose;
         FHGClient.ExportOnly:=FExportOnly;
         result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        SourceOK:=result;
         if result=false then
           WritelnLog('HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
@@ -1117,7 +1138,7 @@ begin
     RemoteURL:=GetValue('GITURL',sl);
     {todo: handle branches (e.g. tiopf doesn't use master branch), perhaps a space after the url and then branch name?
     Similar construction could be used for hg. Suggest leaving svn as is}
-    if RemoteURL<>'' then
+    if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       if CheckLocation then exit;
       UpdateWarnings:=TStringList.Create;
@@ -1129,6 +1150,7 @@ begin
         FGitClient.Verbose:=FVerbose;
         FGitClient.ExportOnly:=FExportOnly;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        SourceOK:=result;
         if result=false then
           WritelnLog('GIT error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
@@ -1141,7 +1163,7 @@ begin
     end;
 
     RemoteURL:=GetValue('ArchiveURL',sl);
-    if RemoteURL<>'' then
+    if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       if CheckLocation then exit;
       TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
@@ -1166,13 +1188,16 @@ begin
            '.ZIP':
               ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
            '.7Z':
-           begin
-             ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
-             if ResultCode <> 0 then
-             begin
-               ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
-             end;
-           end;
+              begin
+                ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+                {$ifdef MSWINDOWS}
+                // try winrar
+                if ResultCode <> 0 then
+                begin
+                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                end;
+                {$endif}
+              end;
            else {.tar and all others}
               ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
            end;
@@ -1183,10 +1208,11 @@ begin
         end;
       end;
       SysUtils.Deletefile(TempArchive); //Get rid of temp file.
+      SourceOK:=result;
     end;
 
     RemoteURL:=GetValue('ArchivePATH',sl);
-    if RemoteURL<>'' then
+    if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       if CheckLocation then exit;
       TempArchive := RemoteURL;
@@ -1376,7 +1402,7 @@ try
           infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
           if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/tags/release_3_0_0';
           {$ifndef FPCONLY}
-          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_1_4_4';
+          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_1_6';
           {$endif}
         end;
         if result='' then
@@ -1407,7 +1433,7 @@ var
     name:=ini.ReadString(ModuleName,'Name','');
     result:=name<>'';
     if result then
-      begin
+    begin
       //if StrToBoolDef(ini.ReadString(ModuleName,'Enabled',''),false) then
       // skip all default modules when only installing FPC ... tricky but ok for now.
       {$ifndef FPCONLY}
@@ -1419,11 +1445,11 @@ var
       sl:=TstringList.Create;
       ini.ReadSectionRaw(ModuleName,sl);
       for li:=sl.Count-1 downto 0 do
-        begin
-          if (TrimLeft(sl.Strings[li])[1]=';') OR (TrimLeft(sl.Strings[li])[1]='#') then sl.Delete(li);
-        end;
-      UniModuleList.AddObject(name,TObject(sl));
+      begin
+        if (TrimLeft(sl.Strings[li])[1]=';') OR (TrimLeft(sl.Strings[li])[1]='#') then sl.Delete(li);
       end;
+      UniModuleList.AddObject(name,TObject(sl));
+    end;
   end;
 
   function CreateModuleSequence(ModuleName:string):string;
@@ -1458,8 +1484,9 @@ var
 begin
   result:='';
   ini:=TMemIniFile.Create(CurrentConfigFile);
-  ini.CaseSensitive:=false;
-  ini.StripQuotes:=true; //helps read description lines
+  ini.Options:=[ifoStripQuotes];
+  //ini.CaseSensitive:=false;
+  //ini.StripQuotes:=true; //helps read description lines
 
   // parse inifile
   try
@@ -1518,8 +1545,8 @@ end;
 function CheckIncludeModule(ModuleName: string):boolean;
 var
   ini:TMemIniFile;
-  j:integer;
-  os,cpu:string;
+  j,k:integer;
+  os,cpu,s:string;
   AddModule,NegativeList:boolean;
   sl:TStringList;
   e:Exception;
@@ -1658,7 +1685,6 @@ begin
          end;
          {$endif}
       end;
-
     end;
 
     result:=AddModule;

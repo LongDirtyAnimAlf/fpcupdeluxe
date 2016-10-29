@@ -161,6 +161,16 @@ procedure DumpConsole(Sender:TProcessEx; output:string);
 
 implementation
 
+{$ifndef CONSOLE}
+uses
+  Forms;
+  {$IFDEF MSWINDOWS}
+  //Windows, Messages;
+  {$ELSE}
+  //LCLIntf, LMessages, LCLType;
+  {$ENDIF}
+{$endif}
+
 { TProcessEx }
 
 function TProcessEx.GetOutputString: string;
@@ -231,9 +241,12 @@ begin
 end;
 
 procedure TProcessEx.Execute;
+{$ifdef CONSOLEEE}
+var
+  Msg: TMsg;
+{$endif}
 
   function ReadOutput: boolean;
-
   const
     BufSize = 4096;
   var
@@ -291,7 +304,22 @@ begin
       while Running do
       begin
         if not ReadOutput then
-          Sleep(50);
+        begin
+          {$ifndef CONSOLE}
+          Application.ProcessMessages;
+          Sleep(10);
+          {
+          while PeekMessage(Msg,0,0,0,0) do
+          begin
+            GetMessage(Msg,0,0,0);
+            TranslateMessage(Msg);
+            DispatchMessage(Msg);
+          end;
+          }
+          {$else}
+          Sleep(100);
+          {$endif}
+        end;
       end;
       ReadOutput;
 
@@ -324,6 +352,9 @@ end;
 constructor TProcessEx.Create(AOwner : TComponent);
 begin
   inherited;
+  {$ifndef CONSOLE}
+  Self.ShowWindow:=swoHIDE;
+  {$endif}
   FExceptionInfoStrings:= TstringList.Create;
   FOutputStrings:= TstringList.Create;
   FOutStream := TMemoryStream.Create;

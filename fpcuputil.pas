@@ -42,8 +42,13 @@ interface
 
 uses
   Classes, SysUtils,
-  //blcksock,typinfo {for status info},
+  fphttpclient,
+  sslsockets, fpopenssl,
   eventlog;
+
+Const
+  // Maximum retries when downloading a file
+  DefMaxRetries = 5;
 
 type
   //callback = class
@@ -64,6 +69,24 @@ type
     property LogFile: string read GetLogFile write SetLogFile ;
     constructor Create;
     destructor Destroy; override;
+  end;
+
+  TDownLoader = Class(Tobject)
+  private
+    FVerbose:boolean;
+    FMaxRetries:byte;
+    aFPHTTPClient:TFPHTTPClient;
+    procedure DoProgress(Sender: TObject; Const ContentLength, CurrentPos : Int64);
+    procedure DoHeaders(Sender : TObject);
+    procedure DoPassword(Sender: TObject; var RepeatRequest: Boolean);
+    procedure ShowRedirect(ASender : TObject; Const ASrc : String; Var ADest : String);
+  public
+    constructor Create(const verbose:boolean=false);
+    destructor Destroy; override;
+    procedure setProxy(host:string;port:integer;user,pass:string);
+    function getFile(const URL,filename:string):boolean;
+  protected
+    Property MaxRetries : Byte Read FMaxRetries Write FMaxRetries default DefMaxRetries;
   end;
 
 // Create shortcut on desktop to Target file
@@ -481,7 +504,8 @@ begin
 
     //Who knows, this might help:
     ExistingUserAgent:=HTTPSender.UserAgent;
-    HTTPSender.UserAgent:='curl/7.21.0 (i686-pc-linux-gnu) libcurl/7.21.0 OpenSSL/0.9.8o zlib/1.2.3.4 libidn/1.18';
+    HTTPSender.UserAgent:='curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
+
     while not FoundCorrectURL do
     begin
       HTTPSender.HTTPMethod('GET', URL);
@@ -545,6 +569,7 @@ function DownloadHTTP(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPPro
 // Could use Synapse HttpGetBinary, but that doesn't deal
 // with result codes (i.e. it happily downloads a 404 error document)
 var
+  aDownLoader: TDownLoader;
   HTTPGetResult: boolean;
   HTTPSender: THTTPSend;
   RetryAttempt: integer;
@@ -589,6 +614,22 @@ begin
       // Follow URL if necessary
       URL:=SourceForgeURL(URL,HTTPSender); //Deal with sourceforge URLs
 
+      //aDownLoader:=TDownLoader.Create{$ifdef DEBUG}(True){$endif};
+      aDownLoader:=TDownLoader.Create;
+      try
+        if HTTPProxyHost<>'' then aDownLoader.setProxy(HTTPSender.ProxyHost,StrToInt(HTTPSender.ProxyPort),HTTPSender.ProxyUser,HTTPSender.ProxyPass);
+        result:=aDownLoader.getFile(URL,TargetFile);
+        if (NOT result) then // try only once again in case of error
+        begin
+          infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
+          SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+          result:=aDownLoader.getFile(URL,TargetFile);
+        end;
+      finally
+        aDownLoader.Destroy;
+      end;
+
+      {
       // Try to get the file
       //HTTPSender.Sock.OnStatus := callback.Status;
       repeat
@@ -650,6 +691,7 @@ begin
         500..599: result:=false; //internal server error
         else result:=false; //unknown code
       end;
+      }
     except
       // We don't care for the reason for this error; the download failed.
       result:=false;
@@ -1323,6 +1365,131 @@ begin
   FLog.Free;
   inherited Destroy;
 end;
+
+procedure TDownLoader.DoHeaders(Sender : TObject);
+Var
+  I : Integer;
+begin
+  writeln('Response headers received:');
+  with (Sender as TFPHTTPClient) do
+    for I:=0 to ResponseHeaders.Count-1 do
+      writeln(ResponseHeaders[i]);
+end;
+
+procedure TDownLoader.DoProgress(Sender: TObject; const ContentLength, CurrentPos: Int64);
+begin
+  If (ContentLength=0) then
+    writeln('Reading headers : ',CurrentPos,' Bytes.')
+  else If (ContentLength=-1) then
+    writeln('Reading data (no length available) : ',CurrentPos,' Bytes.')
+  else
+    writeln('Reading data : ',CurrentPos,' Bytes of ',ContentLength);
+end;
+
+procedure TDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
+Var
+  H,UN,PW : String;
+  P : Integer;
+begin
+  with TFPHTTPClient(Sender) do
+  begin
+    H:=GetHeader(ResponseHeaders,'WWW-Authenticate');
+  end;
+  P:=Pos('realm',LowerCase(H));
+  if (P>0) then
+  begin
+    P:=Pos('"',H);
+    Delete(H,1,P);
+    P:=Pos('"',H);
+    H:=Copy(H,1,Pos('"',H)-1);
+  end;
+  writeln('Authorization required. Remote site says: ',H);
+  write('Enter username (empty quits): ');
+  readLn(UN);
+  RepeatRequest:=(UN<>'');
+  if RepeatRequest then
+  begin
+    write('Enter password: ');
+    readln(PW);
+    TFPHTTPClient(Sender).UserName:=UN;
+    TFPHTTPClient(Sender).Password:=PW;
+  end;
+end;
+
+procedure TDownLoader.ShowRedirect(ASender: TObject; const ASrc: String;
+  var ADest: String);
+begin
+  writeln('Following redirect from ',ASrc,'  ==> ',ADest);
+end;
+
+constructor TDownLoader.Create(const verbose:boolean);
+begin
+  FVerbose:=verbose;
+  aFPHTTPClient:=TFPHTTPClient.Create(Nil);
+  with aFPHTTPClient do
+  begin
+    AllowRedirect:=True;
+    FMaxRetries:=DefMaxRetries;
+    OnPassword:=@DoPassword;
+    if FVerbose then
+    begin
+      OnRedirect:=@ShowRedirect;
+      OnDataReceived:=@DoProgress;
+      OnHeaders:=@DoHeaders;
+    end;
+  end;
+end;
+
+procedure TDownLoader.setProxy(host:string;port:integer;user,pass:string);
+begin
+  with aFPHTTPClient do
+  begin
+    Proxy.Host:=host;
+    Proxy.Port:=port;
+    Proxy.UserName:=user;
+    Proxy.Password:=pass;
+  end;
+end;
+
+
+function TDownLoader.getFile(const URL,filename:string):boolean;
+var
+  tries:byte;
+  response: Integer;
+begin
+  result:=false;
+  tries:=0;
+  with aFPHTTPClient do
+  begin
+    repeat
+      //RequestHeaders.Add('Connection: Close');
+      // User-Agent needed for sourceforge
+      AddHeader('User-Agent','curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3');
+      try
+        Get(URL,filename);
+        response:=ResponseStatusCode;
+        result:=(response=200);
+        //result:=(response>=100) and (response<300);
+        if (NOT result) then
+        begin
+          Inc(tries);
+          if FVerbose then
+            writeln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.');
+        end;
+      except
+        tries:=(MaxRetries+1);
+      end;
+    until (result or (tries>MaxRetries));
+  end;
+end;
+
+
+destructor TDownLoader.Destroy;
+begin
+  FreeAndNil(aFPHTTPClient);
+  inherited;
+end;
+
 
 end.
 

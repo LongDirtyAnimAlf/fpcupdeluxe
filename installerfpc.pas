@@ -36,7 +36,6 @@ uses
 
 Const
   FPCTRUNKVERSION  = '3.1.1';
-  FPCTRUNKCOMPILER = '3.0.0';
 
   Sequences=
 // convention: FPC sequences start with 'FPC'.
@@ -974,8 +973,7 @@ begin
   exit;
   {$ENDIF}
 
-  // set default to latest stable compiler
-  result:=FPCTRUNKCOMPILER;
+  result:='0.0.0';
 
   if s=FPCTRUNKVERSION then result:='3.0.0'
   else if (s='3.0.2') or (s='3.0.1') then result:='3.0.0'
@@ -1188,7 +1186,9 @@ begin
     if OperationSucceeded = True then
     begin
       infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, etDebug);
-      renamefile(ArchiveDir + CompilerName, FBootstrapCompiler);
+      SysUtils.DeleteFile(FBootstrapCompiler);
+      SysUtils.RenameFile(ArchiveDir + CompilerName, FBootstrapCompiler);
+      //SysUtils.DeleteFile(ArchiveDir + CompilerName);
     end;
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
@@ -1251,10 +1251,10 @@ begin
       // todo: currently tar spits out uncompressed file in current dir...
       // which might not have proper permissions to actually create file...!?
       infoln('Going to rename/move '+CompilerName+' to '+FBootstrapCompiler,etwarning);
-      sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
+      Sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
       // We might be moving files across partitions so we cannot use renamefile
       OperationSucceeded:=FileUtil.CopyFile(CompilerName, FBootstrapCompiler);
-      sysutils.DeleteFile(CompilerName);
+      Sysutils.DeleteFile(CompilerName);
     end;
     {$ENDIF DARWIN}
     {$ENDIF BSD}
@@ -1563,23 +1563,15 @@ begin
         //exit(false);
       end;
 
-      // Only download bootstrap compiler if we can't find a valid one
-      if CheckExecutable(FBootstrapCompiler, '-i', 'Free Pascal Compiler') then
-      begin
-        infoln('Found bootstrap compiler with version '+GetCompilerVersion(FBootstrapCompiler),etInfo);
-      end
-      else
-      begin
-        {$ifdef darwin}
-        // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
-        // doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
-        // FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
-        // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
-        // FBootstrapCompilerOverrideVersionCheck:=true;
-        {$endif darwin}
-        infoln('Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
-        result:=DownloadBootstrapCompiler;
-      end;
+      {$ifdef darwin}
+      // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
+      // doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
+      // FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
+      // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
+      // FBootstrapCompilerOverrideVersionCheck:=true;
+      {$endif darwin}
+      infoln('Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
+      result:=DownloadBootstrapCompiler;
   end;
 
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.

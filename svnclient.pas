@@ -290,8 +290,9 @@ begin
     while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       //E155004: Working copy '<directory>' locked.
-      //run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
-      if Pos('E155004', Output) > 0 then
+      //E175002: Connection failure
+      //run 'svn cleanup' first to remove eventual locks (type 'svn help cleanup' for details)
+      if (Pos('E155004', Output) > 0) OR (Pos('E175002', Output) > 0) then
       begin
         // Let's try one time to fix it (don't update FReturnCode here)
         ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again

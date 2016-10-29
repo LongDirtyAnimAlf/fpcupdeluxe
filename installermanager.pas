@@ -68,7 +68,7 @@ Const
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
-    'Do DOCEDITOR;'+
+    //'Do DOCEDITOR;'+
     //Get default external packages/universal modules
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
@@ -89,7 +89,7 @@ Const
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
-    'Do DOCEDITOR;'+
+    //'Do DOCEDITOR;'+
     // Get default external packages/universal modules
     'Do UniversalDefault;'+
     // Recompile user IDE so any packages selected by the
@@ -128,7 +128,7 @@ below}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
     'Do helplazarus;'+
-    'Do DOCEDITOR;'+
+    //'Do DOCEDITOR;'+
     //Get default external packages/universal modules
     'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
@@ -175,7 +175,7 @@ below}
     {$ifndef FPCONLY}
     'Do lazarusclean;'+
     'Do helplazarusclean;'+
-    'CleanModule DOCEDITOR;'+
+    //'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
     {$endif}
     'End;'+
@@ -190,7 +190,7 @@ below}
     {$ifndef FPCONLY}
     'Do lazarusclean;'+
     'Do helplazarusclean;'+
-    'CleanModule DOCEDITOR;'+
+    //'CleanModule DOCEDITOR;'+
     'Do UniversalDefaultClean;'+
     {$endif}
     'Do crosswin32-64Clean;'+   //this has to be the last. All TExecState reset!
@@ -221,7 +221,7 @@ below}
     {$ifndef FPCONLY}
     'Do lazarusuninstall;'+
     'Do helpuninstall;'+
-    'UninstallModule DOCEDITOR;'+
+    //'UninstallModule DOCEDITOR;'+
     'Do UniversalDefaultUnInstall;'+
     {$endif}
     'End;'+
@@ -1203,7 +1203,6 @@ var
   sequencename:string='';
 
   function KeyStringToKeyword(Key:string):TKeyword;
-
   begin
     if key='DECLARE' then result:=SMdeclare
     else if key='DECLAREHIDDEN' then result:=SMdeclareHidden

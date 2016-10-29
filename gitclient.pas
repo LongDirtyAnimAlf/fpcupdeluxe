@@ -116,6 +116,9 @@ begin
     FRepoExecutable := GetEnvironmentVariable('ProgramFiles\Git\bin\' + RepoExecutableName + '.exe');
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := GetEnvironmentVariable('ProgramFiles(x86)\Git\bin\' + RepoExecutableName + '.exe');
+  if not FileExists(FRepoExecutable) then
+    FRepoExecutable := 'C:\Program Files (x86)\Git\bin\' + RepoExecutableName + '.exe';
+
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := (SafeGetApplicationPath  + RepoExecutableName + '.exe');

@@ -10,7 +10,7 @@ begin
   {$ENDIF}
 end;
 
-procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList;ConfigFile:string);
+procedure WriteHelp(ModuleList,ModuleEnabledList:TStringList);
 var
   i:integer;
   SortedModules: TStringList;
@@ -485,6 +485,10 @@ begin
       FInstaller.Uninstall:=Options.GetOptionNoParam('','uninstall',true);
       // do not add to default options:
       FInstaller.Verbose:=Options.GetOptionNoParam('','verbose',false);
+      {$ifdef DEBUG}
+      FInstaller.Verbose:=True;
+      {$endif}
+
       // getfullrepo is a depreciated option ... left here for compatibility only
       Options.GetOptionNoParam('','getfullrepo',false);
       FInstaller.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
@@ -500,7 +504,7 @@ begin
       writeln(E.Message);
       writeln('Press enter to see a list of all available command line options.');
       readln;
-      WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
+      WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
       result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
       exit;
       end
@@ -628,7 +632,7 @@ begin
           writeln(LeftOverOptions.Text);
           writeln('Press enter to see a list of all available command line options.');
           readln;
-          WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
+          WriteHelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
           result:=ERROR_WRONG_OPTIONS; //Quit with error resultcode
           exit;
         end;
@@ -639,7 +643,7 @@ begin
 
     if bHelp then
       begin
-      writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList,FInstaller.ConfigFile);
+      writehelp(FInstaller.ModulePublishedList,FInstaller.ModuleEnabledList);
       result:=0; //quit without error
       end
     else if bVersion then

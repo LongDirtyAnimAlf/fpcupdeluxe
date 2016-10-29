@@ -898,6 +898,7 @@ var
   oldlog: TErrorMethod;
 begin
   Result := InitModule;
+
   if not Result then
     exit;
   // Check for valid basedirectory to avoid deleting in random locations or
