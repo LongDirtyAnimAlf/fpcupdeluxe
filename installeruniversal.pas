@@ -1079,9 +1079,38 @@ begin
     // Common keywords for all repo methods
     PinRevision:=GetValue('REVISION',sl);
 
+
+    // Handle Git URLs
+    RemoteURL:=GetValue('GITURL',sl);
+    {todo: handle branches (e.g. tiopf doesn't use master branch), perhaps a space after the url and then branch name?
+    Similar construction could be used for hg. Suggest leaving svn as is}
+    if (RemoteURL<>'') AND (NOT SourceOK) then
+    begin
+      if CheckLocation then exit;
+      UpdateWarnings:=TStringList.Create;
+      try
+        FBaseDirectory:=InstallDir;
+        FUrl:=RemoteURL;
+        if PinRevision<>'' then
+          FGitClient.DesiredRevision:=PinRevision;
+        FGitClient.Verbose:=FVerbose;
+        FGitClient.ExportOnly:=FExportOnly;
+        result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+        SourceOK:=result;
+        if result=false then
+          WritelnLog('GIT error downloading from '+RemoteURL+'. Continuing regardless.',true);
+        if UpdateWarnings.Count>0 then
+        begin
+          WritelnLog(UpdateWarnings.Text);
+        end;
+      finally
+        UpdateWarnings.Free;
+      end;
+    end;
+
     // Handle SVN urls
     RemoteURL:=GetValue('SVNURL',sl);
-    if RemoteURL<>'' then
+    if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       if CheckLocation then exit;
       infoln('Going to download/update from SVN repository '+RemoteURL,etDebug);
@@ -1125,34 +1154,6 @@ begin
         SourceOK:=result;
         if result=false then
           WritelnLog('HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
-        end;
-      finally
-        UpdateWarnings.Free;
-      end;
-    end;
-
-    // Handle Git URLs
-    RemoteURL:=GetValue('GITURL',sl);
-    {todo: handle branches (e.g. tiopf doesn't use master branch), perhaps a space after the url and then branch name?
-    Similar construction could be used for hg. Suggest leaving svn as is}
-    if (RemoteURL<>'') AND (NOT SourceOK) then
-    begin
-      if CheckLocation then exit;
-      UpdateWarnings:=TStringList.Create;
-      try
-        FBaseDirectory:=InstallDir;
-        FUrl:=RemoteURL;
-        if PinRevision<>'' then
-          FGitClient.DesiredRevision:=PinRevision;
-        FGitClient.Verbose:=FVerbose;
-        FGitClient.ExportOnly:=FExportOnly;
-        result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        SourceOK:=result;
-        if result=false then
-          WritelnLog('GIT error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);

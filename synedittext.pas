@@ -21,7 +21,11 @@ uses
 type
   SynEditData = record
     SynEdit: TCustomSynEdit;
-    Filler: Array [1..12] of Char;
+    {$ifdef CPU64}
+    Filler: packed array [1..8] of char;
+    {$else}
+    Filler: packed array [1..12] of char;
+    {$endif}
   end;
   PSynEditData = ^SynEditData;
 

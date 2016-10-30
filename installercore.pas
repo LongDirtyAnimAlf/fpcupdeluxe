@@ -376,7 +376,7 @@ begin
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
 
     // Get 7zip binary from 7zip URL for unpacking of 7zip archives
-    F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '7z1604'{$ifdef win64} + '-x64' + {$endif} + '.exe';
+    F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '7z1604'{$ifdef win64} + '-x64'{$endif} + '.exe';
     GetFile('http://www.7-zip.org/a/'+ExtractFileName(F7zip),F7zip);
 
     {$ENDIF}

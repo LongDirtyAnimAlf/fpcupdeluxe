@@ -839,7 +839,10 @@ end;
 procedure ShowErrorHints();
 begin
   writeln('Please check log for details. Possible troubleshooting steps:');
-  writeln('- run again with --verbose and check for make, lazbuild errors etc.');
+  writeln('First action :');
+  writeln('Run fpcup again with --verbose and check for make, lazbuild errors etc.');
+  writeln('Run fpcup again also in case of incomple download due to SVN errors.');
+  writeln;
   {$IFNDEF MSWINDOWS}
   writeln('- make sure there''s a valid SVN executable in your path.');
   writeln('- make sure the GNU binutils (make etc), windres, subversion client are installed');
@@ -847,10 +850,6 @@ begin
   writeln('  ln -s /usr/bin/i586-mingw32msvc-windres /usr/bin/windres');
   writeln('  see http://wiki.lazarus.freepascal.org/Lazarus_Resources#Checking_you_have_windres');
   {$ENDIF MSWINDOWS}
-  writeln('- if compiling Lazarus, make sure your lhelp is closed.');
-  writeln('- try removing all intermediate files by running fpcup with the --clean option');
-  writeln('  and/or manually deleting all *.ppu/*.a/*.o followed by svn up');
-  writeln('- if that does not work: use the --uninstall option to remove all files ');
-  writeln('  including your FPC and Lazarus directories');
-  writeln('- remove the files in the bootstrap directory. fpcup will redownload if required.');
+  writeln('If that does not work ... last resort action :');
+  writeln('Remove all files from install-directory, and try again');
 end;

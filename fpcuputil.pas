@@ -208,8 +208,16 @@ end;
 function SafeGetApplicationPath: String;
 var
   StartPath: String;
+  {$ifdef Darwin}
+  x:integer;
+  {$endif}
 begin
- StartPath:=ExpandFileNameUTF8(ParamStrUTF8(0));
+ //StartPath:=ExpandFileNameUTF8(ParamStrUTF8(0));
+ StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
+ {$ifdef Darwin}
+ x:=pos(ExtractFileName(paramstr(0))+'.app/Contents/MacOS',StartPath);
+ if x>0 then StartPath:=copy(StartPath,1,x-1);
+ {$endif}
  if FileIsSymlink(StartPath) then
     StartPath:=GetPhysicalFilename(StartPath,pfeException);
  result:=ExtractFilePath(StartPath);
