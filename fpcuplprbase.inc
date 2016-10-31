@@ -43,12 +43,12 @@ begin
   writeln('Options are not required; they include:');
   writeln(' help                  Show this text');
   writeln('');
-  writeln(' fpcURL=<URL>          SVN URL from which to download; default: fixes_3.0:');
-  writeln('                       http://svn.freepascal.org/svn/fpc/branches/fixes_3_0');
+  writeln(' fpcURL=<URL>          SVN URL from which to download; default: 3.0.0:');
+  writeln('                       http://svn.freepascal.org/svn/fpc/branches/3_0_0');
   writeln('                       Accepts shortcuts: ');
   writeln('                       '+installerUniversal.GetAlias('fpcURL','list'));
   {$ifndef FPCONLY}
-  writeln(' lazURL=<URL>          SVN URL from which to download; default: 1.4');
+  writeln(' lazURL=<URL>          SVN URL from which to download; default: 1.6');
   writeln('                       trunk (newest version):');
   writeln('                       http://svn.freepascal.org/svn/lazarus/trunk');
   writeln('                       Accepts shortcuts: ');

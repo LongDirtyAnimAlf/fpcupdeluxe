@@ -59,5 +59,7 @@ Temporary Items
 
 *.log
 backup/
+icons/
+deluxebin/
 lib/
 lib*/

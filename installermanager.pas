@@ -318,6 +318,7 @@ type
     // Write msg to log with line ending. Can also write to console
     procedure WritelnLog(msg:string;ToConsole:boolean=true);
  public
+    property Sequencer: TSequencer read FSequencer;
    {$ifndef FPCONLY}
     property ShortCutNameLazarus: string read FShortCutNameLazarus write FShortCutNameLazarus; //Name of the shortcut that points to the fpcup-installed Lazarus
     {$endif}
@@ -445,8 +446,9 @@ type
       function GetText:string;
       function IsSkipped(ModuleName:string):boolean;
       // Reset memory of executed steps, allowing sequences with e.g. new OS to be rerun
-      procedure ResetAllExecuted(SkipFPC:boolean=false);
     public
+      // set Executed to ESNever for all sequences
+      procedure ResetAllExecuted(SkipFPC:boolean=false);
       property Parent:TFPCupManager write Fparent;
       // Text representation of sequence; for diagnostic purposes
       property Text:String read GetText;

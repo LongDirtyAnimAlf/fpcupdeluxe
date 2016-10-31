@@ -161,6 +161,7 @@ type
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
     function GetFile(aURL,aFile:string):boolean;
   public
+    property Unzipper: string read F7zip;
     property SVNClient: TSVNClient read FSVNClient;
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
@@ -494,6 +495,27 @@ begin
         OperationSucceeded := CheckExecutable(FTar, '--version', '');
       end;
     end;
+
+    {$IFNDEF MSWINDOWS}
+    if OperationSucceeded then
+    begin
+      OperationSucceeded := CheckExecutable(Make, '-v', '');
+      // expand make path ... not needed
+      //if OperationSucceeded then FMake:=FindDefaultExecutablePath(Make);
+      {
+      try
+        ExecuteCommand(Make + ' -v', Output, true);
+        if Ansipos('GNU Make', Output) = 0 then
+        begin
+          infoln('Found make executable, but it is not GNU Make.',etError);
+          OperationSucceeded := false;
+        end else OperationSucceeded := true;
+      except
+        // ignore errors, this is only an extra check
+      end;
+      }
+    end;
+    {$ENDIF}
 
     FNeededExecutablesChecked:=OperationSucceeded;
   end;

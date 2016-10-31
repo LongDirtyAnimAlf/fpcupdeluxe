@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, SynEdit, SynHighlighterAny,
-  Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls,
+  Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, ButtonPanel, Buttons,
   installerManager;
 
 type
@@ -14,6 +14,14 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
+    TrunkBtn: TBitBtn;
+    NPBtn: TBitBtn;
+    FixesBtn: TBitBtn;
+    StableBtn: TBitBtn;
+    OldBtn: TBitBtn;
+    DinoBtn: TBitBtn;
+    FeaturesBtn: TBitBtn;
+    mORMotBtn: TBitBtn;
     Button1: TButton;
     Button2: TButton;
     Button3: TButton;
@@ -22,6 +30,7 @@ type
     Button6: TButton;
     CheckVerbosity: TCheckBox;
     Edit1: TEdit;
+    Panel1: TPanel;
     RealFPCURL: TEdit;
     Label1: TLabel;
     Label2: TLabel;
@@ -47,6 +56,7 @@ type
     procedure RadioGroup2Click(Sender: TObject);
     procedure SynEdit1SpecialLineColors(Sender: TObject; Line: integer;
       var Special: boolean; var FG, BG: TColor);
+    procedure QuickBtnClick(Sender: TObject);
   private
     { private declarations }
     oldoutput: TextFile;
@@ -54,6 +64,7 @@ type
     FPCupManager:TFPCupManager;
     procedure DisEnable(Sender: TObject;value:boolean);
     procedure PrepareRun;
+    function RealRun:boolean;
   public
     { public declarations }
   end;
@@ -70,10 +81,14 @@ uses
   StrUtils,
   installerUniversal,
   fpcuputil,
+  {$ifdef MSWINDOWS}
+  processutils,
+  {$endif}
   synedittext;
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
+  FPCUPGITREPO='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
 
 { TForm1 }
 
@@ -97,6 +112,13 @@ begin
   sInstallDir:='~/fpcupdeluxe';
   {$ENDIF}
 
+  SetCurrentDir(SafeGetApplicationPath);
+  {$IFDEF MSWINDOWS}
+  //SetCurrentDir(SafeGetApplicationPath);
+  {$ELSE}
+  //SetCurrentDir('');
+  {$ENDIF}
+
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
@@ -118,12 +140,19 @@ begin
   FPCupManager.LoadFPCUPConfig;
 
   {$IF (defined(BSD)) and (not defined(Darwin))}
+  FInstaller.FPCOpt:='-Fl/usr/local/lib';
   FInstaller.LazarusOpt:='-Fl/usr/local/lib -Fl/usr/X11R6/lib';
   {$endif}
 
   FPCupManager.FPCURL:='default';
   FPCupManager.LazarusURL:='default';
   FPCupManager.Verbose:=true;
+
+  {$IF defined(BSD) and not defined(DARWIN)}
+  FPCupManager.PatchCmd:='gpatch';
+  {$ELSE}
+  FPCupManager.PatchCmd:='patch';
+  {$ENDIF MSWINDOWS}
 
   SortedModules:=TStringList.Create;
   try
@@ -262,36 +291,93 @@ begin
   end;
 end;
 
+procedure TForm1.QuickBtnClick(Sender: TObject);
+var
+  s,FPCURL,LazarusURL:string;
+  i:integer;
+begin
+  DisEnable(Sender,False);
+  Application.ProcessMessages;
+  try
+    PrepareRun;
+
+    if Sender=TrunkBtn then
+    begin
+      s:='Going to install both FPC trunk and Lazarus trunk';
+      FPCURL:='trunk';
+      LazarusURL:='trunk';
+    end;
+
+    if Sender=NPBtn then
+    begin
+      s:='Going to install NewPascal';
+      FPCURL:='newpascal';
+      LazarusURL:='newpascal';
+      FPCupManager.IncludeModules:='mORMotFPC,zeos';
+    end;
+
+    if Sender=FixesBtn then
+    begin
+      s:='Going to install FPC fixes and Lazarus fixes';
+      FPCURL:='fixes';
+      LazarusURL:='fixes';
+    end;
+
+    if Sender=StableBtn then
+    begin
+      s:='Going to install FPC stable and Lazarus stable';
+      FPCURL:='stable';
+      LazarusURL:='stable';
+    end;
+
+    if Sender=OldBtn then
+    begin
+      s:='Going to install FPC 2.6.4 and Lazarus 1.4 ';
+      FPCURL:='2.6.4';
+      LazarusURL:='1.4';
+    end;
+
+    if Sender=DinoBtn then
+    begin
+      s:='Going to install FPC 2.0.2 and Lazarus 0.9.4 ';
+      FPCURL:='2.0.2';
+      LazarusURL:='0.9.4';
+      FPCupManager.SkipModules:='lazbuild';
+    end;
+
+    if Sender=FeaturesBtn then
+    begin
+      s:='Going to install FPC trunk and Lazarus trunk with extras ';
+      FPCURL:='trunk';
+      LazarusURL:='trunk';
+      FPCupManager.IncludeModules:='mORMotFPC,lazgoogleapis,virtualtreeview,lazpaint,bgracontrols,uecontrols,ECControls,zeos,cudatext,indy,lnet,lamw,mupdf,tiopf,abbrevia,uos,wst,anchordocking,simplegraph,cm630commons,turbobird';
+    end;
+
+    i:=ListBox1.Items.IndexOf(FPCURL);
+    if i<>-1 then ListBox1.Selected[i]:=true;
+    i:=ListBox2.Items.IndexOf(LazarusURL);
+    if i<>-1 then ListBox2.Selected[i]:=true;
+
+    FPCupManager.FPCURL:=FPCURL;
+    FPCupManager.LazarusURL:=LazarusURL;
+
+    writeln(s+'.');
+
+    RealRun;
+
+  finally
+    DisEnable(Sender,True);
+  end;
+end;
+
 procedure TForm1.Button1Click(Sender: TObject);
 begin
   DisEnable(Sender,False);
   Application.ProcessMessages;
   try
-    try
-      PrepareRun;
-      writeln('Going to install FPC and Lazarus with given options.');
-      writeln('Please stand back and enjoy !');
-      writeln;
-      Application.ProcessMessages;
-      sleep(2000);
-      if (FPCupManager.Run=false)
-         then
-         begin
-           writeln('ERROR: Fpclazupdeluxe failed.');
-           label1.Font.Color:=clRed;
-           label2.Font.Color:=clRed;
-         end
-         else
-         begin
-           writeln('SUCCESS: Fpclazupdeluxe ended without errors.');
-           label1.Font.Color:=clLime;
-           label2.Font.Color:=clLime;
-         end;
-    except
-      FPCupManager.free;
-    end;
-    writeln;
-    writeln('Please come back when needed !!');
+    PrepareRun;
+    writeln('Going to install FPC and Lazarus with given options.');
+    RealRun;
   finally
     DisEnable(Sender,True);
   end;
@@ -305,41 +391,22 @@ begin
   DisEnable(Sender,False);
   Application.ProcessMessages;
   try
-    try
-      PrepareRun;
-      modules:='';
-      for i:=0 to ListBox3.Count-1 do
-      begin
-        if ListBox3.Selected[i] then modules:=modules+ListBox3.Items[i]+',';
-      end;
-      // delete stale trailing comma, if any
-      if Length(modules)>0 then Delete(modules,Length(modules),1);
-      FPCupManager.OnlyModules:=modules;
-      writeln('Limiting installation/update to '+FPCupManager.OnlyModules);
-      writeln;
-      writeln('Going to install selected modules with given options.');
-      writeln('Please stand back and enjoy !');
-      writeln;
-      Application.ProcessMessages;
-      sleep(2000);
-      if (FPCupManager.Run=false)
-         then
-         begin
-           writeln('ERROR: Fpclazupdeluxe failed.');
-           label1.Font.Color:=clRed;
-           label2.Font.Color:=clRed;
-         end
-         else
-         begin
-           writeln('SUCCESS: Installing modules ended without errors.');
-           label1.Font.Color:=clLime;
-           label2.Font.Color:=clLime;
-         end;
-    except
-      FPCupManager.free;
+    PrepareRun;
+
+    modules:='';
+    for i:=0 to ListBox3.Count-1 do
+    begin
+      if ListBox3.Selected[i] then modules:=modules+ListBox3.Items[i]+',';
     end;
+    // delete stale trailing comma, if any
+    if Length(modules)>0 then Delete(modules,Length(modules),1);
+    FPCupManager.OnlyModules:=modules;
+    writeln('Limiting installation/update to '+FPCupManager.OnlyModules);
     writeln;
-    writeln('Please come back when needed !!');
+    writeln('Going to install selected modules with given options.');
+
+    RealRun;
+
   finally
     DisEnable(Sender,True);
   end;
@@ -361,107 +428,142 @@ begin
 end;
 
 procedure TForm1.Button5Click(Sender: TObject);
+var
+  aDownLoader: TDownLoader;
+  URL,TargetFile,UnZipper:string;
+  success:boolean;
 begin
   DisEnable(Sender,False);
   Application.ProcessMessages;
   try
-    try
-      PrepareRun;
+    PrepareRun;
 
-      if RadioGroup1.ItemIndex<>-1 then FPCupManager.CrossCPU_Target:=RadioGroup1.Items[RadioGroup1.ItemIndex];
-      if RadioGroup2.ItemIndex<>-1 then FPCupManager.CrossOS_Target:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    if RadioGroup1.ItemIndex<>-1 then FPCupManager.CrossCPU_Target:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+    if RadioGroup2.ItemIndex<>-1 then FPCupManager.CrossOS_Target:=RadioGroup2.Items[RadioGroup2.ItemIndex];
 
-      if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
-      if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
+    if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
+    if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
 
-      if (FPCupManager.CrossCPU_Target='') OR (FPCupManager.CrossOS_Target='') then
-      begin
-        writeln;
-        writeln('Input error.');
-        writeln('Please select CPU AND OS !!');
-        writeln;
-        exit;
-      end;
-
-      if FPCupManager.CrossCPU_Target='arm' then
-      begin
-        // default: armhf
-        FPCupManager.FPCOPT:='-dFPC_ARMHF';
-        FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF';
-        //'-CfSoft -CpARMV6'
-      end;
-
-      FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
-
-      writeln('Going to install a  cross-compiler.');
-      writeln('Please stand back and enjoy !');
+    if (FPCupManager.CrossCPU_Target='') OR (FPCupManager.CrossOS_Target='') then
+    begin
       writeln;
-      Application.ProcessMessages;
-      sleep(2000);
-      if (FPCupManager.Run=false)
-         then
-         begin
-           writeln('ERROR: Installing cross-compiler failed.');
-           label1.Font.Color:=clRed;
-           label2.Font.Color:=clRed;
-         end
-         else
-         begin
-           writeln('SUCCESS: Installing cross-compiler ended without errors.');
-           label1.Font.Color:=clLime;
-           label2.Font.Color:=clLime;
-         end;
-    except
-      FPCupManager.free;
+      writeln('Input error.');
+      writeln('Please select CPU AND OS !!');
+      writeln;
+      exit;
     end;
-    writeln;
-    writeln('Please come back when needed !!');
+
+    if FPCupManager.CrossCPU_Target='arm' then
+    begin
+      // default: armhf
+      FPCupManager.FPCOPT:='-dFPC_ARMHF';
+      FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF';
+      //'-CfSoft -CpARMV6'
+    end;
+
+    // use the available source to build the cross-compiler ... change nothing !!
+    FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
+    FPCupManager.FPCURL:='skip';
+    FPCupManager.LazarusURL:='skip';
+
+    writeln('Going to install a cross-compiler from current sources.');
+
+    if NOT RealRun then
+    begin
+
+      {$ifdef MSWINDOWS}
+      // perhaps there were not libraries and/or binutils ... download them (if available) from fpcup on GitHub
+      URL:='';
+
+      if FPCupManager.CrossOS_Target='linux' then
+      begin
+        if FPCupManager.CrossCPU_Target='arm' then URL:='LinuxARM.rar';
+        if FPCupManager.CrossCPU_Target='aarch64' then URL:='LinuxAarch64.rar';
+        if FPCupManager.CrossCPU_Target='i386' then URL:='Linuxi386.rar';
+        if FPCupManager.CrossCPU_Target='x86_64' then URL:='Linuxx64.rar';
+      end;
+      if FPCupManager.CrossOS_Target='wince' then
+      begin
+        if FPCupManager.CrossCPU_Target='arm' then URL:='WinceARM.rar';
+      end;
+      if FPCupManager.CrossOS_Target='android' then
+      begin
+        if FPCupManager.CrossCPU_Target='arm' then URL:='AndroidARM.rar';
+      end;
+
+      if URL<>'' then
+      begin
+
+        writeln('Going to download the right cross-tools.');
+
+        URL:=FPCUPGITREPO+'/raw/master/crosstools/WinCross'+URL;
+
+        TargetFile := SysUtils.GetTempFileName;
+
+        aDownLoader:=TDownLoader.Create;
+        try
+          success:=aDownLoader.getFile(URL,TargetFile);
+          if (NOT success) then // try only once again in case of error
+          begin
+            writeln('Error while trying to download '+URL+'. Trying once again.');
+            SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+            success:=aDownLoader.getFile(URL,TargetFile);
+          end;
+        finally
+          aDownLoader.Destroy;
+        end;
+
+        if success then
+        begin
+          success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+
+          if (NOT success) then
+          begin
+            UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + '7z1604'{$ifdef win64} + '-x64'{$endif} + '.exe';
+            success:=(ExecuteCommand(UnZipper + ' x -o"' + IncludeTrailingPathDelimiter(sInstallDir)+'" '+TargetFile,true)=0);
+          end;
+
+          SysUtils.DeleteFile(TargetFile);
+          if success then
+          begin
+            // run again with the correct libs and binutils
+            label1.Font.Color:=clDefault;
+            label2.Font.Color:=clDefault;
+            FPCupManager.Sequencer.ResetAllExecuted;
+            RealRun;
+          end;
+        end;
+        if (NOT success) then writeln('No luck in getting then cross-tools ... aborting.');
+      end
+      else
+      begin
+        writeln('No suitable cross-tools found ... aborting.');
+      end;
+
+      {$endif}
+    end;
+
   finally
     DisEnable(Sender,True);
   end;
-
 end;
 
 procedure TForm1.Button6Click(Sender: TObject);
 var
   store:integer;
 begin
+  if listbox1.ItemIndex=-1 then exit;
   DisEnable(Sender,False);
-  store:=listbox2.ItemIndex;
-  listbox2.ClearSelection;
   Application.ProcessMessages;
   try
-    try
-      PrepareRun;
+    PrepareRun;
 
-      FPCupManager.OnlyModules:='fpc';
+    FPCupManager.OnlyModules:='fpc';
+    FPCupManager.LazarusURL:='skip';
 
-      writeln('Going to install FPC with given options.');
-      writeln('Please stand back and enjoy !');
-      writeln;
-      Application.ProcessMessages;
-      sleep(2000);
-      if (FPCupManager.Run=false)
-         then
-         begin
-           writeln('ERROR: Fpclazupdeluxe failed.');
-           label1.Font.Color:=clRed;
-           label2.Font.Color:=clRed;
-         end
-         else
-         begin
-           writeln('SUCCESS: Fpclazupdeluxe ended without errors.');
-           label1.Font.Color:=clLime;
-           label2.Font.Color:=clLime;
-         end;
-    except
-      FPCupManager.free;
-    end;
-    writeln;
-    writeln('Please come back when needed !!');
+    RealRun;
   finally
     DisEnable(Sender,True);
-    listbox2.ItemIndex:=store;
   end;
 end;
 
@@ -530,6 +632,15 @@ begin
   RadioGroup1.Enabled:=value;
   RadioGroup2.Enabled:=value;
   CheckVerbosity.Enabled:=value;
+
+  TrunkBtn.Enabled:=value;
+  NPBtn.Enabled:=value;
+  FixesBtn.Enabled:=value;
+  StableBtn.Enabled:=value;
+  OldBtn.Enabled:=value;
+  DinoBtn.Enabled:=value;
+  FeaturesBtn.Enabled:=value;
+  mORMotBtn.Enabled:=value;
 end;
 
 procedure TForm1.PrepareRun;
@@ -537,7 +648,11 @@ begin
   label1.Font.Color:=clDefault;
   label2.Font.Color:=clDefault;
 
+  FPCupManager.Sequencer.ResetAllExecuted;
+
   FPCupManager.OnlyModules:='';
+  FPCupManager.IncludeModules:='';
+  FPCupManager.SkipModules:='';
   FPCupManager.CrossCPU_Target:='';
   FPCupManager.CrossOS_Target:='';
   FPCupManager.CrossOS_SubArch:='';
@@ -547,9 +662,9 @@ begin
 
   FPCupManager.Verbose:=CheckVerbosity.Checked;
 
+  // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:='default';
   FPCupManager.LazarusURL:='default';
-
   if (listbox1.ItemIndex<>-1) then FPCupManager.FPCURL:=listbox1.Items[listbox1.ItemIndex];
   if (listbox2.ItemIndex<>-1) then FPCupManager.LazarusURL:=listbox2.Items[listbox2.ItemIndex];
 
@@ -560,34 +675,78 @@ begin
 
   sInstallDir:=sInstallDir+DirectorySeparator;
 
+  {$IFDEF MSWINDOWS}
   FPCupManager.MakeDirectory:=sInstallDir+'fpcbootstrap';
+  {$ELSE}
+  FPCupManager.MakeDirectory:='';
+  {$ENDIF MSWINDOWS}
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
   FPCupManager.FPCDirectory:=sInstallDir+'fpc';
   FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
 
   FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusDirectory);
 
-  writeln('FPCUP de luxe.');
+  RealFPCURL.Text:='';
+  RealLazURL.Text:='';
+
+end;
+
+function TForm1.RealRun:boolean;
+begin
+  result:=false;
+
+  writeln('FPCUP de luxe is starting up.');
   writeln;
   {$IFDEF MSWINDOWS}
   writeln('Binutils/make dir:  '+FPCupManager.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('Bootstrap dir:      '+FPCupManager.BootstrapCompilerDirectory);
-  writeln('FPC URL:            '+FPCupManager.FPCURL);
-  writeln('FPC options:        '+FPCupManager.FPCOPT);
-  writeln('FPC directory:      '+FPCupManager.FPCDirectory);
-  RealFPCURL.Text:=FPCupManager.FPCURL;
 
-  if (listbox2.ItemIndex<>-1) then
+  if FPCupManager.FPCURL<>'SKIP' then
+  begin
+    writeln('FPC URL:            '+FPCupManager.FPCURL);
+    writeln('FPC options:        '+FPCupManager.FPCOPT);
+    writeln('FPC directory:      '+FPCupManager.FPCDirectory);
+    RealFPCURL.Text:=FPCupManager.FPCURL;
+  end else RealFPCURL.Text:='Skipping FPC';
+
+  if FPCupManager.LazarusURL<>'SKIP' then
   begin
     writeln('Lazarus URL:        '+FPCupManager.LazarusURL);
     writeln('Lazarus options:    '+FPCupManager.LazarusOPT);
     writeln('Lazarus directory:  '+FPCupManager.LazarusDirectory);
     RealLazURL.Text:=FPCupManager.LazarusURL;
-  end else RealLazURL.Text:='';
+  end else RealLazURL.Text:='Skipping Lazarus';
 
+  writeln('Please stand back and enjoy !');
   writeln;
+
+  Application.ProcessMessages;
+  sleep(2000);
+
+  try
+    result:=FPCupManager.Run;
+    if (NOT result) then
+    begin
+      writeln;
+      writeln;
+      writeln('ERROR: Fpclazupdeluxe failed.');
+      label1.Font.Color:=clRed;
+      label2.Font.Color:=clRed;
+    end
+    else
+    begin
+      writeln;
+      writeln;
+      writeln('SUCCESS: Fpclazupdeluxe ended without errors.');
+      label1.Font.Color:=clLime;
+      label2.Font.Color:=clLime;
+    end;
+  except
+    // just swallow exceptions
+  end;
 end;
+
 
 end.
 

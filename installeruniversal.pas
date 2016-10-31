@@ -1385,17 +1385,17 @@ var
   sl:TStringList;
   e:Exception;
 begin
-sl:=TStringList.Create;
-ini:=TMemIniFile.Create(CurrentConfigFile);
-ini.CaseSensitive:=false;
-try
-  ini.ReadSection('ALIAS'+Dictionary,sl);
-  if Uppercase(KeyWord)='LIST' then
-    result:=sl.CommaText
-  else
+  sl:=TStringList.Create;
+  ini:=TMemIniFile.Create(CurrentConfigFile);
+  ini.CaseSensitive:=false;
+  try
+    ini.ReadSection('ALIAS'+Dictionary,sl);
+    if Uppercase(KeyWord)='LIST' then
+      result:=sl.CommaText
+    else
     begin
-    result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
-    if result='' then
+      result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
+      if result='' then
       begin
         // added because older fpc.ini or equivalent may not have the default keyword !!
         if Uppercase(KeyWord)='DEFAULT' then
@@ -1406,17 +1406,19 @@ try
           if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_1_6';
           {$endif}
         end;
-        if result='' then
+        if Uppercase(KeyWord)='SKIP' then result:='SKIP';
+
+        if (result='') then
         begin
           e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[Dictionary,KeyWord,sl.CommaText]);
           raise e;
         end;
       end;
     end;
-finally
-  ini.Free;
-  sl.free;
-end;
+  finally
+    ini.Free;
+    sl.free;
+  end;
 end;
 
 function GetModuleList: string;

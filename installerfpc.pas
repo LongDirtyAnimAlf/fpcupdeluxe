@@ -1233,28 +1233,24 @@ begin
     {$ENDIF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
     {$IFDEF DARWIN}
     // Extract .tar.bz2, overwriting without prompting
-    CompilerName:=ExtractFileName(FBootstrapCompiler);
     // GNU tar: -x -v -j -f
     // BSD tar:
-    if ExecuteCommand(FTar+' -xf '+BootstrapArchive,FVerbose) <> 0 then
+    if ExecuteCommand(FTar+' -xf ' + BootstrapArchive + ' -C ' + ArchiveDir ,FVerbose) <> 0 then
     begin
       infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
       OperationSucceeded := False;
     end
     else
     begin
-      OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      OperationSucceeded := True;
     end;
-    // Move compiler to proper directory; note bzip2 will append .out to file
     if OperationSucceeded = True then
     begin
-      // todo: currently tar spits out uncompressed file in current dir...
-      // which might not have proper permissions to actually create file...!?
       infoln('Going to rename/move '+CompilerName+' to '+FBootstrapCompiler,etwarning);
       Sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
       // We might be moving files across partitions so we cannot use renamefile
-      OperationSucceeded:=FileUtil.CopyFile(CompilerName, FBootstrapCompiler);
-      Sysutils.DeleteFile(CompilerName);
+      OperationSucceeded:=FileUtil.CopyFile(ArchiveDir + CompilerName, FBootstrapCompiler);
+      Sysutils.DeleteFile(ArchiveDir + CompilerName);
     end;
     {$ENDIF DARWIN}
     {$ENDIF BSD}
