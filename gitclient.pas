@@ -169,32 +169,45 @@ procedure TGitClient.CheckOut;
 const
   MaxRetries = 3;
 var
-  Command: string;
+  Command: string = '';
   Output: string = '';
   RetryAttempt: integer;
+  //TargetFile: string;
 begin
   if NOT ValidClient then exit;
 
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
-  //if ExportOnly then
-  //begin
-  //  Result:=True;
-  //  exit;
-  //end;
-  //git archive --format zip --output /path/to/file.zip --prefix=newdir/ master
-  //git checkout-index -a -f --prefix=/destination/path/
-  //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
-  //ExecuteCommand(FUnzip);
-
   // Actual clone/checkout
-  if ExportOnly
-     //then Command := ' checkout-index -a -f --recurse-submodules ' + Repository + ' --prefix=' + IncludeTrailingPathDelimiter(LocalRepository)
-     then Command := ' clone --recurse-submodules --depth 1 ' + Repository + ' ' + LocalRepository
-     else Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
+  if ExportOnly then
+  begin
+    {
+    TargetFile := SysUtils.GetTempFileName;
+    Command := ' archive --format zip --output ' + TargetFile + ' --prefix=/ --remote=' + Repository + ' master';
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, FVerbose);
+    FReturnCode := ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TargetFile,FVerbose);
+    SysUtils.DeleteFile(TargetFile);
+    }
+    if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
+    begin
+      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all ',LocalRepository, FVerbose);
+      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/master ',LocalRepository, FVerbose);
+    end
+    else
+    begin
+      // initial : very shallow clone = fast !!
+      Command := ' clone --recurse-submodules --depth 1 ' + Repository + ' ' + LocalRepository
+    end;
+  end
+  else
+  begin
+    Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
+  end;
 
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose);
+  if Command<>''
+     then FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
+     else FReturnCode := 0;
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;

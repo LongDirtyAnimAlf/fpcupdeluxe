@@ -1357,6 +1357,8 @@ begin
   if (aBootstrapVersion<>'') then
   begin
 
+      infoln('Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
+
       FBootstrapCompilerOverrideVersionCheck:=false;
 
       aStandardCompilerArchive:=aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
@@ -1478,6 +1480,9 @@ begin
       // second, try the FPCUP binaries from release
       if (NOT aCompilerFound) then
       begin
+
+        infoln('Looking for a bootstrap compiler from Github FPCUP releases.',etInfo);
+
         aGithubBootstrapURL:='';
 
         aLocalBootstrapVersion:=aBootstrapVersion;
