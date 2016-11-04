@@ -1313,7 +1313,7 @@ const
   FpcupGitRepo='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
 var
   aCompilerList:TStringList;
-  i:integer;
+  i,j:integer;
   aCompilerArchive,aStandardCompilerArchive:string;
   aCompilerFound:boolean;
   aCPU,aOS: string;
@@ -1324,6 +1324,7 @@ var
   ReturnCode:integer;
   aLocalBootstrapVersion:string;
   aIntermediateBootstrapCompiler:string;
+  aDownLoader: TDownLoader;
 begin
   result:=true;
 
@@ -1462,42 +1463,30 @@ begin
         aCompilerList.Free;
       end;
 
-      // second, try the FPCUP binaries
+      // second, try the FPCUP binaries from release
       if (NOT aCompilerFound) then
       begin
-        ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ls ' + FpcupGitRepo+'.git/branches/master/bootstrappers', s, FVerbose);
-        if (ReturnCode <> 0) then
-        begin
-          // second try, if first fails due to some unknown reason.
-          ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ls ' + FpcupGitRepo+'.git/branches/master/bootstrappers', s, FVerbose);
-        end;
+        aLocalBootstrapVersion:=aBootstrapVersion;
+        FBootstrapCompilerOverrideVersionCheck:=false;
 
-        if (ReturnCode = 0) then
-        begin
+        aCompilerList:=TStringList.Create;
+        try
+          aCompilerList.Clear;
 
-          aLocalBootstrapVersion:=aBootstrapVersion;
-          FBootstrapCompilerOverrideVersionCheck:=false;
-
-          aCompilerList:=TStringList.Create;
+          aDownLoader:=TDownLoader.Create;
           try
-            aCompilerList.Text:=s;
 
             while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
             begin
+              infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
+              FBootstrapCompilerURL:=FpcupGitRepo+
+                '/releases/download/bootstrappers/'+
+                'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
+              infoln('Checking existence of: '+FBootstrapCompilerURL,etInfo);
+              aCompilerFound:=aDownLoader.checkURL(FBootstrapCompilerURL);
+              if aCompilerFound then aCompilerList.Add(FBootstrapCompilerURL);
 
-              infoln('Looking for FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
-
-              for i:=0 to Pred(aCompilerList.Count) do
-              begin
-                aCompilerFound:=(aCompilerList[i]='fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU));
-                if aCompilerFound then
-                begin
-                  infoln('Found a correct bootstrap compiler from FPCUP FPC bootstrap binaries.',etInfo);
-                  break;
-                end;
-              end;
-
-              // look for a previous compiler if not found, and use overrideversioncheck
+              // look for a previous (fitting) compiler if not found, and use overrideversioncheck
               if NOT aCompilerFound then
               begin
                 FBootstrapCompilerOverrideVersionCheck:=true;
@@ -1506,11 +1495,9 @@ begin
                    then aLocalBootstrapVersion:=s
                    else break;
               end;
-
             end;
 
-            // last resort !!
-            // use first available bootstrapper with correct architecture.
+
             if NOT aCompilerFound then
             begin
               aCompilerList.Sorted:=true;
@@ -1520,6 +1507,7 @@ begin
                 begin
                   FBootstrapCompilerOverrideVersionCheck:=true;
                   aCompilerFound:=true;
+                  j:=Pos('fpcup-',aCompilerList[i]);
                   aLocalBootstrapVersion := Copy(aCompilerList[i],7,5);
                   aLocalBootstrapVersion := StringReplace(aLocalBootstrapVersion,'_','.',[rfReplaceAll]);
                   infoln('Got last resort FPCUP bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
@@ -1528,21 +1516,22 @@ begin
               end;
             end;
 
+            if (aCompilerFound) then
+            begin
+              if FBootstrapCompilerURL='' then
+              begin
+                 infoln('Got a bootstrap compiler from FPCUP bootstrap sources.',etInfo);
+              end;
+            end;
 
           finally
-            aCompilerList.Free;
+            aDownLoader.Destroy;
           end;
 
-          if (aCompilerFound) then
-          begin
-            if FBootstrapCompilerURL='' then
-            begin
-               infoln('Got a bootstrap compiler from FPCUP bootstrap sources.',etInfo);
-               FBootstrapCompilerURL := FpcupGitRepo+'/raw/master/bootstrappers/fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
-            end;
-          end;
-
+        finally
+          aCompilerList.Free;
         end;
+
       end
       else
       begin

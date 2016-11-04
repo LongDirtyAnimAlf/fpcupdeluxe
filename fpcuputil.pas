@@ -86,6 +86,7 @@ type
     destructor Destroy; override;
     procedure setProxy(host:string;port:integer;user,pass:string);
     function getFile(const URL,filename:string):boolean;
+    function checkURL(const URL:string):boolean;
   protected
     Property MaxRetries : Byte Read FMaxRetries Write FMaxRetries default DefMaxRetries;
   end;
@@ -1493,7 +1494,48 @@ begin
       except
         tries:=(MaxRetries+1);
       end;
+      if result then
+      begin
+        //AddHeader('Connection','Close');
+        //HTTPMethod('HEAD', URL, Nil, [200]);
+      end;
     until (result or (tries>MaxRetries));
+  end;
+end;
+
+function TDownLoader.checkURL(const URL:string):boolean;
+var
+  tries:byte;
+  response: Integer;
+begin
+  result:=false;
+  tries:=0;
+  with aFPHTTPClient do
+  begin
+    AddHeader('User-Agent','curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3');
+    AddHeader('Connection','Close');
+    repeat
+      try
+        HTTPMethod('HEAD', URL, Nil, []);
+        response:=ResponseStatusCode;
+        // 404 Not Found
+        // The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
+        result:=(response<>404);
+        if (NOT result) then
+        begin
+          Inc(tries);
+          if FVerbose then
+            writeln('TFPHTTPClient retry #' +InttoStr(tries)+ ' check of ' + URL + '.');
+        end;
+      except
+        tries:=(MaxRetries+1);
+      end;
+    until (result or (tries>MaxRetries));
+    if result then
+    begin
+      //AddHeader('Connection','Close');
+      //HTTPMethod('HEAD', URL, Nil, [200]);
+    end;
   end;
 end;
 

@@ -43,6 +43,7 @@ Temporary Items
 .apdisk
 
 *.ppu
+*.lps
 *.o
 *.obj
 *.s

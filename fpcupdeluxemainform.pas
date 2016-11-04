@@ -628,13 +628,9 @@ begin
 
       if URL<>'' then
       begin
-
-        writeln('Going to download the right cross-tools.');
-
-        URL:=FPCUPGITREPO+'/raw/master/crosstools/WinCross'+URL;
-
+        writeln('Please wait: Going to download the right cross-tools. Can (will) take some time !');
+        URL:=FPCUPGITREPO+'/releases/download/crosstoolswindows/WinCross'+URL;
         TargetFile := SysUtils.GetTempFileName;
-
         aDownLoader:=TDownLoader.Create;
         try
           success:=aDownLoader.getFile(URL,TargetFile);
