@@ -190,8 +190,10 @@ begin
 
   // Actual clone/checkout
   if ExportOnly
-     then Command := ' checkout-index -a -f --recurse-submodules ' + Repository + ' --prefix=' + IncludeTrailingPathDelimiter(LocalRepository)
+     //then Command := ' checkout-index -a -f --recurse-submodules ' + Repository + ' --prefix=' + IncludeTrailingPathDelimiter(LocalRepository)
+     then Command := ' clone --recurse-submodules --depth 1 ' + Repository + ' ' + LocalRepository
      else Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
+
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose);
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
