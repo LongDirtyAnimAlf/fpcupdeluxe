@@ -483,6 +483,10 @@ begin
   try
     PrepareRun;
 
+    // for mudules, limit the install to files only ... whole rpo's are not that necessary (yet).
+    // can be changed (added as a option) in the future
+    FPCupManager.ExportOnly:=(NOT CheckRepo.Checked);
+
     modules:='';
     for i:=0 to ListBox3.Count-1 do
     begin

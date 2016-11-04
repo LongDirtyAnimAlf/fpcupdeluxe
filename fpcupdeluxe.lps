@@ -9,7 +9,7 @@
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
         <TopLine Value="4"/>
-        <UsageCount Value="147"/>
+        <UsageCount Value="148"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -20,9 +20,9 @@
         <ResourceBaseClass Value="Form"/>
         <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
-        <TopLine Value="994"/>
-        <CursorPos Y="1009"/>
-        <UsageCount Value="147"/>
+        <TopLine Value="476"/>
+        <CursorPos X="56" Y="487"/>
+        <UsageCount Value="148"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -34,7 +34,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="9" Y="17"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="47"/>
       </Unit2>
       <Unit3>
         <Filename Value="fpcuplprbase.inc"/>
@@ -53,26 +53,27 @@
       <Unit5>
         <Filename Value="installermanager.pas"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="37"/>
-        <CursorPos X="16" Y="608"/>
-        <UsageCount Value="64"/>
+        <EditorIndex Value="3"/>
+        <TopLine Value="579"/>
+        <CursorPos X="50" Y="590"/>
+        <UsageCount Value="65"/>
+        <Loaded Value="True"/>
       </Unit5>
       <Unit6>
         <Filename Value="fpcuputil.pas"/>
         <EditorIndex Value="1"/>
         <TopLine Value="207"/>
         <CursorPos X="6" Y="219"/>
-        <UsageCount Value="33"/>
+        <UsageCount Value="34"/>
         <Loaded Value="True"/>
       </Unit6>
       <Unit7>
         <Filename Value="installercore.pas"/>
         <UnitName Value="installerCore"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="5"/>
         <TopLine Value="184"/>
         <CursorPos X="18" Y="208"/>
-        <UsageCount Value="59"/>
+        <UsageCount Value="60"/>
         <Loaded Value="True"/>
       </Unit7>
       <Unit8>
@@ -85,10 +86,10 @@
       <Unit9>
         <Filename Value="installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="3"/>
-        <TopLine Value="63"/>
-        <CursorPos X="36" Y="67"/>
-        <UsageCount Value="55"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="1593"/>
+        <CursorPos X="3" Y="1593"/>
+        <UsageCount Value="56"/>
         <Loaded Value="True"/>
       </Unit9>
       <Unit10>
@@ -499,25 +500,25 @@
       <Unit64>
         <Filename Value="installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="6"/>
         <TopLine Value="1028"/>
         <CursorPos X="21" Y="1043"/>
-        <UsageCount Value="46"/>
+        <UsageCount Value="47"/>
         <Loaded Value="True"/>
       </Unit64>
       <Unit65>
         <Filename Value="fpcup.ini"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="8"/>
         <TopLine Value="1224"/>
         <CursorPos X="2" Y="1242"/>
-        <UsageCount Value="61"/>
+        <UsageCount Value="62"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit65>
       <Unit66>
         <Filename Value="settings.ini"/>
-        <EditorIndex Value="8"/>
-        <UsageCount Value="61"/>
+        <EditorIndex Value="9"/>
+        <UsageCount Value="62"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit66>
@@ -586,10 +587,10 @@
       </Unit75>
       <Unit76>
         <Filename Value="repoclient.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="7"/>
         <TopLine Value="195"/>
         <CursorPos X="36" Y="221"/>
-        <UsageCount Value="11"/>
+        <UsageCount Value="12"/>
         <Loaded Value="True"/>
       </Unit76>
       <Unit77>
@@ -1146,120 +1147,120 @@
     <JumpHistory Count="30" HistoryIndex="29">
       <Position1>
         <Filename Value="fpcup.ini"/>
-        <Caret Line="865" Column="21" TopLine="850"/>
+        <Caret Line="11" Column="23"/>
       </Position1>
       <Position2>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="112" Column="26" TopLine="99"/>
-      </Position2>
-      <Position3>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="7" Column="6"/>
-      </Position3>
-      <Position4>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="9" Column="57"/>
-      </Position4>
-      <Position5>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="10" Column="31"/>
-      </Position5>
-      <Position6>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="10" Column="31"/>
-      </Position6>
-      <Position7>
-        <Filename Value="fpcup.ini"/>
-        <Caret Line="11" Column="23"/>
-      </Position7>
-      <Position8>
         <Filename Value="fpcuputil.pas"/>
         <Caret Line="1092" Column="11" TopLine="1052"/>
-      </Position8>
-      <Position9>
+      </Position2>
+      <Position3>
         <Filename Value="fpcuputil.pas"/>
-      </Position9>
-      <Position10>
+      </Position3>
+      <Position4>
         <Filename Value="fpcuputil.pas"/>
         <Caret Line="219" Column="7" TopLine="201"/>
+      </Position4>
+      <Position5>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+      </Position5>
+      <Position6>
+        <Filename Value="installeruniversal.pas"/>
+      </Position6>
+      <Position7>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="316" Column="34" TopLine="301"/>
+      </Position7>
+      <Position8>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="317" Column="34" TopLine="302"/>
+      </Position8>
+      <Position9>
+        <Filename Value="installeruniversal.pas"/>
+        <Caret Line="1097" Column="15" TopLine="1082"/>
+      </Position9>
+      <Position10>
+        <Filename Value="installeruniversal.pas"/>
+        <Caret Line="1054" Column="18" TopLine="1044"/>
       </Position10>
       <Position11>
-        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Filename Value="installeruniversal.pas"/>
+        <Caret Line="85" Column="7" TopLine="63"/>
       </Position11>
       <Position12>
         <Filename Value="installeruniversal.pas"/>
+        <Caret Line="303" Column="14" TopLine="277"/>
       </Position12>
       <Position13>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="316" Column="34" TopLine="301"/>
-      </Position13>
-      <Position14>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="317" Column="34" TopLine="302"/>
-      </Position14>
-      <Position15>
-        <Filename Value="installeruniversal.pas"/>
-        <Caret Line="1097" Column="15" TopLine="1082"/>
-      </Position15>
-      <Position16>
-        <Filename Value="installeruniversal.pas"/>
-        <Caret Line="1054" Column="18" TopLine="1044"/>
-      </Position16>
-      <Position17>
-        <Filename Value="installeruniversal.pas"/>
-        <Caret Line="85" Column="7" TopLine="63"/>
-      </Position17>
-      <Position18>
-        <Filename Value="installeruniversal.pas"/>
-        <Caret Line="303" Column="14" TopLine="277"/>
-      </Position18>
-      <Position19>
         <Filename Value="installeruniversal.pas"/>
         <Caret Line="335" Column="11" TopLine="310"/>
-      </Position19>
-      <Position20>
+      </Position13>
+      <Position14>
         <Filename Value="installeruniversal.pas"/>
         <Caret Line="67" Column="36" TopLine="63"/>
-      </Position20>
-      <Position21>
+      </Position14>
+      <Position15>
         <Filename Value="installercore.pas"/>
         <Caret Line="111" Column="12" TopLine="97"/>
-      </Position21>
-      <Position22>
+      </Position15>
+      <Position16>
         <Filename Value="installerlazarus.pas"/>
         <Caret Line="667" Column="5" TopLine="648"/>
-      </Position22>
-      <Position23>
+      </Position16>
+      <Position17>
         <Filename Value="installerlazarus.pas"/>
         <Caret Line="1043" Column="21" TopLine="1028"/>
-      </Position23>
-      <Position24>
+      </Position17>
+      <Position18>
         <Filename Value="repoclient.pas"/>
         <Caret Line="134" Column="59" TopLine="121"/>
+      </Position18>
+      <Position19>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="806" Column="10" TopLine="792"/>
+      </Position19>
+      <Position20>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="837" Column="31" TopLine="813"/>
+      </Position20>
+      <Position21>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="35" Column="19" TopLine="20"/>
+      </Position21>
+      <Position22>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="219" Column="15" TopLine="203"/>
+      </Position22>
+      <Position23>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="220" Column="27" TopLine="203"/>
+      </Position23>
+      <Position24>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="737" Column="22" TopLine="711"/>
       </Position24>
       <Position25>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="806" Column="10" TopLine="792"/>
+        <Caret Line="1009" TopLine="994"/>
       </Position25>
       <Position26>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="837" Column="31" TopLine="813"/>
+        <Caret Line="193" Column="40" TopLine="184"/>
       </Position26>
       <Position27>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="35" Column="19" TopLine="20"/>
+        <Filename Value="installermanager.pas"/>
+        <Caret Line="375" Column="59" TopLine="362"/>
       </Position27>
       <Position28>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="219" Column="15" TopLine="203"/>
+        <Caret Line="172" Column="23" TopLine="157"/>
       </Position28>
       <Position29>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="220" Column="27" TopLine="203"/>
+        <Filename Value="installermanager.pas"/>
+        <Caret Line="590" Column="50" TopLine="579"/>
       </Position29>
       <Position30>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="737" Column="22" TopLine="711"/>
+        <Caret Line="172" Column="23" TopLine="157"/>
       </Position30>
     </JumpHistory>
   </ProjectSession>

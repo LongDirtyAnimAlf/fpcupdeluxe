@@ -60,6 +60,9 @@ Temporary Items
 *.log
 backup/
 icons/
+bin/
+crosstools/
+bootstrappers/
 deluxebin/
 lib/
 lib*/
