@@ -1324,6 +1324,7 @@ var
   ReturnCode:integer;
   aLocalBootstrapVersion:string;
   aIntermediateBootstrapCompiler:string;
+  aGithubBootstrapURL:string;
   aDownLoader: TDownLoader;
 begin
   result:=true;
@@ -1463,9 +1464,22 @@ begin
         aCompilerList.Free;
       end;
 
+      // found an official FPC bootstrapper !
+      if (aCompilerFound) then
+      begin
+        if FBootstrapCompilerURL='' then
+        begin
+          infoln('Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
+          FBootstrapCompilerURL := 'ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
+        end;
+      end;
+
+
       // second, try the FPCUP binaries from release
       if (NOT aCompilerFound) then
       begin
+        aGithubBootstrapURL:='';
+
         aLocalBootstrapVersion:=aBootstrapVersion;
         FBootstrapCompilerOverrideVersionCheck:=false;
 
@@ -1479,12 +1493,12 @@ begin
             while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
             begin
               infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
-              FBootstrapCompilerURL:=FpcupGitRepo+
+              aGithubBootstrapURL:=FpcupGitRepo+
                 '/releases/download/bootstrappers/'+
                 'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
-              infoln('Checking existence of: '+FBootstrapCompilerURL,etInfo);
-              aCompilerFound:=aDownLoader.checkURL(FBootstrapCompilerURL);
-              if aCompilerFound then aCompilerList.Add(FBootstrapCompilerURL);
+              infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
+              aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
+              if aCompilerFound then aCompilerList.Add(aGithubBootstrapURL);
 
               // look for a previous (fitting) compiler if not found, and use overrideversioncheck
               if NOT aCompilerFound then
@@ -1505,22 +1519,15 @@ begin
               begin
                 if Pos(aCPU+'-'+aOS+'-'+GetCompilerName(aCPU),aCompilerList[i])>0 then
                 begin
+                  aGithubBootstrapURL:=aCompilerList[i];
                   FBootstrapCompilerOverrideVersionCheck:=true;
                   aCompilerFound:=true;
-                  j:=Pos('fpcup-',aCompilerList[i]);
-                  aLocalBootstrapVersion := Copy(aCompilerList[i],7,5);
+                  j:=Pos('fpcup-',aGithubBootstrapURL);
+                  aLocalBootstrapVersion := Copy(aGithubBootstrapURL,7,5);
                   aLocalBootstrapVersion := StringReplace(aLocalBootstrapVersion,'_','.',[rfReplaceAll]);
                   infoln('Got last resort FPCUP bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
                   break;
                 end;
-              end;
-            end;
-
-            if (aCompilerFound) then
-            begin
-              if FBootstrapCompilerURL='' then
-              begin
-                 infoln('Got a bootstrap compiler from FPCUP bootstrap sources.',etInfo);
               end;
             end;
 
@@ -1532,14 +1539,16 @@ begin
           aCompilerList.Free;
         end;
 
-      end
-      else
-      begin
-        if FBootstrapCompilerURL='' then
+        // found a less official FPCUP bootstrapper !
+        if (aCompilerFound) then
         begin
-          infoln('Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
-          FBootstrapCompilerURL := 'ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
+          if FBootstrapCompilerURL='' then
+          begin
+            infoln('Got a bootstrap compiler from FPCUP bootstrap sources.',etInfo);
+            FBootstrapCompilerURL := aGithubBootstrapURL;
+          end;
         end;
+
       end;
 
       if (NOT aCompilerFound) AND (FBootstrapCompilerURL='') then
@@ -1555,8 +1564,12 @@ begin
       // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
       // FBootstrapCompilerOverrideVersionCheck:=true;
       {$endif darwin}
-      infoln('Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
-      result:=DownloadBootstrapCompiler;
+      // final check ... do we have the correct (as in version) compiler already ?
+      if GetCompilerVersion(FCompiler)<>aLocalBootstrapVersion then
+      begin
+        infoln('Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
+        result:=DownloadBootstrapCompiler;
+      end;
   end;
 
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.

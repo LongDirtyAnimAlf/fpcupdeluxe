@@ -7,7 +7,8 @@ program fpcupdeluxe;
 // todo: check addition of -FL (linker path) in case of crossing for libraries) !!
 // todo: give info about the link that must be used to start Lazarus that is created by fpcupdeluxe !!
 // or make a button or popup or something for this link.
-// todo: add some form of help
+// todo: add some means of help
+// check available bootstrapper just before downloading a new one ... they could be the same !
 
 {$IFDEF LINUX}
   {$IFDEF FPC_CROSSCOMPILING}

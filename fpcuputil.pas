@@ -225,7 +225,7 @@ begin
    x:=RPos('/',StartPath);
    if x>0 then
    begin
-     Delete(StartPath,x,MaxInt);
+     Delete(StartPath,x+1,MaxInt);
    end;
  end;
   {$endif}
