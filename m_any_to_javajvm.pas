@@ -44,8 +44,6 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
 
 implementation
-const
-  CrossModuleName='Tany_javajvm';
 
 type
 

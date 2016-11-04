@@ -146,14 +146,14 @@ const
   DirName='mipsel-linux';
 var
   AsFile: string;
+  BinPrefixTry:string;
 begin
   inherited;
 
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+  if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
@@ -177,90 +177,92 @@ begin
   // Now also allow for mips-linux-gnu- binutilsprefix (e.g. codesourcery)
   if not result then
   begin
-    FBinutilsPrefix:='mips-linux-gnu-';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    BinPrefixTry:='mips-linux-gnu-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(FBinUtilsPath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+    {$ifdef unix}
+    // User may also have placed them into their regular search path:
+    if not result then { try /usr/local/bin/<dirprefix>/ }
+      result:=SearchBinUtil('/usr/local/bin/'+DirName,
+        AsFile);
+
+    if not result then { try /usr/local/bin/ }
+      result:=SearchBinUtil('/usr/local/bin',
+        AsFile);
+
+    if not result then { try /usr/bin/ }
+      result:=SearchBinUtil('/usr/bin',
+        AsFile);
+
+    if not result then { try /bin/ }
+      result:=SearchBinUtil('/bin',
+        AsFile);
+    {$endif unix}
+
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
-
-  {$ifdef unix}
-  // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-  {$endif unix}
-
 
   // Now also allow for mipsel-linux- binutilsprefix (e.g. using standard GCC crossbinutils)
   if not result then
   begin
-    FBinutilsPrefix:='mipsel-linux-';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    BinPrefixTry:='mipsel-linux-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(FBinUtilsPath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+    {$ifdef unix}
+    // User may also have placed them into their regular search path:
+    if not result then { try /usr/local/bin/<dirprefix>/ }
+      result:=SearchBinUtil('/usr/local/bin/'+DirName,
+        AsFile);
+
+    if not result then { try /usr/local/bin/ }
+      result:=SearchBinUtil('/usr/local/bin',
+        AsFile);
+
+    if not result then { try /usr/bin/ }
+      result:=SearchBinUtil('/usr/bin',
+        AsFile);
+
+    if not result then { try /bin/ }
+      result:=SearchBinUtil('/bin',
+        AsFile);
+    {$endif unix}
+
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
-
-  {$ifdef unix}
-  // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-  {$endif unix}
 
   // Now also allow for empty binutilsprefix:
   if not result then
   begin
-    FBinutilsPrefix:='';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(FBinUtilsPath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+    {$ifdef unix}
+    // User may also have placed them into their regular search path:
+    if not result then { try /usr/local/bin/<dirprefix>/ }
+      result:=SearchBinUtil('/usr/local/bin/'+DirName,
+        AsFile);
+
+    if not result then { try /usr/local/bin/ }
+      result:=SearchBinUtil('/usr/local/bin',
+        AsFile);
+
+    if not result then { try /usr/bin/ }
+      result:=SearchBinUtil('/usr/bin',
+        AsFile);
+
+    if not result then { try /bin/ }
+      result:=SearchBinUtil('/bin',
+        AsFile);
+    {$endif unix}
+
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
-
-  {$ifdef unix}
-  // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-  {$endif unix}
 
   if result then
   begin

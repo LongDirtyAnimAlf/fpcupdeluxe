@@ -19,12 +19,13 @@ uses
   SysUtils;
 
 type
+
   SynEditData = record
     SynEdit: TCustomSynEdit;
     {$ifdef CPU64}
-    Filler: packed array [1..8] of char;
+    Filler: array [1..8] of char;
     {$else}
-    Filler: packed array [1..12] of char;
+    Filler: array [1..12] of char;
     {$endif}
   end;
   PSynEditData = ^SynEditData;
@@ -36,7 +37,8 @@ type
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 begin
   //Self.Append(StrPas(aBuf));
-  Self.InsertTextAtCaret(StrPas(aBuf),scamIgnore);
+  //Self.InsertTextAtCaret(StrPas(aBuf),scamIgnore);
+  Self.InsertTextAtCaret(StrPas(aBuf),scamBegin);
   Self.CaretX:=0;
 end;
 
@@ -68,10 +70,13 @@ begin
   EditFlush := 0;
 end;
 
+
 function EditOpen(var F: TTextRec): Integer; far;
 begin
   with F do
   begin
+    BufPos:=0;
+    BufEnd:=0;
     if Mode <> fmInput then
     begin
       Mode := fmOutput;
@@ -89,14 +94,23 @@ end;
 
 procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit);
 begin
+  FillChar(T,SizeOf(TextRec),0);
+  {$ifdef FPC_HAS_CPSTRING}
+  SetTextCodePage(T,TTextRec(T).CodePage);
+  {$endif}
   with TTextRec(T) do
   begin
-    Handle := $FFFF;
+    Handle := UnusedHandle;
     Mode := fmClosed;
     BufSize := SizeOf(Buffer)-1;
     BufPtr := @Buffer;
     OpenFunc := @EditOpen;
     CloseFunc := @EditIgnore;
+    case DefaultTextLineBreakStyle of
+      tlbsLF: LineEnd := #10;
+      tlbsCRLF: LineEnd := #13#10;
+      tlbsCR: LineEnd := #13;
+    end;
     Name[0] := #0;
     PSynEditData(@UserData)^.SynEdit:= NewSynEditComponent;
   end;

@@ -154,6 +154,9 @@ function GetNumericalVersion(aVersion: string): word;
 implementation
 
 uses
+  {$ifdef LCL}
+  Forms,Controls,
+  {$endif}
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil, LazFileUtils, LazUTF8,
@@ -212,17 +215,24 @@ var
   x:integer;
   {$endif}
 begin
- //StartPath:=ExpandFileNameUTF8(ParamStrUTF8(0));
  StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
  {$ifdef Darwin}
- x:=pos(ExtractFileName(paramstr(0))+'.app/Contents/MacOS',StartPath);
- if x>0 then StartPath:=copy(StartPath,1,x-1);
- {$endif}
+ x:=pos('/Contents/MacOS',StartPath);
+ if x>0 then
+ begin
+   Delete(StartPath,x,MaxInt);
+   x:=RPos('/',StartPath);
+   if x>0 then
+   begin
+     Delete(StartPath,x,MaxInt);
+   end;
+ end;
+  {$endif}
  if FileIsSymlink(StartPath) then
     StartPath:=GetPhysicalFilename(StartPath,pfeException);
  result:=ExtractFilePath(StartPath);
-    if DirectoryExistsUTF8(result) then
-       result:=GetPhysicalFilename(result,pfeException);
+ if DirectoryExistsUTF8(result) then
+    result:=GetPhysicalFilename(result,pfeException);
  result:=AppendPathDelim(result);
 end;
 
@@ -1065,28 +1075,23 @@ end;
 
 procedure infoln(Message: string; Level: TEventType);
 const
-  {$ifndef FPCONLY}
-  BeginSnippet='fpclazup: '; //helps identify messages as comfing from fpclazup instead of make etc
+  {$ifdef LCL}
+  BeginSnippet='fpcupdeluxe: '; //helps identify messages as coming from fpcupdeluxe instead of make etc
   {$else}
-  BeginSnippet='fpcup: '; //helps identify messages as comfing from fpcup instead of make etc
+  {$ifndef FPCONLY}
+  BeginSnippet='fpclazup: '; //helps identify messages as coming from fpclazup instead of make etc
+  {$else}
+  BeginSnippet='fpcup: '; //helps identify messages as coming from fpcup instead of make etc
   {$endif}
-var
-  Seriousness: string;
+  {$endif}
+  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
 begin
 {$IFNDEF NOCONSOLE}
   // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
-  case Level of
-    etCustom: Seriousness:='custom:';
-    etDebug: Seriousness:='debug:';
-    etInfo: Seriousness:='info:';
-    etWarning: Seriousness:='WARNING:';
-    etError: Seriousness:='ERROR:';
-    else Seriousness:='UNKNOWN CATEGORY!!:'
-  end;
   if (Level<>etDebug) then
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-      writeln(BeginSnippet+Seriousness+' '+ Message); //we misuse this for info output
+      writeln(BeginSnippet+Seriousness[Level]+' '+ Message); //we misuse this for info output
       sleep(200); //hopefully allow output to be written without interfering with other output
     end
   else
@@ -1095,7 +1100,7 @@ begin
     {DEBUG conditional symbol is defined using
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-    writeln(BeginSnippet+Seriousness+' '+ Message); //we misuse this for info output
+    writeln(BeginSnippet+Seriousness[Level]+' '+ Message); //we misuse this for info output
     sleep(200); //hopefully allow output to be written without interfering with other output
     {$ENDIF}
     end;

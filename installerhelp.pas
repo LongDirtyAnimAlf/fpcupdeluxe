@@ -251,8 +251,13 @@ begin
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
     SetPath(BinPath+PathSeparator+
-    PlainBinPath,
-    true,false);
+    {$IFDEF DARWIN}
+    // pwd is located in /bin ... the makefile needs it !!
+    // tools are located in /usr/bin ... the makefile needs it !!
+    // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
+    '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
+    {$ENDIF}
+    PlainBinPath,true,false);
     {$ENDIF UNIX}
   end;
 end;

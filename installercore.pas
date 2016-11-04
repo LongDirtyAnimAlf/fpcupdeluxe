@@ -114,6 +114,7 @@ type
     FTar: string;
     FUnzip: string;
     F7zip: string;
+    FUnrar: string;
     ProcessEx: TProcessEx;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
@@ -161,7 +162,6 @@ type
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
     function GetFile(aURL,aFile:string):boolean;
   public
-    property Unzipper: string read F7zip;
     property SVNClient: TSVNClient read FSVNClient;
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
@@ -284,9 +284,11 @@ begin
     {$ELSE}
     {$IF defined(BSD) and not defined(DARWIN)}
     FMake := 'gmake'; //GNU make; assume in path
+    //FMake := FindDefaultExecutablePath('gmake');
     {$else}
     // Linux, OSX
     FMake := 'make'; //assume in path
+    //FMake := FindDefaultExecutablePath('make');
     {$ENDIF}
     {$ENDIF MSWINDOWS}
   Result := FMake;
@@ -344,12 +346,15 @@ begin
     // Need to do it here so we can pick up make path.
     FBunzip2 := '';
     FTar := '';
+    FUnrar := '';
+    F7zip := '';
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
     FTar := 'tar';
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     F7zip := '7za';
+    FUnrar := 'unrar';
     {$ENDIF LINUX}
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
@@ -357,11 +362,13 @@ begin
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     F7zip := '7za';
+    FUnrar := 'unrar';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     F7zip := '7za';
+    FUnrar := 'unrar';
     {$ENDIF DARWIN}
     {$ENDIF BSD}
 
@@ -376,10 +383,57 @@ begin
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
 
-    // Get 7zip binary from 7zip URL for unpacking of 7zip archives
-    F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '7z1604'{$ifdef win64} + '-x64'{$endif} + '.exe';
-    GetFile('http://www.7-zip.org/a/'+ExtractFileName(F7zip),F7zip);
+    F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
+    if Not FileExists(F7zip) then
+    begin
+      ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
+      // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
+      Output:='7za920.zip';
+      OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      if NOT OperationSucceeded then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+        OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      end;
+      if OperationSucceeded then
+      begin
+        OperationSucceeded:=(ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+' '+IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output,FVerbose)=0);
+        if OperationSucceeded then
+        begin
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+          OperationSucceeded:=FileExists(F7zip);
+        end;
+      end;
+      // do not fail ... perhaps there is another 7zip available in the path
+      OperationSucceeded:=True;
+    end;
 
+    FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
+    if Not FileExists(FUnrar) then
+    begin
+      ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
+      // this version of unrar does not need installation ... so we can silently get it !!
+      Output:='unrar-3.4.3-bin.zip';
+      OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+      if NOT OperationSucceeded then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+      end;
+      if OperationSucceeded then
+      begin
+        OperationSucceeded:=(ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+' '+IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,FVerbose)=0);
+        if OperationSucceeded then
+        begin
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          OperationSucceeded:=FileExists(FUnrar);
+        end;
+      end;
+      // do not fail ... perhaps there is another unrar available in the path
+      OperationSucceeded:=True;
+    end;
     {$ENDIF}
 
     {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
@@ -532,7 +586,7 @@ begin
   OperationSucceeded := true;
 
   {$IFDEF MSWINDOWS}
-  infoln('Get the right binutils for intermediate bootstrap compiler.',etInfo);
+  infoln('Get the right binutils for the bootstrap compiler.',etInfo);
   if OperationSucceeded then
   begin
     // Download if needed, including unzip - needed for SVN download
@@ -863,6 +917,11 @@ var
   DiffFileSL:TStringList;
   Output: string = '';
 begin
+
+  Result := false;
+
+  // check if we do have a client !!
+  if NOT aClient.ValidClient then exit;
 
   aClientName:=Copy(aClient.ClassName,2,200);
 
@@ -1479,6 +1538,7 @@ end;
 function TInstaller.GetPath: string;
 begin
   result:=ProcessEx.Environment.GetVar(PATHVARNAME);
+  //result:=GetEnvironmentVariable(PATHVARNAME);
 end;
 
 procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);
@@ -1519,6 +1579,7 @@ var
   ResultingPath: string;
 begin
   OldPath := ProcessEx.Environment.GetVar(PATHVARNAME);
+  //OldPath := GetEnvironmentVariable(PATHVARNAME);
   if Prepend and (OldPath<>'') then
     ResultingPath := NewPath + PathSeparator + OldPath
   else if Append and (OldPath<>'') then

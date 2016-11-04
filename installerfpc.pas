@@ -416,96 +416,96 @@ begin
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
-      if CrossInstaller.BinUtilsPathInPath then
-      begin
-        SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
-      end;
-
-      // Make all
-      ProcessEx.Executable := Make;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
-      ProcessEx.Parameters.Clear;
-      if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-      ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
-      ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
-      // this installs everything in the source directory : has consequences for cleaning up !!
-      ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
-      // Tell make where to find the target binutils if cross-compiling:
-      if CrossInstaller.BinUtilsPath<>'' then
-        ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
-      {$IFDEF MSWINDOWS}
-      ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-      ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-      {$ENDIF}
-      // Don't really know if this is necessary, but it can't hurt:
-      // Override makefile checks that checks for stable compiler in FPC trunk
-      if FBootstrapCompilerOverrideVersionCheck then
-         ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      //putting all before target might help!?!?
-      ProcessEx.Parameters.Add('all');
-      ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-      ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-      if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
-      Options:=FCompilerOptions;
-      // Error checking for some known problems with cross compilers
-      //todo: this really should go to the cross compiler unit itself but would require a rewrite
-      if (CrossInstaller.TargetCPU='i8086') and
-        (CrossInstaller.TargetOS='msdos') then
-        begin
-        if (pos('-g',Options)>0) then
-          begin
-          infoln('You specified these FPC options: '+Options+'... however, this cross compiler does not support debug symbols. Aborting.',etError);
-          exit(false);
-          end;
-        end;
-      if CrossInstaller.LibsPath<>''then
-        Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
-
-      if (CrossInstaller.TargetOS='android') then
-      begin
-       if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
-      end;
-
-      if CrossInstaller.BinUtilsPrefix<>'' then
-        begin
-        // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
-        CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
-        ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
-        end;
-      if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
-        CrossOptions:='CROSSOPT=';
-      for i:=0 to CrossInstaller.CrossOpt.Count-1 do
-        begin
-        CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
-        end;
-      if CrossOptions<>'' then
-        ProcessEx.Parameters.Add(CrossOptions);
-      // suppress hints
-      ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
       try
-        if CrossOptions='' then
-          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
-        else
-          infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
-        ProcessEx.Execute;
-        result:=(ProcessEx.ExitStatus=0);
-      except
-        on E: Exception do
-          begin
-          WritelnLog('FPC: Running cross compiler fpc make all failed with an exception!'+LineEnding+
-            'Details: '+E.Message,true);
-          exit(false);
-          end;
-    end;
+        if CrossInstaller.BinUtilsPathInPath then
+           SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
 
-      // Return path to previous state
-      if CrossInstaller.BinUtilsPathInPath then
-      begin
-        SetPath(OldPath,false,false);
+        // Make all
+        ProcessEx.Executable := Make;
+        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
+        ProcessEx.Parameters.Clear;
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+        ProcessEx.Parameters.Add('FPC='+ChosenCompiler);
+        ProcessEx.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FBaseDirectory));
+        // this installs everything in the source directory : has consequences for cleaning up !!
+        ProcessEx.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+        // Tell make where to find the target binutils if cross-compiling:
+        if CrossInstaller.BinUtilsPath<>'' then
+           ProcessEx.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
+        {$IFDEF MSWINDOWS}
+        ProcessEx.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+        ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+        {$ENDIF}
+        // Don't really know if this is necessary, but it can't hurt:
+        // Override makefile checks that checks for stable compiler in FPC trunk
+        if FBootstrapCompilerOverrideVersionCheck then
+           ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+        //putting all before target might help!?!?
+        ProcessEx.Parameters.Add('all');
+        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
+        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+        if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
+        Options:=FCompilerOptions;
+        // Error checking for some known problems with cross compilers
+        //todo: this really should go to the cross compiler unit itself but would require a rewrite
+        if (CrossInstaller.TargetCPU='i8086') and
+          (CrossInstaller.TargetOS='msdos') then
+        begin
+          if (pos('-g',Options)>0) then
+          begin
+            infoln('You specified these FPC options: '+Options+'... however, this cross compiler does not support debug symbols. Aborting.',etError);
+            exit(false);
+          end;
+        end;
+        if CrossInstaller.LibsPath<>''then
+           Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+
+        if (CrossInstaller.TargetOS='android') then
+        begin
+          if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
+        end;
+
+        if CrossInstaller.BinUtilsPrefix<>'' then
+        begin
+          // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
+          CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
+          ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
+        end;
+        if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
+           CrossOptions:='CROSSOPT=';
+        for i:=0 to CrossInstaller.CrossOpt.Count-1 do
+        begin
+          CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
+        end;
+        if CrossOptions<>'' then
+           ProcessEx.Parameters.Add(CrossOptions);
+        // suppress hints
+        ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
+        try
+          if CrossOptions='' then
+             infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
+          else
+            infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
+          ProcessEx.Execute;
+          result:=(ProcessEx.ExitStatus=0);
+        except
+          on E: Exception do
+          begin
+            WritelnLog('FPC: Running cross compiler fpc make all failed with an exception!'+LineEnding+
+              'Details: '+E.Message,true);
+            exit(false);
+          end;
+        end;
+      finally
+        // Return path to previous state
+        if CrossInstaller.BinUtilsPathInPath then
+        begin
+          SetPath(OldPath,false,false);
+        end;
       end;
 
       if not(Result) then
-        begin
+      begin
         // Not an error but warning for optional modules: crosswin32-64 and crosswin64-32
         // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
         {$ifdef win32}
@@ -526,9 +526,9 @@ begin
         // No use in going on, but
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(result);
-        end
+      end
       else
-        begin
+      begin
         // Install crosscompiler: make crossinstall
         // (apparently equivalent to make install CROSSINSTALL=1)
         ProcessEx.Executable := Make;
@@ -575,15 +575,15 @@ begin
           ProcessEx.Execute;
         except
           on E: Exception do
-            begin
+          begin
             WritelnLog('FPC: Running cross compiler fpc make crossinstall failed with an exception!'+LineEnding+
               'Details: '+E.Message,true);
             result:=false;
-            end;
+          end;
         end;
 
         if ProcessEx.ExitStatus<>0 then
-          begin
+        begin
           // If anything else than crosswin32-64 or crosswin64-32, fail:
           result:=false;
           {$ifdef win32}
@@ -601,9 +601,9 @@ begin
           else
             infoln('FPC: Problem installing crosscompiler for '+FCrossCPU_Target+'-'+FCrossOS_Target+'.', etError);
           FCompiler:='////\\\Error trying to compile FPC\|!';
-          end
+        end
         else
-          begin
+        begin
           {$IFDEF UNIX}
           s:=GetCompilerName(CrossInstaller.TargetCPU);
           if FileExists(IncludeTrailingPathDelimiter(FBaseDirectory)+'compiler/'+s) then
@@ -623,7 +623,7 @@ begin
           end;
           {$ENDIF}
           if CrossInstaller.FPCCFGSnippet<>'' then
-            begin
+          begin
             // Modify fpc.cfg
             FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
             InsertFPCCFGSnippet(FPCCfg,
@@ -638,23 +638,23 @@ begin
               '#ENDIF'+LineEnding+
               '#ENDIF'+LineEnding+
               SnipMagicEnd);
-            end;
-        {$IFDEF UNIX}
-          result:=CreateFPCScript;
-        {$ENDIF UNIX}
-          GetCompiler;
           end;
+          {$IFDEF UNIX}
+          result:=CreateFPCScript;
+          {$ENDIF UNIX}
+          GetCompiler;
         end;
       end;
+    end;
 
     RemoveStaleBuildDirectories(FBaseDirectory,FCrossCPU_Target+'-'+FCrossOS_Target);
 
-    end
-    else
-      begin
-      infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
-      result:=false;
-      end;
+  end
+  else
+  begin
+    infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
+    result:=false;
+  end;
 
 end;
 
@@ -1597,6 +1597,12 @@ begin
   {$IFDEF UNIX}
   //add fpc/utils to solve data2inc not found by fpcmkcfg
   SetPath(FBinPath+PathSeparator+
+  {$IFDEF DARWIN}
+  // pwd is located in /bin ... the makefile needs it !!
+  // tools are located in /usr/bin ... the makefile needs it !!
+  // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
+  '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
+  {$ENDIF}
   IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
   IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',
   true,false);
@@ -1609,6 +1615,7 @@ function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   bIntermediateNeeded:boolean;
   IntermediateCompiler:string;
+  ICSVNCommand:string;
   RequiredBootstrapVersion:string;
   RequiredBootstrapBootstrapVersion:string;
   FPCCfg: string;
@@ -1703,7 +1710,7 @@ begin
 
   // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
   // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
-  if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersion) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0))then
+  if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersion) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
   begin
     // we need an intermediate compiler !!
     if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompiler) then
@@ -1739,19 +1746,62 @@ begin
     result:=CheckAndGetNeededBinUtils;
     //if not result then exit;
 
+
     infoln('Checking out/updating sources for intermediate bootstrap compiler.',etInfo);
     BootstrapDirectory := ExpandFileName(IncludeTrailingPathDelimiter(FBaseDirectory) + '..');
     BootstrapDirectory := IncludeTrailingPathDelimiter(BootstrapDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
     s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
-    ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' checkout --depth=files ' + s + ' ' + BootstrapDirectory, Output, FVerbose);
+
+    // first cleanout the intermediat bootstrapper in case of .... as the rules prescibe
+    ProcessEx.Executable := Make;
+    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
+    ProcessEx.Parameters.Clear;
+    ProcessEx.Parameters.Add('clean');
+    if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+    ProcessEx.Parameters.Add('FPC='+FCompiler);
+    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
+    ProcessEx.Parameters.Add('OS_TARGET='+aOS);
+    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+    ProcessEx.Execute;
+    infoln('Cleaned FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
+
+    ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' info ' + BootstrapDirectory, Output, FVerbose);
+    if (ReturnCode <> 0) then
+    begin
+      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + BootstrapDirectory, Output, FVerbose);
+      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' info ' + BootstrapDirectory, Output, FVerbose);
+    end;
+
+    s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
+    if (ReturnCode = 0)
+        then ICSVNCommand:='update'
+        else ICSVNCommand:='checkout --depth=files ' + s;
+
+    ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ' + ICSVNCommand + ' ' + BootstrapDirectory, Output, FVerbose);
     if (ReturnCode <> 0) then
     begin
       // try once again, after a cleanup
       ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + BootstrapDirectory, Output, FVerbose);
-      if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' checkout --depth=files ' + s + ' ' + BootstrapDirectory, Output, FVerbose);
+      if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ' + ICSVNCommand + ' ' + BootstrapDirectory, Output, FVerbose);
     end;
+
+    // get compiler source
     if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+    // try once again
+    if (ReturnCode <> 0) then
+    begin
+      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', Output, FVerbose);
+      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+    end;
+
+    // get rtl source
     if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
+    // try once again
+    if (ReturnCode <> 0) then
+    begin
+      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', Output, FVerbose);
+      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
+    end;
 
     if (ReturnCode = 0) then
     begin
@@ -1784,35 +1834,42 @@ begin
       ProcessEx.Executable := Make;
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
 
-      ProcessEx.Parameters.Clear;
-      ProcessEx.Parameters.Add('compiler_cycle');
-      // not sure if this needed here, but better safe than sorry
-      if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
+      // clean and build intermediate
+      for ReturnCode:=0 to 1 do
       begin
-        ProcessEx.Parameters.Add('DATA2INC=echo');
-      end;
-      if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-      ProcessEx.Parameters.Add('FPC='+FCompiler);
-      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
-      ProcessEx.Parameters.Add('OPT=-vi-n-h-');
-      ProcessEx.Parameters.Add('OS_TARGET='+aOS);
-      ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+        ProcessEx.Parameters.Clear;
+        if ReturnCode=0
+           then ProcessEx.Parameters.Add('clean')
+           else ProcessEx.Parameters.Add('compiler_cycle');
+        // not sure if this needed here, but better safe than sorry
+        if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
+        begin
+          ProcessEx.Parameters.Add('DATA2INC=echo');
+        end;
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+        ProcessEx.Parameters.Add('FPC='+FCompiler);
+        ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
+        ProcessEx.Parameters.Add('OPT=-vi-n-h-');
+        ProcessEx.Parameters.Add('OS_TARGET='+aOS);
+        ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
 
-      if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
-      begin
-         infoln('Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
-         ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      end;
+        if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
+        begin
+           if ReturnCode=1 then infoln('Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
+           ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+        end;
 
-      infoln('Running make cycle for intermediate bootstrap compiler:',etInfo);
-      ProcessEx.Execute;
-      if ProcessEx.ExitStatus <> 0 then
-      begin
-        result := False;
-        WritelnLog('FPC: Failed to build intermediate bootstrap compiler ',true);
-        exit;
+        if ReturnCode=0 then infoln('Running clean cycle for intermediate bootstrap compiler:',etInfo);
+        if ReturnCode=1 then infoln('Running make cycle for intermediate bootstrap compiler:',etInfo);
+        ProcessEx.Execute;
+        if ProcessEx.ExitStatus <> 0 then
+        begin
+          result := False;
+          WritelnLog('FPC: Failed to build intermediate bootstrap compiler ',true);
+          exit;
+        end;
+        if ReturnCode=1 then infoln('Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
       end;
-      infoln('Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
 
       FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(aCPU),
         ExtractFilePath(FCompiler)+IntermediateCompiler);
@@ -1972,7 +2029,19 @@ begin
       ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
       ProcessEx.Parameters.Clear;
       ProcessEx.Parameters.Add('-d');
+
+      // needed ???
+      // see : http://wiki.freepascal.org/Installing_Lazarus#STEP_.234:_Create_fpc.cfg_file
+      {
+      if (GetNumericalVersion(GetCompilerVersionFromSource(FBaseDirectory))>=(2*10000+4*100+4))
+         then ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FBaseDirectory))
+         else ProcessEx.Parameters.Add('basepath='+IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true));
+      }
+
+      //-FiC:\fpcupdlbaseold\fpc/rtl/inc;C:\fpcupdlbaseold\fpc/rtl/i386;C:\fpcupdlbaseold\fpc/rtl/win32;C:\fpcupdlbaseold\fpc/rtl/win32/wininc;C:\fpcupdlbasetrunk\fpc\rtl\objpas\sysutils
+
       ProcessEx.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FBaseDirectory));
+
       ProcessEx.Parameters.Add('-o');
       ProcessEx.Parameters.Add('' + FPCCfg + '');
       infoln('Creating fpc.cfg: '+ProcessEx.Executable+' '+StringReplace(ProcessEx.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
@@ -2120,9 +2189,11 @@ begin
   oldlog:=ProcessEx.OnErrorM; //current error handler, if any
   CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
   if CrossCompiling then
-    CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target
-  else
-    CPU_OSSignature:=GetFPCTarget(true);
+  begin
+    CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
+    // Delete any existing buildstamp file
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+'build-stamp.'+CPU_OSSignature);
+  end else CPU_OSSignature:=GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
   // Remove all fpmakes

@@ -466,8 +466,10 @@ type
 
 implementation
 
+{$ifdef linux}
 uses
   processutils;
+{$endif}
 
 { TFPCupManager }
 
@@ -1189,11 +1191,11 @@ procedure TSequencer.ResetAllExecuted(SkipFPC: boolean);
 var
   idx:integer;
 begin
-for idx:=0 to FParent.FModuleList.Count -1 do
-  // convention: FPC sequences that are to be skipped start with 'FPC'. Used in SetLCL.
-  // todo: skip also help???? Who would call several help installs in one sequence? SubSequences?
-  if not SkipFPC or (pos('FPC',Uppercase(FParent.FModuleList[idx]))<>1) then
-    PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESNever;
+  for idx:=0 to FParent.FModuleList.Count -1 do
+    // convention: FPC sequences that are to be skipped start with 'FPC'. Used in SetLCL.
+    // todo: skip also help???? Who would call several help installs in one sequence? SubSequences?
+    if not SkipFPC or (pos('FPC',Uppercase(FParent.FModuleList[idx]))<>1) then
+      PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESNever;
 end;
 
 function TSequencer.AddSequence(Sequence: string): boolean;

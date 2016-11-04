@@ -126,18 +126,18 @@ end;"/>
       <Unit0>
         <Filename Value="fpclazup.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="64"/>
+        <TopLine Value="76"/>
+        <CursorPos X="9" Y="98"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
         <Filename Value="svnclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="276"/>
         <CursorPos X="33" Y="294"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit1>
       <Unit2>
         <Filename Value="updatelazconfig.pas"/>
@@ -148,12 +148,10 @@ end;"/>
       <Unit3>
         <Filename Value="processutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="7"/>
-        <TopLine Value="248"/>
-        <CursorPos Y="246"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="250"/>
+        <CursorPos X="25" Y="257"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit3>
       <Unit4>
         <Filename Value="installercore.pas"/>
@@ -194,9 +192,10 @@ end;"/>
         <Filename Value="installeruniversal.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerUniversal"/>
-        <EditorIndex Value="9"/>
-        <TopLine Value="1296"/>
-        <CursorPos X="73" Y="1324"/>
+        <IsVisibleTab Value="True"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="308"/>
+        <CursorPos Y="316"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit8>
@@ -204,8 +203,6 @@ end;"/>
         <Filename Value="fpcup.ini"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="753"/>
-        <CursorPos X="3" Y="776"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -214,9 +211,9 @@ end;"/>
         <Filename Value="installermanager.pas"/>
         <IsPartOfProject Value="True"/>
         <UnitName Value="installerManager"/>
-        <EditorIndex Value="10"/>
-        <TopLine Value="1387"/>
-        <CursorPos X="18" Y="1394"/>
+        <EditorIndex Value="7"/>
+        <TopLine Value="168"/>
+        <CursorPos X="52" Y="184"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit10>
@@ -260,11 +257,10 @@ end;"/>
       <Unit16>
         <Filename Value="repoclient.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="24"/>
         <CursorPos X="3" Y="41"/>
         <UsageCount Value="200"/>
-        <Loaded Value="True"/>
       </Unit16>
       <Unit17>
         <Filename Value="gitclient.pas"/>
@@ -458,9 +454,6 @@ end;"/>
         <Filename Value="revision.inc"/>
         <IsPartOfProject Value="True"/>
         <EditorIndex Value="-1"/>
-        <WindowIndex Value="-1"/>
-        <TopLine Value="-1"/>
-        <CursorPos X="-1" Y="-1"/>
         <UsageCount Value="200"/>
       </Unit41>
       <Unit42>
@@ -484,9 +477,9 @@ end;"/>
       <Unit45>
         <Filename Value="fpcuputil.pas"/>
         <IsPartOfProject Value="True"/>
-        <EditorIndex Value="11"/>
-        <TopLine Value="1083"/>
-        <CursorPos X="5" Y="1085"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="29"/>
+        <CursorPos X="3" Y="45"/>
         <UsageCount Value="155"/>
         <Loaded Value="True"/>
       </Unit45>

@@ -116,6 +116,7 @@ const
   DirName='powerpc-aix';
 var
   AsFile: string;
+  BinPrefixTry: string;
 begin
   inherited;
 
@@ -129,25 +130,25 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    FBinUtilsPrefix:='powerpc-aix-';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    if not result then
-      result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    BinPrefixTry:='powerpc-aix-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Also allow for crossbinutils without prefix
   if not result then
   begin
-    FBinUtilsPrefix:='';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    if not result then
-      result:=SearchBinUtil(FBinUtilsPath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   SearchBinUtilsInfo(result);
+
   if not result then
   begin
     infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);

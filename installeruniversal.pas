@@ -313,20 +313,18 @@ begin
   if not(result) then
     infoln('Universalinstaller: missing required executables. Aborting.',etError);
 
-  {$ifndef FPCONLY}
-  if not(FileExistsUTF8(IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt)) then
-  begin
-    result:=false;
-    infoln('Universalinstaller: missing lazbuild. Aborting.',etError);
-  end;
-  {$endif}
-
   // Add fpc architecture bin and plain paths
   FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
   PlainBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin';
   // Need to remember because we don't always use ProcessEx
   FPath:=FBinPath+PathSeparator+
-    PlainBinPath+PathSeparator;
+  {$IFDEF DARWIN}
+  // pwd is located in /bin ... the makefile needs it !!
+  // tools are located in /usr/bin ... the makefile needs it !!
+  // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
+  '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
+  {$ENDIF}
+  PlainBinPath+PathSeparator;
   SetPath(FPath,true,false);
   // No need to build Lazarus IDE again right now; will
   // be changed by buildmodule/configmodule installexecute/
@@ -456,7 +454,11 @@ begin
        else PackagePath:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if PackagePath='' then continue;
-    if NOT FileExists(PackagePath) then continue;
+    if NOT FileExists(PackagePath) then
+    begin
+      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etError);
+      continue;
+    end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
     // Try to uninstall everything, even if some of these fail.
@@ -513,6 +515,14 @@ begin
       Workingdir:=GetValue(Location+IntToStr(i),sl);
     end;
     // Skip over missing data:
+    if (PackagePath='') then continue;
+    if NOT FileExists(PackagePath) then
+    begin
+      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etError);
+      continue;
+    end;
+
+    {
     if (NOT FileExists(PackagePath)) OR (PackagePath='') then
     begin
       for j:=0 to sl.Count-1 do
@@ -525,6 +535,8 @@ begin
       end;
       continue;
     end;
+    }
+
     if Workingdir='' then Workingdir:=BaseWorkingdir;
 
     {$ifndef FPCONLY}
@@ -897,13 +909,13 @@ begin
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
+      sl:=TStringList(UniModuleList.Objects[idx]);
       // Process AddPackage
       // Compile a package and add it to the list of user-installed packages.
       // Usage:
       // AddPackage<n>=<path to package>\<package.lpk>
       // As this will modify config values, we keep it out the section below.
-      AddPackages(TStringList(UniModuleList.Objects[idx]));
-      sl:=TStringList(UniModuleList.Objects[idx]);
+      AddPackages(sl);
 
       LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
       try
@@ -1041,7 +1053,7 @@ end;
 // Download from SVN, hg, git for module
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 var
-  idx:integer;
+  idx,i,j:integer;
   sl:TStringList;
   RemoteURL,InstallDir:string;
   PinRevision: string=''; //Pin at a certain revision number
@@ -1051,32 +1063,27 @@ var
   TempArchive:string;
   ResultCode: longint;
   User,Pass:string;
-  GotLocation:boolean;
   SourceOK:boolean;
-
-  function CheckLocation:boolean;
-  begin
-    result:=GotLocation;
-    if GotLocation
-      then infoln('Warning !! Duplicate location !! Ignoring module location: '+RemoteURL,etInfo)
-      else GotLocation:=True;
-  end;
+  PackagePath:string;
+  PackageName:string;
+  ExtensionName:string;
+  Direction:string;
 
 begin
   result:=InitModule;
   if not result then exit;
-  GotLocation:=False;
-  result:=true;
   SourceOK:=false;
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
-    begin
+  begin
     sl:=TStringList(UniModuleList.Objects[idx]);
+
     WritelnLog('Getting module '+ModuleName,True);
     InstallDir:=GetValue('InstallDir',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
     // Common keywords for all repo methods
+
     PinRevision:=GetValue('REVISION',sl);
 
 
@@ -1086,7 +1093,8 @@ begin
     Similar construction could be used for hg. Suggest leaving svn as is}
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      if CheckLocation then exit;
+      infoln('Going to download/update from GIT repository '+RemoteURL,etInfo);
+      infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         FBaseDirectory:=InstallDir;
@@ -1097,8 +1105,6 @@ begin
         FGitClient.ExportOnly:=FExportOnly;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=result;
-        if result=false then
-          WritelnLog('GIT error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1106,14 +1112,17 @@ begin
       finally
         UpdateWarnings.Free;
       end;
+      if SourceOK
+         then infoln('Download/update from GIT repository ok.',etInfo)
+         else infoln('Getting GIT repo failed. Trying another source, if available.',etInfo)
     end;
 
     // Handle SVN urls
     RemoteURL:=GetValue('SVNURL',sl);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      if CheckLocation then exit;
-      infoln('Going to download/update from SVN repository '+RemoteURL,etDebug);
+      infoln('Going to download/update from SVN repository '+RemoteURL,etInfo);
+      infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         FBaseDirectory:=InstallDir;
@@ -1126,8 +1135,6 @@ begin
         FSVNClient.ExportOnly:=FExportOnly;
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
         SourceOK:=result;
-        if result=false then
-          WritelnLog('SVN error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1135,13 +1142,17 @@ begin
       finally
         UpdateWarnings.Free;
       end;
+      if SourceOK
+         then infoln('Download/update from SVN repository ok.',etInfo)
+         else infoln('Getting SVN repo failed. Trying another source, if available.',etInfo)
     end;
 
     // Handle HG URLs
     RemoteURL:=GetValue('HGURL',sl);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      if CheckLocation then exit;
+      infoln('Going to download/update from HG repository '+RemoteURL,etInfo);
+      infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         FBaseDirectory:=InstallDir;
@@ -1161,12 +1172,15 @@ begin
       finally
         UpdateWarnings.Free;
       end;
+      if SourceOK
+         then infoln('Download/update from HG repository ok.',etInfo)
+         else infoln('Getting HG repo failed. Trying another source, if available.',etInfo)
     end;
 
     RemoteURL:=GetValue('ArchiveURL',sl);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      if CheckLocation then exit;
+      infoln('Going to download from archive '+RemoteURL,etInfo);
       TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
       WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
       try
@@ -1198,7 +1212,27 @@ begin
                   ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
                 end;
                 {$endif}
+                if ResultCode <> 0 then
+                begin
+                  ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+                end;
+                if ResultCode <> 0 then
+                begin
+                  ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+                end;
               end;
+           '.rar':
+              begin
+                ResultCode:=ExecuteCommand(FUnrar+' x "'+TempArchive+'" "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                {$ifdef MSWINDOWS}
+                // try winrar
+                if ResultCode <> 0 then
+                begin
+                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                end;
+                {$endif}
+              end;
+
            else {.tar and all others}
               ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
            end;
@@ -1210,19 +1244,88 @@ begin
       end;
       SysUtils.Deletefile(TempArchive); //Get rid of temp file.
       SourceOK:=result;
+      if SourceOK then
+      begin
+        infoln('Download from archive ok.',etInfo);
+
+        // check specials for GitHub !!
+        // tricky, but necessary unfortunately ...
+        if (Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) then
+        begin
+
+          ExtensionName:=fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(RemoteURL));
+
+          // we have an archive from github ... this archive adds an extra path (name-master) when unpacking the master.zip
+          // so replace package path and package installer with the right path !!
+
+          PackageName:=GetValue('Name',sl);
+          if Pos('/'+PackageName+'/',RemoteURL)=0 then
+          begin
+            writeln('ERROR: Make new name');
+            // we must build the name from ArchiveURL ... :-(
+            // /..../bgracontrols/archive/master.zip
+            // ...../^^^^^^^^^^^^/.....
+            i:=RPos('/archive/',RemoteURL);
+            if (i>0) then
+            begin
+              Delete(PackageName,i,MaxInt);
+              i:=RPos('/',PackageName);
+              if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
+            end;
+            // there was something wrong ... back to default ... cheap and dirty coding ...
+            if i=0 then PackageName:=GetValue('Name',sl);
+          end;
+
+          for i:=-1 to MAXINSTRUCTIONS do
+          begin
+            if i>=0 then Direction:='AddPackage'+InttoStr(i)+'=' else Direction:='AddPackage=';
+            for j:=0 to sl.Count-1 do
+            begin
+              // find directive, but only rewrite once
+              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName+'-'+ExtensionName,sl[j])=0) then
+              begin
+                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
+                break;
+              end;
+            end;
+            if i>=0 then Direction:='InstallExecute'+InttoStr(i)+'=' else Direction:='InstallExecute=';
+            for j:=0 to sl.Count-1 do
+            begin
+              // find directive, but only rewrite once
+              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName+'-'+ExtensionName,sl[j])=0) then
+              begin
+                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
+                break;
+              end;
+            end;
+          end;
+
+        end;
+      end else infoln('Getting archive failed. Trying another source, if available.',etInfo)
     end;
 
     RemoteURL:=GetValue('ArchivePATH',sl);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      if CheckLocation then exit;
+      infoln('Going to download from archive path '+RemoteURL,etInfo);
       TempArchive := RemoteURL;
       case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
          '.ZIP':
             ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
          '.7Z':
          begin
-           ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+           ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+           {$ifdef MSWINDOWS}
+           // try winrar
+           if ResultCode <> 0 then
+           begin
+             ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+           end;
+           {$endif}
+           if ResultCode <> 0 then
+           begin
+             ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+           end;
            if ResultCode <> 0 then
            begin
              ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
@@ -1236,6 +1339,8 @@ begin
         result := False;
         infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
+
+      if result then infoln('Download from archive path ok.',etInfo);
 
       // todo patch package if correct patch is available in patch directory
 

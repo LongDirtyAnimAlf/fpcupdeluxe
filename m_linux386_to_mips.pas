@@ -74,8 +74,6 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil;
 
 implementation
-const
-  CrossModuleName='TLinux386_mips';
 
 type
 

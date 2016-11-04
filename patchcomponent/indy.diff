@@ -1,20 +1,11 @@
-Index: Lib/indylaz.lpk
-===================================================================
---- Lib/indylaz.lpk	(revision 5273)
-+++ Lib/indylaz.lpk	(working copy)
-@@ -10,6 +10,7 @@
-       <PathDelim Value="\"/>
-       <SearchPaths>
-         <OtherUnitFiles Value=".;Core\;Design\;FCL\;Protocols\;Security\;SuperCore\;System\"/>
-+        <IncludeFiles Value="$(ProjOutDir);FCL\"/>
-         <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
-       </SearchPaths>
-       <Parsing>
-@@ -20,6 +21,7 @@
-       </Parsing>
-       <Other>
-         <CompilerPath Value="$(CompPath)"/>
-+        <CompilerOptions Value="-Ur"/>
-       </Other>
-     </CompilerOptions>
-     <License Value="Duel License
+--- C:/fpcupdlbasetrunk/ccr/indy/Lib/System/IdWship6.pas	Tue Nov 01 13:46:24 2016
++++ C:/fpcupdlbasetrunk/ccr/indy/Lib/System/IdWship6.pas.new	Tue Nov 01 13:51:41 2016
+@@ -431,7 +431,7 @@
+   {$ENDIF}
+ 
+ var
+-  GIdIPv6FuncsAvailable: Boolean = False{$IFDEF HAS_DEPRECATED}{$IFDEF FPC};{$ENDIF} deprecated{$ENDIF};
++  GIdIPv6FuncsAvailable: Boolean = False{$IFDEF HAS_DEPRECATED} deprecated{$ENDIF};
+ 
+ function gaiErrorToWsaError(const gaiError: Integer): Integer;
+ 

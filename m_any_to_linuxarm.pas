@@ -125,6 +125,7 @@ const
   DirName='arm-linux';
 var
   AsFile: string;
+  BinPrefixTry:string;
 begin
   inherited;
 
@@ -138,19 +139,19 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    FBinUtilsPrefix:='arm-linux-';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    BinPrefixTry:='arm-linux-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Also allow for crossbinutils without prefix
   if not result then
   begin
-    FBinUtilsPrefix:='';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Also allow for hardfloat crossbinutils
@@ -158,25 +159,27 @@ begin
   begin
     if StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1 then
     begin
-      FBinUtilsPrefix:='arm-linux-gnueabihf-';
-      AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
+      BinPrefixTry:='arm-linux-gnueabihf-';
+      AsFile:=BinPrefixTry+'as'+GetExeExt;
       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
       // also check in the normal directory
       if not result then
         result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if result then FBinUtilsPrefix:=BinPrefixTry;
     end;
   end;
 
   // Also allow for android crossbinutils
   if not result then
   begin
-    FBinUtilsPrefix:='arm-linux-androideabi-';//standard eg in Android NDK 9
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    BinPrefixTry:='arm-linux-androideabi-';//standard eg in Android NDK 9
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   SearchBinUtilsInfo(result);
+
   if not result then
   begin
     {$ifdef mswindows}

@@ -4,6 +4,11 @@ program fpcupdeluxe;
 
 //{$APPTYPE GUI}
 
+// todo: check addition of -FL (linker path) in case of crossing for libraries) !!
+// todo: give info about the link that must be used to start Lazarus that is created by fpcupdeluxe !!
+// or make a button or popup or something for this link.
+// todo: add some form of help
+
 {$IFDEF LINUX}
   {$IFDEF FPC_CROSSCOMPILING}
     {$linklib libc_nonshared.a}
@@ -18,7 +23,7 @@ uses
   //cthreads,
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, fpcupdeluxemainform,
+  Forms, fpcupdeluxemainform, extrasettings,
   Classes, sysutils, strings,
   FileUtil, LazFileUtils,
   synautil, // for rpos ... could also use strutil
@@ -53,6 +58,7 @@ begin
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);
+  Application.CreateForm(TForm2, Form2);
   Application.Run;
 end.
 

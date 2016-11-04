@@ -1,47 +1,49 @@
 object Form1: TForm1
-  Left = 282
+  Left = 353
   Height = 580
-  Top = 140
-  Width = 1043
+  Top = 177
+  Width = 1046
   Anchors = []
   Caption = 'Form1'
   ClientHeight = 580
-  ClientWidth = 1043
+  ClientWidth = 1046
   OnClose = FormClose
   OnCreate = FormCreate
   OnResize = FormResize
   LCLVersion = '1.7'
   object ListBox1: TListBox
-    Left = 17
+    Left = 16
     Height = 152
-    Top = 32
+    Top = 64
     Width = 135
     ItemHeight = 0
+    ScrollWidth = 133
     TabOrder = 0
   end
   object Button1: TButton
-    Left = 16
-    Height = 54
-    Top = 461
-    Width = 136
+    Left = 0
+    Height = 29
+    Top = 496
+    Width = 162
     Anchors = [akTop, akLeft, akBottom]
-    Caption = 'Start regular fpcup'
+    Caption = 'Install/update FPC+Laz'
     OnClick = Button1Click
     TabOrder = 1
   end
   object ListBox2: TListBox
     Left = 17
     Height = 152
-    Top = 264
+    Top = 296
     Width = 135
     ItemHeight = 0
+    ScrollWidth = 133
     TabOrder = 2
   end
   inline SynEdit1: TSynEdit
-    Left = 336
-    Height = 483
-    Top = 32
-    Width = 694
+    Left = 368
+    Height = 384
+    Top = 64
+    Width = 665
     Anchors = [akTop, akLeft, akRight, akBottom]
     Color = clBlack
     Font.CharSet = ANSI_CHARSET
@@ -53,6 +55,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 3
+    OnMouseWheel = SynEdit1MouseWheel
     Gutter.AutoSize = False
     Gutter.Visible = False
     Gutter.Width = 55
@@ -489,11 +492,13 @@ object Form1: TForm1
     MouseTextActions = <>
     MouseSelActions = <>
     MaxLeftChar = 8096
+    MaxUndo = 0
     Options = [eoHideRightMargin, eoNoCaret, eoShowSpecialChars]
     Options2 = []
     VisibleSpecialChars = [vscSpace, vscTabAtLast]
     ReadOnly = True
-    RightEdge = 800
+    RightEdge = 8096
+    RightEdgeColor = clNone
     SelectedColor.BackPriority = 50
     SelectedColor.ForePriority = 50
     SelectedColor.FramePriority = 50
@@ -558,7 +563,7 @@ object Form1: TForm1
   object Label1: TLabel
     Left = 17
     Height = 18
-    Top = 8
+    Top = 40
     Width = 87
     Caption = 'FPC version'
     Font.CharSet = ANSI_CHARSET
@@ -572,7 +577,7 @@ object Form1: TForm1
   object Label2: TLabel
     Left = 17
     Height = 18
-    Top = 240
+    Top = 272
     Width = 109
     Caption = 'Lazarus version'
     Font.CharSet = ANSI_CHARSET
@@ -586,7 +591,7 @@ object Form1: TForm1
   object CheckVerbosity: TCheckBox
     Left = 16
     Height = 19
-    Top = 429
+    Top = 461
     Width = 62
     Caption = 'Verbose'
     Checked = True
@@ -594,60 +599,64 @@ object Form1: TForm1
     TabOrder = 4
   end
   object ListBox3: TListBox
-    Left = 160
+    Left = 168
     Height = 216
-    Top = 200
-    Width = 169
+    Top = 232
+    Width = 190
     Anchors = [akTop, akLeft, akBottom]
     ItemHeight = 0
     MultiSelect = True
+    ScrollWidth = 191
     Sorted = True
     TabOrder = 5
   end
   object Button2: TButton
-    Left = 160
-    Height = 28
-    Top = 488
-    Width = 169
+    Left = 168
+    Height = 29
+    Top = 496
+    Width = 189
     Anchors = [akLeft, akBottom]
     Caption = 'Install module(s) from list'
     OnClick = Button2Click
     TabOrder = 6
   end
   object Edit1: TEdit
-    Left = 160
+    Left = 17
     Height = 23
-    Top = 456
-    Width = 120
-    Anchors = [akLeft, akBottom]
-    OnChange = Edit1Change
+    Hint = 'Directory to install FPC and Lazarus'
+    Top = 4
+    Width = 208
+    Font.Color = clRed
+    ParentFont = False
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 7
   end
   object Button3: TButton
-    Left = 288
+    Left = 232
     Height = 23
-    Top = 456
-    Width = 41
-    Anchors = [akLeft, akBottom]
-    Caption = 'DirSel'
+    Top = 4
+    Width = 126
+    Caption = 'InstallDir select'
     OnClick = Button3Click
     TabOrder = 8
   end
   object Button4: TButton
-    Left = 160
-    Height = 24
-    Top = 424
-    Width = 169
+    Left = 168
+    Height = 28
+    Top = 461
+    Width = 120
     Anchors = [akLeft, akBottom]
     Caption = 'Clear selection'
     OnClick = Button4Click
     TabOrder = 9
   end
   object RadioGroup1: TRadioGroup
-    Left = 160
-    Height = 120
-    Top = 24
-    Width = 80
+    Left = 168
+    Height = 129
+    Hint = 'Double click to select location for cross-tools'
+    Top = 56
+    Width = 92
     AutoFill = True
     Caption = 'CPU'
     ChildSizing.LeftRightSpacing = 6
@@ -657,8 +666,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 100
-    ClientWidth = 76
+    ClientHeight = 109
+    ClientWidth = 88
     Items.Strings = (
       'i386'
       'x86_64'
@@ -667,13 +676,17 @@ object Form1: TForm1
       'jvm'
     )
     OnClick = RadioGroup1Click
+    OnDblClick = CrossTargetSelectDblClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 10
   end
   object RadioGroup2: TRadioGroup
-    Left = 249
-    Height = 120
-    Top = 24
-    Width = 80
+    Left = 260
+    Height = 129
+    Hint = 'Double click to select location for cross-tools'
+    Top = 56
+    Width = 97
     AutoFill = True
     Caption = 'OS'
     ChildSizing.LeftRightSpacing = 6
@@ -683,32 +696,35 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 100
-    ClientWidth = 76
+    ClientHeight = 109
+    ClientWidth = 93
     Items.Strings = (
-      'win32'
+      'windows'
       'linux'
       'android'
       'wince'
       'java'
     )
     OnClick = RadioGroup2Click
+    OnDblClick = CrossTargetSelectDblClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 11
   end
   object Button5: TButton
-    Left = 160
+    Left = 168
     Height = 36
-    Top = 148
-    Width = 169
+    Top = 192
+    Width = 190
     Caption = 'Install cross-compiler'
     OnClick = Button5Click
     TabOrder = 12
   end
   object RealFPCURL: TEdit
-    Left = 338
+    Left = 368
     Height = 23
     Top = 4
-    Width = 343
+    Width = 313
     ReadOnly = True
     TabOrder = 13
   end
@@ -716,36 +732,38 @@ object Form1: TForm1
     Left = 687
     Height = 23
     Top = 4
-    Width = 343
+    Width = 345
     ReadOnly = True
     TabOrder = 14
   end
   object Button6: TButton
-    Left = 16
-    Height = 28
-    Top = 192
-    Width = 136
-    Caption = 'Start fpcup, fpc only'
+    Left = 0
+    Height = 29
+    Top = 232
+    Width = 161
+    Caption = 'Install/update FPC only'
     OnClick = Button6Click
     TabOrder = 15
   end
   object Panel1: TPanel
     Left = 14
-    Height = 56
-    Top = 520
-    Width = 1015
+    Height = 44
+    Top = 532
+    Width = 1018
     Align = alBottom
+    AutoSize = True
     BorderSpacing.Left = 14
     BorderSpacing.Right = 14
     BorderSpacing.Bottom = 4
     BevelInner = bvLowered
-    ClientHeight = 56
-    ClientWidth = 1015
+    ClientHeight = 44
+    ClientWidth = 1018
     TabOrder = 16
     object TrunkBtn: TBitBtn
-      Left = 8
+      Left = 2
       Height = 40
-      Top = 8
+      Hint = 'Will install/update trunk version of both FPC and Lazarus'
+      Top = 2
       Width = 98
       Caption = 'Trunk'
       Glyph.Data = {
@@ -881,12 +899,15 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 0
     end
     object NPBtn: TBitBtn
-      Left = 112
+      Left = 106
       Height = 40
-      Top = 8
+      Hint = 'Will install/update NewPascal and the mORMot for FPC'
+      Top = 2
       Width = 122
       Caption = 'NewPascal'
       Glyph.Data = {
@@ -1022,12 +1043,15 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 1
     end
     object FixesBtn: TBitBtn
-      Left = 240
+      Left = 234
       Height = 40
-      Top = 8
+      Hint = 'Will install/update current fixes versions of both FPC and Lazarus'
+      Top = 2
       Width = 90
       Caption = 'Fixes'
       Glyph.Data = {
@@ -1195,13 +1219,16 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 2
     end
     object StableBtn: TBitBtn
-      Left = 336
+      Left = 330
       Height = 40
-      Top = 8
-      Width = 90
+      Hint = 'Will install/update stable versions of both FPC and Lazarus'
+      Top = 2
+      Width = 94
       Caption = 'Stable'
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
@@ -1336,12 +1363,15 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 3
     end
     object OldBtn: TBitBtn
       Left = 432
       Height = 40
-      Top = 8
+      Hint = 'Will install/update FPC 2.6.4 and Lazarus 1.4'
+      Top = 2
       Width = 128
       Caption = '2.6.4 + 1.4'
       Glyph.Data = {
@@ -1477,14 +1507,17 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 4
     end
     object DinoBtn: TBitBtn
       Left = 568
       Height = 40
-      Top = 8
-      Width = 128
-      Caption = '2.0.2 + 0.9.4'
+      Hint = 'Will install/update prehistoric FPC and Lazarus'
+      Top = 2
+      Width = 136
+      Caption = '2.0.2+0.9.16'
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
         2000000000000010000064000000640000000000000000000000000000000000
@@ -1618,13 +1651,16 @@ object Form1: TForm1
         FE1D0DADFE040000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 5
     end
     object FeaturesBtn: TBitBtn
-      Left = 704
+      Left = 712
       Height = 40
-      Top = 8
-      Width = 96
+      Hint = 'Will install/update trunk version of both FPC and Lazarus with lots of extra packages'
+      Top = 2
+      Width = 110
       Caption = 'Trunk ++'
       Glyph.Data = {
         36100000424D3610000000000000360000002800000020000000200000000100
@@ -1759,12 +1795,15 @@ object Form1: TForm1
         25002A2827032D2B281300000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 6
     end
     object mORMotBtn: TBitBtn
-      Left = 808
+      Left = 832
       Height = 40
-      Top = 8
+      Hint = 'Get the mORMot for FPC'
+      Top = 2
       Width = 112
       Caption = 'mORMot'
       Glyph.Data = {
@@ -1900,12 +1939,60 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = QuickBtnClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 7
     end
+  end
+  object StatusMessage: TEdit
+    Left = 368
+    Height = 23
+    Top = 35
+    Width = 665
+    Anchors = [akTop, akLeft, akRight]
+    ReadOnly = True
+    TabOrder = 17
+    Text = 'Sitting and waiting'
+  end
+  object Memo1: TMemo
+    Left = 368
+    Height = 68
+    Hint = 'Will show error'
+    Top = 457
+    Width = 665
+    Anchors = [akLeft, akRight, akBottom]
+    ParentShowHint = False
+    ReadOnly = True
+    ScrollBars = ssAutoVertical
+    ShowHint = True
+    TabOrder = 18
+  end
+  object Button7: TButton
+    Left = 294
+    Height = 28
+    Top = 461
+    Width = 63
+    Caption = 'Setup+'
+    OnClick = Button7Click
+    TabOrder = 19
+  end
+  object CheckRepo: TCheckBox
+    Left = 96
+    Height = 19
+    Hint = 'Download whole repository, or only latest files'
+    Top = 461
+    Width = 47
+    Anchors = [akLeft, akBottom]
+    Caption = 'Repo'
+    Checked = True
+    ParentShowHint = False
+    ShowHint = True
+    State = cbChecked
+    TabOrder = 20
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
     left = 72
-    top = 48
+    top = 72
   end
 end

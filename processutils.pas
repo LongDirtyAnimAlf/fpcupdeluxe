@@ -154,6 +154,8 @@ function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; 
 // Runs command, returns result code. Negative codes are processutils internal error codes
 // PrependPath is prepended to existing path. If empty, keep current path
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean; PrependPath: string): integer; overload;
+// Don't process comamndline
+function ExecutePlainCommand(Commandline: string; var Output: string; Verbose: boolean): integer;
 // Writes output to console
 procedure DumpConsole(Sender:TProcessEx; output:string);
 
@@ -161,14 +163,9 @@ procedure DumpConsole(Sender:TProcessEx; output:string);
 
 implementation
 
-{$ifndef CONSOLE}
+{$ifdef LCL}
 uses
-  Forms;
-  {$IFDEF MSWINDOWS}
-  //Windows, Messages;
-  {$ELSE}
-  //LCLIntf, LMessages, LCLType;
-  {$ENDIF}
+  Forms,Controls;
 {$endif}
 
 { TProcessEx }
@@ -241,30 +238,29 @@ begin
 end;
 
 procedure TProcessEx.Execute;
-{$ifdef CONSOLEEE}
+{$ifdef LCL}
 var
-  Msg: TMsg;
+  i:integer;
 {$endif}
-
-  function ReadOutput: boolean;
-  const
-    BufSize = 4096;
-  var
-    Buffer: array[0..BufSize - 1] of byte;
-    ReadBytes: integer;
+function ReadOutput: boolean;
+const
+  BufSize = 4096;
+var
+  Buffer: array[0..BufSize - 1] of byte;
+  ReadBytes: integer;
+begin
+  Result := False;
+  while Output.NumBytesAvailable > 0 do
   begin
-    Result := False;
-    while Output.NumBytesAvailable > 0 do
-    begin
-      ReadBytes := {%H-}Output.Read(Buffer, BufSize);
-      FOutStream.Write(Buffer, ReadBytes);
-      if Assigned(FOnOutput) then
-        FOnOutput(Self,copy(pchar(@buffer[0]),1,ReadBytes));
-      if Assigned(FOnOutputM) then
-        FOnOutputM(Self,copy(pchar(@buffer[0]),1,ReadBytes));
-      Result := True;
-    end;
+    ReadBytes := {%H-}Output.Read(Buffer, BufSize);
+    FOutStream.Write(Buffer, ReadBytes);
+    if Assigned(FOnOutput) then
+      FOnOutput(Self,copy(pchar(@buffer[0]),1,ReadBytes));
+    if Assigned(FOnOutputM) then
+      FOnOutputM(Self,copy(pchar(@buffer[0]),1,ReadBytes));
+    Result := True;
   end;
+end;
 
 begin
   try
@@ -300,27 +296,28 @@ begin
           exit;
         end;
       end;
+      {$ifdef LCL}
+      i:=0;
+      {$endif}
       inherited Execute;
       while Running do
       begin
         if not ReadOutput then
         begin
-          {$ifndef CONSOLE}
+          {$ifdef LCL}
           Application.ProcessMessages;
           Sleep(10);
-          {
-          while PeekMessage(Msg,0,0,0,0) do
-          begin
-            GetMessage(Msg,0,0,0);
-            TranslateMessage(Msg);
-            DispatchMessage(Msg);
-          end;
-          }
+          // set cursor after 1 second of execution time
+          if (i<100) then Inc(i);
+          if (i=99) then Application.MainForm.Cursor:=crHourGlass;
           {$else}
           Sleep(100);
           {$endif}
         end;
       end;
+      {$ifdef LCL}
+      Application.MainForm.Cursor:=crDefault;
+      {$endif}
       ReadOutput;
 
       FExitStatus:=inherited ExitStatus;
@@ -352,7 +349,7 @@ end;
 constructor TProcessEx.Create(AOwner : TComponent);
 begin
   inherited;
-  {$ifndef CONSOLE}
+  {$ifdef LCL}
   Self.ShowWindow:=swoHIDE;
   {$endif}
   FExceptionInfoStrings:= TstringList.Create;
@@ -572,6 +569,32 @@ begin
     {$ENDIF DEBUGCONSOLE}
     PE.Execute;
 
+    Output:=PE.OutputString;
+    Result:=PE.ExitStatus;
+    {$IFDEF DEBUGCONSOLE}
+    writeln('ExecuteCommandInDir: exit status: '+inttostr(Result));
+    {$ENDIF DEBUGCONSOLE}
+  finally
+    PE.Free;
+  end;
+end;
+
+function ExecutePlainCommand(Commandline: string; var Output: string; Verbose: boolean): integer;
+var
+  PE:TProcessEx;
+  s:string;
+begin
+  PE:=TProcessEx.Create(nil);
+  try
+    PE.CommandLine:=Commandline;
+    PE.ShowWindow := swoHIDE;
+    if Verbose then
+      PE.OnOutput:=@DumpConsole;
+    {$IFDEF DEBUGCONSOLE}
+    writeln('ExecuteCommandInDir: executable '+PE.Executable);
+    writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
+    {$ENDIF DEBUGCONSOLE}
+    PE.Execute;
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
     {$IFDEF DEBUGCONSOLE}

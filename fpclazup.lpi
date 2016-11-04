@@ -26,7 +26,7 @@
     <MacroValues Count="1">
       <Macro1 Name="LCLWidgetType" Value="nogui"/>
     </MacroValues>
-    <BuildModes Count="8">
+    <BuildModes Count="7">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <MacroValues Count="1">
@@ -40,7 +40,7 @@
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;C:\NewPascal2\fpc\utils\fppkg\lnet\"/>
+            <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpclazup\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Conditionals Value="if TargetOS = 'darwin' then begin
@@ -194,43 +194,7 @@ end;"/>
           </Other>
         </CompilerOptions>
       </Item5>
-      <Item6 Name="androidarm">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="bin\$(TargetCPU)-$(TargetOS)\fpclazup_android_arm"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser"/>
-            <UnitOutputDirectory Value="libfpclazup\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <SmartLinkUnit Value="True"/>
-            <TargetCPU Value="arm"/>
-            <TargetOS Value="android"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
-              <UseExternalDbgSyms Value="True"/>
-            </Debugging>
-            <LinkSmart Value="True"/>
-          </Linking>
-          <Other>
-            <WriteFPCLogo Value="False"/>
-            <ExecuteBefore>
-              <CompileReasons Run="False"/>
-            </ExecuteBefore>
-          </Other>
-        </CompilerOptions>
-      </Item6>
-      <Item7 Name="linux64">
+      <Item6 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -268,8 +232,8 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="linuxaarch64">
+      </Item6>
+      <Item7 Name="linuxaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -307,7 +271,7 @@ end;"/>
             </ExecuteBefore>
           </Other>
         </CompilerOptions>
-      </Item8>
+      </Item7>
       <SharedMatrixOptions Count="1">
         <Item1 ID="233755810855" Modes="Default,Debug,win32" Type="IDEMacro" MacroName="LCLWidgetType" Value="nogui"/>
       </SharedMatrixOptions>
@@ -320,7 +284,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--installdir=&quot;C:\NewPascallll\&quot; --fpcURL=&quot;trunk&quot; --lazURL=&quot;trunk&quot; --only=&quot;mormot&quot;"/>
+        <CommandLineParams Value="--installdir=&quot;C:\NewPascallll\&quot; --fpcURL=&quot;trunk&quot; --lazURL=&quot;trunk&quot;"/>
       </local>
     </RunParams>
     <RequiredPackages Count="2">

@@ -44,8 +44,6 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
 
 implementation
-const
-  CrossModuleName='Tany_linux386';
 
 type
 
@@ -98,6 +96,7 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    '-FL'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {new : needed in case of compiling a library}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
   end;
@@ -116,6 +115,7 @@ const
   DirName='i386-linux';
 var
   AsFile: string;
+  BinPrefixTry: string;
 begin
   inherited;
 
@@ -124,16 +124,6 @@ begin
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-  // Also allow for (cross)binutils without prefix
-  if not result then
-  begin
-    FBinUtilsPrefix:='';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-  end;
 
   {$IFDEF UNIX}
   if not result then { try /usr/local/bin/<dirprefix>/ }
@@ -153,7 +143,37 @@ begin
       AsFile);
   {$ENDIF}
 
+  // Also allow for (cross)binutils without prefix
+  if not result then
+  begin
+    BinPrefixTry:='powerpc-aix-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+    {$IFDEF UNIX}
+    if not result then { try /usr/local/bin/<dirprefix>/ }
+      result:=SearchBinUtil('/usr/local/bin/'+DirName,
+        AsFile);
+
+    if not result then { try /usr/local/bin/ }
+      result:=SearchBinUtil('/usr/local/bin',
+        AsFile);
+
+    if not result then { try /usr/bin/ }
+      result:=SearchBinUtil('/usr/bin',
+        AsFile);
+
+    if not result then { try /bin/ }
+      result:=SearchBinUtil('/bin',
+        AsFile);
+    {$ENDIF}
+
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   SearchBinUtilsInfo(result);
+
   if result then
   begin
     // Configuration snippet for FPC

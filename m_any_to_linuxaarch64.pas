@@ -37,8 +37,6 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
 
 implementation
-const
-  CrossModuleName='Tany_linuxaarch64';
 
 type
 
@@ -109,6 +107,7 @@ const
   DirName='aarch64-linux';
 var
   AsFile: string;
+  BinPrefixTry: string;
 begin
   inherited;
 
@@ -117,16 +116,6 @@ begin
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-  // Also allow for (cross)binutils without prefix
-  if not result then
-  begin
-    FBinUtilsPrefix:='';
-    AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-  end;
 
   {$IFDEF UNIX}
   if not result then { try /usr/local/bin/<dirprefix>/ }
@@ -146,7 +135,36 @@ begin
       AsFile);
   {$ENDIF}
 
+  // Also allow for (cross)binutils without prefix
+  if not result then
+  begin
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+    {$IFDEF UNIX}
+    if not result then { try /usr/local/bin/<dirprefix>/ }
+      result:=SearchBinUtil('/usr/local/bin/'+DirName,
+        AsFile);
+
+    if not result then { try /usr/local/bin/ }
+      result:=SearchBinUtil('/usr/local/bin',
+        AsFile);
+
+    if not result then { try /usr/bin/ }
+      result:=SearchBinUtil('/usr/bin',
+        AsFile);
+
+    if not result then { try /bin/ }
+      result:=SearchBinUtil('/bin',
+        AsFile);
+    {$ENDIF}
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   SearchBinUtilsInfo(result);
+
   if result then
   begin
     // Configuration snippet for FPC

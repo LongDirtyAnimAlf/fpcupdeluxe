@@ -20,7 +20,7 @@
     </i18n>
     <BuildModes Count="10">
       <Item1 Name="Default" Default="True"/>
-      <Item2 Name="Linuxi386">
+      <Item2 Name="linuxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -301,7 +301,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="2">
+    <Units Count="3">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -313,6 +313,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit1>
+      <Unit2>
+        <Filename Value="extrasettings.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form2"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit2>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

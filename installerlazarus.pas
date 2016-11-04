@@ -55,9 +55,17 @@ const
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
 
+
+    'Declare oldlazarus;' +
+    'Cleanmodule lazarus;' + 'Getmodule lazarus;' + 'Buildmodule lazarus;' +
+    'ConfigModule lazarus;' +
+    'Exec CreateLazarusScript;' + 'End;' +
+
+    {
     'Declare lazscripttest;' +
     'Exec CreateLazarusScript;' +
     'End;' +
+    }
 
     'Declare LazCleanAndBuildOnly;' +
     'Cleanmodule lazarus;' +
@@ -656,8 +664,14 @@ begin
       ExcludeTrailingPathDelimiter(FSVNDirectory) + PathSeparator + FBaseDirectory, false, false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
-    SetPath(FBinPath + PathSeparator + PlainBinPath,
-      true, false);
+    SetPath(FBinPath+PathSeparator+
+    {$IFDEF DARWIN}
+    // pwd is located in /bin ... the makefile needs it !!
+    // tools are located in /usr/bin ... the makefile needs it !!
+    // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
+    '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
+    {$ENDIF}
+    PlainBinPath, true, false);
     {$ENDIF UNIX}
   end;
   InitDone := Result;

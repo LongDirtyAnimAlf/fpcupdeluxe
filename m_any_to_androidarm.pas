@@ -129,6 +129,9 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName);
 
   // search for a library provide by a standard android libraries install
+
+  //C:\Users\<username>\AppData\Local\Android\sdk
+
   if not result then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
@@ -153,6 +156,15 @@ begin
           begin
             infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
+          // check libs in userdir\AppData\Local\Andoid
+          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
+                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          result:=DirectoryExists(FLibsPath);
+          if not result then
+          begin
+            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+          end else break;
+
         end;
       end else break;
     end;
@@ -160,7 +172,6 @@ begin
 
   {$IFDEF MSWINDOWS}
   // find Delphi android libs
-
   if not result then
   begin
     infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
