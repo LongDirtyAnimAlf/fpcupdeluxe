@@ -109,7 +109,8 @@ var
   SortedModules: TStringList;
   i:integer;
 begin
-  Self.Caption:='Lazarus and FPC installer and updater based on '+RevisionStr+', v'+versiondate;
+  Self.Caption:='Lazarus and FPC installer and updater based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
+                lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
 
   sStatus:='Sitting and waiting';
 

@@ -471,6 +471,16 @@ begin
           CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
+
+        {
+        if (CrossInstaller.TargetOS='darwin') then
+        begin
+          CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\bsd');
+          CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\inc');
+          CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\unix');
+        end;
+        }
+
         if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
            CrossOptions:='CROSSOPT=';
         for i:=0 to CrossInstaller.CrossOpt.Count-1 do
@@ -481,6 +491,8 @@ begin
            ProcessEx.Parameters.Add(CrossOptions);
         // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
+
+
         try
           if CrossOptions='' then
              infoln('Running Make all (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)

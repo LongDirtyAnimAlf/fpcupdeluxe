@@ -1,6 +1,6 @@
 procedure WriteVersion;
 begin
-  writeln('Version: based on commit '+RevisionStr+' ('+versiondate+')');
+  writeln('Version: based on commit fpcup'+RevisionStr+' ('+versiondate+')');
   writeln('Build date: '+{$INCLUDE %DATE%}+' '+{$INCLUDE %TIME%});
   writeln('Compiled for CPU: '+lowercase({$INCLUDE %FPCTARGETCPU%})+' on '+lowercase({$INCLUDE %FPCTARGETOS%}));
   writeln('');

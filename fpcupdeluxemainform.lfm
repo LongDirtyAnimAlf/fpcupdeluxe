@@ -18,7 +18,7 @@ object Form1: TForm1
     Width = 135
     ItemHeight = 0
     ScrollWidth = 133
-    TabOrder = 0
+    TabOrder = 2
   end
   object Button1: TButton
     Left = 0
@@ -28,7 +28,7 @@ object Form1: TForm1
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Install/update FPC+Laz'
     OnClick = Button1Click
-    TabOrder = 1
+    TabOrder = 4
   end
   object ListBox2: TListBox
     Left = 17
@@ -37,7 +37,7 @@ object Form1: TForm1
     Width = 135
     ItemHeight = 0
     ScrollWidth = 133
-    TabOrder = 2
+    TabOrder = 3
   end
   inline SynEdit1: TSynEdit
     Left = 368
@@ -54,7 +54,7 @@ object Form1: TForm1
     Font.Quality = fqDraft
     ParentColor = False
     ParentFont = False
-    TabOrder = 3
+    TabOrder = 7
     OnMouseWheel = SynEdit1MouseWheel
     Gutter.AutoSize = False
     Gutter.Visible = False
@@ -596,7 +596,7 @@ object Form1: TForm1
     Caption = 'Verbose'
     Checked = True
     State = cbChecked
-    TabOrder = 4
+    TabOrder = 5
   end
   object ListBox3: TListBox
     Left = 168
@@ -608,7 +608,7 @@ object Form1: TForm1
     MultiSelect = True
     ScrollWidth = 191
     Sorted = True
-    TabOrder = 5
+    TabOrder = 8
   end
   object Button2: TButton
     Left = 168
@@ -618,7 +618,7 @@ object Form1: TForm1
     Anchors = [akLeft, akBottom]
     Caption = 'Install module(s) from list'
     OnClick = Button2Click
-    TabOrder = 6
+    TabOrder = 9
   end
   object Edit1: TEdit
     Left = 17
@@ -630,7 +630,7 @@ object Form1: TForm1
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 7
+    TabOrder = 0
   end
   object Button3: TButton
     Left = 232
@@ -639,7 +639,7 @@ object Form1: TForm1
     Width = 126
     Caption = 'InstallDir select'
     OnClick = Button3Click
-    TabOrder = 8
+    TabOrder = 1
   end
   object Button4: TButton
     Left = 168
@@ -649,7 +649,7 @@ object Form1: TForm1
     Anchors = [akLeft, akBottom]
     Caption = 'Clear selection'
     OnClick = Button4Click
-    TabOrder = 9
+    TabOrder = 10
   end
   object RadioGroup1: TRadioGroup
     Left = 168
@@ -679,7 +679,7 @@ object Form1: TForm1
     OnDblClick = CrossTargetSelectDblClick
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 10
+    TabOrder = 11
   end
   object RadioGroup2: TRadioGroup
     Left = 260
@@ -709,7 +709,7 @@ object Form1: TForm1
     OnDblClick = CrossTargetSelectDblClick
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 11
+    TabOrder = 12
   end
   object Button5: TButton
     Left = 168
@@ -718,7 +718,7 @@ object Form1: TForm1
     Width = 190
     Caption = 'Install cross-compiler'
     OnClick = Button5Click
-    TabOrder = 12
+    TabOrder = 13
   end
   object RealFPCURL: TEdit
     Left = 368
@@ -726,7 +726,7 @@ object Form1: TForm1
     Top = 4
     Width = 313
     ReadOnly = True
-    TabOrder = 13
+    TabOrder = 14
   end
   object RealLazURL: TEdit
     Left = 687
@@ -734,7 +734,7 @@ object Form1: TForm1
     Top = 4
     Width = 345
     ReadOnly = True
-    TabOrder = 14
+    TabOrder = 15
   end
   object Button6: TButton
     Left = 0
@@ -743,7 +743,7 @@ object Form1: TForm1
     Width = 161
     Caption = 'Install/update FPC only'
     OnClick = Button6Click
-    TabOrder = 15
+    TabOrder = 16
   end
   object Panel1: TPanel
     Left = 14
@@ -758,7 +758,7 @@ object Form1: TForm1
     BevelInner = bvLowered
     ClientHeight = 44
     ClientWidth = 1018
-    TabOrder = 16
+    TabOrder = 6
     object TrunkBtn: TBitBtn
       Left = 2
       Height = 40
@@ -1972,6 +1972,7 @@ object Form1: TForm1
     Height = 28
     Top = 461
     Width = 63
+    Anchors = [akLeft, akBottom]
     Caption = 'Setup+'
     OnClick = Button7Click
     TabOrder = 19
@@ -1982,7 +1983,6 @@ object Form1: TForm1
     Hint = 'Download whole repository, or only latest files'
     Top = 461
     Width = 47
-    Anchors = [akLeft, akBottom]
     Caption = 'Repo'
     Checked = True
     ParentShowHint = False

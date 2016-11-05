@@ -8,8 +8,7 @@
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
-        <UsageCount Value="153"/>
+        <UsageCount Value="158"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -18,8 +17,11 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <UsageCount Value="153"/>
+        <TopLine Value="103"/>
+        <CursorPos X="82" Y="113"/>
+        <UsageCount Value="158"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -31,7 +33,7 @@
         <ResourceBaseClass Value="Form"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="9" Y="17"/>
-        <UsageCount Value="52"/>
+        <UsageCount Value="57"/>
       </Unit2>
       <Unit3>
         <Filename Value="fpcuplprbase.inc"/>
@@ -64,15 +66,15 @@
         <Filename Value="installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="184"/>
-        <CursorPos X="18" Y="208"/>
-        <UsageCount Value="59"/>
+        <TopLine Value="376"/>
+        <CursorPos X="6" Y="412"/>
+        <UsageCount Value="60"/>
       </Unit7>
       <Unit8>
         <Filename Value="processutils.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="336"/>
-        <CursorPos X="14" Y="352"/>
+        <TopLine Value="132"/>
+        <CursorPos X="10" Y="147"/>
         <UsageCount Value="23"/>
       </Unit8>
       <Unit9>
@@ -256,7 +258,9 @@
         <Filename Value="installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="62"/>
+        <TopLine Value="1567"/>
+        <CursorPos Y="1484"/>
+        <UsageCount Value="63"/>
       </Unit33>
       <Unit34>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\winapih.inc"/>
@@ -497,14 +501,14 @@
       <Unit65>
         <Filename Value="fpcup.ini"/>
         <EditorIndex Value="2"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="68"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit65>
       <Unit66>
         <Filename Value="settings.ini"/>
         <EditorIndex Value="3"/>
-        <UsageCount Value="65"/>
+        <UsageCount Value="68"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit66>
@@ -560,9 +564,9 @@
       <Unit74>
         <Filename Value="gitclient.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="109"/>
-        <CursorPos X="25" Y="124"/>
-        <UsageCount Value="4"/>
+        <TopLine Value="186"/>
+        <CursorPos X="48" Y="199"/>
+        <UsageCount Value="11"/>
       </Unit74>
       <Unit75>
         <Filename Value="svnclient.pas"/>
@@ -574,8 +578,8 @@
       <Unit76>
         <Filename Value="repoclient.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="195"/>
-        <CursorPos X="36" Y="221"/>
+        <TopLine Value="56"/>
+        <CursorPos X="5" Y="60"/>
         <UsageCount Value="11"/>
       </Unit76>
       <Unit77>
@@ -1136,27 +1140,11 @@
         <UsageCount Value="12"/>
       </Unit155>
     </Units>
-    <JumpHistory Count="5" HistoryIndex="4">
+    <JumpHistory Count="1">
       <Position1>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="650" TopLine="620"/>
+        <Caret Line="635" TopLine="628"/>
       </Position1>
-      <Position2>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="634" Column="22" TopLine="627"/>
-      </Position2>
-      <Position3>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="103" Column="8" TopLine="88"/>
-      </Position3>
-      <Position4>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="625" Column="54" TopLine="616"/>
-      </Position4>
-      <Position5>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="46" Column="33" TopLine="33"/>
-      </Position5>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>
