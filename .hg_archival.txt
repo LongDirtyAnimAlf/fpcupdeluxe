@@ -1,5 +1,0 @@
-repo: 27b6f8954bd33fb7e3564136b39c258a4c9a8878
-node: b2d024f1a6d2c378585c8114866f6fa3a82fa3f3
-branch: default
-latesttag: processutils_bug_on_armhf
-latesttagdistance: 71

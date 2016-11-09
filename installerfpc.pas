@@ -284,6 +284,22 @@ begin
     FindCloseUTF8(FileInfo);
   end;
 
+  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator;
+  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        if (FileInfo.Attr and faDirectory) = faDirectory then
+        begin
+          DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'units'+DirectorySeparator+aArch);
+          RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+    FindCloseUTF8(FileInfo);
+  end;
+
   // for (very) old versions of FPC : fcl and fv directories
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fcl'+DirectorySeparator;
   if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
@@ -420,7 +436,16 @@ begin
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
 
-        // Make all
+        {$ifdef MSWINDOWS}
+        if (CrossInstaller.TargetOS='darwin') then
+        begin
+          // make use of osxcross !!
+          SetPath('c:\cygwin\bin;C:\cygwin\opt\osxcross\target\bin',false,true);
+          //FMakeDir:='c:\cygwin\bin';
+          //FMake:='';
+        end;
+        {$endif}
+
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
         ProcessEx.Parameters.Clear;
@@ -458,7 +483,10 @@ begin
           end;
         end;
         if CrossInstaller.LibsPath<>''then
+        begin
            Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+           Options:=Options+' -Xr'+CrossInstaller.LibsPath;
+        end;
 
         if (CrossInstaller.TargetOS='android') then
         begin
@@ -472,14 +500,15 @@ begin
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
 
-        {
+        {$ifdef MSWINDOWS}
         if (CrossInstaller.TargetOS='darwin') then
         begin
+          // strange, but needed ... must investigate further.
           CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\bsd');
           CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\inc');
           CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\unix');
         end;
-        }
+        {$endif}
 
         if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
            CrossOptions:='CROSSOPT=';
@@ -491,7 +520,7 @@ begin
            ProcessEx.Parameters.Add(CrossOptions);
         // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
-
+        //ProcessEx.Parameters.Add('OPT=-va '+Options);
 
         try
           if CrossOptions='' then
@@ -510,7 +539,9 @@ begin
         end;
       finally
         // Return path to previous state
-        if CrossInstaller.BinUtilsPathInPath then
+        if (CrossInstaller.BinUtilsPathInPath)
+           {$ifdef MSWINDOWS}OR (CrossInstaller.TargetOS='darwin') {$endif}
+        then
         begin
           SetPath(OldPath,false,false);
         end;
@@ -1658,6 +1689,8 @@ begin
   IntermediateCompiler:='intermediate_'+GetCompilerName(aCPU);
   infoln('TFPCInstaller: building module '+ModuleName+'...',etInfo);
 
+  FSVNClient.ModuleName:=ModuleName;
+
   infoln('We have a FPC source (@ '+FBaseDirectory+') with version: '+GetCompilerVersionFromSource(FBaseDirectory),etInfo);
   RequiredBootstrapVersion:=GetBootstrapCompilerVersionFromSource(FBaseDirectory);
   if RequiredBootstrapVersion='0.0.0' then
@@ -1787,39 +1820,39 @@ begin
     ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' info ' + BootstrapDirectory, Output, FVerbose);
     if (ReturnCode <> 0) then
     begin
-      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + BootstrapDirectory, Output, FVerbose);
+      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + BootstrapDirectory, Output, FVerbose);
       ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' info ' + BootstrapDirectory, Output, FVerbose);
     end;
 
     s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
     if (ReturnCode = 0)
-        then ICSVNCommand:='update'
-        else ICSVNCommand:='checkout --depth=files ' + s;
+        then ICSVNCommand:='update --non-interactive --quiet '
+        else ICSVNCommand:='checkout --non-interactive --quiet --depth=files ' + s;
 
     ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ' + ICSVNCommand + ' ' + BootstrapDirectory, Output, FVerbose);
     if (ReturnCode <> 0) then
     begin
       // try once again, after a cleanup
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + BootstrapDirectory, Output, FVerbose);
+      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + BootstrapDirectory, Output, FVerbose);
       if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ' + ICSVNCommand + ' ' + BootstrapDirectory, Output, FVerbose);
     end;
 
     // get compiler source
-    if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+    if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
     // try once again
     if (ReturnCode <> 0) then
     begin
-      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', Output, FVerbose);
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', Output, FVerbose);
+      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
     end;
 
     // get rtl source
-    if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
+    if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
     // try once again
     if (ReturnCode <> 0) then
     begin
-      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', Output, FVerbose);
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
+      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', Output, FVerbose);
+      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
     end;
 
     if (ReturnCode = 0) then
@@ -2151,7 +2184,10 @@ begin
       // Need to add appropriate library search path
       // where it is e.g /usr/lib/arm-linux-gnueabihf...
       Writeln(TxtFile,'# library search path');
-      Write(TxtFile,'-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu'+';'+GetGCCDirectory);
+      //Write(TxtFile,'-Fl/lib'+';'+'/usr/lib');
+      Write(TxtFile,'-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu');
+      Write(TxtFile,';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu');
+      //Write(TxtFile,';'+'/usr/lib/'+aCPU+'-'+aOS+'-gnu');
       {$IFDEF cpuarm}
       {$IFDEF cpuarmhf}
       Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabihf');
@@ -2159,6 +2195,7 @@ begin
       Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabi');
       {$ENDIF cpuarmhf}
       {$ENDIF cpuarm}
+      Write(TxtFile,';'+GetGCCDirectory);
       Writeln;
       {$ENDIF UNIX}
       CloseFile(TxtFile);

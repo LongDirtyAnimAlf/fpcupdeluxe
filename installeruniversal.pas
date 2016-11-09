@@ -1101,6 +1101,7 @@ begin
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FGitClient.DesiredRevision:=PinRevision;
+        FGitClient.ModuleName:=ModuleName;
         FGitClient.Verbose:=FVerbose;
         FGitClient.ExportOnly:=FExportOnly;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
@@ -1131,10 +1132,11 @@ begin
         Pass:=GetValue('Password',sl);
         if PinRevision<>'' then
           FSVNClient.DesiredRevision:=PinRevision;
+        FSVNClient.ModuleName:=ModuleName;
         FSVNClient.Verbose:=FVerbose;
         FSVNClient.ExportOnly:=FExportOnly;
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
-        SourceOK:=result;
+        SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FBaseDirectory+'.svn')) OR FExportOnly);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1159,6 +1161,7 @@ begin
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FHGClient.DesiredRevision:=PinRevision;
+        FHGClient.ModuleName:=ModuleName;
         FHGClient.Verbose:=FVerbose;
         FHGClient.ExportOnly:=FExportOnly;
         result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
@@ -1255,15 +1258,14 @@ begin
 
           ExtensionName:=fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(RemoteURL));
 
-          // we have an archive from github ... this archive adds an extra path (name-master) when unpacking the master.zip
+          // we have an archive from github ... this archive adds an extra path (name-branch) when unpacking the master.zip
           // so replace package path and package installer with the right path !!
 
           PackageName:=GetValue('Name',sl);
           if Pos('/'+PackageName+'/',RemoteURL)=0 then
           begin
-            writeln('ERROR: Make new name');
             // we must build the name from ArchiveURL ... :-(
-            // /..../bgracontrols/archive/master.zip
+            // /..../bgracontrols/archive/branch.zip
             // ...../^^^^^^^^^^^^/.....
             i:=RPos('/archive/',RemoteURL);
             if (i>0) then
@@ -1299,8 +1301,56 @@ begin
               end;
             end;
           end;
-
         end;
+
+        // check specials for SourceForge !!
+        // tricky, but necessary unfortunately ...
+        if (Pos('downloads.sourceforge.net',RemoteURL)>0) then
+        begin
+
+          // we have an archive from sourceforge ... this archive adds an extra path (name) when unpacking the zip
+          // so replace package path and package installer with the right path !!
+
+          PackageName:=GetValue('Name',sl);
+          if Pos('/'+PackageName+'/',lowercase(RemoteURL))=0 then
+          begin
+            PackageName:=RemoteURL;
+            i:=RPos('/',PackageName);
+            if i>0 then
+            begin
+              Delete(PackageName,i,MaxInt);
+              i:=RPos('/',PackageName);
+              if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
+            end;
+            if i=0 then PackageName:=GetValue('Name',sl);
+          end;
+
+          for i:=-1 to MAXINSTRUCTIONS do
+          begin
+            if i>=0 then Direction:='AddPackage'+InttoStr(i)+'=' else Direction:='AddPackage=';
+            for j:=0 to sl.Count-1 do
+            begin
+              // find directive, but only rewrite once
+              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName,sl[j])=0) then
+              begin
+                writeln('Error: newpackage '+PackageName);
+                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
+                break;
+              end;
+            end;
+            if i>=0 then Direction:='InstallExecute'+InttoStr(i)+'=' else Direction:='InstallExecute=';
+            for j:=0 to sl.Count-1 do
+            begin
+              // find directive, but only rewrite once
+              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName,sl[j])=0) then
+              begin
+                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
+                break;
+              end;
+            end;
+          end;
+        end;
+
       end else infoln('Getting archive failed. Trying another source, if available.',etInfo)
     end;
 
@@ -1820,9 +1870,8 @@ var
 begin
   CurrentConfigFile:=aConfigFile;
   // Create fpcup.ini from resource if it doesn't exist yet
-  if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME)
-    and not FileExistsUTF8(SafeGetApplicationPath+CONFIGFILENAME) then
-    SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
+  if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
+     SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
   {
   // Create fpcup.ini from resource
   // Save old version if existing

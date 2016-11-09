@@ -158,6 +158,7 @@ uses
   {$ifdef LCL}
   Forms,Controls,
   {$endif}
+  IniFiles,
   httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil, LazFileUtils, LazUTF8,
@@ -240,20 +241,76 @@ end;
 procedure SaveInisFromResource(filename,resourcename:string);
 var
   fs:Tfilestream;
+  ms:TMemoryStream;
+  BackupFileName:string;
+  Ini:TMemIniFile;
+  OldIniVersion,NewIniVersion:string;
 begin
-  // See InstallerUniversal : the use of fpcup.rc and fpcup.res !!!!
-  // the two resouce files are now added via lazarus
-  with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
-  //with TResourceStream.Create(hInstance, resourcename, 'file') do
-  try
+
+  if NOT FileExists(filename) then
+  begin
+    // create inifile
+    with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
     try
-      fs:=Tfilestream.Create(Filename,fmCreate);
-      Savetostream(fs);
+      try
+        fs:=Tfilestream.Create(filename,fmCreate);
+        Savetostream(fs);
+      finally
+        fs.Free;
+      end;
     finally
-      fs.Free;
+      Free;
     end;
-  finally
-    Free;
+  end
+  else
+  begin
+
+    // create memory stream of resource
+    ms:=TMemoryStream.Create;
+    try
+      with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+      try
+        Savetostream(ms);
+      finally
+        Free;
+     end;
+     ms.Position:=0;
+
+     Ini:=TMemIniFile.Create(ms);
+     Ini.Options:=[ifoStripQuotes];
+     NewIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
+     Ini.Free;
+
+     Ini:=TMemIniFile.Create(filename);
+     Ini.Options:=[ifoStripQuotes];
+     OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
+     Ini.Free;
+
+     if OldIniVersion<>NewIniVersion then
+     begin
+       BackupFileName:=ChangeFileExt(filename,'.bak');
+       while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
+       try
+         FileUtil.CopyFile(filename,BackupFileName);
+         if SysUtils.DeleteFile(filename) then
+         begin
+           ms.Position:=0;
+           fs := TFileStream.Create(filename,fmCreate);
+           try
+             fs.CopyFrom(ms, ms.Size);
+           finally
+             FreeAndNil(fs);
+           end;
+         end;
+       except
+         infoln('Could not make a backup copy of old inifile',etError);
+       end;
+     end;
+
+    finally
+      ms.Free;
+    end;
+
   end;
 
 end;
@@ -290,7 +347,6 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-
 {$IFDEF UNIX}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 var
@@ -305,6 +361,7 @@ begin
   XdgDesktopContent:=TStringList.Create;
   try
     XdgDesktopContent.Add('[Desktop Entry]');
+    XdgDesktopContent.Add('Version=1.0');
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
@@ -312,6 +369,9 @@ begin
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;');
     XdgDesktopContent.Add('Keywords=editor;Pascal;IDE;FreePascal;fpc;Design;Designer;');
+    //XdgDesktopContent.Add('StartupWMClass=Lazarus');
+    //XdgDesktopContent.Add('MimeType=text/x-pascal;');
+    //XdgDesktopContent.Add('Patterns=*.pas;*.pp;*.p;*.inc;*.lpi;*.lpk;*.lpr;*.lfm;*.lrs;*.lpl;');
     // We're going to try and call xdg-desktop-icon
     // this may fail if shortcut exists already
     try
@@ -322,10 +382,14 @@ begin
     end;
 
     if OperationSucceeded=false then
-      infoln('CreateDesktopShortcut: failed to create shortcut to '+Target,etWarning);
+    begin
+      infoln('CreateDesktopShortcut: xdg-desktop-icon failed to create shortcut to '+Target,etWarning);
+      //infoln('CreateDesktopShortcut: going to create shortcut manually',etWarning);
+      //FileUtil.CopyFile(XdgDesktopFile,'/usr/share/applications/'+ExtractFileName(XdgDesktopFile));
+    end;
     // Temp file is no longer needed....
     try
-      DeleteFile(XdgDesktopFile);
+      SysUtils.DeleteFile(XdgDesktopFile);
     finally
       // Swallow, let filesystem maintenance clear it up
     end;

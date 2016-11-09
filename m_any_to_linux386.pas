@@ -96,9 +96,8 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    '-FL'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {new : needed in case of compiling a library}
-    '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+    //'-FL/lib/ld-linux.so.2'+LineEnding+ {buildfaq 3.3.1: the name of the dynamic linker on the target ... can also be ld-linux.so.3 (Arch) ... tricky}
+    '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
   end;
 end;
 

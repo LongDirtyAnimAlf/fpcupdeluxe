@@ -14,7 +14,9 @@ type
   TForm2 = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
+    CheckRepo: TCheckBox;
     GroupBox1: TGroupBox;
+    GroupBox2: TGroupBox;
     HTTPProxyHost: TEdit;
     HTTPProxyPort: TEdit;
     HTTPProxyUser: TEdit;

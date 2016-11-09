@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 353
+  Left = 224
   Height = 580
-  Top = 177
+  Top = 180
   Width = 1046
   Anchors = []
   Caption = 'Form1'
@@ -683,9 +683,9 @@ object Form1: TForm1
   end
   object RadioGroup2: TRadioGroup
     Left = 260
-    Height = 129
+    Height = 145
     Hint = 'Double click to select location for cross-tools'
-    Top = 56
+    Top = 40
     Width = 97
     AutoFill = True
     Caption = 'OS'
@@ -696,12 +696,13 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 109
+    ClientHeight = 125
     ClientWidth = 93
     Items.Strings = (
       'windows'
       'linux'
       'android'
+      'darwin'
       'wince'
       'java'
     )
@@ -1948,7 +1949,7 @@ object Form1: TForm1
     Left = 368
     Height = 23
     Top = 35
-    Width = 665
+    Width = 568
     Anchors = [akTop, akLeft, akRight]
     ReadOnly = True
     TabOrder = 17
@@ -1977,17 +1978,14 @@ object Form1: TForm1
     OnClick = Button7Click
     TabOrder = 19
   end
-  object CheckRepo: TCheckBox
-    Left = 96
-    Height = 19
-    Hint = 'Download whole repository, or only latest files'
-    Top = 461
-    Width = 47
-    Caption = 'Repo'
-    Checked = True
-    ParentShowHint = False
-    ShowHint = True
-    State = cbChecked
+  object Button8: TButton
+    Left = 946
+    Height = 23
+    Top = 35
+    Width = 87
+    Anchors = [akTop, akRight]
+    Caption = 'Clear log'
+    OnClick = Button8Click
     TabOrder = 20
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog

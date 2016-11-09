@@ -52,7 +52,7 @@ type
 
   THGClient = class(TRepoClient)
   protected
-    procedure CheckOut; override;
+    procedure CheckOut(UseForce:boolean=false); override;
     function GetLocalRevision: string; override;
     // Returns command snippet to set HTTP proxy config variables if needed
     function GetProxyCommand: string;
@@ -149,7 +149,7 @@ begin
     Result := FRepoExecutable;
 end;
 
-procedure THGClient.CheckOut;
+procedure THGClient.CheckOut(UseForce:boolean=false);
 const
   MaxRetries = 3;
 var

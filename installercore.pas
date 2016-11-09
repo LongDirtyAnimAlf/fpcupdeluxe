@@ -1060,6 +1060,7 @@ begin
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
+  FSVNClient.ModuleName:=ModuleName;
   FSVNClient.LocalRepository := FBaseDirectory;
   FSVNClient.Repository := FURL;
   FSVNClient.UserName:=aUserName;
@@ -1216,7 +1217,8 @@ const
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.13.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.14.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.0.zip';
-  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
+  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
+  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.4.zip';
   //SourceURL = 'https://sourceforge.net/projects/win32svn/files/1.8.15/apache24/svn-win32-1.8.15-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';

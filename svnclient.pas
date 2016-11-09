@@ -57,7 +57,7 @@ type
     FPassword: string;
   protected
     FLocalRevisionWholeRepo: string;
-    procedure CheckOut; override;
+    procedure CheckOut(UseForce:boolean=false); override;
     function GetLocalRevision: string; override;
     function GetLocalRevisionWholeRepo: string;
     // Figure out branch and whole repo revisions for local repository
@@ -82,6 +82,7 @@ type
     // Run SVN log command for repository and put results into Log
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
+    procedure DeleteDirectories(const CommandOutput: string);
     procedure Revert; override;
     constructor Create;
     destructor Destroy; override;
@@ -199,7 +200,7 @@ begin
     Result := FRepoExecutable;
 end;
 
-procedure TSVNClient.CheckOut;
+procedure TSVNClient.CheckOut(UseForce:boolean=false);
 const
   MaxRetries = 3;
 var
@@ -231,17 +232,21 @@ begin
     // svn quirk : even if no password is needed, it needs an empty password.
     // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
     if Length(Password)=0 then Password:='emptystring';
-    Command := ' --username '+UserName + ' --password '+Password;
+    Command:=' --username '+UserName+' --password '+Password;
   end;
 
   if ExportOnly
-     then Command := ' export --force ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert -r '
-     else Command := ' checkout ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert -r ';
+     then Command:=' export --quiet --force '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r '
+     else
+     begin
+       Command:=' checkout --quiet '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r ';
+       if UseForce then Command:=StringReplace(Command,' checkout ',' checkout --force ',[]);
+     end;
 
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := Command + 'HEAD ' + Repository + ' ' + LocalRepository
+    Command:=Command+'HEAD '+Repository+' '+LocalRepository
   else
-    Command := Command + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
+    Command:=Command+FDesiredRevision+' '+Repository+' '+LocalRepository;
 
   {$IFNDEF MSWINDOWS}
   // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems
@@ -250,7 +255,7 @@ begin
   begin
     Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
     TempOutputFile := SysUtils.GetTempFileName+'.svn';
-    Command:=Command + ' &> '+TempOutputFile;
+    Command:=Command+' &> '+TempOutputFile;
     ExecuteSpecialDue2EmptyString:=True;
   end;
   {$ENDIF}
@@ -258,10 +263,7 @@ begin
   {$IFNDEF MSWINDOWS}
   if ExecuteSpecialDue2EmptyString then
   begin
-    //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
     FReturnCode := fpSystem(FRepoExecutable+' '+Command);
-    //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
-
     if FileExists(TempOutputFile) then
     begin
       TempOutputSL:=TStringList.Create();
@@ -276,11 +278,8 @@ begin
   end
   else
   {$ENDIF}
-
-  // always perform a cleaup before doing anything else ... just to be sure !
-  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose);
-
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+
   FReturnOutput := Output;
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
@@ -294,12 +293,15 @@ begin
       //run 'svn cleanup' first to remove eventual locks (type 'svn help cleanup' for details)
       if (Pos('E155004', Output) > 0) OR (Pos('E175002', Output) > 0) then
       begin
-        // Let's try one time to fix it (don't update FReturnCode here)
-        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
-        // We probably ended up with a local repository where not all files were checked out.
-        // Let's call update to do so.
+        // Let's try one time to fix it and don't update FReturnCode here
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
+        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose); //attempt again
+
+        // We probably ended up with a local repository where not all files were checked out
+        // Let's call update to finalize.
         Update;
       end;
+
       // svn: E155036: Please see the 'svn upgrade' command
       // svn: E155036: The working copy is too old to work with client. You need to upgrade the working copy first
       if Pos('E155036', Output) > 0 then
@@ -315,9 +317,7 @@ begin
       {$IFNDEF MSWINDOWS}
       if ExecuteSpecialDue2EmptyString then
       begin
-        //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
         FReturnCode := fpSystem(FRepoExecutable+' '+Command);
-        //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
         if FileExists(TempOutputFile) then
         begin
           TempOutputSL:=TStringList.Create();
@@ -346,6 +346,177 @@ begin
 
   //find . ! -path "./.svn/*" \( -name "*.pas" -o -name "*.pp" -o -name "*.lpk" -o -name "*.lpr" \) -type f -exec sed -i 's/\r//' {} \;
 
+end;
+
+procedure TSVNClient.Update;
+const
+  MaxErrorRetries = 3;
+  MaxUpdateRetries = 9;
+var
+  Command: string;
+  FileList: TStringList;
+  Output: string = '';
+  ProxyCommand: string;
+  AfterErrorRetry: integer; // Keeps track of retry attempts after error result
+  UpdateRetry: integer;     // Keeps track of retry attempts to get all files
+  ExecuteSpecialDue2EmptyString:boolean;
+  TempOutputFile:string;
+  TempOutputSL:TStringList;
+begin
+
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
+
+  AfterErrorRetry := 1;
+  UpdateRetry := 1;
+  ProxyCommand:=GetProxyCommand;
+
+  ExecuteSpecialDue2EmptyString:=false;
+
+  // Invalidate our revision number cache
+  FLocalRevision := FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+
+  Command := '';
+
+  if Length(UserName)>0 then
+  begin
+    // svn quirk : even if no password is needed, it needs an empty password.
+    // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
+    if Length(Password)=0 then Password:='emptystring';
+    Command := ' --username ' + UserName + ' --password ' + Password;
+  end;
+
+
+  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
+    Command := ' update ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert ' + LocalRepository
+  else
+    Command := ' update ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+
+  {$IFNDEF MSWINDOWS}
+  // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems
+  // see this [Function StringsToPCharList(List : TStrings) : PPChar] inside process.inc for Unix
+  if Pos('emptystring',Command)>0 then
+  begin
+    Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
+    TempOutputFile := SysUtils.GetTempFileName+'.svn';
+    Command:=Command + ' &> '+TempOutputFile;
+    ExecuteSpecialDue2EmptyString:=True;
+  end;
+  {$ENDIF}
+
+  // always perform a cleaup before doing anything else ... just to be sure !
+  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose);
+  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose);
+
+  FileList := TStringList.Create;
+  try
+    // On Windows, at least certain SVN versions don't update everything.
+    // So we try until there are no more files downloaded.
+
+    {$IFNDEF MSWINDOWS}
+    if ExecuteSpecialDue2EmptyString then
+    begin
+      //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
+      FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+      //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
+      if FileExists(TempOutputFile) then
+      begin
+        TempOutputSL:=TStringList.Create();
+        try
+          TempOutputSL.LoadFromFile(TempOutputFile);
+          Output:=TempOutputSL.ToString;
+        finally
+          TempOutputSL.Free();
+        end;
+        SysUtils.DeleteFile(TempOutputFile);
+      end;
+    end
+    else
+    {$ENDIF}
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
+    FReturnOutput := Output;
+
+    if (Pos('An obstructing working copy was found', Output) > 0) then
+    begin
+      // this is a very severe error !
+      // can only be solved by brute force !!
+      // we are going to delete the .svn directory and any obstructing directories
+      DeleteDirectoryEx(IncludeTrailingPathDelimiter(LocalRepository)+'.svn');
+      DeleteDirectories(Output);
+      // perform forced checkout
+      CheckOut(True);
+      Output:='';
+      // hope all is well now
+    end;
+
+    FileList.Clear;
+    ParseFileList(Output, FileList, []);
+
+    // Detect when svn up cannot update any more files anymore.
+    while (FileList.Count > 0) and (UpdateRetry < MaxUpdateRetries) do
+    begin
+      // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+      while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
+      begin
+        if Pos('E155004', Output) > 0 then
+        {
+        E155004: Working copy '<directory>' locked.
+        run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
+        }
+        begin
+          // Let's try to release locks; don't update FReturnCode
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose); //attempt again
+        end;
+        //Give everybody a chance to relax ;)
+        Sleep(500);
+        // attempt again !!
+
+        // last resort measures
+        if (AfterErrorRetry = MaxErrorRetries) then
+        begin
+          //revert local changes to try to cleanup errors ...
+          //ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert -R '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //revert changes
+        end;
+
+        {$IFNDEF MSWINDOWS}
+        if ExecuteSpecialDue2EmptyString then
+        begin
+          //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
+          FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+          //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
+          if FileExists(TempOutputFile) then
+          begin
+            TempOutputSL:=TStringList.Create();
+            try
+              TempOutputSL.LoadFromFile(TempOutputFile);
+              Output:=TempOutputSL.ToString;
+            finally
+              TempOutputSL.Free();
+            end;
+            SysUtils.DeleteFile(TempOutputFile);
+          end;
+        end
+        else
+        {$ENDIF}
+
+        // get problem files, and do something about it !
+        {
+        FileList.Clear;
+        ParseFileList(Output, FileList, ['?','!']);
+        }
+        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, FReturnOutput, Verbose);
+        AfterErrorRetry := AfterErrorRetry + 1;
+      end;
+      UpdateRetry := UpdateRetry + 1;
+    end;
+  finally
+    FileList.Free;
+  end;
 end;
 
 procedure TSVNClient.CheckOutOrUpdate;
@@ -428,148 +599,6 @@ begin
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert '+GetProxyCommand+' --recursive ' + LocalRepository, FReturnOutput, Verbose);
 end;
 
-procedure TSVNClient.Update;
-const
-  MaxErrorRetries = 3;
-  MaxUpdateRetries = 9;
-var
-  Command: string;
-  FileList: TStringList;
-  Output: string = '';
-  ProxyCommand: string;
-  AfterErrorRetry: integer; // Keeps track of retry attempts after error result
-  UpdateRetry: integer;     // Keeps track of retry attempts to get all files
-  ExecuteSpecialDue2EmptyString:boolean;
-  TempOutputFile:string;
-  TempOutputSL:TStringList;
-begin
-
-  if ExportOnly then
-  begin
-    FReturnCode := 0;
-    exit;
-  end;
-
-  AfterErrorRetry := 1;
-  UpdateRetry := 1;
-  ProxyCommand:=GetProxyCommand;
-
-  ExecuteSpecialDue2EmptyString:=false;
-
-  // Invalidate our revision number cache
-  FLocalRevision := FRET_UNKNOWN_REVISION;
-  FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
-
-  Command := '';
-
-  if Length(UserName)>0 then
-  begin
-    // svn quirk : even if no password is needed, it needs an empty password.
-    // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
-    if Length(Password)=0 then Password:='emptystring';
-    Command := ' --username '+UserName + ' --password '+Password;
-  end;
-
-
-  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' update '+ProxyCommand+Command+' --non-interactive --trust-server-cert ' + LocalRepository
-  else
-    Command := ' update '+ProxyCommand+Command+' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
-
-  {$IFNDEF MSWINDOWS}
-  // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems
-  // see this [Function StringsToPCharList(List : TStrings) : PPChar] inside process.inc for Unix
-  if Pos('emptystring',Command)>0 then
-  begin
-    Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
-    TempOutputFile := SysUtils.GetTempFileName+'.svn';
-    Command:=Command + ' &> '+TempOutputFile;
-    ExecuteSpecialDue2EmptyString:=True;
-  end;
-  {$ENDIF}
-
-  // always perform a cleaup before doing anything else ... just to be sure !
-  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose);
-
-  FileList := TStringList.Create;
-  try
-    // On Windows, at least certain SVN versions don't update everything.
-    // So we try until there are no more files downloaded.
-
-    {$IFNDEF MSWINDOWS}
-    if ExecuteSpecialDue2EmptyString then
-    begin
-      //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
-      FReturnCode := fpSystem(FRepoExecutable+' '+Command);
-      //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
-      if FileExists(TempOutputFile) then
-      begin
-        TempOutputSL:=TStringList.Create();
-        try
-          TempOutputSL.LoadFromFile(TempOutputFile);
-          Output:=TempOutputSL.ToString;
-        finally
-          TempOutputSL.Free();
-        end;
-        SysUtils.DeleteFile(TempOutputFile);
-      end;
-    end
-    else
-    {$ENDIF}
-    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
-    FReturnOutput := Output;
-
-    FileList.Clear;
-    ParseFileList(Output, FileList, []);
-
-    // Detect when svn up cannot update any more files anymore.
-    while (FileList.Count > 0) and (UpdateRetry < MaxUpdateRetries) do
-    begin
-      // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-      while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
-      begin
-        if Pos('E155004', Output) > 0 then
-        {
-        E155004: Working copy '<directory>' locked.
-        run 'svn cleanup' to remove locks (type 'svn help cleanup' for details)
-        }
-        begin
-          // Let's try to release locks; don't update FReturnCode
-          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //attempt again
-        end;
-        //Give everybody a chance to relax ;)
-        Sleep(500);
-        // attempt again !!
-        {$IFNDEF MSWINDOWS}
-        if ExecuteSpecialDue2EmptyString then
-        begin
-          //FReturnCode := SysUtils.ExecuteProcess(FRepoExecutable+' '+Command,'');
-          FReturnCode := fpSystem(FRepoExecutable+' '+Command);
-          //RunCommandInDir('',FRepoExecutable,[Command],Output,FReturnCode);
-          if FileExists(TempOutputFile) then
-          begin
-            TempOutputSL:=TStringList.Create();
-            try
-              TempOutputSL.LoadFromFile(TempOutputFile);
-              Output:=TempOutputSL.ToString;
-            finally
-              TempOutputSL.Free();
-            end;
-            SysUtils.DeleteFile(TempOutputFile);
-          end;
-        end
-        else
-        {$ENDIF}
-        FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, FReturnOutput, Verbose);
-        AfterErrorRetry := AfterErrorRetry + 1;
-      end;
-      UpdateRetry := UpdateRetry + 1;
-    end;
-  finally
-    FileList.Free;
-  end;
-end;
-
 procedure TSVNClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
  // Parses file lists from svn update and svn status outputs
  // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
@@ -587,12 +616,22 @@ begin
     for Counter := 0 to AllFilesRaw.Count - 1 do
     begin
       //Some sample files (using svn update and svn status):
-      //A    fpctrunk\tests\webtbs\tw15683.pp
-      //U    fpctrunk\compiler\ncal.pas
-      //M       C:\Development\fpc\packages\bzip2\Makefile
-      //I think I also saw something like:
-      // u      C:\Development\fpc\packages\bzip2\Makefile
-      //123456789
+
+      //‘A’ Item is scheduled for Addition.
+      //‘U’ Item is scheduled for Update.
+      //‘D’ Item is scheduled for Deletion.
+      //‘E’ Item already Existed.
+      //‘E’ Item already Existed.
+      //‘G’ Item is Merged.
+      //‘M’ Item has been modified.
+      //‘R’ Item has been replaced in your working copy. This means the file was scheduled for deletion, and then a new file with the same name was scheduled for addition in its place.
+      //‘C’ The contents (as opposed to the properties) of the item conflict with updates received from the repository.
+      //‘X’ Item is related to an externals definition.
+      //‘I’ Item is being ignored (e.g. with the svn:ignore property).
+      //’?’ Item is not under version control.
+      //’!’ Item is missing (e.g. you moved or deleted it without using svn). This also indicates that a directory is incomplete (a checkout or update was interrupted).
+      //’~’ Item is versioned as one kind of object (file, directory, link), but has been replaced by different kind of object.
+
       // Also accept space in first column and entry on second column
       // Get the first character after a space in the first 2 columns:
       FileName := '';
@@ -612,6 +651,40 @@ begin
     AllFilesRaw.Free;
   end;
 end;
+
+procedure TSVNClient.DeleteDirectories(const CommandOutput: string);
+ // Parses directory lists from svn update and svn status outputsto find skipped directories.
+ // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
+ // Case-sensitive filter.
+var
+  AllFilesRaw: TStringList;
+  Counter,index: integer;
+  DirName: string;
+begin
+  AllFilesRaw := TStringList.Create;
+  try
+    AllFilesRaw.Text := CommandOutput;
+    for Counter := 0 to AllFilesRaw.Count - 1 do
+    begin
+      DirName:=AllFilesRaw[Counter];
+      index:=Pos('Skipped ',DirName);
+      if index>0 then
+      begin
+        Delete(DirName,1,Length('Skipped '));
+        index:=Pos('--',DirName);
+        if index>0 then
+        begin
+          Delete(DirName,index,MaxInt);
+          RemovePadChars(DirName,[' ','''','"','`']);
+          DeleteDirectoryEx(DirName);
+        end;
+      end;
+    end;
+  finally
+    AllFilesRaw.Free;
+  end;
+end;
+
 
 procedure TSVNClient.LocalModifications(var FileList: TStringList);
 var
@@ -800,6 +873,7 @@ begin
       result:=result+' --config-option servers:global:http-proxy-username='+FHTTPProxyUser;
     if FHTTPProxyPassword<>'' then
       result:=result+' --config-option servers:global:http-proxy-password='+FHTTPProxyPassword;
+    //result:=result+' ';
   end
   else
   begin

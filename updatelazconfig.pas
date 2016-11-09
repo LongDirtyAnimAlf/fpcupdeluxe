@@ -392,7 +392,7 @@ begin
     Doc.AppendChild(Doc.CreateElement('CONFIG'));
     end
   else
-    ReadXMLFile(Doc,AFilename);
+    ReadXMLFile(Doc,AFilename,[xrfAllowLowerThanInAttributeValue,xrfAllowSpecialCharsInAttributeValue,xrfAllowSpecialCharsInComments]);
   bChanged:=false;
 end;
 

@@ -54,7 +54,7 @@ type
   however, we're not writing config changes for users, so
   we don't provide http proxy support for git. }
   protected
-    procedure CheckOut; override;
+    procedure CheckOut(UseForce:boolean=false); override;
     function GetLocalRevision: string; override;
     function GetRepoExecutable: string; override;
     function GetRepoExecutableName: string; override;
@@ -164,7 +164,7 @@ begin
     Result := FRepoExecutable;
 end;
 
-procedure TGitClient.CheckOut;
+procedure TGitClient.CheckOut(UseForce:boolean=false);
 // SVN checkout is more or less equivalent to git clone
 const
   MaxRetries = 3;

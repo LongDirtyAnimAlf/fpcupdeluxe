@@ -1,7 +1,7 @@
 unit m_any_to_darwin386;
 
-{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to Linux 32 bit
-Copyright (C) 2014 Reinier Olislagers
+{ Cross compiles to Darwin 32 bit
+Copyright (C) 2014 Reinier Olislagers / DonAlfredo
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -29,19 +29,12 @@ along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
-{
-Debian: adding i386 libs/architecture support on e.g. x64 system
-dpkg --add-architecture i386
-
-Adapt (add) for other setups
-}
-
 {$mode objfpc}{$H+}
 
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
 
 implementation
 
@@ -73,6 +66,18 @@ const
   DirName='i386-darwin';
   LibName='libc.dylib';
 begin
+
+  {$ifdef MSWINDOWS}
+  if Pos('osxcross',FBinUtilsPath)>0 then
+  begin
+    result:=true;
+    //FLibsPath:='C:\cygwin\opt\osxcross\target\SDK\MacOSX10.9.sdk\usr\lib';
+    // automagically picked up by linker !!
+    FLibsPath:='';
+    exit;
+  end;
+  {$endif}
+
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
 
@@ -96,7 +101,6 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    '-FL'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {new : needed in case of compiling a library}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
   end;
@@ -143,34 +147,25 @@ begin
       AsFile);
   {$ENDIF}
 
-  // Also allow for (cross)binutils without prefix
+  {$ifdef MSWINDOWS}
+  // Also allow for (cross)binutils from https://github.com/tpoechtrager/osxcross
   if not result then
   begin
-    BinPrefixTry:='powerpc-aix-';
+    BinPrefixTry:='i386-apple-darwin13-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(FBinUtilsPath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-    {$IFDEF UNIX}
-    if not result then { try /usr/local/bin/<dirprefix>/ }
-      result:=SearchBinUtil('/usr/local/bin/'+DirName,
-        AsFile);
-
-    if not result then { try /usr/local/bin/ }
-      result:=SearchBinUtil('/usr/local/bin',
-        AsFile);
-
-    if not result then { try /usr/bin/ }
-      result:=SearchBinUtil('/usr/bin',
-        AsFile);
-
-    if not result then { try /bin/ }
-      result:=SearchBinUtil('/bin',
-        AsFile);
-    {$ENDIF}
-
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
+
+  if not result then
+  begin
+    BinPrefixTry:='i386-apple-darwin13-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil('C:\cygwin\opt\osxcross\target\bin\',AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+  {$endif}
 
   SearchBinUtilsInfo(result);
 
@@ -179,6 +174,7 @@ begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
+    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
   end;
 end;

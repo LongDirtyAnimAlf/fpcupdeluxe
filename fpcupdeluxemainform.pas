@@ -15,7 +15,7 @@ type
 
   TForm1 = class(TForm)
     Button7: TButton;
-    CheckRepo: TCheckBox;
+    Button8: TButton;
     Memo1: TMemo;
     StatusMessage: TEdit;
     TrunkBtn: TBitBtn;
@@ -53,6 +53,7 @@ type
     procedure Button5Click(Sender: TObject);
     procedure Button6Click(Sender: TObject);
     procedure Button7Click(Sender: TObject);
+    procedure Button8Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormResize(Sender: TObject);
@@ -101,6 +102,7 @@ uses
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
   FPCUPGITREPO='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
+  FPCUPDELUXEVERSION='0.99a';
 
 { TForm1 }
 
@@ -108,8 +110,9 @@ procedure TForm1.FormCreate(Sender: TObject);
 var
   SortedModules: TStringList;
   i:integer;
+  s:string;
 begin
-  Self.Caption:='Lazarus and FPC installer and updater based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
+  Self.Caption:='Lazarus and FPC installer and updater V'+FPCUPDELUXEVERSION+' based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
                 lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
 
   sStatus:='Sitting and waiting';
@@ -165,10 +168,8 @@ begin
 
   FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
 
-  if not FileExists(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME) then
-    SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini');
-  if not FileExists(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME) then
-    SaveInisFromResource(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME,'fpcup_ini');
+  SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini');
+  SaveInisFromResource(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME,'fpcup_ini');
 
   FPCupManager.LoadFPCUPConfig;
 
@@ -191,19 +192,20 @@ begin
   try
     for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
     begin
-      if RightStr(FPCupManager.ModulePublishedList[i],Length('clean'))='clean' then continue;
-      if RightStr(FPCupManager.ModulePublishedList[i],Length('uninstall'))='uninstall' then continue;
-      SortedModules.Add(FPCupManager.ModulePublishedList[i]);
+      s:=FPCupManager.ModulePublishedList[i];
+      // tricky ... get out the modules that are packages only
+      // not nice, but needed to keep list clean of internal commands
+      if (FPCupManager.ModulePublishedList.IndexOf(s+'clean')<>-1)
+          AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
+          AND (s<>'FPC')
+          AND (s<>'lazarus')
+          AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
+          then
+      begin
+        SortedModules.Add(s);
+      end;
     end;
     listbox3.Items.AddStrings(SortedModules);
-
-    {
-    for i:=0 to FPCupManager.ModuleEnabledList.Count-1 do
-    begin
-      j:=listbox3.Items.IndexOf(FPCupManager.ModuleEnabledList[i]);
-      if j<>-1 then listbox3.Selected[j]:=true;
-    end;
-    }
 
   finally
     SortedModules.Free;
@@ -386,7 +388,7 @@ begin
       s:='Going to install NewPascal';
       FPCURL:='newpascal';
       LazarusURL:='newpascal';
-      FPCupManager.IncludeModules:='mORMotFPC,zeos';
+      //FPCupManager.IncludeModules:='mORMotFPC,zeos';
     end;
 
     if Sender=FixesBtn then
@@ -433,6 +435,7 @@ begin
       FPCURL:='skip';
       LazarusURL:='skip';
       FPCupManager.OnlyModules:='mORMotFPC';
+      //FPCupManager.OnlyModules:='mORMotFPC,zeos';
     end;
 
 
@@ -717,10 +720,12 @@ begin
   Form2.HTTPProxyPort.Text:=InttoStr(FPCupManager.HTTPProxyPort);
   Form2.HTTPProxyUser.Text:=FPCupManager.HTTPProxyUser;
   Form2.HTTPProxyPassword.Text:=FPCupManager.HTTPProxyPassword;
+  Form2.CheckRepo.Checked:=(NOT FPCupManager.ExportOnly);
 
   Form2.ShowModal;
   if Form2.ModalResult=mrOk then
   begin
+    FPCupManager.ExportOnly:=(NOT Form2.CheckRepo.Checked);
     if NOT TryStrToInt(Form2.HTTPProxyPort.Text,i) then
     begin
       ShowMessage('Could not get correct proxy port number !');
@@ -731,6 +736,12 @@ begin
     FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser.Text;
     FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPassword.Text;
   end;
+end;
+
+procedure TForm1.Button8Click(Sender: TObject);
+begin
+  SynEdit1.ClearAll;
+  Memo1.Clear;
 end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
@@ -794,15 +805,18 @@ begin
   Button1.Enabled:=value;
   //if Sender<>Button2 then
   Button2.Enabled:=value;
-  ListBox1.Enabled:=value;
-  ListBox2.Enabled:=value;
-  ListBox3.Enabled:=value;
-  Edit1.Enabled:=value;
   Button3.Enabled:=value;
   Button4.Enabled:=value;
   Button5.Enabled:=value;
   Button6.Enabled:=value;
   Button7.Enabled:=value;
+  Button8.Enabled:=value;
+
+  ListBox1.Enabled:=value;
+  ListBox2.Enabled:=value;
+  ListBox3.Enabled:=value;
+
+  Edit1.Enabled:=value;
   RadioGroup1.Enabled:=value;
   RadioGroup2.Enabled:=value;
   CheckVerbosity.Enabled:=value;
@@ -815,8 +829,6 @@ begin
   DinoBtn.Enabled:=value;
   FeaturesBtn.Enabled:=value;
   mORMotBtn.Enabled:=value;
-
-  CheckRepo.Enabled:=value;
 end;
 
 procedure TForm1.PrepareRun;
@@ -837,8 +849,6 @@ begin
   FPCupManager.CrossOPT:='';
 
   FPCupManager.Verbose:=CheckVerbosity.Checked;
-
-  FPCupManager.ExportOnly:=(NOT CheckRepo.Checked);
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:='default';
@@ -880,7 +890,7 @@ begin
 
   StatusMessage.Text:=sStatus;
 
-  writeln('FPCUP de luxe is starting up.');
+  writeln('FPCUP(deluxe) is starting up.');
   writeln;
   {$IFDEF MSWINDOWS}
   writeln('Binutils/make dir:  '+FPCupManager.MakeDirectory);
@@ -915,7 +925,7 @@ begin
     begin
       writeln;
       writeln;
-      writeln('ERROR: Fpclazupdeluxe failed.');
+      writeln('ERROR: Fpcupdeluxe failed.');
       label1.Font.Color:=clRed;
       label2.Font.Color:=clRed;
       StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
@@ -924,7 +934,22 @@ begin
     begin
       writeln;
       writeln;
-      writeln('SUCCESS: Fpclazupdeluxe ended without errors.');
+      writeln('SUCCESS: Fpcupdeluxe ended without errors.');
+      writeln;
+      if (FPCupManager.LazarusURL<>'SKIP') then
+      begin
+        {$ifdef MSWINDOWS}
+        writeln('Fpcupdeluxe has created a desktop shortcut to start Lazarus.');
+        writeln('Shortcut-name: '+FPCupManager.ShortCutNameLazarus);
+        writeln('Lazarus by fpcupdeluxe MUST be started with this shortcut !!');
+        {$else}
+        writeln('Fpcupdeluxe has created a shortcut link in your home-directory to start Lazarus.');
+        writeln('Shortcut-link: '+FPCupManager.ShortCutNameLazarus);
+        writeln('Lazarus MUST be started with this link !!');
+        writeln('Fpcupdeluxe has also (tried to) create a desktop shortcut with the same name.');
+        {$endif}
+        writeln;
+      end;
       label1.Font.Color:=clLime;
       label2.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
@@ -946,7 +971,7 @@ begin
   if result then with TIniFile.Create(IniFile) do
   try
 
-    CheckRepo.Checked:=ReadBool('General','GetRepo',True);
+    FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
     s:=ReadString('URL','fpcURL','');
     if TryStrToInt(s,i) then
@@ -1008,7 +1033,7 @@ begin
   if result then with TIniFile.Create(IniFile) do
   try
 
-    WriteBool('General','GetRepo',CheckRepo.Checked);
+    WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
     //WriteInteger('URL','fpcURL',listbox1.ItemIndex);
     //WriteInteger('URL','lazURL',listbox2.ItemIndex);

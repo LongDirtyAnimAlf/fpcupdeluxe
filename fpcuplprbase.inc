@@ -241,8 +241,7 @@ begin
   // First check for settings.ini; it might not be present but specified anyway.
   // In any case, we need to extract it from the resource sometime unless we
   // want to create an installer for each platform.
-  if not FileExistsUTF8(SafeGetApplicationPath+SETTTINGSFILENAME) then
-    SaveInisFromResource(SafeGetApplicationPath+SETTTINGSFILENAME,'settings_ini');
+  SaveInisFromResource(SafeGetApplicationPath+SETTTINGSFILENAME,'settings_ini');
 
   Options:=TCommandLineOptions.Create;
   try

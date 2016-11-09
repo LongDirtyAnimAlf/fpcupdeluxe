@@ -63,10 +63,11 @@ type
     FReturnCode: integer;
     FReturnOutput: string;
     FVerbose: boolean;
+    FModuleName: string;
     FExportOnly: boolean;
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
-    procedure CheckOut; virtual;
+    procedure CheckOut(UseForce:boolean=false); virtual;
     function GetLocalRevision: string; virtual;
     function GetRepoExecutable: string; virtual;
     // Makes sure non-empty strings have a / at the end.
@@ -131,6 +132,7 @@ type
     property RepoExecutable: string read GetRepoExecutable write SetRepoExecutable;
     // Show additional console/log output?
     property Verbose: boolean read FVerbose write SetVerbose;
+    property ModuleName: string read FModuleName write FModuleName;
     property ExportOnly: boolean read FExportOnly write SetExportOnly;
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
@@ -231,7 +233,7 @@ begin
   result:=( (Length(FRepoExecutable)<>0) AND (FileExists(FRepoExecutable)) );
 end;
 
-procedure TRepoClient.CheckOut;
+procedure TRepoClient.CheckOut(UseForce:boolean=false);
 begin
   raise Exception.Create('TRepoClient descendants must implement CheckOut by themselves.');
 end;

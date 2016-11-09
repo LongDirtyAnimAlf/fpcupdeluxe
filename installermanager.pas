@@ -841,9 +841,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     LIBSCNT=4;
   type
     TLibList=array[1..LIBSCNT] of string;
+    LibSource = record
+      lib:string;
+      source:string;
+    end;
+
   const
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so');
-    //libx11-dev libgdk-pixbuf2.0-dev libcairo2-dev libpangox-1.0-dev xorg-dev libgtk2.0-dev libpango1.0-dev
     QTLIBS:TLibList = ('libQt4Pas.so','','','');
   var
     i:integer;
@@ -851,6 +855,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     Output: string;
     AdvicedLibs:string;
     AllOutput:TStringList;
+    LS:array of LibSource;
 
     function TestLib(LibName:string):boolean;
     var
@@ -869,30 +874,64 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   begin
     result:=true;
 
+    // these libs are alwys needed !!
     AdvicedLibs:='make gdb binutils unzip patch ';
 
-    ExecuteCommand('cat /etc/*-release',Output,false);
     AllOutput:=TStringList.Create;
     try
+      Output:='';
+      ExecuteCommand('cat /etc/os-release',Output,false);
       AllOutput.Text := Output;
-      Output := lowercase(AllOutput.Values['DISTRIB_ID']);
-      if Output='arch' then
+      Output := lowercase(AllOutput.Values['ID_LIKE']);
+      if Length(Output)=0 then Output := lowercase(AllOutput.Values['DISTRIB_ID']);
+      if Length(Output)=0 then Output := lowercase(AllOutput.Values['ID']);
+      if (Output='arch') OR (Output='manjaro') then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
         AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
       end
-      else
-      if (Output='ubuntu') then
+      else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
       begin
-        Output:='libx11-dev libgtk2.0-dev gtk2-engines-pixbuf libcairo2-dev libpango1.0-0';
-      end
-      else if (Output='debian') then
-      begin
+        {
+        SetLength(LS,12);
+        LS[0].lib:='libX11.so';
+        LS[0].source:='libx11-dev' ;
+
+        LS[1].lib:='libgdk_pixbuf-2.0.so';
+        LS[1].source:='libgdk-pixbuf2.0-dev' ;
+
+        LS[2].lib:='libgtk-x11-2.0.so';
+        LS[2].source:='libgtk2.0-0';
+        LS[3].lib:='libgdk-x11-2.0.so';
+        LS[3].source:='libgtk2.0-0';
+
+        LS[4].lib:='libgobject-2.0.so';
+        LS[4].source:='libglib2.0-0';
+
+        LS[5].lib:='libglib-2.0.so';
+        LS[5].source:='libglib2.0-0';
+
+        LS[6].lib:='libgthread-2.0.so';
+
+        LS[7].lib:='libgmodule-2.0.so';
+
+        LS[8].lib:='libpango-1.0.so';
+        LS[8].source:='libpango1.0-dev';
+
+        LS[9].lib:='libcairo.so';
+        LS[8].source:='libcairo2-dev';
+
+        LS[10].lib:='libatk-1.0.so';
+        LS[10].source:='libatk1.0-dev';
+
+        LS[11].lib:='libpangocairo-1.0.so';
+        }
+
         Output:='libgtk2.0-dev libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
         AdvicedLibs:=AdvicedLibs+
                      'build-essential gcc devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                      'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
-                     'libx11-dev libxft2 libfontconfig1 xfonts-scalable libgtk2.0-dev gtk2-engines-pixbuf libcairo2-dev';
+                     'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf';
       end
       else
       if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
@@ -900,7 +939,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         Output:='libX11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
       end
 
-      else Output:=' the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so';
+      else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so';
 
     finally
       AllOutput.Free;
@@ -911,14 +950,17 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     else if Uppercase(LCLPlatform)='QT' then
       pll:=@QTLIBS;
     for i:=1 to LIBSCNT do
-      begin
+    begin
       if not TestLib(pll^[i]) then
-        begin
+      begin
         FParent.WritelnLog('Required packages are not installed for Lazarus: '+pll^[i], true);
         result:=false;
-        end;
       end;
+    end;
     if (NOT result) AND (Length(Output)>0) then FParent.WritelnLog('You need to install at least '+Output+' !', true);
+
+    // do not error out ... user could only install FPC
+    result:=true;
 
   end;
   {$else} //stub for other platforms for now

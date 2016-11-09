@@ -4,11 +4,9 @@ program fpcupdeluxe;
 
 //{$APPTYPE GUI}
 
-// todo: check addition of -FL (linker path) in case of crossing for libraries) !!
 // todo: give info about the link that must be used to start Lazarus that is created by fpcupdeluxe !!
 // or make a button or popup or something for this link.
 // todo: add some means of help
-// check available bootstrapper just before downloading a new one ... they could be the same !
 
 {$IFDEF LINUX}
   {$IFDEF FPC_CROSSCOMPILING}
@@ -35,6 +33,7 @@ uses
   m_any_to_embeddedarm, m_any_to_linuxmipsel, m_any_to_linux386,
   m_any_to_linuxaarch64,
   m_any_to_androidjvm,m_any_to_javajvm,
+  m_any_to_darwin386,
   {$IFDEF Darwin}
   m_crossdarwin64,
   m_crossdarwin32,

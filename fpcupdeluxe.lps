@@ -3,12 +3,13 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="9"/>
-    <BuildModes Active="win32"/>
-    <Units Count="156">
+    <BuildModes Active="Debug"/>
+    <Units Count="157">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
-        <UsageCount Value="158"/>
+        <IsVisibleTab Value="True"/>
+        <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
       <Unit1>
@@ -17,11 +18,8 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <TopLine Value="103"/>
-        <CursorPos X="82" Y="113"/>
-        <UsageCount Value="158"/>
+        <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
       </Unit1>
@@ -31,1120 +29,1208 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="-1"/>
-        <CursorPos X="9" Y="17"/>
-        <UsageCount Value="57"/>
+        <EditorIndex Value="2"/>
+        <UsageCount Value="117"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
       </Unit2>
       <Unit3>
         <Filename Value="fpcuplprbase.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="518"/>
-        <CursorPos X="87" Y="542"/>
-        <UsageCount Value="40"/>
+        <TopLine Value="229"/>
+        <CursorPos Y="244"/>
+        <UsageCount Value="35"/>
       </Unit3>
       <Unit4>
         <Filename Value="fpclazup.lpr"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="77"/>
         <CursorPos Y="99"/>
-        <UsageCount Value="14"/>
+        <UsageCount Value="9"/>
       </Unit4>
       <Unit5>
         <Filename Value="installermanager.pas"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="579"/>
-        <CursorPos X="50" Y="590"/>
-        <UsageCount Value="64"/>
+        <TopLine Value="1021"/>
+        <CursorPos X="14" Y="28"/>
+        <UsageCount Value="66"/>
       </Unit5>
       <Unit6>
         <Filename Value="fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="37"/>
+        <TopLine Value="245"/>
+        <CursorPos X="26" Y="295"/>
+        <UsageCount Value="45"/>
       </Unit6>
       <Unit7>
         <Filename Value="installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="376"/>
-        <CursorPos X="6" Y="412"/>
-        <UsageCount Value="60"/>
+        <TopLine Value="1126"/>
+        <CursorPos X="6" Y="1058"/>
+        <UsageCount Value="75"/>
       </Unit7>
       <Unit8>
         <Filename Value="processutils.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="132"/>
-        <CursorPos X="10" Y="147"/>
-        <UsageCount Value="23"/>
+        <TopLine Value="242"/>
+        <CursorPos X="29" Y="158"/>
+        <UsageCount Value="27"/>
       </Unit8>
       <Unit9>
         <Filename Value="installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1593"/>
-        <CursorPos X="3" Y="1593"/>
-        <UsageCount Value="55"/>
+        <TopLine Value="1120"/>
+        <CursorPos X="58" Y="1127"/>
+        <UsageCount Value="59"/>
       </Unit9>
       <Unit10>
-        <Filename Value="C:\NewPascal2\fpc\packages\rtl-console\src\win\crt.pp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="160"/>
-        <UsageCount Value="1"/>
-      </Unit10>
-      <Unit11>
         <Filename Value="C:\NewPascal2\lazarus\lcl\include\winapih.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="191"/>
         <CursorPos X="36" Y="208"/>
-        <UsageCount Value="2"/>
-      </Unit11>
-      <Unit12>
-        <Filename Value="C:\NewPascal2\lazarus\lcl\lmessages.pp"/>
-        <UnitName Value="LMessages"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="22"/>
-        <CursorPos X="30" Y="5"/>
-        <UsageCount Value="1"/>
-      </Unit12>
-      <Unit13>
-        <Filename Value="C:\NewPascal2\lazarus\lcl\lcltype.pp"/>
-        <UnitName Value="LCLType"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="2616"/>
-        <CursorPos X="7" Y="2633"/>
-        <UsageCount Value="1"/>
-      </Unit13>
-      <Unit14>
+        <UsageCount Value="7"/>
+      </Unit10>
+      <Unit11>
         <Filename Value="C:\NewPascal2\fpc\rtl\win\wininc\redef.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="705"/>
         <CursorPos X="10" Y="722"/>
-        <UsageCount Value="2"/>
-      </Unit14>
-      <Unit15>
+        <UsageCount Value="7"/>
+      </Unit11>
+      <Unit12>
         <Filename Value="C:\NewPascal2\fpc\rtl\win\wininc\messages.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="172"/>
         <CursorPos X="19" Y="189"/>
-        <UsageCount Value="2"/>
-      </Unit15>
-      <Unit16>
-        <Filename Value="C:\NewPascal2\fpc\rtl\win\wininc\func.inc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="413"/>
-        <CursorPos X="11" Y="430"/>
-        <UsageCount Value="1"/>
-      </Unit16>
-      <Unit17>
+        <UsageCount Value="7"/>
+      </Unit12>
+      <Unit13>
         <Filename Value="C:\NewPascal2\lazarus\lcl\stdctrls.pp"/>
         <UnitName Value="StdCtrls"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="682"/>
         <CursorPos X="28" Y="693"/>
-        <UsageCount Value="4"/>
-      </Unit17>
-      <Unit18>
+        <UsageCount Value="9"/>
+      </Unit13>
+      <Unit14>
         <Filename Value="C:\NewPascal2\lazarus\lcl\controls.pp"/>
         <UnitName Value="Controls"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2202"/>
         <CursorPos X="15" Y="2219"/>
-        <UsageCount Value="2"/>
-      </Unit18>
-      <Unit19>
+        <UsageCount Value="7"/>
+      </Unit14>
+      <Unit15>
         <Filename Value="synedittext.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="27"/>
         <CursorPos X="5" Y="40"/>
-        <UsageCount Value="17"/>
-      </Unit19>
-      <Unit20>
+        <UsageCount Value="12"/>
+      </Unit15>
+      <Unit16>
         <Filename Value="C:\NewPascal2\fpc\rtl\win\wininc\ascdef.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="166"/>
         <CursorPos X="10" Y="183"/>
-        <UsageCount Value="2"/>
-      </Unit20>
-      <Unit21>
+        <UsageCount Value="7"/>
+      </Unit16>
+      <Unit17>
         <Filename Value="C:\NewPascal2\fpc\rtl\win\wininc\defines.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1741"/>
         <CursorPos X="6" Y="1677"/>
-        <UsageCount Value="4"/>
-      </Unit21>
-      <Unit22>
+        <UsageCount Value="9"/>
+      </Unit17>
+      <Unit18>
         <Filename Value="C:\NewPascal2\lazarus\lcl\include\customcombobox.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="509"/>
         <CursorPos X="27" Y="289"/>
-        <UsageCount Value="4"/>
-      </Unit22>
-      <Unit23>
+        <UsageCount Value="9"/>
+      </Unit18>
+      <Unit19>
         <Filename Value="C:\NewPascal2\lazarus\lcl\include\customedit.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="184"/>
         <CursorPos X="23" Y="141"/>
-        <UsageCount Value="4"/>
-      </Unit23>
-      <Unit24>
+        <UsageCount Value="9"/>
+      </Unit19>
+      <Unit20>
         <Filename Value="C:\NewPascal2\lazarus\lcl\include\custommemo.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="184"/>
         <CursorPos Y="209"/>
-        <UsageCount Value="4"/>
-      </Unit24>
-      <Unit25>
+        <UsageCount Value="9"/>
+      </Unit20>
+      <Unit21>
         <Filename Value="C:\NewPascal2\fpc\packages\fcl-process\src\process.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="100"/>
         <CursorPos X="15" Y="117"/>
-        <UsageCount Value="6"/>
-      </Unit25>
-      <Unit26>
+        <UsageCount Value="1"/>
+      </Unit21>
+      <Unit22>
         <Filename Value="C:\NewPascal2\fpc\packages\fcl-process\src\unix\process.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="12"/>
         <CursorPos X="21" Y="413"/>
-        <UsageCount Value="3"/>
-      </Unit26>
-      <Unit27>
+        <UsageCount Value="8"/>
+      </Unit22>
+      <Unit23>
         <Filename Value="C:\NewPascal2\fpc\packages\fcl-process\src\win\process.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="223"/>
         <CursorPos X="19" Y="234"/>
-        <UsageCount Value="3"/>
-      </Unit27>
-      <Unit28>
+        <UsageCount Value="8"/>
+      </Unit23>
+      <Unit24>
         <Filename Value="C:\NewPascal2\lazarus\components\chmhelp\packages\idehelp\lazchmhelp.pas"/>
         <UnitName Value="LazChmHelp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="659"/>
         <CursorPos X="13" Y="672"/>
-        <UsageCount Value="3"/>
-      </Unit28>
-      <Unit29>
+        <UsageCount Value="8"/>
+      </Unit24>
+      <Unit25>
         <Filename Value="C:\NewPascal2\lazarus\components\codetools\definetemplates.pas"/>
         <UnitName Value="DefineTemplates"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="5838"/>
         <CursorPos X="19" Y="5932"/>
-        <UsageCount Value="3"/>
-      </Unit29>
-      <Unit30>
+        <UsageCount Value="8"/>
+      </Unit25>
+      <Unit26>
         <Filename Value="C:\NewPascal2\lazarus\components\fpdebug\fpdbgdarwinclasses.pas"/>
         <UnitName Value="FpDbgDarwinClasses"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="757"/>
         <CursorPos X="15" Y="755"/>
-        <UsageCount Value="3"/>
-      </Unit30>
-      <Unit31>
+        <UsageCount Value="8"/>
+      </Unit26>
+      <Unit27>
         <Filename Value="C:\NewPascal2\lazarus\components\fpdebug\fpdbgwinclasses.pas"/>
         <UnitName Value="FpDbgWinClasses"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="458"/>
         <CursorPos X="15" Y="466"/>
-        <UsageCount Value="3"/>
-      </Unit31>
-      <Unit32>
+        <UsageCount Value="8"/>
+      </Unit27>
+      <Unit28>
         <Filename Value="C:\NewPascal2\lazarus\components\fppkg\svn\svncommand.pas"/>
         <UnitName Value="SvnCommand"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="68"/>
         <CursorPos X="23" Y="92"/>
-        <UsageCount Value="3"/>
-      </Unit32>
-      <Unit33>
+        <UsageCount Value="8"/>
+      </Unit28>
+      <Unit29>
         <Filename Value="installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="1567"/>
-        <CursorPos Y="1484"/>
-        <UsageCount Value="63"/>
-      </Unit33>
-      <Unit34>
+        <EditorIndex Value="3"/>
+        <UsageCount Value="90"/>
+        <Loaded Value="True"/>
+      </Unit29>
+      <Unit30>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\winapih.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="192"/>
         <CursorPos X="10" Y="208"/>
-        <UsageCount Value="2"/>
-      </Unit34>
-      <Unit35>
+        <UsageCount Value="7"/>
+      </Unit30>
+      <Unit31>
         <Filename Value="C:\NewPascal\lazarus\lcl\lcltype.pp"/>
         <UnitName Value="LCLType"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2617"/>
         <CursorPos X="3" Y="2633"/>
-        <UsageCount Value="2"/>
-      </Unit35>
-      <Unit36>
+        <UsageCount Value="7"/>
+      </Unit31>
+      <Unit32>
         <Filename Value="C:\NewPascal\lazarus\lcl\lmessages.pp"/>
         <UnitName Value="LMessages"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="218"/>
         <CursorPos X="13" Y="226"/>
-        <UsageCount Value="2"/>
-      </Unit36>
-      <Unit37>
+        <UsageCount Value="7"/>
+      </Unit32>
+      <Unit33>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\controlconsts.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="15"/>
-        <UsageCount Value="2"/>
-      </Unit37>
-      <Unit38>
+        <UsageCount Value="7"/>
+      </Unit33>
+      <Unit34>
         <Filename Value="C:\NewPascal\lazarus\lcl\lclmessageglue.pas"/>
         <UnitName Value="LCLMessageGlue"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="95"/>
         <CursorPos X="36" Y="95"/>
-        <UsageCount Value="2"/>
-      </Unit38>
-      <Unit39>
+        <UsageCount Value="7"/>
+      </Unit34>
+      <Unit35>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\gtk\gtkmsgqueue.pp"/>
         <UnitName Value="GtkMsgQueue"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="124"/>
         <CursorPos X="36" Y="137"/>
-        <UsageCount Value="2"/>
-      </Unit39>
-      <Unit40>
+        <UsageCount Value="7"/>
+      </Unit35>
+      <Unit36>
         <Filename Value="C:\NewPascal\lazarus\lcl\forms.pp"/>
         <UnitName Value="Forms"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1365"/>
         <CursorPos X="19" Y="1351"/>
-        <UsageCount Value="9"/>
-      </Unit40>
-      <Unit41>
+        <UsageCount Value="4"/>
+      </Unit36>
+      <Unit37>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\application.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1250"/>
         <CursorPos X="13" Y="1266"/>
-        <UsageCount Value="2"/>
-      </Unit41>
-      <Unit42>
+        <UsageCount Value="7"/>
+      </Unit37>
+      <Unit38>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfacebase.pp"/>
         <UnitName Value="InterfaceBase"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="131"/>
         <CursorPos X="33" Y="147"/>
-        <UsageCount Value="2"/>
-      </Unit42>
-      <Unit43>
+        <UsageCount Value="7"/>
+      </Unit38>
+      <Unit39>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\customform.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2928"/>
         <CursorPos X="23" Y="2943"/>
-        <UsageCount Value="2"/>
-      </Unit43>
-      <Unit44>
+        <UsageCount Value="7"/>
+      </Unit39>
+      <Unit40>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\carbon\carbonint.pas"/>
         <UnitName Value="CarbonInt"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="78"/>
         <CursorPos X="15" Y="93"/>
-        <UsageCount Value="2"/>
-      </Unit44>
-      <Unit45>
+        <UsageCount Value="7"/>
+      </Unit40>
+      <Unit41>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\carbon\carbonobject.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="649"/>
         <CursorPos X="29" Y="650"/>
-        <UsageCount Value="2"/>
-      </Unit45>
-      <Unit46>
+        <UsageCount Value="7"/>
+      </Unit41>
+      <Unit42>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\carbon\carbonwsdialogs.pp"/>
         <UnitName Value="CarbonWSDialogs"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="638"/>
         <CursorPos X="23" Y="661"/>
-        <UsageCount Value="2"/>
-      </Unit46>
-      <Unit47>
+        <UsageCount Value="7"/>
+      </Unit42>
+      <Unit43>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\cocoa\cocoaint.pas"/>
         <UnitName Value="CocoaInt"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="116"/>
         <CursorPos X="15" Y="131"/>
-        <UsageCount Value="2"/>
-      </Unit47>
-      <Unit48>
+        <UsageCount Value="7"/>
+      </Unit43>
+      <Unit44>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\customdrawn\customdrawnobject_android.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1318"/>
         <CursorPos X="24" Y="1340"/>
-        <UsageCount Value="2"/>
-      </Unit48>
-      <Unit49>
+        <UsageCount Value="7"/>
+      </Unit44>
+      <Unit45>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\customdrawn\customdrawnobject_cocoa.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos X="24" Y="78"/>
-        <UsageCount Value="2"/>
-      </Unit49>
-      <Unit50>
+        <UsageCount Value="7"/>
+      </Unit45>
+      <Unit46>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\customdrawn\customdrawnobject_x11.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="356"/>
         <CursorPos X="27" Y="372"/>
-        <UsageCount Value="2"/>
-      </Unit50>
-      <Unit51>
+        <UsageCount Value="7"/>
+      </Unit46>
+      <Unit47>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\win32\win32int.pp"/>
         <UnitName Value="Win32Int"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="159"/>
         <CursorPos X="15" Y="173"/>
-        <UsageCount Value="2"/>
-      </Unit51>
-      <Unit52>
+        <UsageCount Value="7"/>
+      </Unit47>
+      <Unit48>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\win32\win32object.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="382"/>
         <CursorPos X="27" Y="356"/>
-        <UsageCount Value="2"/>
-      </Unit52>
-      <Unit53>
+        <UsageCount Value="7"/>
+      </Unit48>
+      <Unit49>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\nogui\noguiint.pp"/>
         <UnitName Value="NoGUIInt"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="79"/>
         <CursorPos X="27" Y="95"/>
-        <UsageCount Value="2"/>
-      </Unit53>
-      <Unit54>
+        <UsageCount Value="7"/>
+      </Unit49>
+      <Unit50>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\gtk3\gtk3wsmenus.pp"/>
         <UnitName Value="Gtk3WSMenus"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="750"/>
         <CursorPos X="17" Y="767"/>
-        <UsageCount Value="2"/>
-      </Unit54>
-      <Unit55>
+        <UsageCount Value="7"/>
+      </Unit50>
+      <Unit51>
         <Filename Value="C:\NewPascal\lazarus\lcl\interfaces\gtk2\gtk2widgetset.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2262"/>
         <CursorPos X="26" Y="2290"/>
-        <UsageCount Value="2"/>
-      </Unit55>
-      <Unit56>
+        <UsageCount Value="7"/>
+      </Unit51>
+      <Unit52>
         <Filename Value="C:\NewPascal\lazarus\components\synedit\synedit.pp"/>
         <UnitName Value="SynEdit"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="6009"/>
         <CursorPos X="43" Y="6035"/>
-        <UsageCount Value="10"/>
-      </Unit56>
-      <Unit57>
+        <UsageCount Value="5"/>
+      </Unit52>
+      <Unit53>
         <Filename Value="C:\NewPascal\lazarus\lcl\stdctrls.pp"/>
         <UnitName Value="StdCtrls"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="551"/>
         <CursorPos X="15" Y="565"/>
-        <UsageCount Value="4"/>
-      </Unit57>
-      <Unit58>
+        <UsageCount Value="9"/>
+      </Unit53>
+      <Unit54>
         <Filename Value="C:\NewPascal2\lazarus\components\synedit\synedit.pp"/>
         <UnitName Value="SynEdit"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="918"/>
         <CursorPos X="14" Y="928"/>
-        <UsageCount Value="3"/>
-      </Unit58>
-      <Unit59>
+        <UsageCount Value="8"/>
+      </Unit54>
+      <Unit55>
         <Filename Value="C:\NewPascal\lazarus\components\synedit\lazsynedittext.pas"/>
         <UnitName Value="LazSynEditText"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="538"/>
         <CursorPos X="36" Y="555"/>
-        <UsageCount Value="2"/>
-      </Unit59>
-      <Unit60>
+        <UsageCount Value="7"/>
+      </Unit55>
+      <Unit56>
         <Filename Value="C:\NewPascal\lazarus\components\synedit\synedithighlighter.pp"/>
         <UnitName Value="SynEditHighlighter"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="249"/>
         <CursorPos X="11" Y="265"/>
-        <UsageCount Value="2"/>
-      </Unit60>
-      <Unit61>
+        <UsageCount Value="7"/>
+      </Unit56>
+      <Unit57>
         <Filename Value="C:\NewPascal\lazarus\components\synedit\synhighlighterpas.pp"/>
         <UnitName Value="SynHighlighterPas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3990"/>
         <CursorPos X="35" Y="4007"/>
-        <UsageCount Value="3"/>
-      </Unit61>
-      <Unit62>
+        <UsageCount Value="8"/>
+      </Unit57>
+      <Unit58>
         <Filename Value="synaser\ssl_sbb.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="65"/>
         <CursorPos X="12" Y="85"/>
-        <UsageCount Value="2"/>
-      </Unit62>
-      <Unit63>
+        <UsageCount Value="7"/>
+      </Unit58>
+      <Unit59>
         <Filename Value="C:\NewPascal2\fpc\packages\fcl-base\src\inifiles.pp"/>
         <UnitName Value="IniFiles"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="183"/>
         <CursorPos X="16" Y="197"/>
-        <UsageCount Value="2"/>
-      </Unit63>
-      <Unit64>
+        <UsageCount Value="7"/>
+      </Unit59>
+      <Unit60>
         <Filename Value="installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1028"/>
-        <CursorPos X="21" Y="1043"/>
-        <UsageCount Value="46"/>
-      </Unit64>
-      <Unit65>
+        <TopLine Value="936"/>
+        <CursorPos X="99" Y="955"/>
+        <UsageCount Value="55"/>
+      </Unit60>
+      <Unit61>
         <Filename Value="fpcup.ini"/>
-        <EditorIndex Value="2"/>
-        <UsageCount Value="68"/>
+        <EditorIndex Value="4"/>
+        <CursorPos X="23" Y="22"/>
+        <UsageCount Value="98"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
-      </Unit65>
-      <Unit66>
+      </Unit61>
+      <Unit62>
         <Filename Value="settings.ini"/>
-        <EditorIndex Value="3"/>
-        <UsageCount Value="68"/>
+        <EditorIndex Value="5"/>
+        <UsageCount Value="98"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
-      </Unit66>
-      <Unit67>
+      </Unit62>
+      <Unit63>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-base\src\inifiles.pp"/>
         <UnitName Value="IniFiles"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="192"/>
-        <CursorPos X="11" Y="207"/>
-        <UsageCount Value="2"/>
-      </Unit67>
-      <Unit68>
+        <TopLine Value="222"/>
+        <CursorPos X="3" Y="238"/>
+        <UsageCount Value="10"/>
+      </Unit63>
+      <Unit64>
         <Filename Value="updatelazconfig.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="467"/>
-        <CursorPos X="67" Y="477"/>
-        <UsageCount Value="3"/>
-      </Unit68>
-      <Unit69>
+        <TopLine Value="379"/>
+        <CursorPos Y="386"/>
+        <UsageCount Value="10"/>
+      </Unit64>
+      <Unit65>
         <Filename Value="C:\NewPascal\lazarus\components\codetools\ctloadlaz.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="307"/>
         <CursorPos X="46" Y="322"/>
-        <UsageCount Value="3"/>
-      </Unit69>
-      <Unit70>
+        <UsageCount Value="8"/>
+      </Unit65>
+      <Unit66>
         <Filename Value="C:\NewPascal\lazarus\ide\idecmdline.pas"/>
         <UnitName Value="IDECmdLine"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="30"/>
         <CursorPos X="29" Y="46"/>
-        <UsageCount Value="3"/>
-      </Unit70>
-      <Unit71>
+        <UsageCount Value="8"/>
+      </Unit66>
+      <Unit67>
         <Filename Value="C:\NewPascal\lazarus\ide\lazarusidestrconsts.pas"/>
         <UnitName Value="LazarusIDEStrConsts"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1058"/>
         <CursorPos X="34" Y="1074"/>
-        <UsageCount Value="3"/>
-      </Unit71>
-      <Unit72>
+        <UsageCount Value="8"/>
+      </Unit67>
+      <Unit68>
         <Filename Value="C:\NewPascal\lazarus\tools\install\win\innoscript\conffile.pas"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="16" Y="26"/>
-        <UsageCount Value="3"/>
-      </Unit72>
-      <Unit73>
+        <UsageCount Value="8"/>
+      </Unit68>
+      <Unit69>
         <Filename Value="revision.inc"/>
         <EditorIndex Value="-1"/>
+        <CursorPos X="7"/>
+        <UsageCount Value="6"/>
+      </Unit69>
+      <Unit70>
+        <Filename Value="gitclient.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="151"/>
+        <CursorPos X="54" Y="167"/>
+        <UsageCount Value="9"/>
+      </Unit70>
+      <Unit71>
+        <Filename Value="svnclient.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="282"/>
+        <CursorPos X="91" Y="298"/>
+        <UsageCount Value="23"/>
+      </Unit71>
+      <Unit72>
+        <Filename Value="repoclient.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="192"/>
+        <CursorPos X="33" Y="216"/>
+        <UsageCount Value="18"/>
+      </Unit72>
+      <Unit73>
+        <Filename Value="C:\NewPascal\fpc\packages\rtl-objpas\src\inc\strutils.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="202"/>
+        <CursorPos X="64" Y="208"/>
         <UsageCount Value="9"/>
       </Unit73>
       <Unit74>
-        <Filename Value="gitclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="186"/>
-        <CursorPos X="48" Y="199"/>
-        <UsageCount Value="11"/>
-      </Unit74>
-      <Unit75>
-        <Filename Value="svnclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="107"/>
-        <CursorPos X="77" Y="122"/>
-        <UsageCount Value="12"/>
-      </Unit75>
-      <Unit76>
-        <Filename Value="repoclient.pas"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="56"/>
-        <CursorPos X="5" Y="60"/>
-        <UsageCount Value="11"/>
-      </Unit76>
-      <Unit77>
-        <Filename Value="C:\NewPascal\fpc\packages\rtl-objpas\src\inc\strutils.pp"/>
-        <EditorIndex Value="-1"/>
-        <TopLine Value="225"/>
-        <CursorPos X="76" Y="240"/>
-        <UsageCount Value="10"/>
-      </Unit77>
-      <Unit78>
         <Filename Value="C:\NewPascal\lazarus\components\lazutils\lazfileutils.pas"/>
         <UnitName Value="LazFileUtils"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="109"/>
         <CursorPos X="10" Y="125"/>
-        <UsageCount Value="9"/>
-      </Unit78>
-      <Unit79>
+        <UsageCount Value="4"/>
+      </Unit74>
+      <Unit75>
         <Filename Value="C:\NewPascal\lazarus\components\lazutils\fileutil.pas"/>
         <UnitName Value="FileUtil"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="151"/>
-        <CursorPos X="10" Y="167"/>
-        <UsageCount Value="10"/>
-      </Unit79>
-      <Unit80>
+        <TopLine Value="253"/>
+        <CursorPos X="10" Y="269"/>
+        <UsageCount Value="12"/>
+      </Unit75>
+      <Unit76>
         <Filename Value="C:\NewPascal\fpc\rtl\objpas\sysutils\finah.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="7"/>
-        <CursorPos X="10" Y="23"/>
-        <UsageCount Value="9"/>
-      </Unit80>
-      <Unit81>
+        <TopLine Value="12"/>
+        <CursorPos X="23" Y="22"/>
+        <UsageCount Value="11"/>
+      </Unit76>
+      <Unit77>
         <Filename Value="mainform.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="308"/>
-        <CursorPos X="13" Y="323"/>
-        <UsageCount Value="4"/>
-      </Unit81>
-      <Unit82>
+        <TopLine Value="122"/>
+        <CursorPos X="17" Y="138"/>
+        <UsageCount Value="8"/>
+      </Unit77>
+      <Unit78>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="173"/>
-        <CursorPos X="24" Y="123"/>
+        <TopLine Value="80"/>
+        <CursorPos X="10" Y="102"/>
         <UsageCount Value="8"/>
-      </Unit82>
-      <Unit83>
+      </Unit78>
+      <Unit79>
         <Filename Value="m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="71"/>
-        <UsageCount Value="8"/>
-      </Unit83>
-      <Unit84>
+        <UsageCount Value="26"/>
+      </Unit79>
+      <Unit80>
         <Filename Value="C:\NewPascal\fpc\rtl\objpas\sysutils\diskh.inc"/>
         <EditorIndex Value="-1"/>
         <CursorPos X="10" Y="26"/>
-        <UsageCount Value="9"/>
-      </Unit84>
-      <Unit85>
+        <UsageCount Value="4"/>
+      </Unit80>
+      <Unit81>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-process\src\process.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="529"/>
         <CursorPos X="34" Y="459"/>
-        <UsageCount Value="9"/>
-      </Unit85>
-      <Unit86>
+        <UsageCount Value="4"/>
+      </Unit81>
+      <Unit82>
         <Filename Value="m_win64_to_linux64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="112"/>
-        <CursorPos X="25" Y="109"/>
-        <UsageCount Value="7"/>
-      </Unit86>
-      <Unit87>
+        <TopLine Value="81"/>
+        <CursorPos X="8" Y="96"/>
+        <UsageCount Value="8"/>
+      </Unit82>
+      <Unit83>
         <Filename Value="m_any_to_androidarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="143"/>
-        <CursorPos Y="175"/>
+        <TopLine Value="193"/>
+        <CursorPos X="8" Y="210"/>
         <UsageCount Value="9"/>
-      </Unit87>
-      <Unit88>
+      </Unit83>
+      <Unit84>
         <Filename Value="m_crosswin64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="52"/>
         <CursorPos X="23" Y="49"/>
-        <UsageCount Value="8"/>
-      </Unit88>
-      <Unit89>
+        <UsageCount Value="3"/>
+      </Unit84>
+      <Unit85>
         <Filename Value="m_crossdarwin32.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
         <CursorPos X="20" Y="56"/>
-        <UsageCount Value="7"/>
-      </Unit89>
-      <Unit90>
+        <UsageCount Value="2"/>
+      </Unit85>
+      <Unit86>
         <Filename Value="m_crossdarwin64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="40"/>
         <CursorPos X="20" Y="56"/>
-        <UsageCount Value="7"/>
-      </Unit90>
-      <Unit91>
+        <UsageCount Value="2"/>
+      </Unit86>
+      <Unit87>
         <Filename Value="m_any_to_linux386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="75"/>
-        <CursorPos X="70" Y="99"/>
-        <UsageCount Value="14"/>
-      </Unit91>
-      <Unit92>
+        <TopLine Value="84"/>
+        <CursorPos X="8" Y="101"/>
+        <UsageCount Value="12"/>
+      </Unit87>
+      <Unit88>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
         <CursorPos X="36" Y="57"/>
-        <UsageCount Value="8"/>
-      </Unit92>
-      <Unit93>
+        <UsageCount Value="3"/>
+      </Unit88>
+      <Unit89>
         <Filename Value="m_anyinternallinker_to_win64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="41"/>
         <CursorPos X="35" Y="57"/>
-        <UsageCount Value="8"/>
-      </Unit93>
-      <Unit94>
+        <UsageCount Value="3"/>
+      </Unit89>
+      <Unit90>
         <Filename Value="m_any_to_aixpowerpc.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="103"/>
         <CursorPos X="16" Y="119"/>
-        <UsageCount Value="8"/>
-      </Unit94>
-      <Unit95>
+        <UsageCount Value="3"/>
+      </Unit90>
+      <Unit91>
         <Filename Value="m_any_to_androidjvm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="33"/>
         <CursorPos Y="47"/>
-        <UsageCount Value="8"/>
-      </Unit95>
-      <Unit96>
+        <UsageCount Value="3"/>
+      </Unit91>
+      <Unit92>
         <Filename Value="m_any_to_embeddedarm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="101"/>
         <CursorPos X="16" Y="117"/>
-        <UsageCount Value="8"/>
-      </Unit96>
-      <Unit97>
+        <UsageCount Value="3"/>
+      </Unit92>
+      <Unit93>
         <Filename Value="m_any_to_javajvm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="32"/>
         <CursorPos Y="47"/>
-        <UsageCount Value="8"/>
-      </Unit97>
-      <Unit98>
+        <UsageCount Value="3"/>
+      </Unit93>
+      <Unit94>
         <Filename Value="m_any_to_linuxaarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="25"/>
-        <CursorPos Y="40"/>
+        <TopLine Value="78"/>
+        <CursorPos X="8" Y="93"/>
         <UsageCount Value="8"/>
-      </Unit98>
-      <Unit99>
+      </Unit94>
+      <Unit95>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="249"/>
-        <CursorPos X="24" Y="243"/>
-        <UsageCount Value="7"/>
-      </Unit99>
-      <Unit100>
+        <TopLine Value="112"/>
+        <CursorPos X="8" Y="127"/>
+        <UsageCount Value="8"/>
+      </Unit95>
+      <Unit96>
         <Filename Value="m_crosswin32.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="55"/>
         <CursorPos X="17" Y="71"/>
-        <UsageCount Value="7"/>
-      </Unit100>
-      <Unit101>
+        <UsageCount Value="2"/>
+      </Unit96>
+      <Unit97>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="44"/>
         <CursorPos X="32" Y="54"/>
-        <UsageCount Value="7"/>
-      </Unit101>
-      <Unit102>
+        <UsageCount Value="2"/>
+      </Unit97>
+      <Unit98>
         <Filename Value="m_freebsd_to_linux386.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="66"/>
         <CursorPos X="28" Y="73"/>
-        <UsageCount Value="7"/>
-      </Unit102>
-      <Unit103>
+        <UsageCount Value="2"/>
+      </Unit98>
+      <Unit99>
         <Filename Value="m_freebsd_to_linux64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="113"/>
         <CursorPos X="27" Y="99"/>
-        <UsageCount Value="7"/>
-      </Unit103>
-      <Unit104>
+        <UsageCount Value="2"/>
+      </Unit99>
+      <Unit100>
         <Filename Value="m_linux386_to_mips.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="62"/>
-        <CursorPos Y="77"/>
+        <TopLine Value="105"/>
+        <CursorPos X="8" Y="120"/>
         <UsageCount Value="8"/>
-      </Unit104>
-      <Unit105>
+      </Unit100>
+      <Unit101>
         <Filename Value="m_linux386_to_mipsel.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="143"/>
-        <CursorPos X="27" Y="134"/>
-        <UsageCount Value="7"/>
-      </Unit105>
-      <Unit106>
+        <TopLine Value="106"/>
+        <CursorPos X="8" Y="121"/>
+        <UsageCount Value="8"/>
+      </Unit101>
+      <Unit102>
         <Filename Value="m_win32_to_go32v2i386.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="121"/>
         <CursorPos X="28" Y="118"/>
-        <UsageCount Value="7"/>
-      </Unit106>
-      <Unit107>
+        <UsageCount Value="2"/>
+      </Unit102>
+      <Unit103>
         <Filename Value="m_win32_to_linux386.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="87"/>
-        <CursorPos X="14" Y="91"/>
+        <CursorPos Y="102"/>
         <UsageCount Value="10"/>
-      </Unit107>
-      <Unit108>
+      </Unit103>
+      <Unit104>
         <Filename Value="m_win32_to_linuxmips.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="112"/>
         <CursorPos X="27" Y="118"/>
-        <UsageCount Value="7"/>
-      </Unit108>
-      <Unit109>
+        <UsageCount Value="2"/>
+      </Unit104>
+      <Unit105>
         <Filename Value="m_win32_to_msdosi8086.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="141"/>
         <CursorPos X="28" Y="124"/>
-        <UsageCount Value="7"/>
-      </Unit109>
-      <Unit110>
+        <UsageCount Value="2"/>
+      </Unit105>
+      <Unit106>
         <Filename Value="m_win32_to_wincearm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="131"/>
         <CursorPos X="26" Y="120"/>
-        <UsageCount Value="7"/>
-      </Unit110>
-      <Unit111>
+        <UsageCount Value="2"/>
+      </Unit106>
+      <Unit107>
         <Filename Value="C:\NewPascal\fpc\rtl\objpas\sysutils\filutilh.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="78"/>
-        <CursorPos X="12" Y="93"/>
-        <UsageCount Value="8"/>
-      </Unit111>
-      <Unit112>
+        <TopLine Value="139"/>
+        <CursorPos X="10" Y="155"/>
+        <UsageCount Value="11"/>
+      </Unit107>
+      <Unit108>
         <Filename Value="C:\NewPascal\fpc\rtl\win32\system.pp"/>
         <UnitName Value="System"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="35"/>
         <CursorPos X="2" Y="50"/>
-        <UsageCount Value="7"/>
-      </Unit112>
-      <Unit113>
+        <UsageCount Value="2"/>
+      </Unit108>
+      <Unit109>
         <Filename Value="installerhelp.pas"/>
         <UnitName Value="installerHelp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="237"/>
         <CursorPos Y="260"/>
-        <UsageCount Value="9"/>
-      </Unit113>
-      <Unit114>
+        <UsageCount Value="4"/>
+      </Unit109>
+      <Unit110>
         <Filename Value="C:\NewPascal\fpc\rtl\objpas\sysutils\osutilsh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="13"/>
         <CursorPos X="32" Y="25"/>
-        <UsageCount Value="9"/>
-      </Unit114>
-      <Unit115>
+        <UsageCount Value="4"/>
+      </Unit110>
+      <Unit111>
         <Filename Value="C:\NewPascal\fpc\rtl\objpas\sysutils\sysstrh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="12"/>
         <CursorPos X="54" Y="28"/>
-        <UsageCount Value="9"/>
-      </Unit115>
-      <Unit116>
+        <UsageCount Value="4"/>
+      </Unit111>
+      <Unit112>
         <Filename Value="C:\NewPascal\fpc\packages\univint\src\MacOSAll.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="238"/>
         <CursorPos X="14" Y="11"/>
-        <UsageCount Value="8"/>
-      </Unit116>
-      <Unit117>
+        <UsageCount Value="3"/>
+      </Unit112>
+      <Unit113>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-base\src\custapp.pp"/>
         <UnitName Value="CustApp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="130"/>
         <CursorPos Y="120"/>
-        <UsageCount Value="9"/>
-      </Unit117>
-      <Unit118>
+        <UsageCount Value="4"/>
+      </Unit113>
+      <Unit114>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-base\src\streamio.pp"/>
         <UnitName Value="StreamIO"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="16"/>
         <CursorPos X="9" Y="138"/>
-        <UsageCount Value="9"/>
-      </Unit118>
-      <Unit119>
+        <UsageCount Value="4"/>
+      </Unit114>
+      <Unit115>
         <Filename Value="C:\NewPascal\fpc\rtl\inc\textrec.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="26"/>
         <CursorPos X="38" Y="49"/>
-        <UsageCount Value="9"/>
-      </Unit119>
-      <Unit120>
+        <UsageCount Value="4"/>
+      </Unit115>
+      <Unit116>
         <Filename Value="C:\NewPascal\fpc\rtl\inc\systemh.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1281"/>
         <CursorPos X="11" Y="1315"/>
-        <UsageCount Value="8"/>
-      </Unit120>
-      <Unit121>
+        <UsageCount Value="3"/>
+      </Unit116>
+      <Unit117>
         <Filename Value="C:\NewPascal\fpc\packages\rtl-extra\src\inc\sockets.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="108"/>
         <CursorPos X="5" Y="120"/>
-        <UsageCount Value="8"/>
-      </Unit121>
-      <Unit122>
+        <UsageCount Value="3"/>
+      </Unit117>
+      <Unit118>
         <Filename Value="C:\NewPascal\fpc\rtl\inc\text.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="192"/>
         <CursorPos X="24" Y="207"/>
-        <UsageCount Value="8"/>
-      </Unit122>
-      <Unit123>
+        <UsageCount Value="3"/>
+      </Unit118>
+      <Unit119>
         <Filename Value="C:\NewPascal\fpc\rtl\win\sysos.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="322"/>
         <CursorPos X="13" Y="338"/>
-        <UsageCount Value="9"/>
-      </Unit123>
-      <Unit124>
+        <UsageCount Value="4"/>
+      </Unit119>
+      <Unit120>
         <Filename Value="C:\NewPascal\fpc\rtl\java\justrings.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="19"/>
         <CursorPos X="21" Y="129"/>
-        <UsageCount Value="8"/>
-      </Unit124>
-      <Unit125>
+        <UsageCount Value="3"/>
+      </Unit120>
+      <Unit121>
         <Filename Value="C:\NewPascal\fpc\rtl\inc\system.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="142"/>
         <CursorPos Y="163"/>
-        <UsageCount Value="8"/>
-      </Unit125>
-      <Unit126>
+        <UsageCount Value="3"/>
+      </Unit121>
+      <Unit122>
         <Filename Value="C:\NewPascal\fpc\rtl\inc\astrings.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="48"/>
         <CursorPos X="10" Y="64"/>
-        <UsageCount Value="8"/>
-      </Unit126>
-      <Unit127>
+        <UsageCount Value="3"/>
+      </Unit122>
+      <Unit123>
         <Filename Value="C:\NewPascal\fpc\packages\libxml\src\nanoftp.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="58"/>
         <CursorPos X="27" Y="63"/>
-        <UsageCount Value="8"/>
-      </Unit127>
-      <Unit128>
+        <UsageCount Value="3"/>
+      </Unit123>
+      <Unit124>
         <Filename Value="C:\NewPascal\fpc\packages\libxml\src\xmlerror.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="820"/>
         <CursorPos X="4" Y="836"/>
-        <UsageCount Value="8"/>
-      </Unit128>
-      <Unit129>
+        <UsageCount Value="3"/>
+      </Unit124>
+      <Unit125>
         <Filename Value="C:\NewPascal\fpc\packages\libmicrohttpd\examples\cutils.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="160"/>
         <CursorPos X="7" Y="182"/>
-        <UsageCount Value="8"/>
-      </Unit129>
-      <Unit130>
+        <UsageCount Value="3"/>
+      </Unit125>
+      <Unit126>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-sdo\src\base\sdo_binary_streamer.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="651"/>
         <CursorPos Y="667"/>
-        <UsageCount Value="8"/>
-      </Unit130>
-      <Unit131>
+        <UsageCount Value="3"/>
+      </Unit126>
+      <Unit127>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-sdo\src\base\sdo_date_utils.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="382"/>
         <CursorPos Y="398"/>
-        <UsageCount Value="8"/>
-      </Unit131>
-      <Unit132>
+        <UsageCount Value="3"/>
+      </Unit127>
+      <Unit128>
         <Filename Value="C:\NewPascal\fpc\packages\objcrtl\src\objcrtl10.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="31"/>
         <CursorPos Y="38"/>
-        <UsageCount Value="8"/>
-      </Unit132>
-      <Unit133>
+        <UsageCount Value="3"/>
+      </Unit128>
+      <Unit129>
         <Filename Value="C:\NewPascal\fpc\tests\test\tcpstr7.pp"/>
         <EditorIndex Value="-1"/>
         <CursorPos Y="2"/>
-        <UsageCount Value="8"/>
-      </Unit133>
-      <Unit134>
+        <UsageCount Value="3"/>
+      </Unit129>
+      <Unit130>
         <Filename Value="C:\NewPascal\fpc\tests\test\tdispinterface2.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="27"/>
         <CursorPos Y="34"/>
-        <UsageCount Value="8"/>
-      </Unit134>
-      <Unit135>
+        <UsageCount Value="3"/>
+      </Unit130>
+      <Unit131>
         <Filename Value="C:\NewPascal\fpc\tests\webtbf\tw2478.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="7"/>
         <CursorPos Y="7"/>
-        <UsageCount Value="8"/>
-      </Unit135>
-      <Unit136>
+        <UsageCount Value="3"/>
+      </Unit131>
+      <Unit132>
         <Filename Value="C:\NewPascal\fpc\tests\webtbs\tw16018.pp"/>
         <UnitName Value="testbug"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="20"/>
         <CursorPos Y="36"/>
-        <UsageCount Value="8"/>
-      </Unit136>
-      <Unit137>
+        <UsageCount Value="3"/>
+      </Unit132>
+      <Unit133>
         <Filename Value="C:\NewPascal\fpc\tests\webtbs\tw17180.pp"/>
         <UnitName Value="testbug"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="20"/>
         <CursorPos Y="36"/>
-        <UsageCount Value="8"/>
-      </Unit137>
-      <Unit138>
+        <UsageCount Value="3"/>
+      </Unit133>
+      <Unit134>
         <Filename Value="backup\m_any_to_androidjvm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="36"/>
         <CursorPos Y="47"/>
-        <UsageCount Value="8"/>
-      </Unit138>
-      <Unit139>
+        <UsageCount Value="3"/>
+      </Unit134>
+      <Unit135>
         <Filename Value="backup\m_any_to_javajvm.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="32"/>
         <CursorPos Y="47"/>
-        <UsageCount Value="8"/>
-      </Unit139>
-      <Unit140>
+        <UsageCount Value="3"/>
+      </Unit135>
+      <Unit136>
         <Filename Value="backup\m_any_to_linux386.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="22"/>
         <CursorPos Y="47"/>
-        <UsageCount Value="8"/>
-      </Unit140>
-      <Unit141>
+        <UsageCount Value="3"/>
+      </Unit136>
+      <Unit137>
         <Filename Value="backup\m_any_to_linuxaarch64.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos Y="40"/>
-        <UsageCount Value="8"/>
-      </Unit141>
-      <Unit142>
+        <UsageCount Value="3"/>
+      </Unit137>
+      <Unit138>
         <Filename Value="backup\m_linux386_to_mips.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="8"/>
-      </Unit142>
-      <Unit143>
+        <UsageCount Value="3"/>
+      </Unit138>
+      <Unit139>
         <Filename Value="C:\NewPascal\fpc\rtl\objpas\classes\classesh.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="409"/>
-        <CursorPos X="3" Y="425"/>
-        <UsageCount Value="9"/>
-      </Unit143>
-      <Unit144>
+        <TopLine Value="56"/>
+        <CursorPos X="3" Y="72"/>
+        <UsageCount Value="10"/>
+      </Unit139>
+      <Unit140>
         <Filename Value="C:\NewPascal\lazarus\lcl\controls.pp"/>
         <UnitName Value="Controls"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="205"/>
         <CursorPos X="3" Y="221"/>
-        <UsageCount Value="9"/>
-      </Unit144>
-      <Unit145>
+        <UsageCount Value="4"/>
+      </Unit140>
+      <Unit141>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-base\src\os2\eventlog.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="208"/>
         <CursorPos X="75" Y="170"/>
-        <UsageCount Value="9"/>
-      </Unit145>
-      <Unit146>
+        <UsageCount Value="4"/>
+      </Unit141>
+      <Unit142>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-base\src\unix\eventlog.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="104"/>
         <CursorPos X="8" Y="123"/>
-        <UsageCount Value="9"/>
-      </Unit146>
-      <Unit147>
+        <UsageCount Value="4"/>
+      </Unit142>
+      <Unit143>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-base\src\win\eventlog.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="132"/>
         <CursorPos X="17" Y="149"/>
-        <UsageCount Value="9"/>
-      </Unit147>
-      <Unit148>
+        <UsageCount Value="4"/>
+      </Unit143>
+      <Unit144>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-extra\src\daemonapp.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="350"/>
         <CursorPos X="32" Y="364"/>
-        <UsageCount Value="9"/>
-      </Unit148>
-      <Unit149>
+        <UsageCount Value="4"/>
+      </Unit144>
+      <Unit145>
         <Filename Value="C:\NewPascal\lazarus\lcl\graphics.pp"/>
         <UnitName Value="Graphics"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="295"/>
         <CursorPos X="3" Y="310"/>
-        <UsageCount Value="9"/>
-      </Unit149>
-      <Unit150>
+        <UsageCount Value="4"/>
+      </Unit145>
+      <Unit146>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\control.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="3638"/>
         <CursorPos Y="3654"/>
-        <UsageCount Value="10"/>
-      </Unit150>
-      <Unit151>
+        <UsageCount Value="5"/>
+      </Unit146>
+      <Unit147>
         <Filename Value="fpcupdeluxemainform.lfm"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <UsageCount Value="4"/>
         <DefaultSyntaxHighlighter Value="LFM"/>
-      </Unit151>
-      <Unit152>
+      </Unit147>
+      <Unit148>
         <Filename Value="C:\NewPascal\fpc\rtl\amiga\m68k\doslibf.inc"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="389"/>
         <CursorPos X="10" Y="405"/>
-        <UsageCount Value="9"/>
-      </Unit152>
-      <Unit153>
+        <UsageCount Value="4"/>
+      </Unit148>
+      <Unit149>
         <Filename Value="C:\NewPascal\fpc\packages\os4units\src\amigados.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="2439"/>
         <CursorPos X="10" Y="2455"/>
-        <UsageCount Value="9"/>
-      </Unit153>
-      <Unit154>
+        <UsageCount Value="4"/>
+      </Unit149>
+      <Unit150>
         <Filename Value="backup\fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="20"/>
         <CursorPos X="14" Y="28"/>
-        <UsageCount Value="9"/>
-      </Unit154>
-      <Unit155>
+        <UsageCount Value="4"/>
+      </Unit150>
+      <Unit151>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-web\src\base\fphttpclient.pp"/>
         <EditorIndex Value="-1"/>
         <TopLine Value="1000"/>
         <CursorPos X="3" Y="1011"/>
-        <UsageCount Value="12"/>
+        <UsageCount Value="7"/>
+      </Unit151>
+      <Unit152>
+        <Filename Value="m_any_to_darwin386.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="27"/>
+      </Unit152>
+      <Unit153>
+        <Filename Value="C:\cygwin\home\Alfred\osxcross\wrapper\target.cpp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="274"/>
+        <CursorPos X="32" Y="283"/>
+        <UsageCount Value="17"/>
+        <DefaultSyntaxHighlighter Value="C++"/>
+      </Unit153>
+      <Unit154>
+        <Filename Value="hgclient.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="136"/>
+        <CursorPos X="53" Y="152"/>
+        <UsageCount Value="9"/>
+      </Unit154>
+      <Unit155>
+        <Filename Value="wininstaller.pas"/>
+        <UnitName Value="winInstaller"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="224"/>
+        <CursorPos Y="163"/>
+        <UsageCount Value="16"/>
       </Unit155>
+      <Unit156>
+        <Filename Value="C:\NewPascal\lazarus\components\lazutils\laz2_xmlread.pas"/>
+        <UnitName Value="laz2_XMLRead"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="24"/>
+        <CursorPos X="35" Y="37"/>
+        <UsageCount Value="10"/>
+      </Unit156>
     </Units>
-    <JumpHistory Count="1">
+    <JumpHistory Count="21" HistoryIndex="20">
       <Position1>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="635" TopLine="628"/>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="1267" Column="24" TopLine="1262"/>
       </Position1>
+      <Position2>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="171" Column="11" TopLine="157"/>
+      </Position2>
+      <Position3>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="502" Column="22" TopLine="480"/>
+      </Position3>
+      <Position4>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="503" Column="72" TopLine="480"/>
+      </Position4>
+      <Position5>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+      </Position5>
+      <Position6>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="421" Column="31" TopLine="395"/>
+      </Position6>
+      <Position7>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="437" Column="31" TopLine="411"/>
+      </Position7>
+      <Position8>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="438" Column="33" TopLine="412"/>
+      </Position8>
+      <Position9>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="502" Column="29" TopLine="475"/>
+      </Position9>
+      <Position10>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="503" Column="72" TopLine="476"/>
+      </Position10>
+      <Position11>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="581" Column="29" TopLine="534"/>
+      </Position11>
+      <Position12>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="704" Column="29" TopLine="683"/>
+      </Position12>
+      <Position13>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="841" Column="27" TopLine="829"/>
+      </Position13>
+      <Position14>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="841" Column="27" TopLine="829"/>
+      </Position14>
+      <Position15>
+        <Filename Value="fpcupdeluxe.lpr"/>
+        <Caret Line="63" TopLine="32"/>
+      </Position15>
+      <Position16>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="22" Column="23"/>
+      </Position16>
+      <Position17>
+        <Filename Value="fpcup.ini"/>
+      </Position17>
+      <Position18>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="1183" Column="31" TopLine="1158"/>
+      </Position18>
+      <Position19>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="1184" Column="35" TopLine="1159"/>
+      </Position19>
+      <Position20>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="1192" Column="31" TopLine="1167"/>
+      </Position20>
+      <Position21>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="1195" Column="45" TopLine="1180"/>
+      </Position21>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

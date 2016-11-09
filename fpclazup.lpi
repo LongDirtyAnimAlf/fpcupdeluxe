@@ -284,7 +284,7 @@ end;"/>
     <RunParams>
       <local>
         <FormatVersion Value="1"/>
-        <CommandLineParams Value="--installdir=&quot;C:\NewPascallll\&quot; --fpcURL=&quot;trunk&quot; --lazURL=&quot;trunk&quot;"/>
+        <CommandLineParams Value="--verbose --fpcURL=&quot;newpascal&quot; --lazURL=&quot;newpascal&quot; --ostarget=&quot;darwin&quot; --cputarget=&quot;i386&quot; --only=&quot;FPCCleanOnly,FPCBuildOnly&quot; --installdir=&quot;c:\NewPascal\&quot;"/>
       </local>
     </RunParams>
     <RequiredPackages Count="2">
