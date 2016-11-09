@@ -341,7 +341,11 @@ begin
       BG      := clBlue;
       Special := True;
       // filter on fatal
-      if (Pos('fatal:',lowercase(s))>0) then Memo1.Lines.Append(s);
+      if (Pos('fatal:',lowercase(s))>0) then
+      begin
+        Memo1.Lines.Append(s);
+        Memo1.Lines.Append(SynEdit1.Lines[Line-2]);
+      end;
       if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
       begin
         Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');

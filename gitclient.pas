@@ -172,12 +172,17 @@ var
   Command: string = '';
   Output: string = '';
   RetryAttempt: integer;
+  aBranch: string = '';
   //TargetFile: string;
 begin
   if NOT ValidClient then exit;
 
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
+
+  if Branch=''
+     then aBranch:='master'
+     else aBranch:=Branch;
 
   // Actual clone/checkout
   if ExportOnly then
@@ -191,18 +196,18 @@ begin
     }
     if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
     begin
-      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all ',LocalRepository, FVerbose);
-      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/master ',LocalRepository, FVerbose);
+      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all',LocalRepository, FVerbose);
+      ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+aBranch,LocalRepository, FVerbose);
     end
     else
     begin
       // initial : very shallow clone = fast !!
-      Command := ' clone --recurse-submodules --depth 1 ' + Repository + ' ' + LocalRepository
+      Command := ' clone --recurse-submodules --depth 1 -b ' + aBranch + ' ' + Repository + ' ' + LocalRepository
     end;
   end
   else
   begin
-    Command := ' clone --recurse-submodules ' + Repository + ' ' + LocalRepository;
+    Command := ' clone --recurse-submodules -b ' + aBranch + ' ' +  Repository + ' ' + LocalRepository;
   end;
 
   if Command<>''

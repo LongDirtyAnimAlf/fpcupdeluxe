@@ -1068,6 +1068,7 @@ var
   PackageName:string;
   ExtensionName:string;
   Direction:string;
+  Branch:string;
 
 begin
   result:=InitModule;
@@ -1080,6 +1081,7 @@ begin
 
     WritelnLog('Getting module '+ModuleName,True);
     InstallDir:=GetValue('InstallDir',sl);
+    Branch:=GetValue('Branch',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
     // Common keywords for all repo methods
@@ -1104,6 +1106,7 @@ begin
         FGitClient.ModuleName:=ModuleName;
         FGitClient.Verbose:=FVerbose;
         FGitClient.ExportOnly:=FExportOnly;
+        FGitClient.Branch:=Branch;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=result;
         if UpdateWarnings.Count>0 then

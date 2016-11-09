@@ -51,6 +51,7 @@ type
   TRepoClient = class(TObject)
   protected
     FDesiredRevision: string;
+    FBranch: string;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
     FHTTPProxyPort: integer;
@@ -73,6 +74,7 @@ type
     // Makes sure non-empty strings have a / at the end.
     function IncludeTrailingSlash(AValue: string): string; virtual;
     procedure SetDesiredRevision(AValue: string); virtual;
+    procedure SetBranch(AValue: string); virtual;
     procedure SetLocalRepository(AValue: string); virtual;
     procedure SetRepositoryURL(AValue: string); virtual;
     procedure SetRepoExecutable(AValue: string); virtual;
@@ -105,6 +107,8 @@ type
     procedure Revert; virtual;
     // Get/set desired revision to checkout/pull to (if none given, use HEAD/tip/newest)
     property DesiredRevision: string read FDesiredRevision write SetDesiredRevision;
+    // Get/set desired branch to checkout/pull
+    property Branch: string read FBranch write SetBranch;
     // If using http transport, an http proxy can be used. Proxy hostname/ip address
     property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
     // If using http transport, an http proxy can be used. Proxy port
@@ -179,6 +183,14 @@ begin
     Exit;
   FDesiredRevision := AValue;
 end;
+
+procedure TRepoClient.SetBranch(AValue: string);
+begin
+  if FBranch = AValue then
+    Exit;
+  FBranch := AValue;
+end;
+
 
 procedure TRepoClient.SetLocalRepository(AValue: string);
  // Sets local repository, converting relative path to absolute path
