@@ -17,7 +17,7 @@ function sysconf(i: cint): clong; cdecl; external name 'sysconf';
 {$IF defined(windows)}
 uses windows;
 {$endif}
-{$IF defined(darwin)}
+{$IF defined(darwin) OR defined(freebsd)}
 uses ctypes, sysctl;
 {$endif}
 

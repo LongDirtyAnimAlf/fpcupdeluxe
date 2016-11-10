@@ -173,11 +173,6 @@ begin
 
   FPCupManager.LoadFPCUPConfig;
 
-  {$IF (defined(BSD)) and (not defined(Darwin))}
-  FInstaller.FPCOpt:='-Fl/usr/local/lib';
-  FInstaller.LazarusOpt:='-Fl/usr/local/lib -Fl/usr/X11R6/lib';
-  {$endif}
-
   FPCupManager.FPCURL:='default';
   FPCupManager.LazarusURL:='default';
   FPCupManager.Verbose:=true;
@@ -849,6 +844,7 @@ begin
   FPCupManager.CrossOS_Target:='';
   FPCupManager.CrossOS_SubArch:='';
 
+  FPCupManager.LazarusOpt:='';
   FPCupManager.FPCOPT:='';
   FPCupManager.CrossOPT:='';
 
@@ -900,6 +896,11 @@ begin
   writeln('Binutils/make dir:  '+FPCupManager.MakeDirectory);
   {$ENDIF MSWINDOWS}
   writeln('Bootstrap dir:      '+FPCupManager.BootstrapCompilerDirectory);
+
+  {$IF (defined(BSD)) and (not defined(Darwin))}
+  FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib';
+  FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
+  {$endif}
 
   if FPCupManager.FPCURL<>'SKIP' then
   begin

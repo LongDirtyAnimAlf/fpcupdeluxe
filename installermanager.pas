@@ -888,7 +888,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       if (Output='arch') OR (Output='manjaro') then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
-        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
+        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
       end
       else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
       begin
@@ -926,10 +926,9 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
         LS[11].lib:='libpangocairo-1.0.so';
         }
-
-        Output:='libgtk2.0-dev libcairo2-dev libpango1.0-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
+        Output:='libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
         AdvicedLibs:=AdvicedLibs+
-                     'build-essential gcc devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
+                     'build-essential gcc subversion devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                      'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
                      'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf';
       end

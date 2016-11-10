@@ -600,8 +600,8 @@ object Form1: TForm1
   end
   object ListBox3: TListBox
     Left = 168
-    Height = 216
-    Top = 232
+    Height = 208
+    Top = 240
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
     ItemHeight = 0
@@ -614,7 +614,7 @@ object Form1: TForm1
     Left = 168
     Height = 29
     Top = 496
-    Width = 189
+    Width = 191
     Anchors = [akLeft, akBottom]
     Caption = 'Install module(s) from list'
     OnClick = Button2Click
@@ -655,7 +655,7 @@ object Form1: TForm1
     Left = 168
     Height = 129
     Hint = 'Double click to select location for cross-tools'
-    Top = 56
+    Top = 64
     Width = 92
     AutoFill = True
     Caption = 'CPU'
@@ -683,10 +683,10 @@ object Form1: TForm1
   end
   object RadioGroup2: TRadioGroup
     Left = 260
-    Height = 145
+    Height = 158
     Hint = 'Double click to select location for cross-tools'
-    Top = 40
-    Width = 97
+    Top = 35
+    Width = 99
     AutoFill = True
     Caption = 'OS'
     ChildSizing.LeftRightSpacing = 6
@@ -696,13 +696,14 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 125
-    ClientWidth = 93
+    ClientHeight = 138
+    ClientWidth = 95
     Items.Strings = (
       'windows'
       'linux'
       'android'
       'darwin'
+      'freebsd'
       'wince'
       'java'
     )
@@ -715,8 +716,8 @@ object Form1: TForm1
   object Button5: TButton
     Left = 168
     Height = 36
-    Top = 192
-    Width = 190
+    Top = 200
+    Width = 191
     Caption = 'Install cross-compiler'
     OnClick = Button5Click
     TabOrder = 13
@@ -738,9 +739,9 @@ object Form1: TForm1
     TabOrder = 15
   end
   object Button6: TButton
-    Left = 0
+    Left = 1
     Height = 29
-    Top = 232
+    Top = 224
     Width = 161
     Caption = 'Install/update FPC only'
     OnClick = Button6Click
@@ -1972,7 +1973,7 @@ object Form1: TForm1
     Left = 294
     Height = 28
     Top = 461
-    Width = 63
+    Width = 65
     Anchors = [akLeft, akBottom]
     Caption = 'Setup+'
     OnClick = Button7Click

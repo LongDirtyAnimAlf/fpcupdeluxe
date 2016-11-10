@@ -5,7 +5,7 @@ unit extrasettings;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons;
+  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls;
 
 type
 
@@ -17,6 +17,7 @@ type
     CheckRepo: TCheckBox;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
+    GroupBox3: TGroupBox;
     HTTPProxyHost: TEdit;
     HTTPProxyPort: TEdit;
     HTTPProxyUser: TEdit;
@@ -25,6 +26,8 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    RadioGroup1: TRadioGroup;
+    RadioGroup2: TRadioGroup;
   private
   public
   end;
