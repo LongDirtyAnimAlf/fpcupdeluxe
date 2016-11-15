@@ -103,7 +103,9 @@ const
   http://ftp.gnu.org/gnu/binutils/binutils-2.23.1.tar.bz2
   }
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
+
   //todo: remove once done
   infoln('TFreeBSD_Linux64: Experimental, not finished. Stopping now.', etError);
   result:=false;
@@ -133,6 +135,7 @@ begin
   result:=FileExists(FBinUtilsPath+'/as'); // let the assembler be our coalmine canary
   if result then
   begin
+    FBinsFound:=true;
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}

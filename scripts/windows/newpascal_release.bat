@@ -5,6 +5,9 @@ del ..\CrossLinuxARM.rar
 del ..\CrossLinuxi386.rar
 del ..\CrossLinuxx64.rar
 del ..\CrossWinceARM.rar
+del ..\CrossFreeBSDi386.rar
+del ..\CrossFreeBSDx64.rar
+
 
 "C:\Program Files (x86)\WinRAR\Rar.exe" a -r -x..\fpc\.svn -x..\lazarus\.svn -x..\fpc\units -x..\fpc\bin -x..\cross -x..\newpascalbatchfiles -x..\apps -x..\ccr ..\NPLazBaseWin32.rar ..\
 "C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\NPLazBaseWin32.rar ..\fpc\bin\i386-win32
@@ -43,5 +46,15 @@ del ..\CrossWinceARM.rar
 "C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossWinceARM.rar ..\fpc\units\arm-wince
 "C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossWinceARM.rar ..\cross\bin\arm-wince
 "C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossWinceARM.rar ..\cross\lib\arm-wince
+
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDi386.rar ..\fpc\bin\i386-freebsd
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDi386.rar ..\fpc\units\i386-freebsd
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDi386.rar ..\cross\bin\i386-freebsd
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDi386.rar ..\cross\lib\i386-freebsd
+
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDx64.rar ..\fpc\bin\x86_64-freebsd
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDx64.rar ..\fpc\units\x86_64-freebsd
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDx64.rar ..\cross\bin\x86_64-freebsd
+"C:\Program Files (x86)\WinRAR\Rar.exe" a -r ..\CrossFreeBSDx64.rar ..\cross\lib\x86_64-freebsd
 
 pause

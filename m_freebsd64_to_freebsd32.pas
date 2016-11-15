@@ -53,7 +53,9 @@ end;
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
+
   //todo: remove once done
   infoln('TFreeBSD64_FreeBSD386: Experimental, not finished. Stopping now.',etError);
   result:=false;
@@ -62,6 +64,7 @@ begin
   result:=true;
   if result then
   begin
+    FBinsFound:=true;
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}

@@ -56,15 +56,12 @@ end;
 
 function Tanyinternallinker_win64.GetBinUtils(Basepath:string): boolean;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
-  if (result=false) and (FAlreadyWarned=false) then
-  begin
-    infoln(ErrorNotFound,etError);
-    FAlreadyWarned:=true;
-  end;
+  FBinsFound:=true;
 end;
 
 constructor Tanyinternallinker_win64.Create;

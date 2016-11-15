@@ -392,9 +392,9 @@ begin
 
 
   if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' update ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert ' + LocalRepository
+    Command := ' update ' + ProxyCommand + Command + ' --quiet --non-interactive --trust-server-cert ' + LocalRepository
   else
-    Command := ' update ' + ProxyCommand + Command + ' --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+    Command := ' update ' + ProxyCommand + Command + ' --quiet --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
 
   {$IFNDEF MSWINDOWS}
   // due to the fact that strnew returns nil for an empty string, we have to use something special to process a command with empty strings on non windows systems

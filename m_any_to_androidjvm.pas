@@ -85,9 +85,11 @@ end;
 
 function Tany_androidjvm.GetBinUtils(Basepath:string): boolean;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
   FBinUtilsPath:=ExtractFilePath(Which('java'+GetExeExt));
   result:=True;
+  FBinsFound:=true;
 end;
 
 constructor Tany_androidjvm.Create;

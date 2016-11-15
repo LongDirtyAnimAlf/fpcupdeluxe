@@ -127,7 +127,9 @@ const
 var
   AsFile: string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
+
   AsFile:=FBinUtilsPrefix+'nasm.exe'; //nasm, not GNU as.exe
 
   result:=SearchBinUtil(BasePath,AsFile);
@@ -142,6 +144,8 @@ begin
 
   if result then
   begin
+    FBinsFound:=true;
+
     infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
 
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then

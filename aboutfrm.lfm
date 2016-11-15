@@ -1,0 +1,214 @@
+object AboutForm: TAboutForm
+  Left = 530
+  Height = 376
+  Top = 262
+  Width = 460
+  ActiveControl = Notebook
+  BorderIcons = [biSystemMenu, biMaximize]
+  Caption = 'About Lazarus'
+  ClientHeight = 376
+  ClientWidth = 460
+  OnCreate = AboutFormCreate
+  Position = poScreenCenter
+  LCLVersion = '1.7'
+  object Notebook: TPageControl
+    Left = 0
+    Height = 326
+    Top = 0
+    Width = 460
+    ActivePage = AboutPage
+    Align = alClient
+    TabIndex = 1
+    TabOrder = 0
+    object VersionPage: TTabSheet
+      Caption = 'Version'
+      ClientHeight = 298
+      ClientWidth = 452
+      object LogoImage: TImage
+        AnchorSideLeft.Control = VersionPage
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = VersionPage
+        Left = 71
+        Height = 186
+        Top = 0
+        Width = 311
+        AutoSize = True
+      end
+      object VersionLabel: TLabel
+        AnchorSideLeft.Control = LogoImage
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = LogoImage
+        AnchorSideTop.Side = asrBottom
+        AnchorSideBottom.Control = LogoImage
+        AnchorSideBottom.Side = asrBottom
+        Left = 199
+        Height = 15
+        Top = 186
+        Width = 54
+        Alignment = taCenter
+        Caption = 'Version #:'
+        Font.Color = clSilver
+        Font.Style = [fsBold]
+        ParentColor = False
+        ParentFont = False
+      end
+      object BuildDateLabel: TLabel
+        AnchorSideLeft.Control = LogoImage
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = VersionLabel
+        AnchorSideTop.Side = asrBottom
+        Left = 213
+        Height = 15
+        Top = 207
+        Width = 27
+        Alignment = taCenter
+        BorderSpacing.Around = 6
+        Caption = 'Date:'
+        Font.Color = clSilver
+        ParentColor = False
+        ParentFont = False
+      end
+      object PlatformLabel: TLabel
+        AnchorSideLeft.Control = LogoImage
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Side = asrBottom
+        Left = 189
+        Height = 15
+        Top = 256
+        Width = 74
+        BorderSpacing.Around = 6
+        Caption = 'PlatformLabel'
+        Font.Color = clSilver
+        ParentColor = False
+        ParentFont = False
+      end
+      object FPCVersionLabel: TLabel
+        AnchorSideLeft.Control = LogoImage
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = BuildDateLabel
+        AnchorSideTop.Side = asrBottom
+        Left = 175
+        Height = 15
+        Top = 228
+        Width = 102
+        BorderSpacing.Around = 6
+        Caption = 'FPCUPVersionLabel'
+        Font.Color = clSilver
+        ParentColor = False
+        ParentFont = False
+      end
+    end
+    object AboutPage: TTabSheet
+      Caption = 'About'
+      ClientHeight = 298
+      ClientWidth = 452
+      object OfficialLabel: TLabel
+        AnchorSideLeft.Control = AboutPage
+        AnchorSideBottom.Control = DocumentationLabel
+        Left = 6
+        Height = 15
+        Top = 256
+        Width = 66
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Around = 6
+        Caption = 'OfficialLabel'
+        ParentColor = False
+      end
+      object OfficialURLLabel: TLabel
+        AnchorSideLeft.Control = OfficialLabel
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideBottom.Control = DocumentationLabel
+        Left = 78
+        Height = 15
+        Top = 256
+        Width = 87
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Around = 6
+        Caption = 'OfficialURLLabel'
+        Font.Color = clBlue
+        ParentColor = False
+        ParentFont = False
+        OnMouseDown = URLLabelMouseDown
+        OnMouseEnter = URLLabelMouseEnter
+        OnMouseLeave = URLLabelMouseLeave
+      end
+      object DocumentationLabel: TLabel
+        AnchorSideLeft.Control = AboutPage
+        AnchorSideBottom.Control = AboutPage
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 15
+        Top = 277
+        Width = 111
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Around = 6
+        Caption = 'DocumentationLabel'
+        ParentColor = False
+      end
+      object DocumentationURLLabel: TLabel
+        AnchorSideLeft.Control = DocumentationLabel
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideBottom.Control = AboutPage
+        AnchorSideBottom.Side = asrBottom
+        Left = 123
+        Height = 15
+        Top = 277
+        Width = 132
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Around = 6
+        Caption = 'DocumentationURLLabel'
+        Font.Color = clBlue
+        ParentColor = False
+        ParentFont = False
+        OnMouseDown = URLLabelMouseDown
+        OnMouseEnter = URLLabelMouseEnter
+        OnMouseLeave = URLLabelMouseLeave
+      end
+      object AboutMemo: TMemo
+        AnchorSideLeft.Control = AboutPage
+        AnchorSideTop.Control = AboutPage
+        AnchorSideRight.Control = AboutPage
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = OfficialLabel
+        Left = 0
+        Height = 250
+        Top = 0
+        Width = 452
+        Anchors = [akTop, akLeft, akRight, akBottom]
+        ReadOnly = True
+        ScrollBars = ssAutoBoth
+        TabOrder = 0
+      end
+    end
+  end
+  object ButtonPanel: TPanel
+    Left = 0
+    Height = 50
+    Top = 326
+    Width = 460
+    Align = alBottom
+    BevelOuter = bvNone
+    ClientHeight = 50
+    ClientWidth = 460
+    TabOrder = 1
+    object CloseButton: TBitBtn
+      AnchorSideLeft.Control = ButtonPanel
+      AnchorSideLeft.Side = asrCenter
+      AnchorSideTop.Control = ButtonPanel
+      AnchorSideTop.Side = asrCenter
+      AnchorSideBottom.Control = Owner
+      AnchorSideBottom.Side = asrBottom
+      Left = 193
+      Height = 26
+      Top = 12
+      Width = 75
+      AutoSize = True
+      BorderSpacing.Around = 6
+      Cancel = True
+      Caption = '&Close'
+      Kind = bkClose
+      ModalResult = 1
+      TabOrder = 0
+    end
+  end
+end

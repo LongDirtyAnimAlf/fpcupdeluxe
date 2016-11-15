@@ -1,6 +1,6 @@
-unit m_any_to_linuxaarch64;
+unit m_any_to_freebsd386;
 
-{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to Linux 64 bit aarch
+{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to FreeBSD i386
 Copyright (C) 2014 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -40,8 +40,8 @@ implementation
 
 type
 
-{ Tany_linuxaarch64 }
-Tany_linuxaarch64 = class(TCrossInstaller)
+{ Tany_freebsd386 }
+Tany_freebsd386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -55,15 +55,15 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_linuxaarch64 }
-function Tany_linuxaarch64.TargetSignature: string;
+{ Tany_freebsd386 }
+function Tany_freebsd386.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function Tany_linuxaarch64.GetLibs(Basepath:string): boolean;
+function Tany_freebsd386.GetLibs(Basepath:string): boolean;
 const
-  DirName='aarch64-linux';
+  DirName='i386-freebsd';
   LibName='libc.so';
 begin
   // begin simple: check presence of library file in basedir
@@ -76,10 +76,10 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/aarch64-linux-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/i386-freebsd-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_linuxaarch64: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('Tany_freebsd386: failed: searched libspath '+FLibsPath,etInfo);
     {$ENDIF}
   end;
 
@@ -95,16 +95,16 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function Tany_linuxaarch64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function Tany_freebsd386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
   result:=true;
 end;
 {$endif}
 
-function Tany_linuxaarch64.GetBinUtils(Basepath:string): boolean;
+function Tany_freebsd386.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='aarch64-linux';
+  DirName='i386-freebsd';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -140,33 +140,33 @@ begin
   end;
 end;
 
-constructor Tany_linuxaarch64.Create;
+constructor Tany_freebsd386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linuxaarch64';
-  FBinUtilsPrefix:='aarch64-linux-';
+  FCrossModuleName:='any_freebsd386';
+  FBinUtilsPrefix:='i386-freebsd-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='aarch64';
-  FTargetOS:='linux';
+  FTargetCPU:='i386';
+  FTargetOS:='freebsd';
   FAlreadyWarned:=false;
-  infoln('Tany_linuxaarch64 crosscompiler loading',etDebug);
+  infoln('Tany_freebsd386 crosscompiler loading',etDebug);
 end;
 
-destructor Tany_linuxaarch64.Destroy;
+destructor Tany_freebsd386.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  any_linuxaarch64:Tany_linuxaarch64;
+  any_freebsd386:Tany_freebsd386;
 
 initialization
-  any_linuxaarch64:=Tany_linuxaarch64.Create;
-  RegisterExtension(any_linuxaarch64.TargetCPU+'-'+any_linuxaarch64.TargetOS,any_linuxaarch64);
+  any_freebsd386:=Tany_freebsd386.Create;
+  RegisterExtension(any_freebsd386.TargetCPU+'-'+any_freebsd386.TargetOS,any_freebsd386);
 finalization
-  any_linuxaarch64.Destroy;
+  any_freebsd386.Destroy;
 
 end.
 

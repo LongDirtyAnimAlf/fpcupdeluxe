@@ -38,6 +38,7 @@ uses
 type
 
   CompilerType=(ctBootstrap,ctInstalled);
+  SearchMode=(smFPCUPOnly,smAuto,smManual);
 
   { TCrossInstaller }
   TCrossInstaller = class(TObject)
@@ -46,6 +47,7 @@ type
     FBinutilsPathInPath: boolean;
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FCompilerUsed: CompilerType;
+    FSearchMode: SearchMode;
     FCrossModuleName: string; //used for identifying module to user in messages
     FCrossOpts: TStringList; //Options to be added to CROSSOPT by the calling code. XP= (binutils prefix) is already done, no need to add it
     FFPCCFGSnippet: string; //snippet to be added to fpc.cfg in order to find binutils/libraries etc
@@ -53,6 +55,7 @@ type
     FTargetCPU: string; //cpu for the target environment. Follows FPC names
     FTargetOS: string; //operating system for the target environment. Follows FPC names
     FSubArch: string; //optional subarch for embedded targets
+    FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     // Sets FBinutilspath if file LookFor found in Directory. Returns true if found.
     function SearchLibrary(Directory, LookFor: string): boolean;
     function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string=''): boolean;
@@ -60,6 +63,8 @@ type
     function SimpleSearchBinUtil(BasePath,DirName: string; const LookFor:string=''): boolean;
     procedure SearchLibraryInfo(found:boolean; const extrainfo:string='');
     procedure SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
+    function SearchUtil(Directory, LookFor: string; LibsOrBins:boolean): boolean;
+    function FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string=''): boolean;
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
@@ -76,6 +81,7 @@ type
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
     property CompilerUsed: CompilerType read FCompilerUsed;
+    property SearchModeUsed: SearchMode read FSearchMode write FSearchMode;
     property CrossModuleName: string read FCrossModuleName;
     // Represents arguments for CROSSOPT parameter
     // No need to add XP= (binutils prefix): calling code will do this
@@ -105,8 +111,8 @@ type
     destructor Destroy; override;
   end;
 
-Procedure
-RegisterExtension(Platform:string;Extension:TCrossInstaller);
+Procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
+
 Var
   CrossInstallers:TStringList=nil;
 
@@ -147,109 +153,127 @@ end;
 
 function TCrossInstaller.SearchLibrary(Directory, LookFor: string): boolean;
 begin
-  result:=false;
-  FLibsPath:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Directory));
-  result:=FileExists(IncludeTrailingPathDelimiter(FLibsPath)+LookFor);
-  // Report results to user. SearchLibrary will probably only be called until
-  // its result is true; if it's called more times, it still ok to keep the
-  // user informed about succesful searches.
-  if result then
-    infoln(FCrossModuleName + ': found library '+LookFor+
-      ' in directory '+FLibsPath, etDebug)
-  else
-    infoln(FCrossModuleName + ': searched but did not find library '+LookFor+
-      ' in directory '+FLibsPath, etDebug);
+  result:=SearchUtil(Directory, LookFor, true);
 end;
 
 function TCrossInstaller.SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string=''): boolean;
 begin
-// first search local paths based on libbraries provided for or adviced by fpc itself
-  FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName);
-  if Length(LookFor)=0
-     then result:=DirectoryExists(FLibsPath)
-     else result:=FileExists(FLibsPath+DirectorySeparator+LookFor);
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
-    FLibsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
-    'cross'+DirectorySeparator+
-    'lib'+DirectorySeparator+
-    DirName);
-    if Length(LookFor)=0
-       then result:=DirectoryExists(FLibsPath)
-       else result:=FileExists(FLibsPath+DirectorySeparator+LookFor);
-  end;
-  if not result then
-  begin
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
-    FLibsPath:=SafeExpandFileName(SafeGetApplicationPath+
-      'cross'+DirectorySeparator+
-      'lib'+DirectorySeparator+
-      DirName);
-    if Length(LookFor)=0
-       then result:=DirectoryExists(FLibsPath)
-       else result:=FileExists(FLibsPath+DirectorySeparator+LookFor);
-  end;
-  if not result then
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
+  result:=FPCUPToolsSearch(BasePath,DirName,true,LookFor);
 end;
 
 function TCrossInstaller.SearchBinUtil(Directory, LookFor: string): boolean;
 begin
-  FBinUtilsPath:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Directory));
-  result:=FileExists(IncludeTrailingPathDelimiter(FBinUtilsPath)+LookFor);
-  // Report results to user. SearchBinUtil will probably only be called until
-  // its result is true; if it's called more times, it still ok to keep the
-  // user informed about succesful searches.
-  if result then
-    infoln(FCrossModuleName + ': found binutil '+LookFor+
-      ' in directory '+FBinUtilsPath, etDebug)
-  else
-    infoln(FCrossModuleName + ': searched but did not find binutil '+LookFor+
-      ' in directory '+FBinUtilsPath, etDebug);
+  result:=SearchUtil(Directory, LookFor, false);
 end;
 
 function TCrossInstaller.SimpleSearchBinUtil(BasePath,DirName: string; const LookFor:string=''): boolean;
 begin
-// first search local paths based on libbraries provided for or adviced by fpc itself
-  FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'bin'+DirectorySeparator+DirName);
-  if Length(LookFor)=0
-     then result:=DirectoryExists(FBinUtilsPath)
-     else result:=FileExists(FBinUtilsPath+DirectorySeparator+LookFor);
-  if not result then
-  begin
-    // Show path info etc so the user can fix his setup if errors occur
-    infoln(FCrossModuleName + ': failed: searched binutil '+FBinUtilsPath,etDebug);
-    FBinUtilsPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+
-    'cross'+DirectorySeparator+
-    'bin'+DirectorySeparator+
-    DirName);
-    if Length(LookFor)=0
-       then result:=DirectoryExists(FBinUtilsPath)
-       else result:=FileExists(FBinUtilsPath+DirectorySeparator+LookFor);
-  end;
-  if not result then
-  begin
-    infoln(FCrossModuleName + ': failed: searched binutil '+FBinUtilsPath,etDebug);
-    FBinUtilsPath:=SafeExpandFileName(SafeGetApplicationPath+
-      'cross'+DirectorySeparator+
-      'bin'+DirectorySeparator+
-      DirName);
-    if Length(LookFor)=0
-       then result:=DirectoryExists(FBinUtilsPath)
-       else result:=FileExists(FBinUtilsPath+DirectorySeparator+LookFor);
-  end;
-  if not result then
-    infoln(FCrossModuleName + ': failed: searched binutil '+FBinUtilsPath,etDebug);
+  result:=FPCUPToolsSearch(BasePath,DirName,false,LookFor);
 end;
 
+function TCrossInstaller.SearchUtil(Directory, LookFor: string; LibsOrBins:boolean): boolean;
+var
+  sd:string;
+  info:string;
+begin
+  sd:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Directory));
+  if LibsOrBins
+     then FLibsPath:=sd
+     else FBinUtilsPath:=sd;
+  if Length(LookFor)=0
+     then result:=DirectoryExists(sd)
+     else result:=FileExists(IncludeTrailingPathDelimiter(sd)+LookFor);
+
+  // Report results to user. SearchBinUtil will probably only be called until
+  // its result is true; if it's called more times, it still ok to keep the
+  // user informed about succesful searches.
+
+  if LibsOrBins
+     then info:='library'
+     else info:='binutil(s)';
+
+  if result then
+    infoln(FCrossModuleName + ': found '+info+' '+LookFor+
+      ' in directory '+sd, etDebug)
+  else
+    infoln(FCrossModuleName + ': searched but did not find '+info+' '+LookFor+
+      ' in directory '+sd, etDebug);
+end;
+
+
+function TCrossInstaller.FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string=''): boolean;
+var
+  sd:string;
+begin
+  result:=false;
+
+  if SearchModeUsed=smManual then exit;
+
+  // first search local paths based on libraries provided for or adviced by fpc itself
+  sd:=IncludeTrailingPathDelimiter(BasePath);
+  if LibsOrBins
+     then sd:=sd+'lib'
+     else sd:=sd+'bin';
+  sd:=sd+DirectorySeparator+DirName;
+  sd:=SafeExpandFileName(sd);
+  result:=SearchUtil(sd, LookFor, LibsOrBins);
+  if not result then
+  begin
+    sd:=IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator;
+    if LibsOrBins
+       then sd:=sd+'lib'
+       else sd:=sd+'bin';
+    sd:=sd+DirectorySeparator+DirName;
+    sd:=SafeExpandFileName(sd);
+    result:=SearchUtil(sd, LookFor, LibsOrBins);
+  end;
+  if not result then
+  begin
+    sd:=SafeGetApplicationPath+'cross'+DirectorySeparator;
+    if LibsOrBins
+       then sd:=sd+'lib'
+       else sd:=sd+'bin';
+    sd:=sd+DirectorySeparator+DirName;
+    sd:=SafeExpandFileName(sd);
+    result:=SearchUtil(sd, LookFor, LibsOrBins);
+  end;
+
+
+  {$IFDEF UNIX}
+  if SearchModeUsed=smAuto then
+  begin
+    if LibsOrBins
+       then sd:='lib'
+       else sd:='bin';
+
+    if not result then
+      result:=SearchUtil('/usr/local/'+sd+'/'+DirName,
+        LookFor, LibsOrBins);
+
+    if not result then
+      result:=SearchUtil('/usr/local/'+sd,
+        LookFor, LibsOrBins);
+
+    if not result then
+      result:=SearchUtil('/usr/'+sd,
+        LookFor, LibsOrBins);
+
+    if not result then
+      result:=SearchUtil('/'+sd,
+        LookFor, LibsOrBins);
+  end;
+  {$ENDIF}
+
+end;
 
 function TCrossInstaller.GetBinUtils(Basepath: string): boolean;
 var
   i:integer;
 begin
-  result:=false;
+  result:=FBinsFound;
+
+  // only add options once !
+  if FCrossOptsAdded then exit;
 
   // Add user-selected CROSSOPT to fpc.cfg snippet
   // Descendents can add more fpc.cfg snippets but shouldn't remove what the user chose
@@ -260,6 +284,7 @@ begin
     else
       FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i];
   end;
+  FCrossOptsAdded:=true;
 end;
 
 procedure TCrossInstaller.SetCrossOpt(CrossOpts: string);
@@ -294,6 +319,11 @@ begin
   FTargetCPU:='Error: cross compiler extension must set FTargetCPU: cpu for the target environment. Follows FPC names.';
   FTargetOS:='Error: cross compiler extension must set FTargetOS: operating system for the target environment. Follows FPC names';
   FSubArch:='';
+
+  FLibsFound:=false;
+  FBinsFound:=false;
+
+  FCrossOptsAdded:=false;
 end;
 
 destructor TCrossInstaller.Destroy;

@@ -127,7 +127,8 @@ var
   AsFile: string;
   BinPrefixTry:string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
@@ -139,32 +140,26 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:='arm-linux-';
+    BinPrefixTry:='arm-linux-gnueabi';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
-  // Also allow for crossbinutils without prefix
-  if not result then
-  begin
-    BinPrefixTry:='';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    // also check in the gnueabi directory
+    if not result then
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   // Also allow for hardfloat crossbinutils
   if not result then
   begin
-    if StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1 then
+    //if StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1 then
     begin
       BinPrefixTry:='arm-linux-gnueabihf-';
       AsFile:=BinPrefixTry+'as'+GetExeExt;
-      result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
-      // also check in the normal directory
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      // also check in the gnueabihf directory
       if not result then
-        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+         result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
       if result then FBinUtilsPrefix:=BinPrefixTry;
     end;
   end;
@@ -178,17 +173,31 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  // Last resort: also allow for crossbinutils without prefix, but in correct directory
+  if not result then
+  begin
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    // also check in the gnueabi directory
+    if not result then
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+    // also check in the gnueabihf directory
+    if not result then
+       result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabihf',AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   SearchBinUtilsInfo(result);
 
   if not result then
   begin
-    {$ifdef mswindows}
-    infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils, mirrored at the fpcup download site.',etInfo);
-    {$endif}
     FAlreadyWarned:=true;
   end
   else
   begin
+    FBinsFound:=true;
+
     { for raspberry pi look into
     instruction set
     -CpARMV6Z (not 7)

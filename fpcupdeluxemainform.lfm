@@ -1,14 +1,16 @@
 object Form1: TForm1
-  Left = 224
+  Left = 265
   Height = 580
-  Top = 180
+  Top = 189
   Width = 1046
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 580
+  ClientHeight = 560
   ClientWidth = 1046
+  Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
+  OnDestroy = FormDestroy
   OnResize = FormResize
   LCLVersion = '1.7'
   object ListBox1: TListBox
@@ -22,7 +24,7 @@ object Form1: TForm1
   end
   object Button1: TButton
     Left = 0
-    Height = 29
+    Height = 9
     Top = 496
     Width = 162
     Anchors = [akTop, akLeft, akBottom]
@@ -41,7 +43,7 @@ object Form1: TForm1
   end
   inline SynEdit1: TSynEdit
     Left = 368
-    Height = 384
+    Height = 364
     Top = 64
     Width = 665
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -600,7 +602,7 @@ object Form1: TForm1
   end
   object ListBox3: TListBox
     Left = 168
-    Height = 208
+    Height = 188
     Top = 240
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
@@ -613,7 +615,7 @@ object Form1: TForm1
   object Button2: TButton
     Left = 168
     Height = 29
-    Top = 496
+    Top = 476
     Width = 191
     Anchors = [akLeft, akBottom]
     Caption = 'Install module(s) from list'
@@ -644,7 +646,7 @@ object Form1: TForm1
   object Button4: TButton
     Left = 168
     Height = 28
-    Top = 461
+    Top = 441
     Width = 120
     Anchors = [akLeft, akBottom]
     Caption = 'Clear selection'
@@ -676,7 +678,6 @@ object Form1: TForm1
       'jvm'
     )
     OnClick = RadioGroup1Click
-    OnDblClick = CrossTargetSelectDblClick
     ParentShowHint = False
     ShowHint = True
     TabOrder = 11
@@ -708,7 +709,6 @@ object Form1: TForm1
       'java'
     )
     OnClick = RadioGroup2Click
-    OnDblClick = CrossTargetSelectDblClick
     ParentShowHint = False
     ShowHint = True
     TabOrder = 12
@@ -750,7 +750,7 @@ object Form1: TForm1
   object Panel1: TPanel
     Left = 14
     Height = 44
-    Top = 532
+    Top = 512
     Width = 1018
     Align = alBottom
     AutoSize = True
@@ -1960,7 +1960,7 @@ object Form1: TForm1
     Left = 368
     Height = 68
     Hint = 'Will show error'
-    Top = 457
+    Top = 437
     Width = 665
     Anchors = [akLeft, akRight, akBottom]
     ParentShowHint = False
@@ -1972,7 +1972,7 @@ object Form1: TForm1
   object Button7: TButton
     Left = 294
     Height = 28
-    Top = 461
+    Top = 441
     Width = 65
     Anchors = [akLeft, akBottom]
     Caption = 'Setup+'
@@ -1993,5 +1993,13 @@ object Form1: TForm1
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
     left = 72
     top = 72
+  end
+  object MainMenu1: TMainMenu
+    left = 72
+    top = 128
+    object MenuItem1: TMenuItem
+      Caption = 'About'
+      OnClick = MenuItem1Click
+    end
   end
 end

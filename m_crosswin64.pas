@@ -70,10 +70,12 @@ end;
 
 function TWin64.GetBinUtils(Basepath:string): boolean;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';  
   result:=true;
+  FBinsFound:=true;
 end;
 
 constructor TWin64.Create;

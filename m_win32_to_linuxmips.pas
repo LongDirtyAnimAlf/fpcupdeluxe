@@ -121,7 +121,8 @@ const
 var
   AsFile: string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   AsFile:=FBinUtilsPrefix+'as.exe';
 
@@ -131,6 +132,7 @@ begin
 
   if result then
   begin
+    FBinsFound:=true;
     infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+

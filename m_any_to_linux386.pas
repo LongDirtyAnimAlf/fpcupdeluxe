@@ -116,58 +116,23 @@ var
   AsFile: string;
   BinPrefixTry: string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
+
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-  {$IFDEF UNIX}
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-  {$ENDIF}
 
   // Also allow for (cross)binutils without prefix
   if not result then
   begin
-    BinPrefixTry:='powerpc-aix-';
+    BinPrefixTry:='';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-
-    {$IFDEF UNIX}
-    if not result then { try /usr/local/bin/<dirprefix>/ }
-      result:=SearchBinUtil('/usr/local/bin/'+DirName,
-        AsFile);
-
-    if not result then { try /usr/local/bin/ }
-      result:=SearchBinUtil('/usr/local/bin',
-        AsFile);
-
-    if not result then { try /usr/bin/ }
-      result:=SearchBinUtil('/usr/bin',
-        AsFile);
-
-    if not result then { try /bin/ }
-      result:=SearchBinUtil('/bin',
-        AsFile);
-    {$ENDIF}
-
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
@@ -175,6 +140,7 @@ begin
 
   if result then
   begin
+    FBinsFound:=true;
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}

@@ -32,6 +32,8 @@ uses
   m_any_to_aixpowerpc, m_any_to_androidarm, m_any_to_linuxarm,
   m_any_to_embeddedarm, m_any_to_linuxmipsel, m_any_to_linux386,
   m_any_to_linuxaarch64,
+  m_any_to_freebsdx64,
+  m_any_to_freebsd386,
   m_any_to_androidjvm,m_any_to_javajvm,
   m_any_to_darwin386,
   {$IFDEF Darwin}

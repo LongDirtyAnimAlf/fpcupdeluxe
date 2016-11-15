@@ -121,7 +121,9 @@ const
 var
   AsFile: string;
 begin  
-  inherited;
+  result:=inherited;
+  if result then exit;
+
   AsFile:=FBinUtilsPrefix+'as.exe';
 
   result:=SearchBinUtil(BasePath,AsFile);
@@ -135,6 +137,7 @@ begin
   end;
   if result then
   begin
+    FBinsFound:=true;
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}

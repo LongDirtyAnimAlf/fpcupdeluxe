@@ -1,19 +1,21 @@
 object Form2: TForm2
-  Left = 268
-  Height = 371
-  Top = 232
-  Width = 667
+  Left = 368
+  Height = 511
+  Top = 207
+  Width = 708
   Caption = 'Advanced settings'
-  ClientHeight = 371
-  ClientWidth = 667
+  ClientHeight = 511
+  ClientWidth = 708
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
   Position = poMainFormCenter
   LCLVersion = '1.7'
   object BitBtn1: TBitBtn
-    Left = 11
+    Left = 505
     Height = 31
-    Top = 328
+    Top = 468
     Width = 86
-    Anchors = [akLeft, akBottom]
+    Anchors = [akRight, akBottom]
     Default = True
     DefaultCaption = True
     Kind = bkOK
@@ -21,11 +23,11 @@ object Form2: TForm2
     TabOrder = 0
   end
   object BitBtn2: TBitBtn
-    Left = 112
+    Left = 605
     Height = 31
-    Top = 328
+    Top = 468
     Width = 89
-    Anchors = [akLeft, akBottom]
+    Anchors = [akRight, akBottom]
     Cancel = True
     DefaultCaption = True
     Kind = bkCancel
@@ -36,11 +38,11 @@ object Form2: TForm2
     Left = 8
     Height = 168
     Top = 8
-    Width = 645
+    Width = 686
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Proxy settings'
     ClientHeight = 148
-    ClientWidth = 641
+    ClientWidth = 682
     TabOrder = 2
     object Label1: TLabel
       Left = 8
@@ -50,16 +52,16 @@ object Form2: TForm2
       Caption = 'HTTP proxy URL:'
       ParentColor = False
     end
-    object HTTPProxyHost: TEdit
+    object EditHTTPProxyHost: TEdit
       Left = 8
       Height = 23
       Top = 40
-      Width = 491
+      Width = 532
       Anchors = [akTop, akLeft, akRight]
       TabOrder = 0
     end
     object Label2: TLabel
-      Left = 507
+      Left = 548
       Height = 15
       Top = 16
       Width = 90
@@ -67,8 +69,8 @@ object Form2: TForm2
       Caption = 'HTTP proxy port:'
       ParentColor = False
     end
-    object HTTPProxyPort: TEdit
-      Left = 507
+    object EditHTTPProxyPort: TEdit
+      Left = 548
       Height = 23
       Top = 40
       Width = 120
@@ -84,7 +86,7 @@ object Form2: TForm2
       Caption = 'HTTP proxy username:'
       ParentColor = False
     end
-    object HTTPProxyUser: TEdit
+    object EditHTTPProxyUser: TEdit
       Left = 8
       Height = 23
       Top = 104
@@ -99,7 +101,7 @@ object Form2: TForm2
       Caption = 'HTTP proxy password:'
       ParentColor = False
     end
-    object HTTPProxyPassword: TEdit
+    object EditHTTPProxyPassword: TEdit
       Left = 184
       Height = 23
       Top = 104
@@ -111,36 +113,58 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 11
-    Height = 134
+    Height = 126
     Top = 186
-    Width = 389
+    Width = 430
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Miscellaneous settings'
-    ClientHeight = 114
-    ClientWidth = 385
+    ClientHeight = 106
+    ClientWidth = 426
     TabOrder = 3
     object CheckRepo: TCheckBox
       Left = 5
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 8
-      Width = 175
-      Caption = 'Get repositories (default=yes)'
+      Width = 221
+      Caption = 'Get FPC/Laz repositories (default=yes)'
       Checked = True
       ParentShowHint = False
       ShowHint = True
       State = cbChecked
       TabOrder = 0
     end
+    object CheckPackageRepo: TCheckBox
+      Left = 5
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 36
+      Width = 219
+      Caption = 'Get package repositories (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+    end
+    object CheckIncludeLCL: TCheckBox
+      Left = 5
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 64
+      Width = 260
+      Caption = 'Include LCL with cross-compiler (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 2
+    end
   end
   object GroupBox3: TGroupBox
-    Left = 416
-    Height = 134
+    Left = 457
+    Height = 126
     Top = 186
     Width = 237
     Anchors = [akTop, akRight]
     Caption = 'NewPascal'
-    ClientHeight = 114
+    ClientHeight = 106
     ClientWidth = 233
     TabOrder = 4
     object RadioGroup1: TRadioGroup
@@ -191,5 +215,105 @@ object Form2: TForm2
       )
       TabOrder = 1
     end
+  end
+  object GroupBox4: TGroupBox
+    Left = 8
+    Height = 179
+    Top = 320
+    Width = 272
+    Caption = 'Binutils and library location'
+    ClientHeight = 159
+    ClientWidth = 268
+    TabOrder = 5
+    object ComboBoxOS: TComboBox
+      Left = 128
+      Height = 23
+      Top = 8
+      Width = 136
+      ItemHeight = 15
+      OnChange = ComboBoxCPUOSChange
+      TabOrder = 0
+      Text = 'Select OS'
+    end
+    object ComboBoxCPU: TComboBox
+      Left = 8
+      Height = 23
+      Top = 8
+      Width = 112
+      ItemHeight = 15
+      OnChange = ComboBoxCPUOSChange
+      TabOrder = 1
+      Text = 'Select CPU'
+    end
+    object RadioGroup3: TRadioGroup
+      Left = 8
+      Height = 50
+      Top = 38
+      Width = 256
+      AutoFill = True
+      Caption = 'Search options'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 3
+      ClientHeight = 30
+      ClientWidth = 252
+      Columns = 3
+      Enabled = False
+      ItemIndex = 0
+      Items.Strings = (
+        'fpcup'
+        'full auto'
+        'custom'
+      )
+      OnSelectionChanged = RadioGroup3SelectionChanged
+      TabOrder = 2
+    end
+    object EditLibLocation: TEdit
+      Left = 10
+      Height = 23
+      Top = 97
+      Width = 182
+      Enabled = False
+      ReadOnly = True
+      TabOrder = 3
+    end
+    object EditBinLocation: TEdit
+      Left = 10
+      Height = 23
+      Top = 128
+      Width = 182
+      Enabled = False
+      ReadOnly = True
+      TabOrder = 4
+    end
+    object btnSelectLibDir: TButton
+      Left = 198
+      Height = 23
+      Top = 97
+      Width = 66
+      Caption = 'Libraries'
+      Enabled = False
+      OnClick = OnDirectorySelect
+      TabOrder = 5
+    end
+    object btnSelectBinDir: TButton
+      Left = 198
+      Height = 23
+      Top = 128
+      Width = 66
+      Caption = 'Tools'
+      Enabled = False
+      OnClick = OnDirectorySelect
+      TabOrder = 6
+    end
+  end
+  object SelectDirectoryDialog1: TSelectDirectoryDialog
+    Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
+    left = 254
+    top = 24
   end
 end

@@ -405,18 +405,33 @@ begin
 
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
 
-    if Length(CrossToolsDirectory)=0
-       then result:=CrossInstaller.GetBinUtils(FBaseDirectory)
-       else result:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
+
+    // set bin and libdirs !!
+    if (CrossToolsDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
+    else if (CrossToolsDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
+    else CrossInstaller.SearchModeUsed:=smManual;
+    if CrossInstaller.SearchModeUsed<>smManual then result:=CrossInstaller.GetBinUtils(FBaseDirectory) else
+    begin
+      if Length(CrossToolsDirectory)=0
+         then result:=CrossInstaller.GetBinUtils(FBaseDirectory)
+         else result:=CrossInstaller.GetBinUtils(CrossLibraryDirectory);
+    end;
     if not result then infoln('Failed to get crossbinutils', etError);
 
     if result then
     begin
-      if Length(CrossLibraryDirectory)=0
-         then result:=CrossInstaller.GetLibs(FBaseDirectory)
-         else result:=CrossInstaller.GetLibs(CrossLibraryDirectory);
+      if (CrossLibraryDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
+      else if (CrossLibraryDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
+      else CrossInstaller.SearchModeUsed:=smManual;
+      if CrossInstaller.SearchModeUsed<>smManual then result:=CrossInstaller.GetLibs(FBaseDirectory) else
+      begin
+        if Length(CrossLibraryDirectory)=0
+           then result:=CrossInstaller.GetLibs(FBaseDirectory)
+           else result:=CrossInstaller.GetLibs(CrossLibraryDirectory);
+      end;
       if not result then infoln('Failed to get crosslibrary', etError)
     end;
+
 
     if result then
     begin
@@ -508,6 +523,7 @@ begin
           CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\inc');
           CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\unix');
         end;
+
         {$endif}
 
         if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then

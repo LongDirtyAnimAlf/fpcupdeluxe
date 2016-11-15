@@ -137,7 +137,8 @@ const
 var
   AsFile: string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   AsFile:=FBinUtilsPrefix+'as';
 
@@ -145,24 +146,9 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-
   if result then
   begin
+    FBinsFound:=true;
     infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+

@@ -118,7 +118,8 @@ var
   AsFile: string;
   BinPrefixTry: string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
@@ -132,7 +133,7 @@ begin
   begin
     BinPrefixTry:='powerpc-aix-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
@@ -142,7 +143,7 @@ begin
   begin
     BinPrefixTry:='';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(FBinUtilsPath,AsFile);
+    result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
@@ -156,6 +157,7 @@ begin
   end
   else
   begin
+    FBinsFound:=true;
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}

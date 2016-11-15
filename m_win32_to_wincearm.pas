@@ -122,29 +122,32 @@ const
   DirName='arm-wince';
 var
   AsFile: string;
+  BinPrefixTry: string;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   AsFile:=FBinUtilsPrefix+'as.exe';
 
   result:=SearchBinUtil(BasePath,AsFile);
-
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Search for FTP (old) version
   if not result then
   begin
-    FBinUtilsPrefix:='arm-wince-pe-';
-    AsFile:=FBinUtilsPrefix+'as.exe';
+    BinPrefixTry:='arm-wince-pe-';
+    AsFile:=BinPrefixTry+'as.exe';
     result:=SearchBinUtil(BasePath,AsFile);
-    if not result then
-      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
   SearchBinUtilsInfo(result);
+
   if result then
   begin
+    FBinsFound:=true;
     infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-wince

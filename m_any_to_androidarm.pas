@@ -102,7 +102,7 @@ begin
   result:=SearchLibrary(Basepath,LibName);
 
   // if binaries already found, search for library belonging to these binaries !!
-  if (not result) AND (Length(FBinUtilsPath)>0) then
+  if (not result) AND (Length(FBinUtilsPath)>0) AND (SearchModeUsed=smAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FBinUtilsPath);
     if ndkversion>0 then
@@ -132,7 +132,7 @@ begin
 
   //C:\Users\<username>\AppData\Local\Android\sdk
 
-  if not result then
+  if (not result) AND (SearchModeUsed=smAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -172,7 +172,7 @@ begin
 
   {$IFDEF MSWINDOWS}
   // find Delphi android libs
-  if not result then
+  if (not result) AND (SearchModeUsed=smAuto) then
   begin
     infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
     for delphiversion:=17 downto 12 do
@@ -200,6 +200,7 @@ begin
   {$ENDIF}
 
   SearchLibraryInfo(result);
+
   if result then
   begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
@@ -258,14 +259,15 @@ var
   PresetBinPath:string;
   ndkversion,delphiversion,toolchain:byte;
 begin
-  inherited;
+  result:=inherited;
+  if result then exit;
 
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);
 
   // if libs already found, search for binutils belonging to this lib !!
-  if (not result) AND (Length(FLibsPath)>0) then
+  if (not result) AND (Length(FLibsPath)>0) AND (SearchModeUsed=smAuto) then
   begin
     ndkversion:=Pos(NDKVERSIONBASENAME,FLibsPath);
     if ndkversion>0 then
@@ -310,7 +312,7 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  if not result then
+  if (not result) AND (SearchModeUsed=smAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -359,7 +361,7 @@ begin
   //http://dl.google.com/android/ndk/android-ndk-r9c-windows-x86_64.zip
   //also windows may be windows-x86_64...
 
-  if not result then
+  if (not result) AND (SearchModeUsed=smAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
     begin
@@ -388,7 +390,7 @@ begin
   end;
 
   // check Delphi auto installed android libraries
-  if not result then
+  if (not result) AND (SearchModeUsed=smAuto) then
   begin
     for delphiversion:=17 downto 12 do
     begin
@@ -416,34 +418,16 @@ begin
   end;
   {$ENDIF}
 
-  {$IFDEF UNIX}
-  // Also, the NDK can be installed basically anywhere...
-  // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-  {$ENDIF}
-
   SearchBinUtilsInfo(result);
+
   if result then
   begin
+    FBinsFound:=true;
     // Set some defaults if user hasn't specified otherwise
     // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH';
+      AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH ';
       FCrossOpts.Add(AsFile); //apparently earlier instruction sets unsupported by Android
       infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using '+AsFile+'.',etInfo);
       AsFile:=StringReplace(AsFile,' ',LineEnding,[rfReplaceAll]);

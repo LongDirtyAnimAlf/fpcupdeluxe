@@ -2,15 +2,15 @@
 # Source and Install directories
 #---------------------------------------------------------------------------------
 
-SRCDIR=/home/Alfred/binutils-2.25                   # the source code dir for binutils
-prefix=/home/Alfred/cross/i386-darwin               # installation directory
+SRCDIR=/home/Alfred/binutils-2.27                   # the source code dir for binutils
+prefix=/home/Alfred/cross/x86_64-freebsd                # installation directory
 
 #---------------------------------------------------------------------------------
 # set the target and compiler flags
 #---------------------------------------------------------------------------------
 
 #target=arm-elf
-target=i386-darwin
+target=x86_64-freebsd
 
 export CFLAGS='-O2 -pipe'
 export CXXFLAGS='-O2 -pipe'

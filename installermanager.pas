@@ -522,12 +522,14 @@ end;
 
 procedure TFPCupManager.SetCrossToolsDirectory(AValue: string);
 begin
-  FCrossToolsDirectory:=SafeExpandFileName(AValue);
+  //FCrossToolsDirectory:=SafeExpandFileName(AValue);
+  FCrossToolsDirectory:=AValue;
 end;
 
 procedure TFPCupManager.SetCrossLibraryDirectory(AValue: string);
 begin
-  FCrossLibraryDirectory:=SafeExpandFileName(AValue);
+  //FCrossLibraryDirectory:=SafeExpandFileName(AValue);
+  FCrossLibraryDirectory:=AValue;
 end;
 
 {$ifndef FPCONLY}
