@@ -98,6 +98,10 @@ var
   PresetLibPath:string;
   AsFile: string;
 begin
+
+  result:=FLibsFound;
+  if result then exit;
+
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
 
@@ -203,6 +207,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=true;
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}

@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 265
-  Height = 580
-  Top = 189
+  Left = 342
+  Height = 644
+  Top = 170
   Width = 1046
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 560
+  ClientHeight = 624
   ClientWidth = 1046
   Menu = MainMenu1
   OnClose = FormClose
@@ -24,8 +24,8 @@ object Form1: TForm1
   end
   object Button1: TButton
     Left = 0
-    Height = 9
-    Top = 496
+    Height = 80
+    Top = 489
     Width = 162
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Install/update FPC+Laz'
@@ -43,7 +43,7 @@ object Form1: TForm1
   end
   inline SynEdit1: TSynEdit
     Left = 368
-    Height = 364
+    Height = 428
     Top = 64
     Width = 665
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -602,7 +602,7 @@ object Form1: TForm1
   end
   object ListBox3: TListBox
     Left = 168
-    Height = 188
+    Height = 252
     Top = 240
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
@@ -615,7 +615,7 @@ object Form1: TForm1
   object Button2: TButton
     Left = 168
     Height = 29
-    Top = 476
+    Top = 540
     Width = 191
     Anchors = [akLeft, akBottom]
     Caption = 'Install module(s) from list'
@@ -646,7 +646,7 @@ object Form1: TForm1
   object Button4: TButton
     Left = 168
     Height = 28
-    Top = 441
+    Top = 505
     Width = 120
     Anchors = [akLeft, akBottom]
     Caption = 'Clear selection'
@@ -750,7 +750,7 @@ object Form1: TForm1
   object Panel1: TPanel
     Left = 14
     Height = 44
-    Top = 512
+    Top = 576
     Width = 1018
     Align = alBottom
     AutoSize = True
@@ -1960,7 +1960,7 @@ object Form1: TForm1
     Left = 368
     Height = 68
     Hint = 'Will show error'
-    Top = 437
+    Top = 501
     Width = 665
     Anchors = [akLeft, akRight, akBottom]
     ParentShowHint = False
@@ -1972,7 +1972,7 @@ object Form1: TForm1
   object Button7: TButton
     Left = 294
     Height = 28
-    Top = 441
+    Top = 505
     Width = 65
     Anchors = [akLeft, akBottom]
     Caption = 'Setup+'
@@ -1991,12 +1991,12 @@ object Form1: TForm1
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
-    left = 72
-    top = 72
+    Left = 72
+    Top = 72
   end
   object MainMenu1: TMainMenu
-    left = 72
-    top = 128
+    Left = 72
+    Top = 128
     object MenuItem1: TMenuItem
       Caption = 'About'
       OnClick = MenuItem1Click

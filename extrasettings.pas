@@ -30,13 +30,23 @@ type
   TForm2 = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
+    btnCygwin: TButton;
     btnSelectLibDir: TButton;
     btnSelectBinDir: TButton;
+    btnOSXCross: TButton;
+    CheckIncludeFPCIDE1: TCheckBox;
     CheckIncludeLCL: TCheckBox;
+    CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
+    EditOSXCrossLocation: TEdit;
+    EditCygwinLocation: TEdit;
+    EditFPCbranch: TEdit;
+    EditFPCrevision: TEdit;
+    EditLazarusbranch: TEdit;
+    EditLazarusrevision: TEdit;
     EditLibLocation: TEdit;
     EditBinLocation: TEdit;
     GroupBox1: TGroupBox;
@@ -47,14 +57,21 @@ type
     EditHTTPProxyPort: TEdit;
     EditHTTPProxyUser: TEdit;
     EditHTTPProxyPassword: TEdit;
+    GroupBox5: TGroupBox;
+    GroupBoxFPCLazBranchRevision: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
-    RadioGroup1: TRadioGroup;
-    RadioGroup2: TRadioGroup;
+    LabelFPCbranch: TLabel;
+    LabelFPCrevision: TLabel;
+    LabelLazarusbranch: TLabel;
+    LabelLazarusrevision: TLabel;
+    RadioGroupNPFPCbranch: TRadioGroup;
+    RadioGroupNPLazarusbranch: TRadioGroup;
     RadioGroup3: TRadioGroup;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
+    procedure OSXCrossSelect(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -64,11 +81,14 @@ type
     FCrossUtils:TCrossUtils;
     function GetRepo:boolean;
     function GetPackageRepo:boolean;
+    function GetUpdateOnly:boolean;
     function GetIncludeLCL:boolean;
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
     function GetHTTPProxyPass:string;
+    function GetCygwinLocation:string;
+    function GetOSXCrossLocation:string;
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
@@ -76,12 +96,18 @@ type
     property Repo:boolean read GetRepo;
     property PackageRepo:boolean read GetPackageRepo;
 
+    property UpdateOnly:boolean read GetUpdateOnly;
+
     property IncludeLCL:boolean read GetIncludeLCL;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
     property HTTPProxyUser:string read GetHTTPProxyUser;
     property HTTPProxyPass:string read GetHTTPProxyPass;
+
+    property CygwinLocation:string read GetCygwinLocation;
+    property OSXCrossLocation:string read GetOSXCrossLocation;
+
   end;
 
 var
@@ -148,6 +174,9 @@ begin
     EditHTTPProxyUser.Text:=ReadString('ProxySettings','HTTPProxyUser','');
     EditHTTPProxyPassword.Text:=ReadString('ProxySettings','HTTPProxyPass','');
 
+    EditOSXCrossLocation.Text:=ReadString('OSXCross','OSXCrossLocation','');
+    EditCygwinLocation.Text:=ReadString('OSXCross','CygwinLocation','');
+
     for OS := Low(TOS) to High(TOS) do
     begin
       for CPU := Low(TCPU) to High(TCPU) do
@@ -180,6 +209,17 @@ begin
   end;
 end;
 
+procedure TForm2.OSXCrossSelect(Sender: TObject);
+begin
+  if Sender=btnOSXCross then SelectDirectoryDialog1.InitialDir:=EditOSXCrossLocation.Text;
+  if Sender=btnCygwin then SelectDirectoryDialog1.InitialDir:=EditCygwinLocation.Text;
+  if SelectDirectoryDialog1.Execute then
+  begin
+    if Sender=btnOSXCross then EditOSXCrossLocation.Text:=SelectDirectoryDialog1.FileName;
+    if Sender=btnCygwin then EditCygwinLocation.Text:=SelectDirectoryDialog1.FileName;
+  end;
+end;
+
 procedure TForm2.FormDestroy(Sender: TObject);
 var
   CPU:TCPU;
@@ -197,6 +237,9 @@ begin
     WriteInteger('ProxySettings','HTTPProxyPort',StrToInt(EditHTTPProxyPort.Text));
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
     WriteString('ProxySettings','HTTPProxyPass',EditHTTPProxyPassword.Text);
+
+    WriteString('OSXCross','OSXCrossLocation',EditOSXCrossLocation.Text);
+    WriteString('OSXCross','CygwinLocation',EditCygwinLocation.Text);
 
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -289,6 +332,11 @@ begin
   result:=CheckPackageRepo.Checked;
 end;
 
+function TForm2.GetUpdateOnly:boolean;
+begin
+  result:=CheckUpdateOnly.Checked;
+end;
+
 function TForm2.GetIncludeLCL:boolean;
 begin
   result:=CheckIncludeLCL.Checked;
@@ -314,6 +362,15 @@ begin
   result:=EditHTTPProxyPassword.Text;
 end;
 
+function TForm2.GetCygwinLocation:string;
+begin
+  result:=EditCygwinLocation.Text;
+end;
+
+function TForm2.GetOSXCrossLocation:string;
+begin
+  result:=EditOSXCrossLocation.Text;
+end;
 
 
 end.

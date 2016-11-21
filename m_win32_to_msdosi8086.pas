@@ -93,12 +93,16 @@ function TWin32_msdosi8086.GetLibs(Basepath:string): boolean;
 const
   DirName='i8086-msdos';
 begin
+  result:=FLibsFound;
+  if result then exit;
+
   // DOS8086 does not need libs by default, but user can add them.
   // first search local paths based on libbraries provided for or adviced by fpc itself
   result:=SimpleSearchLibrary(BasePath,DirName);
 
   if result then
   begin
+    FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};

@@ -72,6 +72,8 @@ const
   DirName='arm-linux';
   LibName='libc.so';
 begin
+  result:=FLibsFound;
+  if result then exit;
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
@@ -84,6 +86,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     //todo: implement -Xr for other platforms if this setup works
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+

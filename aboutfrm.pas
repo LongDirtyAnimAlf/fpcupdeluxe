@@ -68,7 +68,11 @@ type
     BuildDateLabel: TLABEL;
     AboutMemo: TMemo;
     DocumentationLabel: TLabel;
+    ForumLabel: TLabel;
+    ReinierLabel: TLabel;
     DocumentationURLLabel: TLabel;
+    ForumURLLabel: TLabel;
+    ReinierURLLabel: TLabel;
     FPCVersionLabel: TLabel;
     LogoImage: TImage;
     OfficialLabel: TLabel;
@@ -111,9 +115,6 @@ end;
 { TAboutForm }
 
 procedure TAboutForm.AboutFormCreate(Sender:TObject);
-const
-  DoubleLineEnding = LineEnding + LineEnding;
-
   {The compiler generated date string is always of the form y/m/d.
    This function gives it a string respresentation according to the
    shortdateformat}
@@ -152,13 +153,14 @@ begin
   Width:= 460;
   Height:= 380;
 
-  AboutMemo.Lines.Text:='This is fpcupdeluxe. More to follow.';
-   // Format(lisAboutLazarusMsg,[DoubleLineEnding,DoubleLineEnding,DoubleLineEnding]);
-
-  OfficialLabel.Caption := 'URL';
+  OfficialLabel.Caption := 'Source';
   OfficialURLLabel.Caption := 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/';
   DocumentationLabel.Caption := 'Wiki';
   DocumentationURLLabel.Caption := 'http://wiki.lazarus.freepascal.org/fpcup';
+  ForumLabel.Caption := 'Forum';
+  ForumURLLabel.Caption := 'http://forum.lazarus.freepascal.org/index.php/topic,34645.0.html';
+  ReinierLabel.Caption := 'Reinier';
+  ReinierURLLabel.Caption := 'http://forum.lazarus.freepascal.org/index.php/topic,26726.0.html';
 
   CloseButton.Caption:='Close';
 end;

@@ -38,13 +38,11 @@ end;
 
 function Tanyinternallinker_win64.GetLibs(Basepath:string): boolean;
 begin
+  result:=FLibsFound;
+  if result then exit;
   FLibsPath:='';
   result:=true;
-  if (result=false) and (FAlreadyWarned=false) then
-  begin
-    infoln(ErrorNotFound,etError);
-    FAlreadyWarned:=true;
-  end;
+  FLibsFound:=true;
 end;
 
 {$ifndef FPCONLY}

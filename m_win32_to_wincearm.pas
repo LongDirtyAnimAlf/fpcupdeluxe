@@ -87,6 +87,9 @@ function TWin32_wincearm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-wince';
 begin
+  result:=FLibsFound;
+  if result then exit;
+
   // Wince does not need libs by default, but user can add them.
 
   // search local paths based on libbraries provided for or adviced by fpc itself
@@ -94,6 +97,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};

@@ -390,6 +390,17 @@ begin
     Memo1.Lines.Append('Github blocked us due to too many download requests. This will last for an hour, so please wait and be patient. After this period, please re-run fpcupdeluxe.');
   end;
 
+  // diskspace error
+  if (ExistWordInString(PChar(s),'Stream write error',[])) then
+  begin
+    FG      := clRed;
+    BG      := clNavy;
+    Special := True;
+    // add help into summary memo
+    Memo1.Lines.Append('There is not enough diskspace to finish this operation. Please free some space and re-run fpcupdeluxe.');
+  end;
+
+
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
@@ -506,6 +517,7 @@ begin
     PrepareRun;
     AddMessage('Going to install/update FPC and Lazarus with given options.');
     sStatus:='Going to install/update FPC and Lazarus.';
+    if Form2.UpdateOnly then FPCupManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
     RealRun;
   finally
     DisEnable(Sender,True);
@@ -1144,7 +1156,7 @@ end;
 procedure TForm1.AddMessage(aMessage:string);
 begin
   //SynEdit1.Append(aMessage);
-  SynEdit1.InsertTextAtCaret(aMessage+sLineBreak,scamBegin);
+  SynEdit1.InsertTextAtCaret(aMessage+sLineBreak,scamAdjust);
   SynEdit1.CaretX:=0;
   Application.ProcessMessages;
 end;

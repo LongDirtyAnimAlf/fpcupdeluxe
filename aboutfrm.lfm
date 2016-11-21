@@ -107,7 +107,7 @@ object AboutForm: TAboutForm
         AnchorSideBottom.Control = DocumentationLabel
         Left = 6
         Height = 15
-        Top = 256
+        Top = 200
         Width = 66
         Anchors = [akLeft, akBottom]
         BorderSpacing.Around = 6
@@ -120,7 +120,7 @@ object AboutForm: TAboutForm
         AnchorSideBottom.Control = DocumentationLabel
         Left = 78
         Height = 15
-        Top = 256
+        Top = 200
         Width = 87
         Anchors = [akLeft, akBottom]
         BorderSpacing.Around = 6
@@ -134,13 +134,14 @@ object AboutForm: TAboutForm
       end
       object DocumentationLabel: TLabel
         AnchorSideLeft.Control = AboutPage
-        AnchorSideBottom.Control = AboutPage
+        AnchorSideBottom.Control = ForumLabel
         AnchorSideBottom.Side = asrBottom
         Left = 6
         Height = 15
-        Top = 277
+        Top = 221
         Width = 111
         Anchors = [akLeft, akBottom]
+        BorderSpacing.Bottom = 14
         BorderSpacing.Around = 6
         Caption = 'DocumentationLabel'
         ParentColor = False
@@ -148,13 +149,14 @@ object AboutForm: TAboutForm
       object DocumentationURLLabel: TLabel
         AnchorSideLeft.Control = DocumentationLabel
         AnchorSideLeft.Side = asrBottom
-        AnchorSideBottom.Control = AboutPage
+        AnchorSideBottom.Control = ForumLabel
         AnchorSideBottom.Side = asrBottom
         Left = 123
         Height = 15
-        Top = 277
+        Top = 221
         Width = 132
         Anchors = [akLeft, akBottom]
+        BorderSpacing.Bottom = 14
         BorderSpacing.Around = 6
         Caption = 'DocumentationURLLabel'
         Font.Color = clBlue
@@ -171,13 +173,96 @@ object AboutForm: TAboutForm
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = OfficialLabel
         Left = 0
-        Height = 250
+        Height = 194
         Top = 0
         Width = 452
         Anchors = [akTop, akLeft, akRight, akBottom]
+        Lines.Strings = (
+          'fpcupdeluxe / fpcup / fpclazup'
+          ''
+          'Original: https://bitbucket.org/reiniero/fpcup/'
+          'New (this) : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup'
+          ''
+          'Acknowledgement.'
+          'Reinier Olieslagers was the original creator/maintainer of fpcup. May he rest in peace.'
+          ''
+          'Fpcupdeluxe is a wrapper around the original fpclazup.'
+          'Fpclazup is a tool that gets both the current version of FreePascal Compiler (FPC) and Lazarus IDE from their subversion repositories and compiles/installs them.'
+          'It adds CHM documentation and configures the Lazarus help for you.'
+          ''
+          'Shortcut on your desktop are created that point to the new (Lazarus) installation.'
+          ''
+          'Meant to be used side by side with other FPC/Lazarus installations. It creates a separate primary config path directory for the new Lazarus installation, so it doesn''t interfere with existing Lazarus installs.'
+        )
         ReadOnly = True
         ScrollBars = ssAutoBoth
         TabOrder = 0
+      end
+      object ForumLabel: TLabel
+        AnchorSideLeft.Control = AboutPage
+        AnchorSideBottom.Control = ReinierLabel
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 15
+        Top = 241
+        Width = 63
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Bottom = 30
+        BorderSpacing.Around = 6
+        Caption = 'ForumLabel'
+        ParentColor = False
+      end
+      object ForumURLLabel: TLabel
+        AnchorSideLeft.Control = ForumLabel
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideBottom.Control = ReinierLabel
+        AnchorSideBottom.Side = asrBottom
+        Left = 75
+        Height = 15
+        Top = 241
+        Width = 84
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Bottom = 30
+        BorderSpacing.Around = 6
+        Caption = 'ForumURLLabel'
+        Font.Color = clBlue
+        ParentColor = False
+        ParentFont = False
+        OnMouseDown = URLLabelMouseDown
+        OnMouseEnter = URLLabelMouseEnter
+        OnMouseLeave = URLLabelMouseLeave
+      end
+      object ReinierLabel: TLabel
+        AnchorSideLeft.Control = AboutPage
+        AnchorSideBottom.Control = AboutPage
+        AnchorSideBottom.Side = asrBottom
+        Left = 6
+        Height = 15
+        Top = 277
+        Width = 64
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Around = 6
+        Caption = 'ReinierLabel'
+        ParentColor = False
+      end
+      object ReinierURLLabel: TLabel
+        AnchorSideLeft.Control = ReinierLabel
+        AnchorSideLeft.Side = asrBottom
+        AnchorSideBottom.Control = AboutPage
+        AnchorSideBottom.Side = asrBottom
+        Left = 76
+        Height = 15
+        Top = 277
+        Width = 85
+        Anchors = [akLeft, akBottom]
+        BorderSpacing.Around = 6
+        Caption = 'ReinierURLLabel'
+        Font.Color = clBlue
+        ParentColor = False
+        ParentFont = False
+        OnMouseDown = URLLabelMouseDown
+        OnMouseEnter = URLLabelMouseEnter
+        OnMouseLeave = URLLabelMouseLeave
       end
     end
   end

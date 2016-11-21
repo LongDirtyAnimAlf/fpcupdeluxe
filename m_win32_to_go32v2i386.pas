@@ -87,12 +87,15 @@ function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-go32v2';
 begin
+  result:=FLibsFound;
+  if result then exit;
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   result:=SimpleSearchLibrary(BasePath,DirName);
 
   if result then
   begin
+    FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};

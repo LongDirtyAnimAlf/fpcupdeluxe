@@ -245,6 +245,17 @@ begin
       ConfigText.Add(LineEnding);
     ConfigText.Add(Snippet);
 
+    // remove pipeline assembling for Darwin when cross-compiling !!
+    SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
+    if SnipBegin>-1 then
+    begin
+      if ConfigText.Strings[SnipBegin+1]<>'#IFNDEF FPC_CROSSCOMPILING' then
+      begin
+        ConfigText.Insert(SnipBegin+1,'#IFNDEF FPC_CROSSCOMPILING');
+        ConfigText.Insert(SnipBegin+3,'#ENDIF');
+      end;
+    end;
+
     ConfigText.SaveToFile(FPCCFG);
     result:=true;
   finally
@@ -484,6 +495,7 @@ begin
         ProcessEx.Parameters.Add('all');
         ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
         ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+        ProcessEx.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
         if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
         Options:=FCompilerOptions;
         // Error checking for some known problems with cross compilers
@@ -500,7 +512,11 @@ begin
         if CrossInstaller.LibsPath<>''then
         begin
            Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
-           Options:=Options+' -Xr'+CrossInstaller.LibsPath;
+           if Pos('osxcross',CrossInstaller.LibsPath)>0 then
+           begin
+             //Options:=Options+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
+           end;
+           //Options:=Options+' -Xr'+CrossInstaller.LibsPath;
         end;
 
         if (CrossInstaller.TargetOS='android') then
@@ -515,17 +531,6 @@ begin
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
 
-        {$ifdef MSWINDOWS}
-        if (CrossInstaller.TargetOS='darwin') then
-        begin
-          // strange, but needed ... must investigate further.
-          CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\bsd');
-          CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\inc');
-          CrossInstaller.CrossOpt.Add('-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+'rtl\unix');
-        end;
-
-        {$endif}
-
         if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
            CrossOptions:='CROSSOPT=';
         for i:=0 to CrossInstaller.CrossOpt.Count-1 do
@@ -536,7 +541,14 @@ begin
            ProcessEx.Parameters.Add(CrossOptions);
         // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
-        //ProcessEx.Parameters.Add('OPT=-va '+Options);
+        //ProcessEx.Parameters.Add('OPT="-vw -vl -vx -vd -vi-n-h- '+Options+'"');
+
+        {
+        ProcessEx.Parameters.Add('OPT=-vh- '+Options);
+        ProcessEx.Parameters.Add('--warn-undefined-variables');
+        ProcessEx.Parameters.Add('--debug');
+        ProcessEx.Parameters.Add('-p');
+        }
 
         try
           if CrossOptions='' then
@@ -553,15 +565,6 @@ begin
             exit(false);
           end;
         end;
-      finally
-        // Return path to previous state
-        if (CrossInstaller.BinUtilsPathInPath)
-           {$ifdef MSWINDOWS}OR (CrossInstaller.TargetOS='darwin') {$endif}
-        then
-        begin
-          SetPath(OldPath,false,false);
-        end;
-      end;
 
       if not(Result) then
       begin
@@ -702,6 +705,16 @@ begin
           result:=CreateFPCScript;
           {$ENDIF UNIX}
           GetCompiler;
+        end;
+      end;
+
+      finally
+        // Return path to previous state
+        if (CrossInstaller.BinUtilsPathInPath)
+           {$ifdef MSWINDOWS}OR (CrossInstaller.TargetOS='darwin') {$endif}
+        then
+        begin
+          SetPath(OldPath,false,false);
         end;
       end;
     end;

@@ -95,7 +95,7 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
+            <IncludeFiles Value="$(ProjOutDir);C:\fpctrunk\fpc\compiler\;C:\fpctrunk\fpc\compiler\i386\;C:\fpctrunk\fpc\compiler\x86\"/>
             <OtherUnitFiles Value="synaser"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>

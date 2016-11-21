@@ -78,6 +78,8 @@ const
   DirName='x86_64-linux';
   LibName='libc.so';
 begin
+  result:=FLibsFound;
+  if result then exit;
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
@@ -88,6 +90,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=true;
     infoln('Twin64_linux64: found libspath '+FLibsPath,etInfo);
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+

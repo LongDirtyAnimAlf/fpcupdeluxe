@@ -109,6 +109,8 @@ const
   DirName='mipsel-linux';
   LibName='libc.so';
 begin
+  result:=FLibsFound;
+  if result then exit;
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
@@ -119,6 +121,7 @@ begin
 
   if result then
   begin
+    FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}

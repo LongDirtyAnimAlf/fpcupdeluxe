@@ -47,13 +47,17 @@ end;
 
 function TFreeBSD_Linux386.GetLibs(Basepath:string): boolean;
 begin
+  result:=FLibsFound;
+  if result then exit;
+
   FLibsPath:='/compat/linux/lib';
   result:=DirectoryExists(FLibsPath);
   if result then
   begin
+    FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath) {set linker's rlink path };
+    '-Xr'+IncludeTrailingPathDelimiter(FLibsPath); //set linker's rlink path
   end;
   {
   perhaps these?!? todo: check.

@@ -70,9 +70,12 @@ end;
 
 function Tany_androidjvm.GetLibs(Basepath:string): boolean;
 begin
+  result:=FLibsFound;
+  if result then exit;
   //FLibsPath:='where is jasmin.jar'
   //for now, jasmin.jar will be downloaded into normal bin-dir !!
   result:=True;
+  FLibsFound:=True;
 end;
 
 {$ifndef FPCONLY}

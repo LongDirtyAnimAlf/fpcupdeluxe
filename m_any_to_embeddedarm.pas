@@ -81,6 +81,9 @@ const
 begin
   // Arm-embedded does not need libs by default, but user can add them.
 
+  result:=FLibsFound;
+  if result then exit;
+
   // search local paths based on libbraries provided for or adviced by fpc itself
   result:=SimpleSearchLibrary(BasePath,DirName);
 
@@ -98,6 +101,7 @@ begin
     FLibsPath:='';
     result:=true;
   end;
+  FLibsFound:=True;
 end;
 
 {$ifndef FPCONLY}

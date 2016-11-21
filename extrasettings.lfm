@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 368
+  Left = 434
   Height = 511
-  Top = 207
+  Top = 185
   Width = 708
   Caption = 'Advanced settings'
   ClientHeight = 511
@@ -11,10 +11,10 @@ object Form2: TForm2
   Position = poMainFormCenter
   LCLVersion = '1.7'
   object BitBtn1: TBitBtn
-    Left = 505
+    Left = 504
     Height = 31
     Top = 468
-    Width = 86
+    Width = 89
     Anchors = [akRight, akBottom]
     Default = True
     DefaultCaption = True
@@ -156,6 +156,29 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 2
     end
+    object CheckUpdateOnly: TCheckBox
+      Left = 248
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 8
+      Width = 129
+      Caption = 'FPC/Laz update only'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+    end
+    object CheckIncludeFPCIDE1: TCheckBox
+      Left = 248
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 36
+      Width = 173
+      Caption = 'Include FPC IDE (default=no)'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+    end
   end
   object GroupBox3: TGroupBox
     Left = 457
@@ -166,8 +189,9 @@ object Form2: TForm2
     Caption = 'NewPascal'
     ClientHeight = 106
     ClientWidth = 233
+    Enabled = False
     TabOrder = 4
-    object RadioGroup1: TRadioGroup
+    object RadioGroupNPFPCbranch: TRadioGroup
       Left = 8
       Height = 96
       Top = 8
@@ -191,7 +215,7 @@ object Form2: TForm2
       )
       TabOrder = 0
     end
-    object RadioGroup2: TRadioGroup
+    object RadioGroupNPLazarusbranch: TRadioGroup
       Left = 120
       Height = 96
       Top = 8
@@ -209,7 +233,7 @@ object Form2: TForm2
       ClientWidth = 100
       ItemIndex = 2
       Items.Strings = (
-        'FreePascal'
+        'Lazarus'
         'Master'
         'Release'
       )
@@ -311,9 +335,124 @@ object Form2: TForm2
       TabOrder = 6
     end
   end
+  object GroupBoxFPCLazBranchRevision: TGroupBox
+    Left = 296
+    Height = 128
+    Top = 320
+    Width = 250
+    Caption = 'FPC and Lazarus branch and revision'
+    ClientHeight = 108
+    ClientWidth = 246
+    Enabled = False
+    TabOrder = 6
+    object EditFPCbranch: TEdit
+      Left = 8
+      Height = 23
+      Top = 24
+      Width = 112
+      TabOrder = 0
+    end
+    object LabelFPCbranch: TLabel
+      Left = 8
+      Height = 15
+      Top = 8
+      Width = 61
+      Caption = 'FPC branch'
+      ParentColor = False
+    end
+    object EditFPCrevision: TEdit
+      Left = 136
+      Height = 23
+      Top = 24
+      Width = 104
+      TabOrder = 1
+    end
+    object LabelFPCrevision: TLabel
+      Left = 136
+      Height = 15
+      Top = 8
+      Width = 65
+      Caption = 'FPC revision'
+      ParentColor = False
+    end
+    object LabelLazarusbranch: TLabel
+      Left = 8
+      Height = 15
+      Top = 56
+      Width = 79
+      Caption = 'Lazarus branch'
+      ParentColor = False
+    end
+    object EditLazarusbranch: TEdit
+      Left = 8
+      Height = 23
+      Top = 72
+      Width = 112
+      TabOrder = 2
+    end
+    object LabelLazarusrevision: TLabel
+      Left = 136
+      Height = 15
+      Top = 56
+      Width = 83
+      Caption = 'Lazarus revision'
+      ParentColor = False
+    end
+    object EditLazarusrevision: TEdit
+      Left = 136
+      Height = 23
+      Top = 72
+      Width = 104
+      TabOrder = 3
+    end
+  end
+  object GroupBox5: TGroupBox
+    Left = 560
+    Height = 128
+    Top = 320
+    Width = 128
+    Caption = 'osxcross'
+    ClientHeight = 108
+    ClientWidth = 124
+    TabOrder = 7
+    object btnOSXCross: TButton
+      Left = 11
+      Height = 20
+      Top = 32
+      Width = 105
+      Caption = 'OSXCross'
+      OnClick = OSXCrossSelect
+      TabOrder = 0
+    end
+    object EditOSXCrossLocation: TEdit
+      Left = 12
+      Height = 23
+      Top = 8
+      Width = 103
+      ReadOnly = True
+      TabOrder = 1
+    end
+    object EditCygwinLocation: TEdit
+      Left = 11
+      Height = 23
+      Top = 56
+      Width = 103
+      ReadOnly = True
+      TabOrder = 2
+    end
+    object btnCygwin: TButton
+      Left = 10
+      Height = 20
+      Top = 80
+      Width = 105
+      Caption = 'Cygwin'
+      OnClick = OSXCrossSelect
+      TabOrder = 3
+    end
+  end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 254
-    top = 24
+    Left = 254
+    Top = 24
   end
 end

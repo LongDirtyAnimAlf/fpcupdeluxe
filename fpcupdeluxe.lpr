@@ -12,6 +12,7 @@ program fpcupdeluxe;
   {$IFDEF FPC_CROSSCOMPILING}
     {$linklib libc_nonshared.a}
     {$IFDEF CPUARM}
+      // for RPi
       {$linklib GLESv2}
     {$ENDIF}
   {$ENDIF}
@@ -36,6 +37,7 @@ uses
   m_any_to_freebsd386,
   m_any_to_androidjvm,m_any_to_javajvm,
   m_any_to_darwin386,
+  m_any_to_darwinx64,
   {$IFDEF Darwin}
   m_crossdarwin64,
   m_crossdarwin32,
