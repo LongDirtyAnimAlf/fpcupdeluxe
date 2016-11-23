@@ -70,18 +70,12 @@ begin
   result:=FLibsFound;
   if result then exit;
 
-  {$ifdef MSWINDOWS}
-  if Pos('osxcross',FBinUtilsPath)>0 then
-  begin
-    result:=true;
-    if Pos('darwin13',FBinUtilsPrefix)>0 then FLibsPath:='C:\cygwin\opt\osxcross\target\SDK\MacOSX10.9.sdk\usr\lib';
-    if Pos('darwin14',FBinUtilsPrefix)>0 then FLibsPath:='C:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\usr\lib';
-  end;
-  {$endif}
-
   // begin simple: check presence of library file in basedir
   if not result then
     result:=SearchLibrary(Basepath,LibName);
+
+  if not result then
+    result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',LibName);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
@@ -102,24 +96,22 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
     if Pos('osxcross',FLibsPath)>0 then
     begin
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system\'+LineEnding+
-      '-k-FC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks'+LineEnding+
-      '-k-FC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\PrivateFrameworks'+LineEnding+
-      '-k-FC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\ApplicationServices.framework\Frameworks'+LineEnding+
-      '-k-FC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\CoreServices.framework\Frameworks'+LineEnding+
-      '-k-FC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\Carbon.framework\Frameworks'+LineEnding+
-      '-k-framework AppKit'+LineEnding+
-      '-k-framework Foundation'+LineEnding+
-      '-k-framework CoreFoundation'+LineEnding+
-      '-k-dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:C:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\OpenGL.framework\Versions\A\Libraries\libGL.dylib'+LineEnding+
-      '-k-dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLU.dylib:C:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\OpenGL.framework\Versions\A\Libraries\libGLU.dylib'+LineEnding+
-      '-XRC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\';
+      '-k-framework'+LineEnding+
+      '-kAppKit'+LineEnding+
+      '-k-framework'+LineEnding+
+      '-kFoundation'+LineEnding+
+      '-k-framework'+LineEnding+
+      '-kCoreFoundation'+LineEnding+
+      //'-k-dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGL.dylib:C:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\OpenGL.framework\Versions\A\Libraries\libGL.dylib'+LineEnding+
+      //'-k-dylib_file /System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/libGLU.dylib:C:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk\System\Library\Frameworks\OpenGL.framework\Versions\A\Libraries\libGLU.dylib'+LineEnding+
+      // -XRx is needed for fpc : prepend <x> to all linker search paths
+      '-XRC:\cygwin\opt\osxcross\target\SDK\MacOSX10.10.sdk';
     end;
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
@@ -150,49 +142,33 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  {$ifdef MSWINDOWS}
   // Also allow for (cross)binutils from https://github.com/tpoechtrager/osxcross
-
-  // version 10.10
+  // version 10.10 = v14
+  {$IFDEF MSWINDOWS}
   if IsWindows64
-     then BinPrefixTry:='x86_64-apple-darwin14-'
-     else BinPrefixTry:='i386-apple-darwin14-';
-
-  if not result then
-  begin
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
-  if not result then
-  begin
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil('C:\cygwin\opt\osxcross\target\bin\',AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
-  // version 10.9
-  if IsWindows64
-     then BinPrefixTry:='x86_64-apple-darwin13-'
-     else BinPrefixTry:='i386-apple-darwin13-';
-
-  if not result then
-  begin
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
-  if not result then
-  begin
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil('C:\cygwin\opt\osxcross\target\bin\',AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
+     then BinPrefixTry:='x86_64'
+     else BinPrefixTry:='i386';
+  {$else}
+  BinPrefixTry:=lowercase({$i %FPCTARGETCPU%});
   {$endif}
+  BinPrefixTry:=BinPrefixTry+'-apple-darwin';
+
+  if not result then
+  begin
+    AsFile:=BinPrefixTry+'14-'+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry+'14-';
+  end;
+
+  // version 10.9 = v13
+  if not result then
+  begin
+    AsFile:=BinPrefixTry+'13-'+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry+'13-';
+  end;
 
   SearchBinUtilsInfo(result);
 

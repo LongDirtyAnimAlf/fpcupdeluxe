@@ -416,7 +416,6 @@ begin
 
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
 
-
     // set bin and libdirs !!
     if (CrossToolsDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
     else if (CrossToolsDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
@@ -425,7 +424,7 @@ begin
     begin
       if Length(CrossToolsDirectory)=0
          then result:=CrossInstaller.GetBinUtils(FBaseDirectory)
-         else result:=CrossInstaller.GetBinUtils(CrossLibraryDirectory);
+         else result:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
     end;
     if not result then infoln('Failed to get crossbinutils', etError);
 
@@ -461,16 +460,6 @@ begin
       try
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
-
-        {$ifdef MSWINDOWS}
-        if (CrossInstaller.TargetOS='darwin') then
-        begin
-          // make use of osxcross !!
-          SetPath('c:\cygwin\bin;C:\cygwin\opt\osxcross\target\bin',false,true);
-          //FMakeDir:='c:\cygwin\bin';
-          //FMake:='';
-        end;
-        {$endif}
 
         ProcessEx.Executable := Make;
         ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(FBaseDirectory);
@@ -511,12 +500,12 @@ begin
         end;
         if CrossInstaller.LibsPath<>''then
         begin
-           Options:=Options+' -Xd -Fl'+CrossInstaller.LibsPath;
+           Options:=Options+' -Xd';
+           Options:=Options+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
            if Pos('osxcross',CrossInstaller.LibsPath)>0 then
            begin
-             //Options:=Options+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
+             Options:=Options+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
            end;
-           //Options:=Options+' -Xr'+CrossInstaller.LibsPath;
         end;
 
         if (CrossInstaller.TargetOS='android') then
@@ -539,16 +528,11 @@ begin
         end;
         if CrossOptions<>'' then
            ProcessEx.Parameters.Add(CrossOptions);
-        // suppress hints
-        ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
-        //ProcessEx.Parameters.Add('OPT="-vw -vl -vx -vd -vi-n-h- '+Options+'"');
 
-        {
-        ProcessEx.Parameters.Add('OPT=-vh- '+Options);
-        ProcessEx.Parameters.Add('--warn-undefined-variables');
-        ProcessEx.Parameters.Add('--debug');
-        ProcessEx.Parameters.Add('-p');
-        }
+        // suppress hints and add all other options
+        Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+        Options:=Trim(Options);
+        ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
 
         try
           if CrossOptions='' then
@@ -710,9 +694,7 @@ begin
 
       finally
         // Return path to previous state
-        if (CrossInstaller.BinUtilsPathInPath)
-           {$ifdef MSWINDOWS}OR (CrossInstaller.TargetOS='darwin') {$endif}
-        then
+        if (CrossInstaller.BinUtilsPathInPath)  then
         begin
           SetPath(OldPath,false,false);
         end;
@@ -776,12 +758,13 @@ begin
 
   if FBootstrapCompilerOverrideVersionCheck then
     ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+  s:='-vi-n-h- '+FCompilerOptions;
+  s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
+  s:=Trim(s);
   {$IFDEF UNIX}
-  s:='-Sg -vi-n-h-';
-  {$ELSE}
-  s:='-vi-n-h-';
+  s:='-Sg '+s;
   {$ENDIF}
-  ProcessEx.Parameters.Add('OPT='+s+' '+FCompilerOptions);
+  ProcessEx.Parameters.Add('OPT='+s);
   ProcessEx.Parameters.Add('all');
   ProcessEx.Parameters.Add('install');
   infoln('Running make all install for FPC:',etInfo);
@@ -1662,26 +1645,25 @@ begin
   {$ENDIF MSWINDOWS}
   FBinPath:=IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
   {$IFDEF MSWINDOWS}
+  if Length(FSVNDirectory)>0
+     then s:=ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator
+     else s:='';
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(
-    ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator+
+  SetPath(s+
     FBinPath+PathSeparator+ {compiler for current architecture}
     IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
     IncludeTrailingPathDelimiter(FBaseDirectory)+'utils'+PathSeparator+
     FMakeDir+PathSeparator+
     FBootstrapCompilerDirectory, {any missing utilities etc; put these last}
-    false,false);
+    true,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //add fpc/utils to solve data2inc not found by fpcmkcfg
   SetPath(FBinPath+PathSeparator+
-  {$IFDEF DARWIN}
   // pwd is located in /bin ... the makefile needs it !!
   // tools are located in /usr/bin ... the makefile needs it !!
-  // don't ask, but this is needed when fpcupdeluxe runs out of an .app package ... quirk solved this way .. ;-)
   '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
-  {$ENDIF}
   IncludeTrailingPathDelimiter(FBaseDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
   IncludeTrailingPathDelimiter(FBaseDirectory)+'utils',
   true,false);

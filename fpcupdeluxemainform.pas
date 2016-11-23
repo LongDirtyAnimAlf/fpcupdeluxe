@@ -107,7 +107,7 @@ uses
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
   FPCUPGITREPO='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
-  FPCUPDELUXEVERSION='0.99c';
+  FPCUPDELUXEVERSION='0.99e';
 
 resourcestring
   CrossGCCMsg =
@@ -301,11 +301,36 @@ var
 begin
   s:=SynEdit1.Lines[Line-1];
 
+  // github error
+  if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
+  begin
+    FG      := clRed;   //Text Color
+    BG      := clNavy;  //BackGround
+    Special := True;    //Must be true
+    // add help into summary memo
+    Memo1.Lines.Append('GitHub blocked us due to too many download requests.');
+    Memo1.Lines.Append('This will last for an hour, so please wait and be patient.');
+    Memo1.Lines.Append('After this period, please re-run fpcupdeluxe.');
+  end;
+
+  // svn connection error
+  if (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
+  begin
+    FG      := clRed;   //Text Color
+    BG      := clNavy;  //BackGround
+    Special := True;    //Must be true
+    // add help into summary memo
+    Memo1.Lines.Append('SVN could not connect to the desired repository. URL:');
+    Memo1.Lines.Append(FPCupManager.FPCURL);
+    Memo1.Lines.Append('Please check your connection. Or run the command to try yourself:');
+    Memo1.Lines.Append(SynEdit1.Lines[Line-2]);
+  end;
+
   if ExistWordInString(PChar(s),'svn: e',[soDown]) then
   begin
-    FG      := clFuchsia; //Text Color
-    BG      := clBlack;  //BackGround
-    Special := True;     //Must be true
+    FG      := clFuchsia;
+    BG      := clBlack;
+    Special := True;
   end;
 
   if ExistWordInString(PChar(s),'Executing :',[soWholeWord,soDown]) then
@@ -380,16 +405,6 @@ begin
     end;
   end;
 
-  // github error
-  if (ExistWordInString(PChar(s),'429 Too Many Requests',[])) then
-  begin
-    FG      := clRed;
-    BG      := clNavy;
-    Special := True;
-    // add help into summary memo
-    Memo1.Lines.Append('Github blocked us due to too many download requests. This will last for an hour, so please wait and be patient. After this period, please re-run fpcupdeluxe.');
-  end;
-
   // diskspace error
   if (ExistWordInString(PChar(s),'Stream write error',[])) then
   begin
@@ -397,7 +412,8 @@ begin
     BG      := clNavy;
     Special := True;
     // add help into summary memo
-    Memo1.Lines.Append('There is not enough diskspace to finish this operation. Please free some space and re-run fpcupdeluxe.');
+    Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
+    Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
   end;
 
 
@@ -410,7 +426,6 @@ var
   Revision,Branch:string;
 begin
   DisEnable(Sender,False);
-  Application.ProcessMessages;
   try
     PrepareRun;
 
@@ -429,7 +444,7 @@ begin
       s:='Going to install NewPascal';
       FPCURL:='newpascal';
       LazarusURL:='newpascal';
-      Revision:='69e7216e7be1f42045a70a6f1c453f685da8b84b';
+      //Revision:='69e7216e7be1f42045a70a6f1c453f685da8b84b';
       Branch:='release';
       //FPCupManager.IncludeModules:='mORMotFPC,zeos';
     end;
@@ -493,6 +508,11 @@ begin
     FPCupManager.FPCURL:=FPCURL;
     FPCupManager.LazarusURL:=LazarusURL;
 
+    if NOT Form2.IncludeHelp then
+    begin
+      FPCupManager.SkipModules:='helpfpc,helplazarus';
+    end;
+
     AddMessage(s+'.');
 
     sStatus:=s;
@@ -505,6 +525,8 @@ begin
 end;
 
 procedure TForm1.Button1Click(Sender: TObject);
+var
+  FModuleList: TStringList;
 begin
   if (ListBox1.ItemIndex=-1) or (ListBox2.ItemIndex=-1) then
   begin
@@ -512,12 +534,22 @@ begin
     exit;
   end;
   DisEnable(Sender,False);
-  Application.ProcessMessages;
   try
     PrepareRun;
     AddMessage('Going to install/update FPC and Lazarus with given options.');
     sStatus:='Going to install/update FPC and Lazarus.';
-    if Form2.UpdateOnly then FPCupManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
+    if Form2.UpdateOnly then
+    begin
+      FPCupManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
+      FModuleList:=TStringList.Create;
+      try
+        GetModuleEnabledList(FModuleList);
+        // also include enabled modules (packages) when rebuilding Lazarus
+        if FModuleList.Count>0 then FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+FModuleList.CommaText;
+      finally
+        FModuleList.Free;
+      end;
+    end;
     RealRun;
   finally
     DisEnable(Sender,True);
@@ -530,7 +562,6 @@ var
   modules:string;
 begin
   DisEnable(Sender,False);
-  Application.ProcessMessages;
   try
     PrepareRun;
 
@@ -637,7 +668,6 @@ begin
   end;
 
   DisEnable(Sender,False);
-  Application.ProcessMessages;
 
   try
     if (FPCupManager.CrossCPU_Target='arm') then
@@ -796,12 +826,16 @@ begin
     exit;
   end;
   DisEnable(Sender,False);
-  Application.ProcessMessages;
   try
     PrepareRun;
 
     FPCupManager.OnlyModules:='fpc';
     FPCupManager.LazarusURL:='skip';
+
+    if NOT Form2.IncludeHelp then
+    begin
+      FPCupManager.SkipModules:='helpfpc';
+    end;
 
     sStatus:='Going to install/update FPC only.';
 
@@ -1015,7 +1049,8 @@ begin
   AddMessage('');
 
   Application.ProcessMessages;
-  sleep(2000);
+
+  sleep(1000);
 
   try
     result:=FPCupManager.Run;

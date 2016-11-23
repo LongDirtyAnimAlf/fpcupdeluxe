@@ -273,6 +273,8 @@ begin
           Options := Options + ' -XP' + CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX=' + CrossInstaller.BinUtilsPrefix);
         end;
+        Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+        Options:=Trim(Options);
         ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + Options);
         // Since April 2012, LCL requires lazutils which requires registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
@@ -396,9 +398,17 @@ begin
     }
     // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
     sCmpOpt:=StringReplace(FCompilerOptions,'-g ','-gw ',[]);
+
+    sCmpOpt:=StringReplace(sCmpOpt,'  ',' ',[rfReplaceAll]);
+    sCmpOpt:=Trim(sCmpOpt);
     ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + sCmpOpt);
 
     case UpperCase(ModuleName) of
+      'IDE':
+      begin
+        ProcessEx.Parameters.Add('-C ide idepkg');
+        infoln(ModuleName + ': running make -C ide idepkg:', etInfo);
+      end;
       'LAZARUS':
       begin
         ProcessEx.Parameters.Add('all');
