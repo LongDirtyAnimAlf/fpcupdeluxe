@@ -106,8 +106,10 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  FPCUPGITREPO='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
-  FPCUPDELUXEVERSION='0.99e';
+  FPCUPGITREPO='https://github.com/newpascal/fpcupdeluxe';
+  FPCUPWINBINSURL='/releases/download/wincrossbins_v1.0';
+  FPCUPLIBSURL='/releases/download/crosslibs_v1.0';
+  FPCUPDELUXEVERSION='1.00a';
 
 resourcestring
   CrossGCCMsg =
@@ -300,6 +302,11 @@ var
   x:integer;
 begin
   s:=SynEdit1.Lines[Line-1];
+
+  if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
+  begin
+    Memo1.Lines.Append('Performing a checkout ... please wait, could take some time.');
+  end;
 
   // github error
   if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
@@ -608,7 +615,7 @@ end;
 procedure TForm1.Button5Click(Sender: TObject);
 var
   aDownLoader: TDownLoader;
-  URL,TargetFile,UnZipper:string;
+  URL,DownloadURL,TargetFile,UnZipper:string;
   success:boolean;
 begin
   if (RadioGroup1.ItemIndex=-1) and (RadioGroup2.ItemIndex=-1) then
@@ -763,24 +770,24 @@ begin
       if URL<>'' then
       begin
         AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
-        URL:=FPCUPGITREPO+'/releases/download/crosstoolswindows/WinCross'+URL;
+        DownloadURL:=FPCUPGITREPO+FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
+        AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
         TargetFile := SysUtils.GetTempFileName;
         aDownLoader:=TDownLoader.Create;
         try
-          success:=aDownLoader.getFile(URL,TargetFile);
+          success:=aDownLoader.getFile(DownloadURL,TargetFile);
           if (NOT success) then // try only once again in case of error
           begin
             AddMessage('Error while trying to download '+URL+'. Trying once again.');
             SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-            success:=aDownLoader.getFile(URL,TargetFile);
+            success:=aDownLoader.getFile(DownloadURL,TargetFile);
           end;
         finally
           aDownLoader.Destroy;
         end;
-
         if success then
         begin
-          AddMessage('Successfully downloaded cross-tools.');
+          AddMessage('Successfully downloaded binary-tools.');
           AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
           success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
           if (NOT success) then
@@ -788,19 +795,46 @@ begin
             UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
             success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
           end;
+        end;
+        SysUtils.DeleteFile(TargetFile);
 
-          if success then
+        DownloadURL:=FPCUPGITREPO+FPCUPLIBSURL+'/'+'CrossLibs'+URL;
+        AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+        TargetFile := SysUtils.GetTempFileName;
+        aDownLoader:=TDownLoader.Create;
+        try
+          success:=aDownLoader.getFile(DownloadURL,TargetFile);
+          if (NOT success) then // try only once again in case of error
           begin
-            AddMessage('Successfully extracted cross-tools.');
-            // run again with the correct libs and binutils
-            label1.Font.Color:=clDefault;
-            label2.Font.Color:=clDefault;
-            sStatus:='Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
-            FPCupManager.Sequencer.ResetAllExecuted;
-            RealRun;
+            AddMessage('Error while trying to download '+URL+'. Trying once again.');
+            SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+            success:=aDownLoader.getFile(DownloadURL,TargetFile);
+          end;
+        finally
+          aDownLoader.Destroy;
+        end;
+        if success then
+        begin
+          AddMessage('Successfully downloaded the libraries.');
+          AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
+          success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+          if (NOT success) then
+          begin
+            UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+            success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
           end;
         end;
 
+        if success then
+        begin
+          AddMessage('Successfully extracted cross-tools.');
+          // run again with the correct libs and binutils
+          label1.Font.Color:=clDefault;
+          label2.Font.Color:=clDefault;
+          sStatus:='Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+          FPCupManager.Sequencer.ResetAllExecuted;
+          RealRun;
+        end;
         SysUtils.DeleteFile(TargetFile);
 
         if (NOT success) then AddMessage('No luck in getting then cross-tools ... aborting.');
