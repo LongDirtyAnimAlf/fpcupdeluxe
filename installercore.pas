@@ -84,10 +84,9 @@ type
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
     FDesiredRevision: string;
+    FDesiredBranch: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
-    FGitClient: TGitClient;
-    FHGClient: THGClient;
     FHTTPProxyHost: string;
     FHTTPProxyPassword: string;
     FHTTPProxyPort: integer;
@@ -98,6 +97,8 @@ type
     FMakeDir: string; //Binutils/make/patch directory
     FPatchCmd: string;
     FNeededExecutablesChecked: boolean;
+    FGitClient: TGitClient;
+    FHGClient: THGClient;
     FSVNClient: TSVNClient;
     FSVNDirectory: string;
     FRepositoryUpdated: boolean;
@@ -183,6 +184,7 @@ type
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision
     property DesiredRevision: string write FDesiredRevision;
+    property DesiredBranch: string write FDesiredBranch;
     // If using HTTP proxy: host
     property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
     // If using HTTP proxy: port (optional, default 8080)
@@ -952,6 +954,8 @@ begin
   end;
 
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
+  aClient.DesiredBranch := FDesiredBranch; //We want to update to this specific branch
+
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   aClient.CheckOutOrUpdate;
   ReturnCode := aClient.ReturnCode;

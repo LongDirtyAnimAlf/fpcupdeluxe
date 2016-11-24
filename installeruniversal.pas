@@ -1106,7 +1106,7 @@ begin
         FGitClient.ModuleName:=ModuleName;
         FGitClient.Verbose:=FVerbose;
         FGitClient.ExportOnly:=FExportOnly;
-        FGitClient.Branch:=Branch;
+        FGitClient.DesiredBranch:=Branch;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=result;
         if UpdateWarnings.Count>0 then

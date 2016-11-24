@@ -264,6 +264,7 @@ type
     FCrossOS_Target: string;
     FCrossOS_SubArch: string;
     FFPCDesiredRevision: string;
+    FFPCDesiredBranch: string;
     FFPCDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
@@ -271,6 +272,7 @@ type
     FKeepLocalDiffs: boolean;
     {$ifndef FPCONLY}
     FLazarusDesiredRevision: string;
+    FLazarusDesiredBranch: string;
     FLazarusDirectory: string;
     FLazarusOPT: string;
     FLazarusPrimaryConfigPath: string;
@@ -352,6 +354,7 @@ type
     property FPCURL: string read FFPCURL write SetFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
+    property FPCDesiredBranch: string read FFPCDesiredBranch write FFPCDesiredBranch;
     property HTTPProxyHost: string read FHTTPProxyHost write FHTTPProxyHost;
     property HTTPProxyPassword: string read FHTTPProxyPassword write FHTTPProxyPassword;
     property HTTPProxyPort: integer read FHTTPProxyPort write FHTTPProxyPort;
@@ -363,6 +366,7 @@ type
     property LazarusURL: string read FLazarusURL write SetLazarusURL;
     property LazarusOPT:string read FLazarusOPT write FLazarusOPT;
     property LazarusDesiredRevision:string read FLazarusDesiredRevision write FLazarusDesiredRevision;
+    property LazarusDesiredBranch:string read FLazarusDesiredBranch write FLazarusDesiredBranch;
     {$endif}
     // Location where fpcup log will be written to.
     property LogFileName: string read GetLogFileName write SetLogFileName;
@@ -1075,6 +1079,7 @@ begin
     FInstaller.Compiler:='';  //bootstrap used
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
+    FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
     FInstaller.URL:=FParent.FPCURL;
     end
 
@@ -1110,6 +1115,7 @@ begin
       FInstaller.Compiler:=FParent.CompilerName;
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
+    FInstaller.DesiredBranch:=FParent.LazarusDesiredBranch;
     // CrossLCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;

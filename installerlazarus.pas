@@ -189,7 +189,9 @@ type
 
 implementation
 
-uses fpcuputil, fileutil,
+uses
+  fpcuputil, fileutil,
+  repoclient,
   lazfileutils {utf8 file functions},
   updatelazconfig
   {$IFDEF UNIX}
@@ -1042,25 +1044,30 @@ var
   ReturnCode,i: integer;
   RevisionIncText: Text;
   ConstStart: string;
+  aRepoClient:TRepoClient;
 begin
   Result := InitModule;
-  if not Result then
-    exit;
+  if not Result then exit;
+
+  // not so elegant check to see what kind of client we need ...
+  if ( (Pos('GITHUB',UpperCase(FURL))>0) OR (Pos('.GIT',UpperCase(FURL))>0) )
+     then aRepoClient:=FGitClient
+     else aRepoClient:=FSVNClient;
+
   infoln('Checking out/updating Lazarus sources:', etInfo);
   UpdateWarnings := TStringList.Create;
   try
-    FSVNClient.Verbose:=FVerbose;
-    FSVNClient.ExportOnly:=FExportOnly;
-    Result := DownloadFromSVN(ModuleName, BeforeRevision, AfterRevision, UpdateWarnings);
-    if UpdateWarnings.Count > 0 then
-    begin
-      WritelnLog(UpdateWarnings.Text);
-    end;
+    aRepoClient.Verbose:=FVerbose;
+    aRepoClient.ExportOnly:=FExportOnly;
+    aRepoClient.ModuleName:=ModuleName;
+    if aRepoClient=FGitClient
+       then result:=DownloadFromGit(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings)
+       else result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
   finally
     UpdateWarnings.Free;
   end;
 
-  if NOT FSVNClient.ExportOnly then
+  if NOT aRepoClient.ExportOnly then
   begin
     infoln('Lazarus was at: ' + BeforeRevision, etInfo);
 
@@ -1090,7 +1097,7 @@ begin
       Rewrite(RevisionIncText);
       writeln(RevisionIncText, RevisionIncComment);
       ConstStart := Format('const %s = ''', [ConstName]);
-      writeln(RevisionIncText, ConstStart, FSVNClient.LocalRevision, ''';');
+      writeln(RevisionIncText, ConstStart, aRepoClient.LocalRevision, ''';');
     finally
       CloseFile(RevisionIncText);
     end;

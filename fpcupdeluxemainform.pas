@@ -106,9 +106,10 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  FPCUPGITREPO='https://github.com/newpascal/fpcupdeluxe';
-  FPCUPWINBINSURL='/releases/download/wincrossbins_v1.0';
-  FPCUPLIBSURL='/releases/download/crosslibs_v1.0';
+  NEWPASCALGITREPO='https://github.com/newpascal';
+  FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
+  FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
   FPCUPDELUXEVERSION='1.00a';
 
 resourcestring
@@ -534,6 +535,7 @@ end;
 procedure TForm1.Button1Click(Sender: TObject);
 var
   FModuleList: TStringList;
+  i:integer;
 begin
   if (ListBox1.ItemIndex=-1) or (ListBox2.ItemIndex=-1) then
   begin
@@ -770,7 +772,7 @@ begin
       if URL<>'' then
       begin
         AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
-        DownloadURL:=FPCUPGITREPO+FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
+        DownloadURL:=FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
         AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
         TargetFile := SysUtils.GetTempFileName;
         aDownLoader:=TDownLoader.Create;
@@ -798,7 +800,7 @@ begin
         end;
         SysUtils.DeleteFile(TargetFile);
 
-        DownloadURL:=FPCUPGITREPO+FPCUPLIBSURL+'/'+'CrossLibs'+URL;
+        DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
         AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
         TargetFile := SysUtils.GetTempFileName;
         aDownLoader:=TDownLoader.Create;
@@ -984,6 +986,8 @@ begin
 end;
 
 procedure TForm1.PrepareRun;
+var
+  s:string;
 begin
   label1.Font.Color:=clDefault;
   label2.Font.Color:=clDefault;
@@ -1012,8 +1016,8 @@ begin
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:='default';
   FPCupManager.LazarusURL:='default';
-  if (listbox1.ItemIndex<>-1) then FPCupManager.FPCURL:=listbox1.Items[listbox1.ItemIndex];
-  if (listbox2.ItemIndex<>-1) then FPCupManager.LazarusURL:=listbox2.Items[listbox2.ItemIndex];
+  FPCupManager.FPCDesiredBranch:='';
+  FPCupManager.LazarusDesiredBranch:='';
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
 
@@ -1041,8 +1045,13 @@ begin
   sStatus:='Sitting and waiting';
   StatusMessage.Text:=sStatus;
 
-  Memo1.Lines.Clear;
+  if (listbox1.ItemIndex<>-1) then
+     FPCupManager.FPCURL:=listbox1.Items[listbox1.ItemIndex];
 
+  if (listbox2.ItemIndex<>-1) then
+     FPCupManager.LazarusURL:=listbox2.Items[listbox2.ItemIndex];
+
+  Memo1.Lines.Clear;
 end;
 
 function TForm1.RealRun:boolean;
@@ -1065,6 +1074,13 @@ begin
 
   if FPCupManager.FPCURL<>'SKIP' then
   begin
+
+    if (Pos('trunk',lowercase(FPCupManager.FPCURL))>0) AND (NOT Form2.UseFreePascalSVN) then
+    begin
+      FPCupManager.FPCURL:=NEWPASCALGITREPO+'/freepascal.git';
+      FPCupManager.FPCDesiredBranch:='freepascal';
+    end;
+
     AddMessage('FPC URL:            '+FPCupManager.FPCURL);
     AddMessage('FPC options:        '+FPCupManager.FPCOPT);
     AddMessage('FPC directory:      '+FPCupManager.FPCDirectory);
@@ -1073,6 +1089,13 @@ begin
 
   if FPCupManager.LazarusURL<>'SKIP' then
   begin
+
+    if (Pos('trunk',lowercase(FPCupManager.LazarusURL))>0) AND (NOT Form2.UseFreePascalSVN) then
+    begin
+      FPCupManager.LazarusURL:=NEWPASCALGITREPO+'/lazarus.git';
+      FPCupManager.LazarusDesiredBranch:='lazarus';
+    end;
+
     AddMessage('Lazarus URL:        '+FPCupManager.LazarusURL);
     AddMessage('Lazarus options:    '+FPCupManager.LazarusOPT);
     AddMessage('Lazarus directory:  '+FPCupManager.LazarusDirectory);

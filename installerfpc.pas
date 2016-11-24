@@ -186,6 +186,7 @@ implementation
 
 uses
   fpcuputil,
+  repoclient,
   FileUtil, LazFileUtils
   {$IFDEF UNIX}
     ,baseunix
@@ -2411,6 +2412,7 @@ var
   UpdateWarnings: TStringList;
   ReturnCode,i: integer;
   MakefileSL:TStringList;
+  aRepoClient:TRepoClient;
 begin
   result:=InitModule;
   if not result then exit;
@@ -2436,12 +2438,20 @@ begin
     end;
   end;
 
+  // not so elegant check to see what kind of client we need ...
+  if ( (Pos('GITHUB',UpperCase(FURL))>0) OR (Pos('.GIT',UpperCase(FURL))>0) )
+     then aRepoClient:=FGitClient
+     else aRepoClient:=FSVNClient;
+
   infoln('Checking out/updating FPC sources...',etInfo);
   UpdateWarnings:=TStringList.Create;
   try
-   FSVNClient.Verbose:=FVerbose;
-   FSVNClient.ExportOnly:=FExportOnly;
-   result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
+   aRepoClient.Verbose:=FVerbose;
+   aRepoClient.ExportOnly:=FExportOnly;
+   aRepoClient.ModuleName:=ModuleName;
+   if aRepoClient=FGitClient
+      then result:=DownloadFromGit(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings)
+      else result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
    if UpdateWarnings.Count>0 then
    begin
      WritelnLog(UpdateWarnings.Text);
@@ -2450,7 +2460,7 @@ begin
     UpdateWarnings.Free;
   end;
 
-  if NOT FSVNClient.ExportOnly then
+  if NOT aRepoClient.ExportOnly then
   begin
     infoln('FPC was at: '+BeforeRevision,etInfo);
     if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etInfo) else

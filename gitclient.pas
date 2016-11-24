@@ -180,9 +180,9 @@ begin
   // Invalidate our revision number cache
   FLocalRevision := FRET_UNKNOWN_REVISION;
 
-  if Branch=''
+  if DesiredBranch=''
      then aBranch:='master'
-     else aBranch:=Branch;
+     else aBranch:=DesiredBranch;
 
   // Actual clone/checkout
   if ExportOnly then
@@ -472,13 +472,12 @@ begin
   begin
     //todo: find out: without max-count, I can get multiple entries. No idea what these mean!??
     // alternative command: rev-parse --verify "HEAD^0" but that doesn't look as low-level ;)
-    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', FLocalRepository, Output, Verbose);
-    if FReturnCode = 0 then
-    begin
-      FLocalRevision := trim(Output);
-    end
-    else
-    begin
+    try
+      FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' rev-list --max-count=1 HEAD ', FLocalRepository, Output, Verbose);
+      if FReturnCode = 0
+        then FLocalRevision := trim(Output)
+        else FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
+    except
       FLocalRevision := FRET_UNKNOWN_REVISION; //for compatibility with the svnclient code
     end;
   end;
