@@ -63,6 +63,7 @@ type
     LabelFPCrevision: TLabel;
     LabelLazarusbranch: TLabel;
     LabelLazarusrevision: TLabel;
+    RadioGroupTrunkLocation: TRadioGroup;
     RadioGroupNPFPCbranch: TRadioGroup;
     RadioGroupNPLazarusbranch: TRadioGroup;
     RadioGroup3: TRadioGroup;
@@ -79,6 +80,7 @@ type
     function GetUpdateOnly:boolean;
     function GetIncludeLCL:boolean;
     function GetIncludeHelp:boolean;
+    function GetUseFreePascalSVN:boolean;
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -91,6 +93,7 @@ type
     property PackageRepo:boolean read GetPackageRepo;
 
     property UpdateOnly:boolean read GetUpdateOnly;
+    property UseFreePascalSVN:boolean read GetUseFreePascalSVN;
 
     property IncludeLCL:boolean read GetIncludeLCL;
     property IncludeHelp:boolean read GetIncludeHelp;
@@ -159,6 +162,10 @@ begin
     CheckPackageRepo.Checked:=ReadBool('General','GetPackageRepo',False);
     CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',True);
 
+    if ReadBool('General','UseFreePascalSVNforTrunk',True)
+       then RadioGroupTrunkLocation.ItemIndex:=0
+       else RadioGroupTrunkLocation.ItemIndex:=1;
+
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
@@ -176,7 +183,6 @@ begin
         FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
       end;
     end;
-
 
   finally
     Free;
@@ -209,6 +215,8 @@ begin
     WriteBool('General','GetRepo',CheckRepo.Checked);
     WriteBool('General','GetPackageRepo',CheckPackageRepo.Checked);
     WriteBool('General','IncludeHelp',CheckIncludeHelp.Checked);
+
+    WriteBool('General','UseFreePascalSVNforTrunk',RadioGroupTrunkLocation.ItemIndex=0);
 
     WriteBool('Cross','IncludeLCL',CheckIncludeLCL.Checked);
 
@@ -321,6 +329,11 @@ end;
 function TForm2.GetIncludeHelp:boolean;
 begin
   result:=CheckIncludeHelp.Checked;
+end;
+
+function TForm2.GetUseFreePascalSVN:boolean;
+begin
+  result:=(RadioGroupTrunkLocation.ItemIndex=0);
 end;
 
 function TForm2.GetHTTPProxyHost:string;
