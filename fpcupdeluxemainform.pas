@@ -60,6 +60,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click(Sender: TObject);
     procedure RadioGroup1Click(Sender: TObject);
     procedure RadioGroup2Click(Sender: TObject);
@@ -74,6 +75,9 @@ type
     oldoutput: TextFile;
     sInstallDir:string;
     sStatus:string;
+    FFPCTarget,FLazarusTarget:string;
+    procedure SetFPCTarget(aFPCTarget:string);
+    procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable(Sender: TObject;value:boolean);
     procedure Edit1Change(Sender: TObject);
     procedure PrepareRun;
@@ -81,6 +85,8 @@ type
     function GetFPCUPSettings(IniFile:string):boolean;
     function SetFPCUPSettings(IniFile:string):boolean;
     procedure AddMessage(aMessage:string);
+    property FPCTarget:string read FFPCTarget write SetFPCTarget;
+    property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
   public
     { public declarations }
   end;
@@ -225,6 +231,9 @@ begin
   listbox1.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
   listbox2.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
 
+  FPCTarget:='default';
+  LazarusTarget:='default';
+
   Edit1.Text:=sInstallDir;
   // set change here, to prevent early firing
   Edit1.OnChange:=@Edit1Change;
@@ -251,6 +260,12 @@ begin
   RealFPCURL.Width:=(w-4);
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
+end;
+
+procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
+begin
+  if Sender=ListBox1 then FPCTarget:=listbox1.Items[listbox1.ItemIndex];
+  if Sender=ListBox2 then LazarusTarget:=listbox2.Items[listbox2.ItemIndex];
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -380,7 +395,7 @@ begin
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
   begin
     // skip git fatal messages ... they are not that fatal !
-    if (Pos('fatal: not a git repository',lowercase(s))=0) then
+    // if (Pos('fatal: not a git repository',lowercase(s))=0) then
     begin
       FG      := clRed;
       BG      := clBlue;
@@ -429,7 +444,7 @@ end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var
-  s,FPCURL,LazarusURL:string;
+  s:string;
   i:integer;
   Revision,Branch:string;
 begin
@@ -443,15 +458,15 @@ begin
     if Sender=TrunkBtn then
     begin
       s:='Going to install both FPC trunk and Lazarus trunk';
-      FPCURL:='trunk';
-      LazarusURL:='trunk';
+      FPCTarget:='trunk';
+      LazarusTarget:='trunk';
     end;
 
     if Sender=NPBtn then
     begin
       s:='Going to install NewPascal';
-      FPCURL:='newpascal';
-      LazarusURL:='newpascal';
+      FPCTarget:='newpascal';
+      LazarusTarget:='newpascal';
       //Revision:='69e7216e7be1f42045a70a6f1c453f685da8b84b';
       Branch:='release';
       //FPCupManager.IncludeModules:='mORMotFPC,zeos';
@@ -460,30 +475,30 @@ begin
     if Sender=FixesBtn then
     begin
       s:='Going to install FPC fixes and Lazarus fixes';
-      FPCURL:='fixes';
-      LazarusURL:='fixes';
+      FPCTarget:='fixes';
+      LazarusTarget:='fixes';
     end;
 
     if Sender=StableBtn then
     begin
       s:='Going to install FPC stable and Lazarus stable';
-      FPCURL:='stable';
-      LazarusURL:='stable';
+      FPCTarget:='stable';
+      LazarusTarget:='stable';
     end;
 
     if Sender=OldBtn then
     begin
       s:='Going to install FPC 2.6.4 and Lazarus 1.4 ';
-      FPCURL:='2.6.4';
-      LazarusURL:='1.4';
+      FPCTarget:='2.6.4';
+      LazarusTarget:='1.4';
     end;
 
     if Sender=DinoBtn then
     begin
       s:='Going to install FPC 2.0.2 and Lazarus 0.9.16 ';
-      FPCURL:='2.0.2';
-      //LazarusURL:='0.9.4';
-      LazarusURL:='0.9.16';
+      FPCTarget:='2.0.2';
+      //LazarusTarget:='0.9.4';
+      LazarusTarget:='0.9.16';
       FPCupManager.OnlyModules:='fpc,oldlazarus';
     end;
 
@@ -493,8 +508,8 @@ begin
       exit;
       {
       s:='Going to install FPC trunk and Lazarus trunk with extras ';
-      FPCURL:='trunk';
-      LazarusURL:='trunk';
+      FPCTarget:='trunk';
+      LazarusTarget:='trunk';
       FPCupManager.IncludeModules:='mORMotFPC,lazgoogleapis,virtualtreeview,lazpaint,bgracontrols,uecontrols,ECControls,zeos,cudatext,indy,lnet,lamw,mupdf,tiopf,abbrevia,uos,wst,anchordocking,simplegraph,cm630commons,turbobird';
       }
     end;
@@ -502,19 +517,14 @@ begin
     if Sender=mORMotBtn then
     begin
       s:='Going to install de special version of mORMot for FPC ';
-      FPCURL:='skip';
-      LazarusURL:='skip';
+      FPCTarget:='skip';
+      LazarusTarget:='skip';
       FPCupManager.OnlyModules:='mORMotFPC';
       //FPCupManager.OnlyModules:='mORMotFPC,zeos';
     end;
 
-    i:=ListBox1.Items.IndexOf(FPCURL);
-    if i<>-1 then ListBox1.Selected[i]:=true;
-    i:=ListBox2.Items.IndexOf(LazarusURL);
-    if i<>-1 then ListBox2.Selected[i]:=true;
-
-    FPCupManager.FPCURL:=FPCURL;
-    FPCupManager.LazarusURL:=LazarusURL;
+    FPCupManager.FPCURL:=FPCTarget;
+    FPCupManager.LazarusURL:=LazarusTarget;
 
     if NOT Form2.IncludeHelp then
     begin
@@ -1014,10 +1024,14 @@ begin
   FPCupManager.Verbose:=CheckVerbosity.Checked;
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
-  FPCupManager.FPCURL:='default';
-  FPCupManager.LazarusURL:='default';
+  FPCupManager.FPCURL:=FPCTarget;
+  FPCupManager.LazarusURL:=LazarusTarget;
+
   FPCupManager.FPCDesiredBranch:='';
   FPCupManager.LazarusDesiredBranch:='';
+
+  FPCupManager.FPCOPT:=Form2.FPCOptions;
+  FPCupManager.LazarusOPT:=Form2.LazarusOptions;
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
 
@@ -1045,12 +1059,6 @@ begin
   sStatus:='Sitting and waiting';
   StatusMessage.Text:=sStatus;
 
-  if (listbox1.ItemIndex<>-1) then
-     FPCupManager.FPCURL:=listbox1.Items[listbox1.ItemIndex];
-
-  if (listbox2.ItemIndex<>-1) then
-     FPCupManager.LazarusURL:=listbox2.Items[listbox2.ItemIndex];
-
   Memo1.Lines.Clear;
 end;
 
@@ -1075,9 +1083,11 @@ begin
   if FPCupManager.FPCURL<>'SKIP' then
   begin
 
-    if (Pos('trunk',lowercase(FPCupManager.FPCURL))>0) AND (NOT Form2.UseFreePascalSVN) then
+    if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
     begin
-      FPCupManager.FPCURL:=NEWPASCALGITREPO+'/freepascal.git';
+      // use NewPascal git mirror for trunk sources
+      // set branch
+
       FPCupManager.FPCDesiredBranch:='freepascal';
     end;
 
@@ -1090,9 +1100,10 @@ begin
   if FPCupManager.LazarusURL<>'SKIP' then
   begin
 
-    if (Pos('trunk',lowercase(FPCupManager.LazarusURL))>0) AND (NOT Form2.UseFreePascalSVN) then
+    if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
     begin
-      FPCupManager.LazarusURL:=NEWPASCALGITREPO+'/lazarus.git';
+      // use NewPascal git mirror for trunk sources
+      // set branch to lazarus
       FPCupManager.LazarusDesiredBranch:='lazarus';
     end;
 
@@ -1152,7 +1163,6 @@ end;
 
 function TForm1.GetFPCUPSettings(IniFile:string):boolean;
 var
-  s:string;
   i,j:integer;
   SortedModules:TStringList;
 begin
@@ -1163,37 +1173,10 @@ begin
 
     FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
-    s:=ReadString('URL','fpcURL','');
-    if TryStrToInt(s,i) then
-    begin
-      listbox1.ItemIndex:=i;
-    end
-    else
-    begin
-      j:=-1;
-      for i:=0 to listbox1.Items.Count-1 do
-      begin
-        j:=listbox1.Items.IndexOf(s);
-        if j<>-1 then break;
-      end;
-      listbox1.ItemIndex:=j;
-    end;
-
-    s:=ReadString('URL','lazURL','');
-    if TryStrToInt(s,i) then
-    begin
-      listbox2.ItemIndex:=i;
-    end
-    else
-    begin
-      j:=-1;
-      for i:=0 to listbox2.Items.Count-1 do
-      begin
-        j:=listbox2.Items.IndexOf(s);
-        if j<>-1 then break;
-      end;
-      listbox2.ItemIndex:=j;
-    end;
+    FPCTarget:=ReadString('URL','fpcURL','default');
+    if FPCTarget='' then FPCTarget:='default';
+    LazarusTarget:=ReadString('URL','lazURL','default');
+    if LazarusTarget='' then LazarusTarget:='default';
 
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
@@ -1226,8 +1209,8 @@ begin
     // mmm, is this correct ?  See extrasettings !!
     WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
-    if ListBox1.ItemIndex<>-1 then WriteString('URL','fpcURL',ListBox1.Items[ListBox1.ItemIndex]);
-    if ListBox2.ItemIndex<>-1 then WriteString('URL','lazURL',ListBox2.Items[ListBox2.ItemIndex]);
+    WriteString('URL','fpcURL',FPCTarget);
+    WriteString('URL','lazURL',LazarusTarget);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do
@@ -1251,6 +1234,30 @@ begin
   SynEdit1.InsertTextAtCaret(aMessage+sLineBreak,scamAdjust);
   SynEdit1.CaretX:=0;
   Application.ProcessMessages;
+end;
+
+procedure TForm1.SetFPCTarget(aFPCTarget:string);
+var
+  i:integer;
+begin
+  if aFPCTarget<>FFPCTarget then
+  begin
+    FFPCTarget:=aFPCTarget;
+    i:=listbox1.Items.IndexOf(FFPCTarget);
+    if i<>-1 then listbox1.Selected[i]:=true;
+  end;
+end;
+
+procedure TForm1.SetLazarusTarget(aLazarusTarget:string);
+var
+  i:integer;
+begin
+  if aLazarusTarget<>FLazarusTarget then
+  begin
+    FLazarusTarget:=aLazarusTarget;
+    i:=listbox2.Items.IndexOf(FLazarusTarget);
+    if i<>-1 then listbox2.Selected[i]:=true;
+  end;
 end;
 
 end.

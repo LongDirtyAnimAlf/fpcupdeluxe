@@ -41,8 +41,10 @@ type
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditFPCbranch: TEdit;
+    EditFPCOptions: TEdit;
     EditFPCrevision: TEdit;
     EditLazarusbranch: TEdit;
+    EditLazarusOptions: TEdit;
     EditLazarusrevision: TEdit;
     EditLibLocation: TEdit;
     EditBinLocation: TEdit;
@@ -54,16 +56,18 @@ type
     EditHTTPProxyPort: TEdit;
     EditHTTPProxyUser: TEdit;
     EditHTTPProxyPassword: TEdit;
+    GroupBoxCompileOptions: TGroupBox;
     GroupBoxFPCLazBranchRevision: TGroupBox;
     Label1: TLabel;
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     LabelFPCbranch: TLabel;
+    LabelFPCOptions: TLabel;
     LabelFPCrevision: TLabel;
     LabelLazarusbranch: TLabel;
+    LabelLazarusOptions: TLabel;
     LabelLazarusrevision: TLabel;
-    RadioGroupTrunkLocation: TRadioGroup;
     RadioGroupNPFPCbranch: TRadioGroup;
     RadioGroupNPLazarusbranch: TRadioGroup;
     RadioGroup3: TRadioGroup;
@@ -80,11 +84,12 @@ type
     function GetUpdateOnly:boolean;
     function GetIncludeLCL:boolean;
     function GetIncludeHelp:boolean;
-    function GetUseFreePascalSVN:boolean;
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
     function GetHTTPProxyPass:string;
+    function GetFPCOptions:string;
+    function GetLazarusOptions:string;
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
@@ -93,7 +98,6 @@ type
     property PackageRepo:boolean read GetPackageRepo;
 
     property UpdateOnly:boolean read GetUpdateOnly;
-    property UseFreePascalSVN:boolean read GetUseFreePascalSVN;
 
     property IncludeLCL:boolean read GetIncludeLCL;
     property IncludeHelp:boolean read GetIncludeHelp;
@@ -102,6 +106,9 @@ type
     property HTTPProxyPort:integer read GetHTTPProxyPort;
     property HTTPProxyUser:string read GetHTTPProxyUser;
     property HTTPProxyPass:string read GetHTTPProxyPass;
+
+    property FPCOptions:string read GetFPCOptions;
+    property LazarusOptions:string read GetLazarusOptions;
   end;
 
 var
@@ -162,16 +169,15 @@ begin
     CheckPackageRepo.Checked:=ReadBool('General','GetPackageRepo',False);
     CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',True);
 
-    if ReadBool('General','UseFreePascalSVNforTrunk',True)
-       then RadioGroupTrunkLocation.ItemIndex:=0
-       else RadioGroupTrunkLocation.ItemIndex:=1;
-
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
     EditHTTPProxyUser.Text:=ReadString('ProxySettings','HTTPProxyUser','');
     EditHTTPProxyPassword.Text:=ReadString('ProxySettings','HTTPProxyPass','');
+
+    EditFPCOptions.Text:=ReadString('General','FPCOptions','');
+    EditLazarusOptions.Text:=ReadString('General','LazarusOptions','');
 
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -216,14 +222,15 @@ begin
     WriteBool('General','GetPackageRepo',CheckPackageRepo.Checked);
     WriteBool('General','IncludeHelp',CheckIncludeHelp.Checked);
 
-    WriteBool('General','UseFreePascalSVNforTrunk',RadioGroupTrunkLocation.ItemIndex=0);
-
     WriteBool('Cross','IncludeLCL',CheckIncludeLCL.Checked);
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     WriteInteger('ProxySettings','HTTPProxyPort',StrToInt(EditHTTPProxyPort.Text));
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
     WriteString('ProxySettings','HTTPProxyPass',EditHTTPProxyPassword.Text);
+
+    WriteString('General','FPCOptions',EditFPCOptions.Text);
+    WriteString('General','LazarusOptions',EditLazarusOptions.Text);
 
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -331,10 +338,16 @@ begin
   result:=CheckIncludeHelp.Checked;
 end;
 
-function TForm2.GetUseFreePascalSVN:boolean;
+function TForm2.GetFPCOptions:string;
 begin
-  result:=(RadioGroupTrunkLocation.ItemIndex=0);
+  result:=EditFPCOptions.Text;
 end;
+
+function TForm2.GetLazarusOptions:string;
+begin
+  result:=EditLazarusOptions.Text;
+end;
+
 
 function TForm2.GetHTTPProxyHost:string;
 begin

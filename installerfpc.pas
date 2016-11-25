@@ -1366,7 +1366,7 @@ end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
 const
-  FpcupGitRepo='https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
+  FpcupdeluxeGitRepo='https://github.com/newpascal/fpcupdeluxe';
 var
   aCompilerList:TStringList;
   i,j:integer;
@@ -1554,8 +1554,8 @@ begin
             while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
             begin
               infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
-              aGithubBootstrapURL:=FpcupGitRepo+
-                '/releases/download/bootstrappers/'+
+              aGithubBootstrapURL:=FpcupdeluxeGitRepo+
+                '/releases/download/bootstrappers_v1.0/'+
                 'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
               infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
               aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
@@ -2439,7 +2439,7 @@ begin
   end;
 
   // not so elegant check to see what kind of client we need ...
-  if ( (Pos('GITHUB',UpperCase(FURL))>0) OR (Pos('.GIT',UpperCase(FURL))>0) )
+  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) )
      then aRepoClient:=FGitClient
      else aRepoClient:=FSVNClient;
 

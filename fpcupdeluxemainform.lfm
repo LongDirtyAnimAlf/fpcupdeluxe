@@ -19,6 +19,7 @@ object Form1: TForm1
     Top = 64
     Width = 135
     ItemHeight = 0
+    OnSelectionChange = TargetSelectionChange
     ScrollWidth = 133
     TabOrder = 2
   end
@@ -38,6 +39,7 @@ object Form1: TForm1
     Top = 296
     Width = 135
     ItemHeight = 0
+    OnSelectionChange = TargetSelectionChange
     ScrollWidth = 133
     TabOrder = 3
   end
