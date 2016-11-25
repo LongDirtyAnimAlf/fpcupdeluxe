@@ -135,7 +135,7 @@ begin
     infoln(FCrossModuleName + ': found correct library ' +
       ' in directory '+FLibsPath, etInfo)
   else
-    infoln(FCrossModuleName + ': searched but did not find any library !!', etInfo);
+    infoln(FCrossModuleName + ': searched but did not find any library !!', etError);
 
   if Length(extrainfo)>0 then infoln(FCrossModuleName + ' libs : '+extrainfo, etInfo);
 end;
@@ -146,7 +146,7 @@ begin
     infoln(FCrossModuleName + ': found binary utilities ' +
       ' in directory '+FBinUtilsPath, etInfo)
   else
-    infoln(FCrossModuleName + ': searched but did not find any binary utilities !!', etInfo);
+    infoln(FCrossModuleName + ': searched but did not find any binary utilities !!', etError);
   if Length(extrainfo)>0 then infoln(FCrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 

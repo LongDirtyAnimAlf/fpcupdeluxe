@@ -76,6 +76,8 @@ type
     sInstallDir:string;
     sStatus:string;
     FFPCTarget,FLazarusTarget:string;
+    MissingCrossBins:boolean;
+    MissingCrossLibs:boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable(Sender: TObject;value:boolean);
@@ -406,6 +408,18 @@ begin
         Memo1.Lines.Append(s);
         Memo1.Lines.Append(SynEdit1.Lines[Line-2]);
       end;
+
+      if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
+      begin
+        MissingCrossBins:=true;
+      end;
+
+      if  (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
+      begin
+        MissingCrossLibs:=true;
+      end;
+
+
       if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
       begin
         Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');
@@ -636,6 +650,9 @@ begin
     exit;
   end;
 
+  MissingCrossBins:=false;
+  MissingCrossLibs:=false;
+
   PrepareRun;
 
   if RadioGroup1.ItemIndex<>-1 then FPCupManager.CrossCPU_Target:=RadioGroup1.Items[RadioGroup1.ItemIndex];
@@ -735,121 +752,139 @@ begin
 
       {$ifdef MSWINDOWS}
 
-      URL:='';
+      if MissingCrossBins OR MissingCrossLibs then
+      begin
+        if (MessageDlg('The building of a crosscompiler failed due to missing cross-tools.' + sLineBreak +
+                   'Fpcupdeluxe can try to download them if available !' + sLineBreak +
+                   'Do you want to continue ?'
+                   ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+                   begin
+                     exit;
+                   end;
 
-      if FPCupManager.CrossOS_Target='linux' then
-      begin
-        if FPCupManager.CrossCPU_Target='arm' then URL:='LinuxARM.rar';
-        if FPCupManager.CrossCPU_Target='aarch64' then URL:='LinuxAarch64.rar';
-        if FPCupManager.CrossCPU_Target='i386' then URL:='Linuxi386.rar';
-        if FPCupManager.CrossCPU_Target='x86_64' then URL:='Linuxx64.rar';
-      end;
-      if FPCupManager.CrossOS_Target='freebsd' then
-      begin
-        if FPCupManager.CrossCPU_Target='i386' then URL:='FreeBSDi386.rar';
-        if FPCupManager.CrossCPU_Target='x86_64' then URL:='FreeBSDx64.rar';
-      end;
+        URL:='';
 
-      if FPCupManager.CrossOS_Target='wince' then
-      begin
-        if FPCupManager.CrossCPU_Target='arm' then URL:='WinceARM.rar';
-      end;
-      if FPCupManager.CrossOS_Target='android' then
-      begin
-        if FPCupManager.CrossCPU_Target='arm' then URL:='AndroidARM.rar';
-      end;
-
-      // tricky ... reset URL in case the binutils and libs are already there ... to exit this retry ... ;-)
-      if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
-                         'cross'+
-                         DirectorySeparator+
-                         'bin'+
-                         DirectorySeparator+
-                         FPCupManager.CrossCPU_Target+
-                         '-'+
-                         FPCupManager.CrossOS_Target))
-          AND
-          (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
-                                   'cross'+
-                                   DirectorySeparator+
-                                   'lib'+
-                                   DirectorySeparator+
-                                   FPCupManager.CrossCPU_Target+
-                                   '-'+
-                                   FPCupManager.CrossOS_Target))
-          then URL:='';
-
-      if URL<>'' then
-      begin
-        AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
-        DownloadURL:=FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
-        AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
-        TargetFile := SysUtils.GetTempFileName;
-        aDownLoader:=TDownLoader.Create;
-        try
-          success:=aDownLoader.getFile(DownloadURL,TargetFile);
-          if (NOT success) then // try only once again in case of error
-          begin
-            AddMessage('Error while trying to download '+URL+'. Trying once again.');
-            SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-            success:=aDownLoader.getFile(DownloadURL,TargetFile);
-          end;
-        finally
-          aDownLoader.Destroy;
-        end;
-        if success then
+        if FPCupManager.CrossOS_Target='linux' then
         begin
-          AddMessage('Successfully downloaded binary-tools.');
-          AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
-          success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
-          if (NOT success) then
-          begin
-            UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-            success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
-          end;
+          if FPCupManager.CrossCPU_Target='arm' then URL:='LinuxARM.rar';
+          if FPCupManager.CrossCPU_Target='aarch64' then URL:='LinuxAarch64.rar';
+          if FPCupManager.CrossCPU_Target='i386' then URL:='Linuxi386.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Linuxx64.rar';
         end;
-        SysUtils.DeleteFile(TargetFile);
-
-        DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
-        AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
-        TargetFile := SysUtils.GetTempFileName;
-        aDownLoader:=TDownLoader.Create;
-        try
-          success:=aDownLoader.getFile(DownloadURL,TargetFile);
-          if (NOT success) then // try only once again in case of error
-          begin
-            AddMessage('Error while trying to download '+URL+'. Trying once again.');
-            SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-            success:=aDownLoader.getFile(DownloadURL,TargetFile);
-          end;
-        finally
-          aDownLoader.Destroy;
-        end;
-        if success then
+        if FPCupManager.CrossOS_Target='freebsd' then
         begin
-          AddMessage('Successfully downloaded the libraries.');
-          AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
-          success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
-          if (NOT success) then
-          begin
-            UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-            success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
-          end;
+          if FPCupManager.CrossCPU_Target='i386' then URL:='FreeBSDi386.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then URL:='FreeBSDx64.rar';
         end;
 
-        if success then
+        if FPCupManager.CrossOS_Target='wince' then
         begin
-          AddMessage('Successfully extracted cross-tools.');
-          // run again with the correct libs and binutils
-          label1.Font.Color:=clDefault;
-          label2.Font.Color:=clDefault;
-          sStatus:='Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
-          FPCupManager.Sequencer.ResetAllExecuted;
-          RealRun;
+          if FPCupManager.CrossCPU_Target='arm' then URL:='WinceARM.rar';
         end;
-        SysUtils.DeleteFile(TargetFile);
+        if FPCupManager.CrossOS_Target='android' then
+        begin
+          if FPCupManager.CrossCPU_Target='arm' then URL:='AndroidARM.rar';
+        end;
 
-        if (NOT success) then AddMessage('No luck in getting then cross-tools ... aborting.');
+        // tricky ... reset URL in case the binutils and libs are already there ... to exit this retry ... ;-)
+        if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
+                           'cross'+
+                           DirectorySeparator+
+                           'bin'+
+                           DirectorySeparator+
+                           FPCupManager.CrossCPU_Target+
+                           '-'+
+                           FPCupManager.CrossOS_Target))
+            AND
+            (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
+                                     'cross'+
+                                     DirectorySeparator+
+                                     'lib'+
+                                     DirectorySeparator+
+                                     FPCupManager.CrossCPU_Target+
+                                     '-'+
+                                     FPCupManager.CrossOS_Target))
+            then URL:='';
+
+        if URL<>'' then
+        begin
+
+          if MissingCrossBins then
+          begin
+            AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
+            DownloadURL:=FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
+            AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
+            TargetFile := SysUtils.GetTempFileName;
+            aDownLoader:=TDownLoader.Create;
+            try
+              success:=aDownLoader.getFile(DownloadURL,TargetFile);
+              if (NOT success) then // try only once again in case of error
+              begin
+                AddMessage('Error while trying to download '+URL+'. Trying once again.');
+                SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+                success:=aDownLoader.getFile(DownloadURL,TargetFile);
+              end;
+            finally
+              aDownLoader.Destroy;
+            end;
+            if success then
+            begin
+              AddMessage('Successfully downloaded binary-tools.');
+              AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+              if (NOT success) then
+              begin
+                UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
+              end;
+            end;
+            SysUtils.DeleteFile(TargetFile);
+          end;
+
+          if MissingCrossLibs then
+          begin
+            DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
+            AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+            TargetFile := SysUtils.GetTempFileName;
+            aDownLoader:=TDownLoader.Create;
+            try
+              success:=aDownLoader.getFile(DownloadURL,TargetFile);
+              if (NOT success) then // try only once again in case of error
+              begin
+                AddMessage('Error while trying to download '+URL+'. Trying once again.');
+                SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+                success:=aDownLoader.getFile(DownloadURL,TargetFile);
+              end;
+            finally
+              aDownLoader.Destroy;
+            end;
+            if success then
+            begin
+              AddMessage('Successfully downloaded the libraries.');
+              AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+              if (NOT success) then
+              begin
+                UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
+              end;
+            end;
+          end;
+
+          if success then
+          begin
+            AddMessage('Successfully extracted cross-tools.');
+            // run again with the correct libs and binutils
+            label1.Font.Color:=clDefault;
+            label2.Font.Color:=clDefault;
+            sStatus:='Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+            FPCupManager.Sequencer.ResetAllExecuted;
+            RealRun;
+          end;
+          SysUtils.DeleteFile(TargetFile);
+
+          if (NOT success) then AddMessage('No luck in getting then cross-tools ... aborting.');
+        end;
       end
       else
       begin
