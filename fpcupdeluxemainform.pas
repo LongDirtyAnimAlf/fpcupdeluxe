@@ -16,6 +16,7 @@ type
   TForm1 = class(TForm)
     Button7: TButton;
     Button8: TButton;
+    CheckAutoClear: TCheckBox;
     MainMenu1: TMainMenu;
     Memo1: TMemo;
     MenuItem1: TMenuItem;
@@ -118,7 +119,7 @@ Const
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
   FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.00a';
+  FPCUPDELUXEVERSION='1.0.1';
 
 resourcestring
   CrossGCCMsg =
@@ -167,6 +168,7 @@ begin
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
     CheckVerbosity.Checked:=ReadBool('General','Verbose',True);
+    CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
     FPCupManager.HTTPProxyHost:=ReadString('ProxySettings','HTTPProxyURL','');
     FPCupManager.HTTPProxyPort:=ReadInteger('ProxySettings','HTTPProxyPort',8080);
     FPCupManager.HTTPProxyUser:=ReadString('ProxySettings','HTTPProxyUser','');
@@ -239,6 +241,10 @@ begin
   Edit1.Text:=sInstallDir;
   // set change here, to prevent early firing
   Edit1.OnChange:=@Edit1Change;
+
+  // create settings form
+  // must be done here, to enable local storage/access of some setttings !!
+  Form2:=TForm2.Create(Form1);
 
   // localize FPCUPSettings if possible
   if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
@@ -573,6 +579,7 @@ begin
     sStatus:='Going to install/update FPC and Lazarus.';
     if Form2.UpdateOnly then
     begin
+      // still not working 100% for Lazarus ...  todo
       FPCupManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
       FModuleList:=TStringList.Create;
       try
@@ -659,9 +666,9 @@ begin
   if RadioGroup2.ItemIndex<>-1 then FPCupManager.CrossOS_Target:=RadioGroup2.Items[RadioGroup2.ItemIndex];
 
   {$ifndef FreeBSD}
-  if (FPCupManager.CrossOS_Target='freebsd') then
+  if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') then
   begin
-    if (MessageDlg('Be forwarned: this will only work with FPC>=3.1.1 (trunk, NewPascal).' + sLineBreak +
+    if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes).' + sLineBreak +
                'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
                'Do you want to continue ?'
                ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
@@ -675,7 +682,7 @@ begin
   {$ifdef MSWINDOWS}
   if (FPCupManager.CrossOS_Target='linux') then
   begin
-    ShowMessage('Be forwarned: you need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
+    ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
     Memo1.Lines.Append(CrossGCCMsg);
   end;
   {$endif}
@@ -964,6 +971,7 @@ begin
     WriteString('General','InstallDirectory',sInstallDir);
 
     WriteBool('General','Verbose',CheckVerbosity.Checked);
+    WriteBool('General','AutoClear',CheckAutoClear.Checked);
 
     Application.MainForm.Cursor:=crHourGlass;
 
@@ -1019,6 +1027,7 @@ begin
   RadioGroup1.Enabled:=value;
   RadioGroup2.Enabled:=value;
   CheckVerbosity.Enabled:=value;
+  CheckAutoClear.Enabled:=value;
 
   TrunkBtn.Enabled:=value;
   NPBtn.Enabled:=value;
@@ -1036,6 +1045,8 @@ var
 begin
   label1.Font.Color:=clDefault;
   label2.Font.Color:=clDefault;
+
+  if CheckAutoClear.Checked then Button8.Click;
 
   FPCupManager.Sequencer.ResetAllExecuted;
 
@@ -1114,6 +1125,9 @@ begin
   FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib';
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
   {$endif}
+
+  FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;
+  FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
   if FPCupManager.FPCURL<>'SKIP' then
   begin
@@ -1213,6 +1227,11 @@ begin
     LazarusTarget:=ReadString('URL','lazURL','default');
     if LazarusTarget='' then LazarusTarget:='default';
 
+    Form2.FPCOptions:=ReadString('General','FPCOptions','');
+    Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
+    Form2.FPCRevision:=ReadString('General','FPCRevision','');
+    Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
+
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
     try
@@ -1246,6 +1265,11 @@ begin
 
     WriteString('URL','fpcURL',FPCTarget);
     WriteString('URL','lazURL',LazarusTarget);
+
+    WriteString('General','FPCOptions',Form2.FPCOptions);
+    WriteString('General','LazarusOptions',Form2.LazarusOptions);
+    WriteString('General','FPCRevision',Form2.FPCRevision);
+    WriteString('General','LazarusRevision',Form2.LazarusRevision);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do

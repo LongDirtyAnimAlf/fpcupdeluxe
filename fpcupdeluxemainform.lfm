@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 408
+  Left = 329
   Height = 644
-  Top = 97
+  Top = 100
   Width = 1046
   Anchors = []
   Caption = 'Form1'
@@ -1952,7 +1952,7 @@ object Form1: TForm1
     Left = 368
     Height = 23
     Top = 35
-    Width = 568
+    Width = 472
     Anchors = [akTop, akLeft, akRight]
     ReadOnly = True
     TabOrder = 17
@@ -1990,6 +1990,21 @@ object Form1: TForm1
     Caption = 'Clear log'
     OnClick = Button8Click
     TabOrder = 20
+  end
+  object CheckAutoClear: TCheckBox
+    AnchorSideLeft.Control = StatusMessage
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = StatusMessage
+    Left = 850
+    Height = 19
+    Top = 36
+    Width = 73
+    BorderSpacing.Left = 10
+    BorderSpacing.Top = 1
+    Caption = 'AutoClear'
+    Checked = True
+    State = cbChecked
+    TabOrder = 21
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]

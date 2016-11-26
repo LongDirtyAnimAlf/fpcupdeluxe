@@ -42,15 +42,14 @@ type
     ComboBoxCPU: TComboBox;
     EditFPCbranch: TEdit;
     EditFPCOptions: TEdit;
-    EditFPCrevision: TEdit;
+    EditFPCRevision: TEdit;
     EditLazarusbranch: TEdit;
     EditLazarusOptions: TEdit;
-    EditLazarusrevision: TEdit;
+    EditLazarusRevision: TEdit;
     EditLibLocation: TEdit;
     EditBinLocation: TEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
-    GroupBox3: TGroupBox;
     GroupBox4: TGroupBox;
     EditHTTPProxyHost: TEdit;
     EditHTTPProxyPort: TEdit;
@@ -64,12 +63,10 @@ type
     Label4: TLabel;
     LabelFPCbranch: TLabel;
     LabelFPCOptions: TLabel;
-    LabelFPCrevision: TLabel;
+    LabelFPCRevision: TLabel;
     LabelLazarusbranch: TLabel;
     LabelLazarusOptions: TLabel;
-    LabelLazarusrevision: TLabel;
-    RadioGroupNPFPCbranch: TRadioGroup;
-    RadioGroupNPLazarusbranch: TRadioGroup;
+    LabelLazarusRevision: TLabel;
     RadioGroup3: TRadioGroup;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     procedure ComboBoxCPUOSChange(Sender: TObject);
@@ -89,7 +86,13 @@ type
     function GetHTTPProxyUser:string;
     function GetHTTPProxyPass:string;
     function GetFPCOptions:string;
+    procedure SetFPCOptions(value:string);
     function GetLazarusOptions:string;
+    procedure SetLazarusOptions(value:string);
+    function GetFPCRevision:string;
+    procedure SetFPCRevision(value:string);
+    function GetLazarusRevision:string;
+    procedure SetLazarusRevision(value:string);
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
@@ -107,8 +110,11 @@ type
     property HTTPProxyUser:string read GetHTTPProxyUser;
     property HTTPProxyPass:string read GetHTTPProxyPass;
 
-    property FPCOptions:string read GetFPCOptions;
-    property LazarusOptions:string read GetLazarusOptions;
+    property FPCOptions:string read GetFPCOptions write SetFPCOptions;
+    property LazarusOptions:string read GetLazarusOptions write SetLazarusOptions;
+    property FPCRevision:string read GetFPCRevision write SetFPCRevision;
+    property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
+
   end;
 
 var
@@ -176,9 +182,6 @@ begin
     EditHTTPProxyUser.Text:=ReadString('ProxySettings','HTTPProxyUser','');
     EditHTTPProxyPassword.Text:=ReadString('ProxySettings','HTTPProxyPass','');
 
-    EditFPCOptions.Text:=ReadString('General','FPCOptions','');
-    EditLazarusOptions.Text:=ReadString('General','LazarusOptions','');
-
     for OS := Low(TOS) to High(TOS) do
     begin
       for CPU := Low(TCPU) to High(TCPU) do
@@ -228,9 +231,6 @@ begin
     WriteInteger('ProxySettings','HTTPProxyPort',StrToInt(EditHTTPProxyPort.Text));
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
     WriteString('ProxySettings','HTTPProxyPass',EditHTTPProxyPassword.Text);
-
-    WriteString('General','FPCOptions',EditFPCOptions.Text);
-    WriteString('General','LazarusOptions',EditLazarusOptions.Text);
 
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -342,12 +342,37 @@ function TForm2.GetFPCOptions:string;
 begin
   result:=EditFPCOptions.Text;
 end;
+procedure TForm2.SetFPCOptions(value:string);
+begin
+  EditFPCOptions.Text:=value;
+end;
 
 function TForm2.GetLazarusOptions:string;
 begin
   result:=EditLazarusOptions.Text;
 end;
+procedure TForm2.SetLazarusOptions(value:string);
+begin
+  EditLazarusOptions.Text:=value;
+end;
 
+function TForm2.GetFPCRevision:string;
+begin
+  result:=EditFPCRevision.Text;
+end;
+procedure TForm2.SetFPCRevision(value:string);
+begin
+  EditFPCRevision.Text:=value;
+end;
+
+function TForm2.GetLazarusRevision:string;
+begin
+  result:=EditLazarusRevision.Text;
+end;
+procedure TForm2.SetLazarusRevision(value:string);
+begin
+  EditLazarusRevision.Text:=value;
+end;
 
 function TForm2.GetHTTPProxyHost:string;
 begin

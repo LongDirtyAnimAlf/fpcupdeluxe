@@ -378,6 +378,8 @@ var
   OldPath:String;
   Options:String;
   s:string;
+  LibsAvailable,BinsAvailable:boolean;
+
 begin
 
   // Make crosscompiler using new compiler
@@ -417,32 +419,33 @@ begin
 
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
 
-    // set bin and libdirs !!
+    // get/set cross binary utils !!
+    BinsAvailable:=false;
     if (CrossToolsDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
     else if (CrossToolsDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
     else CrossInstaller.SearchModeUsed:=smManual;
-    if CrossInstaller.SearchModeUsed<>smManual then result:=CrossInstaller.GetBinUtils(FBaseDirectory) else
+    if CrossInstaller.SearchModeUsed<>smManual then BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory) else
     begin
       if Length(CrossToolsDirectory)=0
-         then result:=CrossInstaller.GetBinUtils(FBaseDirectory)
-         else result:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
+         then BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory)
+         else BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
     end;
-    if not result then infoln('Failed to get crossbinutils', etError);
+    if not BinsAvailable then infoln('Failed to get crossbinutils', etError);
 
-    if result then
+    // get/set cross libraries !!
+    LibsAvailable:=false;
+    if (CrossLibraryDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
+    else if (CrossLibraryDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
+    else CrossInstaller.SearchModeUsed:=smManual;
+    if CrossInstaller.SearchModeUsed<>smManual then LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory) else
     begin
-      if (CrossLibraryDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
-      else if (CrossLibraryDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
-      else CrossInstaller.SearchModeUsed:=smManual;
-      if CrossInstaller.SearchModeUsed<>smManual then result:=CrossInstaller.GetLibs(FBaseDirectory) else
-      begin
-        if Length(CrossLibraryDirectory)=0
-           then result:=CrossInstaller.GetLibs(FBaseDirectory)
-           else result:=CrossInstaller.GetLibs(CrossLibraryDirectory);
-      end;
-      if not result then infoln('Failed to get crosslibrary', etError)
+      if Length(CrossLibraryDirectory)=0
+         then LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory)
+         else LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory);
     end;
+    if not LibsAvailable then infoln('Failed to get crosslibrary', etError);
 
+    result:=(BinsAvailable AND LibsAvailable);
 
     if result then
     begin
