@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 427
+  Left = 502
   Height = 515
-  Top = 166
+  Top = 197
   Width = 708
   Caption = 'Advanced settings'
   ClientHeight = 515
@@ -391,7 +391,7 @@ object Form2: TForm2
     ClientHeight = 108
     ClientWidth = 246
     TabOrder = 5
-    object EditFPCbranch: TEdit
+    object EditFPCBranch: TEdit
       Left = 8
       Height = 23
       Top = 24
@@ -432,7 +432,7 @@ object Form2: TForm2
       Enabled = False
       ParentColor = False
     end
-    object EditLazarusbranch: TEdit
+    object EditLazarusBranch: TEdit
       Left = 8
       Height = 23
       Top = 72

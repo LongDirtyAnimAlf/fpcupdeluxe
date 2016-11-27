@@ -6,14 +6,18 @@ interface
 
 uses
   Classes, SysUtils, FileUtil,
-  Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Types,
-  SynEdit, SynEditPopup, Buttons, Menus, installerManager;
+  Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Types, Buttons, Menus,
+  SynEdit, SynEditPopup, SynEditMiscClasses, SynEditMarkupSpecialLine,
+  installerManager, SynEditTypes;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    BitBtnFPCandLazarus: TBitBtn;
+    BitBtnFPCOnly: TBitBtn;
+    BitBtnLazarusOnly: TBitBtn;
     Button7: TButton;
     Button8: TButton;
     CheckAutoClear: TCheckBox;
@@ -29,12 +33,10 @@ type
     DinoBtn: TBitBtn;
     FeaturesBtn: TBitBtn;
     mORMotBtn: TBitBtn;
-    Button1: TButton;
     Button2: TButton;
     Button3: TButton;
     Button4: TButton;
     Button5: TButton;
-    Button6: TButton;
     CheckVerbosity: TCheckBox;
     Edit1: TEdit;
     Panel1: TPanel;
@@ -49,26 +51,28 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     SynEdit1: TSynEdit;
-    procedure Button1Click(Sender: TObject);
+    procedure LazarusOnlyClick(Sender: TObject);
+    procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
     procedure Button5Click(Sender: TObject);
-    procedure Button6Click(Sender: TObject);
+    procedure FPCOnlyClick(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure SynEdit1Change(Sender: TObject);
+    procedure SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
+      var Special: boolean; Markup: TSynSelectedColor);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click(Sender: TObject);
     procedure RadioGroup1Click(Sender: TObject);
     procedure RadioGroup2Click(Sender: TObject);
     procedure SynEdit1MouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
-    procedure SynEdit1SpecialLineColors(Sender: TObject; Line: integer;
-      var Special: boolean; var FG, BG: TColor);
     procedure QuickBtnClick(Sender: TObject);
   private
     { private declarations }
@@ -119,7 +123,7 @@ Const
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
   FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.0.1';
+  FPCUPDELUXEVERSION='1.0.2';
 
 resourcestring
   CrossGCCMsg =
@@ -128,6 +132,14 @@ resourcestring
        '    {$linklib libc_nonshared.a}'+ sLineBreak +
        '  {$endif}'+ sLineBreak +
        '{$endif}';
+
+function ExistWordInString(aString:pchar;aSearchString:string;aSearchOptions: TStringSearchOptions): Boolean;
+var
+  Size : Integer;
+begin
+  Size:=StrLen(aString);
+  Result := SearchBuf(aString, Size, 0, 0, aSearchString, aSearchOptions)<>nil;
+end;
 
 { TForm1 }
 
@@ -272,8 +284,8 @@ end;
 
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
 begin
-  if Sender=ListBox1 then FPCTarget:=listbox1.Items[listbox1.ItemIndex];
-  if Sender=ListBox2 then LazarusTarget:=listbox2.Items[listbox2.ItemIndex];
+  if Sender=ListBox1 then FFPCTarget:=listbox1.Items[listbox1.ItemIndex];
+  if Sender=ListBox2 then FLazarusTarget:=listbox2.Items[listbox2.ItemIndex];
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -311,21 +323,13 @@ begin
   end;
 end;
 
-
-procedure TForm1.SynEdit1SpecialLineColors(Sender: TObject; Line: integer;
-  var Special: boolean; var FG, BG: TColor);
-function ExistWordInString(aString:pchar;aSearchString:string;aSearchOptions: TStringSearchOptions): Boolean;
-var
-  Size : Integer;
-begin
-  Size:=StrLen(aString);
-  Result := SearchBuf(aString, Size, 0, 0, aSearchString, aSearchOptions)<>nil;
-end;
+procedure TForm1.SynEdit1Change(Sender: TObject);
 var
   s:string;
   x:integer;
 begin
-  s:=SynEdit1.Lines[Line-1];
+  s:=SynEdit1.LineText;
+  if Length(s)=0 then s:=SynEdit1.Lines[SynEdit1.CaretY-2];
 
   if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
@@ -335,26 +339,86 @@ begin
   // github error
   if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
   begin
-    FG      := clRed;   //Text Color
-    BG      := clNavy;  //BackGround
-    Special := True;    //Must be true
-    // add help into summary memo
     Memo1.Lines.Append('GitHub blocked us due to too many download requests.');
     Memo1.Lines.Append('This will last for an hour, so please wait and be patient.');
     Memo1.Lines.Append('After this period, please re-run fpcupdeluxe.');
   end;
 
-  // svn connection error
   if (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
+  begin
+    Memo1.Lines.Append('SVN could not connect to the desired repository. URL:');
+    Memo1.Lines.Append(FPCupManager.FPCURL);
+    Memo1.Lines.Append('Please check your connection. Or run the command to try yourself:');
+    Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+  end;
+
+  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
+  begin
+    if (Pos('fatal:',lowercase(s))>0) then
+    begin
+      Memo1.Lines.Append(s);
+      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+    end;
+
+    if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
+    begin
+      MissingCrossBins:=true;
+    end;
+
+    if  (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
+    begin
+      MissingCrossLibs:=true;
+    end;
+
+    if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
+    begin
+      Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');
+      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+    end;
+  end;
+
+  // linker error
+  if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[])) then
+  begin
+    x:=Pos('-l',s);
+    if x>0 then
+    begin
+      // add help into summary memo
+      Memo1.Lines.Append('Missing library: lib'+Copy(s,x+2,MaxInt));
+    end;
+  end;
+
+  // diskspace error
+  if (ExistWordInString(PChar(s),'Stream write error',[])) then
+  begin
+    Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
+    Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
+  end;
+
+end;
+
+procedure TForm1.SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
+  var Special: boolean; Markup: TSynSelectedColor);
+var
+  FG, BG: TColor;
+  s:string;
+begin
+  s:=SynEdit1.Lines[Line-1];
+
+  // github error
+  if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
   begin
     FG      := clRed;   //Text Color
     BG      := clNavy;  //BackGround
     Special := True;    //Must be true
-    // add help into summary memo
-    Memo1.Lines.Append('SVN could not connect to the desired repository. URL:');
-    Memo1.Lines.Append(FPCupManager.FPCURL);
-    Memo1.Lines.Append('Please check your connection. Or run the command to try yourself:');
-    Memo1.Lines.Append(SynEdit1.Lines[Line-2]);
+  end;
+
+  // svn connection error
+  if (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
+  begin
+    FG      := clRed;
+    BG      := clNavy;
+    Special := True;
   end;
 
   if ExistWordInString(PChar(s),'svn: e',[soDown]) then
@@ -392,7 +456,6 @@ begin
     Special := True;
   end;
 
-
   if (ExistWordInString(PChar(s),'warning:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'hint:',[soWholeWord,soDown])) then
   begin
     FG      := clGreen;
@@ -402,35 +465,12 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
   begin
-    // skip git fatal messages ... they are not that fatal !
+    // skip git fatal messages ... they are not that fatal ... but not sure yet !
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
     begin
       FG      := clRed;
       BG      := clBlue;
       Special := True;
-      // filter on fatal
-      if (Pos('fatal:',lowercase(s))>0) then
-      begin
-        Memo1.Lines.Append(s);
-        Memo1.Lines.Append(SynEdit1.Lines[Line-2]);
-      end;
-
-      if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
-      begin
-        MissingCrossBins:=true;
-      end;
-
-      if  (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
-      begin
-        MissingCrossLibs:=true;
-      end;
-
-
-      if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
-      begin
-        Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');
-        Memo1.Lines.Append(SynEdit1.Lines[Line-2]);
-      end;
     end;
   end;
 
@@ -440,12 +480,6 @@ begin
     FG      := clRed;
     BG      := clNavy;
     Special := True;
-    x:=Pos('-l',s);
-    if x>0 then
-    begin
-      // add help into summary memo
-      Memo1.Lines.Append('Missing library: lib'+Copy(s,x+2,MaxInt));
-    end;
   end;
 
   // diskspace error
@@ -454,26 +488,30 @@ begin
     FG      := clRed;
     BG      := clNavy;
     Special := True;
-    // add help into summary memo
-    Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
-    Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
   end;
 
+  if Special then
+  begin
+    Markup.Background:=BG;
+    Markup.Foreground:=FG;
+  end;
 
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var
   s:string;
-  i:integer;
-  Revision,Branch:string;
+  FPCRevision,FPCBranch:string;
+  LazarusRevision,LazarusBranch:string;
 begin
   DisEnable(Sender,False);
   try
     PrepareRun;
 
-    Revision:='';
-    Branch:='';
+    FPCBranch:=FPCupManager.FPCDesiredBranch;
+    LazarusBranch:=FPCupManager.LazarusDesiredBranch;
+    FPCRevision:=FPCupManager.FPCDesiredRevision;
+    LazarusRevision:=FPCupManager.LazarusDesiredRevision;
 
     if Sender=TrunkBtn then
     begin
@@ -484,11 +522,11 @@ begin
 
     if Sender=NPBtn then
     begin
-      s:='Going to install NewPascal';
+      s:='Going to install NewPascal release';
       FPCTarget:='newpascal';
+      FPCBranch:='release';
       LazarusTarget:='newpascal';
-      //Revision:='69e7216e7be1f42045a70a6f1c453f685da8b84b';
-      Branch:='release';
+      LazarusBranch:='release';
       //FPCupManager.IncludeModules:='mORMotFPC,zeos';
     end;
 
@@ -546,6 +584,11 @@ begin
     FPCupManager.FPCURL:=FPCTarget;
     FPCupManager.LazarusURL:=LazarusTarget;
 
+    FPCupManager.FPCDesiredBranch:=FPCBranch;
+    FPCupManager.LazarusDesiredBranch:=LazarusBranch;
+    FPCupManager.FPCDesiredRevision:=FPCRevision;
+    FPCupManager.LazarusDesiredRevision:=LazarusRevision;
+
     if NOT Form2.IncludeHelp then
     begin
       FPCupManager.SkipModules:='helpfpc,helplazarus';
@@ -562,7 +605,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button1Click(Sender: TObject);
+procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);
 var
   FModuleList: TStringList;
   i:integer;
@@ -575,11 +618,14 @@ begin
   DisEnable(Sender,False);
   try
     PrepareRun;
+
     AddMessage('Going to install/update FPC and Lazarus with given options.');
     sStatus:='Going to install/update FPC and Lazarus.';
+
     if Form2.UpdateOnly then
     begin
       // still not working 100% for Lazarus ...  todo
+      // packages that are installed by the user are not included
       FPCupManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
       FModuleList:=TStringList.Create;
       try
@@ -906,7 +952,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button6Click(Sender: TObject);
+procedure TForm1.FPCOnlyClick(Sender: TObject);
 begin
   if (ListBox1.ItemIndex=-1) then
   begin
@@ -917,7 +963,10 @@ begin
   try
     PrepareRun;
 
-    FPCupManager.OnlyModules:='fpc';
+    if Form2.UpdateOnly
+       then FPCupManager.OnlyModules:='FPCCleanAndBuildOnly'
+       else FPCupManager.OnlyModules:='fpc';
+
     FPCupManager.LazarusURL:='skip';
 
     if NOT Form2.IncludeHelp then
@@ -932,6 +981,47 @@ begin
     DisEnable(Sender,True);
   end;
 end;
+
+procedure TForm1.LazarusOnlyClick(Sender: TObject);
+var
+  FModuleList:TStringList;
+begin
+  if (ListBox2.ItemIndex=-1) then
+  begin
+    ShowMessage('Please select a Lazarus version first');
+    exit;
+  end;
+
+  DisEnable(Sender,False);
+
+  try
+    PrepareRun;
+
+    if Form2.UpdateOnly then
+    begin
+      FPCupManager.OnlyModules:='LazCleanAndBuildOnly';
+    end
+    else
+    begin
+      //FPCupManager.OnlyModules:='lazarus';
+    end;
+
+    FPCupManager.SkipModules:='fpc';
+    FPCupManager.FPCURL:='skip';
+
+    if NOT Form2.IncludeHelp then
+    begin
+      FPCupManager.SkipModules:='helpfpc';
+    end;
+
+    sStatus:='Going to install/update Lazarus only.';
+
+    RealRun;
+  finally
+    DisEnable(Sender,True);
+  end;
+end;
+
 
 procedure TForm1.Button7Click(Sender: TObject);
 var
@@ -1008,14 +1098,15 @@ end;
 
 procedure TForm1.DisEnable(Sender: TObject;value:boolean);
 begin
-  //if Sender<>Button1 then
-  Button1.Enabled:=value;
+  //if Sender<>BitBtnFPCandLazarus then
+  BitBtnFPCandLazarus.Enabled:=value;
   //if Sender<>Button2 then
   Button2.Enabled:=value;
   Button3.Enabled:=value;
   Button4.Enabled:=value;
   Button5.Enabled:=value;
-  Button6.Enabled:=value;
+  BitBtnFPCOnly.Enabled:=value;
+  BitBtnLazarusOnly.Enabled:=value;
   Button7.Enabled:=value;
   Button8.Enabled:=value;
 
@@ -1057,27 +1148,37 @@ begin
   FPCupManager.CrossOS_Target:='';
   FPCupManager.CrossOS_SubArch:='';
 
-  FPCupManager.LazarusOpt:='';
-  FPCupManager.FPCOPT:='';
   FPCupManager.CrossOPT:='';
-
-  FPCupManager.LazarusDesiredRevision:='';
-  FPCupManager.FPCDesiredRevision:='';
 
   FPCupManager.CrossLibraryDirectory:='';
   FPCupManager.CrossToolsDirectory:='';
 
   FPCupManager.Verbose:=CheckVerbosity.Checked;
 
+  FPCupManager.FPCOPT:=Form2.FPCOptions;
+  FPCupManager.FPCDesiredBranch:=Form2.FPCBranch;
+  FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;
+
+  FPCupManager.LazarusOPT:=Form2.LazarusOptions;
+  FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
+  FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
+
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
+  if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
+  begin
+    // use NewPascal git mirror for trunk sources
+    // set branch to get latest freepascal
+    FPCupManager.FPCDesiredBranch:='freepascal';
+  end;
+
   FPCupManager.LazarusURL:=LazarusTarget;
-
-  FPCupManager.FPCDesiredBranch:='';
-  FPCupManager.LazarusDesiredBranch:='';
-
-  FPCupManager.FPCOPT:=Form2.FPCOptions;
-  FPCupManager.LazarusOPT:=Form2.LazarusOptions;
+  if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
+  begin
+    // use NewPascal git mirror for trunk sources
+    // set branch to get latest lazarus
+    FPCupManager.LazarusDesiredBranch:='lazarus';
+  end;
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
 
@@ -1126,20 +1227,8 @@ begin
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
   {$endif}
 
-  FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;
-  FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
-
   if FPCupManager.FPCURL<>'SKIP' then
   begin
-
-    if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
-    begin
-      // use NewPascal git mirror for trunk sources
-      // set branch
-
-      FPCupManager.FPCDesiredBranch:='freepascal';
-    end;
-
     AddMessage('FPC URL:            '+FPCupManager.FPCURL);
     AddMessage('FPC options:        '+FPCupManager.FPCOPT);
     AddMessage('FPC directory:      '+FPCupManager.FPCDirectory);
@@ -1148,14 +1237,6 @@ begin
 
   if FPCupManager.LazarusURL<>'SKIP' then
   begin
-
-    if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
-    begin
-      // use NewPascal git mirror for trunk sources
-      // set branch to lazarus
-      FPCupManager.LazarusDesiredBranch:='lazarus';
-    end;
-
     AddMessage('Lazarus URL:        '+FPCupManager.LazarusURL);
     AddMessage('Lazarus options:    '+FPCupManager.LazarusOPT);
     AddMessage('Lazarus directory:  '+FPCupManager.LazarusDirectory);

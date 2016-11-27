@@ -40,10 +40,10 @@ type
     CheckPackageRepo: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
-    EditFPCbranch: TEdit;
+    EditFPCBranch: TEdit;
     EditFPCOptions: TEdit;
     EditFPCRevision: TEdit;
-    EditLazarusbranch: TEdit;
+    EditLazarusBranch: TEdit;
     EditLazarusOptions: TEdit;
     EditLazarusRevision: TEdit;
     EditLibLocation: TEdit;
@@ -93,6 +93,10 @@ type
     procedure SetFPCRevision(value:string);
     function GetLazarusRevision:string;
     procedure SetLazarusRevision(value:string);
+    function GetFPCBranch:string;
+    procedure SetFPCBranch(value:string);
+    function GetLazarusBranch:string;
+    procedure SetLazarusBranch(value:string);
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
@@ -114,6 +118,8 @@ type
     property LazarusOptions:string read GetLazarusOptions write SetLazarusOptions;
     property FPCRevision:string read GetFPCRevision write SetFPCRevision;
     property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
+    property FPCBranch:string read GetFPCBranch write SetFPCBranch;
+    property LazarusBranch:string read GetLazarusBranch write SetLazarusBranch;
 
   end;
 
@@ -373,6 +379,26 @@ procedure TForm2.SetLazarusRevision(value:string);
 begin
   EditLazarusRevision.Text:=value;
 end;
+
+function TForm2.GetFPCBranch:string;
+begin
+  result:=EditFPCBranch.Text;
+end;
+procedure TForm2.SetFPCBranch(value:string);
+begin
+  EditFPCBranch.Text:=value;
+end;
+
+function TForm2.GetLazarusBranch:string;
+begin
+  result:=EditLazarusBranch.Text;
+end;
+procedure TForm2.SetLazarusBranch(value:string);
+begin
+  EditLazarusBranch.Text:=value;
+end;
+
+
 
 function TForm2.GetHTTPProxyHost:string;
 begin

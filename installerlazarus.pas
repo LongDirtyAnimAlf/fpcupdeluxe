@@ -43,18 +43,20 @@ const
     //standard lazarus build
     //Note: we only do a getmodule/cleanmodule once here in this sequence,
     //otherwise we keep running distclean and svn
-    'Declare lazarus;' + 'Cleanmodule lazarus;' + 'Getmodule lazarus;' +
+    'Declare lazarus;' +
+    'Cleanmodule lazarus;' +
+    'Getmodule lazarus;' +
     //config lazarus so we can use lazbuild in the build step:
     'ConfigModule lazarus;' +
     // Cross compile support at least requires lazbuild.
     // we're building it here directly to avoid circular
     // dependencies
-    'Buildmodule lazbuild;' + 'Buildmodule lazarus;' +
+    'Buildmodule lazbuild;' +
+    'Buildmodule lazarus;' +
     //Config again to (possibly) fix any wrong settings introduced:
     'ConfigModule lazarus;' +
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
-
 
     'Declare oldlazarus;' +
     'Cleanmodule lazarus;' + 'Getmodule lazarus;' + 'Buildmodule lazarus;' +
@@ -71,9 +73,9 @@ const
     'Cleanmodule lazarus;' +
     'ConfigModule lazarus;' +
     'Buildmodule lazbuild;' +
-    'Buildmodule lazarus;' +
     'ConfigModule lazarus;' +
-    'Exec CreateLazarusScript;' +
+    'Do UniversalDefault;'+
+    'Do USERIDE;'+
     'End;' +
 
     //Nogui widgetset+Lazbuild:
@@ -899,6 +901,11 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Item1/Value', 'C:\Windows\Temp\');
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Item2/Value', 'C:\Users\Public\Documents');
       {$ENDIF MSWINDOWS}
+
+      {$IFDEF Darwin}
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
+      {$endif}
+
 
     except
       on E: Exception do
