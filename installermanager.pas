@@ -454,6 +454,7 @@ type
       // set Executed to ESNever for all sequences
       procedure ResetAllExecuted(SkipFPC:boolean=false);
       property Parent:TFPCupManager write Fparent;
+      property Installer:TInstaller read FInstaller;
       // Text representation of sequence; for diagnostic purposes
       property Text:String read GetText;
       // parse a sequence source code and append to the FStateMachine

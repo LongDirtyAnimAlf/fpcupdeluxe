@@ -139,9 +139,12 @@ begin
   LogoImage.Picture.LoadFromResourceName(HInstance, 'splash_logo', TPortableNetworkGraphic);
   VersionLabel.Caption := '';
   //RevisionLabel.Caption := '';
-  BuildDateLabel.Caption := 'Build-date: '+GetLocalizedBuildDate; ;
+  BuildDateLabel.Caption := 'Build-date: '+GetLocalizedBuildDate;
   FPCVersionLabel.Caption:= '';
   PlatformLabel.Caption:= '';
+
+  // Reinier Olislagers
+  // 4-dec-2014
 
   //VersionPage.Caption:='';
   //AboutPage.Caption:='';

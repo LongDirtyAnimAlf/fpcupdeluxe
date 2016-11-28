@@ -243,7 +243,7 @@ begin
        if UseForce then Command:=StringReplace(Command,' checkout ',' checkout --force ',[]);
      end;
 
-  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
+  if (FDesiredRevision = '') or (Uppercase(trim(FDesiredRevision)) = 'HEAD') then
     Command:=Command+'HEAD '+Repository+' '+LocalRepository
   else
     Command:=Command+FDesiredRevision+' '+Repository+' '+LocalRepository;
@@ -390,9 +390,8 @@ begin
     Command := ' --username ' + UserName + ' --password ' + Password;
   end;
 
-
-  if (FDesiredRevision = '') or (trim(FDesiredRevision) = 'HEAD') then
-    Command := ' update ' + ProxyCommand + Command + ' --quiet --non-interactive --trust-server-cert ' + LocalRepository
+  if (FDesiredRevision = '') or (Uppercase(trim(FDesiredRevision)) = 'HEAD') then
+    Command := ' update ' + ProxyCommand + Command + ' --quiet --non-interactive --trust-server-cert -r HEAD ' + LocalRepository
   else
     Command := ' update ' + ProxyCommand + Command + ' --quiet --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
 

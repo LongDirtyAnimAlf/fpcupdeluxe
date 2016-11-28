@@ -8,13 +8,14 @@ uses
   Classes, SysUtils, FileUtil,
   Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Types, Buttons, Menus,
   SynEdit, SynEditPopup, SynEditMiscClasses, SynEditMarkupSpecialLine,
-  installerManager, SynEditTypes;
+  installerManager;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
+    BitBtnHalt: TBitBtn;
     BitBtnFPCandLazarus: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
@@ -51,6 +52,7 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     SynEdit1: TSynEdit;
+    procedure BitBtnHaltClick(Sender: TObject);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -123,7 +125,7 @@ Const
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
   FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.0.2';
+  FPCUPDELUXEVERSION='1.1.0';
 
 resourcestring
   CrossGCCMsg =
@@ -1019,6 +1021,14 @@ begin
     RealRun;
   finally
     DisEnable(Sender,True);
+  end;
+end;
+
+procedure TForm1.BitBtnHaltClick(Sender: TObject);
+begin
+  if Assigned(FPCupManager.Sequencer.Installer) then
+  begin
+    FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
   end;
 end;
 

@@ -164,6 +164,8 @@ type
     function GetFile(aURL,aFile:string):boolean;
   public
     property SVNClient: TSVNClient read FSVNClient;
+    // Get processor for termination of running processes
+    property Processor: TProcessEx read ProcessEx;
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
     // Base directory for installation (fpcdir, lazdir,... option)

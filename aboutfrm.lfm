@@ -16,9 +16,9 @@ object AboutForm: TAboutForm
     Height = 326
     Top = 0
     Width = 460
-    ActivePage = AboutPage
+    ActivePage = VersionPage
     Align = alClient
-    TabIndex = 1
+    TabIndex = 0
     TabOrder = 0
     object VersionPage: TTabSheet
       Caption = 'Version'
