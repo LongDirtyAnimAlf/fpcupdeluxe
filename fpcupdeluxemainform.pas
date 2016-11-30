@@ -128,7 +128,7 @@ Const
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
   FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.1.0';
+  FPCUPDELUXEVERSION='1.1.0a';
 
 resourcestring
   CrossGCCMsg =
@@ -1363,6 +1363,9 @@ begin
     Form2.FPCRevision:=ReadString('General','FPCRevision','');
     Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
 
+    Form2.SplitFPC:=ReadBool('General','SplitFPC',False);
+    Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
+
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
     try
@@ -1401,6 +1404,9 @@ begin
     WriteString('General','LazarusOptions',Form2.LazarusOptions);
     WriteString('General','FPCRevision',Form2.FPCRevision);
     WriteString('General','LazarusRevision',Form2.LazarusRevision);
+
+    WriteBool('General','SplitFPC',Form2.SplitFPC);
+    WriteBool('General','SplitLazarus',Form2.SplitLazarus);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do
