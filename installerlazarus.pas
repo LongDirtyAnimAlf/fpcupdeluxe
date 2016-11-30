@@ -72,12 +72,6 @@ const
     'End;' +
     }
 
-    'Declare LazCleanAndBuildOnly;' +
-    'Cleanmodule lazarus;' +
-    'Buildmodule lazbuild;' +
-    'Buildmodule USERIDE;' +
-    'End;' +
-
     //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' +
     'Getmodule lazarus;' +
@@ -106,6 +100,11 @@ const
     'Declare LazarusGetOnly;' + 'Getmodule lazarus;' + 'End;' +
     'Declare LazarusBuildOnly;' + 'Buildmodule lazarus;' + 'End;' +
     'Declare LazarusConfigOnly;' + 'Configmodule lazarus;' + 'End;' +
+    'Declare LazCleanAndBuildOnly;' +
+    'Cleanmodule lazarus;' +
+    'Buildmodule lazbuild;' +
+    'Buildmodule USERIDE;' +
+    'End;' +
 
     // Crosscompile build
     'Declare LazarusCrossWin32-64;' +

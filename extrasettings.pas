@@ -34,7 +34,9 @@ type
     btnSelectBinDir: TButton;
     CheckIncludeFPCIDE: TCheckBox;
     CheckIncludeHelp: TCheckBox;
+    CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
+    CheckSplitLazarus: TCheckBox;
     CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
@@ -81,6 +83,8 @@ type
     function GetUpdateOnly:boolean;
     function GetIncludeLCL:boolean;
     function GetIncludeHelp:boolean;
+    function GetSplitFPC:boolean;
+    function GetSplitLazarus:boolean;
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -108,6 +112,9 @@ type
 
     property IncludeLCL:boolean read GetIncludeLCL;
     property IncludeHelp:boolean read GetIncludeHelp;
+
+    property SplitFPC:boolean read GetSplitFPC;
+    property SplitLazarus:boolean read GetSplitLazarus;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -183,6 +190,9 @@ begin
 
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 
+    CheckSplitFPC.Checked:=ReadBool('General','SplitFPC',False);
+    CheckSplitLazarus.Checked:=ReadBool('General','SplitLazarus',False);
+
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
     EditHTTPProxyUser.Text:=ReadString('ProxySettings','HTTPProxyUser','');
@@ -232,6 +242,9 @@ begin
     WriteBool('General','IncludeHelp',CheckIncludeHelp.Checked);
 
     WriteBool('Cross','IncludeLCL',CheckIncludeLCL.Checked);
+
+    WriteBool('General','SplitFPC',CheckSplitFPC.Checked);
+    WriteBool('General','SplitLazarus',CheckSplitLazarus.Checked);
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     WriteInteger('ProxySettings','HTTPProxyPort',StrToInt(EditHTTPProxyPort.Text));
@@ -343,6 +356,18 @@ function TForm2.GetIncludeHelp:boolean;
 begin
   result:=CheckIncludeHelp.Checked;
 end;
+
+function TForm2.GetSplitFPC:boolean;
+begin
+  result:=CheckSplitFPC.Checked;
+end;
+
+function TForm2.GetSplitLazarus:boolean;
+begin
+  result:=CheckSplitLazarus.Checked;
+end;
+
+
 
 function TForm2.GetFPCOptions:string;
 begin

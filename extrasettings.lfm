@@ -1,48 +1,24 @@
 object Form2: TForm2
-  Left = 502
-  Height = 515
-  Top = 197
-  Width = 708
+  Left = 498
+  Height = 474
+  Top = 139
+  Width = 746
   Caption = 'Advanced settings'
-  ClientHeight = 515
-  ClientWidth = 708
+  ClientHeight = 474
+  ClientWidth = 746
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poMainFormCenter
   LCLVersion = '1.7'
-  object BitBtn1: TBitBtn
-    Left = 488
-    Height = 31
-    Top = 472
-    Width = 89
-    Anchors = [akRight, akBottom]
-    Default = True
-    DefaultCaption = True
-    Kind = bkOK
-    ModalResult = 1
-    TabOrder = 0
-  end
-  object BitBtn2: TBitBtn
-    Left = 600
-    Height = 31
-    Top = 472
-    Width = 89
-    Anchors = [akRight, akBottom]
-    Cancel = True
-    DefaultCaption = True
-    Kind = bkCancel
-    ModalResult = 2
-    TabOrder = 1
-  end
   object GroupBox1: TGroupBox
     Left = 8
     Height = 128
     Top = 8
-    Width = 686
+    Width = 724
     Anchors = [akTop, akLeft, akRight]
     Caption = 'Proxy settings'
     ClientHeight = 108
-    ClientWidth = 682
+    ClientWidth = 720
     TabOrder = 2
     object Label1: TLabel
       AnchorSideLeft.Control = GroupBox1
@@ -64,7 +40,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 536
+      Width = 574
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -74,7 +50,7 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditHTTPProxyHost
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Label1
-      Left = 548
+      Left = 586
       Height = 15
       Top = 4
       Width = 90
@@ -86,7 +62,7 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditHTTPProxyHost
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = EditHTTPProxyHost
-      Left = 548
+      Left = 586
       Height = 23
       Top = 23
       Width = 120
@@ -147,13 +123,12 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 176
+    Height = 323
     Top = 144
-    Width = 422
-    Anchors = [akTop, akLeft, akRight]
+    Width = 320
     Caption = 'Miscellaneous settings'
-    ClientHeight = 156
-    ClientWidth = 418
+    ClientHeight = 303
+    ClientWidth = 316
     TabOrder = 3
     object CheckRepo: TCheckBox
       AnchorSideLeft.Control = GroupBox2
@@ -255,11 +230,44 @@ object Form2: TForm2
       State = cbChecked
       TabOrder = 5
     end
+    object CheckSplitFPC: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckIncludeHelp
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 154
+      Width = 223
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Split FPC source and bins (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 6
+    end
+    object CheckSplitLazarus: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckSplitFPC
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 179
+      Width = 241
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Split Lazarus source and bins (default=no)'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+    end
   end
   object GroupBox4: TGroupBox
-    Left = 8
+    Left = 336
     Height = 179
-    Top = 328
+    Top = 288
     Width = 272
     Caption = 'Binutils and library location'
     ClientHeight = 159
@@ -383,7 +391,7 @@ object Form2: TForm2
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
-    Left = 444
+    Left = 482
     Height = 128
     Top = 144
     Width = 250
@@ -457,9 +465,9 @@ object Form2: TForm2
     end
   end
   object GroupBoxCompileOptions: TGroupBox
-    Left = 288
+    Left = 336
     Height = 128
-    Top = 328
+    Top = 144
     Width = 142
     Caption = 'Compile Options'
     ClientHeight = 108
@@ -495,6 +503,30 @@ object Form2: TForm2
       Width = 120
       TabOrder = 1
     end
+  end
+  object BitBtn1: TBitBtn
+    Left = 632
+    Height = 31
+    Top = 384
+    Width = 89
+    Anchors = [akRight, akBottom]
+    Default = True
+    DefaultCaption = True
+    Kind = bkOK
+    ModalResult = 1
+    TabOrder = 0
+  end
+  object BitBtn2: TBitBtn
+    Left = 632
+    Height = 31
+    Top = 432
+    Width = 89
+    Anchors = [akRight, akBottom]
+    Cancel = True
+    DefaultCaption = True
+    Kind = bkCancel
+    ModalResult = 2
+    TabOrder = 1
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]

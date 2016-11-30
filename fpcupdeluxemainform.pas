@@ -303,11 +303,18 @@ end;
 
 procedure TForm1.BitBtnHaltClick(Sender: TObject);
 begin
+  if (MessageDlg('I am going to try to halt.' + sLineBreak +
+             'Do not (yet) expect too much of it.' + sLineBreak +
+             'Its a non-finished feature !'
+             ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+             begin
+               exit;
+             end;
+
   if Assigned(FPCupManager.Sequencer.Installer) then
   begin
     FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
   end;
-
   // brute force ... nothing better at the moment
   // but still does not work when downloading from SVN
   // the process that gets created when downloading if not reachable from here through the fpcupmanager
@@ -1225,9 +1232,18 @@ begin
   FPCupManager.MakeDirectory:='';
   {$ENDIF MSWINDOWS}
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
-  FPCupManager.FPCSourceDirectory:=sInstallDir+'fpcsrc';
+
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
+  if Form2.SplitFPC
+     then FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory+'src'
+     else FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory;
+
   FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
+  {
+  if Form2.SplitLazarus
+     then FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory+'src'
+     else FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory;
+  }
 
   FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusDirectory);
 
