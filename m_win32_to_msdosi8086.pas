@@ -121,7 +121,7 @@ end;
 function TWin32_msdosi8086.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   infoln('TWin32_msdosi8086: no support for LCL platform '+LCL_Platform,etInfo);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

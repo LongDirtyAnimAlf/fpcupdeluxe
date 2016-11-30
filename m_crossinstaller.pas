@@ -69,9 +69,9 @@ type
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
     {$ifndef FPCONLY}
-    // In your descendent, implement this function: you can download libraries or check for their existence for Lazarus LCL cross compile libs:
+    // In your descendent, implement this function when needed: you can download libraries or check for their existence for Lazarus LCL cross compile libs:
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
-    function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual; abstract;
+    function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual;
     {$endif}
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
     function GetBinUtils(Basepath:string):boolean;virtual;
@@ -119,7 +119,7 @@ Var
 implementation
 
 uses
-  fileutil;
+  LazFileUtils;
 
 { TCrossInstaller }
 procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
@@ -220,6 +220,7 @@ begin
   if not result then
   begin
     sd:=IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator;
+    sd:=ResolveDots(sd);
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';
@@ -264,6 +265,11 @@ begin
   end;
   {$ENDIF}
 
+end;
+
+function TCrossInstaller.GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;
+begin
+  result:=true;
 end;
 
 function TCrossInstaller.GetBinUtils(Basepath: string): boolean;

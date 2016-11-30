@@ -106,6 +106,8 @@ function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList
 // Recursively delete files with specified extension(s),
 // only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
+// only if filename contains specfied part somewhere
+function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
 function GetFileNameFromURL(URL:string):string;
 function GetVersionFromUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
@@ -1107,6 +1109,64 @@ begin
   FindCloseUTF8(FileInfo);
   Result:=true;
 end;
+
+function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
+// Deletes all files containing OnlyIfNameHas
+// DirectoryName and recursing down.
+// Will try to remove read-only files.
+//todo: check how this works with case insensitive file system like Windows
+var
+  AllFiles: boolean;
+  CurSrcDir: String;
+  CurFilename: String;
+  FileInfo: TSearchRec;
+  i: integer;
+begin
+  Result:=false;
+  AllFiles:=(Length(OnlyIfNameHas)=0);
+
+  // for now, exit when no filename data is given ... use DeleteDirectoryEx
+  if AllFiles then exit;
+
+  CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
+  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      // Ignore directories and files without name:
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        // Look at all files and directories in this directory:
+        CurFilename:=CurSrcDir+FileInfo.Name;
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        begin
+          // Directory; call recursively exit with failure on error
+          if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then
+          begin
+            FindCloseUTF8(FileInfo);
+            exit;
+          end;
+        end
+        else
+        begin
+          if AllFiles or (Pos(UpperCase(OnlyIfNameHas),UpperCase(FileInfo.Name))>0) then
+          begin
+            // Remove read-only file attribute so we can delete it:
+            if (FileInfo.Attr and faReadOnly)>0 then
+              FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+            if not DeleteFileUTF8(CurFilename) then
+            begin
+              FindCloseUTF8(FileInfo);
+              exit;
+            end;
+          end;
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+  end;
+  FindCloseUTF8(FileInfo);
+  Result:=true;
+end;
+
 
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin

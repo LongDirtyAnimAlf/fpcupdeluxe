@@ -247,7 +247,7 @@ begin
       PlainBinPath+PathSeparator+
       FMakeDir+PathSeparator+
       FSVNDirectory+PathSeparator+
-      FBaseDirectory,false,false);
+      FInstallDirectory,false,false);
     {$ENDIF MSWINDOWS}
     {$IFDEF UNIX}
     SetPath(BinPath+PathSeparator+
@@ -476,7 +476,7 @@ begin
   if inherited InitModule then
   begin
     //todo: check with FreeVision FPCIDE to see if this is a sensible location.
-    FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
     infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,etInfo);
@@ -607,7 +607,7 @@ begin
           // Check for valid lazbuild.
           // Note: we don't check if we have a valid primary config path, but that will come out
           // in the next steps.
-          LazbuildExe:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'lazbuild'+GetExeExt;;
+          LazbuildExe:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild'+GetExeExt;;
           if CheckExecutable(LazbuildExe, '--help','lazbuild')=false then
           begin
             writelnlog(ModuleName+': No valid lazbuild executable found. Aborting.', true);
@@ -758,11 +758,11 @@ begin
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
     // build_lcl_docs will fail; at least it won't pick up the FPC help files for cross references
-    FTargetDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+    FTargetDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
       'docs'+DirectorySeparator+
       'chm'+DirectorySeparator;
     infoln('helplazarus: documentation directory: '+FTargetDirectory,etInfo);
-    FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+
+    FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
     infoln('helplazarus: FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);

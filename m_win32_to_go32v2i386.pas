@@ -114,7 +114,7 @@ end;
 function TWin32_go32v2i386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   infoln('TWin32_go32v2i386: no support for LCL platform '+LCL_Platform,etInfo);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

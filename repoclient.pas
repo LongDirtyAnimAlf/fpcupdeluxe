@@ -326,7 +326,7 @@ begin
   FReturnCode := 0;
   FReturnOutput := '';
   FRepoExecutable := '';
-  FindRepoExecutable; //Do this now so hopefully the hgExecutable property is valid.
+  FindRepoExecutable;
 end;
 
 destructor TRepoClient.Destroy;

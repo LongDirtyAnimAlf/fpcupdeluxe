@@ -13,7 +13,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnResize = FormResize
   LCLVersion = '1.7'
-  object ListBox1: TListBox
+  object ListBoxFPCTarget: TListBox
     Left = 16
     Height = 152
     Top = 64
@@ -23,7 +23,7 @@ object Form1: TForm1
     ScrollWidth = 133
     TabOrder = 2
   end
-  object ListBox2: TListBox
+  object ListBoxLazarusTarget: TListBox
     Left = 16
     Height = 152
     Top = 256

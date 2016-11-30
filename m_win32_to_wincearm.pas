@@ -117,7 +117,7 @@ function TWin32_wincearm.GetLibsLCL(LCL_Platform: string; Basepath: string): boo
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

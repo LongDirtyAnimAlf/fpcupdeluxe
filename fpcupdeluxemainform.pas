@@ -44,8 +44,8 @@ type
     RealFPCURL: TEdit;
     Label1: TLabel;
     Label2: TLabel;
-    ListBox1: TListBox;
-    ListBox2: TListBox;
+    ListBoxFPCTarget: TListBox;
+    ListBoxLazarusTarget: TListBox;
     ListBox3: TListBox;
     RadioGroup1: TRadioGroup;
     RadioGroup2: TRadioGroup;
@@ -94,6 +94,7 @@ type
     function GetFPCUPSettings(IniFile:string):boolean;
     function SetFPCUPSettings(IniFile:string):boolean;
     procedure AddMessage(aMessage:string);
+    procedure InitFPCupManager;
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
   public
@@ -108,15 +109,17 @@ implementation
 {$R *.lfm}
 
 uses
-  AboutFrm,
-  extrasettings,
   IniFiles,
   StrUtils,
+  LazFileUtils,
+  AboutFrm,
+  extrasettings,
   installerUniversal,
   fpcuputil,
   {$ifdef MSWINDOWS}
   processutils,
   {$endif}
+
   synedittext;
 
 Const
@@ -146,10 +149,6 @@ end;
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-  SortedModules: TStringList;
-  i:integer;
-  s:string;
 begin
   Self.Caption:='Lazarus and FPC installer and updater V'+FPCUPDELUXEVERSION+' based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
                 lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
@@ -163,8 +162,6 @@ begin
 
   AddMessage('Welcome @ fpclupdeluxe.');
   AddMessage('');
-
-  FPCupManager:=TFPCupManager.Create;
 
   {$IFDEF MSWINDOWS}
   sInstallDir:='C:\fpcupdeluxe';
@@ -183,10 +180,6 @@ begin
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
     CheckVerbosity.Checked:=ReadBool('General','Verbose',True);
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
-    FPCupManager.HTTPProxyHost:=ReadString('ProxySettings','HTTPProxyURL','');
-    FPCupManager.HTTPProxyPort:=ReadInteger('ProxySettings','HTTPProxyPort',8080);
-    FPCupManager.HTTPProxyUser:=ReadString('ProxySettings','HTTPProxyUser','');
-    FPCupManager.HTTPProxyPassword:=ReadString('ProxySettings','HTTPProxyPass','');
     SynEdit1.Font.Size := ReadInteger('General','CommandFontSize',SynEdit1.Font.Size);
     if ReadBool('General','Maximized',False) then
     begin
@@ -204,66 +197,31 @@ begin
     Free;
   end;
 
-  sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
-
-  FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
-
   SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini');
-  SaveInisFromResource(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME,'fpcup_ini');
+  SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
 
-  FPCupManager.LoadFPCUPConfig;
-
-  FPCupManager.FPCURL:='default';
-  FPCupManager.LazarusURL:='default';
-  FPCupManager.Verbose:=true;
-
-  {$IF defined(BSD) and not defined(DARWIN)}
-  FPCupManager.PatchCmd:='gpatch';
-  {$ELSE}
-  FPCupManager.PatchCmd:='patch';
-  {$ENDIF MSWINDOWS}
-
-  SortedModules:=TStringList.Create;
-  try
-    for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
-    begin
-      s:=FPCupManager.ModulePublishedList[i];
-      // tricky ... get out the modules that are packages only
-      // not nice, but needed to keep list clean of internal commands
-      if (FPCupManager.ModulePublishedList.IndexOf(s+'clean')<>-1)
-          AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
-          AND (s<>'FPC')
-          AND (s<>'lazarus')
-          AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
-          then
-      begin
-        SortedModules.Add(s);
-      end;
-    end;
-    listbox3.Items.AddStrings(SortedModules);
-
-  finally
-    SortedModules.Free;
+  if ListBoxFPCTarget.Count=0 then
+  begin
+    ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+    FPCTarget:='default';
+  end;
+  if ListBoxLazarusTarget.Count=0 then
+  begin
+    ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+    LazarusTarget:='default';
   end;
 
-  listbox1.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-  listbox2.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-
-  FPCTarget:='default';
-  LazarusTarget:='default';
+  sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
   Edit1.Text:=sInstallDir;
-  // set change here, to prevent early firing
+  // set onchange here, to prevent early firing
   Edit1.OnChange:=@Edit1Change;
 
   // create settings form
   // must be done here, to enable local storage/access of some setttings !!
   Form2:=TForm2.Create(Form1);
 
-  // localize FPCUPSettings if possible
-  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
-     then GetFPCUPSettings(SafeGetApplicationPath+DELUXEFILENAME);
-
+  InitFPCupManager;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -284,10 +242,84 @@ begin
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
 end;
 
+procedure TForm1.InitFPCupManager;
+var
+  SortedModules: TStringList;
+  i:integer;
+  s:string;
+begin
+  FPCupManager:=TFPCupManager.Create;
+
+  FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
+
+  FPCupManager.LoadFPCUPConfig;
+
+  FPCupManager.FPCURL:='default';
+  FPCupManager.LazarusURL:='default';
+  FPCupManager.Verbose:=true;
+
+  {$IF defined(BSD) and not defined(DARWIN)}
+  FPCupManager.PatchCmd:='gpatch';
+  {$ELSE}
+  FPCupManager.PatchCmd:='patch';
+  {$ENDIF MSWINDOWS}
+
+  if listbox3.Count=0 then
+  begin
+    SortedModules:=TStringList.Create;
+    try
+      for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
+      begin
+        s:=FPCupManager.ModulePublishedList[i];
+        // tricky ... get out the modules that are packages only
+        // not nice, but needed to keep list clean of internal commands
+        if (FPCupManager.ModulePublishedList.IndexOf(s+'clean')<>-1)
+            AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
+            AND (s<>'FPC')
+            AND (s<>'lazarus')
+            AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
+            then
+        begin
+          SortedModules.Add(s);
+        end;
+      end;
+      listbox3.Items.AddStrings(SortedModules);
+
+    finally
+      SortedModules.Free;
+    end;
+  end;
+
+  FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
+  FPCupManager.HTTPProxyHost:=Form2.HTTPProxyHost;
+  FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser;
+  FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
+
+  // localize FPCUPSettings if possible
+  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
+     then GetFPCUPSettings(SafeGetApplicationPath+DELUXEFILENAME);
+end;
+
+
+procedure TForm1.BitBtnHaltClick(Sender: TObject);
+begin
+  if Assigned(FPCupManager.Sequencer.Installer) then
+  begin
+    FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
+  end;
+
+  // brute force ... nothing better at the moment
+  // but still does not work when downloading from SVN
+  // the process that gets created when downloading if not reachable from here through the fpcupmanager
+  FPCupManager.Destroy;
+  InitFPCupManager;
+  //DisEnable(Sender,True);
+end;
+
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
 begin
-  if Sender=ListBox1 then FFPCTarget:=listbox1.Items[listbox1.ItemIndex];
-  if Sender=ListBox2 then FLazarusTarget:=listbox2.Items[listbox2.ItemIndex];
+  if Sender=ListBoxFPCTarget then FFPCTarget:=ListBoxFPCTarget.Items[ListBoxFPCTarget.ItemIndex];
+  if Sender=ListBoxLazarusTarget then FLazarusTarget:=ListBoxLazarusTarget.Items[ListBoxLazarusTarget.ItemIndex];
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -593,7 +625,7 @@ begin
 
     if NOT Form2.IncludeHelp then
     begin
-      FPCupManager.SkipModules:='helpfpc,helplazarus';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus';
     end;
 
     AddMessage(s+'.');
@@ -612,7 +644,7 @@ var
   FModuleList: TStringList;
   i:integer;
 begin
-  if (ListBox1.ItemIndex=-1) or (ListBox2.ItemIndex=-1) then
+  if (ListBoxFPCTarget.ItemIndex=-1) or (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
     ShowMessage('Please select a FPC and Lazarus version first');
     exit;
@@ -956,7 +988,7 @@ end;
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
 begin
-  if (ListBox1.ItemIndex=-1) then
+  if (ListBoxFPCTarget.ItemIndex=-1) then
   begin
     ShowMessage('Please select a FPC version first');
     exit;
@@ -973,7 +1005,7 @@ begin
 
     if NOT Form2.IncludeHelp then
     begin
-      FPCupManager.SkipModules:='helpfpc';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc';
     end;
 
     sStatus:='Going to install/update FPC only.';
@@ -988,7 +1020,7 @@ procedure TForm1.LazarusOnlyClick(Sender: TObject);
 var
   FModuleList:TStringList;
 begin
-  if (ListBox2.ItemIndex=-1) then
+  if (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
     ShowMessage('Please select a Lazarus version first');
     exit;
@@ -1005,15 +1037,14 @@ begin
     end
     else
     begin
-      //FPCupManager.OnlyModules:='lazarus';
+      FPCupManager.OnlyModules:='lazarus';
     end;
 
-    FPCupManager.SkipModules:='fpc';
     FPCupManager.FPCURL:='skip';
 
     if NOT Form2.IncludeHelp then
     begin
-      FPCupManager.SkipModules:='helpfpc';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus';
     end;
 
     sStatus:='Going to install/update Lazarus only.';
@@ -1023,15 +1054,6 @@ begin
     DisEnable(Sender,True);
   end;
 end;
-
-procedure TForm1.BitBtnHaltClick(Sender: TObject);
-begin
-  if Assigned(FPCupManager.Sequencer.Installer) then
-  begin
-    FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
-  end;
-end;
-
 
 procedure TForm1.Button7Click(Sender: TObject);
 var
@@ -1120,8 +1142,8 @@ begin
   Button7.Enabled:=value;
   Button8.Enabled:=value;
 
-  ListBox1.Enabled:=value;
-  ListBox2.Enabled:=value;
+  ListBoxFPCTarget.Enabled:=value;
+  ListBoxLazarusTarget.Enabled:=value;
   ListBox3.Enabled:=value;
 
   Edit1.Enabled:=value;
@@ -1203,7 +1225,8 @@ begin
   FPCupManager.MakeDirectory:='';
   {$ENDIF MSWINDOWS}
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
-  FPCupManager.FPCDirectory:=sInstallDir+'fpc';
+  FPCupManager.FPCSourceDirectory:=sInstallDir+'fpcsrc';
+  FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
   FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
 
   FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusDirectory);
@@ -1239,9 +1262,10 @@ begin
 
   if FPCupManager.FPCURL<>'SKIP' then
   begin
-    AddMessage('FPC URL:            '+FPCupManager.FPCURL);
-    AddMessage('FPC options:        '+FPCupManager.FPCOPT);
-    AddMessage('FPC directory:      '+FPCupManager.FPCDirectory);
+    AddMessage('FPC URL:               '+FPCupManager.FPCURL);
+    AddMessage('FPC options:           '+FPCupManager.FPCOPT);
+    AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
+    AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
     RealFPCURL.Text:=FPCupManager.FPCURL;
   end else RealFPCURL.Text:='Skipping FPC';
 
@@ -1393,8 +1417,8 @@ begin
   if aFPCTarget<>FFPCTarget then
   begin
     FFPCTarget:=aFPCTarget;
-    i:=listbox1.Items.IndexOf(FFPCTarget);
-    if i<>-1 then listbox1.Selected[i]:=true;
+    i:=ListBoxFPCTarget.Items.IndexOf(FFPCTarget);
+    if i<>-1 then ListBoxFPCTarget.Selected[i]:=true;
   end;
 end;
 
@@ -1405,8 +1429,8 @@ begin
   if aLazarusTarget<>FLazarusTarget then
   begin
     FLazarusTarget:=aLazarusTarget;
-    i:=listbox2.Items.IndexOf(FLazarusTarget);
-    if i<>-1 then listbox2.Selected[i]:=true;
+    i:=ListBoxLazarusTarget.Items.IndexOf(FLazarusTarget);
+    if i<>-1 then ListBoxLazarusTarget.Selected[i]:=true;
   end;
 end;
 

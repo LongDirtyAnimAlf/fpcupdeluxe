@@ -105,7 +105,7 @@ function Twin64_linux64.GetLibsLCL(LCL_Platform: string; Basepath: string): bool
 begin
   // todo: get gtk at least, add to ffpccfgsnippet
   // todo: perhaps move checkdevlibs routines here
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 
