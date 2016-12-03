@@ -111,30 +111,56 @@ implementation
 uses
   IniFiles,
   StrUtils,
+  {$IFDEF UNIX}
+  baseunix,
+  {$ENDIF UNIX}
   LazFileUtils,
   AboutFrm,
   extrasettings,
   installerUniversal,
   fpcuputil,
-  {$ifdef MSWINDOWS}
   processutils,
-  {$endif}
-
   synedittext;
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
   NEWPASCALGITREPO='https://github.com/newpascal';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
-  FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  {$ifdef MSWINDOWS}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  {$endif}
+  {$ifdef Linux}
+  {$ifdef CPUX86}
+  FPCUPBINSURL='';
+  {$endif CPUX86}
+  {$ifdef CPUX64}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
+  {$endif CPUX64}
+  {$ifdef CPUARM}
+  FPCUPBINSURL='';
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  FPCUPBINSURL='';
+  {$endif CPUAARCH64}
+  {$endif}
+  {$ifdef FreeBSD}
+  FPCUPBINSURL='';
+  {$endif}
+  {$ifdef Darwin}
+  FPCUPBINSURL='';
+  {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
   FPCUPDELUXEVERSION='1.1.0a';
 
 resourcestring
   CrossGCCMsg =
-       '{$ifdef Linux}'+ sLineBreak +
-       '  {$ifdef FPC_CROSSCOMPILING}'+ sLineBreak +
+       '{$ifdef FPC_CROSSCOMPILING}'+ sLineBreak +
+       '  {$ifdef Linux}'+ sLineBreak +
        '    {$linklib libc_nonshared.a}'+ sLineBreak +
+       '    {$IFDEF CPUARM}'+ sLineBreak +
+       '      // for GUI on RPi[1,2,3]'+ sLineBreak +
+       '      {$linklib GLESv2}'+ sLineBreak +
+       '    {$ENDIF}'+ sLineBreak +
        '  {$endif}'+ sLineBreak +
        '{$endif}';
 
@@ -735,8 +761,12 @@ end;
 procedure TForm1.Button5Click(Sender: TObject);
 var
   aDownLoader: TDownLoader;
-  URL,DownloadURL,TargetFile,UnZipper:string;
+  URL,DownloadURL,TargetFile,TargetPath,UnZipper:string;
   success:boolean;
+  {$ifdef Unix}
+  fileList: TStringList;
+  i:integer;
+  {$endif}
 begin
   if (RadioGroup1.ItemIndex=-1) and (RadioGroup2.ItemIndex=-1) then
   begin
@@ -766,13 +796,11 @@ begin
   end;
   {$endif}
 
-  {$ifdef MSWINDOWS}
   if (FPCupManager.CrossOS_Target='linux') then
   begin
     ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
     Memo1.Lines.Append(CrossGCCMsg);
   end;
-  {$endif}
 
   if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
   if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
@@ -842,12 +870,10 @@ begin
     begin
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
-      // for the moment windows only ... will change in near future
-
-      {$ifdef MSWINDOWS}
 
       if MissingCrossBins OR MissingCrossLibs then
       begin
+
         if (MessageDlg('The building of a crosscompiler failed due to missing cross-tools.' + sLineBreak +
                    'Fpcupdeluxe can try to download them if available !' + sLineBreak +
                    'Do you want to continue ?'
@@ -905,8 +931,16 @@ begin
 
           if MissingCrossBins then
           begin
+
+            // no cross-bins available
+            if (Length(FPCUPBINSURL)=0) then exit;
+
             AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
-            DownloadURL:=FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
+            {$ifdef MSWINDOWS}
+            DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+URL;
+            {$else}
+            DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+URL;
+            {$endif}
             AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
             aDownLoader:=TDownLoader.Create;
@@ -924,12 +958,37 @@ begin
             if success then
             begin
               AddMessage('Successfully downloaded binary-tools.');
-              AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+              {$ifndef MSWINDOWS}
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              {$endif}
+              AddMessage('Going to extract them into '+TargetPath);
+              {$ifdef MSWINDOWS}
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
               if (NOT success) then
+              {$endif}
               begin
+                {$ifdef MSWINDOWS}
                 UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
+                {$else}
+                UnZipper := 'unrar';
+                {$endif}
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+
+                {$IFDEF UNIX}
+                fileList:=FindAllFiles(TargetPath);
+                try
+                  if (fileList.Count > 0) then
+                  begin
+                    for i:=0 to Pred(fileList.Count) do
+                    begin
+                      fpChmod(fileList.Strings[i],&755);
+                    end;
+                  end;
+                finally
+                  fileList.Free;
+                end;
+                {$ENDIF}
               end;
             end;
             SysUtils.DeleteFile(TargetFile);
@@ -955,12 +1014,20 @@ begin
             if success then
             begin
               AddMessage('Successfully downloaded the libraries.');
-              AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+              //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              AddMessage('Going to extract them into '+TargetPath);
+              {$ifdef MSWINDOWS}
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
               if (NOT success) then
+              {$endif}
               begin
+                {$ifdef MSWINDOWS}
                 UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
+                {$else}
+                UnZipper := 'unrar';
+                {$endif}
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
               end;
             end;
           end;
@@ -985,7 +1052,6 @@ begin
         AddMessage('Building cross-tools failed ... ??? ... aborting.');
       end;
 
-      {$endif}
     end;
 
   finally

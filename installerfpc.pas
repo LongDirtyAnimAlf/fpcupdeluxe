@@ -540,14 +540,18 @@ begin
             exit(false);
           end;
         end;
-        if CrossInstaller.LibsPath<>''then
+
+        if (CrossInstaller.TargetOS='darwin') then
         begin
-           Options:=Options+' -Xd';
-           Options:=Options+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
-           if Pos('osxcross',CrossInstaller.LibsPath)>0 then
-           begin
-             Options:=Options+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
-           end;
+          if CrossInstaller.LibsPath<>''then
+          begin
+             Options:=Options+' -Xd';
+             Options:=Options+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
+             if Pos('osxcross',CrossInstaller.LibsPath)>0 then
+             begin
+               Options:=Options+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
+             end;
+          end;
         end;
 
         if (CrossInstaller.TargetOS='android') then
@@ -569,7 +573,9 @@ begin
           CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
         end;
         if CrossOptions<>'' then
-           ProcessEx.Parameters.Add(CrossOptions);
+        begin
+          ProcessEx.Parameters.Add(CrossOptions);
+        end;
 
         // suppress hints and add all other options
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
