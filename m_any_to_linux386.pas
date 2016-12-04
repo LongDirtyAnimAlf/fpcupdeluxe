@@ -94,6 +94,7 @@ begin
   end;
 
   SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
@@ -148,7 +149,11 @@ begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    '-XP'+FBinUtilsPrefix {Prepend the binutils names}
+    {$ifdef MSWINDOWS}
+    +LineEnding+'-Tlinux'; {target operating system}
+    {$endif}
+    ;
   end;
 end;
 

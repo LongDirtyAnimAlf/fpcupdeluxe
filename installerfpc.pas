@@ -541,6 +541,7 @@ begin
           end;
         end;
 
+        {$ifndef Darwin}
         if (CrossInstaller.TargetOS='darwin') then
         begin
           if CrossInstaller.LibsPath<>''then
@@ -553,6 +554,7 @@ begin
              end;
           end;
         end;
+        {$endif}
 
         if (CrossInstaller.TargetOS='android') then
         begin

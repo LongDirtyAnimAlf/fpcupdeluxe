@@ -131,7 +131,7 @@ Const
   {$endif}
   {$ifdef Linux}
   {$ifdef CPUX86}
-  FPCUPBINSURL='';
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxi386crossbins_v1.0';
   {$endif CPUX86}
   {$ifdef CPUX64}
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
@@ -150,7 +150,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.1.0a';
+  FPCUPDELUXEVERSION='1.1.0c';
 
 resourcestring
   CrossGCCMsg =
@@ -933,7 +933,11 @@ begin
           begin
 
             // no cross-bins available
-            if (Length(FPCUPBINSURL)=0) then exit;
+            if (Length(FPCUPBINSURL)=0) then
+            begin
+              ShowMessage('No tools available online. You could do a feature request ... ;-)');
+              exit;
+            end;
 
             AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
             {$ifdef MSWINDOWS}
@@ -1463,8 +1467,8 @@ begin
     // mmm, is this correct ?  See extrasettings !!
     WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
-    WriteString('URL','fpcURL',FPCTarget);
-    WriteString('URL','lazURL',LazarusTarget);
+    if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
+    if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
 
     WriteString('General','FPCOptions',Form2.FPCOptions);
     WriteString('General','LazarusOptions',Form2.LazarusOptions);

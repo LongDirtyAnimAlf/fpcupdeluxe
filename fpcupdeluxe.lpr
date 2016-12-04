@@ -30,10 +30,16 @@ uses
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
   m_linux386_to_mips,
-  m_any_to_aixpowerpc, m_any_to_androidarm, m_any_to_linuxarm,
-  m_any_to_embeddedarm, m_any_to_linuxmipsel, m_any_to_linux386,
+  m_any_to_aixpowerpc,
+  m_any_to_androidarm,
+  m_any_to_linuxarm,
+  m_any_to_embeddedarm,
   m_any_to_linuxaarch64,
-  m_any_to_androidjvm,m_any_to_javajvm,
+  m_any_to_androidjvm,
+  m_any_to_javajvm,
+  {$IFNDEF MSWINDOWS}
+  m_any_to_linuxmipsel,
+  {$ENDIF}
   {$IFDEF Darwin}
   m_crossdarwin64,
   m_crossdarwin32,
@@ -44,13 +50,14 @@ uses
   {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,
   {$else}
+  m_any_to_linux386,
+  m_any_to_linuxx64,
   m_any_to_freebsdx64,
   m_any_to_freebsd386,
   {$endif}
   {$IFDEF MSWINDOWS}
   m_crosswin32, m_crosswin64,
-  m_win32_to_linuxmips, m_win32_to_msdosi8086, m_win32_to_go32v2i386, m_win32_to_wincearm, m_win32_to_linux386,
-  m_win64_to_linux64,
+  m_win32_to_linuxmips, m_win32_to_msdosi8086, m_win32_to_go32v2i386, m_win32_to_wincearm,
   {$endif}
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_win64
