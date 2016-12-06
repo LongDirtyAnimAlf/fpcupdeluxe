@@ -80,7 +80,13 @@ begin
 
   // local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+  // also check in the gnueabi directory
+  if not result then
+     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LibName);
+  // also check in the gnueabihf directory
+  if not result then
+     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LibName);
 
   SearchLibraryInfo(result);
 

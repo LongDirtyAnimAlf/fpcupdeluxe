@@ -12,8 +12,8 @@ program fpcupdeluxe;
   {$IFDEF FPC_CROSSCOMPILING}
     {$linklib libc_nonshared.a}
     {$IFDEF CPUARM}
-      // for RPi
-      {$linklib GLESv2}
+      // for RPi with Arch Linux
+      //{$linklib GLESv2}
     {$ENDIF}
   {$ENDIF}
 {$ENDIF}

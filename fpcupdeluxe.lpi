@@ -9,6 +9,10 @@
       <Title Value="fpcupdeluxe"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
+      <XPManifest>
+        <TextName Value="CompanyName.ProductName.AppName"/>
+        <TextDesc Value="Your application description."/>
+      </XPManifest>
       <Icon Value="0"/>
       <Resources Count="3">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>

@@ -1311,10 +1311,10 @@ end;
 function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2e-x64_86-win64.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-x64_86-win64.zip';
   {$endif}
   {$ifdef win32}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2e-i386-win32.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-i386-win32.zip';
   {$endif}
 var
   OperationSucceeded: boolean;

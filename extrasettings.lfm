@@ -268,19 +268,19 @@ object Form2: TForm2
     Left = 336
     Height = 179
     Top = 288
-    Width = 272
+    Width = 296
     Caption = 'Binutils and library location'
     ClientHeight = 159
-    ClientWidth = 268
+    ClientWidth = 292
     TabOrder = 4
     object ComboBoxOS: TComboBox
       AnchorSideLeft.Control = ComboBoxCPU
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = ComboBoxCPU
-      Left = 124
+      Left = 140
       Height = 23
       Top = 8
-      Width = 136
+      Width = 148
       BorderSpacing.Left = 8
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
@@ -293,7 +293,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 8
-      Width = 112
+      Width = 128
       BorderSpacing.Left = 4
       BorderSpacing.Top = 8
       ItemHeight = 15
@@ -308,7 +308,7 @@ object Form2: TForm2
       Left = 4
       Height = 50
       Top = 38
-      Width = 256
+      Width = 284
       AutoFill = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 7
@@ -321,7 +321,7 @@ object Form2: TForm2
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 3
       ClientHeight = 30
-      ClientWidth = 252
+      ClientWidth = 280
       Columns = 3
       Enabled = False
       ItemIndex = 0
@@ -340,7 +340,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 98
-      Width = 182
+      Width = 211
       BorderSpacing.Left = 4
       BorderSpacing.Top = 10
       Enabled = False
@@ -354,7 +354,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 127
-      Width = 182
+      Width = 211
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       Enabled = False
@@ -365,7 +365,7 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditLibLocation
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = EditLibLocation
-      Left = 194
+      Left = 223
       Height = 23
       Top = 98
       Width = 66
@@ -379,7 +379,7 @@ object Form2: TForm2
       AnchorSideLeft.Control = EditBinLocation
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = EditBinLocation
-      Left = 194
+      Left = 223
       Height = 23
       Top = 127
       Width = 66
@@ -505,7 +505,7 @@ object Form2: TForm2
     end
   end
   object BitBtn1: TBitBtn
-    Left = 632
+    Left = 643
     Height = 31
     Top = 384
     Width = 89
@@ -517,7 +517,7 @@ object Form2: TForm2
     TabOrder = 0
   end
   object BitBtn2: TBitBtn
-    Left = 632
+    Left = 643
     Height = 31
     Top = 432
     Width = 89
@@ -530,7 +530,7 @@ object Form2: TForm2
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    left = 254
-    top = 24
+    Left = 254
+    Top = 24
   end
 end

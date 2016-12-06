@@ -98,7 +98,7 @@ begin
 
   // DOS8086 does not need libs by default, but user can add them.
   // first search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName);
+  result:=SimpleSearchLibrary(BasePath,DirName,'');
 
   if result then
   begin

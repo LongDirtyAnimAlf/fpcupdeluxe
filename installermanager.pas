@@ -904,7 +904,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       if (Output='arch') OR (Output='manjaro') then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
-        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
+        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
       end
       else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
       begin
@@ -946,7 +946,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         AdvicedLibs:=AdvicedLibs+
                      'build-essential gcc subversion devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                      'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
-                     'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf';
+                     'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
       end
       else
       if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then

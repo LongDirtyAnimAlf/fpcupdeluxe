@@ -150,16 +150,17 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.1.0c';
+  FPCUPDELUXEVERSION='1.1.0d';
 
 resourcestring
   CrossGCCMsg =
        '{$ifdef FPC_CROSSCOMPILING}'+ sLineBreak +
        '  {$ifdef Linux}'+ sLineBreak +
+       '    // for most versions of Linux in case of linking errors'+ sLineBreak +
        '    {$linklib libc_nonshared.a}'+ sLineBreak +
        '    {$IFDEF CPUARM}'+ sLineBreak +
-       '      // for GUI on RPi[1,2,3]'+ sLineBreak +
-       '      {$linklib GLESv2}'+ sLineBreak +
+       '      // for GUI on RPi[1,2,3] with Arch Linux in case of linking errors'+ sLineBreak +
+       '      // {$linklib GLESv2}'+ sLineBreak +
        '    {$ENDIF}'+ sLineBreak +
        '  {$endif}'+ sLineBreak +
        '{$endif}';

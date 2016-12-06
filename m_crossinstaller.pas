@@ -58,13 +58,13 @@ type
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     // Sets FBinutilspath if file LookFor found in Directory. Returns true if found.
     function SearchLibrary(Directory, LookFor: string): boolean;
-    function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string=''): boolean;
+    function SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
     function SearchBinUtil(Directory, LookFor: string): boolean;
-    function SimpleSearchBinUtil(BasePath,DirName: string; const LookFor:string=''): boolean;
+    function SimpleSearchBinUtil(BasePath,DirName: string; const LookFor:string): boolean;
     procedure SearchLibraryInfo(found:boolean; const extrainfo:string='');
     procedure SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
     function SearchUtil(Directory, LookFor: string; LibsOrBins:boolean): boolean;
-    function FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string=''): boolean;
+    function FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string): boolean;
   public
     // In your descendent, implement this function: you can download libraries or check for their existence for normal cross compile libs:
     function GetLibs(Basepath:string):boolean;virtual; abstract;
@@ -156,7 +156,7 @@ begin
   result:=SearchUtil(Directory, LookFor, true);
 end;
 
-function TCrossInstaller.SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string=''): boolean;
+function TCrossInstaller.SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
 begin
   result:=FPCUPToolsSearch(BasePath,DirName,true,LookFor);
 end;
@@ -166,7 +166,7 @@ begin
   result:=SearchUtil(Directory, LookFor, false);
 end;
 
-function TCrossInstaller.SimpleSearchBinUtil(BasePath,DirName: string; const LookFor:string=''): boolean;
+function TCrossInstaller.SimpleSearchBinUtil(BasePath,DirName: string; const LookFor:string): boolean;
 begin
   result:=FPCUPToolsSearch(BasePath,DirName,false,LookFor);
 end;
@@ -201,7 +201,7 @@ begin
 end;
 
 
-function TCrossInstaller.FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string=''): boolean;
+function TCrossInstaller.FPCUPToolsSearch(BasePath,DirName: string; LibsOrBins:boolean; const LookFor:string): boolean;
 var
   sd:string;
 begin
@@ -239,9 +239,8 @@ begin
     result:=SearchUtil(sd, LookFor, LibsOrBins);
   end;
 
-
   {$IFDEF UNIX}
-  if SearchModeUsed=smAuto then
+  if (SearchModeUsed=smAuto) then
   begin
     if LibsOrBins
        then sd:='lib'
@@ -251,17 +250,22 @@ begin
       result:=SearchUtil('/usr/local/'+sd+'/'+DirName,
         LookFor, LibsOrBins);
 
-    if not result then
-      result:=SearchUtil('/usr/local/'+sd,
-        LookFor, LibsOrBins);
+    // extend search, but not for libraries !!
+    if (NOT LibsOrBins) then
+    begin
+      if not result then
+        result:=SearchUtil('/usr/local/'+sd,
+          LookFor, LibsOrBins);
 
-    if not result then
-      result:=SearchUtil('/usr/'+sd,
-        LookFor, LibsOrBins);
+      if not result then
+        result:=SearchUtil('/usr/'+sd,
+          LookFor, LibsOrBins);
 
-    if not result then
-      result:=SearchUtil('/'+sd,
-        LookFor, LibsOrBins);
+      if not result then
+        result:=SearchUtil('/'+sd,
+          LookFor, LibsOrBins);
+    end;
+
   end;
   {$ENDIF}
 
