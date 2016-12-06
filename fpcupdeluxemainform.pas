@@ -1277,17 +1277,21 @@ begin
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
   begin
+    FPCupManager.FPCDesiredBranch:='release';
     // use NewPascal git mirror for trunk sources
     // set branch to get latest freepascal
-    FPCupManager.FPCDesiredBranch:='freepascal';
+    if FPCTarget='trunkgit'
+       then FPCupManager.FPCDesiredBranch:='freepascal';
   end;
 
   FPCupManager.LazarusURL:=LazarusTarget;
   if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
   begin
+    FPCupManager.LazarusDesiredBranch:='release';
     // use NewPascal git mirror for trunk sources
     // set branch to get latest lazarus
-    FPCupManager.LazarusDesiredBranch:='lazarus';
+    if LazarusTarget='trunkgit'
+       then FPCupManager.LazarusDesiredBranch:='lazarus';
   end;
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
