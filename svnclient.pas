@@ -66,12 +66,12 @@ type
     function GetProxyCommand: string;
     function GetRepoExecutable: string; override;
     function GetRepoExecutableName: string; override;
+    function FindRepoExecutable: string; override;
     procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
     function Execute(Command: string): integer; override;
-    function FindRepoExecutable: string; override;
     function GetDiffAll: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
     function LocalRepositoryExists: boolean; override;

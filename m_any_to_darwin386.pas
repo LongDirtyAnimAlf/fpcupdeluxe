@@ -184,6 +184,7 @@ begin
   FCrossModuleName:='any_darwin386';
   FBinUtilsPrefix:='i386-darwin-';
   FBinUtilsPath:='';
+  FBinutilsPathInPath:=true;
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='i386';

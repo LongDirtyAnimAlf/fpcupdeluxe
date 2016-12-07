@@ -1199,7 +1199,7 @@ begin
       end;
 
       if result=false then
-         WritelnLog('Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+         WritelnLog(etError,'Error downloading from '+RemoteURL+'. Continuing regardless.',True);
 
       if result then
       begin

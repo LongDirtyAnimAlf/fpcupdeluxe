@@ -217,7 +217,8 @@ type
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
     // append line ending and write to log and, if specified, to console
-    procedure WritelnLog(msg: string; ToConsole: boolean = true);
+    procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
+    procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
     // Build module
     function BuildModule(ModuleName: string): boolean; virtual; abstract;
     // Clean up environment
@@ -382,6 +383,19 @@ begin
     {$IFDEF MSWINDOWS}
     ForceDirectoriesUTF8(FMakeDir);
 
+    {
+    // check if we have make ... otherwise get it from standard URL
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+
+            '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
+    }
+
+    {$ifdef win64}
+    // the standard make by FPC does not work when Git is present, but this one works ??!!
+    // strange, but do not enable (yet) !!
+    // Download('ftp://ftp.equation.com/make/'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make), Make);
+    {$endif}
+
+
     // Get unzip binary from default binutils URL
     FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
@@ -513,7 +527,7 @@ begin
       begin
         // look system default
         FSVNDirectory := '';
-        AllThere:=Length(FSVNClient.FindRepoExecutable)<>0;
+        AllThere:=Length(FSVNClient.RepoExecutable)<>0;
         //AllThere:=Length(FSVNClient.RepoExecutable)<>0;
       end;
 
@@ -533,7 +547,7 @@ begin
       begin
         OperationSucceeded := false;
         infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
-      end else WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
+      end else WritelnLog('SVN client found: ' + FSVNClient.RepoExecutable, true);
     end;
 
     if OperationSucceeded then
@@ -894,13 +908,13 @@ begin
 
       if (FileExists(InstallPath)) then continue;
 
-      DownloadSuccess:=GetFile(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
+      DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
 
       if NOT DownloadSuccess then
       begin
         infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
         Errors := Errors + 1;
-      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etDebug);
+      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
 
     end;
 
@@ -1621,6 +1635,14 @@ begin
   end;
 end;
 
+procedure TInstaller.WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean);
+begin
+  if Assigned(FLog) then
+  begin
+    FLog.WriteLog(EventType,msg,ToConsole);
+  end;
+end;
+
 
 function TInstaller.GetCompilerInDir(Dir: string): string;
 var
@@ -1665,21 +1687,21 @@ begin
   result:=false;
   if (NOT FileExists(aFile)) then
   begin
-    infoln('Downloading ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etDebug);
     //aDownLoader:=TDownLoader.Create(FVerbose);
+    if FVerbose then infoln('Downloading ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etInfo);
     aDownLoader:=TDownLoader.Create;
     try
       if FHTTPProxyHost<>'' then aDownLoader.setProxy(FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
       result:=aDownLoader.getFile(aURL,aFile);
       if (NOT result) then // try only once again in case of error
       begin
-        infoln('Error while trying to download '+aURL+'. Trying again.',etDebug);
         SysUtils.DeleteFile(aFile); // delete stale targetfile
         result:=aDownLoader.getFile(aURL,aFile);
       end;
     finally
       aDownLoader.Destroy;
     end;
+    if (NOT result) then infoln('Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
   end;
 end;
 

@@ -8,8 +8,8 @@ program fpcupdeluxe;
 // or make a button or popup or something for this link.
 // todo: add some means of help
 
-{$IFDEF LINUX}
-  {$IFDEF FPC_CROSSCOMPILING}
+{$IFDEF FPC_CROSSCOMPILING}
+  {$IFDEF LINUX}
     {$linklib libc_nonshared.a}
     {$IFDEF CPUARM}
       // for RPi with Arch Linux
@@ -29,7 +29,6 @@ uses
   synautil, // for rpos ... could also use strutil
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
-  m_linux386_to_mips,
   m_any_to_aixpowerpc,
   m_any_to_androidarm,
   m_any_to_linuxarm,
@@ -38,6 +37,7 @@ uses
   m_any_to_androidjvm,
   m_any_to_javajvm,
   {$IFNDEF MSWINDOWS}
+  m_linux386_to_mips,
   m_any_to_linuxmipsel,
   {$ENDIF}
   {$IFDEF Darwin}
@@ -56,8 +56,13 @@ uses
   m_any_to_freebsd386,
   {$endif}
   {$IFDEF MSWINDOWS}
-  m_crosswin32, m_crosswin64,
+  {$ifdef win64}
+  m_crosswin32,
+  {$endif}
+  {$ifdef win32}
+  m_crosswin64,
   m_win32_to_linuxmips, m_win32_to_msdosi8086, m_win32_to_go32v2i386, m_win32_to_wincearm,
+  {$endif}
   {$endif}
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_win64

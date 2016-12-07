@@ -1261,7 +1261,7 @@ end;
 BootstrapArchive := SysUtils.GetTempFileName;
 if OperationSucceeded then
 begin
-  OperationSucceeded:=Download(FBootstrapCompilerURL, BootstrapArchive);
+  OperationSucceeded:=Download(FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,InttoStr(HTTPProxyPort),HTTPProxyUser,HTTPProxyPassword);
   if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
 end;
 
@@ -1424,7 +1424,7 @@ var
   {$IFDEF FREEBSD}
   FreeBSDVersion:integer;
   {$ENDIF}
-  s:string;
+  s,s1:string;
   ReturnCode:integer;
   aLocalBootstrapVersion:string;
   aIntermediateBootstrapCompiler:string;
@@ -1521,7 +1521,7 @@ begin
           infoln('Looking for (online) bootstrapper '+aCompilerArchive,etInfo);
 
           aCompilerList.Clear;
-          FtpGetFileList('ftp.freepascal.org', 'pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap', aCompilerList);
+          FtpGetFileList('ftp.freepascal.org', 'pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap', aCompilerList, HTTPProxyHost, InttoStr(HTTPProxyPort), HTTPProxyUser, HTTPProxyPassword);
 
           {$IFDEF FREEBSD}
           // FreeBSD : special because of versions
@@ -1603,7 +1603,7 @@ begin
 
           aDownLoader:=TDownLoader.Create;
           try
-
+            if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
             while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
             begin
               infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
@@ -1624,7 +1624,6 @@ begin
                    else break;
               end;
             end;
-
 
             if NOT aCompilerFound then
             begin
@@ -1699,29 +1698,56 @@ begin
   WritelnLog('Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
   FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
+
   {$IFDEF MSWINDOWS}
+  s:='';
+  // preserve cygwin and msys(2) paths when setting path
+  aCompilerList:=TStringList.Create;
+  try
+    aCompilerList.Delimiter:=PathSeparator;
+    aCompilerList.StrictDelimiter:=True;
+    aCompilerList.DelimitedText:=GetPath;
+    for i:=0 to aCompilerList.Count-1 do
+    begin
+      s1:=aCompilerList[i];
+      if (Pos('cygwin',LowerCase(s1))>0) OR (Pos('msys',LowerCase(s1))>0) OR (Pos('msys2',LowerCase(s1))>0) then
+      begin
+        s:=PathSeparator+s1+s;
+      end;
+    end;
+  finally
+    aCompilerList.Free;
+  end;
   if Length(FSVNDirectory)>0
-     then s:=ExcludeTrailingPathDelimiter(FSVNDirectory)+PathSeparator
-     else s:='';
+     then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory)+s;
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(s+
+  SetPath(
     FBinPath+PathSeparator+ {compiler for current architecture}
+    FMakeDir+PathSeparator+
+    FBootstrapCompilerDirectory+PathSeparator+
+    IncludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
     IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
     IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-    FMakeDir+PathSeparator+
-    FBootstrapCompilerDirectory, {any missing utilities etc; put these last}
-    true,false);
+    IncludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
+    IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
+    s,
+    false,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //add fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(FBinPath+PathSeparator+
-  // pwd is located in /bin ... the makefile needs it !!
-  // tools are located in /usr/bin ... the makefile needs it !!
-  '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
-  IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
-  IncludeTrailingPathDelimiter(FInstallDirectory)+'utils',
-  true,false);
+  SetPath(
+    FBinPath+PathSeparator+
+    // pwd is located in /bin ... the makefile needs it !!
+    // tools are located in /usr/bin ... the makefile needs it !!
+    '/bin'+PathSeparator+'/usr/bin'+PathSeparator+
+    FBootstrapCompilerDirectory+PathSeparator+
+    IncludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
+    IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
+    IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
+    IncludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
+    IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler',
+    true,false);
   {$ENDIF UNIX}
   InitDone:=result;
 end;
@@ -1864,62 +1890,66 @@ begin
     result:=CheckAndGetNeededBinUtils;
     //if not result then exit;
 
-
     infoln('Checking out/updating sources for intermediate bootstrap compiler.',etInfo);
     BootstrapDirectory := ExpandFileName(IncludeTrailingPathDelimiter(FSourceDirectory) + '..');
     BootstrapDirectory := IncludeTrailingPathDelimiter(BootstrapDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
     BootstrapDirectory := ResolveDots(BootstrapDirectory);
-    s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
 
-    // first cleanout the intermediat bootstrapper in case of .... as the rules prescibe
-    ProcessEx.Executable := Make;
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
-    ProcessEx.Parameters.Clear;
-    ProcessEx.Parameters.Add('clean');
-    if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
-    ProcessEx.Parameters.Add('FPC='+FCompiler);
-    ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
-    ProcessEx.Parameters.Add('OS_TARGET='+aOS);
-    ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
-    ProcessEx.Execute;
-    infoln('Cleaned FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
-
-    ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' info ' + BootstrapDirectory, Output, FVerbose);
-    if (ReturnCode <> 0) then
+    ReturnCode:=-1;
+    if DirectoryExists(BootstrapDirectory) then
     begin
-      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + BootstrapDirectory, Output, FVerbose);
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' info ' + BootstrapDirectory, Output, FVerbose);
+      // first cleanout the intermediat bootstrapper in case of .... as the rules prescibe
+      ProcessEx.Executable := Make;
+      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
+      ProcessEx.Parameters.Clear;
+      ProcessEx.Parameters.Add('clean');
+      if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      ProcessEx.Parameters.Add('FPC='+FCompiler);
+      ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
+      ProcessEx.Parameters.Add('OS_TARGET='+aOS);
+      ProcessEx.Parameters.Add('CPU_TARGET='+aCPU);
+      ProcessEx.Execute;
+      infoln('Cleaned FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
+
+      ReturnCode := FSVNClient.Execute('info ' + BootstrapDirectory);
+      if (ReturnCode <> 0) then
+      begin
+        FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
+        ReturnCode := FSVNClient.Execute('info ' + BootstrapDirectory);
+      end;
     end;
 
     s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
     if (ReturnCode = 0)
-        then ICSVNCommand:='update --non-interactive --quiet '
+        then ICSVNCommand:='update --non-interactive --quiet'
         else ICSVNCommand:='checkout --non-interactive --quiet --depth=files ' + s;
 
-    ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ' + ICSVNCommand + ' ' + BootstrapDirectory, Output, FVerbose);
+    ReturnCode := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
     if (ReturnCode <> 0) then
     begin
       // try once again, after a cleanup
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + BootstrapDirectory, Output, FVerbose);
-      if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' ' + ICSVNCommand + ' ' + BootstrapDirectory, Output, FVerbose);
+      ReturnCode := FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
+      if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
     end;
 
     // get compiler source
-    if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+    s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler';
+    if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update compiler --quiet ' + s);
     // try once again
     if (ReturnCode <> 0) then
     begin
-      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', Output, FVerbose);
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update compiler --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler', FVerbose);
+      FSVNClient.Execute('cleanup --non-interactive ' + s);
+      ReturnCode := FSVNClient.Execute('update compiler --quiet ' + s);
     end;
 
     // get rtl source
-    if (ReturnCode = 0) then ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
+    s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl';
+    if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update rtl --quiet ' + s);
     // try once again
     if (ReturnCode <> 0) then
     begin
-      ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' cleanup --non-interactive ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', Output, FVerbose);
-      ReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FSVNClient.RepoExecutable) + ' update rtl --quiet ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl', FVerbose);
+      FSVNClient.Execute('cleanup --non-interactive ' + s);
+      ReturnCode := FSVNClient.Execute('update rtl --quiet ' + s);
     end;
 
     if (ReturnCode = 0) then
@@ -1977,14 +2007,13 @@ begin
            if ReturnCode=1 then infoln('Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
            ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
         end;
-
-        if ReturnCode=0 then infoln('Running clean cycle for intermediate bootstrap compiler:',etInfo);
         if ReturnCode=1 then infoln('Running make cycle for intermediate bootstrap compiler:',etInfo);
         ProcessEx.Execute;
         if ProcessEx.ExitStatus <> 0 then
         begin
           result := False;
-          WritelnLog('FPC: Failed to build intermediate bootstrap compiler ',true);
+          if ReturnCode=0 then infoln('Running clean cycle for intermediate bootstrap compiler failed',etError);
+          if ReturnCode=1 then infoln('Running make cycle for intermediate bootstrap compiler failed',etError);
           exit;
         end;
         if ReturnCode=1 then infoln('Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);

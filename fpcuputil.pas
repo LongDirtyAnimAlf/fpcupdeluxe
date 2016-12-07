@@ -113,9 +113,8 @@ function GetVersionFromUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
-// File size; returns 0 if empty, non-existent or error.
-//function FileSizeUTF8(FileName: string): int64;
-function FtpGetFileList(const URL, Path: string; DirList: TStringList): Boolean;
+function FtpGetFile(const IP, Port, FileName, LocalFile, User, Pass: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): Boolean;
+function FtpGetFileList(const URL, Path: string; DirList: TStringList; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): Boolean;
 {$IFDEF MSWINDOWS}
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
@@ -473,7 +472,7 @@ begin
   {$ENDIF UNIX}
 end;
 
-function DownloadFTP(URL, TargetFile: string): boolean;
+function DownloadFTP(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 const
   FTPPort=21; //default ftp server port
   FTPScheme='ftp://'; //URI scheme name for FTP URLs
@@ -503,7 +502,7 @@ begin
   end;
   RetryAttempt:=0;
   repeat
-    Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
+    Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com', HTTPProxyHost, HTTPProxyPort, HTTPProxyUser, HTTPProxyPassword);
     if NOT Result then
     begin
       Inc(RetryAttempt);
@@ -826,8 +825,38 @@ begin
   end;
 end;
 
+function FtpGetFile(const IP, Port, FileName, LocalFile,
+  User, Pass: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): Boolean;
+begin
+  Result := False;
+  with TFTPSend.Create do
+  try
+    if User <> '' then
+    begin
+      Username := User;
+      Password := Pass;
+    end;
+    if Length(HTTPProxyHost)>0 then
+    begin
+      Sock.HTTPTunnelIP:=HTTPProxyHost;
+      Sock.HTTPTunnelPort:=HTTPProxyPort;
+      Sock.HTTPTunnelUser:=HTTPProxyUser;
+      Sock.HTTPTunnelPass:=HTTPProxyPassword;
+    end;
+    TargetHost := IP;
+    TargetPort := Port;
+    if not Login then
+      Exit;
+    DirectFileName := LocalFile;
+    DirectFile:=True;
+    Result := RetrieveFile(FileName, False);
+    Logout;
+  finally
+    Free;
+  end;
+end;
 
-function FtpGetFileList(const URL, Path: string; DirList: TStringList): Boolean;
+function FtpGetFileList(const URL, Path: string; DirList: TStringList; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): Boolean;
 var
   i: Integer;
   s: string;
@@ -837,6 +866,13 @@ begin
   try
     //Username := 'anonymous';
     //Password := '';
+    if Length(HTTPProxyHost)>0 then
+    begin
+      Sock.HTTPTunnelIP:=HTTPProxyHost;
+      Sock.HTTPTunnelPort:=HTTPProxyPort;
+      Sock.HTTPTunnelUser:=HTTPProxyUser;
+      Sock.HTTPTunnelPass:=HTTPProxyPassword;
+    end;
     TargetHost := URL;
     if not Login then
       Exit;
@@ -1174,11 +1210,11 @@ begin
 
   // Assume http if no ftp detected
   try
-    infoln('Going to download '+TargetFile+' from URL: ' + URL, etDebug);
+    infoln('Going to download '+TargetFile+' from URL: ' + URL, etInfo);
     if (Copy(URL, 1, Length('ftp://'))='ftp://') or
     (Copy(URL,1,Length('ftp.'))='ftp.') then
     begin
-      result:=DownloadFTP(URL, TargetFile);
+      result:=DownloadFTP(URL, TargetFile, HTTPProxyHost, HTTPProxyPort, HTTPProxyUser, HTTPProxyPassword);
     end
     else
     begin
@@ -1188,7 +1224,7 @@ begin
     on E: Exception do
     begin
       infoln('Download: error occurred downloading file '+TargetFile+' from URL: '+URL+
-        '. Exception occurred: '+E.ClassName+'/'+E.Message+')', eterror);
+        '. Exception occurred: '+E.ClassName+'/'+E.Message+')', etError);
     end;
     //Not writing message here; to be handled by calling code with more context.
     //if result:=false then infoln('Download: download of '+TargetFile+' from URL: '+URL+' failed.');
@@ -1526,7 +1562,7 @@ end;
 procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
 begin
   FLog.Log(EventType, Message);
-  if ToConsole then infoln(Message,etInfo);
+  if ToConsole then infoln(Message,EventType);
 end;
 
 constructor TLogger.Create;
@@ -1652,7 +1688,7 @@ begin
         begin
           Inc(tries);
           if FVerbose then
-            writeln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.');
+            infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.',etDebug);
         end;
       except
         tries:=(MaxRetries+1);

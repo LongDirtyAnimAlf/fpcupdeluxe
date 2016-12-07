@@ -53,6 +53,7 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     SynEdit1: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
+    procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -241,8 +242,17 @@ begin
   sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
   Edit1.Text:=sInstallDir;
-  // set onchange here, to prevent early firing
-  Edit1.OnChange:=@Edit1Change;
+
+  // set edit1 (installdir) onchange here, to prevent early firing
+  Edit1.OnChange:=nil;
+  Edit1.OnKeyUp:=nil;
+  {$ifdef Darwin}
+  {$ifdef LCLCOCOA}
+  // onchange does not work on cocoa, so use onkeyup
+  Edit1.OnKeyUp:=@Edit1KeyUp;
+  {$endif}
+  {$endif}
+  if Edit1.OnKeyUp=nil then Edit1.OnChange:=@Edit1Change;
 
   // create settings form
   // must be done here, to enable local storage/access of some setttings !!
@@ -950,6 +960,7 @@ begin
             TargetFile := SysUtils.GetTempFileName;
             aDownLoader:=TDownLoader.Create;
             try
+              if FPCupManager.HTTPProxyHost<>'' then aDownLoader.setProxy(FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
               success:=aDownLoader.getFile(DownloadURL,TargetFile);
               if (NOT success) then // try only once again in case of error
               begin
@@ -1006,6 +1017,7 @@ begin
             TargetFile := SysUtils.GetTempFileName;
             aDownLoader:=TDownLoader.Create;
             try
+              if FPCupManager.HTTPProxyHost<>'' then aDownLoader.setProxy(FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
               success:=aDownLoader.getFile(DownloadURL,TargetFile);
               if (NOT success) then // try only once again in case of error
               begin
@@ -1162,6 +1174,16 @@ begin
     AddMessage('Got settings from install directory');
   end;
 end;
+
+procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  sInstallDir:=Edit1.Text;
+  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME) then
+  begin
+    AddMessage('Got settings from install directory');
+  end;
+end;
+
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin

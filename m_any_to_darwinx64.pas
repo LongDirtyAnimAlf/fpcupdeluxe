@@ -184,6 +184,7 @@ begin
   FCrossModuleName:='any_darwinx64';
   FBinUtilsPrefix:='x86_64-darwin-';
   FBinUtilsPath:='';
+  FBinutilsPathInPath:=true;
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='x86_64';
