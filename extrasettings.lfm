@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 498
+  Left = 576
   Height = 474
-  Top = 139
+  Top = 209
   Width = 746
   Caption = 'Advanced settings'
   ClientHeight = 474
@@ -123,11 +123,11 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 323
+    Height = 251
     Top = 144
     Width = 320
     Caption = 'Miscellaneous settings'
-    ClientHeight = 303
+    ClientHeight = 231
     ClientWidth = 316
     TabOrder = 3
     object CheckRepo: TCheckBox
@@ -566,9 +566,43 @@ object Form2: TForm2
     ModalResult = 2
     TabOrder = 1
   end
+  object ListBoxPatch: TListBox
+    Left = 12
+    Height = 59
+    Top = 404
+    Width = 200
+    ClickOnSelChange = False
+    ExtendedSelect = False
+    ItemHeight = 0
+    TabOrder = 7
+  end
+  object Button1: TButton
+    Left = 222
+    Height = 28
+    Top = 404
+    Width = 106
+    Caption = 'Add patch'
+    OnClick = Button1Click
+    TabOrder = 8
+  end
+  object Button2: TButton
+    Left = 222
+    Height = 26
+    Top = 437
+    Width = 106
+    Caption = 'Remove patch'
+    OnClick = Button2Click
+    TabOrder = 9
+  end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
     Left = 254
+    Top = 24
+  end
+  object OpenDialog1: TOpenDialog
+    Filter = 'Patch|*.patch|Diff|*.diff|All|*.*'
+    Options = [ofFileMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail, ofAutoPreview]
+    Left = 344
     Top = 24
   end
 end

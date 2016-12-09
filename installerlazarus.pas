@@ -1134,12 +1134,8 @@ begin
         begin
           infoln('Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
           PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then
-          begin
-            infoln('Could not find patchfile '+PatchFilePath,etInfo);
-            infoln('Trying current app directory.',etInfo);
-            PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
-          end;
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
             // check for default values

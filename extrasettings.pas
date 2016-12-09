@@ -32,6 +32,8 @@ type
     BitBtn2: TBitBtn;
     btnSelectLibDir: TButton;
     btnSelectBinDir: TButton;
+    Button1: TButton;
+    Button2: TButton;
     CheckIncludeFPCIDE: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
@@ -70,8 +72,12 @@ type
     LabelLazarusbranch: TLabel;
     LabelLazarusOptions: TLabel;
     LabelLazarusRevision: TLabel;
+    ListBoxPatch: TListBox;
+    OpenDialog1: TOpenDialog;
     RadioGroup3: TRadioGroup;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -238,6 +244,28 @@ begin
     EditBinLocation.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].BinDir;
     RadioGroup3.ItemIndex:=Ord(FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Setting);
   end;
+end;
+
+
+procedure TForm2.Button1Click(Sender: TObject);
+var
+  PatchName: string;
+  FullPatchPath: string;
+begin
+  if OpenDialog1.Execute then
+  begin
+    FullPatchPath := OpenDialog1.FileName;
+    PatchName := ExtractFileName(FullPatchPath);
+    if ListBoxPatch.Items.IndexOf(PatchName)=-1 then
+    begin
+      ListBoxPatch.Items.AddObject(PatchName, TObject(FullPatchPath));
+    end;
+  end;
+end;
+
+procedure TForm2.Button2Click(Sender: TObject);
+begin
+  ListBoxPatch.DeleteSelected;
 end;
 
 procedure TForm2.FormDestroy(Sender: TObject);

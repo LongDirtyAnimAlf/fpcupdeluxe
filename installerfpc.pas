@@ -2546,6 +2546,7 @@ begin
         begin
           PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
             // check for default values
