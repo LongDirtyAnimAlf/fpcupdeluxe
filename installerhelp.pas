@@ -346,7 +346,7 @@ begin
     OperationSucceeded:=true;
 
     try
-      OperationSucceeded:=Download(HelpUrl,DocsZip);
+      OperationSucceeded:=Download(FUseWget, HelpUrl, DocsZip);
     except
       on E: Exception do
       begin
@@ -361,7 +361,7 @@ begin
     begin
       // try a second time
       try
-        OperationSucceeded:=Download(HelpUrl,DocsZip);
+        OperationSucceeded:=Download(FUseWget, HelpUrl, DocsZip);
       except
         on E: Exception do
         begin
@@ -394,7 +394,7 @@ begin
       DocsZip := SysUtils.GetTempFileName + '.zip';
 
       try
-        OperationSucceeded:=Download(FPC_CHM_URL,DocsZip);
+        OperationSucceeded:=Download(FUseWget, FPC_CHM_URL, DocsZip);
       except
         on E: Exception do
         begin
@@ -409,7 +409,7 @@ begin
       begin
         // try a second time
         try
-          OperationSucceeded:=Download(FPC_CHM_URL_LASTRESORT,DocsZip);
+          OperationSucceeded:=Download(FUseWget, FPC_CHM_URL_LASTRESORT, DocsZip);
         except
           on E: Exception do
           begin

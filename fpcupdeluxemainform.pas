@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.1.0d';
+  FPCUPDELUXEVERSION='1.1.0f';
 
 resourcestring
   CrossGCCMsg =
@@ -771,7 +771,6 @@ end;
 
 procedure TForm1.Button5Click(Sender: TObject);
 var
-  aDownLoader: TDownLoader;
   URL,DownloadURL,TargetFile,TargetPath,UnZipper:string;
   success:boolean;
   {$ifdef Unix}
@@ -958,19 +957,7 @@ begin
             {$endif}
             AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
-            aDownLoader:=TDownLoader.Create;
-            try
-              if FPCupManager.HTTPProxyHost<>'' then aDownLoader.setProxy(FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-              success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              if (NOT success) then // try only once again in case of error
-              begin
-                AddMessage('Error while trying to download '+URL+'. Trying once again.');
-                SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-                success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              end;
-            finally
-              aDownLoader.Destroy;
-            end;
+            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             if success then
             begin
               AddMessage('Successfully downloaded binary-tools.');
@@ -1015,19 +1002,7 @@ begin
             DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
             AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
-            aDownLoader:=TDownLoader.Create;
-            try
-              if FPCupManager.HTTPProxyHost<>'' then aDownLoader.setProxy(FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-              success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              if (NOT success) then // try only once again in case of error
-              begin
-                AddMessage('Error while trying to download '+URL+'. Trying once again.');
-                SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-                success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              end;
-            finally
-              aDownLoader.Destroy;
-            end;
+            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             if success then
             begin
               AddMessage('Successfully downloaded the libraries.');
@@ -1295,6 +1270,12 @@ begin
   FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
   FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
+  {$ifdef MSWINDOWS}
+  FPCupManager.UseWget:=false;
+  {$else}
+  FPCupManager.UseWget:=Form2.UseWget;
+  {$endif}
+
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
@@ -1463,6 +1444,8 @@ begin
     Form2.SplitFPC:=ReadBool('General','SplitFPC',False);
     Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
 
+    Form2.UseWget:=ReadBool('General','UseWget',False);
+
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
     try
@@ -1504,6 +1487,8 @@ begin
 
     WriteBool('General','SplitFPC',Form2.SplitFPC);
     WriteBool('General','SplitLazarus',Form2.SplitLazarus);
+
+    WriteBool('General','UseWget',Form2.UseWget);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do

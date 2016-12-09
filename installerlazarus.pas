@@ -1096,8 +1096,8 @@ begin
       begin
         infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FSourceDirectory, etDebug);
         try
-          if Download(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(FSourceDirectory) +
-            FUtilFiles[Counter].FileName, FHTTPProxyHost, IntToStr(FHTTPProxyPort), FHTTPProxyUser,
+          if Download(FUseWget, FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(FSourceDirectory) +
+            FUtilFiles[Counter].FileName, FHTTPProxyHost, FHTTPProxyPort, FHTTPProxyUser,
             FHTTPProxyPassword) = false then
           begin
             Errors := Errors + 1;

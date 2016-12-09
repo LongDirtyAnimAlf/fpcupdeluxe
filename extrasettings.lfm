@@ -263,6 +263,22 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 7
     end
+    object CheckUseWget: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckSplitLazarus
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 204
+      Width = 218
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Use wget as downloader (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 8
+    end
   end
   object GroupBox4: TGroupBox
     Left = 336

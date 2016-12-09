@@ -1261,7 +1261,7 @@ end;
 BootstrapArchive := SysUtils.GetTempFileName;
 if OperationSucceeded then
 begin
-  OperationSucceeded:=Download(FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,InttoStr(HTTPProxyPort),HTTPProxyUser,HTTPProxyPassword);
+  OperationSucceeded:=Download(NOT FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
 end;
 
@@ -1429,7 +1429,7 @@ var
   aLocalBootstrapVersion:string;
   aIntermediateBootstrapCompiler:string;
   aGithubBootstrapURL:string;
-  aDownLoader: TDownLoader;
+  aDownLoader: TBasicDownLoader;
 begin
   result:=true;
 
@@ -1466,27 +1466,34 @@ begin
   if (aBootstrapVersion<>'') then
   begin
 
-      infoln('Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
+    infoln('Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
 
-      FBootstrapCompilerOverrideVersionCheck:=false;
+    FBootstrapCompilerOverrideVersionCheck:=false;
 
-      aStandardCompilerArchive:=aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
-      // remove file extension
-      aStandardCompilerArchive:=ChangeFileExt(aStandardCompilerArchive,'');
-      {$IFDEF MSWINDOWS}
-      aStandardCompilerArchive:=aStandardCompilerArchive+'.zip';
-      {$ELSE}
-      {$IFDEF Darwin}
-      aStandardCompilerArchive:=aStandardCompilerArchive+'.tar.bz2';
-      {$ELSE}
-      aStandardCompilerArchive:=aStandardCompilerArchive+'.bz2';
-      {$ENDIF}
-      {$ENDIF}
+    aStandardCompilerArchive:=aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
+    // remove file extension
+    aStandardCompilerArchive:=ChangeFileExt(aStandardCompilerArchive,'');
+    {$IFDEF MSWINDOWS}
+    aStandardCompilerArchive:=aStandardCompilerArchive+'.zip';
+    {$ELSE}
+    {$IFDEF Darwin}
+    aStandardCompilerArchive:=aStandardCompilerArchive+'.tar.bz2';
+    {$ELSE}
+    aStandardCompilerArchive:=aStandardCompilerArchive+'.bz2';
+    {$ENDIF}
+    {$ENDIF}
 
-      aLocalBootstrapVersion:=aBootstrapVersion;
-      aCompilerFound:=false;
+    aLocalBootstrapVersion:=aBootstrapVersion;
+    aCompilerFound:=false;
+
+    if FUseWget
+       then aDownLoader:=TWGetDownLoader.Create
+       else aDownLoader:=TNativeDownLoader.Create;
+
+    try
 
       // first, try official FPC binaries
+
       aCompilerList:=TStringList.Create;
       try
 
@@ -1521,7 +1528,8 @@ begin
           infoln('Looking for (online) bootstrapper '+aCompilerArchive,etInfo);
 
           aCompilerList.Clear;
-          FtpGetFileList('ftp.freepascal.org', 'pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap', aCompilerList, HTTPProxyHost, InttoStr(HTTPProxyPort), HTTPProxyUser, HTTPProxyPassword);
+
+          aDownLoader.getFTPFileList('ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/',aCompilerList);
 
           {$IFDEF FREEBSD}
           // FreeBSD : special because of versions
@@ -1586,11 +1594,13 @@ begin
       end;
 
 
+
       // second, try the FPCUP binaries from release
       if (NOT aCompilerFound) then
       begin
 
-        infoln('Looking for a bootstrap compiler from Github FPCUP releases.',etInfo);
+        infoln('Slight panic: No official FPC bootstrapper found.',etError);
+        infoln('Now looking for last resort bootstrap compiler from Github FPCUP(deluxe) releases.',etError);
 
         aGithubBootstrapURL:='';
 
@@ -1601,51 +1611,45 @@ begin
         try
           aCompilerList.Clear;
 
-          aDownLoader:=TDownLoader.Create;
-          try
-            if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-            while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
-            begin
-              infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
-              aGithubBootstrapURL:=FpcupdeluxeGitRepo+
-                '/releases/download/bootstrappers_v1.0/'+
-                'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
-              infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
-              aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
-              if aCompilerFound then aCompilerList.Add(aGithubBootstrapURL);
+          if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+          while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
+          begin
+            infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
+            aGithubBootstrapURL:=FpcupdeluxeGitRepo+
+              '/releases/download/bootstrappers_v1.0/'+
+              'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
+            infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
+            aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
+            if aCompilerFound then aCompilerList.Add(aGithubBootstrapURL);
 
-              // look for a previous (fitting) compiler if not found, and use overrideversioncheck
-              if NOT aCompilerFound then
-              begin
-                FBootstrapCompilerOverrideVersionCheck:=true;
-                s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
-                if aLocalBootstrapVersion<>s
-                   then aLocalBootstrapVersion:=s
-                   else break;
-              end;
-            end;
-
+            // look for a previous (fitting) compiler if not found, and use overrideversioncheck
             if NOT aCompilerFound then
             begin
-              aCompilerList.Sorted:=true;
-              for i:=0 to Pred(aCompilerList.Count) do
+              FBootstrapCompilerOverrideVersionCheck:=true;
+              s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
+              if aLocalBootstrapVersion<>s
+                 then aLocalBootstrapVersion:=s
+                 else break;
+            end;
+          end;
+
+          if NOT aCompilerFound then
+          begin
+            aCompilerList.Sorted:=true;
+            for i:=0 to Pred(aCompilerList.Count) do
+            begin
+              if Pos(aCPU+'-'+aOS+'-'+GetCompilerName(aCPU),aCompilerList[i])>0 then
               begin
-                if Pos(aCPU+'-'+aOS+'-'+GetCompilerName(aCPU),aCompilerList[i])>0 then
-                begin
-                  aGithubBootstrapURL:=aCompilerList[i];
-                  FBootstrapCompilerOverrideVersionCheck:=true;
-                  aCompilerFound:=true;
-                  j:=Pos('fpcup-',aGithubBootstrapURL);
-                  aLocalBootstrapVersion := Copy(aGithubBootstrapURL,7,5);
-                  aLocalBootstrapVersion := StringReplace(aLocalBootstrapVersion,'_','.',[rfReplaceAll]);
-                  infoln('Got last resort FPCUP bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
-                  break;
-                end;
+                aGithubBootstrapURL:=aCompilerList[i];
+                FBootstrapCompilerOverrideVersionCheck:=true;
+                aCompilerFound:=true;
+                j:=Pos('fpcup-',aGithubBootstrapURL);
+                aLocalBootstrapVersion := Copy(aGithubBootstrapURL,7,5);
+                aLocalBootstrapVersion := StringReplace(aLocalBootstrapVersion,'_','.',[rfReplaceAll]);
+                infoln('Got last resort FPCUP bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
+                break;
               end;
             end;
-
-          finally
-            aDownLoader.Destroy;
           end;
 
         finally
@@ -1683,7 +1687,13 @@ begin
         infoln('Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
         result:=DownloadBootstrapCompiler;
       end;
+
+    finally
+      aDownLoader.Free
+    end;
+
   end;
+
 
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
     FCompiler:=FBootstrapCompiler;

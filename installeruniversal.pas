@@ -1190,7 +1190,7 @@ begin
       TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
       WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
       try
-        result:=Download(RemoteURL,TempArchive);
+        result:=Download(FUseWget, RemoteURL, TempArchive);
       except
         on E: Exception do
         begin

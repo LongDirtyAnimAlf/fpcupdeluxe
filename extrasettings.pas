@@ -37,6 +37,7 @@ type
     CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
     CheckSplitLazarus: TCheckBox;
+    CheckUseWget: TCheckBox;
     CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
@@ -89,6 +90,9 @@ type
     function GetSplitLazarus:boolean;
     procedure SetSplitLazarus(value:boolean);
 
+    function GetUseWget:boolean;
+    procedure SetUseWget(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -119,6 +123,8 @@ type
 
     property SplitFPC:boolean read GetSplitFPC write SetSplitFPC;
     property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
+
+    property UseWget:boolean read GetUseWget write SetUseWget;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -213,6 +219,10 @@ begin
   finally
     Free;
   end;
+
+  {$ifdef MSWINDOWS}
+  CheckUseWget.Enabled:=False;
+  {$endif}
 
 end;
 
@@ -372,6 +382,16 @@ procedure TForm2.SetSplitLazarus(value:boolean);
 begin
   CheckSplitLazarus.Checked:=value;
 end;
+
+function TForm2.GetUseWget:boolean;
+begin
+  result:=CheckUseWget.Checked;
+end;
+procedure TForm2.SetUseWget(value:boolean);
+begin
+  CheckUseWget.Checked:=value;
+end;
+
 
 function TForm2.GetFPCOptions:string;
 begin

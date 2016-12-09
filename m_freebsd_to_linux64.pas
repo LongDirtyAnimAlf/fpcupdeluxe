@@ -128,7 +128,7 @@ begin
     end;
     // Get gnu binutils
     //todo: check for gunzip/tar executable=>installercore checkandget?
-    Download(BinutilsDownloadURL,GetTempDir); //todo: proper temp directory
+    //Download(BinutilsDownloadURL,GetTempDir); //todo: proper temp directory
     //todo: extract tar.gz in place
     {make example for arm
     ./configure --target=arm-linux --disable-werror

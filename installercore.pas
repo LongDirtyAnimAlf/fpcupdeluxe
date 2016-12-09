@@ -74,7 +74,6 @@ type
   protected
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
-    FBunzip2: string;
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
@@ -113,8 +112,10 @@ type
     FExportOnly: boolean;
     FNoJobs: boolean;
     FVerbose: boolean;
+    FUseWget: boolean;
     FTar: string;
     FUnzip: string;
+    FBunzip2: string;
     F7zip: string;
     FUnrar: string;
     ProcessEx: TProcessEx;
@@ -162,7 +163,7 @@ type
     procedure LogError(Sender: TProcessEx; IsException: boolean);
     // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
-    function GetFile(aURL,aFile:string):boolean;
+    function GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
   public
     property SVNClient: TSVNClient read FSVNClient;
     // Get processor for termination of running processes
@@ -216,6 +217,8 @@ type
     property NoJobs: boolean write FNoJobs;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
+    // use wget as downloader ??
+    property UseWget: boolean write FUseWget;
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
@@ -341,7 +344,6 @@ end;
 function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   AllThere: boolean;
-  i: integer;
   OperationSucceeded: boolean;
   Output: string;
 begin
@@ -411,6 +413,7 @@ begin
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      //OperationSucceeded:=GetFile('https://freefr.dl.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if NOT OperationSucceeded then
       begin
         // try one more time
@@ -599,8 +602,10 @@ end;
 
 function TInstaller.CheckAndGetNeededBinUtils: boolean;
 var
+  {$IFDEF MSWINDOWS}
   AllThere: boolean;
   i: integer;
+  {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
   Output: string;
 begin
@@ -1281,10 +1286,11 @@ begin
     if OperationSucceeded then
     begin
       OperationSucceeded := Download(
+        FUseWget,
         SourceURL,
         SVNZip,
         FHTTPProxyUser,
-        inttostr(FHTTPProxyPort),
+        FHTTPProxyPort,
         FHTTPProxyUser,
         FHTTPProxyPassword);
     end;
@@ -1344,10 +1350,11 @@ begin
     if OperationSucceeded then
     begin
       OperationSucceeded := Download(
+        FUseWget,
         SourceURL,
         OpenSSLZip,
         FHTTPProxyUser,
-        inttostr(FHTTPProxyPort),
+        FHTTPProxyPort,
         FHTTPProxyUser,
         FHTTPProxyPassword);
     end;
@@ -1402,10 +1409,11 @@ begin
       if OperationSucceeded then
       begin
         OperationSucceeded := Download(
+          FUseWget,
           SourceURL,
           JasminZip,
           FHTTPProxyUser,
-          inttostr(FHTTPProxyPort),
+          FHTTPProxyPort,
           FHTTPProxyUser,
           FHTTPProxyPassword);
       end;
@@ -1680,27 +1688,12 @@ begin
   ProcessEx.OnErrorM:=@(ProcessError);
 end;
 
-function TInstaller.GetFile(aURL,aFile:string):boolean;
-var
-  aDownLoader:TDownLoader;
+function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
 begin
-  result:=false;
-  if (NOT FileExists(aFile)) then
+  result:=((FileExists(aFile)) AND (NOT forceoverwrite));
+  if (NOT result) then
   begin
-    //aDownLoader:=TDownLoader.Create(FVerbose);
-    if FVerbose then infoln('Downloading ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etInfo);
-    aDownLoader:=TDownLoader.Create;
-    try
-      if FHTTPProxyHost<>'' then aDownLoader.setProxy(FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-      result:=aDownLoader.getFile(aURL,aFile);
-      if (NOT result) then // try only once again in case of error
-      begin
-        SysUtils.DeleteFile(aFile); // delete stale targetfile
-        result:=aDownLoader.getFile(aURL,aFile);
-      end;
-    finally
-      aDownLoader.Destroy;
-    end;
+    result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
     if (NOT result) then infoln('Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
   end;
 end;

@@ -296,6 +296,7 @@ type
     {$endif}
     FUninstall:boolean;
     FVerbose: boolean;
+    FUseWget: boolean;
     FExportOnly:boolean;
     FNoJobs:boolean;
     FUseGitClient:boolean;
@@ -397,6 +398,7 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
+    property UseWget:boolean read FUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
@@ -1224,6 +1226,7 @@ begin
   FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
   FInstaller.PatchCmd:=FParent.PatchCmd;
   FInstaller.Verbose:=FParent.Verbose;
+  FInstaller.UseWget:=FParent.UseWget;
   FInstaller.ExportOnly:=FParent.ExportOnly;
   FInstaller.NoJobs:=FParent.NoJobs;
   FInstaller.Log:=FParent.FLog;
