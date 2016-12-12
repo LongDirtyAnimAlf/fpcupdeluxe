@@ -1,138 +1,6 @@
-Index: compiler/script.pas
-===================================================================
---- compiler/script.pas	(revision 35094)
-+++ compiler/script.pas	(working copy)
-@@ -236,7 +236,11 @@
-      Add('echo Assembling %THEFILE%');
-    end;
-   Add(maybequoted(command)+' '+Options);
-+  {$ifdef hasUnix}
-   Add('if errorlevel 1 goto asmend');
-+  {$else}
-+  Add('if %ERRORLEVEL% EQU 1 goto asmend');
-+  {$endif}
- end;
- 
- 
-@@ -249,6 +253,11 @@
-    end;
-   Add(maybequoted(command)+' '+Options);
-   Add('if errorlevel 1 goto linkend');
-+  {$ifdef hasUnix}
-+  Add('if errorlevel 1 goto linkend');
-+  {$else}
-+  Add('if %ERRORLEVEL% EQU 1 goto linkend');
-+  {$endif}
- end;
- 
- 
-@@ -260,7 +269,11 @@
- 
- Procedure TAsmScriptDos.AddDeleteDirCommand (Const FileName : TCmdStr);
- begin
-+ {$ifdef hasUnix}
-  Add('Rmdir ' + MaybeQuoted (ScriptFixFileName (FileName)));
-+ {$else}
-+ Add('RMDIR /S /Q ' + MaybeQuoted (ScriptFixFileName (FileName)));
-+ {$endif}
- end;
- 
- 
-@@ -361,7 +374,11 @@
-   if FileName<>'' then
-    Add('echo Assembling '+ScriptFixFileName(FileName));
-   Add(maybequoted(command)+' '+Options);
-+  {$ifdef hasUnix}
-   Add('if [ $? != 0 ]; then DoExitAsm '+ScriptFixFileName(FileName)+'; fi');
-+  {$else}
-+  Add('if %ERRORLEVEL% NEQ 0 call:DoExitAsm '+ScriptFixFileName(FileName));
-+  {$endif}
- end;
- 
- 
-@@ -369,12 +386,18 @@
- begin
-   if FileName<>'' then
-    Add('echo Linking '+ScriptFixFileName(FileName));
-+  {$ifdef hasUnix}
-   Add('OFS=$IFS');
-   Add('IFS="');
-   Add('"');
-+  {$endif}
-   Add(maybequoted(command)+' '+Options);
-+  {$ifdef hasUnix}
-   Add('if [ $? != 0 ]; then DoExitLink '+ScriptFixFileName(FileName)+'; fi');
-   Add('IFS=$OFS');
-+  {$else}
-+  Add('if %ERRORLEVEL% NEQ 0 call:DoExitLink '+ScriptFixFileName(FileName));
-+  {$endif}
- end;
- 
- 
-@@ -386,12 +409,18 @@
- 
- Procedure TAsmScriptUnix.AddDeleteDirCommand (Const FileName : TCmdStr);
- begin
-+ {$ifdef hasUnix}
-  Add('rmdir ' + MaybeQuoted (ScriptFixFileName(FileName)));
-+ {$else}
-+ Add('RMDIR /S /Q ' + MaybeQuoted (ScriptFixFileName(FileName)));
-+ {$endif}
-+
- end;
- 
- 
- Procedure TAsmScriptUnix.WriteToDisk;
- Begin
-+  {$ifdef hasUnix}
-   AddStart('{ echo "An error occurred while linking $1"; exit 1; }');
-   AddStart('DoExitLink ()');
-   AddStart('{ echo "An error occurred while assembling $1"; exit 1; }');
-@@ -401,6 +430,15 @@
-   {$else}
-    AddStart('#!/bin/sh');
-   {$endif}
-+  {$else}
-+  Add('EXIT /B %ERRORLEVEL%');
-+  Add(':DoExitLink');
-+  Add('echo An error occurred while linking %*');
-+  Add('EXIT /B 1');
-+  Add(':DoExitAsm');
-+  Add('echo An error occurred while assembling %*');
-+  Add('EXIT /B 1');
-+  {$endif}
-   inherited WriteToDisk;
- end;
- 
-@@ -420,7 +458,9 @@
-   if FileName<>'' then
-     Add('Echo Assembling '+ScriptFixFileName(FileName));
-   Add(maybequoted(command)+' '+Options);
-+  {$ifdef hasUnix}
-   Add('Exit If "{Status}" != 0');
-+  {$endif}
- end;
- 
- 
-@@ -429,6 +469,7 @@
-   if FileName<>'' then
-     Add('Echo Linking '+ScriptFixFileName(FileName));
-   Add(maybequoted(command)+' '+Options);
-+  {$ifdef hasUnix}
-   Add('Exit If "{Status}" != 0');
- 
-   {Add resources}
-@@ -437,6 +478,7 @@
-       Add('Rez -append "{RIncludes}"SIOW.r -o '+ ScriptFixFileName(FileName));
-       Add('Exit If "{Status}" != 0');
-     end;
-+  {$endif}
- end;
- 
- 
 Index: compiler/systems/t_bsd.pas
 ===================================================================
---- compiler/systems/t_bsd.pas	(revision 35094)
+--- compiler/systems/t_bsd.pas	(revision 35106)
 +++ compiler/systems/t_bsd.pas	(working copy)
 @@ -147,8 +147,8 @@
         begin
@@ -181,36 +49,36 @@ Index: compiler/systems/t_bsd.pas
 +
 +  { Generate linkfiles.res file if needed }
 +  { Always needed on Windows, due to the limitation of 8196 characters for command line }
++  { linkfiles.res will be piped if possible }
 +  if LdSupportsNoResponseFile then
-+  begin
-+    FilesList:=TLinkRes.Create(outputexedir+'linkfiles.res',not LdSupportsNoResponseFile);
++   begin
++     FilesList:=TLinkRes.Create(outputexedir+'linkfiles.res',not LdSupportsNoResponseFile);
    while not ObjectFiles.Empty do
     begin
       s:=ObjectFiles.GetFirst;
       if s<>'' then
 -      if LdSupportsNoResponseFile then
 -        LinkRes.AddFileName(s)
-+      begin
-+         // osxcross can only handle '/'
-+         repeat
-+           i:=Pos('\',s);
-+           if i>0 then s[i]:='/';
-+         until i=0;
-+        FilesList.Add(s);
++         begin
++           repeat
++            i:=Pos(source_info.dirsep,s);
++            if i>0 then s[i]:=target_info.dirsep;
++           until i=0;
++           FilesList.Add(s);
++         end;
 +      end;
-+    end;
-+    FilesList.writetodisk;
-+    FilesList.Free;
-+  end
++     FilesList.writetodisk;
++     FilesList.Free;
++   end
        else
 -        LinkRes.AddFileName(maybequoted(s));
-+  begin
-+    while not ObjectFiles.Empty do
-+    begin
-+      s:=ObjectFiles.GetFirst;
-+      if s<>'' then LinkRes.AddFileName(maybequoted(s));
++   begin
++     while not ObjectFiles.Empty do
++      begin
++        s:=ObjectFiles.GetFirst;
++        if s<>'' then LinkRes.AddFileName(maybequoted(s));
     end;
-+  end;
++   end;
 +
    if not LdSupportsNoResponseFile then
     LinkRes.Add(')');
@@ -225,18 +93,27 @@ Index: compiler/systems/t_bsd.pas
    Replace(cmdstr,'$STATIC',StaticStr);
    Replace(cmdstr,'$STRIP',StripStr);
    Replace(cmdstr,'$GCSECTIONS',GCSectionsStr);
-@@ -813,8 +839,10 @@
+@@ -807,14 +833,17 @@
+      not(cs_link_nolink in current_settings.globalswitches) then
+     begin
+       { we have to use a script to use the IFS hack }
+-      linkscript:=TAsmScriptUnix.create(outputexedir+'ppaslink');
++      linkscript:=GenerateScript(outputexedir+'ppaslink');
+       linkscript.AddLinkCommand(BinStr,CmdStr,'');
+       if (extdbgcmdstr<>'') then
          linkscript.AddLinkCommand(extdbgbinstr,extdbgcmdstr,'');
        linkscript.WriteToDisk;
        BinStr:=linkscript.fn;
-+      {$ifdef hasUnix}
        if not path_absolute(BinStr) then
-         BinStr:='./'+BinStr;
-+      {$endif}
+-        BinStr:='./'+BinStr;
++        if cs_link_on_target in current_settings.globalswitches then
++          BinStr:='.'+target_info.dirsep+BinStr
++        else
++          BinStr:='.'+source_info.dirsep+BinStr;
        CmdStr:='';
      end;
  
-@@ -836,6 +864,9 @@
+@@ -836,6 +865,9 @@
         end;
     end;
  
@@ -246,7 +123,7 @@ Index: compiler/systems/t_bsd.pas
    MakeExecutable:=success;   { otherwise a recursive call to link method }
  end;
  
-@@ -902,6 +933,9 @@
+@@ -902,6 +934,9 @@
    Replace(cmdstr,'$TARGET',targetstr);
    Replace(cmdstr,'$EMUL',EmulStr);
    Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
@@ -256,18 +133,27 @@ Index: compiler/systems/t_bsd.pas
    Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
    Replace(cmdstr,'$INIT',InitStr);
    Replace(cmdstr,'$FINI',FiniStr);
-@@ -947,8 +981,10 @@
+@@ -941,14 +976,17 @@
+      not(cs_link_nolink in current_settings.globalswitches) then
+     begin
+       { we have to use a script to use the IFS hack }
+-      linkscript:=TAsmScriptUnix.create(outputexedir+'ppaslink');
++      linkscript:=GenerateScript(outputexedir+'ppaslink');
+       linkscript.AddLinkCommand(BinStr,CmdStr,'');
+       if (extdbgbinstr<>'') then
          linkscript.AddLinkCommand(extdbgbinstr,extdbgcmdstr,'');
        linkscript.WriteToDisk;
        BinStr:=linkscript.fn;
-+      {$ifdef hasUnix}
        if not path_absolute(BinStr) then
-         BinStr:='./'+BinStr;
-+      {$endif}
+-        BinStr:='./'+BinStr;
++        if cs_link_on_target in current_settings.globalswitches then
++          BinStr:='.'+target_info.dirsep+BinStr
++        else
++          BinStr:='.'+source_info.dirsep+BinStr;
        CmdStr:='';
      end;
  
-@@ -979,6 +1015,9 @@
+@@ -979,6 +1017,9 @@
          DeleteFile(outputexedir+'linksyms.fpc');
      end;
  

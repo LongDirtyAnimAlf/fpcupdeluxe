@@ -3,12 +3,11 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="10"/>
-    <BuildModes Active="linux64"/>
-    <Units Count="216">
+    <BuildModes Active="darwin32"/>
+    <Units Count="228">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -29,7 +28,10 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="2"/>
+        <TopLine Value="555"/>
+        <CursorPos X="52" Y="567"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -51,7 +53,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="131"/>
         <CursorPos X="11" Y="147"/>
-        <UsageCount Value="189"/>
+        <UsageCount Value="200"/>
       </Unit4>
       <Unit5>
         <Filename Value="fpcuplprbase.inc"/>
@@ -71,8 +73,9 @@
         <Filename Value="installermanager.pas"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <CursorPos Y="1229"/>
-        <UsageCount Value="99"/>
+        <TopLine Value="696"/>
+        <CursorPos Y="712"/>
+        <UsageCount Value="100"/>
       </Unit7>
       <Unit8>
         <Filename Value="fpcuputil.pas"/>
@@ -194,8 +197,8 @@
         <Filename Value="installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1489"/>
-        <CursorPos Y="1496"/>
+        <TopLine Value="2529"/>
+        <CursorPos X="26" Y="2548"/>
         <UsageCount Value="108"/>
       </Unit24>
       <Unit25>
@@ -414,8 +417,8 @@
         <Filename Value="installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1089"/>
-        <CursorPos X="14" Y="1099"/>
+        <TopLine Value="1122"/>
+        <CursorPos X="23" Y="1132"/>
         <UsageCount Value="102"/>
       </Unit53>
       <Unit54>
@@ -427,7 +430,7 @@
       </Unit54>
       <Unit55>
         <Filename Value="settings.ini"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="9"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -457,8 +460,8 @@
       </Unit58>
       <Unit59>
         <Filename Value="revision.inc"/>
-        <EditorIndex Value="5"/>
-        <UsageCount Value="89"/>
+        <EditorIndex Value="10"/>
+        <UsageCount Value="94"/>
         <Loaded Value="True"/>
       </Unit59>
       <Unit60>
@@ -1571,36 +1574,207 @@
         <CursorPos X="71" Y="245"/>
         <UsageCount Value="10"/>
       </Unit215>
+      <Unit216>
+        <Filename Value="C:\NewPascal\lazarus\lcl\lclproc.pas"/>
+        <UnitName Value="LCLProc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="888"/>
+        <CursorPos Y="901"/>
+        <UsageCount Value="10"/>
+      </Unit216>
+      <Unit217>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <EditorIndex Value="6"/>
+        <TopLine Value="495"/>
+        <CursorPos X="8" Y="34"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit217>
+      <Unit218>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\utils\fpcmkcfg\fpccfg.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="32"/>
+        <CursorPos X="8" Y="67"/>
+        <UsageCount Value="10"/>
+      </Unit218>
+      <Unit219>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\script.pas"/>
+        <EditorIndex Value="4"/>
+        <TopLine Value="463"/>
+        <CursorPos X="25" Y="466"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit219>
+      <Unit220>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\utils\fpcm\fpcmake.inc"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1988"/>
+        <CursorPos Y="2166"/>
+        <UsageCount Value="10"/>
+      </Unit220>
+      <Unit221>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\utils\delp.pp"/>
+        <UnitName Value="Delp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="268"/>
+        <CursorPos X="47" Y="281"/>
+        <UsageCount Value="10"/>
+      </Unit221>
+      <Unit222>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_linux.pas"/>
+        <EditorIndex Value="7"/>
+        <CursorPos X="53" Y="421"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit222>
+      <Unit223>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_win.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="25"/>
+        <CursorPos X="51" Y="953"/>
+        <UsageCount Value="10"/>
+      </Unit223>
+      <Unit224>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\x86\cpubase.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="268"/>
+        <CursorPos X="9" Y="281"/>
+        <UsageCount Value="10"/>
+      </Unit224>
+      <Unit225>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_win16.pas"/>
+        <EditorIndex Value="8"/>
+        <TopLine Value="242"/>
+        <CursorPos X="53" Y="215"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit225>
+      <Unit226>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_aix.pas"/>
+        <EditorIndex Value="5"/>
+        <TopLine Value="287"/>
+        <CursorPos Y="307"/>
+        <UsageCount Value="11"/>
+        <Loaded Value="True"/>
+      </Unit226>
+      <Unit227>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\rtl\win\sysutils.pp"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="1483"/>
+        <UsageCount Value="10"/>
+      </Unit227>
     </Units>
-    <JumpHistory Count="7" HistoryIndex="6">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="774" TopLine="767"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="896" Column="13" TopLine="875"/>
       </Position1>
       <Position2>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="960" Column="22" TopLine="955"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="981" Column="47" TopLine="961"/>
       </Position2>
       <Position3>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1006" TopLine="1002"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
       </Position3>
       <Position4>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="154" Column="29" TopLine="139"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="37" Column="20" TopLine="16"/>
       </Position4>
       <Position5>
-        <Filename Value="extrasettings.pas"/>
-        <Caret Line="379" Column="16" TopLine="368"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="732" Column="25" TopLine="711"/>
       </Position5>
       <Position6>
-        <Filename Value="fpcup.ini"/>
-        <Caret Line="75" Column="9" TopLine="55"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="748" Column="13" TopLine="728"/>
       </Position6>
       <Position7>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="80" TopLine="61"/>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="844" TopLine="830"/>
       </Position7>
+      <Position8>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="845" Column="17" TopLine="830"/>
+      </Position8>
+      <Position9>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="847" Column="19" TopLine="830"/>
+      </Position9>
+      <Position10>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="848" Column="17" TopLine="830"/>
+      </Position10>
+      <Position11>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="849" Column="25" TopLine="830"/>
+      </Position11>
+      <Position12>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="870" Column="31" TopLine="850"/>
+      </Position12>
+      <Position13>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="871" Column="20" TopLine="851"/>
+      </Position13>
+      <Position14>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="887" Column="25" TopLine="866"/>
+      </Position14>
+      <Position15>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="900" Column="13" TopLine="879"/>
+      </Position15>
+      <Position16>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_linux.pas"/>
+      </Position16>
+      <Position17>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_linux.pas"/>
+        <Caret Line="1401" Column="35" TopLine="1382"/>
+      </Position17>
+      <Position18>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_linux.pas"/>
+        <Caret Line="1433" Column="62" TopLine="1413"/>
+      </Position18>
+      <Position19>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_linux.pas"/>
+      </Position19>
+      <Position20>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_win16.pas"/>
+      </Position20>
+      <Position21>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_win16.pas"/>
+        <Caret Line="35" Column="47" TopLine="14"/>
+      </Position21>
+      <Position22>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_win16.pas"/>
+        <Caret Line="295" Column="10" TopLine="273"/>
+      </Position22>
+      <Position23>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_win16.pas"/>
+        <Caret Line="65" Column="27" TopLine="52"/>
+      </Position23>
+      <Position24>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\script.pas"/>
+      </Position24>
+      <Position25>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\script.pas"/>
+        <Caret Line="106" Column="24" TopLine="85"/>
+      </Position25>
+      <Position26>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_aix.pas"/>
+      </Position26>
+      <Position27>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\systems\t_bsd.pas"/>
+        <Caret Line="34" Column="8" TopLine="22"/>
+      </Position27>
+      <Position28>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="351" TopLine="335"/>
+      </Position28>
+      <Position29>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="568" TopLine="554"/>
+      </Position29>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

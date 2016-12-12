@@ -271,10 +271,12 @@ begin
 
 end;
 
+{$ifndef FPCONLY}
 function TCrossInstaller.GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;
 begin
   result:=true;
 end;
+{$endif}
 
 function TCrossInstaller.GetBinUtils(Basepath: string): boolean;
 var

@@ -1327,6 +1327,8 @@ begin
 
   FPCupManager.ExportOnly:=(NOT Form2.CheckRepo.Checked);
 
+  FPCupManager.FPCPatches:=Form2.FPCPatches;
+
   RealFPCURL.Text:='';
   RealLazURL.Text:='';
 
@@ -1337,28 +1339,10 @@ begin
 end;
 
 function TForm1.RealRun:boolean;
-var
-  FullPatchPath: string;
-  i:integer;
-  AllPatches:string;
 begin
   result:=false;
 
   StatusMessage.Text:=sStatus;
-
-  AllPatches:='';
-  for i:=0 to Form2.ListBoxPatch.Items.Count-1 do
-  begin
-    FullPatchPath := (string(Form2.ListBoxPatch.Items.Objects[i]));
-    AllPatches:=AllPatches+FullPatchPath+',';
-  end;
-  if Length(AllPatches)>0 then
-  begin
-    Delete(AllPatches,Length(AllPatches),1);
-    AddMessage('Patching with: '+AllPatches);
-  end;
-  FPCupManager.FPCPatches:=AllPatches;
-  // exit;
 
   AddMessage('FPCUP(deluxe) is starting up.');
   AddMessage('');
@@ -1464,6 +1448,8 @@ begin
 
     Form2.UseWget:=ReadBool('General','UseWget',False);
 
+    Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
+
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
     try
@@ -1507,6 +1493,8 @@ begin
     WriteBool('General','SplitLazarus',Form2.SplitLazarus);
 
     WriteBool('General','UseWget',Form2.UseWget);
+
+    WriteString('Patches','FPCPatches',Form2.FPCPatches);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do

@@ -2544,9 +2544,10 @@ begin
         UpdateWarnings.CommaText := FSourcePatches;
         for i:=0 to (UpdateWarnings.Count-1) do
         begin
-          PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+UpdateWarnings[i]);
+          infoln('Trying to patch FPC with '+UpdateWarnings[i],etInfo);
+          PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
             // check for default values

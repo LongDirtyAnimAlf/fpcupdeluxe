@@ -26,6 +26,14 @@ type
 
   TCrossUtils = array[TCPU,TOS] of TCrossUtil;
 
+  TString = class(TObject)
+  private
+    fStr: String;
+  public
+    constructor Create(const AStr: String) ;
+    property Str: String read FStr write FStr;
+  end;
+
   { TForm2 }
   TForm2 = class(TForm)
     BitBtn1: TBitBtn;
@@ -115,6 +123,10 @@ type
     procedure SetFPCBranch(value:string);
     function GetLazarusBranch:string;
     procedure SetLazarusBranch(value:string);
+
+    function GetFPCPatches:string;
+    procedure SetFPCPatches(value:string);
+
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
@@ -144,6 +156,8 @@ type
     property FPCBranch:string read GetFPCBranch write SetFPCBranch;
     property LazarusBranch:string read GetLazarusBranch write SetLazarusBranch;
 
+    property FPCPatches:string read GetFPCPatches write SetFPCPatches;
+
   end;
 
 var
@@ -159,6 +173,12 @@ uses
   typinfo;
 
 { TForm2 }
+
+constructor TString.Create(const AStr: String) ;
+begin
+  inherited Create;
+  FStr := AStr;
+end;
 
 procedure TForm2.OnDirectorySelect(Sender: TObject);
 begin
@@ -229,7 +249,6 @@ begin
   {$ifdef MSWINDOWS}
   CheckUseWget.Enabled:=False;
   {$endif}
-
 end;
 
 procedure TForm2.ComboBoxCPUOSChange(Sender: TObject);
@@ -258,14 +277,27 @@ begin
     PatchName := ExtractFileName(FullPatchPath);
     if ListBoxPatch.Items.IndexOf(PatchName)=-1 then
     begin
-      ListBoxPatch.Items.AddObject(PatchName, TObject(FullPatchPath));
+      ListBoxPatch.Items.AddObject(PatchName, TString.Create(FullPatchPath));
     end;
   end;
 end;
 
 procedure TForm2.Button2Click(Sender: TObject);
+var
+  i:integer;
 begin
-  ListBoxPatch.DeleteSelected;
+  if ListBoxPatch.SelCount>0 then
+  begin
+    for i:=ListBoxPatch.Count-1 downto 0 do
+    begin
+      if ListBoxPatch.Selected[i] then
+      begin
+        TString(ListBoxPatch.Items.Objects[i]).Free;
+        ListBoxPatch.Items.Objects[i]:=nil;
+        ListBoxPatch.Items.Delete(i);
+      end;
+    end;
+  end;
 end;
 
 procedure TForm2.FormDestroy(Sender: TObject);
@@ -273,6 +305,7 @@ var
   CPU:TCPU;
   OS:TOS;
   s:string;
+  i:integer;
 begin
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
@@ -308,6 +341,12 @@ begin
 
   finally
     Free;
+  end;
+
+  for i := 0 to ListBoxPatch.Items.Count - 1 do
+  begin
+     TString(ListBoxPatch.Items.Objects[i]).Free;
+     ListBoxPatch.Items.Objects[i] := nil;
   end;
 
 end;
@@ -495,6 +534,59 @@ end;
 function TForm2.GetHTTPProxyPass:string;
 begin
   result:=EditHTTPProxyPassword.Text;
+end;
+
+function TForm2.GetFPCPatches:string;
+var
+  i:integer;
+  FullPatchPath:string;
+begin
+  result:='';
+  if ListBoxPatch.Count=0 then exit;
+  for i:=0 to ListBoxPatch.Count-1 do
+  begin
+    FullPatchPath := TString(ListBoxPatch.Items.Objects[i]).Str;
+    result:=result+FullPatchPath+',';
+  end;
+  // delete last comma
+  if Length(result)>0 then
+  begin
+    Delete(result,Length(result),1);
+  end;
+end;
+
+procedure TForm2.SetFPCPatches(value:string);
+var
+  PatchName: string;
+  FullPatchPath: string;
+  PatchList:TStringList;
+  i:integer;
+begin
+
+  // cleanup
+  for i := ListBoxPatch.Items.Count - 1 downto 0 do
+  begin
+     TString(ListBoxPatch.Items.Objects[i]).Free;
+     ListBoxPatch.Items.Objects[i] := nil;
+     ListBoxPatch.Items.Delete(i);
+  end;
+
+  PatchList:=TStringList.Create;
+  try
+    PatchList.CommaText:=value;
+    if PatchList.Count=0 then exit;
+    for i:=0 to PatchList.Count-1 do
+    begin
+      FullPatchPath := Trim(PatchList.Strings[i]);
+      if Length(FullPatchPath)>0 then
+      begin
+        PatchName := ExtractFileName(FullPatchPath);
+        ListBoxPatch.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+      end;
+    end;
+  finally
+    PatchList.Free;
+  end;
 end;
 
 end.

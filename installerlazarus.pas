@@ -1133,9 +1133,9 @@ begin
         for i:=0 to (UpdateWarnings.Count-1) do
         begin
           infoln('Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
-          PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
+          PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
+          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
           if FileExists(PatchFilePath) then
           begin
             // check for default values
