@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 310
+  Left = 274
   Height = 643
-  Top = 258
+  Top = 137
   Width = 1137
   Anchors = []
   Caption = 'Form1'
@@ -595,8 +595,8 @@ object Form1: TForm1
   end
   object ListBox3: TListBox
     Left = 168
-    Height = 251
-    Top = 240
+    Height = 211
+    Top = 280
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
     ItemHeight = 0
@@ -648,7 +648,7 @@ object Form1: TForm1
   end
   object RadioGroup1: TRadioGroup
     Left = 168
-    Height = 158
+    Height = 189
     Hint = 'Double click to select location for cross-tools'
     Top = 35
     Width = 92
@@ -661,7 +661,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 138
+    ClientHeight = 169
     ClientWidth = 88
     Items.Strings = (
       'i386'
@@ -677,7 +677,7 @@ object Form1: TForm1
   end
   object RadioGroup2: TRadioGroup
     Left = 260
-    Height = 158
+    Height = 189
     Hint = 'Double click to select location for cross-tools'
     Top = 35
     Width = 99
@@ -690,7 +690,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 138
+    ClientHeight = 169
     ClientWidth = 95
     Items.Strings = (
       'windows'
@@ -708,8 +708,8 @@ object Form1: TForm1
   end
   object Button5: TButton
     Left = 168
-    Height = 36
-    Top = 200
+    Height = 28
+    Top = 232
     Width = 191
     Caption = 'Install cross-compiler'
     OnClick = Button5Click

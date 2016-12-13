@@ -1201,7 +1201,7 @@ begin
       FInstaller:=TUniversalInstaller.Create;
       FCurrentModule:=ModuleName;
       //assign properties
-      (FInstaller as TUniversalInstaller).FPCDir:=FParent.FPCSourceDirectory;
+      (FInstaller as TUniversalInstaller).FPCDir:=FParent.FPCInstallDirectory;
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
