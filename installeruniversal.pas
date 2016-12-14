@@ -1081,6 +1081,8 @@ begin
 
     WritelnLog('Getting module '+ModuleName,True);
     InstallDir:=GetValue('InstallDir',sl);
+    FSourceDirectory:=InstallDir;
+
     Branch:=GetValue('Branch',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
@@ -1099,7 +1101,6 @@ begin
       infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FInstallDirectory:=InstallDir;
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FGitClient.DesiredRevision:=PinRevision;
@@ -1129,7 +1130,6 @@ begin
       infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FSourceDirectory:=InstallDir;
         FUrl:=RemoteURL;
         User:=GetValue('UserName',sl);
         Pass:=GetValue('Password',sl);
@@ -1160,7 +1160,6 @@ begin
       infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FSourceDirectory:=InstallDir;
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FHGClient.DesiredRevision:=PinRevision;
