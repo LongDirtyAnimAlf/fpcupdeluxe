@@ -771,7 +771,7 @@ end;
 
 procedure TForm1.Button5Click(Sender: TObject);
 var
-  URL,DownloadURL,TargetFile,TargetPath,UnZipper:string;
+  URL,DownloadURL,TargetFile,TargetPath,UnZipper,s:string;
   success:boolean;
   {$ifdef Unix}
   fileList: TStringList;
@@ -789,8 +789,18 @@ begin
 
   PrepareRun;
 
-  if RadioGroup1.ItemIndex<>-1 then FPCupManager.CrossCPU_Target:=RadioGroup1.Items[RadioGroup1.ItemIndex];
-  if RadioGroup2.ItemIndex<>-1 then FPCupManager.CrossOS_Target:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+  if RadioGroup1.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+    if s='ppc' then s:='powerpc';
+    if s='ppc64' then s:='powerpc64';
+    FPCupManager.CrossCPU_Target:=s;
+  end;
+  if RadioGroup2.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    FPCupManager.CrossOS_Target:=s;
+  end;
 
   {$ifndef FreeBSD}
   if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') then
@@ -846,6 +856,8 @@ begin
         FPCupManager.CrossOPT:='-CpARMV6 ';
       end
       else
+      // for Darwin, use defaults
+      if (FPCupManager.CrossOS_Target<>'darwin') then
       begin
         // default: armhf
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
@@ -900,13 +912,19 @@ begin
           if FPCupManager.CrossCPU_Target='aarch64' then URL:='LinuxAarch64.rar';
           if FPCupManager.CrossCPU_Target='i386' then URL:='Linuxi386.rar';
           if FPCupManager.CrossCPU_Target='x86_64' then URL:='Linuxx64.rar';
+          if FPCupManager.CrossCPU_Target='powerpc' then URL:='LinuxPowerPC.rar';
+          if FPCupManager.CrossCPU_Target='powerpc64' then URL:='LinuxPowerPC64.rar';
         end;
         if FPCupManager.CrossOS_Target='freebsd' then
         begin
           if FPCupManager.CrossCPU_Target='i386' then URL:='FreeBSDi386.rar';
           if FPCupManager.CrossCPU_Target='x86_64' then URL:='FreeBSDx64.rar';
         end;
-
+        if FPCupManager.CrossOS_Target='solaris' then
+        begin
+          if FPCupManager.CrossCPU_Target='sparc' then URL:='SolarisSparc.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Solarisx64.rar';
+        end;
         if FPCupManager.CrossOS_Target='wince' then
         begin
           if FPCupManager.CrossCPU_Target='arm' then URL:='WinceARM.rar';
@@ -914,6 +932,11 @@ begin
         if FPCupManager.CrossOS_Target='android' then
         begin
           if FPCupManager.CrossCPU_Target='arm' then URL:='AndroidARM.rar';
+        end;
+        if FPCupManager.CrossOS_Target='embedded' then
+        begin
+          if FPCupManager.CrossCPU_Target='arm' then URL:='EmbeddedARM.rar';
+          if FPCupManager.CrossCPU_Target='avr' then URL:='EmbeddedAVR.rar';
         end;
 
         // tricky ... reset URL in case the binutils and libs are already there ... to exit this retry ... ;-)

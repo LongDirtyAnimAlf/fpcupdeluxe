@@ -43,9 +43,13 @@ uses
   {$IFDEF Darwin}
   m_crossdarwin64,
   m_crossdarwin32,
+  m_crossdarwinpowerpc,
+  m_crossdarwinarm,
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,
+  m_any_to_darwinpowerpc,
+  m_any_to_darwinarm,
   {$endif}
   {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,

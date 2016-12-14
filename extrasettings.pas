@@ -12,7 +12,7 @@ Const
   DELUXEFILENAME='fpcupdeluxe.ini';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,jvm);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm);
   TOS  = (windows,linux,android,darwin,freebsd,wince,java);
   TCrossSetting = (fpcup,auto,custom);
 
@@ -249,6 +249,9 @@ begin
   {$ifdef MSWINDOWS}
   CheckUseWget.Enabled:=False;
   {$endif}
+  {$IFDEF Darwin}
+  CheckUseWget.Enabled:=False;
+  {$endif}
 end;
 
 procedure TForm2.ComboBoxCPUOSChange(Sender: TObject);
@@ -330,7 +333,8 @@ begin
         if (OS=wince) AND (CPU<>arm) then continue;
         if (OS=windows) AND (CPU=arm) then continue;
         if (OS=windows) AND (CPU=aarch64) then continue;
-        if (OS=darwin) AND ((CPU=aarch64) OR (CPU=arm)) then continue;
+        if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
+        if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
 
         s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));

@@ -668,6 +668,8 @@ object Form1: TForm1
       'x86_64'
       'arm'
       'aarch64'
+      'ppc'
+      'ppc64'
       'jvm'
     )
     OnClick = RadioGroup1Click
