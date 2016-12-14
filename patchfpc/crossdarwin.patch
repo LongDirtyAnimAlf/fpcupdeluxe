@@ -1,0 +1,165 @@
+Index: compiler/systems/t_bsd.pas
+===================================================================
+--- compiler/systems/t_bsd.pas	(revision 35106)
++++ compiler/systems/t_bsd.pas	(working copy)
+@@ -147,8 +147,8 @@
+        begin
+          if not(target_info.system in systems_darwin) then
+            begin
+-             ExeCmd[1]:='ld $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE $CATRES';
+-             DllCmd[1]:='ld $TARGET $EMUL $OPT -shared -L. -o $EXE $CATRES'
++             ExeCmd[1]:='ld $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -L. -o $EXE $CATRES $FILELIST ';
++             DllCmd[1]:='ld $TARGET $EMUL $OPT -shared -L. -o $EXE $CATRES $FILELIST'
+            end
+          else
+            begin
+@@ -167,16 +167,16 @@
+                programs with problems that require Valgrind will have more
+                than 60KB of data (first 4KB of address space is always invalid)
+              }
+-               ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES';
++               ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST';
+              if not(cs_gdb_valgrind in current_settings.globalswitches) then
+                ExeCmd[1]:=ExeCmd[1]+' -pagezero_size 0x10000';
+ {$else ndef cpu64bitaddr}
+-             ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES';
++             ExeCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $DYNLINK $STATIC $GCSECTIONS $STRIP -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST';
+ {$endif ndef cpu64bitaddr}
+              if (apptype<>app_bundle) then
+-               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -dylib -multiply_defined suppress -L. -o $EXE $CATRES'
++               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -dylib -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST'
+              else
+-               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -bundle -multiply_defined suppress -L. -o $EXE $CATRES'
++               DllCmd[1]:='ld $PRTOBJ $TARGET $EMUL $OPT $GCSECTIONS -dynamic -bundle -multiply_defined suppress -L. -o $EXE $CATRES $FILELIST'
+            end
+        end
+      else
+@@ -388,6 +388,7 @@
+ Function TLinkerBSD.WriteResponseFile(isdll:boolean) : Boolean;
+ Var
+   linkres      : TLinkRes;
++  FilesList    : TLinkRes;
+   i            : longint;
+   cprtobj,
+   gprtobj,
+@@ -589,15 +590,37 @@
+              LinkRes.AddFileName(s);
+    end;
+   { main objectfiles }
++
++  { Generate linkfiles.res file if needed }
++  { Always needed on Windows, due to the limitation of 8196 characters for command line }
++  { linkfiles.res will be piped if possible }
++  if LdSupportsNoResponseFile then
++   begin
++     FilesList:=TLinkRes.Create(outputexedir+'linkfiles.res',not LdSupportsNoResponseFile);
+   while not ObjectFiles.Empty do
+    begin
+      s:=ObjectFiles.GetFirst;
+      if s<>'' then
+-      if LdSupportsNoResponseFile then
+-        LinkRes.AddFileName(s)
++         begin
++           repeat
++            i:=Pos(source_info.dirsep,s);
++            if i>0 then s[i]:=target_info.dirsep;
++           until i=0;
++           FilesList.Add(s);
++         end;
++      end;
++     FilesList.writetodisk;
++     FilesList.Free;
++   end
+       else
+-        LinkRes.AddFileName(maybequoted(s));
++   begin
++     while not ObjectFiles.Empty do
++      begin
++        s:=ObjectFiles.GetFirst;
++        if s<>'' then LinkRes.AddFileName(maybequoted(s));
+    end;
++   end;
++
+   if not LdSupportsNoResponseFile then
+    LinkRes.Add(')');
+ 
+@@ -784,6 +807,9 @@
+   Replace(cmdstr,'$EMUL',EmulStr);
+   Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
+   Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
++  if LdSupportsNoResponseFile
++     then Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
++     else Replace(cmdstr,'$FILELIST','');
+   Replace(cmdstr,'$STATIC',StaticStr);
+   Replace(cmdstr,'$STRIP',StripStr);
+   Replace(cmdstr,'$GCSECTIONS',GCSectionsStr);
+@@ -807,14 +833,17 @@
+      not(cs_link_nolink in current_settings.globalswitches) then
+     begin
+       { we have to use a script to use the IFS hack }
+-      linkscript:=TAsmScriptUnix.create(outputexedir+'ppaslink');
++      linkscript:=GenerateScript(outputexedir+'ppaslink');
+       linkscript.AddLinkCommand(BinStr,CmdStr,'');
+       if (extdbgcmdstr<>'') then
+         linkscript.AddLinkCommand(extdbgbinstr,extdbgcmdstr,'');
+       linkscript.WriteToDisk;
+       BinStr:=linkscript.fn;
+       if not path_absolute(BinStr) then
+-        BinStr:='./'+BinStr;
++        if cs_link_on_target in current_settings.globalswitches then
++          BinStr:='.'+target_info.dirsep+BinStr
++        else
++          BinStr:='.'+source_info.dirsep+BinStr;
+       CmdStr:='';
+     end;
+ 
+@@ -836,6 +865,9 @@
+        end;
+    end;
+ 
++  { Remove linkfiles.res }
++  if (success) and (LdSupportsNoResponseFile) then DeleteFile(outputexedir+'linkfiles.res');
++
+   MakeExecutable:=success;   { otherwise a recursive call to link method }
+ end;
+ 
+@@ -902,6 +934,9 @@
+   Replace(cmdstr,'$TARGET',targetstr);
+   Replace(cmdstr,'$EMUL',EmulStr);
+   Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
++  if LdSupportsNoResponseFile
++     then Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
++     else Replace(cmdstr,'$FILELIST','');
+   Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
+   Replace(cmdstr,'$INIT',InitStr);
+   Replace(cmdstr,'$FINI',FiniStr);
+@@ -941,14 +976,17 @@
+      not(cs_link_nolink in current_settings.globalswitches) then
+     begin
+       { we have to use a script to use the IFS hack }
+-      linkscript:=TAsmScriptUnix.create(outputexedir+'ppaslink');
++      linkscript:=GenerateScript(outputexedir+'ppaslink');
+       linkscript.AddLinkCommand(BinStr,CmdStr,'');
+       if (extdbgbinstr<>'') then
+         linkscript.AddLinkCommand(extdbgbinstr,extdbgcmdstr,'');
+       linkscript.WriteToDisk;
+       BinStr:=linkscript.fn;
+       if not path_absolute(BinStr) then
+-        BinStr:='./'+BinStr;
++        if cs_link_on_target in current_settings.globalswitches then
++          BinStr:='.'+target_info.dirsep+BinStr
++        else
++          BinStr:='.'+source_info.dirsep+BinStr;
+       CmdStr:='';
+     end;
+ 
+@@ -979,6 +1017,9 @@
+         DeleteFile(outputexedir+'linksyms.fpc');
+     end;
+ 
++  { Remove linkfiles.res }
++  if (success) and (LdSupportsNoResponseFile) then DeleteFile(outputexedir+'linkfiles.res');
++
+   MakeSharedLibrary:=success;   { otherwise a recursive call to link method }
+ end;
+ 

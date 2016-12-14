@@ -55,15 +55,16 @@ type
   we don't provide http proxy support for git. }
   protected
     procedure CheckOut(UseForce:boolean=false); override;
+    function GetProxyCommand: string;
     function GetLocalRevision: string; override;
     function GetRepoExecutable: string; override;
     function GetRepoExecutableName: string; override;
+    function FindRepoExecutable: string; override;
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
     function Execute(Command: string): integer; override;
     function GetDiffAll: string; override;
-    function FindRepoExecutable: string; override;
     procedure LocalModifications(var FileList: TStringList); override;
     function LocalRepositoryExists: boolean; override;
     procedure Log(var Log: TStringList); override;
@@ -210,14 +211,17 @@ begin
     Command := ' clone --recurse-submodules -b ' + aBranch + ' ' +  Repository + ' ' + LocalRepository;
   end;
 
-  if Command<>''
-     then FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
-     else FReturnCode := 0;
+  if Command<>'' then
+  begin
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
+  end else FReturnCode := 0;
 
   // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
   RetryAttempt := 1;
   if (FReturnCode <> 0) then
   begin
+    // if we have a proxy, set it now !
+    if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
     while (FReturnCode <> 0) and (RetryAttempt < MaxRetries) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
@@ -388,9 +392,9 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
+  if NOT DirectoryExists(FLocalRepository) then exit;
 
   FileList.Clear;
-  if NOT ValidClient then exit;
   // --porcelain indicate stable output;
   // -z would indicate machine-parsable output but uses ascii 0 to terminate strings, which doesn't match ParseFileList;
   FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' status --porcelain --untracked-files=no ',
@@ -414,6 +418,7 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
+  if NOT DirectoryExists(FLocalRepository) then exit;
 
   // This will output nothing to stdout and
   // fatal: Not a git repository (or any of the parent directories): .git
@@ -458,6 +463,31 @@ begin
   end;
 end;
 
+
+function TGitClient.GetProxyCommand: string;
+var
+  s:string;
+begin
+  if FHTTPProxyHost<>'' then
+  begin
+    s:=FHTTPProxyHost;
+    if FHTTPProxyPort<>0 then s:=s+':'+inttostr(FHTTPProxyPort);
+    if FHTTPProxyUser<>'' then
+    begin
+      s:='@'+s;
+      if FHTTPProxyPassword<>'' then s:=':'+FHTTPProxyPassword+s;
+      s:=FHTTPProxyUser+s;
+    end;
+    result:=' config --local --add http.proxy http://'+s;
+  end
+  else
+  begin
+    result:='';
+  end;
+end;
+
+
+
 function TGitClient.GetLocalRevision: string;
 var
   Output: string = '';
@@ -466,6 +496,7 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
+  if NOT DirectoryExists(FLocalRepository) then exit;
 
   // Only update if we have invalid revision info, in order to minimize git info calls
   if FLocalRevision = FRET_UNKNOWN_REVISION then

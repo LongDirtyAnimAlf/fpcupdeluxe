@@ -96,7 +96,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
@@ -114,7 +114,7 @@ end;
 function Twin32_linuxmips.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

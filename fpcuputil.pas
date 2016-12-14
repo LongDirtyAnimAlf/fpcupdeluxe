@@ -72,24 +72,84 @@ type
     destructor Destroy; override;
   end;
 
-  TDownLoader = Class(Tobject)
+  TBasicDownLoader = Class(TComponent)
   private
     FVerbose:boolean;
     FMaxRetries:byte;
+    FUsername: string;
+    FPassword: string;
+    FHTTPProxyHost: string;
+    FHTTPProxyPort: integer;
+    FHTTPProxyUser: string;
+    FHTTPProxyPassword: string;
+  protected
+    procedure SetVerbose(aValue:boolean);virtual;
+    property MaxRetries : Byte Read FMaxRetries Write FMaxRetries default DefMaxRetries;
+    property Username: string read FUsername;
+    property Password: string read FPassword;
+    property HTTPProxyHost: string read FHTTPProxyHost;
+    property HTTPProxyPort: integer read FHTTPProxyPort;
+    property HTTPProxyUser: string read FHTTPProxyUser;
+    property HTTPProxyPassword: string read FHTTPProxyPassword;
+    property Verbose: boolean write SetVerbose;
+  public
+    constructor Create;virtual;
+    constructor Create(AOwner: TComponent);override;
+    destructor Destroy;override;
+    procedure setCredentials(user,pass:string);virtual;
+    procedure setProxy(host:string;port:integer;user,pass:string);virtual;
+    function getFile(const URL,filename:string):boolean;virtual;abstract;
+    function getFTPFileList(const URL:string; filelist:TStringList):boolean;virtual;abstract;
+    function checkURL(const URL:string):boolean;virtual;abstract;
+  end;
+
+
+  TUseNativeDownLoader = Class(TBasicDownLoader)
+  private
     aFPHTTPClient:TFPHTTPClient;
     procedure DoProgress(Sender: TObject; Const ContentLength, CurrentPos : Int64);
     procedure DoHeaders(Sender : TObject);
     procedure DoPassword(Sender: TObject; var RepeatRequest: Boolean);
     procedure ShowRedirect(ASender : TObject; Const ASrc : String; Var ADest : String);
-  public
-    constructor Create(const verbose:boolean=false);
-    destructor Destroy; override;
-    procedure setProxy(host:string;port:integer;user,pass:string);
-    function getFile(const URL,filename:string):boolean;
-    function checkURL(const URL:string):boolean;
+    function Download(const URL: String; filename:string):boolean;
   protected
-    Property MaxRetries : Byte Read FMaxRetries Write FMaxRetries default DefMaxRetries;
+    procedure SetVerbose(aValue:boolean);override;
+    function FTPDownload(Const URL : String; filename:string):boolean;
+    function HTTPDownload(Const URL : String; filename:string):boolean;
+  public
+    constructor Create;override;
+    destructor Destroy; override;
+    procedure setProxy(host:string;port:integer;user,pass:string);override;
+    function getFile(const URL,filename:string):boolean;override;
+    function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
+    function checkURL(const URL:string):boolean;override;
   end;
+
+  {$IFDEF UNIX}
+  TUseWGetDownloader = Class(TBasicDownLoader)
+  private
+    function WGetDownload(Const URL : String; Dest : TStream):boolean;
+    function Download(const URL: String; Dest: TStream):boolean;
+  protected
+    function FTPDownload(Const URL : String; Dest : TStream):boolean;
+    function HTTPDownload(Const URL : String; Dest : TStream):boolean;
+  public
+    function getFile(const URL,filename:string):boolean;override;
+    function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
+    function checkURL(const URL:string):boolean;override;
+  end;
+  {$ENDIF}
+
+  TNativeDownloader = TUseNativeDownLoader;
+  {$IFDEF Darwin}
+  TWGetDownloader = TUseNativeDownLoader;
+  {$else}
+  {$IFDEF UNIX}
+  TWGetDownloader = TUseWGetDownloader;
+  {$ELSE}
+  TWGetDownloader = TUseNativeDownLoader;
+  {$ENDIF}
+  {$endif}
 
 // Create shortcut on desktop to Target file
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string) ;
@@ -106,14 +166,13 @@ function DeleteFilesSubDirs(const DirectoryName: string; const Names:TStringList
 // Recursively delete files with specified extension(s),
 // only if path contains specfied directory name somewhere (or no directory name specified):
 function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensions:TstringList; const OnlyIfPathHas: string): boolean;
+// only if filename contains specfied part somewhere
+function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
 function GetFileNameFromURL(URL:string):string;
 function GetVersionFromUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
-function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
-// File size; returns 0 if empty, non-existent or error.
-//function FileSizeUTF8(FileName: string): int64;
-function FtpGetFileList(const URL, Path: string; DirList: TStringList): Boolean;
+function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 {$IFDEF MSWINDOWS}
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
@@ -160,15 +219,16 @@ uses
   Forms,Controls,
   {$endif}
   IniFiles,
-  httpsend {for downloading from http},
   ftpsend {for downloading from ftp},
   FileUtil, LazFileUtils, LazUTF8,
-  strutils
+  strutils,uriparser
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
     ,windows, shlobj {for special folders}, ActiveX, ComObj
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
+  // for wget downloader
+  ,process
   ,baseunix,processutils
   {$ENDIF UNIX}
   ;
@@ -471,397 +531,12 @@ begin
   {$ENDIF UNIX}
 end;
 
-function DownloadFTP(URL, TargetFile: string): boolean;
-const
-  FTPPort=21; //default ftp server port
-  FTPScheme='ftp://'; //URI scheme name for FTP URLs
-var
-  Host: string;
-  Port: integer;
-  Source: string;
-  FoundPos: integer;
-  RetryAttempt:integer;
-begin
-  // Strip out scheme info:
-  if LeftStr(URL, length(FTPScheme))=FTPScheme then
-    URL:=Copy(URL, length(FTPScheme)+1, length(URL));
-
-  // Crude parsing; could have used URI parsing code in FPC packages...
-  FoundPos:=pos('/', URL);
-  Host:=LeftStr(URL, FoundPos-1);
-  Source:=Copy(URL, FoundPos+1, Length(URL));
-
-  //Check for port numbers:
-  FoundPos:=pos(':', Host);
-  Port:=FTPPort;
-  if FoundPos>0 then
-  begin
-    Host:=LeftStr(Host, FoundPos-1);
-    Port:=StrToIntDef(Copy(Host, FoundPos+1, Length(Host)),21);
-  end;
-  RetryAttempt:=0;
-  repeat
-    Result:=FtpGetFile(Host, IntToStr(Port), Source, TargetFile, 'anonymous', 'fpc@example.com');
-    if NOT Result then
-    begin
-      Inc(RetryAttempt);
-      sleep(200*RetryAttempt);
-    end;
-  until (Result) OR (RetryAttempt>5);
-  if result=false then infoln('DownloadFTP: error downloading '+URL+'. Details: host: '+Host+'; port: '+Inttostr(Port)+'; remote path: '+Source+' to '+TargetFile, eterror);
-end;
-
-function SFDirectLinkURL(URL: string; Document: TMemoryStream): string;
-{
-Transform this part of the body:
-<noscript>
-<meta http-equiv="refresh" content="5; url=http://downloads.sourceforge.net/project/base64decoder/base64decoder/version%202.0/b64util.zip?r=&amp;ts=1329648745&amp;use_mirror=kent">
-</noscript>
-into a valid URL:
-http://downloads.sourceforge.net/project/base64decoder/base64decoder/version%202.0/b64util.zip?r=&amp;ts=1329648745&amp;use_mirror=kent
-}
-const
-  Refresh='<meta http-equiv="refresh"';
-  URLMarker='url=';
-var
-  Counter: integer;
-  HTMLBody: TStringList;
-  RefreshStart: integer;
-  URLStart: integer;
-begin
-  HTMLBody:=TStringList.Create;
-  try
-    HTMLBody.LoadFromStream(Document);
-    for Counter:=0 to HTMLBody.Count-1 do
-    begin
-      // This line should be between noscript tags and give the direct download locations:
-      RefreshStart:=Ansipos(Refresh, HTMLBody[Counter]);
-      if RefreshStart>0 then
-      begin
-        URLStart:=AnsiPos(URLMarker, HTMLBody[Counter])+Length(URLMarker);
-        if URLStart>RefreshStart then
-        begin
-          // Look for closing "
-          URL:=Copy(HTMLBody[Counter],
-            URLStart,
-            PosEx('"',HTMLBody[Counter],URLStart+1)-URLStart);
-          break;
-        end;
-      end;
-    end;
-  finally
-    HTMLBody.Free;
-  end;
-  result:=URL;
-end;
-
-function SourceForgeURL(URL: string; HTTPSender: THTTPSend): string;
-// Detects sourceforge download and tries to deal with
-// redirection, and extracting direct download link.
-// Thanks to
-// Ocye: http://lazarus.freepascal.org/index.php/topic,13425.msg70575.html#msg70575
-const
-  SFProjectPart = '//sourceforge.net/projects/';
-  SFFilesPart = '/files/';
-  SFDownloadPart ='/download';
-var
-  ExistingUserAgent: string;
-  i, j: integer;
-  FoundCorrectURL: boolean;
-  SFDirectory: string; //Sourceforge directory
-  SFDirectoryBegin: integer;
-  SFFileBegin: integer;
-  SFFilename: string; //Sourceforge name of file
-  SFProject: string;
-  SFProjectBegin: integer;
-begin
-  // Detect SourceForge download; e.g. from URL
-  //          1         2         3         4         5         6         7         8         9
-  // 1234557890123456789012345578901234567890123455789012345678901234557890123456789012345578901234567890
-  // http://sourceforge.net/projects/base64decoder/files/base64decoder/version%202.0/b64util.zip/download
-  //                                 ^^^project^^^       ^^^directory............^^^ ^^^file^^^
-  FoundCorrectURL:=true; //Assume not a SF download
-  i:=Pos(SFProjectPart, URL);
-  if i>0 then
-  begin
-    // Possibly found project; now extract project, directory and filename parts.
-    SFProjectBegin:=i+Length(SFProjectPart);
-    j := PosEx(SFFilesPart, URL, SFProjectBegin);
-    if (j>0) then
-    begin
-      SFProject:=Copy(URL, SFProjectBegin, j-SFProjectBegin);
-      SFDirectoryBegin:=PosEx(SFFilesPart, URL, SFProjectBegin)+Length(SFFilesPart);
-      if SFDirectoryBegin>0 then
-      begin
-        // Find file
-        // URL might have trailing arguments... so: search for first
-        // /download coming up from the right, but it should be after
-        // /files/
-        i:=RPos(SFDownloadPart, URL);
-        // Now look for previous / so we can make out the file
-        // This might perhaps be the trailing / in /files/
-        SFFileBegin:=RPosEx('/',URL,i-1)+1;
-
-        if SFFileBegin>0 then
-        begin
-          SFFilename:=Copy(URL,SFFileBegin, i-SFFileBegin);
-          //Include trailing /
-          SFDirectory:=Copy(URL, SFDirectoryBegin, SFFileBegin-SFDirectoryBegin);
-          FoundCorrectURL:=false;
-        end;
-      end;
-    end;
-  end;
-
-  if not FoundCorrectURL then
-  begin
-
-    if HTTPSender=nil then
-    begin
-      result:=SFFilename;
-      exit;
-    end;
-
-    // Rewrite URL if needed for Sourceforge download redirection
-    // Detect direct link in HTML body and get URL from that
-
-    //Who knows, this might help:
-    ExistingUserAgent:=HTTPSender.UserAgent;
-    HTTPSender.UserAgent:='curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
-
-    while not FoundCorrectURL do
-    begin
-      HTTPSender.HTTPMethod('GET', URL);
-      case HTTPSender.Resultcode of
-        301, 302, 307:
-          begin
-            for i := 0 to HTTPSender.Headers.Count - 1 do
-              if (Pos('Location: ', HTTPSender.Headers.Strings[i]) > 0) or
-                (Pos('location: ', HTTPSender.Headers.Strings[i]) > 0) then
-              begin
-                j := Pos('use_mirror=', HTTPSender.Headers.Strings[i]);
-                if j > 0 then
-                  URL :=
-                    'http://' + RightStr(HTTPSender.Headers.Strings[i],
-                    length(HTTPSender.Headers.Strings[i]) - j - 10) +
-                    '.dl.sourceforge.net/project/' +
-                    SFProject + '/' + SFDirectory + SFFilename
-                else
-                  URL:=StringReplace(
-                    HTTPSender.Headers.Strings[i], 'Location: ', '', []);
-                HTTPSender.Clear;//httpsend
-                FoundCorrectURL:=true;
-                break; //out of rewriting loop
-            end;
-          end;
-        100..200:
-          begin
-            //Could be a sourceforge timer/direct link page, but...
-            if AnsiPos('Content-Type: text/html', HTTPSender.Headers.Text)>0 then
-            begin
-              // find out... it's at least not a binary
-              URL:=SFDirectLinkURL(URL, HTTPSender.Document);
-            end;
-            FoundCorrectURL:=true; //We're done by now
-          end;
-        500: raise Exception.Create('Internal server error 500; perhaps no internet connection available');
-          //Internal Server Error ('+aURL+')');
-        else
-          raise Exception.Create('Download failed with error code ' +
-            IntToStr(HTTPSender.ResultCode) + ' (' + HTTPSender.ResultString + ')');
-      end;//case
-    end;//while
-    HTTPSender.UserAgent:=ExistingUserAgent;
-  end;
-  result:=URL;
-end;
-
-
-//class procedure callback.Status(Sender: TObject; Reason: THookSocketReason;
-//  const Value: String);
-//var
-//  V: String;
-//Begin
-//  V := GetEnumName(TypeInfo(THookSocketReason), Integer(Reason)) + ' ' + Value;
-//  writeln(V)
-//end;
-
-function DownloadHTTP(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
-// Download file; retry if necessary.
-// Deals with SourceForge download links
-// Could use Synapse HttpGetBinary, but that doesn't deal
-// with result codes (i.e. it happily downloads a 404 error document)
-var
-  aDownLoader: TDownLoader;
-  HTTPGetResult: boolean;
-  HTTPSender: THTTPSend;
-  RetryAttempt: integer;
-  ResultCode: integer;
-  fs:TFileStream;
-function GetRedirectUrl: string;
-var
-  i: integer;
-  Line: string;
-begin
-  Result:='';
-  for i := 0 to HTTPSender.Headers.Count-1 do
-  begin
-    Line:=LowerCase(HTTPSender.Headers[i]);
-    if Pos('location:',Line)>0 then
-    begin
-      Result:=Trim(StringReplace(Line,'Location:','',[rfIgnoreCase]));
-      break;
-    end;
-  end;
-end;
-
-begin
-  result:=false;
-
-  RetryAttempt:=0;
-
-  HTTPSender:=THTTPSend.Create;
-  try
-    try
-      if HTTPProxyHost<>'' then
-      begin
-        HTTPSender.ProxyHost:=HTTPProxyHost;
-        if HTTPProxyPort='' then
-          HTTPSender.ProxyPort:='8080'
-        else
-          HTTPSender.ProxyPort:=HTTPProxyPort;
-        HTTPSender.ProxyUser:=HTTPProxyUser;
-        HTTPSender.ProxyPass:=HTTPProxyPassword;
-      end;
-
-      // Follow URL if necessary
-      URL:=SourceForgeURL(URL,HTTPSender); //Deal with sourceforge URLs
-
-      //aDownLoader:=TDownLoader.Create{$ifdef DEBUG}(True){$endif};
-      aDownLoader:=TDownLoader.Create;
-      try
-        if HTTPProxyHost<>'' then aDownLoader.setProxy(HTTPSender.ProxyHost,StrToInt(HTTPSender.ProxyPort),HTTPSender.ProxyUser,HTTPSender.ProxyPass);
-        result:=aDownLoader.getFile(URL,TargetFile);
-        if (NOT result) then // try only once again in case of error
-        begin
-          infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
-          SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-          result:=aDownLoader.getFile(URL,TargetFile);
-        end;
-      finally
-        aDownLoader.Destroy;
-      end;
-
-      {
-      // Try to get the file
-      //HTTPSender.Sock.OnStatus := callback.Status;
-      repeat
-        HTTPGetResult:=HTTPSender.HTTPMethod('GET', URL);
-        if (NOT HTTPGetResult) then
-        begin
-          Inc(RetryAttempt);
-          sleep(100*RetryAttempt);
-        end;
-      until (HTTPGetResult) OR (RetryAttempt>3);
-
-      // still no valid result : exit;
-      if (NOT HTTPGetResult) then exit;
-
-      ResultCode:=HTTPSender.Resultcode;
-      infoln('Download http(s) result: '+InttoStr(Resultcode)+'; for URL: '+URL,etDebug);
-      // If we have an answer from the server, check if the file
-      // was sent to us.
-      case Resultcode of
-        100..299:
-        begin
-          with TFileStream.Create(TargetFile,fmCreate or fmOpenWrite) do
-          try
-            Seek(0, soFromBeginning);
-            CopyFrom(HTTPSender.Document, 0);
-          finally
-            Free;
-          end;
-          result:=true;
-        end; //informational, success
-        300,301: result:=false; //Other redirection. Not implemented, but could be.
-        302:
-        begin
-          infoln('Download: got redirect.', etDebug);
-          URL:=GetRedirectUrl;
-          infoln('Download: got redirect towards URL: '+URL, etDebug);
-          // do we have a redirect from github for a direct download of a file ?
-          if (Pos('codeload.github.com',URL)>0) OR (Pos('raw.githubusercontent.com',URL)>0) then
-          begin
-            fs:=TFileStream.Create(TargetFile,fmCreate or fmOpenWrite);
-            HTTPGetBinary(URL, fs);
-            fs.free;
-            result:=true;
-          end
-          else
-          begin
-            with TFileStream.Create(TargetFile,fmCreate or fmOpenWrite) do
-            try
-              Seek(0, soFromBeginning);
-              CopyFrom(HTTPSender.Document, 0);
-            finally
-              Free;
-            end;
-            result:=true;
-          end;
-        end;
-        303..399: result:=false; //Other redirection. Not implemented, but could be.
-        400..499: result:=false; //client error; 404 not found etc
-        500..599: result:=false; //internal server error
-        else result:=false; //unknown code
-      end;
-      }
-    except
-      // We don't care for the reason for this error; the download failed.
-      result:=false;
-    end;
-  finally
-    HTTPSender.Free;
-  end;
-end;
-
-
-function FtpGetFileList(const URL, Path: string; DirList: TStringList): Boolean;
-var
-  i: Integer;
-  s: string;
-begin
-  Result := False;
-  with TFTPSend.Create do
-  try
-    //Username := 'anonymous';
-    //Password := '';
-    TargetHost := URL;
-    if not Login then
-      Exit;
-    Result := List(Path, False);
-    for i := 0 to FtpList.Count -1 do
-    begin
-      s := FTPList[i].FileName;
-      DirList.Add(s);
-    end;
-    Logout;
-  finally
-    Free;
-  end;
-end;
-
-
 function GetFileNameFromURL(URL:string):string;
 var
-  i:integer;
+  URI:TURI;
 begin
-  if Length(URL)=0 then exit;
-  // handle sourgeforge URL
-  result:=SourceForgeURL(URL,nil);
-  i:=Length(result);
-  if i=0 then exit;
-  while (i>0) AND (result[i]<>'/') do Dec(i);
-  result:=RightStr(result,Length(result)-i+1);
+  URI:=ParseURI(URL);
+  result:=URI.Document;
 end;
 
 function GetVersionFromUrl(URL:string): string;
@@ -1108,30 +783,89 @@ begin
   Result:=true;
 end;
 
-function Download(URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: string=''; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
+// Deletes all files containing OnlyIfNameHas
+// DirectoryName and recursing down.
+// Will try to remove read-only files.
+//todo: check how this works with case insensitive file system like Windows
+var
+  AllFiles: boolean;
+  CurSrcDir: String;
+  CurFilename: String;
+  FileInfo: TSearchRec;
+  i: integer;
+begin
+  Result:=false;
+  AllFiles:=(Length(OnlyIfNameHas)=0);
+
+  // for now, exit when no filename data is given ... use DeleteDirectoryEx
+  if AllFiles then exit;
+
+  CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
+  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      // Ignore directories and files without name:
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        // Look at all files and directories in this directory:
+        CurFilename:=CurSrcDir+FileInfo.Name;
+        if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
+        begin
+          // Directory; call recursively exit with failure on error
+          if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then
+          begin
+            FindCloseUTF8(FileInfo);
+            exit;
+          end;
+        end
+        else
+        begin
+          if AllFiles or (Pos(UpperCase(OnlyIfNameHas),UpperCase(FileInfo.Name))>0) then
+          begin
+            // Remove read-only file attribute so we can delete it:
+            if (FileInfo.Attr and faReadOnly)>0 then
+              FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+            if not DeleteFileUTF8(CurFilename) then
+            begin
+              FindCloseUTF8(FileInfo);
+              exit;
+            end;
+          end;
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+  end;
+  FindCloseUTF8(FileInfo);
+  Result:=true;
+end;
+
+function DownloadBase(aDownLoader:TBasicDownloader;URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin
   result:=false;
+  if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+  result:=aDownLoader.getFile(URL,TargetFile);
+  if (NOT result) then // try only once again in case of error
+  begin
+    infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
+    SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+    result:=aDownLoader.getFile(URL,TargetFile);
+  end;
+end;
 
-  // Assume http if no ftp detected
+
+function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+var
+  aDownLoader:TBasicDownLoader;
+begin
+  result:=false;
+  if UseWget
+     then aDownLoader:=TWGetDownLoader.Create
+     else aDownLoader:=TNativeDownLoader.Create;
   try
-    infoln('Going to download '+TargetFile+' from URL: ' + URL, etDebug);
-    if (Copy(URL, 1, Length('ftp://'))='ftp://') or
-    (Copy(URL,1,Length('ftp.'))='ftp.') then
-    begin
-      result:=DownloadFTP(URL, TargetFile);
-    end
-    else
-    begin
-      result:=DownloadHTTP(URL, TargetFile, HTTPProxyHost, HTTPProxyPort, HTTPProxyUser, HTTPProxyPassword);
-    end;
-  except
-    on E: Exception do
-    begin
-      infoln('Download: error occurred downloading file '+TargetFile+' from URL: '+URL+
-        '. Exception occurred: '+E.ClassName+'/'+E.Message+')', eterror);
-    end;
-    //Not writing message here; to be handled by calling code with more context.
-    //if result:=false then infoln('Download: download of '+TargetFile+' from URL: '+URL+' failed.');
+    result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+  finally
+    aDownLoader.Destroy;
   end;
 end;
 
@@ -1466,7 +1200,7 @@ end;
 procedure TLogger.WriteLog(EventType: TEventType;Message: string; ToConsole: Boolean);
 begin
   FLog.Log(EventType, Message);
-  if ToConsole then infoln(Message,etInfo);
+  if ToConsole then infoln(Message,EventType);
 end;
 
 constructor TLogger.Create;
@@ -1484,7 +1218,48 @@ begin
   inherited Destroy;
 end;
 
-procedure TDownLoader.DoHeaders(Sender : TObject);
+constructor TBasicDownLoader.Create;
+begin
+  Inherited Create(nil);
+end;
+
+constructor TBasicDownLoader.Create(AOwner: TComponent);
+begin
+  inherited;
+  FVerbose:=False;
+  FUsername:='';
+  FPassword:='';
+  FHTTPProxyHost:='';
+  FHTTPProxyPort:=0;
+  FHTTPProxyUser:='';
+  FHTTPProxyPassword:='';
+end;
+
+destructor TBasicDownLoader.Destroy;
+begin
+  inherited;
+end;
+
+procedure TBasicDownLoader.SetVerbose(aValue:boolean);
+begin
+  FVerbose:=aValue;
+end;
+
+procedure TBasicDownLoader.setCredentials(user,pass:string);
+begin
+  FUsername:=user;
+  FPassword:=pass;
+end;
+
+procedure TBasicDownLoader.setProxy(host:string;port:integer;user,pass:string);
+begin
+  FHTTPProxyHost:=host;
+  FHTTPProxyPort:=port;
+  FHTTPProxyUser:=user;
+  FHTTPProxyPassword:=pass;
+end;
+
+procedure TUseNativeDownLoader.DoHeaders(Sender : TObject);
 Var
   I : Integer;
 begin
@@ -1494,7 +1269,7 @@ begin
       writeln(ResponseHeaders[i]);
 end;
 
-procedure TDownLoader.DoProgress(Sender: TObject; const ContentLength, CurrentPos: Int64);
+procedure TUseNativeDownLoader.DoProgress(Sender: TObject; const ContentLength, CurrentPos: Int64);
 begin
   If (ContentLength=0) then
     writeln('Reading headers : ',CurrentPos,' Bytes.')
@@ -1504,45 +1279,55 @@ begin
     writeln('Reading data : ',CurrentPos,' Bytes of ',ContentLength);
 end;
 
-procedure TDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
+procedure TUseNativeDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
 Var
   H,UN,PW : String;
   P : Integer;
 begin
-  with TFPHTTPClient(Sender) do
+  if FUsername <> '' then
   begin
-    H:=GetHeader(ResponseHeaders,'WWW-Authenticate');
-  end;
-  P:=Pos('realm',LowerCase(H));
-  if (P>0) then
+    TFPHTTPClient(Sender).UserName:=FUsername;
+    TFPHTTPClient(Sender).Password:=FPassword;
+  end
+  else
   begin
-    P:=Pos('"',H);
-    Delete(H,1,P);
-    P:=Pos('"',H);
-    H:=Copy(H,1,Pos('"',H)-1);
-  end;
-  writeln('Authorization required. Remote site says: ',H);
-  write('Enter username (empty quits): ');
-  readLn(UN);
-  RepeatRequest:=(UN<>'');
-  if RepeatRequest then
-  begin
-    write('Enter password: ');
-    readln(PW);
-    TFPHTTPClient(Sender).UserName:=UN;
-    TFPHTTPClient(Sender).Password:=PW;
+
+    with TFPHTTPClient(Sender) do
+    begin
+      H:=GetHeader(ResponseHeaders,'WWW-Authenticate');
+    end;
+    P:=Pos('realm',LowerCase(H));
+    if (P>0) then
+    begin
+      P:=Pos('"',H);
+      Delete(H,1,P);
+      P:=Pos('"',H);
+      H:=Copy(H,1,Pos('"',H)-1);
+    end;
+
+    writeln('Authorization required. Remote site says: ',H);
+    write('Enter username (empty quits): ');
+    readLn(UN);
+    RepeatRequest:=(UN<>'');
+    if RepeatRequest then
+    begin
+      write('Enter password: ');
+      readln(PW);
+      TFPHTTPClient(Sender).UserName:=UN;
+      TFPHTTPClient(Sender).Password:=PW;
+    end;
+
   end;
 end;
 
-procedure TDownLoader.ShowRedirect(ASender: TObject; const ASrc: String;
+procedure TUseNativeDownLoader.ShowRedirect(ASender: TObject; const ASrc: String;
   var ADest: String);
 begin
   writeln('Following redirect from ',ASrc,'  ==> ',ADest);
 end;
 
-constructor TDownLoader.Create(const verbose:boolean);
+constructor TUseNativeDownLoader.Create;
 begin
-  FVerbose:=verbose;
   aFPHTTPClient:=TFPHTTPClient.Create(Nil);
   with aFPHTTPClient do
   begin
@@ -1558,19 +1343,119 @@ begin
   end;
 end;
 
-procedure TDownLoader.setProxy(host:string;port:integer;user,pass:string);
+procedure TUseNativeDownLoader.SetVerbose(aValue:boolean);
 begin
+  inherited;
   with aFPHTTPClient do
   begin
-    Proxy.Host:=host;
-    Proxy.Port:=port;
-    Proxy.UserName:=user;
-    Proxy.Password:=pass;
+    if FVerbose then
+    begin
+      OnRedirect:=@ShowRedirect;
+      OnDataReceived:=@DoProgress;
+      OnHeaders:=@DoHeaders;
+    end
+    else
+    begin
+      OnRedirect:=nil;
+      OnDataReceived:=nil;
+      OnHeaders:=nil;
+    end;
   end;
 end;
 
+procedure TUseNativeDownLoader.setProxy(host:string;port:integer;user,pass:string);
+begin
+  inherited;
+  with aFPHTTPClient do
+  begin
+    Proxy.Host:=FHTTPProxyHost;
+    Proxy.Port:=FHTTPProxyPort;
+    Proxy.UserName:=FHTTPProxyUser;
+    Proxy.Password:=FHTTPProxyPassword;
+  end;
+end;
 
-function TDownLoader.getFile(const URL,filename:string):boolean;
+function TUseNativeDownLoader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
+var
+  i: Integer;
+  s: string;
+  URI : TURI;
+  P : String;
+begin
+  result:=false;
+  URI:=ParseURI(URL);
+  P:=URI.Protocol;
+  if CompareText(P,'ftp')=0 then
+  begin
+    with TFTPSend.Create do
+    try
+      if FUsername <> '' then
+      begin
+        Username := FUsername;
+        Password := FPassword;
+      end;
+      if Length(HTTPProxyHost)>0 then
+      begin
+        Sock.HTTPTunnelIP:=HTTPProxyHost;
+        Sock.HTTPTunnelPort:=InttoStr(HTTPProxyPort);
+        Sock.HTTPTunnelUser:=HTTPProxyUser;
+        Sock.HTTPTunnelPass:=HTTPProxyPassword;
+      end;
+      TargetHost := URI.Host;
+      if not Login then exit;
+      Result := List(URI.Path, False);
+      for i := 0 to FtpList.Count -1 do
+      begin
+        s := FTPList[i].FileName;
+        filelist.Add(s);
+      end;
+      Logout;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+function TUseNativeDownLoader.FTPDownload(Const URL : String; filename:string):boolean;
+var
+  URI : TURI;
+  aPort:integer;
+begin
+  // we will use synapse TFTPSend ... FPHTTPClient does not support FTP (yet)
+  result:=false;
+  URI:=ParseURI(URL);
+  aPort:=URI.Port;
+  if aPort=0 then aPort:=21;
+  Result := False;
+  with TFTPSend.Create do
+  try
+    TargetHost := URI.Host;
+    TargetPort := InttoStr(aPort);
+    if FUsername <> '' then
+    begin
+      Username := FUsername;
+      Password := FPassword;
+    end;
+    if Length(HTTPProxyHost)>0 then
+    begin
+      Sock.HTTPTunnelIP:=HTTPProxyHost;
+      Sock.HTTPTunnelPort:=InttoStr(HTTPProxyPort);
+      Sock.HTTPTunnelUser:=HTTPProxyUser;
+      Sock.HTTPTunnelPass:=HTTPProxyPassword;
+    end;
+    if Login then
+    begin
+      DirectFileName := filename;
+      DirectFile:=True;
+      Result := RetrieveFile(URI.Path+URI.Document, False);
+      Logout;
+    end;
+  finally
+    Free;
+  end;
+end;
+
+function TUseNativeDownLoader.HTTPDownload(Const URL : String; filename:string):boolean;
 var
   tries:byte;
   response: Integer;
@@ -1592,7 +1477,7 @@ begin
         begin
           Inc(tries);
           if FVerbose then
-            writeln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.');
+            infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.',etDebug);
         end;
       except
         tries:=(MaxRetries+1);
@@ -1606,7 +1491,16 @@ begin
   end;
 end;
 
-function TDownLoader.checkURL(const URL:string):boolean;
+function TUseNativeDownLoader.getFile(const URL,filename:string):boolean;
+begin
+  try
+    result:=Download(URL,filename);
+  except
+    SysUtils.DeleteFile(filename);
+  end;
+end;
+
+function TUseNativeDownLoader.checkURL(const URL:string):boolean;
 var
   tries:byte;
   response: Integer;
@@ -1628,7 +1522,7 @@ begin
         begin
           Inc(tries);
           if FVerbose then
-            writeln('TFPHTTPClient retry #' +InttoStr(tries)+ ' check of ' + URL + '.');
+            infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' check of ' + URL + '.',etInfo);
         end;
       except
         tries:=(MaxRetries+1);
@@ -1642,13 +1536,162 @@ begin
   end;
 end;
 
-
-destructor TDownLoader.Destroy;
+destructor TUseNativeDownLoader.Destroy;
 begin
   FreeAndNil(aFPHTTPClient);
   inherited;
 end;
 
+function TUseNativeDownLoader.Download(const URL: String; filename:string):boolean;
+Var
+  URI : TURI;
+  P : String;
+begin
+  result:=false;
+  URI:=ParseURI(URL);
+  infoln('FPHTTPClient downloader: Getting ' + URI.Document + ' from '+URI.Host+URI.Path,etInfo);
+  P:=URI.Protocol;
+  If CompareText(P,'ftp')=0 then
+    result:=FTPDownload(URL,filename)
+  else if CompareText(P,'http')=0 then
+    result:=HTTPDownload(URL,filename)
+  else if CompareText(P,'https')=0 then
+    result:=HTTPDownload(URL,filename);
+end;
+
+
+{$IFDEF UNIX}
+
+// proxy still to do !!
+
+function TUseWGetDownloader.WGetDownload(Const URL : String; Dest : TStream):boolean;
+var
+  Buffer : Array[0..4096] of byte;
+  Count : Integer;
+begin
+  result:=false;
+  With TProcess.Create(Self) do
+  try
+    CommandLine:='wget -q --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
+    Options:=[poUsePipes,poNoConsole];
+    Execute;
+    while Running do
+    begin
+      Count:=Output.Read(Buffer,SizeOf(Buffer));
+      if (Count>0) then Dest.WriteBuffer(Buffer,Count);
+    end;
+    result:=(ExitStatus=0);
+  finally
+    Free;
+  end;
+end;
+
+function TUseWGetDownloader.FTPDownload(Const URL : String; Dest : TStream):boolean;
+begin
+  result:=WGetDownload(URL,Dest);
+end;
+
+function TUseWGetDownloader.HTTPDownload(Const URL : String; Dest : TStream):boolean;
+begin
+  result:=WGetDownload(URL,Dest);
+end;
+
+function TUseWGetDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
+const
+  WGETFTPLISTFILE='.listing';
+var
+  aURL:string;
+  aTFTPList:TFTPList;
+  s:string;
+  i:integer;
+  URI : TURI;
+  P : String;
+begin
+  result:=false;
+  URI:=ParseURI(URL);
+  P:=URI.Protocol;
+  if CompareText(P,'ftp')=0 then
+  begin
+    aURL:=URL;
+    if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
+    result:=(ExecuteCommand('wget -q --no-remove-listing --tries='+InttoStr(MaxRetries)+' --spider '+aURL,false)=0);
+    if result then
+    begin
+      if FileExists(WGETFTPLISTFILE) then
+      begin
+        aTFTPList:=TFTPList.Create;
+        try
+          aTFTPList:=TFTPList.Create;
+          aTFTPList.Lines.LoadFromFile(WGETFTPLISTFILE);
+          aTFTPList.ParseLines;
+          for i := 0 to aTFTPList.Count -1 do
+          begin
+            s := aTFTPList[i].FileName;
+            filelist.Add(s);
+          end;
+          SysUtils.DeleteFile(WGETFTPLISTFILE);
+        finally
+          aTFTPList.Free;
+        end;
+      end;
+    end;
+  end;
+end;
+
+function TUseWGetDownloader.getFile(const URL,filename:string):boolean;
+var
+  F : TFileStream;
+begin
+  result:=false;
+  try
+    F:=TFileStream.Create(filename,fmCreate);
+    try
+      result:=Download(URL,F);
+    finally
+      F.Free;
+    end;
+  except
+    result:=False;
+    SysUtils.DeleteFile(filename);
+  end;
+end;
+
+function TUseWGetDownloader.checkURL(const URL:string):boolean;
+var
+  Output:string;
+begin
+  Output:='';
+  //'curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3'
+  //'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3'
+  result:=(ExecuteCommand('wget -U "curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
+  if result then
+  begin
+    result:=(Pos('Remote file exists',Output)>0);
+  end;
+  if NOT result then
+  begin
+    // on github, we get a 403 forbidden for an existing file !!
+    result:=(Pos('github',Output)>0) AND (Pos('403 Forbidden',Output)>0);
+  end;
+end;
+
+function TUseWGetDownloader.Download(const URL: String; Dest: TStream):boolean;
+Var
+  URI : TURI;
+  P : String;
+begin
+  result:=false;
+  URI:=ParseURI(URL);
+  infoln('WGET downloader: Getting ' + URI.Document + ' from '+URI.Host+URI.Path,etInfo);
+  P:=URI.Protocol;
+  If CompareText(P,'ftp')=0 then
+    result:=FTPDownload(URL,Dest)
+  else if CompareText(P,'http')=0 then
+    result:=HTTPDownload(URL,Dest)
+  else if CompareText(P,'https')=0 then
+    result:=HTTPDownload(URL,Dest);
+end;
+{$ENDIF}
 
 end.
 

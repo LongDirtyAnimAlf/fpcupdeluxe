@@ -92,7 +92,7 @@ type
     property LazarusDir:string read FLazarusDir write FLazarusDir;
     // Lazarus primary config path
     property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
-    constructor Create(InstallDirectory, FPCCompiler: string; Verbosity: boolean);
+    constructor Create(aInstallDirectory, aFPCCompiler: string; Verbosity: boolean);
     destructor Destroy; override;
   end;
 {$ENDIF MSWINDOWS}
@@ -168,9 +168,9 @@ begin
   // Basedirectory = install directory from fpcup.ini/universal module.
   // We use it to put SVN repos needed for building.
   if FFPCBuildDir='' then
-    FFPCBuildDir:=IncludeTrailingPathDelimiter(FBaseDirectory)+'fpcbuild';
+    FFPCBuildDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'fpcbuild';
   if FLazarusBinaryDir='' then
-    FLazarusBinaryDir:=IncludeTrailingPathDelimiter(FBaseDirectory)+'lazbin';
+    FLazarusBinaryDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lazbin';
 
   InstallerBatchDir:=IncludeTrailingPathDelimiter(FLazarusDir)+'tools\install\win';
 
@@ -260,12 +260,12 @@ begin
   end;
 end;
 
-constructor TWinInstaller.Create(InstallDirectory, FPCCompiler: string; Verbosity: boolean);
+constructor TWinInstaller.Create(aInstallDirectory, aFPCCompiler: string; Verbosity: boolean);
 begin
   inherited Create;
-  FBaseDirectory:=InstallDirectory;
+  FInstallDirectory:=aInstallDirectory;
   FVerbose:=Verbosity;
-  FCompiler:=FPCCompiler;
+  FCompiler:=aFPCCompiler;
   // Sensible default for an x64 Windows:
   FindInno;
   if FInnoSetupCompiler='' then

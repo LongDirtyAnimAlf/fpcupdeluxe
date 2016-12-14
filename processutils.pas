@@ -148,12 +148,14 @@ function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload
 // Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommand(Commandline: string; var Output:string; Verbose:boolean): integer; overload;
 // Runs command, returns result code. Negative codes are processutils internal error codes
+function ExecuteCommand(Commandline: string; Output : TStream; Verbose:boolean): integer; overload;
+// Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
 // Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean): integer; overload;
 // Runs command, returns result code. Negative codes are processutils internal error codes
 // PrependPath is prepended to existing path. If empty, keep current path
-function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; Verbose:boolean; PrependPath: string): integer; overload;
+function ExecuteCommandInDir(Commandline, Directory: string; var Output:string; PrependPath: string; Verbose:boolean): integer; overload;
 // Don't process comamndline
 function ExecutePlainCommand(Commandline: string; var Output: string; Verbose: boolean): integer;
 // Writes output to console
@@ -477,6 +479,14 @@ begin
   Result:=ExecuteCommandInDir(Commandline,'',Output,Verbose);
 end;
 
+function ExecuteCommand(Commandline: string; Output : TStream;
+  Verbose: boolean): integer;
+begin
+  // to be done
+  //Result:=ExecuteCommandInDir(Commandline,'',Output,Verbose);
+end;
+
+
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose: boolean
   ): integer;
 var
@@ -488,11 +498,11 @@ end;
 function ExecuteCommandInDir(Commandline, Directory: string;
   var Output: string; Verbose: boolean): integer;
 begin
-  Result:=ExecuteCommandInDir(CommandLine,Directory,Output,Verbose,'');
+  Result:=ExecuteCommandInDir(CommandLine,Directory,Output,'',Verbose);
 end;
 
 function ExecuteCommandInDir(Commandline, Directory: string;
-  var Output: string; Verbose: boolean; PrependPath: string): integer;
+  var Output: string; PrependPath: string; Verbose: boolean): integer;
 var
   OldPath: string;
   PE:TProcessEx;

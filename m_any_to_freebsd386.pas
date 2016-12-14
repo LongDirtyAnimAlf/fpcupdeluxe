@@ -47,9 +47,6 @@ private
   function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -75,7 +72,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if not result then
   begin
@@ -99,14 +96,6 @@ begin
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
   end;
 end;
-
-{$ifndef FPCONLY}
-function Tany_freebsd386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // todo: get gtk at least
-  result:=true;
-end;
-{$endif}
 
 function Tany_freebsd386.GetBinUtils(Basepath:string): boolean;
 const

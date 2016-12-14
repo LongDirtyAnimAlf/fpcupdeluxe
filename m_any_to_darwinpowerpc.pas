@@ -1,4 +1,4 @@
-unit m_any_to_darwin386;
+unit m_any_to_darwinpowerpc;
 
 { Cross compiles to Darwin 32 bit
 Copyright (C) 2014 Reinier Olislagers / DonAlfredo
@@ -40,8 +40,8 @@ implementation
 
 type
 
-{ Tany_darwin386 }
-Tany_darwin386 = class(TCrossInstaller)
+{ Tany_darwinpowerpc }
+Tany_darwinpowerpc = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -52,15 +52,15 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_darwin386 }
-function Tany_darwin386.TargetSignature: string;
+{ Tany_darwinpowerpc }
+function Tany_darwinpowerpc.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function Tany_darwin386.GetLibs(Basepath:string): boolean;
+function Tany_darwinpowerpc.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-darwin';
+  DirName='powerpc-darwin';
   LibName='libc.dylib';
 begin
 
@@ -85,10 +85,10 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/powerpc-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_darwin386: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('Tany_darwinpowerpc: failed: searched libspath '+FLibsPath,etInfo);
     {$ENDIF}
   end;
 
@@ -121,9 +121,9 @@ begin
   end;
 end;
 
-function Tany_darwin386.GetBinUtils(Basepath:string): boolean;
+function Tany_darwinpowerpc.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='i386-darwin';
+  DirName='powerpc-darwin';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -178,34 +178,34 @@ begin
   end;
 end;
 
-constructor Tany_darwin386.Create;
+constructor Tany_darwinpowerpc.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_darwin386';
-  FBinUtilsPrefix:='i386-darwin-';
+  FCrossModuleName:='any_darwinpowerpc';
+  FBinUtilsPrefix:='powerpc-darwin-';
   FBinUtilsPath:='';
   FBinutilsPathInPath:=true;
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
+  FTargetCPU:='powerpc';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  infoln('Tany_darwin386 crosscompiler loading',etDebug);
+  infoln('Tany_darwinpowerpc crosscompiler loading',etDebug);
 end;
 
-destructor Tany_darwin386.Destroy;
+destructor Tany_darwinpowerpc.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  any_darwin386:Tany_darwin386;
+  any_darwinpowerpc:Tany_darwinpowerpc;
 
 initialization
-  any_darwin386:=Tany_darwin386.Create;
-  RegisterExtension(any_darwin386.TargetCPU+'-'+any_darwin386.TargetOS,any_darwin386);
+  any_darwinpowerpc:=Tany_darwinpowerpc.Create;
+  RegisterExtension(any_darwinpowerpc.TargetCPU+'-'+any_darwinpowerpc.TargetOS,any_darwinpowerpc);
 finalization
-  any_darwin386.Destroy;
+  any_darwinpowerpc.Destroy;
 
 end.
 

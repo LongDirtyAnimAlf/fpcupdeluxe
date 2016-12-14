@@ -93,7 +93,7 @@ begin
   // Wince does not need libs by default, but user can add them.
 
   // search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName);
+  result:=SimpleSearchLibrary(BasePath,DirName,'');
 
   if result then
   begin
@@ -117,7 +117,7 @@ function TWin32_wincearm.GetLibsLCL(LCL_Platform: string; Basepath: string): boo
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

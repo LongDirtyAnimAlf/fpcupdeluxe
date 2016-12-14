@@ -12,7 +12,7 @@ Const
   DELUXEFILENAME='fpcupdeluxe.ini';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,jvm);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm);
   TOS  = (windows,linux,android,darwin,freebsd,wince,java);
   TCrossSetting = (fpcup,auto,custom);
 
@@ -26,15 +26,28 @@ type
 
   TCrossUtils = array[TCPU,TOS] of TCrossUtil;
 
+  TString = class(TObject)
+  private
+    fStr: String;
+  public
+    constructor Create(const AStr: String) ;
+    property Str: String read FStr write FStr;
+  end;
+
   { TForm2 }
   TForm2 = class(TForm)
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
     btnSelectLibDir: TButton;
     btnSelectBinDir: TButton;
+    Button1: TButton;
+    Button2: TButton;
     CheckIncludeFPCIDE: TCheckBox;
     CheckIncludeHelp: TCheckBox;
+    CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
+    CheckSplitLazarus: TCheckBox;
+    CheckUseWget: TCheckBox;
     CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
@@ -67,8 +80,12 @@ type
     LabelLazarusbranch: TLabel;
     LabelLazarusOptions: TLabel;
     LabelLazarusRevision: TLabel;
+    ListBoxPatch: TListBox;
+    OpenDialog1: TOpenDialog;
     RadioGroup3: TRadioGroup;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
+    procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -81,6 +98,15 @@ type
     function GetUpdateOnly:boolean;
     function GetIncludeLCL:boolean;
     function GetIncludeHelp:boolean;
+
+    function GetSplitFPC:boolean;
+    procedure SetSplitFPC(value:boolean);
+    function GetSplitLazarus:boolean;
+    procedure SetSplitLazarus(value:boolean);
+
+    function GetUseWget:boolean;
+    procedure SetUseWget(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -97,6 +123,10 @@ type
     procedure SetFPCBranch(value:string);
     function GetLazarusBranch:string;
     procedure SetLazarusBranch(value:string);
+
+    function GetFPCPatches:string;
+    procedure SetFPCPatches(value:string);
+
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
@@ -109,6 +139,11 @@ type
     property IncludeLCL:boolean read GetIncludeLCL;
     property IncludeHelp:boolean read GetIncludeHelp;
 
+    property SplitFPC:boolean read GetSplitFPC write SetSplitFPC;
+    property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
+
+    property UseWget:boolean read GetUseWget write SetUseWget;
+
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
     property HTTPProxyUser:string read GetHTTPProxyUser;
@@ -120,6 +155,8 @@ type
     property LazarusRevision:string read GetLazarusRevision write SetLazarusRevision;
     property FPCBranch:string read GetFPCBranch write SetFPCBranch;
     property LazarusBranch:string read GetLazarusBranch write SetLazarusBranch;
+
+    property FPCPatches:string read GetFPCPatches write SetFPCPatches;
 
   end;
 
@@ -136,6 +173,12 @@ uses
   typinfo;
 
 { TForm2 }
+
+constructor TString.Create(const AStr: String) ;
+begin
+  inherited Create;
+  FStr := AStr;
+end;
 
 procedure TForm2.OnDirectorySelect(Sender: TObject);
 begin
@@ -203,6 +246,12 @@ begin
     Free;
   end;
 
+  {$ifdef MSWINDOWS}
+  CheckUseWget.Enabled:=False;
+  {$endif}
+  {$IFDEF Darwin}
+  CheckUseWget.Enabled:=False;
+  {$endif}
 end;
 
 procedure TForm2.ComboBoxCPUOSChange(Sender: TObject);
@@ -219,11 +268,47 @@ begin
   end;
 end;
 
+
+procedure TForm2.Button1Click(Sender: TObject);
+var
+  PatchName: string;
+  FullPatchPath: string;
+begin
+  if OpenDialog1.Execute then
+  begin
+    FullPatchPath := OpenDialog1.FileName;
+    PatchName := ExtractFileName(FullPatchPath);
+    if ListBoxPatch.Items.IndexOf(PatchName)=-1 then
+    begin
+      ListBoxPatch.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+    end;
+  end;
+end;
+
+procedure TForm2.Button2Click(Sender: TObject);
+var
+  i:integer;
+begin
+  if ListBoxPatch.SelCount>0 then
+  begin
+    for i:=ListBoxPatch.Count-1 downto 0 do
+    begin
+      if ListBoxPatch.Selected[i] then
+      begin
+        TString(ListBoxPatch.Items.Objects[i]).Free;
+        ListBoxPatch.Items.Objects[i]:=nil;
+        ListBoxPatch.Items.Delete(i);
+      end;
+    end;
+  end;
+end;
+
 procedure TForm2.FormDestroy(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
   s:string;
+  i:integer;
 begin
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
@@ -248,7 +333,8 @@ begin
         if (OS=wince) AND (CPU<>arm) then continue;
         if (OS=windows) AND (CPU=arm) then continue;
         if (OS=windows) AND (CPU=aarch64) then continue;
-        if (OS=darwin) AND ((CPU=aarch64) OR (CPU=arm)) then continue;
+        if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
+        if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
 
         s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));
@@ -259,6 +345,12 @@ begin
 
   finally
     Free;
+  end;
+
+  for i := 0 to ListBoxPatch.Items.Count - 1 do
+  begin
+     TString(ListBoxPatch.Items.Objects[i]).Free;
+     ListBoxPatch.Items.Objects[i] := nil;
   end;
 
 end;
@@ -344,6 +436,34 @@ begin
   result:=CheckIncludeHelp.Checked;
 end;
 
+function TForm2.GetSplitFPC:boolean;
+begin
+  result:=CheckSplitFPC.Checked;
+end;
+procedure TForm2.SetSplitFPC(value:boolean);
+begin
+  CheckSplitFPC.Checked:=value;
+end;
+
+function TForm2.GetSplitLazarus:boolean;
+begin
+  result:=CheckSplitLazarus.Checked;
+end;
+procedure TForm2.SetSplitLazarus(value:boolean);
+begin
+  CheckSplitLazarus.Checked:=value;
+end;
+
+function TForm2.GetUseWget:boolean;
+begin
+  result:=CheckUseWget.Checked;
+end;
+procedure TForm2.SetUseWget(value:boolean);
+begin
+  CheckUseWget.Checked:=value;
+end;
+
+
 function TForm2.GetFPCOptions:string;
 begin
   result:=EditFPCOptions.Text;
@@ -418,6 +538,59 @@ end;
 function TForm2.GetHTTPProxyPass:string;
 begin
   result:=EditHTTPProxyPassword.Text;
+end;
+
+function TForm2.GetFPCPatches:string;
+var
+  i:integer;
+  FullPatchPath:string;
+begin
+  result:='';
+  if ListBoxPatch.Count=0 then exit;
+  for i:=0 to ListBoxPatch.Count-1 do
+  begin
+    FullPatchPath := TString(ListBoxPatch.Items.Objects[i]).Str;
+    result:=result+FullPatchPath+',';
+  end;
+  // delete last comma
+  if Length(result)>0 then
+  begin
+    Delete(result,Length(result),1);
+  end;
+end;
+
+procedure TForm2.SetFPCPatches(value:string);
+var
+  PatchName: string;
+  FullPatchPath: string;
+  PatchList:TStringList;
+  i:integer;
+begin
+
+  // cleanup
+  for i := ListBoxPatch.Items.Count - 1 downto 0 do
+  begin
+     TString(ListBoxPatch.Items.Objects[i]).Free;
+     ListBoxPatch.Items.Objects[i] := nil;
+     ListBoxPatch.Items.Delete(i);
+  end;
+
+  PatchList:=TStringList.Create;
+  try
+    PatchList.CommaText:=value;
+    if PatchList.Count=0 then exit;
+    for i:=0 to PatchList.Count-1 do
+    begin
+      FullPatchPath := Trim(PatchList.Strings[i]);
+      if Length(FullPatchPath)>0 then
+      begin
+        PatchName := ExtractFileName(FullPatchPath);
+        ListBoxPatch.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+      end;
+    end;
+  finally
+    PatchList.Free;
+  end;
 end;
 
 end.

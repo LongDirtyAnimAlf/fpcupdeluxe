@@ -70,7 +70,6 @@ type
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut(UseForce:boolean=false); virtual;
     function GetLocalRevision: string; virtual;
-    function GetRepoExecutable: string; virtual;
     // Makes sure non-empty strings have a / at the end.
     function IncludeTrailingSlash(AValue: string): string; virtual;
     procedure SetDesiredRevision(AValue: string); virtual;
@@ -81,7 +80,10 @@ type
     procedure SetVerbose(AValue: boolean); virtual;
     procedure SetExportOnly(AValue: boolean); virtual;
     function GetValidClient:boolean;
+    // Search for installed version control client executable (might return just a filename if in the OS path)
+    function GetRepoExecutable:string;virtual;
     function GetRepoExecutableName:string;virtual;
+    function FindRepoExecutable: string; virtual;
     //Performs an update (pull)
     //Note: it's often easier to call CheckOutOrUpdate; that also has some more network error recovery built in
     procedure Update; virtual;
@@ -95,8 +97,6 @@ type
     // Executes command and returns result code
     // Note: caller is responsible for quoting: to do: find out again in processutils what rules apply?!?
     function Execute(Command: string): integer; virtual;
-    // Search for installed version control client executable (might return just a filename if in the OS path)
-    function FindRepoExecutable: string; virtual;
     // Creates diff of all changes in the local directory versus the remote version
     function GetDiffAll: string; virtual;
     // Shows commit log for local directory
@@ -326,7 +326,7 @@ begin
   FReturnCode := 0;
   FReturnOutput := '';
   FRepoExecutable := '';
-  FindRepoExecutable; //Do this now so hopefully the hgExecutable property is valid.
+  FindRepoExecutable;
 end;
 
 destructor TRepoClient.Destroy;

@@ -26,9 +26,6 @@ private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -44,13 +41,6 @@ begin
   result:=true;
   FLibsFound:=true;
 end;
-
-{$ifndef FPCONLY}
-function Tanyinternallinker_win386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  result:=true;
-end;
-{$endif}
 
 function Tanyinternallinker_win386.GetBinUtils(Basepath:string): boolean;
 begin

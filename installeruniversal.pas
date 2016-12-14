@@ -631,7 +631,7 @@ begin
     if Workingdir='' then Workingdir:=BaseWorkingdir;
     if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
     try
-      result:=ExecuteCommandInDir(exec,Workingdir,output,FVerbose,FPath)=0;
+      result:=ExecuteCommandInDir(exec,Workingdir,output,FPath,FVerbose)=0;
       if result then
       begin
         {$ifndef FPCONLY}
@@ -1099,7 +1099,7 @@ begin
       infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FBaseDirectory:=InstallDir;
+        FInstallDirectory:=InstallDir;
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FGitClient.DesiredRevision:=PinRevision;
@@ -1129,7 +1129,7 @@ begin
       infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FBaseDirectory:=InstallDir;
+        FSourceDirectory:=InstallDir;
         FUrl:=RemoteURL;
         User:=GetValue('UserName',sl);
         Pass:=GetValue('Password',sl);
@@ -1139,7 +1139,7 @@ begin
         FSVNClient.Verbose:=FVerbose;
         FSVNClient.ExportOnly:=FExportOnly;
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
-        SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FBaseDirectory+'.svn')) OR FExportOnly);
+        SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1160,7 +1160,7 @@ begin
       infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FBaseDirectory:=InstallDir;
+        FSourceDirectory:=InstallDir;
         FUrl:=RemoteURL;
         if PinRevision<>'' then
           FHGClient.DesiredRevision:=PinRevision;
@@ -1190,7 +1190,7 @@ begin
       TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
       WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
       try
-        result:=Download(RemoteURL,TempArchive);
+        result:=Download(FUseWget, RemoteURL, TempArchive);
       except
         on E: Exception do
         begin
@@ -1199,7 +1199,7 @@ begin
       end;
 
       if result=false then
-         WritelnLog('Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+         WritelnLog(etError,'Error downloading from '+RemoteURL+'. Continuing regardless.',True);
 
       if result then
       begin
@@ -1875,23 +1875,6 @@ begin
   // Create fpcup.ini from resource if it doesn't exist yet
   if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
      SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
-  {
-  // Create fpcup.ini from resource
-  // Save old version if existing
-  if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
-  begin
-    if FileExists(CurrentConfigFile) then
-    begin
-      CurrentConfigFileName:=CurrentConfigFile;
-      while FileExists(CurrentConfigFileName) do
-        CurrentConfigFileName := CurrentConfigFileName + 'i';
-      FileUtil.CopyFile(CurrentConfigFile,CurrentConfigFileName);
-      infoln('Old configfile('+CurrentConfigFile+') saved as '+CurrentConfigFileName+ '!!',etInfo);
-    end;
-    SysUtils.Deletefile(CurrentConfigFile);
-    SaveInisFromResource(CurrentConfigFile,'fpcup_ini');
-  end;
-  }
 end;
 
 initialization

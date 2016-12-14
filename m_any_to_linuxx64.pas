@@ -1,6 +1,6 @@
-unit m_any_to_linuxaarch64;
+unit m_any_to_linuxx64;
 
-{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to Linux 64 bit aarch
+{ Cross compiles from any (or any other OS with relevant binutils/libs) to Linux 64 bit
 Copyright (C) 2014 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -34,14 +34,14 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
 
 implementation
 
 type
 
-{ Tany_linuxaarch64 }
-Tany_linuxaarch64 = class(TCrossInstaller)
+{ Tany_linux64 }
+Tany_linux64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -55,15 +55,15 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_linuxaarch64 }
-function Tany_linuxaarch64.TargetSignature: string;
+{ Tany_linux64 }
+function Tany_linux64.TargetSignature: string;
 begin
   result:=FTargetCPU+'-'+TargetOS;
 end;
 
-function Tany_linuxaarch64.GetLibs(Basepath:string): boolean;
+function Tany_linux64.GetLibs(Basepath:string): boolean;
 const
-  DirName='aarch64-linux';
+  DirName='x86_64-linux';
   LibName='libc.so';
 begin
   result:=FLibsFound;
@@ -79,10 +79,10 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/aarch64-linux-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/x86_64-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_linuxaarch64: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('Tany_linux64: failed: searched libspath '+FLibsPath,etInfo);
     {$ENDIF}
   end;
 
@@ -93,22 +93,22 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+    //'-FL/lib/ld-linux.so.2'+LineEnding+ {buildfaq 3.3.1: the name of the dynamic linker on the target ... can also be ld-linux.so.3 (Arch) ... tricky}
+    '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
   end;
 end;
 
 {$ifndef FPCONLY}
-function Tany_linuxaarch64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function Tany_linux64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
   result:=inherited;
 end;
 {$endif}
 
-function Tany_linuxaarch64.GetBinUtils(Basepath:string): boolean;
+function Tany_linux64.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='aarch64-linux';
+  DirName='x86_64-linux';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -119,6 +119,7 @@ begin
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
+
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
@@ -140,37 +141,41 @@ begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    '-XP'+FBinUtilsPrefix {Prepend the binutils names}
+    {$ifdef MSWINDOWS}
+    +LineEnding+'-Tlinux'; {target operating system}
+    {$endif}
+    ;
   end;
 end;
 
-constructor Tany_linuxaarch64.Create;
+constructor Tany_linux64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linuxaarch64';
-  FBinUtilsPrefix:='aarch64-linux-';
+  FCrossModuleName:='any_linux64';
+  FBinUtilsPrefix:='x86_64-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='aarch64';
+  FTargetCPU:='x86_64';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Tany_linuxaarch64 crosscompiler loading',etDebug);
+  infoln('Tany_linux64 crosscompiler loading',etDebug);
 end;
 
-destructor Tany_linuxaarch64.Destroy;
+destructor Tany_linux64.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  any_linuxaarch64:Tany_linuxaarch64;
+  any_linux64:Tany_linux64;
 
 initialization
-  any_linuxaarch64:=Tany_linuxaarch64.Create;
-  RegisterExtension(any_linuxaarch64.TargetCPU+'-'+any_linuxaarch64.TargetOS,any_linuxaarch64);
+  any_linux64:=Tany_linux64.Create;
+  RegisterExtension(any_linux64.TargetCPU+'-'+any_linux64.TargetOS,any_linux64);
 finalization
-  any_linuxaarch64.Destroy;
+  any_linux64.Destroy;
 
 end.
 

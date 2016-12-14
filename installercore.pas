@@ -72,8 +72,8 @@ type
     procedure SetHTTPProxyUser(AValue: string);
     function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
   protected
-    FBaseDirectory: string; //Top directory for a product (FPC, Lazarus)
-    FBunzip2: string;
+    FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
+    FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
@@ -112,8 +112,10 @@ type
     FExportOnly: boolean;
     FNoJobs: boolean;
     FVerbose: boolean;
+    FUseWget: boolean;
     FTar: string;
     FUnzip: string;
+    FBunzip2: string;
     F7zip: string;
     FUnrar: string;
     ProcessEx: TProcessEx;
@@ -131,13 +133,13 @@ type
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
     // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
-    // Clone/update using HG; use FBaseDirectory as local repository
+    // Clone/update using HG; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromHG(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
-    // Clone/update using Git; use FBaseDirectory as local repository
+    // Clone/update using Git; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromGit(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
-    // Checkout/update using SVN; use FBaseDirectory as local repository
+    // Checkout/update using SVN; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
@@ -161,15 +163,17 @@ type
     procedure LogError(Sender: TProcessEx; IsException: boolean);
     // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
-    function GetFile(aURL,aFile:string):boolean;
+    function GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
   public
     property SVNClient: TSVNClient read FSVNClient;
     // Get processor for termination of running processes
     property Processor: TProcessEx read ProcessEx;
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
-    // Base directory for installation (fpcdir, lazdir,... option)
-    property BaseDirectory: string write FBaseDirectory;
+    // Source directory for installation (fpcdir, lazdir,... option)
+    property SourceDirectory: string write FSourceDirectory;
+    // Source directory for installation (fpcdir, lazdir,... option)
+    property InstallDirectory: string write FInstallDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string read GetCompiler write FCompiler;
     // Compiler options passed on to make as OPT=
@@ -213,8 +217,11 @@ type
     property NoJobs: boolean write FNoJobs;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
+    // use wget as downloader ??
+    property UseWget: boolean write FUseWget;
     // append line ending and write to log and, if specified, to console
-    procedure WritelnLog(msg: string; ToConsole: boolean = true);
+    procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
+    procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
     // Build module
     function BuildModule(ModuleName: string): boolean; virtual; abstract;
     // Clean up environment
@@ -250,7 +257,7 @@ uses
 function TInstaller.GetCompiler: string;
 begin
   if (Self is TFPCNativeInstaller) or (Self is TFPCInstaller) then
-    Result := GetCompilerInDir(FBaseDirectory)
+    Result := GetCompilerInDir(FInstallDirectory)
   else
     Result := FCompiler;
 end;
@@ -337,7 +344,6 @@ end;
 function TInstaller.CheckAndGetNeededExecutables: boolean;
 var
   AllThere: boolean;
-  i: integer;
   OperationSucceeded: boolean;
   Output: string;
 begin
@@ -379,6 +385,19 @@ begin
     {$IFDEF MSWINDOWS}
     ForceDirectoriesUTF8(FMakeDir);
 
+    {
+    // check if we have make ... otherwise get it from standard URL
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+
+            '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
+    }
+
+    {$ifdef win64}
+    // the standard make by FPC does not work when Git is present, but this one works ??!!
+    // strange, but do not enable (yet) !!
+    // Download('ftp://ftp.equation.com/make/'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make), Make);
+    {$endif}
+
+
     // Get unzip binary from default binutils URL
     FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
@@ -394,6 +413,7 @@ begin
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      //OperationSucceeded:=GetFile('https://freefr.dl.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if NOT OperationSucceeded then
       begin
         // try one more time
@@ -510,7 +530,7 @@ begin
       begin
         // look system default
         FSVNDirectory := '';
-        AllThere:=Length(FSVNClient.FindRepoExecutable)<>0;
+        AllThere:=Length(FSVNClient.RepoExecutable)<>0;
         //AllThere:=Length(FSVNClient.RepoExecutable)<>0;
       end;
 
@@ -530,7 +550,7 @@ begin
       begin
         OperationSucceeded := false;
         infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
-      end else WritelnLog('SVN client found: ' + FSVNClient.FindRepoExecutable, true);
+      end else WritelnLog('SVN client found: ' + FSVNClient.RepoExecutable, true);
     end;
 
     if OperationSucceeded then
@@ -582,8 +602,10 @@ end;
 
 function TInstaller.CheckAndGetNeededBinUtils: boolean;
 var
+  {$IFDEF MSWINDOWS}
   AllThere: boolean;
   i: integer;
+  {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
   Output: string;
 begin
@@ -891,13 +913,13 @@ begin
 
       if (FileExists(InstallPath)) then continue;
 
-      DownloadSuccess:=GetFile(FUtilFIles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
+      DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
 
       if NOT DownloadSuccess then
       begin
         infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
         Errors := Errors + 1;
-      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etDebug);
+      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
 
     end;
 
@@ -933,7 +955,7 @@ begin
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
-  aClient.LocalRepository := FBaseDirectory;
+  aClient.LocalRepository := FSourceDirectory;
   aClient.Repository := FURL;
 
   BeforeRevision := 'revision '+aClient.LocalRevision;
@@ -947,7 +969,7 @@ begin
       UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + BeforeRevisionShort + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
         UpdateWarnings.Add(ModuleName + ': reverting to original before updating.');
         aClient.Revert; //Remove local changes
@@ -991,7 +1013,7 @@ begin
             then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
             else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
 
-         ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
+         ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
 
          {$IFNDEF MSWINDOWS}
          if ReturnCode<>0 then
@@ -1001,7 +1023,7 @@ begin
            // Try to circumvent this problem by trick below (replacing line enddings)
            if Pos('different line endings',Output)>0 then
            begin
-             ReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FBaseDirectory, FVerbose);
+             ReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FSourceDirectory, FVerbose);
              if ReturnCode<>0 then
              begin
                DiffFileSL:=TStringList.Create();
@@ -1013,8 +1035,8 @@ begin
                finally
                  DiffFileSL.Free();
                end;
-               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FBaseDirectory, FVerbose);
-               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
+               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
+               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
              end;
              if ReturnCode=0 then
              begin
@@ -1022,7 +1044,7 @@ begin
                if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
                   then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
                   else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-               ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
+               ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
              end;
            end;
          end;
@@ -1067,7 +1089,7 @@ begin
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
   FSVNClient.ModuleName:=ModuleName;
-  FSVNClient.LocalRepository := FBaseDirectory;
+  FSVNClient.LocalRepository := FSourceDirectory;
   FSVNClient.Repository := FURL;
   FSVNClient.UserName:=aUserName;
   FSVNClient.Password:=aPassword;
@@ -1083,17 +1105,17 @@ begin
   else
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
-    writelnlog('INFO: directory ' + FBaseDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
+    writelnlog('INFO: directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
     if not(DirectoryExistsUTF8(FSVNClient.LocalRepository)) then
     begin
-      writelnlog('INFO: creating directory '+FBaseDirectory+' for SVN checkout.');
-      ForceDirectoriesUTF8(FBaseDirectory);
+      writelnlog('INFO: creating directory '+FSourceDirectory+' for SVN checkout.');
+      ForceDirectoriesUTF8(FSourceDirectory);
     end;
   end;
 
   if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
-    writelnlog('ERROR: The working copy in ' + FBaseDirectory + ' was created with an older, incompatible version of svn.', true);
+    writelnlog('ERROR: The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
     writelnlog('  Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
     result := false;  //fail
     exit;
@@ -1108,7 +1130,7 @@ begin
       UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + BeforeRevisionShort + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
         UpdateWarnings.Add(ModuleName + ': reverting before updating.');
         FSVNClient.Revert; //Remove local changes
@@ -1166,7 +1188,7 @@ begin
         if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
            then LocalPatchCmd:=FPatchCmd + ' -p0 -i '
            else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
+        CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
 
         {$IFNDEF MSWINDOWS}
         if CheckoutOrUpdateReturnCode<>0 then
@@ -1176,7 +1198,7 @@ begin
           // Try to circumvent this problem by trick below (replacing line enddings)
           if Pos('different line endings',Output)>0 then
           begin
-            CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FBaseDirectory, FVerbose);
+            CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FSourceDirectory, FVerbose);
             if CheckoutOrUpdateReturnCode<>0 then
             begin
               DiffFileSL:=TStringList.Create();
@@ -1188,15 +1210,15 @@ begin
               finally
                 DiffFileSL.Free();
               end;
-              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FBaseDirectory, FVerbose);
-              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FBaseDirectory, FVerbose);
+              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
+              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
             end;
             if CheckoutOrUpdateReturnCode=0 then
             begin
               if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
                  then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-              CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FBaseDirectory, Output, FVerbose);
+              CheckoutOrUpdateReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
             end;
           end;
         end;
@@ -1264,10 +1286,11 @@ begin
     if OperationSucceeded then
     begin
       OperationSucceeded := Download(
+        FUseWget,
         SourceURL,
         SVNZip,
         FHTTPProxyUser,
-        inttostr(FHTTPProxyPort),
+        FHTTPProxyPort,
         FHTTPProxyUser,
         FHTTPProxyPassword);
     end;
@@ -1308,10 +1331,10 @@ end;
 function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2e-x64_86-win64.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-x64_86-win64.zip';
   {$endif}
   {$ifdef win32}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2e-i386-win32.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-i386-win32.zip';
   {$endif}
 var
   OperationSucceeded: boolean;
@@ -1327,10 +1350,11 @@ begin
     if OperationSucceeded then
     begin
       OperationSucceeded := Download(
+        FUseWget,
         SourceURL,
         OpenSSLZip,
         FHTTPProxyUser,
-        inttostr(FHTTPProxyPort),
+        FHTTPProxyPort,
         FHTTPProxyUser,
         FHTTPProxyPassword);
     end;
@@ -1376,7 +1400,7 @@ var
   ResultCode: longint;
   JasminZip,JasminDir: string;
 begin
-  JasminDir:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+  JasminDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
   if NOT FileExists(JasminDir+'jasmin.jar') then
   begin
     OperationSucceeded := true;
@@ -1385,10 +1409,11 @@ begin
       if OperationSucceeded then
       begin
         OperationSucceeded := Download(
+          FUseWget,
           SourceURL,
           JasminZip,
           FHTTPProxyUser,
-          inttostr(FHTTPProxyPort),
+          FHTTPProxyPort,
           FHTTPProxyUser,
           FHTTPProxyPassword);
       end;
@@ -1402,7 +1427,7 @@ begin
     end;
 
     // for now, just put jasmin.jar in bin directory ... easy and simple and working
-    JasminDir:=IncludeTrailingPathDelimiter(FBaseDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+    JasminDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
 
     if OperationSucceeded then
     begin
@@ -1618,6 +1643,14 @@ begin
   end;
 end;
 
+procedure TInstaller.WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean);
+begin
+  if Assigned(FLog) then
+  begin
+    FLog.WriteLog(EventType,msg,ToConsole);
+  end;
+end;
+
 
 function TInstaller.GetCompilerInDir(Dir: string): string;
 var
@@ -1655,28 +1688,13 @@ begin
   ProcessEx.OnErrorM:=@(ProcessError);
 end;
 
-function TInstaller.GetFile(aURL,aFile:string):boolean;
-var
-  aDownLoader:TDownLoader;
+function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
 begin
-  result:=false;
-  if (NOT FileExists(aFile)) then
+  result:=((FileExists(aFile)) AND (NOT forceoverwrite));
+  if (NOT result) then
   begin
-    infoln('Downloading ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etDebug);
-    //aDownLoader:=TDownLoader.Create(FVerbose);
-    aDownLoader:=TDownLoader.Create;
-    try
-      if FHTTPProxyHost<>'' then aDownLoader.setProxy(FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-      result:=aDownLoader.getFile(aURL,aFile);
-      if (NOT result) then // try only once again in case of error
-      begin
-        infoln('Error while trying to download '+aURL+'. Trying again.',etDebug);
-        SysUtils.DeleteFile(aFile); // delete stale targetfile
-        result:=aDownLoader.getFile(aURL,aFile);
-      end;
-    finally
-      aDownLoader.Destroy;
-    end;
+    result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
+    if (NOT result) then infoln('Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
   end;
 end;
 

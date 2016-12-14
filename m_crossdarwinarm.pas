@@ -1,6 +1,6 @@
-unit m_crossdarwin32;
+unit m_crossdarwinarm;
 
-{ Cross compiles from Darwin x86_64 code to Darwin x86/32 bit
+{ Cross compiles from Darwin i386 to Darwin arm
 }
 
 
@@ -18,9 +18,9 @@ const
 
 type
 
-{ TDarwin32 }
+{ TDarwinarm }
 
-TDarwin32 = class(TCrossInstaller)
+TDarwinarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -30,9 +30,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwin32 }
+{ TDarwinarm }
 
-function TDarwin32.GetLibs(Basepath:string): boolean;
+function TDarwinarm.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -41,7 +41,7 @@ begin
   FLibsFound:=true;
 end;
 
-function TDarwin32.GetBinUtils(Basepath:string): boolean;
+function TDarwinarm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
@@ -51,33 +51,33 @@ begin
   FBinsFound:=true;
 end;
 
-constructor TDarwin32.Create;
+constructor TDarwinarm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Darwin32';
-  FTargetCPU:='i386';
+  FCrossModuleName:='Darwinarm';
+  FTargetCPU:='arm';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('TDarwin32 crosscompiler loading',etDebug);
+  infoln('TDarwinarm crosscompiler loading',etDebug);
 end;
 
-destructor TDarwin32.Destroy;
+destructor TDarwinarm.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
-{$IFDEF CPUX86_64}
+{$IFDEF CPUi386}
 
 var
-  Darwin32:TDarwin32;
+  Darwinarm:TDarwinarm;
 
 initialization
-  Darwin32:=TDarwin32.Create;
-  RegisterExtension(Darwin32.TargetCPU+'-'+Darwin32.TargetOS,Darwin32);
+  Darwinarm:=TDarwinarm.Create;
+  RegisterExtension(Darwinarm.TargetCPU+'-'+Darwinarm.TargetOS,Darwinarm);
 finalization
-  Darwin32.Destroy;
+  Darwinarm.Destroy;
 {$ENDIF}
 {$ENDIF}
 end.

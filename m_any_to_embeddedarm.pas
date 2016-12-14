@@ -85,7 +85,7 @@ begin
   if result then exit;
 
   // search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName);
+  result:=SimpleSearchLibrary(BasePath,DirName,'');
 
   if result then
   begin
@@ -109,7 +109,7 @@ function TAny_Embeddedarm.GetLibsLCL(LCL_Platform: string; Basepath: string): bo
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

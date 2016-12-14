@@ -72,9 +72,6 @@ private
   function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
-  {$ifndef FPCONLY}
-  function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
-  {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;
@@ -130,7 +127,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   // search for a library provide by a standard android libraries install
 
@@ -231,21 +228,6 @@ begin
     FAlreadyWarned:=true;
   end;
 end;
-
-{$ifndef FPCONLY}
-function TAny_ARMAndroid.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
-begin
-  // Android does not support Gtk/Qt. To do: how to figure out how to do custom drawn?
-  result:=false;
-  { Any libs from Android SDK, e.g. r22 (no need for ADT), e.g.
-  http://dl.google.com/android/android-sdk_r22.3-windows.zip
-  ?
-
-  todo: add ant tools etc?
-  http://pascalgeek.blogspot.com/2013/10/android-programming-with-lazarus.html
-  }
-end;
-{$endif}
 
 function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
 const
@@ -446,10 +428,6 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName + ': Please fill '+IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+DirName+
-    ' with cross binutils for Android ARM, e.g. from the Android NDK.'+LineEnding+
-    'See http://wiki.lazarus.freepascal.org/Android.'
-    ,etError);
     FAlreadyWarned:=true;
   end;
 end;

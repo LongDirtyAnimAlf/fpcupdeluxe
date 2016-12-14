@@ -98,7 +98,7 @@ begin
 
   // DOS8086 does not need libs by default, but user can add them.
   // first search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName);
+  result:=SimpleSearchLibrary(BasePath,DirName,'');
 
   if result then
   begin
@@ -121,7 +121,7 @@ end;
 function TWin32_msdosi8086.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   infoln('TWin32_msdosi8086: no support for LCL platform '+LCL_Platform,etInfo);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

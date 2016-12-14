@@ -44,8 +44,8 @@ type
     RealFPCURL: TEdit;
     Label1: TLabel;
     Label2: TLabel;
-    ListBox1: TListBox;
-    ListBox2: TListBox;
+    ListBoxFPCTarget: TListBox;
+    ListBoxLazarusTarget: TListBox;
     ListBox3: TListBox;
     RadioGroup1: TRadioGroup;
     RadioGroup2: TRadioGroup;
@@ -53,6 +53,7 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     SynEdit1: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
+    procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
@@ -94,6 +95,7 @@ type
     function GetFPCUPSettings(IniFile:string):boolean;
     function SetFPCUPSettings(IniFile:string):boolean;
     procedure AddMessage(aMessage:string);
+    procedure InitFPCupManager;
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
   public
@@ -108,30 +110,59 @@ implementation
 {$R *.lfm}
 
 uses
-  AboutFrm,
-  extrasettings,
   IniFiles,
   StrUtils,
+  {$IFDEF UNIX}
+  baseunix,
+  {$ENDIF UNIX}
+  LazFileUtils,
+  AboutFrm,
+  extrasettings,
   installerUniversal,
   fpcuputil,
-  {$ifdef MSWINDOWS}
   processutils,
-  {$endif}
   synedittext;
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
   NEWPASCALGITREPO='https://github.com/newpascal';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
-  FPCUPWINBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  {$ifdef MSWINDOWS}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  {$endif}
+  {$ifdef Linux}
+  {$ifdef CPUX86}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxi386crossbins_v1.0';
+  {$endif CPUX86}
+  {$ifdef CPUX64}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
+  {$endif CPUX64}
+  {$ifdef CPUARM}
+  FPCUPBINSURL='';
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  FPCUPBINSURL='';
+  {$endif CPUAARCH64}
+  {$endif}
+  {$ifdef FreeBSD}
+  FPCUPBINSURL='';
+  {$endif}
+  {$ifdef Darwin}
+  FPCUPBINSURL='';
+  {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.1.0';
+  FPCUPDELUXEVERSION='1.1.0g';
 
 resourcestring
   CrossGCCMsg =
-       '{$ifdef Linux}'+ sLineBreak +
-       '  {$ifdef FPC_CROSSCOMPILING}'+ sLineBreak +
+       '{$ifdef FPC_CROSSCOMPILING}'+ sLineBreak +
+       '  {$ifdef Linux}'+ sLineBreak +
+       '    // for most versions of Linux in case of linking errors'+ sLineBreak +
        '    {$linklib libc_nonshared.a}'+ sLineBreak +
+       '    {$IFDEF CPUARM}'+ sLineBreak +
+       '      // for GUI on RPi[1,2,3] with Arch Linux in case of linking errors'+ sLineBreak +
+       '      // {$linklib GLESv2}'+ sLineBreak +
+       '    {$ENDIF}'+ sLineBreak +
        '  {$endif}'+ sLineBreak +
        '{$endif}';
 
@@ -146,10 +177,6 @@ end;
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
-var
-  SortedModules: TStringList;
-  i:integer;
-  s:string;
 begin
   Self.Caption:='Lazarus and FPC installer and updater V'+FPCUPDELUXEVERSION+' based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
                 lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
@@ -163,8 +190,6 @@ begin
 
   AddMessage('Welcome @ fpclupdeluxe.');
   AddMessage('');
-
-  FPCupManager:=TFPCupManager.Create;
 
   {$IFDEF MSWINDOWS}
   sInstallDir:='C:\fpcupdeluxe';
@@ -183,10 +208,6 @@ begin
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
     CheckVerbosity.Checked:=ReadBool('General','Verbose',True);
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
-    FPCupManager.HTTPProxyHost:=ReadString('ProxySettings','HTTPProxyURL','');
-    FPCupManager.HTTPProxyPort:=ReadInteger('ProxySettings','HTTPProxyPort',8080);
-    FPCupManager.HTTPProxyUser:=ReadString('ProxySettings','HTTPProxyUser','');
-    FPCupManager.HTTPProxyPassword:=ReadString('ProxySettings','HTTPProxyPass','');
     SynEdit1.Font.Size := ReadInteger('General','CommandFontSize',SynEdit1.Font.Size);
     if ReadBool('General','Maximized',False) then
     begin
@@ -204,66 +225,40 @@ begin
     Free;
   end;
 
-  sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
-
-  FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
-
   SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini');
-  SaveInisFromResource(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME,'fpcup_ini');
+  SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
 
-  FPCupManager.LoadFPCUPConfig;
-
-  FPCupManager.FPCURL:='default';
-  FPCupManager.LazarusURL:='default';
-  FPCupManager.Verbose:=true;
-
-  {$IF defined(BSD) and not defined(DARWIN)}
-  FPCupManager.PatchCmd:='gpatch';
-  {$ELSE}
-  FPCupManager.PatchCmd:='patch';
-  {$ENDIF MSWINDOWS}
-
-  SortedModules:=TStringList.Create;
-  try
-    for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
-    begin
-      s:=FPCupManager.ModulePublishedList[i];
-      // tricky ... get out the modules that are packages only
-      // not nice, but needed to keep list clean of internal commands
-      if (FPCupManager.ModulePublishedList.IndexOf(s+'clean')<>-1)
-          AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
-          AND (s<>'FPC')
-          AND (s<>'lazarus')
-          AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
-          then
-      begin
-        SortedModules.Add(s);
-      end;
-    end;
-    listbox3.Items.AddStrings(SortedModules);
-
-  finally
-    SortedModules.Free;
+  if ListBoxFPCTarget.Count=0 then
+  begin
+    ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+    FPCTarget:='default';
+  end;
+  if ListBoxLazarusTarget.Count=0 then
+  begin
+    ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+    LazarusTarget:='default';
   end;
 
-  listbox1.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-  listbox2.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-
-  FPCTarget:='default';
-  LazarusTarget:='default';
+  sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
   Edit1.Text:=sInstallDir;
-  // set change here, to prevent early firing
-  Edit1.OnChange:=@Edit1Change;
+
+  // set edit1 (installdir) onchange here, to prevent early firing
+  Edit1.OnChange:=nil;
+  Edit1.OnKeyUp:=nil;
+  {$ifdef Darwin}
+  {$ifdef LCLCOCOA}
+  // onchange does not work on cocoa, so use onkeyup
+  Edit1.OnKeyUp:=@Edit1KeyUp;
+  {$endif}
+  {$endif}
+  if Edit1.OnKeyUp=nil then Edit1.OnChange:=@Edit1Change;
 
   // create settings form
   // must be done here, to enable local storage/access of some setttings !!
   Form2:=TForm2.Create(Form1);
 
-  // localize FPCUPSettings if possible
-  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
-     then GetFPCUPSettings(SafeGetApplicationPath+DELUXEFILENAME);
-
+  InitFPCupManager;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -284,10 +279,91 @@ begin
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
 end;
 
+procedure TForm1.InitFPCupManager;
+var
+  SortedModules: TStringList;
+  i:integer;
+  s:string;
+begin
+  FPCupManager:=TFPCupManager.Create;
+
+  FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
+
+  FPCupManager.LoadFPCUPConfig;
+
+  FPCupManager.FPCURL:='default';
+  FPCupManager.LazarusURL:='default';
+  FPCupManager.Verbose:=true;
+
+  {$IF defined(BSD) and not defined(DARWIN)}
+  FPCupManager.PatchCmd:='gpatch';
+  {$ELSE}
+  FPCupManager.PatchCmd:='patch';
+  {$ENDIF MSWINDOWS}
+
+  if listbox3.Count=0 then
+  begin
+    SortedModules:=TStringList.Create;
+    try
+      for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
+      begin
+        s:=FPCupManager.ModulePublishedList[i];
+        // tricky ... get out the modules that are packages only
+        // not nice, but needed to keep list clean of internal commands
+        if (FPCupManager.ModulePublishedList.IndexOf(s+'clean')<>-1)
+            AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
+            AND (s<>'FPC')
+            AND (s<>'lazarus')
+            AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
+            then
+        begin
+          SortedModules.Add(s);
+        end;
+      end;
+      listbox3.Items.AddStrings(SortedModules);
+
+    finally
+      SortedModules.Free;
+    end;
+  end;
+
+  FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
+  FPCupManager.HTTPProxyHost:=Form2.HTTPProxyHost;
+  FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser;
+  FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
+
+  // localize FPCUPSettings if possible
+  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
+     then GetFPCUPSettings(SafeGetApplicationPath+DELUXEFILENAME);
+end;
+
+
+procedure TForm1.BitBtnHaltClick(Sender: TObject);
+begin
+  if (MessageDlg('I am going to try to halt.' + sLineBreak +
+             'Do not (yet) expect too much of it.' + sLineBreak +
+             'Its a non-finished feature !'
+             ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+             begin
+               exit;
+             end;
+
+  if Assigned(FPCupManager.Sequencer.Installer) then
+  begin
+    FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
+  end;
+  // brute force ... nothing better at the moment
+  // but still does not work when downloading from SVN
+  // the process that gets created when downloading if not reachable from here through the fpcupmanager
+  FPCupManager.Destroy;
+  InitFPCupManager;
+  //DisEnable(Sender,True);
+end;
+
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
 begin
-  if Sender=ListBox1 then FFPCTarget:=listbox1.Items[listbox1.ItemIndex];
-  if Sender=ListBox2 then FLazarusTarget:=listbox2.Items[listbox2.ItemIndex];
+  if Sender=ListBoxFPCTarget then FFPCTarget:=ListBoxFPCTarget.Items[ListBoxFPCTarget.ItemIndex];
+  if Sender=ListBoxLazarusTarget then FLazarusTarget:=ListBoxLazarusTarget.Items[ListBoxLazarusTarget.ItemIndex];
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -593,7 +669,7 @@ begin
 
     if NOT Form2.IncludeHelp then
     begin
-      FPCupManager.SkipModules:='helpfpc,helplazarus';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus';
     end;
 
     AddMessage(s+'.');
@@ -612,7 +688,7 @@ var
   FModuleList: TStringList;
   i:integer;
 begin
-  if (ListBox1.ItemIndex=-1) or (ListBox2.ItemIndex=-1) then
+  if (ListBoxFPCTarget.ItemIndex=-1) or (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
     ShowMessage('Please select a FPC and Lazarus version first');
     exit;
@@ -695,9 +771,12 @@ end;
 
 procedure TForm1.Button5Click(Sender: TObject);
 var
-  aDownLoader: TDownLoader;
-  URL,DownloadURL,TargetFile,UnZipper:string;
+  URL,DownloadURL,TargetFile,TargetPath,UnZipper,s:string;
   success:boolean;
+  {$ifdef Unix}
+  fileList: TStringList;
+  i:integer;
+  {$endif}
 begin
   if (RadioGroup1.ItemIndex=-1) and (RadioGroup2.ItemIndex=-1) then
   begin
@@ -710,8 +789,18 @@ begin
 
   PrepareRun;
 
-  if RadioGroup1.ItemIndex<>-1 then FPCupManager.CrossCPU_Target:=RadioGroup1.Items[RadioGroup1.ItemIndex];
-  if RadioGroup2.ItemIndex<>-1 then FPCupManager.CrossOS_Target:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+  if RadioGroup1.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+    if s='ppc' then s:='powerpc';
+    if s='ppc64' then s:='powerpc64';
+    FPCupManager.CrossCPU_Target:=s;
+  end;
+  if RadioGroup2.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    FPCupManager.CrossOS_Target:=s;
+  end;
 
   {$ifndef FreeBSD}
   if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') then
@@ -727,13 +816,11 @@ begin
   end;
   {$endif}
 
-  {$ifdef MSWINDOWS}
   if (FPCupManager.CrossOS_Target='linux') then
   begin
     ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
     Memo1.Lines.Append(CrossGCCMsg);
   end;
-  {$endif}
 
   if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
   if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
@@ -769,6 +856,8 @@ begin
         FPCupManager.CrossOPT:='-CpARMV6 ';
       end
       else
+      // for Darwin, use defaults
+      if (FPCupManager.CrossOS_Target<>'darwin') then
       begin
         // default: armhf
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
@@ -803,12 +892,10 @@ begin
     begin
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
-      // for the moment windows only ... will change in near future
-
-      {$ifdef MSWINDOWS}
 
       if MissingCrossBins OR MissingCrossLibs then
       begin
+
         if (MessageDlg('The building of a crosscompiler failed due to missing cross-tools.' + sLineBreak +
                    'Fpcupdeluxe can try to download them if available !' + sLineBreak +
                    'Do you want to continue ?'
@@ -825,13 +912,19 @@ begin
           if FPCupManager.CrossCPU_Target='aarch64' then URL:='LinuxAarch64.rar';
           if FPCupManager.CrossCPU_Target='i386' then URL:='Linuxi386.rar';
           if FPCupManager.CrossCPU_Target='x86_64' then URL:='Linuxx64.rar';
+          if FPCupManager.CrossCPU_Target='powerpc' then URL:='LinuxPowerPC.rar';
+          if FPCupManager.CrossCPU_Target='powerpc64' then URL:='LinuxPowerPC64.rar';
         end;
         if FPCupManager.CrossOS_Target='freebsd' then
         begin
           if FPCupManager.CrossCPU_Target='i386' then URL:='FreeBSDi386.rar';
           if FPCupManager.CrossCPU_Target='x86_64' then URL:='FreeBSDx64.rar';
         end;
-
+        if FPCupManager.CrossOS_Target='solaris' then
+        begin
+          if FPCupManager.CrossCPU_Target='sparc' then URL:='SolarisSparc.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Solarisx64.rar';
+        end;
         if FPCupManager.CrossOS_Target='wince' then
         begin
           if FPCupManager.CrossCPU_Target='arm' then URL:='WinceARM.rar';
@@ -839,6 +932,11 @@ begin
         if FPCupManager.CrossOS_Target='android' then
         begin
           if FPCupManager.CrossCPU_Target='arm' then URL:='AndroidARM.rar';
+        end;
+        if FPCupManager.CrossOS_Target='embedded' then
+        begin
+          if FPCupManager.CrossCPU_Target='arm' then URL:='EmbeddedARM.rar';
+          if FPCupManager.CrossCPU_Target='avr' then URL:='EmbeddedAVR.rar';
         end;
 
         // tricky ... reset URL in case the binutils and libs are already there ... to exit this retry ... ;-)
@@ -866,31 +964,57 @@ begin
 
           if MissingCrossBins then
           begin
+
+            // no cross-bins available
+            if (Length(FPCUPBINSURL)=0) then
+            begin
+              ShowMessage('No tools available online. You could do a feature request ... ;-)');
+              exit;
+            end;
+
             AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
-            DownloadURL:=FPCUPWINBINSURL+'/'+'WinCrossBins'+URL;
+            {$ifdef MSWINDOWS}
+            DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+URL;
+            {$else}
+            DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+URL;
+            {$endif}
             AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
-            aDownLoader:=TDownLoader.Create;
-            try
-              success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              if (NOT success) then // try only once again in case of error
-              begin
-                AddMessage('Error while trying to download '+URL+'. Trying once again.');
-                SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-                success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              end;
-            finally
-              aDownLoader.Destroy;
-            end;
+            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             if success then
             begin
               AddMessage('Successfully downloaded binary-tools.');
-              AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+              {$ifndef MSWINDOWS}
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              {$endif}
+              AddMessage('Going to extract them into '+TargetPath);
+              {$ifdef MSWINDOWS}
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
               if (NOT success) then
+              {$endif}
               begin
+                {$ifdef MSWINDOWS}
                 UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
+                {$else}
+                UnZipper := 'unrar';
+                {$endif}
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+
+                {$IFDEF UNIX}
+                fileList:=FindAllFiles(TargetPath);
+                try
+                  if (fileList.Count > 0) then
+                  begin
+                    for i:=0 to Pred(fileList.Count) do
+                    begin
+                      fpChmod(fileList.Strings[i],&755);
+                    end;
+                  end;
+                finally
+                  fileList.Free;
+                end;
+                {$ENDIF}
               end;
             end;
             SysUtils.DeleteFile(TargetFile);
@@ -901,27 +1025,24 @@ begin
             DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
             AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
-            aDownLoader:=TDownLoader.Create;
-            try
-              success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              if (NOT success) then // try only once again in case of error
-              begin
-                AddMessage('Error while trying to download '+URL+'. Trying once again.');
-                SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-                success:=aDownLoader.getFile(DownloadURL,TargetFile);
-              end;
-            finally
-              aDownLoader.Destroy;
-            end;
+            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             if success then
             begin
               AddMessage('Successfully downloaded the libraries.');
-              AddMessage('Going to extract them into '+IncludeTrailingPathDelimiter(sInstallDir));
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+IncludeTrailingPathDelimiter(sInstallDir)+'"',true)=0);
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+              //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              AddMessage('Going to extract them into '+TargetPath);
+              {$ifdef MSWINDOWS}
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
               if (NOT success) then
+              {$endif}
               begin
+                {$ifdef MSWINDOWS}
                 UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + IncludeTrailingPathDelimiter(sInstallDir) + '"',true)=0);
+                {$else}
+                UnZipper := 'unrar';
+                {$endif}
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
               end;
             end;
           end;
@@ -946,7 +1067,6 @@ begin
         AddMessage('Building cross-tools failed ... ??? ... aborting.');
       end;
 
-      {$endif}
     end;
 
   finally
@@ -956,7 +1076,7 @@ end;
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
 begin
-  if (ListBox1.ItemIndex=-1) then
+  if (ListBoxFPCTarget.ItemIndex=-1) then
   begin
     ShowMessage('Please select a FPC version first');
     exit;
@@ -973,7 +1093,7 @@ begin
 
     if NOT Form2.IncludeHelp then
     begin
-      FPCupManager.SkipModules:='helpfpc';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc';
     end;
 
     sStatus:='Going to install/update FPC only.';
@@ -988,7 +1108,7 @@ procedure TForm1.LazarusOnlyClick(Sender: TObject);
 var
   FModuleList:TStringList;
 begin
-  if (ListBox2.ItemIndex=-1) then
+  if (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
     ShowMessage('Please select a Lazarus version first');
     exit;
@@ -1005,15 +1125,14 @@ begin
     end
     else
     begin
-      //FPCupManager.OnlyModules:='lazarus';
+      FPCupManager.OnlyModules:='lazarus';
     end;
 
-    FPCupManager.SkipModules:='fpc';
     FPCupManager.FPCURL:='skip';
 
     if NOT Form2.IncludeHelp then
     begin
-      FPCupManager.SkipModules:='helpfpc';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus';
     end;
 
     sStatus:='Going to install/update Lazarus only.';
@@ -1023,15 +1142,6 @@ begin
     DisEnable(Sender,True);
   end;
 end;
-
-procedure TForm1.BitBtnHaltClick(Sender: TObject);
-begin
-  if Assigned(FPCupManager.Sequencer.Installer) then
-  begin
-    FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
-  end;
-end;
-
 
 procedure TForm1.Button7Click(Sender: TObject);
 var
@@ -1062,6 +1172,16 @@ begin
     AddMessage('Got settings from install directory');
   end;
 end;
+
+procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+begin
+  sInstallDir:=Edit1.Text;
+  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME) then
+  begin
+    AddMessage('Got settings from install directory');
+  end;
+end;
+
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
@@ -1120,8 +1240,8 @@ begin
   Button7.Enabled:=value;
   Button8.Enabled:=value;
 
-  ListBox1.Enabled:=value;
-  ListBox2.Enabled:=value;
+  ListBoxFPCTarget.Enabled:=value;
+  ListBoxLazarusTarget.Enabled:=value;
   ListBox3.Enabled:=value;
 
   Edit1.Enabled:=value;
@@ -1173,21 +1293,31 @@ begin
   FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
   FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
+  {$ifdef MSWINDOWS}
+  FPCupManager.UseWget:=false;
+  {$else}
+  FPCupManager.UseWget:=Form2.UseWget;
+  {$endif}
+
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
   begin
+    FPCupManager.FPCDesiredBranch:='release';
     // use NewPascal git mirror for trunk sources
     // set branch to get latest freepascal
-    FPCupManager.FPCDesiredBranch:='freepascal';
+    if FPCTarget='trunkgit'
+       then FPCupManager.FPCDesiredBranch:='freepascal';
   end;
 
   FPCupManager.LazarusURL:=LazarusTarget;
   if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
   begin
+    FPCupManager.LazarusDesiredBranch:='release';
     // use NewPascal git mirror for trunk sources
     // set branch to get latest lazarus
-    FPCupManager.LazarusDesiredBranch:='lazarus';
+    if LazarusTarget='trunkgit'
+       then FPCupManager.LazarusDesiredBranch:='lazarus';
   end;
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
@@ -1203,12 +1333,24 @@ begin
   FPCupManager.MakeDirectory:='';
   {$ENDIF MSWINDOWS}
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
-  FPCupManager.FPCDirectory:=sInstallDir+'fpc';
+
+  FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
+  if Form2.SplitFPC
+     then FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory+'src'
+     else FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory;
+
   FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
+  {
+  if Form2.SplitLazarus
+     then FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory+'src'
+     else FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory;
+  }
 
   FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusDirectory);
 
   FPCupManager.ExportOnly:=(NOT Form2.CheckRepo.Checked);
+
+  FPCupManager.FPCPatches:=Form2.FPCPatches;
 
   RealFPCURL.Text:='';
   RealLazURL.Text:='';
@@ -1239,9 +1381,10 @@ begin
 
   if FPCupManager.FPCURL<>'SKIP' then
   begin
-    AddMessage('FPC URL:            '+FPCupManager.FPCURL);
-    AddMessage('FPC options:        '+FPCupManager.FPCOPT);
-    AddMessage('FPC directory:      '+FPCupManager.FPCDirectory);
+    AddMessage('FPC URL:               '+FPCupManager.FPCURL);
+    AddMessage('FPC options:           '+FPCupManager.FPCOPT);
+    AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
+    AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
     RealFPCURL.Text:=FPCupManager.FPCURL;
   end else RealFPCURL.Text:='Skipping FPC';
 
@@ -1323,6 +1466,13 @@ begin
     Form2.FPCRevision:=ReadString('General','FPCRevision','');
     Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
 
+    Form2.SplitFPC:=ReadBool('General','SplitFPC',False);
+    Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
+
+    Form2.UseWget:=ReadBool('General','UseWget',False);
+
+    Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
+
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
     try
@@ -1354,13 +1504,20 @@ begin
     // mmm, is this correct ?  See extrasettings !!
     WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
-    WriteString('URL','fpcURL',FPCTarget);
-    WriteString('URL','lazURL',LazarusTarget);
+    if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
+    if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
 
     WriteString('General','FPCOptions',Form2.FPCOptions);
     WriteString('General','LazarusOptions',Form2.LazarusOptions);
     WriteString('General','FPCRevision',Form2.FPCRevision);
     WriteString('General','LazarusRevision',Form2.LazarusRevision);
+
+    WriteBool('General','SplitFPC',Form2.SplitFPC);
+    WriteBool('General','SplitLazarus',Form2.SplitLazarus);
+
+    WriteBool('General','UseWget',Form2.UseWget);
+
+    WriteString('Patches','FPCPatches',Form2.FPCPatches);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do
@@ -1393,8 +1550,8 @@ begin
   if aFPCTarget<>FFPCTarget then
   begin
     FFPCTarget:=aFPCTarget;
-    i:=listbox1.Items.IndexOf(FFPCTarget);
-    if i<>-1 then listbox1.Selected[i]:=true;
+    i:=ListBoxFPCTarget.Items.IndexOf(FFPCTarget);
+    if i<>-1 then ListBoxFPCTarget.Selected[i]:=true;
   end;
 end;
 
@@ -1405,8 +1562,8 @@ begin
   if aLazarusTarget<>FLazarusTarget then
   begin
     FLazarusTarget:=aLazarusTarget;
-    i:=listbox2.Items.IndexOf(FLazarusTarget);
-    if i<>-1 then listbox2.Selected[i]:=true;
+    i:=ListBoxLazarusTarget.Items.IndexOf(FLazarusTarget);
+    if i<>-1 then ListBoxLazarusTarget.Selected[i]:=true;
   end;
 end;
 

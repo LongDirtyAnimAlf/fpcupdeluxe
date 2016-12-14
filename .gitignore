@@ -59,6 +59,9 @@ Temporary Items
 *.local
 
 *.log
+libfpcup/
+libfpclazup/
+libfpclazupdeluxe/
 backup/
 icons/
 bin/

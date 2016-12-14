@@ -87,7 +87,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   SearchLibraryInfo(result);
   if result then
@@ -112,7 +112,7 @@ function TAny_AIXPowerPC.GetLibsLCL(LCL_Platform: string; Basepath: string): boo
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 

@@ -265,7 +265,8 @@ type
     FCrossOS_SubArch: string;
     FFPCDesiredRevision: string;
     FFPCDesiredBranch: string;
-    FFPCDirectory: string;
+    FFPCSourceDirectory: string;
+    FFPCInstallDirectory: string;
     FFPCOPT: string;
     FFPCURL: string;
     FIncludeModules: string;
@@ -295,6 +296,7 @@ type
     {$endif}
     FUninstall:boolean;
     FVerbose: boolean;
+    FUseWget: boolean;
     FExportOnly:boolean;
     FNoJobs:boolean;
     FUseGitClient:boolean;
@@ -306,7 +308,8 @@ type
     {$endif}
     function GetLogFileName: string;
     procedure SetBootstrapCompilerDirectory(AValue: string);
-    procedure SetFPCDirectory(AValue: string);
+    procedure SetFPCSourceDirectory(AValue: string);
+    procedure SetFPCInstallDirectory(AValue: string);
     procedure SetFPCURL(AValue: string);
     procedure SetCrossToolsDirectory(AValue: string);
     procedure SetCrossLibraryDirectory(AValue: string);
@@ -350,7 +353,8 @@ type
     property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
     property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write SetCrossLibraryDirectory;
-    property FPCDirectory: string read FFPCDirectory write SetFPCDirectory;
+    property FPCSourceDirectory: string read FFPCSourceDirectory write SetFPCSourceDirectory;
+    property FPCInstallDirectory: string read FFPCInstallDirectory write SetFPCInstallDirectory;
     property FPCURL: string read FFPCURL write SetFPCURL;
     property FPCOPT: string read FFPCOPT write FFPCOPT;
     property FPCDesiredRevision: string read FFPCDesiredRevision write FFPCDesiredRevision;
@@ -394,6 +398,7 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
+    property UseWget:boolean read FUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
@@ -510,10 +515,16 @@ begin
   FBootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(AValue));
 end;
 
-procedure TFPCupManager.SetFPCDirectory(AValue: string);
+procedure TFPCupManager.SetFPCSourceDirectory(AValue: string);
 begin  
-  FFPCDirectory:=SafeExpandFileName(AValue);
+  FFPCSourceDirectory:=SafeExpandFileName(AValue);
 end;
+
+procedure TFPCupManager.SetFPCInstallDirectory(AValue: string);
+begin
+  FFPCInstallDirectory:=SafeExpandFileName(AValue);
+end;
+
 
 procedure TFPCupManager.SetFPCURL(AValue: string);
 begin
@@ -895,7 +906,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       if (Output='arch') OR (Output='manjaro') then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
-        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation';
+        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
       end
       else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
       begin
@@ -937,7 +948,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         AdvicedLibs:=AdvicedLibs+
                      'build-essential gcc subversion devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                      'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
-                     'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf';
+                     'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
       end
       else
       if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
@@ -1073,7 +1084,8 @@ begin
     end
     else
       FInstaller:=TFPCNativeInstaller.Create;
-    FInstaller.BaseDirectory:=FParent.FPCDirectory;
+    FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
+    FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FFPCPatches;
@@ -1109,9 +1121,11 @@ begin
       end
     else
       FInstaller:=TLazarusNativeInstaller.Create;
-    FInstaller.BaseDirectory:=FParent.LazarusDirectory ;
+    // source- and install-dir are the same for Lazarus ... could be changed
+    FInstaller.SourceDirectory:=FParent.LazarusDirectory ;
+    FInstaller.InstallDirectory:=FParent.LazarusDirectory ;
     if FParent.CompilerName='' then
-      FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
+      FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
     else
       FInstaller.Compiler:=FParent.CompilerName;
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
@@ -1120,7 +1134,8 @@ begin
     // CrossLCL_Platform is only used when building LCL, but the Lazarus module
     // will take care of that.
     (FInstaller as TLazarusInstaller).CrossLCL_Platform:=FParent.CrossLCL_Platform;
-    (FInstaller as TLazarusInstaller).FPCDir:=FParent.FPCDirectory;
+    (FInstaller as TLazarusInstaller).FPCSourceDir:=FParent.FPCSourceDirectory;
+    (FInstaller as TLazarusInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
     FInstaller.URL:=FParent.LazarusURL;
@@ -1141,9 +1156,9 @@ begin
           FInstaller.free; // get rid of old FInstaller
         end;
       FInstaller:=THelpFPCInstaller.Create;
-      FInstaller.BaseDirectory:=FParent.FPCDirectory;
+      FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
       if FParent.CompilerName='' then
-        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
+        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
       else
         FInstaller.Compiler:=FParent.CompilerName;
       end
@@ -1160,12 +1175,14 @@ begin
           FInstaller.free; // get rid of old FInstaller
         end;
       FInstaller:=THelpLazarusInstaller.Create;
-      FInstaller.BaseDirectory:=FParent.LazarusDirectory ;
+      FInstaller.SourceDirectory:=FParent.LazarusDirectory;
+      // the same ... may change in the future
+      FInstaller.InstallDirectory:=FParent.LazarusDirectory;
       if FParent.CompilerName='' then
-        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
+        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
       else
         FInstaller.Compiler:=FParent.CompilerName;
-      (FInstaller as THelpLazarusInstaller).FPCDirectory:=FParent.FPCDirectory;
+      (FInstaller as THelpLazarusInstaller).FPCDirectory:=FParent.FPCInstallDirectory;
       (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       end
   {$endif}
@@ -1184,7 +1201,7 @@ begin
       FInstaller:=TUniversalInstaller.Create;
       FCurrentModule:=ModuleName;
       //assign properties
-      (FInstaller as TUniversalInstaller).FPCDir:=FParent.FPCDirectory;
+      (FInstaller as TUniversalInstaller).FPCDir:=FParent.FPCInstallDirectory;
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
@@ -1194,7 +1211,7 @@ begin
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       {$endif}
       if FParent.CompilerName='' then
-        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCDirectory)
+        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
       else
         FInstaller.Compiler:=FParent.CompilerName;
     end;
@@ -1209,6 +1226,7 @@ begin
   FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
   FInstaller.PatchCmd:=FParent.PatchCmd;
   FInstaller.Verbose:=FParent.Verbose;
+  FInstaller.UseWget:=FParent.UseWget;
   FInstaller.ExportOnly:=FParent.ExportOnly;
   FInstaller.NoJobs:=FParent.NoJobs;
   FInstaller.Log:=FParent.FLog;

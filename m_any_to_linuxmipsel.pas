@@ -117,7 +117,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
@@ -136,7 +136,7 @@ end;
 function Tany_linuxmipsel.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 
@@ -211,11 +211,6 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName + ': could not find bin path. Please fill '+IncludeTrailingPathDelimiter(BasePath)+'..\cross\bin\'+DirName+LineEnding+
-    ' with cross binutils for Android/Linux MIPSEL, such as mipsel-linux-android-as.exe '+LineEnding+
-    ' e.g. from the Android NDK.'+LineEnding+
-    'See http://wiki.lazarus.freepascal.org/MIPS.'
-    ,etError);
     FAlreadyWarned:=true;
   end;
 end;

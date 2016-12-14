@@ -81,7 +81,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if not result then
   begin
@@ -94,6 +94,7 @@ begin
   end;
 
   SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
@@ -109,7 +110,7 @@ end;
 function Tany_linux386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
-  result:=true;
+  result:=inherited;
 end;
 {$endif}
 
@@ -148,7 +149,11 @@ begin
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    '-XP'+FBinUtilsPrefix {Prepend the binutils names}
+    {$ifdef MSWINDOWS}
+    +LineEnding+'-Tlinux'; {target operating system}
+    {$endif}
+    ;
   end;
 end;
 
