@@ -1535,6 +1535,10 @@ begin
 
           aDownLoader.getFTPFileList('ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/',aCompilerList);
 
+          // https://github.com/newpascal/fpcupdeluxe/releases/tag/bootstrappers_v1.0
+          // =
+          // https://api.github.com/repos/newpascal/fpcupdeluxe/releases/4751959
+
           {$IFDEF FREEBSD}
           // FreeBSD : special because of versions
           FreeBSDVersion:=0;

@@ -12,8 +12,7 @@
 
     This version:
     Specially for fpcupdeluxe.
-    Enable dynamic load to prevent errors on systems without libcurl.
-
+    Enable static/dynamic lib-loading to prevent errors on systems without libcurl.
 
  **********************************************************************}
  {
@@ -28,7 +27,6 @@ unit fpcuplibcurl;
 {$ifdef libcurlstatic}
 {$LINKLIB curl}
 {$endif}
-
 
 interface
 
@@ -696,7 +694,7 @@ var
 {$ifdef libcurlstatic}function {$endif}curl_strequal{$ifndef libcurlstatic}: function{$endif}(s1:Pchar; s2:Pchar):longint;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_strnequal{$ifndef libcurlstatic}: function{$endif}(s1:Pchar; s2:Pchar; n:size_t):longint;cdecl;{$ifdef libcurlstatic}external;{$endif}
 
-{$ifdef libcurlstatic}function {$endif}curl_formadd{$ifndef libcurlstatic}: function{$endif}(httppost:PPcurl_httppost; last_post:PPcurl_httppost):CURLFORMcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
+{$ifdef libcurlstatic}function {$endif}curl_formadd{$ifndef libcurlstatic}: function{$endif}(httppost:PPcurl_httppost; last_post:PPcurl_httppost):CURLFORMcode;cdecl varargs;{$ifdef libcurlstatic}external;{$endif}
 
 {$ifdef libcurlstatic}function {$endif}curl_formget{$ifndef libcurlstatic}: function{$endif}(form:Pcurl_httppost; arg:pointer; append:curl_formget_callback):longint;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}procedure {$endif}curl_formfree{$ifndef libcurlstatic}: procedure{$endif}(form:Pcurl_httppost);cdecl;{$ifdef libcurlstatic}external;{$endif}
@@ -716,17 +714,17 @@ var
 {$ifdef libcurlstatic}function {$endif}curl_getdate{$ifndef libcurlstatic}: function{$endif}(p:Pchar; unused:Ptime_t):time_t;cdecl;{$ifdef libcurlstatic}external;{$endif}
 
 {$ifdef libcurlstatic}function {$endif}curl_share_init{$ifndef libcurlstatic}: function{$endif}:PCURLSH;cdecl;{$ifdef libcurlstatic}external;{$endif}
-{$ifdef libcurlstatic}function {$endif}curl_share_setopt{$ifndef libcurlstatic}: function{$endif}(_para1:PCURLSH; option:CURLSHoption):CURLSHcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
+{$ifdef libcurlstatic}function {$endif}curl_share_setopt{$ifndef libcurlstatic}: function{$endif}(_para1:PCURLSH; option:CURLSHoption):CURLSHcode;cdecl varargs;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_share_cleanup{$ifndef libcurlstatic}: function{$endif}(_para1:PCURLSH):CURLSHcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
 
 {$ifdef libcurlstatic}function {$endif}curl_version_info{$ifndef libcurlstatic}: function{$endif}(_para1:CURLversion):Pcurl_version_info_data;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_easy_strerror{$ifndef libcurlstatic}: function{$endif}(_para1:CURLcode):Pchar;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_share_strerror{$ifndef libcurlstatic}: function{$endif}(_para1:CURLSHcode):Pchar;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_easy_init{$ifndef libcurlstatic}: function{$endif}:PCURL;cdecl;{$ifdef libcurlstatic}external;{$endif}
-{$ifdef libcurlstatic}function {$endif}curl_easy_setopt{$ifndef libcurlstatic}: function{$endif}(curl:PCURL; option:CURLoption):CURLcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
+{$ifdef libcurlstatic}function {$endif}curl_easy_setopt{$ifndef libcurlstatic}: function{$endif}(curl:PCURL; option:CURLoption):CURLcode;cdecl varargs;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_easy_perform{$ifndef libcurlstatic}: function{$endif}(curl:PCURL):CURLcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}procedure {$endif}curl_easy_cleanup{$ifndef libcurlstatic}: procedure{$endif}(curl:PCURL);cdecl;{$ifdef libcurlstatic}external;{$endif}
-{$ifdef libcurlstatic}function {$endif}curl_easy_getinfo{$ifndef libcurlstatic}: function{$endif}(curl:PCURL; info:CURLINFO):CURLcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
+{$ifdef libcurlstatic}function {$endif}curl_easy_getinfo{$ifndef libcurlstatic}: function{$endif}(curl:PCURL; info:CURLINFO):CURLcode;cdecl varargs;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_easy_duphandle{$ifndef libcurlstatic}: function{$endif}(curl:PCURL):PCURL;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}procedure {$endif}curl_easy_reset{$ifndef libcurlstatic}: procedure{$endif}(curl:PCURL);cdecl;{$ifdef libcurlstatic}external;{$endif}
 
@@ -743,12 +741,10 @@ var
 {$ifdef libcurlstatic}function {$endif}curl_multi_socket_all{$ifndef libcurlstatic}: function{$endif}(multi_handle:PCURLM; running_handles:Plongint):CURLMcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_multi_timeout{$ifndef libcurlstatic}: function{$endif}(multi_handle:PCURLM; milliseconds:Plongint):CURLMcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
 
-{$ifdef libcurlstatic}function {$endif}curl_multi_setopt{$ifndef libcurlstatic}: function{$endif}(multi_handle:PCURLM; option:CURLMoption):CURLMcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
+{$ifdef libcurlstatic}function {$endif}curl_multi_setopt{$ifndef libcurlstatic}: function{$endif}(multi_handle:PCURLM; option:CURLMoption):CURLMcode;cdecl varargs;{$ifdef libcurlstatic}external;{$endif}
 {$ifdef libcurlstatic}function {$endif}curl_multi_assign{$ifndef libcurlstatic}: function{$endif}(multi_handle:PCURLM; sockfd:curl_socket_t; sockp:pointer):CURLMcode;cdecl;{$ifdef libcurlstatic}external;{$endif}
 
-{$ifndef libcurlstatic}
-procedure LoadCurlLibrary;
-{$endif}
+function LoadCurlLibrary:boolean;
 
 implementation
 
@@ -760,82 +756,95 @@ uses
 var
   libcurl: TLibHandle = NilHandle;
 
-procedure LoadCurlLibrary;
-var
-  e:Exception;
+function LoadCurlLibrary:boolean;
 begin
-  if (libcurl <> NilHandle) then exit;
+  {$ifdef libcurlstatic}
+  result:=true;
+  {$else}
+  result:=(libcurl <> NilHandle);
 
-  libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.3');
-  if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.0');
-  if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix);
+  if result then exit;
 
-  if (libcurl <> NilHandle) then
   try
-    pointer(curl_strequal):= GetProcAddress(libcurl, 'curl_strequal');
-    pointer(curl_strnequal):= GetProcAddress(libcurl, 'curl_strnequal');
+    libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.4');
+    if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.3');
+    if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.0');
+    if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix);
 
-    pointer(curl_formadd):= GetProcAddress(libcurl, 'curl_formadd');
+    if (libcurl <> NilHandle) then
+    try
+      pointer(curl_strequal):= GetProcAddress(libcurl, 'curl_strequal');
+      pointer(curl_strnequal):= GetProcAddress(libcurl, 'curl_strnequal');
 
-    pointer(curl_formget):= GetProcAddress(libcurl, 'curl_formget');
-    pointer(curl_formfree):= GetProcAddress(libcurl, 'curl_formfree');
-    pointer(curl_getenv):= GetProcAddress(libcurl, 'curl_getenv');
-    pointer(curl_version):= GetProcAddress(libcurl, 'curl_version');
-    pointer(curl_easy_escape):= GetProcAddress(libcurl, 'curl_easy_escape');
-    pointer(curl_escape):= GetProcAddress(libcurl, 'curl_escape');
-    pointer(curl_easy_unescape):= GetProcAddress(libcurl, 'curl_easy_unescape');
-    pointer(curl_unescape):= GetProcAddress(libcurl, 'curl_unescape');
-    pointer(curl_free):= GetProcAddress(libcurl, 'curl_free');
-    pointer(curl_global_init):= GetProcAddress(libcurl, 'curl_global_init');
-    pointer(curl_global_init_mem):= GetProcAddress(libcurl, 'curl_global_init_mem');
+      pointer(curl_formadd):= GetProcAddress(libcurl, 'curl_formadd');
 
-    pointer(curl_global_cleanup):= GetProcAddress(libcurl, 'curl_global_cleanup');
-    pointer(curl_slist_append):= GetProcAddress(libcurl, 'curl_slist_append');
-    pointer(curl_slist_free_all):= GetProcAddress(libcurl, 'curl_slist_free_all');
-    pointer(curl_getdate):= GetProcAddress(libcurl, 'curl_getdate');
+      pointer(curl_formget):= GetProcAddress(libcurl, 'curl_formget');
+      pointer(curl_formfree):= GetProcAddress(libcurl, 'curl_formfree');
+      pointer(curl_getenv):= GetProcAddress(libcurl, 'curl_getenv');
+      pointer(curl_version):= GetProcAddress(libcurl, 'curl_version');
+      pointer(curl_easy_escape):= GetProcAddress(libcurl, 'curl_easy_escape');
+      pointer(curl_escape):= GetProcAddress(libcurl, 'curl_escape');
+      pointer(curl_easy_unescape):= GetProcAddress(libcurl, 'curl_easy_unescape');
+      pointer(curl_unescape):= GetProcAddress(libcurl, 'curl_unescape');
+      pointer(curl_free):= GetProcAddress(libcurl, 'curl_free');
+      pointer(curl_global_init):= GetProcAddress(libcurl, 'curl_global_init');
+      pointer(curl_global_init_mem):= GetProcAddress(libcurl, 'curl_global_init_mem');
 
-    pointer(curl_share_init):= GetProcAddress(libcurl, 'curl_share_init');
-    pointer(curl_share_setopt):= GetProcAddress(libcurl, 'curl_share_setopt');
-    pointer(curl_share_cleanup):= GetProcAddress(libcurl, 'curl_share_cleanup');
+      pointer(curl_global_cleanup):= GetProcAddress(libcurl, 'curl_global_cleanup');
+      pointer(curl_slist_append):= GetProcAddress(libcurl, 'curl_slist_append');
+      pointer(curl_slist_free_all):= GetProcAddress(libcurl, 'curl_slist_free_all');
+      pointer(curl_getdate):= GetProcAddress(libcurl, 'curl_getdate');
 
-    pointer(curl_version_info):= GetProcAddress(libcurl, 'curl_version_info');
-    pointer(curl_easy_strerror):= GetProcAddress(libcurl, 'curl_easy_strerror');
-    pointer(curl_share_strerror):= GetProcAddress(libcurl, 'curl_share_strerror');
-    pointer(curl_easy_init):= GetProcAddress(libcurl, 'curl_easy_init');
-    pointer(curl_easy_setopt):= GetProcAddress(libcurl, 'curl_easy_setopt');
-    pointer(curl_easy_perform):= GetProcAddress(libcurl, 'curl_easy_perform');
-    pointer(curl_easy_cleanup):= GetProcAddress(libcurl, 'curl_easy_cleanup');
-    pointer(curl_easy_getinfo):= GetProcAddress(libcurl, 'curl_easy_getinfo');
-    pointer(curl_easy_duphandle):= GetProcAddress(libcurl, 'curl_easy_duphandle');
-    pointer(curl_easy_reset):= GetProcAddress(libcurl, 'curl_easy_reset');
+      pointer(curl_share_init):= GetProcAddress(libcurl, 'curl_share_init');
+      pointer(curl_share_setopt):= GetProcAddress(libcurl, 'curl_share_setopt');
+      pointer(curl_share_cleanup):= GetProcAddress(libcurl, 'curl_share_cleanup');
 
-    pointer(curl_multi_init):= GetProcAddress(libcurl, 'curl_multi_init');
-    pointer(curl_multi_add_handle):= GetProcAddress(libcurl, 'curl_multi_add_handle');
-    pointer(curl_multi_remove_handle):= GetProcAddress(libcurl, 'curl_multi_remove_handle');
-    pointer(curl_multi_fdset):= GetProcAddress(libcurl, 'curl_multi_fdset');
-    pointer(curl_multi_perform):= GetProcAddress(libcurl, 'curl_multi_perform');
-    pointer(curl_multi_cleanup):= GetProcAddress(libcurl, 'curl_multi_cleanup');
-    pointer(curl_multi_info_read):= GetProcAddress(libcurl, 'curl_multi_info_read');
-    pointer(curl_multi_strerror):= GetProcAddress(libcurl, 'curl_multi_strerror');
+      pointer(curl_version_info):= GetProcAddress(libcurl, 'curl_version_info');
+      pointer(curl_easy_strerror):= GetProcAddress(libcurl, 'curl_easy_strerror');
+      pointer(curl_share_strerror):= GetProcAddress(libcurl, 'curl_share_strerror');
+      pointer(curl_easy_init):= GetProcAddress(libcurl, 'curl_easy_init');
+      pointer(curl_easy_setopt):= GetProcAddress(libcurl, 'curl_easy_setopt');
+      pointer(curl_easy_perform):= GetProcAddress(libcurl, 'curl_easy_perform');
+      pointer(curl_easy_cleanup):= GetProcAddress(libcurl, 'curl_easy_cleanup');
+      pointer(curl_easy_getinfo):= GetProcAddress(libcurl, 'curl_easy_getinfo');
+      pointer(curl_easy_duphandle):= GetProcAddress(libcurl, 'curl_easy_duphandle');
+      pointer(curl_easy_reset):= GetProcAddress(libcurl, 'curl_easy_reset');
 
-    pointer(curl_multi_socket):= GetProcAddress(libcurl, 'curl_multi_socket');
-    pointer(curl_multi_socket_all):= GetProcAddress(libcurl, 'curl_multi_socket_all');
-    pointer(curl_multi_timeout):= GetProcAddress(libcurl, 'curl_multi_timeout');
+      pointer(curl_multi_init):= GetProcAddress(libcurl, 'curl_multi_init');
+      pointer(curl_multi_add_handle):= GetProcAddress(libcurl, 'curl_multi_add_handle');
+      pointer(curl_multi_remove_handle):= GetProcAddress(libcurl, 'curl_multi_remove_handle');
+      pointer(curl_multi_fdset):= GetProcAddress(libcurl, 'curl_multi_fdset');
+      pointer(curl_multi_perform):= GetProcAddress(libcurl, 'curl_multi_perform');
+      pointer(curl_multi_cleanup):= GetProcAddress(libcurl, 'curl_multi_cleanup');
+      pointer(curl_multi_info_read):= GetProcAddress(libcurl, 'curl_multi_info_read');
+      pointer(curl_multi_strerror):= GetProcAddress(libcurl, 'curl_multi_strerror');
 
-    pointer(curl_multi_setopt):= GetProcAddress(libcurl, 'curl_multi_setopt');
-    pointer(curl_multi_assign):= GetProcAddress(libcurl, 'curl_multi_assign');
+      pointer(curl_multi_socket):= GetProcAddress(libcurl, 'curl_multi_socket');
+      pointer(curl_multi_socket_all):= GetProcAddress(libcurl, 'curl_multi_socket_all');
+      pointer(curl_multi_timeout):= GetProcAddress(libcurl, 'curl_multi_timeout');
 
-  except
+      pointer(curl_multi_setopt):= GetProcAddress(libcurl, 'curl_multi_setopt');
+      pointer(curl_multi_assign):= GetProcAddress(libcurl, 'curl_multi_assign');
+
+      result:=true;
+
+    except
       on E: Exception do
       begin
         UnloadLibrary(libcurl);
         libcurl := NilHandle;
-        e:=Exception.Create('No curl library found');
-        raise e;
       end;
     end;
-  end;
 
+  except
+    on E: Exception do
+    begin
+      UnloadLibrary(libcurl);
+      libcurl := NilHandle;
+    end;
+  end;
+  {$endif}
+end;
 
 finalization
   if (libcurl <> NilHandle) then

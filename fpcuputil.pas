@@ -129,6 +129,9 @@ type
   TUseWGetDownloader = Class(TBasicDownLoader)
   private
     function WGetDownload(Const URL : String; Dest : TStream):boolean;
+    function LibCurlDownload(Const URL : String; Dest : TStream):boolean;
+    function WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
+    function LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
     function Download(const URL: String; Dest: TStream):boolean;
   protected
     function FTPDownload(Const URL : String; Dest : TStream):boolean;
@@ -138,20 +141,6 @@ type
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
-
-  TUseLibCurlDownloader = Class(TBasicDownLoader)
-  private
-    function LibcDownload(Const URL : String; Dest : TStream):boolean;
-    function Download(const URL: String; Dest: TStream):boolean;
-  protected
-    function FTPDownload(Const URL : String; Dest : TStream):boolean;
-    function HTTPDownload(Const URL : String; Dest : TStream):boolean;
-  public
-    function getFile(const URL,filename:string):boolean;override;
-    function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
-    function checkURL(const URL:string):boolean;override;
-  end;
-
 
   {$ENDIF}
 
@@ -1483,8 +1472,9 @@ begin
   begin
     repeat
       //RequestHeaders.Add('Connection: Close');
-      // User-Agent needed for sourceforge
+      // User-Agent needed for sourceforge and GitHub
       AddHeader('User-Agent','curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3');
+      //AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
       try
         Get(URL,filename);
         response:=ResponseStatusCode;
@@ -1526,7 +1516,9 @@ begin
   tries:=0;
   with aFPHTTPClient do
   begin
+    // User-Agent needed for sourceforge and GitHub
     AddHeader('User-Agent','curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3');
+    //AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
     AddHeader('Connection','Close');
     repeat
       try
@@ -1603,9 +1595,43 @@ begin
   end;
 end;
 
+function DoWrite(Ptr : Pointer; Size : size_t; nmemb: size_t; Data : Pointer) : size_t;cdecl;
+begin
+  Result:=TStream(Data).Write(Ptr^,Size*nmemb);
+end;
+
+function TUseWGetDownloader.LibCurlDownload(Const URL : String; Dest : TStream):boolean;
+var
+  hCurl : pCurl;
+  res: CURLcode;
+begin
+  result:=false;
+
+  if LoadCurlLibrary then
+  begin
+    try
+      hCurl:= curl_easy_init();
+      if Assigned(hCurl) then
+      begin
+        curl_easy_setopt(hCurl,CURLOPT_VERBOSE, Ord(True));
+        curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
+        curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
+        curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(Dest));
+        res := curl_easy_perform(hCurl);
+        result:=(res=CURLE_OK);
+        curl_easy_cleanup(hCurl);
+      end;
+    except
+    end;
+  end;
+end;
+
+
 function TUseWGetDownloader.FTPDownload(Const URL : String; Dest : TStream):boolean;
 begin
-  result:=WGetDownload(URL,Dest);
+  result:=LibCurlDownload(URL,Dest);
+  if (result) then infoln('LibCurl file download success !!!!', etInfo);
+  if (NOT result) then result:=WGetDownload(URL,Dest);
 end;
 
 function TUseWGetDownloader.HTTPDownload(Const URL : String; Dest : TStream):boolean;
@@ -1613,7 +1639,7 @@ begin
   result:=WGetDownload(URL,Dest);
 end;
 
-function TUseWGetDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
+function TUseWGetDownloader.WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
 const
   WGETFTPLISTFILE='.listing';
 var
@@ -1655,6 +1681,72 @@ begin
   end;
 end;
 
+function TUseWGetDownloader.LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
+var
+  hCurl : pCurl;
+  res: CURLcode;
+  URI : TURI;
+  s : String;
+  aTFTPList:TFTPList;
+  F:TMemoryStream;
+  i:integer;
+
+begin
+  result:=false;
+
+  URI:=ParseURI(URL);
+  s:=URI.Protocol;
+  if CompareText(s,'ftp')=0 then
+  begin
+    if LoadCurlLibrary then
+    begin
+      try
+        hCurl:= curl_easy_init();
+        if Assigned(hCurl) then
+        begin
+
+          F:=TMemoryStream.Create;
+          try
+
+            curl_easy_setopt(hCurl,CURLOPT_VERBOSE, Ord(True));
+            curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
+            curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
+            curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
+            res := curl_easy_perform(hCurl);
+            result:=(res=CURLE_OK);
+            curl_easy_cleanup(hCurl);
+
+            if result then
+            begin
+              if (F.Size>0) then
+              begin
+                aTFTPList:=TFTPList.Create;
+                try
+                  aTFTPList:=TFTPList.Create;
+                  aTFTPList.Lines.LoadFromStream(F);
+                  aTFTPList.ParseLines;
+                  for i := 0 to aTFTPList.Count -1 do
+                  begin
+                    s := aTFTPList[i].FileName;
+                    filelist.Add(s);
+                  end;
+                finally
+                  aTFTPList.Free;
+                end;
+              end;
+            end;
+
+          finally
+            F.Free;
+          end;
+
+        end;
+      except
+      end;
+    end;
+  end;
+end;
+
 function TUseWGetDownloader.getFile(const URL,filename:string):boolean;
 var
   F : TFileStream;
@@ -1671,6 +1763,13 @@ begin
     result:=False;
     SysUtils.DeleteFile(filename);
   end;
+end;
+
+function TUseWGetDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
+begin
+  result:=LibCurlFTPFileList(URL,filelist);
+  if (result) then infoln('LibCurl FTP filelist success !!!!', etInfo);
+  if (NOT result) then result:=WGetFTPFileList(URL,filelist);
 end;
 
 function TUseWGetDownloader.checkURL(const URL:string):boolean;
@@ -1707,28 +1806,6 @@ begin
     result:=HTTPDownload(URL,Dest)
   else if CompareText(P,'https')=0 then
     result:=HTTPDownload(URL,Dest);
-end;
-
-function TUseLibCurlDownloader.LibcDownload(Const URL : String; Dest : TStream):boolean;
-begin
-end;
-function TUseLibCurlDownloader.Download(const URL: String; Dest: TStream):boolean;
-begin
-end;
-function TUseLibCurlDownloader.FTPDownload(Const URL : String; Dest : TStream):boolean;
-begin
-end;
-function TUseLibCurlDownloader.HTTPDownload(Const URL : String; Dest : TStream):boolean;
-begin
-end;
-function TUseLibCurlDownloader.getFile(const URL,filename:string):boolean;
-begin
-end;
-function TUseLibCurlDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
-begin
-end;
-function TUseLibCurlDownloader.checkURL(const URL:string):boolean;
-begin
 end;
 
 {$ENDIF}
