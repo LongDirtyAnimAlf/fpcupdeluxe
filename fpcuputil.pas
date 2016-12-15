@@ -138,6 +138,21 @@ type
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
+
+  TUseLibCurlDownloader = Class(TBasicDownLoader)
+  private
+    function LibcDownload(Const URL : String; Dest : TStream):boolean;
+    function Download(const URL: String; Dest: TStream):boolean;
+  protected
+    function FTPDownload(Const URL : String; Dest : TStream):boolean;
+    function HTTPDownload(Const URL : String; Dest : TStream):boolean;
+  public
+    function getFile(const URL,filename:string):boolean;override;
+    function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
+    function checkURL(const URL:string):boolean;override;
+  end;
+
+
   {$ENDIF}
 
   TNativeDownloader = TUseNativeDownLoader;
@@ -230,6 +245,8 @@ uses
   // for wget downloader
   ,process
   ,baseunix,processutils
+  // for libc downloader
+  ,fpcuplibcurl
   {$ENDIF UNIX}
   ;
 
@@ -1691,6 +1708,29 @@ begin
   else if CompareText(P,'https')=0 then
     result:=HTTPDownload(URL,Dest);
 end;
+
+function TUseLibCurlDownloader.LibcDownload(Const URL : String; Dest : TStream):boolean;
+begin
+end;
+function TUseLibCurlDownloader.Download(const URL: String; Dest: TStream):boolean;
+begin
+end;
+function TUseLibCurlDownloader.FTPDownload(Const URL : String; Dest : TStream):boolean;
+begin
+end;
+function TUseLibCurlDownloader.HTTPDownload(Const URL : String; Dest : TStream):boolean;
+begin
+end;
+function TUseLibCurlDownloader.getFile(const URL,filename:string):boolean;
+begin
+end;
+function TUseLibCurlDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
+begin
+end;
+function TUseLibCurlDownloader.checkURL(const URL:string):boolean;
+begin
+end;
+
 {$ENDIF}
 
 end.
