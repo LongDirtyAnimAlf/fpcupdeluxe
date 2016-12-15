@@ -1535,9 +1535,10 @@ begin
 
           aDownLoader.getFTPFileList('ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/',aCompilerList);
 
-          // https://github.com/newpascal/fpcupdeluxe/releases/tag/bootstrappers_v1.0
-          // =
-          // https://api.github.com/repos/newpascal/fpcupdeluxe/releases/4751959
+          if FVerbose then
+          begin
+            if aCompilerList.Count>0 then infoln('Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etInfo);
+          end;
 
           {$IFDEF FREEBSD}
           // FreeBSD : special because of versions
@@ -1690,9 +1691,10 @@ begin
       // FBootstrapCompilerOverrideVersionCheck:=true;
       {$endif darwin}
       // final check ... do we have the correct (as in version) compiler already ?
+      infoln('Check if we already have a bootstrap compiler with version '+ aLocalBootstrapVersion,etInfo);
       if GetCompilerVersion(FCompiler)<>aLocalBootstrapVersion then
       begin
-        infoln('Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
+        infoln('No compiler. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
         result:=DownloadBootstrapCompiler;
       end;
 

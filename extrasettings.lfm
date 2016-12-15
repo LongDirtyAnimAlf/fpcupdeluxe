@@ -123,11 +123,11 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 251
+    Height = 267
     Top = 144
     Width = 320
     Caption = 'Miscellaneous settings'
-    ClientHeight = 231
+    ClientHeight = 247
     ClientWidth = 316
     TabOrder = 3
     object CheckRepo: TCheckBox
@@ -271,10 +271,10 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 204
-      Width = 218
+      Width = 256
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Use wget as downloader (default=no)'
+      Caption = 'Use wget/libcurl as downloader (default=no)'
       ParentShowHint = False
       ShowHint = True
       TabOrder = 8
@@ -569,7 +569,7 @@ object Form2: TForm2
   object ListBoxPatch: TListBox
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 12
+    Left = 8
     Height = 59
     Top = 425
     Width = 200
