@@ -126,6 +126,7 @@ object Form2: TForm2
     Height = 267
     Top = 144
     Width = 320
+    Anchors = [akTop, akLeft, akBottom]
     Caption = 'Miscellaneous settings'
     ClientHeight = 247
     ClientWidth = 316
