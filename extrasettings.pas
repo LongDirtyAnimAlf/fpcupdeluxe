@@ -10,6 +10,7 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
+  DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm);
@@ -168,6 +169,9 @@ implementation
 {$R *.lfm}
 
 uses
+  DCPDES,
+  //DCPrc4,
+  DCPsha256,
   fpcuputil,
   IniFiles,
   typinfo;
@@ -203,6 +207,8 @@ var
   CPU:TCPU;
   OS:TOS;
   s:string;
+  //Cipher: TDCP_rc4;
+  Cipher: TDCP_DES;
 begin
   for OS := Low(TOS) to High(TOS) do
     ComboBoxOS.Items.Add(GetEnumName(TypeInfo(TOS),Ord(OS)));
@@ -229,7 +235,18 @@ begin
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
     EditHTTPProxyUser.Text:=ReadString('ProxySettings','HTTPProxyUser','');
-    EditHTTPProxyPassword.Text:=ReadString('ProxySettings','HTTPProxyPass','');
+    s:=ReadString('ProxySettings','HTTPProxyPass','');
+
+    // add some security into the password storage ... ;-)
+    //Cipher:= TDCP_rc4.Create(nil);
+    Cipher := TDCP_DES.Create(nil);
+    try
+      Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+      EditHTTPProxyPassword.Text:=Cipher.DecryptString(s);
+    finally
+      Cipher.Burn;
+      Cipher.Free;
+    end;
 
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -309,6 +326,8 @@ var
   OS:TOS;
   s:string;
   i:integer;
+  //Cipher: TDCP_rc4;
+  Cipher: TDCP_DES;
 begin
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
@@ -321,7 +340,18 @@ begin
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     WriteInteger('ProxySettings','HTTPProxyPort',StrToInt(EditHTTPProxyPort.Text));
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
-    WriteString('ProxySettings','HTTPProxyPass',EditHTTPProxyPassword.Text);
+
+    // add some security into the password storage ... ;-)
+    //Cipher:= TDCP_rc4.Create(nil);
+    Cipher := TDCP_DES.Create(nil);
+    try
+      Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+      s:=Cipher.EncryptString(EditHTTPProxyPassword.Text);
+      WriteString('ProxySettings','HTTPProxyPass',s);
+    finally
+      Cipher.Burn;
+      Cipher.Free;
+    end;
 
     for OS := Low(TOS) to High(TOS) do
     begin

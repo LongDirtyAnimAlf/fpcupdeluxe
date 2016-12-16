@@ -239,6 +239,12 @@ uses
   {$ENDIF UNIX}
   ;
 
+const
+  USERAGENT = 'curl/7.50.1 (i686-pc-linux-gnu) libcurl/7.50.1 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
+  //USERAGENT = 'Mozilla/5.0 (compatible; fpweb)';
+  //USERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)';
+
+
 {$ifdef mswindows}
 function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
 var
@@ -1478,8 +1484,7 @@ begin
     repeat
       //RequestHeaders.Add('Connection: Close');
       // User-Agent needed for sourceforge and GitHub
-      AddHeader('User-Agent','curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3');
-      //AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
+      AddHeader('User-Agent',USERAGENT);
       try
         Get(URL,filename);
         response:=ResponseStatusCode;
@@ -1522,8 +1527,7 @@ begin
   with aFPHTTPClient do
   begin
     // User-Agent needed for sourceforge and GitHub
-    AddHeader('User-Agent','curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3');
-    //AddHeader('User-Agent','Mozilla/5.0 (compatible; fpweb)');
+    AddHeader('User-Agent',USERAGENT);
     AddHeader('Connection','Close');
     repeat
       try
@@ -1586,7 +1590,7 @@ begin
   result:=false;
   With TProcess.Create(Self) do
   try
-    CommandLine:='wget -q --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
+    CommandLine:='wget -q --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
     Options:=[poUsePipes,poNoConsole];
     Execute;
     while Running do
@@ -1635,6 +1639,8 @@ begin
         curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
         curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(Dest));
+        curl_easy_setopt(hCurl,CURLOPT_USERAGENT, PChar('Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)'));
+
         res := curl_easy_perform(hCurl);
         result:=(res=CURLE_OK);
         curl_easy_cleanup(hCurl);
@@ -1741,6 +1747,7 @@ begin
             curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
             curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
             curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
+            curl_easy_setopt(hCurl,CURLOPT_USERAGENT, PChar('Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)'));
             res := curl_easy_perform(hCurl);
             result:=(res=CURLE_OK);
             curl_easy_cleanup(hCurl);
@@ -1806,9 +1813,7 @@ var
   Output:string;
 begin
   Output:='';
-  //'curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3'
-  //'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3'
-  result:=(ExecuteCommand('wget -U "curl/7.38.0 (i686-pc-linux-gnu) libcurl/7.38.0 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
+  result:=(ExecuteCommand('wget --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
   if result then
   begin
     result:=(Pos('Remote file exists',Output)>0);
