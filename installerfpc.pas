@@ -923,7 +923,7 @@ begin
     if (ExecuteCommand(CompilerPath+ ' -iV', Output, FVerbose)=0) then
     begin
       Output:=StringReplace(Output,LineEnding,'',[rfReplaceAll,rfIgnoreCase]);
-      Result:=Output;
+      if Length(Output)>0 then Result:=Output;
     end;
   except
   end;
@@ -1628,7 +1628,9 @@ begin
               '/releases/download/bootstrappers_v1.0/'+
               'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+aCPU+'-'+aOS+'-'+GetCompilerName(aCPU);
             infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
+
             aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
+
             if aCompilerFound then aCompilerList.Add(aGithubBootstrapURL);
 
             // look for a previous (fitting) compiler if not found, and use overrideversioncheck
@@ -1677,25 +1679,36 @@ begin
 
       end;
 
+      // get compiler version (if any)
+      s:=GetCompilerVersion(FCompiler);
+
+      // we did not find any suitable bootstrapper
+      // check if we have a manual installed bootstrapper
       if (NOT aCompilerFound) AND (FBootstrapCompilerURL='') then
       begin
-        raise Exception.Create('No bootstrap compiler available for this operating system.');
-        //exit(false);
+        if (s='0.0.0') then
+        begin
+          infoln('No bootstrapper local and online. Fatal. Stopping.',etError);
+          exit(false);
+        end
+        else
+        begin
+          // there is a bootstrapper available: just use it !!
+          infoln('No correct bootstrapper. But going to use the available one with version ' + s,etInfo);
+          FBootstrapCompilerOverrideVersionCheck:=true;
+          result:=true;
+        end;
       end;
 
-      {$ifdef darwin}
-      // Force use of universal bootstrap compiler regardless of what user said as fpc ftp
-      // doesn't have a ppc386 bootstrap. Will have to build one later in TFPCInstaller.BuildModule
-      // FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcuniversal';
-      // Ensure make doesn't care if we build an i386 compiler with an old stable compiler:
-      // FBootstrapCompilerOverrideVersionCheck:=true;
-      {$endif darwin}
-      // final check ... do we have the correct (as in version) compiler already ?
-      infoln('Check if we already have a bootstrap compiler with version '+ aLocalBootstrapVersion,etInfo);
-      if GetCompilerVersion(FCompiler)<>aLocalBootstrapVersion then
+      if (aCompilerFound) AND (FBootstrapCompilerURL<>'') then
       begin
-        infoln('No compiler. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
-        result:=DownloadBootstrapCompiler;
+        // final check ... do we have the correct (as in version) compiler already ?
+        infoln('Check if we already have a bootstrap compiler with version '+ aLocalBootstrapVersion,etInfo);
+        if s<>aLocalBootstrapVersion then
+        begin
+          infoln('No correct bootstrapper. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
+          result:=DownloadBootstrapCompiler;
+        end;
       end;
 
     finally

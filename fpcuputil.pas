@@ -1399,6 +1399,11 @@ begin
       begin
         Username := FUsername;
         Password := FPassword;
+      end
+      else
+      begin
+        Username := 'anonymous';
+        Password := 'fpc@example.com';
       end;
       if Length(HTTPProxyHost)>0 then
       begin
@@ -1604,6 +1609,7 @@ function TUseWGetDownloader.LibCurlDownload(Const URL : String; Dest : TStream):
 var
   hCurl : pCurl;
   res: CURLcode;
+  UserPass:string;
 begin
   result:=false;
 
@@ -1613,6 +1619,18 @@ begin
       hCurl:= curl_easy_init();
       if Assigned(hCurl) then
       begin
+
+        UserPass:='';
+        if FUsername <> '' then
+        begin
+          UserPass:=FUsername+':'+FPassword;
+        end
+        else
+        begin
+          if Pos('ftp.freepascal.org',URL)>0 then UserPass:='anonymous:fpc@example.com';
+        end;
+        if Length(UserPass)>0 then curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
+
         curl_easy_setopt(hCurl,CURLOPT_VERBOSE, Ord(True));
         curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
         curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
@@ -1690,7 +1708,7 @@ var
   aTFTPList:TFTPList;
   F:TMemoryStream;
   i:integer;
-
+  UserPass :string;
 begin
   result:=false;
 
@@ -1707,6 +1725,17 @@ begin
 
           F:=TMemoryStream.Create;
           try
+
+            UserPass:='';
+            if FUsername <> '' then
+            begin
+              UserPass:=FUsername+':'+FPassword;
+            end
+            else
+            begin
+              if Pos('ftp.freepascal.org',URL)>0 then UserPass:='anonymous:fpc@example.com';
+            end;
+            if Length(UserPass)>0 then curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
 
             curl_easy_setopt(hCurl,CURLOPT_VERBOSE, Ord(True));
             curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
