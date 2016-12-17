@@ -1265,10 +1265,9 @@ end;
 BootstrapArchive := SysUtils.GetTempFileName;
 if OperationSucceeded then
 begin
-  OperationSucceeded:=Download(NOT FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+  OperationSucceeded:=Download(FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
 end;
-
 
 if OperationSucceeded then
 begin

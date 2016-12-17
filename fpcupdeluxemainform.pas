@@ -1151,8 +1151,8 @@ begin
   if Form2.ModalResult=mrOk then
   begin
     FPCupManager.ExportOnly:=(NOT Form2.Repo);
-    FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
     FPCupManager.HTTPProxyHost:=Form2.HTTPProxyHost;
+    FPCupManager.HTTPProxyPort:=Form2.HTTPProxyPort;
     FPCupManager.HTTPProxyUser:=Form2.HTTPProxyUser;
     FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
   end;
@@ -1293,7 +1293,7 @@ begin
   FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
   FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
-  {$ifdef MSWINDOWS}
+  {$ifdef Darwin}
   FPCupManager.UseWget:=false;
   {$else}
   FPCupManager.UseWget:=Form2.UseWget;
@@ -1469,6 +1469,8 @@ begin
     Form2.SplitFPC:=ReadBool('General','SplitFPC',False);
     Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
 
+    //FPCupManager.UseWget:=ReadBool('General','UseWget',False);
+    //Form2.UseWget:=FPCupManager.UseWget;
     Form2.UseWget:=ReadBool('General','UseWget',False);
 
     Form2.FPCPatches:=ReadString('Patches','FPCPatches','');

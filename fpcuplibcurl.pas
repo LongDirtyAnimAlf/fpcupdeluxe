@@ -22,10 +22,20 @@
 {$mode objfpc}
 unit fpcuplibcurl;
 
-{.$define libcurlstatic}
+{$define libcurlstatic}
 
 {$ifdef libcurlstatic}
-{$LINKLIB curl}
+{$IFDEF WIN32}
+  {$linklib .\libs\win32\libcurl.a}
+  {$linklib .\libs\win32\libadvapi32.a}
+  {$linklib .\libs\win32\libws2_32.a}
+  {$linklib .\libs\win32\libmingwex.a}
+  {$linklib .\libs\win32\libmsvcrt.a}
+  {$linklib .\libs\win32\libmsvcr100.a}
+  {$linklib .\libs\win32\libkernel32.a}
+  {$linklib .\libs\win32\libcrypt32.a}
+  {$linklib .\libs\win32\libgcc.a}
+{$ENDIF}
 {$endif}
 
 interface
@@ -755,7 +765,7 @@ uses
 
 var
   libcurl: TLibHandle = NilHandle;
-
+{$endif}
 function LoadCurlLibrary:boolean;
 begin
   {$ifdef libcurlstatic}
@@ -846,6 +856,7 @@ begin
   {$endif}
 end;
 
+{$ifndef libcurlstatic}
 finalization
   if (libcurl <> NilHandle) then
   begin

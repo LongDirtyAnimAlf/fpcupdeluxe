@@ -264,7 +264,7 @@ begin
   end;
 
   {$ifdef MSWINDOWS}
-  CheckUseWget.Enabled:=False;
+  //CheckUseWget.Enabled:=False;
   {$endif}
   {$IFDEF Darwin}
   CheckUseWget.Enabled:=False;
@@ -338,7 +338,7 @@ begin
     WriteBool('Cross','IncludeLCL',CheckIncludeLCL.Checked);
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
-    WriteInteger('ProxySettings','HTTPProxyPort',StrToInt(EditHTTPProxyPort.Text));
+    if TryStrToInt(EditHTTPProxyPort.Text,i) then WriteInteger('ProxySettings','HTTPProxyPort',i);
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
 
     // add some security into the password storage ... ;-)
@@ -556,8 +556,10 @@ begin
 end;
 
 function TForm2.GetHTTPProxyPort:integer;
+var
+  i:integer;
 begin
-  result:=StrToInt(EditHTTPProxyPort.Text);
+  if TryStrToInt(EditHTTPProxyPort.Text,i) then result:=i;
 end;
 
 function TForm2.GetHTTPProxyUser:string;
