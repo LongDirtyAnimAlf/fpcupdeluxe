@@ -22,26 +22,29 @@
 {$mode objfpc}
 unit fpcuplibcurl;
 
+{$ifdef win32}
 {$define libcurlstatic}
+{$endif}
 
 {$ifdef libcurlstatic}
-{$IFDEF WIN32}
+{$ifdef win32}
   {$linklib .\libs\win32\libcurl.a}
   {$linklib .\libs\win32\libadvapi32.a}
   {$linklib .\libs\win32\libws2_32.a}
-  {$linklib .\libs\win32\libmingwex.a}
+  //{$linklib .\libs\win32\libmingwex.a} // for _stroll and ___mingw_basename
   {$linklib .\libs\win32\libmsvcrt.a}
-  {$linklib .\libs\win32\libmsvcr100.a}
+  //{$linklib .\libs\win32\libmsvcr100.a} // for __assert
   {$linklib .\libs\win32\libkernel32.a}
   {$linklib .\libs\win32\libcrypt32.a}
-  {$linklib .\libs\win32\libgcc.a}
-{$ENDIF}
+  //{$linklib .\libs\win32\libgcc.a} for ___divdi3, ___umoddi3, ___udivdi3
+{$endif}
 {$endif}
 
 interface
 
 {$IFDEF WINDOWS}
 uses
+  SysUtils,
   ctypes;
 
 type
@@ -697,6 +700,16 @@ const
   CURL_CSELECT_OUT = $02;
   CURL_CSELECT_ERR = $04;
 
+  {$ifdef libcurlstatic}
+  function  divdi3(num,den:int64):int64; cdecl;
+  function  umoddi3(num,den:uint64):uint64; cdecl;
+  function  udivdi3(num,den:uint64):uint64; cdecl;
+  function  strtoll(str,endptr:pansichar;base:longint):int64; cdecl;
+  function  mingw_basename(str:pansichar):pansichar; cdecl;
+  procedure chkstk_ms; cdecl;
+  procedure assert(const str1:pansichar; const str2:pansichar; anum:longint); cdecl;
+  {$endif}
+
 {$ifndef libcurlstatic}
 var
 {$endif}
@@ -761,7 +774,7 @@ implementation
 {$ifndef libcurlstatic}
 
 uses
-  SysUtils,DynLibs;
+  DynLibs;
 
 var
   libcurl: TLibHandle = NilHandle;
@@ -839,22 +852,76 @@ begin
       result:=true;
 
     except
-      on E: Exception do
-      begin
-        UnloadLibrary(libcurl);
-        libcurl := NilHandle;
-      end;
-    end;
-
-  except
-    on E: Exception do
-    begin
       UnloadLibrary(libcurl);
       libcurl := NilHandle;
     end;
+
+  except
+    UnloadLibrary(libcurl);
+    libcurl := NilHandle;
   end;
   {$endif}
 end;
+
+{$ifdef libcurlstatic}
+function divdi3(num,den:int64):int64; cdecl; [public, alias: '___divdi3'];
+begin
+ result:=num div den;
+end;
+
+function umoddi3(num,den:uint64):uint64; cdecl; [public, alias: '___umoddi3'];
+begin
+ result:=num mod den;
+end;
+
+function udivdi3(num,den:uint64):uint64; cdecl; [public, alias: '___udivdi3'];
+begin
+ result:=num div den;
+end;
+
+function strtoll(str,endptr:pansichar;base:longint):int64; cdecl; [alias: '_strtoll'];
+var s:longint;
+begin
+ result:=0;
+ s:=1;
+ while (str^<>#0) and (ptruint(str)<ptruint(endptr)) do begin
+  case str^ of
+   '-':begin
+    s:=-s;
+   end;
+   '0'..'9': result:=(result*base)+(byte(ansichar(str^))-byte(ansichar('0')));
+   'a'..'z': result:=(result*base)+((byte(ansichar(str^))-byte(ansichar('a')))+$a);
+   'A'..'Z': result:=(result*base)+((byte(ansichar(str^))-byte(ansichar('A')))+$a);
+  end;
+  inc(str^);
+ end;
+end;
+
+function malloc(size:longint):pointer; cdecl; external name 'malloc';
+
+function mingw_basename(str:pansichar):pansichar; cdecl; [public, alias: '___mingw_basename'];
+var
+  l:integer;
+  s:string;
+begin
+  s:=str;
+  s:=ExtractFileName(s);
+  l:=length(s);
+  result:=malloc(l+1);
+  move(s,result^,l);
+  result[l]:=#0;
+end;
+
+procedure chkstk_ms; cdecl; [public, alias: '___chkstk_ms'];
+begin
+ // not implemented
+end;
+
+procedure assert (const str1:pansichar; const str2:pansichar; anum:longint); cdecl; [public, alias: '__assert'];
+begin
+ // not implemented
+end;
+{$endif}
 
 {$ifndef libcurlstatic}
 finalization
