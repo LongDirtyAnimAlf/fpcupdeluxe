@@ -141,7 +141,7 @@ type
     function DownloadFromGit(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Checkout/update using SVN; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
-    function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
+    function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     {$IFDEF MSWINDOWS}
     function DownloadSVN: boolean;
@@ -1073,7 +1073,7 @@ begin
   result:=DownloadFromBase(FGitClient,ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
 end;
 
-function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList;const aUserName:string='';const aPassword:string=''): boolean;
+function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
 var
   BeforeRevisionShort: string; //Basically the branch revision number
   CheckoutOrUpdateReturnCode: integer;
@@ -1091,8 +1091,6 @@ begin
   FSVNClient.ModuleName:=ModuleName;
   FSVNClient.LocalRepository := FSourceDirectory;
   FSVNClient.Repository := FURL;
-  FSVNClient.UserName:=aUserName;
-  FSVNClient.Password:=aPassword;
   RepoExists:=FSVNClient.LocalRepositoryExists;
   if RepoExists then
   begin

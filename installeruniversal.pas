@@ -1054,22 +1054,17 @@ end;
 function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 var
   idx,i,j:integer;
-  sl:TStringList;
+  PackageSettings:TStringList;
   RemoteURL,InstallDir:string;
-  PinRevision: string=''; //Pin at a certain revision number
   BeforeRevision: string='';
   AfterRevision: string='';
   UpdateWarnings: TStringList;
   TempArchive:string;
   ResultCode: longint;
-  User,Pass:string;
   SourceOK:boolean;
-  PackagePath:string;
   PackageName:string;
   ExtensionName:string;
   Direction:string;
-  Branch:string;
-
 begin
   result:=InitModule;
   if not result then exit;
@@ -1077,24 +1072,21 @@ begin
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
   begin
-    sl:=TStringList(UniModuleList.Objects[idx]);
+    PackageSettings:=TStringList(UniModuleList.Objects[idx]);
 
     WritelnLog('Getting module '+ModuleName,True);
-    InstallDir:=GetValue('InstallDir',sl);
+    InstallDir:=GetValue('InstallDir',PackageSettings);
     FSourceDirectory:=InstallDir;
 
-    Branch:=GetValue('Branch',sl);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
+
     // Common keywords for all repo methods
-
-    PinRevision:=GetValue('REVISION',sl);
-
+    FDesiredRevision:=GetValue('Revision',PackageSettings);
+    FDesiredBranch:=GetValue('Branch',PackageSettings);
 
     // Handle Git URLs
-    RemoteURL:=GetValue('GITURL',sl);
-    {todo: handle branches (e.g. tiopf doesn't use master branch), perhaps a space after the url and then branch name?
-    Similar construction could be used for hg. Suggest leaving svn as is}
+    RemoteURL:=GetValue('GITURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln('Going to download/update from GIT repository '+RemoteURL,etInfo);
@@ -1102,12 +1094,9 @@ begin
       UpdateWarnings:=TStringList.Create;
       try
         FUrl:=RemoteURL;
-        if PinRevision<>'' then
-          FGitClient.DesiredRevision:=PinRevision;
         FGitClient.ModuleName:=ModuleName;
         FGitClient.Verbose:=FVerbose;
         FGitClient.ExportOnly:=FExportOnly;
-        FGitClient.DesiredBranch:=Branch;
         result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=result;
         if UpdateWarnings.Count>0 then
@@ -1122,8 +1111,9 @@ begin
          else infoln('Getting GIT repo failed. Trying another source, if available.',etInfo)
     end;
 
+
     // Handle SVN urls
-    RemoteURL:=GetValue('SVNURL',sl);
+    RemoteURL:=GetValue('SVNURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln('Going to download/update from SVN repository '+RemoteURL,etInfo);
@@ -1131,14 +1121,12 @@ begin
       UpdateWarnings:=TStringList.Create;
       try
         FUrl:=RemoteURL;
-        User:=GetValue('UserName',sl);
-        Pass:=GetValue('Password',sl);
-        if PinRevision<>'' then
-          FSVNClient.DesiredRevision:=PinRevision;
         FSVNClient.ModuleName:=ModuleName;
         FSVNClient.Verbose:=FVerbose;
         FSVNClient.ExportOnly:=FExportOnly;
-        result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings,User,Pass);
+        FSVNClient.UserName:=GetValue('UserName',PackageSettings);
+        FSVNClient.Password:=GetValue('Password',PackageSettings);
+        result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
         if UpdateWarnings.Count>0 then
         begin
@@ -1153,7 +1141,7 @@ begin
     end;
 
     // Handle HG URLs
-    RemoteURL:=GetValue('HGURL',sl);
+    RemoteURL:=GetValue('HGURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln('Going to download/update from HG repository '+RemoteURL,etInfo);
@@ -1161,8 +1149,6 @@ begin
       UpdateWarnings:=TStringList.Create;
       try
         FUrl:=RemoteURL;
-        if PinRevision<>'' then
-          FHGClient.DesiredRevision:=PinRevision;
         FHGClient.ModuleName:=ModuleName;
         FHGClient.Verbose:=FVerbose;
         FHGClient.ExportOnly:=FExportOnly;
@@ -1182,7 +1168,7 @@ begin
          else infoln('Getting HG repo failed. Trying another source, if available.',etInfo)
     end;
 
-    RemoteURL:=GetValue('ArchiveURL',sl);
+    RemoteURL:=GetValue('ArchiveURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln('Going to download from archive '+RemoteURL,etInfo);
@@ -1263,7 +1249,7 @@ begin
           // we have an archive from github ... this archive adds an extra path (name-branch) when unpacking the master.zip
           // so replace package path and package installer with the right path !!
 
-          PackageName:=GetValue('Name',sl);
+          PackageName:=GetValue('Name',PackageSettings);
           if Pos('/'+PackageName+'/',RemoteURL)=0 then
           begin
             // we must build the name from ArchiveURL ... :-(
@@ -1277,28 +1263,28 @@ begin
               if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
             end;
             // there was something wrong ... back to default ... cheap and dirty coding ...
-            if i=0 then PackageName:=GetValue('Name',sl);
+            if i=0 then PackageName:=GetValue('Name',PackageSettings);
           end;
 
           for i:=-1 to MAXINSTRUCTIONS do
           begin
             if i>=0 then Direction:='AddPackage'+InttoStr(i)+'=' else Direction:='AddPackage=';
-            for j:=0 to sl.Count-1 do
+            for j:=0 to PackageSettings.Count-1 do
             begin
               // find directive, but only rewrite once
-              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName+'-'+ExtensionName,sl[j])=0) then
+              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName+'-'+ExtensionName,PackageSettings[j])=0) then
               begin
-                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
+                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
                 break;
               end;
             end;
             if i>=0 then Direction:='InstallExecute'+InttoStr(i)+'=' else Direction:='InstallExecute=';
-            for j:=0 to sl.Count-1 do
+            for j:=0 to PackageSettings.Count-1 do
             begin
               // find directive, but only rewrite once
-              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName+'-'+ExtensionName,sl[j])=0) then
+              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName+'-'+ExtensionName,PackageSettings[j])=0) then
               begin
-                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
+                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
                 break;
               end;
             end;
@@ -1313,7 +1299,7 @@ begin
           // we have an archive from sourceforge ... this archive adds an extra path (name) when unpacking the zip
           // so replace package path and package installer with the right path !!
 
-          PackageName:=GetValue('Name',sl);
+          PackageName:=GetValue('Name',PackageSettings);
           if Pos('/'+PackageName+'/',lowercase(RemoteURL))=0 then
           begin
             PackageName:=RemoteURL;
@@ -1324,29 +1310,28 @@ begin
               i:=RPos('/',PackageName);
               if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
             end;
-            if i=0 then PackageName:=GetValue('Name',sl);
+            if i=0 then PackageName:=GetValue('Name',PackageSettings);
           end;
 
           for i:=-1 to MAXINSTRUCTIONS do
           begin
             if i>=0 then Direction:='AddPackage'+InttoStr(i)+'=' else Direction:='AddPackage=';
-            for j:=0 to sl.Count-1 do
+            for j:=0 to PackageSettings.Count-1 do
             begin
               // find directive, but only rewrite once
-              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName,sl[j])=0) then
+              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName,PackageSettings[j])=0) then
               begin
-                writeln('Error: newpackage '+PackageName);
-                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
+                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
                 break;
               end;
             end;
             if i>=0 then Direction:='InstallExecute'+InttoStr(i)+'=' else Direction:='InstallExecute=';
-            for j:=0 to sl.Count-1 do
+            for j:=0 to PackageSettings.Count-1 do
             begin
               // find directive, but only rewrite once
-              if (Pos(Direction,sl[j])>0) AND (Pos(PackageName,sl[j])=0) then
+              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName,PackageSettings[j])=0) then
               begin
-                sl[j]:=StringReplace(sl[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
+                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
                 break;
               end;
             end;
@@ -1356,7 +1341,7 @@ begin
       end else infoln('Getting archive failed. Trying another source, if available.',etInfo)
     end;
 
-    RemoteURL:=GetValue('ArchivePATH',sl);
+    RemoteURL:=GetValue('ArchivePATH',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln('Going to download from archive path '+RemoteURL,etInfo);
