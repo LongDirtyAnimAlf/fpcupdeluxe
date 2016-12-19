@@ -235,18 +235,22 @@ begin
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
     EditHTTPProxyUser.Text:=ReadString('ProxySettings','HTTPProxyUser','');
-    s:=ReadString('ProxySettings','HTTPProxyPass','');
 
     // add some security into the password storage ... ;-)
-    //Cipher:= TDCP_rc4.Create(nil);
-    Cipher := TDCP_DES.Create(nil);
-    try
-      Cipher.InitStr(DELUXEKEY,TDCP_sha256);
-      EditHTTPProxyPassword.Text:=Cipher.DecryptString(s);
-    finally
-      Cipher.Burn;
-      Cipher.Free;
+    s:=ReadString('ProxySettings','HTTPProxyPass','');
+    if Length(s)>0 then
+    begin
+      //Cipher:= TDCP_rc4.Create(nil);
+      Cipher := TDCP_DES.Create(nil);
+      try
+        Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+        s:=Cipher.DecryptString(s);
+      finally
+        Cipher.Burn;
+        Cipher.Free;
+      end;
     end;
+    EditHTTPProxyPassword.Text:=s;
 
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -264,7 +268,7 @@ begin
   end;
 
   {$ifdef MSWINDOWS}
-  //CheckUseWget.Enabled:=False;
+  CheckUseWget.Enabled:=False;
   {$endif}
   {$IFDEF Darwin}
   CheckUseWget.Enabled:=False;
@@ -342,16 +346,20 @@ begin
     WriteString('ProxySettings','HTTPProxyUser',EditHTTPProxyUser.Text);
 
     // add some security into the password storage ... ;-)
-    //Cipher:= TDCP_rc4.Create(nil);
-    Cipher := TDCP_DES.Create(nil);
-    try
-      Cipher.InitStr(DELUXEKEY,TDCP_sha256);
-      s:=Cipher.EncryptString(EditHTTPProxyPassword.Text);
-      WriteString('ProxySettings','HTTPProxyPass',s);
-    finally
-      Cipher.Burn;
-      Cipher.Free;
+    s:=EditHTTPProxyPassword.Text;
+    if Length(s)>0 then
+    begin
+      //Cipher:= TDCP_rc4.Create(nil);
+      Cipher := TDCP_DES.Create(nil);
+      try
+        Cipher.InitStr(DELUXEKEY,TDCP_sha256);
+        s:=Cipher.EncryptString(s);
+      finally
+        Cipher.Burn;
+        Cipher.Free;
+      end;
     end;
+    WriteString('ProxySettings','HTTPProxyPass',s);
 
     for OS := Low(TOS) to High(TOS) do
     begin

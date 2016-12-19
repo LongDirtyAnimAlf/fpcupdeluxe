@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.1.0h';
+  FPCUPDELUXEVERSION='1.1.0i';
 
 resourcestring
   CrossGCCMsg =
@@ -1293,10 +1293,15 @@ begin
   FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
   FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
+  // force some settings for default downloader
   {$ifdef Darwin}
   FPCupManager.UseWget:=false;
   {$else}
-  FPCupManager.UseWget:=Form2.UseWget;
+    {$ifdef MSWINDOWS}
+    FPCupManager.UseWget:=false;
+    {$else}
+    FPCupManager.UseWget:=Form2.UseWget;
+    {$endif}
   {$endif}
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
