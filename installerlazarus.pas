@@ -41,22 +41,16 @@ uses
 const
   Sequences =
     //standard lazarus build
-    //Note: we only do a getmodule/cleanmodule once here in this sequence,
-    //otherwise we keep running distclean and svn
     'Declare lazarus;' +
     'Cleanmodule lazarus;' +
     'Getmodule lazarus;' +
-    //config lazarus so we can use lazbuild in the build step:
-    'ConfigModule lazarus;' +
-    // Cross compile support at least requires lazbuild.
-    // we're building it here directly to avoid circular
-    // dependencies
     'Buildmodule lazbuild;' +
-    'Buildmodule lazarus;' +
-    //Config again to (possibly) fix any wrong settings introduced:
     'ConfigModule lazarus;' +
-    // Make sure the user can use the IDE:
-    'Exec CreateLazarusScript;' + 'End;' +
+    'Do helplazarus;'+
+    'Do UniversalDefault;'+
+    'Do USERIDE;'+
+    'Exec CreateLazarusScript;' +
+    'End;' +
 
     'Declare oldlazarus;' +
     'Cleanmodule lazarus;' +
@@ -65,12 +59,6 @@ const
     'ConfigModule lazarus;' +
     'Exec CreateLazarusScript;' +
     'End;' +
-
-    {
-    'Declare lazscripttest;' +
-    'Exec CreateLazarusScript;' +
-    'End;' +
-    }
 
     //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' +
@@ -103,7 +91,9 @@ const
     'Declare LazCleanAndBuildOnly;' +
     'Cleanmodule lazarus;' +
     'Buildmodule lazbuild;' +
-    'Buildmodule USERIDE;' +
+    'ConfigModule lazarus;' +
+    'Do UniversalDefault;'+
+    'Do USERIDE;'+
     'End;' +
 
     // Crosscompile build
