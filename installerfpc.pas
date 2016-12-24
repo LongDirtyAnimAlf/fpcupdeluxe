@@ -1915,6 +1915,9 @@ begin
 
   if (bIntermediateNeeded) then
   begin
+    // temporary ... there are no sources (yet) for 3.0.2
+    if RequiredBootstrapVersion='3.0.2' then RequiredBootstrapVersion:='3.0.0';
+
     infoln('We need to build an FPC ' + RequiredBootstrapVersion + ' intermediate compiler.',etInfo);
 
     // get the correct binutils (Windows only)

@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0';
+  FPCUPDELUXEVERSION='1.2.0a';
 
 resourcestring
   CrossGCCMsg =
@@ -299,7 +299,7 @@ begin
   FPCupManager.PatchCmd:='gpatch';
   {$ELSE}
   FPCupManager.PatchCmd:='patch';
-  {$ENDIF MSWINDOWS}
+  {$ENDIF}
 
   if listbox3.Count=0 then
   begin
