@@ -1,4 +1,4 @@
-{ Utility unit for FPCUp
+{ Utility unit for various FPCup versions
 Copyright (C) 2012-2014 Reinier Olislagers, Ludo Brands
 
 This library is free software; you can redistribute it and/or modify it
@@ -890,18 +890,22 @@ begin
 end;
 
 // returns file size in bytes or 0 if not found.
-function FileSizeUTF8(FileName: string) : Int64;
+function FileSize(FileName: string) : Int64;
+//function FileSizeUTF8(FileName: string) : Int64;
 var
-  sr : TSearchRec;
+  sr : TRawByteSearchRec;
+  //sr : TSearchRec;
 begin
 {$ifdef unix}
   result:=filesize(FileName);
 {$else}
-  if FindFirstUTF8(FileName, faAnyFile, sr ) = 0 then
+  if SysUtils.FindFirst(FileName, faAnyFile, sr ) = 0 then
+  //if FindFirstUTF8(FileName, faAnyFile, sr ) = 0 then
      result := Int64(sr.FindData.nFileSizeHigh) shl Int64(32) + Int64(sr.FindData.nFileSizeLow)
   else
      result := 0;
-  FindCloseUTF8(sr);
+  SysUtils.FindClose(sr);
+  //FindCloseUTF8(sr);
 {$endif}
 end;
 

@@ -24,8 +24,7 @@ uses
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, fpcupdeluxemainform, extrasettings,
-  Classes, sysutils, strings,
-  FileUtil, LazFileUtils,
+  Classes, sysutils,
   synautil, // for rpos ... could also use strutil
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
@@ -36,8 +35,10 @@ uses
   m_any_to_linuxaarch64,
   m_any_to_androidjvm,
   m_any_to_javajvm,
-  {$IFNDEF MSWINDOWS}
+  {$IFDEF LINUX}
   m_linux386_to_mips,
+  {$ENDIF}
+  {$IFNDEF MSWINDOWS}
   m_any_to_linuxmipsel,
   {$ENDIF}
   {$IFDEF Darwin}
@@ -52,7 +53,11 @@ uses
   m_any_to_darwinarm,
   {$endif}
   {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
-  m_freebsd_to_linux386, m_freebsd64_to_freebsd32, m_freebsd_to_linux64,
+  m_freebsd_to_linux386,
+  {$ifdef CPU64}
+  m_freebsd64_to_freebsd32,
+  {$endif}
+  m_freebsd_to_linux64,
   {$else}
   m_any_to_linux386,
   m_any_to_linuxx64,

@@ -43,7 +43,6 @@ type
     btnSelectBinDir: TButton;
     Button1: TButton;
     Button2: TButton;
-    CheckIncludeFPCIDE: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;

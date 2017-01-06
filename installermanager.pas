@@ -56,7 +56,7 @@ uses
 // Note that a single os/cpu/sequence combination will only be executed once (the state machine checks for this)
 Const
   Sequences=
-//default sequence. Using declare makes this show up in the module list given by fpcup --help
+    //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
     'Declare default;'+ //keyword Declare gives a name to a sequence of commands
     {$ifndef FPCONLY}
@@ -1055,7 +1055,7 @@ begin
   //check if this is a known module:
 
   // FPC:
-  if uppercase(ModuleName)='FPC' then
+  if (uppercase(ModuleName)='FPC') then
     begin
     if assigned(FInstaller) then
       begin

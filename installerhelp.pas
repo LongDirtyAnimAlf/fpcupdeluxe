@@ -1,4 +1,4 @@
-{ Help installer/uninstaller unit for fpcup
+ { Help installer/uninstaller unit for fpcup
 Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
@@ -594,7 +594,7 @@ begin
       (LazFileUtils.FileIsReadOnlyUTF8(ExistingLCLHelp)=false)
       and
       ((DaysBetween(Now,LCLDate)>7)
-      or (FileSizeUTF8(ExistingLCLHelp)=0))
+      or (FileSize(ExistingLCLHelp)=0))
       )
       then
     begin
@@ -718,7 +718,7 @@ begin
         // Move files if required
         if FileExistsUTF8(GeneratedLCLHelp) then
         begin
-          if FileSizeUTF8(GeneratedLCLHelp)>0 then
+          if FileSize(GeneratedLCLHelp)>0 then
           begin
             infoln(ModuleName+': moving lcl.chm to docs directory',etInfo);
             OperationSucceeded:=MoveFile(GeneratedLCLHelp,ExistingLCLHelp);

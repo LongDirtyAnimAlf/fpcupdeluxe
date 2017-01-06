@@ -196,7 +196,7 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 3
     end
-    object CheckIncludeFPCIDE: TCheckBox
+    object CheckIncludeHelp: TCheckBox
       AnchorSideLeft.Control = GroupBox2
       AnchorSideTop.Control = CheckUpdateOnly
       AnchorSideTop.Side = asrBottom
@@ -204,23 +204,6 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 104
-      Width = 173
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Include FPC IDE (default=no)'
-      Enabled = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 4
-    end
-    object CheckIncludeHelp: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckIncludeFPCIDE
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 129
       Width = 160
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -229,7 +212,7 @@ object Form2: TForm2
       ParentShowHint = False
       ShowHint = True
       State = cbChecked
-      TabOrder = 5
+      TabOrder = 4
     end
     object CheckSplitFPC: TCheckBox
       AnchorSideLeft.Control = GroupBox2
@@ -238,14 +221,14 @@ object Form2: TForm2
       Left = 4
       Height = 19
       Hint = 'Download whole repository, or only latest files'
-      Top = 154
+      Top = 129
       Width = 223
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       Caption = 'Split FPC source and bins (default=no)'
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 6
+      TabOrder = 5
     end
     object CheckSplitLazarus: TCheckBox
       AnchorSideLeft.Control = GroupBox2
@@ -254,7 +237,7 @@ object Form2: TForm2
       Left = 4
       Height = 19
       Hint = 'Download whole repository, or only latest files'
-      Top = 179
+      Top = 154
       Width = 241
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -262,7 +245,7 @@ object Form2: TForm2
       Enabled = False
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 7
+      TabOrder = 6
     end
     object CheckUseWget: TCheckBox
       AnchorSideLeft.Control = GroupBox2
@@ -271,14 +254,14 @@ object Form2: TForm2
       Left = 4
       Height = 19
       Hint = 'Download whole repository, or only latest files'
-      Top = 204
+      Top = 179
       Width = 256
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       Caption = 'Use wget/libcurl as downloader (default=no)'
       ParentShowHint = False
       ShowHint = True
-      TabOrder = 8
+      TabOrder = 7
     end
   end
   object GroupBox4: TGroupBox

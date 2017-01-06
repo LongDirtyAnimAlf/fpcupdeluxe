@@ -66,6 +66,8 @@ type
     FReApplyLocalChanges: boolean;
     procedure SetURL(value:string);
     function GetMake: string;
+    function GetSourceCPU:string;
+    function GetSourceOS:string;
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
@@ -165,6 +167,8 @@ type
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
   public
+    property SourceCPU:string read GetSourceCPU;
+    property SourceOS:string read GetSourceOS;
     property SVNClient: TSVNClient read FSVNClient;
     // Get processor for termination of running processes
     property Processor: TProcessEx read ProcessEx;
@@ -253,6 +257,17 @@ uses
   ;
 
 { TInstaller }
+
+
+function TInstaller.GetSourceCPU:string;
+begin
+  result:=lowercase({$i %FPCTARGETCPU%});
+end;
+
+function TInstaller.GetSourceOS:string;
+begin
+  result:=lowercase({$i %FPCTARGETOS%});
+end;
 
 function TInstaller.GetCompiler: string;
 begin
@@ -497,8 +512,8 @@ begin
     {$IFDEF MSWINDOWS}
     if OperationSucceeded then
     begin
-      // check availability of OpenSSL libraries. Just continue in case oof error
-      if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(ExtractFilePath(ParamStr(0))+'ssleay32.dll') then
+      // check availability of OpenSSL libraries. Just continue in case of error
+      if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll') then
       begin
         infoln('Found OpenSLL library files.',etInfo);
       end
@@ -1688,9 +1703,10 @@ end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
 begin
-  result:=((FileExists(aFile)) AND (NOT forceoverwrite));
+  result:=((FileExists(aFile)) AND (NOT forceoverwrite) AND (FileSize(aFile)>0));
   if (NOT result) then
   begin
+    if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
     result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
     if (NOT result) then infoln('Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
   end;
