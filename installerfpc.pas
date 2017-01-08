@@ -593,6 +593,8 @@ begin
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
         ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
+        //ProcessEx.Parameters.Add('OPT=-vd+ '+Options);
+        //ProcessEx.Parameters.Add('OPT=-vw -vl -vx -vd -vi-n-h- '+Options);
 
         try
           if CrossOptions='' then
@@ -664,20 +666,26 @@ begin
         // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h-');
         if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
+
+        CrossOptions:='';
+
         if CrossInstaller.BinUtilsPrefix<>'' then
-          begin
+        begin
           // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
-          CrossOptions:='CROSSOPT=-XP'+CrossInstaller.BinUtilsPrefix;
+          CrossOptions:=CrossOptions+' -XP'+CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
-          end;
-        if (CrossInstaller.CrossOpt.Count>0) and (CrossOptions='') then
-          CrossOptions:='CROSSOPT=';
+        end;
+
         for i:=0 to CrossInstaller.CrossOpt.Count-1 do
-          begin
+        begin
           CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
-          end;
+        end;
+
+        CrossOptions:=Trim(CrossOptions);
         if CrossOptions<>'' then
-          ProcessEx.Parameters.Add(CrossOptions);
+        begin
+          ProcessEx.Parameters.Add('CROSSOPT='+CrossOptions);
+        end;
 
         try
           ProcessEx.Execute;

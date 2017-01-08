@@ -41,6 +41,7 @@ const
   FPCSVNURL = 'http://svn.freepascal.org/svn';
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
   DEFAULTBINUTILSVERSION = '3.0.0';
+  //DEFAULTBINUTILSVERSION = '2.6.4';
 
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
