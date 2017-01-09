@@ -648,24 +648,30 @@ begin
       infoln('Could not retrieve Windows version using GetWin32Version.',etWarning);
   {$ENDIF}
 
-  if SkipModules<>'' then begin
+  FSequencer.FSkipList:=nil;
+  if SkipModules<>'' then
+  begin
     FSequencer.FSkipList:=TStringList.Create;
     FSequencer.FSkipList.Delimiter:=',';
     FSequencer.FSkipList.DelimitedText:=SkipModules;
-    end;
-  if FOnlyModules<>'' then begin
+  end;
+
+  if FOnlyModules<>'' then
+  begin
     FSequencer.CreateOnly(FOnlyModules);
     result:=FSequencer.Run('Only');
     FSequencer.DeleteOnly;
-    end
-  else begin
+  end
+  else
+  begin
     {$if defined(win32)}
     // Run Windows specific cross compiler or regular version
     if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then begin
       infoln('InstallerManager: going to run sequencer for sequence: Default.',etDebug);
       result:=FSequencer.Run('Default');
     end
-    else begin
+    else
+    begin
       infoln('InstallerManager: going to run sequencer for sequence: DefaultWin32.',etDebug);
       result:=FSequencer.Run('DefaultWin32');
     end;
@@ -706,9 +712,9 @@ begin
       result:=FSequencer.Run('Only');
       FSequencer.DeleteOnly;
     end;
-    end;
-  if assigned(FSequencer.FSkipList) then
-    FSequencer.FSkipList.Free;
+  end;
+
+  if assigned(FSequencer.FSkipList) then FSequencer.FSkipList.Free;
 end;
 
 constructor TFPCupManager.Create;
@@ -1252,7 +1258,11 @@ end;
 
 function TSequencer.IsSkipped(ModuleName: string): boolean;
 begin
-  result:=assigned(FSkipList) and (FSkipList.IndexOf(Uppercase(ModuleName))>=0);
+  try
+    result:=assigned(FSkipList) and (FSkipList.IndexOf(Uppercase(ModuleName))>=0);
+  except
+    result:=false;
+  end;
 end;
 
 procedure TSequencer.ResetAllExecuted(SkipFPC: boolean);
