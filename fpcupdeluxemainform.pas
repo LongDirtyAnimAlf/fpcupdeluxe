@@ -178,6 +178,25 @@ end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
+  {$ifdef CPUAARCH64}
+  // disable some features
+  FixesBtn.Enabled:=False;
+  StableBtn.Enabled:=False;
+  OldBtn.Enabled:=False;
+  DinoBtn.Enabled:=False;
+  RadioGroup1.Enabled:=False;
+  RadioGroup2.Enabled:=False;
+  Button5.Enabled:=False;
+  {$endif CPUAARCH64}
+  {$ifdef CPUARM}
+  // disable some features
+  FixesBtn.Enabled:=False;
+  StableBtn.Enabled:=False;
+  RadioGroup1.Enabled:=False;
+  RadioGroup2.Enabled:=False;
+  Button5.Enabled:=False;
+  {$endif CPUARM}
+
   Self.Caption:='Lazarus and FPC installer and updater V'+FPCUPDELUXEVERSION+' based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
                 lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
 

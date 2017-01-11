@@ -272,6 +272,16 @@ begin
   {$IFDEF Darwin}
   CheckUseWget.Enabled:=False;
   {$endif}
+
+  {$ifdef CPUAARCH64}
+  // disable some features
+  GroupBox4.Enabled:=False;
+  {$endif CPUAARCH64}
+  {$ifdef CPUARM}
+  // disable some features
+  GroupBox4.Enabled:=False;
+  {$endif CPUARM}
+
 end;
 
 procedure TForm2.ComboBoxCPUOSChange(Sender: TObject);
