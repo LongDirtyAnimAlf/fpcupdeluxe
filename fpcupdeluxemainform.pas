@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0b';
+  FPCUPDELUXEVERSION='1.2.0c';
 
 resourcestring
   CrossGCCMsg =

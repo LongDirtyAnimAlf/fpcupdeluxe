@@ -523,12 +523,15 @@ begin
         if FBootstrapCompilerOverrideVersionCheck then
            ProcessEx.Parameters.Add('OVERRIDEVERSIONCHECK=1');
         //putting all before target might help!?!?
+
         ProcessEx.Parameters.Add('all');
         ProcessEx.Parameters.Add('CPU_SOURCE='+SourceCPU);
         ProcessEx.Parameters.Add('OS_SOURCE='+SourceOS);
-        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
+        ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
+        ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
         //ProcessEx.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
+        ProcessEx.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
+
         if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
         Options:=FCompilerOptions;
         // Error checking for some known problems with cross compilers
@@ -592,6 +595,7 @@ begin
         // suppress hints and add all other options
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
+        // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
         //ProcessEx.Parameters.Add('OPT=-vd+ '+Options);
         //ProcessEx.Parameters.Add('OPT=-vw -vl -vx -vd -vi-n-h- '+Options);
@@ -658,11 +662,12 @@ begin
         ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
         {$ENDIF}
         //putting crossinstall before target might help!?!?
+        ProcessEx.Parameters.Add('crossinstall');
         ProcessEx.Parameters.Add('CPU_SOURCE='+SourceCPU);
         ProcessEx.Parameters.Add('OS_SOURCE='+SourceOS);
         ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
         ProcessEx.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
-        ProcessEx.Parameters.Add('crossinstall');
+        ProcessEx.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
         // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h-');
         if Length(FCrossOS_SubArch)>0 then ProcessEx.Parameters.Add('SUBARCH='+FCrossOS_SubArch);

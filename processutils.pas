@@ -389,19 +389,26 @@ var
   end;
 
 begin
-  if not FCaseSensitive then
-    VarName:=UpperCase(VarName);
-  idx:=0;
-  while idx<FEnvironmentList.Count  do
-    begin
-    if VarName = ExtractVar(FEnvironmentList[idx]) then
-      break;
-    idx:=idx+1;
-    end;
-  if idx<FEnvironmentList.Count then
-    result:=idx
-  else
+  if (Length(VarName)=0) then
+  begin
     result:=-1;
+  end
+  else
+  begin
+    if not FCaseSensitive then
+      VarName:=UpperCase(VarName);
+    idx:=0;
+    while idx<FEnvironmentList.Count  do
+    begin
+      if VarName = ExtractVar(FEnvironmentList[idx]) then
+        break;
+      idx:=idx+1;
+    end;
+    if idx<FEnvironmentList.Count then
+      result:=idx
+    else
+      result:=-1;
+  end;
 end;
 
 function TProcessEnvironment.GetVar(VarName: string): string;
@@ -421,7 +428,7 @@ var
 
 begin
   idx:=GetVarIndex(VarName);
-  if idx>0 then
+  if idx>=0 then
     result:=ExtractVal(FEnvironmentList[idx])
   else
     result:='';
@@ -432,9 +439,10 @@ var
   idx:integer;
   s:string;
 begin
+  if (Length(VarName)=0) OR (Length(VarValue)=0) then exit;
   idx:=GetVarIndex(VarName);
   s:=trim(Varname)+'='+trim(VarValue);
-  if idx>0 then
+  if idx>=0 then
     FEnvironmentList[idx]:=s
   else
     FEnvironmentList.Add(s);
