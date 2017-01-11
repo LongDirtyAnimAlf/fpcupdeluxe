@@ -3,6 +3,7 @@ fpcup / fpclazup / fpcupdeluxe
 Original: https://bitbucket.org/reiniero/fpcup/
 Updated : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup
 New (this) : https://github.com/newpascal/fpcupdeluxe
+Wiki : http://wiki.freepascal.org/fpcupdeluxe
 
 Acknowledgement
 ===========
