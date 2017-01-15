@@ -572,6 +572,11 @@ begin
              // add extra libs located in ...\system for Mac SDK
              // does not do harm on other systems if they are not there
              CrossOptions:=CrossOptions+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
+             s:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..\..\';
+             s:=ResolveDots(s);
+             s:=ExcludeTrailingBackslash(s);
+             s:=StringReplace(s,'\','/',[rfReplaceAll]);
+             ProcessEx.Environment.SetVar('OSXCROSS_SDKROOT',s);
            end;
            {$endif}
           // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !
@@ -1759,6 +1764,7 @@ begin
   {$IFDEF MSWINDOWS}
   s:='';
   // preserve cygwin and msys(2) paths when setting path
+  {
   aCompilerList:=TStringList.Create;
   try
     aCompilerList.Delimiter:=PathSeparator;
@@ -1775,6 +1781,7 @@ begin
   finally
     aCompilerList.Free;
   end;
+  }
   if Length(FSVNDirectory)>0
      then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory)+s;
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
@@ -2055,7 +2062,18 @@ begin
         if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
         ProcessEx.Parameters.Add('FPC='+FCompiler);
         ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
+
+        // Legacy settings from fpcup ... not sure if correct [Don]
+        // Copy over user-specified instruction sets e.g. for trunk compiler...
+        // in CROSSOPT though, as the stable compiler likely will not understand them
+        // if FCompilerOptions<>'' then ProcessEx.Parameters.Add('CROSSOPT='+FCompilerOptions);
+
+        {$ifdef CPUARMHF}
+        ProcessEx.Parameters.Add('OPT=-vi-n-h- -dFPC_ARMHF');
+        {$else}
         ProcessEx.Parameters.Add('OPT=-vi-n-h-');
+        {$endif}
+
         //ProcessEx.Parameters.Add('OS_TARGET='+SourceOS);
         //ProcessEx.Parameters.Add('CPU_TARGET='+SourceCPU);
 

@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0c';
+  FPCUPDELUXEVERSION='1.2.0d';
 
 resourcestring
   CrossGCCMsg =
@@ -957,14 +957,27 @@ begin
           if FPCupManager.CrossCPU_Target='arm' then URL:='EmbeddedARM.rar';
           if FPCupManager.CrossCPU_Target='avr' then URL:='EmbeddedAVR.rar';
         end;
+        if FPCupManager.CrossOS_Target='darwin' then
+        begin
+          if FPCupManager.CrossCPU_Target='i386' then URL:='Darwinx86.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Darwinx86.rar';
+        end;
 
         // tricky ... reset URL in case the binutils and libs are already there ... to exit this retry ... ;-)
+
+        // Darwin is special: combined for i386 and x86_64 with osxcross
+        if FPCupManager.CrossOS_Target='darwin' then
+        begin
+          if URL='Darwinx86.rar' then s:='x86';
+        end
+        else s:=FPCupManager.CrossCPU_Target;
+
         if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
                            'cross'+
                            DirectorySeparator+
                            'bin'+
                            DirectorySeparator+
-                           FPCupManager.CrossCPU_Target+
+                           s+
                            '-'+
                            FPCupManager.CrossOS_Target))
             AND
@@ -973,7 +986,7 @@ begin
                                      DirectorySeparator+
                                      'lib'+
                                      DirectorySeparator+
-                                     FPCupManager.CrossCPU_Target+
+                                     s+
                                      '-'+
                                      FPCupManager.CrossOS_Target))
             then URL:='';

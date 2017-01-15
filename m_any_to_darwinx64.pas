@@ -38,6 +38,9 @@ uses
 
 implementation
 
+uses
+  LazFileUtils;
+
 type
 
 { Tany_darwinx64 }
@@ -62,6 +65,9 @@ function Tany_darwinx64.GetLibs(Basepath:string): boolean;
 const
   DirName='x86_64-darwin';
   LibName='libc.dylib';
+var
+  s:string;
+  i:integer;
 begin
 
   result:=FLibsFound;
@@ -70,6 +76,10 @@ begin
   // begin simple: check presence of library file in basedir
   if not result then
     result:=SearchLibrary(Basepath,LibName);
+
+  // for osxcross with special libs: search also for libc.tbd
+  if not result then
+    result:=SearchLibrary(Basepath,'libc.tbd');
 
   if not result then
     result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',LibName);
@@ -81,6 +91,19 @@ begin
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+
+  // also for osxcross
+  if not result then
+  begin
+    for i:=15 downto 10 do
+    begin
+      s:='MacOSX10.'+InttoStr(i);
+      result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+      if result then break;
+    end;
+  end;
 
   if not result then
   begin
@@ -101,8 +124,11 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
 
     // specialities for osxcross
-    if Pos('osxcross',FLibsPath)>0 then
+    //if Pos('osxcross',FLibsPath)>0 then
     begin
+      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..\..\';
+      s:=ResolveDots(s);
+      s:=ExcludeTrailingBackslash(s);
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system\'+LineEnding+
       '-k-framework'+LineEnding+
@@ -112,12 +138,12 @@ begin
       '-k-framework'+LineEnding+
       '-kCoreFoundation'+LineEnding+
       // -XRx is needed for fpc : prepend <x> to all linker search paths
-      '-XR'+ExcludeTrailingPathDelimiter(Basepath);
+      //'-XR'+ExcludeTrailingPathDelimiter(Basepath);
+      '-XR'+s;
     end;
 
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
   end;
 end;
 
@@ -155,7 +181,10 @@ begin
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
-      if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,'x86-darwin',AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
