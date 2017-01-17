@@ -1965,8 +1965,10 @@ begin
       if ((FCPUCount>1) AND (NOT FNoJobs)) then ProcessEx.Parameters.Add('--jobs='+inttostr(FCPUCount));
       ProcessEx.Parameters.Add('FPC='+FCompiler);
       ProcessEx.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
-      //ProcessEx.Parameters.Add('OS_TARGET='+SourceOS);
-      //ProcessEx.Parameters.Add('CPU_TARGET='+SourceCPU);
+
+      ProcessEx.Parameters.Add('OS_TARGET='+SourceOS);
+      ProcessEx.Parameters.Add('CPU_TARGET='+SourceCPU);
+
       ProcessEx.Execute;
       infoln('Cleaned FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
 
@@ -2069,8 +2071,8 @@ begin
         ProcessEx.Parameters.Add('OPT=-vi-n-h-');
         {$endif}
 
-        //ProcessEx.Parameters.Add('OS_TARGET='+SourceOS);
-        //ProcessEx.Parameters.Add('CPU_TARGET='+SourceCPU);
+        ProcessEx.Parameters.Add('OS_TARGET='+SourceOS);
+        ProcessEx.Parameters.Add('CPU_TARGET='+SourceCPU);
 
         if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
         begin
@@ -2089,6 +2091,7 @@ begin
         if ReturnCode=1 then infoln('Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
       end;
 
+      infoln('Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(SourceCPU) + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompiler,etInfo);
       FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(SourceCPU),
         ExtractFilePath(FCompiler)+IntermediateCompiler);
 
