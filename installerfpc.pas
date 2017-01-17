@@ -572,11 +572,6 @@ begin
              // add extra libs located in ...\system for Mac SDK
              // does not do harm on other systems if they are not there
              CrossOptions:=CrossOptions+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
-             s:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..\..\';
-             s:=ResolveDots(s);
-             s:=ExcludeTrailingBackslash(s);
-             s:=StringReplace(s,'\','/',[rfReplaceAll]);
-             ProcessEx.Environment.SetVar('OSXCROSS_SDKROOT',s);
            end;
            {$endif}
           // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !
@@ -2532,6 +2527,7 @@ var
   UpdateWarnings: TStringList;
   ReturnCode,i: integer;
   //MakefileSL:TStringList;
+  DiffFileSL:TStringList;
   aRepoClient:TRepoClient;
 begin
   result:=InitModule;
@@ -2632,6 +2628,34 @@ begin
             {$ELSE}
             ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
             {$ENDIF}
+
+            if ReturnCode<>0 then
+            begin
+              // Patching can go wrong when line endings are not compatible
+              // Try to circumvent this problem by trick below (replacing line enddings)
+              if Pos('different line endings',Output)>0 then
+              begin
+                DiffFileSL:=TStringList.Create();
+                try
+                  {$IFDEF MSWINDOWS}
+                  DiffFileSL.TextLineBreakStyle:=tlbsLF;
+                  {$ELSE}
+                  DiffFileSL.TextLineBreakStyle:=tlbsCRLF;
+                  {$ENDIF}
+                  DiffFileSL.LoadFromFile(PatchFilePath);
+                  DiffFileSL.TextLineBreakStyle:=DefaultTextLineBreakStyle;
+                  DiffFileSL.SaveToFile(PatchFilePath);
+                finally
+                  DiffFileSL.Free();
+                end;
+                {$IFDEF MSWINDOWS}
+                ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
+                {$ELSE}
+                ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
+                {$ENDIF}
+              end;
+            end;
+
             if ReturnCode=0
                then infoln('FPC has been patched successfully with '+UpdateWarnings[i],etInfo)
                else

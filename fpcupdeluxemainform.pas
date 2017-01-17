@@ -94,7 +94,7 @@ type
     function RealRun:boolean;
     function GetFPCUPSettings(IniFile:string):boolean;
     function SetFPCUPSettings(IniFile:string):boolean;
-    procedure AddMessage(aMessage:string);
+    procedure AddMessage(aMessage:string; UpdateStatus:boolean=false);
     procedure InitFPCupManager;
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0d';
+  FPCUPDELUXEVERSION='1.2.0e';
 
 resourcestring
   CrossGCCMsg =
@@ -1004,7 +1004,7 @@ begin
               exit;
             end;
 
-            AddMessage('Please wait: Going to download the right cross-tools. Can (will) take some time !');
+            AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
             {$ifdef MSWINDOWS}
             DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+URL;
             {$else}
@@ -1054,6 +1054,7 @@ begin
 
           if MissingCrossLibs then
           begin
+            AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
             DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
             AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
@@ -1085,7 +1086,7 @@ begin
             // run again with the correct libs and binutils
             label1.Font.Color:=clDefault;
             label2.Font.Color:=clDefault;
-            sStatus:='Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+            AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
             FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
           end;
@@ -1574,11 +1575,12 @@ begin
 
 end;
 
-procedure TForm1.AddMessage(aMessage:string);
+procedure TForm1.AddMessage(aMessage:string; UpdateStatus:boolean=false);
 begin
   //SynEdit1.Append(aMessage);
   SynEdit1.InsertTextAtCaret(aMessage+sLineBreak,scamAdjust);
   SynEdit1.CaretX:=0;
+  if UpdateStatus then StatusMessage.Text:=aMessage;
   Application.ProcessMessages;
 end;
 
