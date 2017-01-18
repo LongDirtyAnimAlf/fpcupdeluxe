@@ -85,7 +85,7 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/arm-linux-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/arm-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     infoln('Tany_darwinarm: failed: searched libspath '+FLibsPath,etInfo);

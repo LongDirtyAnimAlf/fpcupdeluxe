@@ -546,10 +546,13 @@ begin
           end;
         end;
 
-
         if (CrossInstaller.TargetOS='android') then
         begin
-          if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
+          // what to do ...
+          // always build hardfloat for ARM on Android ?
+          // or default to softfloat for ARM on Android ?
+          // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
+          if (Pos('-dFPC_ARMHF',Options)=0) then Options:=Options+' -dFPC_ARMHF';
         end;
 
         CrossOptions:='';
@@ -641,6 +644,15 @@ begin
       end
       else
       begin
+        {$IFDEF UNIX}
+        // fpc bug ?!!
+        s:=GetCompilerName(CrossInstaller.TargetCPU);
+        if (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s)) AND (s=GetCompilerName(SourceCPU)) then
+        begin
+          infoln('Non-native cross-compiler has same same as native compiler ... delete non-native cross-compiler to prevent overwriting of native compiler !!',etInfo);
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s);
+        end;
+        {$ENDIF}
         // Install crosscompiler: make crossinstall
         // (apparently equivalent to make install CROSSINSTALL=1)
         ProcessEx.Executable := Make;
@@ -727,7 +739,7 @@ begin
         begin
           {$IFDEF UNIX}
           s:=GetCompilerName(CrossInstaller.TargetCPU);
-          if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s) then
+          if (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s)) then
           begin
             infoln('Copy compiler ('+s+') into: '+FBinPath,etInfo);
             FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s,

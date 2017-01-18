@@ -108,7 +108,7 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/i386-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     infoln('Tany_darwin386: failed: searched libspath '+FLibsPath,etInfo);
@@ -126,11 +126,11 @@ begin
     // specialities for osxcross
     //if Pos('osxcross',FLibsPath)>0 then
     begin
-      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..\..\';
+      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
       s:=ResolveDots(s);
       s:=ExcludeTrailingBackslash(s);
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system\'+LineEnding+
+      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator+LineEnding+
       '-k-framework'+LineEnding+
       '-kAppKit'+LineEnding+
       '-k-framework'+LineEnding+
@@ -172,6 +172,7 @@ begin
      else BinPrefixTry:='i386';
   {$else}
   BinPrefixTry:=lowercase({$i %FPCTARGETCPU%});
+  //BinPrefixTry:='i386';
   {$endif}
   BinPrefixTry:=BinPrefixTry+'-apple-darwin';
 

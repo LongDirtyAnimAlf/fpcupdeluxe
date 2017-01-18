@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0f';
+  FPCUPDELUXEVERSION='1.2.0g';
 
 resourcestring
   CrossGCCMsg =
@@ -790,8 +790,8 @@ end;
 
 procedure TForm1.Button5Click(Sender: TObject);
 var
-  URL,DownloadURL,TargetFile,TargetPath,UnZipper,s:string;
-  success:boolean;
+  URL,DownloadURL,TargetFile,TargetPath,CPUPath,UnZipper,s:string;
+  success,verbose:boolean;
   {$ifdef Unix}
   fileList: TStringList;
   i:integer;
@@ -968,16 +968,16 @@ begin
         // Darwin is special: combined for i386 and x86_64 with osxcross
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          if URL='Darwinx86.rar' then s:='x86';
+          if URL='Darwinx86.rar' then CPUPath:='x86';
         end
-        else s:=FPCupManager.CrossCPU_Target;
+        else CPUPath:=FPCupManager.CrossCPU_Target;
 
         if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
                            'cross'+
                            DirectorySeparator+
                            'bin'+
                            DirectorySeparator+
-                           s+
+                           CPUPath+
                            '-'+
                            FPCupManager.CrossOS_Target))
             AND
@@ -986,7 +986,7 @@ begin
                                      DirectorySeparator+
                                      'lib'+
                                      DirectorySeparator+
-                                     s+
+                                     CPUPath+
                                      '-'+
                                      FPCupManager.CrossOS_Target))
             then URL:='';
@@ -1018,7 +1018,7 @@ begin
               AddMessage('Successfully downloaded binary-tools.');
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               {$ifndef MSWINDOWS}
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'bin'+DirectorySeparator+CPUPath+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
               {$endif}
               AddMessage('Going to extract them into '+TargetPath);
               {$ifdef MSWINDOWS}
@@ -1065,8 +1065,12 @@ begin
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
               AddMessage('Going to extract them into '+TargetPath);
+
+              // many files to unpack for Darwin libs : do not show progress of unpacking files when unpacking for Darwin.
+              verbose:=(FPCupManager.CrossOS_Target<>'darwin');
+
               {$ifdef MSWINDOWS}
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
+              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
               if (NOT success) then
               {$endif}
               begin
@@ -1075,7 +1079,7 @@ begin
                 {$else}
                 UnZipper := 'unrar';
                 {$endif}
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
               end;
             end;
           end;
