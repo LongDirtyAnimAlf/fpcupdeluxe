@@ -408,11 +408,11 @@ begin
     }
 
     {$ifdef win64}
-    // the standard make by FPC does not work when Git is present, but this one works ??!!
+    // the standard make by FPC does not work when Git is present (and in the path), but this one works ??!!
+    // (but the FPC installer sets its own path to isolate itself from the system, so FPC make still works)
     // strange, but do not enable (yet) !!
     // Download('ftp://ftp.equation.com/make/'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make), Make);
     {$endif}
-
 
     // Get unzip binary from default binutils URL
     FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
@@ -525,7 +525,6 @@ begin
       end;
     end;
     {$ENDIF}
-
 
     if OperationSucceeded then
     begin
@@ -1410,13 +1409,17 @@ end;
 
 function TInstaller.DownloadJasmin: boolean;
 const
-  SourceURL = 'http://sourceforge.net/projects/jasmin/files/jasmin/jasmin-2.4/jasmin-2.4.zip/download';
+  JasminVersion = '2.4';
+  SourceURL = 'http://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JasminVersion+'/jasmin-'+JasminVersion+'.zip/download';
+  //SourceURL = 'https://github.com/davidar/jasmin/archive/'+JasminVersion+'.zip';
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
   JasminZip,JasminDir: string;
 begin
+  // for now, just put jasmin.jar in bin directory ... easy and simple and working
   JasminDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+
   if NOT FileExists(JasminDir+'jasmin.jar') then
   begin
     OperationSucceeded := true;
@@ -1442,16 +1445,14 @@ begin
       end;
     end;
 
-    // for now, just put jasmin.jar in bin directory ... easy and simple and working
-    JasminDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
-
     if OperationSucceeded then
     begin
       // Extract, overwrite
       resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + SysUtils.GetTempDir + ' ' + JasminZip, FVerbose);
       if resultcode = 0 then
       begin
-        OperationSucceeded := MoveFile(IncludeTrailingPathDelimiter(SysUtils.GetTempDir)+IncludeTrailingPathDelimiter(fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(SourceURL)))+'jasmin.jar',JasminDir+'jasmin.jar');
+        OperationSucceeded := MoveFile(IncludeTrailingPathDelimiter(SysUtils.GetTempDir) + 'jasmin-' + JasminVersion + DirectorySeparator + 'jasmin.jar',JasminDir+'jasmin.jar');
+        //MoveFile
         if NOT OperationSucceeded then
         begin
           writelnlog('Could not move jasmin.jar into '+JasminDir);
@@ -1475,7 +1476,7 @@ begin
       begin
         //Get rid of temp zip and dir if success.
         SysUtils.Deletefile(JasminZip);
-        DeleteDirectoryEx(IncludeTrailingPathDelimiter(SysUtils.GetTempDir)+IncludeTrailingPathDelimiter(fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(SourceURL))));
+        DeleteDirectoryEx(IncludeTrailingPathDelimiter(SysUtils.GetTempDir) + 'jasmin-' + JasminVersion + DirectorySeparator);
       end;
     end;
     Result := OperationSucceeded;

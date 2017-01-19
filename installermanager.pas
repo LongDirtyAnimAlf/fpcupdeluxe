@@ -235,10 +235,68 @@ below}
     'End;';
 
 
+type
+
+  TCPUBase = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm,sparc,aix,mips,avr,m68k);
+  TCPUBaseSet = set of TCPUBase;
+  TOSBase  = (windows,linux,android,darwin,freebsd,netbsd,ios,iphonesim,wince,java,embedded,dos,aros,haiku,go32,os2,solaris,amiga,atari);
+  TOSBaseSet = set of TOSBase;
+
+const
+
+  // list of what fpcupdeluxe is able to do !!
+  // this makes the user interaction better, by leaving out non-options
+
+  {$ifdef BSD}
+  {$ifdef Darwin}
+  {$define CPUOSSetDefined}
+  CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
+  OSset  : TOSBaseSet  = [windows,darwin];
+  {$else}
+  {$define CPUOSSetDefined}
+  CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
+  OSset  : TOSBaseSet  = [windows,darwin];
+  {$endif}
+  {$endif}
+
+  {$ifdef MsWindows}
+  {$define CPUOSSetDefined}
+  {$ifdef CPUX86}
+  {$define CPUOSSetDefined}
+  CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64,jvm];
+  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,wince,java];
+  {$endif CPUX86}
+  {$ifdef CPUX64}
+  CPUset : TCPUBaseSet = [x86_64,arm,aarch64,jvm];
+  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,wince,java];
+  {$endif CPUX64}
+  {$endif}
+
+  {$ifdef Linux}
+  {$ifdef CPUX86}
+  {$define CPUOSSetDefined}
+  CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
+  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,java];
+  {$endif CPUX86}
+  {$ifdef CPUX64}
+  {$define CPUOSSetDefined}
+  CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
+  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,java];
+  {$endif CPUX64}
+  {$ifdef CPUARM}
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  {$endif CPUAARCH64}
+  {$endif}
+
+  {$ifndef CPUOSSetDefined}
+  CPUset : TCPUBaseSet = [];
+  OSset : TOSBaseSet = [];
+  {$endif}
 
 type
-  TSequencer=class; //forward
 
+  TSequencer=class; //forward
 
   { TFPCupManager }
 

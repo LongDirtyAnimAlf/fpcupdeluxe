@@ -246,6 +246,7 @@ begin
       ConfigText.Add(LineEnding);
     ConfigText.Add(Snippet);
 
+    {$ifndef Darwin}
     // remove pipeline assembling for Darwin when cross-compiling !!
     SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
     if SnipBegin>-1 then
@@ -256,6 +257,7 @@ begin
         ConfigText.Insert(SnipBegin+3,'#ENDIF');
       end;
     end;
+    {$endif}
 
     ConfigText.SaveToFile(FPCCFG);
     result:=true;
@@ -560,16 +562,16 @@ begin
         if CrossInstaller.BinUtilsPrefix<>'' then
         begin
           // Earlier, we used regular OPT; using CROSSOPT is apparently more precise
-          CrossOptions:=CrossOptions+' -XP'+CrossInstaller.BinUtilsPrefix;//+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
+          CrossOptions:=CrossOptions+' -XP'+CrossInstaller.BinUtilsPrefix;
           ProcessEx.Parameters.Add('BINUTILSPREFIX='+CrossInstaller.BinUtilsPrefix);
         end;
 
         if CrossInstaller.LibsPath<>''then
         begin
+           {$ifndef Darwin}
            CrossOptions:=CrossOptions+' -Xd';
            CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
 
-           {$ifndef Darwin}
            if (CrossInstaller.TargetOS='darwin') then
            begin
              // add extra libs located in ...\system for Mac SDK
@@ -577,11 +579,30 @@ begin
              CrossOptions:=CrossOptions+' -Fl'+IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'system';
            end;
            {$endif}
+
+           {$ifdef Darwin}
+           //if (CrossInstaller.TargetOS='iphonesim') then
+           begin
+             s:=ResolveDots(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
+             CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s);
+           end;
+           {$endif}
+
           // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !
           // but only in case we did not do it before
           // not sure if this is realy needed
           if NOT CrossInstaller.BinUtilsPathInPath then
              SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),true,false);
+        end;
+
+        if CrossInstaller.BinUtilsPath<>''then
+        begin
+           {$ifdef Darwin}
+           //if (CrossInstaller.TargetOS='iphonesim') then
+           begin
+             CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
+           end;
+           {$endif}
         end;
 
         for i:=0 to CrossInstaller.CrossOpt.Count-1 do
@@ -595,9 +616,14 @@ begin
           ProcessEx.Parameters.Add('CROSSOPT='+CrossOptions);
         end;
 
+        {$ifdef Darwin}
+        Options:=Options+' -ap';
+        {$endif}
+
         // suppress hints and add all other options
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
+
         // suppress hints
         ProcessEx.Parameters.Add('OPT=-vi-n-h- '+Options);
         //ProcessEx.Parameters.Add('OPT=-vd+ '+Options);
@@ -2341,7 +2367,6 @@ begin
           CloseFile(TxtFile);
         end;
       end;
-
 
       // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
       // Adding this won't hurt on Windows.

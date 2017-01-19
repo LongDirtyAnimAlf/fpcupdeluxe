@@ -1,8 +1,7 @@
-unit m_crossdarwinarm;
+unit m_crossdarwin64iphonesim;
 
-{ Cross compiles from Darwin to Darwin arm
+{ Cross compiles from Darwin to Darwin 64 bit iphone simulator
 }
-
 
 {$mode objfpc}{$H+}
 
@@ -18,9 +17,9 @@ const
 
 type
 
-{ TDarwinarm }
+{ TDarwin64iphonesim }
 
-TDarwinarm = class(TCrossInstaller)
+TDarwin64iphonesim = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -30,9 +29,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwinarm }
+{ TDarwin64iphonesim }
 
-function TDarwinarm.GetLibs(Basepath:string): boolean;
+function TDarwin64iphonesim.GetLibs(Basepath:string): boolean;
 var
   IOS_BASE:string;
 begin
@@ -43,9 +42,9 @@ begin
   result:=true;
   FLibsFound:=true;
 
-  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
+  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
   if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
+     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
 
   if DirectoryExists(IOS_BASE) then
   begin
@@ -58,7 +57,7 @@ begin
   end;
 end;
 
-function TDarwinarm.GetBinUtils(Basepath:string): boolean;
+function TDarwin64iphonesim.GetBinUtils(Basepath:string): boolean;
 var
   IOS_BASE:string;
 begin
@@ -70,9 +69,9 @@ begin
   result:=true;
   FBinsFound:=true;
 
-  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
+  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
   if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
+     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
 
   if DirectoryExists(IOS_BASE) then
   begin
@@ -81,34 +80,33 @@ begin
     '-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
     '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
   end;
-
 end;
 
-constructor TDarwinarm.Create;
+constructor TDarwin64iphonesim.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Darwinarm';
-  FTargetCPU:='arm';
-  FTargetOS:='darwin';
+  FCrossModuleName:='Darwin64iphonesim';
+  FTargetCPU:='x86_64';
+  FTargetOS:='iphonesim';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('TDarwinarm crosscompiler loading',etDebug);
+  infoln('TDarwin64iphonesim crosscompiler loading',etDebug);
 end;
 
-destructor TDarwinarm.Destroy;
+destructor TDarwin64iphonesim.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
 var
-  Darwinarm:TDarwinarm;
+  Darwin64iphonesim:TDarwin64iphonesim;
 
 initialization
-  Darwinarm:=TDarwinarm.Create;
-  RegisterExtension(Darwinarm.TargetCPU+'-'+Darwinarm.TargetOS,Darwinarm);
+  Darwin64iphonesim:=TDarwin64iphonesim.Create;
+  RegisterExtension(Darwin64iphonesim.TargetCPU+'-'+Darwin64iphonesim.TargetOS,Darwin64iphonesim);
 finalization
-  Darwinarm.Destroy;
+  Darwin64iphonesim.Destroy;
 {$ENDIF}
 end.
 

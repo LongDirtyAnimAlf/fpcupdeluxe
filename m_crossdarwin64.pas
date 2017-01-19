@@ -36,6 +36,7 @@ function TDarwin64.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
+
   FLibsPath:='';
   result:=true;
   FLibsFound:=true;

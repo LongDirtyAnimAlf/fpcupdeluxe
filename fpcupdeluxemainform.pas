@@ -151,7 +151,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0g';
+  FPCUPDELUXEVERSION='1.2.0h';
 
 resourcestring
   CrossGCCMsg =
@@ -195,6 +195,10 @@ begin
   RadioGroup1.Enabled:=False;
   RadioGroup2.Enabled:=False;
   Button5.Enabled:=False;
+  {$endif CPUARM}
+
+  {$ifdef Darwin}
+  RadioGroup2.Items.Strings[RadioGroup2.Items.IndexOf('wince')]:='i-sim';
   {$endif CPUARM}
 
   Self.Caption:='Lazarus and FPC installer and updater V'+FPCUPDELUXEVERSION+' based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
@@ -818,6 +822,7 @@ begin
   if RadioGroup2.ItemIndex<>-1 then
   begin
     s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    if s='i-sim' then s:='iphonesim';
     FPCupManager.CrossOS_Target:=s;
   end;
 
@@ -875,12 +880,27 @@ begin
         FPCupManager.CrossOPT:='-CpARMV6 ';
       end
       else
-      // for Darwin, use defaults
-      if (FPCupManager.CrossOS_Target<>'darwin') then
+      if (FPCupManager.CrossOS_Target='darwin') then
+      begin
+        //FPCupManager.FPCOPT:='-S2ha -CiroR ';
+        //-dIPHONEALL
+        FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
+      end
+      else
       begin
         // default: armhf
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
         FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+      end;
+    end;
+
+    if (FPCupManager.CrossCPU_Target='aarch64') then
+    begin
+      if (FPCupManager.CrossOS_Target='darwin') then
+      begin
+        //FPCupManager.FPCOPT:='-S2ha -CiroR ';
+        //-dIPHONEALL
+        FPCupManager.CrossOPT:='-CaAARCH64IOS ';
       end;
     end;
 
@@ -907,8 +927,11 @@ begin
     if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' ('+FPCupManager.FPCOPT+')';
     sStatus:=sStatus+'.';
 
+
     if NOT RealRun then
     begin
+
+      {$ifndef BSD}
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
 
@@ -1100,6 +1123,7 @@ begin
         end;
       end
       else
+      {$endif BSD}
       begin
         AddMessage('Building cross-tools failed ... ??? ... aborting.');
       end;

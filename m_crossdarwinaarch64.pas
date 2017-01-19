@@ -1,6 +1,6 @@
-unit m_crossdarwinarm;
+unit m_crossdarwinaarch64;
 
-{ Cross compiles from Darwin to Darwin arm
+{ Cross compiles from Darwin to Darwin aarch64
 }
 
 
@@ -18,9 +18,9 @@ const
 
 type
 
-{ TDarwinarm }
+{ TDarwinaarch64 }
 
-TDarwinarm = class(TCrossInstaller)
+TDarwinaarch64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -30,9 +30,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwinarm }
+{ TDarwinaarch64 }
 
-function TDarwinarm.GetLibs(Basepath:string): boolean;
+function TDarwinaarch64.GetLibs(Basepath:string): boolean;
 var
   IOS_BASE:string;
 begin
@@ -58,7 +58,7 @@ begin
   end;
 end;
 
-function TDarwinarm.GetBinUtils(Basepath:string): boolean;
+function TDarwinaarch64.GetBinUtils(Basepath:string): boolean;
 var
   IOS_BASE:string;
 begin
@@ -81,34 +81,34 @@ begin
     '-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
     '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
   end;
-
 end;
 
-constructor TDarwinarm.Create;
+constructor TDarwinaarch64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Darwinarm';
-  FTargetCPU:='arm';
+  FCrossModuleName:='Darwinaarch64';
+  FTargetCPU:='aarch64';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('TDarwinarm crosscompiler loading',etDebug);
+  infoln('TDarwinaarch64 crosscompiler loading',etDebug);
 end;
 
-destructor TDarwinarm.Destroy;
+destructor TDarwinaarch64.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
+
 var
-  Darwinarm:TDarwinarm;
+  Darwinaarch64:TDarwinaarch64;
 
 initialization
-  Darwinarm:=TDarwinarm.Create;
-  RegisterExtension(Darwinarm.TargetCPU+'-'+Darwinarm.TargetOS,Darwinarm);
+  Darwinaarch64:=TDarwinaarch64.Create;
+  RegisterExtension(Darwinaarch64.TargetCPU+'-'+Darwinaarch64.TargetOS,Darwinaarch64);
 finalization
-  Darwinarm.Destroy;
+  Darwinaarch64.Destroy;
 {$ENDIF}
 end.
 

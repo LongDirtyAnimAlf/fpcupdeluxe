@@ -46,6 +46,9 @@ uses
   m_crossdarwin32,
   m_crossdarwinpowerpc,
   m_crossdarwinarm,
+  m_crossdarwinaarch64,
+  m_crossdarwin32iphonesim,
+  m_crossdarwin64iphonesim,
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,
