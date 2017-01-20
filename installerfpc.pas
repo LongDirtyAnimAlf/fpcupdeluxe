@@ -672,6 +672,8 @@ begin
       begin
         {$IFDEF UNIX}
         // fpc bug ?!!
+        // fpcupdeluxe bug !!?
+        // see infoln for problem description
         s:=GetCompilerName(CrossInstaller.TargetCPU);
         if (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s)) AND (s=GetCompilerName(SourceCPU)) then
         begin
@@ -764,22 +766,27 @@ begin
         else
         begin
           {$IFDEF UNIX}
+
+          // get the name of the cross-compiler we just built.
+          IntermediateCompiler:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+
+          {$IFDEF Darwin}
+          // on Darwin, the normal compiler names are used for the final cross-target compiler !!
+          // tricky !
           s:=GetCompilerName(CrossInstaller.TargetCPU);
-          if (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s)) then
-          begin
-            infoln('Copy compiler ('+s+') into: '+FBinPath,etInfo);
-            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s,
-              IncludeTrailingPathDelimiter(FBinPath)+s);
-            fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
-          end;
+          {$else}
           s:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-          if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s) then
+          {$endif}
+
+          // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
+          if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+IntermediateCompiler) then
           begin
-            infoln('Copy cross-compiler ('+s+') into: '+FBinPath,etInfo);
-            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s,
+            infoln('Copy cross-compiler ('+IntermediateCompiler+') into: '+FBinPath,etInfo);
+            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+IntermediateCompiler,
               IncludeTrailingPathDelimiter(FBinPath)+s);
             fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
           end;
+
           {$ENDIF}
           if CrossInstaller.FPCCFGSnippet<>'' then
           begin
@@ -815,7 +822,7 @@ begin
   end
   else
   begin
-    infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target,etwarning);
+    infoln('FPC: Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target+' !!!',etError);
     result:=false;
   end;
 

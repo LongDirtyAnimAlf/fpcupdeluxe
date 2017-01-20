@@ -237,10 +237,91 @@ below}
 
 type
 
-  TCPUBase = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm,sparc,aix,mips,avr,m68k);
-  TCPUBaseSet = set of TCPUBase;
-  TOSBase  = (windows,linux,android,darwin,freebsd,netbsd,ios,iphonesim,wince,java,embedded,dos,aros,haiku,go32,os2,solaris,amiga,atari);
-  TOSBaseSet = set of TOSBase;
+  // from fpmake + fpmkunit !
+
+  TCpu=(cpuNone,
+      i386,m68k,powerpc,sparc,x86_64,arm,powerpc64,avr,armeb,
+      mips,mipsel,jvm,i8086,aarch64
+    );
+  TCPUS = Set of TCPU;
+  TOS=(osNone,
+      linux,go32v2,win32,os2,freebsd,beos,netbsd,
+      amiga,atari, solaris, qnx, netware, openbsd,wdosx,
+      palmos,macos,darwin,emx,watcom,morphos,netwlibc,
+      win64,wince,gba,nds,embedded,symbian,haiku,iphonesim,
+      aix,java,android,nativent,msdos,wii,aros,dragonfly,
+      win16
+    );
+  TOSes = Set of TOS;
+
+Const
+  // Aliases
+  Amd64   = X86_64;
+  PPC = PowerPC;
+  PPC64 = PowerPC64;
+  DOS = Go32v2;
+  MacOSX = Darwin;
+
+  AllOSes = [Low(TOS)..High(TOS)];
+  AllCPUs = [Low(TCPU)..High(TCPU)];
+  AllUnixOSes  = [Linux,FreeBSD,NetBSD,OpenBSD,Darwin,QNX,BeOS,Solaris,Haiku,iphonesim,aix,Android,dragonfly];
+  AllBSDOSes      = [FreeBSD,NetBSD,OpenBSD,Darwin,iphonesim,dragonfly];
+  AllWindowsOSes  = [Win32,Win64,WinCE];
+  AllAmigaLikeOSes = [Amiga,MorphOS,AROS];
+  AllLimit83fsOses = [go32v2,os2,emx,watcom,msdos,win16];
+
+  AllSmartLinkLibraryOSes = [Linux,msdos,amiga,morphos,aros,win16]; // OSes that use .a library files for smart-linking
+  AllImportLibraryOSes = AllWindowsOSes + [os2,emx,netwlibc,netware,watcom,go32v2,macos,nativent,msdos,win16];
+
+  { This table is kept OS,Cpu because it is easier to maintain (PFV) }
+  OSCPUSupported : array[TOS,TCpu] of boolean = (
+    { os          none   i386    m68k  ppc    sparc  x86_64 arm    ppc64  avr    armeb  mips   mipsel jvm    i8086  aarch64 }
+    { none }    ( false, false, false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { linux }   ( false, true,  true,  true,  true,  true,  true,  true,  false, true , true , true , false, false, true ),
+    { go32v2 }  ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { win32 }   ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { os2 }     ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { freebsd } ( false, true,  true,  false, false, true,  false, false, false, false, false, false, false, false, false),
+    { beos }    ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { netbsd }  ( false, true,  true,  true,  true,  true,  false, false, false, false, false, false, false, false, false),
+    { amiga }   ( false, false, true,  true,  false, false, false, false, false, false, false, false, false, false, false),
+    { atari }   ( false, false, true,  false, false, false, false, false, false, false, false, false, false, false, false),
+    { solaris } ( false, true,  false, false, true,  true,  false, false, false, false, false, false, false, false, false),
+    { qnx }     ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { netware } ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { openbsd } ( false, true,  true,  false, false, true,  false, false, false, false, false, false, false, false, false),
+    { wdosx }   ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { palmos }  ( false, false, true,  false, false, false, true,  false, false, false, false, false, false, false, false),
+    { macos }   ( false, false, false, true,  false, false, false, false, false, false, false, false, false, false, false),
+    { darwin }  ( false, true,  false, true,  false, true,  true,  true,  false, false, false, false, false, false, true ),
+    { emx }     ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { watcom }  ( false, true,  false, false, false ,false, false, false, false, false, false, false, false, false, false),
+    { morphos } ( false, false, false, true,  false ,false, false, false, false, false, false, false, false, false, false),
+    { netwlibc }( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { win64   } ( false, false, false, false, false, true,  false, false, false, false, false, false, false, false, false),
+    { wince    }( false, true,  false, false, false, false, true,  false, false, false, false, false, false, false, false),
+    { gba    }  ( false, false, false, false, false, false, true,  false, false, false, false, false, false, false, false),
+    { nds    }  ( false, false, false, false, false, false, true,  false, false, false, false, false, false, false, false),
+    { embedded }( false, true,  true,  true,  true,  true,  true,  true,  true,  true , false, false, false, true , false),
+    { symbian } ( false, true,  false, false, false, false, true,  false, false, false, false, false, false, false, false),
+    { haiku }   ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { iphonesim}( false, true,  false, false, false, true,  false, false, false, false, false, false, false, false, false),
+    { aix    }  ( false, false, false, true,  false, false, false, true,  false, false, false, false, false, false, false),
+    { java }    ( false, false, false, false, false, false, false, false, false, false, false, false, true , false, false),
+    { android } ( false, true,  false, false, false, false, true,  false, false, false, false, true,  true , false, false),
+    { nativent }( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
+    { msdos }   ( false, false, false, false, false, false, false, false, false, false, false, false, false, true , false),
+    { wii }     ( false, false, false, true , false, false, false, false, false, false, false, false, false, false, false),
+    { aros }    ( true,  false, false, false, false, false, true,  false, false, false, false, false, false, false, false),
+    { dragonfly}( false, false, false, false, false, true,  false, false, false, false, false, false, false, false, false),
+    { win16 }   ( false, false, false, false, false, false, false, false, false, false, false, false, false, true , false)
+  );
+
+type
+  //TCPUBase = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm,sparc,aix,mips,avr,m68k);
+  TCPUBaseSet = set of TCPU;
+  //TOSBase  = (windows,linux,android,darwin,freebsd,netbsd,ios,iphonesim,wince,java,embedded,dos,aros,haiku,go32,os2,solaris,amiga,atari);
+  TOSBaseSet = set of TOS;
 
 const
 
@@ -264,11 +345,11 @@ const
   {$ifdef CPUX86}
   {$define CPUOSSetDefined}
   CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64,jvm];
-  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,wince,java];
+  OSset  : TOSBaseSet  = [win32,linux,android,darwin,freebsd,wince,java];
   {$endif CPUX86}
   {$ifdef CPUX64}
   CPUset : TCPUBaseSet = [x86_64,arm,aarch64,jvm];
-  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,wince,java];
+  OSset  : TOSBaseSet  = [win32,linux,android,darwin,freebsd,wince,java];
   {$endif CPUX64}
   {$endif}
 
@@ -276,12 +357,12 @@ const
   {$ifdef CPUX86}
   {$define CPUOSSetDefined}
   CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
-  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,java];
+  OSset  : TOSBaseSet  = [win32,linux,android,darwin,freebsd,java];
   {$endif CPUX86}
   {$ifdef CPUX64}
   {$define CPUOSSetDefined}
   CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
-  OSset  : TOSBaseSet  = [windows,linux,android,darwin,freebsd,java];
+  OSset  : TOSBaseSet  = [win32,linux,android,darwin,freebsd,java];
   {$endif CPUX64}
   {$ifdef CPUARM}
   {$endif CPUARM}

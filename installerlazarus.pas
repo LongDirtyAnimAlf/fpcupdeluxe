@@ -345,7 +345,7 @@ begin
     end; //prereqs in place
   end    //valid cross compile setup
   else
-    infoln('Lazarus: can''t find cross installer for ' + FCrossCPU_Target + '-' + FCrossOS_Target, eterror);
+    infoln('Lazarus: can''t find cross installer for ' + FCrossCPU_Target + '-' + FCrossOS_Target, etError);
 end;
 
 constructor TLazarusCrossInstaller.Create;

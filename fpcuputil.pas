@@ -1122,12 +1122,7 @@ function GetDefaultCompilerFilename(const TargetCPU: string;
   Cross: boolean): string;
 begin
   if Cross then
-    {$ifdef darwin}
-    Result:='ppc' // the mach-o format supports "fat" binaries whereby
-                  // a single executable contains machine code for several architectures
-    {$else}
     Result:='ppcross'
-    {$endif}
   else
     Result:='ppc';
   if TargetCPU='' then

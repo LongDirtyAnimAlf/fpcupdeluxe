@@ -25,7 +25,6 @@ uses
   Interfaces, // this includes the LCL widgetset
   Forms, fpcupdeluxemainform, extrasettings,
   Classes, sysutils,
-  synautil, // for rpos ... could also use strutil
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
   m_any_to_aixpowerpc,
@@ -47,7 +46,6 @@ uses
   m_crossdarwinpowerpc,
   m_crossdarwinarm,
   m_crossdarwinaarch64,
-  m_crossdarwin32iphonesim,
   m_crossdarwin64iphonesim,
   {$else}
   m_any_to_darwin386,
