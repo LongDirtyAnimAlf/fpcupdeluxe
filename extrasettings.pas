@@ -13,7 +13,7 @@ Const
   DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64{,mipsel},jvm);
   TOS  = (windows,linux,android,darwin,freebsd,wince,java);
   TCrossSetting = (fpcup,auto,custom);
 
@@ -376,12 +376,15 @@ begin
       begin
         // skip non-combi's
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java)) then continue;
-        if (OS=android) AND (CPU<>arm) then continue;
+        if (OS=android) AND ((CPU<>arm) {AND (CPU<>aarch64) AND (CPU<>mipsel)}) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
         if (OS=windows) AND (CPU=arm) then continue;
         if (OS=windows) AND (CPU=aarch64) then continue;
         if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
+        if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
+        {if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android)) then continue;}
+
 
         s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));

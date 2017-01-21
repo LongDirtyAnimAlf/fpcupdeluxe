@@ -273,7 +273,6 @@ Const
   AllSmartLinkLibraryOSes = [Linux,msdos,amiga,morphos,aros,win16]; // OSes that use .a library files for smart-linking
   AllImportLibraryOSes = AllWindowsOSes + [os2,emx,netwlibc,netware,watcom,go32v2,macos,nativent,msdos,win16];
 
-  { This table is kept OS,Cpu because it is easier to maintain (PFV) }
   OSCPUSupported : array[TOS,TCpu] of boolean = (
     { os          none   i386    m68k  ppc    sparc  x86_64 arm    ppc64  avr    armeb  mips   mipsel jvm    i8086  aarch64 }
     { none }    ( false, false, false, false, false, false, false, false, false, false, false, false, false, false, false),

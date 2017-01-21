@@ -55,6 +55,7 @@ uses
 implementation
 
 const
+  MAXDELPHIVERSION=22;
   NDKVERSIONBASENAME='android-ndk-r';
   NDKVERSIONNAMES:array[0..16] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e');
   NDKTOOLCHAINVERSIONS:array[0..3] of string = ('arm-linux-androideabi-4.4.7','arm-linux-androideabi-4.6','arm-linux-androideabi-4.8','arm-linux-androideabi-4.9');
@@ -176,7 +177,7 @@ begin
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
     infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
-    for delphiversion:=17 downto 12 do
+    for delphiversion:=MAXDELPHIVERSION downto 12 do
     begin
       if not result then
       begin
@@ -222,9 +223,9 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
-    ' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
-    ,etError);
+    //infoln(FCrossModuleName + ': Please fill '+SafeExpandFileName(IncludeTrailingPathDelimiter(BasePath)+'lib'+DirectorySeparator+DirName)+
+    //' with Android libs, e.g. from the Android NDK. See http://wiki.lazarus.freepascal.org/Android.'
+    //,etError);
     FAlreadyWarned:=true;
   end;
 end;
@@ -379,7 +380,7 @@ begin
   // check Delphi auto installed android libraries
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
-    for delphiversion:=17 downto 12 do
+    for delphiversion:=MAXDELPHIVERSION downto 12 do
     begin
       if not result then
       begin

@@ -218,6 +218,7 @@ function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
 function DoubleQuoteIfNeeded(FileName: string): string;
 function GetNumericalVersion(aVersion: string): word;
+function UppercaseFirstChar(s: String): String;
 
 implementation
 
@@ -1192,6 +1193,15 @@ begin
                 ((ord(aVersion[3])-ord('0')) * 100)+
                 (ord(aVersion[5])-ord('0'));
   end;
+end;
+
+function UppercaseFirstChar(s: String): String;
+var
+  ch, rest: String;
+begin
+  ch := Copy(s, 1, 1);
+  rest := Copy(s, Length(ch)+1, MaxInt);
+  result := Uppercase(ch) + rest
 end;
 
 { TLogger }

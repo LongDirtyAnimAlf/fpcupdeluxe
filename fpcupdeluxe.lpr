@@ -29,6 +29,8 @@ uses
   m_crossinstaller,
   m_any_to_aixpowerpc,
   m_any_to_androidarm,
+  m_any_to_androidmipsel,
+  //m_any_to_androidaarch64, //not yet available !!
   m_any_to_linuxarm,
   m_any_to_embeddedarm,
   m_any_to_linuxaarch64,
