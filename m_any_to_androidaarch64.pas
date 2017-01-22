@@ -43,12 +43,15 @@ uses
 implementation
 
 const
+  ARCH='aarch64';
+  ARCHSHORT='arm64';
+  OS='android';
   MAXDELPHIVERSION=22;
   NDKVERSIONBASENAME='android-ndk-r';
   NDKVERSIONNAMES:array[0..10] of string = ('9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
-  NDKTOOLCHAINVERSIONS:array[0..1] of string = ('aarch64-linux-android-4.8','aarch64-linux-android-4.9');
-  NDKARCHDIRNAME='arch-arm64';
-  PLATFORMVERSIONBASENAME='android-';
+  NDKTOOLCHAINVERSIONS:array[0..1] of string = (ARCH+'-linux-'+OS+'-4.8',ARCH+'-linux-'+OS+'-4.9');
+  NDKARCHDIRNAME='arch-'+ARCHSHORT;
+  PLATFORMVERSIONBASENAME=OS+'-';
   PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
 
 type
@@ -68,12 +71,12 @@ end;
 { TAny_AndroidAarch64 }
 function TAny_AndroidAarch64.TargetSignature: string;
 begin
-  result:=FTargetCPU+'-'+TargetOS;
+  result:=TargetCPU+'-'+TargetOS;
 end;
 
 function TAny_AndroidAarch64.GetLibs(Basepath:string): boolean;
 const
-  DirName='aarch64-android';
+  DirName=ARCH+'-'+OS;
   // we presume, libc.so has to be present in a cross-library for arm
   LibName='libc.so';
   // we presume, libandroid.so has to be present in a cross-library for arm
@@ -138,7 +141,7 @@ begin
             infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\Andoid
-          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
+          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
           result:=DirectoryExists(FLibsPath);
           if not result then
@@ -146,7 +149,7 @@ begin
             infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\AppData\Local\Andoid
-          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
+          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\'+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
           result:=DirectoryExists(FLibsPath);
           if not result then
@@ -219,7 +222,7 @@ end;
 
 function TAny_AndroidAarch64.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='aarch64-android';
+  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   PresetBinPath:string;
@@ -335,13 +338,13 @@ begin
           begin
             {$IFDEF CPU64}
             result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles(x86)'))+
-            'Android\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
+            UppercaseFirstChar(OS)+'\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
             '\prebuilt\windows\bin',AsFile);
             if result then break else
             {$ENDIF}
             begin
               result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles'))+
-              'Android\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
+              UppercaseFirstChar(OS)+'\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
               '\prebuilt\windows\bin',AsFile);
               if result then break;
             end;
@@ -400,21 +403,16 @@ end;
 constructor TAny_AndroidAarch64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Any_AndroidAarch64';
-  // Invoke like
-  // fpc -Paarch64 -Tandroid
-  // Note: the compiler does NOT define LINUX!
-  // It defines UNIX and ANDROID though.
-
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
+  FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
   // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:='aarch64-linux-android-';//standard eg in Android NDK 9
+  FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
   FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
-  FCrossModuleName:='TAny_AndroidAarch64'; //used in messages to user
+  FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='aarch64';
-  FTargetOS:='android';
   FAlreadyWarned:=false;
   infoln(FCrossModuleName+': crosscompiler loading',etDebug);
 end;

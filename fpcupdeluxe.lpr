@@ -30,7 +30,7 @@ uses
   m_any_to_aixpowerpc,
   m_any_to_androidarm,
   m_any_to_androidmipsel,
-  //m_any_to_androidaarch64, //not yet available !!
+  m_any_to_androidaarch64, //not yet available !!
   m_any_to_linuxarm,
   m_any_to_embeddedarm,
   m_any_to_linuxaarch64,
@@ -48,7 +48,8 @@ uses
   m_crossdarwinpowerpc,
   m_crossdarwinarm,
   m_crossdarwinaarch64,
-  m_crossdarwin64iphonesim,
+  m_crossdarwinx64iphonesim,
+  m_crossdarwin386iphonesim,
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,

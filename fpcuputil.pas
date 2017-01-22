@@ -1201,7 +1201,7 @@ var
 begin
   ch := Copy(s, 1, 1);
   rest := Copy(s, Length(ch)+1, MaxInt);
-  result := Uppercase(ch) + rest
+  result := Uppercase(ch) + Lowercase(rest);
 end;
 
 { TLogger }

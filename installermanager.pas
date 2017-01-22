@@ -331,11 +331,11 @@ const
   {$ifdef Darwin}
   {$define CPUOSSetDefined}
   CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
-  OSset  : TOSBaseSet  = [windows,darwin];
+  OSset  : TOSBaseSet  = [win32,darwin];
   {$else}
   {$define CPUOSSetDefined}
   CPUset : TCPUBaseSet = [i386,x86_64,arm,aarch64];
-  OSset  : TOSBaseSet  = [windows,darwin];
+  OSset  : TOSBaseSet  = [win32,darwin];
   {$endif}
   {$endif}
 

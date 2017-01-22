@@ -35,6 +35,10 @@ interface
 uses
   Classes, SysUtils,fpcuputil;
 
+const
+  ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
+    'todo: specify what exactly is missing';
+
 type
 
   CompilerType=(ctBootstrap,ctInstalled);

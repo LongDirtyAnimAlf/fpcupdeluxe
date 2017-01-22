@@ -1,7 +1,10 @@
 unit m_any_to_androidmipsel;
-{ Cross compiles from any platform (with supported crossbin utils to Android Mips (MIPSEL)
+
+{
+Cross compiles from any platform (with supported crossbin utils to Android Mips (MIPSEL)
+
 Copyright (C) 2013 Reinier Olislagers
-Copyright (C) 2016 DonAlfredo
+Copyright (C) 2017 DonAlfredo
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -339,7 +342,7 @@ begin
           begin
             {$IFDEF CPU64}
             result:=SearchBinUtil(IncludeTrailingPathDelimiter(GetEnvironmentVariable('ProgramFiles(x86)'))+
-            'Android\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
+            UppercaseFirstChar(OS)+'\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\toolchains\'+NDKTOOLCHAINVERSIONS[toolchain]+
             '\prebuilt\windows\bin',AsFile);
             if result then break else
             {$ENDIF}
@@ -404,6 +407,8 @@ end;
 constructor TAny_AndroidMIPSEL.Create;
 begin
   inherited Create;
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
   FCrossModuleName:='Any_'+UppercaseFirstChar(OS)+Uppercase(ARCH);
   // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
   FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9
@@ -412,8 +417,6 @@ begin
   FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
   FAlreadyWarned:=false;
   infoln(FCrossModuleName+': crosscompiler loading',etDebug);
 end;

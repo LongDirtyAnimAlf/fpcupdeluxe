@@ -1,6 +1,35 @@
-unit m_crossdarwin64iphonesim;
+unit m_crossdarwinx64iphonesim;
 
-{ Cross compiles from Darwin to Darwin 64 bit iphone simulator
+{
+Cross compiles from Darwin to Darwin x64 bit iphone simulator
+
+Copyright (C) 2013 Reinier Olislagers
+Copyright (C) 2017 DonAlfredo
+
+This library is free software; you can redistribute it and/or modify it
+under the terms of the GNU Library General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at your
+option) any later version with the following modification:
+
+As a special exception, the copyright holders of this library give you
+permission to link this library with independent modules to produce an
+executable, regardless of the license terms of these independent modules,and
+to copy and distribute the resulting executable under terms of your choice,
+provided that you also meet, for each linked independent module, the terms
+and conditions of the license of that module. An independent module is a
+module which is not derived from or based on this library. If you modify
+this library, you may extend this exception to your version of the library,
+but you are not obligated to do so. If you do not wish to do so, delete this
+exception statement from your version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
+for more details.
+
+You should have received a copy of the GNU Library General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {$mode objfpc}{$H+}
@@ -11,9 +40,10 @@ uses
   Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
+
 const
-  ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
-    'todo: specify what exactly is missing';
+  ARCH='x86_64';
+  OS='iphonesim';
 
 type
 
@@ -45,6 +75,10 @@ begin
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
   if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
+  if NOT DirectoryExists(IOS_BASE) then
+     IOS_BASE:='~/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
+  if NOT DirectoryExists(IOS_BASE) then
+     IOS_BASE:='~/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
 
   if DirectoryExists(IOS_BASE) then
   begin
@@ -72,6 +106,10 @@ begin
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
   if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
+  if NOT DirectoryExists(IOS_BASE) then
+     IOS_BASE:='~/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
+  if NOT DirectoryExists(IOS_BASE) then
+     IOS_BASE:='~/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
 
   if DirectoryExists(IOS_BASE) then
   begin
@@ -85,12 +123,12 @@ end;
 constructor TDarwin64iphonesim.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Darwin64iphonesim';
-  FTargetCPU:='x86_64';
-  FTargetOS:='iphonesim';
+  FCrossModuleName:='T'+UppercaseFirstChar(TargetOS)+ARCH+OS;
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('TDarwin64iphonesim crosscompiler loading',etDebug);
+  infoln(FCrossModuleName+' crosscompiler loading',etDebug);
 end;
 
 destructor TDarwin64iphonesim.Destroy;

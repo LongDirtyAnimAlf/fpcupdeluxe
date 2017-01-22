@@ -1412,6 +1412,8 @@ const
   JasminVersion = '2.4';
   SourceURL = 'http://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JasminVersion+'/jasmin-'+JasminVersion+'.zip/download';
   //SourceURL = 'https://github.com/davidar/jasmin/archive/'+JasminVersion+'.zip';
+  //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_0/install/jvm/jasmin.jar';
+  //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/jvm/jasmin.jar';
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
