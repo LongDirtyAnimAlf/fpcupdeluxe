@@ -204,14 +204,12 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 104
-      Width = 160
+      Width = 157
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Include Help (default=yes)'
-      Checked = True
+      Caption = 'Include Help (default=no)'
       ParentShowHint = False
       ShowHint = True
-      State = cbChecked
       TabOrder = 4
     end
     object CheckSplitFPC: TCheckBox
@@ -222,12 +220,14 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 129
-      Width = 223
+      Width = 226
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Split FPC source and bins (default=no)'
+      Caption = 'Split FPC source and bins (default=yes)'
+      Checked = True
       ParentShowHint = False
       ShowHint = True
+      State = cbChecked
       TabOrder = 5
     end
     object CheckSplitLazarus: TCheckBox

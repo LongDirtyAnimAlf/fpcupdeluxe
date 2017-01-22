@@ -3,8 +3,8 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="10"/>
-    <BuildModes Active="Default"/>
-    <Units Count="264">
+    <BuildModes Active="Debug"/>
+    <Units Count="269">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -17,8 +17,10 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
-        <CursorPos X="11" Y="11"/>
+        <TopLine Value="992"/>
+        <CursorPos Y="951"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -29,7 +31,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -70,25 +72,23 @@
       <Unit7>
         <Filename Value="installermanager.pas"/>
         <UnitName Value="installerManager"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="267"/>
-        <CursorPos X="32" Y="387"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="320"/>
+        <CursorPos X="32" Y="338"/>
         <UsageCount Value="101"/>
-        <Loaded Value="True"/>
       </Unit7>
       <Unit8>
         <Filename Value="fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="92"/>
+        <TopLine Value="1198"/>
+        <CursorPos X="45" Y="1204"/>
+        <UsageCount Value="93"/>
       </Unit8>
       <Unit9>
         <Filename Value="installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="412"/>
-        <CursorPos X="10" Y="428"/>
-        <UsageCount Value="100"/>
+        <UsageCount Value="101"/>
       </Unit9>
       <Unit10>
         <Filename Value="processutils.pas"/>
@@ -195,6 +195,8 @@
         <Filename Value="installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="472"/>
+        <CursorPos X="45" Y="485"/>
         <UsageCount Value="106"/>
       </Unit24>
       <Unit25>
@@ -409,14 +411,14 @@
       </Unit52>
       <Unit53>
         <Filename Value="fpcup.ini"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit53>
       <Unit54>
         <Filename Value="settings.ini"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -438,7 +440,7 @@
       </Unit56>
       <Unit57>
         <Filename Value="revision.inc"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit57>
@@ -501,9 +503,7 @@
       <Unit66>
         <Filename Value="m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="208"/>
-        <CursorPos X="33" Y="227"/>
-        <UsageCount Value="49"/>
+        <UsageCount Value="50"/>
       </Unit66>
       <Unit67>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-process\src\process.pp"/>
@@ -519,11 +519,9 @@
         <UsageCount Value="1"/>
       </Unit68>
       <Unit69>
-        <Filename Value="m_any_to_androidarm.pas"/>
+        <Filename Value="m_any_to_androidmipsel.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="26"/>
-        <CursorPos X="67" Y="41"/>
-        <UsageCount Value="17"/>
+        <UsageCount Value="19"/>
       </Unit69>
       <Unit70>
         <Filename Value="m_crosswinaarch64.pas"/>
@@ -575,9 +573,9 @@
       <Unit77>
         <Filename Value="m_any_to_freebsd386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="72"/>
+        <TopLine Value="50"/>
         <CursorPos X="57" Y="75"/>
-        <UsageCount Value="1"/>
+        <UsageCount Value="10"/>
       </Unit77>
       <Unit78>
         <Filename Value="m_any_to_linuxmipsel.pas"/>
@@ -681,7 +679,7 @@
       <Unit92>
         <Filename Value="m_any_to_darwinx64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="190"/>
+        <TopLine Value="52"/>
         <CursorPos Y="205"/>
         <UsageCount Value="42"/>
       </Unit92>
@@ -1920,32 +1918,168 @@
         <CursorPos X="29" Y="2307"/>
         <UsageCount Value="10"/>
       </Unit263>
+      <Unit264>
+        <Filename Value="m_any_to_androidarm.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit264>
+      <Unit265>
+        <Filename Value="m_crossdarwin386iphonesim.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="2"/>
+        <UsageCount Value="10"/>
+      </Unit265>
+      <Unit266>
+        <Filename Value="m_crossdarwinx64iphonesim.pas"/>
+        <EditorIndex Value="-1"/>
+        <CursorPos Y="33"/>
+        <UsageCount Value="10"/>
+      </Unit266>
+      <Unit267>
+        <Filename Value="m_any_to_androidaarch64.pas"/>
+        <EditorIndex Value="-1"/>
+        <UsageCount Value="10"/>
+      </Unit267>
+      <Unit268>
+        <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\assemble.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="975"/>
+        <CursorPos X="37" Y="1077"/>
+        <UsageCount Value="10"/>
+      </Unit268>
     </Units>
-    <JumpHistory Count="6" HistoryIndex="5">
+    <JumpHistory Count="29" HistoryIndex="28">
       <Position1>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="887" TopLine="879"/>
+        <Caret Line="273" Column="14" TopLine="250"/>
       </Position1>
       <Position2>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="886" TopLine="873"/>
+        <Caret Line="910" Column="20" TopLine="896"/>
       </Position2>
       <Position3>
-        <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="51" Column="28" TopLine="31"/>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="142" Column="65" TopLine="126"/>
       </Position3>
       <Position4>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="11" Column="11"/>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="489" Column="28" TopLine="465"/>
       </Position4>
       <Position5>
-        <Filename Value="installermanager.pas"/>
-        <Caret Line="240" Column="30" TopLine="230"/>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="491" Column="24" TopLine="467"/>
       </Position5>
       <Position6>
-        <Filename Value="installermanager.pas"/>
-        <Caret Line="324" Column="26" TopLine="313"/>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="493" Column="29" TopLine="469"/>
       </Position6>
+      <Position7>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="495" Column="16" TopLine="471"/>
+      </Position7>
+      <Position8>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="47" Column="18" TopLine="33"/>
+      </Position8>
+      <Position9>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="102" Column="25" TopLine="79"/>
+      </Position9>
+      <Position10>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="103" Column="26" TopLine="80"/>
+      </Position10>
+      <Position11>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="142" Column="65" TopLine="119"/>
+      </Position11>
+      <Position12>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="910" Column="20" TopLine="836"/>
+      </Position12>
+      <Position13>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+      </Position13>
+      <Position14>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1404" Column="17" TopLine="1381"/>
+      </Position14>
+      <Position15>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1410" Column="17" TopLine="1387"/>
+      </Position15>
+      <Position16>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1562" TopLine="1534"/>
+      </Position16>
+      <Position17>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+      </Position17>
+      <Position18>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="487" Column="18" TopLine="464"/>
+      </Position18>
+      <Position19>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="693" Column="29" TopLine="670"/>
+      </Position19>
+      <Position20>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="695" Column="71" TopLine="672"/>
+      </Position20>
+      <Position21>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1155" Column="29" TopLine="1131"/>
+      </Position21>
+      <Position22>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1157" Column="63" TopLine="1133"/>
+      </Position22>
+      <Position23>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1194" Column="29" TopLine="1171"/>
+      </Position23>
+      <Position24>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="489" Column="28" TopLine="168"/>
+      </Position24>
+      <Position25>
+        <Filename Value="extrasettings.pas"/>
+      </Position25>
+      <Position26>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="46" Column="21" TopLine="22"/>
+      </Position26>
+      <Position27>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="100" Column="28" TopLine="77"/>
+      </Position27>
+      <Position28>
+        <Filename Value="extrasettings.pas"/>
+        <Caret Line="140" Column="53" TopLine="117"/>
+      </Position28>
+      <Position29>
+        <Filename Value="fpcup.ini"/>
+        <Caret Line="1383" Column="28" TopLine="1374"/>
+      </Position29>
     </JumpHistory>
   </ProjectSession>
+  <Debugging>
+    <BreakPoints Count="2">
+      <Item1>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="fpcupdeluxemainform.pas"/>
+        <Line Value="938"/>
+      </Item1>
+      <Item2>
+        <Kind Value="bpkSource"/>
+        <WatchScope Value="wpsLocal"/>
+        <WatchKind Value="wpkWrite"/>
+        <Source Value="fpcupdeluxemainform.pas"/>
+        <Line Value="951"/>
+      </Item2>
+    </BreakPoints>
+  </Debugging>
 </CONFIG>

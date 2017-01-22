@@ -227,7 +227,7 @@ begin
   try
     CheckRepo.Checked:=ReadBool('General','GetRepo',True);
     CheckPackageRepo.Checked:=ReadBool('General','GetPackageRepo',False);
-    CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',True);
+    CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',False);
 
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 

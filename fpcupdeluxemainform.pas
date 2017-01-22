@@ -1532,7 +1532,7 @@ begin
     Form2.FPCRevision:=ReadString('General','FPCRevision','');
     Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
 
-    Form2.SplitFPC:=ReadBool('General','SplitFPC',False);
+    Form2.SplitFPC:=ReadBool('General','SplitFPC',True);
     Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
 
     //FPCupManager.UseWget:=ReadBool('General','UseWget',False);
