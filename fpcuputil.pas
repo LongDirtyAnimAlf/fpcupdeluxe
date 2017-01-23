@@ -1062,6 +1062,8 @@ begin
   {$IFDEF UNIX}
   // Note: we're using external which because
   // FindDefaultExecutablePath
+  // or
+  // ExeSearch(Executable);
   // doesn't check if the user has execute permission
   // on the found file.
   // however

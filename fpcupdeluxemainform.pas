@@ -86,6 +86,7 @@ type
     FFPCTarget,FLazarusTarget:string;
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
+    InternalError:string;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable(Sender: TObject;value:boolean);
@@ -431,6 +432,8 @@ var
 begin
   s:=SynEdit1.LineText;
   if Length(s)=0 then s:=SynEdit1.Lines[SynEdit1.CaretY-2];
+  s:=Trim(s);
+  if Length(s)=0 then exit;
 
   if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
@@ -455,25 +458,53 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
   begin
-    if (Pos('fatal:',lowercase(s))>0) then
+    if (ExistWordInString(PChar(s),'fatal: internal error',[soDown])) then
     begin
-      Memo1.Lines.Append(s);
-      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
-    end;
-
-    if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
+      x:=RPos(' ',s);
+      if x>0 then
+      begin
+        InternalError:=Copy(s,x+1,MaxInt);
+        Memo1.Lines.Append('Compiler error: '+InternalError);
+        if (InternalError='2015030501') OR (InternalError='2014051001') OR (InternalError='2014050604') then
+        begin
+          Memo1.Lines.Append('FPC revision 30351 introduced some changed into the compiler causing this error.');
+          Memo1.Lines.Append('See: http://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
+        end;
+      end;
+    end
+    else if (ExistWordInString(PChar(s),'error: user defined',[soDown])) then
+    begin
+      x:=Pos('error: user defined',LowerCase(s));
+      if x>0 then
+      begin
+        x:=x+Length('error: user defined');
+        InternalError:=Copy(s,x+2,MaxInt);
+        Memo1.Lines.Append('Configuration error: '+InternalError);
+        x:=Pos('80 bit extended floating point',LowerCase(s));
+        if x>0 then
+        begin
+          Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
+        end;
+      end;
+    end
+    else if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
     begin
       MissingCrossBins:=true;
-    end;
-
-    if  (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
+      Memo1.Lines.Append('Missing correct cross libraries');
+    end
+    else if (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
     begin
       MissingCrossLibs:=true;
-    end;
-
-    if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
+      Memo1.Lines.Append('Missing correct cross binary utilities');
+    end
+    else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
       Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');
+      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+    end
+    else if (Pos('fatal:',lowercase(s))>0) then
+    begin
+      Memo1.Lines.Append(s);
       Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end;
   end;
@@ -489,12 +520,20 @@ begin
     end;
   end;
 
-  // diskspace error
+  // diskspace errors
   if (ExistWordInString(PChar(s),'Stream write error',[])) then
   begin
     Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
     Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
   end;
+
+  // RAM errors
+  if (ExistWordInString(PChar(s),'Can''t call the assembler',[])) then
+  begin
+    Memo1.Lines.Append('Most likely, there is not enough RAM (swap) to finish this operation.');
+    Memo1.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
+  end;
+
 
 end;
 
@@ -844,6 +883,7 @@ begin
   begin
     ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
     Memo1.Lines.Append(CrossGCCMsg);
+    Memo1.Lines.Append('');
   end;
 
   if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
@@ -930,7 +970,6 @@ begin
 
     if NOT RealRun then
     begin
-
       {$ifndef BSD}
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
