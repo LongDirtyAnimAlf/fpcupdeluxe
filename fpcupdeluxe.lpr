@@ -55,6 +55,7 @@ uses
   m_any_to_darwinx64,
   m_any_to_darwinpowerpc,
   m_any_to_darwinarm,
+  m_any_to_darwinaarch64,
   {$endif}
   {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
   m_freebsd_to_linux386,

@@ -1,6 +1,6 @@
-unit m_any_to_darwin386;
+unit m_any_to_darwinaarch64;
 
-{ Cross compiles to Darwin 32 bit
+{ Cross compiles to Darwin 64 bit arm
 Copyright (C) 2014 Reinier Olislagers / DonAlfredo
 
 This library is free software; you can redistribute it and/or modify it
@@ -41,10 +41,14 @@ implementation
 uses
   LazFileUtils;
 
+const
+  ARCH='aarch64';
+  OS='darwin';
+
 type
 
-{ Tany_darwin386 }
-Tany_darwin386 = class(TCrossInstaller)
+{ Tany_darwinaarch64 }
+Tany_darwinaarch64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -55,19 +59,20 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_darwin386 }
-function Tany_darwin386.TargetSignature: string;
+{ Tany_darwinaarch64 }
+function Tany_darwinaarch64.TargetSignature: string;
 begin
   result:=TargetCPU+'-'+TargetOS;
 end;
 
-function Tany_darwin386.GetLibs(Basepath:string): boolean;
+function Tany_darwinaarch64.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-darwin';
+  DirName=ARCH+'-'+OS;
   LibName='libc.dylib';
 var
   s:string;
-  i:integer;
+  i,j,k:integer;
+  found:boolean;
 begin
 
   result:=FLibsFound;
@@ -92,26 +97,63 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  // also for osxcross
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName,'libc.tbd');
+
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib',LibName);
+
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+'usr'+DirectorySeparator+'lib','libc.tbd');
+
+  // universal libs : also search in arm-darwin
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,'arm-darwin'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+
+
+  {
+  // also for cctools
   if not result then
   begin
-    for i:=15 downto 10 do
+    found:=false;
+    for i:=10 downto 1 do
     begin
-      s:='MacOSX10.'+InttoStr(i);
-      result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
-      if not result then
-         result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-      if result then break;
+      if found then break;
+      for j:=15 downto -1 do
+      begin
+        if found then break;
+        for k:=15 downto -1 do
+        begin
+          if found then break;
+
+          s:=InttoStr(i);
+          if j<>-1 then
+          begin
+            s:=s+'.'+InttoStr(j);
+            if k<>-1 then s:=s+'.'+InttoStr(k);
+          end;
+          s:='MacIOS'+s+'.sdk';
+
+          s:=DirName+DirectorySeparator+s+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          result:=SimpleSearchLibrary(BasePath,s,LibName);
+          if not result then
+             result:=SimpleSearchLibrary(BasePath,s,'libc.tbd');
+          if result then found:=true;
+        end;
+      end;
     end;
   end;
+  }
 
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/i386-darwin-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/arm-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_darwin386: failed: searched libspath '+FLibsPath,etInfo);
+    infoln('Tany_darwinaarch64: failed: searched libspath '+FLibsPath,etInfo);
     {$ENDIF}
   end;
 
@@ -132,8 +174,6 @@ begin
       FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator+LineEnding+
       '-k-framework'+LineEnding+
-      '-kAppKit'+LineEnding+
-      '-k-framework'+LineEnding+
       '-kFoundation'+LineEnding+
       '-k-framework'+LineEnding+
       '-kCoreFoundation'+LineEnding+
@@ -147,9 +187,9 @@ begin
   end;
 end;
 
-function Tany_darwin386.GetBinUtils(Basepath:string): boolean;
+function Tany_darwinaarch64.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='i386-darwin';
+  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -164,17 +204,8 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for (cross)binutils from https://github.com/tpoechtrager/osxcross
-  // fpc version from https://github.com/LongDirtyAnimalf/osxcross
-  {$IFDEF MSWINDOWS}
-  if IsWindows64
-     then BinPrefixTry:='x86_64'
-     else BinPrefixTry:='i386';
-  {$else}
-  BinPrefixTry:=lowercase({$i %FPCTARGETCPU%});
-  //BinPrefixTry:='i386';
-  {$endif}
-  BinPrefixTry:=BinPrefixTry+'-apple-darwin';
+  // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
+  BinPrefixTry:='aarch64-apple-darwin';
 
   for i:=15 downto 10 do
   begin
@@ -182,10 +213,7 @@ begin
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);
-      if not result then
-        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-      if not result then
-        result:=SimpleSearchBinUtil(BasePath,'x86-darwin',AsFile);
+      if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
       if result then
       begin
         FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
@@ -208,34 +236,34 @@ begin
   end;
 end;
 
-constructor Tany_darwin386.Create;
+constructor Tany_darwinaarch64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_darwin386';
-  FBinUtilsPrefix:='i386-darwin-';
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
+  FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
+  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
-  FBinutilsPathInPath:=true;
+  //FBinutilsPathInPath:=true;
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  infoln('Tany_darwin386 crosscompiler loading',etDebug);
+  infoln(FCrossModuleName+': crosscompiler loading',etDebug);
 end;
 
-destructor Tany_darwin386.Destroy;
+destructor Tany_darwinaarch64.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  any_darwin386:Tany_darwin386;
+  any_darwinaarch64:Tany_darwinaarch64;
 
 initialization
-  any_darwin386:=Tany_darwin386.Create;
-  RegisterExtension(any_darwin386.TargetCPU+'-'+any_darwin386.TargetOS,any_darwin386);
+  any_darwinaarch64:=Tany_darwinaarch64.Create;
+  RegisterExtension(any_darwinaarch64.TargetCPU+'-'+any_darwinaarch64.TargetOS,any_darwinaarch64);
 finalization
-  any_darwin386.Destroy;
+  any_darwinaarch64.Destroy;
 
 end.
 

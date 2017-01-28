@@ -410,7 +410,6 @@ begin
   FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
   FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
-  FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FAlreadyWarned:=false;

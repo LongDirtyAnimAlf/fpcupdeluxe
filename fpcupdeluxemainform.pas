@@ -152,7 +152,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0h';
+  FPCUPDELUXEVERSION='1.2.0i';
 
 resourcestring
   CrossGCCMsg =
@@ -833,7 +833,7 @@ end;
 
 procedure TForm1.Button5Click(Sender: TObject);
 var
-  URL,DownloadURL,TargetFile,TargetPath,CPUPath,UnZipper,s:string;
+  BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
   {$ifdef Unix}
   fileList: TStringList;
@@ -923,8 +923,8 @@ begin
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
         //FPCupManager.FPCOPT:='-S2ha -CiroR ';
-        //-dIPHONEALL
-        FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
+        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+        FPCupManager.CrossOPT:='-CpARMV7 ';
       end
       else
       begin
@@ -944,7 +944,7 @@ begin
       end;
     end;
 
-    // use the available source to build the cross-compiler ... change nothing about source and URL !!
+    // use the available source to build the cross-compiler ... change nothing about source and url !!
     FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
 
     if Form2.IncludeLCL then
@@ -985,75 +985,85 @@ begin
                      exit;
                    end;
 
-        URL:='';
+        BinsURL:='';
 
         if FPCupManager.CrossOS_Target='linux' then
         begin
-          if FPCupManager.CrossCPU_Target='arm' then URL:='LinuxARM.rar';
-          if FPCupManager.CrossCPU_Target='aarch64' then URL:='LinuxAarch64.rar';
-          if FPCupManager.CrossCPU_Target='i386' then URL:='Linuxi386.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Linuxx64.rar';
-          if FPCupManager.CrossCPU_Target='powerpc' then URL:='LinuxPowerPC.rar';
-          if FPCupManager.CrossCPU_Target='powerpc64' then URL:='LinuxPowerPC64.rar';
+          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='LinuxARM.rar';
+          if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='LinuxAarch64.rar';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.rar';
+          if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='LinuxPowerPC.rar';
+          if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='LinuxPowerPC64.rar';
         end;
         if FPCupManager.CrossOS_Target='freebsd' then
         begin
-          if FPCupManager.CrossCPU_Target='i386' then URL:='FreeBSDi386.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then URL:='FreeBSDx64.rar';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='FreeBSDi386.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='FreeBSDx64.rar';
         end;
         if FPCupManager.CrossOS_Target='solaris' then
         begin
-          if FPCupManager.CrossCPU_Target='sparc' then URL:='SolarisSparc.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Solarisx64.rar';
+          if FPCupManager.CrossCPU_Target='sparc' then BinsURL:='SolarisSparc.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Solarisx64.rar';
         end;
         if FPCupManager.CrossOS_Target='wince' then
         begin
-          if FPCupManager.CrossCPU_Target='arm' then URL:='WinceARM.rar';
+          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='WinceARM.rar';
         end;
         if FPCupManager.CrossOS_Target='android' then
         begin
-          if FPCupManager.CrossCPU_Target='arm' then URL:='AndroidARM.rar';
+          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.rar';
         end;
         if FPCupManager.CrossOS_Target='embedded' then
         begin
-          if FPCupManager.CrossCPU_Target='arm' then URL:='EmbeddedARM.rar';
-          if FPCupManager.CrossCPU_Target='avr' then URL:='EmbeddedAVR.rar';
+          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='EmbeddedARM.rar';
+          if FPCupManager.CrossCPU_Target='avr' then BinsURL:='EmbeddedAVR.rar';
         end;
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          if FPCupManager.CrossCPU_Target='i386' then URL:='Darwinx86.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then URL:='Darwinx86.rar';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.rar';
+          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='DarwinARM.rar';
+          if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='DarwinAArch64.rar';
         end;
 
-        // tricky ... reset URL in case the binutils and libs are already there ... to exit this retry ... ;-)
+        // normally, we have the same names for libs and bins URL
+        LibsURL:=BinsURL;
 
-        // Darwin is special: combined for i386 and x86_64 with osxcross
+        // normally, we have the standard names for libs and bins paths
+        LibPath:=DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target;
+        BinPath:=DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target;
+
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          if URL='Darwinx86.rar' then CPUPath:='x86';
-        end
-        else CPUPath:=FPCupManager.CrossCPU_Target;
+          // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
+          if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') then
+          begin
+            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
 
-        if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
-                           'cross'+
-                           DirectorySeparator+
-                           'bin'+
-                           DirectorySeparator+
-                           CPUPath+
-                           '-'+
-                           FPCupManager.CrossOS_Target))
+            //BinPath:=DirectorySeparator+'bin'+DirectorySeparator+'x86-'+FPCupManager.CrossOS_Target;
+            //LibPath:=DirectorySeparator+'lib'+DirectorySeparator+'x86-'+FPCupManager.CrossOS_Target;
+            // LibsURL and BinsURL are already set correct and equal above !!
+            //BinsURL:=StringReplace(BinsURL,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
+            //LibsURL:=StringReplace(LibsURL,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
+          end;
+          // Darwin is special: combined libs for arm and aarch64 with osxcross
+          if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
+          begin
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
+            //LibPath:=DirectorySeparator+'lib'+DirectorySeparator+'arm-'+FPCupManager.CrossOS_Target;
+            LibsURL:=StringReplace(LibsURL,'AArch64','ARM',[rfIgnoreCase]);
+          end;
+        end;
+
+        // tricky ... reset BinsURL in case the binutils and libs are already there ... to exit this retry ... ;-)
+        if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))
             AND
-            (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+
-                                     'cross'+
-                                     DirectorySeparator+
-                                     'lib'+
-                                     DirectorySeparator+
-                                     CPUPath+
-                                     '-'+
-                                     FPCupManager.CrossOS_Target))
-            then URL:='';
+            (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath))
+          then BinsURL:='';
 
-        if URL<>'' then
+        if BinsURL<>'' then
         begin
 
           if MissingCrossBins then
@@ -1068,9 +1078,9 @@ begin
 
             AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
             {$ifdef MSWINDOWS}
-            DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+URL;
+            DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+BinsURL;
             {$else}
-            DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+URL;
+            DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+BinsURL;
             {$endif}
             AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
@@ -1080,7 +1090,7 @@ begin
               AddMessage('Successfully downloaded binary-tools.');
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               {$ifndef MSWINDOWS}
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'bin'+DirectorySeparator+CPUPath+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath+DirectorySeparator;
               {$endif}
               AddMessage('Going to extract them into '+TargetPath);
               {$ifdef MSWINDOWS}
@@ -1117,7 +1127,7 @@ begin
           if MissingCrossLibs then
           begin
             AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
-            DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+URL;
+            DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+LibsURL;
             AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
             TargetFile := SysUtils.GetTempFileName;
             success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
@@ -1125,7 +1135,7 @@ begin
             begin
               AddMessage('Successfully downloaded the libraries.');
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-              //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target+DirectorySeparator;
+              //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath+DirectorySeparator;
               AddMessage('Going to extract them into '+TargetPath);
 
               // many files to unpack for Darwin libs : do not show progress of unpacking files when unpacking for Darwin.
