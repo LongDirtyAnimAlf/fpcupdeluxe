@@ -490,12 +490,12 @@ begin
     else if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
     begin
       MissingCrossBins:=true;
-      Memo1.Lines.Append('Missing correct cross libraries');
+      Memo1.Lines.Append('Missing correct cross binary utilities');
     end
     else if (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
     begin
       MissingCrossLibs:=true;
-      Memo1.Lines.Append('Missing correct cross binary utilities');
+      Memo1.Lines.Append('Missing correct cross libraries');
     end
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
@@ -922,7 +922,7 @@ begin
       else
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
-        //FPCupManager.FPCOPT:='-S2ha -CiroR ';
+        //FPCupManager.FPCOPT:='-Sh -WP8.1';
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
         FPCupManager.CrossOPT:='-CpARMV7 ';
       end
@@ -938,8 +938,7 @@ begin
     begin
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
-        //FPCupManager.FPCOPT:='-S2ha -CiroR ';
-        //-dIPHONEALL
+        //FPCupManager.FPCOPT:='-Sh -WP8.1';
         FPCupManager.CrossOPT:='-CaAARCH64IOS ';
       end;
     end;
