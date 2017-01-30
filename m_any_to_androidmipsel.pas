@@ -50,7 +50,6 @@ const
   ARCH='mipsel';
   ARCHSHORT='mips';
   OS='android';
-  MAXDELPHIVERSION=22;
   NDKVERSIONBASENAME=OS+'-ndk-r';
   NDKVERSIONNAMES:array[0..10] of string = ('9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
   NDKTOOLCHAINVERSIONS:array[0..1] of string = (ARCH+'-linux-'+OS+'-4.8',ARCH+'-linux-'+OS+'-4.9');
@@ -171,7 +170,7 @@ begin
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
     infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
-    for delphiversion:=MAXDELPHIVERSION downto 12 do
+    for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
     begin
       if not result then
       begin
@@ -361,7 +360,7 @@ begin
   // check Delphi auto installed android libraries
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
-    for delphiversion:=MAXDELPHIVERSION downto 12 do
+    for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
     begin
       if not result then
       begin

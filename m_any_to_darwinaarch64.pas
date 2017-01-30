@@ -118,7 +118,7 @@ begin
   if not result then
   begin
     found:=false;
-    for i:=10 downto 1 do
+    for i:=MAXIOSVERSION downto MINIOSVERSION do
     begin
       if found then break;
       for j:=15 downto -1 do
@@ -207,7 +207,19 @@ begin
   // Also allow for (cross)binutils from https://github.com/tpoechtrager/cctools
   BinPrefixTry:='aarch64-apple-darwin';
 
-  for i:=15 downto 10 do
+  {
+  10.4  = darwin8
+  10.5  = darwin9
+  10.6  = darwin10
+  10.7  = darwin11
+  10.8  = darwin12
+  10.9  = darwin13
+  10.10 = darwin14
+  10.11 = darwin15
+  10.12 = darwin16
+  }
+
+  for i:=MAXDARWINVERSION downto MINDARWINVERSION do
   begin
     if not result then
     begin

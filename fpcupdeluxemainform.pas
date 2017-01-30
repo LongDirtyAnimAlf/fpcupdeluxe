@@ -846,9 +846,6 @@ begin
     exit;
   end;
 
-  MissingCrossBins:=false;
-  MissingCrossLibs:=false;
-
   PrepareRun;
 
   if RadioGroup1.ItemIndex<>-1 then
@@ -966,6 +963,8 @@ begin
     if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' ('+FPCupManager.FPCOPT+')';
     sStatus:=sStatus+'.';
 
+    MissingCrossBins:=false;
+    MissingCrossLibs:=false;
 
     if NOT RealRun then
     begin
