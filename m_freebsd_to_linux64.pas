@@ -159,7 +159,7 @@ begin
   FTargetCPU:='x86_64';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TFreeBSD_Linux64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TFreeBSD_Linux64.Destroy;

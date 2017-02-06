@@ -40,8 +40,16 @@ uses
 const
   FPCSVNURL = 'http://svn.freepascal.org/svn';
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
-  DEFAULTBINUTILSVERSION = '3.0.0';
-  //DEFAULTBINUTILSVERSION = '2.6.4';
+  DEFAULTFPCVERSION = '3.0.2';
+  DEFAULTLAZARUSVERSION = '1.6.2';
+  {$IFDEF DEBUG}
+  STANDARDCOMPILEROPTIONS='-vew';
+  {$ELSE}
+  //STANDARDCOMPILEROPTIONS='-veqw -vm2024,2031,3005,3018,3057,4105,4104,4044,4045,4055,4056,4066,5024,5033,5043,5044,5066,5074,5075,5076,6018,11047';
+  //STANDARDCOMPILEROPTIONS='-veqw';
+  STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
+  {$ENDIF}
+
 
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
@@ -403,7 +411,7 @@ begin
 
     {
     // check if we have make ... otherwise get it from standard URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
             '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
     }
 
@@ -416,11 +424,11 @@ begin
 
     // Get unzip binary from default binutils URL
     FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
 
     // Get patch binary from default binutils URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
 
     F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
     if Not FileExists(F7zip) then
@@ -663,7 +671,7 @@ begin
 
     {$IFDEF MSWINDOWS}
     // check if we have make ... otherwise get it from standard URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTBINUTILSVERSION,'.','_',[rfReplaceAll])+
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
             '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
     {$ENDIF MSWINDOWS}
 
@@ -733,7 +741,9 @@ procedure TInstaller.CreateBinutilsList(aVersion:string);
 // Windows-centric
 const
   SourceURL_gdb = FPCSVNURL+'/lazarus/binaries/i386-win32/gdb/bin/';
+  //SourceURL_gdb = 'https://github.com/newpascal/fpcupdeluxe/releases/download/gdb-7.11.1/GDB-i386-win32.zip';
   SourceURL64_gdb = FPCSVNURL+'/lazarus/binaries/x86_64-win64/gdb/bin/';
+  //SourceURL64_gdb = 'https://github.com/newpascal/fpcupdeluxe/releases/download/gdb-7.11.1/GDB-x86_64-win64.zip';
   SourceURL_Qt = FPCSVNURL+'/lazarus/binaries/i386-win32/qt/';
 
   procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
@@ -762,7 +772,7 @@ begin
   {$IFDEF MSWINDOWS}
 
   // default
-  if aVersion='' then aVersion:=DEFAULTBINUTILSVERSION;
+  if aVersion='' then aVersion:=DEFAULTFPCVERSION;
 
   GetWin32Version(aMajor,aMinor,aBuild);
   // if Win7 or higher: use modern (2.4.0 and higher) binutils

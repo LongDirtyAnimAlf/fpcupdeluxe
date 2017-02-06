@@ -152,7 +152,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0i';
+  FPCUPDELUXEVERSION='1.2.0j';
 
 resourcestring
   CrossGCCMsg =
@@ -483,6 +483,7 @@ begin
         x:=Pos('80 bit extended floating point',LowerCase(s));
         if x>0 then
         begin
+          Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
           Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
         end;
       end;
@@ -1011,6 +1012,7 @@ begin
         if FPCupManager.CrossOS_Target='android' then
         begin
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.rar';
+          if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='AndroidAArch64.rar';
         end;
         if FPCupManager.CrossOS_Target='embedded' then
         begin
@@ -1039,18 +1041,11 @@ begin
           begin
             BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
-
-            //BinPath:=DirectorySeparator+'bin'+DirectorySeparator+'x86-'+FPCupManager.CrossOS_Target;
-            //LibPath:=DirectorySeparator+'lib'+DirectorySeparator+'x86-'+FPCupManager.CrossOS_Target;
-            // LibsURL and BinsURL are already set correct and equal above !!
-            //BinsURL:=StringReplace(BinsURL,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
-            //LibsURL:=StringReplace(LibsURL,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
           end;
           // Darwin is special: combined libs for arm and aarch64 with osxcross
           if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
           begin
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
-            //LibPath:=DirectorySeparator+'lib'+DirectorySeparator+'arm-'+FPCupManager.CrossOS_Target;
             LibsURL:=StringReplace(LibsURL,'AArch64','ARM',[rfIgnoreCase]);
           end;
         end;

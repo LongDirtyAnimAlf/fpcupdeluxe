@@ -168,7 +168,7 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Tany_linux386 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_linux386.Destroy;

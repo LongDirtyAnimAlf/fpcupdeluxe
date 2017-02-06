@@ -77,7 +77,7 @@ begin
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   FLibsPath:='';
-  infoln('TFreeBSD64_FreeBSD386 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TFreeBSD64_FreeBSD386.Destroy;

@@ -57,6 +57,9 @@
               </Win32>
             </Options>
           </Linking>
+          <Other>
+            <CustomOptions Value="-dDEBUG"/>
+          </Other>
         </CompilerOptions>
       </Item2>
       <Item3 Name="win32">

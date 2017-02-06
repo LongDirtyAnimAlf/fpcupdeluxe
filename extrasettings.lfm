@@ -1,10 +1,10 @@
 object Form2: TForm2
-  Left = 576
-  Height = 495
-  Top = 209
+  Left = 529
+  Height = 547
+  Top = 107
   Width = 746
   Caption = 'Advanced settings'
-  ClientHeight = 495
+  ClientHeight = 547
   ClientWidth = 746
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -123,12 +123,12 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 267
+    Height = 319
     Top = 144
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Miscellaneous settings'
-    ClientHeight = 247
+    ClientHeight = 299
     ClientWidth = 316
     TabOrder = 3
     object CheckRepo: TCheckBox
@@ -262,6 +262,23 @@ object Form2: TForm2
       ParentShowHint = False
       ShowHint = True
       TabOrder = 7
+    end
+    object CheckUseWget1: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckUseWget
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 204
+      Width = 194
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Use (get) latest GDB (default=no)'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 8
     end
   end
   object GroupBox4: TGroupBox
@@ -529,7 +546,7 @@ object Form2: TForm2
   object BitBtn1: TBitBtn
     Left = 643
     Height = 31
-    Top = 405
+    Top = 457
     Width = 89
     Anchors = [akRight, akBottom]
     Default = True
@@ -541,7 +558,7 @@ object Form2: TForm2
   object BitBtn2: TBitBtn
     Left = 643
     Height = 31
-    Top = 453
+    Top = 505
     Width = 89
     Anchors = [akRight, akBottom]
     Cancel = True
@@ -555,7 +572,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 8
     Height = 59
-    Top = 425
+    Top = 477
     Width = 200
     Anchors = [akLeft, akBottom]
     BorderSpacing.Bottom = 11
@@ -568,7 +585,7 @@ object Form2: TForm2
     AnchorSideTop.Control = ListBoxPatch
     Left = 222
     Height = 28
-    Top = 425
+    Top = 477
     Width = 106
     Caption = 'Add patch'
     OnClick = Button1Click
@@ -579,7 +596,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 222
     Height = 26
-    Top = 458
+    Top = 510
     Width = 106
     Anchors = [akLeft, akBottom]
     Caption = 'Remove patch'

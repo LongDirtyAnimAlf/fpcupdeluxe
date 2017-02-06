@@ -260,7 +260,7 @@ begin
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FAlreadyWarned:=false;
-  infoln(FCrossModuleName+': crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_darwinaarch64.Destroy;

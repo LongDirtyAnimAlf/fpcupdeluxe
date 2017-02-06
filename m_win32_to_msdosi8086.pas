@@ -201,7 +201,7 @@ begin
   FTargetCPU:='i8086';
   FTargetOS:='msdos';
   FAlreadyWarned:=false;
-  infoln('TWin32_msdosi8086 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TWin32_msdosi8086.Destroy;

@@ -12,9 +12,6 @@ uses
   Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
-const
-  ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
-    'todo: specify what exactly is missing';
 
 type
 
@@ -92,7 +89,7 @@ begin
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('TDarwinarm crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TDarwinarm.Destroy;

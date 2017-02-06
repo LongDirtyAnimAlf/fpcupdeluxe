@@ -95,7 +95,7 @@ begin
   FTargetCPU:='jvm';
   FTargetOS:='android';
   FAlreadyWarned:=false;
-  infoln('Tany_androidjvm crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_androidjvm.Destroy;

@@ -81,7 +81,7 @@ begin
   FLibsPath:='';
   FTargetCPU:='i386';
   FTargetOS:='win32';
-  infoln('TWin32 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TWin32.Destroy;

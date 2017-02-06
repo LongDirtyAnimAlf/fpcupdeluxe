@@ -128,7 +128,7 @@ begin
   FTargetOS:=OS;
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln(FCrossModuleName+' crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TDarwin64iphonesim.Destroy;

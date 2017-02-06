@@ -78,7 +78,7 @@ begin
   FTargetCPU:='x86_64';
   FTargetOS:='win64';
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('TWin64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TWin64.Destroy;

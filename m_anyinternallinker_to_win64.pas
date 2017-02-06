@@ -13,9 +13,10 @@ uses
   Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
+
 const
-  ErrorNotFound='An error occurred getting cross compiling binutils/libraries.'+LineEnding+
-    'todo: specify what exactly is missing';
+  ARCH='x86_64';
+  OS='win64';
 
 type
 
@@ -55,12 +56,12 @@ end;
 constructor Tanyinternallinker_win64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='anyinternallinker_win64';
-  FTargetCPU:='x86_64';
-  FTargetOS:='win64';
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
+  FCrossModuleName:='TAnyinternallinker_'+OS+'_'+ARCH;
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
-  infoln('Tanyinternallinker_win64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tanyinternallinker_win64.Destroy;

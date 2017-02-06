@@ -50,6 +50,11 @@ uses
   Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
 
 implementation
+
+const
+  ARCH='powerpc';
+  OS='aix';
+
 type
 
 { TAny_AIXPowerPC }
@@ -70,12 +75,12 @@ end;
 { TAny_AIXPowerPC }
 function TAny_AIXPowerPC.TargetSignature: string;
 begin
-  result:=FTargetCPU+'-'+TargetOS;
+  result:=TargetCPU+'-'+TargetOS;
 end;
 
 function TAny_AIXPowerPC.GetLibs(Basepath:string): boolean;
 const
-  DirName='powerpc-aix';
+  DirName=ARCH+'-'+OS;
   LibName='libc.so';
 begin
 
@@ -118,7 +123,7 @@ end;
 
 function TAny_AIXPowerPC.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='powerpc-aix';
+  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -136,7 +141,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:='powerpc-aix-';
+    BinPrefixTry:=ARCH+'-'+OS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -173,16 +178,16 @@ end;
 constructor TAny_AIXPowerPC.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Any_AIXPowerPC';
-  FBinUtilsPrefix:='powerpc-aix-'; //crossfpc nomenclature; module will also search for no prefix crossbinutils
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
+  FCrossModuleName:='TAny_'+UpperCase(OS)+UppercaseFirstChar(ARCH);
+  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
-  FTargetCPU:='powerpc'; //32 bit powerpc; will run on 64 bit powerpc as well
-  FTargetOS:='aix';
   FAlreadyWarned:=false;
-  infoln(FCrossModuleName+ ': crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TAny_AIXPowerPC.Destroy;

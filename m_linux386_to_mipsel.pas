@@ -173,7 +173,7 @@ begin
   FTargetCPU:='mipsel';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TLinux386_mipsel crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TLinux386_mipsel.Destroy;

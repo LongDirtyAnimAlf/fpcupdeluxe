@@ -176,7 +176,7 @@ begin
   FTargetCPU:='arm';
   FTargetOS:='wince';
   FAlreadyWarned:=false;
-  infoln('TWin32_wincearm crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TWin32_wincearm.Destroy;

@@ -155,7 +155,7 @@ begin
   FTargetCPU:='aarch64';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Tany_linuxaarch64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_linuxaarch64.Destroy;

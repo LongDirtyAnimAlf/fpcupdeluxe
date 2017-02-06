@@ -155,7 +155,7 @@ begin
   FTargetCPU:='x86_64';
   FTargetOS:='freebsd';
   FAlreadyWarned:=false;
-  infoln('Tany_freebsdx64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_freebsdx64.Destroy;

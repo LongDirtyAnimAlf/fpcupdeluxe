@@ -146,7 +146,7 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='freebsd';
   FAlreadyWarned:=false;
-  infoln('Tany_freebsd386 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_freebsd386.Destroy;

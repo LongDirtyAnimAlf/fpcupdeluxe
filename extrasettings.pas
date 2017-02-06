@@ -51,6 +51,7 @@ type
     CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
+    CheckUseWget1: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditFPCBranch: TEdit;
@@ -376,13 +377,13 @@ begin
       begin
         // skip non-combi's
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java)) then continue;
-        if (OS=android) AND ((CPU<>arm) {AND (CPU<>aarch64) AND (CPU<>mipsel)}) then continue;
+        if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) {AND (CPU<>mipsel)}) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
         if (OS=windows) AND (CPU=arm) then continue;
         if (OS=windows) AND (CPU=aarch64) then continue;
         if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
-        if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
+        if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
         {if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android)) then continue;}
 
 

@@ -156,7 +156,7 @@ begin
   FTargetCPU:='mips'; //mips: fpc 2.7+ only; FPC 2.6 does not support mips
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Twin32_linuxmips crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Twin32_linuxmips.Destroy;

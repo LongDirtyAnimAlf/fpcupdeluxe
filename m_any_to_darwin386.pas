@@ -220,7 +220,7 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  infoln('Tany_darwin386 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_darwin386.Destroy;

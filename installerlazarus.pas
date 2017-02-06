@@ -275,7 +275,7 @@ begin
         end;
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
-        ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + Options);
+        ProcessEx.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + Options);
         // Since April 2012, LCL requires lazutils which requires registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
         ProcessEx.Parameters.Add('registration');
@@ -289,8 +289,12 @@ begin
         ProcessEx.Executable := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
         ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         ProcessEx.Parameters.Clear;
+        {$IFDEF DEBUG}
+        ProcessEx.Parameters.Add('--verbose');
+        {$ELSE}
         ProcessEx.Parameters.Add('--quiet');
         ProcessEx.Parameters.Add('--quiet');
+        {$ENDIF}
         ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
         ProcessEx.Parameters.Add('--cpu=' + FCrossCPU_Target);
         ProcessEx.Parameters.Add('--os=' + FCrossOS_Target);
@@ -400,7 +404,7 @@ begin
 
     sCmpOpt:=StringReplace(sCmpOpt,'  ',' ',[rfReplaceAll]);
     sCmpOpt:=Trim(sCmpOpt);
-    ProcessEx.Parameters.Add('OPT=-vi-n-h- ' + sCmpOpt);
+    ProcessEx.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + sCmpOpt);
 
     case UpperCase(ModuleName) of
       'IDE':
@@ -499,8 +503,12 @@ begin
       FErrorLog.Clear;
       ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
       ProcessEx.Parameters.Clear;
+      {$IFDEF DEBUG}
+      ProcessEx.Parameters.Add('--verbose');
+      {$ELSE}
       ProcessEx.Parameters.Add('--quiet');
       ProcessEx.Parameters.Add('--quiet');
+      {$ENDIF}
       ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
@@ -560,8 +568,12 @@ begin
           FErrorLog.Clear;
           ProcessEx.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
           ProcessEx.Parameters.Clear;
+          {$IFDEF DEBUG}
+          ProcessEx.Parameters.Add('--verbose');
+          {$ELSE}
           ProcessEx.Parameters.Add('--quiet');
           ProcessEx.Parameters.Add('--quiet');
+          {$ENDIF}
           ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
           ProcessEx.Parameters.Add(IncludeTrailingPathDelimiter(FSourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi');
@@ -864,8 +876,9 @@ begin
 
       {$IFDEF Darwin}
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
+      // for newer versions Mac OSX versions (>=10.8) perhaps needed:
+      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
       {$endif}
-
 
     except
       on E: Exception do

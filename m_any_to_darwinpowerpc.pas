@@ -190,7 +190,7 @@ begin
   FTargetCPU:='powerpc';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  infoln('Tany_darwinpowerpc crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_darwinpowerpc.Destroy;

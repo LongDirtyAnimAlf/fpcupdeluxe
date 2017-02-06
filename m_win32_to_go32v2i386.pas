@@ -176,7 +176,7 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='go32v2';
   FAlreadyWarned:=false;
-  infoln('TWin32_go32v2i386 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TWin32_go32v2i386.Destroy;

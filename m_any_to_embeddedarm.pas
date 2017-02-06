@@ -218,7 +218,7 @@ begin
   FTargetCPU:='arm';
   FTargetOS:='embedded';
   FAlreadyWarned:=false;
-  infoln(FCrossModuleName+ ': crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TAny_Embeddedarm.Destroy;

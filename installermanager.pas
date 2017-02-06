@@ -1036,7 +1036,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   begin
     result:=true;
 
-    // these libs are alwys needed !!
+    // these libs are always needed !!
     AdvicedLibs:='make gdb binutils unzip patch ';
 
     AllOutput:=TStringList.Create;

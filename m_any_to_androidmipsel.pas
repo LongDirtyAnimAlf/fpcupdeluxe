@@ -417,7 +417,7 @@ begin
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FAlreadyWarned:=false;
-  infoln(FCrossModuleName+': crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TAny_AndroidMIPSEL.Destroy;

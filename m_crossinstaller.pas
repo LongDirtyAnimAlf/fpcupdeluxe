@@ -88,6 +88,7 @@ type
     function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
+    procedure ShowInfo(info: string = '');
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
@@ -326,6 +327,16 @@ begin
   finally
     Parser.Free;
   end;
+end;
+
+procedure TCrossInstaller.ShowInfo(info: string = '');
+begin
+  if Length(info)>0 then infoln(info,etInfo)
+  {$ifndef LCL}
+  else infoln(FCrossModuleName+' crosscompiler loading',etDebug);
+  {$else}
+  ;
+  {$endif}
 end;
 
 constructor TCrossInstaller.Create;

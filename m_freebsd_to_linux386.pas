@@ -99,7 +99,7 @@ begin
   FLibsPath:='';
   FTargetCPU:='i386';
   FTargetOS:='linux';
-  infoln('TFreeBSD_Linux386 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TFreeBSD_Linux386.Destroy;

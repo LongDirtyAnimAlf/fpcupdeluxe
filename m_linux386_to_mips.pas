@@ -170,7 +170,7 @@ begin
   FTargetCPU:='mips';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('TLinux386_mips crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor TLinux386_mips.Destroy;

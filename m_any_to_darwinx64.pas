@@ -220,7 +220,7 @@ begin
   FTargetCPU:='x86_64';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  infoln('Tany_darwinx64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_darwinx64.Destroy;

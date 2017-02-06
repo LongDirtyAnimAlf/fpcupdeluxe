@@ -107,7 +107,7 @@ begin
   FTargetCPU:='jvm';
   FTargetOS:='java';
   FAlreadyWarned:=false;
-  infoln('Tany_javajvm crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_javajvm.Destroy;

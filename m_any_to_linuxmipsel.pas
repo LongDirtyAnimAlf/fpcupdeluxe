@@ -231,7 +231,7 @@ begin
   FTargetCPU:='mipsel';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Twin32_linuxmipsel crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_linuxmipsel.Destroy;

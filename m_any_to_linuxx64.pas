@@ -160,7 +160,7 @@ begin
   FTargetCPU:='x86_64';
   FTargetOS:='linux';
   FAlreadyWarned:=false;
-  infoln('Tany_linux64 crosscompiler loading',etDebug);
+  ShowInfo;
 end;
 
 destructor Tany_linux64.Destroy;
