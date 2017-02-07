@@ -72,6 +72,7 @@ type
     FUnZipper: TUnZipper;
     FPercent: double;
     FFileCount: cardinal;
+    FFileList:TStrings;
     FTotalFileCount: cardinal;
     FCurrentFile: string;
     FOnZipProgress: TOnZipProgress;
@@ -87,11 +88,19 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure DoUnZip(const ASrcFile, ADstDir: String);
+    procedure DoUnZip(const ASrcFile, ADstDir: String; Files:array of string);
   published
     property OnZipProgress: TOnZipProgress read FOnZipProgress write FOnZipProgress;
     property OnZipFile: TOnZipFile read FOnZipFile write FOnZipFile;
     property OnZipCompleted: TOnZipCompleted read FOnZipCompleted write FOnZipCompleted;
+  end;
+
+  TNormalUnzipper = class(TObject)
+  private
+    FUnZipper: TThreadedUnzipper;
+    procedure DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
+  public
+    function DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
   end;
 
 
@@ -1268,7 +1277,9 @@ begin
   try
     FUnZipper.Examine;
     FTotalFileCount:=FUnZipper.Entries.Count;
-    FUnZipper.UnZipAllFiles;
+    if FFileList.Count=0
+      then FUnZipper.UnZipAllFiles
+      else FUnZipper.UnZipFiles(FFileList);
   except
     on E: Exception do
     begin
@@ -1284,11 +1295,13 @@ begin
   inherited Create(True);
   FreeOnTerminate := True;
   FUnZipper := TUnZipper.Create;
+  FFileList := TStringList.Create;
   FStarted := False;
 end;
 
 destructor TThreadedUnzipper.Destroy;
 begin
+  FFileList.Free;
   FUnZipper.Free;
   inherited Destroy;
 end;
@@ -1308,7 +1321,9 @@ begin
 end;
 
 
-procedure TThreadedUnzipper.DoUnZip(const ASrcFile, ADstDir: String);
+procedure TThreadedUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string);
+var
+  i:word;
 begin
   if FStarted then exit;
   FUnZipper.Clear;
@@ -1317,12 +1332,39 @@ begin
   FUnZipper.OutputPath := ADstDir;
   FUnZipper.OnProgress := @DoOnProgress;
   FUnZipper.OnStartFile:= @DoOnFile;
+  FFileList.Clear;
+  if Length(Files)>0 then
+    for i := 0 to high(Files) do
+      FFileList.Append(Files[i]);
   FPercent:=0;
   FFileCount:=0;
   FTotalFileCount:=0;
   FStarted := True;
   Start;
 end;
+
+procedure TNormalUnzipper.DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
+begin
+  writeln('Extracting '+aFile+'. #'+InttoStr(FileCnt)+' out of #'+InttoStr(TotalFileCnt));
+end;
+
+function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
+begin
+  result:=false;
+  FUnzipper := TThreadedUnzipper.Create;
+  try
+    FUnzipper.FreeOnTerminate:=False;
+    FUnzipper.OnZipFile := @DoOnZipFile;
+    FUnzipper.DoUnZip(ASrcFile, ADstDir, Files);
+    FUnzipper.WaitFor;
+    FUnzipper.Free;
+    result:=true;
+  except
+    FUnzipper.Free;
+  end;
+end;
+
+
 
 { TLogger }
 

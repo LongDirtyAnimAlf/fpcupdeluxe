@@ -1102,7 +1102,7 @@ begin
                     FileUnzipper.OnZipProgress := @ProgressForm.DoOnZipProgress;
                     FileUnzipper.OnZipFile := @ProgressForm.DoOnZipFile;
                     FileUnzipper.OnZipCompleted := @ProgressForm.DoOnZipCompleted;
-                    FileUnzipper.DoUnZip(TargetFile, TargetPath);
+                    FileUnzipper.DoUnZip(TargetFile, TargetPath,[]);
                     success:=(ProgressForm.ShowModal=mrOk);
                   finally
                     if Assigned(FileUnzipper) then FileUnzipper := nil;
@@ -1174,7 +1174,7 @@ begin
                     FileUnzipper.OnZipProgress := @ProgressForm.DoOnZipProgress;
                     FileUnzipper.OnZipFile := @ProgressForm.DoOnZipFile;
                     FileUnzipper.OnZipCompleted := @ProgressForm.DoOnZipCompleted;
-                    FileUnzipper.DoUnZip(TargetFile, TargetPath);
+                    FileUnzipper.DoUnZip(TargetFile, TargetPath,[]);
                     success:=(ProgressForm.ShowModal=mrOk);
                   finally
                     if Assigned(FileUnzipper) then FileUnzipper := nil;

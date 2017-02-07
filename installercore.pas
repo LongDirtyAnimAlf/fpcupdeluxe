@@ -463,7 +463,14 @@ begin
       end;
       if OperationSucceeded then
       begin
-        OperationSucceeded:=(ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+' '+IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output,FVerbose)=0);
+        with TNormalUnzipper.Create do
+        begin
+          try
+            OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\',['7za.exe']);
+          finally
+            Free;
+          end;
+        end;
         if OperationSucceeded then
         begin
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
@@ -478,6 +485,7 @@ begin
     if Not FileExists(FUnrar) then
     begin
       ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
+      //ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
@@ -489,7 +497,16 @@ begin
       end;
       if OperationSucceeded then
       begin
-        OperationSucceeded:=(ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+' '+IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,FVerbose)=0);
+        with TNormalUnzipper.Create do
+        begin
+          try
+            //OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',['bin\unrar.exe','\bin\unrar3.dll']);
+            OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\',[]);
+          finally
+            Free;
+          end;
+        end;
+
         if OperationSucceeded then
         begin
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
@@ -1395,8 +1412,17 @@ begin
 
   if OperationSucceeded then
   begin
-    // Extract, overwrite
-    resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + SafeGetApplicationPath + ' ' + OpenSSLZip + ' libeay32.dll ssleay32.dll' , FVerbose);
+    // Extract
+    with TNormalUnzipper.Create do
+    begin
+      try
+        resultcode:=1;
+        if DoUnZip(OpenSSLZip,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
+      finally
+        Free;
+      end;
+    end;
+
     if resultcode <> 0 then
     begin
       OperationSucceeded := false;
