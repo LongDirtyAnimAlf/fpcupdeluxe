@@ -44,6 +44,7 @@ interface
 
 uses
   Classes, SysUtils,
+  zipper,
   fphttpclient,
   sslsockets, fpopenssl,
   //fpftpclient,
@@ -57,6 +58,42 @@ type
   //callback = class
   //  class procedure Status (Sender: TObject; Reason: THookSocketReason; const Value: String);
   //end;
+
+  {TThreadedUnzipper}
+
+  TOnZipProgress = procedure(Sender: TObject; FPercent: double) of object;
+  TOnZipFile = procedure(Sender: TObject; AFileName : string; FileCount,TotalFileCount:cardinal) of object;
+  TOnZipCompleted = TNotifyEvent;
+
+  TThreadedUnzipper = class(TThread)
+  private
+    FStarted: Boolean;
+    FErrMsg: String;
+    FUnZipper: TUnZipper;
+    FPercent: double;
+    FFileCount: cardinal;
+    FTotalFileCount: cardinal;
+    FCurrentFile: string;
+    FOnZipProgress: TOnZipProgress;
+    FOnZipFile: TOnZipFile;
+    FOnZipCompleted: TOnZipCompleted;
+    procedure DoOnProgress(Sender : TObject; Const Pct : Double);
+    procedure DoOnFile(Sender : TObject; Const AFileName : string);
+    procedure DoOnZipProgress;
+    procedure DoOnZipFile;
+    procedure DoOnZipCompleted;
+  protected
+    procedure Execute; override;
+  public
+    constructor Create;
+    destructor Destroy; override;
+    procedure DoUnZip(const ASrcFile, ADstDir: String);
+  published
+    property OnZipProgress: TOnZipProgress read FOnZipProgress write FOnZipProgress;
+    property OnZipFile: TOnZipFile read FOnZipFile write FOnZipFile;
+    property OnZipCompleted: TOnZipCompleted read FOnZipCompleted write FOnZipCompleted;
+  end;
+
 
   { TLogger }
   TLogger = class(TObject)
@@ -1204,6 +1241,87 @@ begin
   ch := Copy(s, 1, 1);
   rest := Copy(s, Length(ch)+1, MaxInt);
   result := UpperCase(ch) + LowerCase(rest);
+end;
+
+{TUnzipper}
+
+procedure TThreadedUnzipper.DoOnZipProgress;
+begin
+  if Assigned(FOnZipProgress) then
+    FOnZipProgress(Self, FPercent);
+end;
+
+procedure TThreadedUnzipper.DoOnZipFile;
+begin
+  if Assigned(FOnZipFile) then
+    FOnZipFile(Self, FCurrentFile, FFileCount, FTotalFileCount);
+end;
+
+procedure TThreadedUnzipper.DoOnZipCompleted;
+begin
+  if Assigned(FOnZipCompleted) then
+    FOnZipCompleted(Self);
+end;
+
+procedure TThreadedUnzipper.Execute;
+begin
+  try
+    FUnZipper.Examine;
+    FTotalFileCount:=FUnZipper.Entries.Count;
+    FUnZipper.UnZipAllFiles;
+  except
+    on E: Exception do
+    begin
+      FErrMsg := E.Message;
+      //Synchronize(@DoOnZipError);
+    end;
+  end;
+  Synchronize(@DoOnZipCompleted);
+end;
+
+constructor TThreadedUnzipper.Create;
+begin
+  inherited Create(True);
+  FreeOnTerminate := True;
+  FUnZipper := TUnZipper.Create;
+  FStarted := False;
+end;
+
+destructor TThreadedUnzipper.Destroy;
+begin
+  FUnZipper.Free;
+  inherited Destroy;
+end;
+
+
+procedure TThreadedUnzipper.DoOnProgress(Sender : TObject; Const Pct : Double);
+begin
+  FPercent:=Pct;
+  Synchronize(@DoOnZipProgress);
+end;
+
+procedure TThreadedUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
+begin
+  Inc(FFileCount);
+  FCurrentFile:=ExtractFileNAme(AFileName);
+  Synchronize(@DoOnZipFile);
+end;
+
+
+procedure TThreadedUnzipper.DoUnZip(const ASrcFile, ADstDir: String);
+begin
+  if FStarted then exit;
+  FUnZipper.Clear;
+  FUnZipper.OnPercent:=10;
+  FUnZipper.FileName := ASrcFile;
+  FUnZipper.OutputPath := ADstDir;
+  FUnZipper.OnProgress := @DoOnProgress;
+  FUnZipper.OnStartFile:= @DoOnFile;
+  FPercent:=0;
+  FFileCount:=0;
+  FTotalFileCount:=0;
+  FStarted := True;
+  Start;
 end;
 
 { TLogger }

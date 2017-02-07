@@ -118,6 +118,7 @@ uses
   {$ENDIF UNIX}
   LazFileUtils,
   AboutFrm,
+  unzipprogress,
   extrasettings,
   installerUniversal,
   fpcuputil,
@@ -836,6 +837,8 @@ procedure TForm1.Button5Click(Sender: TObject);
 var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
+  UseNativeUnzip:boolean;
+  FileUnzipper: TThreadedUnzipper;
   {$ifdef Unix}
   fileList: TStringList;
   i:integer;
@@ -1021,8 +1024,8 @@ begin
         end;
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.rar';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.zip';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.zip';
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='DarwinARM.rar';
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='DarwinAArch64.rar';
         end;
@@ -1059,6 +1062,8 @@ begin
         if BinsURL<>'' then
         begin
 
+          UseNativeUnzip:=(ExtractFileExt(BinsURL)='.zip');
+
           if MissingCrossBins then
           begin
 
@@ -1080,24 +1085,50 @@ begin
             success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             if success then
             begin
-              AddMessage('Successfully downloaded binary-tools.');
+              AddMessage('Successfully downloaded binary-tools archive.');
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               {$ifndef MSWINDOWS}
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath+DirectorySeparator;
               {$endif}
-              AddMessage('Going to extract them into '+TargetPath);
-              {$ifdef MSWINDOWS}
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
-              if (NOT success) then
-              {$endif}
+
+              AddMessage('Going to extract archive into '+TargetPath);
+
+              if UseNativeUnzip then
+              begin
+                ProgressForm := TProgressForm.Create(Self);
+                try
+                  FileUnzipper := TThreadedUnzipper.Create;
+                  try
+                    FileUnzipper.OnZipProgress := @ProgressForm.DoOnZipProgress;
+                    FileUnzipper.OnZipFile := @ProgressForm.DoOnZipFile;
+                    FileUnzipper.OnZipCompleted := @ProgressForm.DoOnZipCompleted;
+                    FileUnzipper.DoUnZip(TargetFile, TargetPath);
+                    success:=(ProgressForm.ShowModal=mrOk);
+                  finally
+                    if Assigned(FileUnzipper) then FileUnzipper := nil;
+                  end;
+               finally
+                 ProgressForm.Free;
+               end;
+              end
+              else
               begin
                 {$ifdef MSWINDOWS}
-                UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                {$else}
-                UnZipper := 'unrar';
+                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
+                if (NOT success) then
                 {$endif}
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+                begin
+                  {$ifdef MSWINDOWS}
+                  UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                  {$else}
+                  UnZipper := 'unrar';
+                  {$endif}
+                  success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+                end;
+              end;
 
+              if success then
+              begin
                 {$IFDEF UNIX}
                 fileList:=FindAllFiles(TargetPath);
                 try
@@ -1134,17 +1165,38 @@ begin
               // many files to unpack for Darwin libs : do not show progress of unpacking files when unpacking for Darwin.
               verbose:=(FPCupManager.CrossOS_Target<>'darwin');
 
-              {$ifdef MSWINDOWS}
-              success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
-              if (NOT success) then
-              {$endif}
+              if UseNativeUnzip then
+              begin
+                ProgressForm := TProgressForm.Create(Self);
+                try
+                  FileUnzipper := TThreadedUnzipper.Create;
+                  try
+                    FileUnzipper.OnZipProgress := @ProgressForm.DoOnZipProgress;
+                    FileUnzipper.OnZipFile := @ProgressForm.DoOnZipFile;
+                    FileUnzipper.OnZipCompleted := @ProgressForm.DoOnZipCompleted;
+                    FileUnzipper.DoUnZip(TargetFile, TargetPath);
+                    success:=(ProgressForm.ShowModal=mrOk);
+                  finally
+                    if Assigned(FileUnzipper) then FileUnzipper := nil;
+                  end;
+               finally
+                 ProgressForm.Free;
+               end;
+              end
+              else
               begin
                 {$ifdef MSWINDOWS}
-                UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                {$else}
-                UnZipper := 'unrar';
+                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
+                if (NOT success) then
                 {$endif}
-                success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                begin
+                  {$ifdef MSWINDOWS}
+                  UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                  {$else}
+                  UnZipper := 'unrar';
+                  {$endif}
+                  success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+                end;
               end;
             end;
           end;
