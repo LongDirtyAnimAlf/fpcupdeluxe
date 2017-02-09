@@ -38,10 +38,16 @@ uses
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
 const
+
+  FPCTRUNKVERSION  = '3.1.1';
+  LAZARUSTRUNKVERSION  = '3.1.1';
+
   FPCSVNURL = 'http://svn.freepascal.org/svn';
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
+
   DEFAULTFPCVERSION = '3.0.2';
   DEFAULTLAZARUSVERSION = '1.6.2';
+
   {$IFDEF DEBUG}
   STANDARDCOMPILEROPTIONS='-vew';
   {$ELSE}
@@ -253,10 +259,12 @@ type
     destructor Destroy; override;
   end;
 
+  TFPCNativeInstaller = class(TInstaller);
+  TFPCInstaller = class(TInstaller);
+
 implementation
 
 uses
-  installerfpc,
   FileUtil, LazFileUtils, LazUTF8,
   ssl_openssl
   // for runtime init of openssl

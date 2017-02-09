@@ -35,8 +35,6 @@ uses
   Classes, SysUtils, installerCore, m_crossinstaller, processutils;
 
 Const
-  FPCTRUNKVERSION  = '3.1.1';
-
   Sequences=
 // convention: FPC sequences start with 'FPC'.
 //standard fpc build

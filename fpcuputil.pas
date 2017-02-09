@@ -1345,7 +1345,8 @@ end;
 
 procedure TNormalUnzipper.DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
 begin
-  writeln('Extracting '+aFile+'. #'+InttoStr(FileCnt)+' out of #'+InttoStr(TotalFileCnt));
+  //if FVerbose then
+    infoln('Extracting '+aFile+'. #'+InttoStr(FileCnt)+' out of #'+InttoStr(TotalFileCnt),etInfo);
 end;
 
 function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;

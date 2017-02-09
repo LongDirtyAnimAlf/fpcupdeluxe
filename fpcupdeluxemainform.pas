@@ -508,6 +508,10 @@ begin
     begin
       Memo1.Lines.Append(s);
       Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+    end
+    else if (Pos('error:',lowercase(s))>0) then
+    begin
+      Memo1.Lines.Append(s);
     end;
   end;
 
@@ -952,6 +956,9 @@ begin
       if (FPCupManager.CrossOS_Target<>'java') AND (FPCupManager.CrossOS_Target<>'android') then
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCLCross';
+        // if Darwin x64, only cocoa will work.
+        if ((FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target='x86_64'))
+            then FPCupManager.CrossLCL_Platform:='cocoa';
       end;
     end;
 
@@ -1432,6 +1439,7 @@ begin
   FPCupManager.CrossCPU_Target:='';
   FPCupManager.CrossOS_Target:='';
   FPCupManager.CrossOS_SubArch:='';
+  FPCupManager.CrossLCL_Platform:='';
 
   FPCupManager.CrossOPT:='';
 
