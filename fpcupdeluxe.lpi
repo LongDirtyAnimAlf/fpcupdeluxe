@@ -406,7 +406,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="5">
+    <Units Count="6">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -438,6 +438,13 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
       </Unit4>
+      <Unit5>
+        <Filename Value="unzipprogress.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="ProgressForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit5>
     </Units>
   </ProjectOptions>
   <CompilerOptions>

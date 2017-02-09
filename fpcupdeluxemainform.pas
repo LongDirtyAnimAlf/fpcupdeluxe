@@ -153,7 +153,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0j';
+  FPCUPDELUXEVERSION='1.2.0k';
 
 resourcestring
   CrossGCCMsg =
@@ -1031,8 +1031,13 @@ begin
         end;
         if FPCupManager.CrossOS_Target='darwin' then
         begin
+          {$ifdef MSWindows}
           if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.zip';
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.zip';
+          {$else}
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.rar';
+          {$endif}
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='DarwinARM.rar';
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='DarwinAArch64.rar';
         end;
