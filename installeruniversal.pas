@@ -1654,7 +1654,11 @@ var
 begin
   result:='';
   ini:=TMemIniFile.Create(CurrentConfigFile);
-  ini.Options:=[ifoStripQuotes];
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  Ini.Options:=[ifoStripQuotes]; //let ini handle e.g. lazopt="-g -gl -O1" for us
+  {$ELSE}
+  ini.StripQuotes:=true; //let ini handle e.g. lazopt="-g -gl -O1" for us
+  {$ENDIF}
   //ini.CaseSensitive:=false;
   //ini.StripQuotes:=true; //helps read description lines
 

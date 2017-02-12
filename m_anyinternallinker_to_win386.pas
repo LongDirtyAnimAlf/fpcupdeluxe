@@ -10,7 +10,7 @@ Requirements: FPC should have an internal linker
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 

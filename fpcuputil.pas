@@ -443,12 +443,20 @@ begin
      ms.Position:=0;
 
      Ini:=TMemIniFile.Create(ms);
+     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
      Ini.Options:=[ifoStripQuotes];
+     {$ELSE}
+     ini.StripQuotes:=true;
+     {$ENDIF}
      NewIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
      Ini.Free;
 
      Ini:=TMemIniFile.Create(filename);
+     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
      Ini.Options:=[ifoStripQuotes];
+     {$ELSE}
+     ini.StripQuotes:=true;
+     {$ENDIF}
      OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
      Ini.Free;
 
@@ -1600,10 +1608,12 @@ begin
   inherited;
   with aFPHTTPClient do
   begin
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
     Proxy.Host:=FHTTPProxyHost;
     Proxy.Port:=FHTTPProxyPort;
     Proxy.UserName:=FHTTPProxyUser;
     Proxy.Password:=FHTTPProxyPassword;
+    {$ENDIF}
   end;
 end;
 

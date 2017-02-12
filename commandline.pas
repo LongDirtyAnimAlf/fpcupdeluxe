@@ -193,14 +193,24 @@ begin
   if (FIniFile<>'') and FileExists(FIniFile) then
     begin
     ini:=TIniFile.Create(FIniFile);
+    {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+    Ini.Options:=[ifoStripQuotes]; //let ini handle e.g. lazopt="-g -gl -O1" for us
+    {$ELSE}
     ini.StripQuotes:=true; //let ini handle e.g. lazopt="-g -gl -O1" for us
+    {$ENDIF}
     SecVals:=TStringList.Create;
     try
       if (FIniFileSection<>'') then
         sSection:=FIniFileSection
       else
         sSection:='General';
+      {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+      if FCaseSensitive
+        then Ini.Options:=Ini.Options+[ifoCaseSensitive];
+      {$ELSE}
       ini.CaseSensitive:=FCaseSensitive;
+      {$ENDIF}
+
       ini.ReadSectionValues(sSection,SecVals);
       if SecVals.Count>0 then
         begin

@@ -240,7 +240,7 @@ begin
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
     { don't know if this is still relevant for 2.7.x and for which linker
-    '-darm'+LineEnding+ {pass arm to linker}
+    '-darm'+LineEnding+
     }
   end;
 end;
