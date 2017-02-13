@@ -1159,7 +1159,8 @@ begin
   result:='0.0.0';
 
   if s=FPCTRUNKVERSION then result:='3.0.0'
-  else if (s='3.0.2') or (s='3.0.1') then result:='3.0.0'
+  else if s='3.0.3' then result:='3.0.0'
+  else if (s='3.0.2')  or (s='3.0.1') then result:='3.0.0'
   //else if (s='3.0.2') or (s='3.0.1') then result:='2.6.4'
   else if s='3.0.0' then result:='2.6.4'
   else if s='2.6.4' then result:='2.6.2'
