@@ -149,6 +149,9 @@ Const
   {$ifdef FreeBSD}
   FPCUPBINSURL='';
   {$endif}
+  {$ifdef OpenBSD}
+  FPCUPBINSURL='';
+  {$endif}
   {$ifdef Darwin}
   FPCUPBINSURL='';
   {$endif}
@@ -871,7 +874,7 @@ begin
   end;
 
   {$ifndef FreeBSD}
-  if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') then
+  if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
   begin
     if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes).' + sLineBreak +
                'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
@@ -1009,6 +1012,11 @@ begin
         begin
           if FPCupManager.CrossCPU_Target='i386' then BinsURL:='FreeBSDi386.rar';
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='FreeBSDx64.rar';
+        end;
+        if FPCupManager.CrossOS_Target='openbsd' then
+        begin
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='OpenBSDi386.rar';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='OpenBSDx64.rar';
         end;
         if FPCupManager.CrossOS_Target='solaris' then
         begin

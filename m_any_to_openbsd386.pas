@@ -1,7 +1,7 @@
-unit m_any_to_linuxaarch64;
+unit m_any_to_openbsd386;
 
-{ Cross compiles from e.g. Linux 64 bit (or any other OS with relevant binutils/libs) to Linux 64 bit aarch
-Copyright (C) 2014 Reinier Olislagers
+{ Cross compiles from any platform with correct binutils to openbsd i386
+Copyright (C) 2013 Reinier Olislagers
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -38,10 +38,14 @@ uses
 
 implementation
 
+const
+  ARCH='i386';
+  OS='openbsd';
+
 type
 
-{ Tany_linuxaarch64 }
-Tany_linuxaarch64 = class(TCrossInstaller)
+{ TAny_OpenBSD386 }
+TAny_OpenBSD386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
   function TargetSignature: string;
@@ -55,17 +59,18 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_linuxaarch64 }
-function Tany_linuxaarch64.TargetSignature: string;
+{ TAny_OpenBSD386 }
+function TAny_OpenBSD386.TargetSignature: string;
 begin
-  result:=FTargetCPU+'-'+TargetOS;
+  result:=TargetCPU+'-'+TargetOS;
 end;
 
-function Tany_linuxaarch64.GetLibs(Basepath:string): boolean;
+function TAny_OpenBSD386.GetLibs(Basepath:string): boolean;
 const
-  DirName='aarch64-linux';
-  LibName='libc.so';
+  DirName=ARCH+'-'+OS;
+  LibName='libc.so.88.0';
 begin
+
   result:=FLibsFound;
   if result then exit;
 
@@ -76,39 +81,39 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  if not result then
-  begin
-    {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/aarch64-linux-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-    infoln('Tany_linuxaarch64: failed: searched libspath '+FLibsPath,etInfo);
-    {$ENDIF}
-  end;
-
   SearchLibraryInfo(result);
   if result then
   begin
-    FLibsFound:=True;
+    FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+    //todo: implement -Xr for other platforms if this setup works
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+      '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+      '-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
+      '-k--allow-shlib-undefined'+LineEnding+
+      '-k--allow-multiple-definition'+LineEnding+
+      '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+  end
+  else
+  begin
+    infoln(FCrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
   end;
+  result:=true; //this step is optional at least for simple hello world programs
 end;
 
 {$ifndef FPCONLY}
-function Tany_linuxaarch64.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TAny_OpenBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  // todo: get gtk at least
+  // todo: get gtk at least, add to FFPCCFGSnippet
+  infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=inherited;
 end;
 {$endif}
 
-function Tany_linuxaarch64.GetBinUtils(Basepath:string): boolean;
+function TAny_OpenBSD386.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='aarch64-linux';
+  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -116,13 +121,24 @@ begin
   result:=inherited;
   if result then exit;
 
+  // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for (cross)binutils without prefix
+  // Also allow for crossfpc naming
+  if not result then
+  begin
+    BinPrefixTry:=ARCH+'-'+OS+'-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
+  // Also allow for crossbinutils without prefix
   if not result then
   begin
     BinPrefixTry:='';
@@ -134,43 +150,48 @@ begin
 
   SearchBinUtilsInfo(result);
 
-  if result then
+  if not result then
+  begin
+    infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
+    FAlreadyWarned:=true;
+  end
+  else
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
   end;
 end;
 
-constructor Tany_linuxaarch64.Create;
+constructor TAny_OpenBSD386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linuxaarch64';
-  FBinUtilsPrefix:='aarch64-linux-';
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
+  FCrossModuleName:='TAny_'+UpperCase(OS)+UppercaseFirstChar(ARCH);
+  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
+  FCompilerUsed:=ctBootstrap;
+  FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
-  FTargetCPU:='aarch64';
-  FTargetOS:='linux';
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor Tany_linuxaarch64.Destroy;
+destructor TAny_OpenBSD386.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  any_linuxaarch64:Tany_linuxaarch64;
+  Any_OpenBSD386:TAny_OpenBSD386;
 
 initialization
-  any_linuxaarch64:=Tany_linuxaarch64.Create;
-  RegisterExtension(any_linuxaarch64.TargetCPU+'-'+any_linuxaarch64.TargetOS,any_linuxaarch64);
+  Any_OpenBSD386:=TAny_OpenBSD386.Create;
+  RegisterExtension(Any_OpenBSD386.TargetCPU+'-'+Any_OpenBSD386.TargetOS,Any_OpenBSD386);
 finalization
-  any_linuxaarch64.Destroy;
-
+  Any_OpenBSD386.Destroy;
 end.
 

@@ -456,6 +456,7 @@ type
     procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
+    function GetUseWget:boolean;
   protected
     FLog:TLogger;
     FModuleList:TStringList;
@@ -541,7 +542,7 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
-    property UseWget:boolean read FUseWget write FUseWget;
+    property UseWget:boolean read GetUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
@@ -730,6 +731,16 @@ end;
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
 begin
   FMakeDirectory:=SafeExpandFileName(AValue);
+end;
+
+function TFPCupManager.GetUseWget:boolean;
+begin
+  {$ifdef OpenBSD}
+  // only curl / wget works on OpenBSD (yet)
+  result:=True;
+  {$else}
+  result:=FUseWget;
+  {$endif}
 end;
 
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
@@ -1064,6 +1075,17 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       Output := lowercase(AllOutput.Values['ID_LIKE']);
       if Length(Output)=0 then Output := lowercase(AllOutput.Values['DISTRIB_ID']);
       if Length(Output)=0 then Output := lowercase(AllOutput.Values['ID']);
+
+      {$ifdef BSD}
+      {$ifndef Darwin}
+      if Length(Output)=0 then
+      begin
+        ExecuteCommand('uname -s',Output,false);
+        Output := lowercase(Output);
+      end;
+      {$endif}
+      {$endif}
+
       if (Output='arch') OR (Output='manjaro') then
       begin
         Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
@@ -1107,7 +1129,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         }
         //apt-get install subversion make binutils gdb gcc libgtk2.0-dev
 
-        Output:='libX11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
+        Output:='libx11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
         AdvicedLibs:=AdvicedLibs+
                      'make binutils build-essential gdb gcc subversion unzip unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                      'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
@@ -1116,9 +1138,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       else
       if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
       begin
-        Output:='libX11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
+        Output:='libx11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
       end
-
+      else
+      if (Output='openbsd') OR (Output='freebsd') OR (Output='netbsd')  then
+      begin
+        //Output:='subversion openssl curl';
+      end
       else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
 
     finally

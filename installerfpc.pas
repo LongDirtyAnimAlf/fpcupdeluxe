@@ -189,7 +189,7 @@ uses
   {$IFDEF UNIX}
     ,baseunix
   {$ENDIF UNIX}
-  {$IFDEF FREEBSD}
+  {$IFDEF BSD}
     ,math
   {$ENDIF}
   ;
@@ -1394,8 +1394,8 @@ begin
       OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
     end;
     {$ENDIF LINUX}
-    {$IFDEF BSD} //*BSD, OSX
-    {$IF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
+    {$IFDEF BSD} //*BSD
+    {$IFNDEF DARWIN}
     //todo: test parameters
     //Extract bz2, overwriting without prompting
     if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
@@ -1414,8 +1414,7 @@ begin
       infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
       OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
     end;
-    {$ENDIF defined(FREEBSD) or defined(NETBSD) or defined(OPENBSD)}
-    {$IFDEF DARWIN}
+    {$ELSE DARWIN}
     // Extract .tar.bz2, overwriting without prompting
     // GNU tar: -x -v -j -f
     // BSD tar:

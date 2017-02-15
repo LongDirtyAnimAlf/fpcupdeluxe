@@ -14,7 +14,7 @@ Const
 
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64{,mipsel},jvm);
-  TOS  = (windows,linux,android,darwin,freebsd,wince,java);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,java);
   TCrossSetting = (fpcup,auto,custom);
 
   TCrossUtil = record
