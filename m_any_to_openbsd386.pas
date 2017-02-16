@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil;
 
 implementation
 
@@ -48,7 +48,6 @@ type
 TAny_OpenBSD386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -60,10 +59,6 @@ public
 end;
 
 { TAny_OpenBSD386 }
-function TAny_OpenBSD386.TargetSignature: string;
-begin
-  result:=TargetCPU+'-'+TargetOS;
-end;
 
 function TAny_OpenBSD386.GetLibs(Basepath:string): boolean;
 const
@@ -97,7 +92,7 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
+    ShowInfo(CrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.');
   end;
   result:=true; //this step is optional at least for simple hello world programs
 end;
@@ -106,7 +101,7 @@ end;
 function TAny_OpenBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
+  //ShowInfo(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=inherited;
 end;
 {$endif}
@@ -152,7 +147,7 @@ begin
 
   if not result then
   begin
-    infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
+    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.');
     FAlreadyWarned:=true;
   end
   else
@@ -170,7 +165,6 @@ begin
   inherited Create;
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
-  FCrossModuleName:='TAny_'+UpperCase(OS)+UppercaseFirstChar(ARCH);
   FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;

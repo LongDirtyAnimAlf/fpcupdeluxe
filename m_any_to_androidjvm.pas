@@ -41,7 +41,7 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller,fileutil, fpcuputil;
 
 implementation
 
@@ -51,7 +51,6 @@ type
 Tany_androidjvm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -60,10 +59,6 @@ public
 end;
 
 { Tany_androidjvm }
-function Tany_androidjvm.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_androidjvm.GetLibs(Basepath:string): boolean;
 begin
@@ -87,7 +82,6 @@ end;
 constructor Tany_androidjvm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_androidjvm';
   FBinUtilsPrefix:='';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

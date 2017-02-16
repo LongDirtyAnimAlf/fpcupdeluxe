@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 
@@ -47,7 +47,6 @@ type
 Tany_darwin386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -56,10 +55,6 @@ public
 end;
 
 { Tany_darwin386 }
-function Tany_darwin386.TargetSignature: string;
-begin
-  result:=TargetCPU+'-'+TargetOS;
-end;
 
 function Tany_darwin386.GetLibs(Basepath:string): boolean;
 const
@@ -111,7 +106,7 @@ begin
     FLibsPath:='/usr/lib/i386-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_darwin386: failed: searched libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName+': failed: searched libspath '+FLibsPath);
     {$ENDIF}
   end;
 
@@ -211,7 +206,6 @@ end;
 constructor Tany_darwin386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_darwin386';
   FBinUtilsPrefix:='i386-darwin-';
   FBinUtilsPath:='';
   FBinutilsPathInPath:=true;

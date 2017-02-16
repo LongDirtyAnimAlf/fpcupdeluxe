@@ -71,7 +71,7 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -81,7 +81,6 @@ type
 TLinux386_mips = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -93,10 +92,6 @@ public
 end;
 
 { TLinux386_mips }
-function TLinux386_mips.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function TLinux386_mips.GetLibs(Basepath:string): boolean;
 const
@@ -121,7 +116,7 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('TLinux386_mips: found libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -151,7 +146,7 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+    ShowInfo(CrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
@@ -162,7 +157,7 @@ end;
 constructor TLinux386_mips.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Linux386_mips';
+  FCrossModuleNamePrefix:='TLinux386';
   FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

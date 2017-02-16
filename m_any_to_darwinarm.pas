@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil;
 
 implementation
 
@@ -51,7 +51,6 @@ type
 Tany_darwinarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -60,10 +59,6 @@ public
 end;
 
 { Tany_darwinarm }
-function Tany_darwinarm.TargetSignature: string;
-begin
-  result:=TargetCPU+'-'+TargetOS;
-end;
 
 function Tany_darwinarm.GetLibs(Basepath:string): boolean;
 const
@@ -146,7 +141,7 @@ begin
     FLibsPath:='/usr/lib/arm-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_darwinarm: failed: searched libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
     {$ENDIF}
   end;
 
@@ -234,7 +229,6 @@ begin
   inherited Create;
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
-  FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
   FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   //FBinutilsPathInPath:=true;

@@ -38,7 +38,7 @@ uses
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF}
-  m_crossinstaller,fpcuputil,fileutil;
+  m_crossinstaller,fileutil,fpcuputil;
 
 implementation
 
@@ -59,7 +59,6 @@ type
 TAny_AndroidAarch64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -68,10 +67,6 @@ public
 end;
 
 { TAny_AndroidAarch64 }
-function TAny_AndroidAarch64.TargetSignature: string;
-begin
-  result:=TargetCPU+'-'+TargetOS;
-end;
 
 function TAny_AndroidAarch64.GetLibs(Basepath:string): boolean;
 const
@@ -108,7 +103,7 @@ begin
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
           result:=DirectoryExists(FLibsPath);
           if not result
-             then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+             then ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
              else break;
         end;
       end;
@@ -137,7 +132,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+            ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
@@ -145,7 +140,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+            ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\AppData\Local\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\'+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
@@ -153,7 +148,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+            ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
           end else break;
 
         end;
@@ -165,7 +160,7 @@ begin
   // find Delphi android libs
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
-    infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
+    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
     begin
       if not result then
@@ -180,7 +175,7 @@ begin
               '.0\PlatformSDKs\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\platforms\'+PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+'\'+NDKARCHDIRNAME+'\usr\lib';
               result:=DirectoryExists(FLibsPath);
               if not result
-                 then infoln(FCrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+                 then ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
                  else break;
             end;
           end else break;
@@ -404,7 +399,6 @@ begin
   inherited Create;
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
-  FCrossModuleName:='TAny_'+UppercaseFirstChar(OS)+UppercaseFirstChar(ARCH);
   // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
   FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';

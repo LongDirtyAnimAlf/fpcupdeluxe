@@ -44,7 +44,6 @@ type
 Tany_freebsd386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -53,10 +52,6 @@ public
 end;
 
 { Tany_freebsd386 }
-function Tany_freebsd386.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_freebsd386.GetLibs(Basepath:string): boolean;
 const
@@ -80,7 +75,7 @@ begin
     FLibsPath:='/usr/lib/i386-freebsd-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_freebsd386: failed: searched libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
     {$ENDIF}
   end;
 
@@ -138,7 +133,6 @@ end;
 constructor Tany_freebsd386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_freebsd386';
   FBinUtilsPrefix:='i386-freebsd-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

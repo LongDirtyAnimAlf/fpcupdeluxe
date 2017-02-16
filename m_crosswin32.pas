@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 type
@@ -74,7 +74,7 @@ end;
 constructor TWin32.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Win32';
+  FCrossModuleNamePrefix:='TWin64';
   FBinUtilsPath:=''; //override parent that has a warning text here
   FBinUtilsPrefix:=''; //override parent that has a warning text here
   FFPCCFGSnippet:=''; //no need to change fpc.cfg

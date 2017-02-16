@@ -53,13 +53,15 @@ type
 
   { TCrossInstaller }
   TCrossInstaller = class(TObject)
+  private
+    function GetCrossModuleName:string;
   protected
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
     FCompilerUsed: CompilerType;
     FSearchMode: SearchMode;
-    FCrossModuleName: string; //used for identifying module to user in messages
+    FCrossModuleNamePrefix: string; //used for identifying module to user in messages
     FCrossOpts: TStringList; //Options to be added to CROSSOPT by the calling code. XP= (binutils prefix) is already done, no need to add it
     FFPCCFGSnippet: string; //snippet to be added to fpc.cfg in order to find binutils/libraries etc
     FLibsPath: string; //path for target environment libraries
@@ -88,13 +90,13 @@ type
     function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
-    procedure ShowInfo(info: string = '');
+    procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
     property CompilerUsed: CompilerType read FCompilerUsed;
     property SearchModeUsed: SearchMode read FSearchMode write FSearchMode;
-    property CrossModuleName: string read FCrossModuleName;
+    property CrossModuleName: string read GetCrossModuleName;
     // Represents arguments for CROSSOPT parameter
     // No need to add XP= (binutils prefix): calling code will do this
     // CROSSOPT: Compiler makefile allows to specify compiler options that are only used during the actual crosscompiling phase (i.e. not during the initial bootstrap cycle)
@@ -141,25 +143,30 @@ begin
   CrossInstallers.AddObject(Platform,TObject(Extension));
 end;
 
+function TCrossInstaller.GetCrossModuleName:string;
+begin
+  result:=FCrossModuleNamePrefix+'_'+TargetOS+'-'+TargetCPU;
+end;
+
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');
 begin
   if found then
-    infoln(FCrossModuleName + ': found correct library ' +
+    infoln(CrossModuleName + ': found correct library ' +
       ' in directory '+FLibsPath, etInfo)
   else
-    infoln(FCrossModuleName + ': searched but did not find any library !!', etError);
+    infoln(CrossModuleName + ': searched but did not find any library !!', etError);
 
-  if Length(extrainfo)>0 then infoln(FCrossModuleName + ' libs : '+extrainfo, etInfo);
+  if Length(extrainfo)>0 then infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
 end;
 
 procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
 begin
   if found then
-    infoln(FCrossModuleName + ': found binary utilities ' +
+    infoln(CrossModuleName + ': found binary utilities ' +
       ' in directory '+FBinUtilsPath, etInfo)
   else
-    infoln(FCrossModuleName + ': searched but did not find any binary utilities !!', etError);
-  if Length(extrainfo)>0 then infoln(FCrossModuleName + ' bins : '+extrainfo, etInfo);
+    infoln(CrossModuleName + ': searched but did not find any binary utilities !!', etError);
+  if Length(extrainfo)>0 then infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 
 
@@ -205,10 +212,10 @@ begin
      else info:='binutil(s)';
 
   if result then
-    infoln(FCrossModuleName + ': found '+info+' '+LookFor+
+    infoln(CrossModuleName + ': found '+info+' '+LookFor+
       ' in directory '+sd, etDebug)
   else
-    infoln(FCrossModuleName + ': searched but did not find '+info+' '+LookFor+
+    infoln(CrossModuleName + ': searched but did not find '+info+' '+LookFor+
       ' in directory '+sd, etDebug);
 end;
 
@@ -329,9 +336,9 @@ begin
   end;
 end;
 
-procedure TCrossInstaller.ShowInfo(info: string = '');
+procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);
 begin
-  if Length(info)>0 then infoln(info,etInfo)
+  if Length(info)>0 then infoln(info,Level)
   {$ifndef LCL}
   else infoln(FCrossModuleName+' crosscompiler loading',etDebug);
   {$else}
@@ -353,6 +360,7 @@ begin
   FTargetCPU:='Error: cross compiler extension must set FTargetCPU: cpu for the target environment. Follows FPC names.';
   FTargetOS:='Error: cross compiler extension must set FTargetOS: operating system for the target environment. Follows FPC names';
   FSubArch:='';
+  FCrossModuleNamePrefix:='TAny';
 
   FLibsFound:=false;
   FBinsFound:=false;

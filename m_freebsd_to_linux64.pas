@@ -49,7 +49,7 @@ These did not work (marked broken) in PC BSD 9 release
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 type
@@ -59,7 +59,6 @@ type
 TFreeBSD_Linux64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -71,10 +70,6 @@ public
 end;
 
 { TFreeBSD_Linux64 }
-function TFreeBSD_Linux64.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function TFreeBSD_Linux64.GetLibs(Basepath:string): boolean;
 begin
@@ -111,18 +106,18 @@ begin
   if result then exit;
 
   //todo: remove once done
-  infoln('TFreeBSD_Linux64: Experimental, not finished. Stopping now.', etError);
+  ShowInfo(CrossModuleName + ': Experimental, not finished. Stopping now.', etError);
   result:=false;
 
   //todo: use conditional compilation for hostcpu, hostos; determine what to do depending on that
   FBinUtilsPrefix:='';
-  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'/cross/bin/'+TargetSignature; //these do not contain as etc though
+  FBinUtilsPath:=IncludeTrailingPathDelimiter(BasePath)+'/cross/bin/'+TargetCPU+'-'+TargetOS; //these do not contain as etc though
   if not FileExists(FBinUtilsPath+'/as') then
   begin
     // Check for and get Linux binutils.
     if not(ForceDirectories(FBinUtilsPath)) then
     begin
-      infoln('TFreeBSD_Linux64: Could not create binutils directory '+FBinUtilsPath,etError);
+      ShowInfo(CrossModuleName + ': Could not create binutils directory '+FBinUtilsPath,etError);
       FAlreadyWarned:=true;
       exit(false);
     end;
@@ -151,7 +146,7 @@ end;
 constructor TFreeBSD_Linux64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='FreeBSD_Linux64';
+  FCrossModuleNamePrefix:='TFreeBSD';
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';

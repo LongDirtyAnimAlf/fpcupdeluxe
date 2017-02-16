@@ -47,7 +47,7 @@ powerpc-aix-strip.exe
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil;
 
 implementation
 
@@ -61,7 +61,6 @@ type
 TAny_AIXPowerPC = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -73,10 +72,6 @@ public
 end;
 
 { TAny_AIXPowerPC }
-function TAny_AIXPowerPC.TargetSignature: string;
-begin
-  result:=TargetCPU+'-'+TargetOS;
-end;
 
 function TAny_AIXPowerPC.GetLibs(Basepath:string): boolean;
 const
@@ -107,7 +102,7 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
+    ShowInfo(CrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
   end;
   result:=true; //this step is optional at least for simple hello world programs
 end;
@@ -116,7 +111,7 @@ end;
 function TAny_AIXPowerPC.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
+  ShowInfo(CrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=inherited;
 end;
 {$endif}
@@ -162,7 +157,7 @@ begin
 
   if not result then
   begin
-    infoln(FCrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
+    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
     FAlreadyWarned:=true;
   end
   else
@@ -180,7 +175,6 @@ begin
   inherited Create;
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
-  FCrossModuleName:='TAny_'+UpperCase(OS)+UppercaseFirstChar(ARCH);
   FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;

@@ -9,7 +9,7 @@ unit m_crossdarwinpowerpc;
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -51,7 +51,7 @@ end;
 constructor TDarwinpowerpc.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Darwinpowerpc';
+  FCrossModuleNamePrefix:='TDarwin32';
   FTargetCPU:='powerpc';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;

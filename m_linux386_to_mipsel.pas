@@ -71,7 +71,7 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -82,7 +82,6 @@ type
 TLinux386_mipsel = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -94,10 +93,6 @@ public
 end;
 
 { TLinux386_mipsel }
-function TLinux386_mipsel.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function TLinux386_mipsel.GetLibs(Basepath:string): boolean;
 const

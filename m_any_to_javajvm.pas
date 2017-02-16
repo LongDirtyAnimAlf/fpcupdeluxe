@@ -41,7 +41,7 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 
@@ -51,7 +51,6 @@ type
 Tany_javajvm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -63,10 +62,6 @@ public
 end;
 
 { Tany_javajvm }
-function Tany_javajvm.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_javajvm.GetLibs(Basepath:string): boolean;
 begin
@@ -99,7 +94,6 @@ end;
 constructor Tany_javajvm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_javajvm';
   FBinUtilsPrefix:='';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

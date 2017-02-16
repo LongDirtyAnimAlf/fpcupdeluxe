@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 
@@ -44,7 +44,6 @@ type
 Tany_darwinpowerpc = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
@@ -53,10 +52,6 @@ public
 end;
 
 { Tany_darwinpowerpc }
-function Tany_darwinpowerpc.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_darwinpowerpc.GetLibs(Basepath:string): boolean;
 const
@@ -88,7 +83,7 @@ begin
     FLibsPath:='/usr/lib/powerpc-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_darwinpowerpc: failed: searched libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
     {$ENDIF}
   end;
 
@@ -181,7 +176,6 @@ end;
 constructor Tany_darwinpowerpc.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_darwinpowerpc';
   FBinUtilsPrefix:='powerpc-darwin-';
   FBinUtilsPath:='';
   FBinutilsPathInPath:=true;

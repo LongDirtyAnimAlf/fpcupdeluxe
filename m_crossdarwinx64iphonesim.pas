@@ -37,7 +37,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -123,7 +123,7 @@ end;
 constructor TDarwin64iphonesim.Create;
 begin
   inherited Create;
-  FCrossModuleName:='T'+UppercaseFirstChar(TargetOS)+ARCH+OS;
+  FCrossModuleNamePrefix:='TDarwin64';
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
   FAlreadyWarned:=false;

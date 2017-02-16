@@ -23,7 +23,7 @@ Another solution would be to get the relevant binutils/libs from a working Linux
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 type
@@ -72,7 +72,7 @@ begin
   if result then exit;
 
   //todo: remove once done
-  infoln('TFreeBSD_Linux386: Experimental, not finished. Stopping now.',etError);
+  ShowInfo(CrossModuleName + ': Experimental, not finished. Stopping now.',etError);
   result:=false;
 
   FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though
@@ -92,7 +92,7 @@ end;
 constructor TFreeBSD_Linux386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='FreeBSD_Linux386';
+  FCrossModuleNamePrefix:='FreeBSD';
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';

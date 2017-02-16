@@ -11,7 +11,7 @@ cd /usr/src && make build32 install32 && ldconfig -v -m -R /usr/lib32
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -52,7 +52,7 @@ begin
   if result then exit;
 
   //todo: remove once done
-  infoln('TFreeBSD64_FreeBSD386: Experimental, not finished. Stopping now.',etError);
+  ShowInfo(CrossModuleName + ': Experimental, not finished. Stopping now.',etError);
   result:=false;
   FBinUtilsPath:='/usr/bin'; //try with regular binutils
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
@@ -71,7 +71,7 @@ end;
 constructor TFreeBSD64_FreeBSD386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='FreeBSD64_FreeBSD386';
+  FCrossModuleNamePrefix:='TFreeBSD64';
   FTargetCPU:='i386';
   FTargetOS:='freebsd';
   FBinUtilsPath:='';

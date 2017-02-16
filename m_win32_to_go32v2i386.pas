@@ -57,7 +57,7 @@ http://homer.rice.edu/~sandmann/cwsdpmi/csdpmi7b.zip
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 type
@@ -66,7 +66,6 @@ type
 TWin32_go32v2i386 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -78,10 +77,6 @@ public
 end;
 
 { TWin32_go32v2i386 }
-function TWin32_go32v2i386.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
@@ -99,12 +94,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    infoln('TWin32_go32v2i386: found libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName+ ': found libspath '+FLibsPath,etInfo);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    infoln('TWin32_go32v2i386: libspath ignored; it is optional for this cross compiler.',etInfo);
+    ShowInfo(CrossModuleName+ ': libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;
@@ -113,7 +108,7 @@ end;
 {$ifndef FPCONLY}
 function TWin32_go32v2i386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  infoln('TWin32_go32v2i386: no support for LCL platform '+LCL_Platform,etInfo);
+  ShowInfo(CrossModuleName+ ': no support for LCL platform '+LCL_Platform,etInfo);
   result:=inherited;
 end;
 {$endif}
@@ -135,7 +130,7 @@ begin
 
   if not result then
   begin
-    infoln(FCrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
+    ShowInfo(CrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
     FAlreadyWarned:=true;
   end;
   if result then
@@ -150,7 +145,7 @@ begin
   begin
     FBinUtilsPrefix:=''; //use built in assembler, linker
     {$IFDEF WIN32}
-    infoln('TWin32_go32v2i386: binutil path ignored; it is optional *IF* compiling with FPC 2.7.1+'+LineEnding+
+    ShowInfo(CrossModuleName+ ': binutil path ignored; it is optional *IF* compiling with FPC 2.7.1+'+LineEnding+
       'For earlier FPC, download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
     result:=true; //success
     {$ENDIF}
@@ -158,7 +153,7 @@ begin
     // Win64 does seem to need the external linker... or an i386 cross compiler I suppose...
     // todo: generate i386 cross compiler first?!
     FBinUtilsPrefix:=''; //use built in assembler, linker
-    infoln('TWin32_go32v2i386: no binutil path found; it is required for win64 installs right now.'+LineEnding+
+    ShowInfo(CrossModuleName+ ': no binutil path found; it is required for win64 installs right now.'+LineEnding+
       'Download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
     result:=false;
     {$ENDIF}
@@ -168,7 +163,7 @@ end;
 constructor TWin32_go32v2i386.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Win32_go32v2i386';
+  FCrossModuleNamePrefix:='TWinAll';
   FBinUtilsPrefix:='i386-go32v2-'; //will be removed if no binutils found
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later

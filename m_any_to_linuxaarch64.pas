@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil;
 
 implementation
 
@@ -44,7 +44,6 @@ type
 Tany_linuxaarch64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -56,10 +55,6 @@ public
 end;
 
 { Tany_linuxaarch64 }
-function Tany_linuxaarch64.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_linuxaarch64.GetLibs(Basepath:string): boolean;
 const
@@ -82,7 +77,7 @@ begin
     FLibsPath:='/usr/lib/aarch64-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_linuxaarch64: failed: searched libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
     {$ENDIF}
   end;
 
@@ -147,7 +142,6 @@ end;
 constructor Tany_linuxaarch64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linuxaarch64';
   FBinUtilsPrefix:='aarch64-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

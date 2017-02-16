@@ -9,7 +9,7 @@ unit m_crossdarwin64;
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -52,7 +52,7 @@ end;
 constructor TDarwin64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='darwin64';
+  FCrossModuleNamePrefix:='TDarwin32';
   FTargetCPU:='x86_64';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;

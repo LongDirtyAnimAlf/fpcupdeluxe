@@ -58,7 +58,7 @@ begin
   inherited Create;
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
-  FCrossModuleName:='TAnyinternallinker_'+OS+'_'+ARCH;
+  FCrossModuleNamePrefix:='TAnyinternallinker';
   FAlreadyWarned:=false;
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
   ShowInfo;

@@ -279,10 +279,10 @@ begin
     DeleteList.Add('.fpm');
     OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils';
     if NOT DeleteFilesExtensionsSubdirs(OldPath,DeleteList,aArch)
-       then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with extension ['+DeleteList.CommaText+']',etWarning);
+       then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with extension ['+DeleteList.CommaText+']',etInfo);
     OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages';
     if NOT DeleteFilesExtensionsSubdirs(OldPath,DeleteList,aArch)
-       then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with extension ['+DeleteList.CommaText+']',etWarning);
+       then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with extension ['+DeleteList.CommaText+']',etInfo);
   finally
     DeleteList.Free;
   end;
@@ -290,24 +290,24 @@ begin
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils';
   if NOT DeleteFilesNameSubdirs(OldPath,aArch+'.fpm')
-     then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with a name containing *'+aArch+'.fpm',etWarning);
+     then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with a name containing *'+aArch+'.fpm',etInfo);
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages';
   if NOT DeleteFilesNameSubdirs(OldPath,aArch+'.fpm')
-     then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with a name containing *'+aArch+'.fpm',etWarning);
+     then infoln('FPC cleanup: could not cleanup '+OldPath+' from files with a name containing *'+aArch+'.fpm',etInfo);
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'bin';
   if NOT DeleteDirectoryEx(OldPath)
-     then infoln('FPC cleanup: could not cleanup '+OldPath,etWarning);
+     then infoln('FPC cleanup: could not cleanup '+OldPath,etInfo);
   RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'bin');
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'units'+DirectorySeparator+aArch;
   if NOT DeleteDirectoryEx(OldPath)
-     then infoln('FPC cleanup: could not cleanup '+OldPath,etWarning);
+     then infoln('FPC cleanup: could not cleanup '+OldPath,etInfo);
   RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator+'units');
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'rtl'+DirectorySeparator+'units'+DirectorySeparator+aArch;
   if NOT DeleteDirectoryEx(OldPath)
-     then infoln('FPC cleanup: could not cleanup '+OldPath,etError);
+     then infoln('FPC cleanup: could not cleanup '+OldPath,etInfo);
   RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'rtl'+DirectorySeparator+'units');
 
   DeleteDirectoryEx(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'units'+DirectorySeparator+aArch);

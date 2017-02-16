@@ -41,7 +41,7 @@ Also looks for android cross compiler bin and bin without any prefix
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 type
@@ -50,7 +50,6 @@ type
 Tany_linuxarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -62,10 +61,6 @@ public
 end;
 
 { Tany_linuxarm }
-function Tany_linuxarm.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_linuxarm.GetLibs(Basepath:string): boolean;
 const
@@ -116,7 +111,7 @@ begin
   end
   else
   begin
-    infoln(FCrossModuleName+ ': You MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.',etInfo);
+    ShowInfo(CrossModuleName+ ': You MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.');
   end;
 end;
 
@@ -124,7 +119,7 @@ end;
 function Tany_linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
+  ShowInfo(CrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
   result:=inherited;
 end;
 {$endif}
@@ -222,7 +217,7 @@ begin
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
       FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android and Raspberry Pi
-      infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
+      ShowInfo(CrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
     end;
 
     // Warn user to check things
@@ -231,7 +226,7 @@ begin
       // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
       // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
       // -dFPC_ARMHF is only used for (cross) compiler generation, not useful when compiling end user
-      infoln(FCrossModuleName+ ': found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
+      ShowInfo(CrossModuleName+ ': found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
     end;
 
     // Configuration snippet for FPC
@@ -248,7 +243,6 @@ end;
 constructor Tany_linuxarm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linuxarm';
   FBinUtilsPrefix:='arm-linux-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FCompilerUsed:=ctBootstrap;

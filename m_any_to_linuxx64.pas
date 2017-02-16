@@ -44,7 +44,6 @@ type
 Tany_linux64 = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -56,10 +55,6 @@ public
 end;
 
 { Tany_linux64 }
-function Tany_linux64.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_linux64.GetLibs(Basepath:string): boolean;
 const
@@ -82,7 +77,7 @@ begin
     FLibsPath:='/usr/lib/x86_64-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    infoln('Tany_linux64: failed: searched libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
     {$ENDIF}
   end;
 
@@ -152,7 +147,6 @@ end;
 constructor Tany_linux64.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linux64';
   FBinUtilsPrefix:='x86_64-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

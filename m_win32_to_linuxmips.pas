@@ -57,7 +57,7 @@ See page 15 of the getting started manual for the layout of lib and relation to 
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 type
@@ -66,7 +66,6 @@ type
 Twin32_linuxmips = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -78,10 +77,6 @@ public
 end;
 
 { Twin32_linuxmips }
-function Twin32_linuxmips.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Twin32_linuxmips.GetLibs(Basepath:string): boolean;
 const
@@ -106,7 +101,7 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('Twin32_linuxmips: found libspath '+FLibsPath,etInfo);
+    ShowInfo('Twin32_linuxmips: found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -136,7 +131,7 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+    ShowInfo(CrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
@@ -148,7 +143,7 @@ end;
 constructor Twin32_linuxmips.Create;
 begin
   inherited Create;
-  FCrossModuleName:='win32_linuxmips';
+  FCrossModuleNamePrefix:='TWinAll';
   FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';

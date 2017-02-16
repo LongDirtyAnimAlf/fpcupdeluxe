@@ -9,7 +9,7 @@ unit m_crossdarwinarm;
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
 
@@ -84,7 +84,7 @@ end;
 constructor TDarwinarm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='Darwinarm';
+  FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:='arm';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;

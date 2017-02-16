@@ -49,7 +49,7 @@ arm-embedded-strip.exe
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fpcuputil, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 type
@@ -58,7 +58,6 @@ type
 TAny_Embeddedarm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -70,10 +69,6 @@ public
 end;
 
 { TAny_Embeddedarm }
-function TAny_Embeddedarm.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
@@ -92,12 +87,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    infoln('Tany_embeddedarm: found libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': found libspath '+FLibsPath);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    infoln('Tany_embeddedarm: libspath ignored; it is optional for this cross compiler.',etInfo);
+    ShowInfo('Tany_embeddedarm: libspath ignored; it is optional for this cross compiler.');
     FLibsPath:='';
     result:=true;
   end;
@@ -108,7 +103,7 @@ end;
 function TAny_Embeddedarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  infoln('todo: implement lcl libs path from basepath '+BasePath,etdebug);
+  //ShowInfo('todo: implement lcl libs path from basepath '+BasePath,etdebug);
   result:=inherited;
 end;
 {$endif}
@@ -173,9 +168,9 @@ begin
   if not result then
   begin
     {$ifdef mswindows}
-    infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.',etInfo);
+    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
     {$else}
-    infoln(FCrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at https://launchpad.net/gcc-arm-embedded.',etInfo);
+    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at https://launchpad.net/gcc-arm-embedded.');
     {$endif}
     FAlreadyWarned:=true;
   end
@@ -195,7 +190,7 @@ begin
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
       FCrossOpts.Add('-Cparmv7em'); // Teensy default
-      infoln(FCrossModuleName+ ': did not find any -Cp architecture parameter; using -Cparmv7em (Teensy default).',etInfo);
+      ShowInfo(CrossModuleName+ ': did not find any -Cp architecture parameter; using -Cparmv7em (Teensy default).');
     end;
 
     // Configuration snippet for FPC
@@ -209,7 +204,6 @@ end;
 constructor TAny_Embeddedarm.Create;
 begin
   inherited Create;
-  FCrossModuleName:='TAny_EmbeddedArm';
   FBinUtilsPrefix:='arm-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later

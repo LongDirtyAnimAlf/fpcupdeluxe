@@ -78,7 +78,7 @@ libgcov.a
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fpcuputil,fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 type
@@ -87,7 +87,6 @@ type
 Tany_linuxmipsel = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
-  function TargetSignature: string;
 public
   function GetLibs(Basepath:string):boolean;override;
   {$ifndef FPCONLY}
@@ -99,10 +98,6 @@ public
 end;
 
 { Twin32_linuxmipsel }
-function Tany_linuxmipsel.TargetSignature: string;
-begin
-  result:=FTargetCPU+'-'+TargetOS;
-end;
 
 function Tany_linuxmipsel.GetLibs(Basepath:string): boolean;
 const
@@ -128,7 +123,7 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    infoln('Twin32_linuxmipsel: found libspath '+FLibsPath,etInfo);
+    ShowInfo(CrossModuleName + ': found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -196,7 +191,7 @@ begin
     //option: check as version with something like as --version, and check the targte against what is needed !!
 
 
-    infoln(FCrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+    ShowInfo(CrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
     // Architecture etc:
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
       FCrossOpts.Add('-CpMIPS32R2'); //Probably supported by most devices today
@@ -218,8 +213,7 @@ end;
 constructor Tany_linuxmipsel.Create;
 begin
   inherited Create;
-  FCrossModuleName:='any_linuxmipsel';
-  // binutilsprefix can be modified later in GetBinUtils  
+  // binutilsprefix can be modified later in GetBinUtils
   FBinUtilsPrefix:='mipsel-linux-android-'; //Used in Android NDK
   FBinUtilsPath:='';
   { Use current trunk compiler to build, not stable bootstrap, e.g. in light of bug
