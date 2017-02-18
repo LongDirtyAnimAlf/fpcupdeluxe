@@ -87,12 +87,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo(CrossModuleName + ': found libspath '+FLibsPath);
+    ShowInfo('Found libspath '+FLibsPath);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    ShowInfo('Tany_embeddedarm: libspath ignored; it is optional for this cross compiler.');
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.');
     FLibsPath:='';
     result:=true;
   end;
@@ -103,7 +103,7 @@ end;
 function TAny_Embeddedarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  //ShowInfo('todo: implement lcl libs path from basepath '+BasePath,etdebug);
+  ShowInfo('Todo: implement lcl libs path from basepath '+BasePath,etdebug);
   result:=inherited;
 end;
 {$endif}
@@ -168,9 +168,9 @@ begin
   if not result then
   begin
     {$ifdef mswindows}
-    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
+    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
     {$else}
-    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: the crossfpc binutils (arm-embedded) at https://launchpad.net/gcc-arm-embedded.');
+    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (arm-embedded) at https://launchpad.net/gcc-arm-embedded.');
     {$endif}
     FAlreadyWarned:=true;
   end
@@ -190,7 +190,7 @@ begin
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
       FCrossOpts.Add('-Cparmv7em'); // Teensy default
-      ShowInfo(CrossModuleName+ ': did not find any -Cp architecture parameter; using -Cparmv7em (Teensy default).');
+      ShowInfo('Did not find any -Cp architecture parameter; using -Cparmv7em (Teensy default).');
     end;
 
     // Configuration snippet for FPC

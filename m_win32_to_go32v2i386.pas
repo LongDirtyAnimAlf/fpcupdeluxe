@@ -94,12 +94,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo(CrossModuleName+ ': found libspath '+FLibsPath,etInfo);
+    ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    ShowInfo(CrossModuleName+ ': libspath ignored; it is optional for this cross compiler.',etInfo);
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;
@@ -108,7 +108,7 @@ end;
 {$ifndef FPCONLY}
 function TWin32_go32v2i386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  ShowInfo(CrossModuleName+ ': no support for LCL platform '+LCL_Platform,etInfo);
+  ShowInfo('No support for LCL platform '+LCL_Platform,etInfo);
   result:=inherited;
 end;
 {$endif}
@@ -130,7 +130,7 @@ begin
 
   if not result then
   begin
-    ShowInfo(CrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
+    ShowInfo('Searched binutil '+AsFile+' without results. ',etInfo);
     FAlreadyWarned:=true;
   end;
   if result then
@@ -145,7 +145,7 @@ begin
   begin
     FBinUtilsPrefix:=''; //use built in assembler, linker
     {$IFDEF WIN32}
-    ShowInfo(CrossModuleName+ ': binutil path ignored; it is optional *IF* compiling with FPC 2.7.1+'+LineEnding+
+    ShowInfo('Binutil path ignored; it is optional *IF* compiling with FPC 2.7.1+'+LineEnding+
       'For earlier FPC, download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
     result:=true; //success
     {$ENDIF}
@@ -153,7 +153,7 @@ begin
     // Win64 does seem to need the external linker... or an i386 cross compiler I suppose...
     // todo: generate i386 cross compiler first?!
     FBinUtilsPrefix:=''; //use built in assembler, linker
-    ShowInfo(CrossModuleName+ ': no binutil path found; it is required for win64 installs right now.'+LineEnding+
+    ShowInfo('No binutil path found; it is required for win64 installs right now.'+LineEnding+
       'Download binutils from ftp://ftp.freepascal.org/pub/fpc/contrib/cross/mingw/binutils-2.20-win32-i386-go32v2.zip',etInfo);
     result:=false;
     {$ENDIF}

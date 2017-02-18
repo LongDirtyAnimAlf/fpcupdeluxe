@@ -84,7 +84,7 @@ begin
     FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
+    ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}
   end;
 

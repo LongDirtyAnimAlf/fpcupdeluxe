@@ -77,7 +77,7 @@ begin
     FLibsPath:='/usr/lib/x86_64-freebsd-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
-    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath);
+    ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}
   end;
 

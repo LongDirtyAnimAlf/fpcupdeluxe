@@ -67,7 +67,7 @@ end;
 
 procedure TWin32_msdosi8086.ShowInstallationInstructions;
 begin
-  ShowInfo('TWin32-msdosi8086: binutils installation instructions:'+LineEnding+
+  ShowInfo('Binutils installation instructions:'+LineEnding+
     'For now, uses binutils from Marco v.d. Voort''s post at:' + LineEnding +
     'http://www.bttr-software.de/forum/forum_entry.php?id=12985' + LineEnding +
     '' + LineEnding +
@@ -101,12 +101,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo('TWin32_msdosi8086: found libspath '+FLibsPath,etInfo);
+    ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    ShowInfo('TWin32_msdosi8086: libspath ignored; it is optional for this cross compiler.',etInfo);
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;
@@ -115,7 +115,7 @@ end;
 {$ifndef FPCONLY}
 function TWin32_msdosi8086.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
-  ShowInfo('TWin32_msdosi8086: no support for LCL platform '+LCL_Platform,etInfo);
+  ShowInfo('No support for LCL platform '+LCL_Platform,etInfo);
   result:=inherited;
 end;
 {$endif}
@@ -137,7 +137,7 @@ begin
 
   if not result then
   begin
-    ShowInfo(CrossModuleName+ ': failed: searched binutil '+AsFile+' without results. ',etInfo);
+    ShowInfo('Searched binutil '+AsFile+' without results. ',etInfo);
     FAlreadyWarned:=true;
   end;
 
@@ -145,16 +145,16 @@ begin
   begin
     FBinsFound:=true;
 
-    ShowInfo(CrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+    ShowInfo('Found binutils '+FBinUtilsPath,etInfo);
 
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then
     begin
-      ShowInfo('TWin32_msdosi8086: this compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etInfo);
+      ShowInfo('This compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etInfo);
       FCrossOpts.Add('-CX');
     end;
     if StringListStartsWith(FCrossOpts,'-XXs')=-1 then
     begin
-      ShowInfo('TWin32_msdosi8086: this compiler requires -XXs (smartlinking). Added it to CROSSOPT.',etInfo);
+      ShowInfo('This compiler requires -XXs (smartlinking). Added it to CROSSOPT.',etInfo);
       FCrossOpts.Add('-CX');
     end;
 

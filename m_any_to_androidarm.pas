@@ -116,7 +116,7 @@ begin
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
           result:=DirectoryExists(FLibsPath);
           if not result
-             then ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+             then ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
              else break;
         end;
       end;
@@ -145,7 +145,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+            ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
@@ -153,7 +153,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+            ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\AppData\Local\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\Android'+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
@@ -161,7 +161,7 @@ begin
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
-            ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+            ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
           end else break;
 
         end;
@@ -173,7 +173,7 @@ begin
   // find Delphi android libs
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
-    ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug);
+    ShowInfo('Searched but not found libspath '+FLibsPath,etDebug);
     for delphiversion:=MAXDELPHIVERSION downto MINDELPHIVERSION do
     begin
       if not result then
@@ -188,7 +188,7 @@ begin
               '.0\PlatformSDKs\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\platforms\'+PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+'\'+NDKARCHDIRNAME+'\usr\lib';
               result:=DirectoryExists(FLibsPath);
               if not result
-                 then ShowInfo(CrossModuleName + ': failed: searched libspath '+FLibsPath,etDebug)
+                 then ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
                  else break;
             end;
           end else break;
@@ -405,7 +405,7 @@ begin
     begin
       AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH ';
       FCrossOpts.Add(AsFile); //apparently earlier instruction sets unsupported by Android
-      ShowInfo(CrossModuleName+ ': did not find any -Cp architecture parameter; using '+AsFile+'.');
+      ShowInfo('Did not find any -Cp architecture parameter; using '+AsFile+'.');
       AsFile:=StringReplace(AsFile,' ',LineEnding,[rfReplaceAll]);
       FFPCCFGSnippet:=FFPCCFGSnippet+AsFile;
     end;

@@ -106,7 +106,7 @@ begin
   if result then exit;
 
   //todo: remove once done
-  ShowInfo(CrossModuleName + ': Experimental, not finished. Stopping now.', etError);
+  ShowInfo('Experimental, not finished. Stopping now.', etError);
   result:=false;
 
   //todo: use conditional compilation for hostcpu, hostos; determine what to do depending on that
@@ -117,7 +117,7 @@ begin
     // Check for and get Linux binutils.
     if not(ForceDirectories(FBinUtilsPath)) then
     begin
-      ShowInfo(CrossModuleName + ': Could not create binutils directory '+FBinUtilsPath,etError);
+      ShowInfo('Could not create binutils directory '+FBinUtilsPath,etError);
       FAlreadyWarned:=true;
       exit(false);
     end;

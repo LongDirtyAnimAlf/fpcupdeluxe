@@ -72,7 +72,7 @@ begin
   if result then exit;
 
   //todo: remove once done
-  ShowInfo(CrossModuleName + ': Experimental, not finished. Stopping now.',etError);
+  ShowInfo('Experimental, not finished. Stopping now.',etError);
   result:=false;
 
   FBinUtilsPath:='/compat/linux/bin'; //these do not contain as etc though

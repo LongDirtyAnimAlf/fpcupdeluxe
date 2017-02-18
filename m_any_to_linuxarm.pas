@@ -111,7 +111,7 @@ begin
   end
   else
   begin
-    ShowInfo(CrossModuleName+ ': You MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.');
+    ShowInfo('You MAY want to copy your /lib, /usr/lib, /usr/lib/arm-linux-gnueabihf (Raspberry Pi Raspbian) from your device to your cross lib directory.');
   end;
 end;
 
@@ -119,7 +119,7 @@ end;
 function Tany_linuxarm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  ShowInfo(CrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
+  ShowInfo('Implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etDebug);
   result:=inherited;
 end;
 {$endif}
@@ -217,7 +217,7 @@ begin
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
       FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android and Raspberry Pi
-      ShowInfo(CrossModuleName+ ': did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
+      ShowInfo('Did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
     end;
 
     // Warn user to check things
@@ -226,7 +226,7 @@ begin
       // Source: http://forum.lazarus.freepascal.org/index.php/topic,23075.msg137838.html#msg137838
       // http://lists.freepascal.org/lists/fpc-devel/2013-May/032093.html
       // -dFPC_ARMHF is only used for (cross) compiler generation, not useful when compiling end user
-      ShowInfo(CrossModuleName+ ': found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
+      ShowInfo('Found -CaEABIHF cross compile option. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
     end;
 
     // Configuration snippet for FPC

@@ -96,12 +96,12 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo(CrossModuleName+ ': found libspath '+FLibsPath,etInfo);
+    ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;
   if not result then
   begin
     //libs path is optional; it can be empty
-    ShowInfo(CrossModuleName+ ': libspath ignored; it is optional for this cross compiler.',etInfo);
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
     FLibsPath:='';
     result:=true;
   end;
@@ -111,7 +111,7 @@ end;
 function TWin32_wincearm.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  ShowInfo('todo: implement lcl libs path from basepath '+BasePath,etdebug);
+  ShowInfo('Todo: implement lcl libs path from basepath '+BasePath,etdebug);
   result:=inherited;
 end;
 {$endif}
@@ -147,7 +147,7 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    ShowInfo(CrossModuleName + ': found binutils '+FBinUtilsPath,etInfo);
+    ShowInfo('Found binutils '+FBinUtilsPath,etInfo);
     // Configuration snippet for FPC
     //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-wince
     //adjusted by

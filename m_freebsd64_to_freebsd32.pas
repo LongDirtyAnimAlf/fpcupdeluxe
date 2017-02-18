@@ -52,7 +52,7 @@ begin
   if result then exit;
 
   //todo: remove once done
-  ShowInfo(CrossModuleName + ': Experimental, not finished. Stopping now.',etError);
+  ShowInfo('Experimental, not finished. Stopping now.',etError);
   result:=false;
   FBinUtilsPath:='/usr/bin'; //try with regular binutils
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix

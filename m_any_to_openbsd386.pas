@@ -92,7 +92,7 @@ begin
   end
   else
   begin
-    ShowInfo(CrossModuleName+ ': For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.');
+    ShowInfo('For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.');
   end;
   result:=true; //this step is optional at least for simple hello world programs
 end;
@@ -101,7 +101,7 @@ end;
 function TAny_OpenBSD386.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
-  //ShowInfo(FCrossModuleName+ ': implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etdebug);
+  ShowInfo('Implement lcl libs path from basepath '+BasePath+' for platform '+LCL_Platform,etDebug);
   result:=inherited;
 end;
 {$endif}
@@ -147,7 +147,7 @@ begin
 
   if not result then
   begin
-    ShowInfo(CrossModuleName+ ': suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.');
+    ShowInfo('Suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.');
     FAlreadyWarned:=true;
   end
   else
