@@ -16,6 +16,34 @@ program fpcupdeluxe;
       //{$linklib GLESv2}
     {$ENDIF}
   {$ENDIF}
+  {$IFDEF OpenBSD}
+  //{$L libgcc.a}
+  {$L libXcursor.so.5.0}
+  {$L libXfixes.so.6.0}
+  {$L libXrandr.so.7.1}
+  {$L libXrender.so.6.0}
+  {$L libpixman-1.so.32.6}
+  {$L libpthread.so.22.0}
+  {$L libm.so.9.0}
+  {$L libfontconfig.so.10.0}
+  {$L libfreetype.so.25.0}
+  {$L libpcre.so.3.0}
+  {$L libffi.so.1.2}
+  {$L libintl.so.6.0}
+  {$L libgdk-x11-2.0.so.2400.0}
+  {$L libgio-2.0.so.4200.3}
+  {$L libpangocairo-1.0.so.3800.0}
+  {$L libX11.so.16.1}
+  {$L libpango-1.0.so.3800.0}
+  {$L libpangoft2-1.0.so.3800.0}
+  {$L libxcb-shm.so.1.1}
+  {$L libXext.so.13.0}
+  //{$L libc.so.88.0}
+  //{$linklib libgcc.a}
+  //{$L libxcb-image.so.2.0}
+  //{$L libX11-xcb.so.2.0}
+{$ENDIF}
+
 {$ENDIF}
 
 uses
@@ -86,6 +114,15 @@ uses
 {$i revision.inc}
 
 {$R *.res}
+
+{$IFDEF FPC_CROSSCOMPILING}
+  {$IFDEF OpenBSD}
+    function fixunsxfdi(aDouble:double):QWORD; cdecl; [public, alias: '__fixunsxfdi'];
+    begin
+      result:=round(aDouble);
+    end;
+  {$ENDIF}
+{$ENDIF}
 
 begin
   RequireDerivedFormResource:=True;
