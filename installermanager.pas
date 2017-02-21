@@ -380,6 +380,9 @@ type
 
   TSequencer=class; //forward
 
+  TResultCodes=(rMissingCrossLibs,rMissingCrossBins);
+  TResultSet = Set of TResultCodes;
+
   { TFPCupManager }
 
   TFPCupManager=class(Tobject)

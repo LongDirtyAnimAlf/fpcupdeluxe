@@ -1385,22 +1385,22 @@ procedure TNormalUnzipper.DoOnZipFile(Sender: TObject; aFile: string; FileCnt, T
 begin
   if TotalFileCnt>50000 then
   begin
-    if (FileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
   end
   else
   if TotalFileCnt>5000 then
   begin
-    if (FileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
   end
   else
   if TotalFileCnt>500 then
   begin
-    if (FileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
   end
   else
   if TotalFileCnt>50 then
   begin
-    if (FileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
   end
   else
     infoln('Extracting '+aFile+'. #'+InttoStr(FileCnt)+' out of #'+InttoStr(TotalFileCnt),etInfo);
