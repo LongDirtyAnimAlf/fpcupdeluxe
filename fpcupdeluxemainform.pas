@@ -431,7 +431,7 @@ end;
 
 procedure TForm1.SynEdit1Change(Sender: TObject);
 var
-  s:string;
+  s,searchstring:string;
   x:integer;
 begin
   s:=SynEdit1.LineText;
@@ -452,12 +452,19 @@ begin
     Memo1.Lines.Append('After this period, please re-run fpcupdeluxe.');
   end;
 
-  if (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
+  searchstring:='unable to connect to a repository at url';
+  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
   begin
-    Memo1.Lines.Append('SVN could not connect to the desired repository. URL:');
-    Memo1.Lines.Append(FPCupManager.FPCURL);
-    Memo1.Lines.Append('Please check your connection. Or run the command to try yourself:');
+    Memo1.Lines.Append('SVN could not connect to the desired repository.');
+    x:=Pos(searchstring,LowerCase(s));
+    if x>0 then
+    begin
+      x:=x+Length(searchstring);
+      InternalError:=Copy(s,x+1,MaxInt);
+      Memo1.Lines.Append('URL: '+InternalError);
+      Memo1.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
     Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+    end;
   end;
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then

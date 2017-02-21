@@ -1211,7 +1211,17 @@ begin
         // Extract, overwrite, flatten path/junk paths
         case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
            '.ZIP':
-              ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+              begin
+                //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+                with TNormalUnzipper.Create do
+                begin
+                  try
+                    ResultCode:=Ord(NOT DoUnZip(TempArchive,IncludeTrailingPathDelimiter(InstallDir),[]));
+                  finally
+                    Free;
+                  end;
+                end;
+              end;
            '.7Z':
               begin
                 ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
@@ -1312,7 +1322,7 @@ begin
 
         // check specials for SourceForge !!
         // tricky, but necessary unfortunately ...
-        if (Pos('downloads.sourceforge.net',RemoteURL)>0) then
+        if (Pos('sourceforge.net',RemoteURL)>0) then
         begin
 
           // we have an archive from sourceforge ... this archive adds an extra path (name) when unpacking the zip

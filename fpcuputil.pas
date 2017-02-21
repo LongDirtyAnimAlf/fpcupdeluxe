@@ -609,8 +609,12 @@ end;
 function GetFileNameFromURL(URL:string):string;
 var
   URI:TURI;
+  aURL:string;
 begin
-  URI:=ParseURI(URL);
+  if AnsiEndsStr('/download',URL)
+     then aURL:=Copy(URL,1,Length(URL)-9)
+     else aURL:=URL;
+  URI:=ParseURI(aURL);
   result:=URI.Document;
 end;
 
@@ -1009,7 +1013,8 @@ begin
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
       writeln(BeginSnippet+Seriousness[Level]+' '+ Message); //we misuse this for info output
-      sleep(200); //hopefully allow output to be written without interfering with other output
+      //sleep(200); //hopefully allow output to be written without interfering with other output
+      sleep(1);
     end
   else
     begin
@@ -1018,7 +1023,8 @@ begin
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
     writeln(BeginSnippet+Seriousness[Level]+' '+ Message); //we misuse this for info output
-    sleep(200); //hopefully allow output to be written without interfering with other output
+    //sleep(200); //hopefully allow output to be written without interfering with other output
+    sleep(1);
     {$ENDIF}
     end;
 {$ENDIF NOCONSOLE}
@@ -1281,10 +1287,34 @@ begin
 end;
 
 procedure TThreadedUnzipper.Execute;
+var
+  x:cardinal;
+  s:string;
 begin
   try
     FUnZipper.Examine;
-    FTotalFileCount:=FUnZipper.Entries.Count;
+
+    {$ifdef MSWINDOWS}
+    // on windows, .files (hidden files) cannot be created !!??
+    // still to check on non-windows
+    if FFileList.Count=0 then
+    begin
+      for x:=0 to FUnZipper.Entries.Count-1 do
+      begin
+        if FUnZipper.UseUTF8
+          then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+          else s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+        if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+        if (Length(s)>0) AND (s[1]='.') then continue;
+        FFileList.Append(s);
+      end;
+    end;
+    {$endif}
+
+    if FFileList.Count=0
+      then FTotalFileCount:=FUnZipper.Entries.Count
+      else FTotalFileCount:=FFileList.Count;
+
     if FFileList.Count=0
       then FUnZipper.UnZipAllFiles
       else FUnZipper.UnZipFiles(FFileList);
@@ -1353,7 +1383,26 @@ end;
 
 procedure TNormalUnzipper.DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
 begin
-  //if FVerbose then
+  if TotalFileCnt>50000 then
+  begin
+    if (FileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+  end
+  else
+  if TotalFileCnt>5000 then
+  begin
+    if (FileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+  end
+  else
+  if TotalFileCnt>500 then
+  begin
+    if (FileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+  end
+  else
+  if TotalFileCnt>50 then
+  begin
+    if (FileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FUnzipper.FileCount)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+  end
+  else
     infoln('Extracting '+aFile+'. #'+InttoStr(FileCnt)+' out of #'+InttoStr(TotalFileCnt),etInfo);
 end;
 
