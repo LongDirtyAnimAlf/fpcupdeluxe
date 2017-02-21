@@ -236,9 +236,6 @@ below}
 
 
 type
-  TResultCodes=(rMissingCrossLibs,rMissingCrossBins);
-  TResultSet = Set of TResultCodes;
-
   // from fpmake + fpmkunit !
 
   TCpu=(cpuNone,

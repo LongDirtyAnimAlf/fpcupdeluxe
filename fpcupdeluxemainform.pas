@@ -1539,6 +1539,7 @@ begin
   FPCupManager.ExportOnly:=(NOT Form2.CheckRepo.Checked);
 
   FPCupManager.FPCPatches:=Form2.FPCPatches;
+  FPCupManager.LazarusPatches:=Form2.LazPatches;
 
   RealFPCURL.Text:='';
   RealLazURL.Text:='';
@@ -1660,8 +1661,10 @@ begin
     //FPCupManager.UseWget:=ReadBool('General','UseWget',False);
     //Form2.UseWget:=FPCupManager.UseWget;
     Form2.UseWget:=ReadBool('General','UseWget',False);
+    Form2.UpdateCrossCompilers:=ReadBool('General','UpdateCrossCompilers',False);
 
     Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
+    Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
@@ -1706,8 +1709,10 @@ begin
     WriteBool('General','SplitLazarus',Form2.SplitLazarus);
 
     WriteBool('General','UseWget',Form2.UseWget);
+    WriteBool('General','UpdateCrossCompilers',Form2.UpdateCrossCompilers);
 
     WriteString('Patches','FPCPatches',Form2.FPCPatches);
+    WriteString('Patches','LazarusPatches',Form2.LazPatches);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do

@@ -1,10 +1,10 @@
 object Form2: TForm2
   Left = 529
-  Height = 547
+  Height = 601
   Top = 107
   Width = 746
   Caption = 'Advanced settings'
-  ClientHeight = 547
+  ClientHeight = 601
   ClientWidth = 746
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -19,7 +19,7 @@ object Form2: TForm2
     Caption = 'Proxy settings'
     ClientHeight = 108
     ClientWidth = 720
-    TabOrder = 2
+    TabOrder = 0
     object Label1: TLabel
       AnchorSideLeft.Control = GroupBox1
       AnchorSideTop.Control = GroupBox1
@@ -123,14 +123,14 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 319
+    Height = 373
     Top = 144
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Miscellaneous settings'
-    ClientHeight = 299
+    ClientHeight = 353
     ClientWidth = 316
-    TabOrder = 3
+    TabOrder = 1
     object CheckRepo: TCheckBox
       AnchorSideLeft.Control = GroupBox2
       AnchorSideTop.Control = GroupBox2
@@ -263,7 +263,7 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 7
     end
-    object CheckUseWget1: TCheckBox
+    object CheckUseLatestGDB: TCheckBox
       AnchorSideLeft.Control = GroupBox2
       AnchorSideTop.Control = CheckUseWget
       AnchorSideTop.Side = asrBottom
@@ -280,6 +280,23 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 8
     end
+    object CheckUpdateAllCrosscompilers: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckUseLatestGDB
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 229
+      Width = 260
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Update crosscompilers with FPC (default=no)'
+      Enabled = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 9
+    end
   end
   object GroupBox4: TGroupBox
     Left = 336
@@ -289,7 +306,7 @@ object Form2: TForm2
     Caption = 'Binutils and library location'
     ClientHeight = 163
     ClientWidth = 292
-    TabOrder = 4
+    TabOrder = 2
     object ComboBoxOS: TComboBox
       AnchorSideLeft.Control = ComboBoxCPU
       AnchorSideLeft.Side = asrBottom
@@ -437,7 +454,7 @@ object Form2: TForm2
     Caption = 'FPC/Laz branch and revision'
     ClientHeight = 108
     ClientWidth = 246
-    TabOrder = 5
+    TabOrder = 3
     object EditFPCBranch: TEdit
       Left = 8
       Height = 23
@@ -511,7 +528,7 @@ object Form2: TForm2
     Caption = 'Compile Options'
     ClientHeight = 108
     ClientWidth = 138
-    TabOrder = 6
+    TabOrder = 4
     object LabelFPCOptions: TLabel
       Left = 8
       Height = 15
@@ -543,65 +560,144 @@ object Form2: TForm2
       TabOrder = 1
     end
   end
-  object BitBtn1: TBitBtn
-    Left = 643
-    Height = 31
-    Top = 457
-    Width = 89
-    Anchors = [akRight, akBottom]
-    Default = True
-    DefaultCaption = True
-    Kind = bkOK
-    ModalResult = 1
-    TabOrder = 0
-  end
-  object BitBtn2: TBitBtn
-    Left = 643
-    Height = 31
-    Top = 505
-    Width = 89
-    Anchors = [akRight, akBottom]
-    Cancel = True
-    DefaultCaption = True
-    Kind = bkCancel
-    ModalResult = 2
-    TabOrder = 1
-  end
-  object ListBoxPatch: TListBox
+  object ListBoxFPCPatch: TListBox
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 8
     Height = 59
-    Top = 477
-    Width = 200
+    Top = 531
+    Width = 176
     Anchors = [akLeft, akBottom]
     BorderSpacing.Bottom = 11
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
+    TabOrder = 5
+  end
+  object btnAddFPCPatch: TButton
+    AnchorSideLeft.Control = ListBoxFPCPatch
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ListBoxFPCPatch
+    Left = 190
+    Height = 28
+    Top = 531
+    Width = 122
+    BorderSpacing.Left = 6
+    Caption = 'Add FPC patch'
+    OnClick = btnAddPatchClick
+    TabOrder = 6
+  end
+  object btnRemFPCPatch: TButton
+    AnchorSideLeft.Control = ListBoxFPCPatch
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideBottom.Control = ListBoxFPCPatch
+    AnchorSideBottom.Side = asrBottom
+    Left = 190
+    Height = 26
+    Top = 564
+    Width = 122
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 6
+    Caption = 'Remove FPC patch'
+    OnClick = btnRemPatchClick
     TabOrder = 7
   end
-  object Button1: TButton
-    AnchorSideTop.Control = ListBoxPatch
-    Left = 222
-    Height = 28
-    Top = 477
-    Width = 106
-    Caption = 'Add patch'
-    OnClick = Button1Click
+  object ListBoxLazPatch: TListBox
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 328
+    Height = 59
+    Top = 531
+    Width = 176
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Bottom = 11
+    ClickOnSelChange = False
+    ExtendedSelect = False
+    ItemHeight = 0
     TabOrder = 8
   end
-  object Button2: TButton
-    AnchorSideBottom.Control = ListBoxPatch
-    AnchorSideBottom.Side = asrBottom
-    Left = 222
-    Height = 26
-    Top = 510
-    Width = 106
-    Anchors = [akLeft, akBottom]
-    Caption = 'Remove patch'
-    OnClick = Button2Click
+  object btnAddLazPatch: TButton
+    AnchorSideLeft.Control = ListBoxLazPatch
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = ListBoxLazPatch
+    Left = 510
+    Height = 28
+    Top = 531
+    Width = 122
+    BorderSpacing.Left = 6
+    Caption = 'Add Laz patch'
+    OnClick = btnAddPatchClick
     TabOrder = 9
+  end
+  object btnRemLazPatch: TButton
+    AnchorSideLeft.Control = ListBoxLazPatch
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideBottom.Control = ListBoxLazPatch
+    AnchorSideBottom.Side = asrBottom
+    Left = 510
+    Height = 26
+    Top = 564
+    Width = 122
+    Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 6
+    Caption = 'Remove Laz patch'
+    OnClick = btnRemPatchClick
+    TabOrder = 10
+  end
+  object ButtonPanel: TPanel
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Owner
+    AnchorSideBottom.Side = asrBottom
+    Left = 640
+    Height = 89
+    Top = 504
+    Width = 98
+    Anchors = [akRight, akBottom]
+    BorderSpacing.Right = 8
+    BorderSpacing.Bottom = 8
+    ClientHeight = 89
+    ClientWidth = 98
+    TabOrder = 11
+    object BitBtn1: TBitBtn
+      AnchorSideLeft.Control = ButtonPanel
+      AnchorSideTop.Control = ButtonPanel
+      AnchorSideRight.Control = ButtonPanel
+      AnchorSideRight.Side = asrBottom
+      Left = 5
+      Height = 35
+      Top = 5
+      Width = 88
+      Anchors = [akTop, akLeft, akRight, akBottom]
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 4
+      Default = True
+      DefaultCaption = True
+      Kind = bkOK
+      ModalResult = 1
+      TabOrder = 0
+    end
+    object BitBtn2: TBitBtn
+      AnchorSideLeft.Control = ButtonPanel
+      AnchorSideRight.Control = ButtonPanel
+      AnchorSideRight.Side = asrBottom
+      AnchorSideBottom.Control = ButtonPanel
+      AnchorSideBottom.Side = asrBottom
+      Left = 5
+      Height = 31
+      Top = 53
+      Width = 88
+      Anchors = [akLeft, akRight, akBottom]
+      BorderSpacing.Left = 4
+      BorderSpacing.Right = 4
+      BorderSpacing.Bottom = 4
+      Cancel = True
+      DefaultCaption = True
+      Kind = bkCancel
+      ModalResult = 2
+      TabOrder = 1
+    end
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]

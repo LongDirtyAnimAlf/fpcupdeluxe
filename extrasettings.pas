@@ -41,8 +41,10 @@ type
     BitBtn2: TBitBtn;
     btnSelectLibDir: TButton;
     btnSelectBinDir: TButton;
-    Button1: TButton;
-    Button2: TButton;
+    btnAddFPCPatch: TButton;
+    btnRemFPCPatch: TButton;
+    btnAddLazPatch: TButton;
+    btnRemLazPatch: TButton;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
@@ -51,7 +53,8 @@ type
     CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
-    CheckUseWget1: TCheckBox;
+    CheckUseLatestGDB: TCheckBox;
+    CheckUpdateAllCrosscompilers: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditFPCBranch: TEdit;
@@ -81,12 +84,14 @@ type
     LabelLazarusbranch: TLabel;
     LabelLazarusOptions: TLabel;
     LabelLazarusRevision: TLabel;
-    ListBoxPatch: TListBox;
+    ListBoxFPCPatch: TListBox;
+    ListBoxLazPatch: TListBox;
     OpenDialog1: TOpenDialog;
+    ButtonPanel: TPanel;
     RadioGroup3: TRadioGroup;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
+    procedure btnAddPatchClick(Sender: TObject);
+    procedure btnRemPatchClick(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -94,6 +99,10 @@ type
     procedure RadioGroup3SelectionChanged(Sender: TObject);
   private
     FCrossUtils:TCrossUtils;
+
+    function  GetPatches(const Lazarus:boolean=false):string;
+    procedure SetPatches(value:string;const Lazarus:boolean=false);
+
     function GetRepo:boolean;
     function GetPackageRepo:boolean;
     function GetUpdateOnly:boolean;
@@ -107,6 +116,10 @@ type
 
     function GetUseWget:boolean;
     procedure SetUseWget(value:boolean);
+
+    function GetUpdateCross:boolean;
+    procedure SetUpdateCross(value:boolean);
+
 
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
@@ -127,6 +140,8 @@ type
 
     function GetFPCPatches:string;
     procedure SetFPCPatches(value:string);
+    function GetLazPatches:string;
+    procedure SetLazPatches(value:string);
 
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
@@ -144,6 +159,7 @@ type
     property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
 
     property UseWget:boolean read GetUseWget write SetUseWget;
+    property UpdateCrossCompilers:boolean read GetUpdateCross write SetUpdateCross;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -158,7 +174,7 @@ type
     property LazarusBranch:string read GetLazarusBranch write SetLazarusBranch;
 
     property FPCPatches:string read GetFPCPatches write SetFPCPatches;
-
+    property LazPatches:string read GetLazPatches write SetLazPatches;
   end;
 
 var
@@ -300,35 +316,45 @@ begin
 end;
 
 
-procedure TForm2.Button1Click(Sender: TObject);
+procedure TForm2.btnAddPatchClick(Sender: TObject);
 var
   PatchName: string;
   FullPatchPath: string;
+  aListBox:TListBox;
 begin
   if OpenDialog1.Execute then
   begin
     FullPatchPath := OpenDialog1.FileName;
     PatchName := ExtractFileName(FullPatchPath);
-    if ListBoxPatch.Items.IndexOf(PatchName)=-1 then
+
+    if Sender=btnAddFPCPatch then aListBox:=ListBoxFPCPatch;
+    if Sender=btnAddLazPatch then aListBox:=ListBoxLazPatch;
+
+    if aListBox.Items.IndexOf(PatchName)=-1 then
     begin
-      ListBoxPatch.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+      aListBox.Items.AddObject(PatchName, TString.Create(FullPatchPath));
     end;
   end;
 end;
 
-procedure TForm2.Button2Click(Sender: TObject);
+procedure TForm2.btnRemPatchClick(Sender: TObject);
 var
   i:integer;
+  aListBox:TListBox;
 begin
-  if ListBoxPatch.SelCount>0 then
+
+  if Sender=btnRemFPCPatch then aListBox:=ListBoxFPCPatch;
+  if Sender=btnRemLazPatch then aListBox:=ListBoxLazPatch;
+
+  if aListBox.SelCount>0 then
   begin
-    for i:=ListBoxPatch.Count-1 downto 0 do
+    for i:=aListBox.Count-1 downto 0 do
     begin
-      if ListBoxPatch.Selected[i] then
+      if aListBox.Selected[i] then
       begin
-        TString(ListBoxPatch.Items.Objects[i]).Free;
-        ListBoxPatch.Items.Objects[i]:=nil;
-        ListBoxPatch.Items.Delete(i);
+        TString(aListBox.Items.Objects[i]).Free;
+        aListBox.Items.Objects[i]:=nil;
+        aListBox.Items.Delete(i);
       end;
     end;
   end;
@@ -398,10 +424,10 @@ begin
     Free;
   end;
 
-  for i := 0 to ListBoxPatch.Items.Count - 1 do
+  for i := 0 to ListBoxFPCPatch.Items.Count - 1 do
   begin
-     TString(ListBoxPatch.Items.Objects[i]).Free;
-     ListBoxPatch.Items.Objects[i] := nil;
+     TString(ListBoxFPCPatch.Items.Objects[i]).Free;
+     ListBoxFPCPatch.Items.Objects[i] := nil;
   end;
 
 end;
@@ -514,6 +540,16 @@ begin
   CheckUseWget.Checked:=value;
 end;
 
+function TForm2.GetUpdateCross:boolean;
+begin
+  result:=CheckUpdateAllCrosscompilers.Checked;
+end;
+procedure TForm2.SetUpdateCross(value:boolean);
+begin
+  CheckUpdateAllCrosscompilers.Checked:=value;
+end;
+
+
 
 function TForm2.GetFPCOptions:string;
 begin
@@ -593,16 +629,21 @@ begin
   result:=EditHTTPProxyPassword.Text;
 end;
 
-function TForm2.GetFPCPatches:string;
+function TForm2.GetPatches(const Lazarus:boolean=false):string;
 var
   i:integer;
   FullPatchPath:string;
+  aListBox:TListBox;
 begin
+  if Lazarus
+    then aListBox:=ListBoxLazPatch
+    else aListBox:=ListBoxFPCPatch;
+
   result:='';
-  if ListBoxPatch.Count=0 then exit;
-  for i:=0 to ListBoxPatch.Count-1 do
+  if aListBox.Count=0 then exit;
+  for i:=0 to aListBox.Count-1 do
   begin
-    FullPatchPath := TString(ListBoxPatch.Items.Objects[i]).Str;
+    FullPatchPath := TString(aListBox.Items.Objects[i]).Str;
     result:=result+FullPatchPath+',';
   end;
   // delete last comma
@@ -612,20 +653,25 @@ begin
   end;
 end;
 
-procedure TForm2.SetFPCPatches(value:string);
+procedure TForm2.SetPatches(value:string;const Lazarus:boolean=false);
 var
   PatchName: string;
   FullPatchPath: string;
   PatchList:TStringList;
   i:integer;
+  aListBox:TListBox;
 begin
 
+  if Lazarus
+    then aListBox:=ListBoxLazPatch
+    else aListBox:=ListBoxFPCPatch;
+
   // cleanup
-  for i := ListBoxPatch.Items.Count - 1 downto 0 do
+  for i := aListBox.Items.Count - 1 downto 0 do
   begin
-     TString(ListBoxPatch.Items.Objects[i]).Free;
-     ListBoxPatch.Items.Objects[i] := nil;
-     ListBoxPatch.Items.Delete(i);
+     TString(aListBox.Items.Objects[i]).Free;
+     aListBox.Items.Objects[i] := nil;
+     aListBox.Items.Delete(i);
   end;
 
   PatchList:=TStringList.Create;
@@ -638,12 +684,33 @@ begin
       if Length(FullPatchPath)>0 then
       begin
         PatchName := ExtractFileName(FullPatchPath);
-        ListBoxPatch.Items.AddObject(PatchName, TString.Create(FullPatchPath));
+        aListBox.Items.AddObject(PatchName, TString.Create(FullPatchPath));
       end;
     end;
   finally
     PatchList.Free;
   end;
+end;
+
+
+function TForm2.GetFPCPatches:string;
+begin
+  result:=GetPatches(false);
+end;
+
+procedure TForm2.SetFPCPatches(value:string);
+begin
+  SetPatches(value,false);
+end;
+
+function TForm2.GetLazPatches:string;
+begin
+  result:=GetPatches(true);
+end;
+
+procedure TForm2.SetLazPatches(value:string);
+begin
+  SetPatches(value,true);
 end;
 
 end.
