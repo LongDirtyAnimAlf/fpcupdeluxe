@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 313
+  Left = 271
   Height = 643
-  Top = 120
+  Top = 123
   Width = 1137
   Anchors = []
   Caption = 'Form1'
@@ -77,36 +77,44 @@ object Form1: TForm1
     TabOrder = 11
   end
   object StatusMessage: TEdit
+    AnchorSideRight.Control = CheckAutoClear
     Left = 368
     Height = 23
     Top = 35
-    Width = 563
+    Width = 573
     Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Right = 12
+    Constraints.MinWidth = 120
     ReadOnly = True
     TabOrder = 15
     Text = 'Sitting and waiting'
   end
   object CheckAutoClear: TCheckBox
-    AnchorSideLeft.Control = StatusMessage
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = StatusMessage
-    Left = 941
+    AnchorSideRight.Control = Button8
+    Left = 953
     Height = 19
     Top = 36
     Width = 73
-    BorderSpacing.Left = 10
+    Anchors = [akTop, akRight]
     BorderSpacing.Top = 1
+    BorderSpacing.Right = 12
     Caption = 'AutoClear'
     Checked = True
     State = cbChecked
     TabOrder = 19
   end
   object Button8: TButton
-    Left = 1037
+    AnchorSideTop.Control = StatusMessage
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 1038
     Height = 23
     Top = 35
     Width = 87
     Anchors = [akTop, akRight]
+    BorderSpacing.Right = 12
     Caption = 'Clear log'
     OnClick = Button8Click
     TabOrder = 18
@@ -1479,11 +1487,17 @@ object Form1: TForm1
     ParentFont = False
   end
   object ListBox3: TListBox
+    AnchorSideTop.Control = Button5
+    AnchorSideTop.Side = asrBottom
+    AnchorSideBottom.Control = Button4
     Left = 168
-    Height = 171
+    Height = 174
     Top = 320
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Top = 12
+    BorderSpacing.Bottom = 8
+    Constraints.MinHeight = 80
     ItemHeight = 0
     MultiSelect = True
     ScrollWidth = 191
