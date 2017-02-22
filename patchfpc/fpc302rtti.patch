@@ -1,6 +1,189 @@
+Index: rtl/objpas/typinfo.pp
+===================================================================
+--- rtl/objpas/typinfo.pp	(revision 35464)
++++ rtl/objpas/typinfo.pp	(working copy)
+@@ -54,7 +54,7 @@
+        TMethodKind = (mkProcedure,mkFunction,mkConstructor,mkDestructor,
+                       mkClassProcedure,mkClassFunction,mkClassConstructor,
+                       mkClassDestructor,mkOperatorOverload);
+-       TParamFlag     = (pfVar,pfConst,pfArray,pfAddress,pfReference,pfOut);
++       TParamFlag     = (pfVar,pfConst,pfArray,pfAddress,pfReference,pfOut,pfConstRef);
+        TParamFlags    = set of TParamFlag;
+        TIntfFlag      = (ifHasGuid,ifDispInterface,ifDispatch,ifHasStrGUID);
+        TIntfFlags     = set of TIntfFlag;
+@@ -63,6 +63,7 @@
+        // don't rely on integer values of TCallConv since it includes all conventions
+        // which both delphi and fpc support. In the future delphi can support more and
+        // fpc own conventions will be shifted/reordered accordinly
++       PCallConv = ^TCallConv;
+        TCallConv = (ccReg, ccCdecl, ccPascal, ccStdCall, ccSafeCall,
+                     ccCppdecl, ccFar16, ccOldFPCCall, ccInternProc,
+                     ccSysCall, ccSoftFloat, ccMWPascal);
+@@ -161,6 +162,49 @@
+         function GetParam(ParamIndex: Integer): PProcedureParam;
+       end;
+ 
++      PVmtMethodParam = ^TVmtMethodParam;
++      TVmtMethodParam =
++      {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
++      packed
++      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
++      record
++        Flags: TParamFlags;
++        ParamType: PTypeInfo;
++        ParReg: Byte;
++        ParOff: LongInt;
++        Name: ShortString;
++        {Attribute data TODO}
++      end;
++
++      PIntfMethodEntry = ^TIntfMethodEntry;
++      TIntfMethodEntry =
++      {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
++      packed
++      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
++      record
++        Name: ShortString;
++        {
++        Version: Byte;
++        CC: TCallConv;
++        ResultType: PTypeInfo;
++        StackSize: Word;
++        ParamCount: Byte;
++        Params: array[0..ParamCount - 1] of TVmtMethodParam;
++        }
++        {Attribute data TODO}
++      end;
++
++      PIntfMethodTable = ^TIntfMethodTable;
++      TIntfMethodTable =
++      {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
++      packed
++      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
++      record
++        Count: Word;
++        RTTICount: Word;//$FFFF if there is no further info, or the value of Count
++        {Entry: array[0..Count - 1] of TIntfMethodEntry}
++      end;
++
+       PTypeData = ^TTypeData;
+       TTypeData =
+ {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
+@@ -241,6 +285,11 @@
+                IntfFlags : TIntfFlagsBase;
+                GUID: TGUID;
+                IntfUnit: ShortString;
++               {
++               IntfPropCount: Word;
++               IntfProps: array[0..IntfPropCount-1] of TPropInfo;
++               IntfMethTable : TIntfMethodTable;
++               }
+               );
+             tkInterfaceRaw:
+               (
+@@ -249,6 +298,11 @@
+                IID: TGUID;
+                RawIntfUnit: ShortString;
+                IIDStr: ShortString;
++               {
++               RawIntfPropCount: Word;
++               RawIntfProps: array[0..IntfPropCount-1] of TPropInfo;
++               IntfMethTable : TIntfMethodTable;
++               }
+               );
+             tkArray:
+               (ArrayData: TArrayTypeData);
+Index: compiler/options.pas
+===================================================================
+--- compiler/options.pas	(revision 35464)
++++ compiler/options.pas	(working copy)
+@@ -3222,6 +3222,7 @@
+   def_system_macro('FPC_HAS_INTERNAL_ABS_INT64');
+ {$endif x86_64 or powerpc64}
+ 
++  def_system_macro('FPC_HAS_EXTENDEDINTERFACERTTI');
+   def_system_macro('FPC_HAS_UNICODESTRING');
+   def_system_macro('FPC_RTTI_PACKSET1');
+   def_system_macro('FPC_HAS_CPSTRING');
+Index: compiler/x86_64/cpupara.pas
+===================================================================
+--- compiler/x86_64/cpupara.pas	(revision 35464)
++++ compiler/x86_64/cpupara.pas	(working copy)
+@@ -44,6 +44,7 @@
+           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
++          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
+           function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
+           function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
+           function get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;override;
+@@ -909,6 +910,63 @@
+         result:=[RS_ST0..RS_ST7];
+       end;
+ 
++    procedure tx86_64paramanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
++    var
++      I : SizeInt;
++    begin
++      with paraloc^ do
++        case loc of
++          LOC_REGISTER:
++            begin
++              reg:=getsupreg(register);
++              { winx64 uses different registers }
++              if target_info.system=system_x86_64_win64 then
++                begin
++                  for I := 0 to high(paraintsupregs_winx64) do
++                    if reg=paraintsupregs_winx64[I] then
++                      begin
++                        reg:=I;
++                        break;
++                      end;
++                end
++              else
++                for I := 0 to high(paraintsupregs) do
++                  if reg=paraintsupregs[I] then
++                    begin
++                      reg:=I;
++                      break;
++                    end;
++              off:=0;
++            end;
++          LOC_MMREGISTER:
++            begin
++              reg:=getsupreg(register);
++              { winx64 uses different registers }
++              if target_info.system=system_x86_64_win64 then
++                begin
++                  for I := 0 to high(parammsupregs_winx64) do
++                    if reg=parammsupregs_winx64[I] then
++                      begin
++                        reg:=I;
++                        break;
++                      end;
++                end
++              else
++                for I := 0 to high(parammsupregs) do
++                  if reg=parammsupregs[I] then
++                    begin
++                      reg:=I;
++                      break;
++                    end;
++              off:=0;
++            end;
++          LOC_REFERENCE:
++            begin
++              reg:=255;
++              off:=reference.offset;
++            end;
++        end;
++    end;
+ 
+     function tx86_64paramanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;
+       const
 Index: compiler/arm/cpupara.pas
 ===================================================================
---- compiler/arm/cpupara.pas	(revision 34539)
+--- compiler/arm/cpupara.pas	(revision 35464)
 +++ compiler/arm/cpupara.pas	(working copy)
 @@ -36,6 +36,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
@@ -54,54 +237,35 @@ Index: compiler/arm/cpupara.pas
  
      function tarmparamanager.get_volatile_registers_mm(calloption: tproccalloption): tcpuregisterset;
        begin
-Index: compiler/i386/cpupara.pas
+Index: compiler/paramgr.pas
 ===================================================================
---- compiler/i386/cpupara.pas	(revision 34539)
-+++ compiler/i386/cpupara.pas	(working copy)
-@@ -40,6 +40,7 @@
-           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
-+          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
-           function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
-           function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
-           procedure createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);override;
-@@ -285,9 +286,30 @@
-         result:=[0..first_mm_imreg-1];
+--- compiler/paramgr.pas	(revision 35464)
++++ compiler/paramgr.pas	(working copy)
+@@ -81,6 +81,8 @@
+           function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
+           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;virtual;
+ 
++          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);virtual;
++
+           procedure getintparaloc(pd: tabstractprocdef; nr : longint; var cgpara: tcgpara);virtual;
+ 
+           {# allocate an individual pcgparalocation that's part of a tcgpara
+@@ -278,6 +280,12 @@
+         result:=[];
        end;
  
-+    procedure ti386paramanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
-+    var
-+      I : SizeInt;
++    procedure tparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
 +    begin
-+      with paraloc^ do
-+        case loc of
-+          LOC_REGISTER:
-+            begin
-+              for I := 0 to high(parasupregs) do
-+                if getsupreg(register)=parasupregs[I] then
-+                  begin
-+                    reg:=I;
-+                    break;
-+                  end;
-+              off:=0;
-+            end;
-+          LOC_REFERENCE:
-+            begin
-+              reg:=255;
-+              off:=reference.offset;
-+            end;
-+        end;
++      reg:=0;
++      off:=0;
 +    end;
- 
--
--
-     function  ti386paramanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): TCGPara;
-       var
-         retcgsize  : tcgsize;
++
+ {$if first_mm_imreg = 0}
+   {$WARN 4044 OFF} { Comparison might be always false ... }
+ {$endif}
 Index: compiler/ncgrtti.pas
 ===================================================================
---- compiler/ncgrtti.pas	(revision 34539)
+--- compiler/ncgrtti.pas	(revision 35464)
 +++ compiler/ncgrtti.pas	(working copy)
 @@ -28,7 +28,7 @@
      uses
@@ -372,61 +536,23 @@ Index: compiler/ncgrtti.pas
            classrefdef,
            pointerdef:
              if not is_objc_class_or_protocol(tabstractpointerdef(def).pointeddef) then
-Index: compiler/options.pas
+Index: compiler/i386/cpupara.pas
 ===================================================================
---- compiler/options.pas	(revision 34539)
-+++ compiler/options.pas	(working copy)
-@@ -3222,6 +3222,7 @@
-   def_system_macro('FPC_HAS_INTERNAL_ABS_INT64');
- {$endif x86_64 or powerpc64}
- 
-+  def_system_macro('FPC_HAS_EXTENDEDINTERFACERTTI');
-   def_system_macro('FPC_HAS_UNICODESTRING');
-   def_system_macro('FPC_RTTI_PACKSET1');
-   def_system_macro('FPC_HAS_CPSTRING');
-Index: compiler/paramgr.pas
-===================================================================
---- compiler/paramgr.pas	(revision 34539)
-+++ compiler/paramgr.pas	(working copy)
-@@ -81,6 +81,8 @@
-           function get_volatile_registers_flags(calloption : tproccalloption):tcpuregisterset;virtual;
-           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;virtual;
- 
-+          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);virtual;
-+
-           procedure getintparaloc(pd: tabstractprocdef; nr : longint; var cgpara: tcgpara);virtual;
- 
-           {# allocate an individual pcgparalocation that's part of a tcgpara
-@@ -278,6 +280,12 @@
-         result:=[];
-       end;
- 
-+    procedure tparamanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
-+    begin
-+      reg:=0;
-+      off:=0;
-+    end;
-+
- {$if first_mm_imreg = 0}
-   {$WARN 4044 OFF} { Comparison might be always false ... }
- {$endif}
-Index: compiler/x86_64/cpupara.pas
-===================================================================
---- compiler/x86_64/cpupara.pas	(revision 34539)
-+++ compiler/x86_64/cpupara.pas	(working copy)
-@@ -44,6 +44,7 @@
+--- compiler/i386/cpupara.pas	(revision 35464)
++++ compiler/i386/cpupara.pas	(working copy)
+@@ -40,6 +40,7 @@
            function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
-           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
            function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
+           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
 +          procedure get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);override;
            function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
            function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
-           function get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;override;
-@@ -909,6 +910,63 @@
-         result:=[RS_ST0..RS_ST7];
+           procedure createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);override;
+@@ -285,9 +286,30 @@
+         result:=[0..first_mm_imreg-1];
        end;
  
-+    procedure tx86_64paramanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
++    procedure ti386paramanager.get_para_regoff(proccalloption: tproccalloption; paraloc: pcgparalocation; out reg: Byte; out off: LongInt);
 +    var
 +      I : SizeInt;
 +    begin
@@ -434,46 +560,12 @@ Index: compiler/x86_64/cpupara.pas
 +        case loc of
 +          LOC_REGISTER:
 +            begin
-+              reg:=getsupreg(register);
-+              { winx64 uses different registers }
-+              if target_info.system=system_x86_64_win64 then
-+                begin
-+                  for I := 0 to high(paraintsupregs_winx64) do
-+                    if reg=paraintsupregs_winx64[I] then
-+                      begin
-+                        reg:=I;
-+                        break;
-+                      end;
-+                end
-+              else
-+                for I := 0 to high(paraintsupregs) do
-+                  if reg=paraintsupregs[I] then
-+                    begin
-+                      reg:=I;
-+                      break;
-+                    end;
-+              off:=0;
-+            end;
-+          LOC_MMREGISTER:
-+            begin
-+              reg:=getsupreg(register);
-+              { winx64 uses different registers }
-+              if target_info.system=system_x86_64_win64 then
-+                begin
-+                  for I := 0 to high(parammsupregs_winx64) do
-+                    if reg=parammsupregs_winx64[I] then
-+                      begin
-+                        reg:=I;
-+                        break;
-+                      end;
-+                end
-+              else
-+                for I := 0 to high(parammsupregs) do
-+                  if reg=parammsupregs[I] then
-+                    begin
-+                      reg:=I;
-+                      break;
-+                    end;
++              for I := 0 to high(parasupregs) do
++                if getsupreg(register)=parasupregs[I] then
++                  begin
++                    reg:=I;
++                    break;
++                  end;
 +              off:=0;
 +            end;
 +          LOC_REFERENCE:
@@ -484,100 +576,8 @@ Index: compiler/x86_64/cpupara.pas
 +        end;
 +    end;
  
-     function tx86_64paramanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;
-       const
-Index: rtl/objpas/typinfo.pp
-===================================================================
---- rtl/objpas/typinfo.pp	(revision 34539)
-+++ rtl/objpas/typinfo.pp	(working copy)
-@@ -54,7 +54,7 @@
-        TMethodKind = (mkProcedure,mkFunction,mkConstructor,mkDestructor,
-                       mkClassProcedure,mkClassFunction,mkClassConstructor,
-                       mkClassDestructor,mkOperatorOverload);
--       TParamFlag     = (pfVar,pfConst,pfArray,pfAddress,pfReference,pfOut);
-+       TParamFlag     = (pfVar,pfConst,pfArray,pfAddress,pfReference,pfOut,pfConstRef);
-        TParamFlags    = set of TParamFlag;
-        TIntfFlag      = (ifHasGuid,ifDispInterface,ifDispatch,ifHasStrGUID);
-        TIntfFlags     = set of TIntfFlag;
-@@ -63,6 +63,7 @@
-        // don't rely on integer values of TCallConv since it includes all conventions
-        // which both delphi and fpc support. In the future delphi can support more and
-        // fpc own conventions will be shifted/reordered accordinly
-+       PCallConv = ^TCallConv;
-        TCallConv = (ccReg, ccCdecl, ccPascal, ccStdCall, ccSafeCall,
-                     ccCppdecl, ccFar16, ccOldFPCCall, ccInternProc,
-                     ccSysCall, ccSoftFloat, ccMWPascal);
-@@ -161,6 +162,49 @@
-         function GetParam(ParamIndex: Integer): PProcedureParam;
-       end;
- 
-+      PVmtMethodParam = ^TVmtMethodParam;
-+      TVmtMethodParam =
-+      {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
-+      packed
-+      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
-+      record
-+        Flags: TParamFlags;
-+        ParamType: PTypeInfo;
-+        ParReg: Byte;
-+        ParOff: LongInt;
-+        Name: ShortString;
-+        {Attribute data TODO}
-+      end;
-+
-+      PIntfMethodEntry = ^TIntfMethodEntry;
-+      TIntfMethodEntry =
-+      {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
-+      packed
-+      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
-+      record
-+        Name: ShortString;
-+        {
-+        Version: Byte;
-+        CC: TCallConv;
-+        ResultType: PTypeInfo;
-+        StackSize: Word;
-+        ParamCount: Byte;
-+        Params: array[0..ParamCount - 1] of TVmtMethodParam;
-+        }
-+        {Attribute data TODO}
-+      end;
-+
-+      PIntfMethodTable = ^TIntfMethodTable;
-+      TIntfMethodTable =
-+      {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
-+      packed
-+      {$endif FPC_REQUIRES_PROPER_ALIGNMENT}
-+      record
-+        Count: Word;
-+        RTTICount: Word;//$FFFF if there is no further info, or the value of Count
-+        {Entry: array[0..Count - 1] of TIntfMethodEntry}
-+      end;
-+
-       PTypeData = ^TTypeData;
-       TTypeData =
- {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}
-@@ -241,6 +285,11 @@
-                IntfFlags : TIntfFlagsBase;
-                GUID: TGUID;
-                IntfUnit: ShortString;
-+               {
-+               IntfPropCount: Word;
-+               IntfProps: array[0..IntfPropCount-1] of TPropInfo;
-+               IntfMethTable : TIntfMethodTable;
-+               }
-               );
-             tkInterfaceRaw:
-               (
-@@ -249,6 +298,11 @@
-                IID: TGUID;
-                RawIntfUnit: ShortString;
-                IIDStr: ShortString;
-+               {
-+               RawIntfPropCount: Word;
-+               RawIntfProps: array[0..IntfPropCount-1] of TPropInfo;
-+               IntfMethTable : TIntfMethodTable;
-+               }
-               );
-             tkArray:
-               (ArrayData: TArrayTypeData);
+-
+-
+     function  ti386paramanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): TCGPara;
+       var
+         retcgsize  : tcgsize;

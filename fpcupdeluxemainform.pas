@@ -156,7 +156,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0l';
+  FPCUPDELUXEVERSION='1.2.0m';
 
 resourcestring
   CrossGCCMsg =
@@ -1510,7 +1510,10 @@ begin
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
 
-  FPCupManager.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update';
+  // do not create shortcut for fpcupeluxe itself: we have already fpcupdeluxe by itself !!
+  //FPCupManager.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update';
+  FPCupManager.ShortCutNameFpcup:=EmptyStr;
+
   FPCupManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir);
 
   sInstallDir:=sInstallDir+DirectorySeparator;

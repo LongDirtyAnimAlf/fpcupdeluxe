@@ -580,7 +580,7 @@ var
   ScriptFile: string;
 begin
   {$IFDEF MSWINDOWS}
-  infoln('todo: write me (CreateHomeStartLink)!', eterror);
+  infoln('Todo: write me (CreateHomeStartLink)!', etInfo);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist
