@@ -86,6 +86,7 @@ type
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual;
     {$endif}
+    procedure AddFPCCFGSnippet(aSnippet: string);
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
     function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
@@ -133,6 +134,7 @@ Var
 implementation
 
 uses
+  StrUtils,
   LazFileUtils;
 
 { TCrossInstaller }
@@ -146,6 +148,16 @@ end;
 function TCrossInstaller.GetCrossModuleName:string;
 begin
   result:=FCrossModuleNamePrefix+'_'+TargetOS+'-'+TargetCPU;
+end;
+
+procedure TCrossInstaller.AddFPCCFGSnippet(aSnippet: string);
+begin
+  if Length(FPCCFGSnippet)>0 then
+  begin
+    if RPos(LineEnding,FFPCCFGSnippet)<Length(FFPCCFGSnippet) then FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding;
+    FFPCCFGSnippet:=FFPCCFGSnippet+aSnippet;
+  end
+  else FFPCCFGSnippet:=aSnippet;
 end;
 
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');

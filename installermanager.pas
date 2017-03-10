@@ -781,6 +781,16 @@ var
 begin
   result:=false;
 
+  if
+    (lowercase(FSequencer.FParent.CrossCPU_Target)=lowercase({$i %FPCTARGETCPU%}))
+    AND
+    (lowercase(FSequencer.FParent.CrossOS_Target)=lowercase({$i %FPCTARGETOS%}))
+  then
+  begin
+    infoln('No crosscompiling to own target !!',etError);
+    exit;
+  end;
+
   FResultSet:=[];
 
   try
@@ -885,6 +895,12 @@ end;
 
 constructor TFPCupManager.Create;
 begin
+  Verbose:=false;
+  UseWget:=false;
+  ExportOnly:=false;
+  NoJobs:=false;
+  UseGitClient:=false;
+
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
   FModulePublishedList:=TStringList.Create;
