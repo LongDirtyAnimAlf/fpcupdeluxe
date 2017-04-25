@@ -952,6 +952,16 @@ begin
       begin
         // default: armhf
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+        // Use hard floats, using armeabi-v7a Android ABI.
+        // Note: do not use -CaEABIHF on Android, to not use
+        // armeabi-v7a-hard ABI. Reasons:
+        // - armeabi-v7a-hard ABI is not adviced anymore by Google,
+        //   see "ARM Hard Float ABI Removal" on
+        //   https://android.googlesource.com/platform/ndk/+/353e653824b79c43b948429870d0abeedebde386/docs/HardFloatAbi.md
+        // - it prevents calling functions from libraries not using
+        //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
+        //   http://repo.or.cz/openal-soft/android.git or
+        //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
             then FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 '
             else FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
