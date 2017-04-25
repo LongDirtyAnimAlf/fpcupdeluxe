@@ -78,17 +78,6 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  if not result then
-  begin
-    {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-    ShowInfo('Searched but not found libspath '+FLibsPath);
-    {$ENDIF}
-  end;
-
-  SearchLibraryInfo(result);
 
   if result then
   begin
@@ -99,6 +88,33 @@ begin
     //'-FL/lib/ld-linux.so.2'+LineEnding+ {buildfaq 3.3.1: the name of the dynamic linker on the target ... can also be ld-linux.so.3 (Arch) ... tricky}
     '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
   end;
+
+  if not result then
+  begin
+    {$IFDEF UNIX}
+    FLibsPath:='/usr/lib/i386-linux-gnu'; //debian (multilib) Jessie+ convention
+    result:=DirectoryExists(FLibsPath);
+    if result then
+    begin
+      FLibsFound:=True;
+      //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/lib/i386-linux-gnu'));
+      {$ifdef CPUX64}
+      // multilib
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/usr/lib/gcc/x86_64-linux-gnu/5/32'));
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/usr/lib/gcc/x86_64-linux-gnu/6/32'));
+      // set linker target; multilib //
+      // we could test multilib by asking the linker ; ld --target-help, and process the output to see if elf32-i386 is supported
+      //AddFPCCFGSnippet('-k-b elf32-i386'));
+      {$endif}
+      //AddFPCCFGSnippet('-FL/lib/ld-linux.so.2');
+      //AddFPCCFGSnippet('-Xr'+ExcludeTrailingPathDelimiter(FLibsPath));
+    end else ShowInfo('Searched but not found (multilib) libspath '+FLibsPath);
+    {$ENDIF}
+  end;
+
+  SearchLibraryInfo(result);
 end;
 
 {$ifndef FPCONLY}

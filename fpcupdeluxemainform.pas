@@ -39,7 +39,7 @@ type
     Button4: TButton;
     Button5: TButton;
     CheckVerbosity: TCheckBox;
-    Edit1: TEdit;
+    InstallDirEdit: TEdit;
     Panel1: TPanel;
     RealFPCURL: TEdit;
     Label1: TLabel;
@@ -116,10 +116,11 @@ uses
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF UNIX}
-  LazFileUtils,
+  //LazFileUtils,
   AboutFrm,
   unzipprogress,
   extrasettings,
+  //checkoptions,
   installerUniversal,
   fpcuputil,
   processutils,
@@ -156,7 +157,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0m';
+  FPCUPDELUXEVERSION='1.2.0n';
 
 resourcestring
   CrossGCCMsg =
@@ -206,7 +207,7 @@ begin
   RadioGroup2.Items.Strings[RadioGroup2.Items.IndexOf('wince')]:='i-sim';
   {$endif CPUARM}
 
-  Self.Caption:='Lazarus and FPC installer and updater V'+FPCUPDELUXEVERSION+' based on fpcup'+RevisionStr+' ('+VersionDate+') for '+
+  Self.Caption:='FPCUPdeluxe V'+FPCUPDELUXEVERSION+' base fpcup'+RevisionStr+' ('+VersionDate+') for '+
                 lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
 
   sStatus:='Sitting and waiting';
@@ -269,18 +270,18 @@ begin
 
   sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
 
-  Edit1.Text:=sInstallDir;
+  InstallDirEdit.Text:=sInstallDir;
 
-  // set edit1 (installdir) onchange here, to prevent early firing
-  Edit1.OnChange:=nil;
-  Edit1.OnKeyUp:=nil;
+  // set InstallDirEdit (installdir) onchange here, to prevent early firing
+  InstallDirEdit.OnChange:=nil;
+  InstallDirEdit.OnKeyUp:=nil;
   {$ifdef Darwin}
   {$ifdef LCLCOCOA}
   // onchange does not work on cocoa, so use onkeyup
-  Edit1.OnKeyUp:=@Edit1KeyUp;
+  InstallDirEdit.OnKeyUp:=@Edit1KeyUp;
   {$endif}
   {$endif}
-  if Edit1.OnKeyUp=nil then Edit1.OnChange:=@Edit1Change;
+  if InstallDirEdit.OnKeyUp=nil then InstallDirEdit.OnChange:=@Edit1Change;
 
   // create settings form
   // must be done here, to enable local storage/access of some setttings !!
@@ -322,6 +323,8 @@ begin
   FPCupManager.FPCURL:='default';
   FPCupManager.LazarusURL:='default';
   FPCupManager.Verbose:=true;
+
+  //CheckFPCUPOptions(FPCupManager);
 
   {$IF defined(BSD) and not defined(DARWIN)}
   FPCupManager.PatchCmd:='gpatch';
@@ -441,7 +444,7 @@ begin
 
   if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
-    Memo1.Lines.Append('Performing a checkout ... please wait, could take some time.');
+    Memo1.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');
   end;
 
   // github error
@@ -521,6 +524,10 @@ begin
     end
     else if (Pos('error:',lowercase(s))>0) then
     begin
+      {$ifdef Darwin}
+      // on Darwin, ignore focus errors
+      if (Pos('setfocus',lowercase(s))=0) then
+      {$endif}
       Memo1.Lines.Append(s);
     end;
   end;
@@ -838,7 +845,7 @@ begin
   if SelectDirectoryDialog1.Execute then
   begin
     sInstallDir:=SelectDirectoryDialog1.FileName;
-    Edit1.Text:=sInstallDir;
+    InstallDirEdit.Text:=sInstallDir;
   end;
 end;
 
@@ -945,7 +952,9 @@ begin
       begin
         // default: armhf
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-        FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+        if (FPCupManager.CrossOS_Target='android')
+            then FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 '
+            else FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
       end;
     end;
 
@@ -1150,7 +1159,10 @@ begin
                   {$else}
                   UnZipper := 'unrar';
                   {$endif}
-                  success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+                  success:=CheckExecutable(UnZipper, '-v', '');
+                  if success
+                     then success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0)
+                     else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                 end;
               end;
 
@@ -1222,7 +1234,10 @@ begin
                   {$else}
                   UnZipper := 'unrar';
                   {$endif}
-                  success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0);
+                  success:=CheckExecutable(UnZipper, '-v', '');
+                  if success
+                     then success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0)
+                     else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                 end;
               end;
             end;
@@ -1287,8 +1302,6 @@ begin
 end;
 
 procedure TForm1.LazarusOnlyClick(Sender: TObject);
-var
-  FModuleList:TStringList;
 begin
   if (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
@@ -1348,7 +1361,7 @@ end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
-  sInstallDir:=Edit1.Text;
+  sInstallDir:=InstallDirEdit.Text;
   if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME) then
   begin
     AddMessage('Got settings from install directory');
@@ -1357,7 +1370,7 @@ end;
 
 procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
-  sInstallDir:=Edit1.Text;
+  sInstallDir:=InstallDirEdit.Text;
   if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME) then
   begin
     AddMessage('Got settings from install directory');
@@ -1426,7 +1439,7 @@ begin
   ListBoxLazarusTarget.Enabled:=value;
   ListBox3.Enabled:=value;
 
-  Edit1.Enabled:=value;
+  InstallDirEdit.Enabled:=value;
   RadioGroup1.Enabled:=value;
   RadioGroup2.Enabled:=value;
   CheckVerbosity.Enabled:=value;
@@ -1531,6 +1544,7 @@ begin
      else FPCupManager.FPCSourceDirectory:=FPCupManager.FPCInstallDirectory;
 
   FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
+
   {
   if Form2.SplitLazarus
      then FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory+'src'

@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 529
+  Left = 121
   Height = 601
-  Top = 107
+  Top = 81
   Width = 746
   Caption = 'Advanced settings'
   ClientHeight = 601
@@ -36,37 +36,42 @@ object Form2: TForm2
       AnchorSideLeft.Control = GroupBox1
       AnchorSideTop.Control = Label1
       AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = EditHTTPProxyPort
       AnchorSideBottom.Control = Label1
       Left = 4
       Height = 23
       Top = 23
-      Width = 574
+      Width = 586
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
+      BorderSpacing.Right = 12
       TabOrder = 0
     end
     object Label2: TLabel
-      AnchorSideLeft.Control = EditHTTPProxyHost
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Label1
-      Left = 586
+      AnchorSideRight.Control = GroupBox1
+      AnchorSideRight.Side = asrBottom
+      Left = 602
       Height = 15
       Top = 4
       Width = 90
-      BorderSpacing.Left = 8
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 10
+      BorderSpacing.Right = 28
       Caption = 'HTTP proxy port:'
       ParentColor = False
     end
     object EditHTTPProxyPort: TEdit
-      AnchorSideLeft.Control = EditHTTPProxyHost
-      AnchorSideLeft.Side = asrBottom
+      AnchorSideLeft.Control = Label2
       AnchorSideTop.Control = EditHTTPProxyHost
-      Left = 586
+      AnchorSideRight.Side = asrBottom
+      Left = 602
       Height = 23
       Top = 23
-      Width = 120
-      BorderSpacing.Left = 8
+      Width = 94
+      BorderSpacing.Right = 6
       NumbersOnly = True
       TabOrder = 1
     end
@@ -84,38 +89,35 @@ object Form2: TForm2
       ParentColor = False
     end
     object EditHTTPProxyUser: TEdit
-      AnchorSideLeft.Control = GroupBox1
+      AnchorSideLeft.Control = Label3
       AnchorSideTop.Control = Label3
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 23
       Top = 77
       Width = 152
-      BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       TabOrder = 2
     end
     object Label4: TLabel
-      AnchorSideLeft.Control = EditHTTPProxyUser
+      AnchorSideLeft.Control = Label3
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Label3
       Left = 176
       Height = 15
       Top = 58
       Width = 118
-      BorderSpacing.Left = 20
+      BorderSpacing.Left = 52
       Caption = 'HTTP proxy password:'
       ParentColor = False
     end
     object EditHTTPProxyPassword: TEdit
-      AnchorSideLeft.Control = EditHTTPProxyUser
-      AnchorSideLeft.Side = asrBottom
+      AnchorSideLeft.Control = Label4
       AnchorSideTop.Control = EditHTTPProxyUser
       Left = 176
       Height = 23
       Top = 77
       Width = 152
-      BorderSpacing.Left = 20
       EchoMode = emPassword
       PasswordChar = '*'
       TabOrder = 3
@@ -456,10 +458,14 @@ object Form2: TForm2
     ClientWidth = 246
     TabOrder = 3
     object EditFPCBranch: TEdit
+      AnchorSideLeft.Control = LabelFPCbranch
+      AnchorSideTop.Control = LabelFPCbranch
+      AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 24
+      Top = 25
       Width = 112
+      BorderSpacing.Top = 2
       Enabled = False
       TabOrder = 0
     end
@@ -473,10 +479,14 @@ object Form2: TForm2
       ParentColor = False
     end
     object EditFPCRevision: TEdit
+      AnchorSideLeft.Control = LabelFPCRevision
+      AnchorSideTop.Control = LabelFPCRevision
+      AnchorSideTop.Side = asrBottom
       Left = 136
       Height = 23
-      Top = 24
+      Top = 25
       Width = 104
+      BorderSpacing.Top = 2
       TabOrder = 1
     end
     object LabelFPCRevision: TLabel
@@ -488,35 +498,49 @@ object Form2: TForm2
       ParentColor = False
     end
     object LabelLazarusbranch: TLabel
+      AnchorSideTop.Control = EditFPCBranch
+      AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 15
-      Top = 56
+      Top = 52
       Width = 79
+      BorderSpacing.Top = 4
       Caption = 'Lazarus branch'
       Enabled = False
       ParentColor = False
     end
     object EditLazarusBranch: TEdit
+      AnchorSideLeft.Control = LabelLazarusbranch
+      AnchorSideTop.Control = LabelLazarusbranch
+      AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 72
+      Top = 69
       Width = 112
+      BorderSpacing.Top = 2
       Enabled = False
       TabOrder = 2
     end
     object LabelLazarusRevision: TLabel
+      AnchorSideTop.Control = EditFPCRevision
+      AnchorSideTop.Side = asrBottom
       Left = 136
       Height = 15
-      Top = 56
+      Top = 52
       Width = 83
+      BorderSpacing.Top = 4
       Caption = 'Lazarus revision'
       ParentColor = False
     end
     object EditLazarusRevision: TEdit
+      AnchorSideLeft.Control = LabelLazarusRevision
+      AnchorSideTop.Control = LabelLazarusRevision
+      AnchorSideTop.Side = asrBottom
       Left = 136
       Height = 23
-      Top = 72
+      Top = 69
       Width = 104
+      BorderSpacing.Top = 2
       TabOrder = 3
     end
   end
@@ -538,25 +562,36 @@ object Form2: TForm2
       ParentColor = False
     end
     object EditFPCOptions: TEdit
+      AnchorSideLeft.Control = LabelFPCOptions
+      AnchorSideTop.Control = LabelFPCOptions
+      AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 24
+      Top = 25
       Width = 120
+      BorderSpacing.Top = 2
       TabOrder = 0
     end
     object LabelLazarusOptions: TLabel
+      AnchorSideTop.Control = EditFPCOptions
+      AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 15
-      Top = 56
+      Top = 52
       Width = 82
+      BorderSpacing.Top = 4
       Caption = 'Lazarus options'
       ParentColor = False
     end
     object EditLazarusOptions: TEdit
+      AnchorSideLeft.Control = LabelLazarusOptions
+      AnchorSideTop.Control = LabelLazarusOptions
+      AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 72
+      Top = 69
       Width = 120
+      BorderSpacing.Top = 2
       TabOrder = 1
     end
   end

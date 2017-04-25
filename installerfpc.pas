@@ -1158,6 +1158,9 @@ begin
 
   result:='0.0.0';
 
+  // for trunk i.e. , also 3.0.2 is allowed
+  // but online, only official 3.0.0 bootstrapper available
+
   if s=FPCTRUNKVERSION then result:='3.0.0'
   else if s='3.0.3' then result:='3.0.0'
   else if (s='3.0.2')  or (s='3.0.1') then result:='3.0.0'
@@ -1329,144 +1332,144 @@ var
   OperationSucceeded: boolean;
 begin
 
-OperationSucceeded:=true;
+  OperationSucceeded:=true;
 
-if FBootstrapCompilerURL='' then exit;
+  if FBootstrapCompilerURL='' then exit;
 
-if OperationSucceeded then
-begin
-  OperationSucceeded:=ForceDirectoriesUTF8(FBootstrapCompilerDirectory);
-  if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+FBootstrapCompilerDirectory,eterror);
-end;
-
-BootstrapArchive := SysUtils.GetTempFileName;
-if OperationSucceeded then
-begin
-  OperationSucceeded:=Download(FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-  if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
-end;
-
-if OperationSucceeded then
-begin
-  ArchiveDir := ExtractFilePath(BootstrapArchive);
-  CompilerName:=ExtractFileName(FBootstrapCompiler);
-
-  if ExtractFileExt(GetFileNameFromURL(FBootstrapCompilerURL))<>GetExeExt then
+  if OperationSucceeded then
   begin
-    // assume we have an archive if the file extension differs from a normal executable extension
+    OperationSucceeded:=ForceDirectoriesUTF8(FBootstrapCompilerDirectory);
+    if OperationSucceeded=false then infoln('DownloadBootstrapCompiler error: could not create directory '+FBootstrapCompilerDirectory,eterror);
+  end;
 
-    {$IFDEF MSWINDOWS}
-    // Extract zip, overwriting without prompting
-    if ExecuteCommand(FUnzip+' -o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
-    begin
-      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
-      OperationSucceeded := False;
-    end
-    else
-    begin
-      OperationSucceeded := True; // Spelling it out can't hurt sometimes
-    end;
-    // Move CompilerName to proper directory
-    if OperationSucceeded = True then
-    begin
-      infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, etDebug);
-      SysUtils.DeleteFile(FBootstrapCompiler);
-      SysUtils.RenameFile(ArchiveDir + CompilerName, FBootstrapCompiler);
-      //SysUtils.DeleteFile(ArchiveDir + CompilerName);
-    end;
-    {$ENDIF MSWINDOWS}
-    {$IFDEF LINUX}
-    // Extract bz2, overwriting without prompting
-    if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
-    begin
-      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
-      OperationSucceeded := False;
-    end
-    else
-    begin
-      ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
-      OperationSucceeded := True; // Spelling it out can't hurt sometimes
-    end;
-    // Move compiler to proper directory; note bzip2 will append .out to file
-    if OperationSucceeded = True then
-    begin
-      infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
-      OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
-    end;
-    {$ENDIF LINUX}
-    {$IFDEF BSD} //*BSD
-    {$IFNDEF DARWIN}
-    //todo: test parameters
-    //Extract bz2, overwriting without prompting
-    if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
-    begin
-      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
-      OperationSucceeded := False;
-    end
-    else
-    begin
-      ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
-      OperationSucceeded := True; // Spelling it out can't hurt sometimes
-    end;
-    // Move compiler to proper directory; note bzip2 will append .out to file
-    if OperationSucceeded = True then
-    begin
-      infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
-      OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
-    end;
-    {$ELSE DARWIN}
-    // Extract .tar.bz2, overwriting without prompting
-    // GNU tar: -x -v -j -f
-    // BSD tar:
-    if ExecuteCommand(FTar+' -xf ' + BootstrapArchive + ' -C ' + ArchiveDir ,FVerbose) <> 0 then
-    begin
-      infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
-      OperationSucceeded := False;
-    end
-    else
-    begin
-      OperationSucceeded := True;
-    end;
-    if OperationSucceeded = True then
-    begin
-      infoln('Going to rename/move '+CompilerName+' to '+FBootstrapCompiler,etwarning);
-      Sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
-      // We might be moving files across partitions so we cannot use renamefile
-      OperationSucceeded:=FileUtil.CopyFile(ArchiveDir + CompilerName, FBootstrapCompiler);
-      Sysutils.DeleteFile(ArchiveDir + CompilerName);
-    end;
-    {$ENDIF DARWIN}
-    {$ENDIF BSD}
+  BootstrapArchive := SysUtils.GetTempFileName;
+  if OperationSucceeded then
+  begin
+    OperationSucceeded:=Download(FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
+  end;
 
+  if OperationSucceeded then
+  begin
+    ArchiveDir := ExtractFilePath(BootstrapArchive);
+    CompilerName:=ExtractFileName(FBootstrapCompiler);
+
+    if ExtractFileExt(GetFileNameFromURL(FBootstrapCompilerURL))<>GetExeExt then
+    begin
+      // assume we have an archive if the file extension differs from a normal executable extension
+
+      {$IFDEF MSWINDOWS}
+      // Extract zip, overwriting without prompting
+      if ExecuteCommand(FUnzip+' -o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
+      begin
+        infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      end;
+      // Move CompilerName to proper directory
+      if OperationSucceeded = True then
+      begin
+        infoln('Going to rename/move ' + ArchiveDir + CompilerName + ' to ' + FBootstrapCompiler, etDebug);
+        SysUtils.DeleteFile(FBootstrapCompiler);
+        SysUtils.RenameFile(ArchiveDir + CompilerName, FBootstrapCompiler);
+        //SysUtils.DeleteFile(ArchiveDir + CompilerName);
+      end;
+      {$ENDIF MSWINDOWS}
+      {$IFDEF LINUX}
+      // Extract bz2, overwriting without prompting
+      if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
+      begin
+        infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
+        OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      end;
+      // Move compiler to proper directory; note bzip2 will append .out to file
+      if OperationSucceeded = True then
+      begin
+        infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
+        OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
+      end;
+      {$ENDIF LINUX}
+      {$IFDEF BSD} //*BSD
+      {$IFNDEF DARWIN}
+      //todo: test parameters
+      //Extract bz2, overwriting without prompting
+      if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapArchive,FVerbose) <> 0 then
+      begin
+        infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        ExtractedCompiler:=BootstrapArchive+'.out'; //default bzip2 output filename
+        OperationSucceeded := True; // Spelling it out can't hurt sometimes
+      end;
+      // Move compiler to proper directory; note bzip2 will append .out to file
+      if OperationSucceeded = True then
+      begin
+        infoln('Going to move ' + ExtractedCompiler + ' to ' + FBootstrapCompiler,etDebug);
+        OperationSucceeded:=MoveFile(ExtractedCompiler,FBootstrapCompiler);
+      end;
+      {$ELSE DARWIN}
+      // Extract .tar.bz2, overwriting without prompting
+      // GNU tar: -x -v -j -f
+      // BSD tar:
+      if ExecuteCommand(FTar+' -xf ' + BootstrapArchive + ' -C ' + ArchiveDir ,FVerbose) <> 0 then
+      begin
+        infoln('Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',eterror);
+        OperationSucceeded := False;
+      end
+      else
+      begin
+        OperationSucceeded := True;
+      end;
+      if OperationSucceeded = True then
+      begin
+        infoln('Going to rename/move '+CompilerName+' to '+FBootstrapCompiler,etwarning);
+        Sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
+        // We might be moving files across partitions so we cannot use renamefile
+        OperationSucceeded:=FileUtil.CopyFile(ArchiveDir + CompilerName, FBootstrapCompiler);
+        Sysutils.DeleteFile(ArchiveDir + CompilerName);
+      end;
+      {$ENDIF DARWIN}
+      {$ENDIF BSD}
+
+    end
+    else
+    begin
+      // no archive but a normal executable
+      infoln('Going to copy '+BootstrapArchive+' to '+FBootstrapCompiler,etwarning);
+      sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
+      OperationSucceeded:=FileUtil.CopyFile(BootstrapArchive, FBootstrapCompiler);
+      sysutils.DeleteFile(BootstrapArchive);
+    end;
+  end;
+
+  {$IFNDEF MSWINDOWS}
+  if OperationSucceeded then
+  begin
+    // Make executable
+    OperationSucceeded:=(fpChmod(FBootstrapCompiler, &700)=0); //rwx------
+    if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,eterror);
+  end;
+  {$ENDIF MSWINDOWS}
+
+  if OperationSucceeded = True then
+  begin
+    SysUtils.DeleteFile(BootstrapArchive);
   end
   else
   begin
-    // no archive but a normal executable
-    infoln('Going to copy '+BootstrapArchive+' to '+FBootstrapCompiler,etwarning);
-    sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
-    OperationSucceeded:=FileUtil.CopyFile(BootstrapArchive, FBootstrapCompiler);
-    sysutils.DeleteFile(BootstrapArchive);
+    infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive, eterror);
   end;
-end;
-
-{$IFNDEF MSWINDOWS}
-if OperationSucceeded then
-begin
-  // Make executable
-  OperationSucceeded:=(fpChmod(FBootstrapCompiler, &700)=0); //rwx------
-  if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,eterror);
-end;
-{$ENDIF MSWINDOWS}
-
-if OperationSucceeded = True then
-begin
-  SysUtils.DeleteFile(BootstrapArchive);
-end
-else
-begin
-  infoln('Error getting/extracting bootstrap compiler. Archive: '+BootstrapArchive, eterror);
-end;
-Result := OperationSucceeded;
+  Result := OperationSucceeded;
 end;
 
 function TFPCInstaller.GetFPCVersion: string;

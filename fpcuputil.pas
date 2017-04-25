@@ -259,6 +259,7 @@ function GetGCCDirectory:string;
 {$ENDIF UNIX}
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
+function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
@@ -1161,6 +1162,52 @@ begin
     Result:=IncludeTrailingPathDelimiter(Result);
 end;
 {$ENDIF UNIX}
+
+function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+var
+  ResultCode: longint;
+  OperationSucceeded: boolean;
+  ExeName: string;
+  Output: string;
+begin
+  try
+    Output:='';
+    ExeName := ExtractFileName(Executable);
+    ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, False);
+    if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really
+    begin
+      if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
+      begin
+        // This is not a warning/error message as sometimes we can use multiple different versions of executables
+        infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',etDebug);
+        OperationSucceeded := false;
+      end
+      else
+      begin
+        // We're not looking for any specific output so we're happy
+        OperationSucceeded := true;
+      end;
+    end
+    else
+    begin
+      // This is not a warning/error message as sometimes we can use multiple different versions of executables
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etDebug);
+      OperationSucceeded := false;
+    end;
+  except
+    on E: Exception do
+    begin
+      // This is not a warning/error message as sometimes we can use multiple different versions of executables
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', etDebug);
+      OperationSucceeded := false;
+    end;
+  end;
+  if OperationSucceeded then
+    infoln('Found valid ' + ExeName + ' application.',etDebug);
+  Result := OperationSucceeded;
+end;
+
 
 function ExtractFileNameOnly(const AFilename: string): string;
 var
