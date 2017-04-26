@@ -1348,9 +1348,14 @@ begin
     begin
       for x:=0 to FUnZipper.Entries.Count-1 do
       begin
+        { UTF8 features are only available in FPC >= 3.1 }
+        {$IF FPC_FULLVERSION > 30100}
         if FUnZipper.UseUTF8
           then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-          else s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+          else
+        {$endif}
+          s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+
         if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
         if (Length(s)>0) AND (s[1]='.') then continue;
         FFileList.Append(s);
