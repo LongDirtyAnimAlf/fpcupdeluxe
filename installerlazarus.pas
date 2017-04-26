@@ -675,6 +675,7 @@ function TLazarusInstaller.ConfigModule(ModuleName: string): boolean;
 const
   LazarusCFG = 'lazarus.cfg'; //file to store primary config argument in
   StaticPackagesFile = 'staticpackages.inc';
+  VALIDVERSIONCHARS = ['0'..'9','.',','];
 var
   DebuggerPath: string;
   LazarusConfig: TUpdateLazConfig;
@@ -682,7 +683,7 @@ var
   StaticPackages: TStringList;
   VersionSnippet: string;
   VersionList: TStringList;
-  i:integer;
+  i,j:integer;
   LazBuildApp:string;
   Output:string;
   FReturnCode: integer;
@@ -748,27 +749,42 @@ begin
 
   if Length(VersionSnippet)>0 then
   begin
+    // remove extensions like RC### from version
+    j:=0;
+    for i:=1 to length(VersionSnippet) do
+    begin
+      if NOT (VersionSnippet[i] in VALIDVERSIONCHARS) then
+      begin
+        j:=i;
+        break;
+      end;
+    end;
+    if j>0 then Delete(VersionSnippet,j,MaxInt);
+
     VersionList := TStringList.Create;
     try
       VersionList.CommaText := VersionSnippet;
-      case VersionList.Count of
-        1:
-        begin
-          FMajorVersion := StrToIntDef(VersionList[0], -1);
-          //FMinorVersion := 0;
-          //FReleaseVersion := 0;
-        end;
-        2:
-        begin
-          FMajorVersion := StrToIntDef(VersionList[0], -1);
-          FMinorVersion := StrToIntDef(VersionList[1], -1);
-          //FReleaseVersion := 0;
-        end;
-        3..maxint:
-        begin
-          FMajorVersion := StrToIntDef(VersionList[0], -1);
-          FMinorVersion := StrToIntDef(VersionList[1], -1);
-          FReleaseVersion := StrToIntDef(VersionList[2], -1);
+      if VersionList.Count>0 then
+      begin
+        case VersionList.Count of
+          1:
+          begin
+            FMajorVersion := StrToIntDef(VersionList[0], -1);
+            //FMinorVersion := 0;
+            //FReleaseVersion := 0;
+          end;
+          2:
+          begin
+            FMajorVersion := StrToIntDef(VersionList[0], -1);
+            FMinorVersion := StrToIntDef(VersionList[1], -1);
+            //FReleaseVersion := 0;
+          end;
+          else
+          begin
+            FMajorVersion := StrToIntDef(VersionList[0], -1);
+            FMinorVersion := StrToIntDef(VersionList[1], -1);
+            FReleaseVersion := StrToIntDef(VersionList[2], -1);
+          end;
         end;
       end;
     finally

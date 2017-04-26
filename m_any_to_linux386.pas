@@ -78,7 +78,6 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-
   if result then
   begin
     FLibsFound:=True;
@@ -92,6 +91,7 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
+    {$IFDEF MULTILIB}
     FLibsPath:='/usr/lib/i386-linux-gnu'; //debian (multilib) Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if result then
@@ -101,7 +101,7 @@ begin
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/lib/i386-linux-gnu'));
       {$ifdef CPUX64}
-      // multilib
+      // gcc multilib
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/usr/lib/gcc/x86_64-linux-gnu/5/32'));
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/usr/lib/gcc/x86_64-linux-gnu/6/32'));
       // set linker target; multilib //
@@ -109,8 +109,11 @@ begin
       //AddFPCCFGSnippet('-k-b elf32-i386'));
       {$endif}
       //AddFPCCFGSnippet('-FL/lib/ld-linux.so.2');
+      {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
       //AddFPCCFGSnippet('-Xr'+ExcludeTrailingPathDelimiter(FLibsPath));
+      //AddFPCCFGSnippet('-Xr/usr/lib);
     end else ShowInfo('Searched but not found (multilib) libspath '+FLibsPath);
+    {$ENDIF}
     {$ENDIF}
   end;
 

@@ -74,10 +74,12 @@ begin
   if not result then
   begin
     {$IFDEF UNIX}
+    {$IFDEF MULTILIB}
     FLibsPath:='/usr/lib/x86_64-linux-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
+    {$ENDIF}
     {$ENDIF}
   end;
 

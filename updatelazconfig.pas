@@ -84,7 +84,7 @@ const
   // Lazarus pre 1.0: 106
   // We can assume Lazarus trunk can parse this version:
   TrunkVersionNewEnvironmentConfig='110';
-  TrunkLazarusNewEnvironmentConfig='1.7';
+  TrunkLazarusNewEnvironmentConfig='1.9.0';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='2';
@@ -492,8 +492,10 @@ begin
                 4 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '108'); //for version 1.4
                 5 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.5
                 6 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.6
+                7 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.7
+                8 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.8 (fixes)
               else
-                begin //-1 or higher than 6 set to trunk version
+                begin //-1 or higher than 8 set to trunk version
                   NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
                   NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
                 end;
