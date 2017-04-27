@@ -157,7 +157,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0n';
+  FPCUPDELUXEVERSION='1.2.0o';
 
 resourcestring
   CrossGCCMsg =
@@ -904,7 +904,7 @@ begin
   if (FPCupManager.CrossOS_Target='linux') then
   begin
     ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-    Memo1.Lines.Append(CrossGCCMsg);
+    Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
     Memo1.Lines.Append('');
   end;
 
@@ -1255,11 +1255,17 @@ begin
 
           if success then
           begin
+            Memo1.Clear;
             AddMessage('Successfully extracted cross-tools.');
             // run again with the correct libs and binutils
             label1.Font.Color:=clDefault;
             label2.Font.Color:=clDefault;
             AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
+            if (FPCupManager.CrossOS_Target='linux') then
+            begin
+              Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
+              Memo1.Lines.Append('');
+            end;
             FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
           end;
