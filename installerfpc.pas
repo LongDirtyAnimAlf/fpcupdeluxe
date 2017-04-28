@@ -2518,7 +2518,7 @@ begin
   end
   else
   begin
-    infoln('FPC: running make distclean failed: could not find compiler ('+FCompiler+')',etError);
+    infoln('FPC: running make distclean failed: could not find compiler ('+FCompiler+')',etWarning);
   end;
 
   // Delete any existing fpc.cfg files

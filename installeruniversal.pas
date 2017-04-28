@@ -456,7 +456,7 @@ begin
     if PackagePath='' then continue;
     if NOT FileExists(PackagePath) then
     begin
-      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etError);
+      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
       continue;
     end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
@@ -518,7 +518,7 @@ begin
     if (PackagePath='') then continue;
     if NOT FileExists(PackagePath) then
     begin
-      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etError);
+      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
       continue;
     end;
 
