@@ -579,10 +579,15 @@ begin
            {$endif}
 
            {$ifdef Darwin}
-           //if (CrossInstaller.TargetOS='iphonesim') then
+           if (CrossInstaller.TargetOS='macos') OR (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
            begin
              s:=ResolveDots(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
              CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s);
+           end
+           else
+           begin
+             CrossOptions:=CrossOptions+' -Xd';
+             CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
            end;
            {$endif}
 

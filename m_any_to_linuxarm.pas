@@ -73,7 +73,7 @@ begin
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
 
-  // local paths based on libbraries provided for or adviced by fpc itself
+  // local paths based on libraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
   // also check in the gnueabi directory
@@ -144,12 +144,21 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:='arm-linux-gnueabi';
+    BinPrefixTry:='arm-linux-gnueabi-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     // also check in the gnueabi directory
     if not result then
        result:=SimpleSearchBinUtil(BasePath,DirName+'-gnueabi',AsFile);
+    {$ifdef Darwin}
+    if not result then
+    begin
+      // some special binutils, also working for RPi2 !!
+      BinPrefixTry:='armv8-rpi3-linux-gnueabihf-';
+      AsFile:=BinPrefixTry+'as'+GetExeExt;
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    end;
+    {$endif}
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
@@ -216,7 +225,7 @@ begin
     // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      FCrossOpts.Add('-CpARMV6'); //apparently earlier instruction sets unsupported by Android and Raspberry Pi
+      FCrossOpts.Add('-CpARMV6 '); //apparently earlier instruction sets unsupported by Android and Raspberry Pi
       ShowInfo('Did not find any -Cp architecture parameter; using -CpARMV6.',etInfo);
     end;
 

@@ -4,11 +4,10 @@
     <PathDelim Value="\"/>
     <Version Value="10"/>
     <BuildModes Active="Default"/>
-    <Units Count="301">
+    <Units Count="304">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -18,6 +17,7 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="1"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
@@ -61,7 +61,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos Y="51"/>
-        <UsageCount Value="54"/>
+        <UsageCount Value="61"/>
       </Unit5>
       <Unit6>
         <Filename Value="fpcuplprbase.inc"/>
@@ -81,22 +81,22 @@
         <Filename Value="installermanager.pas"/>
         <UnitName Value="installerManager"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="14" Y="487"/>
+        <TopLine Value="289"/>
+        <CursorPos X="12" Y="293"/>
         <UsageCount Value="100"/>
       </Unit8>
       <Unit9>
         <Filename Value="fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1073"/>
-        <CursorPos X="37" Y="1129"/>
+        <TopLine Value="1354"/>
+        <CursorPos X="17" Y="1361"/>
         <UsageCount Value="100"/>
       </Unit9>
       <Unit10>
         <Filename Value="installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="385"/>
-        <CursorPos X="6" Y="399"/>
+        <TopLine Value="109"/>
         <UsageCount Value="100"/>
       </Unit10>
       <Unit11>
@@ -110,8 +110,8 @@
         <Filename Value="installeruniversal.pas"/>
         <UnitName Value="installerUniversal"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="56"/>
-        <CursorPos X="33" Y="67"/>
+        <TopLine Value="445"/>
+        <CursorPos X="91" Y="459"/>
         <UsageCount Value="66"/>
       </Unit12>
       <Unit13>
@@ -204,8 +204,8 @@
         <Filename Value="installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="294"/>
-        <CursorPos X="76" Y="317"/>
+        <TopLine Value="564"/>
+        <CursorPos X="36" Y="582"/>
         <UsageCount Value="105"/>
       </Unit25>
       <Unit26>
@@ -416,8 +416,8 @@
         <Filename Value="installerlazarus.pas"/>
         <UnitName Value="installerLazarus"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="382"/>
-        <CursorPos X="16" Y="403"/>
+        <TopLine Value="330"/>
+        <CursorPos X="12" Y="1083"/>
         <UsageCount Value="100"/>
       </Unit53>
       <Unit54>
@@ -445,8 +445,8 @@
       <Unit57>
         <Filename Value="updatelazconfig.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="510"/>
-        <CursorPos X="20" Y="490"/>
+        <TopLine Value="606"/>
+        <CursorPos X="18" Y="616"/>
         <UsageCount Value="10"/>
       </Unit57>
       <Unit58>
@@ -458,8 +458,9 @@
       <Unit59>
         <Filename Value="gitclient.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="43"/>
-        <UsageCount Value="4"/>
+        <TopLine Value="182"/>
+        <CursorPos X="27" Y="195"/>
+        <UsageCount Value="10"/>
       </Unit59>
       <Unit60>
         <Filename Value="svnclient.pas"/>
@@ -485,9 +486,9 @@
         <Filename Value="C:\NewPascal\lazarus\components\lazutils\lazfileutils.pas"/>
         <UnitName Value="LazFileUtils"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="28"/>
-        <CursorPos X="10" Y="63"/>
-        <UsageCount Value="8"/>
+        <TopLine Value="1284"/>
+        <CursorPos X="10" Y="1299"/>
+        <UsageCount Value="10"/>
       </Unit63>
       <Unit64>
         <Filename Value="C:\NewPascal\lazarus\components\lazutils\fileutil.pas"/>
@@ -507,15 +508,15 @@
       <Unit66>
         <Filename Value="m_any_to_linuxarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="230"/>
-        <CursorPos X="24" Y="243"/>
-        <UsageCount Value="10"/>
+        <TopLine Value="135"/>
+        <CursorPos X="18" Y="156"/>
+        <UsageCount Value="11"/>
       </Unit66>
       <Unit67>
         <Filename Value="m_crossinstaller.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="150"/>
-        <CursorPos X="3" Y="155"/>
+        <TopLine Value="252"/>
+        <CursorPos X="37" Y="252"/>
         <UsageCount Value="55"/>
       </Unit67>
       <Unit68>
@@ -560,9 +561,9 @@
       <Unit74>
         <Filename Value="m_any_to_linux386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="78"/>
-        <CursorPos X="53" Y="95"/>
-        <UsageCount Value="16"/>
+        <TopLine Value="65"/>
+        <CursorPos X="20" Y="70"/>
+        <UsageCount Value="17"/>
       </Unit74>
       <Unit75>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
@@ -580,9 +581,9 @@
       <Unit77>
         <Filename Value="m_any_to_embeddedarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="160"/>
-        <CursorPos X="108" Y="173"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="135"/>
+        <CursorPos X="5" Y="149"/>
+        <UsageCount Value="10"/>
       </Unit77>
       <Unit78>
         <Filename Value="m_any_to_freebsd386.pas"/>
@@ -851,8 +852,8 @@
       <Unit116>
         <Filename Value="m_any_to_darwin386.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="200"/>
-        <CursorPos X="11" Y="223"/>
+        <TopLine Value="153"/>
+        <CursorPos X="11" Y="166"/>
         <UsageCount Value="40"/>
       </Unit116>
       <Unit117>
@@ -1282,7 +1283,9 @@
       <Unit175>
         <Filename Value="m_any_to_linuxx64.pas"/>
         <EditorIndex Value="-1"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="72"/>
+        <CursorPos X="39" Y="68"/>
+        <UsageCount Value="11"/>
       </Unit175>
       <Unit176>
         <Filename Value="synaser\ftpsend.pas"/>
@@ -1384,9 +1387,9 @@
       <Unit190>
         <Filename Value="C:\NewPascal\fpcsrc\rtl\objpas\sysutils\filutilh.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="146"/>
-        <CursorPos X="15" Y="160"/>
-        <UsageCount Value="8"/>
+        <TopLine Value="150"/>
+        <CursorPos X="20" Y="174"/>
+        <UsageCount Value="10"/>
       </Unit190>
       <Unit191>
         <Filename Value="fpftpclient.pas"/>
@@ -1578,9 +1581,9 @@
       <Unit217>
         <Filename Value="C:\NewPascal\fpcsrc\rtl\objpas\sysutils\sysstrh.inc"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="14"/>
-        <CursorPos X="54" Y="28"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="242"/>
+        <CursorPos X="10" Y="131"/>
+        <UsageCount Value="10"/>
       </Unit217>
       <Unit218>
         <Filename Value="C:\NewPascal\fpcsrc\packages\winunits-base\src\activex.pp"/>
@@ -1642,8 +1645,8 @@
       <Unit226>
         <Filename Value="m_any_to_darwinarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="222"/>
-        <CursorPos X="11" Y="244"/>
+        <TopLine Value="183"/>
+        <CursorPos X="3" Y="196"/>
         <UsageCount Value="23"/>
       </Unit226>
       <Unit227>
@@ -1936,9 +1939,9 @@
       <Unit265>
         <Filename Value="m_any_to_androidarm.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="211"/>
-        <CursorPos X="32" Y="223"/>
-        <UsageCount Value="9"/>
+        <TopLine Value="382"/>
+        <CursorPos Y="247"/>
+        <UsageCount Value="10"/>
       </Unit265>
       <Unit266>
         <Filename Value="m_crossdarwin386iphonesim.pas"/>
@@ -2006,7 +2009,7 @@
       <Unit275>
         <Filename Value="m_any_to_darwinaarch64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="61"/>
+        <TopLine Value="100"/>
         <CursorPos X="5" Y="74"/>
         <UsageCount Value="11"/>
       </Unit275>
@@ -2165,8 +2168,8 @@
       <Unit297>
         <Filename Value="checkoptions.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="119"/>
-        <CursorPos X="41" Y="478"/>
+        <TopLine Value="211"/>
+        <CursorPos X="49" Y="228"/>
         <UsageCount Value="12"/>
       </Unit297>
       <Unit298>
@@ -2192,84 +2195,64 @@
         <CursorPos X="16" Y="69"/>
         <UsageCount Value="10"/>
       </Unit300>
+      <Unit301>
+        <Filename Value="C:\fpctrunk\lazarus\components\aarre\tools\aarreupdatelist.lpr"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="136"/>
+        <CursorPos X="3" Y="141"/>
+        <UsageCount Value="10"/>
+      </Unit301>
+      <Unit302>
+        <Filename Value="C:\fpctrunk\lazarus\components\jcf2\ReadWrite\FileConverter.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="398"/>
+        <CursorPos X="7" Y="423"/>
+        <UsageCount Value="10"/>
+      </Unit302>
+      <Unit303>
+        <Filename Value="C:\fpctrunk\lazarus\components\jcf2\ReadWrite\ConvertTypes.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="14"/>
+        <CursorPos X="5" Y="28"/>
+        <UsageCount Value="10"/>
+      </Unit303>
     </Units>
-    <JumpHistory Count="19" HistoryIndex="18">
+    <JumpHistory Count="9" HistoryIndex="8">
       <Position1>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="150" Column="18" TopLine="126"/>
+        <Caret Line="1248" TopLine="1146"/>
       </Position1>
       <Position2>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="153" Column="18" TopLine="129"/>
+        <Caret Line="1114" Column="92" TopLine="1091"/>
       </Position2>
       <Position3>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="329" Column="19" TopLine="305"/>
+        <Caret Line="1116" TopLine="1096"/>
       </Position3>
       <Position4>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="890" Column="19" TopLine="876"/>
+        <Caret Line="1114" Column="25" TopLine="1102"/>
       </Position4>
       <Position5>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="891" Column="128" TopLine="876"/>
+        <Caret Line="1108" Column="17" TopLine="1102"/>
       </Position5>
       <Position6>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1011" Column="19" TopLine="1011"/>
+        <Caret Line="1110" Column="17" TopLine="1093"/>
       </Position6>
       <Position7>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1037" Column="48" TopLine="1023"/>
+        <Caret Line="967" Column="25" TopLine="855"/>
       </Position7>
       <Position8>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1039" Column="72" TopLine="1035"/>
+        <Caret Line="1034" TopLine="1020"/>
       </Position8>
       <Position9>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1040" Column="74" TopLine="1035"/>
-      </Position9>
-      <Position10>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1042" Column="48" TopLine="1035"/>
-      </Position10>
-      <Position11>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1044" Column="72" TopLine="1035"/>
-      </Position11>
-      <Position12>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1045" Column="74" TopLine="1035"/>
-      </Position12>
-      <Position13>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1272" Column="18" TopLine="1258"/>
-      </Position13>
-      <Position14>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="1584" Column="10" TopLine="1578"/>
-      </Position14>
-      <Position15>
-        <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="7" Column="10"/>
-      </Position15>
-      <Position16>
-        <Filename Value="extrasettings.pas"/>
-        <Caret Line="221" Column="23" TopLine="214"/>
-      </Position16>
-      <Position17>
-        <Filename Value="fpcup.ini"/>
-        <Caret Line="25" Column="28" TopLine="13"/>
-      </Position17>
-      <Position18>
-        <Filename Value="revision.inc"/>
-        <Caret Column="56"/>
-      </Position18>
-      <Position19>
         <Filename Value="fpcupdeluxe.lpr"/>
-        <Caret Line="26" Column="34" TopLine="14"/>
-      </Position19>
+      </Position9>
     </JumpHistory>
   </ProjectSession>
   <Debugging>
@@ -2279,7 +2262,7 @@
         <WatchScope Value="wpsLocal"/>
         <WatchKind Value="wpkWrite"/>
         <Source Value="installerfpc.pas"/>
-        <Line Value="1956"/>
+        <Line Value="1961"/>
       </Item1>
     </BreakPoints>
   </Debugging>

@@ -100,6 +100,10 @@ begin
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
 
+  // local paths based on libraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+
   // if binaries already found, search for library belonging to these binaries !!
   if (not result) AND (Length(FBinUtilsPath)>0) AND (SearchModeUsed=smAuto) then
   begin
@@ -123,14 +127,7 @@ begin
     end;
   end;
 
-  // first search local paths based on libbraries provided for or adviced by fpc itself
-  if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
-
   // search for a library provide by a standard android libraries install
-
-  //C:\Users\<username>\AppData\Local\Android\sdk
-
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
     for ndkversion:=High(NDKVERSIONNAMES) downto Low(NDKVERSIONNAMES) do
@@ -233,7 +230,10 @@ const
 var
   AsFile: string;
   PresetBinPath:string;
-  ndkversion,delphiversion,toolchain:byte;
+  ndkversion,toolchain:byte;
+  {$IFDEF MSWINDOWS}
+  delphiversion:byte;
+  {$ENDIF}
 begin
   result:=inherited;
   if result then exit;
@@ -241,6 +241,9 @@ begin
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(Basepath,AsFile);
+
+  if not result then
+    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // if libs already found, search for binutils belonging to this lib !!
   if (not result) AND (Length(FLibsPath)>0) AND (SearchModeUsed=smAuto) then
@@ -284,9 +287,6 @@ begin
       end;
     end;
   end;
-
-  if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   if (not result) AND (SearchModeUsed=smAuto) then
   begin
@@ -403,7 +403,8 @@ begin
     // Architecture: e.g. ARMv6, ARMv7,...
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH ';
+      //AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH ';
+      AsFile:='-CpARMV7A ';
       FCrossOpts.Add(AsFile); //apparently earlier instruction sets unsupported by Android
       ShowInfo('Did not find any -Cp architecture parameter; using '+AsFile+'.');
       AsFile:=StringReplace(AsFile,' ',LineEnding,[rfReplaceAll]);

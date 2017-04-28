@@ -154,7 +154,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   {$ifdef Darwin}
-  FPCUPBINSURL='';
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
   FPCUPDELUXEVERSION='1.2.0p';
@@ -963,7 +963,7 @@ begin
         //   http://repo.or.cz/openal-soft/android.git or
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
-            then FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 '
+            then FPCupManager.CrossOPT:='-CpARMV7A '
             else FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
       end;
     end;
@@ -1008,7 +1008,7 @@ begin
 
     if NOT RealRun then
     begin
-      {$ifndef BSD}
+      {$IF not defined(BSD) OR defined(DARWIN)}
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
 
@@ -1027,7 +1027,11 @@ begin
 
         if FPCupManager.CrossOS_Target='linux' then
         begin
+          {$ifdef Darwin}
+          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='LinuxARM.zip';
+          {$else}
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='LinuxARM.rar';
+          {$endif}
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='LinuxAarch64.rar';
           if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.rar';
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.rar';
@@ -1055,7 +1059,11 @@ begin
         end;
         if FPCupManager.CrossOS_Target='android' then
         begin
-          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.rar';
+         {$ifdef Darwin}
+         if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.zip';
+         {$else}
+         if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.rar';
+         {$endif}
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='AndroidAArch64.rar';
         end;
         if FPCupManager.CrossOS_Target='embedded' then
@@ -1099,10 +1107,12 @@ begin
           end;
         end;
 
-        // tricky ... reset BinsURL in case the binutils and libs are already there ... to exit this retry ... ;-)
-        if (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))
-            AND
-            (DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath))
+        // bit tricky ... reset BinsURL in case the binutils and libs are already there ... to exit this retry ... ;-)
+        if (
+           (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))
+           AND
+           (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath))
+           )
           then BinsURL:='';
 
         if BinsURL<>'' then
@@ -1136,11 +1146,15 @@ begin
               {$ifndef MSWINDOWS}
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath+DirectorySeparator;
               {$endif}
+              if (NOT DirectoryExists(TargetPath)) then ForceDirectories(TargetPath);
 
               AddMessage('Going to extract archive into '+TargetPath);
 
               if UseNativeUnzip then
               begin
+                {$ifdef Darwin}
+                success:=(ExecuteCommand('unzip -o -d ' + TargetPath + ' ' + TargetFile, true)=0);
+                {$else}
                 ProgressForm := TProgressForm.Create(Self);
                 try
                   FileUnzipper := TThreadedUnzipper.Create;
@@ -1153,9 +1167,10 @@ begin
                   finally
                     if Assigned(FileUnzipper) then FileUnzipper := nil;
                   end;
-               finally
-                 ProgressForm.Free;
-               end;
+                finally
+                  ProgressForm.Free;
+                end;
+                {$endif}
               end
               else
               begin
@@ -1209,6 +1224,8 @@ begin
               AddMessage('Successfully downloaded the libraries.');
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath+DirectorySeparator;
+              //if (NOT DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath)) then ForceDirectories(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath);
+
               AddMessage('Going to extract them into '+TargetPath);
 
               // many files to unpack for Darwin libs : do not show progress of unpacking files when unpacking for Darwin.
@@ -1216,6 +1233,9 @@ begin
 
               if UseNativeUnzip then
               begin
+                {$ifdef Darwin}
+                success:=(ExecuteCommand('unzip -o -d ' + TargetPath + ' ' + TargetFile, true)=0);
+                {$else}
                 ProgressForm := TProgressForm.Create(Self);
                 try
                   FileUnzipper := TThreadedUnzipper.Create;
@@ -1228,9 +1248,10 @@ begin
                   finally
                     if Assigned(FileUnzipper) then FileUnzipper := nil;
                   end;
-               finally
-                 ProgressForm.Free;
-               end;
+                finally
+                  ProgressForm.Free;
+                end;
+                {$endif}
               end
               else
               begin

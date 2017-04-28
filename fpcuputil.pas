@@ -266,6 +266,7 @@ function GetCrossCompilerName(Cpu_Target:string):string;
 function DoubleQuoteIfNeeded(FileName: string): string;
 function GetNumericalVersion(aVersion: string): word;
 function UppercaseFirstChar(s: String): String;
+function DirectoryIsEmpty(Directory: string): Boolean;
 
 implementation
 
@@ -1352,6 +1353,21 @@ begin
   rest := Copy(s, Length(ch)+1, MaxInt);
   result := UpperCase(ch) + LowerCase(rest);
 end;
+
+function DirectoryIsEmpty(Directory: string): Boolean;
+var
+  SR: TSearchRec;
+  i: Integer;
+begin
+  Result:=(NOT DirectoryExists(Directory));
+  if Result=true then exit;
+  SysUtils.FindFirst(IncludeTrailingPathDelimiter(Directory) + '*', faAnyFile, SR);
+  for i := 1 to 2 do
+    if (SR.Name = '.') or (SR.Name = '..') then
+      Result := SysUtils.FindNext(SR) <> 0;
+  SysUtils.FindClose(SR);
+end;
+
 
 {TUnzipper}
 
