@@ -157,7 +157,7 @@ Const
   FPCUPBINSURL='';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0o';
+  FPCUPDELUXEVERSION='1.2.0p';
 
 resourcestring
   CrossGCCMsg =
@@ -217,7 +217,7 @@ begin
   Reset(System.Input);
   Rewrite(System.Output);
 
-  AddMessage('Welcome @ fpclupdeluxe.');
+  AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage('');
 
   {$IFDEF MSWINDOWS}

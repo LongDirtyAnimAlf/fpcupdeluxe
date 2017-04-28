@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 272
+  Left = 251
   Height = 643
-  Top = 248
+  Top = 156
   Width = 1137
   Anchors = []
   Caption = 'Form1'
@@ -1389,7 +1389,7 @@ object Form1: TForm1
     MaxUndo = 0
     Options = [eoHideRightMargin, eoNoCaret, eoShowSpecialChars]
     Options2 = []
-    VisibleSpecialChars = [vscSpace, vscTabAtLast]
+    VisibleSpecialChars = []
     ReadOnly = True
     RightEdge = 8096
     RightEdgeColor = clNone
