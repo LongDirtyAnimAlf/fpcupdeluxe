@@ -244,7 +244,7 @@ begin
   if LibsOrBins
      then sd:=sd+'lib'
      else sd:=sd+'bin';
-  sd:=sd+DirectorySeparator+DirName;
+  if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
   sd:=SafeExpandFileName(sd);
   result:=SearchUtil(sd, LookFor, LibsOrBins);
   if not result then
@@ -254,7 +254,7 @@ begin
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';
-    sd:=sd+DirectorySeparator+DirName;
+    if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
   end;
@@ -264,7 +264,7 @@ begin
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';
-    sd:=sd+DirectorySeparator+DirName;
+    if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
   end;
@@ -277,7 +277,7 @@ begin
        else sd:='bin';
 
     if not result then
-      result:=SearchUtil('/usr/local/'+sd+'/'+DirName,
+      if Length(DirName)>0 then result:=SearchUtil('/usr/local/'+sd+'/'+DirName,
         LookFor, LibsOrBins);
 
     // extend search, but not for libraries !!

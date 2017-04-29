@@ -32,31 +32,55 @@ end;
 { TFreeBSD64_FreeBSD386 }
 
 function TFreeBSD64_FreeBSD386.GetLibs(Basepath:string): boolean;
+const
+  LibName='libc.so';
 begin
   result:=FLibsFound;
   if result then exit;
   FLibsPath:='/usr/lib32';
-  result:=fileexists(FLibsPath+'/libc.so'); //let the c library be our coalmine canary
+  result:=fileexists(FLibsPath+'/'+LibName);
   if result then
   begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+    //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
+    //'-FL/usr/libexec/ld-elf32.so.1'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath); // buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries
-  end;
+  end
+  else ShowInfo('Searched but did not find 32bit libs in '+FLibsPath+'. Please install lib32 first !!');
 end;
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
+const
+  DirName='i386-freebsd';
+var
+  AsFile: string;
+  BinPrefixTry: string;
 begin
   result:=inherited;
   if result then exit;
 
-  //todo: remove once done
-  ShowInfo('Experimental, not finished. Stopping now.',etError);
-  result:=false;
-  FBinUtilsPath:='/usr/bin'; //try with regular binutils
-  FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=true;
+  AsFile:=FBinUtilsPrefix+'as';
+
+  result:=SearchBinUtil(BasePath,AsFile);
+
+  // Also allow for (cross)binutils (fpcupdeluxe scripts) with prefix
+  if not result then
+  begin
+    BinPrefixTry:='i386-freebsd-';
+    AsFile:=BinPrefixTry+'as';
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
+  if not result then
+      result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+  SearchBinUtilsInfo(result);
+
   if result then
   begin
     FBinsFound:=true;
@@ -64,7 +88,7 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
     '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-Tlinux'; {target operating system}
+    '-Tfreebsd'; {target operating system}
   end;
 end;
 
@@ -75,6 +99,7 @@ begin
   FTargetCPU:='i386';
   FTargetOS:='freebsd';
   FBinUtilsPath:='';
+  FFPCCFGSnippet:='';
   FBinUtilsPrefix:='';
   FLibsPath:='';
   ShowInfo;

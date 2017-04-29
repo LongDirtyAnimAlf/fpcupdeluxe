@@ -148,7 +148,7 @@ Const
   {$endif CPUAARCH64}
   {$endif}
   {$ifdef FreeBSD}
-  FPCUPBINSURL='';
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/freebsdx64crossbins_v1.0';
   {$endif}
   {$ifdef OpenBSD}
   FPCUPBINSURL='';
@@ -1008,7 +1008,6 @@ begin
 
     if NOT RealRun then
     begin
-      {$IF not defined(BSD) OR defined(DARWIN)}
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
 
@@ -1040,7 +1039,11 @@ begin
         end;
         if FPCupManager.CrossOS_Target='freebsd' then
         begin
+          {$ifdef FreeBSD}
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='FreeBSDi386.zip';
+          {$else}
           if FPCupManager.CrossCPU_Target='i386' then BinsURL:='FreeBSDi386.rar';
+          {$endif}
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='FreeBSDx64.rar';
         end;
         if FPCupManager.CrossOS_Target='openbsd' then
@@ -1152,7 +1155,7 @@ begin
 
               if UseNativeUnzip then
               begin
-                {$ifdef Darwin}
+                {$ifdef BSD}
                 success:=(ExecuteCommand('unzip -o -d ' + TargetPath + ' ' + TargetFile, true)=0);
                 {$else}
                 ProgressForm := TProgressForm.Create(Self);
@@ -1233,7 +1236,7 @@ begin
 
               if UseNativeUnzip then
               begin
-                {$ifdef Darwin}
+                {$ifdef BSD}
                 success:=(ExecuteCommand('unzip -o -d ' + TargetPath + ' ' + TargetFile, true)=0);
                 {$else}
                 ProgressForm := TProgressForm.Create(Self);
@@ -1296,7 +1299,6 @@ begin
         end;
       end
       else
-      {$endif BSD}
       begin
         AddMessage('Building cross-tools failed ... ??? ... aborting.');
       end;
