@@ -552,6 +552,7 @@ begin
     // this may fail if shortcut exists already
     try
       XdgDesktopContent.SaveToFile(XdgDesktopFile);
+      FPChmod(XdgDesktopFile, &711); //rwx--x--x
       OperationSucceeded:=(ExecuteCommand('xdg-desktop-icon install ' + XdgDesktopFile,false)=0);
     except
       OperationSucceeded:=false;
