@@ -2,11 +2,19 @@ program fpcupdeluxe;
 
 {$mode objfpc}{$H+}
 
-//{$APPTYPE GUI}
+(*
+  The Initial Developer of the Original FPCUPdeluxe code is:
+  DonAlfredo.
 
-// todo: give info about the link that must be used to start Lazarus that is created by fpcupdeluxe !!
-// or make a button or popup or something for this link.
-// todo: add some means of help
+  The Initial Developer of the Original FPCUP code is:
+  Reinier Olieslagers.
+  May he rest in peace.
+
+  Contributor(s):
+    Maciej Izak
+    Michalis Kamburelis
+
+*)
 
 {$IFDEF FPC_CROSSCOMPILING}
   {$IFDEF LINUX}

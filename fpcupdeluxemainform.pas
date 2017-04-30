@@ -157,7 +157,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0p';
+  FPCUPDELUXEVERSION='1.2.0q';
 
 resourcestring
   CrossGCCMsg =
@@ -1217,9 +1217,11 @@ begin
 
           if MissingCrossLibs then
           begin
+
             AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
             DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+LibsURL;
             AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+
             TargetFile := SysUtils.GetTempFileName;
             success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             if success then

@@ -3,13 +3,12 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="10"/>
-    <BuildModes Active="freebsdx64"/>
-    <Units Count="304">
+    <BuildModes Active="win32"/>
+    <Units Count="305">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
-        <TopLine Value="52"/>
-        <CursorPos X="22" Y="63"/>
+        <IsVisibleTab Value="True"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
       </Unit0>
@@ -19,10 +18,7 @@
         <ComponentName Value="Form1"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <IsVisibleTab Value="True"/>
-        <EditorIndex Value="9"/>
-        <TopLine Value="1271"/>
-        <CursorPos X="28" Y="1239"/>
+        <EditorIndex Value="1"/>
         <UsageCount Value="200"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -33,7 +29,7 @@
         <ComponentName Value="Form2"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <EditorIndex Value="10"/>
+        <EditorIndex Value="2"/>
         <UsageCount Value="202"/>
         <Loaded Value="True"/>
         <LoadedDesigner Value="True"/>
@@ -53,7 +49,8 @@
         <ResourceBaseClass Value="Form"/>
         <UnitName Value="AboutFrm"/>
         <EditorIndex Value="-1"/>
-        <CursorPos X="10" Y="97"/>
+        <TopLine Value="242"/>
+        <CursorPos X="22" Y="17"/>
         <UsageCount Value="200"/>
       </Unit4>
       <Unit5>
@@ -65,7 +62,7 @@
         <EditorIndex Value="-1"/>
         <TopLine Value="25"/>
         <CursorPos Y="51"/>
-        <UsageCount Value="68"/>
+        <UsageCount Value="71"/>
       </Unit5>
       <Unit6>
         <Filename Value="fpcuplprbase.inc"/>
@@ -92,15 +89,12 @@
       <Unit9>
         <Filename Value="fpcuputil.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="1354"/>
-        <CursorPos X="17" Y="1361"/>
         <UsageCount Value="100"/>
       </Unit9>
       <Unit10>
         <Filename Value="installercore.pas"/>
         <UnitName Value="installerCore"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="109"/>
         <UsageCount Value="100"/>
       </Unit10>
       <Unit11>
@@ -207,11 +201,8 @@
       <Unit25>
         <Filename Value="installerfpc.pas"/>
         <UnitName Value="installerFpc"/>
-        <EditorIndex Value="1"/>
-        <TopLine Value="571"/>
-        <CursorPos X="43" Y="585"/>
+        <EditorIndex Value="-1"/>
         <UsageCount Value="105"/>
-        <Loaded Value="True"/>
       </Unit25>
       <Unit26>
         <Filename Value="C:\NewPascal\lazarus\lcl\include\winapih.inc"/>
@@ -427,14 +418,14 @@
       </Unit53>
       <Unit54>
         <Filename Value="fpcup.ini"/>
-        <EditorIndex Value="11"/>
+        <EditorIndex Value="3"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
       </Unit54>
       <Unit55>
         <Filename Value="settings.ini"/>
-        <EditorIndex Value="12"/>
+        <EditorIndex Value="4"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
         <DefaultSyntaxHighlighter Value="Ini"/>
@@ -456,7 +447,7 @@
       </Unit57>
       <Unit58>
         <Filename Value="revision.inc"/>
-        <EditorIndex Value="13"/>
+        <EditorIndex Value="5"/>
         <UsageCount Value="100"/>
         <Loaded Value="True"/>
       </Unit58>
@@ -519,11 +510,10 @@
       </Unit66>
       <Unit67>
         <Filename Value="m_crossinstaller.pas"/>
-        <EditorIndex Value="8"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="336"/>
         <CursorPos X="10" Y="369"/>
         <UsageCount Value="57"/>
-        <Loaded Value="True"/>
       </Unit67>
       <Unit68>
         <Filename Value="C:\NewPascal\fpc\packages\fcl-process\src\process.pp"/>
@@ -540,11 +530,10 @@
       </Unit69>
       <Unit70>
         <Filename Value="m_any_to_androidmipsel.pas"/>
-        <EditorIndex Value="6"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="187"/>
         <CursorPos X="65" Y="200"/>
         <UsageCount Value="17"/>
-        <Loaded Value="True"/>
       </Unit70>
       <Unit71>
         <Filename Value="m_crosswinaarch64.pas"/>
@@ -567,11 +556,10 @@
       </Unit73>
       <Unit74>
         <Filename Value="m_any_to_linux386.pas"/>
-        <EditorIndex Value="7"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="163"/>
         <CursorPos X="22" Y="179"/>
         <UsageCount Value="19"/>
-        <Loaded Value="True"/>
       </Unit74>
       <Unit75>
         <Filename Value="m_anyinternallinker_to_win386.pas"/>
@@ -596,6 +584,8 @@
       <Unit78>
         <Filename Value="m_any_to_freebsd386.pas"/>
         <EditorIndex Value="-1"/>
+        <TopLine Value="100"/>
+        <CursorPos Y="83"/>
         <UsageCount Value="10"/>
       </Unit78>
       <Unit79>
@@ -607,11 +597,10 @@
       </Unit79>
       <Unit80>
         <Filename Value="m_freebsd64_to_freebsd32.pas"/>
-        <EditorIndex Value="2"/>
-        <TopLine Value="28"/>
-        <CursorPos Y="41"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="70"/>
+        <CursorPos Y="53"/>
         <UsageCount Value="12"/>
-        <Loaded Value="True"/>
       </Unit80>
       <Unit81>
         <Filename Value="m_freebsd_to_linux64.pas"/>
@@ -700,8 +689,8 @@
       <Unit93>
         <Filename Value="m_any_to_darwinx64.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="196"/>
-        <CursorPos X="11" Y="223"/>
+        <TopLine Value="113"/>
+        <CursorPos Y="131"/>
         <UsageCount Value="41"/>
       </Unit93>
       <Unit94>
@@ -858,11 +847,10 @@
       </Unit115>
       <Unit116>
         <Filename Value="m_any_to_darwin386.pas"/>
-        <EditorIndex Value="3"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="121"/>
         <CursorPos X="19" Y="133"/>
         <UsageCount Value="41"/>
-        <Loaded Value="True"/>
       </Unit116>
       <Unit117>
         <Filename Value="C:\NewPascal\projects\t_bsd.pas"/>
@@ -1946,11 +1934,10 @@
       </Unit264>
       <Unit265>
         <Filename Value="m_any_to_androidarm.pas"/>
-        <EditorIndex Value="5"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="78"/>
         <CursorPos X="22" Y="88"/>
         <UsageCount Value="10"/>
-        <Loaded Value="True"/>
       </Unit265>
       <Unit266>
         <Filename Value="m_crossdarwin386iphonesim.pas"/>
@@ -1968,11 +1955,10 @@
       </Unit267>
       <Unit268>
         <Filename Value="m_any_to_androidaarch64.pas"/>
-        <EditorIndex Value="4"/>
+        <EditorIndex Value="-1"/>
         <TopLine Value="183"/>
         <CursorPos X="6" Y="202"/>
         <UsageCount Value="14"/>
-        <Loaded Value="True"/>
       </Unit268>
       <Unit269>
         <Filename Value="C:\fpcupdeluxe\fpcsrc\compiler\assemble.pas"/>
@@ -2178,8 +2164,8 @@
       <Unit297>
         <Filename Value="checkoptions.pas"/>
         <EditorIndex Value="-1"/>
-        <TopLine Value="211"/>
-        <CursorPos X="49" Y="228"/>
+        <TopLine Value="275"/>
+        <CursorPos X="64" Y="289"/>
         <UsageCount Value="12"/>
       </Unit297>
       <Unit298>
@@ -2226,128 +2212,55 @@
         <CursorPos X="5" Y="28"/>
         <UsageCount Value="10"/>
       </Unit303>
+      <Unit304>
+        <Filename Value="synaser\synaser.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="2198"/>
+        <CursorPos X="11" Y="2218"/>
+        <UsageCount Value="10"/>
+      </Unit304>
     </Units>
-    <JumpHistory Count="30" HistoryIndex="29">
+    <JumpHistory Count="10" HistoryIndex="9">
       <Position1>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="117" Column="60" TopLine="95"/>
-      </Position1>
-      <Position2>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="177" Column="37" TopLine="156"/>
-      </Position2>
-      <Position3>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="212" Column="24" TopLine="194"/>
-      </Position3>
-      <Position4>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="365" Column="73" TopLine="341"/>
-      </Position4>
-      <Position5>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="366" Column="16" TopLine="342"/>
-      </Position5>
-      <Position6>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="59" Column="18" TopLine="45"/>
-      </Position6>
-      <Position7>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="60" Column="18" TopLine="45"/>
-      </Position7>
-      <Position8>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="72" Column="26" TopLine="48"/>
-      </Position8>
-      <Position9>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="113" Column="52" TopLine="91"/>
-      </Position9>
-      <Position10>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="117" Column="60" TopLine="95"/>
-      </Position10>
-      <Position11>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="177" Column="37" TopLine="153"/>
-      </Position11>
-      <Position12>
-        <Filename Value="m_freebsd64_to_freebsd32.pas"/>
-        <Caret Line="64" Column="32" TopLine="56"/>
-      </Position12>
-      <Position13>
-        <Filename Value="m_freebsd64_to_freebsd32.pas"/>
-        <Caret Line="62" Column="46" TopLine="52"/>
-      </Position13>
-      <Position14>
         <Filename Value="fpcupdeluxemainform.pas"/>
         <Caret Line="150" Column="18" TopLine="126"/>
-      </Position14>
-      <Position15>
+      </Position1>
+      <Position2>
         <Filename Value="fpcupdeluxemainform.pas"/>
         <Caret Line="890" Column="19" TopLine="873"/>
-      </Position15>
-      <Position16>
+      </Position2>
+      <Position3>
         <Filename Value="fpcupdeluxemainform.pas"/>
         <Caret Line="891" Column="43" TopLine="873"/>
-      </Position16>
-      <Position17>
-        <Filename Value="m_freebsd64_to_freebsd32.pas"/>
-        <Caret Line="59" Column="17" TopLine="47"/>
-      </Position17>
-      <Position18>
-        <Filename Value="m_freebsd64_to_freebsd32.pas"/>
-        <Caret Line="62" Column="27" TopLine="47"/>
-      </Position18>
-      <Position19>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="80" Column="20" TopLine="64"/>
-      </Position19>
-      <Position20>
-        <Filename Value="m_any_to_androidaarch64.pas"/>
-        <Caret Line="407" Column="3" TopLine="393"/>
-      </Position20>
-      <Position21>
-        <Filename Value="m_freebsd64_to_freebsd32.pas"/>
-        <Caret Line="77" TopLine="58"/>
-      </Position21>
-      <Position22>
-        <Filename Value="m_crossinstaller.pas"/>
-        <Caret Line="273" TopLine="265"/>
-      </Position22>
-      <Position23>
-        <Filename Value="installerfpc.pas"/>
-        <Caret Line="611" TopLine="605"/>
-      </Position23>
-      <Position24>
-        <Filename Value="m_any_to_androidaarch64.pas"/>
-        <Caret Line="197" Column="13" TopLine="183"/>
-      </Position24>
-      <Position25>
-        <Filename Value="m_any_to_androidaarch64.pas"/>
-        <Caret Line="196" Column="8" TopLine="183"/>
-      </Position25>
-      <Position26>
-        <Filename Value="m_any_to_androidarm.pas"/>
-        <Caret Line="206" Column="8" TopLine="193"/>
-      </Position26>
-      <Position27>
-        <Filename Value="m_any_to_androidarm.pas"/>
-        <Caret Line="211" Column="22" TopLine="193"/>
-      </Position27>
-      <Position28>
-        <Filename Value="m_any_to_androidmipsel.pas"/>
-        <Caret Line="416" Column="3" TopLine="394"/>
-      </Position28>
-      <Position29>
+      </Position3>
+      <Position4>
         <Filename Value="fpcupdeluxemainform.pas"/>
         <Caret Line="1031" Column="28" TopLine="1026"/>
-      </Position29>
-      <Position30>
+      </Position4>
+      <Position5>
         <Filename Value="fpcupdeluxemainform.pas"/>
-        <Caret Line="152" TopLine="279"/>
-      </Position30>
+        <Caret Line="1271" Column="23" TopLine="1271"/>
+      </Position5>
+      <Position6>
+        <Filename Value="fpcupdeluxe.lpr"/>
+        <Caret Line="63" Column="22" TopLine="52"/>
+      </Position6>
+      <Position7>
+        <Filename Value="fpcupdeluxe.lpr"/>
+        <Caret Line="95" TopLine="71"/>
+      </Position7>
+      <Position8>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="1165" Column="40" TopLine="1152"/>
+      </Position8>
+      <Position9>
+        <Filename Value="revision.inc"/>
+        <Caret Column="56"/>
+      </Position9>
+      <Position10>
+        <Filename Value="fpcupdeluxemainform.pas"/>
+        <Caret Line="160" Column="29" TopLine="148"/>
+      </Position10>
     </JumpHistory>
   </ProjectSession>
 </CONFIG>

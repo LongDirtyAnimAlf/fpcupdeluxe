@@ -33,12 +33,24 @@ end;
 
 function TFreeBSD64_FreeBSD386.GetLibs(Basepath:string): boolean;
 const
+  DirName='i386-freebsd';
   LibName='libc.so';
 begin
   result:=FLibsFound;
   if result then exit;
-  FLibsPath:='/usr/lib32';
-  result:=fileexists(FLibsPath+'/'+LibName);
+
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+
+  // first search local paths based on libraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+
+  //FLibsPath:='/usr/lib32';
+  //result:=fileexists(FLibsPath+'/'+LibName);
+
+  SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
@@ -47,6 +59,8 @@ begin
     '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
     //'-FL/usr/libexec/ld-elf32.so.1'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
+    '-k-L'+LineEnding+
+    '-k'+FLibsPath+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath); // buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries
   end
   else ShowInfo('Searched but did not find 32bit libs in '+FLibsPath+'. Please install lib32 first !!');

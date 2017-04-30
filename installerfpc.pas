@@ -1167,6 +1167,7 @@ begin
   // but online, only official 3.0.0 bootstrapper available
 
   if s=FPCTRUNKVERSION then result:='3.0.0'
+  else if s='3.0.4' then result:='3.0.0'
   else if s='3.0.3' then result:='3.0.0'
   else if (s='3.0.2')  or (s='3.0.1') then result:='3.0.0'
   //else if (s='3.0.2') or (s='3.0.1') then result:='2.6.4'
@@ -1364,6 +1365,18 @@ begin
       // assume we have an archive if the file extension differs from a normal executable extension
 
       {$IFDEF MSWINDOWS}
+      // Extract zip, "overwriting"
+      with TNormalUnzipper.Create do
+      begin
+        try
+          SysUtils.DeleteFile(ArchiveDir + CompilerName);
+          OperationSucceeded:=DoUnZip(BootstrapArchive,ArchiveDir,[]);
+        finally
+          Free;
+        end;
+      end;
+
+      {
       // Extract zip, overwriting without prompting
       if ExecuteCommand(FUnzip+' -o -d '+ArchiveDir+' '+BootstrapArchive,FVerbose) <> 0 then
       begin
@@ -1374,6 +1387,8 @@ begin
       begin
         OperationSucceeded := True; // Spelling it out can't hurt sometimes
       end;
+      }
+
       // Move CompilerName to proper directory
       if OperationSucceeded = True then
       begin
@@ -1381,7 +1396,7 @@ begin
         SysUtils.DeleteFile(FBootstrapCompiler);
         SysUtils.RenameFile(ArchiveDir + CompilerName, FBootstrapCompiler);
         //SysUtils.DeleteFile(ArchiveDir + CompilerName);
-      end;
+      end else infoln('Something went wrong while extracting bootstrap compiler. This will abort further processing.',eterror);;
       {$ENDIF MSWINDOWS}
       {$IFDEF LINUX}
       // Extract bz2, overwriting without prompting
@@ -1451,9 +1466,9 @@ begin
     begin
       // no archive but a normal executable
       infoln('Going to copy '+BootstrapArchive+' to '+FBootstrapCompiler,etwarning);
-      sysutils.DeleteFile(FBootstrapCompiler); //ignore errors
+      SysUtils.DeleteFile(FBootstrapCompiler); //ignore errors
       OperationSucceeded:=FileUtil.CopyFile(BootstrapArchive, FBootstrapCompiler);
-      sysutils.DeleteFile(BootstrapArchive);
+      SysUtils.DeleteFile(BootstrapArchive);
     end;
   end;
 
