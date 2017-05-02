@@ -157,7 +157,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0q';
+  FPCUPDELUXEVERSION='1.2.0r';
 
 resourcestring
   CrossGCCMsg =
@@ -977,6 +977,16 @@ begin
       end;
     end;
 
+    // recheck / override / set custom FPC options by special user input through setup+
+    s:=Form2.FPCOptions;
+    s:=Trim(s);
+    if Length(s)>0 then FPCupManager.FPCOPT:=s+' ';
+
+    // override / set custom FPC crossoptions by special user input through setup+
+    s:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+    s:=Trim(s);
+    if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
+
     // use the available source to build the cross-compiler ... change nothing about source and url !!
     FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
 
@@ -1515,6 +1525,7 @@ begin
   FPCupManager.CrossOS_SubArch:='';
   FPCupManager.CrossLCL_Platform:='';
 
+  FPCupManager.FPCOPT:=Form2.FPCOptions;;
   FPCupManager.CrossOPT:='';
 
   FPCupManager.CrossLibraryDirectory:='';
@@ -1522,7 +1533,6 @@ begin
 
   FPCupManager.Verbose:=CheckVerbosity.Checked;
 
-  FPCupManager.FPCOPT:=Form2.FPCOptions;
   FPCupManager.FPCDesiredBranch:=Form2.FPCBranch;
   FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;
 

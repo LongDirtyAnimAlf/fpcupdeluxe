@@ -219,7 +219,7 @@ begin
       if pos('-Fl/usr/local/lib/',FInstaller.FPCOPT)=0 then
       begin
         infoln('FPC options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
-          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
+          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FInstaller.FPCOPT:=FInstaller.FPCOPT+' -Fl/usr/local/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
@@ -279,13 +279,13 @@ begin
       if (pos('-Fl/usr/local/lib/',FInstaller.LazarusOPT)=0) then
       begin
         infoln('Lazarus options: FreeBSD needs -Fl/usr/local/lib as options; adding it. For details, see '+LineEnding+
-          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
+          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/local/lib';
       end;
       if (pos('-Fl/usr/X11R6/lib',FInstaller.LazarusOPT)=0) then
       begin
         infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
-          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4');
+          'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
         FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}

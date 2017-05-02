@@ -23,6 +23,7 @@ type
     Setting:TCrossSetting;
     LibDir:string;
     BinDir:string;
+    CrossBuildOptions:string;
   end;
 
   TCrossUtils = array[TCPU,TOS] of TCrossUtil;
@@ -57,6 +58,7 @@ type
     CheckUpdateAllCrosscompilers: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
+    EditCrossBuildOptions: TEdit;
     EditFPCBranch: TEdit;
     EditFPCOptions: TEdit;
     EditFPCRevision: TEdit;
@@ -78,6 +80,7 @@ type
     Label2: TLabel;
     Label3: TLabel;
     Label4: TLabel;
+    LabelCrossBuildOptions: TLabel;
     LabelFPCbranch: TLabel;
     LabelFPCOptions: TLabel;
     LabelFPCRevision: TLabel;
@@ -93,6 +96,7 @@ type
     procedure btnAddPatchClick(Sender: TObject);
     procedure btnRemPatchClick(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
+    procedure EditCrossBuildOptionsChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure OnDirectorySelect(Sender: TObject);
@@ -146,6 +150,7 @@ type
   public
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
+    function GetCrossBuildOptions(aCPU,aOS:string):string;
 
     property Repo:boolean read GetRepo;
     property PackageRepo:boolean read GetPackageRepo;
@@ -276,6 +281,7 @@ begin
         FCrossUtils[CPU,OS].Setting:=TCrossSetting(ReadInteger(s,'Setting',Ord(fpcup)));
         FCrossUtils[CPU,OS].LibDir:=ReadString(s,'LibPath','');
         FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
+        FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
       end;
     end;
 
@@ -307,14 +313,20 @@ var
 begin
   e:=((ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1));
   RadioGroup3.Enabled:=e;
+  EditCrossBuildOptions.Enabled:=e;
   if e then
   begin
     EditLibLocation.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].LibDir;
     EditBinLocation.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].BinDir;
+    EditCrossBuildOptions.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossBuildOptions;
     RadioGroup3.ItemIndex:=Ord(FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Setting);
   end;
 end;
 
+procedure TForm2.EditCrossBuildOptionsChange(Sender: TObject);
+begin
+  FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossBuildOptions:=TEdit(Sender).Text;
+end;
 
 procedure TForm2.btnAddPatchClick(Sender: TObject);
 var
@@ -417,6 +429,7 @@ begin
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));
         WriteString(s,'LibPath',FCrossUtils[CPU,OS].LibDir);
         WriteString(s,'BinPath',FCrossUtils[CPU,OS].BinDir);
+        WriteString(s,'CrossBuildOptions',FCrossUtils[CPU,OS].CrossBuildOptions);
       end;
     end;
 
@@ -487,6 +500,20 @@ begin
   end;
 end;
 
+function TForm2.GetCrossBuildOptions(aCPU,aOS:string):string;
+var
+  xCPU:TCPU;
+  xOS:TOS;
+begin
+  try
+    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aCPU));
+    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aOS));
+    result:=FCrossUtils[xCPU,xOS].CrossBuildOptions;
+  except
+    result:='';
+  end;
+end;
+
 
 function TForm2.GetRepo:boolean;
 begin
@@ -548,8 +575,6 @@ procedure TForm2.SetUpdateCross(value:boolean);
 begin
   CheckUpdateAllCrosscompilers.Checked:=value;
 end;
-
-
 
 function TForm2.GetFPCOptions:string;
 begin

@@ -3,16 +3,20 @@ program fpcupdeluxe;
 {$mode objfpc}{$H+}
 
 (*
-  The Initial Developer of the Original FPCUPdeluxe code is:
-  DonAlfredo.
+  The Initial Developer of the FPCUPdeluxe code is:
+  Alfred Glänzer (donalfredo, aog)
 
-  The Initial Developer of the Original FPCUP code is:
-  Reinier Olieslagers.
-  May he rest in peace.
+  The Initial Developers of the Original FPCUP code are:
+  Ludo Brands
+  Reinier Olieslagers (bigchimp), may he rest in peace.
+
+  Icon by Taazz
 
   Contributor(s):
-    Maciej Izak
+    Denis Grinyuk (arvur)
+    Maciej Izak (hnb)
     Michalis Kamburelis
+    Marius Maximus
 
 *)
 
