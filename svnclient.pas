@@ -711,7 +711,8 @@ end;
 
 function TSVNClient.LocalRepositoryExists: boolean;
 const
-  URLLen = Length('URL: ');
+  URLTarget = 'URL: ';
+  URLLen = Length(URLTarget);
 var
   Output: string = '';
   URL: string;
@@ -751,7 +752,7 @@ begin
     // Output from info command can include:
     // URL: http://svn.freepascal.org/svn/fpc/branches/fixes_3_0
     // Repository URL might differ from the one we've set though
-    URLPos := pos('URL: ', Output) + URLLen;
+    URLPos := pos(URLTarget, Output) + URLLen;
     URL := IncludeTrailingSlash(trim(copy(Output, (URLPos), Posex(LineEnding, Output, URLPos) - URLPos)));
     if FRepositoryURL = '' then
     begin
@@ -760,7 +761,7 @@ begin
     end
     else
     begin
-      if FRepositoryURL = URL then
+      if StripUrl(FRepositoryURL) = StripUrl(URL) then
       begin
         Result := true;
       end

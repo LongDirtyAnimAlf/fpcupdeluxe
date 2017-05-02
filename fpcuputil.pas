@@ -223,6 +223,7 @@ function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensi
 function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
 function GetFileNameFromURL(URL:string):string;
 function GetVersionFromUrl(URL:string): string;
+function StripUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
@@ -664,6 +665,14 @@ begin
     result:=MajorVersion+'.'+MinorVersion+'.'+ReleaseVersion;
 
   end;
+end;
+
+function StripUrl(URL:string): string;
+var
+  URI:TURI;
+begin
+  URI:=ParseURI(URL);
+  result:=URI.Host+URI.Path;
 end;
 
 

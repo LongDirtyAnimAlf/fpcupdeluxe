@@ -344,7 +344,7 @@ begin
     end
     else
     begin
-      if FRepositoryURL = URL then
+      if StripUrl(FRepositoryURL) = StripUrl(URL) then
       begin
         Result := true;
       end
