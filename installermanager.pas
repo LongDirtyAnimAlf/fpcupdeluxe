@@ -234,7 +234,6 @@ below}
     'Do defaultuninstall;'+
     'End;';
 
-
 type
   // from fpmake + fpmkunit !
 
@@ -603,7 +602,7 @@ type
     public
       // set Executed to ESNever for all sequences
       procedure ResetAllExecuted(SkipFPC:boolean=false);
-      property Parent:TFPCupManager write Fparent;
+      property Parent:TFPCupManager write FParent;
       property Installer:TInstaller read FInstaller;
       // Text representation of sequence; for diagnostic purposes
       property Text:String read GetText;

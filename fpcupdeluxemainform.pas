@@ -19,6 +19,7 @@ type
     BitBtnFPCandLazarus: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
+    AutoCrossUpdate: TButton;
     Button7: TButton;
     Button8: TButton;
     CheckAutoClear: TCheckBox;
@@ -63,6 +64,7 @@ type
     procedure FPCOnlyClick(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
+    procedure ButtonAutoUpdateCrossCompiler(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
@@ -113,6 +115,7 @@ implementation
 uses
   IniFiles,
   StrUtils,
+  typinfo,
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF UNIX}
@@ -121,6 +124,7 @@ uses
   unzipprogress,
   extrasettings,
   //checkoptions,
+  installerCore,
   installerUniversal,
   fpcuputil,
   processutils,
@@ -157,7 +161,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0r';
+  FPCUPDELUXEVERSION='1.2.0s';
 
 resourcestring
   CrossGCCMsg =
@@ -306,6 +310,74 @@ begin
   RealFPCURL.Width:=(w-4);
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
+end;
+
+procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
+var
+  CPUType:TCPU;
+  OSType:TOS;
+  FPCCfg:string;
+  BinPath:string;
+  ConfigText: TStringList;
+  processorname, os: string;
+begin
+  os := {$I %FPCTARGETOS%};
+  processorname := {$I %FPCTARGETCPU%};
+  os := LowerCase(os);
+  processorname := LowerCase(processorname);
+  BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+processorname + '-' + os;
+  FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
+
+  if NOT FileExists(FPCCfg) then
+  begin
+    AddMessage('FPC configfile ' + FPCCfg + ' not found in ' + BinPath);
+    exit;
+  end;
+
+  AddMessage('Checking ' + FPCCfg + ' for ' + processorname + '-' + os+' in ' + BinPath);
+
+  ConfigText:=TStringList.Create;
+  try
+    ConfigText.LoadFromFile(FPCCFG);
+
+    for OSType := Low(TOS) to High(TOS) do
+    begin
+      os:=GetEnumName(TypeInfo(TOS),Ord(OSType));
+
+      if os='i-sim' then os:='iphonesim';
+
+      for CPUType := Low(TCPU) to High(TCPU) do
+      begin
+        processorname:=GetEnumName(TypeInfo(TCPU),Ord(CPUType));
+
+        if processorname='ppc' then processorname:='powerpc';
+        if processorname='ppc64' then processorname:='powerpc64';
+        if os='windows' then
+        begin
+          if processorname='i386' then os:='win32';
+          if processorname='x86_64' then os:='win64';
+        end;
+
+        if (ConfigText.IndexOf(SnipMagicBegin+processorname+'-'+os)<>-1) then
+        begin
+          AddMessage('Crosscompiler for '+processorname + '-' + os+' found !');
+          AddMessage('Going to update cross-compiler !!');
+          // a bit tricky
+          RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(GetEnumName(TypeInfo(TCPU),Ord(CPUType)));
+          RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(GetEnumName(TypeInfo(TOS),Ord(OSType)));
+          // nice decoupling of logic and GUI ... ;-)
+          Button5Click(nil);
+        end;
+      end;
+    end;
+
+    RadioGroup1.ItemIndex:=-1;
+    RadioGroup2.ItemIndex:=-1;
+
+  finally
+    ConfigText.Free;
+  end;
+
 end;
 
 procedure TForm1.InitFPCupManager;
@@ -887,25 +959,29 @@ begin
     FPCupManager.CrossOS_Target:=s;
   end;
 
-  {$ifndef FreeBSD}
-  if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
-  begin
-    if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes).' + sLineBreak +
-               'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
-               'Do you want to continue ?'
-               ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-               begin
-                 Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=30908');
-                 exit;
-               end;
-  end;
-  {$endif}
 
-  if (FPCupManager.CrossOS_Target='linux') then
+  if Sender<>nil then
   begin
-    ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-    Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-    Memo1.Lines.Append('');
+    {$ifndef FreeBSD}
+    if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
+    begin
+      if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes).' + sLineBreak +
+                 'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
+                 'Do you want to continue ?'
+                 ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+                 begin
+                   Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=30908');
+                   exit;
+                 end;
+    end;
+    {$endif}
+
+    if (FPCupManager.CrossOS_Target='linux') then
+    begin
+      ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
+      Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
+      Memo1.Lines.Append('');
+    end;
   end;
 
   if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
@@ -1485,6 +1561,7 @@ begin
   BitBtnLazarusOnly.Enabled:=value;
   Button7.Enabled:=value;
   Button8.Enabled:=value;
+  AutoCrossUpdate:=value;
 
   ListBoxFPCTarget.Enabled:=value;
   ListBoxLazarusTarget.Enabled:=value;

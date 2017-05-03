@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 261
   Height = 643
-  Top = 235
+  Top = 185
   Width = 1137
   Anchors = []
   Caption = 'Form1'
@@ -1484,12 +1484,12 @@ object Form1: TForm1
     ParentFont = False
   end
   object ListBox3: TListBox
-    AnchorSideTop.Control = Button5
+    AnchorSideTop.Control = AutoCrossUpdate
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = Button4
     Left = 168
-    Height = 174
-    Top = 320
+    Height = 142
+    Top = 352
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Top = 12
@@ -2997,6 +2997,21 @@ object Form1: TForm1
     Caption = 'Install module(s) from list'
     OnClick = Button2Click
     TabOrder = 8
+  end
+  object AutoCrossUpdate: TButton
+    AnchorSideTop.Control = Button5
+    AnchorSideTop.Side = asrBottom
+    Left = 168
+    Height = 28
+    Hint = 'Auto-update all installed cross-compilers'
+    Top = 312
+    Width = 190
+    BorderSpacing.Top = 4
+    Caption = 'Auto-update compilers'
+    OnClick = ButtonAutoUpdateCrossCompiler
+    ParentShowHint = False
+    ShowHint = True
+    TabOrder = 23
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]

@@ -193,9 +193,6 @@ uses
     ,math
   {$ENDIF}
   ;
-const
-  SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
-  SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
 
 function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
@@ -791,23 +788,25 @@ begin
           end;
 
           {$ENDIF}
-          if CrossInstaller.FPCCFGSnippet<>'' then
-          begin
-            // Modify fpc.cfg
-            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-            InsertFPCCFGSnippet(FPCCfg,
-              SnipMagicBegin+FCrossCPU_target+'-'+FCrossOS_target+LineEnding+
-              '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
-              '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-              '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
-              '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
-              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
-              CrossInstaller.FPCCFGSnippet+LineEnding+
-              '#ENDIF'+LineEnding+
-              '#ENDIF'+LineEnding+
-              '#ENDIF'+LineEnding+
-              SnipMagicEnd);
-          end;
+          // Modify fpc.cfg
+          // always add this, to be able to detect which cross-compilers are installed
+          // helpfull for later bulk-update of all cross-compilers
+          FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+          if CrossInstaller.FPCCFGSnippet<>''
+             then s:=CrossInstaller.FPCCFGSnippet+LineEnding
+             else s:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+          InsertFPCCFGSnippet(FPCCfg,
+            SnipMagicBegin+FCrossCPU_target+'-'+FCrossOS_target+LineEnding+
+            '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
+            '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
+            '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
+            '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
+            '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
+            s+
+            '#ENDIF'+LineEnding+
+            '#ENDIF'+LineEnding+
+            '#ENDIF'+LineEnding+
+            SnipMagicEnd);
           {$IFDEF UNIX}
           result:=CreateFPCScript;
           {$ENDIF UNIX}

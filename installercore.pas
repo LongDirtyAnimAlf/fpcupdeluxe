@@ -56,6 +56,8 @@ const
   STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
   {$ENDIF}
 
+  SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
+  SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
 
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
