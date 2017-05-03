@@ -1561,7 +1561,7 @@ begin
   BitBtnLazarusOnly.Enabled:=value;
   Button7.Enabled:=value;
   Button8.Enabled:=value;
-  AutoCrossUpdate:=value;
+  AutoCrossUpdate.Enabled:=value;
 
   ListBoxFPCTarget.Enabled:=value;
   ListBoxLazarusTarget.Enabled:=value;
