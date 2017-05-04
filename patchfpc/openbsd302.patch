@@ -1,0 +1,264 @@
+Index: rtl/openbsd/i386/prt0.as
+===================================================================
+--- rtl/openbsd/i386/prt0.as	(revision 36087)
++++ rtl/openbsd/i386/prt0.as	(working copy)
+@@ -6,6 +6,14 @@
+ 	.ascii "OpenBSD\0"
+ 	.long	0
+ 	.previous
++	.section ".note.openbsd.ident", "a"
++	.p2align 2
++	.long	8
++	.long	4
++	.long	1
++	.ascii "OpenBSD\0"
++	.long	0
++	.previous
+ 	.file	"crt0.c"
+ gcc2_compiled.:
+ .data
+Index: rtl/openbsd/i386/cprt0.as
+===================================================================
+--- rtl/openbsd/i386/cprt0.as	(revision 36087)
++++ rtl/openbsd/i386/cprt0.as	(working copy)
+@@ -6,6 +6,14 @@
+ 	.ascii "OpenBSD\0"
+ 	.long	0
+ 	.previous
++	.section ".note.openbsd.ident", "a"
++	.p2align 2
++	.long	8
++	.long	4
++	.long	1
++	.ascii "OpenBSD\0"
++	.long	0
++	.previous
+ 	.file	"crt0.c"
+ gcc2_compiled.:
+ .data
+@@ -108,7 +116,7 @@
+ 	movb $0,(%edx)
+ 	movl $__progname_storage,__progname
+ .L3:
+-	call __init
++#	call __init
+ 	subl $16,%esp
+ 	pushl %eax
+ 	movl 8(%ebp),%eax
+Index: rtl/openbsd/x86_64/cprt0.as
+===================================================================
+--- rtl/openbsd/x86_64/cprt0.as	(revision 36087)
++++ rtl/openbsd/x86_64/cprt0.as	(working copy)
+@@ -6,6 +6,14 @@
+ 	.ascii "OpenBSD\0"
+ 	.long	0
+ 	.previous
++	.section ".note.openbsd.ident", "a"
++	.p2align 2
++	.long	8
++	.long	4
++	.long	1
++	.ascii "OpenBSD\0"
++	.long	0
++	.previous
+ 	.file	"crt0.c"
+ 	.globl	__progname
+ 	.section	.rodata
+Index: rtl/openbsd/x86_64/gprt0.as
+===================================================================
+--- rtl/openbsd/x86_64/gprt0.as	(revision 36087)
++++ rtl/openbsd/x86_64/gprt0.as	(working copy)
+@@ -1,3 +1,11 @@
++	.section ".note.openbsd.ident", "a"
++	.p2align 2
++	.long	8
++	.long	4
++	.long	1
++	.ascii "OpenBSD\0"
++	.long	0
++	.previous
+ 	.file	"crt0.c"
+ 	.globl	__progname
+ 	.section	.rodata
+Index: rtl/openbsd/x86_64/prt0.as
+===================================================================
+--- rtl/openbsd/x86_64/prt0.as	(revision 36087)
++++ rtl/openbsd/x86_64/prt0.as	(working copy)
+@@ -6,6 +6,14 @@
+ 	.ascii "OpenBSD\0"
+ 	.long	0
+ 	.previous
++	.section ".note.openbsd.ident", "a"
++	.p2align 2
++	.long	8
++	.long	4
++	.long	1
++	.ascii "OpenBSD\0"
++	.long	0
++	.previous
+ 	.file	"crt0.c"
+ 	.globl	__progname
+ 	.section	.rodata
+Index: rtl/bsd/ostypes.inc
+===================================================================
+--- rtl/bsd/ostypes.inc	(revision 36087)
++++ rtl/bsd/ostypes.inc	(working copy)
+@@ -87,6 +87,9 @@
+         st_qspare1    : cint64;            // was recursive change detect
+         st_qspare2    : cint64;
+ {$else dragonfly}
++{$ifdef openbsd}
++	st_mode       : mode_t;             // inode protection mode
++{$endif}
+         st_dev        : dev_t;             // inode's device
+ {$ifdef darwinarm}
+         st_mode       : mode_t;            // inode protection mode
+@@ -99,16 +102,15 @@
+         st_ino        : ino_t;             // inode's number
+ {$else not netbsd}
+         st_ino        : ino_t;             // inode's number
++{$ifndef openbsd}
+         st_mode       : mode_t;            // inode protection mode
++{$endif}
+ {$endif not netbsd}
+         st_nlink      : nlink_t;           // number of hard links
+ {$endif}
+         st_uid        : uid_t;             // user ID of the file's owner
+         st_gid        : gid_t;             // group ID of the file's group
+         st_rdev       : dev_t;             // device type
+-{$ifdef openbsd}
+-        st_padd0      : cint;
+-{$endif}
+         st_atime      : time_t;            // time of last access
+         st_atimensec  : clong;             // nsec of last access
+         st_mtime      : time_t;            // time of last data modification
+@@ -146,10 +148,18 @@
+   { directory services }
+ {$ifndef darwinarm}
+    dirent  = record
++{$ifdef openbsd}
++	d_fileno      : ino_t;
++	d_off         : off_t;
++{$else}
+         d_fileno      : cuint32;                        // file number of entry
++{$endif}
+         d_reclen      : cuint16;                        // length of this record
+         d_type        : cuint8;                         // file type, see below
+         d_namlen      : cuint8;                         // length of string in d_name
++{$ifdef openbsd}
++	d_padding     : array[1..4] of cuint8;
++{$endif}
+         d_name        : array[0..(255 + 1)-1] of char;  // name must be no longer than this
+    end;
+ {$else not darwinarm}
+@@ -174,6 +184,11 @@
+         dd_size   : clong;        // amount of data returned by getdirentries
+         dd_buf    : pchar;        // data buffer
+         dd_len    : cint;         // size of data buffer
++{$ifdef openbsd}
++	dd_curpos : off_t;
++	dd_lock   : pointer;
++	dd_rewind : clong;
++{$else}
+ {$ifdef netbsdpowerpc}
+         dd_pad1   : cint;
+         dd_seek   : cint64;        // magic cookie returned by getdirentries
+@@ -186,6 +201,7 @@
+         __dd_lock : pthread_mutex_t; // for thread locking
+         __dd_td : pointer;        // telldir position recording
+ {$endif}
++{$endif not openbsd}
+    end;
+    TDir    = dir;
+    pDir    = ^dir;
+Index: compiler/systems/t_bsd.pas
+===================================================================
+--- compiler/systems/t_bsd.pas	(revision 36087)
++++ compiler/systems/t_bsd.pas	(working copy)
+@@ -126,8 +126,11 @@
+   Inherited Create;
+   if not Dontlinkstdlibpath Then
+    if not(target_info.system in systems_darwin) then
++     if not(target_info.system in systems_openbsd) then
+      LibrarySearchPath.AddPath(sysrootpath,'/lib;/usr/lib;/usr/X11R6/lib',true)
+    else
++       LibrarySearchPath.AddPath(sysrootpath,'/usr/lib;${X11BASE}/lib;${LOCALBASE}/lib',true)
++   else
+      { Mac OS X doesn't have a /lib }
+      LibrarySearchPath.AddPath(sysrootpath,'/usr/lib',true)
+ end;
+@@ -581,7 +584,8 @@
+      { when we have -static for the linker the we also need libgcc }
+      if (cs_link_staticflag in current_settings.globalswitches) then
+       LinkRes.Add('-lgcc');
+-     if linkdynamic and (Info.DynamicLinker<>'') then
++     if linkdynamic and (Info.DynamicLinker<>'') and
++        not(target_info.system in systems_openbsd) then
+       LinkRes.AddFileName(Info.DynamicLinker);
+      if not LdSupportsNoResponseFile then
+        LinkRes.Add(')');
+@@ -697,8 +701,7 @@
+    end;
+    
+ { Use -nopie on OpenBSD }
+-  if (target_info.system in systems_openbsd) and
+-     (target_info.system <> system_x86_64_openbsd) then
++  if (target_info.system in systems_openbsd) then
+     Info.ExtraOptions:=Info.ExtraOptions+' -nopie';
+     
+ { Write used files and libraries }
+Index: packages/opengl/src/gl.pp
+===================================================================
+--- packages/opengl/src/gl.pp	(revision 36087)
++++ packages/opengl/src/gl.pp	(working copy)
+@@ -2267,11 +2267,7 @@
+   {$IFDEF MorphOS}
+   InitTinyGLLibrary;
+   {$ELSE}
+-  {$ifdef haiku}
+   LoadOpenGL('libGL.so');
+-  {$else}
+-  LoadOpenGL('libGL.so.1');
+-  {$endif}
+   {$ENDIF}
+   {$endif}
+   {$ENDIF OS2}
+Index: packages/opengl/src/glut.pp
+===================================================================
+--- packages/opengl/src/glut.pp	(revision 36087)
++++ packages/opengl/src/glut.pp	(working copy)
+@@ -768,13 +768,7 @@
+   {$ifdef darwin}
+   LoadGlut('/System/Library/Frameworks/GLUT.framework/GLUT');
+   {$else}
+-  {$IFDEF haiku}
+   LoadGlut('libglut.so');
+-  {$ELSE}
+-  {$IFNDEF MORPHOS}
+-  LoadGlut('libglut.so.3');
+-  {$ENDIF}
+-  {$ENDIF}
+   {$endif}
+   {$ENDIF OS2}
+   {$ENDIF}
+Index: packages/opengl/src/glu.pp
+===================================================================
+--- packages/opengl/src/glu.pp	(revision 36087)
++++ packages/opengl/src/glu.pp	(working copy)
+@@ -76,16 +76,8 @@
+ {$ifdef darwin}
+   GLU_LIB =  '/System/Library/Frameworks/OpenGL.framework/Libraries/libGLU.dylib';
+ {$else}
+-{$IFDEF haiku}
+   GLU_LIB = 'libGLU.so';
+-{$ELSE}
+-{$ifdef MorphOS}
+-  GLU_LIB = 'tinygl.library';
+-{$else}
+-  GLU_LIB = 'libGLU.so.1';
+-{$endif}
+ {$ENDIF}
+-{$ENDIF}
+ {$ENDIF OS2}
+ {$endif}
+                               
