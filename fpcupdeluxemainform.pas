@@ -1107,8 +1107,9 @@ begin
 
     AddMessage('Going to install a cross-compiler from current sources.');
 
-    sStatus:='Going to build a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
-    if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' ('+FPCupManager.FPCOPT+')';
+    sStatus:='Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+    if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
+    if FPCupManager.CrossOPT<>'' then sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
     sStatus:=sStatus+'.';
 
     MissingCrossBins:=false;
