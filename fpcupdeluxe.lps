@@ -3,7 +3,7 @@
   <ProjectSession>
     <PathDelim Value="\"/>
     <Version Value="10"/>
-    <BuildModes Active="win32"/>
+    <BuildModes Active="Default"/>
     <Units Count="305">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
