@@ -419,7 +419,7 @@ begin
 
   //CheckFPCUPOptions(FPCupManager);
 
-  {$IF defined(BSD) and not defined(DARWIN)}
+  {$IF defined(BSD) and not defined(OpenBSD) and not defined(DARWIN)}
   FPCupManager.PatchCmd:='gpatch';
   {$ELSE}
   FPCupManager.PatchCmd:='patch';

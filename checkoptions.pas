@@ -225,7 +225,7 @@ begin
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.FPCDesiredRevision:=Options.GetOption('','fpcrevision','',false);
 
-      {$IF defined(BSD) and not defined(DARWIN)}
+      {$IF defined(BSD) and not defined(OpenBSD) and not defined(DARWIN)}
       FInstaller.PatchCmd:=Options.GetOption('','patchcmd','gpatch',false);
       {$ELSE}
       FInstaller.PatchCmd:=Options.GetOption('','patchcmd','patch',false);

@@ -2685,7 +2685,11 @@ begin
           begin
             // check for default values
             if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-               then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
+              {$IF defined(BSD) and not defined(DARWIN)}
+              then LocalPatchCmd:=FPatchCmd + ' -p0 -N -i '
+              {$else}
+              then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
+              {$endif}
                else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
             {$IFDEF MSWINDOWS}
             ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);

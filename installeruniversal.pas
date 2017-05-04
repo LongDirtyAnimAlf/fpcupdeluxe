@@ -543,8 +543,8 @@ begin
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
     begin
-      infoln('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',eterror);
-      if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'. Stopping',false);
+      infoln('TUniversalInstaller: error while installing package '+PackagePath+'.',etWarning);
+      if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'.',false);
       break;
     end;
     {$endif}
