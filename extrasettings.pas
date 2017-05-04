@@ -14,7 +14,7 @@ Const
 
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64{,mipsel},jvm);
-  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,java);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,java,iphonesim,nativent);
 
   TCPUOS = record
     CPU:TCPU;
@@ -421,9 +421,11 @@ begin
     begin
       for CPU := Low(TCPU) to High(TCPU) do
       begin
-        // skip non-combi's
-        if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java)) then continue;
-        if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) {AND (CPU<>mipsel)}) then continue;
+        // skip non-combi's to reduce size of ini-file
+        if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
+        if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) {AND (CPU<>mipsel)}) then continue;
+        if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
+        if (OS=nativent) AND (CPU<>i386) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
         if (OS=windows) AND ((CPU=arm) OR (CPU=aarch64)) then continue;
         if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;

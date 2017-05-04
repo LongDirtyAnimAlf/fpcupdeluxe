@@ -38,7 +38,7 @@ type
     Button2: TButton;
     Button3: TButton;
     Button4: TButton;
-    Button5: TButton;
+    ButtonInstallCrossCompiler: TButton;
     CheckVerbosity: TCheckBox;
     InstallDirEdit: TEdit;
     Panel1: TPanel;
@@ -60,7 +60,7 @@ type
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
     procedure Button4Click(Sender: TObject);
-    procedure Button5Click(Sender: TObject);
+    procedure ButtonInstallCrossCompilerClick(Sender: TObject);
     procedure FPCOnlyClick(Sender: TObject);
     procedure Button7Click(Sender: TObject);
     procedure Button8Click(Sender: TObject);
@@ -196,7 +196,7 @@ begin
   DinoBtn.Enabled:=False;
   RadioGroup1.Enabled:=False;
   RadioGroup2.Enabled:=False;
-  Button5.Enabled:=False;
+  ButtonInstallCrossCompiler.Enabled:=False;
   {$endif CPUAARCH64}
   {$ifdef CPUARM}
   // disable some features
@@ -204,7 +204,7 @@ begin
   StableBtn.Enabled:=False;
   RadioGroup1.Enabled:=False;
   RadioGroup2.Enabled:=False;
-  Button5.Enabled:=False;
+  ButtonInstallCrossCompiler.Enabled:=False;
   {$endif CPUARM}
 
   {$ifdef Darwin}
@@ -319,13 +319,16 @@ var
   FPCCfg:string;
   BinPath:string;
   ConfigText: TStringList;
-  processorname, os: string;
+  aCPU, aOS: string;
+  // tricky: to be changed; todo
+  aRadiogroup_CPU,aRadiogroup_OS: string;
+  CheckAutoClearStore:boolean;
 begin
-  os := {$I %FPCTARGETOS%};
-  processorname := {$I %FPCTARGETCPU%};
-  os := LowerCase(os);
-  processorname := LowerCase(processorname);
-  BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+processorname + '-' + os;
+  aOS := {$I %FPCTARGETOS%};
+  aCPU := {$I %FPCTARGETCPU%};
+  aOS := LowerCase(aOS);
+  aCPU := LowerCase(aCPU);
+  BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+aCPU + '-' + aOS;
   FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
 
   if NOT FileExists(FPCCfg) then
@@ -334,7 +337,13 @@ begin
     exit;
   end;
 
-  AddMessage('Checking ' + FPCCfg + ' for ' + processorname + '-' + os+' in ' + BinPath);
+
+  CheckAutoClearStore:=CheckAutoClear.Checked;
+  if CheckAutoClearStore then Button8.Click;
+  CheckAutoClear.Checked:=false;
+
+  Memo1.Lines.Append('Checking ' + FPCCfg + ' for cross-compilers in ' + BinPath);
+  Memo1.Lines.Append('');
 
   ConfigText:=TStringList.Create;
   try
@@ -342,31 +351,42 @@ begin
 
     for OSType := Low(TOS) to High(TOS) do
     begin
-      os:=GetEnumName(TypeInfo(TOS),Ord(OSType));
-
-      if os='i-sim' then os:='iphonesim';
+      aOS:=GetEnumName(TypeInfo(TOS),Ord(OSType));
 
       for CPUType := Low(TCPU) to High(TCPU) do
       begin
-        processorname:=GetEnumName(TypeInfo(TCPU),Ord(CPUType));
+        aCPU:=GetEnumName(TypeInfo(TCPU),Ord(CPUType));
 
-        if processorname='ppc' then processorname:='powerpc';
-        if processorname='ppc64' then processorname:='powerpc64';
-        if os='windows' then
+        // tricky; see above; improvement todo
+        aRadiogroup_CPU:=aCPU;
+        aRadiogroup_OS:=aOS;
+        if aRadiogroup_CPU='powerpc' then aRadiogroup_CPU:='ppc';
+        if aRadiogroup_CPU='powerpc64' then aRadiogroup_CPU:='ppc64';
+        if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
+
+        if aOS='windows' then
         begin
-          if processorname='i386' then os:='win32';
-          if processorname='x86_64' then os:='win64';
+          if aCPU='i386' then aOS:='win32';
+          if aCPU='x86_64' then aOS:='win64';
         end;
 
-        if (ConfigText.IndexOf(SnipMagicBegin+processorname+'-'+os)<>-1) then
+        {$ifdef win32}
+        // On win32, we always build a win64 cross-compiler.
+        // So, if the win32 install is updated, this cross-compiler is also updated already auto-magically.
+        // We can skip it here, in that case.
+        if aOS='win64' then continue;
+        {$endif}
+
+        if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
         begin
-          AddMessage('Crosscompiler for '+processorname + '-' + os+' found !');
-          AddMessage('Going to update cross-compiler !!');
-          // a bit tricky
-          RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(GetEnumName(TypeInfo(TCPU),Ord(CPUType)));
-          RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(GetEnumName(TypeInfo(TOS),Ord(OSType)));
+          SynEdit1.ClearAll;
+          Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+          Memo1.Lines.Append('Going to update cross-compiler !!');
+          Memo1.Lines.Append('');
+          RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
+          RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
           // nice decoupling of logic and GUI ... ;-)
-          Button5Click(nil);
+          ButtonInstallCrossCompilerClick(nil);
         end;
       end;
     end;
@@ -376,6 +396,7 @@ begin
 
   finally
     ConfigText.Free;
+    CheckAutoClear.Checked:=CheckAutoClearStore;
   end;
 
 end;
@@ -844,7 +865,6 @@ end;
 procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);
 var
   FModuleList: TStringList;
-  i:integer;
 begin
   if (ListBoxFPCTarget.ItemIndex=-1) or (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
@@ -928,7 +948,7 @@ begin
   ListBox3.ClearSelection;
 end;
 
-procedure TForm1.Button5Click(Sender: TObject);
+procedure TForm1.ButtonInstallCrossCompilerClick(Sender: TObject);
 var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
@@ -1094,7 +1114,9 @@ begin
     MissingCrossBins:=false;
     MissingCrossLibs:=false;
 
-    if NOT RealRun then
+    success:=RealRun;
+
+    if (Sender<>nil) AND (NOT success) then
     begin
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
@@ -1369,7 +1391,7 @@ begin
 
           if success then
           begin
-            Memo1.Clear;
+            if CheckAutoClear.Checked then Memo1.Clear;
             AddMessage('Successfully extracted cross-tools.');
             // run again with the correct libs and binutils
             label1.Font.Color:=clDefault;
@@ -1471,8 +1493,6 @@ begin
 end;
 
 procedure TForm1.Button7Click(Sender: TObject);
-var
-  i:integer;
 begin
   Form2.ShowModal;
   if Form2.ModalResult=mrOk then
@@ -1561,7 +1581,7 @@ begin
   Button2.Enabled:=value;
   Button3.Enabled:=value;
   Button4.Enabled:=value;
-  Button5.Enabled:=value;
+  ButtonInstallCrossCompiler.Enabled:=value;
   BitBtnFPCOnly.Enabled:=value;
   BitBtnLazarusOnly.Enabled:=value;
   Button7.Enabled:=value;
@@ -1589,8 +1609,6 @@ begin
 end;
 
 procedure TForm1.PrepareRun;
-var
-  s:string;
 begin
   label1.Font.Color:=clDefault;
   label2.Font.Color:=clDefault;
@@ -1698,7 +1716,7 @@ begin
   sStatus:='Sitting and waiting';
   StatusMessage.Text:=sStatus;
 
-  Memo1.Lines.Clear;
+  if CheckAutoClear.Checked then Memo1.Lines.Clear;
 end;
 
 function TForm1.RealRun:boolean;

@@ -14,7 +14,7 @@ object Form1: TForm1
   OnResize = FormResize
   LCLVersion = '1.7'
   object AutoCrossUpdate: TButton
-    AnchorSideTop.Control = Button5
+    AnchorSideTop.Control = ButtonInstallCrossCompiler
     AnchorSideTop.Side = asrBottom
     Left = 168
     Height = 28
@@ -1542,13 +1542,13 @@ object Form1: TForm1
     OnClick = Button3Click
     TabOrder = 1
   end
-  object Button5: TButton
+  object ButtonInstallCrossCompiler: TButton
     Left = 168
     Height = 28
     Top = 280
     Width = 191
     Caption = 'Install cross-compiler'
-    OnClick = Button5Click
+    OnClick = ButtonInstallCrossCompilerClick
     TabOrder = 12
   end
   object RealFPCURL: TEdit
