@@ -505,13 +505,16 @@ var
   xCPU:TCPU;
   xOS:TOS;
 begin
-  try
-    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aCPU));
-    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aOS));
-    result:=FCrossUtils[xCPU,xOS].CrossBuildOptions;
-  except
-    result:='';
-  end;
+  if aOS='win32' then aOS:='windows';
+  if aOS='win64' then aOS:='windows';
+
+  xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aCPU));
+  if Ord(xCPU) < 0 then
+    raise Exception.CreateFmt('Invalid CPU name "%s" for GetCrossBuildOptions', [aCPU]);
+  xOS:=TOS(GetEnumValue(TypeInfo(TOS),aOS));
+  if Ord(xOS) < 0 then
+    raise Exception.CreateFmt('Invalid OS name "%s" for GetCrossBuildOptions', [aOS]);
+  result:=FCrossUtils[xCPU,xOS].CrossBuildOptions;
 end;
 
 
