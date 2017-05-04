@@ -15,6 +15,12 @@ Const
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64{,mipsel},jvm);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,java);
+
+  TCPUOS = record
+    CPU:TCPU;
+    OS:TOS;
+  end;
+
   TCrossSetting = (fpcup,auto,custom);
 
   TCrossUtil = record
@@ -148,6 +154,8 @@ type
     procedure SetLazPatches(value:string);
 
   public
+    function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
     function GetCrossBuildOptions(aCPU,aOS:string):string;
@@ -417,8 +425,7 @@ begin
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java)) then continue;
         if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) {AND (CPU<>mipsel)}) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
-        if (OS=windows) AND (CPU=arm) then continue;
-        if (OS=windows) AND (CPU=aarch64) then continue;
+        if (OS=windows) AND ((CPU=arm) OR (CPU=aarch64)) then continue;
         if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
@@ -462,18 +469,48 @@ begin
   btnSelectBinDir.Enabled:=e;
 end;
 
-function TForm2.GetLibraryDirectory(aCPU,aOS:string):string;
+function TForm2.GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 var
   xCPU:TCPU;
   xOS:TOS;
+  aLocalCPU,aLocalOS:string;
+begin
+  aLocalCPU:=aCPU;
+  //if length(aLocalCPU)=0 then aLocalCPU:=LowerCase({$I %FPCTARGETCPU%});
+  if aLocalCPU='ppc' then aLocalCPU:='powerpc';
+  if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
+
+  xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aLocalCPU));
+  if Ord(xCPU) < 0 then
+    raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
+
+  aLocalOS:=aOS;
+  //if length(aLocalOS)=0 then aLocalOS:=LowerCase({$I %FPCTARGETOS%});
+  if aLocalOS='win32' then aLocalOS:='windows';
+  if aLocalOS='win64' then aLocalOS:='windows';
+  if aLocalOS='i-sim' then aLocalOS:='iphonesim';
+  if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
+  if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
+  if aLocalOS='iphonesimulator' then aLocalOS:='iphonesim';
+
+  xOS:=TOS(GetEnumValue(TypeInfo(TOS),aLocalOS));
+  if Ord(xOS) < 0 then
+    raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
+
+  result.CPU:=xCPU;
+  result.OS:=xOS;
+end;
+
+function TForm2.GetLibraryDirectory(aCPU,aOS:string):string;
+var
+  xCPUOS:TCPUOS;
 begin
   try
-    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aCPU));
-    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aOS));
-    case FCrossUtils[xCPU,xOS].Setting of
+    xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+    case FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting of
       fpcup: result:='FPCUP_AUTO';
       auto: result:='FPCUP_FULLAUTO';
-      custom: result:=FCrossUtils[xCPU,xOS].LibDir;
+      custom: result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
     else result:='';
     end;
   except
@@ -483,16 +520,14 @@ end;
 
 function TForm2.GetToolsDirectory(aCPU,aOS:string):string;
 var
-  xCPU:TCPU;
-  xOS:TOS;
+  xCPUOS:TCPUOS;
 begin
   try
-    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aCPU));
-    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aOS));
-    case FCrossUtils[xCPU,xOS].Setting of
+    xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+    case FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting of
       fpcup: result:='FPCUP_AUTO';
       auto: result:='FPCUP_FULLAUTO';
-      custom: result:=FCrossUtils[xCPU,xOS].BinDir;
+      custom: result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
     else result:='';
     end;
   except
@@ -502,21 +537,11 @@ end;
 
 function TForm2.GetCrossBuildOptions(aCPU,aOS:string):string;
 var
-  xCPU:TCPU;
-  xOS:TOS;
+  xCPUOS:TCPUOS;
 begin
-  if aOS='win32' then aOS:='windows';
-  if aOS='win64' then aOS:='windows';
-
-  xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aCPU));
-  if Ord(xCPU) < 0 then
-    raise Exception.CreateFmt('Invalid CPU name "%s" for GetCrossBuildOptions', [aCPU]);
-  xOS:=TOS(GetEnumValue(TypeInfo(TOS),aOS));
-  if Ord(xOS) < 0 then
-    raise Exception.CreateFmt('Invalid OS name "%s" for GetCrossBuildOptions', [aOS]);
-  result:=FCrossUtils[xCPU,xOS].CrossBuildOptions;
+  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions;
 end;
-
 
 function TForm2.GetRepo:boolean;
 begin

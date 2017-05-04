@@ -161,7 +161,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0s';
+  FPCUPDELUXEVERSION='1.2.0t';
 
 resourcestring
   CrossGCCMsg =
@@ -834,6 +834,7 @@ begin
     sStatus:=s;
 
     RealRun;
+    //if Form2.UpdateCrossCompilers then ButtonAutoUpdateCrossCompiler(nil);
 
   finally
     DisEnable(Sender,True);
@@ -872,6 +873,7 @@ begin
       end;
     end;
     RealRun;
+    //if Form2.UpdateCrossCompilers then ButtonAutoUpdateCrossCompiler(nil);
   finally
     DisEnable(Sender,True);
   end;
@@ -1423,6 +1425,9 @@ begin
     sStatus:='Going to install/update FPC only.';
 
     RealRun;
+
+    //if Form2.UpdateCrossCompilers then ButtonAutoUpdateCrossCompiler(nil);
+
   finally
     DisEnable(Sender,True);
   end;
@@ -1674,6 +1679,7 @@ begin
   FPCupManager.LazarusDirectory:=sInstallDir+'lazarus';
 
   {
+  // not yet
   if Form2.SplitLazarus
      then FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory+'src'
      else FPCupManager.LazarusSourceDirectory:=FPCupManager.LazarusInstallDirectory;

@@ -295,8 +295,6 @@ begin
       begin
         // Let's try one time to fix it and don't update FReturnCode here
         ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
-        ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose); //attempt again
-
         // We probably ended up with a local repository where not all files were checked out
         // Let's call update to finalize.
         Update;
@@ -409,7 +407,6 @@ begin
 
   // always perform a cleaup before doing anything else ... just to be sure !
   ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose);
-  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose);
 
   FileList := TStringList.Create;
   try
@@ -469,18 +466,10 @@ begin
         begin
           // Let's try to release locks; don't update FReturnCode
           ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
-          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose); //attempt again
         end;
         //Give everybody a chance to relax ;)
         Sleep(500);
         // attempt again !!
-
-        // last resort measures
-        if (AfterErrorRetry = MaxErrorRetries) then
-        begin
-          //revert local changes to try to cleanup errors ...
-          //ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert -R '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //revert changes
-        end;
 
         {$IFNDEF MSWINDOWS}
         if ExecuteSpecialDue2EmptyString then
@@ -510,6 +499,15 @@ begin
         }
         FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, FReturnOutput, Verbose);
         AfterErrorRetry := AfterErrorRetry + 1;
+
+        // last resort measures
+        if (AfterErrorRetry = MaxErrorRetries) then
+        begin
+          //revert local changes to try to cleanup errors ...
+          //ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert -R '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //revert changes
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive --remove-unversioned --remove-ignored ' + LocalRepository, Verbose); //attempt again
+        end;
+
       end;
       UpdateRetry := UpdateRetry + 1;
     end;
