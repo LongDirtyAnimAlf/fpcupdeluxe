@@ -1080,7 +1080,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
 
     // these libs are always needed !!
-    AdvicedLibs:='make gdb binutils unzip patch ';
+    AdvicedLibs:='make gdb binutils unzip unrar patch wget ';
 
     AllOutput:=TStringList.Create;
     try
@@ -1156,9 +1156,14 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         Output:='libx11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
       end
       else
-      if (Output='openbsd') OR (Output='freebsd') OR (Output='netbsd')  then
+      if (Output='openbsd') then
       begin
-        //Output:='subversion openssl curl';
+        Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext';
+      end
+      else
+      if (Output='freebsd') OR (Output='netbsd') then
+      begin
+        Output:='xorg-libraries libX11 libXtst gtkglext iconv xorg-fonts-type1 liberation-fonts-ttf';
       end
       else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
 

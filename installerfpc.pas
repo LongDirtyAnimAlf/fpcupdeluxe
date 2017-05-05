@@ -522,6 +522,12 @@ begin
         //putting all before target might help!?!?
 
         ProcessEx.Parameters.Add('all');
+        // future improvement:
+        // 1: Make compiler_cycle CROSSINSTALL=1
+        // 2: Make rtl packages CROSSINSTALL=1
+        // 3: Make rtl_install packages_install CROSSINSTALL=1
+        // if cross-compiler is already present, this could reduce some build-time
+
         ProcessEx.Parameters.Add('CPU_SOURCE='+SourceCPU);
         ProcessEx.Parameters.Add('OS_SOURCE='+SourceOS);
         ProcessEx.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
@@ -549,8 +555,13 @@ begin
           // always build hardfloat for ARM on Android ?
           // or default to softfloat for ARM on Android ?
           // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
-          if (Pos('-dFPC_ARMHF',Options)=0) then Options:=Options+' -dFPC_ARMHF';
+          // decision: (nearly) always build hardfloat ... not necessary correct however !
+          if (Pos('-dFPC_ARMHF',Options)=0) AND (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMHF';
         end;
+
+        {$ifdef solaris}
+        Options:=Options+' -Xn';
+        {$endif}
 
         CrossOptions:='';
 

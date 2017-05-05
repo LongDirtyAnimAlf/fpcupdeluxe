@@ -522,6 +522,16 @@ begin
       continue;
     end;
 
+    {$ifdef OpenBSD}
+    // the packages lazdatadict and lazdbexport are not suitable for OpenBSD: their FPC units are not included !
+    // so skip them in case they are included.
+    if (Pos('lazdatadict',PackagePath)>0) OR (Pos('lazdbexport',PackagePath)>0) then
+    begin
+      infoln('TUniversalInstaller: incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      continue;
+    end;
+    {$endif}
+
     {
     if (NOT FileExists(PackagePath)) OR (PackagePath='') then
     begin

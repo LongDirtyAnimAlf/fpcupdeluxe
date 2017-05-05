@@ -1061,7 +1061,7 @@ begin
         //   http://repo.or.cz/openal-soft/android.git or
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
-            then FPCupManager.CrossOPT:='-CpARMV7A '
+            then FPCupManager.CrossOPT:='-CpARMV7A ' //-CfVFPV
             else FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
       end;
     end;
