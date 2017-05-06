@@ -1838,9 +1838,19 @@ begin
          {$ifdef linux}
          if (Pos('linux',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-linux',os)=0),NegativeList);
          {$endif}
+
          {$ifdef Darwin}
          if (Pos('darwin',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-darwin',os)=0),NegativeList);
          {$endif}
+
+         {$ifdef OpenBSD}
+         if (Pos('openbsd',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-openbsd',os)=0),NegativeList);
+         {$endif}
+
+         {$ifdef FreeBSD}
+         if (Pos('freebsd',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-freebsd',os)=0),NegativeList);
+         {$endif}
+
       end;
 
       cpu:=GetValueSimple('CPU_OK',sl);
