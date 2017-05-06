@@ -130,6 +130,7 @@ const
 var
   AsFile: string;
   BinPrefixTry:string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -157,6 +158,26 @@ begin
       BinPrefixTry:='armv8-rpi3-linux-gnueabihf-';
       AsFile:=BinPrefixTry+'as'+GetExeExt;
       result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if result then
+      begin
+        // remove floating point option, if any, as this toolchain does not like them
+        // tricky !
+        i:=StringListStartsWith(FCrossOpts,'-CfVFPV');
+        if i>-1 then
+        begin
+          FCrossOpts.Delete(i);
+        end;
+        i:=StringListStartsWith(FCrossOpts,'-OoFASTMATH');
+        if i>-1 then
+        begin
+          FCrossOpts.Delete(i);
+        end;
+        i:=StringListStartsWith(FCrossOpts,'-CaEABIHF');
+        if i>-1 then
+        begin
+          FCrossOpts.Delete(i);
+        end;
+      end;
     end;
     {$endif}
     if result then FBinUtilsPrefix:=BinPrefixTry;

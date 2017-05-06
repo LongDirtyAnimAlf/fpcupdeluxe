@@ -161,7 +161,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.2.0t';
+  FPCUPDELUXEVERSION='1.4.0';
 
 resourcestring
   CrossGCCMsg =
@@ -1061,7 +1061,7 @@ begin
         //   http://repo.or.cz/openal-soft/android.git or
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
-            then FPCupManager.CrossOPT:='-CpARMV7A ' //-CfVFPV
+            then FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 ' //-CfVFPV
             else FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
       end;
     end;

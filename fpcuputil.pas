@@ -1070,7 +1070,7 @@ begin
   begin
     if CS then
     begin
-      if copy(SearchIn[i],1,length(SearchFor))=SearchFor then
+      if copy(Trim(SearchIn[i]),1,length(SearchFor))=SearchFor then
       begin
         Found:=true;
         break;
@@ -1078,7 +1078,7 @@ begin
     end
     else
     begin
-      if UpperCase(copy(SearchIn[i],1,length(SearchFor)))=UpperCase(SearchFor) then
+      if UpperCase(copy(Trim(SearchIn[i]),1,length(SearchFor)))=UpperCase(SearchFor) then
       begin
         Found:=true;
         break;

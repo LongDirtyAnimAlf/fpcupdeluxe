@@ -2429,6 +2429,9 @@ begin
       Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabi');
       {$ENDIF cpuarmhf}
       {$ENDIF cpuarm}
+      {$IF (defined(BSD)) and (not defined(Darwin))}
+      Write(TxtFile,';'+'/usr/local/lib'+';'+'/usr/X11R6/lib');
+      {$endif}
       Write(TxtFile,';'+GetGCCDirectory);
       Writeln;
       {$ENDIF UNIX}

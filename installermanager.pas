@@ -1159,6 +1159,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       if (Output='openbsd') then
       begin
         Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext';
+        //Output:='gmake gdk-pixbuf gtk+2';
       end
       else
       if (Output='freebsd') OR (Output='netbsd') then
