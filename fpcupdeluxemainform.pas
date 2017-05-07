@@ -161,7 +161,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0a';
+  FPCUPDELUXEVERSION='1.4.0b';
 
 resourcestring
   CrossGCCMsg =
@@ -1114,9 +1114,6 @@ begin
     if FPCupManager.CrossOPT<>'' then sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
     sStatus:=sStatus+'.';
 
-    MissingCrossBins:=false;
-    MissingCrossLibs:=false;
-
     success:=RealRun;
 
     if (Sender<>nil) AND (NOT success) then
@@ -1269,6 +1266,7 @@ begin
               if UseNativeUnzip then
               begin
                 {$ifdef BSD}
+                // just do a simple unzip
                 with TNormalUnzipper.Create do
                 begin
                   try
@@ -1359,6 +1357,7 @@ begin
               if UseNativeUnzip then
               begin
                 {$ifdef BSD}
+                // just do a simple unzip
                 with TNormalUnzipper.Create do
                 begin
                   try
@@ -1634,6 +1633,9 @@ begin
 
   FPCupManager.Sequencer.ResetAllExecuted;
 
+  MissingCrossBins:=false;
+  MissingCrossLibs:=false;
+
   FPCupManager.OnlyModules:='';
   FPCupManager.IncludeModules:='';
   FPCupManager.SkipModules:='';
@@ -1784,10 +1786,15 @@ begin
     begin
       AddMessage('');
       AddMessage('');
-      AddMessage('ERROR: Fpcupdeluxe failed.');
+      if MissingCrossBins then AddMessage('Fpcupdeluxe failed due to missing cross binary tools.')
+      else if MissingCrossLibs then AddMessage('Fpcupdeluxe failed due to missing cross libraries.')
+      else
+      begin
+        AddMessage('ERROR: Fpcupdeluxe fatal error !');
+        StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
+      end;
       label1.Font.Color:=clRed;
       label2.Font.Color:=clRed;
-      StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
     end
     else
     begin

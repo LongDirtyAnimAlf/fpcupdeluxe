@@ -1469,14 +1469,36 @@ end;
 procedure TThreadedUnzipper.DoOnProgress(Sender : TObject; Const Pct : Double);
 begin
   FPercent:=Pct;
-  Synchronize(@DoOnZipProgress);
+  if FTotalFileCount<=100 then Synchronize(@DoOnZipProgress);
 end;
 
 procedure TThreadedUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
 begin
   Inc(FFileCount);
-  FCurrentFile:=ExtractFileNAme(AFileName);
-  Synchronize(@DoOnZipFile);
+  if FTotalFileCount>100
+     then FCurrentFile:='files'
+     else FCurrentFile:=ExtractFileName(AFileName);
+  if FTotalFileCount>50000 then
+  begin
+    if (FFileCount MOD 1000)=0 then Synchronize(@DoOnZipFile);
+  end
+  else
+  if FTotalFileCount>5000 then
+  begin
+    if (FFileCount MOD 100)=0 then Synchronize(@DoOnZipFile);
+  end
+  else
+  if FTotalFileCount>500 then
+  begin
+    if (FFileCount MOD 10)=0 then Synchronize(@DoOnZipFile);
+  end
+  else
+  if FTotalFileCount>100 then
+  begin
+    if (FFileCount MOD 2)=0 then Synchronize(@DoOnZipFile);
+  end
+  else
+    Synchronize(@DoOnZipFile);
 end;
 
 

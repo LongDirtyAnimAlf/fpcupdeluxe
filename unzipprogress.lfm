@@ -26,6 +26,7 @@ object ProgressForm: TProgressForm
     BorderSpacing.Around = 10
     Step = 1
     TabOrder = 0
+    Visible = False
   end
   object FileLabel: TLabel
     Left = 16

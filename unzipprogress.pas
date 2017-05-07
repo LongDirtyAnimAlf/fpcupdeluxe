@@ -18,7 +18,6 @@ type
     ProgressBar: TProgressBar;
     FileLabel: TLabel;
   private
-
   public
     procedure DoOnZipProgress(Sender: TObject; Pct: double);
     procedure DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
@@ -34,6 +33,7 @@ implementation
 
 procedure TProgressForm.DoOnZipProgress(Sender: TObject; Pct: double);
 begin
+  if (NOT ProgressBar.Visible) then ProgressBar.Visible:=True;
   ProgressBar.Position:=Round(Pct*100);
 end;
 
