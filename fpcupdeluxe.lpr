@@ -32,7 +32,9 @@ program fpcupdeluxe;
 
 uses
   {$IFDEF UNIX}
-  //cthreads,
+  {$ifndef BSD}
+  cthreads,
+  {$endif}
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, fpcupdeluxemainform, extrasettings, unzipprogress,

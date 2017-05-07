@@ -161,7 +161,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0';
+  FPCUPDELUXEVERSION='1.4.0a';
 
 resourcestring
   CrossGCCMsg =
@@ -953,7 +953,9 @@ var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
   UseNativeUnzip:boolean;
+  {$ifndef BSD}
   FileUnzipper: TThreadedUnzipper;
+  {$endif}
   {$ifdef Unix}
   fileList: TStringList;
   i:integer;
