@@ -1269,7 +1269,14 @@ begin
               if UseNativeUnzip then
               begin
                 {$ifdef BSD}
-                success:=(ExecuteCommand('unzip -o -d ' + TargetPath + ' ' + TargetFile, true)=0);
+                with TNormalUnzipper.Create do
+                begin
+                  try
+                    success:=DoUnZip(TargetFile,TargetPath,[]);
+                  finally
+                    Free;
+                  end;
+                end;
                 {$else}
                 ProgressForm := TProgressForm.Create(Self);
                 try
@@ -1352,7 +1359,14 @@ begin
               if UseNativeUnzip then
               begin
                 {$ifdef BSD}
-                success:=(ExecuteCommand('unzip -o -d ' + TargetPath + ' ' + TargetFile, true)=0);
+                with TNormalUnzipper.Create do
+                begin
+                  try
+                    success:=DoUnZip(TargetFile,TargetPath,[]);
+                  finally
+                    Free;
+                  end;
+                end;
                 {$else}
                 ProgressForm := TProgressForm.Create(Self);
                 try

@@ -33,6 +33,7 @@ program fpcupdeluxe;
 uses
   {$IFDEF UNIX}
   {$ifndef BSD}
+  // for threaded unzipper in mainform
   cthreads,
   {$endif}
   {$ENDIF}

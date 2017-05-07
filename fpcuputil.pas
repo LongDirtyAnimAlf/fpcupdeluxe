@@ -97,12 +97,15 @@ type
 
   TNormalUnzipper = class(TObject)
   private
-    FUnZipper: TThreadedUnzipper;
-    procedure DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
+    FUnZipper: TUnZipper;
+    FFileCnt: cardinal;
+    FFileList:TStrings;
+    FTotalFileCnt: cardinal;
+    FCurrentFile: string;
+    procedure DoOnFile(Sender : TObject; Const AFileName : string);
   public
-    function DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
+    function DoUnZip(const ASrcFile, ADstDir: String; Files: array of string):boolean;
   end;
-
 
   { TLogger }
   TLogger = class(TObject)
@@ -1379,7 +1382,7 @@ begin
 end;
 
 
-{TUnzipper}
+{TThreadedUnzipper}
 
 procedure TThreadedUnzipper.DoOnZipProgress;
 begin
@@ -1499,48 +1502,100 @@ begin
   Start;
 end;
 
-procedure TNormalUnzipper.DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
+{TNormalUnzipper}
+
+procedure TNormalUnzipper.DoOnFile(Sender : TObject; Const AFileName : String);
 begin
-  if TotalFileCnt>50000 then
+  Inc(FFileCnt);
+  FCurrentFile:=ExtractFileName(AFileName);
+  if FTotalFileCnt>50000 then
   begin
-    if (FileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FFileCnt MOD 5000)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
-  if TotalFileCnt>5000 then
+  if FTotalFileCnt>5000 then
   begin
-    if (FileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FFileCnt MOD 500)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
-  if TotalFileCnt>500 then
+  if FTotalFileCnt>500 then
   begin
-    if (FileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FFileCnt MOD 50)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
-  if TotalFileCnt>50 then
+  if FTotalFileCnt>50 then
   begin
-    if (FileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FileCnt)+' files out of #'+InttoStr(TotalFileCnt),etInfo);
+    if (FFileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
-    infoln('Extracting '+aFile+'. #'+InttoStr(FileCnt)+' out of #'+InttoStr(TotalFileCnt),etInfo);
+    infoln('Extracting '+FCurrentFile+'. #'+InttoStr(FFileCnt)+' out of #'+InttoStr(FTotalFileCnt),etInfo);
 end;
 
 function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
+var
+  i:word;
+  x:cardinal;
+  s:string;
 begin
   result:=false;
-  FUnzipper := TThreadedUnzipper.Create;
+  FUnzipper := TUnzipper.Create;
   try
-    FUnzipper.FreeOnTerminate:=False;
-    FUnzipper.OnZipFile := @DoOnZipFile;
-    FUnzipper.DoUnZip(ASrcFile, ADstDir, Files);
-    FUnzipper.WaitFor;
-    FUnzipper.Free;
-    result:=true;
-  except
+    FFileList := TStringList.Create;
+    try
+      FUnZipper.Clear;
+      FUnZipper.OnPercent:=10;
+      FUnZipper.FileName := ASrcFile;
+      FUnZipper.OutputPath := ADstDir;
+      FUnZipper.OnStartFile:= @DoOnFile;
+      FFileList.Clear;
+      if Length(Files)>0 then
+        for i := 0 to high(Files) do
+          FFileList.Append(Files[i]);
+      FFileCnt:=0;
+      FTotalFileCnt:=0;
+
+      FUnZipper.Examine;
+
+      {$ifdef MSWINDOWS}
+      // on windows, .files (hidden files) cannot be created !!??
+      // still to check on non-windows
+      if FFileList.Count=0 then
+      begin
+        for x:=0 to FUnZipper.Entries.Count-1 do
+        begin
+          { UTF8 features are only available in FPC >= 3.1 }
+          {$IF FPC_FULLVERSION > 30100}
+          if FUnZipper.UseUTF8
+            then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+            else
+          {$endif}
+            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+
+          if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+          if (Length(s)>0) AND (s[1]='.') then continue;
+          FFileList.Append(s);
+        end;
+      end;
+      {$endif}
+
+      if FFileList.Count=0
+        then FTotalFileCnt:=FUnZipper.Entries.Count
+        else FTotalFileCnt:=FFileList.Count;
+
+      if FFileList.Count=0
+        then FUnZipper.UnZipAllFiles
+        else FUnZipper.UnZipFiles(FFileList);
+
+      result:=true;
+
+    finally
+      FFileList.Free;
+    end;
+
+  finally
     FUnzipper.Free;
   end;
 end;
-
-
 
 { TLogger }
 
