@@ -161,7 +161,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0b';
+  FPCUPDELUXEVERSION='1.4.0c';
 
 resourcestring
   CrossGCCMsg =
@@ -1030,6 +1030,8 @@ begin
   DisEnable(Sender,False);
 
   try
+
+    //arm predefined settings
     if (FPCupManager.CrossCPU_Target='arm') then
     begin
       if (FPCupManager.CrossOS_Target='wince') then
@@ -1041,8 +1043,8 @@ begin
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
         //FPCupManager.FPCOPT:='-Sh -WP8.1';
-        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-        FPCupManager.CrossOPT:='-CpARMV7 ';
+        FPCupManager.FPCOPT:='-dFPC_ARMHF '; //-WP5.1
+        FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
       end
       else
       begin
@@ -1064,12 +1066,22 @@ begin
       end;
     end;
 
+    //arm64 predefined settings
     if (FPCupManager.CrossCPU_Target='aarch64') then
     begin
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
         //FPCupManager.FPCOPT:='-Sh -WP8.1';
         FPCupManager.CrossOPT:='-CaAARCH64IOS ';
+      end;
+    end;
+
+    //i386 predefined settings
+    if (FPCupManager.CrossCPU_Target='i386') then
+    begin
+      if (FPCupManager.CrossOS_Target='iphonesim') then
+      begin
+        FPCupManager.CrossOPT:='-WP5.1 ';
       end;
     end;
 
