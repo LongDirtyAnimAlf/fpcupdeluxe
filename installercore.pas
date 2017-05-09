@@ -53,7 +53,8 @@ const
   {$ELSE}
   //STANDARDCOMPILEROPTIONS='-veqw -vm2024,2031,3005,3018,3057,4105,4104,4044,4045,4055,4056,4066,5024,5033,5043,5044,5066,5074,5075,5076,6018,11047';
   //STANDARDCOMPILEROPTIONS='-veqw';
-  STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
+  //-vm5023,5057,5058,5060,5024,5028,4055
+  STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x- -vm5024,4055';
   {$ENDIF}
 
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code

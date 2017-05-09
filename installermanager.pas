@@ -998,10 +998,21 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       // Create shortcut on Desktop and in Applications
       fpSystem('/usr/bin/osascript << EOF'+#10+
                'tell application "Finder"'+#10+
-               'make new alias to POSIX file "'+IncludeLeadingPathDelimiter(InstalledLazarus)+'.app" at (path to desktop folder as text)'+#10+
-	       'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
-               'make new alias to POSIX file "'+IncludeLeadingPathDelimiter(InstalledLazarus)+'.app" at (path to applications folder as text)'+#10+
-	       'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
+               'set myLazApp to POSIX file "'+IncludeLeadingPathDelimiter(InstalledLazarus)+'.app" as alias'+#10+
+               'try'+#10+
+                 'set myLazDeskShort to (path to desktop folder as string) & "'+FParent.ShortCutNameLazarus+'" as alias'+#10+
+               'on error'+#10+
+                 'make new alias to myLazApp at (path to desktop folder as text)'+#10+
+                 'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
+               'end try'+#10+
+
+               'try'+#10+
+                 'set myLazAppShort to (path to applications folder as string) & "'+FParent.ShortCutNameLazarus+'" as alias'+#10+
+               'on error'+#10+
+                 'make new alias to myLazApp at (path to applications folder as text)'+#10+
+                 'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
+               'end try'+#10+
+
                'end tell'+#10+
                'EOF');
       {$ELSE}
