@@ -1,6 +1,6 @@
 Index: compiler/systems/t_bsd.pas
 ===================================================================
---- compiler/systems/t_bsd.pas	(revision 35106)
+--- compiler/systems/t_bsd.pas	(revision 36160)
 +++ compiler/systems/t_bsd.pas	(working copy)
 @@ -147,8 +147,8 @@
         begin
@@ -42,27 +42,26 @@ Index: compiler/systems/t_bsd.pas
    i            : longint;
    cprtobj,
    gprtobj,
-@@ -589,15 +590,37 @@
+@@ -588,16 +589,42 @@
+          else if librarysearchpath.FindFile('crtbegin.o',false,s) then
               LinkRes.AddFileName(s);
     end;
++
    { main objectfiles }
 +
 +  { Generate linkfiles.res file if needed }
-+  { Always needed on Windows, due to the limitation of 8196 characters for command line }
-+  { linkfiles.res will be piped if possible }
-+  if LdSupportsNoResponseFile then
++  { Only needed on Windows, due to the limitation of 8196 characters for command line }
++  if (LdSupportsNoResponseFile) AND (source_info.system in systems_all_windows) then
 +   begin
-+     FilesList:=TLinkRes.Create(outputexedir+'linkfiles.res',not LdSupportsNoResponseFile);
++     FilesList:=TLinkRes.Create(outputexedir+'linkfiles.res',false);
    while not ObjectFiles.Empty do
     begin
       s:=ObjectFiles.GetFirst;
       if s<>'' then
--      if LdSupportsNoResponseFile then
--        LinkRes.AddFileName(s)
 +         begin
 +           repeat
-+            i:=Pos(source_info.dirsep,s);
-+            if i>0 then s[i]:=target_info.dirsep;
++             i:=Pos(source_info.dirsep,s);
++             if i>0 then s[i]:=target_info.dirsep;
 +           until i=0;
 +           FilesList.Add(s);
 +         end;
@@ -70,30 +69,34 @@ Index: compiler/systems/t_bsd.pas
 +     FilesList.writetodisk;
 +     FilesList.Free;
 +   end
-       else
--        LinkRes.AddFileName(maybequoted(s));
++  else
 +   begin
 +     while not ObjectFiles.Empty do
 +      begin
 +        s:=ObjectFiles.GetFirst;
-+        if s<>'' then LinkRes.AddFileName(maybequoted(s));
++        if s<>'' then
+       if LdSupportsNoResponseFile then
+         LinkRes.AddFileName(s)
+       else
+         LinkRes.AddFileName(maybequoted(s));
     end;
 +   end;
 +
    if not LdSupportsNoResponseFile then
     LinkRes.Add(')');
  
-@@ -784,6 +807,9 @@
+@@ -784,6 +811,10 @@
    Replace(cmdstr,'$EMUL',EmulStr);
    Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
    Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
-+  if LdSupportsNoResponseFile
-+     then Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
-+     else Replace(cmdstr,'$FILELIST','');
++  if (LdSupportsNoResponseFile) AND (source_info.system in systems_all_windows) then
++    Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
++  else
++    Replace(cmdstr,'$FILELIST','');
    Replace(cmdstr,'$STATIC',StaticStr);
    Replace(cmdstr,'$STRIP',StripStr);
    Replace(cmdstr,'$GCSECTIONS',GCSectionsStr);
-@@ -807,14 +833,17 @@
+@@ -807,14 +838,17 @@
       not(cs_link_nolink in current_settings.globalswitches) then
      begin
        { we have to use a script to use the IFS hack }
@@ -113,27 +116,29 @@ Index: compiler/systems/t_bsd.pas
        CmdStr:='';
      end;
  
-@@ -836,6 +865,9 @@
+@@ -836,6 +870,10 @@
         end;
     end;
  
 +  { Remove linkfiles.res }
-+  if (success) and (LdSupportsNoResponseFile) then DeleteFile(outputexedir+'linkfiles.res');
++  if (success) and (LdSupportsNoResponseFile) and (source_info.system in systems_all_windows) then
++    DeleteFile(outputexedir+'linkfiles.res');
 +
    MakeExecutable:=success;   { otherwise a recursive call to link method }
  end;
  
-@@ -902,6 +934,9 @@
+@@ -902,6 +940,10 @@
    Replace(cmdstr,'$TARGET',targetstr);
    Replace(cmdstr,'$EMUL',EmulStr);
    Replace(cmdstr,'$CATRES',CatFileContent(outputexedir+Info.ResName));
-+  if LdSupportsNoResponseFile
-+     then Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
-+     else Replace(cmdstr,'$FILELIST','');
++  if (LdSupportsNoResponseFile) AND (source_info.system in systems_all_windows) then
++    Replace(cmdstr,'$FILELIST','-filelist '+maybequoted(outputexedir+'linkfiles.res'))
++  else
++    Replace(cmdstr,'$FILELIST','');
    Replace(cmdstr,'$RES',maybequoted(outputexedir+Info.ResName));
    Replace(cmdstr,'$INIT',InitStr);
    Replace(cmdstr,'$FINI',FiniStr);
-@@ -941,14 +976,17 @@
+@@ -941,14 +983,17 @@
       not(cs_link_nolink in current_settings.globalswitches) then
      begin
        { we have to use a script to use the IFS hack }
@@ -153,12 +158,13 @@ Index: compiler/systems/t_bsd.pas
        CmdStr:='';
      end;
  
-@@ -979,6 +1017,9 @@
+@@ -979,6 +1024,10 @@
          DeleteFile(outputexedir+'linksyms.fpc');
      end;
  
 +  { Remove linkfiles.res }
-+  if (success) and (LdSupportsNoResponseFile) then DeleteFile(outputexedir+'linkfiles.res');
++  if (success) and (LdSupportsNoResponseFile) and (source_info.system in systems_all_windows) then
++    DeleteFile(outputexedir+'linkfiles.res');
 +
    MakeSharedLibrary:=success;   { otherwise a recursive call to link method }
  end;

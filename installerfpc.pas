@@ -776,12 +776,13 @@ begin
         end
         else
         begin
-          {$IFDEF UNIX}
 
           // get the name of the cross-compiler we just built.
           IntermediateCompiler:=GetCrossCompilerName(CrossInstaller.TargetCPU);
 
-          {$IFDEF Darwin}
+          {$IFDEF UNIX}
+
+          {$ifdef Darwin}
           // on Darwin, the normal compiler names are used for the final cross-target compiler !!
           // tricky !
           s:=GetCompilerName(CrossInstaller.TargetCPU);
@@ -799,6 +800,10 @@ begin
           end;
 
           {$ENDIF}
+
+          // delete cross-compiler in source-directory
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+IntermediateCompiler);
+
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
           // helpfull for later bulk-update of all cross-compilers

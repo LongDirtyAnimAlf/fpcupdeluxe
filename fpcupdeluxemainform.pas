@@ -419,11 +419,7 @@ begin
 
   //CheckFPCUPOptions(FPCupManager);
 
-  {$IF defined(BSD) and not defined(OpenBSD) and not defined(DARWIN)}
-  FPCupManager.PatchCmd:='gpatch';
-  {$ELSE}
   FPCupManager.PatchCmd:='patch';
-  {$ENDIF}
 
   if listbox3.Count=0 then
   begin
@@ -1231,6 +1227,9 @@ begin
         if BinsURL<>'' then
         begin
 
+          // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.
+          verbose:=(FPCupManager.CrossOS_Target<>'darwin');
+
           UseNativeUnzip:=(ExtractFileExt(BinsURL)='.zip');
 
           if MissingCrossBins then
@@ -1296,7 +1295,8 @@ begin
               else
               begin
                 {$ifdef MSWINDOWS}
-                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
+                if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
+                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
                 if (NOT success) then
                 {$endif}
                 begin
@@ -1306,9 +1306,11 @@ begin
                   UnZipper := 'unrar';
                   {$endif}
                   success:=CheckExecutable(UnZipper, '-v', '');
-                  if success
-                     then success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0)
-                     else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
+                  if success then
+                  begin
+                    if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
+                    success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                  end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                 end;
               end;
 
@@ -1351,9 +1353,6 @@ begin
 
               AddMessage('Going to extract them into '+TargetPath);
 
-              // many files to unpack for Darwin libs : do not show progress of unpacking files when unpacking for Darwin.
-              verbose:=(FPCupManager.CrossOS_Target<>'darwin');
-
               if UseNativeUnzip then
               begin
                 {$ifdef BSD}
@@ -1387,7 +1386,8 @@ begin
               else
               begin
                 {$ifdef MSWINDOWS}
-                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',true)=0);
+                if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
+                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
                 if (NOT success) then
                 {$endif}
                 begin
@@ -1397,9 +1397,11 @@ begin
                   UnZipper := 'unrar';
                   {$endif}
                   success:=CheckExecutable(UnZipper, '-v', '');
-                  if success
-                     then success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',true)=0)
-                     else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
+                  if success then
+                  begin
+                    if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
+                    success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                  end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
                 end;
               end;
             end;
