@@ -200,12 +200,13 @@ function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 var
   ConfigText: TStringList;
   i:integer;
-  SnipBegin,SnipEnd: integer;
+  SnipBegin,SnipEnd,SnipEndLastResort: integer;
   SnippetText: TStringList;
 begin
   result:=false;
   SnipBegin:=-1;
   SnipEnd:=maxint;
+  SnipEndLastResort:=SnipEnd;
   ConfigText:=TStringList.Create;
   SnippetText:=TStringList.Create;
   try
@@ -216,7 +217,7 @@ begin
     if SnipBegin>-1 then
     begin
       infoln('fpc.cfg: found existing snippet in '+FPCCFG+'. Deleting it and writing new version.',etInfo);
-      for i:=SnipBegin to ConfigText.Count-1 do
+      for i:=(SnipBegin+1) to ConfigText.Count-1 do
       begin
         // Once again, look exactly for this text:
         if ConfigText.Strings[i]=SnipMagicEnd then
@@ -224,12 +225,20 @@ begin
           SnipEnd:=i;
           break;
         end;
+        // in case of failure, store beginning of next (magic) config segment
+        if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
+        begin
+          SnipEndLastResort:=i;
+        end;
       end;
       if SnipEnd=maxint then
       begin
         //apparently snippet was not closed
         infoln('fpc.cfg: existing snippet was not closed. Replacing it anyway. Please check your fpc.cfg.',etWarning);
-        SnipEnd:=i;
+        if SnipEndLastResort<>maxint then
+          SnipEnd:=(SnipEndLastResort-1)
+        else
+          SnipEnd:=i;
       end;
       for i:=SnipEnd downto SnipBegin do
       begin
@@ -241,7 +250,8 @@ begin
       ConfigText.Add(LineEnding);
     ConfigText.Add(Snippet);
 
-    {$ifndef Darwin}
+    //{$ifndef Darwin}
+    {$ifdef MSWINDOWS}
     // remove pipeline assembling for Darwin when cross-compiling !!
     SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
     if SnipBegin>-1 then
@@ -255,6 +265,7 @@ begin
     {$endif}
 
     ConfigText.SaveToFile(FPCCFG);
+
     result:=true;
   finally
     ConfigText.Free;
@@ -2400,8 +2411,8 @@ begin
           writeln(TxtFile,'# Write always a nice FPC logo ;)');
           writeln(TxtFile,'-l');
           writeln(TxtFile,'');
-          writeln(TxtFile,'# Display Info, Warnings, Notes and Hints');
-          writeln(TxtFile,'-viwn');
+          writeln(TxtFile,'# Display Info, Warnings and Notes and supress Hints');
+          writeln(TxtFile,'-viwnh-');
           writeln(TxtFile,'');
         finally
           CloseFile(TxtFile);

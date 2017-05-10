@@ -292,8 +292,13 @@ begin
         {$IFDEF DEBUG}
         ProcessEx.Parameters.Add('--verbose');
         {$ELSE}
+        // See compileroptions.pp
+        // Quiet:=ConsoleVerbosity<=-3;
         ProcessEx.Parameters.Add('--quiet');
         ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--build-mode="Fpcupdeluxe"');
         {$ENDIF}
         ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
         ProcessEx.Parameters.Add('--cpu=' + FCrossCPU_Target);
@@ -506,8 +511,13 @@ begin
       {$IFDEF DEBUG}
       ProcessEx.Parameters.Add('--verbose');
       {$ELSE}
+      // See compileroptions.pp
+      // Quiet:=ConsoleVerbosity<=-3;
       ProcessEx.Parameters.Add('--quiet');
       ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--build-mode="Fpcupdeluxe"');
       {$ENDIF}
       ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
       // Support keeping userdefined installed packages when building.
@@ -516,7 +526,6 @@ begin
       if strtointdef(Revision, 38971) >= 38971 then
       begin
         ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FCompilerOptions);
-        ProcessEx.Parameters.Add('--build-mode=');
       end
       else
       begin
@@ -524,9 +533,9 @@ begin
         // We can specify a build mode; otherwise probably the latest build mode will be used
         // which could well be a stripped IDE
         // Let's see how/if FCompilerOptions clashes with the settings in normal build mode
-        writelnlog('LazBuild: building UserIDE but falling back to --build-mode=Normal IDE', true);
+        writelnlog('LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
         ProcessEx.Parameters.Add('--build-ide= ' + FCompilerOptions);
-        ProcessEx.Parameters.Add('--build-mode=Normal IDE');
+        ProcessEx.Parameters.Add('--build-mode="Normal IDE"');
       end;
 
       if FCrossLCL_Platform <> '' then
@@ -895,6 +904,9 @@ begin
       // for newer versions Mac OSX versions (>=10.8) perhaps needed:
       //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
       {$endif}
+
+      // get dummy value to init MiscellaneousConfig
+      Output:=LazarusConfig.GetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Count');
 
     except
       on E: Exception do

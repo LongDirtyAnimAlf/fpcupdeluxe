@@ -647,7 +647,9 @@ begin
       {$IFDEF DEBUG}
       exec:=StringReplace(exec,'lazbuild','lazbuild --verbose',[rfIgnoreCase]);
       {$ELSE}
-      exec:=StringReplace(exec,'lazbuild','lazbuild --quiet --quiet',[rfIgnoreCase]);
+      // See compileroptions.pp
+      // Quiet:=ConsoleVerbosity<=-3;
+      exec:=StringReplace(exec,'lazbuild','lazbuild --quiet --quiet --quiet --quiet',[rfIgnoreCase]);
       {$ENDIF}
     end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
@@ -733,7 +735,7 @@ begin
         end;
       LazarusConfig.DeletePath(xmlfile, 'UserPkgLinks/Item'+IntToStr(cnt)+'/');
       end;
-    xmlfile:='miscellaneousoptions.xml';
+    xmlfile:=MiscellaneousConfig;
     key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/'
       +'Count';
     cnt:=LazarusConfig.GetVariable(xmlfile, key, 0);
@@ -1043,12 +1045,16 @@ begin
         {$IFDEF DEBUG}
         ProcessEx.Parameters.Add('--verbose');
         {$ELSE}
+        // See compileroptions.pp
+        // Quiet:=ConsoleVerbosity<=-3;
         ProcessEx.Parameters.Add('--quiet');
         ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--quiet');
+        ProcessEx.Parameters.Add('--build-mode="Fpcupdeluxe"');
         {$ENDIF}
         ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
         ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
-        ProcessEx.Parameters.Add('--build-mode=');
         try
           ProcessEx.Execute;
           result := ProcessEx.ExitStatus=0;
@@ -1515,12 +1521,16 @@ begin
       {$IFDEF DEBUG}
       ProcessEx.Parameters.Add('--verbose');
       {$ELSE}
+      // See compileroptions.pp
+      // Quiet:=ConsoleVerbosity<=-3;
       ProcessEx.Parameters.Add('--quiet');
       ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--quiet');
+      ProcessEx.Parameters.Add('--build-mode="Fpcupdeluxe"');
       {$ENDIF}
       ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
       ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
-      ProcessEx.Parameters.Add('--build-mode=');
       try
         ProcessEx.Execute;
         result := ProcessEx.ExitStatus=0;

@@ -90,10 +90,10 @@ begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     //todo: implement -Xr for other platforms if this setup works
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-      '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-      '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+
+    AddFPCCFGSnippet('-Xd');
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-Xr/usr/lib');
     {
     Actually leaving this out seems to work ok on the target system.
     if StringListStartsWith(FCrossOpts,'-FL')=-1 then
@@ -261,9 +261,8 @@ begin
 
     // Configuration snippet for FPC
     //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-linux
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
     { don't know if this is still relevant for 2.7.x and for which linker
     '-darm'+LineEnding+
     }
