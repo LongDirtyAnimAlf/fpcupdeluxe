@@ -298,7 +298,6 @@ begin
         ProcessEx.Parameters.Add('--quiet');
         ProcessEx.Parameters.Add('--quiet');
         ProcessEx.Parameters.Add('--quiet');
-        ProcessEx.Parameters.Add('--build-mode="Fpcupdeluxe"');
         {$ENDIF}
         ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
         ProcessEx.Parameters.Add('--cpu=' + FCrossCPU_Target);
@@ -517,7 +516,6 @@ begin
       ProcessEx.Parameters.Add('--quiet');
       ProcessEx.Parameters.Add('--quiet');
       ProcessEx.Parameters.Add('--quiet');
-      ProcessEx.Parameters.Add('--build-mode="Fpcupdeluxe"');
       {$ENDIF}
       ProcessEx.Parameters.Add('--pcp=' + FPrimaryConfigPath);
       // Support keeping userdefined installed packages when building.
@@ -904,9 +902,6 @@ begin
       // for newer versions Mac OSX versions (>=10.8) perhaps needed:
       //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
       {$endif}
-
-      // get dummy value to init MiscellaneousConfig
-      Output:=LazarusConfig.GetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Count');
 
     except
       on E: Exception do

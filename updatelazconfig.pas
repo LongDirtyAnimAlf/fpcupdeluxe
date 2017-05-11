@@ -523,29 +523,6 @@ begin
             NewConfig.SetValue('UserPkgLinks/Count', '0');
           end;
 
-        MiscellaneousConfig:
-          begin
-
-            // set some fpcupdeluxe defaults to suppress hints during build with lazbuild and rebuild of IDE
-
-            NewConfig.SetValue('MiscellaneousOptions/Version/Value', '3');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Count', '3');
-
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Name', 'Fpcupdeluxe');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/IdeBuildMode/Value', 'Build');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Options/Count', '1');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile0/Options/Item1/Value', UNWANTEDHINTSOPTIONS);
-
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile1/Name', 'Normal IDE');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile1/IdeBuildMode/Value', 'Build');
-
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile2/Name', 'Debug IDE');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile2/IdeBuildMode/Value', 'Build');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile2/Options/Count', '1');
-            NewConfig.SetValue('MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile2/Options/Item1/Value', '-gw -gl -godwarfsets -gh -gt -Co -Cr -Ci -Sa');
-
-          end;
-
       end;
     end;
     //NewConfig.Free; //This would remove object from stringlist
