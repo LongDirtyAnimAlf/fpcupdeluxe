@@ -89,6 +89,7 @@ begin
         // these line are not that interesting for the average user of fpcupdeluxe !
         if AnsiContainsText(line,'hint: ') then break;
         if AnsiContainsText(line,'verbose: ') then break;
+        if AnsiContainsText(line,'note: ') then break;
         if AnsiContainsText(line,'warning: ') then
         begin
           if AnsiContainsText(line,'is not portable') then break;
@@ -102,6 +103,9 @@ begin
           if AnsiContainsText(line,'an inherited method is hidden') then break;
           if AnsiContainsText(line,'with abstract method') then break;
           if AnsiContainsText(line,'comment level 2 found') then break;
+          if AnsiContainsText(line,'did you forget -T') then break;
+          if AnsiContainsText(line,'is not recommended') then break;
+          if AnsiContainsText(line,'were not initialized') then break;
         end;
         {$ifdef MSWINDOWS}
         if AnsiContainsText(line,'rm.exe ') then break;
