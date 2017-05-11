@@ -1,6 +1,7 @@
 unit synedittext;
 {
       Original by Kiriakos Vlahos (kvlahos.@lbs.lon.ac.uk)
+      This version by DonAlfredo)
 }
 
 interface
@@ -78,15 +79,16 @@ begin
 
       while true do
       begin
-        // to be absolutely sure not to miss errors and fatals !!
+        // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
         // will be a bit redundant , but just to be sure !
-        if (AnsiContainsText(line,'error:')) OR (AnsiContainsText(line,'fatal:')) then
+        if (AnsiContainsText(line,'error:')) OR (AnsiContainsText(line,'fatal:')) OR (AnsiContainsText(line,'fpcupdeluxe:')) then
         begin
           lineready:=false;
           break;
         end;
-        // remove hints and other trivial warnings from output
+        // remove hints and other "trivial"* warnings from output
         // these line are not that interesting for the average user of fpcupdeluxe !
+        // * = for a normal user.
         if AnsiContainsText(line,'hint: ') then break;
         if AnsiContainsText(line,'verbose: ') then break;
         if AnsiContainsText(line,'note: ') then break;
@@ -106,6 +108,10 @@ begin
           if AnsiContainsText(line,'did you forget -T') then break;
           if AnsiContainsText(line,'is not recommended') then break;
           if AnsiContainsText(line,'were not initialized') then break;
+          if AnsiContainsText(line,'which is not available for the') then break;
+          {$ifdef MSWINDOWS}
+          if AnsiContainsText(line,'unable to determine the libgcc path') then break;
+          {$endif}
         end;
         {$ifdef MSWINDOWS}
         if AnsiContainsText(line,'rm.exe ') then break;

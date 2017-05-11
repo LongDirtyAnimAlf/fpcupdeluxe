@@ -390,11 +390,15 @@ begin
         begin
           SynEdit1.ClearAll;
           Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-          Memo1.Lines.Append('Going to update cross-compiler !!');
-          Memo1.Lines.Append('');
+          Memo1.Lines.Append('Going to update cross-compiler.');
+
           RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
           RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
           success:=InstallCrossCompiler(nil);
+          if success
+            then Memo1.Lines.Append('Cross-compiler update ok.')
+            else Memo1.Lines.Append('Failure during update of cross-compiler !!');
+          Memo1.Lines.Append('');
         end;
       end;
     end;
