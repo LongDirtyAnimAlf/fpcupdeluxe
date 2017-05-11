@@ -89,6 +89,7 @@ type
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
     InternalError:string;
+    function InstallCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable(Sender: TObject;value:boolean);
@@ -161,7 +162,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0c';
+  FPCUPDELUXEVERSION='1.4.0d';
 
 resourcestring
   CrossGCCMsg =
@@ -323,6 +324,7 @@ var
   // tricky: to be changed; todo
   aRadiogroup_CPU,aRadiogroup_OS: string;
   CheckAutoClearStore:boolean;
+  success:boolean;
 begin
   aOS := {$I %FPCTARGETOS%};
   aCPU := {$I %FPCTARGETCPU%};
@@ -337,7 +339,6 @@ begin
     exit;
   end;
 
-
   CheckAutoClearStore:=CheckAutoClear.Checked;
   if CheckAutoClearStore then Button8.Click;
   CheckAutoClear.Checked:=false;
@@ -349,12 +350,20 @@ begin
   try
     ConfigText.LoadFromFile(FPCCFG);
 
+    success:=true;
+
     for OSType := Low(TOS) to High(TOS) do
     begin
+
+      if (NOT success) then break;
+
       aOS:=GetEnumName(TypeInfo(TOS),Ord(OSType));
 
       for CPUType := Low(TCPU) to High(TCPU) do
       begin
+
+        if (NOT success) then break;
+
         aCPU:=GetEnumName(TypeInfo(TCPU),Ord(CPUType));
 
         // tricky; see above; improvement todo
@@ -385,8 +394,7 @@ begin
           Memo1.Lines.Append('');
           RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
           RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
-          // nice decoupling of logic and GUI ... ;-)
-          ButtonInstallCrossCompilerClick(nil);
+          success:=InstallCrossCompiler(nil);
         end;
       end;
     end;
@@ -633,7 +641,7 @@ begin
   end;
 
   // diskspace errors
-  if (ExistWordInString(PChar(s),'Stream write error',[])) then
+  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[])) then
   begin
     Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
     Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
@@ -735,10 +743,10 @@ begin
   end;
 
   // diskspace error
-  if (ExistWordInString(PChar(s),'Stream write error',[])) then
+  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[])) then
   begin
     FG      := clRed;
-    BG      := clNavy;
+    BG      := clAqua;
     Special := True;
   end;
 
@@ -945,6 +953,11 @@ begin
 end;
 
 procedure TForm1.ButtonInstallCrossCompilerClick(Sender: TObject);
+begin
+  InstallCrossCompiler(Sender);
+end;
+
+function TForm1.InstallCrossCompiler(Sender: TObject):boolean;
 var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
@@ -957,6 +970,9 @@ var
   i:integer;
   {$endif}
 begin
+
+  result:=false;
+
   if (RadioGroup1.ItemIndex=-1) and (RadioGroup2.ItemIndex=-1) then
   begin
     ShowMessage('Please select a CPU and OS target first');
@@ -995,6 +1011,16 @@ begin
                  end;
     end;
     {$endif}
+
+    if (FPCupManager.CrossCPU_Target='aarch64'){$ifdef MSWINDOWS} OR (FPCupManager.CrossOS_Target='darwin'){$endif} then
+    begin
+      if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
+                     'Do you want to continue ?'
+                     ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+                     begin
+                       exit;
+                     end;
+    end;
 
     if (FPCupManager.CrossOS_Target='linux') then
     begin
@@ -1141,6 +1167,8 @@ begin
                    end;
 
         BinsURL:='';
+
+        AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
         if FPCupManager.CrossOS_Target='linux' then
         begin
@@ -1450,6 +1478,9 @@ begin
   finally
     DisEnable(Sender,True);
   end;
+
+  result:=success;
+
 end;
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
