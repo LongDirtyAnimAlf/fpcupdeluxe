@@ -747,7 +747,7 @@ begin
   end;
 
   // diskspace error
-  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[])) then
+  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
   begin
     FG      := clRed;
     BG      := clAqua;
