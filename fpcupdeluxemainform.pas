@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0d';
+  FPCUPDELUXEVERSION='1.4.0e';
 
 resourcestring
   CrossGCCMsg =
@@ -1192,6 +1192,7 @@ begin
     sStatus:=sStatus+'.';
 
     AddMessage(sStatus);
+    Memo1.Lines.Append(sStatus);
 
     success:=RealRun;
 

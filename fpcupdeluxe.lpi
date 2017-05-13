@@ -45,6 +45,9 @@
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
           </CodeGeneration>
           <Linking>
             <Debugging>
@@ -493,7 +496,6 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
-        <UseLineInfoUnit Value="False"/>
       </Debugging>
       <Options>
         <Win32>
