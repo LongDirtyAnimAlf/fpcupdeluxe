@@ -1596,9 +1596,9 @@ begin
         if Uppercase(KeyWord)='DEFAULT' then
         begin
           infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
-          if Dictionary='fpcURL' then result:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
+          if Dictionary='fpcURL' then result:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
-          if Dictionary='lazURL' then result:='http://svn.freepascal.org/svn/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          if Dictionary='lazURL' then result:=FPCSVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
         if Uppercase(KeyWord)='SKIP' then result:='SKIP';

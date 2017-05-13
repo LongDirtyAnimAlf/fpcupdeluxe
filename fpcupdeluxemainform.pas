@@ -538,7 +538,7 @@ var
   x:integer;
 begin
   s:=SynEdit1.LineText;
-  if Length(s)=0 then s:=SynEdit1.Lines[SynEdit1.CaretY-2];
+  //if Length(s)=0 then s:=SynEdit1.Lines[SynEdit1.CaretY-2];
   s:=Trim(s);
   if Length(s)=0 then exit;
 
@@ -570,7 +570,7 @@ begin
     end;
   end;
 
-  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
+  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
   begin
     if (ExistWordInString(PChar(s),'fatal: internal error',[soDown])) then
     begin
@@ -617,18 +617,23 @@ begin
       Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');
       Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end
-    else if (Pos('fatal:',lowercase(s))>0) then
+    else if (ExistWordInString(PChar(s),'fatal:',[soDown])) then
     begin
       Memo1.Lines.Append(s);
       Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end
-    else if (Pos('error:',lowercase(s))>0) then
+    else if (ExistWordInString(PChar(s),'error:',[soDown])) then
     begin
       {$ifdef Darwin}
       // on Darwin, ignore focus errors
       if (Pos('setfocus',lowercase(s))=0) then
       {$endif}
-      Memo1.Lines.Append(s);
+      // check if "error:" at the end of the line.
+      // if so:
+      // the real error will follow on the next line(s).
+      // and we have to wait for these lines (done somewhere else in this procedure) !!
+      // if not, just print the error message.
+      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then Memo1.Lines.Append(s);
     end;
   end;
 
@@ -657,6 +662,32 @@ begin
     Memo1.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
   end;
 
+  // go back a few lines to find a special error case
+  x:=(SynEdit1.CaretY-4);
+  if (x>0) then
+  begin
+    s:=SynEdit1.Lines[x];
+    s:=Trim(s);
+    s:=LowerCase(s);
+    if Length(s)=0 then exit;
+    // check if "error:" at the end of the line.
+    // if so:
+    // the real error will follow on the next line(s).
+    // and we have to wait for these lines !!
+    // if not, just print the error message (done somewhere else in this procedure).
+    if (Pos('error:',s)>0) AND (Pos('error:',s)=(Length(s)-Length('error:')+1))
+    {$ifdef Darwin}
+    // on Darwin, ignore focus errors
+    AND (Pos('setfocus',s)=0)
+    {$endif}
+    then
+    begin
+      // print the error itself and the next 2 lines (good guess)
+      Memo1.Lines.Append(SynEdit1.Lines[x]);
+      Memo1.Lines.Append(SynEdit1.Lines[x+1]);
+      Memo1.Lines.Append(SynEdit1.Lines[x+2]);
+    end;
+  end;
 
 end;
 
@@ -667,6 +698,8 @@ var
   s:string;
 begin
   s:=SynEdit1.Lines[Line-1];
+  s:=Trim(s);
+  if Length(s)=0 then exit;
 
   if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord,soDown]) then
   begin
@@ -952,6 +985,13 @@ var
 begin
   DisEnable(Sender,False);
   try
+
+    if ListBox3.SelCount=0 then
+    begin
+      AddMessage('Please select a module / package.');
+      exit;
+    end;
+
     PrepareRun;
 
     FPCupManager.ExportOnly:=(NOT Form2.CheckPackageRepo.Checked);

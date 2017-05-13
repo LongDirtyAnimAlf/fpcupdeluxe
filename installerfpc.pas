@@ -2067,7 +2067,7 @@ begin
 
     infoln('Getting the sources of the FPC ' + RequiredBootstrapVersion + ' intermediate compiler.',etInfo);
 
-    s:='http://svn.freepascal.org/svn/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
+    s:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
     if (ReturnCode = 0)
         then ICSVNCommand:='update --non-interactive --quiet'
         else ICSVNCommand:='checkout --non-interactive --quiet --depth=files ' + s;

@@ -45,7 +45,7 @@ const
   FPCTRUNKVERSION  = '3.1.1';
   LAZARUSTRUNKVERSION  = '1.9';
 
-  FPCSVNURL = 'http://svn.freepascal.org/svn';
+  FPCSVNURL = 'https://svn.freepascal.org/svn';
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
 
   DEFAULTFPCVERSION = '3.0.2';
@@ -430,14 +430,6 @@ begin
     // Download('ftp://ftp.equation.com/make/'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make), Make);
     {$endif}
 
-    // Get unzip binary from default binutils URL
-    FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
-
-    // Get patch binary from default binutils URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
-
     if OperationSucceeded then
     begin
       // check availability of OpenSSL libraries. Just continue in case of error
@@ -451,6 +443,14 @@ begin
         DownloadOpenSSL;
       end;
     end;
+
+    // Get unzip binary from default binutils URL
+    FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
+
+    // Get patch binary from default binutils URL
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
 
     F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
     if Not FileExists(F7zip) then

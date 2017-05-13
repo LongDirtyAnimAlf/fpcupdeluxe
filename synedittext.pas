@@ -73,6 +73,7 @@ begin
     begin
 
       line:=Copy(linestore,1,i);
+      line:=Trim(line);
       Delete(linestore,1,i);
 
       while true do
@@ -137,10 +138,12 @@ begin
 
       if (NOT lineready) then
       begin
-        Self.InsertTextAtCaret(line,scamBegin);
+        Self.Append(line);
         Self.CaretX:=0;
-        //Self.SelStart:=Length(Self.Text);
-        Self.SelStart:=Self.SelStart+i;
+        Self.CaretY:=Self.Lines.Count;
+        // the below is needed:
+        // onchange is no longer called, when appending a line
+        Self.OnChange(Self);
       end;
       i:=0;
       j:=Length(linestore);
