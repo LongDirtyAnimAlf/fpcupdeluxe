@@ -39,6 +39,9 @@ uses
 
 const
 
+  NEWPASCALGITREPO='https://github.com/newpascal';
+  FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
+
   FPCTRUNKVERSION  = '3.1.1';
   LAZARUSTRUNKVERSION  = '1.9';
 
@@ -987,7 +990,7 @@ begin
     begin
       FRepositoryUpdated := false;
       Result := false;
-      writelnlog(aClientName+' ERROR: repository URL in local directory and remote repository don''t match.', true);
+      writelnlog(etError, aClientName+' ERROR: repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + aClient.LocalRepository, true);
       infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
     end;
@@ -1051,7 +1054,7 @@ begin
          // Report error, but continue !
          if ReturnCode<>0 then
          begin
-           writelnlog(aClientName+' ERROR: Patching with ' + DiffFile + ' failed.', true);
+           writelnlog(etError, aClientName+' ERROR: Patching with ' + DiffFile + ' failed.', true);
            writelnlog(aClientName+' output: ' + Output, true);
            writelnlog('Verify the state of the source, correct and rebuild with make.', true);
          end;
@@ -1102,18 +1105,18 @@ begin
   else
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
-    writelnlog('INFO: directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
+    writelnlog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
     if not(DirectoryExistsUTF8(FSVNClient.LocalRepository)) then
     begin
-      writelnlog('INFO: creating directory '+FSourceDirectory+' for SVN checkout.');
+      writelnlog('Creating directory '+FSourceDirectory+' for SVN checkout.');
       ForceDirectoriesUTF8(FSourceDirectory);
     end;
   end;
 
   if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
-    writelnlog('ERROR: The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
-    writelnlog('  Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
+    writelnlog(etError, 'The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
+    writelnlog(etError, 'Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
     result := false;  //fail
     exit;
   end;
@@ -1151,7 +1154,7 @@ begin
     begin
       FRepositoryUpdated := false;
       Result := false;
-      writelnlog('ERROR: repository URL in local directory and remote repository don''t match.', true);
+      writelnlog(etError, 'Repository URL in local directory and remote repository don''t match.', true);
       writelnlog('Local directory: ' + FSVNClient.LocalRepository, true);
       infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
     end;
@@ -1223,7 +1226,7 @@ begin
         // Report error, but continue !
         if CheckoutOrUpdateReturnCode<>0 then
         begin
-          writelnlog('SVNClient ERROR: Patching with ' + DiffFile + ' failed.', true);
+          writelnlog(etError, 'SVNClient error: Patching with ' + DiffFile + ' failed.', true);
           writelnlog('SVNClient output: ' + Output, true);
           writelnlog('Verify the state of the source, correct and rebuild with make.', true);
         end;
@@ -1272,7 +1275,7 @@ begin
   // This svn version won't work on windows 2K
   if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
   begin
-    writelnlog('ERROR: it seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
+    writelnlog(etError, 'It seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
     exit(false);
   end;
 
@@ -1296,7 +1299,7 @@ begin
     on E: Exception do
     begin
       OperationSucceeded := false;
-      writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL, true);
+      writelnlog(etError, 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL, true);
     end;
   end;
 
@@ -1307,12 +1310,12 @@ begin
     if resultcode <> 0 then
     begin
       OperationSucceeded := false;
-      writelnlog('DownloadSVN: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+      writelnlog(etError, 'DownloadSVN error: unzip returned result code: ' + IntToStr(ResultCode));
     end;
   end
   else
   begin
-    writelnlog('ERROR downloading SVN client from ' + SourceURL, true);
+    writelnlog(etError, 'Downloading SVN client from ' + SourceURL, true);
   end;
 
   if OperationSucceeded then
@@ -1362,7 +1365,7 @@ begin
     on E: Exception do
     begin
       OperationSucceeded := false;
-      writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library from ' + SourceURL, true);
+      writelnlog(etError, 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library from ' + SourceURL, true);
     end;
   end;
 
@@ -1382,7 +1385,7 @@ begin
     if resultcode <> 0 then
     begin
       OperationSucceeded := false;
-      writelnlog('Download OpenSSL: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+      writelnlog(etError, 'Download OpenSSL error: unzip returned result code: ' + IntToStr(ResultCode));
     end;
   end;
 
@@ -1436,7 +1439,7 @@ begin
       on E: Exception do
       begin
         OperationSucceeded := false;
-        writelnlog('ERROR: exception ' + E.ClassName + '/' + E.Message + ' downloading Jasmin assembler from ' + SourceURL, true);
+        writelnlog(etError, 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Jasmin assembler from ' + SourceURL, true);
       end;
     end;
 
@@ -1450,18 +1453,18 @@ begin
         //MoveFile
         if NOT OperationSucceeded then
         begin
-          writelnlog('Could not move jasmin.jar into '+JasminDir);
+          writelnlog(etError, 'Could not move jasmin.jar into '+JasminDir);
         end;
       end
       else
       begin
         OperationSucceeded := false;
-        writelnlog('DownloadJasmin: ERROR: unzip returned result code: ' + IntToStr(ResultCode));
+        writelnlog(etError, 'DownloadJasmin error: unzip returned result code: ' + IntToStr(ResultCode));
       end;
     end
     else
     begin
-      writelnlog('ERROR downloading Jasmin assembler from ' + SourceURL, true);
+      writelnlog(etError, 'Downloading Jasmin assembler from ' + SourceURL + ' failed.', true);
     end;
 
     if OperationSucceeded then
@@ -1593,13 +1596,13 @@ begin
   TempFileName := SysUtils.GetTempFileName;
   if IsException then
   begin
-    WritelnLog('Exception raised running ' + Sender.ResultingCommand, true);
-    WritelnLog(Sender.ExceptionInfo, true);
+    WritelnLog(etError, 'Exception raised running ' + Sender.ResultingCommand, true);
+    WritelnLog(etError, Sender.ExceptionInfo, true);
   end
   else
   begin
-    writelnlog('ERROR running ' + Sender.ResultingCommand, true);
-    writelnlog('Command returned non-zero ExitStatus: ' + IntToStr(Sender.ExitStatus), true);
+    writelnlog(etError, 'Running ' + Sender.ResultingCommand + ' failed.', true);
+    writelnlog(etError, 'Command returned non-zero ExitStatus: ' + IntToStr(Sender.ExitStatus), true);
     writelnlog('Command path set to: ' + Sender.Environment.GetVar(PATHVARNAME), true);
     writelnlog('Command current directory: ' + Sender.CurrentDirectory, true);
     writelnlog('Command output:', true);

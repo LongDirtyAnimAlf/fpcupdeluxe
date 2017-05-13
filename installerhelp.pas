@@ -638,7 +638,7 @@ begin
             writelnlog('Execute: '+ProcessEx.Executable+' exit code: '+InttoStr(ProcessEx.ExitStatus), true);
             if ProcessEx.ExitStatus <> 0 then
             begin
-              writelnlog(ModuleName+': error compiling build_lcl_docs docs builder.', true);
+              writelnlog(etError,ModuleName+': error compiling build_lcl_docs docs builder.', true);
               OperationSucceeded := False;
             end;
           end;
@@ -660,7 +660,7 @@ begin
           if FPDocExes.Count>0 then FPDocExe:=FPDocExes[0]; //take only the first
           if (CheckExecutable(FPDocExe, '--help', 'FPDoc')=false) then
           begin
-            writelnlog(ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
+            writelnlog(etError,ModuleName+': no valid fpdoc executable found ('+FPDocExe+'). Please recompile fpc.', true);
             OperationSucceeded := False;
           end
           else
@@ -717,7 +717,7 @@ begin
         BuildResult:=ProcessEx.ExitStatus;
         if BuildResult <> 0 then
         begin
-          writelnlog(ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+inttostr(BuildResult), true);
+          writelnlog(etError,ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+inttostr(BuildResult), true);
           OperationSucceeded := False;
         end;
       end;
@@ -735,7 +735,7 @@ begin
           else
           begin
             // File exists, but is empty. We might have an older file still present
-            writelnlog(ModuleName+': WARNING: '+GeneratedLCLHelp+
+            writelnlog(etWarning, ModuleName+': WARNING: '+GeneratedLCLHelp+
             ' was created but is empty (perhaps due to FPC bugs). Lcl.chm may be out of date! Try running with --verbose to see build_lcl_docs error messages.', true);
             // Todo: change this once fixes for fpdoc chm generation are in fixes_26:
             OperationSucceeded:=true;
@@ -753,7 +753,7 @@ begin
     end;
   end;
 
-  if NOT OperationSucceeded then writelnlog(ModuleName+': Fatal error. But I will continue !!', true);
+  if NOT OperationSucceeded then writelnlog(etError, ModuleName+': Fatal error. But I will continue !!', true);
   //result:=OperationSucceeded;
   // always continue,  even when docs were not build !!
   result:=True;

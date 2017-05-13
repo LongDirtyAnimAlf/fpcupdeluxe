@@ -921,7 +921,7 @@ begin
     else //raise error;
     begin
       ProcessEx.Parameters.Add('--help'); // this should render make harmless
-      WritelnLog('BuildModule: Invalid module name ' + ModuleName + ' specified! Please fix the code.', true);
+      WritelnLog(etError, 'BuildModule: Invalid module name ' + ModuleName + ' specified! Please fix the code.', true);
       OperationSucceeded := false;
       Result := false;
       exit;
@@ -935,13 +935,13 @@ begin
     if ProcessEx.ExitStatus <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog('FPC: Error running make failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, 'FPC: Error running make failed with exit code '+inttostr(ProcessEx.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
     begin
       OperationSucceeded := False;
-      WritelnLog('FPC: Running fpc make failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
+      WritelnLog(etError, 'FPC: Running fpc make failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
     end;
   end;
 
@@ -958,43 +958,43 @@ begin
 
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
-    begin
+  begin
     GetCompiler;
     // Verify it exists
     if not(FileExistsUTF8(FCompiler)) then
-      begin
-      WritelnLog('FPC: error: could not find compiler '+FCompiler+' that should have been created.',true);
-      OperationSucceeded:=false;
-      end;
-    end
-  else
     begin
+      WritelnLog(etError, 'FPC: could not find compiler '+FCompiler+' that should have been created.',true);
+      OperationSucceeded:=false;
+    end;
+  end
+  else
+  begin
     infoln(ModuleName+': Error trying to compile FPC.',etDebug);
     FCompiler:='////\\\Error trying to compile FPC\|!';
-    end;
+  end;
 
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
-    begin
+  begin
     //Copy over binutils to new CompilerName bin directory
     try
       for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
-        begin
+      begin
         if FUtilFiles[FileCounter].Category=ucBinutil then
           FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
             IncludeTrailingPathDelimiter(FBinPath)+FUtilFiles[FileCounter].FileName);
-        end;
+      end;
       // Also, we can change the make/binutils path to our new environment
       // Will modify fmake as well.
       FMakeDir:=FBinPath;
     except
       on E: Exception do
-        begin
+      begin
         writelnlog('FPC: Error copying binutils: '+E.Message,true);
         OperationSucceeded:=false;
-        end;
+      end;
     end;
-    end;
+  end;
   {$ENDIF MSWINDOWS}
   result:=OperationSucceeded;
 end;
@@ -1539,8 +1539,6 @@ begin
 end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
-const
-  FpcupdeluxeGitRepo='https://github.com/newpascal/fpcupdeluxe';
 var
   aCompilerList:TStringList;
   i,j:integer;
@@ -1741,7 +1739,7 @@ begin
           while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
           begin
             infoln('Looking online for a FPCUP bootstrapper with version '+aLocalBootstrapVersion,etDebug);
-            aGithubBootstrapURL:=FpcupdeluxeGitRepo+
+            aGithubBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
               'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+SourceCPU+'-'+SourceOS+'-'+GetCompilerName(SourceCPU);
             infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
@@ -2236,7 +2234,7 @@ begin
     if ProcessEx.ExitStatus <> 0 then
     begin
       result := False;
-      WritelnLog('FPC: Failed to build ppcx64 bootstrap compiler ');
+      WritelnLog(etError, 'FPC: Failed to build ppcx64 bootstrap compiler.');
       exit;
     end;
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\ppcx64.exe',
@@ -2266,7 +2264,7 @@ begin
     if ProcessEx.ExitStatus <> 0 then
     begin
       result := False;
-      WritelnLog('FPC: Failed to build ppc386 bootstrap compiler ');
+      WritelnLog(etError, 'FPC: Failed to build ppc386 bootstrap compiler.');
       exit;
     end;
     FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/ppc386',
@@ -2353,7 +2351,7 @@ begin
       except
         on E: Exception do
           begin
-          WritelnLog('FPC: Running fpcmkcfg failed with an exception!'+LineEnding+
+          WritelnLog(etError, 'FPC: Running fpcmkcfg failed with an exception!'+LineEnding+
             'Details: '+E.Message,true);
           OperationSucceeded := False;
           end;
@@ -2362,7 +2360,7 @@ begin
       if ProcessEx.ExitStatus <> 0 then
       begin
         OperationSucceeded := False;
-        WritelnLog('FPC: Running fpcmkcfg failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
+        WritelnLog(etError, 'FPC: Running fpcmkcfg failed with exit code '+inttostr(ProcessEx.ExitStatus),true);
       end;
 
       // if, for one reason or another, there is no cfg file, create a minimal one by ourselves
@@ -2557,7 +2555,7 @@ begin
         on E: Exception do
         begin
           result:=false;
-          WritelnLog('FPC: running make distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+          WritelnLog(etError, 'FPC: running make distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
         end;
       end;
     finally
@@ -2758,7 +2756,7 @@ begin
                then infoln('FPC has been patched successfully with '+UpdateWarnings[i],etInfo)
                else
                begin
-                 writelnlog(ModuleName+' ERROR: Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
+                 writelnlog(etError, ModuleName+' Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
                  writelnlog(ModuleName+' patch output: ' + Output, true);
                end;
           end;

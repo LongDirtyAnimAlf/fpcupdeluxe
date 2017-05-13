@@ -74,21 +74,23 @@ begin
 
       line:=Copy(linestore,1,i);
       Delete(linestore,1,i);
-      i:=0;
-      j:=Length(linestore);
 
       while true do
       begin
         // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
         // will be a bit redundant , but just to be sure !
-        if (AnsiContainsText(line,'error:')) OR (AnsiContainsText(line,'fatal:')) OR (AnsiContainsText(line,'fpcupdeluxe:')) then
+        if (AnsiContainsText(line,'error:'))
+           OR (AnsiContainsText(line,'fatal:'))
+           OR (AnsiContainsText(line,'fpcupdeluxe:'))
+           OR (AnsiContainsText(line,'execute:'))
+           OR (AnsiContainsText(line,'executing:'))
+        then
         begin
           lineready:=false;
           break;
         end;
         // remove hints and other "trivial"* warnings from output
         // these line are not that interesting for the average user of fpcupdeluxe !
-        // * = for a normal user.
         if AnsiContainsText(line,'hint: ') then break;
         if AnsiContainsText(line,'verbose: ') then break;
         if AnsiContainsText(line,'note: ') then break;
@@ -116,24 +118,32 @@ begin
           if AnsiContainsText(line,'unable to determine the libgcc path') then break;
           {$endif}
         end;
+        // suppress "trivial"* build commands
         {$ifdef MSWINDOWS}
         if AnsiContainsText(line,'rm.exe ') then break;
+        if AnsiContainsText(line,'mkdir.exe ') then break;
+        if AnsiContainsText(line,'mv.exe ') then break;
         {$endif}
         {$ifdef UNIX}
         if AnsiContainsText(line,'rm -f ') then break;
         if AnsiContainsText(line,'rm -rf ') then break;
+        if AnsiContainsText(line,'mkdir ') then break;
+        if AnsiContainsText(line,'mv ') then break;
         {$endif}
         lineready:=false;
         break;
+        // * = trivial for a normal user.
       end;
 
       if (NOT lineready) then
       begin
         Self.InsertTextAtCaret(line,scamBegin);
         Self.CaretX:=0;
-        Self.SelStart:=Length(Self.Text);
-        //Self.SelStart:=Self.SelStart+i;
+        //Self.SelStart:=Length(Self.Text);
+        Self.SelStart:=Self.SelStart+i;
       end;
+      i:=0;
+      j:=Length(linestore);
       lineready:=false;
     end;
     Inc(I);
@@ -152,7 +162,6 @@ begin
         Lines.BeginUpdate;
         try
           SetSelTextBuf(PChar(BufPtr));
-          //SelStart:=Length(Text);
         finally
           Lines.EndUpdate;
         end;

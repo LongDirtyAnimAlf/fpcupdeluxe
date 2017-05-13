@@ -133,8 +133,6 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  NEWPASCALGITREPO='https://github.com/newpascal';
-  FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
   {$ifdef MSWINDOWS}
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
   {$endif}
@@ -335,7 +333,7 @@ begin
 
   if NOT FileExists(FPCCfg) then
   begin
-    AddMessage('FPC configfile ' + FPCCfg + ' not found in ' + BinPath);
+    AddMessage('FPC configfile [fpc.cfg] not found in ' + BinPath);
     exit;
   end;
 
@@ -343,7 +341,8 @@ begin
   if CheckAutoClearStore then Button8.Click;
   CheckAutoClear.Checked:=false;
 
-  Memo1.Lines.Append('Checking ' + FPCCfg + ' for cross-compilers in ' + BinPath);
+  Memo1.Lines.Append('Going to auto-build all installed cross-compilers !');
+  Memo1.Lines.Append('Checking FPC configfile [fpc.cfg] for cross-compilers in ' + BinPath);
   Memo1.Lines.Append('');
 
   ConfigText:=TStringList.Create;
@@ -645,7 +644,7 @@ begin
   end;
 
   // diskspace errors
-  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[])) then
+  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
   begin
     Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
     Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
@@ -669,8 +668,59 @@ var
 begin
   s:=SynEdit1.Lines[Line-1];
 
+  if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord,soDown]) then
+  begin
+    FG      := clAqua;
+    BG      := clBlack;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'A',[soWholeWord])) OR (ExistWordInString(PChar(s),'U',[soWholeWord]))) then
+  begin
+    FG      := clSkyBlue;
+    BG      := clBlack;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ExistWordInString(PChar(s),'info:',[soWholeWord,soDown]) then
+  begin
+    FG      := clYellow;
+    BG      := clBlack;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ExistWordInString(PChar(s),'Please wait:',[soWholeWord,soDown]) then
+  begin
+    FG      := clBlue;
+    BG      := clWhite;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'warning:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'hint:',[soWholeWord,soDown]))) then
+  begin
+    FG      := clGreen;
+    BG      := clBlack;
+    Special := True;
+  end;
+
+  // linker error
+  if (NOT Special) AND (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[])) then
+  begin
+    FG      := clRed;
+    BG      := clNavy;
+    Special := True;
+  end;
+
+  // diskspace error
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[soDown]))) then
+  begin
+    FG      := clRed;
+    BG      := clAqua;
+    Special := True;
+  end;
+
   // github error
-  if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
   begin
     FG      := clRed;   //Text Color
     BG      := clNavy;  //BackGround
@@ -678,51 +728,45 @@ begin
   end;
 
   // svn connection error
-  if (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
   begin
     FG      := clRed;
     BG      := clNavy;
     Special := True;
   end;
 
-  if ExistWordInString(PChar(s),'svn: e',[soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'svn: e',[soDown]) then
   begin
     FG      := clFuchsia;
     BG      := clBlack;
     Special := True;
   end;
 
-  if ExistWordInString(PChar(s),'Executing :',[soWholeWord,soDown]) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'make ',[soDown]) OR ExistWordInString(PChar(s),'gmake ',[soDown])) then
   begin
-    FG      := clAqua;
+    FG      := TColor($FF8C00);
     BG      := clBlack;
     Special := True;
   end;
 
-  if (ExistWordInString(PChar(s),'A',[soWholeWord])) OR (ExistWordInString(PChar(s),'U',[soWholeWord])) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'start compiling package',[soDown]) then
   begin
-    FG      := clSkyBlue;
+    FG      := TColor($107CCF);
     BG      := clBlack;
     Special := True;
   end;
 
-  if ExistWordInString(PChar(s),'info:',[soWholeWord,soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),'success:',[soWholeWord,soDown]) then
   begin
-    FG      := clYellow;
+    FG      := TColor($00D7FF);
     BG      := clBlack;
     Special := True;
   end;
 
-  if ExistWordInString(PChar(s),'Please wait:',[soWholeWord,soDown]) then
-  begin
-    FG      := clBlue;
-    BG      := clWhite;
-    Special := True;
-  end;
 
-  if (ExistWordInString(PChar(s),'warning:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'hint:',[soWholeWord,soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'compiled package',[soDown]) OR ExistWordInString(PChar(s),'succeeded',[soDown]) OR ExistWordInString(PChar(s),'completed',[soDown])) then
   begin
-    FG      := clGreen;
+    FG      := TColor($00A5FF);
     BG      := clBlack;
     Special := True;
   end;
@@ -736,22 +780,6 @@ begin
       BG      := clBlue;
       Special := True;
     end;
-  end;
-
-  // linker error
-  if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[])) then
-  begin
-    FG      := clRed;
-    BG      := clNavy;
-    Special := True;
-  end;
-
-  // diskspace error
-  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
-  begin
-    FG      := clRed;
-    BG      := clAqua;
-    Special := True;
   end;
 
   if Special then
@@ -879,6 +907,16 @@ begin
     ShowMessage('Please select a FPC and Lazarus version first');
     exit;
   end;
+
+  {$ifdef CPUAARCH64}
+  if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
+                 'Do you want to continue ?'
+                 ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+                 begin
+                   exit;
+                 end;
+  {$endif CPUAARCH64}
+
   DisEnable(Sender,False);
   try
     PrepareRun;
@@ -1002,8 +1040,9 @@ begin
 
   if Sender<>nil then
   begin
-    {$ifndef FreeBSD}
-    if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
+    {$ifndef BSD}
+    if (Pos('bsd',FPCupManager.CrossOS_Target)>0) then
+    //if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
     begin
       if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes).' + sLineBreak +
                  'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
@@ -1145,12 +1184,14 @@ begin
     FPCupManager.CrossLibraryDirectory:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
     FPCupManager.CrossToolsDirectory:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
 
-    AddMessage('Going to install a cross-compiler from current sources.');
+    AddMessage('Going to install a cross-compiler from available sources.');
 
     sStatus:='Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
     if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
     if FPCupManager.CrossOPT<>'' then sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
     sStatus:=sStatus+'.';
+
+    AddMessage(sStatus);
 
     success:=RealRun;
 
@@ -1785,6 +1826,10 @@ begin
   StatusMessage.Text:=sStatus;
 
   if CheckAutoClear.Checked then Memo1.Lines.Clear;
+
+  AddMessage(Self.Caption);
+  AddMessage('');
+
 end;
 
 function TForm1.RealRun:boolean;

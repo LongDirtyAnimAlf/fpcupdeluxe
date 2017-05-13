@@ -317,13 +317,13 @@ begin
         ProcessEx.Execute;
         Result := ProcessEx.ExitStatus = 0;
         if not Result then
-          WritelnLog('Lazarus: error compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' ' + FCrossLCL_Platform + LineEnding +
+          WritelnLog(etError,'Lazarus: error compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' ' + FCrossLCL_Platform + LineEnding +
             'Details: ' + FErrorLog.Text, true);
       except
         on E: Exception do
         begin
           Result := false;
-          WritelnLog('Lazarus: exception compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + LineEnding +
+          WritelnLog(etError,'Lazarus: exception compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + LineEnding +
             'Details: ' + E.Message, true);
         end;
       end;
@@ -343,7 +343,7 @@ begin
         {$endif win64}
         if Result then
           infoln('Lazarus: Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target +
-            ' failed. Optional module; continuing regardless.', etInfo)
+            ' failed. Optional module; continuing regardless.', etWarning)
         else
           infoln('Lazarus: Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' failed.', etError);
         // No use in going on, but
