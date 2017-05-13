@@ -90,14 +90,15 @@ type
     MissingCrossLibs:boolean;
     InternalError:string;
     function InstallCrossCompiler(Sender: TObject):boolean;
+    function AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable(Sender: TObject;value:boolean);
     procedure Edit1Change(Sender: TObject);
     procedure PrepareRun;
     function RealRun:boolean;
-    function GetFPCUPSettings(IniFile:string):boolean;
-    function SetFPCUPSettings(IniFile:string):boolean;
+    function GetFPCUPSettings(IniDirectory:string):boolean;
+    function SetFPCUPSettings(IniDirectory:string):boolean;
     procedure AddMessage(aMessage:string; UpdateStatus:boolean=false);
     procedure InitFPCupManager;
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
@@ -216,7 +217,7 @@ begin
   sStatus:='Sitting and waiting';
 
   oldoutput := System.Output;
-  AssignSynEdit(System.Output, SynEdit1);
+  AssignSynEdit(System.Output, SynEdit1,{$IFDEF DEBUG} false{$ELSE} true{$ENDIF});
   Reset(System.Input);
   Rewrite(System.Output);
 
@@ -312,6 +313,11 @@ begin
 end;
 
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
+begin
+  AutoUpdateCrossCompiler(Sender);
+end;
+
+function TForm1.AutoUpdateCrossCompiler(Sender: TObject):boolean;
 var
   CPUType:TCPU;
   OSType:TOS;
@@ -331,19 +337,30 @@ begin
   BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+aCPU + '-' + aOS;
   FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
 
+  result:=false;
+
   if NOT FileExists(FPCCfg) then
   begin
-    AddMessage('FPC configfile [fpc.cfg] not found in ' + BinPath);
+    if (Sender<>nil) then AddMessage('FPC configfile [fpc.cfg] not found in ' + BinPath);
     exit;
   end;
 
-  CheckAutoClearStore:=CheckAutoClear.Checked;
-  if CheckAutoClearStore then Button8.Click;
-  CheckAutoClear.Checked:=false;
+  if (Sender<>nil) then
+  begin
 
-  Memo1.Lines.Append('Going to auto-build all installed cross-compilers !');
-  Memo1.Lines.Append('Checking FPC configfile [fpc.cfg] for cross-compilers in ' + BinPath);
-  Memo1.Lines.Append('');
+    CheckAutoClearStore:=CheckAutoClear.Checked;
+    if CheckAutoClearStore then Button8.Click;
+    CheckAutoClear.Checked:=false;
+
+    Memo1.Lines.Append('Going to auto-build all installed cross-compilers !');
+    Memo1.Lines.Append('Checking FPC configfile [fpc.cfg] for cross-compilers in ' + BinPath);
+    Memo1.Lines.Append('');
+
+  end
+  else
+  begin
+    Memo1.Clear;
+  end;
 
   ConfigText:=TStringList.Create;
   try
@@ -387,28 +404,37 @@ begin
 
         if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
         begin
-          SynEdit1.ClearAll;
           Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-          Memo1.Lines.Append('Going to update cross-compiler.');
 
-          RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
-          RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
-          success:=InstallCrossCompiler(nil);
-          if success
-            then Memo1.Lines.Append('Cross-compiler update ok.')
-            else Memo1.Lines.Append('Failure during update of cross-compiler !!');
-          Memo1.Lines.Append('');
+          if (Sender<>nil) then
+          begin
+            SynEdit1.ClearAll;
+            Memo1.Lines.Append('Going to update cross-compiler.');
+
+            RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
+            RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
+            success:=InstallCrossCompiler(nil);
+            if success
+              then Memo1.Lines.Append('Cross-compiler update ok.')
+              else Memo1.Lines.Append('Failure during update of cross-compiler !!');
+            Memo1.Lines.Append('');
+          end;
         end;
       end;
     end;
 
-    RadioGroup1.ItemIndex:=-1;
-    RadioGroup2.ItemIndex:=-1;
+    if (Sender<>nil) then
+    begin
+      RadioGroup1.ItemIndex:=-1;
+      RadioGroup2.ItemIndex:=-1;
+    end;
 
   finally
     ConfigText.Free;
     CheckAutoClear.Checked:=CheckAutoClearStore;
   end;
+
+  result:=success;
 
 end;
 
@@ -464,8 +490,8 @@ begin
   FPCupManager.HTTPProxyPassword:=Form2.HTTPProxyPass;
 
   // localize FPCUPSettings if possible
-  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
-     then GetFPCUPSettings(SafeGetApplicationPath+DELUXEFILENAME);
+  if (NOT GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)))
+     then GetFPCUPSettings(SafeGetApplicationPath);
 end;
 
 
@@ -924,7 +950,6 @@ begin
     sStatus:=s;
 
     RealRun;
-    //if Form2.UpdateCrossCompilers then ButtonAutoUpdateCrossCompiler(nil);
 
   finally
     DisEnable(Sender,True);
@@ -971,8 +996,9 @@ begin
         FModuleList.Free;
       end;
     end;
+
     RealRun;
-    //if Form2.UpdateCrossCompilers then ButtonAutoUpdateCrossCompiler(nil);
+
   finally
     DisEnable(Sender,True);
   end;
@@ -1595,8 +1621,6 @@ begin
 
     RealRun;
 
-    //if Form2.UpdateCrossCompilers then ButtonAutoUpdateCrossCompiler(nil);
-
   finally
     DisEnable(Sender,True);
   end;
@@ -1661,7 +1685,7 @@ end;
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
   sInstallDir:=InstallDirEdit.Text;
-  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME) then
+  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)) then
   begin
     AddMessage('Got settings from install directory');
   end;
@@ -1670,7 +1694,7 @@ end;
 procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   sInstallDir:=InstallDirEdit.Text;
-  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME) then
+  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)) then
   begin
     AddMessage('Got settings from install directory');
   end;
@@ -1714,8 +1738,8 @@ begin
   end;
 
   // localize FPCUPSettings if possible
-  if (NOT SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)+DELUXEFILENAME))
-     then SetFPCUPSettings(SafeGetApplicationPath+DELUXEFILENAME);
+  if (NOT SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)))
+     then SetFPCUPSettings(SafeGetApplicationPath);
 
   CloseAction:=caFree;
 end;
@@ -1961,15 +1985,18 @@ begin
   end;
 end;
 
-function TForm1.GetFPCUPSettings(IniFile:string):boolean;
+function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   i,j:integer;
   SortedModules:TStringList;
 begin
-  result:=FileExists(IniFile);
+  result:=FileExists(IniDirectory+DELUXEFILENAME);
 
-  if result then with TIniFile.Create(IniFile) do
+  if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
   try
+
+    // get names of cross-compilers
+    AutoUpdateCrossCompiler(nil);
 
     FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
@@ -2013,14 +2040,14 @@ begin
 
 end;
 
-function TForm1.SetFPCUPSettings(IniFile:string):boolean;
+function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
 var
   i:integer;
   modules:string;
 begin
-  result:=DirectoryExists(ExtractFileDir(IniFile));
+  result:=DirectoryExists(ExtractFileDir(IniDirectory+DELUXEFILENAME));
 
-  if result then with TIniFile.Create(IniFile) do
+  if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
   try
     // mmm, is this correct ?  See extrasettings !!
     WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));

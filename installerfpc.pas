@@ -624,6 +624,9 @@ begin
            begin
              CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
            end;
+           {$else}
+           //just for testing
+           //Options:=Options+' -sh -s-';
            {$endif}
         end;
 
@@ -1649,7 +1652,7 @@ begin
 
           aCompilerList.Clear;
 
-          aDownLoader.getFTPFileList('ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/',aCompilerList);
+          aDownLoader.getFTPFileList(FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/',aCompilerList);
 
           if FVerbose then
           begin
@@ -1714,7 +1717,7 @@ begin
         if FBootstrapCompilerURL='' then
         begin
           infoln('Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
-          FBootstrapCompilerURL := 'ftp://ftp.freepascal.org/pub/fpc/dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
+          FBootstrapCompilerURL := FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
         end;
       end;
 

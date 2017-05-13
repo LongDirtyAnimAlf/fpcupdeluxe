@@ -11,7 +11,7 @@ interface
 uses
   SynEdit;
 
-  procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit);
+  procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit; verbose:boolean);
 
 implementation
 
@@ -38,6 +38,7 @@ type
 
 var
   linestore:ansistring;
+  filteroutput:boolean;
 
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
@@ -76,7 +77,7 @@ begin
       line:=Trim(line);
       Delete(linestore,1,i);
 
-      while true do
+      while filteroutput do
       begin
         // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
         // will be a bit redundant , but just to be sure !
@@ -136,7 +137,7 @@ begin
         // * = trivial for a normal user.
       end;
 
-      if (NOT lineready) then
+      if (NOT lineready) OR (NOT filteroutput) then
       begin
         Self.Append(line);
         Self.CaretX:=0;
@@ -206,8 +207,9 @@ begin
   EditIgnore := 0;
 end;
 
-procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit);
+procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit; verbose:boolean);
 begin
+  filteroutput:=verbose;
   FillChar(T,SizeOf(TextRec),0);
   {$ifdef FPC_HAS_CPSTRING}
   SetTextCodePage(T,TTextRec(T).CodePage);

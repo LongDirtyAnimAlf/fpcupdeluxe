@@ -46,13 +46,15 @@ const
   LAZARUSTRUNKVERSION  = '1.9';
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';
+  FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc/dist';
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
 
   DEFAULTFPCVERSION = '3.0.2';
   DEFAULTLAZARUSVERSION = '1.6.4';
 
   {$IFDEF DEBUG}
-  STANDARDCOMPILEROPTIONS='-vew';
+  //STANDARDCOMPILEROPTIONS='-vew';
+  STANDARDCOMPILEROPTIONS='-va';
   {$ELSE}
   STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
   {$ENDIF}
