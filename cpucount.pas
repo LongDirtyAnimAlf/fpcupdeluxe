@@ -59,7 +59,11 @@ begin
   mib[0] := CTL_HW;
   mib[1] := HW_NCPU;
   len := sizeof(t);
+  {$if defined(VER3_0_0) or defined(VER3_0_2)}
   fpsysctl(pchar(@mib), 2, @t, @len, Nil, 0);
+  {$else}
+  fpsysctl(@mib, 2, @t, @len, Nil, 0);
+  {$endif}
   Result:=t;
 end;
 {$ELSEIF defined(linux)}

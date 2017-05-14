@@ -86,6 +86,8 @@ begin
            OR (AnsiContainsText(line,'fpcupdeluxe:'))
            OR (AnsiContainsText(line,'execute:'))
            OR (AnsiContainsText(line,'executing:'))
+           OR (AnsiContainsText(line,'compiling '))
+           OR (AnsiContainsText(line,'linking '))
         then
         begin
           lineready:=false;

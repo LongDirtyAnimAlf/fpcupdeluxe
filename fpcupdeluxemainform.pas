@@ -123,7 +123,9 @@ uses
   {$ENDIF UNIX}
   //LazFileUtils,
   AboutFrm,
+  {$ifndef BSD}
   unzipprogress,
+  {$endif}
   extrasettings,
   //checkoptions,
   installerCore,
@@ -608,6 +610,7 @@ begin
         if (InternalError='2015030501') OR (InternalError='2014051001') OR (InternalError='2014050604') then
         begin
           Memo1.Lines.Append('FPC revision 30351 introduced some changed into the compiler causing this error.');
+          Memo1.Lines.Append('Has something todo about how floating points are handled. And that has changed.');
           Memo1.Lines.Append('See: http://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
         end;
       end;
@@ -786,6 +789,14 @@ begin
     Special := True;    //Must be true
   end;
 
+  // makefile warnings
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'make.exe: ',[soDown])) OR (ExistWordInString(PChar(s),'make: ',[soDown]))) then
+  begin
+    FG      := TColor($AF10FF);//Text Color
+    BG      := clBlack;  //BackGround
+    Special := True;    //Must be true
+  end;
+
   // svn connection error
   if (NOT Special) AND (ExistWordInString(PChar(s),'unable to connect to a repository at url',[soDown])) then
   begin
@@ -801,7 +812,7 @@ begin
     Special := True;
   end;
 
-  if (NOT Special) AND (ExistWordInString(PChar(s),'make ',[soDown]) OR ExistWordInString(PChar(s),'gmake ',[soDown])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'make.exe ',[soDown]) OR ExistWordInString(PChar(s),'make ',[soDown]) OR ExistWordInString(PChar(s),'gmake ',[soDown])) then
   begin
     FG      := TColor($FF8C00);
     BG      := clBlack;

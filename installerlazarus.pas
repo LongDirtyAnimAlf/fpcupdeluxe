@@ -1187,7 +1187,8 @@ begin
           end
           else
           begin
-            infoln('Strange error: could not find patchfile '+PatchFilePath,etInfo);
+            infoln('Strange: could not find patchfile '+PatchFilePath, etWarning);
+            writelnlog(etError, ModuleName+' Patching Lazarus with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
           end;
         end;
       finally

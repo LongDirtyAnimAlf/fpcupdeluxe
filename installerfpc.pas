@@ -2762,6 +2762,11 @@ begin
                  writelnlog(etError, ModuleName+' Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
                  writelnlog(ModuleName+' patch output: ' + Output, true);
                end;
+          end
+          else
+          begin
+            infoln('Strange: could not find patchfile '+PatchFilePath, etWarning);
+            writelnlog(etError, ModuleName+' Patching FPC with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
           end;
         end;
       finally
