@@ -66,8 +66,10 @@ const
   LibName='libc.dylib';
 var
   s:string;
+  {
   i,j,k:integer;
   found:boolean;
+  }
 begin
 
   result:=FLibsFound;

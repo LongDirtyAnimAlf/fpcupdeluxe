@@ -625,7 +625,7 @@ begin
              CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
            end;
            {$else}
-           //just for testing
+           //just for testing/debugging
            //Options:=Options+' -sh -s-';
            {$endif}
         end;

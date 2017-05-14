@@ -841,6 +841,16 @@ begin
     end;
   end;
 
+  // special override for me: for easy debugging FPC and Lazarus source with plain writelines in source
+  if ExistWordInString(PChar(s),'donalf:',[soWholeWord,soDown]) then
+  begin
+    begin
+      FG      := clBlack;
+      BG      := clYellow;
+      Special := True;
+    end;
+  end;
+
   if Special then
   begin
     Markup.Background:=BG;
