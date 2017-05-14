@@ -1464,6 +1464,7 @@ function TSequencer.GetText: string;
 var
   i:integer;
 begin
+  result:='';
   for i:=Low(FStateMachine) to High(FStateMachine) do
   begin
     // todo: add translation of instr

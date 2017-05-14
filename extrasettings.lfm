@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 489
+  Left = 338
   Height = 601
-  Top = 154
+  Top = 110
   Width = 746
   Caption = 'Advanced settings'
   ClientHeight = 601
@@ -9,7 +9,7 @@ object Form2: TForm2
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poMainFormCenter
-  LCLVersion = '1.7'
+  LCLVersion = '1.9.0.0'
   object GroupBox1: TGroupBox
     Left = 8
     Height = 128
@@ -282,7 +282,7 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 8
     end
-    object CheckUpdateAllCrosscompilers: TCheckBox
+    object CheckExtraVerbose: TCheckBox
       AnchorSideLeft.Control = GroupBox2
       AnchorSideTop.Control = CheckUseLatestGDB
       AnchorSideTop.Side = asrBottom
@@ -290,11 +290,10 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 229
-      Width = 260
+      Width = 175
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Update crosscompilers with FPC (default=no)'
-      Enabled = False
+      Caption = 'Be extra verbose (default=no)'
       ParentShowHint = False
       ShowHint = True
       TabOrder = 9
@@ -635,6 +634,7 @@ object Form2: TForm2
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
+    Options = [lboDrawFocusRect]
     TabOrder = 5
   end
   object btnAddFPCPatch: TButton
@@ -677,6 +677,7 @@ object Form2: TForm2
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
+    Options = [lboDrawFocusRect]
     TabOrder = 8
   end
   object btnAddLazPatch: TButton

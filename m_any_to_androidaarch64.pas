@@ -78,7 +78,6 @@ const
 var
   delphiversion,ndkversion,platform:byte;
   PresetLibPath:string;
-  AsFile: string;
 begin
 
   result:=FLibsFound;

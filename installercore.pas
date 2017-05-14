@@ -244,19 +244,19 @@ type
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
     // Build module
-    function BuildModule(ModuleName: string): boolean; virtual; abstract;
+    function BuildModule(ModuleName: string): boolean; virtual;
     // Clean up environment
-    function CleanModule(ModuleName: string): boolean; virtual; abstract;
+    function CleanModule(ModuleName: string): boolean; virtual;
     // Config module
-    function ConfigModule(ModuleName: string): boolean; virtual; abstract;
+    function ConfigModule(ModuleName: string): boolean; virtual;
     // Constructs compiler path from directory and architecture
     // Corrects for use of our fpc.sh launcher on *nix
     // Does not verify compiler actually exists.
     function GetCompilerInDir(Dir: string): string;
     // Install update sources
-    function GetModule(ModuleName: string): boolean; virtual; abstract;
+    function GetModule(ModuleName: string): boolean; virtual;
     // Uninstall module
-    function UnInstallModule(ModuleName: string): boolean; virtual; abstract;
+    function UnInstallModule(ModuleName: string): boolean; virtual;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -1683,6 +1683,28 @@ begin
   end;
   {$ENDIF UNIX}
 end;
+
+function TInstaller.BuildModule(ModuleName: string): boolean;
+begin
+  writelnlog(etWarning, 'Should not happen: calling non-implemented BuildModule for '+ModuleName);
+end;
+function TInstaller.CleanModule(ModuleName: string): boolean;
+begin
+  writelnlog(etWarning, 'Should not happen: calling non-implemented CleanModule for '+ModuleName);
+end;
+function TInstaller.ConfigModule(ModuleName: string): boolean;
+begin
+  writelnlog(etWarning, 'Should not happen: calling non-implemented ConfigModule for '+ModuleName);
+end;
+function TInstaller.GetModule(ModuleName: string): boolean;
+begin
+  writelnlog(etWarning, 'Should not happen: calling non-implemented GetModule for '+ModuleName);
+end;
+function TInstaller.UnInstallModule(ModuleName: string): boolean;
+begin
+  writelnlog(etWarning, 'Should not happen: calling non-implemented UnInstallModule for '+ModuleName);
+end;
+
 
 constructor TInstaller.Create;
 begin

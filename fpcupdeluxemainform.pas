@@ -213,18 +213,15 @@ begin
   RadioGroup2.Items.Strings[RadioGroup2.Items.IndexOf('wince')]:='i-sim';
   {$endif CPUARM}
 
+  oldoutput := System.Output;
+  AssignSynEdit(System.Output, SynEdit1);
+  Reset(System.Input);
+  Rewrite(System.Output);
+
   Self.Caption:='FPCUPdeluxe V'+FPCUPDELUXEVERSION+' base fpcup'+RevisionStr+' ('+VersionDate+') for '+
                 lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
 
   sStatus:='Sitting and waiting';
-
-  oldoutput := System.Output;
-  AssignSynEdit(System.Output, SynEdit1,{$IFDEF DEBUG} false{$ELSE} true{$ENDIF});
-  Reset(System.Input);
-  Rewrite(System.Output);
-
-  AddMessage('Welcome @ FPCUPdeluxe.');
-  AddMessage('');
 
   {$IFDEF MSWINDOWS}
   sInstallDir:='C:\fpcupdeluxe';
@@ -292,6 +289,9 @@ begin
   // create settings form
   // must be done here, to enable local storage/access of some setttings !!
   Form2:=TForm2.Create(Form1);
+
+  AddMessage('Welcome @ FPCUPdeluxe.');
+  AddMessage('');
 
   InitFPCupManager;
 end;
@@ -1827,6 +1827,7 @@ begin
   FPCupManager.CrossToolsDirectory:='';
 
   FPCupManager.Verbose:=CheckVerbosity.Checked;
+  SetVerbosity((Form2.ExtraVerbose) AND (FPCupManager.Verbose));
 
   FPCupManager.FPCDesiredBranch:=Form2.FPCBranch;
   FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;
@@ -2037,7 +2038,7 @@ begin
     //FPCupManager.UseWget:=ReadBool('General','UseWget',False);
     //Form2.UseWget:=FPCupManager.UseWget;
     Form2.UseWget:=ReadBool('General','UseWget',False);
-    Form2.UpdateCrossCompilers:=ReadBool('General','UpdateCrossCompilers',False);
+    Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
 
     Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
     Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
@@ -2085,7 +2086,7 @@ begin
     WriteBool('General','SplitLazarus',Form2.SplitLazarus);
 
     WriteBool('General','UseWget',Form2.UseWget);
-    WriteBool('General','UpdateCrossCompilers',Form2.UpdateCrossCompilers);
+    WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
 
     WriteString('Patches','FPCPatches',Form2.FPCPatches);
     WriteString('Patches','LazarusPatches',Form2.LazPatches);

@@ -567,7 +567,7 @@ function TUniversalInstaller.CreateInstallers(Directive: string; sl: TStringList
 // For now only support WINDOWS/WINDOWS32/WIN32/WINX86, and ignore others
 var
   i:integer;
-  InstallDir,exec,output:string;
+  InstallDir,exec:string;
   Installer: TWinInstaller;
   Workingdir:string;
   BaseWorkingdir:string;
@@ -1581,8 +1581,14 @@ var
   e:Exception;
 begin
   sl:=TStringList.Create;
+
   ini:=TMemIniFile.Create(CurrentConfigFile);
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  ini.Options:=ini.Options-[ifoCaseSensitive];
+  {$ELSE}
   ini.CaseSensitive:=false;
+  {$ENDIF}
+
   try
     ini.ReadSection('ALIAS'+Dictionary,sl);
     if Uppercase(KeyWord)='LIST' then
@@ -1796,10 +1802,14 @@ begin
   result:=False;
 
   ini:=TMemIniFile.Create(SafeGetApplicationPath+CONFIGFILENAME);
-  try
-    ini.CaseSensitive:=false;
-    ini.StripQuotes:=true; //helps read description lines
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  ini.Options:=ini.Options-[ifoCaseSensitive]+[ifoStripQuotes];
+  {$ELSE}
+  ini.CaseSensitive:=false;
+  ini.StripQuotes:=true; //helps read description lines
+  {$ENDIF}
 
+  try
     AddModule:=True;
 
     j:=UniModuleList.IndexOf(ModuleName);

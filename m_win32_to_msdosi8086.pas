@@ -43,8 +43,8 @@ uses
 implementation
 const
   MediumMemOption='-WmMedium';
-  SmallMemOption='-WmSmall'; //default for dos compiler
-  TinyMemOption='-WmTiny';
+  //SmallMemOption='-WmSmall'; //default for dos compiler
+  //TinyMemOption='-WmTiny';
 
 type
 

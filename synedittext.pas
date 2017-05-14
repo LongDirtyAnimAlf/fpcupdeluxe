@@ -11,7 +11,8 @@ interface
 uses
   SynEdit;
 
-  procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit; verbose:boolean);
+  procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit);
+  procedure SetVerbosity(verbose:boolean);
 
 implementation
 
@@ -209,9 +210,9 @@ begin
   EditIgnore := 0;
 end;
 
-procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit; verbose:boolean);
+procedure AssignSynEdit(var T: Text; NewSynEditComponent: TCustomSynEdit);
 begin
-  filteroutput:=verbose;
+  filteroutput:=false;
   FillChar(T,SizeOf(TextRec),0);
   {$ifdef FPC_HAS_CPSTRING}
   SetTextCodePage(T,TTextRec(T).CodePage);
@@ -234,7 +235,9 @@ begin
   end;
 end;
 
+procedure SetVerbosity(verbose:boolean);
+begin
+  filteroutput:=(NOT verbose);
+end;
+
 end.
-
-
-

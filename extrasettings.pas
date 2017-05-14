@@ -61,7 +61,7 @@ type
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
     CheckUseLatestGDB: TCheckBox;
-    CheckUpdateAllCrosscompilers: TCheckBox;
+    CheckExtraVerbose: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditCrossBuildOptions: TEdit;
@@ -127,9 +127,8 @@ type
     function GetUseWget:boolean;
     procedure SetUseWget(value:boolean);
 
-    function GetUpdateCross:boolean;
-    procedure SetUpdateCross(value:boolean);
-
+    function GetExtraVerbose:boolean;
+    procedure SetExtraVerbose(value:boolean);
 
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
@@ -172,7 +171,7 @@ type
     property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
 
     property UseWget:boolean read GetUseWget write SetUseWget;
-    property UpdateCrossCompilers:boolean read GetUpdateCross write SetUpdateCross;
+    property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -597,13 +596,13 @@ begin
   CheckUseWget.Checked:=value;
 end;
 
-function TForm2.GetUpdateCross:boolean;
+function TForm2.GetExtraVerbose:boolean;
 begin
-  result:=CheckUpdateAllCrosscompilers.Checked;
+  result:=CheckExtraVerbose.Checked;
 end;
-procedure TForm2.SetUpdateCross(value:boolean);
+procedure TForm2.SetExtraVerbose(value:boolean);
 begin
-  CheckUpdateAllCrosscompilers.Checked:=value;
+  CheckExtraVerbose.Checked:=value;
 end;
 
 function TForm2.GetFPCOptions:string;
