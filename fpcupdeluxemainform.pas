@@ -163,7 +163,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0e';
+  FPCUPDELUXEVERSION='1.4.0f';
 
 resourcestring
   CrossGCCMsg =
@@ -691,6 +691,12 @@ begin
     Memo1.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
   end;
 
+  // warn for time consuming help files
+  if (ExistWordInString(PChar(s),'writing',[soDown])) AND (ExistWordInString(PChar(s),'pages...',[soDown])) then
+  begin
+    Memo1.Lines.Append('Busy with help files. Be patient: can be time consuming !!');
+  end;
+
   // go back a few lines to find a special error case
   x:=(SynEdit1.CaretY-4);
   if (x>0) then
@@ -789,8 +795,23 @@ begin
     Special := True;    //Must be true
   end;
 
-  // makefile warnings
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'make.exe: ',[soDown])) OR (ExistWordInString(PChar(s),'make: ',[soDown]))) then
+  // makefile and help warnings
+  if (NOT Special)
+  AND
+  (
+    (ExistWordInString(PChar(s),'make.exe: ',[soDown]))
+    OR
+    (ExistWordInString(PChar(s),'make: ',[soDown]))
+    OR
+    (ExistWordInString(PChar(s),'this could take some time',[soDown]))
+    OR
+    (
+      (ExistWordInString(PChar(s),'writing',[soDown]))
+      AND
+      (ExistWordInString(PChar(s),'pages...',[soDown]))
+    )
+  )
+  then
   begin
     FG      := TColor($AF10FF);//Text Color
     BG      := clBlack;  //BackGround

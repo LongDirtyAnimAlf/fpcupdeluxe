@@ -1568,12 +1568,8 @@ function TInstaller.GetFPCTarget(Native: boolean): string;
 var
   processorname, os: string;
 begin
-  processorname := 'notfound';
-  os := processorname;
-  os := {$I %FPCTARGETOS%};
-  processorname := {$I %FPCTARGETCPU%};
-  os := LowerCase(os); //match usage in makefiles
-  processorname := LowerCase(processorname); //match usage in makefiles
+  os := Self.SourceOS;
+  processorname := SourceCPU;
 
   if not Native then
   begin

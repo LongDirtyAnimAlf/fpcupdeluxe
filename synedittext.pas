@@ -101,6 +101,9 @@ begin
         if AnsiContainsText(line,'note: ') then break;
         if AnsiContainsText(line,': entering directory ') then break;
         if AnsiContainsText(line,': leaving directory ') then break;
+        // when generating help
+        if AnsiContainsText(line,'illegal XML element: ') then break;
+        if AnsiContainsText(line,'parsing used unit ') then break;
         if AnsiContainsText(line,'warning: ') then
         begin
           if AnsiContainsText(line,'is not portable') then break;
@@ -119,6 +122,8 @@ begin
           if AnsiContainsText(line,'were not initialized') then break;
           if AnsiContainsText(line,'which is not available for the') then break;
           if AnsiContainsText(line,'argument unused during compilation') then break;
+          // when generating help
+          if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}
           if AnsiContainsText(line,'unable to determine the libgcc path') then break;
           {$endif}

@@ -2490,7 +2490,7 @@ begin
   // current directory
   if not DirectoryExistsUTF8(FSourceDirectory) then
   begin
-    infoln('TFPCInstaller: clean module '+ModuleName + ' directory '+FSourceDirectory+' does not exist. Exiting CleanModule.',etWarning);
+    //infoln('TFPCInstaller: clean module '+ModuleName + ' directory '+FSourceDirectory+' does not exist. Exiting CleanModule.',etInfo);
     exit;
   end;
 

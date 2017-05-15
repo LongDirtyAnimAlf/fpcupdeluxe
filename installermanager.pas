@@ -1407,7 +1407,8 @@ begin
         FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
       else
         FInstaller.Compiler:=FParent.CompilerName;
-      (FInstaller as THelpLazarusInstaller).FPCDirectory:=FParent.FPCInstallDirectory;
+      (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingBackslash(FParent.FPCInstallDirectory);// + 'bin' + DirectorySeparator + FInstaller.SourceCPU + '-' + FInstaller.SourceOS;
+      (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=FParent.FPCSourceDirectory;
       (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       end
   {$endif}
