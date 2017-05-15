@@ -89,6 +89,10 @@ begin
            OR (AnsiContainsText(line,'executing:'))
            OR (AnsiContainsText(line,'compiling '))
            OR (AnsiContainsText(line,'linking '))
+           {$ifdef Darwin}
+           // on Darwin, ignore focus errors
+           OR (AnsiContainsText(line,'setfocus error:'))
+           {$endif}
         then
         begin
           lineready:=false;
@@ -99,6 +103,7 @@ begin
         if AnsiContainsText(line,'hint: ') then break;
         if AnsiContainsText(line,'verbose: ') then break;
         if AnsiContainsText(line,'note: ') then break;
+        if AnsiContainsText(line,'assembling ') then break;
         if AnsiContainsText(line,': entering directory ') then break;
         if AnsiContainsText(line,': leaving directory ') then break;
         // when generating help
@@ -136,6 +141,10 @@ begin
         {$endif}
         {$ifdef UNIX}
         if AnsiContainsText(line,'rm -f ') then break;
+        {$ifdef BSD}
+        // hmmmm
+        if AnsiContainsText(line,'rm -f') then break;
+        {$endif}
         if AnsiContainsText(line,'rm -rf ') then break;
         if AnsiContainsText(line,'mkdir ') then break;
         if AnsiContainsText(line,'mv ') then break;
