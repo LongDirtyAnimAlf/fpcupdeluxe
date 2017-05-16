@@ -163,7 +163,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0f';
+  FPCUPDELUXEVERSION='1.4.0g';
 
 resourcestring
   CrossGCCMsg =

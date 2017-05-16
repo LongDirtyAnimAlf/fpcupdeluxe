@@ -2072,8 +2072,8 @@ begin
 
     s:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
     if (ReturnCode = 0)
-        then ICSVNCommand:='update --non-interactive --quiet'
-        else ICSVNCommand:='checkout --non-interactive --quiet --depth=files ' + s;
+        then ICSVNCommand:='update --non-interactive --trust-server-cert --quiet'
+        else ICSVNCommand:='checkout --non-interactive --trust-server-cert --quiet --depth=files ' + s;
 
     ReturnCode := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
     if (ReturnCode <> 0) then
@@ -2085,22 +2085,22 @@ begin
 
     // get compiler source
     s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler';
-    if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update compiler --quiet ' + s);
+    if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
     // try once again
     if (ReturnCode <> 0) then
     begin
       FSVNClient.Execute('cleanup --non-interactive ' + s);
-      ReturnCode := FSVNClient.Execute('update compiler --quiet ' + s);
+      ReturnCode := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
     end;
 
     // get rtl source
     s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl';
-    if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update rtl --quiet ' + s);
+    if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
     // try once again
     if (ReturnCode <> 0) then
     begin
       FSVNClient.Execute('cleanup --non-interactive ' + s);
-      ReturnCode := FSVNClient.Execute('update rtl --quiet ' + s);
+      ReturnCode := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
     end;
 
     if (ReturnCode = 0) then

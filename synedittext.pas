@@ -6,7 +6,7 @@ unit synedittext;
 
 interface
 
-{$mode objfpc}
+{$mode objfpc}{$H+}
 
 uses
   SynEdit;
@@ -38,14 +38,14 @@ type
   end;
 
 var
-  linestore:ansistring;
+  linestore:string;
   filteroutput:boolean;
 
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
   i,j,k:cardinal;
   lineready:boolean;
-  subline,line:ansistring;
+  subline,line:string;
 begin
   lineready:=false;
   subline:=StrPas(aBuf);
