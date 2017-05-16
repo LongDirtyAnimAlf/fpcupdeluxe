@@ -560,11 +560,11 @@ begin
           end;
         end;
 
-        if (CrossInstaller.TargetOS='android') then
+        if (CrossInstaller.TargetCPU='arm') then
         begin
           // what to do ...
-          // always build hardfloat for ARM on Android ?
-          // or default to softfloat for ARM on Android ?
+          // always build hardfloat for ARM ?
+          // or default to softfloat for ARM ?
           // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
           // decision: (nearly) always build hardfloat ... not necessary correct however !
           if (Pos('-dFPC_ARMHF',Options)=0) AND (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMHF';
@@ -2485,14 +2485,7 @@ begin
   result:=InitModule;
   if not result then exit;
 
-  // Check for valid basedirectory to avoid deleting in random locations or
-  // hitting bug 26706: OSX TProcess.Execute fails on next call with invalid
-  // current directory
-  if not DirectoryExistsUTF8(FSourceDirectory) then
-  begin
-    //infoln('TFPCInstaller: clean module '+ModuleName + ' directory '+FSourceDirectory+' does not exist. Exiting CleanModule.',etInfo);
-    exit;
-  end;
+  if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
   infoln('TFPCInstaller: clean module '+ModuleName+'...',etInfo);
 

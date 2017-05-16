@@ -429,11 +429,11 @@ begin
     begin
       RadioGroup1.ItemIndex:=-1;
       RadioGroup2.ItemIndex:=-1;
+      CheckAutoClear.Checked:=CheckAutoClearStore;
     end;
 
   finally
     ConfigText.Free;
-    CheckAutoClear.Checked:=CheckAutoClearStore;
   end;
 
   result:=success;
@@ -982,10 +982,10 @@ begin
     FPCupManager.FPCDesiredRevision:=FPCRevision;
     FPCupManager.LazarusDesiredRevision:=LazarusRevision;
 
-    if NOT Form2.IncludeHelp then
-    begin
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus';
-    end;
+    if (NOT Form2.IncludeHelp) then
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus'
+    else
+      FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
 
     AddMessage(s+'.');
 
@@ -1037,6 +1037,13 @@ begin
       finally
         FModuleList.Free;
       end;
+    end
+    else
+    begin
+      if (NOT Form2.IncludeHelp) then
+        FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus'
+      else
+        FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
     end;
 
     RealRun;
@@ -1655,9 +1662,7 @@ begin
     FPCupManager.LazarusURL:='skip';
 
     if NOT Form2.IncludeHelp then
-    begin
       FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc';
-    end;
 
     sStatus:='Going to install/update FPC only.';
 
@@ -1692,10 +1697,10 @@ begin
 
     FPCupManager.FPCURL:='skip';
 
-    if NOT Form2.IncludeHelp then
-    begin
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus';
-    end;
+    if (NOT Form2.IncludeHelp) then
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus'
+    else
+      FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
 
     sStatus:='Going to install/update Lazarus only.';
 

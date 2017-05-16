@@ -2,11 +2,11 @@ object Form1: TForm1
   Left = 139
   Height = 643
   Top = 121
-  Width = 1137
+  Width = 1050
   Anchors = []
   Caption = 'Form1'
   ClientHeight = 623
-  ClientWidth = 1137
+  ClientWidth = 1050
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate
@@ -92,7 +92,7 @@ object Form1: TForm1
     Left = 368
     Height = 23
     Top = 35
-    Width = 587
+    Width = 500
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Right = 12
     Constraints.MinWidth = 120
@@ -104,7 +104,7 @@ object Form1: TForm1
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Button8
-    Left = 967
+    Left = 880
     Height = 19
     Top = 36
     Width = 73
@@ -120,7 +120,7 @@ object Form1: TForm1
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    Left = 1052
+    Left = 965
     Height = 25
     Top = 35
     Width = 73
@@ -950,7 +950,7 @@ object Form1: TForm1
     Left = 368
     Height = 377
     Top = 64
-    Width = 757
+    Width = 670
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 8
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -1578,7 +1578,7 @@ object Form1: TForm1
     Left = 14
     Height = 46
     Top = 573
-    Width = 1109
+    Width = 1022
     Align = alBottom
     AutoSize = True
     BorderSpacing.Left = 14
@@ -1586,7 +1586,7 @@ object Form1: TForm1
     BorderSpacing.Bottom = 4
     BevelInner = bvLowered
     ClientHeight = 46
-    ClientWidth = 1109
+    ClientWidth = 1022
     TabOrder = 5
     object TrunkBtn: TBitBtn
       AnchorSideLeft.Control = Panel1
@@ -2814,7 +2814,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       AnchorSideRight.Control = Panel1
       AnchorSideRight.Side = asrBottom
-      Left = 1018
+      Left = 931
       Height = 40
       Top = 4
       Width = 88
@@ -2966,7 +2966,7 @@ object Form1: TForm1
     Height = 120
     Hint = 'Will show error'
     Top = 449
-    Width = 757
+    Width = 670
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
     BorderSpacing.Bottom = 4
