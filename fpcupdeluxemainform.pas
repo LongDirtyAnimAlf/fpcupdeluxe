@@ -406,13 +406,12 @@ begin
 
         if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
         begin
-          Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-
+          AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
           if (Sender<>nil) then
           begin
             SynEdit1.ClearAll;
+            Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
             Memo1.Lines.Append('Going to update cross-compiler.');
-
             RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
             RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
             success:=InstallCrossCompiler(nil);
@@ -583,6 +582,27 @@ begin
     Memo1.Lines.Append('After this period, please re-run fpcupdeluxe.');
   end;
 
+  (*
+  searchstring:='the makefile doesn''t support target';
+  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
+  begin
+    Memo1.Lines.Append('Sorry, but you have chosen a target that is not supported (yet).');
+    x:=Pos(searchstring,LowerCase(s));
+    if x>0 then
+    begin
+      x:=x+Length(searchstring);
+      InternalError:=Copy(s,x+1,MaxInt);
+      x:=Pos(',',LowerCase(InternalError));
+      if x=0 then x:=Pos(' ',LowerCase(InternalError));
+      if x>0 then
+      begin
+        InternalError:=Copy(InternalError,1,x-1);
+        Memo1.Lines.Append('Wrong target: '+InternalError);
+      end;
+    end;
+  end;
+  *)
+
   searchstring:='unable to connect to a repository at url';
   if (ExistWordInString(PChar(s),searchstring,[soDown])) then
   begin
@@ -594,7 +614,7 @@ begin
       InternalError:=Copy(s,x+1,MaxInt);
       Memo1.Lines.Append('URL: '+InternalError);
       Memo1.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
-    Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end;
   end;
 
@@ -897,6 +917,15 @@ var
   FPCRevision,FPCBranch:string;
   LazarusRevision,LazarusBranch:string;
 begin
+
+  {$ifdef CPUAARCH64}
+  if (Sender<>TrunkBtn) AND (Sender<>NPBtn) then
+  begin
+    MessageDlg('Aarch64 is only supported by FPC trunk (or NewPascal).',mtError,[],0);
+    exit;
+  end;
+  {$endif CPUAARCH64}
+
   DisEnable(Sender,False);
   try
     PrepareRun;
@@ -1010,6 +1039,7 @@ begin
 
   {$ifdef CPUAARCH64}
   if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
+                 'An aarch64 fpcupdeluxe bootstrapper wil be used.' + sLineBreak +
                  'Do you want to continue ?'
                  ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
                  begin
@@ -2135,9 +2165,9 @@ end;
 
 procedure TForm1.AddMessage(aMessage:string; UpdateStatus:boolean=false);
 begin
-  //SynEdit1.Append(aMessage);
-  SynEdit1.InsertTextAtCaret(aMessage+sLineBreak,scamAdjust);
+  SynEdit1.Append(aMessage);
   SynEdit1.CaretX:=0;
+  SynEdit1.CaretY:=SynEdit1.Lines.Count;
   if UpdateStatus then StatusMessage.Text:=aMessage;
   Application.ProcessMessages;
 end;
@@ -2150,7 +2180,11 @@ begin
   begin
     FFPCTarget:=aFPCTarget;
     i:=ListBoxFPCTarget.Items.IndexOf(FFPCTarget);
-    if i<>-1 then ListBoxFPCTarget.Selected[i]:=true;
+    if i<>-1 then
+    begin
+      ListBoxFPCTarget.Selected[i]:=true;
+      ListBoxFPCTarget.Invalidate;
+    end;
   end;
 end;
 
@@ -2162,7 +2196,11 @@ begin
   begin
     FLazarusTarget:=aLazarusTarget;
     i:=ListBoxLazarusTarget.Items.IndexOf(FLazarusTarget);
-    if i<>-1 then ListBoxLazarusTarget.Selected[i]:=true;
+    if i<>-1 then
+    begin
+      ListBoxLazarusTarget.Selected[i]:=true;
+      ListBoxLazarusTarget.Invalidate;
+    end;
   end;
 end;
 

@@ -634,7 +634,6 @@ object Form2: TForm2
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
-    Options = [lboDrawFocusRect]
     TabOrder = 5
   end
   object btnAddFPCPatch: TButton
@@ -677,7 +676,6 @@ object Form2: TForm2
     ClickOnSelChange = False
     ExtendedSelect = False
     ItemHeight = 0
-    Options = [lboDrawFocusRect]
     TabOrder = 8
   end
   object btnAddLazPatch: TButton

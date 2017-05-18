@@ -43,7 +43,7 @@ var
 
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
-  i,j,k:cardinal;
+  i,j:cardinal;
   lineready:boolean;
   subline,line:string;
 begin
@@ -70,7 +70,6 @@ begin
         lineready:=(linestore[i]=#13);
       end;
     end;
-
     if lineready then
     begin
 
@@ -140,11 +139,7 @@ begin
         if AnsiContainsText(line,'mv.exe ') then break;
         {$endif}
         {$ifdef UNIX}
-        if AnsiContainsText(line,'rm -f ') then break;
-        {$ifdef BSD}
-        // hmmmm
         if AnsiContainsText(line,'rm -f') then break;
-        {$endif}
         if AnsiContainsText(line,'rm -rf ') then break;
         if AnsiContainsText(line,'mkdir ') then break;
         if AnsiContainsText(line,'mv ') then break;
@@ -172,7 +167,7 @@ begin
 
 end;
 
-function EditWrite(var F: TTextRec): Integer; far;
+function EditWrite(var F: TTextRec): Integer;
 begin
   try
     with F do
@@ -195,7 +190,7 @@ begin
   Application.ProcessMessages;
 end;
 
-function EditFlush(var F: TTextRec): Integer; far;
+function EditFlush(var F: TTextRec): Integer;
 begin
   F.BufPos := 0;
   F.BufEnd := 0;
@@ -203,7 +198,7 @@ begin
 end;
 
 
-function EditOpen(var F: TTextRec): Integer; far;
+function EditOpen(var F: TTextRec): Integer;
 begin
   with F do
   begin
@@ -219,7 +214,7 @@ begin
   end;
 end;
 
-function EditIgnore(var F: TTextRec): Integer; far;
+function EditIgnore(var {%H-}F: TTextRec): Integer;
 begin
   EditIgnore := 0;
 end;
@@ -229,7 +224,11 @@ begin
   filteroutput:=false;
   FillChar(T,SizeOf(TextRec),0);
   {$ifdef FPC_HAS_CPSTRING}
+  {$ifdef FPC_HAS_FEATURE_ANSISTRINGS}
   SetTextCodePage(T,TTextRec(T).CodePage);
+  {$else FPC_HAS_FEATURE_ANSISTRINGS}
+  TextRec(t).CodePage:=0;
+  {$endif FPC_HAS_FEATURE_ANSISTRINGS}
   {$endif}
   with TTextRec(T) do
   begin

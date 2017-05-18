@@ -195,6 +195,30 @@ uses
   , baseunix
   {$ENDIF UNIX}  ;
 
+// remove stale compiled files
+procedure RemoveStaleBuildDirectories(aBaseDir,aArch:string);
+var
+  OldPath:string;
+  FileInfo: TSearchRec;
+  DeleteList:TStringList;
+begin
+  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'components'+DirectorySeparator;
+  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  begin
+    repeat
+      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
+      begin
+        if (FileInfo.Attr and faDirectory) = faDirectory then
+        begin
+          if DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'lib'+DirectorySeparator+aArch) then
+            RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'lib');
+        end;
+      end;
+    until FindNextUTF8(FileInfo)<>0;
+    FindCloseUTF8(FileInfo);
+  end;
+end;
+
 { TLazarusCrossInstaller }
 
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
@@ -351,6 +375,9 @@ begin
         exit(Result);
       end;
     end; //prereqs in place
+
+    RemoveStaleBuildDirectories(FSourceDirectory,FCrossCPU_Target+'-'+FCrossOS_Target);
+
   end    //valid cross compile setup
   else
     infoln('Lazarus: can''t find cross installer for ' + FCrossCPU_Target + '-' + FCrossOS_Target, etError);
@@ -607,6 +634,7 @@ begin
       end;
     end;
   end;
+  RemoveStaleBuildDirectories(FSourceDirectory,SourceCPU+'-'+SourceOS);
   Result := OperationSucceeded;
 end;
 
