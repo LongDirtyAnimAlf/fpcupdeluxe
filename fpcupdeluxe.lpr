@@ -31,12 +31,6 @@ program fpcupdeluxe;
 {$ENDIF}
 
 uses
-  {$IFDEF UNIX}
-  {$ifndef BSD}
-  // for threaded unzipper in mainform
-  cthreads,
-  {$endif}
-  {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, fpcupdeluxemainform, extrasettings, unzipprogress,
   Classes, sysutils,

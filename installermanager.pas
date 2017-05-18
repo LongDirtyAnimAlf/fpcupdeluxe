@@ -390,6 +390,7 @@ type
     FHTTPProxyPort: integer;
     FHTTPProxyUser: string;
     FPersistentOptions: string;
+    FBaseDirectory: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -447,6 +448,7 @@ type
     procedure SetLazarusURL(AValue: string);
     {$endif}
     function GetLogFileName: string;
+    procedure SetBaseDirectory(AValue: string);
     procedure SetBootstrapCompilerDirectory(AValue: string);
     procedure SetFPCSourceDirectory(AValue: string);
     procedure SetFPCInstallDirectory(AValue: string);
@@ -479,6 +481,7 @@ type
     property PersistentOptions: string read FPersistentOptions write FPersistentOptions;
     // Full path to bootstrap compiler
     property BootstrapCompiler: string read FBootstrapCompiler write FBootstrapCompiler;
+    property BaseDirectory: string read FBaseDirectory write SetBaseDirectory;
     // Directory where bootstrap compiler is installed/downloaded
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
     // URL to download the bootstrap compiler from
@@ -652,6 +655,11 @@ end;
 function TFPCupManager.GetLogFileName: string;
 begin
   result:=FLog.LogFile;
+end;
+
+procedure TFPCupManager.SetBaseDirectory(AValue: string);
+begin
+  FBaseDirectory:=SafeExpandFileName(AValue);
 end;
 
 procedure TFPCupManager.SetBootstrapCompilerDirectory(AValue: string);
@@ -1442,23 +1450,28 @@ begin
         FInstaller.Compiler:=FParent.CompilerName;
     end;
 
-  if Assigned(FInstaller.SVNClient) then
-    FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
-  FInstaller.HTTPProxyHost:=FParent.HTTPProxyHost;
-  FInstaller.HTTPProxyPort:=FParent.HTTPProxyPort;
-  FInstaller.HTTPProxyUser:=FParent.HTTPProxyUser;
-  FInstaller.HTTPProxyPassword:=FParent.HTTPProxyPassword;
-  FInstaller.KeepLocalChanges:=FParent.KeepLocalChanges;
-  FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
-  FInstaller.PatchCmd:=FParent.PatchCmd;
-  FInstaller.Verbose:=FParent.Verbose;
-  FInstaller.UseWget:=FParent.UseWget;
-  FInstaller.ExportOnly:=FParent.ExportOnly;
-  FInstaller.NoJobs:=FParent.NoJobs;
-  FInstaller.Log:=FParent.FLog;
-  {$IFDEF MSWINDOWS}
-  FInstaller.MakeDirectory:=FParent.MakeDirectory;
-  {$ENDIF}
+
+  if assigned(FInstaller) then
+  begin
+    FInstaller.BaseDirectory:=FParent.BaseDirectory;
+    if Assigned(FInstaller.SVNClient) then
+      FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
+    FInstaller.HTTPProxyHost:=FParent.HTTPProxyHost;
+    FInstaller.HTTPProxyPort:=FParent.HTTPProxyPort;
+    FInstaller.HTTPProxyUser:=FParent.HTTPProxyUser;
+    FInstaller.HTTPProxyPassword:=FParent.HTTPProxyPassword;
+    FInstaller.KeepLocalChanges:=FParent.KeepLocalChanges;
+    FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
+    FInstaller.PatchCmd:=FParent.PatchCmd;
+    FInstaller.Verbose:=FParent.Verbose;
+    FInstaller.UseWget:=FParent.UseWget;
+    FInstaller.ExportOnly:=FParent.ExportOnly;
+    FInstaller.NoJobs:=FParent.NoJobs;
+    FInstaller.Log:=FParent.FLog;
+    {$IFDEF MSWINDOWS}
+    FInstaller.MakeDirectory:=FParent.MakeDirectory;
+    {$ENDIF}
+  end;
 end;
 
 function TSequencer.GetText: string;

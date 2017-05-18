@@ -94,6 +94,7 @@ type
     procedure SetHTTPProxyUser(AValue: string);
     function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
   protected
+    FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
     FCompiler: string; // Compiler executable
@@ -136,7 +137,6 @@ type
     FVerbose: boolean;
     FUseWget: boolean;
     FTar: string;
-    FUnzip: string;
     FBunzip2: string;
     F7zip: string;
     FUnrar: string;
@@ -193,6 +193,8 @@ type
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
     // Source directory for installation (fpcdir, lazdir,... option)
     property SourceDirectory: string write FSourceDirectory;
+    //Base directory for fpc(laz)up(deluxe) itself
+    property BaseDirectory: string write FBaseDirectory;
     // Source directory for installation (fpcdir, lazdir,... option)
     property InstallDirectory: string write FInstallDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
@@ -386,6 +388,7 @@ begin
   begin
     // The extractors used depend on the bootstrap compiler URL/file we download
     // todo: adapt extractor based on URL that's being passed (low priority as these will be pretty stable)
+
     {$IFDEF MSWINDOWS}
     // Need to do it here so we can pick up make path.
     FBunzip2 := '';
@@ -396,7 +399,6 @@ begin
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
     FTar := 'tar';
-    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     F7zip := '7za';
     FUnrar := 'unrar';
     {$ENDIF LINUX}
@@ -404,13 +406,11 @@ begin
     {$IFDEF DARWIN}
     FBunzip2 := ''; //not really necessary now
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
-    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     F7zip := '7za';
     FUnrar := 'unrar';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
-    FUnzip := 'unzip'; //unzip needed at least for FPC chm help
     F7zip := '7za';
     FUnrar := 'unrar';
     {$ENDIF DARWIN}
@@ -445,10 +445,6 @@ begin
         DownloadOpenSSL;
       end;
     end;
-
-    // Get unzip binary from default binutils URL
-    FUnzip := IncludeTrailingPathDelimiter(FMakeDir) + 'unzip.exe';
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/'+ExtractFileName(FUnzip),FUnzip);
 
     // Get patch binary from default binutils URL
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
@@ -542,22 +538,6 @@ begin
       end;
     end;
     {$ENDIF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))}
-
-    if OperationSucceeded then
-    begin
-      // Check for valid unzip executable, if it is needed
-      if FUnzip <> EmptyStr then
-      begin
-        {$IF (defined(BSD)) and (not defined(Darwin))}
-        // FreeBSD doesn't have an unzip applicationt that responds without needing a zip file
-        // No motivation to go feed it a zip file just to test it
-        OperationSucceeded := true;
-        {$ELSE}
-        // OSes with a normal unzip
-        OperationSucceeded := CheckExecutable(FUnzip, '-v', '');
-        {$ENDIF (defined(BSD)) and (not defined(Darwin))}
-      end;
-    end;
 
     if OperationSucceeded then
     begin
@@ -1248,14 +1228,14 @@ const
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.14.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.0.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
-  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.4.zip';
+  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.4.zip';
+  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.5.zip';
   //SourceURL = 'https://sourceforge.net/projects/win32svn/files/1.8.15/apache24/svn-win32-1.8.15-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
   MajorVersion,MinorVersion,BuildNumber: integer;
   OperationSucceeded: boolean;
-  ResultCode: longint;
   SVNZip: string;
 begin
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
@@ -1308,11 +1288,14 @@ begin
   if OperationSucceeded then
   begin
     // Extract, overwrite
-    resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + FSVNDirectory + ' ' + SVNZip, FVerbose);
-    if resultcode <> 0 then
+    with TNormalUnzipper.Create do
     begin
-      OperationSucceeded := false;
-      writelnlog(etError, 'DownloadSVN error: unzip returned result code: ' + IntToStr(ResultCode));
+      try
+        DeleteDirectoryEx(FSVNDirectory);
+        OperationSucceeded:=DoUnZip(SVNZip,FSVNDirectory,[]);
+      finally
+        Free;
+      end;
     end;
   end
   else
@@ -1414,7 +1397,6 @@ const
   //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/jvm/jasmin.jar';
 var
   OperationSucceeded: boolean;
-  ResultCode: longint;
   JasminZip,JasminDir: string;
 begin
   // for now, just put jasmin.jar in bin directory ... easy and simple and working
@@ -1448,8 +1430,16 @@ begin
     if OperationSucceeded then
     begin
       // Extract, overwrite
-      resultcode:=ExecuteCommand(FUnzip + ' -o -d ' + SysUtils.GetTempDir + ' ' + JasminZip, FVerbose);
-      if resultcode = 0 then
+      with TNormalUnzipper.Create do
+      begin
+        try
+          OperationSucceeded:=DoUnZip(JasminZip,SysUtils.GetTempDir,[]);
+        finally
+          Free;
+        end;
+      end;
+
+      if OperationSucceeded then
       begin
         OperationSucceeded := MoveFile(IncludeTrailingPathDelimiter(SysUtils.GetTempDir) + 'jasmin-' + JasminVersion + DirectorySeparator + 'jasmin.jar',JasminDir+'jasmin.jar');
         //MoveFile
@@ -1461,7 +1451,7 @@ begin
       else
       begin
         OperationSucceeded := false;
-        writelnlog(etError, 'DownloadJasmin error: unzip returned result code: ' + IntToStr(ResultCode));
+        writelnlog(etError, 'DownloadJasmin error: unzip failed due to unknown error.');
       end;
     end
     else

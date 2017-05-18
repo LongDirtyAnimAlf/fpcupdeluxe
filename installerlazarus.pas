@@ -912,8 +912,7 @@ begin
          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Visible/Value', 'True');
 
       // add default projects path
-      DebuggerPath := ExpandFileName(IncludeTrailingPathDelimiter(FInstallDirectory) + '..');
-      DebuggerPath := ResolveDots(IncludeTrailingPathDelimiter(DebuggerPath)+'projects');
+      DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
       ForceDirectoriesUTF8(DebuggerPath);
       //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));

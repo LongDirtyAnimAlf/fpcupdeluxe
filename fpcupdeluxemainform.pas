@@ -123,9 +123,6 @@ uses
   {$ENDIF UNIX}
   //LazFileUtils,
   AboutFrm,
-  {$ifndef BSD}
-  unzipprogress,
-  {$endif}
   extrasettings,
   //checkoptions,
   installerCore,
@@ -472,6 +469,7 @@ begin
             AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
             AND (s<>'FPC')
             AND (s<>'lazarus')
+            AND (s<>'default')
             AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
             then
         begin
@@ -1149,9 +1147,6 @@ var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
   UseNativeUnzip:boolean;
-  {$ifndef BSD}
-  FileUnzipper: TThreadedUnzipper;
-  {$endif}
   {$ifdef Unix}
   fileList: TStringList;
   i:integer;
@@ -1495,8 +1490,6 @@ begin
 
               if UseNativeUnzip then
               begin
-                {$ifdef BSD}
-                // just do a simple unzip
                 with TNormalUnzipper.Create do
                 begin
                   try
@@ -1505,23 +1498,6 @@ begin
                     Free;
                   end;
                 end;
-                {$else}
-                ProgressForm := TProgressForm.Create(Self);
-                try
-                  FileUnzipper := TThreadedUnzipper.Create;
-                  try
-                    FileUnzipper.OnZipProgress := @ProgressForm.DoOnZipProgress;
-                    FileUnzipper.OnZipFile := @ProgressForm.DoOnZipFile;
-                    FileUnzipper.OnZipCompleted := @ProgressForm.DoOnZipCompleted;
-                    FileUnzipper.DoUnZip(TargetFile, TargetPath,[]);
-                    success:=(ProgressForm.ShowModal=mrOk);
-                  finally
-                    if Assigned(FileUnzipper) then FileUnzipper := nil;
-                  end;
-                finally
-                  ProgressForm.Free;
-                end;
-                {$endif}
               end
               else
               begin
@@ -1586,8 +1562,6 @@ begin
 
               if UseNativeUnzip then
               begin
-                {$ifdef BSD}
-                // just do a simple unzip
                 with TNormalUnzipper.Create do
                 begin
                   try
@@ -1596,23 +1570,6 @@ begin
                     Free;
                   end;
                 end;
-                {$else}
-                ProgressForm := TProgressForm.Create(Self);
-                try
-                  FileUnzipper := TThreadedUnzipper.Create;
-                  try
-                    FileUnzipper.OnZipProgress := @ProgressForm.DoOnZipProgress;
-                    FileUnzipper.OnZipFile := @ProgressForm.DoOnZipFile;
-                    FileUnzipper.OnZipCompleted := @ProgressForm.DoOnZipCompleted;
-                    FileUnzipper.DoUnZip(TargetFile, TargetPath,[]);
-                    success:=(ProgressForm.ShowModal=mrOk);
-                  finally
-                    if Assigned(FileUnzipper) then FileUnzipper := nil;
-                  end;
-                finally
-                  ProgressForm.Free;
-                end;
-                {$endif}
               end
               else
               begin
@@ -1925,6 +1882,7 @@ begin
   end;
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
+  FPCupManager.BaseDirectory:=sInstallDir;
 
   // do not create shortcut for fpcupeluxe itself: we have already fpcupdeluxe by itself !!
   //FPCupManager.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update';

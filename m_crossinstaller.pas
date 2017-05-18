@@ -247,10 +247,10 @@ begin
   if Length(DirName)>0 then sd:=sd+DirectorySeparator+DirName;
   sd:=SafeExpandFileName(sd);
   result:=SearchUtil(sd, LookFor, LibsOrBins);
+
   if not result then
   begin
-    sd:=IncludeTrailingPathDelimiter(BasePath)+'..'+DirectorySeparator+'cross'+DirectorySeparator;
-    sd:=ResolveDots(sd);
+    sd:=IncludeTrailingPathDelimiter(BasePath)+'cross'+DirectorySeparator;
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';
@@ -258,6 +258,7 @@ begin
     sd:=SafeExpandFileName(sd);
     result:=SearchUtil(sd, LookFor, LibsOrBins);
   end;
+
   if not result then
   begin
     sd:=SafeGetApplicationPath+'cross'+DirectorySeparator;

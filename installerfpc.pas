@@ -471,10 +471,10 @@ begin
     if (CrossToolsDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
     else if (CrossToolsDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
     else CrossInstaller.SearchModeUsed:=smManual;
-    if CrossInstaller.SearchModeUsed<>smManual then BinsAvailable:=CrossInstaller.GetBinUtils(FInstallDirectory) else
+    if CrossInstaller.SearchModeUsed<>smManual then BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory) else
     begin
       if Length(CrossToolsDirectory)=0
-         then BinsAvailable:=CrossInstaller.GetBinUtils(FInstallDirectory)
+         then BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory)
          else BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
     end;
     if not BinsAvailable then infoln('Failed to get crossbinutils', etError);
@@ -484,10 +484,10 @@ begin
     if (CrossLibraryDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
     else if (CrossLibraryDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
     else CrossInstaller.SearchModeUsed:=smManual;
-    if CrossInstaller.SearchModeUsed<>smManual then LibsAvailable:=CrossInstaller.GetLibs(FInstallDirectory) else
+    if CrossInstaller.SearchModeUsed<>smManual then LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory) else
     begin
       if Length(CrossLibraryDirectory)=0
-         then LibsAvailable:=CrossInstaller.GetLibs(FInstallDirectory)
+         then LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory)
          else LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory);
     end;
     if not LibsAvailable then infoln('Failed to get crosslibrary', etError);
@@ -2036,9 +2036,7 @@ begin
     //if not result then exit;
 
     infoln('Checking out/updating sources for intermediate bootstrap compiler.',etInfo);
-    BootstrapDirectory := ExpandFileName(IncludeTrailingPathDelimiter(FSourceDirectory) + '..');
-    BootstrapDirectory := IncludeTrailingPathDelimiter(BootstrapDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
-    BootstrapDirectory := ResolveDots(BootstrapDirectory);
+    BootstrapDirectory := IncludeTrailingPathDelimiter(FBaseDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
 
     FSVNClient.ModuleName:=ModuleName;
 

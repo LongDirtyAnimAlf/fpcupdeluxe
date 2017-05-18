@@ -246,7 +246,9 @@ begin
         len:=length(macro)+3; // the brackets
         // For the directory macros, the user expects to add path separators himself in fpcup.ini,
         // so strip them out if they are there.
-        if macro='FPCDIR' then //$(FPCDIR)
+        if macro='BASEDIR' then
+          macro:=ExcludeTrailingPathDelimiter(FBaseDirectory)
+        else if macro='FPCDIR' then //$(FPCDIR)
           macro:=ExcludeTrailingPathDelimiter(FFPCDir)
         else if macro='FPCBINDIR' then //$(FPCBINDIR)
             macro:=ExcludeTrailingPathDelimiter(FBinPath)
@@ -1392,7 +1394,16 @@ begin
       TempArchive := RemoteURL;
       case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
          '.ZIP':
-            ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+         begin
+           with TNormalUnzipper.Create do
+           begin
+             try
+               ResultCode:=Ord(NOT DoUnZip(TempArchive,IncludeTrailingPathDelimiter(InstallDir),[]));
+             finally
+               Free;
+             end;
+           end;
+         end;
          '.7Z':
          begin
            ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);

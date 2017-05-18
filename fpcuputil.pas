@@ -1507,6 +1507,7 @@ var
   i:word;
 begin
   if FStarted then exit;
+  infoln('TThreadedUnzipper: Going to extract files from ' + ASrcFile + ' into ' + ADstDir,etInfo);
   FUnZipper.Clear;
   FUnZipper.OnPercent:=10;
   FUnZipper.FileName := ASrcFile;
@@ -1559,6 +1560,7 @@ var
   x:cardinal;
   s:string;
 begin
+  infoln('TNormalUnzipper: Going to extract files from ' + ASrcFile + ' into ' + ADstDir,etInfo);
   result:=false;
   FUnzipper := TUnzipper.Create;
   try

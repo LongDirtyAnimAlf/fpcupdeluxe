@@ -389,12 +389,24 @@ begin
     begin
       // Extract, overwrite, flatten path/junk paths
       // todo: test with spaces in path
+
+      with TNormalUnzipper.Create do
+      begin
+        try
+          OperationSucceeded:=DoUnZip(DocsZip,IncludeTrailingPathDelimiter(FTargetDirectory),[]);
+        finally
+          Free;
+        end;
+      end;
+      if (NOT OperationSucceeded) then writelnlog(etError, 'Download docs error: unzip failed due to unknown error.');
+      {
       ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
       if ResultCode <> 0 then
       begin
         OperationSucceeded := False;
         infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
+      }
     end;
 
     SysUtils.deletefile(DocsZip); //Get rid of temp zip
@@ -437,12 +449,25 @@ begin
       begin
         // Extract, overwrite, flatten path/junk paths
         // todo: test with spaces in path
+
+        with TNormalUnzipper.Create do
+        begin
+          try
+            OperationSucceeded:=DoUnZip(DocsZip,IncludeTrailingPathDelimiter(FTargetDirectory),[]);
+          finally
+            Free;
+          end;
+        end;
+        if (NOT OperationSucceeded) then writelnlog(etError, 'Download docs error: unzip failed due to unknown error.');
+
+        {
         ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
         if ResultCode <> 0 then
         begin
           OperationSucceeded := False;
           infoln(ModuleName+': unzip failed with resultcode: '+IntToStr(ResultCode),etwarning);
         end;
+        }
       end;
 
       SysUtils.deletefile(DocsZip); //Get rid of temp zip
@@ -847,7 +872,7 @@ begin
         We could set it explicitly with
         LazarusConfig.SetVariable(HelpConfig,
           'Viewers/TChmHelpViewer/CHMHelp/FilesPath',
-          IncludeTrailingPathDelimiter(FBaseDirectory)+'docs'+DirectorySeparator+'chm'+DirectorySeparator
+          IncludeTrailingPathDelimiter(FInstallDirectory)+'docs'+DirectorySeparator+'chm'+DirectorySeparator
           );
         }
         result:=true;

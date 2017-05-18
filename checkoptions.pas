@@ -155,6 +155,7 @@ begin
       FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','binutilsdir','')));
       {$ENDIF MSWINDOWS}
 
+      FInstaller.BaseDirectory:=sInstallDir;
       FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
       FInstaller.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
       bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
@@ -502,6 +503,7 @@ begin
       // Makes no sense on other platforms
       writeln('Binutils/make dir:  '+FInstaller.MakeDirectory);
       {$ENDIF MSWINDOWS}
+      writeln('Base directory:     '+FInstaller.BaseDirectory);
       writeln('Bootstrap dir:      '+FInstaller.BootstrapCompilerDirectory);
       writeln('FPC URL:            '+FInstaller.FPCURL);
       writeln('FPC options:        '+FInstaller.FPCOPT);
