@@ -567,6 +567,18 @@ begin
   s:=Trim(s);
   if Length(s)=0 then exit;
 
+  searchstring:='checking out/updating';
+  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
+  begin
+    x:=Pos(searchstring,LowerCase(s));
+    if x>0 then
+    begin
+      x:=x+Length(searchstring);
+      InternalError:=Copy(s,x+1,MaxInt);
+      Memo1.Lines.Append('Getting/updating '+InternalError);
+    end;
+  end;
+
   if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
     Memo1.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');

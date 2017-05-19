@@ -1085,7 +1085,8 @@ begin
      then aRepoClient:=FGitClient
      else aRepoClient:=FSVNClient;
 
-  infoln('Checking out/updating Lazarus sources:', etInfo);
+  infoln(Self.ClassName+': checking out/updating ' + ModuleName + ' sources.',etInfo);
+
   UpdateWarnings := TStringList.Create;
   try
     aRepoClient.Verbose:=FVerbose;
@@ -1134,9 +1135,8 @@ begin
     end;
   end;
 
-  if Result
-     then infoln('Checking out/updating Lazarus sources ok', etInfo)
-     else infoln('Checking out/updating Lazarus sources failure', etError);
+  if (NOT Result) then
+    infoln(Self.ClassName+': checking out/updating ' + ModuleName + ' sources failure.',etError);
 
   // Download Qt bindings if not present yet
   Errors := 0;

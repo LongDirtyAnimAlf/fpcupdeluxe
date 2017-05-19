@@ -310,6 +310,7 @@ const
   FPC_CHM_URL_LASTRESORT_1_6='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip';
   FPC_CHM_URL_LASTRESORT_1_6_4='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6.4/doc-chm-fpc3.0.2-laz1.6.zip';
   FPC_CHM_URL_LASTRESORT_LATEST=FPC_CHM_URL_LASTRESORT_1_6_4;
+  FPC_CHM_URL_LATEST_SVN='https://svn.freepascal.org/cgi-bin/viewvc.cgi/binaries/docs/chm/';
 
 var
   DocsZip: string;

@@ -1648,62 +1648,71 @@ begin
           {$ENDIF}
           {$ENDIF}
 
-          infoln('Looking for (online) bootstrapper '+aCompilerArchive,etInfo);
+          s:=FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/';
+
+          infoln('Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etInfo);
 
           aCompilerList.Clear;
 
-          aDownLoader.getFTPFileList(FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/',aCompilerList);
+          result:=aDownLoader.getFTPFileList(s,aCompilerList);
 
-          if FVerbose then
-          begin
-            if aCompilerList.Count>0 then infoln('Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etInfo);
-          end;
+          if (NOT result) then // if error, try once again
+            result:=aDownLoader.getFTPFileList(s,aCompilerList);
 
-          {$IFDEF FREEBSD}
-          // FreeBSD : special because of versions
-          FreeBSDVersion:=0;
-          for i:=0 to Pred(aCompilerList.Count) do
+          if result then
           begin
-            infoln('Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
-            if Pos(SourceCPU+'-'+SourceOS,aCompilerList[i])=1 then
+
+            if FVerbose then
             begin
-              aCompilerFound:=True;
-              // get the latest available version
-              FreeBSDVersion:=Max(FreeBSDVersion,StrToIntDef(aCompilerList[i][Length(SourceCPU+'-'+SourceOS)+1],0));
+              if aCompilerList.Count>0 then infoln('Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etInfo);
             end;
-          end;
-          if (aCompilerFound) then
-          begin
-            if FreeBSDVersion>0
-               then aCompilerArchive:=SourceCPU+'-'+SourceOS+InttoStr(FreeBSDVersion)+'-'+GetCompilerName(SourceCPU)
-               else aCompilerArchive:=SourceCPU+'-'+SourceOS+'-'+GetCompilerName(SourceCPU);
-            // remove file extension
-            aCompilerArchive:=ChangeFileExt(aCompilerArchive,'');
-            aCompilerArchive:=aCompilerArchive+'.bz2';
-            infoln('Got a correct bootstrap compiler from official FPC bootstrap sources',etDebug);
-            break;
-          end;
-          {$ELSE}
-          for i:=0 to Pred(aCompilerList.Count) do
-          begin
-            infoln('Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
-            aCompilerFound:=(aCompilerList[i]=aCompilerArchive);
-            if aCompilerFound then
+
+            {$IFDEF FREEBSD}
+            // FreeBSD : special because of versions
+            FreeBSDVersion:=0;
+            for i:=0 to Pred(aCompilerList.Count) do
             begin
-              infoln('Found a correct bootstrap compiler from official FPC bootstrap binaries.',etDebug);
+              infoln('Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
+              if Pos(SourceCPU+'-'+SourceOS,aCompilerList[i])=1 then
+              begin
+                aCompilerFound:=True;
+                // get the latest available version
+                FreeBSDVersion:=Max(FreeBSDVersion,StrToIntDef(aCompilerList[i][Length(SourceCPU+'-'+SourceOS)+1],0));
+              end;
+            end;
+            if (aCompilerFound) then
+            begin
+              if FreeBSDVersion>0
+                 then aCompilerArchive:=SourceCPU+'-'+SourceOS+InttoStr(FreeBSDVersion)+'-'+GetCompilerName(SourceCPU)
+                 else aCompilerArchive:=SourceCPU+'-'+SourceOS+'-'+GetCompilerName(SourceCPU);
+              // remove file extension
+              aCompilerArchive:=ChangeFileExt(aCompilerArchive,'');
+              aCompilerArchive:=aCompilerArchive+'.bz2';
+              infoln('Got a correct bootstrap compiler from official FPC bootstrap sources',etDebug);
               break;
             end;
-          end;
-          {$ENDIF}
+            {$ELSE}
+            for i:=0 to Pred(aCompilerList.Count) do
+            begin
+              infoln('Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
+              aCompilerFound:=(aCompilerList[i]=aCompilerArchive);
+              if aCompilerFound then
+              begin
+                infoln('Found a correct bootstrap compiler from official FPC bootstrap binaries.',etDebug);
+                break;
+              end;
+            end;
+            {$ENDIF}
 
-          // look for a previous compiler if not found, and use overrideversioncheck
-          if NOT aCompilerFound then
-          begin
-            FBootstrapCompilerOverrideVersionCheck:=true;
-            s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
-            if aLocalBootstrapVersion<>s
-               then aLocalBootstrapVersion:=s
-               else break;
+            // look for a previous compiler if not found, and use overrideversioncheck
+            if NOT aCompilerFound then
+            begin
+              FBootstrapCompilerOverrideVersionCheck:=true;
+              s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
+              if aLocalBootstrapVersion<>s
+                 then aLocalBootstrapVersion:=s
+                 else break;
+            end;
           end;
         end; // while
 
@@ -2035,7 +2044,6 @@ begin
     result:=CheckAndGetNeededBinUtils;
     //if not result then exit;
 
-    infoln('Checking out/updating sources for intermediate bootstrap compiler.',etInfo);
     BootstrapDirectory := IncludeTrailingPathDelimiter(FBaseDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
 
     FSVNClient.ModuleName:=ModuleName;
@@ -2066,7 +2074,7 @@ begin
       end;
     end;
 
-    infoln('Getting the sources of the FPC ' + RequiredBootstrapVersion + ' intermediate compiler.',etInfo);
+    infoln(Self.ClassName+': checking out/updating ' + ModuleName + ' ' + RequiredBootstrapVersion + ' intermediate compiler sources.',etInfo);
 
     s:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
     if (ReturnCode = 0)
@@ -2103,11 +2111,6 @@ begin
 
     if (ReturnCode = 0) then
     begin
-      infoln('Checking out/updating FPC ' + RequiredBootstrapVersion + ' sources for intermediate bootstrap compiler done.',etInfo);
-
-      // Build an intermediate bootstrap compiler in target fpc[version]bootstrap dir.
-      // Version-dependent: please review and modify when new FPC version is released
-
       infoln('We have a FPC bootstrap source (@ '+BootstrapDirectory+') with version: '+RequiredBootstrapVersion,etInfo);
       RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory);
       if RequiredBootstrapBootstrapVersion='0.0.0' then
@@ -2647,7 +2650,8 @@ begin
      then aRepoClient:=FGitClient
      else aRepoClient:=FSVNClient;
 
-  infoln('Checking out/updating FPC sources...',etInfo);
+  infoln(Self.ClassName+': checking out/updating ' + ModuleName + ' sources.',etInfo);
+
   UpdateWarnings:=TStringList.Create;
   try
    aRepoClient.Verbose:=FVerbose;
@@ -2666,9 +2670,9 @@ begin
 
   if NOT aRepoClient.ExportOnly then
   begin
-    infoln('FPC was at: '+BeforeRevision,etInfo);
-    if FRepositoryUpdated then infoln('FPC is now at: '+AfterRevision,etInfo) else
-      infoln('No updates for FPC found.',etInfo);
+    infoln(ModuleName + ' was at: '+BeforeRevision,etInfo);
+    if FRepositoryUpdated then infoln(ModuleName + ' is now at: '+AfterRevision,etInfo) else
+      infoln('No updates for ' + ModuleName + ' found.',etInfo);
   end;
 
   {
@@ -2690,6 +2694,9 @@ begin
   end;
   }
 
+  if (NOT Result) then
+    infoln(Self.ClassName+': checking out/updating ' + ModuleName + ' sources failure.',etError);
+
   if result then
   begin
     if Length(FSourcePatches)>0 then
@@ -2699,7 +2706,7 @@ begin
         UpdateWarnings.CommaText := FSourcePatches;
         for i:=0 to (UpdateWarnings.Count-1) do
         begin
-          infoln('Trying to patch FPC with '+UpdateWarnings[i],etInfo);
+          infoln('Trying to patch ' + ModuleName + ' with '+UpdateWarnings[i],etInfo);
           PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+UpdateWarnings[i]);
@@ -2747,17 +2754,17 @@ begin
             end;
 
             if ReturnCode=0
-               then infoln('FPC has been patched successfully with '+UpdateWarnings[i],etInfo)
+               then infoln(ModuleName + ' has been patched successfully with '+UpdateWarnings[i],etInfo)
                else
                begin
-                 writelnlog(etError, ModuleName+' Patching FPC with ' + UpdateWarnings[i] + ' failed.', true);
+                 writelnlog(etError, ModuleName+' Patching ' + ModuleName + ' with ' + UpdateWarnings[i] + ' failed.', true);
                  writelnlog(ModuleName+' patch output: ' + Output, true);
                end;
           end
           else
           begin
             infoln('Strange: could not find patchfile '+PatchFilePath, etWarning);
-            writelnlog(etError, ModuleName+' Patching FPC with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
+            writelnlog(etError, ' Patching ' + ModuleName + ' with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
           end;
         end;
       finally
