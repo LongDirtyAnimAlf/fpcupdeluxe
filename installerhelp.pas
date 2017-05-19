@@ -392,6 +392,7 @@ begin
 
       with TNormalUnzipper.Create do
       begin
+        Flat:=True;
         try
           OperationSucceeded:=DoUnZip(DocsZip,IncludeTrailingPathDelimiter(FTargetDirectory),[]);
         finally
@@ -452,6 +453,7 @@ begin
 
         with TNormalUnzipper.Create do
         begin
+          Flat:=True;
           try
             OperationSucceeded:=DoUnZip(DocsZip,IncludeTrailingPathDelimiter(FTargetDirectory),[]);
           finally

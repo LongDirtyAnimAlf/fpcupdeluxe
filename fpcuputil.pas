@@ -102,9 +102,11 @@ type
     FFileList:TStrings;
     FTotalFileCnt: cardinal;
     FCurrentFile: string;
+    FFlat:boolean;
     procedure DoOnFile(Sender : TObject; Const AFileName : string);
   public
     function DoUnZip(const ASrcFile, ADstDir: String; Files: array of string):boolean;
+    property Flat:boolean read FFlat write FFlat default False;
   end;
 
   { TLogger }
@@ -1609,6 +1611,58 @@ begin
       if FFileList.Count=0
         then FUnZipper.UnZipAllFiles
         else FUnZipper.UnZipFiles(FFileList);
+
+      if Flat then
+      begin
+
+        if FFileList.Count=0 then
+        begin
+          for x:=0 to FUnZipper.Entries.Count-1 do
+          begin
+
+            if FUnZipper.Entries.Entries[x].IsDirectory then continue;
+            if FUnZipper.Entries.Entries[x].IsLink then continue;
+
+            { UTF8 features are only available in FPC >= 3.1 }
+            {$IF FPC_FULLVERSION > 30100}
+            if FUnZipper.UseUTF8
+               then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+               else
+            {$endif}
+            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+
+            if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+            if (Length(s)>0) AND (s[1]='.') then continue;
+
+            FFileList.Append(s);
+          end;
+        end;
+
+        for x:=0 to FFileList.Count-1 do
+        begin
+          s:=FFileList.Strings[x];
+          if DirectorySeparator<>'/' then s:=StringReplace(s, '/', DirectorySeparator, [rfReplaceAll]);
+          MoveFile(IncludeTrailingPathDelimiter(ADstDir)+s, IncludeTrailingPathDelimiter(ADstDir)+ExtractFileName(s));
+        end;
+
+        for x:=0 to FUnZipper.Entries.Count-1 do
+        begin
+          if FUnZipper.Entries.Entries[x].IsDirectory then
+          begin
+            { UTF8 features are only available in FPC >= 3.1 }
+            {$IF FPC_FULLVERSION > 30100}
+            if FUnZipper.UseUTF8
+               then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+               else
+            {$endif}
+            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+            if DirectorySeparator<>'/' then s:=StringReplace(s, '/', DirectorySeparator, [rfReplaceAll]);
+            if (s='.') or (s=DirectorySeparator+'.') or (Pos('..',s)>0) then continue;
+            DeleteDirectoryEx(IncludeTrailingPathDelimiter(ADstDir)+s);
+          end;
+        end;
+
+      end;
 
       result:=true;
 
