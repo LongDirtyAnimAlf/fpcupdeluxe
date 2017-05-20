@@ -789,9 +789,9 @@ begin
   result:=false;
 
   if
-    (lowercase(FSequencer.FParent.CrossCPU_Target)=lowercase({$i %FPCTARGETCPU%}))
+    (lowercase(FSequencer.FParent.CrossCPU_Target)=GetTargetCPU)
     AND
-    (lowercase(FSequencer.FParent.CrossOS_Target)=lowercase({$i %FPCTARGETOS%}))
+    (lowercase(FSequencer.FParent.CrossOS_Target)=GetTargetOS)
   then
   begin
     infoln('No crosscompiling to own target !!',etError);
@@ -1099,7 +1099,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
 
     // these libs are always needed !!
-    AdvicedLibs:='make gdb binutils unzip unrar patch wget ';
+    AdvicedLibs:='make gdb binutils unrar patch wget ';
 
     AllOutput:=TStringList.Create;
     try
@@ -1165,7 +1165,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
         Output:='libx11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
         AdvicedLibs:=AdvicedLibs+
-                     'make binutils build-essential gdb gcc subversion unzip unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
+                     'make binutils build-essential gdb gcc subversion unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
                      'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
                      'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
       end

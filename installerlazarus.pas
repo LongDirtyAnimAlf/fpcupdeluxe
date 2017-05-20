@@ -443,6 +443,11 @@ begin
         ProcessEx.Parameters.Add('-C ide idepkg');
         infoln(ModuleName + ': running make -C ide idepkg:', etInfo);
       end;
+      'BIGIDE':
+      begin
+        ProcessEx.Parameters.Add('-C bigide');
+        infoln(ModuleName + ': running make -C bigide:', etInfo);
+      end;
       'LAZARUS':
       begin
         ProcessEx.Parameters.Add('all');
@@ -634,7 +639,7 @@ begin
       end;
     end;
   end;
-  RemoveStaleBuildDirectories(FSourceDirectory,SourceCPU+'-'+SourceOS);
+  RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPUOS);
   Result := OperationSucceeded;
 end;
 

@@ -477,7 +477,7 @@ var
   aLocalCPU,aLocalOS:string;
 begin
   aLocalCPU:=aCPU;
-  //if length(aLocalCPU)=0 then aLocalCPU:=LowerCase({$I %FPCTARGETCPU%});
+  //if length(aLocalCPU)=0 then aLocalCPU:=GetTargetCPU;
   if aLocalCPU='ppc' then aLocalCPU:='powerpc';
   if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
 
@@ -486,7 +486,7 @@ begin
     raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
 
   aLocalOS:=aOS;
-  //if length(aLocalOS)=0 then aLocalOS:=LowerCase({$I %FPCTARGETOS%});
+  //if length(aLocalOS)=0 then aLocalOS:=GetTargetOS;
   if aLocalOS='win32' then aLocalOS:='windows';
   if aLocalOS='win64' then aLocalOS:='windows';
   if aLocalOS='i-sim' then aLocalOS:='iphonesim';

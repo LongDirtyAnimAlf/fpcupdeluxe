@@ -273,6 +273,9 @@ function DoubleQuoteIfNeeded(FileName: string): string;
 function GetNumericalVersion(aVersion: string): word;
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
+function GetTargetCPU:string;
+function GetTargetOS:string;
+function GetTargetCPUOS:string;
 
 implementation
 
@@ -1383,6 +1386,20 @@ begin
   SysUtils.FindClose(SR);
 end;
 
+function GetTargetCPU:string;
+begin
+  result:=lowercase({$i %FPCTARGETCPU%});
+end;
+
+function GetTargetOS:string;
+begin
+  result:=lowercase({$i %FPCTARGETOS%});
+end;
+
+function GetTargetCPUOS:string;
+begin
+  result:=GetTargetCPU+'-'+GetTargetOS;
+end;
 
 {TThreadedUnzipper}
 

@@ -80,7 +80,10 @@ const
   // we presume, libandroid.so has to be present in a cross-library for arm
   //LibName='libandroid.so';
 var
-  delphiversion,ndkversion,platform:byte;
+  {$ifdef MSWINDOWS}
+  delphiversion:byte;
+  {$endif}
+  ndkversion,platform:byte;
   PresetLibPath:string;
 begin
 

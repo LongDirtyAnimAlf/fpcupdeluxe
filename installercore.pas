@@ -86,8 +86,6 @@ type
     FReApplyLocalChanges: boolean;
     procedure SetURL(value:string);
     function GetMake: string;
-    function GetSourceCPU:string;
-    function GetSourceOS:string;
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
@@ -184,8 +182,6 @@ type
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
   public
-    property SourceCPU:string read GetSourceCPU;
-    property SourceOS:string read GetSourceOS;
     property SVNClient: TSVNClient read FSVNClient;
     // Get processor for termination of running processes
     property Processor: TProcessEx read ProcessEx;
@@ -279,16 +275,6 @@ uses
 
 { TInstaller }
 
-
-function TInstaller.GetSourceCPU:string;
-begin
-  result:=lowercase({$i %FPCTARGETCPU%});
-end;
-
-function TInstaller.GetSourceOS:string;
-begin
-  result:=lowercase({$i %FPCTARGETOS%});
-end;
 
 function TInstaller.GetCompiler: string;
 begin
@@ -1558,8 +1544,8 @@ function TInstaller.GetFPCTarget(Native: boolean): string;
 var
   processorname, os: string;
 begin
-  os := Self.SourceOS;
-  processorname := SourceCPU;
+  os := GetTargetOS;
+  processorname := GetTargetCPU;
 
   if not Native then
   begin

@@ -126,6 +126,7 @@ begin
           if AnsiContainsText(line,'were not initialized') then break;
           if AnsiContainsText(line,'which is not available for the') then break;
           if AnsiContainsText(line,'argument unused during compilation') then break;
+          if AnsiContainsText(line,'invalid unitname') then break;
           // when generating help
           if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}

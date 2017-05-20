@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil {$ifdef MSWINDOWS}, fpcuputil{$endif};
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 
@@ -166,7 +166,7 @@ begin
      then BinPrefixTry:='x86_64'
      else BinPrefixTry:='i386';
   {$else}
-  BinPrefixTry:=lowercase({$i %FPCTARGETCPU%});
+  BinPrefixTry:=GetTargetCPU;
   //BinPrefixTry:='x86_64';
   {$endif}
   BinPrefixTry:=BinPrefixTry+'-apple-darwin';

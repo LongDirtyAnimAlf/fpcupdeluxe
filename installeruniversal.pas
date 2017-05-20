@@ -1225,7 +1225,7 @@ begin
       if result then
       begin
         WritelnLog('Download ok',True);
-        // Extract, overwrite, flatten path/junk paths
+        // Extract, overwrite
         case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
            '.ZIP':
               begin
@@ -1899,6 +1899,8 @@ begin
          // if we have a positive define list, then default to false until a positive setting is encountered
          AddModule:=NegativeList;
 
+
+
          {$ifdef CPU32}
          if (Pos('cpu32',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpu32',cpu)=0),NegativeList);
          {$endif}
@@ -1915,6 +1917,12 @@ begin
          if (Pos('cpuarm',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpuarm',cpu)=0),NegativeList) else
          begin
            if (Pos('arm',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-arm',cpu)=0),NegativeList);
+         end;
+         {$endif}
+         {$ifdef CPUAARCH64}
+         if (Pos('cpuaarch64',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpuaarch64',cpu)=0),NegativeList) else
+         begin
+           if (Pos('aarch64',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-aarch64',cpu)=0),NegativeList);
          end;
          {$endif}
       end;

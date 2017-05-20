@@ -215,8 +215,7 @@ begin
   Reset(System.Input);
   Rewrite(System.Output);
 
-  Self.Caption:='FPCUPdeluxe V'+FPCUPDELUXEVERSION+' base fpcup'+RevisionStr+' ('+VersionDate+') for '+
-                lowercase({$i %FPCTARGETCPU%})+'-'+lowercase({$i %FPCTARGETOS%});
+  Self.Caption:='FPCUPdeluxe V'+FPCUPDELUXEVERSION+' base fpcup'+RevisionStr+' ('+VersionDate+') for ' + GetTargetCPUOS;
 
   sStatus:='Sitting and waiting';
 
@@ -329,10 +328,8 @@ var
   CheckAutoClearStore:boolean;
   success:boolean;
 begin
-  aOS := {$I %FPCTARGETOS%};
-  aCPU := {$I %FPCTARGETCPU%};
-  aOS := LowerCase(aOS);
-  aCPU := LowerCase(aCPU);
+  aOS := GetTargetOS;
+  aCPU := GetTargetCPU;
   BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+aCPU + '-' + aOS;
   FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
 
