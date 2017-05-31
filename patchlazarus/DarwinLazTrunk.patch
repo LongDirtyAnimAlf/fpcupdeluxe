@@ -1,6 +1,6 @@
 Index: components/lazutils/utf8process.pp
 ===================================================================
---- components/lazutils/utf8process.pp	(revision 54805)
+--- components/lazutils/utf8process.pp	(revision 55128)
 +++ components/lazutils/utf8process.pp	(working copy)
 @@ -168,7 +168,11 @@
    mib[0] := CTL_HW;
@@ -14,18 +14,3 @@ Index: components/lazutils/utf8process.pp
    Result:=t;
  end;
  {$ELSEIF defined(linux)}
-Index: components/sqldb/registersqldb.pas
-===================================================================
---- components/sqldb/registersqldb.pas	(revision 54805)
-+++ components/sqldb/registersqldb.pas	(working copy)
-@@ -37,8 +37,10 @@
- {$ENDIF}
- 
- {$IF FPC_FULLVERSION >= 20701}
-+{$IFNDEF Darwin}
-   {$DEFINE HASMSSQLCONNECTION}	 
-   {$DEFINE HASSYBASECONNECTION}	 
-+{$ENDIF}   
- {$ELSE}
-   // MS SQL Server and Sybase ASE connectors were introduced in the FPC 2.7 development branch,	 
-   //  and backported to 2.6.1. Operating systems should match FPC packages\fcl-db\fpmake.pp	 
