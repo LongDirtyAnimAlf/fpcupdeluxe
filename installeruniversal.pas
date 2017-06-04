@@ -534,6 +534,16 @@ begin
     end;
     {$endif}
 
+    {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
+    // the package PascalScript is only suitable for i386, x86_64 and arm !
+    // so skip in case package was included.
+    if (Pos('pascalscript',PackagePath)>0) then
+    begin
+      infoln('TUniversalInstaller: incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      continue;
+    end;
+    {$endif}
+
     {
     if (NOT FileExists(PackagePath)) OR (PackagePath='') then
     begin
@@ -1825,7 +1835,9 @@ begin
 
     j:=UniModuleList.IndexOf(ModuleName);
 
-    if j=-1 then AddModule:=false else
+    if j=-1 then AddModule:=false;
+
+    if AddModule=true then
     begin
 
       sl:=TStringList(UniModuleList.Objects[j]);
