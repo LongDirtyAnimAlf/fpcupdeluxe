@@ -1,5 +1,7 @@
 unit SynEditPopup;
 
+{$mode objfpc}{$H+}
+
 interface
 
 uses

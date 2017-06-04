@@ -680,10 +680,6 @@ begin
     end
     else if (ExistWordInString(PChar(s),'error:',[soDown])) then
     begin
-      {$ifdef Darwin}
-      // on Darwin, ignore focus errors
-      if (Pos('setfocus',lowercase(s))=0) then
-      {$endif}
       // check if "error:" at the end of the line.
       // if so:
       // the real error will follow on the next line(s).
@@ -738,10 +734,6 @@ begin
     // and we have to wait for these lines !!
     // if not, just print the error message (done somewhere else in this procedure).
     if (Pos('error:',s)>0) AND (Pos('error:',s)=(Length(s)-Length('error:')+1))
-    {$ifdef Darwin}
-    // on Darwin, ignore focus errors
-    AND (Pos('setfocus',s)=0)
-    {$endif}
     then
     begin
       // print the error itself and the next 2 lines (good guess)
@@ -762,6 +754,14 @@ begin
   s:=SynEdit1.Lines[Line-1];
   s:=Trim(s);
   if Length(s)=0 then exit;
+
+  {
+  if (NOT Special) AND ExistWordInString(PChar(s),'fpcupdeluxe:',[soWholeWord,soDown]) then
+  begin
+    FG      := clAqua;
+    BG      := clBlack;
+  end;
+  }
 
   if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord,soDown]) then
   begin
@@ -788,6 +788,13 @@ begin
   begin
     FG      := clBlue;
     BG      := clWhite;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ExistWordInString(PChar(s),'failed:',[soWholeWord,soDown]) then
+  begin
+    FG      := TColor($FF00AF); //Text Color  BGR
+    BG      := clBlack;
     Special := True;
   end;
 
@@ -840,9 +847,9 @@ begin
   )
   then
   begin
-    FG      := TColor($AF10FF);//Text Color
-    BG      := clBlack;  //BackGround
-    Special := True;    //Must be true
+    FG      := TColor($AF10FF); //Text Color  BGR
+    BG      := clBlack;
+    Special := True;
   end;
 
   // svn connection error
@@ -1266,6 +1273,7 @@ begin
       end
       else
       begin
+        //FPCupManager.CrossOS_SubArch:=;
         // default: armhf
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
         // Use hard floats, using armeabi-v7a Android ABI.
@@ -1377,6 +1385,8 @@ begin
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.rar';
           if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='LinuxPowerPC.rar';
           if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='LinuxPowerPC64.rar';
+          if FPCupManager.CrossCPU_Target='mips' then BinsURL:='LinuxMips.zip';
+          if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='LinuxMipsel.zip';
         end;
         if FPCupManager.CrossOS_Target='freebsd' then
         begin

@@ -898,6 +898,9 @@ begin
   ProcessEx.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   {$ENDIF}
 
+  ProcessEx.Parameters.Add('REVSTR='+ActualRevision);
+  ProcessEx.Parameters.Add('REVINC=force');
+
   if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+4)) then
   begin
     ProcessEx.Parameters.Add('DATA2INC=echo');
@@ -911,6 +914,8 @@ begin
   {$IFDEF UNIX}
   s:='-Sg '+s;
   {$ENDIF}
+
+  s:=s+' -dREVINC';
 
   ProcessEx.Parameters.Add('OPT='+s);
 
@@ -2619,7 +2624,6 @@ end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
-  AfterRevision: string;
   BeforeRevision: string;
   PatchFilePath:string;
   Output: string = '';
@@ -2669,8 +2673,8 @@ begin
    aRepoClient.ExportOnly:=FExportOnly;
    aRepoClient.ModuleName:=ModuleName;
    if aRepoClient=FGitClient
-      then result:=DownloadFromGit(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings)
-      else result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
+      then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
+      else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
    if UpdateWarnings.Count>0 then
    begin
      WritelnLog(UpdateWarnings.Text);
@@ -2682,7 +2686,7 @@ begin
   if NOT aRepoClient.ExportOnly then
   begin
     infoln(ModuleName + ' was at: '+BeforeRevision,etInfo);
-    if FRepositoryUpdated then infoln(ModuleName + ' is now at: '+AfterRevision,etInfo) else
+    if FRepositoryUpdated then infoln(ModuleName + ' is now at revision: '+ActualRevision,etInfo) else
       infoln('No updates for ' + ModuleName + ' found.',etInfo);
   end;
 

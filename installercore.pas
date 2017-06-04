@@ -47,7 +47,12 @@ const
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc/dist';
+
+  {$IFDEF MSWINDOWS}
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
+  //FPC prebuilt binaries of the GNU Binutils
+  PREBUILTBINUTILSURL = BINUTILSURL + '/binaries/i386-win32';
+  {$ENDIF}
 
   DEFAULTFPCVERSION = '3.0.2';
   DEFAULTLAZARUSVERSION = '1.6.4';
@@ -105,6 +110,7 @@ type
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
     FDesiredRevision: string;
+    FActualRevision: string;
     FDesiredBranch: string;
     // Stores tprocessex exception info:
     FErrorLog: TStringList;
@@ -209,6 +215,7 @@ type
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision
     property DesiredRevision: string write FDesiredRevision;
+    property ActualRevision: string read FActualRevision;
     property DesiredBranch: string write FDesiredBranch;
     // If using HTTP proxy: host
     property HTTPProxyHost: string read FHTTPProxyHost write SetHTTPProxyHost;
@@ -952,6 +959,7 @@ begin
 
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   aClient.CheckOutOrUpdate;
+
   ReturnCode := aClient.ReturnCode;
   case ReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:
@@ -968,7 +976,11 @@ begin
       // we do the AfterRevision check as well.
       Result := true;
 
-      AfterRevision := 'revision '+aClient.LocalRevision;
+      if FExportOnly then
+        AfterRevision := FDesiredRevision
+      else
+        AfterRevision := aClient.LocalRevision;
+
       if (aClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> aClient.LocalRevision) then
         FRepositoryUpdated := true
       else
@@ -1131,10 +1143,15 @@ begin
       // If there are svn errors, return a false result.
       // We used to do a check for the revision, but that does not check the integrity
       // or existence of all files in the svn repo.
-      if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-        AfterRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
-      else
-        AfterRevision := 'branch revision '+FSVNClient.LocalRevision+' (repository revision '+FSVNClient.LocalRevisionWholeRepo+')';
+
+      if FExportOnly then AfterRevision := FDesiredRevision else
+      begin
+        if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
+          AfterRevision := FSVNClient.LocalRevisionWholeRepo
+        else
+          AfterRevision := FSVNClient.LocalRevision;
+      end;
+
       if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FSVNClient.LocalRevision) then
         FRepositoryUpdated := true
       else

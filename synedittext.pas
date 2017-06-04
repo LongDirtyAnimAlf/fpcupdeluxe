@@ -70,6 +70,7 @@ begin
         lineready:=(linestore[i]=#13);
       end;
     end;
+
     if lineready then
     begin
 
@@ -150,7 +151,12 @@ begin
         // * = trivial for a normal user.
       end;
 
-      if (NOT lineready) OR (NOT filteroutput) then
+      if ((NOT lineready) OR (NOT filteroutput))
+      {$ifdef Darwin}
+      // suppress all setfocus errors on Darwin, always
+      AND (NOT AnsiContainsText(line,'.setfocus'))
+      {$endif}
+      then
       begin
         Self.Append(line);
         Self.CaretX:=0;
