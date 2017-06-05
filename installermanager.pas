@@ -235,6 +235,32 @@ below}
     'End;';
 
 type
+
+  // from systems.inc
+  tsystemcpu=
+         (
+               cpu_no,                       { 0 }
+               cpu_i386,                     { 1 }
+               cpu_m68k,                     { 2 }
+               cpu_alpha,                    { 3 }
+               cpu_powerpc,                  { 4 }
+               cpu_sparc,                    { 5 }
+               cpu_vm,                       { 6 }
+               cpu_iA64,                     { 7 }
+               cpu_x86_64,                   { 8 }
+               cpu_mipseb,                   { 9 }
+               cpu_arm,                      { 10 }
+               cpu_powerpc64,                { 11 }
+               cpu_avr,                      { 12 }
+               cpu_mipsel,                   { 13 }
+               cpu_jvm,                      { 14 }
+               cpu_i8086,                    { 15 }
+               cpu_aarch64,                  { 16 }
+               cpu_wasm,                     { 17 }
+               cpu_sparc64                   { 18 }
+         );
+
+
   // from fpmake + fpmkunit !
 
   TCpu=(cpuNone,

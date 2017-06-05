@@ -89,10 +89,6 @@ begin
            OR (AnsiContainsText(line,'executing:'))
            OR (AnsiContainsText(line,'compiling '))
            OR (AnsiContainsText(line,'linking '))
-           {$ifdef Darwin}
-           // on Darwin, ignore focus errors
-           OR (AnsiContainsText(line,'setfocus error:'))
-           {$endif}
         then
         begin
           lineready:=false;
@@ -128,6 +124,7 @@ begin
           if AnsiContainsText(line,'which is not available for the') then break;
           if AnsiContainsText(line,'argument unused during compilation') then break;
           if AnsiContainsText(line,'invalid unitname') then break;
+          if AnsiContainsText(line,'procedure type "FAR" ignored') then break;
           // when generating help
           if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}
@@ -152,6 +149,8 @@ begin
       end;
 
       if ((NOT lineready) OR (NOT filteroutput))
+      // do not add empty lines ... :-)
+      AND (Length(line>0))
       {$ifdef Darwin}
       // suppress all setfocus errors on Darwin, always
       AND (NOT AnsiContainsText(line,'.setfocus'))
@@ -162,7 +161,7 @@ begin
         Self.CaretX:=0;
         Self.CaretY:=Self.Lines.Count;
         // the below is needed:
-        // onchange is no longer called, when appending a line
+        // onchange is no longer called, when appending a line ... bug or feature ?!!
         Self.OnChange(Self);
       end;
       i:=0;

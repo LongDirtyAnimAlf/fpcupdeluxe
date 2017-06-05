@@ -544,6 +544,16 @@ begin
     end;
     {$endif}
 
+    {$ifdef CPUAARCH64}
+    // the package macroscript is not working on aarch64 (and perhaps others) !
+    // so skip in case package was included.
+    if (Pos('editormacroscript',PackagePath)>0) then
+    begin
+      infoln('TUniversalInstaller: incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      continue;
+    end;
+    {$endif CPUAARCH64}
+
     {
     if (NOT FileExists(PackagePath)) OR (PackagePath='') then
     begin

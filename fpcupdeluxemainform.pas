@@ -736,7 +736,7 @@ begin
     if (Pos('error:',s)>0) AND (Pos('error:',s)=(Length(s)-Length('error:')+1))
     then
     begin
-      // print the error itself and the next 2 lines (good guess)
+      // print the error itself and the next 2 lines (good or lucky guess)
       Memo1.Lines.Append(SynEdit1.Lines[x]);
       Memo1.Lines.Append(SynEdit1.Lines[x+1]);
       Memo1.Lines.Append(SynEdit1.Lines[x+2]);
@@ -836,6 +836,10 @@ begin
     (ExistWordInString(PChar(s),'make.exe: ',[soDown]))
     OR
     (ExistWordInString(PChar(s),'make: ',[soDown]))
+    OR
+    (ExistWordInString(PChar(s),'echo ',[soDown]))
+    OR
+    (ExistWordInString(PChar(s),'now ',[soDown]))
     OR
     (ExistWordInString(PChar(s),'this could take some time',[soDown]))
     OR
