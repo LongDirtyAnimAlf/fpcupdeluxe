@@ -150,7 +150,7 @@ begin
 
       if ((NOT lineready) OR (NOT filteroutput))
       // do not add empty lines ... :-)
-      AND (Length(line>0))
+      // AND (Length(line>0))
       {$ifdef Darwin}
       // suppress all setfocus errors on Darwin, always
       AND (NOT AnsiContainsText(line,'.setfocus'))

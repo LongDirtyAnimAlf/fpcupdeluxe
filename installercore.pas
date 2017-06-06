@@ -54,6 +54,8 @@ const
   PREBUILTBINUTILSURL = BINUTILSURL + '/binaries/i386-win32';
   {$ENDIF}
 
+  CHM_URL_LATEST_SVN = FPCSVNURL + '/lazarus/binaries/docs/chm';
+
   DEFAULTFPCVERSION = '3.0.2';
   DEFAULTLAZARUSVERSION = '1.6.4';
 

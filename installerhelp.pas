@@ -300,17 +300,16 @@ const
   // Snapshot alternative... that changes name... and is a .tar.bz2
   // ftp://freepascal.dfmk.hu/pub/lazarus/snapshots/fpc-lazarus-doc-chm-20120622.tar.bz2
   // Laz 1.2 version:
-  FPC_CHM_URL_1_2='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
+  CHM_URL_1_2='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.2/fpc-lazarus-doc-chm-1.2.zip/download';
   // Laz 1.4 version:
-  FPC_CHM_URL_1_4='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.4/doc-chm_fpc2014_laz2015.zip/download';
+  CHM_URL_1_4='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.4/doc-chm_fpc2014_laz2015.zip/download';
   // Laz 1.6 version:
-  FPC_CHM_URL_1_6='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip/download';
-  FPC_CHM_URL_1_6_4='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6.4/doc-chm-fpc3.0.2-laz1.6.zip/download';
-  FPC_CHM_URL_LATEST=FPC_CHM_URL_1_6_4;
-  FPC_CHM_URL_LASTRESORT_1_6='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip';
-  FPC_CHM_URL_LASTRESORT_1_6_4='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6.4/doc-chm-fpc3.0.2-laz1.6.zip';
-  FPC_CHM_URL_LASTRESORT_LATEST=FPC_CHM_URL_LASTRESORT_1_6_4;
-  FPC_CHM_URL_LATEST_SVN='https://svn.freepascal.org/cgi-bin/viewvc.cgi/binaries/docs/chm/';
+  CHM_URL_1_6='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip/download';
+  CHM_URL_1_6_4='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.6.4/doc-chm-fpc3.0.2-laz1.6.zip/download';
+  CHM_URL_LATEST=CHM_URL_1_6_4;
+  CHM_URL_LASTRESORT_1_6='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip';
+  CHM_URL_LASTRESORT_1_6_4='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6.4/doc-chm-fpc3.0.2-laz1.6.zip';
+  CHM_URL_LASTRESORT_LATEST=CHM_URL_LASTRESORT_1_6_4;
 
 var
   DocsZip: string;
@@ -331,17 +330,17 @@ begin
   begin
 
     // default to latest help avalable
-    HelpUrl:=FPC_CHM_URL_LATEST;
+    HelpUrl:=CHM_URL_LATEST;
 
     // check if a better version of help is needed
     if FMajorVersion=1 then
     begin
-      if FMinorVersion=2 then HelpUrl:=FPC_CHM_URL_1_2;
-      if FMinorVersion=4 then HelpUrl:=FPC_CHM_URL_1_4;
+      if FMinorVersion=2 then HelpUrl:=CHM_URL_1_2;
+      if FMinorVersion=4 then HelpUrl:=CHM_URL_1_4;
       if FMinorVersion=6 then
       begin
-        HelpUrl:=FPC_CHM_URL_1_6;
-        if FReleaseVersion=4 then HelpUrl:=FPC_CHM_URL_1_6_4;
+        HelpUrl:=CHM_URL_1_6;
+        if FReleaseVersion=4 then HelpUrl:=CHM_URL_1_6_4;
       end;
     end;
 
@@ -420,13 +419,13 @@ begin
       DocsZip := SysUtils.GetTempFileName + '.zip';
 
       try
-        OperationSucceeded:=Download(FUseWget, FPC_CHM_URL_LATEST, DocsZip);
+        OperationSucceeded:=Download(FUseWget, CHM_URL_LATEST, DocsZip);
       except
         on E: Exception do
         begin
           // Deal with timeouts, wrong URLs etc
           OperationSucceeded:=false;
-          infoln(ModuleName+': Download documents failed. URL: '+FPC_CHM_URL_LATEST+LineEnding+
+          infoln(ModuleName+': Download documents failed. URL: '+CHM_URL_LATEST+LineEnding+
             'Exception: '+E.ClassName+'/'+E.Message, etWarning);
         end;
       end;
@@ -435,13 +434,13 @@ begin
       begin
         // try a second time
         try
-          OperationSucceeded:=Download(FUseWget, FPC_CHM_URL_LASTRESORT_LATEST, DocsZip);
+          OperationSucceeded:=Download(FUseWget, CHM_URL_LASTRESORT_LATEST, DocsZip);
         except
           on E: Exception do
           begin
             // Deal with timeouts, wrong URLs etc
             OperationSucceeded:=false;
-            infoln(ModuleName+': Download documents failed. URL: '+FPC_CHM_URL_LASTRESORT_LATEST+LineEnding+
+            infoln(ModuleName+': Download documents failed. URL: '+CHM_URL_LASTRESORT_LATEST+LineEnding+
               'Exception: '+E.ClassName+'/'+E.Message, etWarning);
           end;
         end;
