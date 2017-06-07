@@ -1587,6 +1587,10 @@ begin
     try
       FUnZipper.Clear;
       FUnZipper.OnPercent:=10;
+      { Flat option only available in FPC >= 3.1 }
+      {$IF FPC_FULLVERSION > 30100}
+      FUnZipper.Flat:=Flat;
+      {$ENDIF}
       FUnZipper.FileName := ASrcFile;
       FUnZipper.OutputPath := ADstDir;
       FUnZipper.OnStartFile:= @DoOnFile;
@@ -1629,9 +1633,10 @@ begin
         then FUnZipper.UnZipAllFiles
         else FUnZipper.UnZipFiles(FFileList);
 
+      { Flat option only available in FPC >= 3.1 }
+      {$IF FPC_FULLVERSION < 30100}
       if Flat then
       begin
-
         if FFileList.Count=0 then
         begin
           for x:=0 to FUnZipper.Entries.Count-1 do
@@ -1678,8 +1683,8 @@ begin
             DeleteDirectoryEx(IncludeTrailingPathDelimiter(ADstDir)+s);
           end;
         end;
-
       end;
+      {$ENDIF}
 
       result:=true;
 
