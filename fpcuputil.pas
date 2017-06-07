@@ -1239,7 +1239,7 @@ begin
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
         infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',etDebug);
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',etError);
         OperationSucceeded := false;
       end
       else
@@ -1251,14 +1251,14 @@ begin
     else
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etDebug);
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etError);
       OperationSucceeded := false;
     end;
   except
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', etDebug);
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', etError);
       OperationSucceeded := false;
     end;
   end;

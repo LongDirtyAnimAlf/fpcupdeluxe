@@ -432,7 +432,7 @@ begin
       // check availability of OpenSSL libraries. Just continue in case of error
       if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll') then
       begin
-        infoln('Found OpenSLL library files.',etInfo);
+        infoln('Found OpenSLL library files.',etDebug);
       end
       else
       begin
@@ -522,9 +522,10 @@ begin
     begin
       // Check for proper assembler
       try
-        if ExecuteCommand('as --version', Output, FVerbose) <> 0 then
+        if ExecuteCommand('as --version', Output, False) <> 0 then
         begin
-          infoln('Missing assembler as. Please install the developer tools.',eterror);
+          ExecuteCommand('as --version', Output, True);
+          infoln('Missing assembler as. Please install the developer tools.',etError);
           OperationSucceeded := false;
         end;
       except
@@ -572,8 +573,8 @@ begin
       if NOT AllThere then
       begin
         OperationSucceeded := false;
-        infoln('Could not find SVN executable. Please make sure it is installed.',eterror);
-      end else WritelnLog('SVN client found: ' + FSVNClient.RepoExecutable, true);
+        infoln('Could not find SVN executable. Please make sure it is installed.',etError);
+      end else infoln('SVN client found: ' + FSVNClient.RepoExecutable+'.',etDebug);
     end;
 
     if OperationSucceeded then
@@ -677,9 +678,10 @@ begin
 
     // Check for proper make executable
     try
-      ExecuteCommand(Make + ' -v', Output, FVerbose);
+      ExecuteCommand(Make + ' -v', Output, False);
       if Ansipos('GNU Make', Output) = 0 then
       begin
+        ExecuteCommand(Make + ' -v', Output, True);
         infoln('Found make executable, but it is not GNU Make.',etError);
         OperationSucceeded := false;
       end;
