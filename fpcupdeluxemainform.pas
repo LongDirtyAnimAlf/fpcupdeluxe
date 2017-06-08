@@ -1872,16 +1872,7 @@ begin
   FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
   FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
-  // force some settings for default downloader
-  {$ifdef Darwin}
-  FPCupManager.UseWget:=false;
-  {$else}
-    {$ifdef MSWINDOWS}
-    FPCupManager.UseWget:=false;
-    {$else}
-    FPCupManager.UseWget:=Form2.UseWget;
-    {$endif}
-  {$endif}
+  FPCupManager.UseWget:=Form2.UseWget;
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
@@ -2074,7 +2065,20 @@ begin
 
     //FPCupManager.UseWget:=ReadBool('General','UseWget',False);
     //Form2.UseWget:=FPCupManager.UseWget;
-    Form2.UseWget:=ReadBool('General','UseWget',False);
+    {$ifdef Darwin}
+    Form2.UseWget:=False;
+    {$else}
+      {$ifdef MSWINDOWS}
+      Form2.UseWget:=False;
+      {$else}
+        {$ifdef OpenBSD}
+        Form2.UseWget:=True;
+        {$else}
+        Form2.UseWget:=ReadBool('General','UseWget',False);
+        {$endif}
+      {$endif}
+    {$endif}
+
     Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
 
     Form2.FPCPatches:=ReadString('Patches','FPCPatches','');

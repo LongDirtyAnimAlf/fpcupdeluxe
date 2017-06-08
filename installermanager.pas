@@ -483,7 +483,6 @@ type
     procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
-    function GetUseWget:boolean;
   protected
     FLog:TLogger;
     FModuleList:TStringList;
@@ -570,7 +569,7 @@ type
     property OnlyModules:string read FOnlyModules write FOnlyModules;
     property Uninstall: boolean read FUninstall write FUninstall;
     property Verbose:boolean read FVerbose write FVerbose;
-    property UseWget:boolean read GetUseWget write FUseWget;
+    property UseWget:boolean read FUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
@@ -764,16 +763,6 @@ end;
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
 begin
   FMakeDirectory:=SafeExpandFileName(AValue);
-end;
-
-function TFPCupManager.GetUseWget:boolean;
-begin
-  {$ifdef OpenBSD}
-  // only curl / wget works on OpenBSD (yet)
-  result:=True;
-  {$else}
-  result:=FUseWget;
-  {$endif}
 end;
 
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
@@ -1203,7 +1192,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       else
       if (Output='openbsd') then
       begin
-        Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext';
+        Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext wget';
         //Output:='gmake gdk-pixbuf gtk+2';
       end
       else
@@ -1490,7 +1479,12 @@ begin
     FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
     FInstaller.PatchCmd:=FParent.PatchCmd;
     FInstaller.Verbose:=FParent.Verbose;
+    // only curl / wget works on OpenBSD (yet)
+    {$IFDEF OPENBSD}
+    FInstaller.UseWget:=True;
+    {$ELSE}
     FInstaller.UseWget:=FParent.UseWget;
+    {$ENDIF}
     FInstaller.ExportOnly:=FParent.ExportOnly;
     FInstaller.NoJobs:=FParent.NoJobs;
     FInstaller.Log:=FParent.FLog;

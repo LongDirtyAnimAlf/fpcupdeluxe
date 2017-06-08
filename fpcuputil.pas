@@ -191,6 +191,7 @@ type
     function FTPDownload(Const URL : String; Dest : TStream):boolean;
     function HTTPDownload(Const URL : String; Dest : TStream):boolean;
   public
+    constructor Create;override;
     function getFile(const URL,filename:string):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
@@ -1820,6 +1821,29 @@ begin
   end;
 end;
 
+constructor TUseNativeDownLoader.Create;
+begin
+  Inherited;
+  aFPHTTPClient:=TFPHTTPClient.Create(Nil);
+  with aFPHTTPClient do
+  begin
+    AllowRedirect:=True;
+    FMaxRetries:=DefMaxRetries;
+    OnPassword:=@DoPassword;
+    if FVerbose then
+    begin
+      OnRedirect:=@ShowRedirect;
+      OnDataReceived:=@DoProgress;
+      OnHeaders:=@DoHeaders;
+    end;
+  end;
+end;
+
+destructor TUseNativeDownLoader.Destroy;
+begin
+  FreeAndNil(aFPHTTPClient);
+  inherited;
+end;
 
 procedure TUseNativeDownLoader.DoHeaders(Sender : TObject);
 Var
@@ -1886,23 +1910,6 @@ procedure TUseNativeDownLoader.ShowRedirect(ASender: TObject; const ASrc: String
   var ADest: String);
 begin
   writeln('Following redirect from ',ASrc,'  ==> ',ADest);
-end;
-
-constructor TUseNativeDownLoader.Create;
-begin
-  aFPHTTPClient:=TFPHTTPClient.Create(Nil);
-  with aFPHTTPClient do
-  begin
-    AllowRedirect:=True;
-    FMaxRetries:=DefMaxRetries;
-    OnPassword:=@DoPassword;
-    if FVerbose then
-    begin
-      OnRedirect:=@ShowRedirect;
-      OnDataReceived:=@DoProgress;
-      OnHeaders:=@DoHeaders;
-    end;
-  end;
 end;
 
 procedure TUseNativeDownLoader.SetVerbose(aValue:boolean);
@@ -2128,12 +2135,6 @@ begin
   end;
 end;
 
-destructor TUseNativeDownLoader.Destroy;
-begin
-  FreeAndNil(aFPHTTPClient);
-  inherited;
-end;
-
 function TUseNativeDownLoader.Download(const URL: String; filename:string):boolean;
 Var
   URI : TURI;
@@ -2155,6 +2156,29 @@ end;
 {$IFDEF ENABLEWGET}
 
 // proxy still to do !!
+
+constructor TUseWGetDownloader.Create;
+var
+  success:boolean;
+begin
+  Inherited;
+
+  success:=LoadCurlLibrary;
+  if NOT success then
+  begin
+    infoln('Libcurl error: Could not initialize the libcurl library: expect failures !',etWarning);
+  end;
+
+  success:=CheckExecutable('wget', '-V', '');
+  if NOT success then
+  begin
+    {$IFDEF OPENBSD}
+    infoln('Wget: Could not find a wget executable: expect fatal errors !',etError);
+    {$ELSE}
+    infoln('Wget error: Could not find a wget executable: expect failures if used !',etWarning);
+    {$ENDIF}
+  end;
+end;
 
 function TUseWGetDownloader.WGetDownload(Const URL : String; Dest : TStream):boolean;
 var
