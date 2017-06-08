@@ -1773,19 +1773,22 @@ begin
           if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
           while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
           begin
-            infoln('Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etDebug);
+            infoln('Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
             aGithubBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
               'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
-            infoln('Checking existence of: '+aGithubBootstrapURL,etInfo);
+            infoln('Checking existence of: '+aGithubBootstrapURL,etDebug);
 
             aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
 
-            if aCompilerFound then aCompilerList.Add(aGithubBootstrapURL);
-
-            // look for a previous (fitting) compiler if not found, and use overrideversioncheck
-            if NOT aCompilerFound then
+            if aCompilerFound then
             begin
+              aCompilerList.Add(aGithubBootstrapURL);
+              infoln('Success: found a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
+            end
+            else
+            begin
+              // look for a previous (fitting) compiler if not found, and use overrideversioncheck
               FBootstrapCompilerOverrideVersionCheck:=true;
               s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
               if aLocalBootstrapVersion<>s
