@@ -1547,6 +1547,14 @@ begin
 end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
+const
+  {$IF (defined(OpenBSD)) and (defined(CPU64))}
+  // 2.6.2 and older do not work anymore on newer OpenBSD64 versions
+  FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+6*100+2);
+  {$else}
+  // 2.2.4 and older have no official FPC bootstrapper available online
+  FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+2*100+4);
+  {$endif}
 var
   aCompilerList:TStringList;
   i,j:integer;
@@ -1625,8 +1633,7 @@ begin
       aCompilerList:=TStringList.Create;
       try
 
-        // 2.2.4 and older have no official FPC bootstrapper available online
-        while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(2*10000+2*100+4))) do
+        while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
         begin
 
           infoln('Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
