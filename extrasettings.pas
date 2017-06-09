@@ -52,6 +52,7 @@ type
     btnRemFPCPatch: TButton;
     btnAddLazPatch: TButton;
     btnRemLazPatch: TButton;
+    Button1: TButton;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
@@ -101,6 +102,7 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     procedure btnAddPatchClick(Sender: TObject);
     procedure btnRemPatchClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure EditCrossBuildOptionsChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -197,6 +199,7 @@ implementation
 {$R *.lfm}
 
 uses
+  infounit,
   DCPDES,
   //DCPrc4,
   DCPsha256,
@@ -377,6 +380,49 @@ begin
   end;
 end;
 
+procedure TForm2.Button1Click(Sender: TObject);
+var
+  CPU:TCPU;
+  OS:TOS;
+  s:string;
+  x:integer;
+begin
+  InfoForm:= TInfoForm.Create(Self);
+  try
+    for OS := Low(TOS) to High(TOS) do
+    begin
+      for CPU := Low(TCPU) to High(TCPU) do
+      begin
+        x:=InfoForm.Memo1.Lines.Count;
+        s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
+        if FCrossUtils[CPU,OS].Setting=auto then
+        begin
+          InfoForm.Memo1.Lines.Append(s+': full auto search tools and libraries.');
+        end
+        else
+        if FCrossUtils[CPU,OS].Setting=custom then
+        begin
+          InfoForm.Memo1.Lines.Append(s+' (manual settings):');
+          InfoForm.Memo1.Lines.Append('  libs     : '+FCrossUtils[CPU,OS].LibDir);
+          InfoForm.Memo1.Lines.Append('  bins      : '+FCrossUtils[CPU,OS].BinDir);
+        end;
+
+        if Length(FCrossUtils[CPU,OS].CrossBuildOptions)>0 then
+        begin
+          if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
+          InfoForm.Memo1.Lines.Append('  options : '+FCrossUtils[CPU,OS].CrossBuildOptions);
+        end;
+
+        if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
+
+      end;
+    end;
+    InfoForm.ShowModal;
+  finally
+    InfoForm.Free;
+  end;
+end;
+
 procedure TForm2.FormDestroy(Sender: TObject);
 var
   CPU:TCPU;
@@ -507,8 +553,8 @@ begin
   try
     xCPUOS:=GetCPUOSCombo(aCPU,aOS);
     case FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting of
-      fpcup: result:='FPCUP_AUTO';
-      auto: result:='FPCUP_FULLAUTO';
+      fpcup: result:='';
+      auto: result:='FPCUP_AUTO';
       custom: result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
     else result:='';
     end;
@@ -524,8 +570,8 @@ begin
   try
     xCPUOS:=GetCPUOSCombo(aCPU,aOS);
     case FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting of
-      fpcup: result:='FPCUP_AUTO';
-      auto: result:='FPCUP_FULLAUTO';
+      fpcup: result:='';
+      auto: result:='FPCUP_AUTO';
       custom: result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
     else result:='';
     end;

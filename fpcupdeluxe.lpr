@@ -89,7 +89,7 @@ uses
   {$endif}
   {$endif}
   m_anyinternallinker_to_win386,
-  m_anyinternallinker_to_win64
+  m_anyinternallinker_to_win64, infounit
   ;
 
 {$i revision.inc}

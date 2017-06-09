@@ -468,28 +468,32 @@ begin
 
     // get/set cross binary utils !!
     BinsAvailable:=false;
-    if (CrossToolsDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
-    else if (CrossToolsDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
-    else CrossInstaller.SearchModeUsed:=smManual;
-    if CrossInstaller.SearchModeUsed<>smManual then BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory) else
+    CrossInstaller.SearchModeUsed:=smFPCUPOnly; // default;
+    if Length(CrossToolsDirectory)>0 then
     begin
-      if Length(CrossToolsDirectory)=0
-         then BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory)
-         else BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory);
+      // we have a crosstools setting
+      if (CrossToolsDirectory='FPCUP_AUTO')
+         then CrossInstaller.SearchModeUsed:=smAuto
+         else CrossInstaller.SearchModeUsed:=smManual;
     end;
+    if CrossInstaller.SearchModeUsed=smManual
+       then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
+       else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
     if not BinsAvailable then infoln('Failed to get crossbinutils', etError);
 
     // get/set cross libraries !!
     LibsAvailable:=false;
-    if (CrossLibraryDirectory='FPCUP_AUTO') then CrossInstaller.SearchModeUsed:=smFPCUPOnly
-    else if (CrossLibraryDirectory='FPCUP_FULLAUTO') then CrossInstaller.SearchModeUsed:=smAuto
-    else CrossInstaller.SearchModeUsed:=smManual;
-    if CrossInstaller.SearchModeUsed<>smManual then LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory) else
+    CrossInstaller.SearchModeUsed:=smFPCUPOnly;
+    if Length(CrossLibraryDirectory)>0 then
     begin
-      if Length(CrossLibraryDirectory)=0
-         then LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory)
-         else LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory);
+      // we have a crosslibrary setting
+      if (CrossLibraryDirectory='FPCUP_AUTO')
+         then CrossInstaller.SearchModeUsed:=smAuto
+         else CrossInstaller.SearchModeUsed:=smManual;
     end;
+    if CrossInstaller.SearchModeUsed=smManual
+      then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
+      else LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
     if not LibsAvailable then infoln('Failed to get crosslibrary', etError);
 
     result:=(BinsAvailable AND LibsAvailable);
@@ -649,7 +653,6 @@ begin
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
 
-        // suppress hints
         ProcessEx.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS+' '+Options);
         //ProcessEx.Parameters.Add('OPT=-vd+ '+Options);
         //ProcessEx.Parameters.Add('OPT=-vw -vl -vx -vd -vi-n-h- '+Options);

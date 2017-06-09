@@ -315,17 +315,15 @@ object Form2: TForm2
       AnchorSideTop.Control = ComboBoxCPU
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 140
+      Left = 96
       Height = 23
       Top = 8
-      Width = 138
-      Anchors = [akTop, akLeft, akRight]
+      Width = 104
       BorderSpacing.Left = 8
-      BorderSpacing.Right = 14
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
       TabOrder = 0
-      Text = 'Select OS'
+      Text = 'OS'
     end
     object ComboBoxCPU: TComboBox
       AnchorSideLeft.Control = GroupBox4
@@ -333,13 +331,13 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 8
-      Width = 128
+      Width = 84
       BorderSpacing.Left = 4
       BorderSpacing.Top = 8
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
       TabOrder = 1
-      Text = 'Select CPU'
+      Text = 'CPU'
     end
     object RadioGroup3: TRadioGroup
       AnchorSideLeft.Control = GroupBox4
@@ -473,6 +471,20 @@ object Form2: TForm2
       BorderSpacing.Top = 12
       Caption = 'Cross Build Options'
       ParentColor = False
+    end
+    object Button1: TButton
+      AnchorSideTop.Control = ComboBoxOS
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
+      Left = 216
+      Height = 23
+      Top = 8
+      Width = 62
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Right = 14
+      Caption = 'List'
+      OnClick = Button1Click
+      TabOrder = 8
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox

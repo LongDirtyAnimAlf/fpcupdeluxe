@@ -720,6 +720,12 @@ begin
     Memo1.Lines.Append('Busy with help files. Be patient: can be time consuming !!');
   end;
 
+  // report about correct tools that are found and used
+  if (ExistWordInString(PChar(s),'found correct',[soDown])) then
+  begin
+    Memo1.Lines.Append(s);
+  end;
+
   // go back a few lines to find a special error case
   x:=(SynEdit1.CaretY-4);
   if (x>0) then

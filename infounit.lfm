@@ -1,0 +1,19 @@
+object InfoForm: TInfoForm
+  Left = 285
+  Height = 372
+  Top = 163
+  Width = 419
+  Caption = 'InfoForm'
+  ClientHeight = 372
+  ClientWidth = 419
+  LCLVersion = '1.9.0.0'
+  object Memo1: TMemo
+    Left = 0
+    Height = 372
+    Top = 0
+    Width = 419
+    Align = alClient
+    ScrollBars = ssAutoBoth
+    TabOrder = 0
+  end
+end

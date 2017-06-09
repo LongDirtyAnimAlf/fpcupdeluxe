@@ -173,7 +173,7 @@ end;
 procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
 begin
   if found then
-    infoln(CrossModuleName + ': found binary utilities ' +
+    infoln(CrossModuleName + ': found correct binary utilities ' +
       ' in directory '+FBinUtilsPath, etInfo)
   else
     infoln(CrossModuleName + ': searched but did not find any binary utilities !!', etError);

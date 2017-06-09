@@ -9,6 +9,9 @@
       <Title Value="fpcupdeluxe"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
+      <XPManifest>
+        <DpiAware Value="Per-monitor"/>
+      </XPManifest>
       <Icon Value="0"/>
       <Resources Count="3">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
@@ -19,7 +22,7 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <BuildModes Count="14">
+    <BuildModes Count="15">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="Debug">
         <CompilerOptions>
@@ -92,7 +95,35 @@
           </Linking>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="win32">
+      <Item4 Name="openbsdx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="openbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item4>
+      <Item5 Name="win32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -123,8 +154,8 @@
             </Options>
           </Linking>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="win64">
+      </Item5>
+      <Item6 Name="win64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -156,8 +187,8 @@
             </Options>
           </Linking>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="linuxi386">
+      </Item6>
+      <Item7 Name="linuxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -184,8 +215,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="linux64">
+      </Item7>
+      <Item8 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -212,8 +243,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="linuxaarch64">
+      </Item8>
+      <Item9 Name="linuxaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -235,13 +266,12 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="linuxarm">
+      </Item9>
+      <Item10 Name="linuxarm">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -268,8 +298,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="freebsdi386">
+      </Item10>
+      <Item11 Name="freebsdi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -283,34 +313,6 @@
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="i386"/>
-            <TargetOS Value="freebsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item10>
-      <Item11 Name="freebsdx64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
             <TargetOS Value="freebsd"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
@@ -325,7 +327,35 @@
           </Linking>
         </CompilerOptions>
       </Item11>
-      <Item12 Name="darwin32">
+      <Item12 Name="freebsdx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="freebsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item12>
+      <Item13 Name="darwin32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -352,8 +382,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item12>
-      <Item13 Name="darwin64cocoa">
+      </Item13>
+      <Item14 Name="darwin64cocoa">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -383,8 +413,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item13>
-      <Item14 Name="darwin32cocoa">
+      </Item14>
+      <Item15 Name="darwin32cocoa">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -414,7 +444,7 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item14>
+      </Item15>
       <SharedMatrixOptions Count="1">
         <Item1 ID="178210829291" Modes="darwin64cocoa,darwin32cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
       </SharedMatrixOptions>
@@ -435,7 +465,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -474,6 +504,13 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="infounit.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="InfoForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
