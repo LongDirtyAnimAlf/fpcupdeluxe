@@ -232,6 +232,13 @@ below}
 //default uninstall sequence for win64
     'Declare defaultwin64uninstall;'+
     'Do defaultuninstall;'+
+    'End;'+
+//default check sequence
+    'Declare defaultcheck;'+
+    'Checkmodule fpc;'+
+    {$ifndef FPCONLY}
+    'Checkmodule lazarus;'+
+    {$endif}
     'End;';
 
 type
@@ -593,7 +600,7 @@ type
   PSequenceAttributes=^TSequenceAttributes;
 
   TKeyword=(SMdeclare, SMdeclareHidden, SMdo, SMrequire, SMexec, SMend, SMcleanmodule, SMgetmodule, SMbuildmodule,
-    SMuninstallmodule, SMconfigmodule{$ifndef FPCONLY}, SMResetLCL{$endif}, SMSetOS, SMSetCPU, SMInvalid);
+    SMcheckmodule, SMuninstallmodule, SMconfigmodule{$ifndef FPCONLY}, SMResetLCL{$endif}, SMSetOS, SMSetCPU, SMInvalid);
 
   TState=record
     instr:TKeyword;
@@ -610,6 +617,7 @@ type
       FSkipList:TStringList;
       FStateMachine:array of TState;
       procedure AddToModuleList(ModuleName:string;EntryPoint:integer);
+      function DoCheckModule(ModuleName:string):boolean;
       function DoBuildModule(ModuleName:string):boolean;
       function DoCleanModule(ModuleName:string):boolean;
       function DoConfigModule(ModuleName:string):boolean;
@@ -961,6 +969,12 @@ begin
   SeqAttr^.EntryPoint:=EntryPoint;
   SeqAttr^.Executed:=ESNever;
   FParent.FModuleList.AddObject(ModuleName,TObject(SeqAttr));
+end;
+
+function TSequencer.DoCheckModule(ModuleName: string): boolean;
+begin
+  infoln('TSequencer: DoCheckModule for module '+ModuleName+' called.',etDebug);
+  result:= GetInstaller(ModuleName) and FInstaller.CheckModule(ModuleName);
 end;
 
 function TSequencer.DoBuildModule(ModuleName: string): boolean;
@@ -1549,6 +1563,7 @@ var
     else if key='CLEANMODULE' then result:=SMcleanmodule
     else if key='GETMODULE' then result:=SMgetmodule
     else if key='BUILDMODULE' then result:=SMbuildmodule
+    else if key='CHECKMODULE' then result:=SMcheckmodule
     else if key='UNINSTALLMODULE' then result:=SMuninstallmodule
     else if key='CONFIGMODULE' then result:=SMconfigmodule
     {$ifndef FPCONLY}
@@ -1746,6 +1761,7 @@ begin
         SMcleanmodule : result:=DoCleanModule(FStateMachine[InstructionPointer].param);
         SMgetmodule   : result:=DoGetModule(FStateMachine[InstructionPointer].param);
         SMbuildmodule : result:=DoBuildModule(FStateMachine[InstructionPointer].param);
+        SMcheckmodule : result:=DoCheckModule(FStateMachine[InstructionPointer].param);
         SMuninstallmodule: result:=DoUnInstallModule(FStateMachine[InstructionPointer].param);
         SMconfigmodule: result:=DoConfigModule(FStateMachine[InstructionPointer].param);
         {$ifndef FPCONLY}

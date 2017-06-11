@@ -146,7 +146,7 @@ type
     FBunzip2: string;
     F7zip: string;
     FUnrar: string;
-    ProcessEx: TProcessEx;
+    FProcessEx: TProcessEx;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;
@@ -192,7 +192,7 @@ type
   public
     property SVNClient: TSVNClient read FSVNClient;
     // Get processor for termination of running processes
-    property Processor: TProcessEx read ProcessEx;
+    property Processor: TProcessEx read FProcessEx;
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx;IsException:boolean);
     // Source directory for installation (fpcdir, lazdir,... option)
@@ -262,6 +262,8 @@ type
     function GetCompilerInDir(Dir: string): string;
     // Install update sources
     function GetModule(ModuleName: string): boolean; virtual;
+    // Perform some checks on the sources
+    function CheckModule(ModuleName: string): boolean; virtual;
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
     constructor Create;
@@ -1580,7 +1582,7 @@ end;
 
 function TInstaller.GetPath: string;
 begin
-  result:=ProcessEx.Environment.GetVar(PATHVARNAME);
+  result:=Processor.Environment.GetVar(PATHVARNAME);
   //result:=GetEnvironmentVariable(PATHVARNAME);
 end;
 
@@ -1621,7 +1623,7 @@ var
   OldPath: string;
   ResultingPath: string;
 begin
-  OldPath := ProcessEx.Environment.GetVar(PATHVARNAME);
+  OldPath := Processor.Environment.GetVar(PATHVARNAME);
   //OldPath := GetEnvironmentVariable(PATHVARNAME);
   if Prepend and (OldPath<>'') then
     ResultingPath := NewPath + PathSeparator + OldPath
@@ -1630,7 +1632,7 @@ begin
   else
     ResultingPath := NewPath;
 
-  ProcessEx.Environment.SetVar(PATHVARNAME, ResultingPath);
+  Processor.Environment.SetVar(PATHVARNAME, ResultingPath);
   if ResultingPath <> EmptyStr then
   begin
     WritelnLog('External program path:  ' + ResultingPath, false);
@@ -1679,31 +1681,72 @@ end;
 
 function TInstaller.BuildModule(ModuleName: string): boolean;
 begin
+  result:=false;
   writelnlog(etWarning, 'Should not happen: calling non-implemented BuildModule for '+ModuleName);
 end;
 function TInstaller.CleanModule(ModuleName: string): boolean;
 begin
+  result:=false;
   writelnlog(etWarning, 'Should not happen: calling non-implemented CleanModule for '+ModuleName);
 end;
 function TInstaller.ConfigModule(ModuleName: string): boolean;
 begin
+  result:=false;
   writelnlog(etWarning, 'Should not happen: calling non-implemented ConfigModule for '+ModuleName);
 end;
 function TInstaller.GetModule(ModuleName: string): boolean;
 begin
+  result:=false;
   writelnlog(etWarning, 'Should not happen: calling non-implemented GetModule for '+ModuleName);
+end;
+function TInstaller.CheckModule(ModuleName: string): boolean;
+var
+  aRepoClient:TRepoClient;
+begin
+
+  result:=true;
+
+  // not so elegant check to see what kind of client we need ...
+  aRepoClient:=nil;
+  if (Pos(FPCSVNURL,LowerCase(FURL))>0) then aRepoClient:=FSVNClient;
+  if aRepoClient=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then aRepoClient:=FGitClient;
+  if aRepoClient=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then aRepoClient:=FHGClient;
+  if aRepoClient=nil then aRepoClient:=FSVNClient;
+
+  infoln(Self.ClassName+': checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
+
+  aRepoClient.Verbose:=FVerbose;
+  aRepoClient.ExportOnly:=FExportOnly;
+  aRepoClient.ModuleName:=ModuleName;
+  aRepoClient.LocalRepository:=FSourceDirectory;
+  aRepoClient.Repository:=FURL;
+
+  if NOT aRepoClient.ExportOnly then
+  begin
+    aRepoClient.LocalRepositoryExists;
+    if aRepoClient.ReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH then
+    begin
+      // non-matching URL will always result in an update failure
+      result:=false;
+    end;
+  end;
+
+  if result then
+    infoln(Self.ClassName+': ' + ModuleName + ' sources ok.',etInfo)
+  else
+    infoln(Self.ClassName+': ' + ModuleName + ' sources error.',etError);
 end;
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
+  result:=false;
   writelnlog(etWarning, 'Should not happen: calling non-implemented UnInstallModule for '+ModuleName);
 end;
-
 
 constructor TInstaller.Create;
 begin
   inherited Create;
-  ProcessEx := TProcessEx.Create(nil);
-  ProcessEx.OnErrorM := @LogError;
+  FProcessEx := TProcessEx.Create(nil);
+  Processor.OnErrorM := @LogError;
   FCPUCount := GetLogicalCpuCount;
 
   FGitClient := TGitClient.Create;
@@ -1717,7 +1760,7 @@ begin
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;
   FErrorLog := TStringList.Create;
-  ProcessEx.OnErrorM:=@(ProcessError);
+  Processor.OnErrorM:=@(ProcessError);
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
@@ -1738,11 +1781,11 @@ begin
     FLogVerbose.Free;
   if Assigned(FErrorLog) then
     FErrorLog.Free;
-  if Assigned(ProcessEx.OnErrorM) then
-    ProcessEx.OnErrorM:=nil;
-  if Assigned(ProcessEx.OnError) then
-    ProcessEx.OnError:=nil;
-  ProcessEx.Free;
+  if Assigned(Processor.OnErrorM) then
+    Processor.OnErrorM:=nil;
+  if Assigned(Processor.OnError) then
+    Processor.OnError:=nil;
+  FProcessEx.Free;
   FGitClient.Free;
   FHGClient.Free;
   FSVNClient.Free;

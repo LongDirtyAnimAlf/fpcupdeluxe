@@ -1673,7 +1673,11 @@ begin
 
     if Form2.UpdateOnly
        then FPCupManager.OnlyModules:='FPCCleanAndBuildOnly'
+       {$ifdef win32}
+       else FPCupManager.OnlyModules:='fpc,FPCCrossWin32-64';
+       {$else}
        else FPCupManager.OnlyModules:='fpc';
+       {$endif}
 
     FPCupManager.LazarusURL:='skip';
 
@@ -1708,7 +1712,11 @@ begin
     end
     else
     begin
+      {$ifdef win32}
+      FPCupManager.OnlyModules:='lazarus,LazarusCrossWin32-64';
+      {$else}
       FPCupManager.OnlyModules:='lazarus';
+      {$endif}
     end;
 
     FPCupManager.FPCURL:='skip';

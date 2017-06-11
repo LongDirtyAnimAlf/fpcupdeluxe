@@ -657,16 +657,16 @@ begin
           begin
             // We have a working lazbuild; let's hope it works with primary config path as well
             // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-            ProcessEx.Executable := LazBuildExe;
-            ProcessEx.Parameters.Clear;
-            ProcessEx.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
-            ProcessEx.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
+            Processor.Executable := LazBuildExe;
+            Processor.Parameters.Clear;
+            Processor.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
+            Processor.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
             infoln(ModuleName+': compiling build_lcl_docs help compiler:',etInfo);
             writelnlog('Building help compiler (also time consuming generation of documents) !!!!!!', true);
-            writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
-            ProcessEx.Execute;
-            writelnlog('Execute: '+ProcessEx.Executable+' exit code: '+InttoStr(ProcessEx.ExitStatus), true);
-            if ProcessEx.ExitStatus <> 0 then
+            writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+            Processor.Execute;
+            writelnlog('Execute: '+Processor.Executable+' exit code: '+InttoStr(Processor.ExitStatus), true);
+            if Processor.ExitStatus <> 0 then
             begin
               writelnlog(etError,ModuleName+': error compiling build_lcl_docs docs builder.', true);
               OperationSucceeded := False;
@@ -705,36 +705,36 @@ begin
       if OperationSucceeded then
       begin
         // Compile Lazarus LCL CHM help
-        ProcessEx.Executable := BuildLCLDocsExe;
+        Processor.Executable := BuildLCLDocsExe;
         // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
-        ProcessEx.CurrentDirectory:=FTargetDirectory;
-        ProcessEx.Parameters.Clear;
+        Processor.CurrentDirectory:=FTargetDirectory;
+        Processor.Parameters.Clear;
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
         // the directory that contains the fcl and rtl .xct files.
         // If those .xct files are not present, FPC 2.7.1 fpdoc will throw an exception
-        ProcessEx.Parameters.Add('--fpcdocs');
-        ProcessEx.Parameters.Add(FTargetDirectory);
+        Processor.Parameters.Add('--fpcdocs');
+        Processor.Parameters.Add(FTargetDirectory);
         // Let build_lcl_docs know which fpdoc application to use:
-        ProcessEx.Parameters.Add('--fpdoc');
-        ProcessEx.Parameters.Add(FPDocExe);
+        Processor.Parameters.Add('--fpdoc');
+        Processor.Parameters.Add(FPDocExe);
         // Newer versions of fpc mess up the .css file location;
         // Exception at 00441644: Exception:
         // Can't find CSS file "..\fpdoc.css".
         //
         // So specify path explicitly
         // --css-file argument available since r42283
-        ProcessEx.Parameters.Add('--css-file='+IncludeTrailingPathDelimiter(FFPCSourceDirectory)+
+        Processor.Parameters.Add('--css-file='+IncludeTrailingPathDelimiter(FFPCSourceDirectory)+
           'utils'+DirectorySeparator+'fpdoc'+DirectorySeparator+'fpdoc.css');
 
-        ProcessEx.Parameters.Add('--outfmt');
-        ProcessEx.Parameters.Add('chm');
+        Processor.Parameters.Add('--outfmt');
+        Processor.Parameters.Add('chm');
         { this will give a huge amount of warnings which should be fixed by
         fpdoc and/or the .chm files so are rather useless
-        ProcessEx.Parameters.Add('--warnings'); //let tool show warnings as well
+        Processor.Parameters.Add('--warnings'); //let tool show warnings as well
         }
         // Show application output if desired:
-        if FVerbose then ProcessEx.OnOutput:=@DumpConsole;
+        if FVerbose then Processor.OnOutput:=@DumpConsole;
         infoln(ModuleName+': compiling chm help docs:',etInfo);
         { The CHM file gets output into <lazarusdir>/docs/chm/lcl/lcl.chm
         Though that may work when adjusting the baseurl option in Lazarus for each
@@ -742,9 +742,9 @@ begin
         which is picked up by the default Lazarus settings.
         The generated .xct file is an index file for fpdoc cross file links,
         used if you want to link to the chm from other chms.}
-        writelnlog('Execute: '+ProcessEx.Executable+'. Params: '+ProcessEx.Parameters.CommaText, true);
-        ProcessEx.Execute;
-        BuildResult:=ProcessEx.ExitStatus;
+        writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+        Processor.Execute;
+        BuildResult:=Processor.ExitStatus;
         if BuildResult <> 0 then
         begin
           writelnlog(etError,ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+inttostr(BuildResult), true);

@@ -305,7 +305,7 @@ begin
   if InitDone then
     exit;
   if FVerbose then
-    ProcessEx.OnOutputM:=@DumpOutput;
+    Processor.OnOutputM:=@DumpOutput;
   // While getting svn etc may help a bit, if Lazarus isn't installed correctly,
   // it probably won't help for normal use cases.
   // However, in theory, we could run only external modules and
@@ -378,17 +378,17 @@ begin
      then WritelnLog('Installing '+PackageName,True)
      else WritelnLog('Installing '+PackageName+' version '+lpkversion.AsString,True);
 
-  ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+  Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   FErrorLog.Clear;
   if WorkingDir<>'' then
-    ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
-  ProcessEx.Parameters.Add('--add-package');
-  ProcessEx.Parameters.Add(PackageAbsolutePath);
+    Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
+  Processor.Parameters.Clear;
+  Processor.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+  Processor.Parameters.Add('--add-package');
+  Processor.Parameters.Add(PackageAbsolutePath);
   try
-    ProcessEx.Execute;
-    result := ProcessEx.ExitStatus=0;
+    Processor.Execute;
+    result := Processor.ExitStatus=0;
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
     begin
@@ -398,7 +398,7 @@ begin
     else
     begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
-      if Pos('only for runtime',ProcessEx.OutputString)>0
+      if Pos('only for runtime',Processor.OutputString)>0
          then result:=True
          else WritelnLog('InstallerUniversal: error trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
     end;
@@ -1060,25 +1060,25 @@ begin
       if FLazarusNeedsRebuild then
       begin
         infoln('InstallerUniversal: going to rebuild Lazarus because packages were installed.',etInfo);
-        ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+        Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
         FErrorLog.Clear;
-        ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
-        ProcessEx.Parameters.Clear;
+        Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
+        Processor.Parameters.Clear;
         {$IFDEF DEBUG}
-        ProcessEx.Parameters.Add('--verbose');
+        Processor.Parameters.Add('--verbose');
         {$ELSE}
         // See compileroptions.pp
         // Quiet:=ConsoleVerbosity<=-3;
-        ProcessEx.Parameters.Add('--quiet');
-        ProcessEx.Parameters.Add('--quiet');
-        ProcessEx.Parameters.Add('--quiet');
-        ProcessEx.Parameters.Add('--quiet');
+        Processor.Parameters.Add('--quiet');
+        Processor.Parameters.Add('--quiet');
+        Processor.Parameters.Add('--quiet');
+        Processor.Parameters.Add('--quiet');
         {$ENDIF}
-        ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
-        ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
+        Processor.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+        Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
         try
-          ProcessEx.Execute;
-          result := ProcessEx.ExitStatus=0;
+          Processor.Execute;
+          result := Processor.ExitStatus=0;
           if result then
           begin
             infoln('InstallerUniversal: Lazarus rebuild succeeded',etDebug);
@@ -1544,25 +1544,25 @@ begin
     if FLazarusNeedsRebuild then
     begin
       infoln('InstallerUniversal: going to rebuild Lazarus because packages were uninstalled.',etInfo);
-      ProcessEx.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+      Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
       FErrorLog.Clear;
-      ProcessEx.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
-      ProcessEx.Parameters.Clear;
+      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
+      Processor.Parameters.Clear;
       {$IFDEF DEBUG}
-      ProcessEx.Parameters.Add('--verbose');
+      Processor.Parameters.Add('--verbose');
       {$ELSE}
       // See compileroptions.pp
       // Quiet:=ConsoleVerbosity<=-3;
-      ProcessEx.Parameters.Add('--quiet');
-      ProcessEx.Parameters.Add('--quiet');
-      ProcessEx.Parameters.Add('--quiet');
-      ProcessEx.Parameters.Add('--quiet');
+      Processor.Parameters.Add('--quiet');
+      Processor.Parameters.Add('--quiet');
+      Processor.Parameters.Add('--quiet');
+      Processor.Parameters.Add('--quiet');
       {$ENDIF}
-      ProcessEx.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
-      ProcessEx.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
+      Processor.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+      Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
       try
-        ProcessEx.Execute;
-        result := ProcessEx.ExitStatus=0;
+        Processor.Execute;
+        result := Processor.ExitStatus=0;
         if result then
         begin
           infoln('InstallerUniversal: Lazarus rebuild succeeded',etDebug);

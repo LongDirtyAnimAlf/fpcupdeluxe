@@ -159,7 +159,7 @@ var
 begin
   // todo: split up, move to config, perhaps make dirs properties etc
   if FVerbose then
-    ProcessEx.OnOutputM:=@DumpOutput;
+    Processor.OnOutputM:=@DumpOutput;
   FSVNClient.ModuleName:=ModuleName;
   FSVNClient.Verbose:=FVerbose;
   FSVNClient.ExportOnly:=FExportOnly;
@@ -207,14 +207,14 @@ begin
 
   // Feed this environment to the batch file. In older Laz revisions, double quoting is required
   // Setup compiler exe:
-  ProcessEx.Environment.SetVar('ISCC','"'+FInnoSetupCompiler+'"');
+  Processor.Environment.SetVar('ISCC','"'+FInnoSetupCompiler+'"');
   // SVN executable:
-  ProcessEx.Environment.SetVar('SVN','"'+FSVNClient.RepoExecutable+'"');
+  Processor.Environment.SetVar('SVN','"'+FSVNClient.RepoExecutable+'"');
   // svnversion exe:
-  ProcessEx.Environment.SetVar('SVNVER','"'+ExtractFilePath(FSVNClient.RepoExecutable)+'svnversion'+GetExeExt+'"');
+  Processor.Environment.SetVar('SVNVER','"'+ExtractFilePath(FSVNClient.RepoExecutable)+'svnversion'+GetExeExt+'"');
 
   // Provide this dir without quotes; may work with them but output looks weird
-  ProcessEx.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
+  Processor.Environment.SetVar('LAZTEMPBUILDDIR',ExcludeLeadingPathDelimiter(FInstallerBuildDir));
 
   {
   create_installer.bat FPCSVNDIR LAZSVNDIR LAZSVNBINDIR RELEASE_PPC
@@ -229,25 +229,25 @@ begin
   PATCHFILE: Optional: name of FPC patch file for the FPC sources. If not needed: don't enter it or use ""
   CHMHELPFILES: Optional: directory containing CHM help files to be included in the installer (see A.7). If not needed: don't enter it or use ""
   }
-  ProcessEx.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
+  Processor.Executable := IncludeTrailingPathDelimiter(InstallerBatchDir)+'create_installer.bat';
   // MUST be set to create_installer.bat otherwise it can't find the fpcbuild/lazbuild scripts
-  ProcessEx.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
-  ProcessEx.Parameters.Clear;
-  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCBuildDir)); //FPCSVNDIR
-  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
-  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
+  Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(InstallerBatchDir);
+  Processor.Parameters.Clear;
+  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FFPCBuildDir)); //FPCSVNDIR
+  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusDir)); //LAZSVNDIR
+  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FLazarusBinaryDir)); //LAZSVNBINDIR
   // Should officially be a bootstrap compiler but should work with current compiler:
-  ProcessEx.Parameters.Add(FCompiler); //RELEASE_PPC
-  ProcessEx.Parameters.Add('""'); //an empty parameter as IDE_WIDGETSET
-  ProcessEx.Parameters.Add('""'); //an empty parameter as PATCHFILE
-  ProcessEx.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
-  if FVerbose then WritelnLog(ClassName+': Running '+ProcessEx.Executable,true);
-  ProcessEx.Execute;
+  Processor.Parameters.Add(FCompiler); //RELEASE_PPC
+  Processor.Parameters.Add('""'); //an empty parameter as IDE_WIDGETSET
+  Processor.Parameters.Add('""'); //an empty parameter as PATCHFILE
+  Processor.Parameters.Add(ExcludeTrailingPathDelimiter(HelpFileDir)); //CHMHELPFILES
+  if FVerbose then WritelnLog(ClassName+': Running '+Processor.Executable,true);
+  Processor.Execute;
 
-  if ProcessEx.ExitStatus <> 0 then
+  if Processor.ExitStatus <> 0 then
   begin
     result := False;
-    WritelnLog(ClassName+': Failed to create installer; '+ProcessEx.Executable+' returned '+inttostr(ProcessEx.ExitStatus)+LineEnding+
+    WritelnLog(ClassName+': Failed to create installer; '+Processor.Executable+' returned '+inttostr(Processor.ExitStatus)+LineEnding+
       'Installer log at '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log',true);
   end
   else
