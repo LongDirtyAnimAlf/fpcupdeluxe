@@ -68,17 +68,10 @@ Const
     'End;'+
 
 //selective actions triggered with --only=SequenceName
-    'Declare FPCCleanOnly;'+
-    'Cleanmodule FPC;'+
-    'End;'+
-
-    'Declare FPCGetOnly;'+
-    'Getmodule FPC;'+
-    'End;'+
-
-    'Declare FPCBuildOnly;'+
-    'Buildmodule FPC;'+
-    'End;'+
+    'Declare FPCCheckOnly;'+'Checkmodule FPC;'+'End;'+
+    'Declare FPCCleanOnly;'+'Cleanmodule FPC;'+'End;'+
+    'Declare FPCGetOnly;'+'Getmodule FPC;'+'End;'+
+    'Declare FPCBuildOnly;'+'Buildmodule FPC;'+'End;'+
 
 // Crosscompile build
     'Declare FPCCrossWin32-64;'+

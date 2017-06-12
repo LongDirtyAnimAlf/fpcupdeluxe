@@ -91,6 +91,7 @@ type
   private
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
+    FSwitchURL: boolean;
     procedure SetURL(value:string);
     function GetMake: string;
     procedure SetHTTPProxyHost(AValue: string);
@@ -229,6 +230,8 @@ type
     property HTTPProxyPassword: string read FHTTPProxyPassword write SetHTTPProxyPassword;
     // Whether or not to let locally modified files remain or back them up to .diff and svn revert before compiling
     property KeepLocalChanges: boolean write FKeepLocalChanges;
+    // auto switchover SVN URL
+    property SwitchURL: boolean write FSwitchURL;
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
@@ -1703,8 +1706,10 @@ function TInstaller.CheckModule(ModuleName: string): boolean;
 var
   aRepoClient:TRepoClient;
 begin
-
   result:=true;
+
+  if NOT DirectoryExists(FSourceDirectory) then exit;
+  if FExportOnly then exit;
 
   // not so elegant check to see what kind of client we need ...
   aRepoClient:=nil;
@@ -1721,20 +1726,17 @@ begin
   aRepoClient.LocalRepository:=FSourceDirectory;
   aRepoClient.Repository:=FURL;
 
-  if NOT aRepoClient.ExportOnly then
-  begin
-    aRepoClient.LocalRepositoryExists;
-    if aRepoClient.ReturnCode=FRET_LOCAL_REMOTE_URL_NOMATCH then
-    begin
-      // non-matching URL will always result in an update failure
-      result:=false;
-    end;
-  end;
+  aRepoClient.LocalRepositoryExists;
+  result:=(aRepoClient.ReturnCode<>FRET_LOCAL_REMOTE_URL_NOMATCH);
 
   if result then
     infoln(Self.ClassName+': ' + ModuleName + ' sources ok.',etInfo)
   else
-    infoln(Self.ClassName+': ' + ModuleName + ' sources error.',etError);
+  begin
+    infoln(Self.ClassName+': ' + ModuleName + ' sources error (URL mismatch).',etError);
+    infoln(Self.ClassName+': ' + ModuleName + ' desired URL='+FURL,etError);
+    infoln(Self.ClassName+': ' + ModuleName + ' source URL='+aRepoClient.Repository,etError);
+  end;
 end;
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin

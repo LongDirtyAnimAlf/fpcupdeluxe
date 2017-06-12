@@ -54,6 +54,7 @@ const
     'End;' +
 
     'Declare oldlazarus;' +
+    'Checkmodule lazarus;' +
     'Cleanmodule lazarus;' +
     'Getmodule lazarus;' +
     'Buildmodule lazarus;' +
@@ -63,6 +64,7 @@ const
 
     //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' +
+    'Checkmodule lazarus;' +
     'Getmodule lazarus;' +
     'Buildmodule lazbuild;' +
     //config lazarus, so lazbuild will work:
@@ -85,6 +87,7 @@ const
     'Declare lazarusclean;' + 'Cleanmodule lazarus;' + 'End;' +
 
     //selective actions triggered with --only=SequenceName
+    'Declare LazarusCheckOnly;' + 'Checkmodule lazarus;' + 'End;' +
     'Declare LazarusCleanOnly;' + 'Cleanmodule lazarus;' + 'End;' +
     'Declare LazarusGetOnly;' + 'Getmodule lazarus;' + 'End;' +
     'Declare LazarusBuildOnly;' + 'Buildmodule lazarus;' + 'End;' +

@@ -53,6 +53,7 @@ type
     btnAddLazPatch: TButton;
     btnRemLazPatch: TButton;
     Button1: TButton;
+    CheckAutoSwitchURL: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
@@ -132,6 +133,9 @@ type
     function GetExtraVerbose:boolean;
     procedure SetExtraVerbose(value:boolean);
 
+    function GetAutoSwitchURL:boolean;
+    procedure SetAutoSwitchURL(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -174,6 +178,7 @@ type
 
     property UseWget:boolean read GetUseWget write SetUseWget;
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
+    property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -649,6 +654,15 @@ begin
   CheckExtraVerbose.Checked:=value;
 end;
 
+function TForm2.GetAutoSwitchURL:boolean;
+begin
+  result:=CheckAutoSwitchURL.Checked;
+end;
+procedure TForm2.SetAutoSwitchURL(value:boolean);
+begin
+  CheckAutoSwitchURL.Checked:=value;
+end;
+
 function TForm2.GetFPCOptions:string;
 begin
   result:=EditFPCOptions.Text;
@@ -702,8 +716,6 @@ procedure TForm2.SetLazarusBranch(value:string);
 begin
   EditLazarusBranch.Text:=value;
 end;
-
-
 
 function TForm2.GetHTTPProxyHost:string;
 begin

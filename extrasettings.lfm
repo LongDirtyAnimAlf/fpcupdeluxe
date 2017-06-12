@@ -1,10 +1,10 @@
 object Form2: TForm2
-  Left = 338
-  Height = 601
-  Top = 110
+  Left = 438
+  Height = 644
+  Top = 120
   Width = 746
   Caption = 'Advanced settings'
-  ClientHeight = 601
+  ClientHeight = 644
   ClientWidth = 746
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -125,12 +125,12 @@ object Form2: TForm2
   end
   object GroupBox2: TGroupBox
     Left = 8
-    Height = 373
+    Height = 416
     Top = 144
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Miscellaneous settings'
-    ClientHeight = 353
+    ClientHeight = 396
     ClientWidth = 316
     TabOrder = 1
     object CheckRepo: TCheckBox
@@ -298,15 +298,33 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 9
     end
+    object CheckAutoSwitchURL: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckExtraVerbose
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Download whole repository, or only latest files'
+      Top = 254
+      Width = 209
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Auto-switch repo URL (default=yes)'
+      Checked = True
+      ParentShowHint = False
+      ShowHint = True
+      State = cbChecked
+      TabOrder = 10
+    end
   end
   object GroupBox4: TGroupBox
     Left = 336
-    Height = 237
-    Top = 280
+    Height = 288
+    Top = 272
     Width = 296
     Anchors = [akTop, akLeft, akBottom]
     Caption = 'Cross tools location and build options'
-    ClientHeight = 217
+    ClientHeight = 268
     ClientWidth = 292
     TabOrder = 2
     object ComboBoxOS: TComboBox
@@ -489,11 +507,11 @@ object Form2: TForm2
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
     Left = 482
-    Height = 128
+    Height = 120
     Top = 144
     Width = 250
     Caption = 'FPC/Laz branch and revision'
-    ClientHeight = 108
+    ClientHeight = 100
     ClientWidth = 246
     TabOrder = 3
     object EditFPCBranch: TEdit
@@ -585,11 +603,11 @@ object Form2: TForm2
   end
   object GroupBoxCompileOptions: TGroupBox
     Left = 336
-    Height = 128
+    Height = 120
     Top = 144
     Width = 142
     Caption = 'Compile Options'
-    ClientHeight = 108
+    ClientHeight = 100
     ClientWidth = 138
     TabOrder = 4
     object LabelFPCOptions: TLabel
@@ -639,7 +657,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 8
     Height = 59
-    Top = 531
+    Top = 574
     Width = 176
     Anchors = [akLeft, akBottom]
     BorderSpacing.Bottom = 11
@@ -654,7 +672,7 @@ object Form2: TForm2
     AnchorSideTop.Control = ListBoxFPCPatch
     Left = 190
     Height = 28
-    Top = 531
+    Top = 574
     Width = 122
     BorderSpacing.Left = 6
     Caption = 'Add FPC patch'
@@ -668,7 +686,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 190
     Height = 26
-    Top = 564
+    Top = 607
     Width = 122
     Anchors = [akLeft, akBottom]
     BorderSpacing.Left = 6
@@ -681,7 +699,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 328
     Height = 59
-    Top = 531
+    Top = 574
     Width = 176
     Anchors = [akLeft, akBottom]
     BorderSpacing.Bottom = 11
@@ -696,7 +714,7 @@ object Form2: TForm2
     AnchorSideTop.Control = ListBoxLazPatch
     Left = 510
     Height = 28
-    Top = 531
+    Top = 574
     Width = 122
     BorderSpacing.Left = 6
     Caption = 'Add Laz patch'
@@ -710,7 +728,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 510
     Height = 26
-    Top = 564
+    Top = 607
     Width = 122
     Anchors = [akLeft, akBottom]
     BorderSpacing.Left = 6
@@ -725,7 +743,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 640
     Height = 89
-    Top = 504
+    Top = 547
     Width = 98
     Anchors = [akRight, akBottom]
     BorderSpacing.Right = 8

@@ -474,6 +474,7 @@ type
     FExportOnly:boolean;
     FNoJobs:boolean;
     FUseGitClient:boolean;
+    FSwitchURL:boolean;
     FSequencer: TSequencer;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
@@ -580,6 +581,7 @@ type
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
+    property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     // Stop talking. Do it! Returns success status
@@ -1505,6 +1507,7 @@ begin
     {$IFDEF MSWINDOWS}
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
+    FInstaller.SwitchURL:=FParent.SwitchURL;
   end;
 end;
 

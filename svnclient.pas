@@ -83,6 +83,7 @@ type
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
     procedure DeleteDirectories(const CommandOutput: string);
+    procedure SwitchURL;
     procedure Revert; override;
     constructor Create;
     destructor Destroy; override;
@@ -682,6 +683,46 @@ begin
   end;
 end;
 
+procedure TSVNClient.SwitchURL;
+var
+  Command: string;
+  Output: string = '';
+  ProxyCommand: string;
+begin
+  if ExportOnly then
+  begin
+    FReturnCode := 0;
+    exit;
+  end;
+
+  ProxyCommand:=GetProxyCommand;
+
+  // Invalidate our revision number cache
+  FLocalRevision := FRET_UNKNOWN_REVISION;
+  FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
+
+  Command := '';
+
+  if Length(UserName)>0 then
+  begin
+    // svn quirk : even if no password is needed, it needs an empty password.
+    // to prevent deleting this empty string, we fill it here with a special placeholder: emptystring, that gets replaced later, inside ExecuteCommand
+    if Length(Password)=0 then Password:='emptystring';
+    Command := ' --username ' + UserName + ' --password ' + Password;
+  end;
+
+  if (FDesiredRevision = '') or (Uppercase(trim(FDesiredRevision)) = 'HEAD') then
+    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r HEAD ' + LocalRepository
+  else
+    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+
+  // always perform a cleaup before doing anything else ... just to be sure !
+  ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose);
+
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
+  FReturnOutput := Output;
+end;
+
 
 procedure TSVNClient.LocalModifications(var FileList: TStringList);
 var
@@ -771,6 +812,7 @@ begin
         FLocalRevision := FRET_UNKNOWN_REVISION;
         FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
         FReturnCode := FRET_LOCAL_REMOTE_URL_NOMATCH;
+        FRepositoryURL := URL;
       end;
     end;
   end;
@@ -778,8 +820,10 @@ end;
 
 procedure TSVNClient.GetLocalRevisions;
 const
-  BranchRevLength = Length('Last Changed Rev:');
-  RevLength = Length('Revision:');
+  BranchRevTarget = 'Last Changed Rev:';
+  BranchRevLength = Length(BranchRevTarget);
+  RevTarget = 'Revision:';
+  RevLength = Length(RevTarget);
   RevExpression = '\:\s+(\d+)\s'; //regex to match revision in svn info
 var
   LRevision: string = ''; // Revision of repository as a whole
@@ -839,9 +883,9 @@ begin
         // Regex failed; trying for English revision message (though this may be
         // superfluous with the regex)
         FLocalRevision := FRET_UNKNOWN_REVISION;
-        FLocalRevision := trim(copy(Output, (pos('Last Changed Rev: ', Output) + BranchRevLength), 6));
+        FLocalRevision := trim(copy(Output, (pos(BranchRevTarget, Output) + BranchRevLength), 6));
         FLocalRevisionWholeRepo := FRET_UNKNOWN_REVISION;
-        FLocalRevisionWholeRepo := trim(copy(Output, (pos('Revision: ', Output) + RevLength), 6));
+        FLocalRevisionWholeRepo := trim(copy(Output, (pos(RevTarget, Output) + RevLength), 6));
       end;
       // If we happen to be in the root (no branch), cater for that:
       if FLocalRevision = FRET_UNKNOWN_REVISION then

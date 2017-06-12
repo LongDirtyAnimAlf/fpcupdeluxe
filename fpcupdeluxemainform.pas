@@ -1888,6 +1888,8 @@ begin
 
   FPCupManager.UseWget:=Form2.UseWget;
 
+  FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
+
   // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
@@ -2098,6 +2100,8 @@ begin
     Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
     Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
+    Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',True);
+
     listbox3.ClearSelection;
     SortedModules:=TStringList.Create;
     try
@@ -2145,6 +2149,8 @@ begin
 
     WriteString('Patches','FPCPatches',Form2.FPCPatches);
     WriteString('Patches','LazarusPatches',Form2.LazPatches);
+
+    WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
 
     modules:='';
     for i:=0 to ListBox3.Count-1 do
