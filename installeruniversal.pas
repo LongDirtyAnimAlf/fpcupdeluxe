@@ -146,7 +146,7 @@ type
   function GetAlias(Dictionary,keyword: string): string;
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
-  procedure SetConfigFile(aConfigFile: string);
+  function SetConfigFile(aConfigFile: string):boolean;
 
 var
   sequences:string;
@@ -1968,15 +1968,16 @@ begin
   result:=true;
 end;
 
-procedure SetConfigFile(aConfigFile: string);
+function SetConfigFile(aConfigFile: string):boolean;
 var
   ConfigFile: Text;
   CurrentConfigFileName:string;
 begin
+  result:=true;
   CurrentConfigFile:=aConfigFile;
   // Create fpcup.ini from resource if it doesn't exist yet
   if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
-     SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
+     result:=SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
 end;
 
 initialization

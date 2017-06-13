@@ -256,7 +256,7 @@ function SafeExpandFileNameUTF8 (Const FileName : String): String;
 function SafeGetApplicationPath: String;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
 // to application directory
-procedure SaveInisFromResource(filename,resourcename:string);
+function SaveInisFromResource(filename,resourcename:string):boolean;
 // Searches for SearchFor in the stringlist and returns the index if found; -1 if not
 // Search optionally starts from position SearchFor
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
@@ -416,7 +416,7 @@ begin
  result:=AppendPathDelim(result);
 end;
 
-procedure SaveInisFromResource(filename,resourcename:string);
+function SaveInisFromResource(filename,resourcename:string):boolean;
 var
   fs:Tfilestream;
   ms:TMemoryStream;
@@ -424,59 +424,60 @@ var
   Ini:TMemIniFile;
   OldIniVersion,NewIniVersion:string;
 begin
+  result:=false;
 
-  if NOT FileExists(filename) then
-  begin
-    // create inifile
-    with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
-    try
-      try
-        fs:=Tfilestream.Create(filename,fmCreate);
-        Savetostream(fs);
-      finally
-        fs.Free;
-      end;
-    finally
-      Free;
-    end;
-  end
-  else
-  begin
-
-    // create memory stream of resource
-    ms:=TMemoryStream.Create;
-    try
+  try
+    if NOT FileExists(filename) then
+    begin
+      // create inifile
       with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
       try
-        Savetostream(ms);
+        try
+          fs:=Tfilestream.Create(filename,fmCreate);
+          Savetostream(fs);
+        finally
+          fs.Free;
+        end;
       finally
         Free;
-     end;
-     ms.Position:=0;
+      end;
+    end
+    else
+    begin
 
-     Ini:=TMemIniFile.Create(ms);
-     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-     Ini.Options:=[ifoStripQuotes];
-     {$ELSE}
-     ini.StripQuotes:=true;
-     {$ENDIF}
-     NewIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
-     Ini.Free;
+      // create memory stream of resource
+      ms:=TMemoryStream.Create;
+      try
+        with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+        try
+          Savetostream(ms);
+        finally
+          Free;
+       end;
+       ms.Position:=0;
 
-     Ini:=TMemIniFile.Create(filename);
-     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-     Ini.Options:=[ifoStripQuotes];
-     {$ELSE}
-     ini.StripQuotes:=true;
-     {$ENDIF}
-     OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
-     Ini.Free;
+       Ini:=TMemIniFile.Create(ms);
+       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+       Ini.Options:=[ifoStripQuotes];
+       {$ELSE}
+       ini.StripQuotes:=true;
+       {$ENDIF}
+       NewIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
+       Ini.Free;
 
-     if OldIniVersion<>NewIniVersion then
-     begin
-       BackupFileName:=ChangeFileExt(filename,'.bak');
-       while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
-       try
+       Ini:=TMemIniFile.Create(filename);
+       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+       Ini.Options:=[ifoStripQuotes];
+       {$ELSE}
+       ini.StripQuotes:=true;
+       {$ENDIF}
+       OldIniVersion:=Ini.ReadString('fpcupinfo','inifileversion','0.0.0.0');
+       Ini.Free;
+
+       if OldIniVersion<>NewIniVersion then
+       begin
+         BackupFileName:=ChangeFileExt(filename,'.bak');
+         while FileExists(BackupFileName) do BackupFileName := BackupFileName + 'k';
          FileUtil.CopyFile(filename,BackupFileName);
          if SysUtils.DeleteFile(filename) then
          begin
@@ -488,14 +489,17 @@ begin
              FreeAndNil(fs);
            end;
          end;
-       except
-         infoln('Could not make a backup copy of old inifile',etError);
        end;
-     end;
 
-    finally
-      ms.Free;
+      finally
+        ms.Free;
+      end;
+
     end;
+
+    result:=FileExists(filename);
+
+  except
 
   end;
 

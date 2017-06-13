@@ -91,7 +91,6 @@ type
   private
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
-    FSwitchURL: boolean;
     procedure SetURL(value:string);
     function GetMake: string;
     procedure SetHTTPProxyHost(AValue: string);
@@ -148,6 +147,7 @@ type
     F7zip: string;
     FUnrar: string;
     FProcessEx: TProcessEx;
+    FSwitchURL: boolean;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetNeededExecutables: boolean;

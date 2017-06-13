@@ -186,7 +186,11 @@ end;
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
+var
+  IniFilesOk:boolean;
 begin
+  FPCupManager:=nil;
+
   {$ifdef CPUAARCH64}
   // disable some features
   FixesBtn.Enabled:=False;
@@ -253,43 +257,58 @@ begin
     Free;
   end;
 
-  SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini');
-  SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
+  IniFilesOk:=
+  (SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini'))
+  AND
+  (SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME));
 
-  if ListBoxFPCTarget.Count=0 then
+  if IniFilesOk then
   begin
-    ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-    FPCTarget:='default';
-  end;
-  if ListBoxLazarusTarget.Count=0 then
+    if ListBoxFPCTarget.Count=0 then
+    begin
+      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+      FPCTarget:='default';
+    end;
+    if ListBoxLazarusTarget.Count=0 then
+    begin
+      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+      LazarusTarget:='default';
+    end;
+
+    sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
+
+    InstallDirEdit.Text:=sInstallDir;
+
+    // set InstallDirEdit (installdir) onchange here, to prevent early firing
+    InstallDirEdit.OnChange:=nil;
+    InstallDirEdit.OnKeyUp:=nil;
+    {$ifdef Darwin}
+    {$ifdef LCLCOCOA}
+    // onchange does not work on cocoa, so use onkeyup
+    InstallDirEdit.OnKeyUp:=@Edit1KeyUp;
+    {$endif}
+    {$endif}
+    if InstallDirEdit.OnKeyUp=nil then InstallDirEdit.OnChange:=@Edit1Change;
+
+    // create settings form
+    // must be done here, to enable local storage/access of some setttings !!
+    Form2:=TForm2.Create(Form1);
+
+    AddMessage('Welcome @ FPCUPdeluxe.');
+    AddMessage('');
+
+    InitFPCupManager;
+  end
+  else
   begin
-    ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-    LazarusTarget:='default';
+    AddMessage('FPCUPdeluxe could not create its necessary setting-files.');
+    AddMessage('All functions are disabled for now.');
+    AddMessage('');
+    AddMessage('Please check the folder permissions, and re-start.');
+    AddMessage('');
+    DisEnable(nil,False);
   end;
 
-  sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
-
-  InstallDirEdit.Text:=sInstallDir;
-
-  // set InstallDirEdit (installdir) onchange here, to prevent early firing
-  InstallDirEdit.OnChange:=nil;
-  InstallDirEdit.OnKeyUp:=nil;
-  {$ifdef Darwin}
-  {$ifdef LCLCOCOA}
-  // onchange does not work on cocoa, so use onkeyup
-  InstallDirEdit.OnKeyUp:=@Edit1KeyUp;
-  {$endif}
-  {$endif}
-  if InstallDirEdit.OnKeyUp=nil then InstallDirEdit.OnChange:=@Edit1Change;
-
-  // create settings form
-  // must be done here, to enable local storage/access of some setttings !!
-  Form2:=TForm2.Create(Form1);
-
-  AddMessage('Welcome @ FPCUPdeluxe.');
-  AddMessage('');
-
-  InitFPCupManager;
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -442,6 +461,16 @@ begin
   FPCupManager:=TFPCupManager.Create;
 
   FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
+
+
+  // check permission do determine if we are able to create ini-files.
+  (*
+  {$IFDEF UNIX}
+  FpChmod(OutputFileName, Attrs);
+  {$ELSE}
+  FileSetAttr(OutputFileName, Attrs);
+  {$ENDIF}
+  *)
 
   FPCupManager.LoadFPCUPConfig;
 
@@ -1775,6 +1804,8 @@ end;
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   // set last used install directory
+  if (NOT Assigned(FPCupManager)) then exit;
+
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
     WriteString('General','InstallDirectory',sInstallDir);
@@ -1848,6 +1879,8 @@ begin
   DinoBtn.Enabled:=value;
   FeaturesBtn.Enabled:=value;
   mORMotBtn.Enabled:=value;
+
+  if Sender=nil then BitBtnHalt.Enabled:=value;;
 end;
 
 procedure TForm1.PrepareRun;

@@ -2527,6 +2527,7 @@ begin
   {$IFDEF MSWINDOWS}
   // Remove all fpmakes
   Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'fpmake'+GetExeExt);
+  Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'packages'+DirectorySeparator+'fpmake'+GetExeExt);
   DeleteList:=TStringList.Create;
   try
     DeleteList.Add('fpmake.exe');
@@ -2803,6 +2804,22 @@ begin
   result:=InitModule;
   if not result then exit;
   result:=inherited;
+
+  if ((FSwitchURL) AND (NOT result)) then
+  begin
+    result:=true;
+    infoln(Self.ClassName+': switching ' + ModuleName + ' source URL',etInfo);
+
+    FSVNClient.Verbose:=FVerbose;
+    FSVNClient.ExportOnly:=FExportOnly;
+    FSVNClient.ModuleName:=ModuleName;
+    FSVNClient.LocalRepository:=FSourceDirectory;
+    FSVNClient.Repository:=FURL;
+
+    FSVNClient.SwitchURL;
+
+    result:=true;
+  end;
 end;
 
 function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;

@@ -58,6 +58,7 @@ type
   protected
     FLocalRevisionWholeRepo: string;
     procedure CheckOut(UseForce:boolean=false); override;
+    procedure Update; override;
     function GetLocalRevision: string; override;
     function GetLocalRevisionWholeRepo: string;
     // Figure out branch and whole repo revisions for local repository
@@ -67,7 +68,6 @@ type
     function GetRepoExecutable: string; override;
     function GetRepoExecutableName: string; override;
     function FindRepoExecutable: string; override;
-    procedure Update; override;
   public
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
@@ -100,6 +100,8 @@ uses
   {$ENDIF}
   strutils, regexpr;
 
+const
+  MAXRETRIES = 3;
 
 { TSVNClient }
 function TSVNClient.GetRepoExecutableName: string;
@@ -202,8 +204,6 @@ begin
 end;
 
 procedure TSVNClient.CheckOut(UseForce:boolean=false);
-const
-  MaxRetries = 3;
 var
   Command: string;
   Output: string = '';
@@ -287,7 +287,7 @@ begin
   RetryAttempt := 1;
   if (ReturnCode <> 0) then
   begin
-    while (ReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+    while (ReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
     begin
       //E155004: Working copy '<directory>' locked.
       //E175002: Connection failure
@@ -688,6 +688,7 @@ var
   Command: string;
   Output: string = '';
   ProxyCommand: string;
+  RetryAttempt: integer;
 begin
   if ExportOnly then
   begin
@@ -712,17 +713,31 @@ begin
   end;
 
   if (FDesiredRevision = '') or (Uppercase(trim(FDesiredRevision)) = 'HEAD') then
-    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r HEAD ' + LocalRepository
+    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r HEAD ' + Repository + ' ' + LocalRepository
   else
-    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + LocalRepository;
+    Command := ' switch ' + ProxyCommand + Command + ' --force --quiet --non-interactive --trust-server-cert -r ' + FDesiredRevision + ' ' + Repository + ' ' + LocalRepository;
 
   // always perform a cleaup before doing anything else ... just to be sure !
   ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose);
 
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
   FReturnOutput := Output;
-end;
 
+  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+  RetryAttempt := 1;
+  if (ReturnCode <> 0) then
+  begin
+    while (ReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
+    begin
+      //ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
+      //relax ... ;-)
+      Sleep(500);
+      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+      FReturnOutput := Output;
+      RetryAttempt := RetryAttempt + 1;
+    end;
+  end;
+end;
 
 procedure TSVNClient.LocalModifications(var FileList: TStringList);
 var
