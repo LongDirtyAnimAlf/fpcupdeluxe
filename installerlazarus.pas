@@ -318,6 +318,7 @@ begin
         Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
         Processor.Parameters.Add('--cpu=' + FCrossCPU_Target);
         Processor.Parameters.Add('--os=' + FCrossOS_Target);
+
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
         Processor.Parameters.Add('lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+'lcl.lpk');
@@ -410,16 +411,10 @@ begin
     Processor.Parameters.Add('FPC=' + FCompiler);
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
     Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-
     Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Parameters.Add('FPCDIR=' + FFPCSourceDir); //Make sure our FPC units can be found by Lazarus
     Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
-    { Do not do this - only allow useride to be built for native widgetset.
-    LCL /can/ be built using different widgetset
-    if FCrossLCL_Platform <> '' then
-      Processor.Parameters.Add('LCL_PLATFORM='+FCrossLCL_Platform );
-    }
     // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
     sCmpOpt:=StringReplace(FCompilerOptions,'-g ','-gw ',[]);
     sCmpOpt:=StringReplace(sCmpOpt,'  ',' ',[rfReplaceAll]);
@@ -429,25 +424,25 @@ begin
     case UpperCase(ModuleName) of
       'IDE':
       begin
-        Processor.Parameters.Add('-C ide idepkg');
-        infoln(infotext+'Running make -C ide idepkg:', etInfo);
+        Processor.Parameters.Add('idepkg');
+        infoln(infotext+'Running make idepkg', etInfo);
       end;
       'BIGIDE':
       begin
-        Processor.Parameters.Add('-C bigide');
-        infoln(infotext+'Running make -C bigide:', etInfo);
+        Processor.Parameters.Add('idebig');
+        infoln(infotext+'Running make idebig', etInfo);
       end;
       'LAZARUS':
       begin
         Processor.Parameters.Add('all');
-        infoln(infotext+'Running make all:', etInfo);
+        infoln(infotext+'Running make all', etInfo);
       end;
       'LAZBUILD':
       begin
         Processor.Parameters.Add('lazbuild');
-        infoln(infotext+'Running make lazbuild:', etInfo);
+        infoln(infotext+'Running make lazbuild', etInfo);
       end;
-      'LCL', 'LCLCROSS':
+      'LCL'://, 'LCLCROSS':
       begin
         // April 2012: lcl now requires lazutils and registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
@@ -467,7 +462,7 @@ begin
           else
             Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
         end;
-        infoln(infotext+'Running make registration lazutils lcl:', etInfo);
+        infoln(infotext+'Running make registration lazutils lcl', etInfo);
       end
       else //raise error;
       begin
@@ -541,6 +536,9 @@ begin
       Processor.Parameters.Add('--quiet');
       {$ENDIF}
       Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
+      Processor.Parameters.Add('--cpu=' + GetTargetCPU);
+      Processor.Parameters.Add('--os=' + GetTargetOS);
+
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
       // Assume new Laz version on failure getting revision
@@ -564,7 +562,7 @@ begin
       // Run first time...
       if OperationSucceeded then
       begin
-        infoln(infotext+'Running lazbuild to get IDE with user-specified packages:', etInfo);
+        infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
         try
           writelnlog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
           Processor.Execute;
@@ -605,6 +603,9 @@ begin
           Processor.Parameters.Add('--quiet');
           {$ENDIF}
           Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
+          Processor.Parameters.Add('--cpu=' + GetTargetCPU);
+          Processor.Parameters.Add('--os=' + GetTargetOS);
+
           Processor.Parameters.Add(IncludeTrailingPathDelimiter(FSourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi');
 
@@ -944,48 +945,47 @@ function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
   // Running it twice apparently can fix a lot of problems; see FPC ML message
   // by Jonas Maebe, 1 November 2012
 var
+  {$ifdef MSWINDOWS}
   CrossInstaller: TCrossInstaller;
   CrossWin: boolean;
   LHelpTemp: string; // LHelp gets copied to this temp file
+  {$endif}
   oldlog: TErrorMethod;
-  CleanDirectory:string;
+  command:string;
 begin
   Result := inherited;
 
   Result := InitModule;
   if not Result then exit;
+
   if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
-  CleanDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-  if (UpperCase(ModuleName)='LCL') OR (UpperCase(ModuleName)='LCLCROSS') then
-  begin
-    CleanDirectory:=CleanDirectory+DirectorySeparator+'lcl';
-  end;
-  if (UpperCase(ModuleName)='IDE') OR (UpperCase(ModuleName)='BIGIDE') then
-  begin
-    CleanDirectory:=CleanDirectory+DirectorySeparator+'ide';
-  end;
-
-  CrossInstaller := GetCrossInstaller;
   // If cleaning primary config:
   if (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') then
     infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
       FInstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
 
+  {$ifdef MSWINDOWS}
   // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL
   // but also existing lhelp.exe if present. Temporarily copy that so we can restore it later.
   // failure here does not influence result
   LHelpTemp:='';
   CrossWin:=false;
-  {$ifdef win32}
-  if (CrossInstaller.TargetCPU = 'x86_64') and ((CrossInstaller.TargetOS = 'win64') or (CrossInstaller.TargetOS = 'win32')) then
-    CrossWin := true;
-  {$endif win32}
-  {$ifdef win64}
-  // if this is crosswin64-32, ignore error as it is optional
-  if (CrossInstaller.TargetCPU = 'i386') and (CrossInstaller.TargetOS = 'win32') then
-    CrossWin := true;
-  {$endif win64}
+
+  CrossInstaller := GetCrossInstaller;
+  if Assigned(CrossInstaller) then
+  begin
+    {$ifdef win32}
+    if (CrossInstaller.TargetCPU = 'x86_64') and ((CrossInstaller.TargetOS = 'win64') or (CrossInstaller.TargetOS = 'win32')) then
+      CrossWin := true;
+    {$endif win32}
+    {$ifdef win64}
+    // if this is crosswin64-32, ignore error as it is optional
+    if (CrossInstaller.TargetCPU = 'i386') and (CrossInstaller.TargetOS = 'win32') then
+      CrossWin := true;
+    {$endif win64}
+  end;
+
   if CrossWin then
   begin
     LHelpTemp:=GetTempFileNameUTF8('','');
@@ -997,10 +997,12 @@ begin
       infoln(infotext+'Non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
     end;
   end;
+  {$endif MSWINDOWS}
 
   // Make distclean; we don't care about failure (e.g. directory might be empty etc)
   oldlog := Processor.OnErrorM;
   Processor.OnErrorM := nil;  //don't want to log errors in distclean
+
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
@@ -1008,28 +1010,52 @@ begin
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
   {$ENDIF}
   Processor.Parameters.Add('FPC=' + FCompiler + '');
-  Processor.Parameters.Add('--directory=' + CleanDirectory);
+  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   Processor.Parameters.Add('UPXPROG=echo');  //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+
+  case UpperCase(ModuleName) of
+    'IDE': command:='-C ide cleanide';
+    'BIGIDE': command:='cleanbigide';
+    'LAZARUS': command:='distclean';
+    'LCL', 'LCLCROSS': command:='-C lcl clean';
+    else //raise error;
+    begin
+      WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
+      Result := false;
+      exit;
+    end;
+  end;
+
   if FCrossLCL_Platform <> '' then
+  begin
     Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+    // Makefile:
+    // Compile the interface for the qt widgetset:"
+    // make cleanintf intf LCL_PLATFORM=qt"
+    command:='-C lcl cleanintf';
+  end;
+
   if (Self is TLazarusCrossInstaller) then
   begin
     Processor.Parameters.Add('OS_TARGET=' + FCrossOS_Target);
     Processor.Parameters.Add('CPU_TARGET=' + FCrossCPU_Target);
-    infoln(infotext+'Running make clean twice (OS_TARGET=' + FCrossOS_Target + '/CPU_TARGET=' + FCrossCPU_Target + ')', etInfo);
-    Processor.Parameters.Add('clean');
   end
   else
   begin
     Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
     Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
-    infoln(infotext+'Running make distclean twice', etInfo);
-    Processor.Parameters.Add('distclean');
   end;
+
+  Processor.Parameters.Add(command);
+  if (Self is TLazarusCrossInstaller) then
+    infoln(infotext+'Running "make '+command+'" twice for OS_TARGET=' + FCrossOS_Target + ' and CPU_TARGET=' + FCrossCPU_Target,etInfo)
+  else
+    infoln(infotext+'Running "make '+command+'" twice',etInfo);
+
   try
     writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
     Processor.Execute;
@@ -1046,6 +1072,7 @@ begin
   end;
   Processor.OnErrorM := oldlog; //restore previous logging
 
+  {$ifdef MSWINDOWS}
   // Now try to restore lhelp
   if LHelpTemp<>'' then
   begin
@@ -1058,6 +1085,7 @@ begin
       infoln(infotext+'Non-fatal error restoring lhelp from temp file '+LHelpTemp,etInfo);
     end;
   end;
+  {$endif MSWINDOWS}
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;

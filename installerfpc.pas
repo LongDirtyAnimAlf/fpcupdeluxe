@@ -923,7 +923,7 @@ begin
     else //raise error;
     begin
       Processor.Parameters.Add('--help'); // this should render make harmless
-      WritelnLog(etError, infotext+'Invalid module name specified ! Please fix the code.', true);
+      WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
       OperationSucceeded := false;
       Result := false;
       exit;
@@ -2553,14 +2553,19 @@ begin
       {$IFDEF MSWINDOWS}
       Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+      Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
+      Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
       {$ENDIF}
       if Self is TFPCCrossInstaller then
       begin  // clean out the correct compiler
-        Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-        Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
         Processor.Parameters.Add('OS_TARGET='+FCrossOS_Target);
         Processor.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
         if Length(FCrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
+      end
+      else
+      begin
+        Processor.Parameters.Add('CPU_TARGET='+GetTargetCPU);
+        Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
       end;
       Processor.Parameters.Add('distclean');
       if (FCrossOS_Target='') and (FCrossCPU_Target='') then

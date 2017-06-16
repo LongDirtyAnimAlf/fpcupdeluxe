@@ -385,7 +385,9 @@ begin
   if WorkingDir<>'' then
     Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
   Processor.Parameters.Clear;
-  Processor.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+  Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
+  Processor.Parameters.Add('--cpu=' + GetTargetCPU);
+  Processor.Parameters.Add('--os=' + GetTargetOS);
   Processor.Parameters.Add('--add-package');
   Processor.Parameters.Add(PackageAbsolutePath);
   try
@@ -1096,7 +1098,10 @@ begin
         Processor.Parameters.Add('--quiet');
         Processor.Parameters.Add('--quiet');
         {$ENDIF}
-        Processor.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+        Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
+        Processor.Parameters.Add('--cpu=' + GetTargetCPU);
+        Processor.Parameters.Add('--os=' + GetTargetOS);
+
         Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
         try
           Processor.Execute;
@@ -1582,7 +1587,9 @@ begin
       Processor.Parameters.Add('--quiet');
       Processor.Parameters.Add('--quiet');
       {$ENDIF}
-      Processor.Parameters.Add('--pcp='+FLazarusPrimaryConfigPath);
+      Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
+      Processor.Parameters.Add('--cpu=' + GetTargetCPU);
+      Processor.Parameters.Add('--os=' + GetTargetOS);
       Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
       try
         Processor.Execute;
