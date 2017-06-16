@@ -65,6 +65,7 @@ type
     function Commit(Message: string): boolean; override;
     function Execute(Command: string): integer; override;
     function GetDiffAll: string; override;
+    procedure SwitchURL; override;
     procedure LocalModifications(var FileList: TStringList); override;
     function LocalRepositoryExists: boolean; override;
     procedure Log(var Log: TStringList); override;
@@ -167,8 +168,6 @@ end;
 
 procedure TGitClient.CheckOut(UseForce:boolean=false);
 // SVN checkout is more or less equivalent to git clone
-const
-  MaxRetries = 3;
 var
   Command: string = '';
   Output: string = '';
@@ -222,7 +221,7 @@ begin
   begin
     // if we have a proxy, set it now !
     if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
-    while (FReturnCode <> 0) and (RetryAttempt < MaxRetries) do
+    while (FReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
       FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
@@ -383,6 +382,36 @@ begin
     AllFilesRaw.Free;
   end;
 end;
+
+procedure TGitClient.SwitchURL;
+var
+  Command: string = '';
+  Output: string = '';
+  RetryAttempt: integer;
+begin
+  FReturnCode := 0;
+  if ExportOnly then exit;
+  if NOT ValidClient then exit;
+
+  // Actual clone/checkout
+  Command := ' remote set-url origin ' +  Repository + ' ' + LocalRepository;
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose);
+
+  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
+  RetryAttempt := 1;
+  if (FReturnCode <> 0) then
+  begin
+    // if we have a proxy, set it now !
+    if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
+    while (FReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
+    begin
+      Sleep(500); //Give everybody a chance to relax ;)
+      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
+      RetryAttempt := RetryAttempt + 1;
+    end;
+  end;
+end;
+
 
 procedure TGitClient.LocalModifications(var FileList: TStringList);
 var

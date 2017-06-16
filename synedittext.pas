@@ -105,6 +105,13 @@ begin
         // when generating help
         if AnsiContainsText(line,'illegal XML element: ') then break;
         if AnsiContainsText(line,'parsing used unit ') then break;
+
+        // during building of lazarus components, default compiler switches cause version and copyright info to be shown
+        // do not know if this is allowed, but this version / copyright info is very redundant as it is shown everytime the compiler is called ...
+        // I stand corrected if this has to be changed !
+        if AnsiContainsText(line,'Copyright (c) 1993-') then break;
+        if AnsiContainsText(line,'Free Pascal Compiler version ') then break;
+
         if AnsiContainsText(line,'warning: ') then
         begin
           if AnsiContainsText(line,'is not portable') then break;
@@ -125,6 +132,7 @@ begin
           if AnsiContainsText(line,'argument unused during compilation') then break;
           if AnsiContainsText(line,'invalid unitname') then break;
           if AnsiContainsText(line,'procedure type "FAR" ignored') then break;
+          if AnsiContainsText(line,'duplicate unit') then break;
           // when generating help
           if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}
@@ -136,12 +144,14 @@ begin
         if AnsiContainsText(line,'rm.exe ') then break;
         if AnsiContainsText(line,'mkdir.exe ') then break;
         if AnsiContainsText(line,'mv.exe ') then break;
+        if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then break;
         {$endif}
         {$ifdef UNIX}
         if AnsiContainsText(line,'rm -f') then break;
         if AnsiContainsText(line,'rm -rf ') then break;
         if AnsiContainsText(line,'mkdir ') then break;
         if AnsiContainsText(line,'mv ') then break;
+        if (AnsiContainsText(line,'cp ')) AND (AnsiContainsText(line,'.compiled')) then break;
         {$endif}
         lineready:=false;
         break;

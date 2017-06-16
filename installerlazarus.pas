@@ -42,8 +42,8 @@ const
   Sequences =
     //standard lazarus build
     'Declare lazarus;' +
-    'Checkmodule lazarus;' +
     'Cleanmodule lazarus;' +
+    'Checkmodule lazarus;' +
     'Getmodule lazarus;' +
     'Buildmodule lazbuild;' +
     'ConfigModule lazarus;' +
@@ -54,8 +54,8 @@ const
     'End;' +
 
     'Declare oldlazarus;' +
-    'Checkmodule lazarus;' +
     'Cleanmodule lazarus;' +
+    'Checkmodule lazarus;' +
     'Getmodule lazarus;' +
     'Buildmodule lazarus;' +
     'ConfigModule lazarus;' +
@@ -64,6 +64,7 @@ const
 
     //Nogui widgetset+Lazbuild:
     'Declare lazbuild;' +
+    'Cleanmodule lazarus;' +
     'Checkmodule lazarus;' +
     'Getmodule lazarus;' +
     'Buildmodule lazbuild;' +
@@ -76,7 +77,8 @@ const
     // also we need lazbuild, but we can check for it in our USERIDE code.
     // If we Require it here, it will kick off a lazbuild build cycle that
     // may already have been done.
-    'Declare USERIDE;' + 'Buildmodule USERIDE;' +
+    'Declare USERIDE;' +
+    'Buildmodule USERIDE;' +
     // Make sure the user can use the IDE:
     'Exec CreateLazarusScript;' + 'End;' +
 
@@ -106,14 +108,15 @@ const
     'SetCPU x86_64;' + 'SetOS win64;' +
     // Getmodule has already been done
     // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
-    //'Cleanmodule LCL;' +
+    'Cleanmodule LCL;' +
     'Buildmodule LCL;' + 'End;' +
 
     // Crosscompile only LCL (needs to be run at end
-    'Declare LCLCross;' + 'ResetLCL;' + //module code itself will select proper widgetset
+    'Declare LCLCross;' +
+    'ResetLCL;' + //module code itself will select proper widgetset
     // Getmodule must already have been done
     // If we call CleanModule, currently Lazbuild.exe etc will also be removed!?!?!, so do not do that
-    // 'CleanModule LCL;'+
+    'CleanModule LCL;'+
     'Buildmodule LCL;' + 'End';
 
 type
@@ -201,30 +204,6 @@ uses
   , baseunix
   {$ENDIF UNIX}  ;
 
-// remove stale compiled files
-procedure RemoveStaleBuildDirectories(aBaseDir,aArch:string);
-var
-  OldPath:string;
-  FileInfo: TSearchRec;
-  DeleteList:TStringList;
-begin
-  OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'components'+DirectorySeparator;
-  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
-  begin
-    repeat
-      if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
-      begin
-        if (FileInfo.Attr and faDirectory) = faDirectory then
-        begin
-          if DeleteDirectoryEx(OldPath+FileInfo.Name+DirectorySeparator+'lib'+DirectorySeparator+aArch) then
-            RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'lib');
-        end;
-      end;
-    until FindNextUTF8(FileInfo)<>0;
-    FindCloseUTF8(FileInfo);
-  end;
-end;
-
 { TLazarusCrossInstaller }
 
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
@@ -233,9 +212,12 @@ var
   CrossInstaller: TCrossInstaller;
   Options: string;
 begin
+  Result:=inherited;
+
   CrossInstaller := GetCrossInstaller;
-  infoln('TLazarusCrossInstaller: building module ' + ModuleName + '...', etInfo);
+
   FErrorLog.Clear;
+
   if Assigned(CrossInstaller) then
   begin
     // Actually not using crossopts - they're only for building an FPC compiler; the
@@ -243,11 +225,11 @@ begin
     // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     if not CrossInstaller.GetBinUtils(FFPCInstallDir) then
-      infoln('Failed to get crossbinutils', eterror)
+      infoln(infotext+'Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FFPCInstallDir) then
-      infoln('Failed to get cross libraries', eterror)
+      infoln(infotext+'Failed to get cross libraries', etError)
     else if not CrossInstaller.GetLibsLCL(FCrossLCL_Platform, FInstallDirectory) then
-      infoln('Failed to get LCL cross libraries', eterror)
+      infoln(infotext+'Failed to get LCL cross libraries', etError)
     else
       // Cross compiling prerequisites in place. Let's compile.
     begin
@@ -293,8 +275,12 @@ begin
         Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+
+        Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+        Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
         Processor.Parameters.Add('CPU_TARGET=' + FCrossCPU_Target);
         Processor.Parameters.Add('OS_TARGET=' + FCrossOS_Target);
+
         Options := FCompilerOptions;
         if CrossInstaller.LibsPath <> '' then
           Options := Options + ' -Xd -Fl' + CrossInstaller.LibsPath;
@@ -338,22 +324,22 @@ begin
       end;
 
       if FCrossLCL_Platform = '' then
-        infoln('Lazarus: compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' using ' + BuildMethod, etInfo)
+        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' using ' + BuildMethod, etInfo)
       else
-        infoln('Lazarus: compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + '/' + FCrossLCL_Platform + ' using ' + BuildMethod, etInfo);
+        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + '/' + FCrossLCL_Platform + ' using ' + BuildMethod, etInfo);
 
       try
-        writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+        writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
         Processor.Execute;
         Result := Processor.ExitStatus = 0;
         if not Result then
-          WritelnLog(etError,'Lazarus: error compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' ' + FCrossLCL_Platform + LineEnding +
+          WritelnLog(etError,infotext+'Error compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' ' + FCrossLCL_Platform + LineEnding +
             'Details: ' + FErrorLog.Text, true);
       except
         on E: Exception do
         begin
           Result := false;
-          WritelnLog(etError,'Lazarus: exception compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + LineEnding +
+          WritelnLog(etError,infotext+'Exception compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + LineEnding +
             'Details: ' + E.Message, true);
         end;
       end;
@@ -372,21 +358,19 @@ begin
           Result := true;
         {$endif win64}
         if Result then
-          infoln('Lazarus: Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target +
+          infoln(infotext+'Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target +
             ' failed. Optional module; continuing regardless.', etWarning)
         else
-          infoln('Lazarus: Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' failed.', etError);
+          infoln(infotext+'Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' failed.', etError);
         // No use in going on, but
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(Result);
       end;
     end; //prereqs in place
 
-    RemoveStaleBuildDirectories(FSourceDirectory,FCrossCPU_Target+'-'+FCrossOS_Target);
-
   end    //valid cross compile setup
   else
-    infoln('Lazarus: can''t find cross installer for ' + FCrossCPU_Target + '-' + FCrossOS_Target, etError);
+    infoln(infotext+'Can''t find cross installer for ' + FCrossCPU_Target + '-' + FCrossOS_Target, etError);
 end;
 
 constructor TLazarusCrossInstaller.Create;
@@ -403,15 +387,14 @@ end;
 
 function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
-  DebuggerPath: string;
   ExitCode: integer;
-  FileCounter: integer;
   LazBuildApp: string;
   OperationSucceeded: boolean;
   sCmpOpt: string;
 begin
+  Result:=inherited;
+
   OperationSucceeded := true;
-  infoln('TLazarusNativeInstaller: building module ' + ModuleName + '...', etInfo);
 
   if ModuleName <> 'USERIDE' then
   begin
@@ -427,6 +410,7 @@ begin
     Processor.Parameters.Add('FPC=' + FCompiler);
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
     Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+
     Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Parameters.Add('FPCDIR=' + FFPCSourceDir); //Make sure our FPC units can be found by Lazarus
     Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -438,7 +422,6 @@ begin
     }
     // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
     sCmpOpt:=StringReplace(FCompilerOptions,'-g ','-gw ',[]);
-
     sCmpOpt:=StringReplace(sCmpOpt,'  ',' ',[rfReplaceAll]);
     sCmpOpt:=Trim(sCmpOpt);
     Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + sCmpOpt);
@@ -447,22 +430,22 @@ begin
       'IDE':
       begin
         Processor.Parameters.Add('-C ide idepkg');
-        infoln(ModuleName + ': running make -C ide idepkg:', etInfo);
+        infoln(infotext+'Running make -C ide idepkg:', etInfo);
       end;
       'BIGIDE':
       begin
         Processor.Parameters.Add('-C bigide');
-        infoln(ModuleName + ': running make -C bigide:', etInfo);
+        infoln(infotext+'Running make -C bigide:', etInfo);
       end;
       'LAZARUS':
       begin
         Processor.Parameters.Add('all');
-        infoln(ModuleName + ': running make all:', etInfo);
+        infoln(infotext+'Running make all:', etInfo);
       end;
       'LAZBUILD':
       begin
         Processor.Parameters.Add('lazbuild');
-        infoln(ModuleName + ': running make lazbuild:', etInfo);
+        infoln(infotext+'Running make lazbuild:', etInfo);
       end;
       'LCL', 'LCLCROSS':
       begin
@@ -472,43 +455,45 @@ begin
         Processor.Parameters.Add('lazutils');
         Processor.Parameters.Add('lcl');
         if (Uppercase(ModuleName) = 'LCLCROSS') then
+        begin
           if FCrossLCL_Platform = '' then
           begin
             // Nothing to be done as we're compiling natively. Gracefully exit
-            infoln(ModuleName + ': empty LCL platform specified. No need to cross compile LCL. Stopping.', etInfo);
+            infoln(infotext+'Empty LCL platform specified. No need to cross compile LCL. Skipping.', etWarning);
             OperationSucceeded := true; //belts and braces
             Result := true;
             exit;
           end
           else
             Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-        infoln(ModuleName + ': running make registration lazutils lcl:', etInfo);
+        end;
+        infoln(infotext+'Running make registration lazutils lcl:', etInfo);
       end
       else //raise error;
       begin
         Processor.Parameters.Add('--help'); // this should render make harmless
-        WritelnLog('BuildModule: Invalid module name ' + ModuleName + ' specified! Please fix the code.', true);
+        WritelnLog(etError, infotext+'Invalid module name ' + ModuleName + ' specified! Please fix the code.', true);
         OperationSucceeded := false;
         Result := false;
         exit;
       end;
     end;
     try
-      writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+      writelnlog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
       Processor.Execute;
       ExitCode := Processor.ExitStatus;
       if ExitCode <> 0 then
       begin
         OperationSucceeded := false;
         Result := false;
-        WritelnLog('Lazarus: error running make!' + LineEnding + 'Details: exit code ' + IntToStr(ExitCode), true);
+        WritelnLog(etError, infotext+'Error running make!' + LineEnding + 'Details: exit code ' + IntToStr(ExitCode), true);
       end;
     except
       on E: Exception do
       begin
         OperationSucceeded := false;
         Result := false;
-        WritelnLog('Lazarus: exception running make!' + LineEnding + 'Details: ' + E.Message, true);
+        WritelnLog(etError, infotext+'Exception running make!' + LineEnding + 'Details: ' + E.Message, true);
       end;
     end;
 
@@ -517,7 +502,7 @@ begin
     begin
       if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt, '--help', 'lazbuild') = false then
       begin
-        writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.', true);
+        writelnlog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
         Result := false;
         exit;
       end;
@@ -535,7 +520,7 @@ begin
     LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
     if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
     begin
-      writelnlog('Lazarus: lazbuild could not be found, so cannot build USERIDE.', true);
+      writelnlog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
       exit(false);
     end
     else
@@ -569,7 +554,7 @@ begin
         // We can specify a build mode; otherwise probably the latest build mode will be used
         // which could well be a stripped IDE
         // Let's see how/if FCompilerOptions clashes with the settings in normal build mode
-        writelnlog('LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
+        writelnlog(infotext+'LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
         Processor.Parameters.Add('--build-ide= ' + FCompilerOptions);
         Processor.Parameters.Add('--build-mode="Normal IDE"');
       end;
@@ -579,13 +564,13 @@ begin
       // Run first time...
       if OperationSucceeded then
       begin
-        infoln('Lazarus: running lazbuild to get IDE with user-specified packages:', etInfo);
+        infoln(infotext+'Running lazbuild to get IDE with user-specified packages:', etInfo);
         try
-          writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+          writelnlog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
           Processor.Execute;
           if Processor.ExitStatus <> 0 then
           begin
-            writelnlog('Lazarus: buildmodulecustom: make/lazbuild returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
+            writelnlog(etError, infotext+'Make/lazbuild returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
               'Details: ' + FErrorLog.Text, true);
             OperationSucceeded := false;
           end;
@@ -593,7 +578,7 @@ begin
           on E: Exception do
           begin
             OperationSucceeded := false;
-            WritelnLog('Lazarus: exception running lazbuild to get IDE with user-specified packages!' + LineEnding +
+            WritelnLog(etError, infotext+'Exception running lazbuild to get IDE with user-specified packages!' + LineEnding +
               'Details: ' + E.Message, true);
           end;
         end;
@@ -605,7 +590,7 @@ begin
       begin
         if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
         begin
-          infoln('Lazarus: startlazarus exists already. Not compiling again.', etdebug);
+          infoln(infotext+'Startlazarus exists already. Not compiling again.', etdebug);
         end
         else
         begin
@@ -623,13 +608,13 @@ begin
           Processor.Parameters.Add(IncludeTrailingPathDelimiter(FSourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi');
 
-          infoln('Lazarus: compiling startlazarus to make sure it is present:', etInfo);
+          infoln(infotext+'Compiling startlazarus to make sure it is present:', etInfo);
           try
-            writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+            writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
             Processor.Execute;
             if Processor.ExitStatus <> 0 then
             begin
-              Writelnlog('Lazarus: buildmodulecustom: lazbuild startlazarus returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
+              Writelnlog(etError, infotext+'Lazbuild startlazarus returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
                 'Details: ' + FErrorLog.Text, true);
               OperationSucceeded := false;
             end;
@@ -637,7 +622,7 @@ begin
             on E: Exception do
             begin
               OperationSucceeded := false;
-              WritelnLog('Lazarus: exception running lazbuild to get startlazarus!' + LineEnding +
+              WritelnLog(etError, infotext+'Exception running lazbuild to get startlazarus!' + LineEnding +
                 'Details: ' + E.Message, true);
             end;
           end;
@@ -645,7 +630,6 @@ begin
       end;
     end;
   end;
-  RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPUOS);
   Result := OperationSucceeded;
 end;
 
@@ -664,6 +648,8 @@ end;
 function TLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   Result := true;
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
 
 function TLazarusInstaller.InitModule: boolean;
@@ -671,16 +657,19 @@ var
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   Result := true;
-  infoln('TLazarusInstaller: initialising...', etDebug);
-  if InitDone then
-    exit;
+
+  if InitDone then exit;
+
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+
+  infoln(infotext+'Entering ...',etDebug);
+
   if FVerbose then Processor.OnOutputM := @DumpOutput;
 
-  WritelnLog('TLazarusInstaller init:    ', false);
-  WritelnLog('Lazarus directory:      ' + FSourceDirectory, false);
-  WritelnLog('Lazarus URL:               ' + FURL, false);
-  WritelnLog('Lazarus options:           ' + FCompilerOptions, false);
-  result:=(CheckAndGetNeededExecutables) AND (CheckAndGetNeededBinUtils);
+  WritelnLog(infotext+'Lazarus directory:      ' + FSourceDirectory, false);
+  WritelnLog(infotext+'Lazarus URL:            ' + FURL, false);
+  WritelnLog(infotext+'Lazarus options:        ' + FCompilerOptions, false);
+  result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
   if Result then
   begin
     // Look for make etc in the current compiler directory:
@@ -711,39 +700,34 @@ end;
 
 function TLazarusInstaller.BuildModule(ModuleName: string): boolean;
 begin
+  Result := inherited;
   Result := InitModule;
-  if not Result then
-    exit;
+  if not Result then exit;
   Result := BuildModuleCustom(ModuleName);
 end;
 
 function TLazarusInstaller.ConfigModule(ModuleName: string): boolean;
 const
   LazarusCFG = 'lazarus.cfg'; //file to store primary config argument in
-  StaticPackagesFile = 'staticpackages.inc';
   VALIDVERSIONCHARS = ['0'..'9','.',','];
 var
   DebuggerPath: string;
   LazarusConfig: TUpdateLazConfig;
   PCPSnippet: TStringList;
-  StaticPackages: TStringList;
   VersionSnippet: string;
   VersionList: TStringList;
   i,j:integer;
   LazBuildApp:string;
-  Output:string;
-  FReturnCode: integer;
   TxtFile:Text;
   VersionFile:string;
 begin
-
+  Result := inherited;
   Result := true;
-
 
   if DirectoryExistsUTF8(FPrimaryConfigPath) = false then
   begin
     if ForceDirectoriesUTF8(FPrimaryConfigPath) then
-      infoln('Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
+      infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
   end;
   // Set up a minimal config so we can use LazBuild
   // Parse URLs; expect e.g. ..../lazarus_1_0_14.
@@ -941,6 +925,7 @@ begin
       //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
       {$endif}
 
+
     except
       on E: Exception do
       begin
@@ -963,24 +948,28 @@ var
   CrossWin: boolean;
   LHelpTemp: string; // LHelp gets copied to this temp file
   oldlog: TErrorMethod;
+  CleanDirectory:string;
 begin
-  Result := InitModule;
+  Result := inherited;
 
-  if not Result then
-    exit;
-  // Check for valid basedirectory to avoid deleting in random locations or
-  // hitting bug 26706: OSX TProcess.Execute fails on next call with invalid
-  // current directory
-  if not DirectoryExistsUTF8(FSourceDirectory) then
+  Result := InitModule;
+  if not Result then exit;
+  if not DirectoryExistsUTF8(FSourceDirectory) then exit;
+
+  CleanDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+  if (UpperCase(ModuleName)='LCL') OR (UpperCase(ModuleName)='LCLCROSS') then
   begin
-    infoln('Lazarus CleanModule: directory '+FSourceDirectory+' does not exist. Exiting CleanModule.',etWarning);
-    exit;
+    CleanDirectory:=CleanDirectory+DirectorySeparator+'lcl';
+  end;
+  if (UpperCase(ModuleName)='IDE') OR (UpperCase(ModuleName)='BIGIDE') then
+  begin
+    CleanDirectory:=CleanDirectory+DirectorySeparator+'ide';
   end;
 
   CrossInstaller := GetCrossInstaller;
   // If cleaning primary config:
   if (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') then
-    infoln('Lazarus: if your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
+    infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
       FInstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
 
   // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL
@@ -1005,7 +994,7 @@ begin
         IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
         LHelpTemp,[cffOverWriteFile]);
     except
-      infoln('Lazarus CleanModule: non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
+      infoln(infotext+'Non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
     end;
   end;
 
@@ -1019,36 +1008,40 @@ begin
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
   {$ENDIF}
   Processor.Parameters.Add('FPC=' + FCompiler + '');
-  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+  Processor.Parameters.Add('--directory=' + CleanDirectory);
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   Processor.Parameters.Add('UPXPROG=echo');  //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+  Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
   if FCrossLCL_Platform <> '' then
     Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
   if (Self is TLazarusCrossInstaller) then
-  begin  // clean out the correct compiler
+  begin
     Processor.Parameters.Add('OS_TARGET=' + FCrossOS_Target);
     Processor.Parameters.Add('CPU_TARGET=' + FCrossCPU_Target);
-    infoln('Lazarus: running make distclean (OS_TARGET=' + FCrossOS_Target + '/CPU_TARGET=' + FCrossCPU_Target + '):', etInfo);
+    infoln(infotext+'Running make clean twice (OS_TARGET=' + FCrossOS_Target + '/CPU_TARGET=' + FCrossCPU_Target + ')', etInfo);
+    Processor.Parameters.Add('clean');
   end
   else
   begin
-    infoln('Lazarus: running make distclean:', etInfo);
+    Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
+    Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
+    infoln(infotext+'Running make distclean twice', etInfo);
+    Processor.Parameters.Add('distclean');
   end;
-  Processor.Parameters.Add('distclean');
   try
-    // Note: apparently, you can't specify certain modules to clean, like lcl.
-    writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+    writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
     Processor.Execute;
     sleep(100); //now do it again:
-    writelnlog('Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+    writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
     Processor.Execute;
     Result := true;
   except
     on E: Exception do
     begin
       Result := false;
-      WritelnLog('Lazarus: running make distclean failed with an exception!' + LineEnding + 'Details: ' + E.Message, true);
+      WritelnLog(infotext+'Failed with an exception!' + LineEnding + 'Details: ' + E.Message, true);
     end;
   end;
   Processor.OnErrorM := oldlog; //restore previous logging
@@ -1062,7 +1055,7 @@ begin
         IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
         [cffOverWriteFile]);
     except
-      infoln('Lazarus CleanModule: non-fatal error restoring lhelp from temp file '+LHelpTemp,etInfo);
+      infoln(infotext+'Non-fatal error restoring lhelp from temp file '+LHelpTemp,etInfo);
     end;
   end;
 end;
@@ -1088,7 +1081,9 @@ var
   ConstStart: string;
   aRepoClient:TRepoClient;
 begin
+  Result := inherited;
   Result := InitModule;
+
   if not Result then exit;
 
   // not so elegant check to see what kind of client we need ...
@@ -1096,7 +1091,7 @@ begin
      then aRepoClient:=FGitClient
      else aRepoClient:=FSVNClient;
 
-  infoln(Self.ClassName+': start checkout/update of ' + ModuleName + ' sources.',etInfo);
+  infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
   UpdateWarnings := TStringList.Create;
   try
@@ -1112,29 +1107,29 @@ begin
 
   if NOT aRepoClient.ExportOnly then
   begin
-    infoln('Lazarus was at: ' + BeforeRevision, etInfo);
+    infoln(infotext+'Lazarus was at: ' + BeforeRevision, etInfo);
 
     if FRepositoryUpdated then
     begin
       Revision := AfterRevision;
-      infoln('Lazarus is now at: ' + AfterRevision, etInfo);
+      infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
     end
     else
     begin
       Revision := BeforeRevision;
-      infoln('No updates for Lazarus found.', etInfo);
+      infoln(infotext+'No updates for Lazarus found.', etInfo);
     end;
   end
   else
   begin
     Revision := AfterRevision;
-    infoln('Lazarus is now at: ' + AfterRevision, etInfo);
+    infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
   end;
 
   if (Result) then
   begin
     // update revision.inc;
-    infoln('Updating Lazarus version info.', etInfo);
+    infoln(infotext+'Updating Lazarus version info.', etInfo);
     AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+RevisionIncFileName);
     try
       Rewrite(RevisionIncText);
@@ -1147,7 +1142,7 @@ begin
   end;
 
   if (NOT Result) then
-    infoln(Self.ClassName+': checkout/update of ' + ModuleName + ' sources failure.',etError);
+    infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
 
   // Download Qt bindings if not present yet
   Errors := 0;
@@ -1158,21 +1153,21 @@ begin
       if (FUtilFiles[Counter].Category = ucQtFile) and not
         (FileExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory) + FUtilFiles[Counter].FileName)) then
       begin
-        infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FSourceDirectory, etDebug);
+        infoln(infotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FSourceDirectory, etDebug);
         try
           if Download(FUseWget, FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName, IncludeTrailingPathDelimiter(FSourceDirectory) +
             FUtilFiles[Counter].FileName, FHTTPProxyHost, FHTTPProxyPort, FHTTPProxyUser,
             FHTTPProxyPassword) = false then
           begin
             Errors := Errors + 1;
-            infoln('Error downloading Qt-related file to ' + IncludeTrailingPathDelimiter(FSourceDirectory) +
+            infoln(infotext+'Error downloading Qt-related file to ' + IncludeTrailingPathDelimiter(FSourceDirectory) +
               FUtilFiles[Counter].FileName, eterror);
           end;
         except
           on E: Exception do
           begin
             Result := false;
-            infoln('Error downloading Qt-related files: ' + E.Message, etError);
+            infoln(infotext+'Error downloading Qt-related files: ' + E.Message, etError);
             exit; //out of function.
           end;
         end;
@@ -1182,7 +1177,7 @@ begin
     if Errors > 0 then
     begin
       Result := false;
-      WritelnLog('TLazarusNativeInstaller.GetModule(' + ModuleName + '): ' + IntToStr(Errors) + ' errors downloading Qt-related files.', true);
+      WritelnLog(infotext+IntToStr(Errors) + ' errors downloading Qt-related files.', true);
     end;
   end;
 
@@ -1190,13 +1185,13 @@ begin
   begin
     if Length(FSourcePatches)>0 then
     begin
-      infoln('Found Lazarus patch file(s).',etInfo);
+      infoln(infotext+'Found Lazarus patch file(s).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         UpdateWarnings.CommaText := FSourcePatches;
         for i:=0 to (UpdateWarnings.Count-1) do
         begin
-          infoln('Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
+          infoln(infotext+'Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
           PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
           if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
@@ -1216,23 +1211,23 @@ begin
             ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
             {$ENDIF}
             if ReturnCode=0
-               then infoln('Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
+               then infoln(infotext+'Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
                else
                begin
-                 writelnlog(ModuleName+' ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
-                 writelnlog(ModuleName+' patch output: ' + Output, true);
+                 writelnlog(infotext+'ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
+                 writelnlog(infotext+'Patch output: ' + Output, true);
                end;
           end
           else
           begin
-            infoln('Strange: could not find patchfile '+PatchFilePath, etWarning);
-            writelnlog(etError, ModuleName+' Patching Lazarus with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
+            infoln(infotext+'Strange: could not find patchfile '+PatchFilePath, etWarning);
+            writelnlog(etError, infotext+'Patching Lazarus with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
           end;
         end;
       finally
         UpdateWarnings.Free;
       end;
-    end else infoln('No Lazarus patches defined.',etInfo);
+    end else infoln(infotext+'No Lazarus patches defined.',etInfo);
   end;
 
 end;
@@ -1245,13 +1240,12 @@ begin
 end;
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
-const
-  LookForConfigFile = 'environmentoptions.xml';
 begin
-  result:=InitModule;
-  if not result then exit;
+  Result := inherited;
+  Result := InitModule;
 
-  infoln('Module Lazarus: Uninstall...', etInfo);
+  if not Result then exit;
+
   //sanity check
   if FileExistsUTF8(IncludeTrailingBackslash(FSourceDirectory) + 'Makefile') and DirectoryExistsUTF8(
     IncludeTrailingBackslash(FSourceDirectory) + 'ide') and DirectoryExistsUTF8(IncludeTrailingBackslash(FSourceDirectory) + 'lcl') and
@@ -1259,26 +1253,26 @@ begin
   begin
     Result := DeleteDirectoryEx(FSourceDirectory);
     if not (Result) then
-      WritelnLog('Error deleting Lazarus directory ' + FSourceDirectory);
+      WritelnLog(infotext+'Error deleting Lazarus directory ' + FSourceDirectory);
   end
   else
   begin
-    WritelnLog('Error: invalid Lazarus directory :' + FSourceDirectory);
+    WritelnLog(infotext+'Error: invalid Lazarus directory :' + FSourceDirectory);
     Result := false;
   end;
 
   // Sanity check so we don't try to delete random directories
   // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
-  if Result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath) + LookForConfigFile) and
+  if Result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath) + EnvironmentConfig) and
     ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FPrimaryConfigPath)) then
   begin
     Result := DeleteDirectoryEx(FPrimaryConfigPath) = false;
     if not (Result) then
-      WritelnLog('Error deleting Lazarus PrimaryConfigPath directory ' + FPrimaryConfigPath);
+      WritelnLog(infotext+'Error deleting Lazarus PrimaryConfigPath directory ' + FPrimaryConfigPath);
   end
   else
   begin
-    WritelnLog('Error: invalid Lazarus FPrimaryConfigPath: ' + FPrimaryConfigPath);
+    WritelnLog(infotext+'Error: invalid Lazarus FPrimaryConfigPath: ' + FPrimaryConfigPath);
     Result := false;
   end;
 end;

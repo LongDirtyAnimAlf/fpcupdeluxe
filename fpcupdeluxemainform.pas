@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0i';
+  FPCUPDELUXEVERSION='1.4.0j';
 
 resourcestring
   CrossGCCMsg =
@@ -301,6 +301,7 @@ begin
   end
   else
   begin
+    AddMessage('');
     AddMessage('FPCUPdeluxe could not create its necessary setting-files.');
     AddMessage('All functions are disabled for now.');
     AddMessage('');
@@ -462,16 +463,6 @@ begin
 
   FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
 
-
-  // check permission do determine if we are able to create ini-files.
-  (*
-  {$IFDEF UNIX}
-  FpChmod(OutputFileName, Attrs);
-  {$ELSE}
-  FileSetAttr(OutputFileName, Attrs);
-  {$ENDIF}
-  *)
-
   FPCupManager.LoadFPCUPConfig;
 
   FPCupManager.FPCURL:='default';
@@ -610,6 +601,11 @@ begin
     Memo1.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');
   end;
 
+  if (ExistWordInString(PChar(s),'switch',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
+  begin
+    Memo1.Lines.Append('Performing a SVN repo URL switch ... please wait, could take some time.');
+  end;
+
   // github error
   if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
   begin
@@ -719,7 +715,7 @@ begin
   end;
 
   // linker error
-  if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[])) then
+  if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[soDown])) then
   begin
     x:=Pos('-l',s);
     if x>0 then
@@ -730,14 +726,14 @@ begin
   end;
 
   // diskspace errors
-  if (ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
+  if (ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
   begin
     Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
     Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
   end;
 
   // RAM errors
-  if (ExistWordInString(PChar(s),'Can''t call the assembler',[])) then
+  if (ExistWordInString(PChar(s),'Can''t call the assembler',[soDown])) then
   begin
     Memo1.Lines.Append('Most likely, there is not enough RAM (swap) to finish this operation.');
     Memo1.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
@@ -790,13 +786,21 @@ begin
   s:=Trim(s);
   if Length(s)=0 then exit;
 
-  {
-  if (NOT Special) AND ExistWordInString(PChar(s),'fpcupdeluxe:',[soWholeWord,soDown]) then
+  if (NOT Special) AND ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
   begin
-    FG      := clAqua;
-    BG      := clBlack;
+    if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
+    begin
+      FG      := clYellow;
+      BG      := clBlack;
+      Special := True;
+    end;
+    if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
+    begin
+      FG      := clFuchsia;
+      BG      := clBlack;
+      Special := True;
+    end;
   end;
-  }
 
   if (NOT Special) AND ExistWordInString(PChar(s),'executing:',[soWholeWord,soDown]) then
   begin
@@ -808,13 +812,6 @@ begin
   if (NOT Special) AND ((ExistWordInString(PChar(s),'A',[soWholeWord])) OR (ExistWordInString(PChar(s),'U',[soWholeWord]))) then
   begin
     FG      := clSkyBlue;
-    BG      := clBlack;
-    Special := True;
-  end;
-
-  if (NOT Special) AND ExistWordInString(PChar(s),'info:',[soWholeWord,soDown]) then
-  begin
-    FG      := clYellow;
     BG      := clBlack;
     Special := True;
   end;
@@ -841,7 +838,7 @@ begin
   end;
 
   // linker error
-  if (NOT Special) AND (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[])) then
+  if (NOT Special) AND (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[soDown])) then
   begin
     FG      := clRed;
     BG      := clNavy;
@@ -849,7 +846,7 @@ begin
   end;
 
   // diskspace error
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'Stream write error',[])) OR (ExistWordInString(PChar(s),'disk full',[soDown]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown]))) then
   begin
     FG      := clRed;
     BG      := clAqua;
@@ -915,7 +912,7 @@ begin
 
   if (NOT Special) AND ExistWordInString(PChar(s),'start compiling package',[soDown]) then
   begin
-    FG      := TColor($107CCF);
+    FG      := TColor($FFA000);
     BG      := clBlack;
     Special := True;
   end;

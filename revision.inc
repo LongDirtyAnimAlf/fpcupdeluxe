@@ -1,1 +1,1 @@
-const {%H-}RevisionStr='026';{%H-}versiondate='20170606';
+const {%H-}RevisionStr='027';{%H-}versiondate='20170616';

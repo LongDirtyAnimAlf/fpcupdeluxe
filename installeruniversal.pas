@@ -301,7 +301,8 @@ var
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   result:=true;
-  infoln('TUniversalInstaller: initialising...',etDebug);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  infoln(infotext+'Entering ...',etDebug);
   if InitDone then
     exit;
   if FVerbose then
@@ -311,9 +312,9 @@ begin
   // However, in theory, we could run only external modules and
   // only download some SVN repositories
   // So.. enable this.
-  result:=(CheckAndGetNeededExecutables) AND (CheckAndGetNeededBinUtils);
+  result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
   if not(result) then
-    infoln('Universalinstaller: missing required executables. Aborting.',etError);
+    infoln(infotext+'Missing required executables. Aborting.',etError);
 
   // Add fpc architecture bin and plain paths
   FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
@@ -347,6 +348,7 @@ var
   TxtFile:TextFile;
 begin
   result:=false;
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InstallPackage): ';
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
 
   // Convert any relative path to absolute path, if it's not just a file/package name:
@@ -375,8 +377,8 @@ begin
   end;
 
   if lpkversion.Name='unknown'
-     then WritelnLog('Installing '+PackageName,True)
-     else WritelnLog('Installing '+PackageName+' version '+lpkversion.AsString,True);
+     then WritelnLog(localinfotext+'Installing '+PackageName,True)
+     else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
 
   Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
   FErrorLog.Clear;
@@ -400,12 +402,12 @@ begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
       if Pos('only for runtime',Processor.OutputString)>0
          then result:=True
-         else WritelnLog('InstallerUniversal: error trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
+         else WritelnLog(localinfotext+'Rrror trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
       begin
-      WritelnLog('InstallerUniversal: exception trying to add package '+PackageName+LineEnding+
+      WritelnLog(localinfotext+'Exception trying to add package '+PackageName+LineEnding+
         'Details: '+E.Message,true);
       end;
   end;
@@ -415,7 +417,7 @@ begin
   // in fact, we cannot do anything in that case : we do not know anything about the package !
   if (result) AND (lpkversion.Name<>'unknown') then
   begin
-    if FVerbose then WritelnLog('TUniversalInstaller: checking lpl file for '+PackageName,true);
+    if FVerbose then WritelnLog(localinfotext+'Checking lpl file for '+PackageName,true);
     Path := IncludeTrailingPathDelimiter(LazarusDir)+
             'packager'+DirectorySeparator+
             'globallinks'+DirectorySeparator+
@@ -430,7 +432,7 @@ begin
       finally
         CloseFile(TxtFile);
       end;
-      if FVerbose then WritelnLog('Created lpl file ('+Path+') with contents: '+PackageAbsolutePath,true);
+      if FVerbose then WritelnLog(localinfotext+'Created lpl file ('+Path+') with contents: '+PackageAbsolutePath,true);
     end;
   end;
 end;
@@ -447,6 +449,7 @@ var
   BaseWorkingdir:string;
 begin
   Failure:=false;
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
   BaseWorkingdir:=GetValue('Workingdir',sl);
   // Go backward; reverse order to deal with any dependencies
   for i:=MAXINSTRUCTIONS downto 0 do
@@ -458,7 +461,8 @@ begin
     if PackagePath='' then continue;
     if NOT FileExists(PackagePath) then
     begin
-      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+      infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+      UnInstallPackage(PackagePath);
       continue;
     end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
@@ -502,6 +506,7 @@ var
   BaseWorkingdir:string;
   RealDirective:string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages): ';
 
   RealDirective:=Directive;
   PackagePath:=GetValue(RealDirective,sl);
@@ -520,7 +525,8 @@ begin
     if (PackagePath='') then continue;
     if NOT FileExists(PackagePath) then
     begin
-      infoln('TUniversalInstaller: package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+      infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+      UnInstallPackage(PackagePath);
       continue;
     end;
 
@@ -529,7 +535,7 @@ begin
     // so skip them in case they are included.
     if (Pos('lazdatadict',PackagePath)>0) OR (Pos('lazdbexport',PackagePath)>0) then
     begin
-      infoln('TUniversalInstaller: incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
       continue;
     end;
     {$endif}
@@ -539,7 +545,7 @@ begin
     // so skip in case package was included.
     if (Pos('pascalscript',PackagePath)>0) then
     begin
-      infoln('TUniversalInstaller: incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
       continue;
     end;
     {$endif}
@@ -549,7 +555,7 @@ begin
     // so skip in case package was included.
     if (Pos('editormacroscript',PackagePath)>0) then
     begin
-      infoln('TUniversalInstaller: incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
       continue;
     end;
     {$endif CPUAARCH64}
@@ -575,8 +581,8 @@ begin
     result:=InstallPackage(PackagePath,WorkingDir);
     if not result then
     begin
-      infoln('TUniversalInstaller: error while installing package '+PackagePath+'.',etWarning);
-      if FVerbose then WritelnLog('TUniversalInstaller: error while installing package '+PackagePath+'.',false);
+      infoln(localinfotext+'Error while installing package '+PackagePath+'.',etWarning);
+      if FVerbose then WritelnLog(localinfotext+'Error while installing package '+PackagePath+'.',false);
       break;
     end;
     {$endif}
@@ -594,6 +600,8 @@ var
   Workingdir:string;
   BaseWorkingdir:string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateInstallers): ';
+
   result:=true; //succeed by default
   BaseWorkingdir:=GetValue('Workingdir',sl);
   for i:=0 to MAXINSTRUCTIONS do
@@ -609,12 +617,12 @@ begin
       'WINDOWS','WINDOWS32','WIN32','WINX86': {good name};
       else
         begin
-        writelnlog('TUniversalInstaller: ignoring unknown installer name '+exec+'.',true);
+        writelnlog(localinfotext+'Ignoring unknown installer name '+exec+'.',true);
         continue;
         end;
     end;
 
-    if FVerbose then WritelnLog('TUniversalInstaller: running CreateInstallers for '+exec,true);
+    if FVerbose then WritelnLog(localinfotext+'Running CreateInstallers for '+exec,true);
     // Convert any relative path to absolute path:
     InstallDir:=IncludeTrailingPathDelimiter(SafeExpandFileName(GetValue('InstallDir',sl)));
     if InstallDir<>'' then
@@ -635,7 +643,7 @@ begin
 
     if not result then
       begin
-      WritelnLog('TUniversalInstaller: CreateInstallers for '+exec+' failed. Stopping installer creation.',true);
+      WritelnLog(etError,localinfotext+'CreateInstallers for '+exec+' failed. Stopping installer creation.',true);
       break; //fail on first installer failure
       end;
     end;
@@ -650,6 +658,8 @@ var
   BaseWorkingdir:string;
   Workingdir:string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RunCommands: '+Directive+'): ';
+
   result:=true; //not finding any instructions at all should not be a problem.
   BaseWorkingdir:=GetValue('Workingdir',sl);
   for i:=0 to MAXINSTRUCTIONS do
@@ -676,7 +686,7 @@ begin
     end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
-    if FVerbose then WritelnLog('TUniversalInstaller: running ExecuteCommandInDir for '+exec,true);
+    if FVerbose then WritelnLog(localinfotext+'Running ExecuteCommandInDir for '+exec,true);
     try
       result:=ExecuteCommandInDir(exec,Workingdir,output,FPath,FVerbose)=0;
       if result then
@@ -689,20 +699,20 @@ begin
           (pos('only for runtime',lowercase(output))=0)
         then
         begin
-          infoln('Marking Lazarus for rebuild based on exec line '+exec,etDebug);
+          infoln(localinfotext+'Marking Lazarus for rebuild based on exec line '+exec,etDebug);
           FLazarusNeedsRebuild:=true;
         end;
         {$endif}
       end
       else
       begin
-        WritelnLog('InstallerUniversal: warning: running '+exec+' returned an error.',true);
+        WritelnLog(etWarning, localinfotext+'Running '+exec+' returned an error.',true);
         break;
       end;
     except
       on E: Exception do
         begin
-        WritelnLog('InstallerUniversal: exception trying to execute '+exec+LineEnding+
+        WritelnLog(etError, localinfotext+'Exception trying to execute '+exec+LineEnding+
           'Details: '+E.Message,true);
         end;
     end;
@@ -721,13 +731,20 @@ var
   lpkversion:TAPkgVersion;
 begin
   result:=false;
+
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
+  infoln(localinfotext+'Entering ...',etDebug);
+
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+
+  infoln(localinfotext+'Removing package from config-files',etInfo);
+
   // Convert any relative path to absolute path, if it's not just a file/package name:
   if ExtractFileName(PackagePath)=PackagePath then
     PackageAbsolutePath:=PackagePath
   else
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
-  if FVerbose then WritelnLog('TUniversalInstaller: going to uninstall package '+PackageName,true);
+  if FVerbose then WritelnLog(localinfotext+'Going to uninstall package',true);
   xmlfile:=PackageConfig;
   key:='UserPkgLinks/Count';
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
@@ -746,6 +763,7 @@ begin
       end;
     if i>1 then // found
       begin
+      infoln(localinfotext+'Removing package from '+xmlfile,etInfo);
       FLazarusNeedsRebuild:=true;
       LazarusConfig.SetVariable(xmlfile, key, cnt-1);
       key:='UserPkgLinks/Item'+IntToStr(cnt)+'/';
@@ -775,6 +793,7 @@ begin
       end;
     if i>1 then // found
       begin
+      infoln(localinfotext+'Removing package from '+xmlfile,etInfo);
       FLazarusNeedsRebuild:=true;
       LazarusConfig.SetVariable(xmlfile, key, cnt-1);
       key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages'
@@ -793,12 +812,12 @@ begin
           );
       end
   finally
-    LazarusConfig.Free;
+    LazarusConfig.Destroy;
   end;
 
   if (ExtractFileName(PackagePath)<>PackagePath) then
   begin
-    if FVerbose then WritelnLog('TUniversalInstaller: removing lpl file for '+ExtractFileName(PackagePath),true);
+    if FVerbose then WritelnLog(localinfotext+'Removing lpl file for '+ExtractFileName(PackagePath),true);
     lpkdoc:=TConfig.Create(PackageAbsolutePath);
     key:='Package/';
     try
@@ -836,10 +855,11 @@ var
   idx:integer;
   sl:TStringList;
 begin
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
   // Log to console only:
-  infoln('TUniversalInstaller: building module '+ModuleName+'...',etInfo);
+  infoln(infotext+'Building module '+ModuleName+'...',etInfo);
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
     begin
@@ -847,13 +867,13 @@ begin
 
     // Run all InstallExecute<n> commands:
     // More detailed logging only if verbose or debug:
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
+    if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all InstallExecute commands in: '+LineEnding+
       sl.text,true);
     result:=RunCommands('InstallExecute',sl);
 
     // Run all CreateInstaller<n> commands; for now Windows only
     {$IFDEF MSWINDOWS}
-    if FVerbose then WritelnLog('TUniversalInstaller: building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
+    if FVerbose then WritelnLog(infotext+'Building module '+ModuleName+' running all CreateInstaller commands in: '+LineEnding+
       sl.text,true);
     result:=CreateInstallers('CreateInstaller',sl, ModuleName);
     {$ENDIF MSWINDOWS}
@@ -864,6 +884,7 @@ end;
 
 function TUniversalInstaller.CleanModule(ModuleName: string): boolean;
 begin
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
   result:=true;
@@ -950,6 +971,7 @@ begin
 // counter: the attribute key for the counter used to keep track of lists. Used to insert a new value in a list. Read and incremented by 1;
 //          When using a counter, <key> can use a the '#' character as a placeholder for the new count written to <counter>
 // value:  the string value to store in <key>.
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
   {$ifndef FPCONLY}
@@ -999,7 +1021,7 @@ begin
             key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
             LazarusConfig.SetVariable(xmlfile,key+'Format/Version','2');
             LazarusConfig.SetVariable(xmlfile,key+'Title/Value',ModuleName);
-            infoln('Going to register external tool '+Directive+GetExeExt,etDebug);
+            infoln(infotext+'Going to register external tool '+Directive+GetExeExt,etDebug);
             LazarusConfig.SetVariable(xmlfile,key+'Filename/Value',Directive+GetExeExt);
 
             // If we're registering external tools, we should look for associated/
@@ -1032,7 +1054,7 @@ begin
             begin
             xmlfile:=HelpConfig;
             key:='Viewers/TChmHelpViewer/CHMHelp/Exe';
-            infoln('Going to register help viewer '+Directive+GetExeExt,etDebug);
+            infoln(infotext+'Going to register help viewer '+Directive+GetExeExt,etDebug);
             LazarusConfig.SetVariable(xmlfile,key,Directive+GetExeExt);
             end;
 
@@ -1040,16 +1062,16 @@ begin
           Directive:=GetValue('RegisterLazDocPath',sl);
           if Directive<>'' then
             begin
-            infoln('Going to add docpath '+Directive,etDebug);
+            infoln(infotext+'Going to add docpath '+Directive,etDebug);
             LazDocPathAdd(Directive, LazarusConfig);
             end;
         except
           on E: Exception do
           begin
             if Directive='' then
-              writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName, true)
+              writelnlog(etError,infotext+'Exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName, true)
             else
-              writelnlog('ERROR: Universal installer: exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName+' (parsing directive:'+Directive+')', true);
+              writelnlog(etError,infotext+'Exception '+E.ClassName+'/'+E.Message+' configuring module: '+ModuleName+' (parsing directive:'+Directive+')', true);
           end;
         end;
       finally
@@ -1059,7 +1081,7 @@ begin
       // If Lazarus was marked for rebuild, do so:
       if FLazarusNeedsRebuild then
       begin
-        infoln('InstallerUniversal: going to rebuild Lazarus because packages were installed.',etInfo);
+        infoln(infotext+'Going to rebuild Lazarus because packages were installed.',etInfo);
         Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
         FErrorLog.Clear;
         Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
@@ -1081,16 +1103,16 @@ begin
           result := Processor.ExitStatus=0;
           if result then
           begin
-            infoln('InstallerUniversal: Lazarus rebuild succeeded',etDebug);
+            infoln(infotext+'Lazarus rebuild succeeded',etDebug);
             FLazarusNeedsRebuild:=false;
           end
           else
-            WritelnLog('InstallerUniversal: error trying to rebuild Lazarus. '+LineEnding+
+            WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
               'Details: '+FErrorLog.Text,true);
         except
           on E: Exception do
             begin
-            WritelnLog('InstallerUniversal: exception trying to rebuild Lazarus '+LineEnding+
+            WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
               'Details: '+E.Message,true);
             result:=false;
             end;
@@ -1100,7 +1122,7 @@ begin
   else
     begin
     // Could not find module in module list
-    writelnlog('ERROR: Universal installer: could not find specified module '+ModuleName,true);
+    writelnlog(etError, infotext+'Could not find specified module '+ModuleName,true);
     result:=false;
     end;
   {$endif}
@@ -1122,6 +1144,7 @@ var
   ExtensionName:string;
   Direction:string;
 begin
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
   SourceOK:=false;
@@ -1130,7 +1153,7 @@ begin
   begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
 
-    WritelnLog('Getting module '+ModuleName,True);
+    WritelnLog(infotext+'Getting module '+ModuleName,True);
     InstallDir:=GetValue('InstallDir',PackageSettings);
     FSourceDirectory:=InstallDir;
 
@@ -1145,8 +1168,8 @@ begin
     RemoteURL:=GetValue('GITURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      infoln('Going to download/update from GIT repository '+RemoteURL,etInfo);
-      infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
+      infoln(infotext+'Going to download/update from GIT repository '+RemoteURL,etInfo);
+      infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         FUrl:=RemoteURL;
@@ -1163,8 +1186,8 @@ begin
         UpdateWarnings.Free;
       end;
       if SourceOK
-         then infoln('Download/update from GIT repository ok.',etInfo)
-         else infoln('Getting GIT repo failed. Trying another source, if available.',etInfo)
+         then infoln(infotext+'Download/update from GIT repository ok.',etInfo)
+         else infoln(infotext+'Getting GIT repo failed. Trying another source, if available.',etInfo)
     end;
 
 
@@ -1172,8 +1195,8 @@ begin
     RemoteURL:=GetValue('SVNURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      infoln('Going to download/update from SVN repository '+RemoteURL,etInfo);
-      infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
+      infoln(infotext+'Going to download/update from SVN repository '+RemoteURL,etInfo);
+      infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         FUrl:=RemoteURL;
@@ -1192,16 +1215,16 @@ begin
         UpdateWarnings.Free;
       end;
       if SourceOK
-         then infoln('Download/update from SVN repository ok.',etInfo)
-         else infoln('Getting SVN repo failed. Trying another source, if available.',etInfo)
+         then infoln(infotext+'Download/update from SVN repository ok.',etInfo)
+         else infoln(infotext+'Getting SVN repo failed. Trying another source, if available.',etInfo)
     end;
 
     // Handle HG URLs
     RemoteURL:=GetValue('HGURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      infoln('Going to download/update from HG repository '+RemoteURL,etInfo);
-      infoln('Please wait: this can take some time (if repo is big or has a large history).',etInfo);
+      infoln(infotext+'Going to download/update from HG repository '+RemoteURL,etInfo);
+      infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
         FUrl:=RemoteURL;
@@ -1211,7 +1234,7 @@ begin
         result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=result;
         if result=false then
-          WritelnLog('HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
+          WritelnLog(infotext+'HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1220,16 +1243,16 @@ begin
         UpdateWarnings.Free;
       end;
       if SourceOK
-         then infoln('Download/update from HG repository ok.',etInfo)
-         else infoln('Getting HG repo failed. Trying another source, if available.',etInfo)
+         then infoln(infotext+'Download/update from HG repository ok.',etInfo)
+         else infoln(infotext+'Getting HG repo failed. Trying another source, if available.',etInfo)
     end;
 
     RemoteURL:=GetValue('ArchiveURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      infoln('Going to download from archive '+RemoteURL,etInfo);
+      infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
       TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
-      WritelnLog('Going to download '+RemoteURL+' into '+TempArchive,True);
+      WritelnLog(infotext+'Going to download '+RemoteURL+' into '+TempArchive,false);
       try
         result:=Download(FUseWget, RemoteURL, TempArchive);
       except
@@ -1240,11 +1263,11 @@ begin
       end;
 
       if result=false then
-         WritelnLog(etError,'Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+         WritelnLog(etError,infotext+'Error downloading from '+RemoteURL+'. Continuing regardless.',True);
 
       if result then
       begin
-        WritelnLog('Download ok',True);
+        WritelnLog(infotext+'Download ok',True);
         // Extract, overwrite
         case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
            '.ZIP':
@@ -1296,14 +1319,14 @@ begin
         if ResultCode <> 0 then
         begin
           result := False;
-          infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+          infoln(infotext+'Unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
         end;
       end;
       SysUtils.Deletefile(TempArchive); //Get rid of temp file.
       SourceOK:=result;
       if SourceOK then
       begin
-        infoln('Download from archive ok.',etInfo);
+        infoln(infotext+'Download from archive ok.',etInfo);
 
         // check specials for GitHub !!
         // tricky, but necessary unfortunately ...
@@ -1404,13 +1427,13 @@ begin
           end;
         end;
 
-      end else infoln('Getting archive failed. Trying another source, if available.',etInfo)
+      end else infoln(infotext+'Getting archive failed. Trying another source, if available.',etInfo)
     end;
 
     RemoteURL:=GetValue('ArchivePATH',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
-      infoln('Going to download from archive path '+RemoteURL,etInfo);
+      infoln(infotext+'Going to download from archive path '+RemoteURL,etInfo);
       TempArchive := RemoteURL;
       case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
          '.ZIP':
@@ -1449,10 +1472,10 @@ begin
       if ResultCode <> 0 then
       begin
         result := False;
-        infoln(ModuleName+': unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+        infoln(infotext+'Unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
 
-      if result then infoln('Download from archive path ok.',etInfo);
+      if result then infoln(infotext+'Download from archive path ok.',etInfo);
 
       // todo patch package if correct patch is available in patch directory
 
@@ -1481,6 +1504,7 @@ var
   LazarusConfig:TUpdateLazConfig;
 {$endif}
 begin
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
   {$ifndef FPCONLY}
@@ -1488,7 +1512,7 @@ begin
   if idx>=0 then
   begin
     sl:=TStringList(UniModuleList.Objects[idx]);
-    WritelnLog('UnInstalling module '+ModuleName);
+    WritelnLog(infotext+'UnInstalling module '+ModuleName);
     result:=RunCommands('UnInstallExecute',sl);
 
     // Process all AddPackage<n> directives in reverse.
@@ -1543,7 +1567,7 @@ begin
     // If Lazarus was marked for rebuild, do so:
     if FLazarusNeedsRebuild then
     begin
-      infoln('InstallerUniversal: going to rebuild Lazarus because packages were uninstalled.',etInfo);
+      infoln(infotext+'Going to rebuild Lazarus because packages were uninstalled.',etInfo);
       Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
       FErrorLog.Clear;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
@@ -1565,16 +1589,16 @@ begin
         result := Processor.ExitStatus=0;
         if result then
         begin
-          infoln('InstallerUniversal: Lazarus rebuild succeeded',etDebug);
+          infoln(infotext+'Lazarus rebuild succeeded',etDebug);
           FLazarusNeedsRebuild:=false;
         end
         else
-          WritelnLog('InstallerUniversal: error trying to rebuild Lazarus. '+LineEnding+
+          WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
             'Details: '+FErrorLog.Text,true);
       except
         on E: Exception do
           begin
-          WritelnLog('InstallerUniversal: exception trying to rebuild Lazarus '+LineEnding+
+          WritelnLog(etError,infotext+'Exception trying to rebuild Lazarus '+LineEnding+
             'Details: '+E.Message,true);
           result:=false;
           end;
@@ -1632,7 +1656,7 @@ begin
         // added because older fpc.ini or equivalent may not have the default keyword !!
         if Uppercase(KeyWord)='DEFAULT' then
         begin
-          infoln('InstallerUniversal: no default source alias found: using fpcup default',etInfo);
+          infoln('InstallerUniversal (GetAlias): no default source alias found: using fpcup default',etInfo);
           if Dictionary='fpcURL' then result:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
           if Dictionary='lazURL' then result:=FPCSVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);

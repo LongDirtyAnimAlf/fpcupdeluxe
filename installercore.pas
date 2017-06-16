@@ -150,7 +150,7 @@ type
     FSwitchURL: boolean;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
-    function CheckAndGetNeededExecutables: boolean;
+    function CheckAndGetTools: boolean;
     // Check for existence of required binutils; if not there, get them if possible
     function CheckAndGetNeededBinUtils: boolean;
     // Make a list (in FUtilFiles) of all binutils that can be downloaded
@@ -191,6 +191,8 @@ type
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
   public
+    InfoText: string;
+    LocalInfoText: string;
     property SVNClient: TSVNClient read FSVNClient;
     // Get processor for termination of running processes
     property Processor: TProcessEx read FProcessEx;
@@ -377,12 +379,14 @@ begin
   FSVNClient.HTTPProxyUser:=FHTTPProxyUser;
 end;
 
-function TInstaller.CheckAndGetNeededExecutables: boolean;
+function TInstaller.CheckAndGetTools: boolean;
 var
   AllThere: boolean;
   OperationSucceeded: boolean;
   Output: string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
+
   OperationSucceeded := true;
   if not FNeededExecutablesChecked then
   begin
@@ -437,11 +441,11 @@ begin
       // check availability of OpenSSL libraries. Just continue in case of error
       if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll') then
       begin
-        infoln('Found OpenSLL library files.',etDebug);
+        infoln(localinfotext+'Found OpenSLL library files.',etDebug);
       end
       else
       begin
-        infoln('No OpenSLL library files available. Going to download them',etWarning);
+        infoln(localinfotext+'No OpenSLL library files available. Going to download them',etWarning);
         DownloadOpenSSL;
       end;
     end;
@@ -530,7 +534,7 @@ begin
         if ExecuteCommand('as --version', Output, False) <> 0 then
         begin
           ExecuteCommand('as --version', Output, True);
-          infoln('Missing assembler as. Please install the developer tools.',etError);
+          infoln(localinfotext+'Missing assembler as. Please install the developer tools.',etError);
           OperationSucceeded := false;
         end;
       except
@@ -566,7 +570,7 @@ begin
       {$IFDEF MSWINDOWS}
       if NOT AllThere then
       begin
-        infoln('Going to download SVN',etInfo);
+        infoln(localinfotext+'Going to download SVN',etInfo);
         // Download will look in and below FSVNDirectory
         // and set FSVNClient.SVNExecutable if succesful
         FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
@@ -578,8 +582,8 @@ begin
       if NOT AllThere then
       begin
         OperationSucceeded := false;
-        infoln('Could not find SVN executable. Please make sure it is installed.',etError);
-      end else infoln('SVN client found: ' + FSVNClient.RepoExecutable+'.',etDebug);
+        infoln(localinfotext+'Could not find SVN executable. Please make sure it is installed.',etError);
+      end else infoln(localinfotext+'SVN client found: ' + FSVNClient.RepoExecutable+'.',etDebug);
     end;
 
     if OperationSucceeded then
@@ -614,7 +618,7 @@ begin
         ExecuteCommand(Make + ' -v', Output, true);
         if Ansipos('GNU Make', Output) = 0 then
         begin
-          infoln('Found make executable, but it is not GNU Make.',etError);
+          infoln(localinfotext+'Found make executable, but it is not GNU Make.',etError);
           OperationSucceeded := false;
         end else OperationSucceeded := true;
       except
@@ -638,10 +642,11 @@ var
   OperationSucceeded: boolean;
   Output: string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+
   OperationSucceeded := true;
 
   {$IFDEF MSWINDOWS}
-  infoln('Get the right binutils for the bootstrap compiler.',etInfo);
   if OperationSucceeded then
   begin
     // Download if needed, including unzip - needed for SVN download
@@ -649,7 +654,7 @@ begin
     AllThere:=true;
     if DirectoryExists(FMakeDir) = false then
     begin
-      infoln('Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
+      infoln(localinfotext+'Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
       AllThere:=false;
     end
     else
@@ -662,7 +667,7 @@ begin
           if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
           begin
             AllThere:=false;
-            infoln('Make path ' + FMakeDir + ' does not have (all) binutils. Going to download needed binutils.',etInfo);
+            infoln(localinfotext+'Make path ' + FMakeDir + ' does not have (all) binutils. Going to download needed binutils.',etInfo);
             break;
           end;
         end;
@@ -687,7 +692,7 @@ begin
       if Ansipos('GNU Make', Output) = 0 then
       begin
         ExecuteCommand(Make + ' -v', Output, True);
-        infoln('Found make executable, but it is not GNU Make.',etError);
+        infoln(localinfotext+'Found make executable, but it is not GNU Make.',etError);
         OperationSucceeded := false;
       end;
     except
@@ -727,6 +732,7 @@ var
   aMajor,aMinor,aBuild : Integer;
 begin
 
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
 
   SetLength(FUtilFiles,0); //clean out any cruft
 
@@ -753,9 +759,9 @@ begin
   aSourceURL64:=BINUTILSURL+'/'+aTag+'/install/binw64/';
   {$endif}
 
-  infoln('Getting binutils from URL: '+aSourceURL+'.',etInfo);
+  infoln(localinfotext+'Getting binutils from URL: '+aSourceURL+'.',etInfo);
   {$ifdef win64}
-  infoln('Getting 64bit binutils from URL: '+aSourceURL64+'.',etInfo);
+  infoln(localinfotext+'Getting 64bit binutils from URL: '+aSourceURL64+'.',etInfo);
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)
@@ -877,8 +883,8 @@ var
   Errors: integer = 0;
   DownloadSuccess:boolean;
   InstallPath:string;
-
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesUTF8(FMakeDir);
   Result := true;
@@ -903,9 +909,9 @@ begin
 
       if NOT DownloadSuccess then
       begin
-        infoln('Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
+        infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
         Errors := Errors + 1;
-      end else infoln('Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
+      end else infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
 
     end;
 
@@ -914,7 +920,7 @@ begin
   if Errors > 0 then
   begin
     Result := false;
-    WritelnLog('DownloadBinUtils: ' + IntToStr(Errors) + ' error(s) downloading binutils.', true);
+    WritelnLog(localinfotext+IntToStr(Errors) + ' error(s) downloading binutils.', true);
   end;
 end;
 
@@ -923,19 +929,17 @@ function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; va
 var
   BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
-  aClientName:string;
   DiffFile: String;
   LocalPatchCmd : string;
   DiffFileSL:TStringList;
   Output: string = '';
 begin
-
   Result := false;
 
   // check if we do have a client !!
   if NOT aClient.ValidClient then exit;
 
-  aClientName:=Copy(aClient.ClassName,2,200);
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+Copy(aClient.ClassName,2,MaxInt)+': '+ModuleName+'): ';
 
   //todo: check if we need to add forcedirectoriesutf8 to create local repo dir if it doesn't exist
   BeforeRevision := 'failure';
@@ -975,9 +979,9 @@ begin
     begin
       FRepositoryUpdated := false;
       Result := false;
-      writelnlog(etError, aClientName+' ERROR: repository URL in local directory and remote repository don''t match.', true);
-      writelnlog('Local directory: ' + aClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
+      writelnlog(etError, localinfotext+'Repository URL in local directory and remote repository don''t match.', true);
+      writelnlog(localinfotext+'Local directory: ' + aClient.LocalRepository, true);
+      infoln(localinfotext+'Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
     end;
     else
     begin
@@ -1043,9 +1047,9 @@ begin
          // Report error, but continue !
          if ReturnCode<>0 then
          begin
-           writelnlog(etError, aClientName+' ERROR: Patching with ' + DiffFile + ' failed.', true);
-           writelnlog(aClientName+' output: ' + Output, true);
-           writelnlog('Verify the state of the source, correct and rebuild with make.', true);
+           writelnlog(etError, localinfotext+'Patching with ' + DiffFile + ' failed.', true);
+           writelnlog(localinfotext+'Output: ' + Output, true);
+           writelnlog(localinfotext+'Verify the state of the source, correct and rebuild with make.', true);
          end;
        end;
     end;
@@ -1076,6 +1080,8 @@ var
 begin
   result:=true;
 
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromSVN: '+ModuleName+'): ';
+
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
@@ -1097,15 +1103,15 @@ begin
     writelnlog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
     if not(DirectoryExistsUTF8(FSVNClient.LocalRepository)) then
     begin
-      writelnlog('Creating directory '+FSourceDirectory+' for SVN checkout.');
+      writelnlog(localinfotext+'Creating directory '+FSourceDirectory+' for SVN checkout.');
       ForceDirectoriesUTF8(FSourceDirectory);
     end;
   end;
 
   if (FSVNClient.LocalRevisionWholeRepo = FRET_UNKNOWN_REVISION) and (FSVNClient.Returncode=FRET_WORKING_COPY_TOO_OLD) then
   begin
-    writelnlog(etError, 'The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
-    writelnlog(etError, 'Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
+    writelnlog(etError, localinfotext+'The working copy in ' + FSourceDirectory + ' was created with an older, incompatible version of svn.', true);
+    writelnlog(etError, localinfotext+'Run svn upgrade in the directory or make sure the original svn executable is the first in the search path.', true);
     result := false;  //fail
     exit;
   end;
@@ -1132,7 +1138,7 @@ begin
   end;
 
   FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
-  infoln('Running SVN checkout or update.',etInfo);
+  infoln(localinfotext+'Running SVN checkout or update.',etInfo);
 
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
@@ -1143,9 +1149,9 @@ begin
     begin
       FRepositoryUpdated := false;
       Result := false;
-      writelnlog(etError, 'Repository URL in local directory and remote repository don''t match.', true);
-      writelnlog('Local directory: ' + FSVNClient.LocalRepository, true);
-      infoln('Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
+      writelnlog(etError, localinfotext+'Repository URL in local directory and remote repository don''t match.', true);
+      writelnlog(localinfotext+'Local directory: ' + FSVNClient.LocalRepository, true);
+      infoln(localinfotext+'Have you specified the wrong directory or a directory with an old repository checkout?',etDebug);
     end;
     else
     begin
@@ -1171,8 +1177,8 @@ begin
 
       if not Result then
       begin
-        writelnlog('DownloadFromSVN: SVN gave error code: '+inttostr(CheckoutOrUpdateReturnCode));
-        writelnlog('DownloadFromSVN: SVN gave error message: '+FSVNClient.ReturnOutput);
+        writelnlog(localinfotext+'SVN gave error code: '+inttostr(CheckoutOrUpdateReturnCode));
+        writelnlog(localinfotext+'SVN gave error message: '+FSVNClient.ReturnOutput);
       end;
 
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
@@ -1220,9 +1226,9 @@ begin
         // Report error, but continue !
         if CheckoutOrUpdateReturnCode<>0 then
         begin
-          writelnlog(etError, 'SVNClient error: Patching with ' + DiffFile + ' failed.', true);
-          writelnlog('SVNClient output: ' + Output, true);
-          writelnlog('Verify the state of the source, correct and rebuild with make.', true);
+          writelnlog(etError, localinfotext+'Patching with ' + DiffFile + ' failed.', true);
+          writelnlog(localinfotext+'Output: ' + Output, true);
+          writelnlog(localinfotext+'Verify the state of the source, correct and rebuild with make.', true);
         end;
       end;
     end;
@@ -1250,6 +1256,8 @@ var
   OperationSucceeded: boolean;
   SVNZip: string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadSVN): ';
+
   // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
   { Alternative 1: sourceforge packaged
   This won't work, we'd get an .msi:
@@ -1269,7 +1277,7 @@ begin
   // This svn version won't work on windows 2K
   if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
   begin
-    writelnlog(etError, 'It seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
+    writelnlog(etError, localinfotext + 'It seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
     exit(false);
   end;
 
@@ -1293,7 +1301,7 @@ begin
     on E: Exception do
     begin
       OperationSucceeded := false;
-      writelnlog(etError, 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL, true);
+      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL, true);
     end;
   end;
 
@@ -1312,12 +1320,12 @@ begin
   end
   else
   begin
-    writelnlog(etError, 'Downloading SVN client from ' + SourceURL, true);
+    writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL, true);
   end;
 
   if OperationSucceeded then
   begin
-    WritelnLog('SVN download and unpacking ok. Not going to search SVN client itself in ' + FSVNDirectory, true);
+    WritelnLog(localinfotext + 'SVN download and unpacking ok. Not going to search SVN client itself in ' + FSVNDirectory, true);
     OperationSucceeded := FindSVNSubDirs;
     if OperationSucceeded then
       SysUtils.Deletefile(SVNZip); //Get rid of temp zip if success.
@@ -1340,6 +1348,8 @@ var
   ResultCode: longint;
   OpenSSLZip: string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
+
   OperationSucceeded := true;
 
   ForceDirectoriesUTF8(SafeGetApplicationPath);
@@ -1362,7 +1372,7 @@ begin
     on E: Exception do
     begin
       OperationSucceeded := false;
-      writelnlog(etError, 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library from ' + SourceURL, true);
+      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library from ' + SourceURL, true);
     end;
   end;
 
@@ -1382,13 +1392,13 @@ begin
     if resultcode <> 0 then
     begin
       OperationSucceeded := false;
-      writelnlog(etError, 'Download OpenSSL error: unzip returned result code: ' + IntToStr(ResultCode));
+      writelnlog(etError, localinfotext + 'Download OpenSSL error: unzip returned result code: ' + IntToStr(ResultCode));
     end;
   end;
 
   if OperationSucceeded then
   begin
-    WritelnLog('OpenSLL download and unpacking ok.', true);
+    WritelnLog(localinfotext + 'OpenSLL download and unpacking ok.', true);
     SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
   end;
   Result := OperationSucceeded;
@@ -1411,6 +1421,8 @@ var
   OperationSucceeded: boolean;
   JasminZip,JasminDir: string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadJasmin): ';
+
   // for now, just put jasmin.jar in bin directory ... easy and simple and working
   JasminDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
 
@@ -1435,7 +1447,7 @@ begin
       on E: Exception do
       begin
         OperationSucceeded := false;
-        writelnlog(etError, 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Jasmin assembler from ' + SourceURL, true);
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Jasmin assembler from ' + SourceURL, true);
       end;
     end;
 
@@ -1457,23 +1469,23 @@ begin
         //MoveFile
         if NOT OperationSucceeded then
         begin
-          writelnlog(etError, 'Could not move jasmin.jar into '+JasminDir);
+          writelnlog(etError, localinfotext + 'Could not move jasmin.jar into '+JasminDir);
         end;
       end
       else
       begin
         OperationSucceeded := false;
-        writelnlog(etError, 'DownloadJasmin error: unzip failed due to unknown error.');
+        writelnlog(etError, localinfotext + 'DownloadJasmin error: unzip failed due to unknown error.');
       end;
     end
     else
     begin
-      writelnlog(etError, 'Downloading Jasmin assembler from ' + SourceURL + ' failed.', true);
+      writelnlog(etError, localinfotext + 'Downloading Jasmin assembler from ' + SourceURL + ' failed.', true);
     end;
 
     if OperationSucceeded then
     begin
-      WritelnLog('Jasmin assembler download and unpacking ok.', true);
+      WritelnLog(localinfotext + 'Jasmin assembler download and unpacking ok.', true);
       if OperationSucceeded then
       begin
         //Get rid of temp zip and dir if success.
@@ -1494,7 +1506,7 @@ begin
     begin
       FLogVerbose:=TLogger.Create;
       FLogVerbose.LogFile:=SysUtils.GetTempFileName;
-      WritelnLog('Verbose output saved to ' + FLogVerbose.LogFile, false);
+      WritelnLog(localinfotext+'Verbose output saved to ' + FLogVerbose.LogFile, false);
     end;
     FLogVerbose.WriteLog(Output,false);
   end;
@@ -1507,6 +1519,7 @@ var
   SVNFiles: TStringList;
   OperationSucceeded: boolean;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (FindSVNSubDirs): ';
   SVNFiles := FindAllFiles(FSVNDirectory, FSVNClient.RepoExecutableName + GetExeExt, true);
   try
     if SVNFiles.Count > 0 then
@@ -1517,7 +1530,7 @@ begin
     end
     else
     begin
-      infoln('Could not find svn executable in or under ' + FSVNDirectory,etwarning);
+      infoln(localinfotext+'Could not find svn executable in or under ' + FSVNDirectory,etWarning);
       OperationSucceeded := false;
     end;
   finally
@@ -1593,31 +1606,32 @@ procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);
 var
   TempFileName: string;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+': ';
   TempFileName := SysUtils.GetTempFileName;
   if IsException then
   begin
-    WritelnLog(etError, 'Exception raised running ' + Sender.ResultingCommand, true);
-    WritelnLog(etError, Sender.ExceptionInfo, true);
+    WritelnLog(etError, localinfotext+'Exception raised running ' + Sender.ResultingCommand, true);
+    WritelnLog(etError, localinfotext+Sender.ExceptionInfo, true);
   end
   else
   begin
-    writelnlog(etError, 'Running ' + Sender.ResultingCommand + ' failed.', true);
-    writelnlog(etError, 'Command returned non-zero ExitStatus: ' + IntToStr(Sender.ExitStatus), true);
-    writelnlog('Command path set to: ' + Sender.Environment.GetVar(PATHVARNAME), true);
-    writelnlog('Command current directory: ' + Sender.CurrentDirectory, true);
-    writelnlog('Command output:', true);
+    writelnlog(etError, localinfotext+'Running ' + Sender.ResultingCommand + ' failed.', true);
+    writelnlog(etError, localinfotext+'Command returned non-zero ExitStatus: ' + IntToStr(Sender.ExitStatus), true);
+    writelnlog(localinfotext+'Command path set to: ' + Sender.Environment.GetVar(PATHVARNAME), true);
+    writelnlog(localinfotext+'Command current directory: ' + Sender.CurrentDirectory, true);
+    writelnlog(localinfotext+'Command output:', true);
     // Dump command output to screen and detailed log
-    infoln(Sender.OutputString,etDebug);
+    infoln(localinfotext+Sender.OutputString,etDebug);
     try
       Sender.OutputStrings.SaveToFile(TempFileName);
     except
       on E: Exception do
       begin
         // Preferably continue if we can but do inform user of problems
-        infoln('LogError: Error writing verbose output to '+TempFileName+': '+E.Message,etError);
+        infoln(localinfotext+'Error writing verbose output to '+TempFileName+': '+E.Message,etError);
       end;
     end;
-    WritelnLog('  output logged in ' + TempFileName, false);
+    WritelnLog(localinfotext+'Output logged in ' + TempFileName, false);
   end;
 end;
 
@@ -1638,10 +1652,10 @@ begin
   Processor.Environment.SetVar(PATHVARNAME, ResultingPath);
   if ResultingPath <> EmptyStr then
   begin
-    WritelnLog('External program path:  ' + ResultingPath, false);
+    WritelnLog(Copy(Self.ClassName,2,MaxInt)+' (SetPath): External program path:  ' + ResultingPath, false);
   end;
   if FVerbose then
-    infoln('Set path to: ' + ResultingPath,etdebug);
+    infoln(Copy(Self.ClassName,2,MaxInt)+' (SetPath): Set path to: ' + ResultingPath,etDebug);
 end;
 
 procedure TInstaller.ProcessError(Sender: TProcessEx; IsException: boolean);
@@ -1685,31 +1699,45 @@ end;
 function TInstaller.BuildModule(ModuleName: string): boolean;
 begin
   result:=false;
-  writelnlog(etWarning, 'Should not happen: calling non-implemented BuildModule for '+ModuleName);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModule: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
 function TInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=false;
-  writelnlog(etWarning, 'Should not happen: calling non-implemented CleanModule for '+ModuleName);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
 function TInstaller.ConfigModule(ModuleName: string): boolean;
 begin
   result:=false;
-  writelnlog(etWarning, 'Should not happen: calling non-implemented ConfigModule for '+ModuleName);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (ConfigModule: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
 function TInstaller.GetModule(ModuleName: string): boolean;
 begin
   result:=false;
-  writelnlog(etWarning, 'Should not happen: calling non-implemented GetModule for '+ModuleName);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (GetModule: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
+
 function TInstaller.CheckModule(ModuleName: string): boolean;
 var
   aRepoClient:TRepoClient;
+  aEvent:TEventType;
 begin
   result:=true;
 
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckModule: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
+
   if NOT DirectoryExists(FSourceDirectory) then exit;
   if FExportOnly then exit;
+
+  if FSwitchURL then
+    aEvent:=etWarning
+  else
+    aEvent:=etError;
 
   // not so elegant check to see what kind of client we need ...
   aRepoClient:=nil;
@@ -1718,7 +1746,7 @@ begin
   if aRepoClient=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then aRepoClient:=FHGClient;
   if aRepoClient=nil then aRepoClient:=FSVNClient;
 
-  infoln(Self.ClassName+': checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
+  infoln(infotext+'checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
 
   aRepoClient.Verbose:=FVerbose;
   aRepoClient.ExportOnly:=FExportOnly;
@@ -1730,18 +1758,36 @@ begin
   result:=(aRepoClient.ReturnCode<>FRET_LOCAL_REMOTE_URL_NOMATCH);
 
   if result then
-    infoln(Self.ClassName+': ' + ModuleName + ' sources ok.',etInfo)
+    infoln(infotext+'sources ok.',etInfo)
   else
   begin
-    infoln(Self.ClassName+': ' + ModuleName + ' sources error (URL mismatch).',etError);
-    infoln(Self.ClassName+': ' + ModuleName + ' desired URL='+FURL,etError);
-    infoln(Self.ClassName+': ' + ModuleName + ' source URL='+aRepoClient.Repository,etError);
+    infoln(infotext+'sources error (URL mismatch).',aEvent);
+    infoln(infotext+'desired URL='+FURL,aEvent);
+    infoln(infotext+'source URL='+aRepoClient.Repository,aEvent);
+
+    if ((FSwitchURL) AND (NOT result)) then
+    begin
+      result:=true;
+
+      infoln(infotext+'switching source URL',etInfo);
+
+      FSVNClient.Verbose:=FVerbose;
+      FSVNClient.ExportOnly:=FExportOnly;
+      FSVNClient.ModuleName:=ModuleName;
+      FSVNClient.LocalRepository:=FSourceDirectory;
+      FSVNClient.Repository:=FURL;
+
+      FSVNClient.SwitchURL;
+
+      result:=true;
+    end;
   end;
 end;
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   result:=false;
-  writelnlog(etWarning, 'Should not happen: calling non-implemented UnInstallModule for '+ModuleName);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallModule: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
 
 constructor TInstaller.Create;
@@ -1767,12 +1813,13 @@ end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (GetFile): ';
   result:=((FileExists(aFile)) AND (NOT forceoverwrite) AND (FileSize(aFile)>0));
   if (NOT result) then
   begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
     result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    if (NOT result) then infoln('Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
+    if (NOT result) then infoln(localinfotext+'Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
   end;
 end;
 

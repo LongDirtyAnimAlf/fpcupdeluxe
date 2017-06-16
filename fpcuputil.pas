@@ -53,6 +53,17 @@ uses
 Const
   // Maximum retries when downloading a file
   DefMaxRetries = 5;
+  {$ifdef LCL}
+  BeginSnippet='fpcupdeluxe:'; //helps identify messages as coming from fpcupdeluxe instead of make etc
+  {$else}
+  {$ifndef FPCONLY}
+  BeginSnippet='fpclazup:'; //helps identify messages as coming from fpclazup instead of make etc
+  {$else}
+  BeginSnippet='fpcup:'; //helps identify messages as coming from fpcup instead of make etc
+  {$endif}
+  {$endif}
+  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
+
 
 type
   //callback = class
@@ -500,7 +511,8 @@ begin
     result:=FileExists(filename);
 
   except
-
+    on E: Exception do
+      infoln('File creation error: '+E.Message,etError);
   end;
 
 end;
@@ -1020,24 +1032,13 @@ end;
 {$ENDIF MSWINDOWS}
 
 procedure infoln(Message: string; Level: TEventType);
-const
-  {$ifdef LCL}
-  BeginSnippet='fpcupdeluxe: '; //helps identify messages as coming from fpcupdeluxe instead of make etc
-  {$else}
-  {$ifndef FPCONLY}
-  BeginSnippet='fpclazup: '; //helps identify messages as coming from fpclazup instead of make etc
-  {$else}
-  BeginSnippet='fpcup: '; //helps identify messages as coming from fpcup instead of make etc
-  {$endif}
-  {$endif}
-  Seriousness: array [TEventType] of string = ('custom:', 'info:', 'WARNING:', 'ERROR:', 'debug:');
 begin
 {$IFNDEF NOCONSOLE}
   // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
   if (Level<>etDebug) then
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-      writeln(BeginSnippet+Seriousness[Level]+' '+ Message); //we misuse this for info output
+      writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
       //sleep(200); //hopefully allow output to be written without interfering with other output
       sleep(1);
     end
@@ -1047,7 +1048,7 @@ begin
     {DEBUG conditional symbol is defined using
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
-    writeln(BeginSnippet+Seriousness[Level]+' '+ Message); //we misuse this for info output
+    writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
     //sleep(200); //hopefully allow output to be written without interfering with other output
     sleep(1);
     {$ENDIF}

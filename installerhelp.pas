@@ -226,6 +226,8 @@ uses
 function THelpInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
   result:=true;
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
+  infoln(infotext+'Entering ...',etDebug);
 end;
 
 function THelpInstaller.InitModule: boolean;
@@ -233,7 +235,10 @@ var
   BinPath: string; //path where compiler is
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
-  result:=(CheckAndGetNeededExecutables) AND (CheckAndGetNeededBinUtils);
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  infoln(infotext+'Entering ...',etDebug);
+
+  result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
 
   if result then
   begin
@@ -274,12 +279,14 @@ end;
 
 function THelpInstaller.CleanModule(ModuleName: string): boolean;
 begin
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
 end;
 
 function THelpInstaller.ConfigModule(ModuleName: string): boolean;
 begin
+  result:=inherited;
   result:=true;
 end;
 
@@ -317,6 +324,7 @@ var
   ResultCode: longint;
   HelpUrl:string;
 begin
+  result:=inherited;
   result:=InitModule;
   if not result then exit;
 
@@ -486,7 +494,7 @@ end;
 
 function THelpInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
-//todo: implement help uninstall
+  result:=inherited;
   result:=true;
 end;
 
@@ -504,13 +512,13 @@ end;
 
 function THelpFPCInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
-  // A no op right now...
+  result:=inherited;
   result:=true;
 end;
 
 function THelpFPCInstaller.InitModule: boolean;
 begin
-  infoln('THelpFPCInstaller: initialising...',etDebug);
+  result:=inherited;
   result:=false;
   if inherited InitModule then
   begin
@@ -518,7 +526,7 @@ begin
     FTargetDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
       'doc'+DirectorySeparator+
       'ide'+DirectorySeparator; ;
-    infoln('Module FPCHELP: documentation directory: '+FTargetDirectory,etInfo);
+    infoln(infotext+'Documentation directory: '+FTargetDirectory,etInfo);
     result:=true;
   end;
 end;
@@ -529,7 +537,7 @@ begin
   // Check for valid directory
   if not DirectoryExistsUTF8(FTargetDirectory) then
   begin
-    infoln('HelpFPCInstaller CleanModule: directory '+FTargetDirectory+' does not exist. Exiting CleanModule.',etInfo);
+    infoln(infotext+'Directory '+FTargetDirectory+' does not exist. Exiting CleanModule.',etInfo);
     exit;
   end;
   if result then
@@ -599,6 +607,7 @@ var
   LHelpDirectory: string;
   OperationSucceeded:boolean;
 begin
+  result:=inherited;
   // lhelp viewer is needed which Lazarus builds that on first run
   // However, it can be prebuilt by enabling it as an external module in fpcup.ini
   OperationSucceeded:=true;
@@ -791,8 +800,10 @@ end;
 
 function THelpLazarusInstaller.InitModule: boolean;
 begin
+  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  infoln(infotext+'Entering ...',etDebug);
+
   result:=false;
-  infoln('THelpLazarusInstaller: initialising...',etDebug);
   if inherited InitModule then
   begin
     // This must be the directory of the build_lcl_docs project, otherwise
@@ -804,7 +815,7 @@ begin
     FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
-    infoln('helplazarus: FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
+    infoln(infotext+'FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
     result:=true;
   end;
 end;

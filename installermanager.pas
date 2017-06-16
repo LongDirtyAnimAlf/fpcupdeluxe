@@ -98,10 +98,11 @@ Const
     {$endif}
     {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
     'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
-    {$endif}
+    {$else}
     {$ifndef FPCONLY}
     // Any further cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
+    {$endif}
     {$endif}
     'End;'+
 
@@ -153,7 +154,7 @@ below}
     {$ifndef FPCONLY}
     //Getmodule has already been done
     // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
-    //'Cleanmodule LCL;'+
+    'Cleanmodule LCL;'+
     'Buildmodule LCL;'+
     {$endif}
     'End;'+
@@ -233,6 +234,7 @@ below}
     'Declare defaultwin64uninstall;'+
     'Do defaultuninstall;'+
     'End;'+
+
 //default check sequence
     'Declare defaultcheck;'+
     'Checkmodule fpc;'+
@@ -1024,7 +1026,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
-    infoln('Lazarus: creating desktop shortcut:',etInfo);
+    infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
     try
       // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
@@ -1075,7 +1077,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   result:=true;
   if FParent.ShortCutNameLazarus<>EmptyStr then
   begin
-    infoln('Lazarus: deleting desktop shortcut:',etInfo);
+    infoln('TSequencer.DoExec (Lazarus): deleting desktop shortcut:',etInfo);
     try
       //Delete shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
       {$IFDEF MSWINDOWS}
@@ -1286,7 +1288,7 @@ end;
 
 function TSequencer.DoSetOS(OS: string): boolean;
 begin
-  infoln('TSequencer: called DoSetOS for OS '+OS,etDebug);
+  infoln('TSequencer: DoSetOS for OS '+OS+' called.',etDebug);
   FParent.CrossOS_Target:=OS;
   ResetAllExecuted;
   result:=true;

@@ -83,7 +83,7 @@ type
     procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
     procedure DeleteDirectories(const CommandOutput: string);
-    procedure SwitchURL;
+    procedure SwitchURL; override;
     procedure Revert; override;
     constructor Create;
     destructor Destroy; override;
@@ -99,9 +99,6 @@ uses
   Unix,
   {$ENDIF}
   strutils, regexpr;
-
-const
-  MAXRETRIES = 3;
 
 { TSVNClient }
 function TSVNClient.GetRepoExecutableName: string;
