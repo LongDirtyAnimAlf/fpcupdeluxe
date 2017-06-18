@@ -235,8 +235,8 @@ var
   BinPath: string; //path where compiler is
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
-  infoln(infotext+'Entering ...',etDebug);
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  infoln(localinfotext+'Entering ...',etDebug);
 
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
 
@@ -800,8 +800,8 @@ end;
 
 function THelpLazarusInstaller.InitModule: boolean;
 begin
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
-  infoln(infotext+'Entering ...',etDebug);
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  infoln(localinfotext+'Entering ...',etDebug);
 
   result:=false;
   if inherited InitModule then
@@ -815,7 +815,7 @@ begin
     FBuildLCLDocsExeDirectory:=IncludeTrailingPathDelimiter(FInstallDirectory)+
       'docs'+DirectorySeparator+
       'html'+DirectorySeparator;
-    infoln(infotext+'FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
+    infoln(localinfotext+'FBuildLCLDocsExeDirectory: '+FTargetDirectory,etDebug);
     result:=true;
   end;
 end;

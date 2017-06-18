@@ -667,13 +667,17 @@ begin
           if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
           begin
             AllThere:=false;
-            infoln(localinfotext+'Make path ' + FMakeDir + ' does not have (all) binutils. Going to download needed binutils.',etInfo);
             break;
           end;
         end;
       end;
     end;
-    if not(AllThere) then OperationSucceeded := DownloadBinUtils;
+    if not(AllThere) then
+    begin
+      infoln(localinfotext+'Make path [' + FMakeDir + '] does not have (all) binutils. Going to download needed binutils.',etInfo);
+      //infoln(localinfotext+'Some binutils missing: going to get them.',etInfo);
+      OperationSucceeded := DownloadBinUtils;
+    end;
   end;
   {$ENDIF MSWINDOWS}
 
@@ -731,9 +735,6 @@ var
   aTag:string;
   aMajor,aMinor,aBuild : Integer;
 begin
-
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
-
   SetLength(FUtilFiles,0); //clean out any cruft
 
   {$IFDEF MSWINDOWS}
@@ -757,11 +758,6 @@ begin
   aSourceURL:=BINUTILSURL+'/'+aTag+'/install/binw32/';
   {$ifdef win64}
   aSourceURL64:=BINUTILSURL+'/'+aTag+'/install/binw64/';
-  {$endif}
-
-  infoln(localinfotext+'Getting binutils from URL: '+aSourceURL+'.',etInfo);
-  {$ifdef win64}
-  infoln(localinfotext+'Getting 64bit binutils from URL: '+aSourceURL64+'.',etInfo);
   {$endif}
 
   // Common to both 32 and 64 bit windows (i.e. 32 bit files)

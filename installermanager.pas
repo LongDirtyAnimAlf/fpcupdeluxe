@@ -79,7 +79,8 @@ Const
     {$endif}
     'End;'+ //keyword End specifies the end of the sequence
 
-//default sequence for win32
+    {$ifdef win32}
+    //default sequences for win32
     'Declare defaultwin32;'+
     {$ifndef FPCONLY}
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
@@ -95,18 +96,12 @@ Const
     // Recompile user IDE so any packages selected by the
     // universal installer are compiled into the IDE:
     'Do USERIDE;'+
-    {$endif}
-    {$ifdef mswindows} //not really necessary as crosswin checks arechitecture anyway
-    'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
-    {$else}
-    {$ifndef FPCONLY}
-    // Any further cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
     {$endif}
-    {$endif}
+    'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
     'End;'+
 
-//cross sequence for win32. Note: if changing this name,
+    //cross sequence for win32. Note: if changing this name,
     //also change checks for this in skipmodules etc.
     'Declare crosswin32-64;'+
     'Do FPCCrossWin32-64;'+
@@ -114,11 +109,10 @@ Const
     'Do LazarusCrossWin32-64;'+
     {$endif}
     'End;'+
+    {$endif win32}
 
-//default sequence for win64
-{todo: win64 sequence currently not enabled; see
-$elseif defined(win64)
-below}
+    //default sequences for win64
+    {$ifdef win64}
     'Declare defaultwin64;'+
     {$ifndef FPCONLY}
     // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
@@ -135,15 +129,14 @@ below}
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    'Do LCLCross;'+
     {$endif}
     'Do crosswin64-32;'+  //this has to be the last. All TExecState reset!
     {$ifndef FPCONLY}
-    //Any cross compilation; must be at end because it resets state machine run memory
-    'Do LCLCross;'+
     {$endif}
     'End;'+
 
-//cross sequence for win32. Note: if changing this name,
+    //cross sequence for win32. Note: if changing this name,
     //also change checks for this in skipmodules etc.
     'Declare crosswin64-32;'+
     'SetCPU i386;'+
@@ -152,12 +145,10 @@ below}
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
     {$ifndef FPCONLY}
-    //Getmodule has already been done
-    // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
-    'Cleanmodule LCL;'+
-    'Buildmodule LCL;'+
+    'Do LCL;'+
     {$endif}
     'End;'+
+    {$endif win64}
 
     //default sequence for ARM: some packages give errors and memory is limited, so keep it simple
     'Declare defaultARM;'+
@@ -660,10 +651,19 @@ type
 
 implementation
 
+{$IFDEF DEBUG}
+uses
+  {$ifdef linux}
+  processutils,
+  {$endif}
+  typinfo;
+{$ELSE}
 {$ifdef linux}
 uses
   processutils;
 {$endif}
+
+{$ENDIF DEBUG}
 
 { TFPCupManager }
 
@@ -1364,8 +1364,15 @@ begin
 
   {$ifndef FPCONLY}
   // Lazarus:
-  else if (uppercase(ModuleName)='LAZARUS') or (uppercase(ModuleName)='LAZBUILD') or (uppercase(ModuleName)='LCL') or
-    (uppercase(ModuleName)='USERIDE') then
+  else
+    if (uppercase(ModuleName)='LAZARUS')
+    or (uppercase(ModuleName)='LAZBUILD')
+    or (uppercase(ModuleName)='LCL')
+    or (uppercase(ModuleName)='LCLCROSS')
+    or (uppercase(ModuleName)='IDE')
+    or (uppercase(ModuleName)='BIGIDE')
+    or (uppercase(ModuleName)='USERIDE')
+    then
     begin
     if assigned(FInstaller) then
       begin
@@ -1694,6 +1701,7 @@ var
   EntryPoint,InstructionPointer:integer;
   idx:integer;
   SeqAttr:^TSequenceAttributes;
+  localinfotext:string;
 
   Procedure CleanUpInstaller;
   begin
@@ -1705,10 +1713,11 @@ var
   end;
 
 begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+SequenceName+'): ';
   if not assigned(FParent.FModuleList) then
     begin
     result:=false;
-    FParent.WritelnLog('Error: No sequences loaded while trying to find sequence name ' + SequenceName);
+    FParent.WritelnLog(etError,localinfotext+'No sequences loaded while trying to find sequence name ' + SequenceName);
     exit;
     end;
   // --clean or --install ??
@@ -1731,12 +1740,12 @@ begin
     // Don't run sequence if already run
     case SeqAttr^.Executed of
       ESFailed : begin
-        infoln('State machine: already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
+        infoln(localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
         result:=false;
         exit;
         end;
       ESSucceeded : begin
-        infoln('State machine: already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
+        infoln(localinfotext+'Already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
         exit;
         end;
       end;
@@ -1746,11 +1755,12 @@ begin
     // run sequence until end or failure
     while true do
       begin
-      { For debugging state machine sequence:
-      FParent.writelnlog('State machine: ',true);
-      FParent.writelnlog(FStateMachine[InstructionPointer].instr,true);
-      FParent.writelnlog(FStateMachine[InstructionPointer].param,true);
-      }
+      //For debugging state machine sequence:
+      {$IFDEF DEBUG}
+      infoln(localinfotext+'State machine running sequence '+SequenceName,etDebug);
+      infoln(localinfotext+'State machine [instr]: '+GetEnumName(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr)),etDebug);
+      infoln(localinfotext+'State machine [param]: '+FStateMachine[InstructionPointer].param,etDebug);
+      {$ENDIF DEBUG}
       case FStateMachine[InstructionPointer].instr of
         SMdeclare     :;
         SMdeclareHidden :;
@@ -1778,7 +1788,7 @@ begin
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
-        FParent.WritelnLog('Error running fpcup. Technical details: error executing sequence '+SequenceName+
+        FParent.WritelnLog(etError,localinfotext+'Failure running fpcup. Technical details: error executing sequence '+SequenceName+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
           ', param: '+FStateMachine[InstructionPointer].param);
         CleanUpInstaller;
@@ -1796,7 +1806,7 @@ begin
   else
     begin
     result:=false;  // sequence not found
-    FParent.WritelnLog('Error: Failed to load sequence :' + SequenceName);
+    FParent.WritelnLog(localinfotext+'Failed to load sequence :' + SequenceName);
     end;
 end;
 

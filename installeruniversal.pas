@@ -301,8 +301,8 @@ var
   PlainBinPath: string; //the directory above e.g. c:\development\fpc\bin\i386-win32
 begin
   result:=true;
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
-  infoln(infotext+'Entering ...',etDebug);
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  infoln(localinfotext+'Entering ...',etDebug);
   if InitDone then
     exit;
   if FVerbose then
@@ -314,7 +314,7 @@ begin
   // So.. enable this.
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
   if not(result) then
-    infoln(infotext+'Missing required executables. Aborting.',etError);
+    infoln(localinfotext+'Missing required executables. Aborting.',etError);
 
   // Add fpc architecture bin and plain paths
   FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);

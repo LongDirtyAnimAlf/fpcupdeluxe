@@ -57,23 +57,8 @@ Const
     'Uninstallmodule FPC;'+
     'End;'+
 
-//standard clean
-    'Declare FPCclean;'+
-    'Cleanmodule FPC;'+
-    'End;'+
-
-    'Declare FPCCleanAndBuildOnly;'+
-    'Cleanmodule FPC;'+
-    'Buildmodule FPC;'+
-    'End;'+
-
-//selective actions triggered with --only=SequenceName
-    'Declare FPCCheckOnly;'+'Checkmodule FPC;'+'End;'+
-    'Declare FPCCleanOnly;'+'Cleanmodule FPC;'+'End;'+
-    'Declare FPCGetOnly;'+'Getmodule FPC;'+'End;'+
-    'Declare FPCBuildOnly;'+'Buildmodule FPC;'+'End;'+
-
-// Crosscompile build
+    {$ifdef MSWINDOWS}
+    // Crosscompile build
     'Declare FPCCrossWin32-64;'+
     // Needs to be run after regular compile because of CPU/OS switch
     'SetCPU x86_64;'+
@@ -81,6 +66,24 @@ Const
     // Getmodule has already been done
     'Cleanmodule fpc;'+
     'Buildmodule fpc;'+
+    'End;'+
+    {$endif}
+
+
+    //selective actions triggered with --only=SequenceName
+    'Declare FPCCheckOnly;'+'Checkmodule FPC;'+'End;'+
+    'Declare FPCCleanOnly;'+'Cleanmodule FPC;'+'End;'+
+    'Declare FPCGetOnly;'+'Getmodule FPC;'+'End;'+
+    'Declare FPCBuildOnly;'+'Buildmodule FPC;'+'End;'+
+
+    //standard clean
+    'Declare FPCclean;'+
+    'Cleanmodule FPC;'+
+    'End;'+
+
+    'Declare FPCCleanAndBuildOnly;'+
+    'Cleanmodule FPC;'+
+    'Buildmodule FPC;'+
     'End';
 
 
@@ -212,7 +215,7 @@ begin
     SnipBegin:=ConfigText.IndexOf(SnippetText.Strings[0]);
     if SnipBegin>-1 then
     begin
-      infoln('InsertFPCCFGSnippet (fpc.cfg): Found existing snippet in '+FPCCFG+'. Deleting it and writing new version.',etInfo);
+      infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Found existing snippet in '+FPCCFG+'. Deleting it and writing new version.',etInfo);
       for i:=(SnipBegin+1) to ConfigText.Count-1 do
       begin
         // Once again, look exactly for this text:
@@ -230,7 +233,7 @@ begin
       if SnipEnd=maxint then
       begin
         //apparently snippet was not closed
-        infoln('InsertFPCCFGSnippet (fpc.cfg): Existing snippet was not closed. Replacing it anyway. Please check your fpc.cfg.',etWarning);
+        infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed. Replacing it anyway. Please check your fpc.cfg.',etWarning);
         if SnipEndLastResort<>maxint then
           SnipEnd:=(SnipEndLastResort-1)
         else
@@ -1573,16 +1576,16 @@ begin
 
   if (InitDone) AND (aBootstrapVersion='') then exit;
 
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
 
   result:=CheckAndGetTools;
 
   if FVerbose then Processor.OnOutputM:=@DumpOutput;
 
-  WritelnLog(infotext+'Init:', false);
-  WritelnLog(infotext+'FPC directory:      ' + FSourceDirectory, false);
-  WritelnLog(infotext+'FPC URL:            ' + FURL, false);
-  WritelnLog(infotext+'FPC options:        ' + FCompilerOptions, false);
+  WritelnLog(localinfotext+'Init:', false);
+  WritelnLog(localinfotext+'FPC directory:      ' + FSourceDirectory, false);
+  WritelnLog(localinfotext+'FPC URL:            ' + FURL, false);
+  WritelnLog(localinfotext+'FPC options:        ' + FCompilerOptions, false);
 
   // set standard bootstrap compilername
   FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
@@ -1601,7 +1604,7 @@ begin
   if (aBootstrapVersion<>'') then
   begin
 
-    infoln(infotext+'Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
+    infoln(localinfotext+'Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
 
     FBootstrapCompilerOverrideVersionCheck:=false;
 
@@ -1635,7 +1638,7 @@ begin
         while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
         begin
 
-          infoln(infotext+'Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
+          infoln(localinfotext+'Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
 
           // set initial standard achive name
           aCompilerArchive:=aStandardCompilerArchive;
@@ -1661,7 +1664,7 @@ begin
 
           s:=FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/';
 
-          infoln(infotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etInfo);
+          infoln(localinfotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etInfo);
 
           aCompilerList.Clear;
 
@@ -1669,14 +1672,14 @@ begin
 
           if (NOT result) then
           begin
-            infoln(infotext+'Could not get compiler list from ' + s + '. Trying again.',etWarning);
+            infoln(localinfotext+'Could not get compiler list from ' + s + '. Trying again.',etWarning);
             sleep(100);
             result:=aDownLoader.getFTPFileList(s,aCompilerList);
           end;
 
           if (NOT result) then
           begin
-            infoln(infotext+'Could not get compiler list from ' + s + '. Final try.',etWarning);
+            infoln(localinfotext+'Could not get compiler list from ' + s + '. Final try.',etWarning);
             sleep(500);
             result:=aDownLoader.getFTPFileList(s,aCompilerList);
           end;
@@ -1686,7 +1689,7 @@ begin
 
             if FVerbose then
             begin
-              if aCompilerList.Count>0 then infoln(infotext+'Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etInfo);
+              if aCompilerList.Count>0 then infoln(localinfotext+'Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etInfo);
             end;
 
             {$IFDEF FREEBSD}
@@ -1694,7 +1697,7 @@ begin
             FreeBSDVersion:=0;
             for i:=0 to Pred(aCompilerList.Count) do
             begin
-              infoln(infotext+'Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
+              infoln(localinfotext+'Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
               if Pos(GetTargetCPUOS,aCompilerList[i])=1 then
               begin
                 aCompilerFound:=True;
@@ -1710,17 +1713,17 @@ begin
               // remove file extension
               aCompilerArchive:=ChangeFileExt(aCompilerArchive,'');
               aCompilerArchive:=aCompilerArchive+'.bz2';
-              infoln(infotext+'Got a correct bootstrap compiler from official FPC bootstrap sources',etDebug);
+              infoln(localinfotext+'Got a correct bootstrap compiler from official FPC bootstrap sources',etDebug);
               break;
             end;
             {$ELSE}
             for i:=0 to Pred(aCompilerList.Count) do
             begin
-              infoln(infotext+'Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
+              infoln(localinfotext+'Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
               aCompilerFound:=(aCompilerList[i]=aCompilerArchive);
               if aCompilerFound then
               begin
-                infoln(infotext+'Found a correct bootstrap compiler from official FPC bootstrap binaries.',etDebug);
+                infoln(localinfotext+'Found a correct bootstrap compiler from official FPC bootstrap binaries.',etDebug);
                 break;
               end;
             end;
@@ -1747,7 +1750,7 @@ begin
       begin
         if FBootstrapCompilerURL='' then
         begin
-          infoln(infotext+'Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
+          infoln(localinfotext+'Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
           FBootstrapCompilerURL := FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
         end;
       end;
@@ -1757,8 +1760,8 @@ begin
       if (NOT aCompilerFound) then
       begin
 
-        infoln(infotext+'Slight panic: No official FPC bootstrapper found.',etError);
-        infoln(infotext+'Now looking for last resort bootstrap compiler from Github FPCUP(deluxe) releases.',etError);
+        infoln(localinfotext+'Slight panic: No official FPC bootstrapper found.',etError);
+        infoln(localinfotext+'Now looking for last resort bootstrap compiler from Github FPCUP(deluxe) releases.',etError);
 
         aGithubBootstrapURL:='';
 
@@ -1772,18 +1775,18 @@ begin
           if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
           while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
           begin
-            infoln(infotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
+            infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
             aGithubBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
               'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
-            infoln(infotext+'Checking existence of: '+aGithubBootstrapURL,etDebug);
+            infoln(localinfotext+'Checking existence of: '+aGithubBootstrapURL,etDebug);
 
             aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
 
             if aCompilerFound then
             begin
               aCompilerList.Add(aGithubBootstrapURL);
-              infoln(infotext+'Success: found a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
+              infoln(localinfotext+'Success: found a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
             end
             else
             begin
@@ -1809,7 +1812,7 @@ begin
                 j:=Pos('fpcup-',aGithubBootstrapURL);
                 aLocalBootstrapVersion := Copy(aGithubBootstrapURL,7,5);
                 aLocalBootstrapVersion := StringReplace(aLocalBootstrapVersion,'_','.',[rfReplaceAll]);
-                infoln(infotext+'Got last resort FPCUP(deluxe) bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
+                infoln(localinfotext+'Got last resort FPCUP(deluxe) bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
                 break;
               end;
             end;
@@ -1824,7 +1827,7 @@ begin
         begin
           if FBootstrapCompilerURL='' then
           begin
-            infoln(infotext+'Got a bootstrap compiler from FPCUP(deluxe) bootstrap sources.',etInfo);
+            infoln(localinfotext+'Got a bootstrap compiler from FPCUP(deluxe) bootstrap sources.',etInfo);
             FBootstrapCompilerURL := aGithubBootstrapURL;
           end;
         end;
@@ -1840,13 +1843,13 @@ begin
       begin
         if (s='0.0.0') then
         begin
-          infoln(infotext+'No bootstrapper local and online. Fatal. Stopping.',etError);
+          infoln(localinfotext+'No bootstrapper local and online. Fatal. Stopping.',etError);
           exit(false);
         end
         else
         begin
           // there is a bootstrapper available: just use it !!
-          infoln(infotext+'No correct bootstrapper. But going to use the available one with version ' + s,etInfo);
+          infoln(localinfotext+'No correct bootstrapper. But going to use the available one with version ' + s,etInfo);
           FBootstrapCompilerOverrideVersionCheck:=true;
           result:=true;
         end;
@@ -1855,10 +1858,10 @@ begin
       if (aCompilerFound) AND (FBootstrapCompilerURL<>'') then
       begin
         // final check ... do we have the correct (as in version) compiler already ?
-        infoln(infotext+'Check if we already have a bootstrap compiler with version '+ aLocalBootstrapVersion,etInfo);
+        infoln(localinfotext+'Check if we already have a bootstrap compiler with version '+ aLocalBootstrapVersion,etInfo);
         if s<>aLocalBootstrapVersion then
         begin
-          infoln(infotext+'No correct bootstrapper. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
+          infoln(localinfotext+'No correct bootstrapper. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
           result:=DownloadBootstrapCompiler;
         end;
       end;
@@ -1873,14 +1876,14 @@ begin
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
     FCompiler:=FBootstrapCompiler;
 
-  WritelnLog(infotext+'Init:',false);
-  WritelnLog(infotext+'Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
-  WritelnLog(infotext+'FPC URL:                '+FURL,false);
-  WritelnLog(infotext+'FPC options:            '+FCompilerOptions,false);
-  WritelnLog(infotext+'FPC source directory:   '+FSourceDirectory,false);
-  WritelnLog(infotext+'FPC install directory:  '+FInstallDirectory,false);
+  WritelnLog(localinfotext+'Init:',false);
+  WritelnLog(localinfotext+'Bootstrap compiler dir: '+ExtractFilePath(FCompiler),false);
+  WritelnLog(localinfotext+'FPC URL:                '+FURL,false);
+  WritelnLog(localinfotext+'FPC options:            '+FCompilerOptions,false);
+  WritelnLog(localinfotext+'FPC source directory:   '+FSourceDirectory,false);
+  WritelnLog(localinfotext+'FPC install directory:  '+FInstallDirectory,false);
   {$IFDEF MSWINDOWS}
-  WritelnLog(infotext+'Make/binutils path:     '+FMakeDir,false);
+  WritelnLog(localinfotext+'Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
   FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
 

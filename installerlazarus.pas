@@ -102,22 +102,32 @@ const
     'Do USERIDE;'+
     'End;' +
 
+    // Compile only LCL
+    'Declare LCL;' +
+    'CleanModule LCL;'+
+    'Buildmodule LCL;' +
+    'End;' +
+
+    {$ifdef win32}
     // Crosscompile build
     'Declare LazarusCrossWin32-64;' +
-    // Needs to be run after regular compile because of CPU/OS switch
     'SetCPU x86_64;' + 'SetOS win64;' +
-    // Getmodule has already been done
-    // Don't use cleanmodule; make distclean will remove lazbuild.exe etc
-    'Cleanmodule LCL;' +
-    'Buildmodule LCL;' + 'End;' +
+    'Do LCL;'+
+    'End;' +
+    {$endif}
+    {$ifdef win64}
+    'Declare LazarusCrossWin64-32;' +
+    'SetCPU i386;'+ 'SetOS win32;'+
+    'Do LCL;'+
+    'End;' +
+    {$endif}
 
-    // Crosscompile only LCL (needs to be run at end
+    // Crosscompile only LCL native widgetset (needs to be run at end
     'Declare LCLCross;' +
     'ResetLCL;' + //module code itself will select proper widgetset
-    // Getmodule must already have been done
-    // If we call CleanModule, currently Lazbuild.exe etc will also be removed!?!?!, so do not do that
-    'CleanModule LCL;'+
-    'Buildmodule LCL;' + 'End';
+    'CleanModule LCLCross;'+
+    'Buildmodule LCLCross;' +
+    'End';
 
 type
 
@@ -208,9 +218,9 @@ uses
 
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
-  BuildMethod: string;
   CrossInstaller: TCrossInstaller;
   Options: string;
+  LazBuildApp: string;
 begin
   Result:=inherited;
 
@@ -233,7 +243,7 @@ begin
     else
       // Cross compiling prerequisites in place. Let's compile.
     begin
-      // If we're "crosscompiling" with the native compiler and binutils - "cross compiling lite" - use lazbuild.
+      // If we're "crosscompiling" with the native compiler and binutils - "cross compiling [lite]" - use lazbuild.
       // Advantages:
       // - dependencies are taken care of
       // - it won't trigger a rebuild of the LCL when the user compiles his first cross project.
@@ -241,23 +251,21 @@ begin
       // - can deal with various bin tools
       // - can deal with compiler options
       // - doesn't need existing lazbuild (+nogui LCL)
-      if FCrossLCL_Platform <> '' then
+
+      LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
+      if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
       begin
-        {
-        Lazarus mailing list, message by Mattias Gaertner, 10 April 2012
-        Changes of make, part III
-        Precompiling a second LCL platform:
-        Do not use "make lcl LCL_PLATFORM=qt", as this will update
-        lclbase.compiled and this tells the IDE to rebuild the
-        existing ppu of the first platform.
-        Use instead:
-        make -C lcl/interfaces/qt
-        *note*: -C is the same option as --directory=
-        => however, this would require us to split compilation into
-        - prerequisites
-        - LCL
-        }
-        BuildMethod := 'make';
+        writelnlog(etWarning, infotext+'Lazbuild could not be found ... using make to cross-build '+ModuleName, true);
+        LazBuildApp := '';
+      end;
+
+      // Since April 2012, LCL requires lazutils which requires registration
+      // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+      //http://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
+
+      if Length(LazBuildApp)=0 then
+      begin
+        // Use make for cross compiling
         Processor.Executable := Make;
         Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
@@ -273,13 +281,14 @@ begin
         if CrossInstaller.BinUtilsPath <> '' then
           Processor.Parameters.Add('CROSSBINDIR=' + ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
         Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
-        if FCrossLCL_Platform <> '' then
-          Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
         Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
         Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
         Processor.Parameters.Add('CPU_TARGET=' + FCrossCPU_Target);
         Processor.Parameters.Add('OS_TARGET=' + FCrossOS_Target);
+
+        if FCrossLCL_Platform <> '' then
+          Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
         Options := FCompilerOptions;
         if CrossInstaller.LibsPath <> '' then
@@ -292,17 +301,15 @@ begin
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
         Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + Options);
-        // Since April 2012, LCL requires lazutils which requires registration
-        // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
         Processor.Parameters.Add('registration');
         Processor.Parameters.Add('lazutils');
         Processor.Parameters.Add('lcl');
+        Processor.Parameters.Add('basecomponents');
       end
       else
       begin
-        // Use lazbuild for cross compiling lite:
-        BuildMethod := 'lazbuild';
-        Processor.Executable := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
+        // Use lazbuild for cross compiling
+        Processor.Executable := LazBuildApp;
         Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
         {$IFDEF DEBUG}
@@ -321,13 +328,19 @@ begin
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
+
+        Processor.Parameters.Add('packager'+DirectorySeparator+'registration'+DirectorySeparator+'fcl.lpk');
+        Processor.Parameters.Add('components'+DirectorySeparator+'lazutils'+DirectorySeparator+'lazutils.lpk');
         Processor.Parameters.Add('lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+'lcl.lpk');
+        Processor.Parameters.Add('components'+DirectorySeparator+'synedit'+DirectorySeparator+'synedit.lpk');
+        Processor.Parameters.Add('components'+DirectorySeparator+'lazcontrols'+DirectorySeparator+'lazcontrols.lpk');
+        Processor.Parameters.Add('components'+DirectorySeparator+'ideintf'+DirectorySeparator+'ideintf.lpk');
       end;
 
       if FCrossLCL_Platform = '' then
-        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' using ' + BuildMethod, etInfo)
+        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' using ' + ExtractFileName(Processor.Executable), etInfo)
       else
-        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + '/' + FCrossLCL_Platform + ' using ' + BuildMethod, etInfo);
+        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
 
       try
         writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
@@ -442,27 +455,35 @@ begin
         Processor.Parameters.Add('lazbuild');
         infoln(infotext+'Running make lazbuild', etInfo);
       end;
-      'LCL'://, 'LCLCROSS':
+      'LCL':
       begin
         // April 2012: lcl now requires lazutils and registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+        // http://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
         Processor.Parameters.Add('registration');
         Processor.Parameters.Add('lazutils');
         Processor.Parameters.Add('lcl');
-        if (Uppercase(ModuleName) = 'LCLCROSS') then
-        begin
-          if FCrossLCL_Platform = '' then
-          begin
-            // Nothing to be done as we're compiling natively. Gracefully exit
-            infoln(infotext+'Empty LCL platform specified. No need to cross compile LCL. Skipping.', etWarning);
-            OperationSucceeded := true; //belts and braces
-            Result := true;
-            exit;
-          end
-          else
-            Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-        end;
+        // always build standard LCL for native system ... other widgetsets to be done by LCLCROSS: see below
+        //if FCrossLCL_Platform<>'' then Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
         infoln(infotext+'Running make registration lazutils lcl', etInfo);
+      end;
+      'LCLCROSS':
+      begin
+        if FCrossLCL_Platform<>'' then
+        begin
+          Processor.Parameters.Add('-C lcl');
+          Processor.Parameters.Add('intf');
+          Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+          infoln(infotext+'Running make -C lcl intf LCL_PLATFORM='+FCrossLCL_Platform, etInfo);
+        end
+        else
+        begin
+          // nothing to be done: exit graceously
+          infoln(infotext+'No LCL_PLATFORM defined ... nothing to be done', etInfo);
+          OperationSucceeded := true;
+          Result := true;
+          exit;
+        end;
       end
       else //raise error;
       begin
@@ -516,7 +537,8 @@ begin
     if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
     begin
       writelnlog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
-      exit(false);
+      Result := false;
+      exit;
     end
     else
     begin
@@ -661,15 +683,15 @@ begin
 
   if InitDone then exit;
 
-  infotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
 
-  infoln(infotext+'Entering ...',etDebug);
+  infoln(localinfotext+'Entering ...',etDebug);
 
   if FVerbose then Processor.OnOutputM := @DumpOutput;
 
-  WritelnLog(infotext+'Lazarus directory:      ' + FSourceDirectory, false);
-  WritelnLog(infotext+'Lazarus URL:            ' + FURL, false);
-  WritelnLog(infotext+'Lazarus options:        ' + FCompilerOptions, false);
+  WritelnLog(localinfotext+'Lazarus directory:      ' + FSourceDirectory, false);
+  WritelnLog(localinfotext+'Lazarus URL:            ' + FURL, false);
+  WritelnLog(localinfotext+'Lazarus options:        ' + FCompilerOptions, false);
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
   if Result then
   begin
@@ -937,7 +959,6 @@ begin
   finally
     LazarusConfig.Free;
   end;
-
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
@@ -951,7 +972,7 @@ var
   LHelpTemp: string; // LHelp gets copied to this temp file
   {$endif}
   oldlog: TErrorMethod;
-  command:string;
+  CleanCommand,CleanDirectory:string;
 begin
   Result := inherited;
 
@@ -1010,33 +1031,54 @@ begin
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
   {$ENDIF}
   Processor.Parameters.Add('FPC=' + FCompiler + '');
-  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   Processor.Parameters.Add('UPXPROG=echo');  //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
 
+  CleanDirectory:='';
+  CleanCommand:='';
   case UpperCase(ModuleName) of
-    'IDE': command:='-C ide cleanide';
-    'BIGIDE': command:='cleanbigide';
-    'LAZARUS': command:='distclean';
-    'LCL', 'LCLCROSS': command:='-C lcl clean';
+    'IDE':
+    begin
+      CleanCommand:='cleanide';
+      CleanDirectory:=DirectorySeparator+'ide';
+    end;
+    'BIGIDE': CleanCommand:='cleanbigide';
+    'LAZARUS': CleanCommand:='distclean';
+    'LCL':
+    begin
+      CleanDirectory:=DirectorySeparator+'lcl';
+      if (Self is TLazarusCrossInstaller) AND (FCrossLCL_Platform <> '') then
+      begin
+        Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+        CleanCommand:='cleanintf';
+      end
+      else
+      begin
+        CleanCommand:='clean';
+      end;
+    end;
+    'LCLCROSS':
+    begin
+      CleanDirectory:=DirectorySeparator+'lcl';
+      if (FCrossLCL_Platform <> '') then
+      begin
+        Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+        CleanCommand:='cleanintf';
+      end
+      else
+      begin
+        infoln(infotext+'No LCL_PLATFORM defined ... nothing to be done', etInfo);
+        Result := true;
+        exit;
+      end;
+    end;
     else //raise error;
     begin
       WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
-      Result := false;
-      exit;
     end;
-  end;
-
-  if FCrossLCL_Platform <> '' then
-  begin
-    Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-    // Makefile:
-    // Compile the interface for the qt widgetset:"
-    // make cleanintf intf LCL_PLATFORM=qt"
-    command:='-C lcl cleanintf';
   end;
 
   if (Self is TLazarusCrossInstaller) then
@@ -1050,11 +1092,12 @@ begin
     Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
   end;
 
-  Processor.Parameters.Add(command);
+  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory)+CleanDirectory);
+  Processor.Parameters.Add(CleanCommand);
   if (Self is TLazarusCrossInstaller) then
-    infoln(infotext+'Running "make '+command+'" twice for OS_TARGET=' + FCrossOS_Target + ' and CPU_TARGET=' + FCrossCPU_Target,etInfo)
+    infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory+' for OS_TARGET='+FCrossOS_Target+' and CPU_TARGET='+FCrossCPU_Target,etInfo)
   else
-    infoln(infotext+'Running "make '+command+'" twice',etInfo);
+    infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory,etInfo);
 
   try
     writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);

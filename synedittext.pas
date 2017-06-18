@@ -133,6 +133,7 @@ begin
           if AnsiContainsText(line,'invalid unitname') then break;
           if AnsiContainsText(line,'procedure type "FAR" ignored') then break;
           if AnsiContainsText(line,'duplicate unit') then break;
+          if AnsiContainsText(line,'is ignored for the current target platform') then break;
           // when generating help
           if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}

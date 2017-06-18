@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0j';
+  FPCUPDELUXEVERSION='1.4.0k';
 
 resourcestring
   CrossGCCMsg =
@@ -865,6 +865,12 @@ begin
   if (NOT Special)
   AND
   (
+    (ExistWordInString(PChar(s),'lines compiled,',[soDown]))
+    OR
+    (ExistWordInString(PChar(s),'issued',[soWholeWord,soDown]))
+    OR
+    (ExistWordInString(PChar(s),'Target OS: ',[soDown]))
+    OR
     (ExistWordInString(PChar(s),'make.exe: ',[soDown]))
     OR
     (ExistWordInString(PChar(s),'make: ',[soDown]))
@@ -930,6 +936,16 @@ begin
     FG      := TColor($00A5FF);
     BG      := clBlack;
     Special := True;
+  end;
+
+  // special override for debugging statemachine
+  if ExistWordInString(PChar(s),'sequencer',[soWholeWord,soDown]) then
+  begin
+    begin
+      FG      := clRed;
+      BG      := clBlack;
+      Special := True;
+    end;
   end;
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
@@ -1199,6 +1215,7 @@ var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
   UseNativeUnzip:boolean;
+  IncludeLCL:boolean;
   {$ifdef Unix}
   fileList: TStringList;
   i:integer;
@@ -1360,15 +1377,22 @@ begin
     // use the available source to build the cross-compiler ... change nothing about source and url !!
     FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
 
-    if Form2.IncludeLCL then
+    IncludeLCL:=Form2.IncludeLCL;
+    if (FPCupManager.CrossOS_Target='java') then IncludeLCL:=false;
+    if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;
+    // AFAIK, on Darwin, LCL Carbon and Cocoa are only supported for i386 and x86_64 ... but I stand corrected if wrong
+    if (FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target<>'x86_64') AND (FPCupManager.CrossCPU_Target<>'i386') then IncludeLCL:=false;
+
+    if IncludeLCL then
     begin
-      if (FPCupManager.CrossOS_Target<>'java') AND (FPCupManager.CrossOS_Target<>'android') then
-      begin
-        FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCLCross';
-        // if Darwin x64, only cocoa will work.
-        if ((FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target='x86_64'))
-            then FPCupManager.CrossLCL_Platform:='cocoa';
-      end;
+      FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
+      // if Darwin x64, only cocoa will work.
+      if ((FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target='x86_64'))
+          then FPCupManager.CrossLCL_Platform:='cocoa';
+    end
+    else
+    begin
+      if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
     end;
 
     FPCupManager.FPCURL:='skip';

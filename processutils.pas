@@ -317,10 +317,11 @@ begin
           {$endif}
         end;
       end;
+      ReadOutput;
       {$ifdef LCL}
       Application.MainForm.Cursor:=crDefault;
+      Application.ProcessMessages;
       {$endif}
-      ReadOutput;
 
       FExitStatus:=inherited ExitStatus;
     except
