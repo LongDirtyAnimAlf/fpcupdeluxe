@@ -318,13 +318,17 @@ begin
         // See compileroptions.pp
         // Quiet:=ConsoleVerbosity<=-3;
         Processor.Parameters.Add('--quiet');
-        Processor.Parameters.Add('--quiet');
-        Processor.Parameters.Add('--quiet');
-        Processor.Parameters.Add('--quiet');
         {$ENDIF}
         Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
-        Processor.Parameters.Add('--cpu=' + FCrossCPU_Target);
-        Processor.Parameters.Add('--os=' + FCrossOS_Target);
+
+        // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
+        // So, use this test to prevent a rebuild !!!
+        if (GetTargetCPU<>FCrossCPU_Target) then
+          Processor.Parameters.Add('--cpu=' + FCrossCPU_Target);
+
+        // See above: perhaps the ame for OS: ToDo.
+        //if (GetTargetOS<>FCrossOS_Target) then
+          Processor.Parameters.Add('--os=' + FCrossOS_Target);
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
@@ -332,6 +336,7 @@ begin
         Processor.Parameters.Add('packager'+DirectorySeparator+'registration'+DirectorySeparator+'fcl.lpk');
         Processor.Parameters.Add('components'+DirectorySeparator+'lazutils'+DirectorySeparator+'lazutils.lpk');
         Processor.Parameters.Add('lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+'lcl.lpk');
+        // Also add the basecomponents !
         Processor.Parameters.Add('components'+DirectorySeparator+'synedit'+DirectorySeparator+'synedit.lpk');
         Processor.Parameters.Add('components'+DirectorySeparator+'lazcontrols'+DirectorySeparator+'lazcontrols.lpk');
         Processor.Parameters.Add('components'+DirectorySeparator+'ideintf'+DirectorySeparator+'ideintf.lpk');
@@ -471,6 +476,8 @@ begin
       begin
         if FCrossLCL_Platform<>'' then
         begin
+          // first: Processor.Parameters.Add('-C lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+FCrossLCL_Platform);
+          // followed by: make ideintf basecomponents bigidecomponents LCL_PLATFORM=qt
           Processor.Parameters.Add('-C lcl');
           Processor.Parameters.Add('intf');
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
@@ -553,9 +560,6 @@ begin
       // See compileroptions.pp
       // Quiet:=ConsoleVerbosity<=-3;
       Processor.Parameters.Add('--quiet');
-      Processor.Parameters.Add('--quiet');
-      Processor.Parameters.Add('--quiet');
-      Processor.Parameters.Add('--quiet');
       {$ENDIF}
       Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
       Processor.Parameters.Add('--cpu=' + GetTargetCPU);
@@ -621,7 +625,6 @@ begin
           {$IFDEF DEBUG}
           Processor.Parameters.Add('--verbose');
           {$ELSE}
-          Processor.Parameters.Add('--quiet');
           Processor.Parameters.Add('--quiet');
           {$ENDIF}
           Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
