@@ -326,8 +326,8 @@ begin
         if (GetTargetCPU<>FCrossCPU_Target) then
           Processor.Parameters.Add('--cpu=' + FCrossCPU_Target);
 
-        // See above: perhaps the ame for OS: ToDo.
-        //if (GetTargetOS<>FCrossOS_Target) then
+        // See above: the same for OS !
+        if (GetTargetOS<>FCrossOS_Target) then
           Processor.Parameters.Add('--os=' + FCrossOS_Target);
 
         if FCrossLCL_Platform <> '' then

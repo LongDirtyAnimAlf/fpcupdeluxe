@@ -624,7 +624,7 @@ begin
     ScriptText.Add(Target+' '+TargetArguments);
     try
       ScriptText.SaveToFile(ScriptFile);
-      FPChmod(ScriptFile, &700); //rwx------
+      FPChmod(ScriptFile, &755); //rwxr-xr-x
     except
       on E: Exception do
         infoln('CreateHomeStartLink: could not create link: '+E.Message,etWarning);

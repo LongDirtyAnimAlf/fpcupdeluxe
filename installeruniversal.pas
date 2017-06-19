@@ -385,6 +385,11 @@ begin
   if WorkingDir<>'' then
     Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
   Processor.Parameters.Clear;
+  {$IFDEF DEBUG}
+  Processor.Parameters.Add('--verbose');
+  {$ELSE}
+  Processor.Parameters.Add('--quiet');
+  {$ENDIF}
   Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
   Processor.Parameters.Add('--cpu=' + GetTargetCPU);
   Processor.Parameters.Add('--os=' + GetTargetOS);
@@ -682,8 +687,7 @@ begin
       exec:=StringReplace(exec,'lazbuild','lazbuild --verbose',[rfIgnoreCase]);
       {$ELSE}
       // See compileroptions.pp
-      // Quiet:=ConsoleVerbosity<=-3;
-      exec:=StringReplace(exec,'lazbuild','lazbuild --quiet --quiet --quiet --quiet',[rfIgnoreCase]);
+      exec:=StringReplace(exec,'lazbuild','lazbuild --quiet',[rfIgnoreCase]);
       {$ENDIF}
     end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
@@ -1092,10 +1096,6 @@ begin
         Processor.Parameters.Add('--verbose');
         {$ELSE}
         // See compileroptions.pp
-        // Quiet:=ConsoleVerbosity<=-3;
-        Processor.Parameters.Add('--quiet');
-        Processor.Parameters.Add('--quiet');
-        Processor.Parameters.Add('--quiet');
         Processor.Parameters.Add('--quiet');
         {$ENDIF}
         Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
@@ -1581,10 +1581,6 @@ begin
       Processor.Parameters.Add('--verbose');
       {$ELSE}
       // See compileroptions.pp
-      // Quiet:=ConsoleVerbosity<=-3;
-      Processor.Parameters.Add('--quiet');
-      Processor.Parameters.Add('--quiet');
-      Processor.Parameters.Add('--quiet');
       Processor.Parameters.Add('--quiet');
       {$ENDIF}
       Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);

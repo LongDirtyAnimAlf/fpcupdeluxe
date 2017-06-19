@@ -1324,14 +1324,16 @@ function TFPCInstaller.CreateFPCScript: boolean;
 var
   FPCScript:string;
   TxtFile:Text;
+  FPCCompiler:String;
   {$ENDIF UNIX}
 begin
   {$IFDEF UNIX}
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateFPCScript): ';
+  FPCCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt;
 
   // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
   // If this fails, Lazarus compilation will fail...
-  FPCScript := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.sh';
+  FPCScript := IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)) + 'fpc.sh';
   if FileExists(FPCScript) then
   begin
     infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
@@ -1347,11 +1349,17 @@ begin
   writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
   writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
   writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-  writeln(TxtFile,IncludeTrailingPathDelimiter(FBinPath),'fpc  -n @',
-    IncludeTrailingPathDelimiter(FBinPath),'fpc.cfg '+
+  writeln(TxtFile,FPCCompiler,' -n @',
+    IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),'fpc.cfg '+
     '"$@"');
   CloseFile(TxtFile);
-  Result:=(FPChmod(FPCScript,&700)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+  Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+  if Result then
+  begin
+    // To prevent unneccessary rebuilds of FCL, LCL and others:
+    // Set fileage the same as the FPC binary itself
+    Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
+  end;
   if Result then
   begin
     infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
@@ -1512,7 +1520,7 @@ begin
   if OperationSucceeded then
   begin
     // Make executable
-    OperationSucceeded:=(fpChmod(FBootstrapCompiler, &700)=0); //rwx------
+    OperationSucceeded:=(fpChmod(FBootstrapCompiler, &755)=0); //rwxr-xr-x
     if OperationSucceeded=false then infoln('Bootstrap compiler: chmod failed for '+FBootstrapCompiler,eterror);
   end;
   {$ENDIF MSWINDOWS}
@@ -2217,7 +2225,7 @@ begin
 
       //Make executable
       {$ifdef unix}
-      OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateCompiler, &700)=0); //rwx------
+      OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateCompiler, &755)=0); //rwxr-xr-x
       if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateCompiler,etError);
       {$endif}
 
