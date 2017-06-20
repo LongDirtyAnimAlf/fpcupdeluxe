@@ -1930,8 +1930,13 @@ begin
   FPCupManager.CrossLibraryDirectory:='';
   FPCupManager.CrossToolsDirectory:='';
 
+  {$IFDEF DEBUG}
+  FPCupManager.Verbose:=True;
+  SetVerbosity(True);
+  {$ELSE}
   FPCupManager.Verbose:=CheckVerbosity.Checked;
   SetVerbosity((Form2.ExtraVerbose) AND (FPCupManager.Verbose));
+  {$ENDIF}
 
   FPCupManager.FPCDesiredBranch:=Form2.FPCBranch;
   FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;

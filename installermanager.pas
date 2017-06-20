@@ -1788,7 +1788,7 @@ begin
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
-        FParent.WritelnLog(etError,localinfotext+'Failure running fpcup. Technical details: error executing sequence '+SequenceName+
+        FParent.WritelnLog(etError,localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
           ', param: '+FStateMachine[InstructionPointer].param);
         CleanUpInstaller;

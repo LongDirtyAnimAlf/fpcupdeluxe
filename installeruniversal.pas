@@ -533,7 +533,9 @@ begin
     if NOT FileExists(PackagePath) then
     begin
       infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+      {$ifndef FPCONLY}
       UnInstallPackage(PackagePath);
+      {$endif}
       continue;
     end;
 
@@ -727,9 +729,12 @@ end;
 
 {$ifndef FPCONLY}
 function TUniversalInstaller.UnInstallPackage(PackagePath: string): boolean;
+const
+  PACKAGE_KEYSTART='UserPkgLinks/';
+  MISC_KEYSTART='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/';
 var
   cnt, i: integer;
-  key: string;
+  key,value:string;
   LazarusConfig: TUpdateLazConfig;
   PackageName,PackageAbsolutePath: string;
   xmlfile: string;
@@ -738,10 +743,11 @@ var
 begin
   result:=false;
 
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
-  infoln(localinfotext+'Entering ...',etDebug);
-
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
+
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (UnInstallPackage: '+PackageName+'): ';
+
+  infoln(localinfotext+'Entering ...',etDebug);
 
   infoln(localinfotext+'Removing package from config-files',etInfo);
 
@@ -751,79 +757,85 @@ begin
   else
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
   if FVerbose then WritelnLog(localinfotext+'Going to uninstall package',true);
-  xmlfile:=PackageConfig;
-  key:='UserPkgLinks/Count';
+
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
-    cnt:=LazarusConfig.GetVariable(xmlfile, key, 0);
-    // check if package is already registered
-    i:=cnt;
-    while i>0 do
+    try
+
+      xmlfile:=PackageConfig;
+      cnt:=LazarusConfig.GetVariable(xmlfile, PACKAGE_KEYSTART+'Count', 0);
+      // check if package is already registered
+      i:=cnt;
+      while i>0 do
       begin
-      // Ignore package name casing
-      if UpperCase(LazarusConfig.GetVariable(xmlfile, 'UserPkgLinks/Item'+IntToStr(i)+'/'
-        +'Name/Value'))
-        =UpperCase(PackageName) then
-          break;
-      i:=i-1;
+        // Ignore package name casing
+        if UpperCase(LazarusConfig.GetVariable(xmlfile, PACKAGE_KEYSTART+'Item'+IntToStr(i)+'/'
+          +'Name/Value'))
+          =UpperCase(PackageName) then
+            break;
+        i:=i-1;
       end;
-    if i>1 then // found
+      if i>1 then // found
       begin
-      infoln(localinfotext+'Removing package from '+xmlfile,etInfo);
-      FLazarusNeedsRebuild:=true;
-      LazarusConfig.SetVariable(xmlfile, key, cnt-1);
-      key:='UserPkgLinks/Item'+IntToStr(cnt)+'/';
-      while i<cnt do
+        infoln(localinfotext+'Found the package as item '+IntToStr(i)+' ... removing it from '+xmlfile,etInfo);
+        FLazarusNeedsRebuild:=true;
+        while i<cnt do
         begin
-        LazarusConfig.MovePath(xmlfile, 'UserPkgLinks/Item'+IntToStr(i+1)+'/',
-           'UserPkgLinks/Item'+IntToStr(i)+'/');
-        i:=i+1;
+          LazarusConfig.MovePath(
+            xmlfile,
+            PACKAGE_KEYSTART+'Item'+IntToStr(i+1)+'/',
+            PACKAGE_KEYSTART+'Item'+IntToStr(i)+'/');
+          i:=i+1;
         end;
-      LazarusConfig.DeletePath(xmlfile, 'UserPkgLinks/Item'+IntToStr(cnt)+'/');
+        LazarusConfig.DeletePath(xmlfile, PACKAGE_KEYSTART+'Item'+IntToStr(cnt)+'/');
+        LazarusConfig.SetVariable(xmlfile, PACKAGE_KEYSTART+'Count', cnt-1);
       end;
-    xmlfile:=MiscellaneousConfig;
-    key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/'
-      +'Count';
-    cnt:=LazarusConfig.GetVariable(xmlfile, key, 0);
-    // check if package is already registered
-    i:=cnt;
-    while i>0 do
+
+      xmlfile:=MiscellaneousConfig;
+      cnt:=LazarusConfig.GetVariable(xmlfile, MISC_KEYSTART+'Count', 0);
+      // check if package is already registered
+      i:=cnt;
+      while i>0 do
       begin
-      // Ignore package name casing
-      if UpperCase(LazarusConfig.GetVariable(xmlfile, 'MiscellaneousOptions/'
-        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+
-        IntToStr(i)+'/Value'))
-        =UpperCase(PackageName) then
-          break;
-      i:=i-1;
+        // Ignore package name casing
+        if UpperCase(LazarusConfig.GetVariable(xmlfile, MISC_KEYSTART+'Item'+IntToStr(i)+'/Value'))=UpperCase(PackageName) then break;
+        i:=i-1;
       end;
-    if i>1 then // found
+      if i>1 then // found
       begin
-      infoln(localinfotext+'Removing package from '+xmlfile,etInfo);
-      FLazarusNeedsRebuild:=true;
-      LazarusConfig.SetVariable(xmlfile, key, cnt-1);
-      key:='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages'
-        +'/Item'+IntToStr(cnt)+'/';
-      while i<cnt do
+        infoln(localinfotext+'Found the package as item '+IntToStr(i)+' ... removing it from '+xmlfile,etInfo);
+        FLazarusNeedsRebuild:=true;
+        while i<cnt do
         begin
-        LazarusConfig.MovePath(xmlfile, 'MiscellaneousOptions/'
-          +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(i+1)+
-            '/',
-           'MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages'
-             +'/Item'+IntToStr(i)+'/');
-        i:=i+1;
+          value:=LazarusConfig.GetVariable(xmlfile, MISC_KEYSTART+'Item'+IntToStr(i+1)+'/Value');
+          LazarusConfig.SetVariable(xmlfile, MISC_KEYSTART+'Item'+IntToStr(i)+'/Value', value);
+          // Move does mot work. ToDo !
+          //infoln(localinfotext+'Moving '+MISC_KEYSTART+'Item'+IntToStr(i+1)+' towards '+MISC_KEYSTART+'Item'+IntToStr(i),etDebug);
+          //LazarusConfig.MovePath(xmlfile,
+          //  MISC_KEYSTART+'Item'+IntToStr(i+1)+'/',
+          //  MISC_KEYSTART+'Item'+IntToStr(i)+'/');
+          i:=i+1;
         end;
-      LazarusConfig.DeletePath(xmlfile, 'MiscellaneousOptions/'
-        +'BuildLazarusOptions/StaticAutoInstallPackages/Item'+IntToStr(cnt)+'/'
-          );
-      end
+        infoln(localinfotext+'Deleting duplicate '+MISC_KEYSTART+'Item'+IntToStr(cnt),etDebug);
+        LazarusConfig.DeletePath(xmlfile, MISC_KEYSTART+'Item'+IntToStr(cnt)+'/');
+        infoln(localinfotext+'Setting '+MISC_KEYSTART+'Count to '+IntToStr(cnt-1),etDebug);
+        LazarusConfig.SetVariable(xmlfile, MISC_KEYSTART+'Count', cnt-1);
+      end;
+
+    except
+      on E: Exception do
+      begin
+        Result := false;
+        infoln(localinfotext+'Failure setting Lazarus config: ' + E.ClassName + '/' + E.Message, etError);
+      end;
+    end;
   finally
-    LazarusConfig.Destroy;
+    LazarusConfig.Free;
   end;
 
   if (ExtractFileName(PackagePath)<>PackagePath) then
   begin
-    if FVerbose then WritelnLog(localinfotext+'Removing lpl file for '+ExtractFileName(PackagePath),true);
+    if FVerbose then WritelnLog(localinfotext+'Checking lpl file for '+ExtractFileName(PackagePath),true);
     lpkdoc:=TConfig.Create(PackageAbsolutePath);
     key:='Package/';
     try
@@ -844,7 +856,8 @@ begin
 
       if FileExists(PackageAbsolutePath) then
       begin
-        SysUtils.DeleteFile(PackageAbsolutePath);
+        if SysUtils.DeleteFile(PackageAbsolutePath) then
+          infoln(localinfotext+'Package '+PackageAbsolutePath+' deleted',etInfo);
       end;
     end;
   end;

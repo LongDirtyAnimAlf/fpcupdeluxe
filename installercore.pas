@@ -835,7 +835,7 @@ begin
   AddNewUtil('rm' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('strip' + GetExeExt,aSourceURL64,'',ucBinutil);
   //No equivalent for Win64...
-  //AddNewUtil('Qt4Pas5.dll',SourceURL64_Qt,'',ucBinding);
+  //AddNewUtil('Qt4Pas5.dll',SourceURL64_Qt,'',ucQtFile);
   {$endif win64}
   {$ENDIF MSWINDOWS}
 end;
