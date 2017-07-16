@@ -99,8 +99,7 @@ begin
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName);
 
-
-{$IFDEF MSWINDOWS}
+  {$IFDEF MSWINDOWS}
   // Git on Windows can be a .cmd file
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName + '.cmd');
@@ -124,7 +123,7 @@ begin
   //Directory where current executable is:
   if not FileExists(FRepoExecutable) then
     FRepoExecutable := (SafeGetApplicationPath  + RepoExecutableName + '.exe');
-{$ENDIF MSWINDOWS}
+  {$ENDIF MSWINDOWS}
 
   if not FileExists(FRepoExecutable) then
   begin

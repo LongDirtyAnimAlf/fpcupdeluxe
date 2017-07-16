@@ -406,8 +406,11 @@ var
   x:integer;
   {$endif}
 begin
- StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
+ //StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
+ StartPath:=Application.Location;
  {$ifdef Darwin}
+ // do not store settings inside app iself ...
+ // not necessary the right choice ... ;-)
  x:=pos('/Contents/MacOS',StartPath);
  if x>0 then
  begin
@@ -418,7 +421,7 @@ begin
      Delete(StartPath,x+1,MaxInt);
    end;
  end;
-  {$endif}
+ {$endif}
  if FileIsSymlink(StartPath) then
     StartPath:=GetPhysicalFilename(StartPath,pfeException);
  result:=ExtractFilePath(StartPath);

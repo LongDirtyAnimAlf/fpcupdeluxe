@@ -1,31 +1,24 @@
 unit installerCore;
-{ Core fpcup installer code
-Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
+{
+    Core fpc(laz)up(deluxe) installer code
 
-This library is free software; you can redistribute it and/or modify it
-under the terms of the GNU Library General Public License as published by
-the Free Software Foundation; either version 2 of the License, or (at your
-option) any later version with the following modification:
+    Copyright (C) 2012-2014 Ludo Brands, Reinier Olislagers
+    Copyright (C) 2015-2017 Alfred Glänzer
 
-As a special exception, the copyright holders of this library give you
-permission to link this library with independent modules to produce an
-executable, regardless of the license terms of these independent modules,and
-to copy and distribute the resulting executable under terms of your choice,
-provided that you also meet, for each linked independent module, the terms
-and conditions of the license of that module. An independent module is a
-module which is not derived from or based on this library. If you modify
-this library, you may extend this exception to your version of the library,
-but you are not obligated to do so. If you do not wish to do so, delete this
-exception statement from your version.
+    This file is part of fpc(laz)up(deluxe).
 
-This program is distributed in the hope that it will be useful, but WITHOUT
-ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
-FITNESS FOR A PARTICULAR PURPOSE. See the GNU Library General Public License
-for more details.
+    Fpc(laz)up(deluxe) is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-You should have received a copy of the GNU Library General Public License
-along with this library; if not, write to the Free Software Foundation,
-Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+    Fpc(laz)up(deluxe) is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with fpc(laz)up(deluxe).  If not, see <http://www.gnu.org/licenses/>
 }
 
 {$mode objfpc}{$H+}
@@ -63,7 +56,8 @@ const
   STANDARDCOMPILEROPTIONS='-vewh';
   //STANDARDCOMPILEROPTIONS='-va';
   {$ELSE}
-  STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
+  //STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
+  STANDARDCOMPILEROPTIONS='-vw-n-h-l-d-u-t-p-c-';
   {$ENDIF}
 
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
@@ -146,6 +140,7 @@ type
     FBunzip2: string;
     F7zip: string;
     FUnrar: string;
+    FGit: string;
     FProcessEx: TProcessEx;
     FSwitchURL: boolean;
     property Make: string read GetMake;
@@ -399,12 +394,14 @@ begin
     FTar := '';
     FUnrar := '';
     F7zip := '';
+    FGit := '';
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
     FTar := 'tar';
     F7zip := '7za';
     FUnrar := 'unrar';
+    FGit := 'git';
     {$ENDIF LINUX}
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
@@ -412,11 +409,13 @@ begin
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     F7zip := '7za';
     FUnrar := 'unrar';
+    FGit := 'git';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     F7zip := '7za';
     FUnrar := 'unrar';
+    FGit := 'git';
     {$ENDIF DARWIN}
     {$ENDIF BSD}
 
@@ -454,7 +453,9 @@ begin
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
 
-    F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
+    F7zip:=Which('7z');
+    if Not FileExists(F7zip) then Which('7za');
+    if Not FileExists(F7zip) then F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
     if Not FileExists(F7zip) then
     begin
       ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
@@ -523,6 +524,51 @@ begin
       // do not fail ... perhaps there is another unrar available in the path
       OperationSucceeded:=True;
     end;
+
+    if Assigned(FGitClient)
+       then FGit:=FGitClient.RepoExecutableName
+       else FGit:=Which('git');
+    if Not FileExists(FGit) then FGit := IncludeTrailingPathDelimiter(FMakeDir) + 'git\bin\git.exe';
+    if Not FileExists(FGit) then
+    begin
+      //Source:
+      //https://github.com/git-for-windows/git/releases/download/v2.13.2.windows.1/Git-2.13.2-32-bit.exe
+      ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+      {$ifdef win32}
+      Output:='git32.7z';
+      {$else}
+      Output:='git64.7z';
+      {$endif}
+      infoln(localinfotext+'GIT not found. Download it (may take time) from '+FPCUPGITREPO+'/releases/download/Git-2.13.2',etInfo);
+      OperationSucceeded:=GetFile(FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+      if NOT OperationSucceeded then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+        OperationSucceeded:=GetFile(FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+      end;
+      if OperationSucceeded then
+      begin
+        infoln(localinfotext+'GIT download ready: unpacking (may take time).',etInfo);
+        OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+        if NOT OperationSucceeded then
+        begin
+          OperationSucceeded:=(ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+        end;
+        if NOT OperationSucceeded then
+        begin
+          OperationSucceeded:=(ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+        end;
+        if OperationSucceeded then
+        begin
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+          OperationSucceeded:=FileExists(FGit);
+        end;
+      end;
+      // do not fail ... perhaps there is another git available in the path
+      OperationSucceeded:=True;
+    end;
+    if FileExists(FGit) AND Assigned(FGitClient) then FGitClient.RepoExecutable:=FGit;
     {$ENDIF}
 
     {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
@@ -564,7 +610,6 @@ begin
         // look system default
         FSVNDirectory := '';
         AllThere:=Length(FSVNClient.RepoExecutable)<>0;
-        //AllThere:=Length(FSVNClient.RepoExecutable)<>0;
       end;
 
       {$IFDEF MSWINDOWS}
@@ -604,6 +649,16 @@ begin
       if FTar <> EmptyStr then
       begin
         OperationSucceeded := CheckExecutable(FTar, '--version', '');
+      end;
+    end;
+
+    if OperationSucceeded then
+    begin
+      // Check for valid tar executable, if it is needed
+      if FGit <> EmptyStr then
+      begin
+        // check exe, but do not fail: GIT is not always needed
+        CheckExecutable(FGit, '--version', '');
       end;
     end;
 

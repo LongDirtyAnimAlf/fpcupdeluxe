@@ -45,6 +45,7 @@ uses
   m_any_to_linuxaarch64,
   m_any_to_androidjvm,
   m_any_to_javajvm,
+  m_any_to_linuxpowerpc64,
   {$IFDEF LINUX}
   m_linux386_to_mips,
   {$ENDIF}

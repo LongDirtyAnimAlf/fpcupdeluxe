@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0k';
+  FPCUPDELUXEVERSION='1.4.0l';
 
 resourcestring
   CrossGCCMsg =
@@ -233,7 +233,6 @@ begin
   // we could have started from with an .app , so goto the basedir ... not sure if realy needed, but to be sure.
   SetCurrentDir(ExcludeTrailingPathDelimiter(SafeGetApplicationPath));
   {$endif}
-
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
@@ -2187,42 +2186,54 @@ var
 begin
   result:=DirectoryExists(ExtractFileDir(IniDirectory+DELUXEFILENAME));
 
-  if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
+  if not result then exit;
+
   try
-    // mmm, is this correct ?  See extrasettings !!
-    WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
+    with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
+    try
+      // mmm, is this correct ?  See extrasettings !!
+      WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
 
-    if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
-    if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
+      if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
+      if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
 
-    WriteString('General','FPCOptions',Form2.FPCOptions);
-    WriteString('General','LazarusOptions',Form2.LazarusOptions);
-    WriteString('General','FPCRevision',Form2.FPCRevision);
-    WriteString('General','LazarusRevision',Form2.LazarusRevision);
+      WriteString('General','FPCOptions',Form2.FPCOptions);
+      WriteString('General','LazarusOptions',Form2.LazarusOptions);
+      WriteString('General','FPCRevision',Form2.FPCRevision);
+      WriteString('General','LazarusRevision',Form2.LazarusRevision);
 
-    WriteBool('General','SplitFPC',Form2.SplitFPC);
-    WriteBool('General','SplitLazarus',Form2.SplitLazarus);
+      WriteBool('General','SplitFPC',Form2.SplitFPC);
+      WriteBool('General','SplitLazarus',Form2.SplitLazarus);
 
-    WriteBool('General','UseWget',Form2.UseWget);
-    WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
+      WriteBool('General','UseWget',Form2.UseWget);
+      WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
 
-    WriteString('Patches','FPCPatches',Form2.FPCPatches);
-    WriteString('Patches','LazarusPatches',Form2.LazPatches);
+      WriteString('Patches','FPCPatches',Form2.FPCPatches);
+      WriteString('Patches','LazarusPatches',Form2.LazPatches);
 
-    WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
+      WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
 
-    modules:='';
-    for i:=0 to ListBox3.Count-1 do
-    begin
-      if ListBox3.Selected[i] then modules:=modules+ListBox3.Items[i]+',';
+      modules:='';
+      for i:=0 to ListBox3.Count-1 do
+      begin
+        if ListBox3.Selected[i] then modules:=modules+ListBox3.Items[i]+',';
+      end;
+      // delete stale trailing comma, if any
+      if Length(modules)>0 then
+      Delete(modules,Length(modules),1);
+      WriteString('General','Modules',modules);
+
+    finally
+      Free;
     end;
-    // delete stale trailing comma, if any
-    if Length(modules)>0 then
-    Delete(modules,Length(modules),1);
-    WriteString('General','Modules',modules);
 
-  finally
-    Free;
+    result:=FileExists(IniDirectory+DELUXEFILENAME);
+
+  except
+    on E: Exception do
+    begin
+      //infoln(DELUXEFILENAME+': File creation error: '+E.Message,etError);
+    end;
   end;
 
 end;
