@@ -485,12 +485,12 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebinqt\$NameOnly($(ProjFile))-qt-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir)"/>
             <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxeqt\$(TargetCPU)-$(TargetOS)"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
@@ -510,7 +510,10 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-k-framework
+            <CustomOptions Value="-k&quot;-rpath @executable_path/../Frameworks&quot;
+-k-framework
+-kQt5Pas 
+-k-framework
 -kQtPrintSupport 
 -k-framework
 -kQtWidgets

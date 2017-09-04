@@ -68,5 +68,6 @@ bin/
 crosstools/
 bootstrappers/
 deluxebin/
+deluxebinqt/
 lib/
 lib*/

@@ -1323,6 +1323,8 @@ begin
     Result:=Result+'avr'
   else if SysUtils.CompareText(TargetCPU,'sparc')=0 then
     Result:=Result+'sparc'
+  else if SysUtils.CompareText(TargetCPU,'sparc64')=0 then
+    Result:=Result+'sparc64'
   else if SysUtils.CompareText(TargetCPU,'x86_64')=0 then
     Result:=Result+'x64'
   else if SysUtils.CompareText(TargetCPU,'ia64')=0 then
