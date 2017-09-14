@@ -410,6 +410,7 @@ var
   LazBuildApp: string;
   OperationSucceeded: boolean;
   sCmpOpt: string;
+  NothingToBeDone:boolean;
 begin
   Result:=inherited;
 
@@ -474,7 +475,24 @@ begin
       end;
       'LCLCROSS':
       begin
+        NothingToBeDone:=false;
         if FCrossLCL_Platform<>'' then
+        begin
+          {$ifdef Darwin}
+            {$ifdef LCLCOCOA}
+              NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+            {$else}
+              {$ifdef CPUX64}
+                {$ifdef LCLQT5}
+                  NothingToBeDone:=(FCrossLCL_Platform='qt5');
+                {$else}
+                  NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+                {$endif}
+              {$endif}
+            {$endif}
+          {$endif}
+        end;
+        if (NOT NothingToBeDone) then
         begin
           // first: Processor.Parameters.Add('-C lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+FCrossLCL_Platform);
           // followed by: make ideintf basecomponents bigidecomponents LCL_PLATFORM=qt
@@ -486,7 +504,7 @@ begin
         else
         begin
           // nothing to be done: exit graceously
-          infoln(infotext+'No LCL_PLATFORM defined ... nothing to be done', etInfo);
+          infoln(infotext+'No extra LCL_PLATFORM defined ... nothing to be done', etInfo);
           OperationSucceeded := true;
           Result := true;
           exit;
@@ -980,6 +998,7 @@ var
   {$endif}
   oldlog: TErrorMethod;
   CleanCommand,CleanDirectory:string;
+  NothingToBeDone:boolean;
 begin
   Result := inherited;
 
@@ -1070,14 +1089,31 @@ begin
     'LCLCROSS':
     begin
       CleanDirectory:=DirectorySeparator+'lcl';
-      if (FCrossLCL_Platform <> '') then
+      NothingToBeDone:=false;
+      if FCrossLCL_Platform<>'' then
+      begin
+        {$ifdef Darwin}
+          {$ifdef LCLCOCOA}
+            NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+          {$else}
+            {$ifdef CPUX64}
+              {$ifdef LCLQT5}
+                NothingToBeDone:=(FCrossLCL_Platform='qt5');
+              {$else}
+                NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+              {$endif}
+            {$endif}
+          {$endif}
+        {$endif}
+      end;
+      if (NOT NothingToBeDone) then
       begin
         Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
         CleanCommand:='cleanintf';
       end
       else
       begin
-        infoln(infotext+'No LCL_PLATFORM defined ... nothing to be done', etInfo);
+        infoln(infotext+'No extra LCL_PLATFORM defined ... nothing to be done', etInfo);
         Result := true;
         exit;
       end;
