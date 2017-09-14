@@ -480,8 +480,8 @@ begin
           // followed by: make ideintf basecomponents bigidecomponents LCL_PLATFORM=qt
           Processor.Parameters.Add('-C lcl');
           Processor.Parameters.Add('intf');
-          Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-          infoln(infotext+'Running make -C lcl intf LCL_PLATFORM='+FCrossLCL_Platform, etInfo);
+          //Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+          infoln(infotext+'Running make -C lcl intf', etInfo);
         end
         else
         begin
@@ -500,6 +500,7 @@ begin
         Result := false;
         exit;
       end;
+      if FCrossLCL_Platform<>'' then Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
     end;
     try
       writelnlog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
@@ -630,6 +631,9 @@ begin
           Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
           Processor.Parameters.Add('--cpu=' + GetTargetCPU);
           Processor.Parameters.Add('--os=' + GetTargetOS);
+
+          if FCrossLCL_Platform <> '' then
+            Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
 
           Processor.Parameters.Add(IncludeTrailingPathDelimiter(FSourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi');
@@ -1147,7 +1151,7 @@ var
   Counter: integer;
   Errors: integer;
   UpdateWarnings: TStringList;
-  PatchFilePath:string;
+  FilePath:string;
   LocalPatchCmd:string;
   Output: string = '';
   ReturnCode,i: integer;
@@ -1218,7 +1222,34 @@ begin
   if (NOT Result) then
     infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
 
-  // Download Qt bindings if not present yet
+  // Get Qt bindings if not present yet
+  // Lazy ... use the same defines as the mainform ... very redundant ...
+  {$ifdef Darwin}
+    {$ifdef LCLCOCOA}
+    {$else}
+      {$ifdef CPUX64}
+        {$ifdef LCLQT5}
+        // Note:
+        // do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
+        // ToDo : check if this presumption is correct
+
+        FilePath:=ExcludeTrailingPathDelimiter(SafeGetApplicationName);
+        infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
+        // copy QT5 frameworks to Lazarus source directory for future use.
+        if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks')
+          then infoln(infotext+'Adding QT5 Frameworks success.',etInfo)
+          else infoln(infotext+'Adding QT5 Frameworks failure.',etError);
+        // QT5 quirk: copy QT5 libqcocoa.dylib to Lazarus app.
+        if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
+          then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+          else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
+        {$else}
+        {$endif}
+      {$endif}
+    {$endif}
+  {$endif}
+
+  (*
   Errors := 0;
   if (Result) and (Uppercase(FCrossLCL_Platform) = 'QT') then
   begin
@@ -1254,6 +1285,7 @@ begin
       WritelnLog(infotext+IntToStr(Errors) + ' errors downloading Qt-related files.', true);
     end;
   end;
+  *)
 
   if result then
   begin
@@ -1266,10 +1298,10 @@ begin
         for i:=0 to (UpdateWarnings.Count-1) do
         begin
           infoln(infotext+'Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
-          PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
-          if FileExists(PatchFilePath) then
+          FilePath:=SafeExpandFileName(UpdateWarnings[i]);
+          if NOT FileExists(FilePath) then FilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
+          if NOT FileExists(FilePath) then FilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
+          if FileExists(FilePath) then
           begin
             // check for default values
             if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
@@ -1282,7 +1314,7 @@ begin
             {$IFDEF MSWINDOWS}
             ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
             {$ELSE}
-            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
+            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + FilePath, FSourceDirectory, Output, True);
             {$ENDIF}
             if ReturnCode=0
                then infoln(infotext+'Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
@@ -1294,7 +1326,7 @@ begin
           end
           else
           begin
-            infoln(infotext+'Strange: could not find patchfile '+PatchFilePath, etWarning);
+            infoln(infotext+'Strange: could not find patchfile '+FilePath, etWarning);
             writelnlog(etError, infotext+'Patching Lazarus with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
           end;
         end;

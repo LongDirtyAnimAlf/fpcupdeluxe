@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0l';
+  FPCUPDELUXEVERSION='1.4.0m';
 
 resourcestring
   CrossGCCMsg =
@@ -1385,7 +1385,7 @@ begin
     if IncludeLCL then
     begin
       FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
-      // if Darwin x64, only cocoa will work.
+      // if Darwin x64, only cocoa (but also qt5) will work.
       if ((FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target='x86_64'))
           then FPCupManager.CrossLCL_Platform:='cocoa';
     end
@@ -2007,6 +2007,20 @@ begin
 
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;
+
+  {$ifdef Darwin}
+    {$ifdef LCLCOCOA}
+      FPCupManager.CrossLCL_Platform:='cocoa';
+    {$else}
+      {$ifdef CPUX64}
+        {$ifdef LCLQT5}
+          FPCupManager.CrossLCL_Platform:='qt5';
+        {$else}
+          FPCupManager.CrossLCL_Platform:='cocoa';
+        {$endif}
+      {$endif}
+    {$endif}
+  {$endif}
 
   RealFPCURL.Text:='';
   RealLazURL.Text:='';

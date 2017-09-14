@@ -2464,7 +2464,7 @@ begin
       PlainBinPath:=ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'));
       AssignFile(TxtFile,FPCCfg);
       Append(TxtFile);
-      Writeln(TxtFile,'# fpcup:');
+      Writeln(TxtFile,'# Fpcup[deluxe]:');
       Writeln(TxtFile,'# Adding binary tools paths to');
       Writeln(TxtFile,'# plain bin dir and architecture bin dir so');
       Writeln(TxtFile,'# fpc 3.1+ fpcres etc can be found.');
@@ -2490,6 +2490,22 @@ begin
       Write(TxtFile,';'+GetGCCDirectory);
       Writeln;
       {$ENDIF UNIX}
+
+      {$ifndef FPCONLY}
+        {$ifdef Darwin}
+          {$ifdef LCLQT5}
+          Writeln(TxtFile,'# Fpcup[deluxe]:');
+          Writeln(TxtFile,'# Adding some standard paths for QT5 locations ... bit dirty');
+          Writeln(TxtFile,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+          Writeln(TxtFile,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+          Writeln(TxtFile,'-k-rpath');
+          Writeln(TxtFile,'-k@executable_path/../Frameworks');
+          Writeln(TxtFile,'-k-rpath');
+          Writeln(TxtFile,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+          {$endif}
+        {$endif}
+      {$endif}
+
       CloseFile(TxtFile);
     end
     else

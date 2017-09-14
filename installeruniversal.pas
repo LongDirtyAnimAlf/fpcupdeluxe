@@ -80,6 +80,8 @@ type
     FLazarusNeedsRebuild:boolean;
     // Directory where configuration for Lazarus is stored:
     FLazarusPrimaryConfigPath:string;
+    // LCL widget set to be built
+    FLCL_Platform: string;
     {$endif}
     FPath:string; //Path to be used within this session (e.g. including compiler path)
     InitDone:boolean;
@@ -118,8 +120,10 @@ type
     property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
     // Lazarus base directory
     property LazarusDir:string read FLazarusDir write FLazarusDir;
-    // Build module
+    // LCL widget set to be built
+    property LCL_Platform: string read FLCL_Platform write FLCL_Platform;
     {$endif}
+    // Build module
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
     function CleanModule(ModuleName:string): boolean; override;
@@ -409,7 +413,7 @@ begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
       if Pos('only for runtime',Processor.OutputString)>0
          then result:=True
-         else WritelnLog(localinfotext+'Rrror trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
+         else WritelnLog(localinfotext+'Error trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
@@ -549,6 +553,18 @@ begin
     end;
     {$endif}
 
+    {$ifdef Darwin}
+    {$ifdef CPUX64}
+    // the packages onlinepackagemanager [and editormacroscript] are not suitable for Darwin 64 bit !
+    // so skip them in case they are included.
+    if (Pos('onlinepackagemanager',PackagePath)>0) OR (Pos('editormacroscript',PackagePath)>0) then
+    begin
+      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+      continue;
+    end;
+    {$endif}
+    {$endif}
+
     {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
     // the package PascalScript is only suitable for i386, x86_64 and arm !
     // so skip in case package was included.
@@ -685,6 +701,10 @@ begin
       j:=Pos('lazbuild.exe',lowerCase(exec));
       if j>0 then exec:=StringReplace(exec,'lazbuild.exe','lazbuild',[rfIgnoreCase]);
       {$ENDIF}
+
+      // TODO
+      // should more options for lazbuild be added here, as is been done on other places !!??
+
       {$IFDEF DEBUG}
       exec:=StringReplace(exec,'lazbuild','lazbuild --verbose',[rfIgnoreCase]);
       {$ELSE}
@@ -1116,6 +1136,10 @@ begin
         Processor.Parameters.Add('--os=' + GetTargetOS);
 
         Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
+
+        if FLCL_Platform <> '' then
+          Processor.Parameters.Add('--widgetset=' + FLCL_Platform);
+
         try
           Processor.Execute;
           result := Processor.ExitStatus=0;

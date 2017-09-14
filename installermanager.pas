@@ -1483,6 +1483,7 @@ begin
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
       (FInstaller as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+      (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.CrossLCL_Platform;
       {$endif}
       if FParent.CompilerName='' then
         FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)

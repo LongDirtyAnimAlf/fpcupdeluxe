@@ -229,6 +229,8 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 // Delete shortcut on desktop
 procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
+// Copy a directory recursive
+function DirCopy(FromDir,ToDir: String): Boolean;
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Recursively delete files with specified name(s), only if path contains specfied directory name somewhere (or no directory name specified):
@@ -263,6 +265,8 @@ function MoveFile(const SrcFilename, DestFilename: string): boolean;
 function SafeExpandFileName (Const FileName : String): String;
 // Like ExpandFilenameUTF8 but does not expand an empty string to current directory
 function SafeExpandFileNameUTF8 (Const FileName : String): String;
+// Get application name
+function SafeGetApplicationName: String;
 // Get application path
 function SafeGetApplicationPath: String;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
@@ -399,13 +403,39 @@ begin
     result:=ExpandFileNameUTF8(FileName);
 end;
 
-function SafeGetApplicationPath: String;
+function SafeGetApplicationName: String;
 var
   StartPath: String;
   {$ifdef Darwin}
   x:integer;
   {$endif}
 begin
+ StartPath:=Application.ExeName;
+ {$ifdef Darwin}
+ // we need the .app itself !!
+ x:=pos('/Contents/MacOS',StartPath);
+ if x>0 then
+ begin
+   Delete(StartPath,x,MaxInt);
+   (*
+   x:=RPos('/',StartPath);
+   if x>0 then
+   begin
+     Delete(StartPath,x+1,MaxInt);
+   end;
+   *)
+ end;
+ {$endif}
+ if FileIsSymlink(StartPath) then
+    StartPath:=GetPhysicalFilename(StartPath,pfeException);
+ result:=StartPath;
+end;
+
+function SafeGetApplicationPath: String;
+begin
+  result:=ExtractFilePath(SafeGetApplicationName);
+
+  (*
  //StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
  StartPath:=Application.Location;
  {$ifdef Darwin}
@@ -425,6 +455,8 @@ begin
  if FileIsSymlink(StartPath) then
     StartPath:=GetPhysicalFilename(StartPath,pfeException);
  result:=ExtractFilePath(StartPath);
+ *)
+
  if DirectoryExistsUTF8(result) then
     result:=GetPhysicalFilename(result,pfeException);
  result:=AppendPathDelim(result);
@@ -718,6 +750,11 @@ begin
   SysUtils.DeleteFile(LinkName);
 end;
 {$ENDIF MSWINDOWS}
+
+function DirCopy(FromDir,ToDir: String): Boolean;
+begin
+  result:=FileUtil.CopyDirTree(FromDir,ToDir,[cffOverwriteFile,cffCreateDestDirectory]);
+end;
 
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Lazarus fileutil.DeleteDirectory on steroids, works like
@@ -1726,7 +1763,7 @@ end;
 
 procedure TLogger.WriteLog(Message: string; ToConsole: Boolean);
 begin
-  FLog.Log(etInfo, Message);
+  FLog.Info(Message);
   if ToConsole then infoln(Message,etInfo);
 end;
 

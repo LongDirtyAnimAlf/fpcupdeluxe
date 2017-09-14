@@ -58,7 +58,10 @@ unit processutils;
 interface
 
 uses
-  Classes, SysUtils, process, strutils;
+  Classes, SysUtils,
+  process,
+  //UTF8Process,
+  strutils;
 
 const
   // Internal error code/result codes:
@@ -98,6 +101,7 @@ type
   { TProcessEx }
 
   TProcessEx = class(TProcess)
+  //TProcessEx = class(TProcessUTF8)
     private
       FExceptionInfoStrings: TstringList;
       FExitStatus: integer; //result code/exit status that executable returned with
