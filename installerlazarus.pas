@@ -331,7 +331,7 @@ begin
           Processor.Parameters.Add('--os=' + FCrossOS_Target);
 
         if FCrossLCL_Platform <> '' then
-          Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
+          Processor.Parameters.Add('--ws=' + FCrossLCL_Platform);
 
         Processor.Parameters.Add('packager'+DirectorySeparator+'registration'+DirectorySeparator+'fcl.lpk');
         Processor.Parameters.Add('components'+DirectorySeparator+'lazutils'+DirectorySeparator+'lazutils.lpk');
@@ -406,11 +406,12 @@ end;
 
 function TLazarusNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
-  ExitCode: integer;
+  i,j,ExitCode: integer;
   LazBuildApp: string;
   OperationSucceeded: boolean;
   sCmpOpt: string;
   NothingToBeDone:boolean;
+  LazarusConfig: TUpdateLazConfig;
 begin
   Result:=inherited;
 
@@ -584,6 +585,9 @@ begin
       Processor.Parameters.Add('--cpu=' + GetTargetCPU);
       Processor.Parameters.Add('--os=' + GetTargetOS);
 
+      if FCrossLCL_Platform <> '' then
+        Processor.Parameters.Add('--ws=' + FCrossLCL_Platform);
+
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
       // Assume new Laz version on failure getting revision
@@ -602,8 +606,6 @@ begin
         Processor.Parameters.Add('--build-mode="Normal IDE"');
       end;
 
-      if FCrossLCL_Platform <> '' then
-        Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
       // Run first time...
       if OperationSucceeded then
       begin
@@ -626,6 +628,36 @@ begin
           end;
         end;
       end;
+
+      if OperationSucceeded then
+      begin
+        // Change the build modes to reflect the default LCL widget set.
+        // Somewhat strange that this is necessary: should be done by lazbuild with widgetset defined ...
+        LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
+        try
+          {$ifdef Darwin}
+          i:=LazarusConfig.GetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Count',0);
+          if i=0
+            then infoln(infotext+'No build profiles in '+MiscellaneousConfig, etWarning)
+            else infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig, etInfo);
+          {$ifdef LCLQT5}
+          for j:=0 to (i-1) do
+          begin
+            LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', 'qt5');
+          end;
+          {$endif}
+          {$ifdef LCLCOCOA}
+          for j:=0 to (i-1) do
+          begin
+            LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', 'cocoa');
+          end;
+          {$endif}
+          {$endif}
+        finally
+          LazarusConfig.Destroy;
+        end;
+      end;
+
 
       // ... build startlazarus if it doesn't exist
       // (even an old version left over by make distclean is probably ok)
@@ -651,7 +683,7 @@ begin
           Processor.Parameters.Add('--os=' + GetTargetOS);
 
           if FCrossLCL_Platform <> '' then
-            Processor.Parameters.Add('--widgetset=' + FCrossLCL_Platform);
+            Processor.Parameters.Add('--ws=' + FCrossLCL_Platform);
 
           Processor.Parameters.Add(IncludeTrailingPathDelimiter(FSourceDirectory)+
             'ide'+DirectorySeparator+'startlazarus.lpi');
@@ -789,6 +821,7 @@ begin
   LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
   Processor.Executable := LazBuildApp;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+
   Processor.Parameters.Clear;
   Processor.Parameters.Add('--version');
   Processor.Execute;
@@ -973,7 +1006,6 @@ begin
       //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
       {$endif}
 
-
     except
       on E: Exception do
       begin
@@ -984,6 +1016,7 @@ begin
   finally
     LazarusConfig.Free;
   end;
+
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
@@ -1275,8 +1308,12 @@ begin
         if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks')
           then infoln(infotext+'Adding QT5 Frameworks success.',etInfo)
           else infoln(infotext+'Adding QT5 Frameworks failure.',etError);
-        // QT5 quirk: copy QT5 libqcocoa.dylib to Lazarus app.
+        // QT5 quirk: copy QT5 libqcocoa.dylib to lazarus.app
         if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
+          then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+          else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
+        // QT5 quirk: copy QT5 libqcocoa.dylib to startlazarus.app
+        if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
           then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
           else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
         {$else}
@@ -1348,7 +1385,7 @@ begin
               {$endif}
                else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
             {$IFDEF MSWINDOWS}
-            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
+            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + FilePath, FSourceDirectory, Output, True);
             {$ELSE}
             ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + FilePath, FSourceDirectory, Output, True);
             {$ENDIF}

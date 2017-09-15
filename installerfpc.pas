@@ -2488,20 +2488,24 @@ begin
       Write(TxtFile,';'+'/usr/local/lib'+';'+'/usr/X11R6/lib');
       {$endif}
       Write(TxtFile,';'+GetGCCDirectory);
-      Writeln;
+      Writeln(TxtFile);
       {$ENDIF UNIX}
 
       {$ifndef FPCONLY}
         {$ifdef Darwin}
           {$ifdef LCLQT5}
+          Writeln(TxtFile);
           Writeln(TxtFile,'# Fpcup[deluxe]:');
           Writeln(TxtFile,'# Adding some standard paths for QT5 locations ... bit dirty');
+          Writeln(TxtFile,'#IFNDEF FPC_CROSSCOMPILING');
           Writeln(TxtFile,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
           Writeln(TxtFile,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
           Writeln(TxtFile,'-k-rpath');
           Writeln(TxtFile,'-k@executable_path/../Frameworks');
           Writeln(TxtFile,'-k-rpath');
           Writeln(TxtFile,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+          Writeln(TxtFile,'#ENDIF');
+          Writeln(TxtFile);
           {$endif}
         {$endif}
       {$endif}

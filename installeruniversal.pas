@@ -398,6 +398,9 @@ begin
   Processor.Parameters.Add('--cpu=' + GetTargetCPU);
   Processor.Parameters.Add('--os=' + GetTargetOS);
   Processor.Parameters.Add('--add-package');
+  if FLCL_Platform <> '' then
+            Processor.Parameters.Add('--ws=' + FLCL_Platform);
+
   Processor.Parameters.Add(PackageAbsolutePath);
   try
     Processor.Execute;
@@ -557,7 +560,9 @@ begin
     {$ifdef CPUX64}
     // the packages onlinepackagemanager [and editormacroscript] are not suitable for Darwin 64 bit !
     // so skip them in case they are included.
-    if (Pos('onlinepackagemanager',PackagePath)>0) OR (Pos('editormacroscript',PackagePath)>0) then
+    if
+      {(Pos('onlinepackagemanager',PackagePath)>0) OR}
+      (Pos('editormacroscript',PackagePath)>0) then
     begin
       infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
       continue;
@@ -944,6 +949,8 @@ var
     exec,key,counter,oldcounter,filename:string;
     count:integer;
   begin
+  //filename:=xmlfile;
+  //if rightstr(filename,4)<>'.xml' then
   filename:=xmlfile+'.xml';
   oldcounter:='';
   for i:=0 to MAXINSTRUCTIONS do
@@ -1033,7 +1040,6 @@ begin
           AddToLazXML('helpoptions');
           AddToLazXML('miscellaneousoptions'); //e.g. list of packages to be installed on recompile
           AddToLazXML('packagefiles'); //e.g. list of available packages
-
           // Process special directives
           Directive:=GetValue('RegisterExternalTool',sl);
           if Directive<>'' then
@@ -1135,10 +1141,10 @@ begin
         Processor.Parameters.Add('--cpu=' + GetTargetCPU);
         Processor.Parameters.Add('--os=' + GetTargetOS);
 
-        Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
-
         if FLCL_Platform <> '' then
-          Processor.Parameters.Add('--widgetset=' + FLCL_Platform);
+          Processor.Parameters.Add('--ws=' + FLCL_Platform);
+
+        Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
 
         try
           Processor.Execute;
@@ -1623,6 +1629,8 @@ begin
       Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
       Processor.Parameters.Add('--cpu=' + GetTargetCPU);
       Processor.Parameters.Add('--os=' + GetTargetOS);
+      if FLCL_Platform <> '' then
+        Processor.Parameters.Add('--ws=' + FLCL_Platform);
       Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
       try
         Processor.Execute;

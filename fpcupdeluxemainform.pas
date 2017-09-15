@@ -1440,8 +1440,13 @@ begin
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='LinuxARM.rar';
           {$endif}
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='LinuxAarch64.rar';
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.rar';
+          {$ifdef Darwin}
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.zip';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.zip';
+          {$else}
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.rar';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.rar';
+          {$endif}
           if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='LinuxPowerPC.rar';
           if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='LinuxPowerPC64.rar';
           if FPCupManager.CrossCPU_Target='mips' then BinsURL:='LinuxMips.zip';
