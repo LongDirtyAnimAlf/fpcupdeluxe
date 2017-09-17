@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0m';
+  FPCUPDELUXEVERSION='1.4.0n';
 
 resourcestring
   CrossGCCMsg =
@@ -219,7 +219,27 @@ begin
   Reset(System.Input);
   Rewrite(System.Output);
 
-  Self.Caption:='FPCUPdeluxe V'+FPCUPDELUXEVERSION+' base fpcup'+RevisionStr+' ('+VersionDate+') for ' + GetTargetCPUOS;
+  Self.Caption:=
+    'FPCUPdeluxe V'+
+    FPCUPDELUXEVERSION+
+    ' base fpcup'+
+    RevisionStr+
+    ' ('+
+    VersionDate+
+    ') for ' +
+    GetTargetCPUOS
+    {$ifdef Darwin}
+      {$ifdef LCLCARBON}
+      +'-carbon'
+      {$endif}
+      {$ifdef LCLCOCOA}
+      +'-cocoa'
+      {$endif}
+      {$ifdef LCLQT5}
+      +'-qt5'
+      {$endif}
+    {$endif}
+    ;
 
   sStatus:='Sitting and waiting';
 

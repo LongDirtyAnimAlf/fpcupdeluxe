@@ -33,11 +33,6 @@ unit fpcuputil;
 //{$mode DELPHI}{$H+}
 {$mode objfpc}{$H+}
 
-{Define NOCONSOLE e.g. if using Windows GUI {$APPTYPE GUI} or -WG
-this will disable writeln calls
-}
-{not $DEFINE NOCONSOLE}
-
 {$define ENABLEWGET}
 
 interface
@@ -230,7 +225,7 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
 // Copy a directory recursive
-function DirCopy(FromDir,ToDir: String): Boolean;
+function DirCopy(SourcePath, DestPath: String): Boolean;
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Recursively delete files with specified name(s), only if path contains specfied directory name somewhere (or no directory name specified):
@@ -751,9 +746,9 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-function DirCopy(FromDir,ToDir: String): Boolean;
+function DirCopy(SourcePath, DestPath: String): Boolean;
 begin
-  result:=FileUtil.CopyDirTree(FromDir,ToDir,[cffOverwriteFile,cffCreateDestDirectory]);
+  result:=FileUtil.CopyDirTree(SourcePath, DestPath,[cffOverwriteFile,cffCreateDestDirectory]);
 end;
 
 function DeleteDirectoryEx(DirectoryName: string): boolean;

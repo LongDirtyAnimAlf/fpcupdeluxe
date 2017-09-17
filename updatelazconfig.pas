@@ -81,7 +81,8 @@ const
   MiscellaneousConfig='miscellaneousoptions.xml';
   // FPC defines (source cache):
   FPCDefines='fpcdefines.xml';
-
+  // File history:
+  History='inputhistory.xml';
   // Versions used when new config files are generated.
   // Lazarus pre 1.0: 106
   // We can assume Lazarus trunk can parse this version:

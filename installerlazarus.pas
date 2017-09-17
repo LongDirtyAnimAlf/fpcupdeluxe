@@ -476,9 +476,10 @@ begin
       end;
       'LCLCROSS':
       begin
-        NothingToBeDone:=false;
+        NothingToBeDone:=true;
         if FCrossLCL_Platform<>'' then
         begin
+          NothingToBeDone:=false;
           {$ifdef Darwin}
             {$ifdef LCLCOCOA}
               NothingToBeDone:=(FCrossLCL_Platform='cocoa');
@@ -992,6 +993,9 @@ begin
       ForceDirectoriesUTF8(DebuggerPath);
       //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
+      // Set file history
+      LazarusConfig.SetVariable(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
+
 
       {$IFDEF MSWINDOWS}
       // needed while running Lazarus adds a personal directory that is not valid for other users.
@@ -1122,9 +1126,10 @@ begin
     'LCLCROSS':
     begin
       CleanDirectory:=DirectorySeparator+'lcl';
-      NothingToBeDone:=false;
+      NothingToBeDone:=true;
       if FCrossLCL_Platform<>'' then
       begin
+        NothingToBeDone:=false;
         {$ifdef Darwin}
           {$ifdef LCLCOCOA}
             NothingToBeDone:=(FCrossLCL_Platform='cocoa');
@@ -1208,6 +1213,63 @@ begin
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;
+{$ifdef Darwin}
+{$ifdef LCLQT5}
+function CreateQT5Symlinks(aApp:string):boolean;
+var
+  DirectoriesFoundList,FilesFoundList : TStringList;
+  DirCounter,FileCounter:integer;
+  FrameworkDir,FrameworkName,FileToLink:string;
+  success:boolean;
+begin
+  // create symlinks for Frameworks to save space
+  result:=true;
+  DirectoriesFoundList := FindAllDirectories(aApp,False);
+  try
+    for DirCounter := 0 to DirectoriesFoundList.Count -1 do
+    begin
+      FrameworkDir := ExcludeTrailingPathDelimiter(DirectoriesFoundList.Strings[DirCounter]);
+      FrameworkName := ExtractFileNameOnly(FrameworkDir);
+      FilesFoundList := FindAllFiles(FrameworkDir+'/Versions');
+      try
+        for FileCounter := 0 to FilesFoundList.Count -1 do
+        begin
+          FileToLink := FilesFoundList.Strings[FileCounter];
+          if ExtractFileName(FileToLink) = FrameworkName then
+          begin
+            FileToLink:=CreateRelativePath(FileToLink,FrameworkDir);
+
+            // do we already have some sort of file ?
+            if (FileExists(FrameworkDir+'/'+FrameworkName)) then
+            begin
+              // if its not a link, then delete file !! tricky ...
+              if (FpReadLink(FrameworkDir+'/'+FrameworkName) = '') then DeleteFile(FrameworkDir+'/'+FrameworkName);
+            end;
+
+            if (NOT FileExists(FrameworkDir+'/'+FrameworkName)) then
+            begin
+              // create the symlink towards the base framework library
+              success:=(FPSymLink(PChar(FileToLink),PChar(FrameworkDir+'/'+FrameworkName))=0);
+              if NOT success then
+              begin
+                result:=false;
+                infoln(infotext+'Symlink creation failure for '+FrameworkName,etError);
+              end;
+            end;
+
+          end;
+        end;
+      finally
+        FilesFoundList.Free;
+      end;
+    end;
+  finally
+    DirectoriesFoundList.Free;
+  end;
+end;
+{$endif}
+{$endif}
+
 const
   // needs to be exactly the same as used by Lazarus !!!
   //RevisionIncComment = '// Created by FPCLAZUP';
@@ -1227,6 +1289,11 @@ var
   RevisionIncText: Text;
   ConstStart: string;
   aRepoClient:TRepoClient;
+  {$ifdef Darwin}
+  {$ifdef LCLQT5}
+  fs:TMemoryStream;
+  {$endif}
+  {$endif}
 begin
   Result := inherited;
   Result := InitModule;
@@ -1291,35 +1358,88 @@ begin
   if (NOT Result) then
     infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
 
-  // Get Qt bindings if not present yet
-  // Lazy ... use the same defines as the mainform ... very redundant ...
   {$ifdef Darwin}
-    {$ifdef LCLCOCOA}
-    {$else}
-      {$ifdef CPUX64}
-        {$ifdef LCLQT5}
-        // Note:
-        // do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
-        // ToDo : check if this presumption is correct
+  {$ifdef LCLQT5}
+  // Only for Darwin
+  // Get Qt bindings if not present yet
+  // I know that this involves a lot of trickery and some dirty work, but it gives the user an öut-of-the-box" experience !
+  // And fpcupdeluxe is there to make the user-experience of FPC and Lazarus an easy one
+  // Note:
+  // Do not fail on error : could be that the fpcupdeluxe user has installed QT5 by himself
+  // ToDo : check if this presumption is correct
 
-        FilePath:=ExcludeTrailingPathDelimiter(SafeGetApplicationName);
-        infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
-        // copy QT5 frameworks to Lazarus source directory for future use.
-        if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks')
-          then infoln(infotext+'Adding QT5 Frameworks success.',etInfo)
-          else infoln(infotext+'Adding QT5 Frameworks failure.',etError);
-        // QT5 quirk: copy QT5 libqcocoa.dylib to lazarus.app
-        if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
-          then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
-          else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
-        // QT5 quirk: copy QT5 libqcocoa.dylib to startlazarus.app
-        if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
-          then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
-          else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
-        {$else}
-        {$endif}
-      {$endif}
-    {$endif}
+  FilePath:=ExcludeTrailingPathDelimiter(SafeGetApplicationName);
+  infoln(infotext+'Adding QT5 binary sources (QT5 + QT5Pas Frameworks + libqcocoa) from fpcupdeluxe.app itself.',etInfo);
+
+  // copy QT5 frameworks to Lazarus source directory for future use.
+  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks') then
+  begin
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks');
+    infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' success.',etInfo);
+  end else infoln(infotext+'Adding QT5 Frameworks to ' + ExcludeTrailingPathDelimiter(FBaseDirectory)+'/Frameworks' + ' failure.',etError);
+
+  // copy QT5 frameworks to lazarus.app ... a bit redundant ... :-(
+  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks') then
+  begin
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Frameworks');
+    infoln(infotext+'Adding QT5 Frameworks to lazarus.app success.',etInfo);
+  end else infoln(infotext+'Adding QT5 Frameworks to lazarus.app failure.',etError);
+
+  // copy QT5 frameworks to startlazarus.app ... a bit redundant ... :-(
+  if DirCopy(FilePath+'/Contents/Frameworks',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks') then
+  begin
+    CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Frameworks');
+    infoln(infotext+'Adding QT5 Frameworks to startlazarus.app success.',etInfo);
+  end  else infoln(infotext+'Adding QT5 Frameworks to startlazarus.app failure.',etError);
+  CreateQT5Symlinks(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app');
+
+  // QT5 quirk: copy QT5 libqcocoa.dylib to lazarus.app
+  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/lazarus.app/Contents/Plugins')
+    then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+    else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
+
+  // QT5 quirk: copy QT5 libqcocoa.dylib to startlazarus.app
+  if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
+    then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
+    else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
+
+  // Replace applicationbundle.pas with a version that adds the necessary files into the app-bundle
+  // This is dirty
+  fs:=TMemoryStream.Create;
+  try
+    with TResourceStream.Create(hInstance, 'APPLICATIONBUNDLE', RT_RCDATA) do
+    try
+      Savetostream(fs);
+    finally
+      Free;
+    end;
+    fs.Position:=0;
+    SysUtils.DeleteFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/applicationbundle.pas');
+    if (NOT FileExists(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/applicationbundle.pas')) then
+       fs.SaveToFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/applicationbundle.pas');
+  finally
+    fs.Free;
+  end;
+
+  // Replace debugmanager.pas with a version that always creates the app-bundle
+  // This is very dirty
+  fs:=TMemoryStream.Create;
+  try
+    with TResourceStream.Create(hInstance, 'DEBUGMANAGER', RT_RCDATA) do
+    try
+      Savetostream(fs);
+    finally
+      Free;
+    end;
+    fs.Position:=0;
+    SysUtils.DeleteFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/debugmanager.pas');
+    if (NOT FileExists(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/debugmanager.pas')) then
+       fs.SaveToFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/debugmanager.pas');
+  finally
+    fs.Free;
+  end;
+
+  {$endif}
   {$endif}
 
   (*
