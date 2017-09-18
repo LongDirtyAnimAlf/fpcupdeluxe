@@ -986,18 +986,53 @@ begin
       {$IFDEF FREEBSD}
       // Check for newer user-installed debugger (e.g. from ports tree
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
-      DebuggerPath := '/usr/local/bin/';
-      if CheckExecutable(DebuggerPath + 'gdb', '--version', 'GNU gdb') then
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', DebuggerPath + 'gdb')
-      else
-        LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', which('gdb')); //system gdb; assume in path
+      DebuggerPath := '/usr/local/bin/gdb';
+      if NOT CheckExecutable(DebuggerPath, '--version', 'GNU gdb') then DebuggerPath := which('gdb');
       {$ELSE}//other *nix
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', which('gdb')); //assume in path
+      DebuggerPath := which('gdb');  //assume in path
       {$ENDIF FREEBSD}
+      if Length(DebuggerPath)>0 then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', DebuggerPath);
 
       {$IFDEF BSD}
       {$IFDEF DARWIN}
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('make')); //assume in path
+
+      // extra gdb settings
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
+      // for newer versions Mac OSX versions (>=10.8) perhaps needed:
+      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
+      if length(DebuggerPath)>0 then
+      begin
+        // we have a gdb ... check version
+        Processor.Executable := DebuggerPath;
+        Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
+
+        Processor.Parameters.Clear;
+        Processor.Parameters.Add('--version');
+        Processor.Execute;
+        if Processor.ExitStatus = 0 then
+        begin
+          i:=Processor.OutputStrings.Count;
+          if i>0 then
+          begin
+            // gdb outputs version info on first line
+            VersionSnippet:=Processor.OutputStrings.Strings[0];
+            // e.g. GNU gdb (GDB) 7.7.1-kjhkjh
+            i:=0;
+            // move towards first numerical
+            while (Length(VersionSnippet)>i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+            j:=0;
+            // get only major version
+            while (Length(VersionSnippet)>i) AND (VersionSnippet[i] in ['0'..'9']) do
+            begin
+              j:=j*10+Ord(VersionSnippet[i])-$30;
+              Inc(i);
+            end;
+            // for newer versions Mac OSX versions (>=10.11) and GDB >= 8.0 [perhaps] needed:
+            if j>=8 then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
+          end;
+        end;
+      end;
       {$ELSE}//*BSD: FreeBSD, NetBSD, OpenBSD
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('gmake')); //GNU make; assume in path
       {$ENDIF DARWIN}
@@ -1016,15 +1051,6 @@ begin
       if LazarusConfig.GetVariable(EnvironmentConfig,'Desktops/Desktop2/Name')='default docked' then
          LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop2/IDECoolBarOptions/Visible/Value', 'True');
 
-      // add default projects path
-      DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
-      ForceDirectoriesUTF8(DebuggerPath);
-      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
-      // Set file history
-      LazarusConfig.SetVariable(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
-
-
       {$IFDEF MSWINDOWS}
       // needed while running Lazarus adds a personal directory that is not valid for other users.
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Count', '2');
@@ -1032,13 +1058,12 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/History/Item2/Value', 'C:\Users\Public\Documents');
       {$ENDIF MSWINDOWS}
 
-      {$IFDEF Darwin}
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
-      // for newer versions Mac OSX versions (>=10.8) perhaps needed:
-      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerOptions/DebuggerResetAfterRun', 'True');
-      // for newer versions Mac OSX versions (>=10.11) and GDB >= 8.0 perhaps needed:
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
-      {$endif}
+      // add default projects path
+      DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
+      ForceDirectoriesUTF8(DebuggerPath);
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
+      // Set file history towards default project directory
+      LazarusConfig.SetVariable(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
 
     except
       on E: Exception do
