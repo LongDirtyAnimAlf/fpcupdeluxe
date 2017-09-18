@@ -979,11 +979,12 @@ begin
          then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', ExtractFilePath(FCompiler) + 'make' + GetExeExt)
          else LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt);
       {$ENDIF MSWINDOWS}
+
       {$IFDEF UNIX}
       // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', FCompiler);
 
-      {$IFDEF FREEBSD}
+      {$IF (defined(FREEBSD)) or (defined(Darwin))}
       // Check for newer user-installed debugger (e.g. from ports tree
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
       DebuggerPath := '/usr/local/bin/gdb';
@@ -1017,6 +1018,7 @@ begin
           begin
             // gdb outputs version info on first line
             VersionSnippet:=Processor.OutputStrings.Strings[0];
+            infoln(infotext+'GDB --version output: ' + VersionSnippet, etInfo);
             // e.g. GNU gdb (GDB) 7.7.1-kjhkjh
             i:=0;
             // move towards first numerical
@@ -1028,6 +1030,7 @@ begin
               j:=j*10+Ord(VersionSnippet[i])-$30;
               Inc(i);
             end;
+            infoln(infotext+'GDB major version: ' + InttoStr(j), etInfo);
             // for newer versions Mac OSX versions (>=10.11) and GDB >= 8.0 [perhaps] needed:
             if j>=8 then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/Debugger_Startup_Options', '--eval-command="set startup-with-shell off"');
           end;
@@ -1075,7 +1078,6 @@ begin
   finally
     LazarusConfig.Free;
   end;
-
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;

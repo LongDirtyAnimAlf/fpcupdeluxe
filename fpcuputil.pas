@@ -1220,6 +1220,10 @@ function Which(Executable: string): string;
 var
   Output: string;
 begin
+  result:=FindDefaultExecutablePath(Executable);
+  if (NOT FileIsExecutable(result)) then result:='';
+
+  (*
   {$IFDEF UNIX}
   // Note: we're using external which because
   // FindDefaultExecutablePath
@@ -1246,6 +1250,7 @@ begin
   begin
     result:=''; //command failed
   end;
+  *)
 end;
 
 {$IFDEF UNIX}
