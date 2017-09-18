@@ -212,7 +212,7 @@ begin
 
   {$ifdef Darwin}
   RadioGroup2.Items.Strings[RadioGroup2.Items.IndexOf('wince')]:='i-sim';
-  {$endif CPUARM}
+  {$endif Darwin}
 
   oldoutput := System.Output;
   AssignSynEdit(System.Output, SynEdit1);
