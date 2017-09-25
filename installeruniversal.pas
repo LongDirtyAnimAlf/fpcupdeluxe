@@ -1247,7 +1247,7 @@ begin
       infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
       UpdateWarnings:=TStringList.Create;
       try
-        FUrl:=RemoteURL;
+        FURL:=RemoteURL;
         FSVNClient.ModuleName:=ModuleName;
         FSVNClient.Verbose:=FVerbose;
         FSVNClient.ExportOnly:=FExportOnly;

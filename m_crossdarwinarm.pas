@@ -13,6 +13,9 @@ uses
 
 implementation
 
+uses
+  LazFileUtils;
+
 type
 
 { TDarwinarm }
@@ -30,20 +33,51 @@ end;
 { TDarwinarm }
 
 function TDarwinarm.GetLibs(Basepath:string): boolean;
+const
+  LibName='libc.dylib';
 var
   IOS_BASE:string;
+  s:string;
 begin
   result:=FLibsFound;
   if result then exit;
-
-  FLibsPath:='';
-  result:=true;
-  FLibsFound:=true;
 
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
   if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
 
+  if not result then
+    result:=SearchLibrary(IncludeTrailingPathDelimiter(IOS_BASE)+'usr'+DirectorySeparator+'lib',LibName);
+  if not result then
+    result:=SearchLibrary(IncludeTrailingPathDelimiter(IOS_BASE)+'usr'+DirectorySeparator+'lib','libc.tbd');
+
+  SearchLibraryInfo(result);
+
+  if result then
+  begin
+    FLibsFound:=True;
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
+
+    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    s:=ResolveDots(s);
+    s:=ExcludeTrailingBackslash(s);
+    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'System'+DirectorySeparator+LineEnding+
+    '-k-framework'+LineEnding+
+    '-kFoundation'+LineEnding+
+    '-k-framework'+LineEnding+
+    '-kCoreFoundation'+LineEnding+
+    // -XRx is needed for fpc : prepend <x> to all linker search paths
+    //'-XR'+ExcludeTrailingPathDelimiter(Basepath);
+    '-Xd'+LineEnding+
+    '-XR'+s;
+
+    //FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
+    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+  end;
+
+(*
   if DirectoryExists(IOS_BASE) then
   begin
     FLibsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/lib/';
@@ -53,6 +87,7 @@ begin
     //'-Xr'+IncludeTrailingPathDelimiter(IOS_BASE); //set linker's rlink path
     //'-Xr'; //set linker's rlink path
   end;
+  *)
 end;
 
 function TDarwinarm.GetBinUtils(Basepath:string): boolean;
@@ -66,18 +101,22 @@ begin
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
   FBinsFound:=true;
-
+  (*
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
   if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
 
   if DirectoryExists(IOS_BASE) then
   begin
-    FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
+    //FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
+    //'-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
     '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
   end;
+  *)
+
+  SearchBinUtilsInfo(result);
+
 
 end;
 

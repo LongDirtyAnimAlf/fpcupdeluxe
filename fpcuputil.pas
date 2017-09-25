@@ -274,6 +274,10 @@ function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex
 function XdgConfigHome: String;
 function GetGCCDirectory:string;
 {$ENDIF UNIX}
+{$IFDEF DARWIN}
+function GetSDKVersion(aSDK: string):string;
+{$ENDIF MSWINDOWS}
+function CompareVersionStrings(s1,s2: string): longint;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
@@ -1215,6 +1219,101 @@ begin
   end;
 end;
 {$ENDIF UNIX}
+
+{$IFDEF DARWIN}
+function GetSDKVersion(aSDK: string):string;
+const
+  SearchTarget='SDKVersion: ';
+var
+  Output,s:string;
+  i,j:integer;
+begin
+  Output:='';
+  s:='';
+  j:=0;
+  //if ExecuteCommand('xcodebuild -version -sdk '+aSDK, Output, False) <> 0 then
+  ExecuteCommand('xcodebuild -version -sdk '+aSDK, Output, False);
+  begin
+    i:=Pos(SearchTarget,Output);
+    if i>0 then
+    begin
+      i:=i+length(SearchTarget);
+      while (Length(Output)>i) AND (Output[i] in ['0'..'9','.']) do
+      begin
+        s:=s+Output[i];
+        Inc(i);
+      end;
+    end;
+  end;
+  result:=s;
+end;
+{$ENDIF DARWIN}
+
+// 1on1 copy from unit cutils from the fopc compiler;
+function CompareVersionStrings(s1,s2: string): longint;
+var
+  start1, start2,
+  i1, i2,
+  num1,num2,
+  res,
+  err: longint;
+begin
+  i1:=1;
+  i2:=1;
+  repeat
+    start1:=i1;
+    start2:=i2;
+    while (i1<=length(s1)) and
+          (s1[i1] in ['0'..'9']) do
+       inc(i1);
+    while (i2<=length(s2)) and
+          (s2[i2] in ['0'..'9']) do
+       inc(i2);
+    { one of the strings misses digits -> other is the largest version }
+    if i1=start1 then
+      if i2=start2 then
+        exit(0)
+      else
+        exit(-1)
+    else if i2=start2 then
+      exit(1);
+    { get version number part }
+    val(copy(s1,start1,i1-start1),num1,err);
+    val(copy(s2,start2,i2-start2),num2,err);
+    { different -> done }
+    res:=num1-num2;
+    if res<>0 then
+      exit(res);
+    { if one of the two is at the end while the other isn't, add a '.0' }
+    if (i1>length(s1)) and
+       (i2<=length(s1)) then
+      s1:=s1+'.0'
+    else if i2>length(s2) then
+      s2:=s2+'.0';
+    { compare non-numerical characters normally }
+    while (i1<=length(s1)) and
+          not(s1[i1] in ['0'..'9']) and
+          (i2<=length(s2)) and
+          not(s2[i2] in ['0'..'9']) do
+      begin
+        res:=ord(s1[i1])-ord(s2[i2]);
+        if res<>0 then
+          exit(res);
+        inc(i1);
+        inc(i2);
+      end;
+    { both should be digits again now, otherwise pick the one with the
+      digits as the largest (it more likely means that the input was
+      ill-formatted though) }
+    if (i1<=length(s1)) and
+       not(s1[i1] in ['0'..'9']) then
+      exit(-1);
+    if (i2<=length(s2)) and
+       not(s2[i2] in ['0'..'9']) then
+      exit(1);
+  until false;
+end;
+
 
 function Which(Executable: string): string;
 var

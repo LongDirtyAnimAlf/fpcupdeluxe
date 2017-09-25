@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0n';
+  FPCUPDELUXEVERSION='1.4.0o';
 
 resourcestring
   CrossGCCMsg =
@@ -1340,8 +1340,18 @@ begin
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
         //FPCupManager.FPCOPT:='-Sh -WP8.1';
-        FPCupManager.FPCOPT:='-dFPC_ARMHF '; //-WP5.1
+        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
         FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
+        {$ifdef Darwin}
+        //FPCupManager.CrossOPT:='-WP'+GetSDKVersion('iphoneos')+' '+FPCupManager.CrossOPT;
+        if (CompareVersionStrings(GetSDKVersion('iphoneos'),'6.0')>=0)
+           then FPCupManager.CrossOPT:='-WP6.0 '+FPCupManager.CrossOPT
+           else
+             begin
+               if (CompareVersionStrings(GetSDKVersion('iphoneos'),'3.1')>=0)
+                  then FPCupManager.CrossOPT:='-WP3.1 '+FPCupManager.CrossOPT;
+             end;
+        {$endif}
       end
       else
       begin
