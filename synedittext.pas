@@ -135,6 +135,11 @@ begin
           if AnsiContainsText(line,'procedure type "FAR" ignored') then break;
           if AnsiContainsText(line,'duplicate unit') then break;
           if AnsiContainsText(line,'is ignored for the current target platform') then break;
+          if AnsiContainsText(line,'Inlining disabled') then break;
+          if AnsiContainsText(line,'not yet supported inside inline procedure/function') then break;
+          if AnsiContainsText(line,'Check size of memory operand') then break;
+          if AnsiContainsText(line,'User defined: TODO') then break;
+          if AnsiContainsText(line,'Circular dependency detected') then break;
           // when generating help
           if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}

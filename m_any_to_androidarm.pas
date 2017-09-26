@@ -58,12 +58,10 @@ const
   ARCH='arm';
   ARCHSHORT='arm';
   OS='android';
-  NDKVERSIONBASENAME='android-ndk-r';
-  NDKVERSIONNAMES:array[0..16] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e');
+  NDKVERSIONBASENAME=OS+'-ndk-r';
   NDKTOOLCHAINVERSIONS:array[0..3] of string = (ARCH+'-linux-'+OS+'eabi-4.4.7',ARCH+'-linux-'+OS+'eabi-4.6',ARCH+'-linux-'+OS+'eabi-4.8',ARCH+'-linux-'+OS+'eabi-4.9');
   NDKARCHDIRNAME='arch-'+ARCHSHORT;
   PLATFORMVERSIONBASENAME=OS+'-';
-  PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
 
 
 type

@@ -40,14 +40,16 @@ const
     'todo: specify what exactly is missing';
   MAXDARWINVERSION=16;
   MINDARWINVERSION=10;
-  MAXIOSVERSION=10;
+  MAXIOSVERSION=12;
   MINIOSVERSION=1;
   MAXDELPHIVERSION=22;
   MINDELPHIVERSION=12;
+  NDKVERSIONNAMES:array[0..21] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
+  //PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
+  PLATFORMVERSIONSNUMBERS:array[0..17] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26);
 
 
 type
-
   CompilerType=(ctBootstrap,ctInstalled);
   SearchMode=(smFPCUPOnly,smAuto,smManual);
 

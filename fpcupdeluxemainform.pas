@@ -1513,6 +1513,7 @@ begin
          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.rar';
          {$endif}
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='AndroidAArch64.rar';
+          if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='AndroidMipsel.zip';
         end;
         if FPCupManager.CrossOS_Target='embedded' then
         begin

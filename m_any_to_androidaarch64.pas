@@ -46,12 +46,10 @@ const
   ARCH='aarch64';
   ARCHSHORT='arm64';
   OS='android';
-  NDKVERSIONBASENAME='android-ndk-r';
-  NDKVERSIONNAMES:array[0..10] of string = ('9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
+  NDKVERSIONBASENAME=OS+'-ndk-r';
   NDKTOOLCHAINVERSIONS:array[0..1] of string = (ARCH+'-linux-'+OS+'-4.8',ARCH+'-linux-'+OS+'-4.9');
   NDKARCHDIRNAME='arch-'+ARCHSHORT;
   PLATFORMVERSIONBASENAME=OS+'-';
-  PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
 
 type
 

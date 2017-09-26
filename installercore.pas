@@ -469,6 +469,13 @@ begin
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
         OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       end;
+      if NOT OperationSucceeded then
+      begin
+        // try one more time on different URL
+        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+        OperationSucceeded:=GetFile('http://7-zip.org/a/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      end;
+
       if OperationSucceeded then
       begin
         with TNormalUnzipper.Create do
@@ -1389,11 +1396,11 @@ function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
   SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-x64_86-win64.zip';
-  //SourceURL = = 'http://packages.lazarus-ide.org/openssl-1.0.2j-x64_86-win64.zip';
+  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2j-x64_86-win64.zip';
   {$endif}
   {$ifdef win32}
   SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-i386-win32.zip';
-  //SourceURL = 'http://packages.lazarus-ide.org/openssl-1.0.2j-i386-win32.zip';
+  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2j-i386-win32.zip';
   {$endif}
 var
   OperationSucceeded: boolean;
@@ -1402,29 +1409,31 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-  OperationSucceeded := true;
+  OperationSucceeded := false;
 
   ForceDirectoriesUTF8(SafeGetApplicationPath);
 
   OpenSSLZip := SysUtils.GetTempFileName + '.zip';
+
   try
-    if OperationSucceeded then
+    OperationSucceeded:=GetFile(SourceURL,OpenSSLZip);
+    if (NOT OperationSucceeded) then
     begin
-      OperationSucceeded := Download(
-        FUseWget,
-        SourceURL,
-        OpenSSLZip,
-        FHTTPProxyUser,
-        FHTTPProxyPort,
-        FHTTPProxyUser,
-        FHTTPProxyPassword);
+      // try one more time
+      SysUtils.DeleteFile(OpenSSLZip);
+      OperationSucceeded:=GetFile(SourceURL,OpenSSLZip);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time on failsafe URL
+        SysUtils.DeleteFile(OpenSSLZip);
+        OperationSucceeded:=GetFile(SourceURLfailsafe,OpenSSLZip);
+      end;
     end;
   except
-    // Deal with timeouts, wrong URLs etc
     on E: Exception do
     begin
       OperationSucceeded := false;
-      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library from ' + SourceURL, true);
+      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
     end;
   end;
 
@@ -1452,7 +1461,7 @@ begin
   begin
     WritelnLog(localinfotext + 'OpenSLL download and unpacking ok.', true);
     SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
-  end;
+  end else infoln(localinfotext+'Could not install openssl library', etError);
   Result := OperationSucceeded;
 
   //SslLibraryInit;
@@ -1466,7 +1475,7 @@ function TInstaller.DownloadJasmin: boolean;
 const
   JasminVersion = '2.4';
   SourceURL = 'http://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JasminVersion+'/jasmin-'+JasminVersion+'.zip/download';
-  //SourceURL = 'https://github.com/davidar/jasmin/archive/'+JasminVersion+'.zip';
+  SourceURLfailsafe = 'https://github.com/davidar/jasmin/archive/'+JasminVersion+'.zip';
   //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_0/install/jvm/jasmin.jar';
   //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/jvm/jasmin.jar';
 var
@@ -1480,26 +1489,27 @@ begin
 
   if NOT FileExists(JasminDir+'jasmin.jar') then
   begin
-    OperationSucceeded := true;
+    OperationSucceeded := false;
     JasminZip := SysUtils.GetTempFileName + '.zip';
     try
-      if OperationSucceeded then
+      OperationSucceeded:=GetFile(SourceURL,JasminZip);
+      if (NOT OperationSucceeded) then
       begin
-        OperationSucceeded := Download(
-          FUseWget,
-          SourceURL,
-          JasminZip,
-          FHTTPProxyUser,
-          FHTTPProxyPort,
-          FHTTPProxyUser,
-          FHTTPProxyPassword);
+        // try one more time
+        SysUtils.DeleteFile(JasminZip);
+        OperationSucceeded:=GetFile(SourceURL,JasminZip);
+        if (NOT OperationSucceeded) then
+        begin
+          // try one more time on failsafe URL
+          SysUtils.DeleteFile(JasminZip);
+          OperationSucceeded:=GetFile(SourceURLfailsafe,JasminZip);
+        end;
       end;
     except
-      // Deal with timeouts, wrong URLs etc
       on E: Exception do
       begin
         OperationSucceeded := false;
-        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Jasmin assembler from ' + SourceURL, true);
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading jasmin.jar', true);
       end;
     end;
 
@@ -1871,7 +1881,7 @@ begin
   begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
     result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    if (NOT result) then infoln(localinfotext+'Could not download ' + ExtractFileName(aFile) +' from ' + aURL + ' into ' + ExtractFileDir(aFile),etError);
+    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etError);
   end;
 end;
 

@@ -51,11 +51,9 @@ const
   ARCHSHORT='mips';
   OS='android';
   NDKVERSIONBASENAME=OS+'-ndk-r';
-  NDKVERSIONNAMES:array[0..10] of string = ('9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
   NDKTOOLCHAINVERSIONS:array[0..1] of string = (ARCH+'-linux-'+OS+'-4.8',ARCH+'-linux-'+OS+'-4.9');
   NDKARCHDIRNAME='arch-'+ARCHSHORT;
   PLATFORMVERSIONBASENAME=OS+'-';
-  PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
 
 type
 
@@ -405,7 +403,7 @@ begin
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
   // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9
+  FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9 and 10
   FBinUtilsPath:='';
   FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
   FFPCCFGSnippet:='';
