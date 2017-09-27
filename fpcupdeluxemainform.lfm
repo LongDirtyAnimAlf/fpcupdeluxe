@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 319
+  Left = 307
   Height = 595
-  Top = 136
+  Top = 169
   Width = 1050
   Anchors = []
   Caption = 'Form1'
@@ -18,21 +18,21 @@ object Form1: TForm1
   object AutoCrossUpdate: TButton
     AnchorSideTop.Control = ButtonInstallCrossCompiler
     AnchorSideTop.Side = asrBottom
-    Left = 168
+    Left = 169
     Height = 28
     Hint = 'Auto-update all installed cross-compilers'
-    Top = 312
+    Top = 344
     Width = 190
     BorderSpacing.Top = 4
     Caption = 'Auto-update compilers'
     OnClick = ButtonAutoUpdateCrossCompiler
     ParentShowHint = False
     ShowHint = True
-    TabOrder = 23
+    TabOrder = 21
   end
   object RadioGroup1: TRadioGroup
     Left = 168
-    Height = 237
+    Height = 264
     Top = 40
     Width = 92
     AutoFill = True
@@ -44,7 +44,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 217
+    ClientHeight = 244
     ClientWidth = 88
     Items.Strings = (
       'i386'
@@ -54,15 +54,16 @@ object Form1: TForm1
       'ppc'
       'ppc64'
       'mipsel'
+      'avr'
       'jvm'
     )
     OnClick = RadioGroup1Click
     ParentShowHint = False
-    TabOrder = 10
+    TabOrder = 8
   end
   object RadioGroup2: TRadioGroup
     Left = 260
-    Height = 237
+    Height = 264
     Top = 40
     Width = 99
     AutoFill = True
@@ -74,7 +75,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 217
+    ClientHeight = 244
     ClientWidth = 95
     Items.Strings = (
       'windows'
@@ -84,11 +85,12 @@ object Form1: TForm1
       'freebsd'
       'openbsd'
       'wince'
+      'embedded'
       'java'
     )
     OnClick = RadioGroup2Click
     ParentShowHint = False
-    TabOrder = 11
+    TabOrder = 9
   end
   object StatusMessage: TEdit
     AnchorSideRight.Control = CheckAutoClear
@@ -100,7 +102,7 @@ object Form1: TForm1
     BorderSpacing.Right = 12
     Constraints.MinWidth = 120
     ReadOnly = True
-    TabOrder = 15
+    TabOrder = 13
     Text = 'Sitting and waiting'
   end
   object CheckAutoClear: TCheckBox
@@ -117,7 +119,7 @@ object Form1: TForm1
     Caption = 'AutoClear'
     Checked = True
     State = cbChecked
-    TabOrder = 19
+    TabOrder = 17
   end
   object Button8: TButton
     AnchorSideTop.Control = StatusMessage
@@ -132,19 +134,19 @@ object Form1: TForm1
     BorderSpacing.Right = 12
     Caption = 'Clear log'
     OnClick = Button8Click
-    TabOrder = 18
+    TabOrder = 16
   end
   object BitBtnFPCandLazarus: TBitBtn
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = CheckVerbosity
+    AnchorSideTop.Control = Button7
     AnchorSideTop.Side = asrBottom
     Left = 6
     Height = 60
-    Top = 459
+    Top = 460
     Width = 153
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 6
-    BorderSpacing.Top = 12
+    BorderSpacing.Top = 6
     Caption = 'Install/update FPC+Laz'
     Constraints.MinHeight = 60
     Glyph.Data = {
@@ -633,21 +635,7 @@ object Form1: TForm1
     }
     Layout = blGlyphTop
     OnClick = BitBtnFPCandLazarusClick
-    TabOrder = 22
-  end
-  object CheckVerbosity: TCheckBox
-    AnchorSideLeft.Control = BitBtnFPCOnly
-    AnchorSideTop.Control = BitBtnFPCOnly
-    AnchorSideTop.Side = asrBottom
-    Left = 16
-    Height = 19
-    Top = 428
-    Width = 62
-    BorderSpacing.Top = 12
-    Caption = 'Verbose'
-    Checked = True
-    State = cbChecked
-    TabOrder = 4
+    TabOrder = 20
   end
   object BitBtnLazarusOnly: TBitBtn
     AnchorSideTop.Control = ListBoxLazarusTarget
@@ -795,7 +783,7 @@ object Form1: TForm1
     }
     Layout = blGlyphTop
     OnClick = LazarusOnlyClick
-    TabOrder = 21
+    TabOrder = 19
   end
   object BitBtnFPCOnly: TBitBtn
     AnchorSideLeft.Control = ListBoxLazarusTarget
@@ -941,7 +929,7 @@ object Form1: TForm1
     }
     Layout = blGlyphTop
     OnClick = FPCOnlyClick
-    TabOrder = 20
+    TabOrder = 18
   end
   object ListBoxFPCTarget: TListBox
     AnchorSideLeft.Control = FPCVersionLabel
@@ -993,7 +981,7 @@ object Form1: TForm1
     Font.Quality = fqDraft
     ParentColor = False
     ParentFont = False
-    TabOrder = 6
+    TabOrder = 5
     OnMouseWheel = SynEdit1MouseWheel
     Gutter.AutoSize = False
     Gutter.Visible = False
@@ -1540,20 +1528,19 @@ object Form1: TForm1
   object ListBox3: TListBox
     AnchorSideTop.Control = AutoCrossUpdate
     AnchorSideTop.Side = asrBottom
-    AnchorSideBottom.Control = Button4
+    AnchorSideBottom.Control = Button2
     Left = 168
-    Height = 94
-    Top = 352
+    Height = 98
+    Top = 384
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Top = 12
     BorderSpacing.Bottom = 8
     Constraints.MinHeight = 80
     ItemHeight = 0
-    MultiSelect = True
     ScrollWidth = 191
     Sorted = True
-    TabOrder = 7
+    TabOrder = 6
   end
   object InstallDirEdit: TEdit
     AnchorSideLeft.Control = Owner
@@ -1586,13 +1573,13 @@ object Form1: TForm1
     TabOrder = 1
   end
   object ButtonInstallCrossCompiler: TButton
-    Left = 168
+    Left = 167
     Height = 28
-    Top = 280
+    Top = 312
     Width = 191
     Caption = 'Install cross-compiler'
     OnClick = ButtonInstallCrossCompilerClick
-    TabOrder = 12
+    TabOrder = 10
   end
   object RealFPCURL: TEdit
     Left = 368
@@ -1600,7 +1587,7 @@ object Form1: TForm1
     Top = 4
     Width = 313
     ReadOnly = True
-    TabOrder = 13
+    TabOrder = 11
   end
   object RealLazURL: TEdit
     Left = 687
@@ -1608,7 +1595,7 @@ object Form1: TForm1
     Top = 4
     Width = 345
     ReadOnly = True
-    TabOrder = 14
+    TabOrder = 12
   end
   object Panel1: TPanel
     AnchorSideRight.Control = Owner
@@ -1627,7 +1614,7 @@ object Form1: TForm1
     BevelInner = bvLowered
     ClientHeight = 46
     ClientWidth = 1022
-    TabOrder = 5
+    TabOrder = 4
     object TrunkBtn: TBitBtn
       AnchorSideLeft.Control = Panel1
       AnchorSideTop.Control = Panel1
@@ -3015,34 +3002,25 @@ object Form1: TForm1
     ReadOnly = True
     ScrollBars = ssAutoVertical
     ShowHint = True
-    TabOrder = 16
-  end
-  object Button4: TButton
-    AnchorSideBottom.Control = Button2
-    Left = 168
-    Height = 28
-    Top = 454
-    Width = 120
-    Anchors = [akLeft, akBottom]
-    BorderSpacing.Bottom = 8
-    Caption = 'Clear selection'
-    OnClick = Button4Click
-    TabOrder = 9
+    TabOrder = 14
   end
   object Button7: TButton
-    AnchorSideLeft.Control = Button4
-    AnchorSideLeft.Side = asrBottom
+    AnchorSideLeft.Control = BitBtnFPCOnly
+    AnchorSideTop.Control = BitBtnFPCOnly
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = BitBtnLazarusOnly
+    AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Button2
-    Left = 294
+    Left = 16
     Height = 28
-    Top = 454
-    Width = 65
-    Anchors = [akLeft, akBottom]
-    BorderSpacing.Left = 6
+    Top = 424
+    Width = 135
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     Caption = 'Setup+'
     OnClick = Button7Click
-    TabOrder = 17
+    TabOrder = 15
   end
   object Button2: TButton
     AnchorSideBottom.Control = Panel1
@@ -3052,9 +3030,9 @@ object Form1: TForm1
     Width = 191
     Anchors = [akLeft, akBottom]
     BorderSpacing.Bottom = 6
-    Caption = 'Install module(s) from list'
+    Caption = 'Install module from list'
     OnClick = Button2Click
-    TabOrder = 8
+    TabOrder = 7
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]

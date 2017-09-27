@@ -1789,9 +1789,11 @@ begin
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
+        {$IFDEF DEBUG}
         FParent.WritelnLog(etError,localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
           ', param: '+FStateMachine[InstructionPointer].param);
+        {$ENDIF DEBUG}
         CleanUpInstaller;
         exit; //failure, bail out
         end;

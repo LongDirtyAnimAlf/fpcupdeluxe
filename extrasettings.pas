@@ -13,8 +13,8 @@ Const
   DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mipsel,jvm);
-  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,java,iphonesim,nativent);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mipsel,avr,jvm);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java);
 
   TCPUOS = record
     CPU:TCPU;
@@ -67,6 +67,7 @@ type
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditCrossBuildOptions: TEdit;
+    EditSubArch: TEdit;
     EditFPCBranch: TEdit;
     EditFPCOptions: TEdit;
     EditFPCRevision: TEdit;
@@ -89,6 +90,7 @@ type
     Label3: TLabel;
     Label4: TLabel;
     LabelCrossBuildOptions: TLabel;
+    LabelCrossBuildOptions1: TLabel;
     LabelFPCbranch: TLabel;
     LabelFPCOptions: TLabel;
     LabelFPCRevision: TLabel;
@@ -473,13 +475,13 @@ begin
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
         if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then continue;
         if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
-        if (OS=nativent) AND (CPU<>i386) then continue;
         if (OS=wince) AND (CPU<>arm) then continue;
         if (OS=windows) AND ((CPU=arm) OR (CPU=aarch64)) then continue;
         if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
         if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android)) then continue;
+        if (CPU=avr) AND (OS<>embedded) then continue;
 
         s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));

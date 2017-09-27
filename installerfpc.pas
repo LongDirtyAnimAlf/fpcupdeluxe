@@ -2318,9 +2318,6 @@ begin
   // Now: the real build of FPC !!!
   OperationSucceeded:=BuildModuleCustom(ModuleName);
 
-  if not (OperationSucceeded) then
-    infoln(infotext+'Error running !',etError);
-
   {$IFDEF UNIX}
   if OperationSucceeded then
   begin

@@ -37,9 +37,7 @@ type
     mORMotBtn: TBitBtn;
     Button2: TButton;
     Button3: TButton;
-    Button4: TButton;
     ButtonInstallCrossCompiler: TButton;
-    CheckVerbosity: TCheckBox;
     InstallDirEdit: TEdit;
     Panel1: TPanel;
     RealFPCURL: TEdit;
@@ -59,7 +57,6 @@ type
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure Button3Click(Sender: TObject);
-    procedure Button4Click(Sender: TObject);
     procedure ButtonInstallCrossCompilerClick(Sender: TObject);
     procedure FPCOnlyClick(Sender: TObject);
     procedure Button7Click(Sender: TObject);
@@ -257,7 +254,6 @@ begin
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
-    CheckVerbosity.Checked:=ReadBool('General','Verbose',True);
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
     SynEdit1.Font.Size := ReadInteger('General','CommandFontSize',SynEdit1.Font.Size);
     if ReadBool('General','Maximized',False) then
@@ -684,6 +680,15 @@ begin
           Memo1.Lines.Append('Has something todo about how floating points are handled. And that has changed.');
           Memo1.Lines.Append('See: http://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
         end;
+
+        if (InternalError='2013051401') then
+        begin
+          Memo1.Lines.Append('FPC revision 37182 breaks cross building avr-embedded.');
+          Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32418');
+          Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=31925');
+          Memo1.Lines.Append('FPC revision 37179 still ok');
+        end;
+
       end;
     end
     else if (ExistWordInString(PChar(s),'error: user defined',[soDown])) then
@@ -1219,11 +1224,6 @@ begin
   end;
 end;
 
-procedure TForm1.Button4Click(Sender: TObject);
-begin
-  ListBox3.ClearSelection;
-end;
-
 procedure TForm1.ButtonInstallCrossCompilerClick(Sender: TObject);
 begin
   InstallCrossCompiler(Sender);
@@ -1329,7 +1329,7 @@ begin
   try
 
     //arm predefined settings
-    if (FPCupManager.CrossCPU_Target='arm') then
+    if (FPCupManager.CrossCPU_Target='arm') AND (FPCupManager.CrossOS_Target<>'embedded') then
     begin
       if (FPCupManager.CrossOS_Target='wince') then
       begin
@@ -1393,6 +1393,29 @@ begin
       end;
     end;
 
+    //embedded predefined settings
+    if (FPCupManager.CrossOS_Target='embedded') then
+    begin
+      if (FPCupManager.CrossCPU_Target='avr') then
+      begin
+        FPCupManager.FPCOPT:='-ap -O2 ';
+        // for Uno (ATMega328P) use avr5
+        // for Mega (ATMega2560) use avr6
+        FPCupManager.CrossOPT:='-Cpavr5 ';
+        FPCupManager.CrossOS_SubArch:='avr5';
+      end;
+      if (FPCupManager.CrossCPU_Target='arm') then
+      begin
+        FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+        FPCupManager.CrossOS_SubArch:='armv7m';
+      end;
+      if (FPCupManager.CrossCPU_Target='mipsel') then
+      begin
+        FPCupManager.CrossOPT:='-Cppic32 ';
+        FPCupManager.CrossOS_SubArch:='pic32mx';
+      end;
+    end;
+
     // recheck / override / set custom FPC options by special user input through setup+
     s:=Form2.FPCOptions;
     s:=Trim(s);
@@ -1435,6 +1458,7 @@ begin
     sStatus:='Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
     if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
     if FPCupManager.CrossOPT<>'' then sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
+    if FPCupManager.CrossOS_SubArch<>'' then sStatus:=sStatus+' {Subarch: '+FPCupManager.CrossOS_SubArch+'}';
     sStatus:=sStatus+'.';
 
     AddMessage(sStatus);
@@ -1918,7 +1942,6 @@ begin
   try
     WriteString('General','InstallDirectory',sInstallDir);
 
-    WriteBool('General','Verbose',CheckVerbosity.Checked);
     WriteBool('General','AutoClear',CheckAutoClear.Checked);
 
     Application.MainForm.Cursor:=crHourGlass;
@@ -1961,7 +1984,6 @@ begin
   //if Sender<>Button2 then
   Button2.Enabled:=value;
   Button3.Enabled:=value;
-  Button4.Enabled:=value;
   ButtonInstallCrossCompiler.Enabled:=value;
   BitBtnFPCOnly.Enabled:=value;
   BitBtnLazarusOnly.Enabled:=value;
@@ -1976,7 +1998,6 @@ begin
   InstallDirEdit.Enabled:=value;
   RadioGroup1.Enabled:=value;
   RadioGroup2.Enabled:=value;
-  CheckVerbosity.Enabled:=value;
   CheckAutoClear.Enabled:=value;
 
   TrunkBtn.Enabled:=value;
@@ -2021,7 +2042,7 @@ begin
   FPCupManager.Verbose:=True;
   SetVerbosity(True);
   {$ELSE}
-  FPCupManager.Verbose:=CheckVerbosity.Checked;
+  FPCupManager.Verbose:=True;
   SetVerbosity((Form2.ExtraVerbose) AND (FPCupManager.Verbose));
   {$ENDIF}
 

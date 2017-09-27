@@ -462,12 +462,27 @@ begin
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      if OperationSucceeded then
+      begin
+        // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
+        if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output)<50000) then
+        begin
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+          OperationSucceeded:=false;
+        end;
+      end;
       //OperationSucceeded:=GetFile('https://freefr.dl.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if NOT OperationSucceeded then
       begin
         // try one more time
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
         OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+        // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
+        if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output)<50000) then
+        begin
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+          OperationSucceeded:=false;
+        end;
       end;
       if NOT OperationSucceeded then
       begin
@@ -504,11 +519,23 @@ begin
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+      // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
+      if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
+      begin
+        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        OperationSucceeded:=false;
+      end;
       if NOT OperationSucceeded then
       begin
         // try one more time
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
         OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
+        if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
+        begin
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+          OperationSucceeded:=false;
+        end;
       end;
       if OperationSucceeded then
       begin
@@ -528,7 +555,7 @@ begin
           OperationSucceeded:=FileExists(FUnrar);
         end;
       end;
-      // do not fail ... perhaps there is another unrar available in the path
+      // do not fail ... perhaps there is another unrar available in the path ... or use 7zip on windows
       OperationSucceeded:=True;
     end;
 
