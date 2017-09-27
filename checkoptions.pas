@@ -339,9 +339,9 @@ begin
     FInstaller.LoadFPCUPConfig;
     //load URLs after LoadFPCUPConfig so we're sure we have loaded/parsed the URL aliases
     try
-      FInstaller.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','default'));
+      FInstaller.FPCURL:=Options.GetOption('','fpcURL',installerUniversal.GetAlias('fpcURL','stable'));
       {$ifndef FPCONLY}
-      FInstaller.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','default'));
+      FInstaller.LazarusURL:=Options.GetOption('','lazURL',installerUniversal.GetAlias('lazURL','stable'));
       {$endif}
     except
       on E:Exception do

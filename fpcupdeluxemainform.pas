@@ -43,8 +43,8 @@ type
     InstallDirEdit: TEdit;
     Panel1: TPanel;
     RealFPCURL: TEdit;
-    Label1: TLabel;
-    Label2: TLabel;
+    FPCVersionLabel: TLabel;
+    LazarusVersionLabel: TLabel;
     ListBoxFPCTarget: TListBox;
     ListBoxLazarusTarget: TListBox;
     ListBox3: TListBox;
@@ -286,12 +286,12 @@ begin
     if ListBoxFPCTarget.Count=0 then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-      FPCTarget:='default';
+      FPCTarget:='stable';
     end;
     if ListBoxLazarusTarget.Count=0 then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-      LazarusTarget:='default';
+      LazarusTarget:='stable';
     end;
 
     sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
@@ -484,8 +484,8 @@ begin
 
   FPCupManager.LoadFPCUPConfig;
 
-  FPCupManager.FPCURL:='default';
-  FPCupManager.LazarusURL:='default';
+  FPCupManager.FPCURL:='stable';
+  FPCupManager.LazarusURL:='stable';
   FPCupManager.Verbose:=true;
 
   //CheckFPCUPOptions(FPCupManager);
@@ -1746,8 +1746,8 @@ begin
             if CheckAutoClear.Checked then Memo1.Clear;
             AddMessage('Successfully extracted cross-tools.');
             // run again with the correct libs and binutils
-            label1.Font.Color:=clDefault;
-            label2.Font.Color:=clDefault;
+            FPCVersionLabel.Font.Color:=clDefault;
+            LazarusVersionLabel.Font.Color:=clDefault;
             AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
             if (FPCupManager.CrossOS_Target='linux') then
             begin
@@ -1973,8 +1973,8 @@ end;
 
 procedure TForm1.PrepareRun;
 begin
-  label1.Font.Color:=clDefault;
-  label2.Font.Color:=clDefault;
+  FPCVersionLabel.Font.Color:=clDefault;
+  LazarusVersionLabel.Font.Color:=clDefault;
 
   if CheckAutoClear.Checked then Button8.Click;
 
@@ -2158,8 +2158,8 @@ begin
         AddMessage('ERROR: Fpcupdeluxe fatal error !');
         StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
       end;
-      label1.Font.Color:=clRed;
-      label2.Font.Color:=clRed;
+      FPCVersionLabel.Font.Color:=clRed;
+      LazarusVersionLabel.Font.Color:=clRed;
     end
     else
     begin
@@ -2181,8 +2181,8 @@ begin
         {$endif}
         AddMessage('');
       end;
-      label1.Font.Color:=clLime;
-      label2.Font.Color:=clLime;
+      FPCVersionLabel.Font.Color:=clLime;
+      LazarusVersionLabel.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
     end;
   except
@@ -2206,10 +2206,10 @@ begin
 
     FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
-    FPCTarget:=ReadString('URL','fpcURL','default');
-    if FPCTarget='' then FPCTarget:='default';
-    LazarusTarget:=ReadString('URL','lazURL','default');
-    if LazarusTarget='' then LazarusTarget:='default';
+    FPCTarget:=ReadString('URL','fpcURL','stable');
+    if FPCTarget='' then FPCTarget:='stable';
+    LazarusTarget:=ReadString('URL','lazURL','stable');
+    if LazarusTarget='' then LazarusTarget:='stable';
 
     Form2.FPCOptions:=ReadString('General','FPCOptions','');
     Form2.LazarusOptions:=ReadString('General','LazarusOptions','');

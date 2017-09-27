@@ -1701,16 +1701,15 @@ begin
       result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
       if result='' then
       begin
-        // added because older fpc.ini or equivalent may not have the default keyword !!
-        if Uppercase(KeyWord)='DEFAULT' then
+        if Uppercase(KeyWord)='SKIP' then result:='SKIP';
+        if (result='') then
         begin
-          infoln('InstallerUniversal (GetAlias): no default source alias found: using fpcup default',etInfo);
+          infoln('InstallerUniversal (GetAlias): no source alias found: using fpcup default',etInfo);
           if Dictionary='fpcURL' then result:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
           if Dictionary='lazURL' then result:=FPCSVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
-        if Uppercase(KeyWord)='SKIP' then result:='SKIP';
 
         if (result='') then
         begin
