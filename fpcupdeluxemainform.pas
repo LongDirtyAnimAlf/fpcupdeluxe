@@ -1590,8 +1590,14 @@ begin
             TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
             SysUtils.DeleteFile(TargetFile);
             UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-            AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
-            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            success:=false;
+            {$ifdef Darwin}
+            if (UseNativeUnzip) then
+            {$endif}
+            begin
+              AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
+              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            end;
 
             // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
             if (NOT success) then
@@ -1603,8 +1609,13 @@ begin
               TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
               SysUtils.DeleteFile(TargetFile);
               UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-              AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
-              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              {$ifdef Darwin}
+              if (UseNativeUnzip) then
+              {$endif}
+              begin
+                AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
+                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              end;
             end;
 
             if success then
@@ -1679,22 +1690,31 @@ begin
             TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
             SysUtils.DeleteFile(TargetFile);
             UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-            AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
-            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-
+            success:=false;
+            {$ifdef Darwin}
+            if (UseNativeUnzip) then
+            {$endif}
+            begin
+              AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            end;
             // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
             if (NOT success) then
             begin
               if (ExtractFileExt(DownloadURL)='.zip')
                  then DownloadURL:=ChangeFileExt(DownloadURL,'.rar')
                  else DownloadURL:=ChangeFileExt(DownloadURL,'.zip');
-              UseNativeUnzip:=(ExtractFileExt(DownloadURL)='.zip');
-              AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
               SysUtils.DeleteFile(TargetFile);
               TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
               SysUtils.DeleteFile(TargetFile);
               UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              {$ifdef Darwin}
+              if (UseNativeUnzip) then
+              {$endif}
+              begin
+                AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              end;
             end;
 
             if success then
@@ -1739,6 +1759,7 @@ begin
                 end;
               end;
             end;
+            SysUtils.DeleteFile(TargetFile);
           end;
 
           if success then
@@ -1757,7 +1778,6 @@ begin
             FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
           end;
-          SysUtils.DeleteFile(TargetFile);
 
           if (NOT success) then AddMessage('No luck in getting then cross-tools ... aborting.');
         end;
