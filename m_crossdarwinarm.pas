@@ -108,6 +108,7 @@ begin
 
   if DirectoryExists(IOS_BASE) then
   begin
+    //SearchBinUtilsInfo(result);
     //FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     //'-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
@@ -115,7 +116,6 @@ begin
   end;
   *)
 
-  SearchBinUtilsInfo(result);
 
 
 end;

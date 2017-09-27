@@ -160,7 +160,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0o';
+  FPCUPDELUXEVERSION='1.4.0p';
 
 resourcestring
   CrossGCCMsg =
@@ -1569,8 +1569,7 @@ begin
 
           // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.
           verbose:=(FPCupManager.CrossOS_Target<>'darwin');
-
-          UseNativeUnzip:=(ExtractFileExt(BinsURL)='.zip');
+          UseNativeUnzip:=false;
 
           if MissingCrossBins then
           begin
@@ -1588,9 +1587,26 @@ begin
             {$else}
             DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+BinsURL;
             {$endif}
+            TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
+            SysUtils.DeleteFile(TargetFile);
+            UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
             AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
-            TargetFile := SysUtils.GetTempFileName;
             success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+
+            // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
+            if (NOT success) then
+            begin
+              if (ExtractFileExt(DownloadURL)='.zip')
+                 then DownloadURL:=ChangeFileExt(DownloadURL,'.rar')
+                 else DownloadURL:=ChangeFileExt(DownloadURL,'.zip');
+              SysUtils.DeleteFile(TargetFile);
+              TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
+              SysUtils.DeleteFile(TargetFile);
+              UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
+              AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
+              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            end;
+
             if success then
             begin
               AddMessage('Successfully downloaded binary-tools archive.');
@@ -1658,13 +1674,29 @@ begin
 
           if MissingCrossLibs then
           begin
-
             AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
             DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+LibsURL;
+            TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
+            SysUtils.DeleteFile(TargetFile);
+            UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
             AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
-
-            TargetFile := SysUtils.GetTempFileName;
             success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+
+            // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
+            if (NOT success) then
+            begin
+              if (ExtractFileExt(DownloadURL)='.zip')
+                 then DownloadURL:=ChangeFileExt(DownloadURL,'.rar')
+                 else DownloadURL:=ChangeFileExt(DownloadURL,'.zip');
+              UseNativeUnzip:=(ExtractFileExt(DownloadURL)='.zip');
+              AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+              SysUtils.DeleteFile(TargetFile);
+              TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
+              SysUtils.DeleteFile(TargetFile);
+              UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
+              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            end;
+
             if success then
             begin
               AddMessage('Successfully downloaded the libraries.');

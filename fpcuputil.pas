@@ -1249,7 +1249,7 @@ begin
 end;
 {$ENDIF DARWIN}
 
-// 1on1 copy from unit cutils from the fopc compiler;
+// 1on1 copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;
 var
   start1, start2,
@@ -1286,7 +1286,7 @@ begin
       exit(res);
     { if one of the two is at the end while the other isn't, add a '.0' }
     if (i1>length(s1)) and
-       (i2<=length(s1)) then
+       (i2<=length(s2)) then
       s1:=s1+'.0'
     else if i2>length(s2) then
       s2:=s2+'.0';
