@@ -1339,24 +1339,14 @@ begin
       else
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
-        //FPCupManager.FPCOPT:='-Sh -WP8.1';
-        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+        FPCupManager.FPCOPT:='-dFPC_ARMHF '; //-Sh ';
         FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
-        {$ifdef Darwin}
-        //FPCupManager.CrossOPT:='-WP'+GetSDKVersion('iphoneos')+' '+FPCupManager.CrossOPT;
-        if (CompareVersionStrings(GetSDKVersion('iphoneos'),'6.0')>=0)
-           then FPCupManager.CrossOPT:='-WP6.0 '+FPCupManager.CrossOPT
-           else
-             begin
-               if (CompareVersionStrings(GetSDKVersion('iphoneos'),'3.1')>=0)
-                  then FPCupManager.CrossOPT:='-WP3.1 '+FPCupManager.CrossOPT;
-             end;
-        {$endif}
       end
       else
       begin
         //FPCupManager.CrossOS_SubArch:=;
         // default: armhf
+        // don't worry: this option will still build a normal ppcrossarm (non-hf, armel) for Android
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
         // Use hard floats, using armeabi-v7a Android ABI.
         // Note: do not use -CaEABIHF on Android, to not use
@@ -1374,22 +1364,32 @@ begin
       end;
     end;
 
-    //arm64 predefined settings
-    if (FPCupManager.CrossCPU_Target='aarch64') then
+    //darwin predefined settings
+    if (FPCupManager.CrossOS_Target='darwin') then
     begin
-      if (FPCupManager.CrossOS_Target='darwin') then
+      if (FPCupManager.CrossCPU_Target='aarch64') OR (FPCupManager.CrossCPU_Target='arm') then
       begin
-        //FPCupManager.FPCOPT:='-Sh -WP8.1';
-        FPCupManager.CrossOPT:='-CaAARCH64IOS ';
+        if (FPCupManager.CrossCPU_Target='aarch64') then FPCupManager.CrossOPT:='-CaAARCH64IOS ';
+        {$ifdef Darwin}
+        FPCupManager.CrossOPT:='-WP'+GetSDKVersion('iphoneos')+' '+FPCupManager.CrossOPT;
+        {$endif}
+      end;
+      if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') OR (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+      begin
+        {$ifdef Darwin}
+        FPCupManager.CrossOPT:='-WM'+GetSDKVersion('macosx')+' '+FPCupManager.CrossOPT;
+        {$endif}
       end;
     end;
 
-    //i386 predefined settings
-    if (FPCupManager.CrossCPU_Target='i386') then
+    //iphonesim i386+x86_64 predefined settings
+    if (FPCupManager.CrossOS_Target='iphonesim') then
     begin
-      if (FPCupManager.CrossOS_Target='iphonesim') then
+      if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') then
       begin
-        FPCupManager.CrossOPT:='-WP5.1 ';
+        {$ifdef Darwin}
+        FPCupManager.CrossOPT:='-WP'+GetSDKVersion('iphonesimulator')+' '+FPCupManager.CrossOPT;
+        {$endif}
       end;
     end;
 
