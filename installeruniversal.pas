@@ -558,10 +558,12 @@ begin
 
     {$ifdef Darwin}
     {$ifdef CPUX64}
-    // the packages onlinepackagemanager [and editormacroscript] are not suitable for Darwin 64 bit !
+    // the packages [onlinepackagemanager and] editormacroscript are not suitable for Darwin 64 bit !
     // so skip them in case they are included.
     if
-      {(Pos('onlinepackagemanager',PackagePath)>0) OR}
+      {$ifdef LCLCOCOA}
+      //(Pos('onlinepackagemanager',PackagePath)>0) OR
+      {$endif}
       (Pos('editormacroscript',PackagePath)>0) then
     begin
       infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);

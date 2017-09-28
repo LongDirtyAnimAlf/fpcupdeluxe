@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 402
+  Left = 593
   Height = 644
-  Top = 66
+  Top = 125
   Width = 746
   Caption = 'Advanced settings'
   ClientHeight = 644
@@ -484,10 +484,10 @@ object Form2: TForm2
       Left = 4
       Height = 15
       Top = 164
-      Width = 104
+      Width = 219
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
-      Caption = 'Cross Build Options'
+      Caption = 'Cross Build Options Override (i.e. -CfSoft)'
       ParentColor = False
     end
     object Button1: TButton
@@ -504,31 +504,31 @@ object Form2: TForm2
       OnClick = Button1Click
       TabOrder = 8
     end
-    object LabelCrossBuildOptions1: TLabel
+    object LabelCrossSubArch: TLabel
       AnchorSideLeft.Control = GroupBox4
       AnchorSideTop.Control = EditCrossBuildOptions
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 218
-      Width = 50
+      Top = 212
+      Width = 213
       BorderSpacing.Left = 4
-      BorderSpacing.Top = 12
-      Caption = 'Sub-Arch'
+      BorderSpacing.Top = 6
+      Caption = 'Cross SubArch Override (i.e. armv7m, ...)'
       ParentColor = False
     end
-    object EditSubArch: TEdit
+    object EditCrossSubArch: TEdit
       AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = LabelCrossBuildOptions1
+      AnchorSideTop.Control = LabelCrossSubArch
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 237
+      Top = 231
       Width = 274
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       Enabled = False
-      OnChange = EditCrossBuildOptionsChange
+      OnChange = EditCrossSubArchChange
       TabOrder = 9
     end
   end
@@ -633,7 +633,7 @@ object Form2: TForm2
     Height = 120
     Top = 144
     Width = 142
-    Caption = 'Compile Options'
+    Caption = 'Options Override'
     ClientHeight = 100
     ClientWidth = 138
     TabOrder = 4

@@ -43,6 +43,7 @@ uses
   m_any_to_linuxarm,
   m_any_to_embeddedarm,
   m_any_to_embeddedavr,
+  m_any_to_embeddedmipsel,
   m_any_to_linuxaarch64,
   m_any_to_androidjvm,
   m_any_to_javajvm,

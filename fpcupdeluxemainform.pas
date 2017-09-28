@@ -438,7 +438,7 @@ begin
           AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
           if (Sender<>nil) then
           begin
-            SynEdit1.ClearAll;
+            SynEdit1.Clear;
             Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
             Memo1.Lines.Append('Going to update cross-compiler.');
             RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
@@ -561,12 +561,14 @@ end;
 
 procedure TForm1.RadioGroup1Click(Sender: TObject);
 begin
+  (*
   if (RadioGroup1.ItemIndex<>-1) AND (RadioGroup1.Items[RadioGroup1.ItemIndex]='jvm') then
   begin
     RadioGroup2.ItemIndex:=-1;
     RadioGroup2.Enabled:=false;
   end
   else RadioGroup2.Enabled:=true;
+  *)
 end;
 
 procedure TForm1.RadioGroup2Click(Sender: TObject);
@@ -684,9 +686,10 @@ begin
         if (InternalError='2013051401') then
         begin
           Memo1.Lines.Append('FPC revision 37182 breaks cross building avr-embedded.');
-          Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32418');
-          Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=31925');
-          Memo1.Lines.Append('FPC revision 37179 still ok');
+          Memo1.Lines.Append('However, this has been solved in the meantime !');
+          Memo1.Lines.Append('Please update FPC trunk !!');
+          //Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32418');
+          //Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=31925');
         end;
 
       end;
@@ -1249,6 +1252,78 @@ begin
     exit;
   end;
 
+  // the below three checks are just temporary and rough
+  // we should use the array OSCPUSupported : array[TOS,TCpu] of boolean
+
+  success:=true;
+  if RadioGroup2.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    if s='embedded' then
+    begin
+      if RadioGroup1.ItemIndex<>-1 then
+      begin
+        s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+        if (s<>'avr') and (s<>'arm') and (s<>'mipsel') then
+        begin
+          success:=false;
+        end;
+      end else success:=false;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    ShowMessage('No valid CPU target for embedded.');
+    exit;
+  end;
+
+  success:=true;
+  if RadioGroup2.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    if s='android' then
+    begin
+      if RadioGroup1.ItemIndex<>-1 then
+      begin
+        s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') then
+        begin
+          success:=false;
+        end;
+      end else success:=false;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    ShowMessage('No valid CPU target for android.');
+    exit;
+  end;
+
+  success:=true;
+  if RadioGroup1.ItemIndex<>-1 then
+  begin
+    s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+    if s='jvm' then
+    begin
+      if RadioGroup2.ItemIndex<>-1 then
+      begin
+        s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+        if (s<>'android') and (s<>'java') then
+        begin
+          success:=false;
+        end;
+      end else success:=false;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    ShowMessage('No valid OS target for jvm.');
+    exit;
+  end;
+
   PrepareRun;
 
   if RadioGroup1.ItemIndex<>-1 then
@@ -1264,7 +1339,6 @@ begin
     if s='i-sim' then s:='iphonesim';
     FPCupManager.CrossOS_Target:=s;
   end;
-
 
   if Sender<>nil then
   begin
@@ -1301,7 +1375,6 @@ begin
     end;
   end;
 
-  if (FPCupManager.CrossCPU_Target='jvm') then FPCupManager.CrossOS_Target:='java';
   if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
 
   if FPCupManager.CrossOS_Target='windows' then
@@ -1331,23 +1404,23 @@ begin
     //arm predefined settings
     if (FPCupManager.CrossCPU_Target='arm') AND (FPCupManager.CrossOS_Target<>'embedded') then
     begin
+      // default: armhf
+      // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets
+      // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
+      // but I stand corrected if this assumption is wrong
+      FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+
       if (FPCupManager.CrossOS_Target='wince') then
       begin
-        //FPCupManager.CrossOPT:='-CpARMV6 -CfSoft ';
         FPCupManager.CrossOPT:='-CpARMV6 ';
       end
       else
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
-        FPCupManager.FPCOPT:='-dFPC_ARMHF '; //-Sh ';
         FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
       end
       else
       begin
-        //FPCupManager.CrossOS_SubArch:=;
-        // default: armhf
-        // don't worry: this option will still build a normal ppcrossarm (non-hf, armel) for Android
-        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
         // Use hard floats, using armeabi-v7a Android ABI.
         // Note: do not use -CaEABIHF on Android, to not use
         // armeabi-v7a-hard ABI. Reasons:
@@ -1398,7 +1471,7 @@ begin
     begin
       if (FPCupManager.CrossCPU_Target='avr') then
       begin
-        FPCupManager.FPCOPT:='-ap -O2 ';
+        FPCupManager.FPCOPT:='-O2 ';
         // for Uno (ATMega328P) use avr5
         // for Mega (ATMega2560) use avr6
         FPCupManager.CrossOPT:='-Cpavr5 ';
@@ -1406,6 +1479,10 @@ begin
       end;
       if (FPCupManager.CrossCPU_Target='arm') then
       begin
+        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
+        // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
+        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+
         FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
         FPCupManager.CrossOS_SubArch:='armv7m';
       end;
@@ -1426,13 +1503,18 @@ begin
     s:=Trim(s);
     if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
 
+    // override / set custom FPC cross-subarch by special user input through setup+
+    s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+    s:=Trim(s);
+    if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
+
     // use the available source to build the cross-compiler ... change nothing about source and url !!
     FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
 
     IncludeLCL:=Form2.IncludeLCL;
     if (FPCupManager.CrossOS_Target='java') then IncludeLCL:=false;
     if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;
-    // AFAIK, on Darwin, LCL Carbon and Cocoa are only supported for i386 and x86_64 ... but I stand corrected if wrong
+    // AFAIK, on Darwin, LCL Carbon and Cocoa are only supported for i386 and x86_64 ... but again I stand corrected if wrong
     if (FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target<>'x86_64') AND (FPCupManager.CrossCPU_Target<>'i386') then IncludeLCL:=false;
 
     if IncludeLCL then
@@ -1458,7 +1540,7 @@ begin
     sStatus:='Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
     if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
     if FPCupManager.CrossOPT<>'' then sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
-    if FPCupManager.CrossOS_SubArch<>'' then sStatus:=sStatus+' {Subarch: '+FPCupManager.CrossOS_SubArch+'}';
+    if FPCupManager.CrossOS_SubArch<>'' then sStatus:=sStatus+' {SUBARCH: '+FPCupManager.CrossOS_SubArch+'}';
     sStatus:=sStatus+'.';
 
     AddMessage(sStatus);
@@ -1543,6 +1625,7 @@ begin
         begin
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='EmbeddedARM.rar';
           if FPCupManager.CrossCPU_Target='avr' then BinsURL:='EmbeddedAVR.rar';
+          //if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='EmbeddedMipsel.rar';
         end;
         if FPCupManager.CrossOS_Target='darwin' then
         begin
@@ -1910,26 +1993,20 @@ end;
 
 procedure TForm1.Button8Click(Sender: TObject);
 begin
-  SynEdit1.ClearAll;
+  SynEdit1.Clear;
   Memo1.Clear;
 end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
   sInstallDir:=InstallDirEdit.Text;
-  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)) then
-  begin
-    AddMessage('Got settings from install directory');
-  end;
+  GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
 procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   sInstallDir:=InstallDirEdit.Text;
-  if GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)) then
-  begin
-    AddMessage('Got settings from install directory');
-  end;
+  GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
 
@@ -2241,6 +2318,13 @@ begin
 
   if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
   try
+
+    SynEdit1.Clear;
+    AddMessage('Welcome @ FPCUPdeluxe.');
+    AddMessage(Self.Caption);
+    AddMessage('');
+    AddMessage('Got settings from install directory');
+    AddMessage('');
 
     // get names of cross-compilers
     AutoUpdateCrossCompiler(nil);

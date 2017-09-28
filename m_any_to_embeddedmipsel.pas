@@ -1,5 +1,5 @@
-unit m_any_to_embeddedavr;
-{ Cross compiles from any platform with correct binutils to Embedded AVR
+unit m_any_to_embeddedmipsel;
+{ Cross compiles from any platform with correct binutils to Embedded Mipsel
 Copyright (C) 2017 Alf
 
 This library is free software; you can redistribute it and/or modify it
@@ -34,14 +34,14 @@ http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/
 with binutils 2.22
 
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\avr-embedded
+Then place the binaries in c:\development\cross\bin\mipsel-embedded
 Binaries include
-avr-embedded-ar.exe
-avr-embedded-as.exe
-avr-embedded-ld.exe
-avr-embedded-objcopy.exe
-avr-embedded-objdump.exe
-avr-embedded-strip.exe
+mipsel-embedded-ar.exe
+mipsel-embedded-as.exe
+mipsel-embedded-ld.exe
+mipsel-embedded-objcopy.exe
+mipsel-embedded-objdump.exe
+mipsel-embedded-strip.exe
 }
 
 {$mode objfpc}{$H+}
@@ -54,8 +54,8 @@ uses
 implementation
 type
 
-{ TAny_Embeddedavr }
-TAny_Embeddedavr = class(TCrossInstaller)
+{ TAny_Embeddedmipsel }
+TAny_Embeddedmipsel = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -68,13 +68,13 @@ public
   destructor Destroy; override;
 end;
 
-{ TAny_Embeddedavr }
+{ TAny_Embeddedmipsel }
 
-function TAny_Embeddedavr.GetLibs(Basepath:string): boolean;
+function TAny_Embeddedmipsel.GetLibs(Basepath:string): boolean;
 const
-  DirName='avr-embedded';
+  DirName='mipsel-embedded';
 begin
-  // AVR-embedded does not need libs by default, but user can add them.
+  // mipsel-embedded does not need libs by default, but user can add them.
 
   result:=FLibsFound;
   if result then exit;
@@ -100,7 +100,7 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function TAny_Embeddedavr.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function TAny_Embeddedmipsel.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least, add to FFPCCFGSnippet
   ShowInfo('Todo: implement lcl libs path from basepath '+BasePath,etdebug);
@@ -108,9 +108,9 @@ begin
 end;
 {$endif}
 
-function TAny_Embeddedavr.GetBinUtils(Basepath:string): boolean;
+function TAny_Embeddedmipsel.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='avr-embedded';
+  DirName='mipsel-embedded';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -143,10 +143,10 @@ begin
       AsFile);
   {$endif unix}
 
-  // Now also allow for avr- binutilsprefix
+  // Now also allow for mipsel- binutilsprefix
   if not result then
   begin
-    BinPrefixTry:='avr-';
+    BinPrefixTry:='mipsel-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -168,7 +168,7 @@ begin
   if not result then
   begin
     {$ifdef mswindows}
-    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (avr-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
+    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (mipsel-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
     {$endif}
     FAlreadyWarned:=true;
   end
@@ -178,8 +178,8 @@ begin
 
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
-      FCrossOpts.Add('-Cpavr5'); // Teensy default
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cpavr5.');
+      FCrossOpts.Add('-Cppic32'); // Teensy default
+      ShowInfo('Did not find any -Cp architecture parameter; using -Cppic32.');
     end;
 
     // Configuration snippet for FPC
@@ -189,32 +189,32 @@ begin
   end;
 end;
 
-constructor TAny_Embeddedavr.Create;
+constructor TAny_Embeddedmipsel.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='avr-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
+  FBinUtilsPrefix:='mipsel-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   //FCompilerUsed:=ctInstalled;
   FLibsPath:='';
-  FTargetCPU:='avr';
+  FTargetCPU:='mipsel';
   FTargetOS:='embedded';
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor TAny_Embeddedavr.Destroy;
+destructor TAny_Embeddedmipsel.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_Embeddedavr:TAny_Embeddedavr;
+  Any_Embeddedmipsel:TAny_Embeddedmipsel;
 
 initialization
-  Any_Embeddedavr:=TAny_Embeddedavr.Create;
-  RegisterExtension(Any_Embeddedavr.TargetCPU+'-'+Any_Embeddedavr.TargetOS,Any_Embeddedavr);
+  Any_Embeddedmipsel:=TAny_Embeddedmipsel.Create;
+  RegisterExtension(Any_Embeddedmipsel.TargetCPU+'-'+Any_Embeddedmipsel.TargetOS,Any_Embeddedmipsel);
 finalization
-  Any_Embeddedavr.Destroy;
+  Any_Embeddedmipsel.Destroy;
 end.
 

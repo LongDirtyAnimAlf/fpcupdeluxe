@@ -30,6 +30,7 @@ type
     LibDir:string;
     BinDir:string;
     CrossBuildOptions:string;
+    CrossSubArch:string;
   end;
 
   TCrossUtils = array[TCPU,TOS] of TCrossUtil;
@@ -67,7 +68,7 @@ type
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditCrossBuildOptions: TEdit;
-    EditSubArch: TEdit;
+    EditCrossSubArch: TEdit;
     EditFPCBranch: TEdit;
     EditFPCOptions: TEdit;
     EditFPCRevision: TEdit;
@@ -90,7 +91,7 @@ type
     Label3: TLabel;
     Label4: TLabel;
     LabelCrossBuildOptions: TLabel;
-    LabelCrossBuildOptions1: TLabel;
+    LabelCrossSubArch: TLabel;
     LabelFPCbranch: TLabel;
     LabelFPCOptions: TLabel;
     LabelFPCRevision: TLabel;
@@ -108,6 +109,7 @@ type
     procedure Button1Click(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure EditCrossBuildOptionsChange(Sender: TObject);
+    procedure EditCrossSubArchChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure OnDirectorySelect(Sender: TObject);
@@ -166,6 +168,7 @@ type
     function GetLibraryDirectory(aCPU,aOS:string):string;
     function GetToolsDirectory(aCPU,aOS:string):string;
     function GetCrossBuildOptions(aCPU,aOS:string):string;
+    function GetCrossSubArch(aCPU,aOS:string):string;
 
     property Repo:boolean read GetRepo;
     property PackageRepo:boolean read GetPackageRepo;
@@ -299,6 +302,7 @@ begin
         FCrossUtils[CPU,OS].LibDir:=ReadString(s,'LibPath','');
         FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
         FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
+        FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
       end;
     end;
 
@@ -329,11 +333,13 @@ begin
   e:=((ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1));
   RadioGroup3.Enabled:=e;
   EditCrossBuildOptions.Enabled:=e;
+  EditCrossSubArch.Enabled:=e;
   if e then
   begin
     EditLibLocation.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].LibDir;
     EditBinLocation.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].BinDir;
     EditCrossBuildOptions.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossBuildOptions;
+    EditCrossSubArch.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossSubArch;
     RadioGroup3.ItemIndex:=Ord(FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Setting);
   end;
 end;
@@ -341,6 +347,11 @@ end;
 procedure TForm2.EditCrossBuildOptionsChange(Sender: TObject);
 begin
   FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossBuildOptions:=TEdit(Sender).Text;
+end;
+
+procedure TForm2.EditCrossSubArchChange(Sender: TObject);
+begin
+  FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossSubArch:=TEdit(Sender).Text;
 end;
 
 procedure TForm2.btnAddPatchClick(Sender: TObject);
@@ -420,6 +431,12 @@ begin
           InfoForm.Memo1.Lines.Append('  options : '+FCrossUtils[CPU,OS].CrossBuildOptions);
         end;
 
+        if Length(FCrossUtils[CPU,OS].CrossSubArch)>0 then
+        begin
+          if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
+          InfoForm.Memo1.Lines.Append('  subarch : '+FCrossUtils[CPU,OS].CrossSubArch);
+        end;
+
         if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
 
       end;
@@ -488,6 +505,7 @@ begin
         WriteString(s,'LibPath',FCrossUtils[CPU,OS].LibDir);
         WriteString(s,'BinPath',FCrossUtils[CPU,OS].BinDir);
         WriteString(s,'CrossBuildOptions',FCrossUtils[CPU,OS].CrossBuildOptions);
+        WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
       end;
     end;
 
@@ -592,6 +610,14 @@ var
 begin
   xCPUOS:=GetCPUOSCombo(aCPU,aOS);
   result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions;
+end;
+
+function TForm2.GetCrossSubArch(aCPU, aOS: string): string;
+var
+  xCPUOS:TCPUOS;
+begin
+  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch;
 end;
 
 function TForm2.GetRepo:boolean;
