@@ -73,21 +73,59 @@ end;
 function TAny_Embeddedavr.GetLibs(Basepath:string): boolean;
 const
   DirName='avr-embedded';
+  LibName='libc.a';
+  {$ifdef unix}
+  UnixAVRLibDirs :array[0..3] of string = ('/usr/local/lib/avr/lib','/usr/lib/avr/lib','/usr/lib/avr','/lib/avr');
+var
+  i:integer;
+  {$endif}
 begin
   // AVR-embedded does not need libs by default, but user can add them.
 
   result:=FLibsFound;
   if result then exit;
 
-  // search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName,'');
+  if length(FSubArch)>0
+     then ShowInfo('We have a subarch: '+FSubArch)
+     else ShowInfo('No subarch defined');
+
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+  // search local paths based on libraries provided for or adviced by fpc itself
+  if not result then
+     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+  if not result then
+     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+
+  {$ifdef unix}
+  // User may also have placed them into their regular search path:
+  if not result then
+  begin
+    if length(FSubArch)>0 then
+    begin
+      for i:=Low(UnixAVRLibDirs) to High(UnixAVRLibDirs) do
+      begin
+        result:=SearchLibrary(IncludeTrailingPathDelimiter(UnixAVRLibDirs[i])+FSubArch,LibName);
+        if result then break;
+      end;
+    end;
+  end;
+  if not result then
+  begin
+    for i:=Low(UnixAVRLibDirs) to High(UnixAVRLibDirs) do
+    begin
+      result:=SearchLibrary(UnixAVRLibDirs[i],LibName);
+      if result then break;
+    end;
+  end;
+  {$endif unix}
 
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo('Found libspath '+FLibsPath);
+    SearchLibraryInfo(result);
   end;
   if not result then
   begin
@@ -96,7 +134,6 @@ begin
     FLibsPath:='';
     result:=true;
   end;
-  FLibsFound:=True;
 end;
 
 {$ifndef FPCONLY}
@@ -114,6 +151,9 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
+  {$ifdef unix}
+  i:integer;
+  {$endif}
 begin
   result:=inherited;
   if result then exit;
@@ -126,21 +166,15 @@ begin
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
+  if not result then
+  begin
+    for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+    begin
+      result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+DirName, AsFile);
+      if not result then result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+      if result then break;
+    end;
+  end;
   {$endif unix}
 
   // Now also allow for avr- binutilsprefix
@@ -150,10 +184,22 @@ begin
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    {$ifdef unix}
+    // User may also have placed them into their regular search path:
+    if not result then
+    begin
+      for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+      begin
+        result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+DirName, AsFile);
+        if not result then result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+        if result then break;
+      end;
+    end;
+    {$endif unix}
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
-  // Now also allow for empty binutilsprefix:
+  // Now also allow for empty binutilsprefix in the right directory:
   if not result then
   begin
     BinPrefixTry:='';
@@ -179,7 +225,8 @@ begin
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
       FCrossOpts.Add('-Cpavr5'); // Teensy default
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cpavr5.');
+      FSubArch:='avr5';
+      ShowInfo('Did not find any -Cp architecture parameter; using -Cpavr5 and SUBARCH=avr5.');
     end;
 
     // Configuration snippet for FPC

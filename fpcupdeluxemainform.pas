@@ -157,7 +157,7 @@ Const
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0p';
+  FPCUPDELUXEVERSION='1.4.0q';
 
 resourcestring
   CrossGCCMsg =
@@ -1514,6 +1514,7 @@ begin
     IncludeLCL:=Form2.IncludeLCL;
     if (FPCupManager.CrossOS_Target='java') then IncludeLCL:=false;
     if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;
+    if (FPCupManager.CrossOS_Target='embedded') then IncludeLCL:=false;
     // AFAIK, on Darwin, LCL Carbon and Cocoa are only supported for i386 and x86_64 ... but again I stand corrected if wrong
     if (FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target<>'x86_64') AND (FPCupManager.CrossCPU_Target<>'i386') then IncludeLCL:=false;
 
@@ -1688,7 +1689,9 @@ begin
               exit;
             end;
 
+            success:=false;
             AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
+
             {$ifdef MSWINDOWS}
             DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+BinsURL;
             {$else}
@@ -1697,7 +1700,6 @@ begin
             TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
             SysUtils.DeleteFile(TargetFile);
             UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-            success:=false;
             {$ifdef Darwin}
             if (UseNativeUnzip) then
             {$endif}
@@ -1790,6 +1792,10 @@ begin
             SysUtils.DeleteFile(TargetFile);
           end;
 
+          // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
+          if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath)) AND (FPCupManager.CrossOS_Target='embedded')
+            then MissingCrossLibs:=true;
+
           if MissingCrossLibs then
           begin
             AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
@@ -1867,6 +1873,8 @@ begin
               end;
             end;
             SysUtils.DeleteFile(TargetFile);
+            // as libraries are not needed for embedded, always end with success even if the above has failed
+            if FPCupManager.CrossOS_Target='embedded' then success:=true;
           end;
 
           if success then
@@ -2316,13 +2324,14 @@ var
 begin
   result:=FileExists(IniDirectory+DELUXEFILENAME);
 
+  SynEdit1.Clear;
+  AddMessage('Welcome @ FPCUPdeluxe.');
+  AddMessage(Self.Caption);
+  AddMessage('');
+
   if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
   try
 
-    SynEdit1.Clear;
-    AddMessage('Welcome @ FPCUPdeluxe.');
-    AddMessage(Self.Caption);
-    AddMessage('');
     AddMessage('Got settings from install directory');
     AddMessage('');
 

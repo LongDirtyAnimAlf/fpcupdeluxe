@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 593
+  Left = 412
   Height = 644
-  Top = 125
+  Top = 133
   Width = 746
   Caption = 'Advanced settings'
   ClientHeight = 644
@@ -11,14 +11,16 @@ object Form2: TForm2
   Position = poMainFormCenter
   LCLVersion = '1.9.0.0'
   object GroupBox1: TGroupBox
+    AnchorSideTop.Control = Owner
     Left = 8
     Height = 128
     Top = 8
-    Width = 724
+    Width = 320
     Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 8
     Caption = 'Proxy settings'
     ClientHeight = 108
-    ClientWidth = 720
+    ClientWidth = 316
     TabOrder = 0
     object Label1: TLabel
       AnchorSideLeft.Control = GroupBox1
@@ -41,7 +43,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 586
+      Width = 192
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -53,13 +55,13 @@ object Form2: TForm2
       AnchorSideTop.Control = Label1
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 602
+      Left = 208
       Height = 15
       Top = 4
       Width = 90
       Anchors = [akTop, akRight]
       BorderSpacing.Left = 10
-      BorderSpacing.Right = 28
+      BorderSpacing.Right = 18
       Caption = 'HTTP proxy port:'
       ParentColor = False
     end
@@ -67,10 +69,10 @@ object Form2: TForm2
       AnchorSideLeft.Control = Label2
       AnchorSideTop.Control = EditHTTPProxyHost
       AnchorSideRight.Side = asrBottom
-      Left = 602
+      Left = 208
       Height = 23
       Top = 23
-      Width = 94
+      Width = 90
       BorderSpacing.Right = 6
       NumbersOnly = True
       TabOrder = 1
@@ -81,10 +83,10 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 58
+      Top = 54
       Width = 120
       BorderSpacing.Left = 4
-      BorderSpacing.Top = 12
+      BorderSpacing.Top = 8
       Caption = 'HTTP proxy username:'
       ParentColor = False
     end
@@ -94,8 +96,8 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 77
-      Width = 152
+      Top = 73
+      Width = 140
       BorderSpacing.Top = 4
       TabOrder = 2
     end
@@ -103,32 +105,39 @@ object Form2: TForm2
       AnchorSideLeft.Control = Label3
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Label3
-      Left = 176
+      AnchorSideRight.Control = GroupBox1
+      AnchorSideRight.Side = asrBottom
+      Left = 166
       Height = 15
-      Top = 58
+      Top = 54
       Width = 118
-      BorderSpacing.Left = 52
+      Anchors = [akTop, akRight]
+      BorderSpacing.Left = 29
+      BorderSpacing.Right = 32
       Caption = 'HTTP proxy password:'
       ParentColor = False
     end
     object EditHTTPProxyPassword: TEdit
       AnchorSideLeft.Control = Label4
       AnchorSideTop.Control = EditHTTPProxyUser
-      Left = 176
+      Left = 166
       Height = 23
-      Top = 77
-      Width = 152
+      Top = 73
+      Width = 140
       EchoMode = emPassword
       PasswordChar = '*'
       TabOrder = 3
     end
   end
   object GroupBox2: TGroupBox
+    AnchorSideTop.Control = GroupBox1
+    AnchorSideTop.Side = asrBottom
     Left = 8
     Height = 416
     Top = 144
     Width = 320
     Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Top = 8
     Caption = 'Miscellaneous settings'
     ClientHeight = 396
     ClientWidth = 316
@@ -318,13 +327,17 @@ object Form2: TForm2
     end
   end
   object GroupBox4: TGroupBox
+    AnchorSideLeft.Control = GroupBox2
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = GroupBox2
     Left = 336
-    Height = 288
-    Top = 272
+    Height = 416
+    Top = 144
     Width = 296
     Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 8
     Caption = 'Cross tools location and build options'
-    ClientHeight = 268
+    ClientHeight = 396
     ClientWidth = 292
     TabOrder = 2
     object ComboBoxOS: TComboBox
@@ -533,12 +546,17 @@ object Form2: TForm2
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
-    Left = 482
-    Height = 120
-    Top = 144
+    AnchorSideLeft.Control = GroupBoxCompileOptions
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
+    Left = 486
+    Height = 128
+    Top = 8
     Width = 250
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
     Caption = 'FPC/Laz branch and revision'
-    ClientHeight = 100
+    ClientHeight = 108
     ClientWidth = 246
     TabOrder = 3
     object EditFPCBranch: TEdit
@@ -629,19 +647,26 @@ object Form2: TForm2
     end
   end
   object GroupBoxCompileOptions: TGroupBox
+    AnchorSideLeft.Control = GroupBox1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = Owner
     Left = 336
-    Height = 120
-    Top = 144
+    Height = 128
+    Top = 8
     Width = 142
+    BorderSpacing.Left = 8
+    BorderSpacing.Top = 8
     Caption = 'Options Override'
-    ClientHeight = 100
+    ClientHeight = 108
     ClientWidth = 138
     TabOrder = 4
     object LabelFPCOptions: TLabel
+      AnchorSideTop.Control = GroupBoxCompileOptions
       Left = 8
       Height = 15
-      Top = 8
+      Top = 4
       Width = 64
+      BorderSpacing.Top = 4
       Caption = 'FPC options'
       ParentColor = False
     end
@@ -651,9 +676,9 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 25
+      Top = 23
       Width = 120
-      BorderSpacing.Top = 2
+      BorderSpacing.Top = 4
       TabOrder = 0
     end
     object LabelLazarusOptions: TLabel
@@ -661,9 +686,9 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 15
-      Top = 52
+      Top = 54
       Width = 82
-      BorderSpacing.Top = 4
+      BorderSpacing.Top = 8
       Caption = 'Lazarus options'
       ParentColor = False
     end
@@ -673,9 +698,9 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 8
       Height = 23
-      Top = 69
+      Top = 73
       Width = 120
-      BorderSpacing.Top = 2
+      BorderSpacing.Top = 4
       TabOrder = 1
     end
   end
@@ -820,13 +845,13 @@ object Form2: TForm2
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 254
-    Top = 24
+    Left = 32
+    Top = 480
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Patch|*.patch|Diff|*.diff|All|*.*'
     Options = [ofFileMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail, ofAutoPreview]
-    Left = 344
-    Top = 24
+    Left = 128
+    Top = 480
   end
 end

@@ -562,7 +562,8 @@ begin
     // so skip them in case they are included.
     if
       {$ifdef LCLCOCOA}
-      //(Pos('onlinepackagemanager',PackagePath)>0) OR
+      // added in Lazarus revision 55937
+      // (Pos('onlinepackagemanager',PackagePath)>0) OR
       {$endif}
       (Pos('editormacroscript',PackagePath)>0) then
     begin

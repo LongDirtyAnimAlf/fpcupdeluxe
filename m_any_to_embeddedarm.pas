@@ -73,11 +73,16 @@ end;
 function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-embedded';
+  //LibName='libc.a';
 begin
   // Arm-embedded does not need libs by default, but user can add them.
 
   result:=FLibsFound;
   if result then exit;
+
+  if length(FSubArch)>0
+     then ShowInfo('We have a subarch: '+FSubArch)
+     else ShowInfo('No subarch defined');
 
   // search local paths based on libbraries provided for or adviced by fpc itself
   result:=SimpleSearchLibrary(BasePath,DirName,'');
@@ -96,7 +101,6 @@ begin
     FLibsPath:='';
     result:=true;
   end;
-  FLibsFound:=True;
 end;
 
 {$ifndef FPCONLY}
@@ -114,6 +118,9 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
+  {$ifdef unix}
+  i:integer;
+  {$endif}
 begin
   result:=inherited;
   if result then exit;
@@ -126,21 +133,15 @@ begin
 
   {$ifdef unix}
   // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
+  if not result then
+  begin
+    for i:=Low(UnixBinDirs) to High(UnixBinDirs) do
+    begin
+      result:=SearchBinUtil(IncludeTrailingPathDelimiter(UnixBinDirs[i])+DirName, AsFile);
+      if not result then result:=SearchBinUtil(UnixBinDirs[i], AsFile);
+      if result then break;
+    end;
+  end;
   {$endif unix}
 
   // Now also allow for arm-none-eabi- binutilsprefix (e.g. launchpadlibrarian)

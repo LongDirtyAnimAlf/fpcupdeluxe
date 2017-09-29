@@ -47,7 +47,10 @@ const
   NDKVERSIONNAMES:array[0..21] of string = ('7','7b','7c','8','8b','8c','8d','8e','9','9b','9c','9d','10','10b','10c','10d','10e','11','11b','11c','12','12b');
   //PLATFORMVERSIONSNUMBERS:array[0..13] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22); //23 does not yet work due to text allocations
   PLATFORMVERSIONSNUMBERS:array[0..17] of byte = (9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26);
-
+  {$ifdef unix}
+  UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
+  UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
+  {$endif}
 
 type
   CompilerType=(ctBootstrap,ctInstalled);
@@ -93,6 +96,8 @@ type
     function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
     procedure SetCrossOpt(CrossOpts: string);
+    // Pass subarch if any
+    procedure SetSubArch(SubArch: string);
     procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
@@ -346,6 +351,11 @@ begin
   finally
     Parser.Free;
   end;
+end;
+
+procedure TCrossInstaller.SetSubArch(SubArch: string);
+begin
+  FSubArch:=SubArch;
 end;
 
 procedure TCrossInstaller.ShowInfo(info: string = ''; Level: TEventType = etInfo);

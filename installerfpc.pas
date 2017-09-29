@@ -458,6 +458,7 @@ begin
     if CrossInstaller.TargetCPU='jvm' then DownloadJasmin;
 
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
+    CrossInstaller.SetSubArch(CrossOS_SubArch);
 
     // get/set cross binary utils !!
     BinsAvailable:=false;
