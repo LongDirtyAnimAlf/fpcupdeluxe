@@ -73,7 +73,7 @@ end;
 function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-embedded';
-  //LibName='libc.a';
+  LibName='libgcc.a';  // is this correct ??
 begin
   // Arm-embedded does not need libs by default, but user can add them.
 
@@ -84,15 +84,20 @@ begin
      then ShowInfo('We have a subarch: '+FSubArch)
      else ShowInfo('No subarch defined');
 
-  // search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName,'');
+  // begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+  // search local paths based on libraries provided for or adviced by fpc itself
+  if not result then
+     if length(FSubArch)>0 then result:=SimpleSearchLibrary(BasePath,IncludeTrailingPathDelimiter(DirName)+FSubArch,LibName);
+  if not result then
+     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo('Found libspath '+FLibsPath);
+    SearchLibraryInfo(result);
   end;
   if not result then
   begin
@@ -154,7 +159,7 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
-  // Now also allow for empty binutilsprefix:
+  // Now also allow for empty binutilsprefix in the right directory:
   if not result then
   begin
     BinPrefixTry:='';
