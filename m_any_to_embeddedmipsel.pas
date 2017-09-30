@@ -73,6 +73,7 @@ end;
 function TAny_Embeddedmipsel.GetLibs(Basepath:string): boolean;
 const
   DirName='mipsel-embedded';
+  LibName='';
 begin
   // mipsel-embedded does not need libs by default, but user can add them.
 
@@ -80,16 +81,16 @@ begin
   if result then exit;
 
   // search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName,'');
+  result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo('Found libspath '+FLibsPath);
-  end;
-  if not result then
+    SearchLibraryInfo(result);
+  end
+  else
   begin
     //libs path is optional; it can be empty
     ShowInfo('Libspath ignored; it is optional for this cross compiler.');

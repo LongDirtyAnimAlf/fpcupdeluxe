@@ -38,7 +38,8 @@ unit fpcuputil;
 interface
 
 uses
-  Classes, SysUtils,
+  Classes, SysUtils, strutils,
+  typinfo,
   zipper,
   fphttpclient,
   sslsockets, fpopenssl,
@@ -276,8 +277,10 @@ function GetGCCDirectory:string;
 {$ENDIF UNIX}
 {$IFDEF DARWIN}
 function GetSDKVersion(aSDK: string):string;
-{$ENDIF MSWINDOWS}
+{$ENDIF DARWIN}
 function CompareVersionStrings(s1,s2: string): longint;
+function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
+function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
@@ -302,7 +305,7 @@ uses
   DOM,DOM_HTML,SAX_HTML,
   ftpsend {for downloading from ftp},
   FileUtil, LazFileUtils, LazUTF8,
-  strutils,uriparser
+  uriparser
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
     ,windows, shlobj {for special folders}, ActiveX, ComObj
@@ -1314,6 +1317,22 @@ begin
   until false;
 end;
 
+function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
+var
+  Size : Integer;
+begin
+  Size:=StrLen(aString);
+  Result := SearchBuf(aString, Size, 0, 0, aSearchString, aSearchOptions)<>nil;
+end;
+
+function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
+begin
+  begin
+    if (aTypeInfo=nil) or (aTypeInfo^.Kind<>tkEnumeration) then
+      result := '' else
+      result := GetEnumName(aTypeInfo,aEnum);
+  end;
+end;
 
 function Which(Executable: string): string;
 var

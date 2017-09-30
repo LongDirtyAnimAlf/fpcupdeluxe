@@ -68,8 +68,6 @@ const
   External_library='libcurl'; {Setup as you need}
 
 Type
-
-  Pchar  = ^char;
   Pcurl_calloc_callback  = ^curl_calloc_callback;
   Pcurl_closepolicy  = ^curl_closepolicy;
   Pcurl_forms  = ^curl_forms;

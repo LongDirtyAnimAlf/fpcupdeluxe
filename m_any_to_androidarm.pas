@@ -81,7 +81,7 @@ end;
 
 function TAny_ARMAndroid.GetLibs(Basepath:string): boolean;
 const
-  DirName='arm-android';
+  DirName=ARCH+'-'+OS;
   // we presume, libc.so has to be present in a cross-library for arm
   LibName='libc.so';
   // we presume, libandroid.so has to be present in a cross-library for arm

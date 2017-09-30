@@ -31,9 +31,36 @@ uses
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
 const
-
   NEWPASCALGITREPO='https://github.com/newpascal';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
+
+  {$ifdef MSWINDOWS}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  {$endif}
+  {$ifdef Linux}
+  {$ifdef CPUX86}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxi386crossbins_v1.0';
+  {$endif CPUX86}
+  {$ifdef CPUX64}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
+  {$endif CPUX64}
+  {$ifdef CPUARM}
+  FPCUPBINSURL='';
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  FPCUPBINSURL='';
+  {$endif CPUAARCH64}
+  {$endif}
+  {$ifdef FreeBSD}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/freebsdx64crossbins_v1.0';
+  {$endif}
+  {$ifdef OpenBSD}
+  FPCUPBINSURL='';
+  {$endif}
+  {$ifdef Darwin}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
+  {$endif}
+  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
 
   FPCTRUNKVERSION  = '3.1.1';
   LAZARUSTRUNKVERSION  = '1.9';
@@ -59,6 +86,8 @@ const
   //STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
   STANDARDCOMPILEROPTIONS='-vw-n-h-l-d-u-t-p-c-';
   {$ENDIF}
+
+  NASMURL='http://www.nasm.us/pub/nasm/releasebuilds/2.13.01';
 
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
@@ -422,11 +451,11 @@ begin
     {$IFDEF MSWINDOWS}
     ForceDirectoriesUTF8(FMakeDir);
 
-    {
+    (*
     // check if we have make ... otherwise get it from standard URL
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
             '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
-    }
+    *)
 
     {$ifdef win64}
     // the standard make by FPC does not work when Git is present (and in the path), but this one works ??!!

@@ -113,8 +113,7 @@ implementation
 
 uses
   IniFiles,
-  StrUtils,
-  typinfo,
+  strutils,
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF UNIX}
@@ -130,34 +129,7 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  {$ifdef MSWINDOWS}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
-  {$endif}
-  {$ifdef Linux}
-  {$ifdef CPUX86}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxi386crossbins_v1.0';
-  {$endif CPUX86}
-  {$ifdef CPUX64}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
-  {$endif CPUX64}
-  {$ifdef CPUARM}
-  FPCUPBINSURL='';
-  {$endif CPUARM}
-  {$ifdef CPUAARCH64}
-  FPCUPBINSURL='';
-  {$endif CPUAARCH64}
-  {$endif}
-  {$ifdef FreeBSD}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/freebsdx64crossbins_v1.0';
-  {$endif}
-  {$ifdef OpenBSD}
-  FPCUPBINSURL='';
-  {$endif}
-  {$ifdef Darwin}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
-  {$endif}
-  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
-  FPCUPDELUXEVERSION='1.4.0q';
+  DELUXEVERSION='1.4.0r';
 
 resourcestring
   CrossGCCMsg =
@@ -172,19 +144,12 @@ resourcestring
        '  {$endif}'+ sLineBreak +
        '{$endif}';
 
-function ExistWordInString(aString:pchar;aSearchString:string;aSearchOptions: TStringSearchOptions): Boolean;
-var
-  Size : Integer;
-begin
-  Size:=StrLen(aString);
-  Result := SearchBuf(aString, Size, 0, 0, aSearchString, aSearchOptions)<>nil;
-end;
-
 { TForm1 }
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
   IniFilesOk:boolean;
+  aTarget:string;
 begin
   FPCupManager:=nil;
 
@@ -218,7 +183,7 @@ begin
 
   Self.Caption:=
     'FPCUPdeluxe V'+
-    FPCUPDELUXEVERSION+
+    DELUXEVERSION+
     ' base fpcup'+
     RevisionStr+
     ' ('+
@@ -279,15 +244,25 @@ begin
 
   if IniFilesOk then
   begin
+    aTarget:='stable';
     if ListBoxFPCTarget.Count=0 then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-      FPCTarget:='stable';
+      {$ifdef CPUAARCH64}
+      aTarget:='trunk';
+      {$endif}
+      FPCTarget:=aTarget;
     end;
     if ListBoxLazarusTarget.Count=0 then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-      LazarusTarget:='stable';
+      {$ifdef LCLQT5}
+      aTarget:='trunk';
+      {$endif}
+      {$ifdef LCLCOCOA}
+      aTarget:='trunk';
+      {$endif}
+      LazarusTarget:=aTarget;
     end;
 
     sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
@@ -404,14 +379,14 @@ begin
 
       if (NOT success) then break;
 
-      aOS:=GetEnumName(TypeInfo(TOS),Ord(OSType));
+      aOS:=GetEnumNameSimple(TypeInfo(TOS),Ord(OSType));
 
       for CPUType := Low(TCPU) to High(TCPU) do
       begin
 
         if (NOT success) then break;
 
-        aCPU:=GetEnumName(TypeInfo(TCPU),Ord(CPUType));
+        aCPU:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPUType));
 
         // tricky; see above; improvement todo
         aRadiogroup_CPU:=aCPU;
@@ -561,24 +536,27 @@ end;
 
 procedure TForm1.RadioGroup1Click(Sender: TObject);
 begin
-  (*
-  if (RadioGroup1.ItemIndex<>-1) AND (RadioGroup1.Items[RadioGroup1.ItemIndex]='jvm') then
+  if (RadioGroup1.ItemIndex<>-1) then
   begin
-    RadioGroup2.ItemIndex:=-1;
-    RadioGroup2.Enabled:=false;
+  if (RadioGroup1.Items[RadioGroup1.ItemIndex]='i8086') then
+    begin
+      RadioGroup2.ItemIndex:=-1;
+      RadioGroup2.Enabled:=false;
+    end
+    else RadioGroup2.Enabled:=true;
   end
-  else RadioGroup2.Enabled:=true;
-  *)
 end;
 
 procedure TForm1.RadioGroup2Click(Sender: TObject);
 begin
-  if (RadioGroup2.ItemIndex<>-1) AND (RadioGroup2.Items[RadioGroup2.ItemIndex]='java') then
+  if (RadioGroup2.ItemIndex<>-1) then
   begin
-    RadioGroup1.ItemIndex:=-1;
-    RadioGroup1.Enabled:=false;
-  end
-  else RadioGroup1.Enabled:=true;
+    if (RadioGroup2.Items[RadioGroup2.ItemIndex]='java') OR (RadioGroup2.Items[RadioGroup2.ItemIndex]='msdos') then
+    begin
+      RadioGroup1.ItemIndex:=-1;
+      RadioGroup1.Enabled:=false;
+    end else RadioGroup1.Enabled:=true;
+  end;
 end;
 
 procedure TForm1.SynEdit1MouseWheel(Sender: TObject; Shift: TShiftState;
@@ -1340,8 +1318,33 @@ begin
     FPCupManager.CrossOS_Target:=s;
   end;
 
+  if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
+  if (FPCupManager.CrossOS_Target='msdos') then FPCupManager.CrossCPU_Target:='i8086';
+  if (FPCupManager.CrossCPU_Target='i8086') then FPCupManager.CrossOS_Target:='msdos';
+
+  if FPCupManager.CrossOS_Target='windows' then
+  begin
+    if FPCupManager.CrossCPU_Target='i386' then FPCupManager.CrossOS_Target:='win32';
+    if FPCupManager.CrossCPU_Target='x86_64' then FPCupManager.CrossOS_Target:='win64';
+  end;
+
   if Sender<>nil then
   begin
+
+    if (FPCupManager.CrossCPU_Target='') then
+    begin
+      ShowMessage('Please select a CPU target first');
+      FPCupManager.CrossOS_Target:=''; // cleanup
+      exit;
+    end;
+
+    if (FPCupManager.CrossOS_Target='') then
+    begin
+      ShowMessage('Please select an OS target first');
+      FPCupManager.CrossCPU_Target:=''; // cleanup
+      exit;
+    end;
+
     {$ifndef BSD}
     if (Pos('bsd',FPCupManager.CrossOS_Target)>0) then
     //if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
@@ -1357,7 +1360,11 @@ begin
     end;
     {$endif}
 
-    if (FPCupManager.CrossCPU_Target='aarch64'){$ifdef MSWINDOWS} OR (FPCupManager.CrossOS_Target='darwin'){$endif} then
+    if (FPCupManager.CrossCPU_Target='aarch64')
+    {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target='darwin'){$endif}
+    OR (FPCupManager.CrossOS_Target='msdos')
+    OR (FPCupManager.CrossOS_Target='i8086')
+    then
     begin
       if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
                      'Do you want to continue ?'
@@ -1373,28 +1380,6 @@ begin
       Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
       Memo1.Lines.Append('');
     end;
-  end;
-
-  if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
-
-  if FPCupManager.CrossOS_Target='windows' then
-  begin
-    if FPCupManager.CrossCPU_Target='i386' then FPCupManager.CrossOS_Target:='win32';
-    if FPCupManager.CrossCPU_Target='x86_64' then FPCupManager.CrossOS_Target:='win64';
-  end;
-
-  if (FPCupManager.CrossCPU_Target='') then
-  begin
-    ShowMessage('Please select a CPU target first');
-    FPCupManager.CrossOS_Target:=''; // cleanup
-    exit;
-  end;
-
-  if (FPCupManager.CrossOS_Target='') then
-  begin
-    ShowMessage('Please select an OS target first');
-    FPCupManager.CrossCPU_Target:=''; // cleanup
-    exit;
   end;
 
   DisEnable(Sender,False);
@@ -1490,6 +1475,19 @@ begin
       begin
         FPCupManager.CrossOPT:='-Cppic32 ';
         FPCupManager.CrossOS_SubArch:='pic32mx';
+      end;
+    end;
+
+    //msdos predefined settings
+    if (FPCupManager.CrossOS_Target='msdos') then
+    begin
+      if (FPCupManager.CrossCPU_Target='i8086') then
+      begin
+        {$IFDEF DARWIN}
+        FPCupManager.CrossOPT:='-WmLarge ';
+        {$ELSE}
+        FPCupManager.CrossOPT:='-WmMedium ';
+        {$ENDIF DARWIN}
       end;
     end;
 
@@ -1639,6 +1637,11 @@ begin
           {$endif}
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='DarwinARM.rar';
           if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='DarwinAArch64.rar';
+        end;
+
+        if FPCupManager.CrossOS_Target='msdos' then
+        begin
+          if FPCupManager.CrossCPU_Target='i8086' then BinsURL:='MSDosi8086.zip';
         end;
 
         // normally, we have the same names for libs and bins URL

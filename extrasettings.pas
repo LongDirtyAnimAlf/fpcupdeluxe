@@ -13,8 +13,8 @@ Const
   DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mipsel,avr,jvm);
-  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mipsel,avr,jvm,i8086);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos);
 
   TCPUOS = record
     CPU:TCPU;

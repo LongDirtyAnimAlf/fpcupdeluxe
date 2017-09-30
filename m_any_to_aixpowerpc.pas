@@ -84,12 +84,10 @@ begin
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
-
-  // first search local paths based on libbraries provided for or adviced by fpc itself
+  // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
-  SearchLibraryInfo(result);
   if result then
   begin
     FLibsFound:=true;
@@ -99,12 +97,16 @@ begin
       '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    SearchLibraryInfo(result);
   end
   else
   begin
-    ShowInfo('For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.',etInfo);
+    //libs path is optional; it can be empty
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.');
+    FLibsPath:='';
+    result:=true;
   end;
-  result:=true; //this step is optional at least for simple hello world programs
+  FLibsFound:=True;
 end;
 
 {$ifndef FPCONLY}

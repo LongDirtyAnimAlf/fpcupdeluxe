@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 312
+  Left = 302
   Height = 595
-  Top = 161
+  Top = 135
   Width = 1050
   Anchors = []
   Caption = 'Form1'
@@ -16,13 +16,17 @@ object Form1: TForm1
   LCLVersion = '1.9.0.0'
   Visible = True
   object AutoCrossUpdate: TButton
+    AnchorSideLeft.Control = ButtonInstallCrossCompiler
     AnchorSideTop.Control = ButtonInstallCrossCompiler
     AnchorSideTop.Side = asrBottom
-    Left = 169
+    AnchorSideRight.Control = ButtonInstallCrossCompiler
+    AnchorSideRight.Side = asrBottom
+    Left = 160
     Height = 28
     Hint = 'Auto-update all installed cross-compilers'
-    Top = 344
-    Width = 190
+    Top = 366
+    Width = 202
+    Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 4
     Caption = 'Auto-update compilers'
     OnClick = ButtonAutoUpdateCrossCompiler
@@ -31,8 +35,8 @@ object Form1: TForm1
     TabOrder = 21
   end
   object RadioGroup1: TRadioGroup
-    Left = 168
-    Height = 264
+    Left = 160
+    Height = 288
     Top = 40
     Width = 92
     AutoFill = True
@@ -44,7 +48,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 244
+    ClientHeight = 268
     ClientWidth = 88
     Items.Strings = (
       'i386'
@@ -56,17 +60,25 @@ object Form1: TForm1
       'mipsel'
       'avr'
       'jvm'
+      'i8086'
     )
     OnClick = RadioGroup1Click
     ParentShowHint = False
     TabOrder = 8
   end
   object RadioGroup2: TRadioGroup
-    Left = 260
-    Height = 264
+    AnchorSideLeft.Control = RadioGroup1
+    AnchorSideLeft.Side = asrBottom
+    AnchorSideTop.Control = RadioGroup1
+    AnchorSideBottom.Control = RadioGroup1
+    AnchorSideBottom.Side = asrBottom
+    Left = 256
+    Height = 288
     Top = 40
-    Width = 99
+    Width = 106
+    Anchors = [akTop, akLeft, akBottom]
     AutoFill = True
+    BorderSpacing.Left = 4
     Caption = 'OS'
     ChildSizing.LeftRightSpacing = 6
     ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -75,8 +87,8 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 244
-    ClientWidth = 95
+    ClientHeight = 268
+    ClientWidth = 102
     Items.Strings = (
       'windows'
       'linux'
@@ -87,6 +99,7 @@ object Form1: TForm1
       'wince'
       'embedded'
       'java'
+      'msdos'
     )
     OnClick = RadioGroup2Click
     ParentShowHint = False
@@ -1530,8 +1543,8 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = Button2
     Left = 168
-    Height = 98
-    Top = 384
+    Height = 80
+    Top = 406
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Top = 12
@@ -1573,10 +1586,17 @@ object Form1: TForm1
     TabOrder = 1
   end
   object ButtonInstallCrossCompiler: TButton
-    Left = 167
+    AnchorSideLeft.Control = RadioGroup1
+    AnchorSideTop.Control = RadioGroup1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = RadioGroup2
+    AnchorSideRight.Side = asrBottom
+    Left = 160
     Height = 28
-    Top = 312
-    Width = 191
+    Top = 334
+    Width = 202
+    Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Top = 6
     Caption = 'Install cross-compiler'
     OnClick = ButtonInstallCrossCompilerClick
     TabOrder = 10

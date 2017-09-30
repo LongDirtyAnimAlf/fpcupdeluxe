@@ -32,8 +32,8 @@ program fpcupdeluxe;
 
 uses
   Interfaces, // this includes the LCL widgetset
-  Forms, fpcupdeluxemainform, extrasettings, unzipprogress,
-  Classes, sysutils,
+  Forms, Classes, sysutils,
+  fpcupdeluxemainform, extrasettings, unzipprogress,
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
   m_any_to_aixpowerpc,
@@ -48,6 +48,7 @@ uses
   m_any_to_androidjvm,
   m_any_to_javajvm,
   m_any_to_linuxpowerpc64,
+  m_any_to_msdosi8086,
   {$IFDEF LINUX}
   m_linux386_to_mips,
   {$ENDIF}
@@ -88,11 +89,12 @@ uses
   {$endif}
   {$ifdef win32}
   m_crosswin64,
-  m_win32_to_linuxmips, m_win32_to_msdosi8086, m_win32_to_go32v2i386, m_win32_to_wincearm,
+  m_win32_to_linuxmips, m_win32_to_go32v2i386, m_win32_to_wincearm,
   {$endif}
   {$endif}
   m_anyinternallinker_to_win386,
-  m_anyinternallinker_to_win64, infounit
+  m_anyinternallinker_to_win64,
+  infounit
   ;
 
 {$i revision.inc}

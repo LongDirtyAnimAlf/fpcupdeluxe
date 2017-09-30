@@ -60,6 +60,11 @@ uses
   Classes, SysUtils, m_crossinstaller;
 
 implementation
+
+const
+  ARCH='i386';
+  OS='go32v2';
+
 type
 
 { TWin32_go32v2i386 }
@@ -80,13 +85,14 @@ end;
 
 function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-go32v2';
+  DirName=ARCH+'-'+OS;
+  LibName='';
 begin
   result:=FLibsFound;
   if result then exit;
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
-  result:=SimpleSearchLibrary(BasePath,DirName,'');
+  result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
   if result then
   begin
@@ -94,7 +100,7 @@ begin
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath) {buildfaq 1.6.4/3.3.1:  the directory to look for the target  libraries};
-    ShowInfo('Found libspath '+FLibsPath,etInfo);
+    SearchLibraryInfo(result);
   end;
   if not result then
   begin
@@ -115,7 +121,7 @@ end;
 
 function TWin32_go32v2i386.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='i386-go32v2';
+  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
 begin  
@@ -163,13 +169,13 @@ end;
 constructor TWin32_go32v2i386.Create;
 begin
   inherited Create;
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
   FCrossModuleNamePrefix:='TWinAll';
-  FBinUtilsPrefix:='i386-go32v2-'; //will be removed if no binutils found
+  FBinUtilsPrefix:=ARCH+'-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='go32v2';
   FAlreadyWarned:=false;
   ShowInfo;
 end;
