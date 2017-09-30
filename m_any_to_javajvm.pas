@@ -45,6 +45,10 @@ uses
 
 implementation
 
+const
+  ARCH='jvm';
+  OS='java';
+
 type
 
 { Tany_javajvm }
@@ -86,20 +90,29 @@ function Tany_javajvm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
-  FBinUtilsPath:=ExtractFilePath(Which('java'+GetExeExt));
-  result:=True;
-  FBinsFound:=true;
+  result:=CheckExecutable('java', '-version', '');
+  if result then
+  begin
+    FBinsFound:=true;
+    FBinUtilsPath:=ExtractFilePath(Which('java'+GetExeExt));
+    SearchBinUtilsInfo(result);
+  end
+  else
+  begin
+    FAlreadyWarned:=true;
+    ShowInfo('Java is needed. Please install java.');
+  end;
 end;
 
 constructor Tany_javajvm.Create;
 begin
   inherited Create;
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
   FBinUtilsPrefix:='';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='jvm';
-  FTargetOS:='java';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

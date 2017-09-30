@@ -114,6 +114,7 @@ implementation
 uses
   IniFiles,
   strutils,
+  LCLType, // for MessageBox
   {$IFDEF UNIX}
   baseunix,
   {$ENDIF UNIX}
@@ -1333,16 +1334,52 @@ begin
 
     if (FPCupManager.CrossCPU_Target='') then
     begin
-      ShowMessage('Please select a CPU target first');
+      Application.MessageBox(PChar('Please select a CPU target first.'), PChar('CPU error'), MB_ICONERROR);
       FPCupManager.CrossOS_Target:=''; // cleanup
       exit;
     end;
 
     if (FPCupManager.CrossOS_Target='') then
     begin
-      ShowMessage('Please select an OS target first');
+      Application.MessageBox(PChar('Please select an OS target first.'), PChar('OS error'), MB_ICONERROR);
       FPCupManager.CrossCPU_Target:=''; // cleanup
       exit;
+    end;
+
+    {$ifdef Linux}
+    if (FPCupManager.CrossOS_Target='darwin') then
+    begin
+      success:=CheckExecutable('clang', '-v', '');
+      if (NOT success) then
+      begin
+        s:=
+        'Clang cannot be found !!'+ sLineBreak +
+        'Clang need to be installed to be able to cross-compile towards Darwin !'+ sLineBreak +
+        'Install clang and retry !!';
+        Application.MessageBox(PChar(s), PChar('Missing clang'), MB_ICONERROR);
+        Memo1.Lines.Append('');
+        Memo1.Lines.Append('To get clang: sudo apt-get install clang');
+        exit;
+      end;
+    end;
+    {$endif}
+
+    if (FPCupManager.CrossOS_Target='java') then
+    begin
+      success:=CheckExecutable('java', '-version', '');
+      if (NOT success) then
+      begin
+        s:=
+        'Java cannot be found !!'+ sLineBreak +
+        'Java need to be installed to be able to cross-compile towards java !'+ sLineBreak +
+        'Install java and retry !!';
+        Application.MessageBox(PChar(s), PChar('Missing java'), MB_ICONERROR);
+        {$ifdef Linux}
+        Memo1.Lines.Append('');
+        Memo1.Lines.Append('To get java: sudo apt-get install default-jre');
+        {$endif}
+        exit;
+      end;
     end;
 
     {$ifndef BSD}
@@ -1363,7 +1400,6 @@ begin
     if (FPCupManager.CrossCPU_Target='aarch64')
     {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target='darwin'){$endif}
     OR (FPCupManager.CrossOS_Target='msdos')
-    OR (FPCupManager.CrossOS_Target='i8086')
     then
     begin
       if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +

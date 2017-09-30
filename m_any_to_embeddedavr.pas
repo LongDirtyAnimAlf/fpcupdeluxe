@@ -52,6 +52,7 @@ uses
   Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
+
 type
 
 { TAny_Embeddedavr }
