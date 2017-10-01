@@ -114,6 +114,8 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
+  SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=True;
@@ -122,8 +124,6 @@ begin
     '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
-    ShowInfo('Found libspath '+FLibsPath,etInfo);
   end;
 end;
 
@@ -164,10 +164,20 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
-  // Now also allow for mipsel-linux- binutilsprefix (e.g. using standard GCC crossbinutils)
+  // Now also allow for mips-linux-uclibc binutilsprefix (e.g. using standard GCC crossbinutils)
   if not result then
   begin
-    BinPrefixTry:='mipsel-linux-';
+    BinPrefixTry:='mips-linux-uclibc-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
+  // Now also allow for mips-openwrt-linux-uclibc binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:='mips-openwrt-linux-uclibc-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -184,21 +194,18 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  SearchBinUtilsInfo(result);
+
   if result then
   begin
     FBinsFound:=true;
-
     //option: check as version with something like as --version, and check the targte against what is needed !!
-
-
-    ShowInfo('Found binutils '+FBinUtilsPath,etInfo);
     // Architecture etc:
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
       FCrossOpts.Add('-CpMIPS32R2'); //Probably supported by most devices today
     // Softfloat unless otherwise specified (probably equivalent to -msoft-float for gcc):
     if StringListStartsWith(FCrossOpts,'-Cf')=-1 then
       FCrossOpts.Add('-CfSOFT');
-
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
     '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
@@ -214,7 +221,7 @@ constructor Tany_linuxmipsel.Create;
 begin
   inherited Create;
   // binutilsprefix can be modified later in GetBinUtils
-  FBinUtilsPrefix:='mipsel-linux-android-'; //Used in Android NDK
+  FBinUtilsPrefix:='mipsel-linux-';
   FBinUtilsPath:='';
   { Use current trunk compiler to build, not stable bootstrap, e.g. in light of bug
    http://bugs.freepascal.org/view.php?id=25399

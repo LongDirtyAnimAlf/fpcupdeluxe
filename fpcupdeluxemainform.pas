@@ -130,7 +130,7 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  DELUXEVERSION='1.4.0r';
+  DELUXEVERSION='1.4.0s';
 
 resourcestring
   CrossGCCMsg =
@@ -1509,7 +1509,8 @@ begin
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin
-        FPCupManager.CrossOPT:='-Cppic32 ';
+        //FPCupManager.CrossOPT:='-Cppic32 ';
+        //FPCupManager.CrossOPT:='-Cpmips32 ';
         FPCupManager.CrossOS_SubArch:='pic32mx';
       end;
     end;
@@ -1660,7 +1661,7 @@ begin
         begin
           if FPCupManager.CrossCPU_Target='arm' then BinsURL:='EmbeddedARM.rar';
           if FPCupManager.CrossCPU_Target='avr' then BinsURL:='EmbeddedAVR.rar';
-          //if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='EmbeddedMipsel.rar';
+          if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='EmbeddedMipsel.rar';
         end;
         if FPCupManager.CrossOS_Target='darwin' then
         begin

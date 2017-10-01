@@ -125,25 +125,6 @@ begin
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  {$ifdef unix}
-  // User may also have placed them into their regular search path:
-  if not result then { try /usr/local/bin/<dirprefix>/ }
-    result:=SearchBinUtil('/usr/local/bin/'+DirName,
-      AsFile);
-
-  if not result then { try /usr/local/bin/ }
-    result:=SearchBinUtil('/usr/local/bin',
-      AsFile);
-
-  if not result then { try /usr/bin/ }
-    result:=SearchBinUtil('/usr/bin',
-      AsFile);
-
-  if not result then { try /bin/ }
-    result:=SearchBinUtil('/bin',
-      AsFile);
-  {$endif unix}
-
   // Now also allow for mipsel- binutilsprefix
   if not result then
   begin
@@ -153,6 +134,17 @@ begin
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
+
+  // Now also allow for mipsel- binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:='pic32-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
 
   // Now also allow for empty binutilsprefix:
   if not result then
@@ -169,7 +161,7 @@ begin
   if not result then
   begin
     {$ifdef mswindows}
-    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (mipsel-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
+    ShowInfo('Suggestion for pic32 cross binutils: http://chipkit.s3.amazonaws.com');
     {$endif}
     FAlreadyWarned:=true;
   end
@@ -177,11 +169,13 @@ begin
   begin
     FBinsFound:=true;
 
+    (*
     if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
     begin
       FCrossOpts.Add('-Cppic32'); // Teensy default
       ShowInfo('Did not find any -Cp architecture parameter; using -Cppic32.');
     end;
+    *)
 
     // Configuration snippet for FPC
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
@@ -193,7 +187,7 @@ end;
 constructor TAny_Embeddedmipsel.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='mipsel-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
+  FBinUtilsPrefix:='mipsel-embedded-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   //FCompilerUsed:=ctInstalled;
