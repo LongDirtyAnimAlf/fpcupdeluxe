@@ -2046,8 +2046,8 @@ begin
   else
   begin
     // get the bootstrapper, among other things (binutils)
-    // start with the lowest requirement ??!!
-    RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
+    // start with the lowest requirement, due to limited availability of online bootstrappers ??!!
+    RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
     result:=InitModule(RequiredBootstrapVersion);
     if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersion)
       then infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo)
