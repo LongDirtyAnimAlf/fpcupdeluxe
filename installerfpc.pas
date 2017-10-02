@@ -530,7 +530,16 @@ begin
            Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
         //putting all before target might help!?!?
 
-        Processor.Parameters.Add('all');
+        if (CrossInstaller.TargetCPU='mipsel') AND (CrossInstaller.TargetOS='embedded') then
+        begin
+          //This builds only the compiler and the RTL
+          Processor.Parameters.Add('crossall');
+        end
+        else
+        begin
+          Processor.Parameters.Add('all');
+        end;
+
         // future improvement:
         // 1: Make compiler_cycle CROSSINSTALL=1
         // 2: Make rtl packages CROSSINSTALL=1
@@ -546,6 +555,7 @@ begin
 
         if Length(FCrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
         Options:=FCompilerOptions;
+
         // Error checking for some known problems with cross compilers
         //todo: this really should go to the cross compiler unit itself but would require a rewrite
         if (CrossInstaller.TargetCPU='i8086') and
@@ -553,7 +563,7 @@ begin
         begin
           if (pos('-g',Options)>0) then
           begin
-            infoln(infotext+'Specified FPC options: '+Options+'... However, this cross compiler does not support debug symbols. Aborting.',etError);
+            infoln(infotext+'Specified debugging FPC options: '+Options+'... However, this cross compiler does not support debug symbols. Aborting.',etError);
             exit(false);
           end;
         end;
@@ -888,6 +898,9 @@ begin
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
   Processor.Parameters.Add('FPC='+FCompiler);
   Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+  {$IFDEF DEBUG}
+  Processor.Parameters.Add('-d');
+  {$ENDIF}
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$IFDEF UNIX}
   Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -914,6 +927,12 @@ begin
   {$ENDIF}
 
   s:=s+' -dREVINC';
+
+  {$ifdef cpux64}
+  // soft 80 bit float
+  // disabled for now : gives compilation errors on win64
+  //s:=s+' -dFPC_SOFT_FPUX80 -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\inc';
+  {$endif}
 
   Processor.Parameters.Add('OPT='+s);
 
@@ -2028,7 +2047,7 @@ begin
   begin
     // get the bootstrapper, among other things (binutils)
     // start with the lowest requirement ??!!
-    RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
+    RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
     result:=InitModule(RequiredBootstrapVersion);
     if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersion)
       then infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo)

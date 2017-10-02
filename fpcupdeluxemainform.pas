@@ -130,7 +130,7 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  DELUXEVERSION='1.4.0s';
+  DELUXEVERSION='1.4.0t';
 
 resourcestring
   CrossGCCMsg =
@@ -684,6 +684,9 @@ begin
         x:=Pos('80 bit extended floating point',LowerCase(s));
         if x>0 then
         begin
+          //Memo1.Lines.Append('Please use trunk that has 80-bit float type using soft float unit.');
+          //Memo1.Lines.Append('FPC revisions 37294 - 37306 add this soft float feature.');
+          //Memo1.Lines.Append('So update your FPC trunk to a revision > 37306 !!');
           Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
           Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
         end;
@@ -755,6 +758,15 @@ begin
   if (ExistWordInString(PChar(s),'found correct',[soDown])) then
   begin
     Memo1.Lines.Append(s);
+  end;
+
+  if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
+  begin
+    if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
+    begin
+      // repeat fpcupdeluxe warning
+      Memo1.Lines.Append(s);
+    end;
   end;
 
   // go back a few lines to find a special error case
@@ -1510,7 +1522,7 @@ begin
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin
         //FPCupManager.CrossOPT:='-Cppic32 ';
-        //FPCupManager.CrossOPT:='-Cpmips32 ';
+        FPCupManager.CrossOPT:='-Cpmips32 -Wppic32mx110f016b';
         FPCupManager.CrossOS_SubArch:='pic32mx';
       end;
     end;

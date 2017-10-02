@@ -1386,7 +1386,7 @@ begin
 end;
 {$ENDIF UNIX}
 
-function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+function CheckExecutable(Executable, Parameters, ExpectOutput: string; Level: TEventType): boolean;
 var
   ResultCode: longint;
   OperationSucceeded: boolean;
@@ -1403,7 +1403,7 @@ begin
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
         infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
-          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',etError);
+          ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
         OperationSucceeded := false;
       end
       else
@@ -1415,14 +1415,14 @@ begin
     else
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etError);
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
       OperationSucceeded := false;
     end;
   except
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', etError);
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
       OperationSucceeded := false;
     end;
   end;
@@ -1431,6 +1431,10 @@ begin
   Result := OperationSucceeded;
 end;
 
+function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
+begin
+  result:=CheckExecutable(Executable, Parameters, ExpectOutput, etInfo);
+end;
 
 function ExtractFileNameOnly(const AFilename: string): string;
 var

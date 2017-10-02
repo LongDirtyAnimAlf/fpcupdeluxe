@@ -2,25 +2,29 @@ object Form2: TForm2
   Left = 412
   Height = 644
   Top = 133
-  Width = 746
+  Width = 756
   Caption = 'Advanced settings'
   ClientHeight = 644
-  ClientWidth = 746
+  ClientWidth = 756
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poMainFormCenter
   LCLVersion = '1.9.0.0'
   object GroupBox1: TGroupBox
+    AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
+    AnchorSideRight.Control = GroupBoxCompileOptions
     Left = 8
     Height = 128
     Top = 8
-    Width = 320
+    Width = 324
     Anchors = [akTop, akLeft, akRight]
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
     Caption = 'Proxy settings'
     ClientHeight = 108
-    ClientWidth = 316
+    ClientWidth = 320
     TabOrder = 0
     object Label1: TLabel
       AnchorSideLeft.Control = GroupBox1
@@ -43,7 +47,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 23
-      Width = 192
+      Width = 210
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -55,25 +59,26 @@ object Form2: TForm2
       AnchorSideTop.Control = Label1
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 208
+      Left = 226
       Height = 15
       Top = 4
       Width = 90
       Anchors = [akTop, akRight]
       BorderSpacing.Left = 10
-      BorderSpacing.Right = 18
+      BorderSpacing.Right = 4
       Caption = 'HTTP proxy port:'
       ParentColor = False
     end
     object EditHTTPProxyPort: TEdit
       AnchorSideLeft.Control = Label2
       AnchorSideTop.Control = EditHTTPProxyHost
+      AnchorSideRight.Control = Label2
       AnchorSideRight.Side = asrBottom
-      Left = 208
+      Left = 226
       Height = 23
       Top = 23
       Width = 90
-      BorderSpacing.Right = 6
+      Anchors = [akTop, akLeft, akRight]
       NumbersOnly = True
       TabOrder = 1
     end
@@ -107,40 +112,46 @@ object Form2: TForm2
       AnchorSideTop.Control = Label3
       AnchorSideRight.Control = GroupBox1
       AnchorSideRight.Side = asrBottom
-      Left = 166
+      Left = 198
       Height = 15
       Top = 54
       Width = 118
       Anchors = [akTop, akRight]
-      BorderSpacing.Left = 29
-      BorderSpacing.Right = 32
+      BorderSpacing.Right = 4
       Caption = 'HTTP proxy password:'
       ParentColor = False
     end
     object EditHTTPProxyPassword: TEdit
       AnchorSideLeft.Control = Label4
       AnchorSideTop.Control = EditHTTPProxyUser
-      Left = 166
+      AnchorSideRight.Control = Label4
+      AnchorSideRight.Side = asrBottom
+      Left = 198
       Height = 23
       Top = 73
-      Width = 140
+      Width = 118
+      Anchors = [akTop, akLeft, akRight]
       EchoMode = emPassword
       PasswordChar = '*'
       TabOrder = 3
     end
   end
   object GroupBox2: TGroupBox
+    AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = GroupBox1
     AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = GroupBox4
     Left = 8
-    Height = 416
+    Height = 400
     Top = 144
-    Width = 320
-    Anchors = [akTop, akLeft, akBottom]
+    Width = 410
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
     Caption = 'Miscellaneous settings'
-    ClientHeight = 396
-    ClientWidth = 316
+    ClientHeight = 380
+    ClientWidth = 406
     TabOrder = 1
     object CheckRepo: TCheckBox
       AnchorSideLeft.Control = GroupBox2
@@ -330,15 +341,18 @@ object Form2: TForm2
     AnchorSideLeft.Control = GroupBox2
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = GroupBox2
-    Left = 336
-    Height = 416
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 426
+    Height = 400
     Top = 144
-    Width = 296
-    Anchors = [akTop, akLeft, akBottom]
+    Width = 320
+    Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
+    BorderSpacing.Right = 10
     Caption = 'Cross tools location and build options'
-    ClientHeight = 396
-    ClientWidth = 292
+    ClientHeight = 380
+    ClientWidth = 316
     TabOrder = 2
     object ComboBoxOS: TComboBox
       AnchorSideLeft.Control = ComboBoxCPU
@@ -379,7 +393,7 @@ object Form2: TForm2
       Left = 4
       Height = 58
       Top = 38
-      Width = 274
+      Width = 298
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
       BorderSpacing.Left = 4
@@ -394,7 +408,7 @@ object Form2: TForm2
       ChildSizing.Layout = cclLeftToRightThenTopToBottom
       ChildSizing.ControlsPerLine = 3
       ClientHeight = 38
-      ClientWidth = 270
+      ClientWidth = 294
       Columns = 3
       Enabled = False
       ItemIndex = 0
@@ -414,7 +428,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 100
-      Width = 188
+      Width = 212
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
@@ -431,7 +445,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Top = 129
-      Width = 188
+      Width = 212
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -446,7 +460,7 @@ object Form2: TForm2
       AnchorSideTop.Control = EditLibLocation
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 204
+      Left = 228
       Height = 23
       Top = 100
       Width = 74
@@ -464,7 +478,7 @@ object Form2: TForm2
       AnchorSideTop.Control = EditBinLocation
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
-      Left = 204
+      Left = 228
       Height = 23
       Top = 129
       Width = 74
@@ -480,12 +494,16 @@ object Form2: TForm2
       AnchorSideLeft.Control = GroupBox4
       AnchorSideTop.Control = LabelCrossBuildOptions
       AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
       Top = 183
-      Width = 274
+      Width = 298
+      Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
+      BorderSpacing.Right = 14
       Enabled = False
       OnChange = EditCrossBuildOptionsChange
       TabOrder = 7
@@ -510,7 +528,7 @@ object Form2: TForm2
       Left = 216
       Height = 23
       Top = 8
-      Width = 62
+      Width = 86
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Right = 14
       Caption = 'List'
@@ -534,12 +552,16 @@ object Form2: TForm2
       AnchorSideLeft.Control = GroupBox4
       AnchorSideTop.Control = LabelCrossSubArch
       AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
       Top = 231
-      Width = 274
+      Width = 298
+      Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
+      BorderSpacing.Right = 14
       Enabled = False
       OnChange = EditCrossSubArchChange
       TabOrder = 9
@@ -549,15 +571,19 @@ object Form2: TForm2
     AnchorSideLeft.Control = GroupBoxCompileOptions
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
-    Left = 486
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    Left = 490
     Height = 128
     Top = 8
-    Width = 250
+    Width = 258
+    Anchors = [akTop, akRight]
     BorderSpacing.Left = 8
     BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
     Caption = 'FPC/Laz branch and revision'
     ClientHeight = 108
-    ClientWidth = 246
+    ClientWidth = 254
     TabOrder = 3
     object EditFPCBranch: TEdit
       AnchorSideLeft.Control = LabelFPCbranch
@@ -650,12 +676,14 @@ object Form2: TForm2
     AnchorSideLeft.Control = GroupBox1
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = Owner
-    Left = 336
+    AnchorSideRight.Control = GroupBoxFPCLazBranchRevision
+    Left = 340
     Height = 128
     Top = 8
     Width = 142
-    BorderSpacing.Left = 8
+    Anchors = [akTop, akRight]
     BorderSpacing.Top = 8
+    BorderSpacing.Right = 8
     Caption = 'Options Override'
     ClientHeight = 108
     ClientWidth = 138
@@ -705,6 +733,7 @@ object Form2: TForm2
     end
   end
   object ListBoxFPCPatch: TListBox
+    AnchorSideLeft.Control = Owner
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
     Left = 8
@@ -712,6 +741,7 @@ object Form2: TForm2
     Top = 574
     Width = 176
     Anchors = [akLeft, akBottom]
+    BorderSpacing.Left = 8
     BorderSpacing.Bottom = 11
     ClickOnSelChange = False
     ExtendedSelect = False
@@ -793,7 +823,7 @@ object Form2: TForm2
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Owner
     AnchorSideBottom.Side = asrBottom
-    Left = 640
+    Left = 650
     Height = 89
     Top = 547
     Width = 98

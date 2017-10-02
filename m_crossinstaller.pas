@@ -159,6 +159,8 @@ end;
 
 procedure TCrossInstaller.AddFPCCFGSnippet(aSnippet: string);
 begin
+  if Length(Trim(aSnippet))=0 then exit;
+  if (Pos(aSnippet+' ',FFPCCFGSnippet)>0) OR (Pos(aSnippet+LineEnding,FFPCCFGSnippet)>0) then exit; // already there: skip
   if Length(FPCCFGSnippet)>0 then
   begin
     if RPos(LineEnding,FFPCCFGSnippet)<Length(FFPCCFGSnippet) then FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding;
@@ -325,13 +327,7 @@ begin
 
   // Add user-selected CROSSOPT to fpc.cfg snippet
   // Descendents can add more fpc.cfg snippets but shouldn't remove what the user chose
-  for i:=0 to FCrossOpts.Count-1 do
-  begin
-    if i<FCrossOpts.Count-1 then
-      FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i]+LineEnding
-    else
-      FFPCCFGSnippet:=FFPCCFGSnippet+FCrossOpts[i];
-  end;
+  for i:=0 to FCrossOpts.Count-1 do AddFPCCFGSnippet(FCrossOpts[i]);
   FCrossOptsAdded:=true;
 end;
 
@@ -383,10 +379,8 @@ begin
   FTargetOS:='Error: cross compiler extension must set FTargetOS: operating system for the target environment. Follows FPC names';
   FSubArch:='';
   FCrossModuleNamePrefix:='TAny';
-
   FLibsFound:=false;
   FBinsFound:=false;
-
   FCrossOptsAdded:=false;
 end;
 

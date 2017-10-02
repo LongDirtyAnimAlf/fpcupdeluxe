@@ -142,7 +142,7 @@ begin
   // Also allow for outdated naming
   if (not result) then
   begin
-    BinPrefixTry:='msdos-';
+    BinPrefixTry:=OS+'-';
     AsFile:=BinPrefixTry+'nasm'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -159,31 +159,33 @@ begin
     if StringListStartsWith(FCrossOpts,'-Wm')=-1 then
     begin
       // -WmSmall, -WmTiny, -WmMedium, -WmCompact, -WmLarge, -WmHuge
-      ShowInfo('This compiler requires -Wm (memory model) !',etInfo);
+      ShowInfo('This compiler requires -Wm (memory model) !',etWarning);
       {$IFDEF DARWIN}
-      ShowInfo('Added -WmLarge to CROSSOPT.',etInfo);
+      ShowInfo('Added -WmLarge to CROSSOPT.',etWarning);
       FCrossOpts.Add('-WmLarge');
       {$ELSE}
-      ShowInfo('Added -WmMedium to CROSSOPT.',etInfo);
+      ShowInfo('Added -WmMedium to CROSSOPT.',etWarning);
       FCrossOpts.Add('-WmMedium');
       {$ENDIF DARWIN}
     end;
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then
     begin
-      ShowInfo('This compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etInfo);
+      ShowInfo('This compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etWarning);
       FCrossOpts.Add('-CX');
     end;
-    if StringListStartsWith(FCrossOpts,'-XXs')=-1 then
+    if (StringListStartsWith(FCrossOpts,'-XXs')=-1) OR (StringListStartsWith(FCrossOpts,'-XX')=-1) then
     begin
-      ShowInfo('This compiler requires -XXs (smartlinking). Added it to CROSSOPT.',etInfo);
-      FCrossOpts.Add('-CX');
+      ShowInfo('This compiler requires -XX (smartlinking). Added it (and stripping) to CROSSOPT.',etWarning);
+      FCrossOpts.Add('-XX');
+      FCrossOpts.Add('-Xs');
     end;
 
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix+LineEnding+ {Prepend the binutils names}
-    '-XX'+LineEnding+ {Smartlink}
-    '-CX'+LineEnding; {Smartlink libraries}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));{search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);{Prepend the binutils names}
+    // these are required ... see above.
+    AddFPCCFGSnippet('-XX');{Smartlink}
+    AddFPCCFGSnippet('-CX');{Smartlink libraries}
+    AddFPCCFGSnippet('-Xs');{Strip}
   end
   else
   begin

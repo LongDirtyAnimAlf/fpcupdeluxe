@@ -135,7 +135,7 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
-  // Now also allow for mipsel- binutilsprefix
+  // Now also allow for pic32- binutilsprefix
   if not result then
   begin
     BinPrefixTry:='pic32-';
@@ -145,6 +145,15 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  // Now also allow for xc32- binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:='xc32-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
 
   // Now also allow for empty binutilsprefix:
   if not result then

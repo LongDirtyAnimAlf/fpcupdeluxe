@@ -36,6 +36,11 @@ uses
   Classes, SysUtils, m_crossinstaller;
 
 implementation
+
+const
+  ARCH='i386';
+  OS='win32';
+
 type
 
 { TWin32 }
@@ -74,13 +79,13 @@ end;
 constructor TWin32.Create;
 begin
   inherited Create;
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
   FCrossModuleNamePrefix:='TWin64';
   FBinUtilsPath:=''; //override parent that has a warning text here
   FBinUtilsPrefix:=''; //override parent that has a warning text here
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='win32';
   ShowInfo;
 end;
 
