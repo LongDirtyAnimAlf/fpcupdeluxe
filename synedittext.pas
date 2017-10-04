@@ -87,7 +87,7 @@ begin
            OR (AnsiContainsText(line,'fpcupdeluxe:'))
            OR (AnsiContainsText(line,'execute:'))
            OR (AnsiContainsText(line,'executing:'))
-           OR (AnsiContainsText(line,'compiling '))
+           OR ((AnsiContainsText(line,'compiling ')) AND (NOT AnsiContainsText(line,'when compiling target')))
            OR (AnsiContainsText(line,'linking '))
         then
         begin
@@ -113,14 +113,14 @@ begin
         if AnsiContainsText(line,'Copyright (c) 1993-') then break;
         if AnsiContainsText(line,'Free Pascal Compiler version ') then break;
 
-        if AnsiContainsText(line,'warning: ') then
+        if AnsiContainsText(line,'Warning: ') then
         begin
           if AnsiContainsText(line,'is not portable') then break;
           if AnsiContainsText(line,'is deprecated') then break;
           if AnsiContainsText(line,'implicit string type conversion') then break;
           if AnsiContainsText(line,'function result does not seem to be set') then break;
           if AnsiContainsText(line,'comparison might be always') then break;
-          if AnsiContainsText(line,'unreachable code') then break;
+          //if AnsiContainsText(line,'unreachable code') then break;
           if AnsiContainsText(line,'converting pointers to signed integers') then break;
           if AnsiContainsText(line,'does not seem to be initialized') then break;
           if AnsiContainsText(line,'an inherited method is hidden') then break;
@@ -139,7 +139,9 @@ begin
           if AnsiContainsText(line,'not yet supported inside inline procedure/function') then break;
           if AnsiContainsText(line,'Check size of memory operand') then break;
           if AnsiContainsText(line,'User defined: TODO') then break;
-          if AnsiContainsText(line,'Circular dependency detected') then break;
+          if AnsiContainsText(line,'Circular dependency detected when compiling target') then break;
+          if AnsiContainsText(line,'overriding recipe for target') then break;
+          if AnsiContainsText(line,'ignoring old recipe for target') then break;
           // when generating help
           if AnsiContainsText(line,'is unknown') then break;
           {$ifdef MSWINDOWS}

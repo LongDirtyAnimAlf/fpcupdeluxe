@@ -82,9 +82,10 @@ begin
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
   FCrossModuleNamePrefix:='TWin64';
-  FBinUtilsPath:=''; //override parent that has a warning text here
-  FBinUtilsPrefix:=''; //override parent that has a warning text here
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  FCompilerUsed:=ctInstalled; // use installed due to potential availability of (needed) softfloat in starting compiler
+  FBinUtilsPath:='';
+  FBinUtilsPrefix:='';
+  FFPCCFGSnippet:='';
   FLibsPath:='';
   ShowInfo;
 end;

@@ -168,6 +168,9 @@ begin
       FCrossOpts.Add('-WmMedium');
       {$ENDIF DARWIN}
     end;
+
+    // Always use smartlinking on i8086, because the system unit exceeds the 64kb code limit
+
     if StringListStartsWith(FCrossOpts,'-CX')=-1 then
     begin
       ShowInfo('This compiler requires -CX (create smartlinked libraries). Added it to CROSSOPT.',etWarning);

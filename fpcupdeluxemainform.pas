@@ -848,9 +848,16 @@ begin
     Special := True;
   end;
 
-  if (NOT Special) AND ((ExistWordInString(PChar(s),'warning:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'hint:',[soWholeWord,soDown]))) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'hint:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'note:',[soWholeWord,soDown]))) then
   begin
     FG      := clGreen;
+    BG      := clBlack;
+    Special := True;
+  end;
+
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'warning:',[soWholeWord,soDown]))) then
+  begin
+    FG      := clMaroon;
     BG      := clBlack;
     Special := True;
   end;
@@ -2160,6 +2167,12 @@ begin
 
   MissingCrossBins:=false;
   MissingCrossLibs:=false;
+
+  {$ifdef win64}
+  FPCupManager.NoJobs:=true;
+  {$else}
+  FPCupManager.NoJobs:=false;
+  {$endif}
 
   FPCupManager.OnlyModules:='';
   FPCupManager.IncludeModules:='';
