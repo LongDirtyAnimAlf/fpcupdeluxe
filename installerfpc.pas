@@ -533,12 +533,16 @@ begin
         Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
         Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
         {$ENDIF}
-        // Don't really know if this is necessary, but it can't hurt:
-        // Override makefile checks that checks for stable compiler in FPC trunk
-        if FBootstrapCompilerOverrideVersionCheck then
-           Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-        //putting all before target might help!?!?
 
+        // will not happen often but if the compiler version is too low, add override
+        if (CompareVersionStrings(GetCompilerVersion(ChosenCompiler),GetBootstrapCompilerVersionFromSource(FSourceDirectory,True))<0) then
+        begin
+          infoln(infotext+'OVERRIDEVERSIONCHECK needed for building of cross-compiler. Very strange.',etError);
+          infoln(infotext+'The building process will continue, but results may be unexpected.',etError);
+          Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
+        end;
+
+        //putting all before target might help!?!?
         if (CrossInstaller.TargetCPU='mipsel') AND (CrossInstaller.TargetOS='embedded') then
         begin
           //This builds only the compiler and the RTL
@@ -2042,8 +2046,7 @@ begin
   // trust the previous work done by this code for the native installer!
   if (NOT (Self is TFPCCrossInstaller)) then
   begin
-
-  RequiredBootstrapVersion:='0.0.0';
+    RequiredBootstrapVersion:='0.0.0';
     RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,True);
     RequiredBootstrapVersionHigh:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,False);
 
@@ -2375,7 +2378,7 @@ begin
       fpChmod(FCompiler,&755);
     end;
     {$endif darwin}
-  end;
+  end;//(NOT (Self is TFPCCrossInstaller))
 
   // Now: the real build of FPC !!!
   OperationSucceeded:=BuildModuleCustom(ModuleName);
