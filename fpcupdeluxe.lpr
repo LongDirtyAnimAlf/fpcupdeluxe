@@ -22,7 +22,7 @@ program fpcupdeluxe;
 
 {$IFDEF FPC_CROSSCOMPILING}
   {$IFDEF LINUX}
-    {$linklib libc_nonshared.a}
+    //{$linklib libc_nonshared.a}
     {$IFDEF CPUARM}
       // for RPi with Arch Linux
       //{$linklib GLESv2}

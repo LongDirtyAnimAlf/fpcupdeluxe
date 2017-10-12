@@ -29,9 +29,10 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
 {$mode objfpc}{$H+}
+(*
 {Define NOCONSOLE e.g. if using Windows GUI {$APPTYPE GUI} or -WG
 this will disable writeln calls
-}
+*)
 {not $DEFINE NOCONSOLE}
 
 interface
@@ -171,7 +172,7 @@ Const
     'Do UniversalDefaultClean;'+
     {$endif}
     'End;'+
-    {
+    (*
 // Currently, make distclean LCL removes lazbuild.exe/lazarus.exe as well
 // Then, universal installer won't work because of missing lazbuild, and of
 // course Lazarus won't work either.
@@ -205,7 +206,7 @@ Const
     'Cleanmodule lazarus;'+
     {$endif}
     'End;'+
-    }
+    *)
 
 //default uninstall sequence
     'Declare defaultuninstall;'+
@@ -651,19 +652,10 @@ type
 
 implementation
 
-{$IFDEF DEBUG}
-uses
-  {$ifdef linux}
-  processutils,
-  {$endif}
-  typinfo;
-{$ELSE}
 {$ifdef linux}
 uses
   processutils;
 {$endif}
-
-{$ENDIF DEBUG}
 
 { TFPCupManager }
 
@@ -1247,7 +1239,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
   end;
   {$else} //stub for other platforms for now
-  function CheckDevLibs(LCLPlatform: string): boolean;
+  function CheckDevLibs({%H-}LCLPlatform: string): boolean;
   begin
     result:=true;
   end;
@@ -1759,7 +1751,7 @@ begin
       //For debugging state machine sequence:
       {$IFDEF DEBUG}
       infoln(localinfotext+'State machine running sequence '+SequenceName,etDebug);
-      infoln(localinfotext+'State machine [instr]: '+GetEnumName(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr)),etDebug);
+      infoln(localinfotext+'State machine [instr]: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr)),etDebug);
       infoln(localinfotext+'State machine [param]: '+FStateMachine[InstructionPointer].param,etDebug);
       {$ENDIF DEBUG}
       case FStateMachine[InstructionPointer].instr of
@@ -1789,21 +1781,20 @@ begin
       if not result then
         begin
         SeqAttr^.Executed:=ESFailed;
-        {$IFDEF DEBUG}
         FParent.WritelnLog(etError,localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName+
+          '; instr: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr))+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
           ', param: '+FStateMachine[InstructionPointer].param);
-        {$ENDIF DEBUG}
         CleanUpInstaller;
         exit; //failure, bail out
         end;
       InstructionPointer:=InstructionPointer+1;
       if InstructionPointer>=length(FStateMachine) then  //somebody forgot end
-        begin
+      begin
         SeqAttr^.Executed:=ESSucceeded;
         CleanUpInstaller;
         exit; //success
-        end;
+      end;
       end;
     end
   else
