@@ -118,6 +118,7 @@ object Form1: TForm1
       'embedded'
       'java'
       'msdos'
+      'haiku'
     )
     OnClick = RadioGroup2Click
     ParentShowHint = False

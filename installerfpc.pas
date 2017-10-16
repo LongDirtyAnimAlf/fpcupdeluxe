@@ -667,6 +667,7 @@ begin
         {$endif}
 
         {$if not defined(FPC_HAS_TYPE_EXTENDED)}
+        (*
         // soft 80 bit float if available
         if (CrossInstaller.TargetCPU='i386') OR ((CrossInstaller.TargetCPU='i8086')) then
         begin
@@ -677,6 +678,7 @@ begin
           Options:=Options+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\inc';
           Options:=Options+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
         end;
+        *)
         {$endif}
 
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
@@ -958,6 +960,7 @@ begin
 
   {$if not defined(FPC_HAS_TYPE_EXTENDED)}
   // soft 80 bit float if available
+  (*
   infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support.',etInfo);
   s:=s+' -dFPC_SOFT_FPUX80';
   // needed at this moment ... the makefile is yet to be adjusted
@@ -968,6 +971,7 @@ begin
   s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\systems';
   s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\inc';
   s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
+  *)
   {$endif}
 
   Processor.Parameters.Add('OPT='+s);
@@ -1690,7 +1694,7 @@ begin
 
     if FUseWget
        then aDownLoader:=TWGetDownLoader.Create
-       else aDownLoader:=TNativeDownLoader.Create;
+       {$ifndef Haiku}else aDownLoader:=TNativeDownLoader.Create{$endif};
 
     try
 

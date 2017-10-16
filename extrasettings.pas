@@ -14,7 +14,7 @@ Const
 
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mipsel,avr,jvm,i8086);
-  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos,haiku);
 
   TCPUOS = record
     CPU:TCPU;
@@ -499,6 +499,7 @@ begin
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
         if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android)) then continue;
         if (CPU=avr) AND (OS<>embedded) then continue;
+        if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
 
         s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));

@@ -202,6 +202,14 @@ begin
       +'-qt5'
       {$endif}
     {$endif}
+    {$ifdef Haiku}
+      {$ifdef LCLQT}
+      +'-qt'
+      {$endif}
+      {$ifdef LCLQT5}
+      +'-qt5'
+      {$endif}
+    {$endif}
     ;
 
   sStatus:='Sitting and waiting';
@@ -684,11 +692,11 @@ begin
         x:=Pos('80 bit extended floating point',LowerCase(s));
         if x>0 then
         begin
-          //Memo1.Lines.Append('Please use trunk that has 80-bit float type using soft float unit.');
-          //Memo1.Lines.Append('FPC revisions 37294 - 37306 add this soft float feature.');
-          //Memo1.Lines.Append('So update your FPC trunk to a revision > 37306 !!');
-          Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
-          Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
+          Memo1.Lines.Append('Please use trunk that has 80-bit float type using soft float unit.');
+          Memo1.Lines.Append('FPC revisions 37294 - 37306 add this soft float feature.');
+          Memo1.Lines.Append('So update your FPC trunk to a revision > 37306 !!');
+          //Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
+          //Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
         end;
       end;
     end
@@ -1700,6 +1708,13 @@ begin
           if FPCupManager.CrossCPU_Target='i8086' then BinsURL:='MSDosi8086.zip';
         end;
 
+        if FPCupManager.CrossOS_Target='haiku' then
+        begin
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Haikui386.zip';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Haikux64.zip';
+        end;
+
+
         // normally, we have the same names for libs and bins URL
         LibsURL:=BinsURL;
 
@@ -2281,6 +2296,15 @@ begin
     {$endif}
   {$endif}
 
+  {$ifdef Haiku}
+    {$ifdef LCLQT}
+      FPCupManager.CrossLCL_Platform:='qt';
+    {$endif}
+    {$ifdef LCLQT5}
+      FPCupManager.CrossLCL_Platform:='qt5';
+    {$endif}
+  {$endif}
+
   RealFPCURL.Text:='';
   RealLazURL.Text:='';
 
@@ -2423,6 +2447,9 @@ begin
     {$ifdef Darwin}
     Form2.UseWget:=False;
     {$else}
+      {$ifdef Haiku}
+      Form2.UseWget:=True;
+      {$endif}
       {$ifdef MSWINDOWS}
       Form2.UseWget:=False;
       {$else}

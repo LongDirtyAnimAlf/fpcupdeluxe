@@ -60,6 +60,10 @@ const
   {$ifdef Darwin}
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
   {$endif}
+  {$ifdef Haiku}
+  FPCUPBINSURL='';
+  {$endif}
+
   FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
 
   FPCTRUNKVERSION  = '3.1.1';
@@ -305,11 +309,13 @@ type
 implementation
 
 uses
-  FileUtil, LazFileUtils, LazUTF8,
-  ssl_openssl
+  FileUtil, LazFileUtils, LazUTF8
+  {$ifndef Haiku}
+  ,ssl_openssl
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
   ,blcksock, ssl_openssl_lib
+  {$ENDIF}
   {$ENDIF}
   ;
 

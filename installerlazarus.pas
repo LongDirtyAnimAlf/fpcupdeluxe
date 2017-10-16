@@ -494,6 +494,14 @@ begin
               {$endif}
             {$endif}
           {$endif}
+          {$ifdef Haiku}
+            {$ifdef LCLQT}
+              NothingToBeDone:=(FCrossLCL_Platform='qt');
+            {$endif}
+            {$ifdef LCLQT5}
+              NothingToBeDone:=(FCrossLCL_Platform='qt5');
+            {$endif}
+          {$endif}
         end;
         if (NOT NothingToBeDone) then
         begin

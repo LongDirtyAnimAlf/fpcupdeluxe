@@ -164,7 +164,7 @@ type
     function checkURL(const URL:string):boolean;virtual;abstract;
   end;
 
-
+  {$ifndef Haiku}
   TUseNativeDownLoader = Class(TBasicDownLoader)
   private
     aFPHTTPClient:TFPHTTPClient;
@@ -185,6 +185,7 @@ type
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
+  {$endif}
 
   {$IFDEF ENABLEWGET}
   TUseWGetDownloader = Class(TBasicDownLoader)
@@ -206,7 +207,9 @@ type
 
   {$ENDIF}
 
+  {$ifndef Haiku}
   TNativeDownloader = TUseNativeDownLoader;
+  {$endif}
   {$IFDEF Darwin}
   TWGetDownloader = TUseNativeDownLoader;
   {$else}
@@ -303,7 +306,11 @@ uses
   {$endif}
   IniFiles,
   DOM,DOM_HTML,SAX_HTML,
+  {$ifndef Haiku}
   ftpsend {for downloading from ftp},
+  {$else}
+  ftplist,
+  {$endif}
   FileUtil, LazFileUtils, LazUTF8,
   uriparser
   {$IFDEF MSWINDOWS}
@@ -1019,7 +1026,7 @@ begin
   result:=false;
   if UseWget
      then aDownLoader:=TWGetDownLoader.Create
-     else aDownLoader:=TNativeDownLoader.Create;
+     {$ifndef Haiku}else aDownLoader:=TNativeDownLoader.Create{$endif};
   try
     result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   finally
@@ -1990,6 +1997,7 @@ begin
   end;
 end;
 
+{$ifndef Haiku}
 constructor TUseNativeDownLoader.Create;
 begin
   Inherited;
@@ -2320,6 +2328,7 @@ begin
   else if CompareText(P,'https')=0 then
     result:=HTTPDownload(URL,filename);
 end;
+{$endif}
 
 
 {$IFDEF ENABLEWGET}
