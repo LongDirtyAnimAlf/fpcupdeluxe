@@ -20,11 +20,11 @@ type
     BitBtnFPCOnly: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
     AutoCrossUpdate: TButton;
-    Button7: TButton;
-    Button8: TButton;
+    btnSetupPlus: TButton;
+    btnClearLog: TButton;
     CheckAutoClear: TCheckBox;
     MainMenu1: TMainMenu;
-    Memo1: TMemo;
+    memoSummary: TMemo;
     MenuItem1: TMenuItem;
     StatusMessage: TEdit;
     TrunkBtn: TBitBtn;
@@ -35,8 +35,8 @@ type
     DinoBtn: TBitBtn;
     FeaturesBtn: TBitBtn;
     mORMotBtn: TBitBtn;
-    Button2: TButton;
-    Button3: TButton;
+    btnInstallModule: TButton;
+    btnInstallDirSelect: TButton;
     ButtonInstallCrossCompiler: TButton;
     InstallDirEdit: TEdit;
     Panel1: TPanel;
@@ -45,9 +45,9 @@ type
     LazarusVersionLabel: TLabel;
     ListBoxFPCTarget: TListBox;
     ListBoxLazarusTarget: TListBox;
-    ListBox3: TListBox;
-    RadioGroup1: TRadioGroup;
-    RadioGroup2: TRadioGroup;
+    listModules: TListBox;
+    radgrpCPU: TRadioGroup;
+    radgrpOS: TRadioGroup;
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     SynEdit1: TSynEdit;
@@ -55,12 +55,12 @@ type
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
-    procedure Button3Click(Sender: TObject);
+    procedure btnInstallModuleClick(Sender: TObject);
+    procedure btnInstallDirSelectClick(Sender: TObject);
     procedure ButtonInstallCrossCompilerClick(Sender: TObject);
     procedure FPCOnlyClick(Sender: TObject);
-    procedure Button7Click(Sender: TObject);
-    procedure Button8Click(Sender: TObject);
+    procedure btnSetupPlusClick(Sender: TObject);
+    procedure btnClearLogClick(Sender: TObject);
     procedure ButtonAutoUpdateCrossCompiler(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -71,8 +71,8 @@ type
       var Special: boolean; Markup: TSynSelectedColor);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click(Sender: TObject);
-    procedure RadioGroup1Click(Sender: TObject);
-    procedure RadioGroup2Click(Sender: TObject);
+    procedure radgrpCPUClick(Sender: TObject);
+    procedure radgrpOSClick(Sender: TObject);
     procedure SynEdit1MouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
@@ -115,9 +115,9 @@ uses
   IniFiles,
   strutils,
   LCLType, // for MessageBox
-  {$IFDEF UNIX}
+  {$ifdef UNIX}
   baseunix,
-  {$ENDIF UNIX}
+  {$endif UNIX}
   //LazFileUtils,
   AboutFrm,
   extrasettings,
@@ -160,21 +160,22 @@ begin
   StableBtn.Enabled:=False;
   OldBtn.Enabled:=False;
   DinoBtn.Enabled:=False;
-  RadioGroup1.Enabled:=False;
-  RadioGroup2.Enabled:=False;
   ButtonInstallCrossCompiler.Enabled:=False;
   {$endif CPUAARCH64}
   {$ifdef CPUARM}
   // disable some features
   FixesBtn.Enabled:=False;
   StableBtn.Enabled:=False;
-  RadioGroup1.Enabled:=False;
-  RadioGroup2.Enabled:=False;
+  OldBtn.Enabled:=False;
+  DinoBtn.Enabled:=False;
   ButtonInstallCrossCompiler.Enabled:=False;
   {$endif CPUARM}
 
+  radgrpCPU.Enabled:=ButtonInstallCrossCompiler.Enabled;
+  radgrpOS.Enabled:=ButtonInstallCrossCompiler.Enabled;
+
   {$ifdef Darwin}
-  RadioGroup2.Items.Strings[RadioGroup2.Items.IndexOf('wince')]:='i-sim';
+  radgrpOS.Items.Strings[radgrpOS.Items.IndexOf('wince')]:='i-sim';
   {$endif Darwin}
 
   oldoutput := System.Output;
@@ -364,17 +365,17 @@ begin
   begin
 
     CheckAutoClearStore:=CheckAutoClear.Checked;
-    if CheckAutoClearStore then Button8.Click;
+    if CheckAutoClearStore then btnClearLog.Click;
     CheckAutoClear.Checked:=false;
 
-    Memo1.Lines.Append('Going to auto-build all installed cross-compilers !');
-    Memo1.Lines.Append('Checking FPC configfile [fpc.cfg] for cross-compilers in ' + BinPath);
-    Memo1.Lines.Append('');
+    memoSummary.Lines.Append('Going to auto-build all installed cross-compilers !');
+    memoSummary.Lines.Append('Checking FPC configfile [fpc.cfg] for cross-compilers in ' + BinPath);
+    memoSummary.Lines.Append('');
 
   end
   else
   begin
-    Memo1.Clear;
+    memoSummary.Clear;
   end;
 
   ConfigText:=TStringList.Create;
@@ -423,15 +424,15 @@ begin
           if (Sender<>nil) then
           begin
             SynEdit1.Clear;
-            Memo1.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-            Memo1.Lines.Append('Going to update cross-compiler.');
-            RadioGroup1.ItemIndex:=RadioGroup1.Items.IndexOf(aRadiogroup_CPU);
-            RadioGroup2.ItemIndex:=RadioGroup2.Items.IndexOf(aRadiogroup_OS);
+            memoSummary.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+            memoSummary.Lines.Append('Going to update cross-compiler.');
+            radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
+            radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
             success:=InstallCrossCompiler(nil);
             if success
-              then Memo1.Lines.Append('Cross-compiler update ok.')
-              else Memo1.Lines.Append('Failure during update of cross-compiler !!');
-            Memo1.Lines.Append('');
+              then memoSummary.Lines.Append('Cross-compiler update ok.')
+              else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
+            memoSummary.Lines.Append('');
           end;
         end;
       end;
@@ -439,8 +440,8 @@ begin
 
     if (Sender<>nil) then
     begin
-      RadioGroup1.ItemIndex:=-1;
-      RadioGroup2.ItemIndex:=-1;
+      radgrpCPU.ItemIndex:=-1;
+      radgrpOS.ItemIndex:=-1;
       CheckAutoClear.Checked:=CheckAutoClearStore;
     end;
 
@@ -472,7 +473,7 @@ begin
 
   FPCupManager.PatchCmd:='patch';
 
-  if listbox3.Count=0 then
+  if listModules.Count=0 then
   begin
     SortedModules:=TStringList.Create;
     try
@@ -492,7 +493,7 @@ begin
           SortedModules.Add(s);
         end;
       end;
-      listbox3.Items.AddStrings(SortedModules);
+      listModules.Items.AddStrings(SortedModules);
 
     finally
       SortedModules.Free;
@@ -543,28 +544,28 @@ begin
   ShowAboutForm;
 end;
 
-procedure TForm1.RadioGroup1Click(Sender: TObject);
+procedure TForm1.radgrpCPUClick(Sender: TObject);
 begin
-  if (RadioGroup1.ItemIndex<>-1) then
+  if (radgrpCPU.ItemIndex<>-1) then
   begin
-  if (RadioGroup1.Items[RadioGroup1.ItemIndex]='i8086') then
+  if (radgrpCPU.Items[radgrpCPU.ItemIndex]='i8086') then
     begin
-      RadioGroup2.ItemIndex:=-1;
-      RadioGroup2.Enabled:=false;
+      radgrpOS.ItemIndex:=-1;
+      radgrpOS.Enabled:=false;
     end
-    else RadioGroup2.Enabled:=true;
+    else radgrpOS.Enabled:=true;
   end
 end;
 
-procedure TForm1.RadioGroup2Click(Sender: TObject);
+procedure TForm1.radgrpOSClick(Sender: TObject);
 begin
-  if (RadioGroup2.ItemIndex<>-1) then
+  if (radgrpOS.ItemIndex<>-1) then
   begin
-    if (RadioGroup2.Items[RadioGroup2.ItemIndex]='java') OR (RadioGroup2.Items[RadioGroup2.ItemIndex]='msdos') then
+    if (radgrpOS.Items[radgrpOS.ItemIndex]='java') OR (radgrpOS.Items[radgrpOS.ItemIndex]='msdos') then
     begin
-      RadioGroup1.ItemIndex:=-1;
-      RadioGroup1.Enabled:=false;
-    end else RadioGroup1.Enabled:=true;
+      radgrpCPU.ItemIndex:=-1;
+      radgrpCPU.Enabled:=false;
+    end else radgrpCPU.Enabled:=true;
   end;
 end;
 
@@ -596,33 +597,33 @@ begin
     begin
       x:=x+Length(searchstring);
       InternalError:=Copy(s,x+1,MaxInt);
-      Memo1.Lines.Append('Getting/updating '+InternalError);
+      memoSummary.Lines.Append('Getting/updating '+InternalError);
     end;
   end;
 
   if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
-    Memo1.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');
+    memoSummary.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');
   end;
 
   if (ExistWordInString(PChar(s),'switch',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
-    Memo1.Lines.Append('Performing a SVN repo URL switch ... please wait, could take some time.');
+    memoSummary.Lines.Append('Performing a SVN repo URL switch ... please wait, could take some time.');
   end;
 
   // github error
   if (ExistWordInString(PChar(s),'429 too many requests',[soDown])) then
   begin
-    Memo1.Lines.Append('GitHub blocked us due to too many download requests.');
-    Memo1.Lines.Append('This will last for an hour, so please wait and be patient.');
-    Memo1.Lines.Append('After this period, please re-run fpcupdeluxe.');
+    memoSummary.Lines.Append('GitHub blocked us due to too many download requests.');
+    memoSummary.Lines.Append('This will last for an hour, so please wait and be patient.');
+    memoSummary.Lines.Append('After this period, please re-run fpcupdeluxe.');
   end;
 
   (*
   searchstring:='the makefile doesn''t support target';
   if (ExistWordInString(PChar(s),searchstring,[soDown])) then
   begin
-    Memo1.Lines.Append('Sorry, but you have chosen a target that is not supported (yet).');
+    memoSummary.Lines.Append('Sorry, but you have chosen a target that is not supported (yet).');
     x:=Pos(searchstring,LowerCase(s));
     if x>0 then
     begin
@@ -633,7 +634,7 @@ begin
       if x>0 then
       begin
         InternalError:=Copy(InternalError,1,x-1);
-        Memo1.Lines.Append('Wrong target: '+InternalError);
+        memoSummary.Lines.Append('Wrong target: '+InternalError);
       end;
     end;
   end;
@@ -642,15 +643,15 @@ begin
   searchstring:='unable to connect to a repository at url';
   if (ExistWordInString(PChar(s),searchstring,[soDown])) then
   begin
-    Memo1.Lines.Append('SVN could not connect to the desired repository.');
+    memoSummary.Lines.Append('SVN could not connect to the desired repository.');
     x:=Pos(searchstring,LowerCase(s));
     if x>0 then
     begin
       x:=x+Length(searchstring);
       InternalError:=Copy(s,x+1,MaxInt);
-      Memo1.Lines.Append('URL: '+InternalError);
-      Memo1.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
-      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      memoSummary.Lines.Append('URL: '+InternalError);
+      memoSummary.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
+      memoSummary.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end;
   end;
 
@@ -662,21 +663,21 @@ begin
       if x>0 then
       begin
         InternalError:=Copy(s,x+1,MaxInt);
-        Memo1.Lines.Append('Compiler error: '+InternalError);
+        memoSummary.Lines.Append('Compiler error: '+InternalError);
         if (InternalError='2015030501') OR (InternalError='2014051001') OR (InternalError='2014050604') then
         begin
-          Memo1.Lines.Append('FPC revision 30351 introduced some changed into the compiler causing this error.');
-          Memo1.Lines.Append('Has something todo about how floating points are handled. And that has changed.');
-          Memo1.Lines.Append('See: http://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
+          memoSummary.Lines.Append('FPC revision 30351 introduced some changed into the compiler causing this error.');
+          memoSummary.Lines.Append('Has something todo about how floating points are handled. And that has changed.');
+          memoSummary.Lines.Append('See: http://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
         end;
 
         if (InternalError='2013051401') then
         begin
-          Memo1.Lines.Append('FPC revision 37182 breaks cross building avr-embedded.');
-          Memo1.Lines.Append('However, this has been solved in the meantime !');
-          Memo1.Lines.Append('Please update FPC trunk !!');
-          //Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32418');
-          //Memo1.Lines.Append('See: https://bugs.freepascal.org/view.php?id=31925');
+          memoSummary.Lines.Append('FPC revision 37182 breaks cross building avr-embedded.');
+          memoSummary.Lines.Append('However, this has been solved in the meantime !');
+          memoSummary.Lines.Append('Please update FPC trunk !!');
+          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32418');
+          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=31925');
         end;
 
       end;
@@ -688,37 +689,37 @@ begin
       begin
         x:=x+Length('error: user defined');
         InternalError:=Copy(s,x+2,MaxInt);
-        Memo1.Lines.Append('Configuration error: '+InternalError);
+        memoSummary.Lines.Append('Configuration error: '+InternalError);
         x:=Pos('80 bit extended floating point',LowerCase(s));
         if x>0 then
         begin
-          Memo1.Lines.Append('Please use trunk that has 80-bit float type using soft float unit.');
-          Memo1.Lines.Append('FPC revisions 37294 - 37306 add this soft float feature.');
-          Memo1.Lines.Append('So update your FPC trunk to a revision > 37306 !!');
-          //Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
-          //Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
+          memoSummary.Lines.Append('Please use trunk that has 80-bit float type using soft float unit.');
+          memoSummary.Lines.Append('FPC revisions 37294 - 37306 add this soft float feature.');
+          memoSummary.Lines.Append('So update your FPC trunk to a revision > 37306 !!');
+          //memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
+          //memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
         end;
       end;
     end
     else if (ExistWordInString(PChar(s),'failed to get crossbinutils',[soDown])) then
     begin
       MissingCrossBins:=true;
-      Memo1.Lines.Append('Missing correct cross binary utilities');
+      memoSummary.Lines.Append('Missing correct cross binary utilities');
     end
     else if (ExistWordInString(PChar(s),'failed to get crosslibrary',[soDown])) then
     begin
       MissingCrossLibs:=true;
-      Memo1.Lines.Append('Missing correct cross libraries');
+      memoSummary.Lines.Append('Missing correct cross libraries');
     end
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
-      Memo1.Lines.Append('We have had a SVN connection failure. Just start again !');
-      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
+      memoSummary.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end
     else if (ExistWordInString(PChar(s),'fatal:',[soDown])) then
     begin
-      Memo1.Lines.Append(s);
-      Memo1.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      memoSummary.Lines.Append(s);
+      memoSummary.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
     end
     else if (ExistWordInString(PChar(s),'error:',[soDown])) then
     begin
@@ -727,7 +728,7 @@ begin
       // the real error will follow on the next line(s).
       // and we have to wait for these lines (done somewhere else in this procedure) !!
       // if not, just print the error message.
-      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then Memo1.Lines.Append(s);
+      if (Pos('error:',lowercase(s))<>(Length(s)-Length('error:')+1)) then memoSummary.Lines.Append(s);
     end;
   end;
 
@@ -738,34 +739,34 @@ begin
     if x>0 then
     begin
       // add help into summary memo
-      Memo1.Lines.Append('Missing library: lib'+Copy(s,x+2,MaxInt));
+      memoSummary.Lines.Append('Missing library: lib'+Copy(s,x+2,MaxInt));
     end;
   end;
 
   // diskspace errors
   if (ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
   begin
-    Memo1.Lines.Append('There is not enough diskspace to finish this operation.');
-    Memo1.Lines.Append('Please free some space and re-run fpcupdeluxe.');
+    memoSummary.Lines.Append('There is not enough diskspace to finish this operation.');
+    memoSummary.Lines.Append('Please free some space and re-run fpcupdeluxe.');
   end;
 
   // RAM errors
   if (ExistWordInString(PChar(s),'Can''t call the assembler',[soDown])) then
   begin
-    Memo1.Lines.Append('Most likely, there is not enough RAM (swap) to finish this operation.');
-    Memo1.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
+    memoSummary.Lines.Append('Most likely, there is not enough RAM (swap) to finish this operation.');
+    memoSummary.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
   end;
 
   // warn for time consuming help files
   if (ExistWordInString(PChar(s),'writing',[soDown])) AND (ExistWordInString(PChar(s),'pages...',[soDown])) then
   begin
-    Memo1.Lines.Append('Busy with help files. Be patient: can be time consuming !!');
+    memoSummary.Lines.Append('Busy with help files. Be patient: can be time consuming !!');
   end;
 
   // report about correct tools that are found and used
   if (ExistWordInString(PChar(s),'found correct',[soDown])) then
   begin
-    Memo1.Lines.Append(s);
+    memoSummary.Lines.Append(s);
   end;
 
   if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
@@ -773,7 +774,7 @@ begin
     if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
     begin
       // repeat fpcupdeluxe warning
-      Memo1.Lines.Append(s);
+      memoSummary.Lines.Append(s);
     end;
   end;
 
@@ -794,9 +795,9 @@ begin
     then
     begin
       // print the error itself and the next 2 lines (good or lucky guess)
-      Memo1.Lines.Append(SynEdit1.Lines[x]);
-      Memo1.Lines.Append(SynEdit1.Lines[x+1]);
-      Memo1.Lines.Append(SynEdit1.Lines[x+2]);
+      memoSummary.Lines.Append(SynEdit1.Lines[x]);
+      memoSummary.Lines.Append(SynEdit1.Lines[x+1]);
+      memoSummary.Lines.Append(SynEdit1.Lines[x+2]);
     end;
   end;
 
@@ -1182,7 +1183,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button2Click(Sender: TObject);
+procedure TForm1.btnInstallModuleClick(Sender: TObject);
 var
   i:integer;
   modules:string;
@@ -1190,7 +1191,7 @@ begin
   DisEnable(Sender,False);
   try
 
-    if ListBox3.SelCount=0 then
+    if listModules.SelCount=0 then
     begin
       AddMessage('Please select a module / package.');
       exit;
@@ -1201,9 +1202,9 @@ begin
     FPCupManager.ExportOnly:=(NOT Form2.CheckPackageRepo.Checked);
 
     modules:='';
-    for i:=0 to ListBox3.Count-1 do
+    for i:=0 to listModules.Count-1 do
     begin
-      if ListBox3.Selected[i] then modules:=modules+ListBox3.Items[i]+',';
+      if listModules.Selected[i] then modules:=modules+listModules.Items[i]+',';
     end;
 
     if Length(modules)>0 then
@@ -1223,7 +1224,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button3Click(Sender: TObject);
+procedure TForm1.btnInstallDirSelectClick(Sender: TObject);
 begin
   SelectDirectoryDialog1.InitialDir:=sInstallDir;
   if SelectDirectoryDialog1.Execute then
@@ -1252,7 +1253,7 @@ begin
 
   result:=false;
 
-  if (RadioGroup1.ItemIndex=-1) and (RadioGroup2.ItemIndex=-1) then
+  if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
   begin
     ShowMessage('Please select a CPU and OS target first');
     exit;
@@ -1262,14 +1263,14 @@ begin
   // we should use the array OSCPUSupported : array[TOS,TCpu] of boolean
 
   success:=true;
-  if RadioGroup2.ItemIndex<>-1 then
+  if radgrpOS.ItemIndex<>-1 then
   begin
-    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='embedded' then
     begin
-      if RadioGroup1.ItemIndex<>-1 then
+      if radgrpCPU.ItemIndex<>-1 then
       begin
-        s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
         if (s<>'avr') and (s<>'arm') and (s<>'mipsel') then
         begin
           success:=false;
@@ -1285,14 +1286,14 @@ begin
   end;
 
   success:=true;
-  if RadioGroup2.ItemIndex<>-1 then
+  if radgrpOS.ItemIndex<>-1 then
   begin
-    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='android' then
     begin
-      if RadioGroup1.ItemIndex<>-1 then
+      if radgrpCPU.ItemIndex<>-1 then
       begin
-        s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
         if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') then
         begin
           success:=false;
@@ -1308,14 +1309,14 @@ begin
   end;
 
   success:=true;
-  if RadioGroup1.ItemIndex<>-1 then
+  if radgrpCPU.ItemIndex<>-1 then
   begin
-    s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
     if s='jvm' then
     begin
-      if RadioGroup2.ItemIndex<>-1 then
+      if radgrpOS.ItemIndex<>-1 then
       begin
-        s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+        s:=radgrpOS.Items[radgrpOS.ItemIndex];
         if (s<>'android') and (s<>'java') then
         begin
           success:=false;
@@ -1332,16 +1333,16 @@ begin
 
   PrepareRun;
 
-  if RadioGroup1.ItemIndex<>-1 then
+  if radgrpCPU.ItemIndex<>-1 then
   begin
-    s:=RadioGroup1.Items[RadioGroup1.ItemIndex];
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
     if s='ppc' then s:='powerpc';
     if s='ppc64' then s:='powerpc64';
     FPCupManager.CrossCPU_Target:=s;
   end;
-  if RadioGroup2.ItemIndex<>-1 then
+  if radgrpOS.ItemIndex<>-1 then
   begin
-    s:=RadioGroup2.Items[RadioGroup2.ItemIndex];
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='i-sim' then s:='iphonesim';
     FPCupManager.CrossOS_Target:=s;
   end;
@@ -1384,8 +1385,8 @@ begin
         'Clang need to be installed to be able to cross-compile towards Darwin !'+ sLineBreak +
         'Install clang and retry !!';
         Application.MessageBox(PChar(s), PChar('Missing clang'), MB_ICONERROR);
-        Memo1.Lines.Append('');
-        Memo1.Lines.Append('To get clang: sudo apt-get install clang');
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append('To get clang: sudo apt-get install clang');
         exit;
       end;
     end;
@@ -1402,8 +1403,8 @@ begin
         'Install java and retry !!';
         Application.MessageBox(PChar(s), PChar('Missing java'), MB_ICONERROR);
         {$ifdef Linux}
-        Memo1.Lines.Append('');
-        Memo1.Lines.Append('To get java: sudo apt-get install default-jre');
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append('To get java: sudo apt-get install default-jre');
         {$endif}
         exit;
       end;
@@ -1418,7 +1419,7 @@ begin
                  'Do you want to continue ?'
                  ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
                  begin
-                   Memo1.Lines.Append('See: http://bugs.freepascal.org/view.php?id=30908');
+                   memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=30908');
                    exit;
                  end;
     end;
@@ -1440,8 +1441,8 @@ begin
     if (FPCupManager.CrossOS_Target='linux') then
     begin
       ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-      Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-      Memo1.Lines.Append('');
+      memoSummary.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
+      memoSummary.Lines.Append('');
     end;
   end;
 
@@ -1607,7 +1608,7 @@ begin
     sStatus:=sStatus+'.';
 
     AddMessage(sStatus);
-    Memo1.Lines.Append(sStatus);
+    memoSummary.Lines.Append(sStatus);
 
     success:=RealRun;
 
@@ -1953,7 +1954,7 @@ begin
 
           if success then
           begin
-            if CheckAutoClear.Checked then Memo1.Clear;
+            if CheckAutoClear.Checked then memoSummary.Clear;
             AddMessage('Successfully extracted cross-tools.');
             // run again with the correct libs and binutils
             FPCVersionLabel.Font.Color:=clDefault;
@@ -1961,8 +1962,8 @@ begin
             AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
             if (FPCupManager.CrossOS_Target='linux') then
             begin
-              Memo1.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-              Memo1.Lines.Append('');
+              memoSummary.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
+              memoSummary.Lines.Append('');
             end;
             FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
@@ -2060,7 +2061,7 @@ begin
   end;
 end;
 
-procedure TForm1.Button7Click(Sender: TObject);
+procedure TForm1.btnSetupPlusClick(Sender: TObject);
 begin
   Form2.ShowModal;
   if Form2.ModalResult=mrOk then
@@ -2073,10 +2074,10 @@ begin
   end;
 end;
 
-procedure TForm1.Button8Click(Sender: TObject);
+procedure TForm1.btnClearLogClick(Sender: TObject);
 begin
   SynEdit1.Clear;
-  Memo1.Clear;
+  memoSummary.Clear;
 end;
 
 procedure TForm1.Edit1Change(Sender: TObject);
@@ -2140,23 +2141,25 @@ procedure TForm1.DisEnable(Sender: TObject;value:boolean);
 begin
   //if Sender<>BitBtnFPCandLazarus then
   BitBtnFPCandLazarus.Enabled:=value;
-  //if Sender<>Button2 then
-  Button2.Enabled:=value;
-  Button3.Enabled:=value;
-  ButtonInstallCrossCompiler.Enabled:=value;
+  //if Sender<>btnInstallModule then
+  btnInstallModule.Enabled:=value;
+  btnInstallDirSelect.Enabled:=value;
   BitBtnFPCOnly.Enabled:=value;
   BitBtnLazarusOnly.Enabled:=value;
-  Button7.Enabled:=value;
-  Button8.Enabled:=value;
+  btnSetupPlus.Enabled:=value;
+  btnClearLog.Enabled:=value;
   AutoCrossUpdate.Enabled:=value;
 
   ListBoxFPCTarget.Enabled:=value;
   ListBoxLazarusTarget.Enabled:=value;
-  ListBox3.Enabled:=value;
+  listModules.Enabled:=value;
 
   InstallDirEdit.Enabled:=value;
-  RadioGroup1.Enabled:=value;
-  RadioGroup2.Enabled:=value;
+
+  ButtonInstallCrossCompiler.Enabled:=value;
+  radgrpCPU.Enabled:=ButtonInstallCrossCompiler.Enabled;
+  radgrpOS.Enabled:=ButtonInstallCrossCompiler.Enabled;
+
   CheckAutoClear.Enabled:=value;
 
   TrunkBtn.Enabled:=value;
@@ -2168,7 +2171,7 @@ begin
   FeaturesBtn.Enabled:=value;
   mORMotBtn.Enabled:=value;
 
-  if Sender=nil then BitBtnHalt.Enabled:=value;;
+  if Sender=nil then BitBtnHalt.Enabled:=value;
 end;
 
 procedure TForm1.PrepareRun;
@@ -2176,7 +2179,7 @@ begin
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;
 
-  if CheckAutoClear.Checked then Button8.Click;
+  if CheckAutoClear.Checked then btnClearLog.Click;
 
   FPCupManager.Sequencer.ResetAllExecuted;
 
@@ -2311,7 +2314,7 @@ begin
   sStatus:='Sitting and waiting';
   StatusMessage.Text:=sStatus;
 
-  if CheckAutoClear.Checked then Memo1.Lines.Clear;
+  if CheckAutoClear.Checked then memoSummary.Lines.Clear;
 
   AddMessage(Self.Caption);
   AddMessage('');
@@ -2442,24 +2445,7 @@ begin
     Form2.SplitFPC:=ReadBool('General','SplitFPC',True);
     Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
 
-    //FPCupManager.UseWget:=ReadBool('General','UseWget',False);
-    //Form2.UseWget:=FPCupManager.UseWget;
-    {$ifdef Darwin}
-    Form2.UseWget:=False;
-    {$else}
-      {$ifdef Haiku}
-      Form2.UseWget:=True;
-      {$endif}
-      {$ifdef MSWINDOWS}
-      Form2.UseWget:=False;
-      {$else}
-        {$ifdef OpenBSD}
-        Form2.UseWget:=True;
-        {$else}
-        Form2.UseWget:=ReadBool('General','UseWget',False);
-        {$endif}
-      {$endif}
-    {$endif}
+    Form2.UseWget:=ReadBool('General','UseWget',False);
 
     Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
 
@@ -2468,14 +2454,14 @@ begin
 
     Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',True);
 
-    listbox3.ClearSelection;
+    listModules.ClearSelection;
     SortedModules:=TStringList.Create;
     try
       SortedModules.CommaText:=ReadString('General','Modules','');
       for i:=0 to SortedModules.Count-1 do
       begin
-        j:=listbox3.Items.IndexOf(SortedModules[i]);
-        if j<>-1 then listbox3.Selected[j]:=true;
+        j:=listModules.Items.IndexOf(SortedModules[i]);
+        if j<>-1 then listModules.Selected[j]:=true;
       end;
     finally
       SortedModules.Free;
@@ -2522,9 +2508,9 @@ begin
       WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
 
       modules:='';
-      for i:=0 to ListBox3.Count-1 do
+      for i:=0 to listModules.Count-1 do
       begin
-        if ListBox3.Selected[i] then modules:=modules+ListBox3.Items[i]+',';
+        if listModules.Selected[i] then modules:=modules+listModules.Items[i]+',';
       end;
       // delete stale trailing comma, if any
       if Length(modules)>0 then

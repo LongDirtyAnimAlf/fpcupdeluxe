@@ -1694,7 +1694,7 @@ begin
 
     if FUseWget
        then aDownLoader:=TWGetDownLoader.Create
-       {$ifndef Haiku}else aDownLoader:=TNativeDownLoader.Create{$endif};
+       else aDownLoader:=TNativeDownLoader.Create;
 
     try
 

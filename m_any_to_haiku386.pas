@@ -66,8 +66,7 @@ end;
 function Tany_haiku386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-haiku';
-  //LibName='libc.so';
-  LibName='libgcc_s.so';
+  LibName='libroot.so';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -86,7 +85,7 @@ begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-    AddFPCCFGSnippet('-Xr/usr/lib');
+    AddFPCCFGSnippet('-Xr/boot/system/develop/lib/x86');
   end;
 
 end;

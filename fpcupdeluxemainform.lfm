@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 311
-  Height = 611
-  Top = 229
+  Left = 286
+  Height = 631
+  Top = 115
   Width = 1039
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 591
+  ClientHeight = 611
   ClientWidth = 1039
   Menu = MainMenu1
   OnClose = FormClose
@@ -15,22 +15,22 @@ object Form1: TForm1
   Position = poDesktopCenter
   LCLVersion = '1.9.0.0'
   Visible = True
-  object Button7: TButton
+  object btnSetupPlus: TButton
     AnchorSideLeft.Control = BitBtnFPCOnly
     AnchorSideTop.Control = BitBtnFPCOnly
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = BitBtnLazarusOnly
     AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = Button2
+    AnchorSideBottom.Control = btnInstallModule
     Left = 11
     Height = 28
-    Top = 424
+    Top = 434
     Width = 131
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 8
     BorderSpacing.Bottom = 8
     Caption = 'Setup+'
-    OnClick = Button7Click
+    OnClick = btnSetupPlusClick
     TabOrder = 15
   end
   object AutoCrossUpdate: TButton
@@ -42,7 +42,7 @@ object Form1: TForm1
     Left = 152
     Height = 28
     Hint = 'Auto-update all installed cross-compilers'
-    Top = 366
+    Top = 382
     Width = 210
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 4
@@ -52,9 +52,9 @@ object Form1: TForm1
     ShowHint = True
     TabOrder = 21
   end
-  object RadioGroup1: TRadioGroup
+  object radgrpCPU: TRadioGroup
     Left = 152
-    Height = 288
+    Height = 304
     Top = 40
     Width = 100
     AutoFill = True
@@ -66,7 +66,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 268
+    ClientHeight = 284
     ClientWidth = 96
     Items.Strings = (
       'i386'
@@ -80,18 +80,18 @@ object Form1: TForm1
       'jvm'
       'i8086'
     )
-    OnClick = RadioGroup1Click
+    OnClick = radgrpCPUClick
     ParentShowHint = False
     TabOrder = 8
   end
-  object RadioGroup2: TRadioGroup
-    AnchorSideLeft.Control = RadioGroup1
+  object radgrpOS: TRadioGroup
+    AnchorSideLeft.Control = radgrpCPU
     AnchorSideLeft.Side = asrBottom
-    AnchorSideTop.Control = RadioGroup1
-    AnchorSideBottom.Control = RadioGroup1
+    AnchorSideTop.Control = radgrpCPU
+    AnchorSideBottom.Control = radgrpCPU
     AnchorSideBottom.Side = asrBottom
     Left = 256
-    Height = 288
+    Height = 304
     Top = 40
     Width = 106
     Anchors = [akTop, akLeft, akBottom]
@@ -105,7 +105,7 @@ object Form1: TForm1
     ChildSizing.ShrinkVertical = crsScaleChilds
     ChildSizing.Layout = cclLeftToRightThenTopToBottom
     ChildSizing.ControlsPerLine = 1
-    ClientHeight = 268
+    ClientHeight = 284
     ClientWidth = 102
     Items.Strings = (
       'windows'
@@ -120,7 +120,7 @@ object Form1: TForm1
       'msdos'
       'haiku'
     )
-    OnClick = RadioGroup2Click
+    OnClick = radgrpOSClick
     ParentShowHint = False
     TabOrder = 9
   end
@@ -140,7 +140,7 @@ object Form1: TForm1
   object CheckAutoClear: TCheckBox
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = StatusMessage
-    AnchorSideRight.Control = Button8
+    AnchorSideRight.Control = btnClearLog
     Left = 869
     Height = 19
     Top = 36
@@ -153,7 +153,7 @@ object Form1: TForm1
     State = cbChecked
     TabOrder = 17
   end
-  object Button8: TButton
+  object btnClearLog: TButton
     AnchorSideTop.Control = StatusMessage
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
@@ -165,17 +165,17 @@ object Form1: TForm1
     AutoSize = True
     BorderSpacing.Right = 12
     Caption = 'Clear log'
-    OnClick = Button8Click
+    OnClick = btnClearLogClick
     TabOrder = 16
   end
   object BitBtnFPCandLazarus: TBitBtn
     AnchorSideLeft.Control = Owner
-    AnchorSideTop.Control = Button7
+    AnchorSideTop.Control = btnSetupPlus
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = Panel1
     Left = 6
-    Height = 65
-    Top = 460
+    Height = 75
+    Top = 470
     Width = 153
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Left = 6
@@ -678,7 +678,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 95
     Height = 60
-    Top = 356
+    Top = 366
     Width = 47
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 16
@@ -825,7 +825,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     Left = 11
     Height = 60
-    Top = 356
+    Top = 366
     Width = 56
     BorderSpacing.Top = 16
     Caption = 'Only'
@@ -970,7 +970,7 @@ object Form1: TForm1
     AnchorSideTop.Control = FPCVersionLabel
     AnchorSideTop.Side = asrBottom
     Left = 11
-    Height = 120
+    Height = 130
     Top = 62
     Width = 131
     BorderSpacing.Top = 4
@@ -987,7 +987,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 11
     Height = 120
-    Top = 220
+    Top = 230
     Width = 131
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 4
@@ -999,9 +999,9 @@ object Form1: TForm1
   inline SynEdit1: TSynEdit
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
-    AnchorSideBottom.Control = Memo1
+    AnchorSideBottom.Control = memoSummary
     Left = 368
-    Height = 335
+    Height = 355
     Top = 64
     Width = 659
     BorderSpacing.Right = 12
@@ -1550,7 +1550,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     Left = 11
     Height = 18
-    Top = 198
+    Top = 208
     Width = 109
     BorderSpacing.Top = 16
     Caption = 'Lazarus version'
@@ -1562,13 +1562,13 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
   end
-  object ListBox3: TListBox
+  object listModules: TListBox
     AnchorSideTop.Control = AutoCrossUpdate
     AnchorSideTop.Side = asrBottom
-    AnchorSideBottom.Control = Button2
+    AnchorSideBottom.Control = btnInstallModule
     Left = 168
-    Height = 82
-    Top = 406
+    Height = 86
+    Top = 422
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
     BorderSpacing.Top = 12
@@ -1595,7 +1595,7 @@ object Form1: TForm1
     ShowHint = True
     TabOrder = 0
   end
-  object Button3: TButton
+  object btnInstallDirSelect: TButton
     AnchorSideLeft.Control = InstallDirEdit
     AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = InstallDirEdit
@@ -1606,18 +1606,18 @@ object Form1: TForm1
     AutoSize = True
     BorderSpacing.Left = 6
     Caption = 'InstallDir Select'
-    OnClick = Button3Click
+    OnClick = btnInstallDirSelectClick
     TabOrder = 1
   end
   object ButtonInstallCrossCompiler: TButton
-    AnchorSideLeft.Control = RadioGroup1
-    AnchorSideTop.Control = RadioGroup1
+    AnchorSideLeft.Control = radgrpCPU
+    AnchorSideTop.Control = radgrpCPU
     AnchorSideTop.Side = asrBottom
-    AnchorSideRight.Control = RadioGroup2
+    AnchorSideRight.Control = radgrpOS
     AnchorSideRight.Side = asrBottom
     Left = 152
     Height = 28
-    Top = 334
+    Top = 350
     Width = 210
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
@@ -1649,7 +1649,7 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 531
+    Top = 551
     Width = 1021
     Align = alBottom
     AutoSize = True
@@ -3053,14 +3053,14 @@ object Form1: TForm1
       TabOrder = 8
     end
   end
-  object Memo1: TMemo
+  object memoSummary: TMemo
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = Panel1
     Left = 368
     Height = 120
     Hint = 'Will show error'
-    Top = 407
+    Top = 427
     Width = 659
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
@@ -3072,16 +3072,16 @@ object Form1: TForm1
     ShowHint = True
     TabOrder = 14
   end
-  object Button2: TButton
+  object btnInstallModule: TButton
     AnchorSideBottom.Control = Panel1
     Left = 167
     Height = 29
-    Top = 496
+    Top = 516
     Width = 191
     Anchors = [akLeft, akBottom]
     BorderSpacing.Bottom = 6
     Caption = 'Install module from list'
-    OnClick = Button2Click
+    OnClick = btnInstallModuleClick
     TabOrder = 7
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
