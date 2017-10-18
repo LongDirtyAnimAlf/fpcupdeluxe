@@ -318,6 +318,7 @@ function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
 function GetTargetOS:string;
 function GetTargetCPUOS:string;
+function GetDistro:string;
 
 implementation
 
@@ -1592,6 +1593,53 @@ end;
 function GetTargetOS:string;
 begin
   result:=lowercase({$i %FPCTARGETOS%});
+end;
+
+function GetDistro:string;
+{$ifdef Unix}
+var
+  AllOutput : TStringList;
+  s:string;
+{$endif}
+begin
+  result:='unknown';
+
+  {$ifdef Unix}
+  AllOutput:=TStringList.Create;
+  try
+    s:='';
+    ExecuteCommand('cat /etc/os-release',s,false);
+    AllOutput.Text:=s;
+    result := lowercase(AllOutput.Values['ID_LIKE']);
+    if Length(result)=0 then result := lowercase(AllOutput.Values['DISTRIB_ID']);
+    if Length(result)=0 then result := lowercase(AllOutput.Values['ID']);
+
+    {$ifdef BSD}
+      {$ifndef Darwin}
+        if Length(result)=0 then
+        begin
+          ExecuteCommand('uname -s',result,false);
+          result := lowercase(result);
+        end;
+      {$else}
+        result:=GetTargetOS;
+      {$endif}
+      if Length(result)=0 then  result := GetTargetOS;
+    {$endif}
+
+    {$ifdef Linux}
+      if Length(result)=0 then result := GetTargetOS;
+    {$endif}
+
+  finally
+    AllOutput.Free;
+  end;
+  {$else}
+    {$ifdef MSWindows}
+    result:='windows';
+    //result := GetTargetOS;
+    {$endif}
+  {$endif}
 end;
 
 function GetTargetCPUOS:string;

@@ -1126,95 +1126,74 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     // these libs are always needed !!
     AdvicedLibs:='make gdb binutils unrar patch wget ';
 
-    AllOutput:=TStringList.Create;
-    try
-      Output:='';
-      ExecuteCommand('cat /etc/os-release',Output,false);
-      AllOutput.Text := Output;
-      Output := lowercase(AllOutput.Values['ID_LIKE']);
-      if Length(Output)=0 then Output := lowercase(AllOutput.Values['DISTRIB_ID']);
-      if Length(Output)=0 then Output := lowercase(AllOutput.Values['ID']);
+    Output:=GetDistro;
 
-      {$ifdef BSD}
-      {$ifndef Darwin}
-      if Length(Output)=0 then
-      begin
-        ExecuteCommand('uname -s',Output,false);
-        Output := lowercase(Output);
-      end;
-      {$endif}
-      {$endif}
+    if (Output='arch') OR (Output='manjaro') then
+    begin
+      Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
+      AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
+    end
+    else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
+    begin
+      {
+      SetLength(LS,12);
+      LS[0].lib:='libX11.so';
+      LS[0].source:='libx11-dev' ;
 
-      if (Output='arch') OR (Output='manjaro') then
-      begin
-        Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
-        AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
-      end
-      else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
-      begin
-        {
-        SetLength(LS,12);
-        LS[0].lib:='libX11.so';
-        LS[0].source:='libx11-dev' ;
+      LS[1].lib:='libgdk_pixbuf-2.0.so';
+      LS[1].source:='libgdk-pixbuf2.0-dev' ;
 
-        LS[1].lib:='libgdk_pixbuf-2.0.so';
-        LS[1].source:='libgdk-pixbuf2.0-dev' ;
+      LS[2].lib:='libgtk-x11-2.0.so';
+      LS[2].source:='libgtk2.0-0';
+      LS[3].lib:='libgdk-x11-2.0.so';
+      LS[3].source:='libgtk2.0-0';
 
-        LS[2].lib:='libgtk-x11-2.0.so';
-        LS[2].source:='libgtk2.0-0';
-        LS[3].lib:='libgdk-x11-2.0.so';
-        LS[3].source:='libgtk2.0-0';
+      LS[4].lib:='libgobject-2.0.so';
+      LS[4].source:='libglib2.0-0';
 
-        LS[4].lib:='libgobject-2.0.so';
-        LS[4].source:='libglib2.0-0';
+      LS[5].lib:='libglib-2.0.so';
+      LS[5].source:='libglib2.0-0';
 
-        LS[5].lib:='libglib-2.0.so';
-        LS[5].source:='libglib2.0-0';
+      LS[6].lib:='libgthread-2.0.so';
 
-        LS[6].lib:='libgthread-2.0.so';
+      LS[7].lib:='libgmodule-2.0.so';
 
-        LS[7].lib:='libgmodule-2.0.so';
+      LS[8].lib:='libpango-1.0.so';
+      LS[8].source:='libpango1.0-dev';
 
-        LS[8].lib:='libpango-1.0.so';
-        LS[8].source:='libpango1.0-dev';
+      LS[9].lib:='libcairo.so';
+      LS[8].source:='libcairo2-dev';
 
-        LS[9].lib:='libcairo.so';
-        LS[8].source:='libcairo2-dev';
+      LS[10].lib:='libatk-1.0.so';
+      LS[10].source:='libatk1.0-dev';
 
-        LS[10].lib:='libatk-1.0.so';
-        LS[10].source:='libatk1.0-dev';
+      LS[11].lib:='libpangocairo-1.0.so';
+      }
+      //apt-get install subversion make binutils gdb gcc libgtk2.0-dev
 
-        LS[11].lib:='libpangocairo-1.0.so';
-        }
-        //apt-get install subversion make binutils gdb gcc libgtk2.0-dev
-
-        Output:='libx11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
-        AdvicedLibs:=AdvicedLibs+
-                     'make binutils build-essential gdb gcc subversion unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
-                     'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
-                     'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
-      end
-      else
-      if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
-      begin
-        Output:='libx11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
-      end
-      else
-      if (Output='openbsd') then
-      begin
-        Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext wget';
-        //Output:='gmake gdk-pixbuf gtk+2';
-      end
-      else
-      if (Output='freebsd') OR (Output='netbsd') then
-      begin
-        Output:='xorg-libraries libX11 libXtst gtkglext iconv xorg-fonts-type1 liberation-fonts-ttf';
-      end
-      else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
-
-    finally
-      AllOutput.Free;
-    end;
+      Output:='libx11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
+      AdvicedLibs:=AdvicedLibs+
+                   'make binutils build-essential gdb gcc subversion unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+
+                   'libglu1-mesa libglu1-mesa-dev libgpmg1-dev libsdl-dev libXxf86vm-dev libxtst-dev '+
+                   'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
+    end
+    else
+    if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
+    begin
+      Output:='libx11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
+    end
+    else
+    if (Output='openbsd') then
+    begin
+      Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext wget';
+      //Output:='gmake gdk-pixbuf gtk+2';
+    end
+    else
+    if (Output='freebsd') OR (Output='netbsd') then
+    begin
+      Output:='xorg-libraries libX11 libXtst gtkglext iconv xorg-fonts-type1 liberation-fonts-ttf';
+    end
+    else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
 
     if (LCLPlatform='') or (Uppercase(LCLPlatform)='GTK2') then
       pll:=@LCLLIBS

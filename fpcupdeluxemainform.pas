@@ -130,7 +130,7 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  DELUXEVERSION='1.4.0t';
+  DELUXEVERSION='1.6.0a';
 
 resourcestring
   CrossGCCMsg =
@@ -1243,8 +1243,7 @@ function TForm1.InstallCrossCompiler(Sender: TObject):boolean;
 var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
-  UseNativeUnzip:boolean;
-  IncludeLCL:boolean;
+  IncludeLCL,ZipFile:boolean;
   {$ifdef Unix}
   fileList: TStringList;
   i:integer;
@@ -1414,7 +1413,7 @@ begin
     if (Pos('bsd',FPCupManager.CrossOS_Target)>0) then
     //if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
     begin
-      if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes).' + sLineBreak +
+      if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes, stable).' + sLineBreak +
                  'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
                  'Do you want to continue ?'
                  ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
@@ -1428,6 +1427,7 @@ begin
     if (FPCupManager.CrossCPU_Target='aarch64')
     {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target='darwin'){$endif}
     OR (FPCupManager.CrossOS_Target='msdos')
+    OR (FPCupManager.CrossOS_Target='haiku')
     then
     begin
       if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
@@ -1612,7 +1612,7 @@ begin
 
     success:=RealRun;
 
-    if (Sender<>nil) AND (NOT success) then
+    if {(Sender<>nil) AND} (NOT success) then
     begin
 
       // perhaps there were no libraries and/or binutils ... download them (if available) from fpcup on GitHub
@@ -1620,101 +1620,43 @@ begin
       if MissingCrossBins OR MissingCrossLibs then
       begin
 
-        if (MessageDlg('The building of a crosscompiler failed due to missing cross-tools.' + sLineBreak +
+        if (Sender<>nil) then
+        begin
+          if (MessageDlg('The building of a crosscompiler failed due to missing cross-tools.' + sLineBreak +
                    'Fpcupdeluxe can try to download them if available !' + sLineBreak +
                    'Do you want to continue ?'
                    ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
                    begin
                      exit;
                    end;
+        end;
 
         BinsURL:='';
 
         AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
-        if FPCupManager.CrossOS_Target='linux' then
-        begin
-          {$ifdef Darwin}
-          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='LinuxARM.zip';
-          {$else}
-          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='LinuxARM.rar';
-          {$endif}
-          if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='LinuxAarch64.rar';
-          {$ifdef Darwin}
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.zip';
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.zip';
-          {$else}
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Linuxx64.rar';
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Linuxi386.rar';
-          {$endif}
-          if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='LinuxPowerPC.rar';
-          if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='LinuxPowerPC64.rar';
-          if FPCupManager.CrossCPU_Target='mips' then BinsURL:='LinuxMips.zip';
-          if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='LinuxMipsel.zip';
-        end;
-        if FPCupManager.CrossOS_Target='freebsd' then
-        begin
-          {$ifdef FreeBSD}
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='FreeBSDi386.zip';
-          {$else}
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='FreeBSDi386.rar';
-          {$endif}
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='FreeBSDx64.rar';
-        end;
-        if FPCupManager.CrossOS_Target='openbsd' then
-        begin
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='OpenBSDi386.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='OpenBSDx64.rar';
-        end;
-        if FPCupManager.CrossOS_Target='solaris' then
-        begin
-          if FPCupManager.CrossCPU_Target='sparc' then BinsURL:='SolarisSparc.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Solarisx64.rar';
-        end;
-        if FPCupManager.CrossOS_Target='wince' then
-        begin
-          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='WinceARM.rar';
-        end;
-        if FPCupManager.CrossOS_Target='android' then
-        begin
-         {$ifdef Darwin}
-         if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.zip';
-         {$else}
-         if FPCupManager.CrossCPU_Target='arm' then BinsURL:='AndroidARM.rar';
-         {$endif}
-          if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='AndroidAArch64.rar';
-          if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='AndroidMipsel.zip';
-        end;
-        if FPCupManager.CrossOS_Target='embedded' then
-        begin
-          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='EmbeddedARM.rar';
-          if FPCupManager.CrossCPU_Target='avr' then BinsURL:='EmbeddedAVR.rar';
-          if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='EmbeddedMipsel.rar';
-        end;
+        if FPCupManager.CrossCPU_Target='arm' then BinsURL:='ARM';
+        if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='Aarch64';
+        if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='x64';
+        if FPCupManager.CrossCPU_Target='i386' then BinsURL:='i386';
+        if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='PowerPC';
+        if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='PowerPC64';
+        if FPCupManager.CrossCPU_Target='mips' then BinsURL:='Mips';
+        if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='Mipsel';
+        if FPCupManager.CrossCPU_Target='sparc' then BinsURL:='Sparc';
+        if FPCupManager.CrossCPU_Target='avr' then BinsURL:='AVR';
+        if FPCupManager.CrossCPU_Target='i8086' then BinsURL:='i8086';
+
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          {$ifdef MSWindows}
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.zip';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.zip';
-          {$else}
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Darwinx86.rar';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Darwinx86.rar';
-          {$endif}
-          if FPCupManager.CrossCPU_Target='arm' then BinsURL:='DarwinARM.rar';
-          if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='DarwinAArch64.rar';
+          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='x86';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='x86';
         end;
 
-        if FPCupManager.CrossOS_Target='msdos' then
-        begin
-          if FPCupManager.CrossCPU_Target='i8086' then BinsURL:='MSDosi8086.zip';
-        end;
-
-        if FPCupManager.CrossOS_Target='haiku' then
-        begin
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='Haikui386.zip';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='Haikux64.zip';
-        end;
-
+        if FPCupManager.CrossOS_Target='freebsd' then BinsURL:='FreeBSD'+BinsURL else
+          if FPCupManager.CrossOS_Target='openbsd' then BinsURL:='OpenBSD'+BinsURL else
+            if FPCupManager.CrossOS_Target='msdos' then BinsURL:='MSDos'+BinsURL else
+              BinsURL:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsURL;
 
         // normally, we have the same names for libs and bins URL
         LibsURL:=BinsURL;
@@ -1735,24 +1677,21 @@ begin
           if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
           begin
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
-            LibsURL:=StringReplace(LibsURL,'AArch64','ARM',[rfIgnoreCase]);
+            LibsURL:=StringReplace(LibsURL,'Aarch64','ARM',[rfIgnoreCase]);
           end;
         end;
 
-        // bit tricky ... reset BinsURL in case the binutils and libs are already there ... to exit this retry ... ;-)
+        // bit tricky ... if bins and libs are already there exit this retry ... ;-)
         if (
-           (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))
-           AND
-           (NOT DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath))
+           (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))
+           OR
+           (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath))
            )
-          then BinsURL:='';
-
-        if BinsURL<>'' then
+        then
         begin
 
           // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.
           verbose:=(FPCupManager.CrossOS_Target<>'darwin');
-          UseNativeUnzip:=false;
 
           if MissingCrossBins then
           begin
@@ -1771,36 +1710,37 @@ begin
             DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+BinsURL;
             {$else}
             DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+BinsURL;
-            {$endif}
+            {$ifdef CPUX64}
+            if GetDistro='debian' then
+            begin
+              if FPCupManager.CrossOS_Target='darwin' then
+              begin
+                DownloadURL:=DownloadURL+'-debian';
+              end
+            end;
+            {$endif CPUX64}
+            {$endif MSWINDOWS}
+
+            //default to zip
+            DownloadURL:=DownloadURL+'.zip';
             TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
             SysUtils.DeleteFile(TargetFile);
-            UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-            {$ifdef Darwin}
-            if (UseNativeUnzip) then
-            {$endif}
-            begin
-              AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
-              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            end;
+            AddMessage('Please wait: Going to download the zip binary-tools from '+DownloadURL);
+            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            ZipFile:=success;
 
-            // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
+            {$ifndef Darwin}
+            // try rar .... very dirty and certainly not elegant ... ;-)
             if (NOT success) then
             begin
-              if (ExtractFileExt(DownloadURL)='.zip')
-                 then DownloadURL:=ChangeFileExt(DownloadURL,'.rar')
-                 else DownloadURL:=ChangeFileExt(DownloadURL,'.zip');
+              DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
               SysUtils.DeleteFile(TargetFile);
               TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
               SysUtils.DeleteFile(TargetFile);
-              UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-              {$ifdef Darwin}
-              if (UseNativeUnzip) then
-              {$endif}
-              begin
-                AddMessage('Please wait: Going to download the binary-tools from '+DownloadURL);
-                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-              end;
+              AddMessage('Please wait: Going to download the rar binary-tools from '+DownloadURL);
+              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             end;
+            {$endif}
 
             if success then
             begin
@@ -1813,7 +1753,7 @@ begin
 
               AddMessage('Going to extract archive into '+TargetPath);
 
-              if UseNativeUnzip then
+              if ZipFile then
               begin
                 with TNormalUnzipper.Create do
                 begin
@@ -1875,35 +1815,29 @@ begin
           begin
             AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
             DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+LibsURL;
+
+            // default to zip
+            DownloadURL:=DownloadURL+'.zip';
+
             TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
             SysUtils.DeleteFile(TargetFile);
-            UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
             success:=false;
-            {$ifdef Darwin}
-            if (UseNativeUnzip) then
-            {$endif}
-            begin
-              AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
-              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            end;
+            AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+            ZipFile:=success;
+
+            {$ifndef Darwin}
             // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
             if (NOT success) then
             begin
-              if (ExtractFileExt(DownloadURL)='.zip')
-                 then DownloadURL:=ChangeFileExt(DownloadURL,'.rar')
-                 else DownloadURL:=ChangeFileExt(DownloadURL,'.zip');
+              DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
               SysUtils.DeleteFile(TargetFile);
               TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
               SysUtils.DeleteFile(TargetFile);
-              UseNativeUnzip:=(ExtractFileExt(TargetFile)='.zip');
-              {$ifdef Darwin}
-              if (UseNativeUnzip) then
-              {$endif}
-              begin
-                AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
-                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-              end;
+              AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+              success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
             end;
+            {$endif}
 
             if success then
             begin
@@ -1914,7 +1848,7 @@ begin
 
               AddMessage('Going to extract them into '+TargetPath);
 
-              if UseNativeUnzip then
+              if ZipFile then
               begin
                 with TNormalUnzipper.Create do
                 begin

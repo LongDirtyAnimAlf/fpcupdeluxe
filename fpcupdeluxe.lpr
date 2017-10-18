@@ -20,16 +20,6 @@ program fpcupdeluxe;
 
 *)
 
-{$IFDEF FPC_CROSSCOMPILING}
-  {$IFDEF LINUX}
-    //{$linklib libc_nonshared.a}
-    {$IFDEF CPUARM}
-      // for RPi with Arch Linux
-      //{$linklib GLESv2}
-    {$ENDIF}
-  {$ENDIF}
-{$ENDIF}
-
 uses
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, sysutils,

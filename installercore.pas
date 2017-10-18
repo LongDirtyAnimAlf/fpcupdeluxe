@@ -64,7 +64,7 @@ const
   FPCUPBINSURL='';
   {$endif}
 
-  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.0';
+  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.1';
 
   FPCTRUNKVERSION  = '3.1.1';
   LAZARUSTRUNKVERSION  = '1.9';
