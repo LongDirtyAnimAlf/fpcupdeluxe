@@ -61,7 +61,6 @@ const
   DirName='powerpc64-linux';
   LibName='libc.so';
 begin
-  FLibsFound:=true;
   result:=FLibsFound;
   if result then exit;
 
@@ -91,6 +90,13 @@ begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
     AddFPCCFGSnippet('-Xr/usr/lib');
+  end;
+  if not result then
+  begin
+    //libs path is optional; it can be empty
+    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
+    FLibsPath:='';
+    result:=true;
   end;
 end;
 
