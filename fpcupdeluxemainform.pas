@@ -1681,6 +1681,16 @@ begin
           end;
         end;
 
+        if FPCupManager.CrossOS_Target='linux' then
+        begin
+          // PowerPC64 is special: only little endian libs for now
+          if (FPCupManager.CrossCPU_Target='powerpc64') then
+          begin
+            LibsURL:=StringReplace(LibsURL,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
+          end;
+        end;
+
+
         // bit tricky ... if bins and libs are already there exit this retry ... ;-)
         if (
            (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))

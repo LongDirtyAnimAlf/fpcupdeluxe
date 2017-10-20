@@ -224,9 +224,10 @@ function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
 const
   DirName=ARCH+'-'+OS;
 var
-  AsFile: string;
+  AsFile,aOption: string;
   PresetBinPath:string;
   ndkversion,toolchain:byte;
+  i:integer;
   {$IFDEF MSWINDOWS}
   delphiversion:byte;
   {$ENDIF}
@@ -395,22 +396,22 @@ begin
   if result then
   begin
     FBinsFound:=true;
-    // Set some defaults if user hasn't specified otherwise
-    // Architecture: e.g. ARMv6, ARMv7,...
-    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
-    begin
-      //AsFile:='-CpARMV7A -CfVFPV3 -OoFASTMATH ';
-      AsFile:='-CpARMV7A ';
-      FCrossOpts.Add(AsFile); //apparently earlier instruction sets unsupported by Android
-      ShowInfo('Did not find any -Cp architecture parameter; using '+AsFile+'.');
-      AsFile:=StringReplace(AsFile,' ',LineEnding,[rfReplaceAll]);
-      FFPCCFGSnippet:=FFPCCFGSnippet+AsFile;
-    end;
 
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-      '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+
-      '-XP'+FBinUtilsPrefix; {Prepend the binutils names};
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+
+    // Set some defaults if user hasn't specified otherwise
+    // Architecture: e.g. ARMv6, ARMv7,...
+    i:=StringListStartsWith(FCrossOpts,'-Cp');
+    if i=-1 then
+    begin
+      aOption:='-CpARMV7A';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+
   end
   else
   begin

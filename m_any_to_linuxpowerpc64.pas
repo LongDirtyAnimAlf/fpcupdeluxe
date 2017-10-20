@@ -93,10 +93,17 @@ begin
   end;
   if not result then
   begin
-    //libs path is optional; it can be empty
-    ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
-    FLibsPath:='';
-    result:=true;
+    if (StringListStartsWith(FCrossOpts,'-Cb-')<>-1) then
+    begin
+      // we have little endian libs: get them !!
+    end
+    else
+    begin
+      //no big endian libs yet: go on without them
+      ShowInfo('Libspath ignored; it is optional for this cross compiler.',etInfo);
+      FLibsPath:='';
+      result:=true;
+    end;
   end;
 end;
 
@@ -114,6 +121,8 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
+  aOption:string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -157,22 +166,43 @@ begin
   begin
     FBinsFound:=true;
 
-    // new abi: use it !!
-    if StringListStartsWith(FCrossOpts,'-Ca')=-1 then
-    begin
-      FCrossOpts.Add('-Caelfv2 ');
-      ShowInfo('Did not find any -Ca ABI parameter; using -Caelfv2.',etInfo);
-    end;
-
-    // default to Little Endian
-    if StringListStartsWith(FCrossOpts,'-Cb')=-1 then
-    begin
-      FCrossOpts.Add('-Cb- ');
-      ShowInfo('Did not find any -Cb endianess parameter; using -Cb- (little endian).',etInfo);
-    end;
-
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
+
+    (*
+    2017-10-19 FPC trunk
+    from t_linux.pas powerpc64 part of the FPC compiler:
+    ***************
+      if (target_info.abi=abi_powerpc_elfv2) and
+         (target_info.endian=endian_little) then
+        platformopt:=' -b elf64-powerpcle -m elf64lppc'
+      else
+        platformopt:=' -b elf64-powerpc -m elf64ppc';
+    ***************
+    So, we only get little endian from the linker if we use ABI elfv2 AND set little_endian
+    *)
+
+    // see above : new abi - use it !!
+    i:=StringListStartsWith(FCrossOpts,'-Ca');
+    if i=-1 then
+    begin
+      aOption:='-Caelfv2';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any -Ca ABI parameter; using '+aOption+'.',etInfo);
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+
+    // see above : default to Little Endian
+    i:=StringListStartsWith(FCrossOpts,'-Cb');
+    if i=-1 then
+    begin
+      aOption:='-Cb-';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any -Cb endianess parameter; using '+aOption+' (little endian).',etInfo);
+    end
+    else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+
   end;
 end;
 
