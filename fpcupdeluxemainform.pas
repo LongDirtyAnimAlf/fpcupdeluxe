@@ -8,7 +8,7 @@ uses
   Classes, SysUtils, FileUtil,
   Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Types, Buttons, Menus,
   SynEdit, SynEditPopup, SynEditMiscClasses, SynEditMarkupSpecialLine,
-  installerManager;
+  installerManager, mormotdatamodelclient;
 
 type
 
@@ -33,7 +33,6 @@ type
     StableBtn: TBitBtn;
     OldBtn: TBitBtn;
     DinoBtn: TBitBtn;
-    FeaturesBtn: TBitBtn;
     mORMotBtn: TBitBtn;
     btnInstallModule: TButton;
     btnInstallDirSelect: TButton;
@@ -1082,18 +1081,6 @@ begin
       FPCupManager.OnlyModules:='fpc,oldlazarus';
     end;
 
-    if Sender=FeaturesBtn then
-    begin
-      ShowMessage('Not yet working ... too many included packages will give fatal errors.');
-      exit;
-      {
-      s:='Going to install FPC trunk and Lazarus trunk with extras ';
-      FPCTarget:='trunk';
-      LazarusTarget:='trunk';
-      FPCupManager.IncludeModules:='mORMotFPC,lazgoogleapis,virtualtreeview,lazpaint,bgracontrols,uecontrols,ECControls,zeos,cudatext,indy,lnet,lamw,mupdf,tiopf,abbrevia,uos,wst,anchordocking,simplegraph,cm630commons,turbobird';
-      }
-    end;
-
     if Sender=mORMotBtn then
     begin
       s:='Going to install de special version of mORMot for FPC ';
@@ -2112,7 +2099,6 @@ begin
   StableBtn.Enabled:=value;
   OldBtn.Enabled:=value;
   DinoBtn.Enabled:=value;
-  FeaturesBtn.Enabled:=value;
   mORMotBtn.Enabled:=value;
 
   if Sender=nil then BitBtnHalt.Enabled:=value;

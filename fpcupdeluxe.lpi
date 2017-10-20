@@ -593,7 +593,7 @@
         <PackageName Value="LCL"/>
       </Item2>
     </RequiredPackages>
-    <Units Count="7">
+    <Units Count="8">
       <Unit0>
         <Filename Value="fpcupdeluxe.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -639,6 +639,10 @@
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
       </Unit6>
+      <Unit7>
+        <Filename Value="mormotdatamodelserver.pas"/>
+        <IsPartOfProject Value="True"/>
+      </Unit7>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
@@ -648,8 +652,8 @@
       <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir)"/>
-      <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+      <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+      <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
