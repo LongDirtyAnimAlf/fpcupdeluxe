@@ -32,7 +32,15 @@
           <CodeGeneration>
             <TargetCPU Value="x86_64"/>
             <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
           </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+          </Linking>
         </CompilerOptions>
       </Item2>
     </BuildModes>

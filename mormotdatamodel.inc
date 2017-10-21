@@ -4,8 +4,8 @@ type
   TUpFunction = (
         ufUnknown,
         ufInstallFPC,
-        ufInstallLaz,
-        ufInstallFPCLaz,
+        ufInstallLAZ,
+        ufInstallFPCLAZ,
         ufInstallCross,
         ufInstallModule
       );
@@ -52,7 +52,8 @@ type
 
 const
   AWS_HOST_IP  = '54.194.211.233';
-  IP_DEFAULT   = '127.0.0.1';
+  IP_DEFAULT   = AWS_HOST_IP;
+  //IP_DEFAULT   = '127.0.0.1';
   PORT_DEFAULT = 8880;
   USER_DEFAULT = 'User';
   //PASS_DEFAULT = 'synopse';

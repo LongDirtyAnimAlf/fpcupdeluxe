@@ -22,6 +22,7 @@ type
   protected
     fRootFolder: TFileName;
     fAppFolder: TFileName;
+    aBaseSQL: RawUTF8;
   public
     constructor Create(const aRootFolder: TFileName); reintroduce;
     destructor Destroy; override;
@@ -42,6 +43,9 @@ constructor TDataServer.Create(const aRootFolder: TFileName);
 var
   aModel:TSQLModel;
   U: TSQLAuthUser;
+  aFunction:TUpFunction;
+  i:integer;
+  s:string;
 begin
   fRootFolder := EnsureDirectoryExists(ExpandFileName(aRootFolder),true);
   fAppFolder := EnsureDirectoryExists(ExpandFileName(''),true);
@@ -88,6 +92,16 @@ begin
   Self.ServiceMethodByPassAuthentication('GetInfoJSON');
   Self.ServiceMethodByPassAuthentication('GetInfoHTML');
 
+  // make base SQL and translate enum into SQL
+  aBaseSQL:='SELECT UpVersion,UpOS,UpWidget,Country,DateOfUse,(CASE UpFunction';
+  for aFunction := Low(TUpFunction) to High(TUpFunction) do
+  begin
+    i:=ord(aFunction);
+    s:=GetCaptionFromEnum(TypeInfo(TUpFunction),ord(aFunction));
+    aBaseSQL:=aBaseSQL+' WHEN '+InttoStr(i)+' THEN '+QuotedStr(s);
+  end;
+  aBaseSQL:=aBaseSQL+' ELSE ''ErrorUnknown'' END) AS ''Action'',FPCVersion,LazarusVersion,CrossCPUOS,ExtraData,LogEntry FROM Up';
+
   //AddToServerWrapperMethod(Self,
   //        [fRootFolder+'..'+PathDelim+'templates'+PathDelim,'..\mORMotCurrent\CrossPlatform\templates','..\..\mORMotCurrent\CrossPlatform\templates']);
   {$ifdef WITHLOG}
@@ -108,11 +122,21 @@ procedure TDataServer.GetInfoHTML(Ctxt: TSQLRestServerURIContext);
 var
   aSQL:string;
   T:TSQLTableJSON;
+  aCountry,aFPCVersion:string;
 begin
   case Ctxt.Method of
     mGET:
     begin
-      aSQL:='SELECT UpVersion,UpOS,UpWidget,Country,DateOfUse,UpFunction,FPCVersion,LazarusVersion,CrossCPUOS,ExtraData,LogEntry FROM Up;';
+      aSQL:=aBaseSQL;
+      aCountry:=Ctxt.InputStringOrVoid['Country'];
+      if Length(aCountry)>0 then aSQL:=aSQL+' WHERE Country = ' + QuotedStr(aCountry);
+      aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
+      if Length(aFPCVersion)>0 then
+      begin
+        if Length(aCountry)>0 then aSQL:=aSQL+' AND ';
+        aSQL:=aSQL+' WHERE FPCVersion = ' + QuotedStr(aFPCVersion);
+      end;
+      aSQL:=aSQL+';';
       T:=ExecuteList([TSQLUp],aSQL);
       Ctxt.Returns(T.GetHtmlTable,HTTP_SUCCESS,HTML_CONTENT_TYPE_HEADER);
     end;
@@ -123,11 +147,21 @@ procedure TDataServer.GetInfoJSON(Ctxt: TSQLRestServerURIContext);
 var
   aSQL:string;
   T:TSQLTableJSON;
+  aCountry,aFPCVersion:string;
 begin
   case Ctxt.Method of
     mGET:
     begin
-      aSQL:='SELECT UpVersion,UpOS,UpWidget,Country,DateOfUse,UpFunction,FPCVersion,LazarusVersion,CrossCPUOS,ExtraData,LogEntry FROM Up;';
+      aSQL:=aBaseSQL;
+      aCountry:=Ctxt.InputStringOrVoid['Country'];
+      if Length(aCountry)>0 then aSQL:=aSQL+' WHERE Country = ' + QuotedStr(aCountry);
+      aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
+      if Length(aFPCVersion)>0 then
+      begin
+        if Length(aCountry)>0 then aSQL:=aSQL+' AND ';
+        aSQL:=aSQL+' WHERE FPCVersion = ' + QuotedStr(aFPCVersion);
+      end;
+      aSQL:=aSQL+';';
       T:=ExecuteList([TSQLUp],aSQL);
       // this will return a escaped json with result as title
       //Ctxt.Results([T.GetJSONValues(True)]);

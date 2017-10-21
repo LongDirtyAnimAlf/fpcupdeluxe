@@ -1123,6 +1123,10 @@ begin
 
     sStatus:=s;
 
+    {$ifdef RemoteLog}
+    aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
+    {$endif}
+
     RealRun;
 
   finally
@@ -1180,7 +1184,7 @@ begin
     end;
 
     {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufInstallFPCLaz;
+    aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
     {$endif}
 
     RealRun;
@@ -2029,7 +2033,7 @@ begin
     sStatus:='Going to install/update Lazarus only.';
 
     {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufInstallLaz;
+    aDataClient.UpInfo.UpFunction:=ufInstallLAZ;
     {$endif}
 
     RealRun;
