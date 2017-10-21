@@ -55,6 +55,7 @@ type
     btnRemLazPatch: TButton;
     Button1: TButton;
     CheckAutoSwitchURL: TCheckBox;
+    CheckSendInfo: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
     CheckIncludeLCL: TCheckBox;
@@ -140,6 +141,8 @@ type
     function GetAutoSwitchURL:boolean;
     procedure SetAutoSwitchURL(value:boolean);
 
+    function GetSendInfo:boolean;
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -184,6 +187,7 @@ type
     property UseWget:boolean read GetUseWget write SetUseWget;
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
     property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
+    property SendInfo:boolean read GetSendInfo;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -272,6 +276,8 @@ begin
     CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',False);
 
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
+
+    CheckSendInfo.Checked:=ReadBool('General','SendInfo',True);
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
@@ -458,11 +464,13 @@ var
 begin
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
-    WriteBool('General','GetRepo',CheckRepo.Checked);
-    WriteBool('General','GetPackageRepo',CheckPackageRepo.Checked);
-    WriteBool('General','IncludeHelp',CheckIncludeHelp.Checked);
+    WriteBool('General','GetRepo',Repo);
+    WriteBool('General','GetPackageRepo',PackageRepo);
+    WriteBool('General','IncludeHelp',IncludeHelp);
 
-    WriteBool('Cross','IncludeLCL',CheckIncludeLCL.Checked);
+    WriteBool('Cross','IncludeLCL',IncludeLCL);
+
+    WriteBool('General','SendInfo',SendInfo);
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     if TryStrToInt(EditHTTPProxyPort.Text,i) then WriteInteger('ProxySettings','HTTPProxyPort',i);
@@ -519,6 +527,12 @@ begin
      TString(ListBoxFPCPatch.Items.Objects[i]).Free;
      ListBoxFPCPatch.Items.Objects[i] := nil;
   end;
+  for i := 0 to ListBoxLazPatch.Items.Count - 1 do
+  begin
+     TString(ListBoxLazPatch.Items.Objects[i]).Free;
+     ListBoxLazPatch.Items.Objects[i] := nil;
+  end;
+
 
 end;
 
@@ -689,6 +703,11 @@ end;
 procedure TForm2.SetAutoSwitchURL(value:boolean);
 begin
   CheckAutoSwitchURL.Checked:=value;
+end;
+
+function TForm2.GetSendInfo:boolean;
+begin
+  result:=CheckSendInfo.Checked;
 end;
 
 function TForm2.GetFPCOptions:string;

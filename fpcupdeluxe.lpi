@@ -66,8 +66,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -109,8 +109,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -137,8 +137,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -165,8 +165,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -197,8 +197,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -230,8 +230,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -258,8 +258,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -286,8 +286,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -313,8 +313,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -341,8 +341,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -369,8 +369,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -397,8 +397,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -428,8 +428,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -459,8 +459,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -490,8 +490,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -543,8 +543,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir)"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes"/>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>

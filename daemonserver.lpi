@@ -15,8 +15,26 @@
       <UseAppBundle Value="False"/>
       <ResourceType Value="res"/>
     </General>
-    <BuildModes Count="1">
+    <BuildModes Count="2">
       <Item1 Name="Default" Default="True"/>
+      <Item2 Name="Linuxx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="serverbin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="mORMot;$(ProjOutDir)"/>
+            <OtherUnitFiles Value="mORMot;mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+          </CodeGeneration>
+        </CompilerOptions>
+      </Item2>
     </BuildModes>
     <PublishOptions>
       <Version Value="2"/>

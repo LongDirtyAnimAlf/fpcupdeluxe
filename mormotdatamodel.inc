@@ -1,49 +1,60 @@
+{$I secrets.inc}
+
 type
-  TSQLMachine = class(TSQLRecord)
-  private
-    fMachineID: RawUTF8;
-    fMachineBrand: RawUTF8;
-    fMachineType: RawUTF8;
-    fPicture: TSQLRawBlob;
-  published
-    property MachineID: RawUTF8 index 40 read fMachineID write fMachineID stored AS_UNIQUE;
-    property MachineBrand: RawUTF8 index 30 read fMachineBrand write fMachineBrand;
-    property MachineType: RawUTF8 index 40 read fMachineType write fMachineType;
-    property Picture: TSQLRawBlob read fPicture write fPicture;
-  end;
+  TUpFunction = (
+        ufUnknown,
+        ufInstallFPC,
+        ufInstallLaz,
+        ufInstallFPCLaz,
+        ufInstallCross,
+        ufInstallModule
+      );
 
-  TSQLPerson = class(TSQLRecord)
+  // keep it very simple: all in one record !!
+  TSQLUp = class(TSQLRecord)
   private
-    fLastName: RawUTF8;
-    fFirstName: RawUTF8;
-    fMiddleName: RawUTF8;
-    fPicture: TSQLRawBlob;
+    fUpVersion      : RawUTF8;
+    fUpOS           : RawUTF8;
+    fUpWidget       : RawUTF8;
+    fUpInstallDir   : RawUTF8;
+    fIPV4Address    : RawUTF8;
+    fIPV6Address    : RawUTF8;
+    fCity           : RawUTF8;
+    fCountry        : RawUTF8;
+    fLatitude       : RawUTF8;
+    fLongitude      : RawUTF8;
+    fUpFunction     : TUpFunction;
+    fFPCVersion     : RawUTF8;
+    fLazarusVersion : RawUTF8;
+    fCrossCPUOS     : RawUTF8;
+    fExtraData      : variant;
+    fLogEntry       : RawUTF8;
+    fDateOfUse      : TDateTime;
   published
-    property LastName: RawUTF8 index 40 read fLastName write fLastName;
-    property FirstName: RawUTF8 index 20 read fFirstName write fFirstName;
-    property MiddleName: RawUTF8 index 20 read fMiddleName write fMiddleName;
-    property Picture: TSQLRawBlob read fPicture write fPicture;
-  end;
-
-  TSQLLogEntry = class(TSQLRecord)
-  private
-    fLogEntry: RawUTF8;
-    fMachineID: TSQLMachine;
-    fPerson: TSQLPerson;
-    fLogDate: TDateTime;
-    fPicture: TSQLRawBlob;
-  published
-    property LogEntry: RawUTF8 index 400 read fLogEntry write fLogEntry;
-    property MachineID: TSQLMachine read fMachineID write fMachineID;
-    property Person: TSQLPerson read fPerson write fPerson;
-    property LogDate: TDateTime read fLogDate write fLogDate;
-    property Picture: TSQLRawBlob read fPicture write fPicture;
+    property UpVersion: RawUTF8 index 20 read fUpVersion write fUpVersion;
+    property UpOS: RawUTF8 index 30 read fUpOS write fUpOS;
+    property UpWidget: RawUTF8 index 30 read fUpWidget write fUpWidget;
+    property UpInstallDir: RawUTF8 index 255 read fUpInstallDir write fUpInstallDir;
+    property IPV4Address: RawUTF8 index 15 read fIPV4Address write fIPV4Address;
+    property IPV6Address: RawUTF8 index 40 read fIPV6Address write fIPV6Address;
+    property City: RawUTF8 read fCity write fCity;
+    property Country: RawUTF8 read fCountry write fCountry;
+    property Latitude: RawUTF8 read fLatitude write fLatitude;
+    property Longitude: RawUTF8 read fLongitude write fLongitude;
+    property UpFunction: TUpFunction read fUpFunction write fUpFunction;
+    property FPCVersion: RawUTF8 index 15 read fFPCVersion write fFPCVersion;
+    property LazarusVersion: RawUTF8 index 15 read fLazarusVersion write fLazarusVersion;
+    property CrossCPUOS: RawUTF8 index 40 read fCrossCPUOS write fCrossCPUOS;
+    property ExtraData: variant read fExtraData write fExtraData;
+    property LogEntry: RawUTF8 index 500 read fLogEntry write fLogEntry;
+    property DateOfUse: TDateTime read fDateOfUse write fDateOfUse;
   end;
 
 const
-  // Settings SOHIT LogEntry server
-  IP_DEFAULT   = '192.168.1.175';
+  AWS_HOST_IP  = '54.194.211.233';
+  IP_DEFAULT   = '127.0.0.1';
   PORT_DEFAULT = 8880;
   USER_DEFAULT = 'User';
-  PASS_DEFAULT = 'synopse';
+  //PASS_DEFAULT = 'synopse';
+  PASS_DEFAULT = USERPASS;
 

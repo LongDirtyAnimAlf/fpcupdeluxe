@@ -26,6 +26,9 @@ type
     constructor Create(const aRootFolder: TFileName); reintroduce;
     destructor Destroy; override;
     property RootFolder: TFileName read fRootFolder;
+  published
+    procedure GetInfoJSON(Ctxt: TSQLRestServerURIContext);
+    procedure GetInfoHTML(Ctxt: TSQLRestServerURIContext);
   end;
 
 implementation
@@ -38,6 +41,7 @@ uses
 constructor TDataServer.Create(const aRootFolder: TFileName);
 var
   aModel:TSQLModel;
+  U: TSQLAuthUser;
 begin
   fRootFolder := EnsureDirectoryExists(ExpandFileName(aRootFolder),true);
   fAppFolder := EnsureDirectoryExists(ExpandFileName(''),true);
@@ -55,13 +59,10 @@ begin
   end;
   {$endif}
 
-  // prepare the server SQLite3 storage
-  //inherited Create(DataModel(aRootURI),ChangeFileExt(paramstr(0),'.db3'));
-  aModel:=TSQLModel.Create([TSQLMachine,TSQLPerson,TSQLLogEntry]);
+  aModel:=TSQLModel.Create([TSQLUp]);
 
-  //TSQLMachine.AddFilterOrValidate('MachineID',TSynValidateText.Create('{MinLength:3}'));
-  //TSQLLogEntry.AddFilterOrValidate('LogEntry',TSynValidateNonVoidText.Create);
-
+  //TSQLMachine.AddFilterOrValidate('UpVersion',TSynValidateText.Create('{MinLength:3}'));
+  //TSQLLogEntry.AddFilterOrValidate('UpOS',TSynValidateNonVoidText.Create);
 
   inherited Create(aModel,fRootFolder+'data.db3',True);
 
@@ -69,6 +70,23 @@ begin
   DB.LockingMode := lmExclusive;
 
   CreateMissingTables;
+  U := Self.SQLAuthUserClass.Create;
+  U.ClearProperties;
+  Self.Retrieve('LogonName=?',[],['Admin'],U);
+  U.PasswordPlain := ADMINPASS;
+  Self.Update(U);
+  U.ClearProperties;
+  Self.Retrieve('LogonName=?',[],['Supervisor'],U);
+  U.PasswordPlain := SUPERVISORPASS;
+  Self.Update(U);
+  U.ClearProperties;
+  Self.Retrieve('LogonName=?',[],['User'],U);
+  U.PasswordPlain := USERPASS;
+  Self.Update(U);
+  U.Free;
+
+  Self.ServiceMethodByPassAuthentication('GetInfoJSON');
+  Self.ServiceMethodByPassAuthentication('GetInfoHTML');
 
   //AddToServerWrapperMethod(Self,
   //        [fRootFolder+'..'+PathDelim+'templates'+PathDelim,'..\mORMotCurrent\CrossPlatform\templates','..\..\mORMotCurrent\CrossPlatform\templates']);
@@ -85,5 +103,45 @@ begin
   fModel.Free;
   Inherited;
 end;
+
+procedure TDataServer.GetInfoHTML(Ctxt: TSQLRestServerURIContext);
+var
+  aSQL:string;
+  T:TSQLTableJSON;
+begin
+  case Ctxt.Method of
+    mGET:
+    begin
+      aSQL:='SELECT UpVersion,UpOS,UpWidget,Country,DateOfUse,UpFunction,FPCVersion,LazarusVersion,CrossCPUOS,ExtraData,LogEntry FROM Up;';
+      T:=ExecuteList([TSQLUp],aSQL);
+      Ctxt.Returns(T.GetHtmlTable,HTTP_SUCCESS,HTML_CONTENT_TYPE_HEADER);
+    end;
+  end;
+end;
+
+procedure TDataServer.GetInfoJSON(Ctxt: TSQLRestServerURIContext);
+var
+  aSQL:string;
+  T:TSQLTableJSON;
+begin
+  case Ctxt.Method of
+    mGET:
+    begin
+      aSQL:='SELECT UpVersion,UpOS,UpWidget,Country,DateOfUse,UpFunction,FPCVersion,LazarusVersion,CrossCPUOS,ExtraData,LogEntry FROM Up;';
+      T:=ExecuteList([TSQLUp],aSQL);
+      // this will return a escaped json with result as title
+      //Ctxt.Results([T.GetJSONValues(True)]);
+      // this will return raw json without title
+      Ctxt.Returns(T.GetJSONValues(True));
+    end;
+  end;
+end;
+
+initialization
+{$ifndef ISDELPHI2010}
+{$ifndef HASINTERFACERTTI} // circumvent a old FPC bug
+TTextWriter.RegisterCustomJSONSerializerFromTextSimpleType(TypeInfo(TUpFunction));
+{$endif}
+{$endif}
 
 end.

@@ -58,6 +58,8 @@ Temporary Items
 *.bak
 *.local
 
+secrets.inc
+
 *.log
 libfpcup/
 libfpclazup/

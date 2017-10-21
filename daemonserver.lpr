@@ -2,17 +2,6 @@ program daemonserver;
 
 {$mode objfpc}{$H+}
 
-{$IFDEF FPC_CROSSCOMPILING}
-  {$IFDEF LINUX}
-    //{$linklib libc_nonshared.a}
-    //{$linklib c_nonshared.a}
-    {$IFDEF CPUARM}
-      // for RPi with Arch Linux
-      //{$linklib GLESv2}
-    {$ENDIF}
-  {$ENDIF}
-{$ENDIF}
-
 uses
   {$IFDEF UNIX}
   cthreads,

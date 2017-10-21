@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 412
+  Left = 578
   Height = 644
-  Top = 133
+  Top = 119
   Width = 756
   Caption = 'Advanced settings'
   ClientHeight = 644
@@ -338,6 +338,24 @@ object Form2: TForm2
       ShowHint = True
       State = cbChecked
       TabOrder = 10
+    end
+    object CheckSendInfo: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckAutoSwitchURL
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Location and install info will be send to public central fpcupdeluxe server.'
+      Top = 279
+      Width = 246
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Send location and install info (default=yes)'
+      Checked = True
+      ParentShowHint = False
+      ShowHint = True
+      State = cbChecked
+      TabOrder = 11
     end
   end
   object GroupBox4: TGroupBox

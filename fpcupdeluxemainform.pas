@@ -85,6 +85,7 @@ type
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
     InternalError:string;
+    aDataClient:TDataClient;
     function InstallCrossCompiler(Sender: TObject):boolean;
     function AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
@@ -129,20 +130,6 @@ uses
 
 Const
   DELUXEFILENAME='fpcupdeluxe.ini';
-  DELUXEVERSION='1.6.0a';
-
-resourcestring
-  CrossGCCMsg =
-       '{$ifdef FPC_CROSSCOMPILING}'+ sLineBreak +
-       '  {$ifdef Linux}'+ sLineBreak +
-       '    // for most versions of Linux in case of linking errors'+ sLineBreak +
-       '    {$linklib libc_nonshared.a}'+ sLineBreak +
-       '    {$IFDEF CPUARM}'+ sLineBreak +
-       '      // for GUI on RPi[1,2,3] with Arch Linux in case of linking errors'+ sLineBreak +
-       '      // {$linklib GLESv2}'+ sLineBreak +
-       '    {$ENDIF}'+ sLineBreak +
-       '  {$endif}'+ sLineBreak +
-       '{$endif}';
 
 { TForm1 }
 
@@ -152,6 +139,10 @@ var
   aTarget:string;
 begin
   FPCupManager:=nil;
+
+  aDataClient:=TDataClient.Create;
+  aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
+  aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
 
   {$ifdef CPUAARCH64}
   // disable some features
@@ -182,6 +173,35 @@ begin
   Reset(System.Input);
   Rewrite(System.Output);
 
+  aTarget:=''
+  {$ifdef LCLWin32}
+  +'win32'
+  {$endif}
+  {$ifdef LCLWin64}
+  +'win64'
+  {$endif}
+  {$ifdef LCLGtk}
+  +'gtk'
+  {$endif}
+  {$ifdef LCLGtk2}
+  +'gtk2'
+  {$endif}
+  {$ifdef LCLCARBON}
+  +'carbon'
+  {$endif}
+  {$ifdef LCLCOCOA}
+  +'cocoa'
+  {$endif}
+  {$ifdef LCLQT5}
+  +'qt5'
+  {$endif}
+  {$ifdef LCLQT}
+  +'qt'
+  {$endif}
+  ;
+
+  aDataClient.UpInfo.UpWidget:=aTarget;
+
   Self.Caption:=
     'FPCUPdeluxe V'+
     DELUXEVERSION+
@@ -190,27 +210,9 @@ begin
     ' ('+
     VersionDate+
     ') for ' +
-    GetTargetCPUOS
-    {$ifdef Darwin}
-      {$ifdef LCLCARBON}
-      +'-carbon'
-      {$endif}
-      {$ifdef LCLCOCOA}
-      +'-cocoa'
-      {$endif}
-      {$ifdef LCLQT5}
-      +'-qt5'
-      {$endif}
-    {$endif}
-    {$ifdef Haiku}
-      {$ifdef LCLQT}
-      +'-qt'
-      {$endif}
-      {$ifdef LCLQT5}
-      +'-qt5'
-      {$endif}
-    {$endif}
-    ;
+    GetTargetCPUOS+
+    '-'+
+    aTarget;
 
   sStatus:='Sitting and waiting';
 
@@ -251,6 +253,7 @@ begin
   AND
   (SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME));
 
+  aTarget:='';
   if IniFilesOk then
   begin
     aTarget:='stable';
@@ -313,6 +316,7 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  FreeAndNil(aDataClient);
   FreeAndNil(FPCupManager);
   (* using CloseFile will ensure that all pending output is flushed *)
   CloseFile(System.Output);
@@ -1163,6 +1167,8 @@ begin
         FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
     end;
 
+    aDataClient.UpInfo.UpFunction:=ufInstallFPCLaz;
+
     RealRun;
 
   finally
@@ -1203,6 +1209,8 @@ begin
       AddMessage('');
       AddMessage('Going to install selected modules with given options.');
       sStatus:='Going to install/update selected modules.';
+      aDataClient.UpInfo.UpFunction:=ufInstallModule;
+      aDataClient.AddExtraData('module',modules);
       RealRun;
     end;
   finally
@@ -1424,13 +1432,6 @@ begin
                        exit;
                      end;
     end;
-
-    if (FPCupManager.CrossOS_Target='linux') then
-    begin
-      ShowMessage('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-      memoSummary.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-      memoSummary.Lines.Append('');
-    end;
   end;
 
   DisEnable(Sender,False);
@@ -1589,13 +1590,32 @@ begin
     AddMessage('Going to install a cross-compiler from available sources.');
 
     sStatus:='Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
-    if FPCupManager.FPCOPT<>'' then sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
-    if FPCupManager.CrossOPT<>'' then sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
-    if FPCupManager.CrossOS_SubArch<>'' then sStatus:=sStatus+' {SUBARCH: '+FPCupManager.CrossOS_SubArch+'}';
+    if FPCupManager.FPCOPT<>'' then
+    begin
+      sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
+      aDataClient.AddExtraData('OPT',FPCupManager.FPCOPT);
+    end;
+    if FPCupManager.CrossOPT<>'' then
+    begin
+      sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
+      aDataClient.AddExtraData('CROSSOPT',FPCupManager.CrossOPT);
+    end;
+    if FPCupManager.CrossOS_SubArch<>'' then
+    begin
+      sStatus:=sStatus+' {SUBARCH: '+FPCupManager.CrossOS_SubArch+'}';
+      aDataClient.AddExtraData('SUBARCH',FPCupManager.CrossOS_SubArch);
+    end;
     sStatus:=sStatus+'.';
 
     AddMessage(sStatus);
     memoSummary.Lines.Append(sStatus);
+
+    aDataClient.UpInfo.UpFunction:=ufInstallCross;
+    aDataClient.UpInfo.CrossCPUOS:=FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+
+    if length(FPCupManager.CrossLCL_Platform)>0 then aDataClient.AddExtraData('CrossLCL',FPCupManager.CrossLCL_Platform);
+    if length(FPCupManager.OnlyModules)>0 then aDataClient.AddExtraData('Only',FPCupManager.OnlyModules);
+    if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
 
     success:=RealRun;
 
@@ -1891,11 +1911,6 @@ begin
             FPCVersionLabel.Font.Color:=clDefault;
             LazarusVersionLabel.Font.Color:=clDefault;
             AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
-            if (FPCupManager.CrossOS_Target='linux') then
-            begin
-              memoSummary.Lines.Append('Be forwarned: you may need to add some extra linking when cross-compiling.' + sLineBreak + CrossGCCMsg);
-              memoSummary.Lines.Append('');
-            end;
             FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
           end;
@@ -1944,6 +1959,8 @@ begin
 
     sStatus:='Going to install/update FPC only.';
 
+    aDataClient.UpInfo.UpFunction:=ufInstallFPC;
+
     RealRun;
 
   finally
@@ -1985,6 +2002,8 @@ begin
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
 
     sStatus:='Going to install/update Lazarus only.';
+
+    aDataClient.UpInfo.UpFunction:=ufInstallLaz;
 
     RealRun;
   finally
@@ -2241,6 +2260,12 @@ begin
   RealFPCURL.Text:='';
   RealLazURL.Text:='';
 
+  aDataClient.Enabled:=Form2.SendInfo;
+  aDataClient.UpInfo.UpFunction:=ufUnknown;
+  aDataClient.ClearExtraData;
+  aDataClient.UpInfo.CrossCPUOS:='';
+  aDataClient.UpInfo.LogEntry:='';
+
   sStatus:='Sitting and waiting';
   StatusMessage.Text:=sStatus;
 
@@ -2291,10 +2316,15 @@ begin
 
   Application.ProcessMessages;
 
+  aDataClient.UpInfo.FPCVersion:=FPCTarget;
+  aDataClient.UpInfo.LazarusVersion:=LazarusTarget;
+  aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
+
   sleep(1000);
 
   try
-    result:=FPCupManager.Run;
+    //result:=FPCupManager.Run;
+    result:=false;
     if (NOT result) then
     begin
       AddMessage('');
@@ -2308,6 +2338,9 @@ begin
       end;
       FPCVersionLabel.Font.Color:=clRed;
       LazarusVersionLabel.Font.Color:=clRed;
+
+      aDataClient.UpInfo.LogEntry:=memoSummary.Text;
+      aDataClient.SendData;
     end
     else
     begin
@@ -2332,6 +2365,9 @@ begin
       FPCVersionLabel.Font.Color:=clLime;
       LazarusVersionLabel.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
+
+      aDataClient.UpInfo.LogEntry:='Success !';
+      aDataClient.SendData;
     end;
   except
     // just swallow exceptions

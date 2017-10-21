@@ -29,20 +29,18 @@ begin
   {$endif}
   DataServer := TDataServer.Create(ExtractFilePath(paramstr(0))+'data');
   try
-    //HTTPServer := TSQLHttpServer.Create(HTTP_PORT,ORMServer
-    //          {$ifndef ONLYUSEHTTPSOCKET},'+',useHttpApiRegisteringURI{$endif});
     HTTPServer := TSQLHttpServer.Create(InttoStr(PORT_DEFAULT),[DataServer]);
     try
-     {$ifdef WITHLOG}
+      {$ifdef WITHLOG}
       TSQLLog.Family.EchoToConsole := LOG_VERBOSE;
-     {$endif}
-     //HTTPServer.AccessControlAllowOrigin := '*'; // allow cross-site AJAX queries
-     writeln('Background server is running.'#10);
-     writeln('Cross-Platform wrappers are available at http://localhost:',
-            PORT_DEFAULT,'/root/wrapper'#10);
+      {$endif}
+      //HTTPServer.AccessControlAllowOrigin := '*'; // allow cross-site AJAX queries
+      writeln('Background server is running.'#10);
+      //writeln('Cross-Platform wrappers are available at http://localhost:',PORT_DEFAULT,'/root/wrapper'#10);
       writeln(#13#10'Background server is running at http://localhost:',PORT_DEFAULT,#13#10);
-      WriteLn(#13#10'Done - Press ENTER to Exit');
-      ConsoleWaitForEnterKey;
+      writeLn(#13#10'Done - Press ENTER to Exit');
+      readln;
+      //ConsoleWaitForEnterKey;
       writeln('HTTP server shutdown...');
     finally
       HTTPServer.Free;
