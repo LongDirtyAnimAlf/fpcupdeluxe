@@ -8,7 +8,11 @@ uses
   Classes, SysUtils, FileUtil,
   Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Types, Buttons, Menus,
   SynEdit, SynEditPopup, SynEditMiscClasses, SynEditMarkupSpecialLine,
-  installerManager, mormotdatamodelclient;
+  installerManager
+  {$ifdef RemoteLog}
+  ,mormotdatamodelclient
+  {$endif}
+  ;
 
 type
 
@@ -85,7 +89,9 @@ type
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
     InternalError:string;
+    {$ifdef RemoteLog}
     aDataClient:TDataClient;
+    {$endif}
     function InstallCrossCompiler(Sender: TObject):boolean;
     function AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
@@ -140,9 +146,11 @@ var
 begin
   FPCupManager:=nil;
 
+  {$ifdef RemoteLog}
   aDataClient:=TDataClient.Create;
   aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
+  {$endif}
 
   {$ifdef CPUAARCH64}
   // disable some features
@@ -200,7 +208,9 @@ begin
   {$endif}
   ;
 
+  {$ifdef RemoteLog}
   aDataClient.UpInfo.UpWidget:=aTarget;
+  {$endif}
 
   Self.Caption:=
     'FPCUPdeluxe V'+
@@ -316,7 +326,9 @@ end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
 begin
+  {$ifdef RemoteLog}
   FreeAndNil(aDataClient);
+  {$endif}
   FreeAndNil(FPCupManager);
   (* using CloseFile will ensure that all pending output is flushed *)
   CloseFile(System.Output);
@@ -1167,7 +1179,9 @@ begin
         FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
     end;
 
+    {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallFPCLaz;
+    {$endif}
 
     RealRun;
 
@@ -1209,8 +1223,10 @@ begin
       AddMessage('');
       AddMessage('Going to install selected modules with given options.');
       sStatus:='Going to install/update selected modules.';
+      {$ifdef RemoteLog}
       aDataClient.UpInfo.UpFunction:=ufInstallModule;
       aDataClient.AddExtraData('module',modules);
+      {$endif}
       RealRun;
     end;
   finally
@@ -1593,29 +1609,36 @@ begin
     if FPCupManager.FPCOPT<>'' then
     begin
       sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';
+      {$ifdef RemoteLog}
       aDataClient.AddExtraData('OPT',FPCupManager.FPCOPT);
+      {$endif}
     end;
     if FPCupManager.CrossOPT<>'' then
     begin
       sStatus:=sStatus+' [CROSSOPT: '+FPCupManager.CrossOPT+']';
+      {$ifdef RemoteLog}
       aDataClient.AddExtraData('CROSSOPT',FPCupManager.CrossOPT);
+      {$endif}
     end;
     if FPCupManager.CrossOS_SubArch<>'' then
     begin
       sStatus:=sStatus+' {SUBARCH: '+FPCupManager.CrossOS_SubArch+'}';
+      {$ifdef RemoteLog}
       aDataClient.AddExtraData('SUBARCH',FPCupManager.CrossOS_SubArch);
+      {$endif}
     end;
     sStatus:=sStatus+'.';
 
     AddMessage(sStatus);
     memoSummary.Lines.Append(sStatus);
 
+    {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallCross;
     aDataClient.UpInfo.CrossCPUOS:=FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
-
     if length(FPCupManager.CrossLCL_Platform)>0 then aDataClient.AddExtraData('CrossLCL',FPCupManager.CrossLCL_Platform);
     if length(FPCupManager.OnlyModules)>0 then aDataClient.AddExtraData('Only',FPCupManager.OnlyModules);
     if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
+    {$endif}
 
     success:=RealRun;
 
@@ -1959,7 +1982,9 @@ begin
 
     sStatus:='Going to install/update FPC only.';
 
+    {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallFPC;
+    {$endif}
 
     RealRun;
 
@@ -2003,7 +2028,9 @@ begin
 
     sStatus:='Going to install/update Lazarus only.';
 
+    {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallLaz;
+    {$endif}
 
     RealRun;
   finally
@@ -2260,11 +2287,13 @@ begin
   RealFPCURL.Text:='';
   RealLazURL.Text:='';
 
+  {$ifdef RemoteLog}
   aDataClient.Enabled:=Form2.SendInfo;
   aDataClient.UpInfo.UpFunction:=ufUnknown;
   aDataClient.ClearExtraData;
   aDataClient.UpInfo.CrossCPUOS:='';
   aDataClient.UpInfo.LogEntry:='';
+  {$endif}
 
   sStatus:='Sitting and waiting';
   StatusMessage.Text:=sStatus;
@@ -2316,15 +2345,16 @@ begin
 
   Application.ProcessMessages;
 
+  {$ifdef RemoteLog}
   aDataClient.UpInfo.FPCVersion:=FPCTarget;
   aDataClient.UpInfo.LazarusVersion:=LazarusTarget;
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
+  {$endif}
 
   sleep(1000);
 
   try
-    //result:=FPCupManager.Run;
-    result:=false;
+    result:=FPCupManager.Run;
     if (NOT result) then
     begin
       AddMessage('');
@@ -2339,8 +2369,11 @@ begin
       FPCVersionLabel.Font.Color:=clRed;
       LazarusVersionLabel.Font.Color:=clRed;
 
+      {$ifdef RemoteLog}
       aDataClient.UpInfo.LogEntry:=memoSummary.Text;
       aDataClient.SendData;
+      {$endif}
+
     end
     else
     begin
@@ -2366,8 +2399,11 @@ begin
       LazarusVersionLabel.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
 
+      {$ifdef RemoteLog}
       aDataClient.UpInfo.LogEntry:='Success !';
       aDataClient.SendData;
+      {$endif}
+
     end;
   except
     // just swallow exceptions

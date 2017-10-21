@@ -277,7 +277,11 @@ begin
 
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 
+    {$ifdef RemoteLog}
     CheckSendInfo.Checked:=ReadBool('General','SendInfo',True);
+    {$else}
+    CheckSendInfo.Checked:=ReadBool('General','SendInfo',False);
+    {$endif}
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
     EditHTTPProxyPort.Text:=InttoStr(ReadInteger('ProxySettings','HTTPProxyPort',8080));
@@ -329,6 +333,10 @@ begin
   // disable some features
   GroupBox4.Enabled:=False;
   {$endif CPUARM}
+
+  {$ifndef RemoteLog}
+  CheckSendInfo.Enabled:=false;
+  {$endif}
 
 end;
 
@@ -470,7 +478,9 @@ begin
 
     WriteBool('Cross','IncludeLCL',IncludeLCL);
 
+    {$ifdef RemoteLog}
     WriteBool('General','SendInfo',SendInfo);
+    {$endif}
 
     WriteString('ProxySettings','HTTPProxyURL',EditHTTPProxyHost.Text);
     if TryStrToInt(EditHTTPProxyPort.Text,i) then WriteInteger('ProxySettings','HTTPProxyPort',i);
