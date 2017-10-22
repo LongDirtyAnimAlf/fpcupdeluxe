@@ -104,17 +104,8 @@ type
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
     function GetCompilerVersion(CompilerPath: string): string;
-    function GetCompilerMajorVersion(CompilerPath: string): integer;
-    function GetCompilerMinorVersion(CompilerPath: string): integer;
-    function GetCompilerReleaseVersion(CompilerPath: string): integer;
-
     function GetCompilerVersionFromUrl(aUrl: string): string;
-
     function GetCompilerVersionFromSource(aSourcePath: string): string;
-    function GetCompilerMajorVersionFromSource(CompilerSourcePath: string): integer;
-    function GetCompilerMinorVersionFromSource(CompilerSourcePath: string): integer;
-    function GetCompilerReleaseVersionFromSource(CompilerSourcePath: string): integer;
-
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
     function GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
 
@@ -1121,19 +1112,6 @@ begin
   end;
 end;
 
-function TFPCInstaller.GetCompilerMajorVersion(CompilerPath: string): integer;
-begin
-  result:=GetCompilerVersionNumber(GetCompilerVersion(CompilerPath),0);
-end;
-function TFPCInstaller.GetCompilerMinorVersion(CompilerPath: string): integer;
-begin
-  result:=GetCompilerVersionNumber(GetCompilerVersion(CompilerPath),1);
-end;
-function TFPCInstaller.GetCompilerReleaseVersion(CompilerPath: string): integer;
-begin
-  result:=GetCompilerVersionNumber(GetCompilerVersion(CompilerPath),2);
-end;
-
 function TFPCInstaller.GetCompilerVersionFromUrl(aUrl: string): string;
 var
   aVersion: string;
@@ -1227,19 +1205,6 @@ begin
   end else infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
 
   result:=version_nr+'.'+release_nr+'.'+patch_nr;
-end;
-
-function TFPCInstaller.GetCompilerMajorVersionFromSource(CompilerSourcePath: string): integer;
-begin
-  result:=GetCompilerVersionNumber(GetCompilerVersionFromSource(CompilerSourcePath),0);
-end;
-function TFPCInstaller.GetCompilerMinorVersionFromSource(CompilerSourcePath: string): integer;
-begin
-  result:=GetCompilerVersionNumber(GetCompilerVersionFromSource(CompilerSourcePath),1);
-end;
-function TFPCInstaller.GetCompilerReleaseVersionFromSource(CompilerSourcePath: string): integer;
-begin
-  result:=GetCompilerVersionNumber(GetCompilerVersionFromSource(CompilerSourcePath),2);
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromVersion(aVersion: string): string;

@@ -56,6 +56,7 @@ type
     SynEdit1: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure FormShow(Sender: TObject);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
@@ -102,7 +103,7 @@ type
     function RealRun:boolean;
     function GetFPCUPSettings(IniDirectory:string):boolean;
     function SetFPCUPSettings(IniDirectory:string):boolean;
-    procedure AddMessage(aMessage:string; UpdateStatus:boolean=false);
+    procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
     procedure InitFPCupManager;
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
@@ -150,7 +151,6 @@ begin
   aDataClient:=TDataClient.Create;
   aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
-  aDataClient.UpInfo.UpDistro:=GetDistro;
   {$endif}
 
   {$ifdef CPUAARCH64}
@@ -307,10 +307,8 @@ begin
     // must be done here, to enable local storage/access of some setttings !!
     Form2:=TForm2.Create(Form1);
 
-    AddMessage('Welcome @ FPCUPdeluxe.');
-    AddMessage('');
-
-    InitFPCupManager;
+    // tricky ... due to arm quircks when cross-compiling : GetDistro (ExecuteCommand) gives errors if used in CreateForm
+    Self.OnShow:=@FormShow;
   end
   else
   begin
@@ -1756,7 +1754,7 @@ begin
             {$else}
             DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+BinsURL;
             {$ifdef CPUX64}
-            if GetDistro='debian' then
+            if AnsiContainsText(GetDistro,'debian') then
             begin
               if FPCupManager.CrossOS_Target='darwin' then
               begin
@@ -2072,6 +2070,17 @@ procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   sInstallDir:=InstallDirEdit.Text;
   GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
+end;
+
+procedure TForm1.FormShow(Sender: TObject);
+begin
+  // only run once !!
+  // FPC cross-quirck : GetDistro (ExecuteCommand) gives errors if used in CreateForm
+  Self.OnShow:=nil;
+  {$ifdef RemoteLog}
+  aDataClient.UpInfo.UpDistro:=GetDistro;
+  {$endif}
+  InitFPCupManager;
 end;
 
 
@@ -2424,8 +2433,10 @@ begin
   result:=FileExists(IniDirectory+DELUXEFILENAME);
 
   SynEdit1.Clear;
+
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
+  AddMessage('Running on '+GetDistro);
   AddMessage('');
 
   if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
@@ -2539,7 +2550,7 @@ begin
 
 end;
 
-procedure TForm1.AddMessage(aMessage:string; UpdateStatus:boolean=false);
+procedure TForm1.AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
 begin
   SynEdit1.Append(aMessage);
   SynEdit1.CaretX:=0;

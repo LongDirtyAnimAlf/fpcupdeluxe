@@ -20,7 +20,7 @@ uses
 type
   TDataServer = class(TSQLRestServerDB)
   private
-    function GetTable(aCountry,aFPCVersion:string):TSQLTableJSON;
+    function GetTable(const aCountry,aFPCVersion:string;const witherrors:boolean=false):TSQLTableJSON;
   protected
     fRootFolder: TFileName;
     fAppFolder: TFileName;
@@ -122,16 +122,25 @@ begin
   Inherited;
 end;
 
-function TDataServer.GetTable(aCountry,aFPCVersion:string):TSQLTableJSON;
+function TDataServer.GetTable(const aCountry,aFPCVersion:string;const witherrors:boolean=false):TSQLTableJSON;
 var
   aSQL:string;
 begin
   aSQL:=aBaseSQL;
-  if Length(aCountry)>0 then aSQL:=aSQL+' WHERE Country = ' + QuotedStr(aCountry);
+  if Length(aCountry)>0 then
+  begin
+    if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
+    aSQL:=aSQL+'Country = ' + QuotedStr(aCountry);
+  end;
   if Length(aFPCVersion)>0 then
   begin
-    if Length(aCountry)>0 then aSQL:=aSQL+' AND ';
-    aSQL:=aSQL+' WHERE FPCVersion = ' + QuotedStr(aFPCVersion);
+    if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
+    aSQL:=aSQL+'FPCVersion = ' + QuotedStr(aFPCVersion);
+  end;
+  if (NOT witherrors) then
+  begin
+    if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
+    aSQL:=aSQL+'LogEntry = ' + QuotedStr('Success !');
   end;
   aSQL:=aSQL+';';
   result:=ExecuteList([TSQLUp],aSQL);
@@ -141,13 +150,17 @@ procedure TDataServer.GetInfoHTML(Ctxt: TSQLRestServerURIContext);
 var
   T:TSQLTableJSON;
   aCountry,aFPCVersion:string;
+
 begin
   case Ctxt.Method of
     mGET:
     begin
       aCountry:=Ctxt.InputStringOrVoid['Country'];
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
-      T:=GetTable(aCountry,aFPCVersion);
+      aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
+      if Length(Ctxt.InputStringOrVoid['ShowErrors'])>0
+         then T:=GetTable(aCountry,aFPCVersion,true)
+         else T:=GetTable(aCountry,aFPCVersion);
       Ctxt.Returns(T.GetHtmlTable,HTTP_SUCCESS,HTML_CONTENT_TYPE_HEADER);
       T.Free;
     end;
@@ -164,7 +177,9 @@ begin
     begin
       aCountry:=Ctxt.InputStringOrVoid['Country'];
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
-      T:=GetTable(aCountry,aFPCVersion);
+      if Length(Ctxt.InputStringOrVoid['ShowErrors'])>0
+         then T:=GetTable(aCountry,aFPCVersion,true)
+         else T:=GetTable(aCountry,aFPCVersion);
       // this will return an escaped json with result as title
       //Ctxt.Results([T.GetJSONValues(True)]);
       // this will return raw json without title

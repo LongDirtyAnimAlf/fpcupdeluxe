@@ -263,6 +263,7 @@ function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas
 function GetFileNameFromURL(URL:string):string;
 function GetVersionFromUrl(URL:string): string;
 function StripUrl(URL:string): string;
+procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
@@ -301,6 +302,7 @@ function GetGCCDirectory:string;
 {$ENDIF UNIX}
 {$IFDEF DARWIN}
 function GetSDKVersion(aSDK: string):string;
+function GetDarwinVersion(out Major,Minor,Build : Integer): Boolean;
 {$ENDIF DARWIN}
 function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
@@ -415,8 +417,8 @@ begin
   Result := True;
 {$endif}
 end;
-
 {$endif}
+
 
 function SafeExpandFileName (Const FileName : String): String;
 begin
@@ -764,6 +766,53 @@ var
 begin
   URI:=ParseURI(URL);
   result:=URI.Host+URI.Path;
+end;
+
+procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
+var
+  i,j:integer;
+  found:boolean;
+begin
+  i:=1;
+
+  // move towards first numerical
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // get major version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
+  begin
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
+  end;
+  if found then Major:=j;
+
+  // move towards first numerical
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // get minor version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
+  begin
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
+  end;
+  if found then Minor:=j;
+
+  // move towards first numerical
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // get build version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
+  begin
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
+  end;
+  if found then Build:=j;
 end;
 
 
@@ -1279,6 +1328,17 @@ begin
   end;
   result:=s;
 end;
+function GetDarwinVersion(out Major,Minor,Build: Integer): Boolean;
+var
+  output:string;
+begin
+  result:=(ExecuteCommand('sw_vers -productVersion', Output, False)=0);
+  if result then
+  begin
+    if Length(Output)>0 then GetVersionFromString(Output,Major,Minor,Build);
+  end;
+end;
+
 {$ENDIF DARWIN}
 
 // 1on1 copy from unit cutils from the fpc compiler;
@@ -1565,10 +1625,15 @@ end;
 function UppercaseFirstChar(s: String): String;
 var
   ch, rest: String;
+  //first: String;
+  i: integer;
 begin
-  ch := Copy(s, 1, 1);
-  rest := Copy(s, Length(ch)+1, MaxInt);
-  result := UpperCase(ch) + LowerCase(rest);
+  i:=1;
+  //while (Length(s)>=i) AND (NOT (s[i] in ['a'..'z'])) do inc(i);
+  ch    := Copy(s, i, 1);
+  //first := Copy(s, 1, i-1);
+  rest  := Copy(s, Length(ch)+i, MaxInt);
+  result := {LowerCase(first) + }UpperCase(ch) + LowerCase(rest);
 end;
 
 function DirectoryIsEmpty(Directory: string): Boolean;
@@ -1596,58 +1661,65 @@ begin
 end;
 
 function GetDistro:string;
-{$ifdef Unix}
 var
+  Major,Minor,Build,i: Integer;
   AllOutput : TStringList;
-  s:string;
-{$endif}
-{$ifdef MSWindows}
-var
-  Major,Minor,Build: Integer;
-{$endif}
+  s,t:ansistring;
 begin
-  result:='unknown';
-
+  t:='unknown';
   {$ifdef Unix}
-  AllOutput:=TStringList.Create;
-  try
-    s:='';
-    ExecuteCommand('cat /etc/os-release',s,false);
-    AllOutput.Text:=s;
-    result := lowercase(AllOutput.Values['ID_LIKE']);
-    if Length(result)=0 then result := lowercase(AllOutput.Values['DISTRIB_ID']);
-    if Length(result)=0 then result := lowercase(AllOutput.Values['ID']);
-
-    {$ifdef BSD}
-      {$ifndef Darwin}
-        if Length(result)=0 then
-        begin
-          ExecuteCommand('uname -s',result,false);
-          result := lowercase(result);
+    {$ifndef Darwin}
+      if (ExecuteCommand('cat /etc/os-release',s,false)=0) then
+      begin
+        AllOutput:=TStringList.Create;
+        try
+          AllOutput.Text:=s;
+          s := AllOutput.Values['NAME'];
+          if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
+          if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
+          if Length(s)=0 then s := AllOutput.Values['ID'];
+        finally
+          AllOutput.Free;
         end;
-      {$else}
-        result:=GetTargetOS;
+      end;
+      if Length(s)=0 then t:='unknown' else
+      begin
+        s:=DelChars(s,'"');
+        t:=Trim(s);
+      end;
+      {$ifdef BSD}
+      if (t='unknown') then
+      begin
+        if (ExecuteCommand('uname -r',s,false)=0)
+           then t := GetTargetOS+' '+lowercase(Trim(s));
+      end;
       {$endif}
-      if Length(result)=0 then  result := GetTargetOS;
-    {$endif}
 
-    {$ifdef Linux}
-      if Length(result)=0 then result := GetTargetOS;
-    {$endif}
+      if (t='unknown') then t := GetTargetOS;
 
-  finally
-    AllOutput.Free;
-  end;
-  {$else}
-    {$ifdef MSWindows}
-    result:='win';
+      if (ExecuteCommand('uname -r',s,false)=0)
+         then t := t+' '+lowercase(Trim(s));
+
+    {$else}
+      if (ExecuteCommand('sw_vers -productName', s, false)=0) then
+      begin
+        if Length(s)>0 then t:=Trim(s);
+      end;
+      if Length(s)=0 then t:=GetTargetOS;
+      if GetDarwinVersion(Major,Minor,Build)
+         then t:=t+' '+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
+    {$endif Darwin}
+  {$endif Unix}
+
+  {$ifdef MSWindows}
+    t:='Win';
     if IsWindows64
-       then result:=result+'64'
-       else result:=result+'32';
+       then t:=t+'64'
+       else t:=t+'32';
     if GetWin32Version(Major,Minor,Build)
-       then result:=result+'-'+InttoStr(Major)+'-'+InttoStr(Minor)+'-'+InttoStr(Build);
-    {$endif}
+       then t:=t+'-'+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
   {$endif}
+  result:=t;
 end;
 
 function GetTargetCPUOS:string;

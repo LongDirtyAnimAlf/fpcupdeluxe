@@ -654,6 +654,7 @@ implementation
 
 {$ifdef linux}
 uses
+  strutils,
   processutils;
 {$endif}
 
@@ -1127,13 +1128,12 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     AdvicedLibs:='make gdb binutils unrar patch wget ';
 
     Output:=GetDistro;
-
-    if (Output='arch') OR (Output='manjaro') then
+    if (AnsiContainsText(Output,'arch') OR AnsiContainsText(Output,'manjaro')) then
     begin
       Output:='libx11 gtk2 gdk-pixbuf2 pango cairo';
       AdvicedLibs:=AdvicedLibs+'libx11 gtk2 gdk-pixbuf2 pango cairo ibus-gtk and ibus-gtk3 xorg-fonts-100dpi xorg-fonts-75dpi ttf-freefont ttf-liberation unrar';
     end
-    else if (Output='debian') OR (Output='ubuntu') OR (Output='linuxmint') then
+    else if (AnsiContainsText(Output,'debian') OR AnsiContainsText(Output,'ubuntu') OR AnsiContainsText(Output,'linuxmint')) then
     begin
       {
       SetLength(LS,12);
@@ -1178,18 +1178,18 @@ function TSequencer.DoExec(FunctionName: string): boolean;
                    'libxft2 libfontconfig1 xfonts-scalable gtk2-engines-pixbuf unrar';
     end
     else
-    if (Output='rhel') OR (Output='centos') OR (Output='scientific') OR (Output='fedora')  then
+    if (AnsiContainsText(Output,'rhel') OR AnsiContainsText(Output,'centos') OR AnsiContainsText(Output,'scientific') OR AnsiContainsText(Output,'fedora') OR AnsiContainsText(Output,'redhat'))  then
     begin
       Output:='libx11-devel gtk2-devel gtk+extra gtk+-devel cairo-devel cairo-gobject-devel pango-devel';
     end
     else
-    if (Output='openbsd') then
+    if AnsiContainsText(Output,'openbsd') then
     begin
       Output:='libiconv xorg-libraries libx11 libXtst xorg-fonts-type1 liberation-fonts-ttf gtkglext wget';
       //Output:='gmake gdk-pixbuf gtk+2';
     end
     else
-    if (Output='freebsd') OR (Output='netbsd') then
+    if (AnsiContainsText(Output,'freebsd') OR AnsiContainsText(Output,'netbsd')) then
     begin
       Output:='xorg-libraries libX11 libXtst gtkglext iconv xorg-fonts-type1 liberation-fonts-ttf';
     end

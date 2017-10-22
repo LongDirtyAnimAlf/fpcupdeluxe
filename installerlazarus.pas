@@ -872,7 +872,6 @@ var
   LazarusConfig: TUpdateLazConfig;
   PCPSnippet: TStringList;
   VersionSnippet: string;
-  VersionList: TStringList;
   i,j:integer;
   LazBuildApp:string;
   TxtFile:Text;
@@ -909,7 +908,6 @@ begin
     begin
       // lazbuild outputs version info
       VersionSnippet:=Processor.OutputStrings.Strings[i-1];
-      VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
     end;
   end;
 
@@ -924,7 +922,6 @@ begin
       // remove quotes from string
       //VersionSnippet:=DelChars(VersionSnippet, '''');
       VersionSnippet:=TrimSet(VersionSnippet, [#39]);
-      VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
       CloseFile(TxtFile);
     end;
   end;
@@ -932,7 +929,6 @@ begin
   if Length(VersionSnippet)=0 then
   begin
     VersionSnippet:=GetVersionFromUrl(FURL);
-    VersionSnippet:=StringReplace(VersionSnippet,'.',',',[rfReplaceAll]);
   end;
 
   if Length(VersionSnippet)>0 then
@@ -948,37 +944,9 @@ begin
       end;
     end;
     if j>0 then Delete(VersionSnippet,j,MaxInt);
-
-    VersionList := TStringList.Create;
-    try
-      VersionList.CommaText := VersionSnippet;
-      if VersionList.Count>0 then
-      begin
-        case VersionList.Count of
-          1:
-          begin
-            FMajorVersion := StrToIntDef(VersionList[0], -1);
-            //FMinorVersion := 0;
-            //FReleaseVersion := 0;
-          end;
-          2:
-          begin
-            FMajorVersion := StrToIntDef(VersionList[0], -1);
-            FMinorVersion := StrToIntDef(VersionList[1], -1);
-            //FReleaseVersion := 0;
-          end;
-          else
-          begin
-            FMajorVersion := StrToIntDef(VersionList[0], -1);
-            FMinorVersion := StrToIntDef(VersionList[1], -1);
-            FReleaseVersion := StrToIntDef(VersionList[2], -1);
-          end;
-        end;
-      end;
-    finally
-      VersionList.Free;
-    end;
   end;
+
+  GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
 
   LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, FMajorVersion, FMinorVersion, FReleaseVersion);
   try
@@ -1070,12 +1038,12 @@ begin
             VersionSnippet:=Processor.OutputStrings.Strings[0];
             infoln(infotext+'GDB --version output: ' + VersionSnippet, etInfo);
             // e.g. GNU gdb (GDB) 7.7.1-kjhkjh
-            i:=0;
+            i:=1;
             // move towards first numerical
-            while (Length(VersionSnippet)>i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+            while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
             j:=0;
             // get only major version
-            while (Length(VersionSnippet)>i) AND (VersionSnippet[i] in ['0'..'9']) do
+            while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
             begin
               j:=j*10+Ord(VersionSnippet[i])-$30;
               Inc(i);
