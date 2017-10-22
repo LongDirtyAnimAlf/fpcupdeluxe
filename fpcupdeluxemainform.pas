@@ -89,6 +89,7 @@ type
     FFPCTarget,FLazarusTarget:string;
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
+    MissingTools:boolean;
     InternalError:string;
     {$ifdef RemoteLog}
     aDataClient:TDataClient;
@@ -724,6 +725,11 @@ begin
     begin
       MissingCrossLibs:=true;
       memoSummary.Lines.Append('Missing correct cross libraries');
+    end
+    else if ((ExistWordInString(PChar(s),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(s),'Required package is not installed',[soDown]))) then
+    begin
+      MissingTools:=true;
+      memoSummary.Lines.Append('Missing some tools: please install !');
     end
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
@@ -2175,6 +2181,7 @@ begin
 
   MissingCrossBins:=false;
   MissingCrossLibs:=false;
+  MissingTools:=false;
 
   {$ifdef win64}
   FPCupManager.NoJobs:=true;
@@ -2378,16 +2385,22 @@ begin
       else
       begin
         AddMessage('ERROR: Fpcupdeluxe fatal error !');
-        StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
+        // skip reporting trivial errors about missing things
+        if (NOT MissingTools) then
+        begin
+          StatusMessage.Text:='Hmmm, something went wrong ... have a good look at the command screen !';
+          {$ifdef RemoteLog}
+          aDataClient.UpInfo.LogEntry:=memoSummary.Text;
+          aDataClient.SendData;
+          {$endif}
+        end
+        else
+        begin
+          StatusMessage.Text:='Something went wrong due to missing system tools or dev-libs !';
+        end;
       end;
       FPCVersionLabel.Font.Color:=clRed;
       LazarusVersionLabel.Font.Color:=clRed;
-
-      {$ifdef RemoteLog}
-      aDataClient.UpInfo.LogEntry:=memoSummary.Text;
-      aDataClient.SendData;
-      {$endif}
-
     end
     else
     begin

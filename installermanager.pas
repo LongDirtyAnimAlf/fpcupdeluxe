@@ -821,7 +821,7 @@ begin
   FResultSet:=[];
 
   try
-    WritelnLog(DateTimeToStr(now)+': fpcup'+RevisionStr+' ('+VersionDate+') started.',true);
+    WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
     {$IFNDEF NOCONSOLE}
@@ -906,7 +906,8 @@ begin
     {$endif}
 
     {$endif}
-    if (FIncludeModules<>'') and (result) then begin
+    if (FIncludeModules<>'') and (result) then
+    begin
       // run specified additional modules using the only mechanism
       infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
       FSequencer.CreateOnly(FIncludeModules);
