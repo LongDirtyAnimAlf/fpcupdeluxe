@@ -1,0 +1,70 @@
+object Form1: TForm1
+  Left = 375
+  Height = 485
+  Top = 194
+  Width = 807
+  Caption = 'Form1'
+  ClientHeight = 485
+  ClientWidth = 807
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '1.9.0.0'
+  object btnConnect: TButton
+    Left = 7
+    Height = 53
+    Top = 8
+    Width = 137
+    Caption = 'Connect'
+    OnClick = btnConnectClick
+    TabOrder = 0
+  end
+  object mmoQuery: TMemo
+    Left = 7
+    Height = 346
+    Top = 128
+    Width = 137
+    Anchors = [akTop, akLeft, akBottom]
+    Lines.Strings = (
+      'SELECT * FROM Up;'
+    )
+    TabOrder = 1
+  end
+  object DrawGrid1: TDrawGrid
+    Left = 153
+    Height = 313
+    Top = 10
+    Width = 645
+    AlternateColor = clDefault
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ExtendedSelect = False
+    Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goThumbTracking, goSmoothScroll]
+    PopupMenu = PopupMenu1
+    TabOrder = 2
+  end
+  object btnExecuteSQL: TButton
+    Left = 6
+    Height = 32
+    Top = 75
+    Width = 138
+    Caption = 'Execute SQL'
+    OnClick = btnExecuteSQLClick
+    TabOrder = 3
+  end
+  object Memo1: TMemo
+    Left = 153
+    Height = 143
+    Top = 331
+    Width = 645
+    Anchors = [akLeft, akRight, akBottom]
+    ScrollBars = ssAutoVertical
+    TabOrder = 4
+  end
+  object PopupMenu1: TPopupMenu
+    Left = 147
+    Top = 14
+    object miMarkDelete: TMenuItem
+      Caption = 'Mark for delete'
+      OnClick = miMarkDeleteClick
+    end
+  end
+end
