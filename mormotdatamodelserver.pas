@@ -19,6 +19,8 @@ uses
 
 type
   TDataServer = class(TSQLRestServerDB)
+  private
+    function GetTable(aCountry,aFPCVersion:string):TSQLTableJSON;
   protected
     fRootFolder: TFileName;
     fAppFolder: TFileName;
@@ -57,7 +59,6 @@ begin
     Level := [sllError,sllCustom1];
     LevelStackTrace:=[sllNone];
     DestinationPath := fRootFolder+'..'+PathDelim+'log'+PathDelim;
-    //DestinationPath := fRootFolder+'..'+PathDelim+'log';
     if not FileExists(DestinationPath) then
        CreateDir(DestinationPath);
   end;
@@ -74,6 +75,8 @@ begin
   DB.LockingMode := lmExclusive;
 
   CreateMissingTables;
+
+  // change default passwords into some dark secrets ... ;-)
   U := Self.SQLAuthUserClass.Create;
   U.ClearProperties;
   Self.Retrieve('LogonName=?',[],['Admin'],U);
@@ -89,11 +92,12 @@ begin
   Self.Update(U);
   U.Free;
 
+  // allow anybody to see some filtered results
   Self.ServiceMethodByPassAuthentication('GetInfoJSON');
   Self.ServiceMethodByPassAuthentication('GetInfoHTML');
 
   // make base SQL and translate enum into SQL
-  aBaseSQL:='SELECT UpVersion,UpOS,UpWidget,Country,DateOfUse,(CASE UpFunction';
+  aBaseSQL:='SELECT UpVersion,UpOS,UpDistro,UpWidget,Country,DateOfUse,(CASE UpFunction';
   for aFunction := Low(TUpFunction) to High(TUpFunction) do
   begin
     i:=ord(aFunction);
@@ -118,55 +122,54 @@ begin
   Inherited;
 end;
 
-procedure TDataServer.GetInfoHTML(Ctxt: TSQLRestServerURIContext);
+function TDataServer.GetTable(aCountry,aFPCVersion:string):TSQLTableJSON;
 var
   aSQL:string;
+begin
+  aSQL:=aBaseSQL;
+  if Length(aCountry)>0 then aSQL:=aSQL+' WHERE Country = ' + QuotedStr(aCountry);
+  if Length(aFPCVersion)>0 then
+  begin
+    if Length(aCountry)>0 then aSQL:=aSQL+' AND ';
+    aSQL:=aSQL+' WHERE FPCVersion = ' + QuotedStr(aFPCVersion);
+  end;
+  aSQL:=aSQL+';';
+  result:=ExecuteList([TSQLUp],aSQL);
+end;
+
+procedure TDataServer.GetInfoHTML(Ctxt: TSQLRestServerURIContext);
+var
   T:TSQLTableJSON;
   aCountry,aFPCVersion:string;
 begin
   case Ctxt.Method of
     mGET:
     begin
-      aSQL:=aBaseSQL;
       aCountry:=Ctxt.InputStringOrVoid['Country'];
-      if Length(aCountry)>0 then aSQL:=aSQL+' WHERE Country = ' + QuotedStr(aCountry);
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
-      if Length(aFPCVersion)>0 then
-      begin
-        if Length(aCountry)>0 then aSQL:=aSQL+' AND ';
-        aSQL:=aSQL+' WHERE FPCVersion = ' + QuotedStr(aFPCVersion);
-      end;
-      aSQL:=aSQL+';';
-      T:=ExecuteList([TSQLUp],aSQL);
+      T:=GetTable(aCountry,aFPCVersion);
       Ctxt.Returns(T.GetHtmlTable,HTTP_SUCCESS,HTML_CONTENT_TYPE_HEADER);
+      T.Free;
     end;
   end;
 end;
 
 procedure TDataServer.GetInfoJSON(Ctxt: TSQLRestServerURIContext);
 var
-  aSQL:string;
   T:TSQLTableJSON;
   aCountry,aFPCVersion:string;
 begin
   case Ctxt.Method of
     mGET:
     begin
-      aSQL:=aBaseSQL;
       aCountry:=Ctxt.InputStringOrVoid['Country'];
-      if Length(aCountry)>0 then aSQL:=aSQL+' WHERE Country = ' + QuotedStr(aCountry);
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
-      if Length(aFPCVersion)>0 then
-      begin
-        if Length(aCountry)>0 then aSQL:=aSQL+' AND ';
-        aSQL:=aSQL+' WHERE FPCVersion = ' + QuotedStr(aFPCVersion);
-      end;
-      aSQL:=aSQL+';';
-      T:=ExecuteList([TSQLUp],aSQL);
-      // this will return a escaped json with result as title
+      T:=GetTable(aCountry,aFPCVersion);
+      // this will return an escaped json with result as title
       //Ctxt.Results([T.GetJSONValues(True)]);
       // this will return raw json without title
       Ctxt.Returns(T.GetJSONValues(True));
+      T.Free;
     end;
   end;
 end;

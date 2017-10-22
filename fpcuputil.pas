@@ -268,7 +268,7 @@ function StripUrl(URL:string): string;
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 {$IFDEF MSWINDOWS}
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
-function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
+function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 function IsWindows64: boolean;
 {$ENDIF}
 //check if there is at least one directory between Dir and root
@@ -359,7 +359,7 @@ const
 
 
 {$ifdef mswindows}
-function GetWin32Version(var Major,Minor,Build : Integer): Boolean;
+function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 var
   Info: TOSVersionInfo;
 begin
@@ -1601,6 +1601,10 @@ var
   AllOutput : TStringList;
   s:string;
 {$endif}
+{$ifdef MSWindows}
+var
+  Major,Minor,Build: Integer;
+{$endif}
 begin
   result:='unknown';
 
@@ -1636,8 +1640,12 @@ begin
   end;
   {$else}
     {$ifdef MSWindows}
-    result:='windows';
-    //result := GetTargetOS;
+    result:='win';
+    if IsWindows64
+       then result:=result+'64'
+       else result:=result+'32';
+    if GetWin32Version(Major,Minor,Build)
+       then result:=result+'-'+InttoStr(Major)+'-'+InttoStr(Minor)+'-'+InttoStr(Build);
     {$endif}
   {$endif}
 end;

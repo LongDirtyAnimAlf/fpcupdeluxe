@@ -1,0 +1,41 @@
+object Form1: TForm1
+  Left = 310
+  Height = 250
+  Top = 255
+  Width = 224
+  Caption = 'Form1'
+  ClientHeight = 250
+  ClientWidth = 224
+  LCLVersion = '1.9.0.0'
+  object btnStartServer: TButton
+    Left = 7
+    Height = 53
+    Top = 8
+    Width = 209
+    Anchors = [akTop, akLeft, akRight]
+    Caption = 'Start Server'
+    OnClick = btnStartServerClick
+    TabOrder = 0
+  end
+  object Memo1: TMemo
+    Left = 7
+    Height = 115
+    Top = 128
+    Width = 209
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    Lines.Strings = (
+      'Waiting ....'
+    )
+    TabOrder = 1
+  end
+  object btnStopServer: TButton
+    Left = 7
+    Height = 53
+    Top = 64
+    Width = 209
+    Anchors = [akTop, akLeft, akRight]
+    Caption = 'Stop Server'
+    OnClick = btnStopServerClick
+    TabOrder = 2
+  end
+end

@@ -15,6 +15,7 @@ type
   private
     fUpVersion      : RawUTF8;
     fUpOS           : RawUTF8;
+    fUpDistro       : RawUTF8;
     fUpWidget       : RawUTF8;
     fUpInstallDir   : RawUTF8;
     fIPV4Address    : RawUTF8;
@@ -33,6 +34,7 @@ type
   published
     property UpVersion: RawUTF8 index 20 read fUpVersion write fUpVersion;
     property UpOS: RawUTF8 index 30 read fUpOS write fUpOS;
+    property UpDistro: RawUTF8 index 30 read fUpDistro write fUpDistro;
     property UpWidget: RawUTF8 index 30 read fUpWidget write fUpWidget;
     property UpInstallDir: RawUTF8 index 255 read fUpInstallDir write fUpInstallDir;
     property IPV4Address: RawUTF8 index 15 read fIPV4Address write fIPV4Address;

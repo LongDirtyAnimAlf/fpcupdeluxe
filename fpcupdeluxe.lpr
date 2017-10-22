@@ -23,7 +23,7 @@ program fpcupdeluxe;
 uses
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, sysutils,
-  fpcupdeluxemainform, extrasettings, unzipprogress,
+  fpcupdeluxemainform, extrasettings, unzipprogress, infounit,
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
   m_any_to_androidarm,
@@ -83,9 +83,7 @@ uses
   {$endif}
   {$endif}
   m_anyinternallinker_to_win386,
-  m_anyinternallinker_to_win64,
-  infounit
-  ;
+  m_anyinternallinker_to_win64;
 
 {$i revision.inc}
 

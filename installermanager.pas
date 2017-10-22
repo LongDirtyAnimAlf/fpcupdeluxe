@@ -1203,14 +1203,15 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     begin
       if not TestLib(pll^[i]) then
       begin
-        FParent.WritelnLog(etError,'Required package is not installed for Lazarus: '+pll^[i], true);
+        if result=true then FParent.WritelnLog(etError,'Missing library:', true);
+        FParent.WritelnLog(etError, pll^[i], true);
         result:=false;
       end;
     end;
     if (NOT result) AND (Length(Output)>0) then
     begin
-      FParent.WritelnLog(etError,'You need to install at least '+Output+' to build Lazarus !!', true);
-      FParent.WritelnLog(etError,'Make, binutils, subversion/svn [and gdb] are also required !!', true);
+      FParent.WritelnLog(etWarning,'You need to install at least '+Output+' to build Lazarus !!', true);
+      FParent.WritelnLog(etWarning,'Make, binutils, subversion/svn [and gdb] are also required !!', true);
     end;
 
     // do not error out ... user could only install FPC

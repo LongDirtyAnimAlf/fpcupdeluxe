@@ -150,6 +150,7 @@ begin
   aDataClient:=TDataClient.Create;
   aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
+  aDataClient.UpInfo.UpDistro:=GetDistro;
   {$endif}
 
   {$ifdef CPUAARCH64}
