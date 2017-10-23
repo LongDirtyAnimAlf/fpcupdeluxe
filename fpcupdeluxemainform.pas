@@ -1759,15 +1759,6 @@ begin
             DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+BinsURL;
             {$else}
             DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+BinsURL;
-            {$ifdef CPUX64}
-            if AnsiContainsText(GetDistro,'debian') then
-            begin
-              if FPCupManager.CrossOS_Target='darwin' then
-              begin
-                DownloadURL:=DownloadURL+'-debian';
-              end
-            end;
-            {$endif CPUX64}
             {$endif MSWINDOWS}
 
             //default to zip
