@@ -209,6 +209,7 @@ type
     {$ENDIF}
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
+    // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
     // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
@@ -1704,20 +1705,8 @@ end;
 {$ENDIF}
 
 function TInstaller.GetFPCTarget(Native: boolean): string;
-var
-  processorname, os: string;
 begin
-  os := GetTargetOS;
-  processorname := GetTargetCPU;
-
-  if not Native then
-  begin
-    if FCrossCPU_Target <> '' then
-      processorname := FCrossCPU_Target;
-    if FCrossOS_Target <> '' then
-      os := FCrossOS_Target;
-  end;
-  Result := processorname + '-' + os;
+  result:=GetFPCTargetCPUOS(FCrossCPU_Target,FCrossOS_Target,Native);
 end;
 
 function TInstaller.GetPath: string;
@@ -1943,7 +1932,7 @@ begin
   begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
     result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etError);
+    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etWarning);
   end;
 end;
 

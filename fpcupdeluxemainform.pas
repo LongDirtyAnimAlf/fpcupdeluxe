@@ -132,6 +132,7 @@ uses
   //checkoptions,
   installerCore,
   installerUniversal,
+  m_crossinstaller, // for checking of availability of fpc[laz]up[deluxe] cross-compilers
   fpcuputil,
   processutils,
   synedittext;
@@ -154,25 +155,24 @@ begin
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
   {$endif}
 
-  {$ifdef CPUAARCH64}
+  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
   // disable some features
-  FixesBtn.Enabled:=False;
-  StableBtn.Enabled:=False;
-  OldBtn.Enabled:=False;
-  DinoBtn.Enabled:=False;
-  ButtonInstallCrossCompiler.Enabled:=False;
-  {$endif CPUAARCH64}
-  {$ifdef CPUARM}
-  // disable some features
-  FixesBtn.Enabled:=False;
-  StableBtn.Enabled:=False;
-  OldBtn.Enabled:=False;
-  DinoBtn.Enabled:=False;
-  ButtonInstallCrossCompiler.Enabled:=False;
-  {$endif CPUARM}
+  FixesBtn.Visible:=False;
+  StableBtn.Visible:=False;
+  OldBtn.Visible:=False;
+  DinoBtn.Visible:=False;
+  ButtonInstallCrossCompiler.Visible:=False;
+  {$endif}
 
-  radgrpCPU.Enabled:=ButtonInstallCrossCompiler.Enabled;
-  radgrpOS.Enabled:=ButtonInstallCrossCompiler.Enabled;
+  AutoCrossUpdate.Visible:=ButtonInstallCrossCompiler.Visible;
+  radgrpCPU.Visible:=ButtonInstallCrossCompiler.Visible;
+  radgrpOS.Visible:=ButtonInstallCrossCompiler.Visible;
+
+  if (NOT AutoCrossUpdate.Visible) then
+  begin
+    listModules.BorderSpacing.Top:=0;
+    listModules.AnchorSideTop.Control:=FPCVersionLabel;
+  end;
 
   {$ifdef Darwin}
   radgrpOS.Items.Strings[radgrpOS.Items.IndexOf('wince')]:='i-sim';
@@ -1264,9 +1264,9 @@ var
   BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
+  i:integer;
   {$ifdef Unix}
   fileList: TStringList;
-  i:integer;
   {$endif}
 begin
 
@@ -1376,23 +1376,64 @@ begin
     if FPCupManager.CrossCPU_Target='x86_64' then FPCupManager.CrossOS_Target:='win64';
   end;
 
-  if Sender<>nil then
+  if (FPCupManager.CrossCPU_Target='') then
   begin
+    if Sender<>nil then Application.MessageBox(PChar('Please select a CPU target first.'), PChar('CPU error'), MB_ICONERROR);
+    FPCupManager.CrossOS_Target:=''; // cleanup
+    exit;
+  end;
 
-    if (FPCupManager.CrossCPU_Target='') then
+  if (FPCupManager.CrossOS_Target='') then
+  begin
+    if Sender<>nil then Application.MessageBox(PChar('Please select an OS target first.'), PChar('OS error'), MB_ICONERROR);
+    FPCupManager.CrossCPU_Target:=''; // cleanup
+    exit;
+  end;
+
+  if (NOT FPCupManager.CheckValidCPUOS) then
+  begin
+    if Sender<>nil then
     begin
-      Application.MessageBox(PChar('Please select a CPU target first.'), PChar('CPU error'), MB_ICONERROR);
-      FPCupManager.CrossOS_Target:=''; // cleanup
-      exit;
+      Application.MessageBox(PChar('FPC source: No valid CPU / OS target.'), PChar('Configuration error'), MB_ICONERROR);
+    end
+    else
+    begin
+      memoSummary.Lines.Append('');
+      memoSummary.Lines.Append('FPC source: No valid CPU / OS target. Skipping');
     end;
+    FPCupManager.CrossOS_Target:=''; // cleanup
+    FPCupManager.CrossCPU_Target:=''; // cleanup
+    exit;
+  end;
 
-    if (FPCupManager.CrossOS_Target='') then
+  if assigned(CrossInstallers) then
+  begin
+    success:=false;
+    for i := 0 to CrossInstallers.Count - 1 do
     begin
-      Application.MessageBox(PChar('Please select an OS target first.'), PChar('OS error'), MB_ICONERROR);
+      success:=(CrossInstallers[i] = GetFPCTargetCPUOS(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,false));
+      if success then break;
+    end;
+    if (NOT success) then
+    begin
+      if Sender<>nil then
+      begin
+        Application.MessageBox(PChar('No valid CPU / OS crosscompiler found.'), PChar('FPCUPDELUXE Limitation'), MB_ICONERROR);
+      end
+      else
+      begin
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append('FPCUPDELUXE Limitation: No valid CPU / OS crosscompiler found. Skipping');
+        memoSummary.Lines.Append('FPCUPDELUXE Limitation: You could do a feature request !');
+      end;
+      FPCupManager.CrossOS_Target:=''; // cleanup
       FPCupManager.CrossCPU_Target:=''; // cleanup
       exit;
     end;
+  end;
 
+  if Sender<>nil then
+  begin
     {$ifdef Linux}
     if (FPCupManager.CrossOS_Target='darwin') then
     begin
@@ -1934,7 +1975,7 @@ begin
             FPCVersionLabel.Font.Color:=clDefault;
             LazarusVersionLabel.Font.Color:=clDefault;
             AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
-            FPCupManager.Sequencer.ResetAllExecuted;
+            if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
           end;
 
@@ -2126,39 +2167,22 @@ begin
 end;
 
 procedure TForm1.DisEnable(Sender: TObject;value:boolean);
+var
+  c: TControl;
+  i: integer;
 begin
-  //if Sender<>BitBtnFPCandLazarus then
-  BitBtnFPCandLazarus.Enabled:=value;
-  //if Sender<>btnInstallModule then
-  btnInstallModule.Enabled:=value;
-  btnInstallDirSelect.Enabled:=value;
-  BitBtnFPCOnly.Enabled:=value;
-  BitBtnLazarusOnly.Enabled:=value;
-  btnSetupPlus.Enabled:=value;
-  btnClearLog.Enabled:=value;
-  AutoCrossUpdate.Enabled:=value;
-
-  ListBoxFPCTarget.Enabled:=value;
-  ListBoxLazarusTarget.Enabled:=value;
-  listModules.Enabled:=value;
-
-  InstallDirEdit.Enabled:=value;
-
-  ButtonInstallCrossCompiler.Enabled:=value;
-  radgrpCPU.Enabled:=ButtonInstallCrossCompiler.Enabled;
-  radgrpOS.Enabled:=ButtonInstallCrossCompiler.Enabled;
-
-  CheckAutoClear.Enabled:=value;
-
-  TrunkBtn.Enabled:=value;
-  NPBtn.Enabled:=value;
-  FixesBtn.Enabled:=value;
-  StableBtn.Enabled:=value;
-  OldBtn.Enabled:=value;
-  DinoBtn.Enabled:=value;
-  mORMotBtn.Enabled:=value;
-
-  if Sender=nil then BitBtnHalt.Enabled:=value;
+  for i := 0 to ComponentCount - 1 do
+  begin
+    if (NOT (Components[i] is TControl)) then continue;
+    c := Components[i] AS TControl;
+    if c is TLabel then continue;
+    if c is TPanel then continue;
+    if c is TGroupBox then continue;
+    if c = BitBtnHalt then continue;
+    if c = SynEdit1 then continue;
+    if c = memoSummary then continue;
+    c.Enabled := value;
+  end;
 end;
 
 procedure TForm1.PrepareRun;

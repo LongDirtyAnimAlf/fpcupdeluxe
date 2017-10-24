@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 239
+  Left = 390
   Height = 631
-  Top = 63
+  Top = 86
   Width = 1052
   Anchors = []
   Caption = 'Form1'
@@ -53,6 +53,7 @@ object Form1: TForm1
     TabOrder = 21
   end
   object radgrpCPU: TRadioGroup
+    AnchorSideTop.Control = FPCVersionLabel
     Left = 152
     Height = 304
     Top = 40

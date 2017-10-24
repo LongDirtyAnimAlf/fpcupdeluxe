@@ -312,7 +312,7 @@ begin
   begin
     FBinsFound:=true;
 
-    if hardfloat then ShowInfo('Found hardfloat binary utilities. Please make sure you specified -dFPC_ARMHF in your FPCOPT in order to build a hard-float cross-compiler.',etWarning);
+    if hardfloat then ShowInfo('Found hardfloat binary utilities. Please make sure you did NOT specified -dFPC_ARMEL in your FPCOPT !',etWarning);
 
     { for raspberry pi look into
     instruction set

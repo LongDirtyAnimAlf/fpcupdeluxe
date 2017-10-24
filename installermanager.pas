@@ -578,6 +578,7 @@ type
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
+    function CheckValidCPUOS: boolean;
     // Stop talking. Do it! Returns success status
     function Run: boolean;
 
@@ -652,11 +653,12 @@ type
 
 implementation
 
-{$ifdef linux}
 uses
-  strutils,
-  processutils;
-{$endif}
+  strutils
+  {$ifdef linux}
+  ,processutils
+  {$endif}
+  ;
 
 { TFPCupManager }
 
@@ -797,6 +799,106 @@ begin
   FSequencer.AddSequence(installerUniversal.GetModuleList);
   result:=installerUniversal.GetModuleEnabledList(FModuleEnabledList);
 end;
+
+function TFPCupManager.CheckValidCPUOS: boolean;
+var
+  TxtFile:Text;
+  s:string;
+  x:integer;
+  sl:TStringList;
+  cpuindex:integer;
+begin
+  result:=false;
+
+  //parsing fpmkunit.pp for valid CPU / OS combos
+
+  s:=IncludeTrailingPathDelimiter(FPCSourceDirectory)+'packages'+DirectorySeparator+'fpmkunit'+DirectorySeparator+'src'+DirectorySeparator + 'fpmkunit.pp';
+  if FileExists(s) then
+  begin
+
+    AssignFile(TxtFile,s);
+    Reset(TxtFile);
+    while NOT EOF (TxtFile) do
+    begin
+      Readln(TxtFile,s);
+
+      x:=Pos('OSCPUSupported : array[TOS,TCpu]',s);
+      if x>0 then
+      begin
+        // read the line with all cpus
+        // { os          none   i386    m68k  ppc    sparc  x86_64 arm    ppc64  avr    armeb  mips   mipsel jvm    i8086 aarch64 sparc64}
+        Readln(TxtFile,s);
+        s:=DelChars(s,'{');
+        s:=DelChars(s,'}');
+        s:=Trim(s);
+        while true do
+        begin
+          x:=Pos('  ',s);
+          if x>0 then Delete(s,x,1) else break;
+        end;
+        sl:=TStringList.Create;
+        try
+          sl.Delimiter:=' ';
+          sl.StrictDelimiter:=true;
+          sl.DelimitedText:=s;
+          // slcpu now contains i386,m68k,....
+          s:=CrossCPU_Target;
+          if s='powerpc' then s:='ppc';
+          if s='powerpc64' then s:='ppc64';
+          cpuindex:=sl.IndexOf(s);
+          sl.Clear;
+          if cpuindex>=0 then
+          begin
+            repeat
+              // { none }    ( false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false),
+              Readln(TxtFile,s);
+
+              if Pos(');',s)>0 then break;
+              if Length(Trim(s))=0 then break;
+
+              s:=DelChars(s,'{');
+              s:=DelChars(s,'}');
+              s:=DelChars(s,'(');
+              s:=DelChars(s,')');
+              s:=StringReplace(s,',',' ',[rfReplaceAll]);
+              s:=Trim(s);
+              while true do
+              begin
+                x:=Pos('  ',s);
+                if x>0 then Delete(s,x,1) else break;
+              end;
+              sl.DelimitedText:=s;
+              if sl.Count>cpuindex then
+              begin
+                if sl[0]=CrossOS_Target then
+                begin
+                  if sl[cpuindex]='true' then
+                  begin
+                    result:=true;
+                    break;
+                  end;
+                end;
+              end;
+            until EOF(TxtFile);
+          end;
+
+        finally
+          sl.Free;
+        end;
+
+        break;
+
+      end;
+
+    end;
+
+    CloseFile(TxtFile);
+
+  end else infoln('Tried to get CPU OS combo from source, but failed.',etInfo);
+
+end;
+
+
 
 function TFPCupManager.Run: boolean;
 {$IFDEF MSWINDOWS}
@@ -1295,7 +1397,7 @@ begin
 
   // FPC:
   if (uppercase(ModuleName)='FPC') then
-    begin
+  begin
     if assigned(FInstaller) then
       begin
       // Check for existing normal compiler, or exact same cross compiler
@@ -1323,6 +1425,7 @@ begin
     end
     else
       FInstaller:=TFPCNativeInstaller.Create;
+
     FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
     FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
@@ -1333,7 +1436,7 @@ begin
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
     FInstaller.URL:=FParent.FPCURL;
-    end
+  end
 
   {$ifndef FPCONLY}
   // Lazarus:
@@ -1345,8 +1448,8 @@ begin
     or (uppercase(ModuleName)='IDE')
     or (uppercase(ModuleName)='BIGIDE')
     or (uppercase(ModuleName)='USERIDE')
-    then
-    begin
+  then
+  begin
     if assigned(FInstaller) then
       begin
       if (not crosscompiling and (FInstaller is TLazarusNativeInstaller)) or
@@ -1385,13 +1488,14 @@ begin
     (FInstaller as TLazarusInstaller).PrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
     (FInstaller as TLazarusInstaller).SourcePatches:=FParent.FLazarusPatches;
     FInstaller.URL:=FParent.LazarusURL;
-    end
+  end
 
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
   {$endif}
-  else if uppercase(ModuleName)='HELPFPC' then
-      begin
+  else if uppercase(ModuleName)='HELPFPC'
+  then
+  begin
       if assigned(FInstaller) then
         begin
         if (FInstaller is THelpFPCInstaller) then
@@ -1407,10 +1511,11 @@ begin
         FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
       else
         FInstaller.Compiler:=FParent.CompilerName;
-      end
+  end
   {$ifndef FPCONLY}
-  else if uppercase(ModuleName)='HELPLAZARUS' then
-      begin
+  else if uppercase(ModuleName)='HELPLAZARUS'
+  then
+  begin
       if assigned(FInstaller) then
         begin
        if (FInstaller is THelpLazarusInstaller) then
@@ -1431,10 +1536,10 @@ begin
       (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingBackslash(FParent.FPCInstallDirectory);// + 'bin' + DirectorySeparator + FInstaller.SourceCPU + '-' + FInstaller.SourceOS;
       (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=FParent.FPCSourceDirectory;
       (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
-      end
+  end
   {$endif}
   else       // this is a universal module
-    begin
+  begin
       if assigned(FInstaller) then
         begin
         if (FInstaller is TUniversalInstaller) and
@@ -1462,7 +1567,7 @@ begin
         FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
       else
         FInstaller.Compiler:=FParent.CompilerName;
-    end;
+  end;
 
 
   if assigned(FInstaller) then
@@ -1570,7 +1675,7 @@ var
 
 begin
 while Sequence<>'' do
-  begin
+begin
   i:=pos(';',Sequence);
   if i>0 then
     line:=copy(Sequence,1,i-1)
@@ -1579,21 +1684,21 @@ while Sequence<>'' do
   delete(Sequence,1,length(line)+1);
   line:=NoWhite(line);
   if line<>'' then
-    begin
+  begin
     i:=pos(' ',line);
     if i>0 then
-      begin
+    begin
       key:=copy(line,1,i-1);
       param:=NoWhite(copy(line,i,length(line)));
-      end
+    end
     else
-      begin
+    begin
       key:=line;
       param:='';
-      end;
+    end;
     key:=NoWhite(key);
     if key<>'' then
-      begin
+    begin
       i:=Length(FStateMachine);
       SetLength(FStateMachine,i+1);
       instr:=KeyStringToKeyword(Uppercase(Key));
@@ -1602,15 +1707,15 @@ while Sequence<>'' do
         FParent.WritelnLog('Invalid instruction '+Key+' in sequence '+sequencename);
       FStateMachine[i].param:=param;
       if instr in [SMdeclare,SMdeclareHidden] then
-        begin
+      begin
         AddToModuleList(uppercase(param),i);
         sequencename:=param;
-        end;
+      end;
       if instr = SMdeclare then
         FParent.FModulePublishedList.Add(param);
-      end;
     end;
   end;
+end;
 result:=true;
 end;
 

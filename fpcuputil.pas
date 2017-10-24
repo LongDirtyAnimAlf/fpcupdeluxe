@@ -320,6 +320,7 @@ function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
 function GetTargetOS:string;
 function GetTargetCPUOS:string;
+function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
 function GetDistro:string;
 
 implementation
@@ -1726,6 +1727,25 @@ function GetTargetCPUOS:string;
 begin
   result:=GetTargetCPU+'-'+GetTargetOS;
 end;
+
+
+function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
+var
+  processorname, os: string;
+begin
+  os := GetTargetOS;
+  processorname := GetTargetCPU;
+
+  if not Native then
+  begin
+    if aCPU <> '' then
+      processorname := aCPU;
+    if aOS <> '' then
+      os := aOS;
+  end;
+  Result := processorname + '-' + os;
+end;
+
 
 {TThreadedUnzipper}
 

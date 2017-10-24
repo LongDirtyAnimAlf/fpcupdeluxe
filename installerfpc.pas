@@ -108,7 +108,6 @@ type
     function GetCompilerVersionFromSource(aSourcePath: string): string;
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
     function GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
-
     // Creates fpc proxy script that masks general fpc.cfg
     function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
