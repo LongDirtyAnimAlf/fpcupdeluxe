@@ -11,7 +11,7 @@ type
       );
 
   // keep it very simple: all in one record !!
-  TSQLUp = class(TSQLRecord)
+  TSQLUpBase = class(TSQLRecord)
   private
     fUpVersion      : RawUTF8;
     fUpOS           : RawUTF8;

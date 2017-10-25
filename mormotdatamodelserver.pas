@@ -18,9 +18,14 @@ uses
 {$I mORMotDataModel.inc}
 
 type
+  TSQLUp = class(TSQLUpBase)
+  public
+    procedure ComputeFieldsBeforeWrite(aRest: TSQLRest; aOccasion: TSQLEvent);override;
+  end;
+
   TDataServer = class(TSQLRestServerDB)
   private
-    function GetTable(const aCountry,aFPCVersion:string;const witherrors:boolean=false):TSQLTableJSON;
+    function GetTable(const aCountry,aFPCVersion,aOS,aDistro:string;const witherrors:boolean=false):TSQLTableJSON;
   protected
     fRootFolder: TFileName;
     fAppFolder: TFileName;
@@ -38,6 +43,17 @@ implementation
 
 uses
   SynSQLite3;
+
+{ TSQLUp }
+
+procedure TSQLUp.ComputeFieldsBeforeWrite(aRest: TSQLRest; aOccasion: TSQLEvent);
+begin
+  inherited;
+  // limit length of logentry
+  if aOccasion=seAdd
+     then if Length(Self.fLogEntry)>500
+             then Delete(Self.fLogEntry,500,MaxInt);
+end;
 
 { TDataServer }
 
@@ -70,6 +86,10 @@ begin
   //TSQLLogEntry.AddFilterOrValidate('UpOS',TSynValidateNonVoidText.Create);
 
   inherited Create(aModel,fRootFolder+'data.db3',True);
+
+  // use this to limit length of logentry !!
+  // procedure TSQLUp.ComputeFieldsBeforeWrite(aRest: TSQLRest; aOccasion: TSQLEvent);
+  include(Self.fOptions,rsoComputeFieldsBeforeWriteOnServerSide);
 
   DB.Synchronous := smNormal;
   DB.LockingMode := lmExclusive;
@@ -122,7 +142,7 @@ begin
   Inherited;
 end;
 
-function TDataServer.GetTable(const aCountry,aFPCVersion:string;const witherrors:boolean=false):TSQLTableJSON;
+function TDataServer.GetTable(const aCountry,aFPCVersion,aOS,aDistro:string;const witherrors:boolean=false):TSQLTableJSON;
 var
   aSQL:string;
 begin
@@ -137,6 +157,16 @@ begin
     if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
     aSQL:=aSQL+'FPCVersion = ' + QuotedStr(aFPCVersion);
   end;
+  if Length(aOS)>0 then
+  begin
+    if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
+    aSQL:=aSQL+'UpOS LIKE ' + QuotedStr('%'+aOS+'%');
+  end;
+  if Length(aDistro)>0 then
+  begin
+    if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
+    aSQL:=aSQL+'UpDistro LIKE ' + QuotedStr('%'+aDistro+'%');
+  end;
   if (NOT witherrors) then
   begin
     if Pos('WHERE',aSQL)>0 then aSQL:=aSQL+' AND ' else aSQL:=aSQL+' WHERE ' ;
@@ -149,7 +179,7 @@ end;
 procedure TDataServer.GetInfoHTML(Ctxt: TSQLRestServerURIContext);
 var
   T:TSQLTableJSON;
-  aCountry,aFPCVersion:string;
+  aCountry,aFPCVersion,aOS,aDistro:string;
 
 begin
   case Ctxt.Method of
@@ -158,9 +188,11 @@ begin
       aCountry:=Ctxt.InputStringOrVoid['Country'];
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
+      aOS:=Ctxt.InputStringOrVoid['OS'];
+      aDistro:=Ctxt.InputStringOrVoid['Distro'];
       if Length(Ctxt.InputStringOrVoid['ShowErrors'])>0
-         then T:=GetTable(aCountry,aFPCVersion,true)
-         else T:=GetTable(aCountry,aFPCVersion);
+         then T:=GetTable(aCountry,aFPCVersion,aOS,aDistro,true)
+         else T:=GetTable(aCountry,aFPCVersion,aOS,aDistro);
       Ctxt.Returns(T.GetHtmlTable,HTTP_SUCCESS,HTML_CONTENT_TYPE_HEADER);
       T.Free;
     end;
@@ -170,16 +202,18 @@ end;
 procedure TDataServer.GetInfoJSON(Ctxt: TSQLRestServerURIContext);
 var
   T:TSQLTableJSON;
-  aCountry,aFPCVersion:string;
+  aCountry,aFPCVersion,aOS,aDistro:string;
 begin
   case Ctxt.Method of
     mGET:
     begin
       aCountry:=Ctxt.InputStringOrVoid['Country'];
       aFPCVersion:=Ctxt.InputStringOrVoid['FPCVersion'];
+      aOS:=Ctxt.InputStringOrVoid['OS'];
+      aDistro:=Ctxt.InputStringOrVoid['Distro'];
       if Length(Ctxt.InputStringOrVoid['ShowErrors'])>0
-         then T:=GetTable(aCountry,aFPCVersion,true)
-         else T:=GetTable(aCountry,aFPCVersion);
+         then T:=GetTable(aCountry,aFPCVersion,aOS,aDistro,true)
+         else T:=GetTable(aCountry,aFPCVersion,aOS,aDistro);
       // this will return an escaped json with result as title
       //Ctxt.Results([T.GetJSONValues(True)]);
       // this will return raw json without title

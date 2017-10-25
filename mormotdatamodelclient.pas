@@ -12,6 +12,8 @@ uses
 {$I mORMotDataModel.inc}
 
 type
+  TSQLUp = class(TSQLUpBase);
+
   TDataClient = class(TSQLRestClientHTTP)
   private
     FConnected:boolean;
