@@ -57,14 +57,21 @@ function Tany_darwinpowerpc.GetLibs(Basepath:string): boolean;
 const
   DirName='powerpc-darwin';
   LibName='libc.dylib';
+var
+  s:string;
+  i,aVersion:integer;
+  aOption:string;
 begin
-
   result:=FLibsFound;
   if result then exit;
 
   // begin simple: check presence of library file in basedir
   if not result then
     result:=SearchLibrary(Basepath,LibName);
+
+  // for osxcross with special libs: search also for libc.tbd
+  if not result then
+    result:=SearchLibrary(Basepath,'libc.tbd');
 
   if not result then
     result:=SearchLibrary(IncludeTrailingPathDelimiter(Basepath)+'usr'+DirectorySeparator+'lib',LibName);
@@ -77,10 +84,38 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
+  // also for osxcross
+  if not result then
+  begin
+    for aVersion:=15 downto 3 do
+    begin
+      s:='MacOSX10.'+InttoStr(aVersion);
+      result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'u.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
+      if not result then
+         result:=SimpleSearchLibrary(BasePath,DirName+DirectorySeparator+s+'u.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
+      if result then
+      begin
+        i:=StringListStartsWith(FCrossOpts,'-WM');
+        if i=-1 then
+        begin
+          aOption:='-WM'+'10.'+InttoStr(aVersion);
+          FCrossOpts.Add(aOption+' ');
+          ShowInfo('Did not find any -WM; using '+aOption+'.',etInfo);
+        end else aOption:=Trim(FCrossOpts[aVersion]);
+        AddFPCCFGSnippet(aOption);
+        break;
+      end;
+    end;
+  end;
+
   if not result then
   begin
     {$IFDEF UNIX}
-    FLibsPath:='/usr/lib/powerpc-linux-gnu'; //debian Jessie+ convention
+    FLibsPath:='/usr/lib/powerpc-darwin-gnu'; //debian Jessie+ convention
     result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
@@ -96,23 +131,21 @@ begin
     '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
 
     // specialities for osxcross
-    if Pos('osxcross',FLibsPath)>0 then
+    //if Pos('osxcross',FLibsPath)>0 then
     begin
-      FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system\'+LineEnding+
-      '-k-framework'+LineEnding+
-      '-kAppKit'+LineEnding+
-      '-k-framework'+LineEnding+
-      '-kFoundation'+LineEnding+
-      '-k-framework'+LineEnding+
-      '-kCoreFoundation'+LineEnding+
-      // -XRx is needed for fpc : prepend <x> to all linker search paths
-      '-XR'+ExcludeTrailingPathDelimiter(Basepath);
-    end;
+      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+      s:=ExpandFileName(s);
+      s:=ExcludeTrailingBackslash(s);
 
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    //'-FL/usr/lib/ld-linux.so.2' {buildfaq 3.3.1: the name of the dynamic linker on the target};
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+      AddFPCCFGSnippet('-k-framework -kAppKit');
+      AddFPCCFGSnippet('-k-framework -kFoundation');
+      AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+      AddFPCCFGSnippet('-k-syslibroot -k'+s);
+      AddFPCCFGSnippet('-k-arch -kppc');
+
+      AddFPCCFGSnippet('-XR'+s);
+    end;
   end;
 end;
 
@@ -133,18 +166,9 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for (cross)binutils from https://github.com/tpoechtrager/osxcross
-  // fpc version from https://github.com/LongDirtyAnimalf/osxcross
-  {$IFDEF MSWINDOWS}
-  if IsWindows64
-     then BinPrefixTry:='x86_64'
-     else BinPrefixTry:='i386';
-  {$else}
-  BinPrefixTry:=GetTargetCPU;
-  {$endif}
-  BinPrefixTry:=BinPrefixTry+'-apple-darwin';
+  BinPrefixTry:='powerpc-apple-darwin';
 
-  for i:=15 downto 10 do
+  for i:=15 downto 8 do
   begin
     if not result then
     begin
@@ -165,11 +189,12 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-XX'+LineEnding+
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XX');
+    AddFPCCFGSnippet('-CX');
+    AddFPCCFGSnippet('-Xd');
+    //AddFPCCFGSnippet('-gw');
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix);
   end;
 end;
 
@@ -195,11 +220,12 @@ end;
 var
   any_darwinpowerpc:Tany_darwinpowerpc;
 
+{$ifdef mswindows}
 initialization
   any_darwinpowerpc:=Tany_darwinpowerpc.Create;
   RegisterExtension(any_darwinpowerpc.TargetCPU+'-'+any_darwinpowerpc.TargetOS,any_darwinpowerpc);
 finalization
   any_darwinpowerpc.Destroy;
-
+{$endif mswindows}
 end.
 

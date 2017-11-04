@@ -19,6 +19,23 @@ program fpcupdeluxe;
     Marius Maximus
 
 *)
+(*
+//static QT5 on Linux
+{$ifdef Linux}
+  {$ifdef LCLQT5}
+    //{$linklib libc_nonshared.a}
+    {$L libgcc_s.so.1}
+    {$L libstdc++.so.6}
+    {$L libQt5PrintSupport.so.5}
+    {$L libQt5Widgets.so.5}
+    {$L libQt5Gui.so.5}
+    {$L libQt5Network.so.5}
+    {$L libQt5Core.so.5}
+    {$L libQt5X11Extras.so.5}
+    {$linklib libQt5Pas.a}
+  {$endif}
+{$endif}
+*)
 
 uses
   Interfaces, // this includes the LCL widgetset
@@ -57,6 +74,7 @@ uses
   m_any_to_darwin386,
   m_any_to_darwinx64,
   m_any_to_darwinpowerpc,
+  m_any_to_darwinpowerpc64,
   m_any_to_darwinarm,
   m_any_to_darwinaarch64,
   {$endif}

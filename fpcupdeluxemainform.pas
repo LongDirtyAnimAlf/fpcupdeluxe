@@ -672,6 +672,8 @@ begin
 
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
   begin
+    memoSummary.Lines.Append(BeginSnippet+' Start of compile error summary.');
+
     if (ExistWordInString(PChar(s),'fatal: internal error',[soDown])) then
     begin
       x:=RPos(' ',s);
@@ -759,22 +761,22 @@ begin
     if x>0 then
     begin
       // add help into summary memo
-      memoSummary.Lines.Append('Missing library: lib'+Copy(s,x+2,MaxInt));
+      memoSummary.Lines.Append(BeginSnippet+' Missing library: lib'+Copy(s,x+2,MaxInt));
     end;
   end;
 
   // diskspace errors
   if (ExistWordInString(PChar(s),'Stream write error',[soDown])) OR (ExistWordInString(PChar(s),'disk full',[soDown])) then
   begin
-    memoSummary.Lines.Append('There is not enough diskspace to finish this operation.');
-    memoSummary.Lines.Append('Please free some space and re-run fpcupdeluxe.');
+    memoSummary.Lines.Append(BeginSnippet+' There is not enough diskspace to finish this operation.');
+    memoSummary.Lines.Append(BeginSnippet+' Please free some space and re-run fpcupdeluxe.');
   end;
 
   // RAM errors
   if (ExistWordInString(PChar(s),'Can''t call the assembler',[soDown])) then
   begin
-    memoSummary.Lines.Append('Most likely, there is not enough RAM (swap) to finish this operation.');
-    memoSummary.Lines.Append('Please add some swap-space (1GB) and re-run fpcupdeluxe.');
+    memoSummary.Lines.Append(BeginSnippet+' Most likely, there is not enough RAM (swap) to finish this operation.');
+    memoSummary.Lines.Append(BeginSnippet+' Please add some swap-space (1GB) and re-run fpcupdeluxe.');
   end;
 
   // warn for time consuming help files
@@ -815,6 +817,7 @@ begin
     then
     begin
       // print the error itself and the next 2 lines (good or lucky guess)
+      memoSummary.Lines.Append(BeginSnippet+' Start of special error summary.');
       memoSummary.Lines.Append(SynEdit1.Lines[x]);
       memoSummary.Lines.Append(SynEdit1.Lines[x+1]);
       memoSummary.Lines.Append(SynEdit1.Lines[x+2]);
@@ -1731,6 +1734,8 @@ begin
         begin
           if FPCupManager.CrossCPU_Target='i386' then BinsURL:='x86';
           if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='x86';
+          if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='powerpc';
+          if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='powerpc';
         end;
 
         if FPCupManager.CrossOS_Target='freebsd' then BinsURL:='FreeBSD'+BinsURL else
@@ -1753,6 +1758,12 @@ begin
             BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
           end;
+          if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+          begin
+            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+          end;
+
           // Darwin is special: combined libs for arm and aarch64 with osxcross
           if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
           begin

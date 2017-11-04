@@ -83,6 +83,7 @@ begin
         // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
         // will be a bit redundant , but just to be sure !
         if (AnsiContainsText(line,'error:'))
+           OR (AnsiContainsText(line,'donalf:'))
            OR (AnsiContainsText(line,'fatal:'))
            OR (AnsiContainsText(line,'fpcupdeluxe:'))
            OR (AnsiContainsText(line,'execute:'))

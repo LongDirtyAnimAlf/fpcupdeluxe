@@ -13,9 +13,6 @@ uses
 
 implementation
 
-uses
-  LazFileUtils;
-
 type
 
 { TDarwinarm }
@@ -56,25 +53,18 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
+
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
 
     s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
-    s:=ResolveDots(s);
+    s:=ExpandFileName(s);
     s:=ExcludeTrailingBackslash(s);
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'System'+DirectorySeparator+LineEnding+
-    '-k-framework'+LineEnding+
-    '-kFoundation'+LineEnding+
-    '-k-framework'+LineEnding+
-    '-kCoreFoundation'+LineEnding+
-    // -XRx is needed for fpc : prepend <x> to all linker search paths
-    //'-XR'+ExcludeTrailingPathDelimiter(Basepath);
-    '-Xd'+LineEnding+
-    '-XR'+s;
 
-    //FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'System'+DirectorySeparator);
+    AddFPCCFGSnippet('-k-framework -kFoundation');
+    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+    AddFPCCFGSnippet('-Xd');
+    AddFPCCFGSnippet('-XR'+s);
   end;
 
 (*

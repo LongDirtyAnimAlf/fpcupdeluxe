@@ -1863,17 +1863,19 @@ begin
         {$endif}
         SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
         SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
-        end;
+      end;
       if not result then
-        begin
+      begin
         SeqAttr^.Executed:=ESFailed;
+        {$IFDEF DEBUG}
         FParent.WritelnLog(etError,localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName+
           '; instr: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr))+
           '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
           ', param: '+FStateMachine[InstructionPointer].param);
+        {$ENDIF DEBUG}
         CleanUpInstaller;
         exit; //failure, bail out
-        end;
+      end;
       InstructionPointer:=InstructionPointer+1;
       if InstructionPointer>=length(FStateMachine) then  //somebody forgot end
       begin

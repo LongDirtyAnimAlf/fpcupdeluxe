@@ -91,7 +91,7 @@ type
     // Note: the libraries should be presumably under the basepath using the Lazarus naming convention??
     function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;virtual;
     {$endif}
-    procedure AddFPCCFGSnippet(aSnippet: string);
+    procedure AddFPCCFGSnippet(aSnip: string);
     // In your descendent, implement this function: you can download cross compile binutils or check for their existence
     function GetBinUtils(Basepath:string):boolean;virtual;
     // Parses space-delimited crossopt parameters and sets the CrossOpt property
@@ -157,16 +157,23 @@ begin
   result:=FCrossModuleNamePrefix+'_'+TargetOS+'-'+TargetCPU;
 end;
 
-procedure TCrossInstaller.AddFPCCFGSnippet(aSnippet: string);
+procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string);
+var
+  aSnippd:string;
+  i:integer;
 begin
-  if Length(Trim(aSnippet))=0 then exit;
-  if (Pos(aSnippet+' ',FFPCCFGSnippet)>0) OR (Pos(aSnippet+LineEnding,FFPCCFGSnippet)>0) then exit; // already there: skip
+  if Length(Trim(aSnip))=0 then exit;
+
+  aSnippd:=StringReplace(aSnip,' ',LineEnding,[rfReplaceAll]);
+  if (Pos(aSnippd,FFPCCFGSnippet)>0) then exit;
+
   if Length(FPCCFGSnippet)>0 then
   begin
     if RPos(LineEnding,FFPCCFGSnippet)<Length(FFPCCFGSnippet) then FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding;
-    FFPCCFGSnippet:=FFPCCFGSnippet+aSnippet;
+    FFPCCFGSnippet:=FFPCCFGSnippet+aSnippd;
   end
-  else FFPCCFGSnippet:=aSnippet;
+  else FFPCCFGSnippet:=aSnippd;
+
 end;
 
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');

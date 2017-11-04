@@ -47,12 +47,21 @@ uses
 { TSQLUp }
 
 procedure TSQLUp.ComputeFieldsBeforeWrite(aRest: TSQLRest; aOccasion: TSQLEvent);
+var
+  i:integer;
 begin
   inherited;
-  // limit length of logentry
-  if aOccasion=seAdd
-     then if Length(Self.fLogEntry)>500
-             then Delete(Self.fLogEntry,500,MaxInt);
+  // limit length and contents of logentry
+  if aOccasion=seAdd then
+  begin
+    i:=Length(Self.fLogEntry);
+    if i>500 then Delete(Self.fLogEntry,1,i-500);
+    i:=Pos('Success',Self.fLogEntry);
+    if i>0 then exit;
+    i:=Pos('fpcupdeluxe',Self.fLogEntry);
+    if i=0 then i:=MaxInt else i:=i-1;
+    Delete(Self.fLogEntry,1,i);
+  end;
 end;
 
 { TDataServer }

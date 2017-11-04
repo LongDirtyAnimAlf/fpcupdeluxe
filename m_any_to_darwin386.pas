@@ -38,9 +38,6 @@ uses
 
 implementation
 
-uses
-  LazFileUtils;
-
 type
 
 { Tany_darwin386 }
@@ -115,30 +112,19 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
 
-    // specialities for osxcross
-    //if Pos('osxcross',FLibsPath)>0 then
-    begin
-      s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
-      s:=ResolveDots(s);
-      s:=ExcludeTrailingBackslash(s);
-      FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator+LineEnding+
-      '-k-framework'+LineEnding+
-      '-kAppKit'+LineEnding+
-      '-k-framework'+LineEnding+
-      '-kFoundation'+LineEnding+
-      '-k-framework'+LineEnding+
-      '-kCoreFoundation'+LineEnding+
-      // -XRx is needed for fpc : prepend <x> to all linker search paths
-      //'-XR'+ExcludeTrailingPathDelimiter(Basepath);
-      '-XR'+s;
-    end;
+    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
+    s:=ExpandFileName(s);
+    s:=ExcludeTrailingBackslash(s);
 
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'system'+DirectorySeparator);
+    AddFPCCFGSnippet('-k-framework -kAppKit');
+    AddFPCCFGSnippet('-k-framework -kFoundation');
+    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+    AddFPCCFGSnippet('-XR'+s);
+
+    AddFPCCFGSnippet('-Xr/usr/lib');
   end;
 end;
 
