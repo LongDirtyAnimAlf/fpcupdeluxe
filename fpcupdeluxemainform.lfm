@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 297
+  Left = 302
   Height = 631
-  Top = 194
+  Top = 215
   Width = 1052
   Anchors = []
   Caption = 'Form1'
@@ -1599,7 +1599,6 @@ object Form1: TForm1
     Width = 208
     BorderSpacing.Left = 12
     BorderSpacing.Top = 4
-    Font.Color = clRed
     ParentFont = False
     ParentShowHint = False
     ShowHint = True
@@ -1678,10 +1677,9 @@ object Form1: TForm1
     BorderSpacing.CellAlignHorizontal = ccaCenter
     BorderSpacing.CellAlignVertical = ccaCenter
     BevelInner = bvLowered
-    ChildSizing.EnlargeVertical = crsScaleChilds
-    ChildSizing.ShrinkVertical = crsScaleChilds
     ClientHeight = 56
     ClientWidth = 1034
+    Constraints.MinHeight = 50
     TabOrder = 4
     object TrunkBtn: TBitBtn
       AnchorSideLeft.Control = Panel1

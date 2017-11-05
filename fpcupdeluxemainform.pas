@@ -2312,7 +2312,7 @@ begin
     {$ifdef LCLCOCOA}
       FPCupManager.CrossLCL_Platform:='cocoa';
     {$else}
-      {$ifdef CPUX64}
+      {$ifdef CPU64}
         {$ifdef LCLQT5}
           FPCupManager.CrossLCL_Platform:='qt5';
         {$else}
