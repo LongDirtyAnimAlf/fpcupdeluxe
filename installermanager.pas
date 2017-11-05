@@ -1416,10 +1416,8 @@ begin
     if CrossCompiling then
     begin
       FInstaller:=TFPCCrossInstaller.Create;
-      FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
+      FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
       FInstaller.CrossOPT:=FParent.CrossOPT;
-      FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
-      FInstaller.CrossOS_SubArch:=FParent.CrossOS_SubArch;
       FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
       FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
     end
@@ -1463,10 +1461,8 @@ begin
     if CrossCompiling then
       begin
       FInstaller:=TLazarusCrossInstaller.Create;
-      FInstaller.CrossCPU_Target:=FParent.CrossCPU_Target;
+      FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
       FInstaller.CrossOPT:=FParent.CrossOPT;
-      FInstaller.CrossOS_Target:=FParent.CrossOS_Target;
-      FInstaller.CrossOS_SubArch:=FParent.CrossOS_SubArch;
       end
     else
       FInstaller:=TLazarusNativeInstaller.Create;

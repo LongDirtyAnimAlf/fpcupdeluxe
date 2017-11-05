@@ -218,13 +218,10 @@ uses
 
 function TLazarusCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 var
-  CrossInstaller: TCrossInstaller;
   Options: string;
   LazBuildApp: string;
 begin
   Result:=inherited;
-
-  CrossInstaller := GetCrossInstaller;
 
   FErrorLog.Clear;
 
@@ -285,8 +282,8 @@ begin
 
         Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
         Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-        Processor.Parameters.Add('CPU_TARGET=' + FCrossCPU_Target);
-        Processor.Parameters.Add('OS_TARGET=' + FCrossOS_Target);
+        Processor.Parameters.Add('CPU_TARGET=' + CrossCPU_Target);
+        Processor.Parameters.Add('OS_TARGET=' + CrossOS_Target);
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
@@ -324,12 +321,12 @@ begin
 
         // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
         // So, use this test to prevent a rebuild !!!
-        if (GetTargetCPU<>FCrossCPU_Target) then
-          Processor.Parameters.Add('--cpu=' + FCrossCPU_Target);
+        if (GetTargetCPU<>CrossCPU_Target) then
+          Processor.Parameters.Add('--cpu=' + CrossCPU_Target);
 
         // See above: the same for OS !
-        if (GetTargetOS<>FCrossOS_Target) then
-          Processor.Parameters.Add('--os=' + FCrossOS_Target);
+        if (GetTargetOS<>CrossOS_Target) then
+          Processor.Parameters.Add('--os=' + CrossOS_Target);
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('--ws=' + FCrossLCL_Platform);
@@ -344,22 +341,22 @@ begin
       end;
 
       if FCrossLCL_Platform = '' then
-        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' using ' + ExtractFileName(Processor.Executable), etInfo)
+        infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + ' using ' + ExtractFileName(Processor.Executable), etInfo)
       else
-        infoln(infotext+'Compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
+        infoln(infotext+'Compiling LCL for ' + GetFPCTarget(false) + '/' + FCrossLCL_Platform + ' using ' + ExtractFileName(Processor.Executable), etInfo);
 
       try
         writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
         Processor.Execute;
         Result := Processor.ExitStatus = 0;
         if not Result then
-          WritelnLog(etError,infotext+'Error compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' ' + FCrossLCL_Platform + LineEnding +
+          WritelnLog(etError,infotext+'Error compiling LCL for ' + GetFPCTarget(false) + ' ' + FCrossLCL_Platform + LineEnding +
             'Details: ' + FErrorLog.Text, true);
       except
         on E: Exception do
         begin
           Result := false;
-          WritelnLog(etError,infotext+'Exception compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + LineEnding +
+          WritelnLog(etError,infotext+'Exception compiling LCL for ' + GetFPCTarget(false) + LineEnding +
             'Details: ' + E.Message, true);
         end;
       end;
@@ -378,10 +375,10 @@ begin
           Result := true;
         {$endif win64}
         if Result then
-          infoln(infotext+'Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target +
+          infoln(infotext+'Cross compiling LCL for ' + GetFPCTarget(false) +
             ' failed. Optional module; continuing regardless.', etWarning)
         else
-          infoln(infotext+'Cross compiling LCL for ' + FCrossCPU_Target + '-' + FCrossOS_Target + ' failed.', etError);
+          infoln(infotext+'Cross compiling LCL for ' + GetFPCTarget(false) + ' failed.', etError);
         // No use in going on, but
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(Result);
@@ -390,7 +387,7 @@ begin
 
   end    //valid cross compile setup
   else
-    infoln(infotext+'Can''t find cross installer for ' + FCrossCPU_Target + '-' + FCrossOS_Target, etError);
+    infoln(infotext+'Can''t find cross installer for ' + GetFPCTarget(false), etError);
 end;
 
 constructor TLazarusCrossInstaller.Create;
@@ -1104,7 +1101,6 @@ function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
   // by Jonas Maebe, 1 November 2012
 var
   {$ifdef MSWINDOWS}
-  CrossInstaller: TCrossInstaller;
   CrossWin: boolean;
   LHelpTemp: string; // LHelp gets copied to this temp file
   {$endif}
@@ -1120,7 +1116,7 @@ begin
   if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
   // If cleaning primary config:
-  if (FCrossLCL_Platform = '') and (FCrossCPU_Target = '') then
+  if (FCrossLCL_Platform = '') and (CrossCPU_Target = '') then
     infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
       FInstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
 
@@ -1131,7 +1127,6 @@ begin
   LHelpTemp:='';
   CrossWin:=false;
 
-  CrossInstaller := GetCrossInstaller;
   if Assigned(CrossInstaller) then
   begin
     {$ifdef win32}
@@ -1239,8 +1234,8 @@ begin
 
   if (Self is TLazarusCrossInstaller) then
   begin
-    Processor.Parameters.Add('OS_TARGET=' + FCrossOS_Target);
-    Processor.Parameters.Add('CPU_TARGET=' + FCrossCPU_Target);
+    Processor.Parameters.Add('OS_TARGET=' + CrossOS_Target);
+    Processor.Parameters.Add('CPU_TARGET=' + CrossCPU_Target);
   end
   else
   begin
@@ -1251,7 +1246,7 @@ begin
   Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory)+CleanDirectory);
   Processor.Parameters.Add(CleanCommand);
   if (Self is TLazarusCrossInstaller) then
-    infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory+' for OS_TARGET='+FCrossOS_Target+' and CPU_TARGET='+FCrossCPU_Target,etInfo)
+    infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory+' for OS_TARGET='+CrossOS_Target+' and CPU_TARGET='+CrossCPU_Target,etInfo)
   else
     infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory,etInfo);
 

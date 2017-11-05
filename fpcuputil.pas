@@ -1663,27 +1663,82 @@ end;
 
 function GetDistro:string;
 var
-  Major,Minor,Build,i: Integer;
+  Major,Minor,Build,i,j: Integer;
   AllOutput : TStringList;
   s,t:ansistring;
+  success:boolean;
 begin
   t:='unknown';
+  success:=false;
   {$ifdef Unix}
     {$ifndef Darwin}
+      s:='';
       if (ExecuteCommand('cat /etc/os-release',s,false)=0) then
       begin
-        AllOutput:=TStringList.Create;
-        try
-          AllOutput.Text:=s;
-          s := AllOutput.Values['NAME'];
-          if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
-          if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
-          if Length(s)=0 then s := AllOutput.Values['ID'];
-        finally
-          AllOutput.Free;
+        if Pos('No such file or directory',s)=0 then
+        begin
+          AllOutput:=TStringList.Create;
+          try
+            AllOutput.Text:=s;
+            s:='';
+            s:=AllOutput.Values['NAME'];
+            if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
+            if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
+            if Length(s)=0 then s := AllOutput.Values['ID'];
+            success:=(Length(s)>0);
+          finally
+            AllOutput.Free;
+          end;
         end;
       end;
-      if Length(s)=0 then t:='unknown' else
+      if (NOT success) then
+      begin
+        s:='';
+        if (ExecuteCommand('cat /etc/system-release',s,false)=0) then
+        begin
+          if Pos('No such file or directory',s)=0 then
+          begin
+            AllOutput:=TStringList.Create;
+            try
+              AllOutput.Text:=s;
+              s:='';
+              s:=AllOutput.Values['NAME'];
+              if Length(s)=0 then s := AllOutput.Values['ID_LIKE'];
+              if Length(s)=0 then s := AllOutput.Values['DISTRIB_ID'];
+              if Length(s)=0 then s := AllOutput.Values['ID'];
+              success:=(Length(s)>0);
+            finally
+              AllOutput.Free;
+            end;
+          end;
+        end;
+      end;
+      if (NOT success) then
+      begin
+        s:='';
+        if (ExecuteCommand('hostnamectl',s,false)=0) then
+        begin
+          AllOutput:=TStringList.Create;
+          try
+            AllOutput.NameValueSeparator:=':';
+            AllOutput.Delimiter:=#10;
+            AllOutput.StrictDelimiter:=true;
+            AllOutput.DelimitedText:=s;
+            s:='';
+            for i:=0 to  AllOutput.Count-1 do
+            begin
+              j:=Pos('Operating System',AllOutput.Strings[i]);
+              if j>0 then s:=s+Trim(AllOutput.Values[AllOutput.Names[i]]);
+              j:=Pos('Kernel',AllOutput.Strings[i]);
+              if j>0 then s:=s+' '+Trim(AllOutput.Values[AllOutput.Names[i]]);
+            end;
+            success:=(Length(s)>0);
+          finally
+            AllOutput.Free;
+          end;
+        end;
+      end;
+      if (NOT success) then t:='unknown' else
       begin
         s:=DelChars(s,'"');
         t:=Trim(s);
@@ -1698,10 +1753,10 @@ begin
 
       if (t='unknown') then t := GetTargetOS;
 
-      if (ExecuteCommand('uname -r',s,false)=0)
+      if (NOT success) then if (ExecuteCommand('uname -r',s,false)=0)
          then t := t+' '+lowercase(Trim(s));
 
-    {$else}
+    {$else Darwin}
       if (ExecuteCommand('sw_vers -productName', s, false)=0) then
       begin
         if Length(s)>0 then t:=Trim(s);
@@ -1719,7 +1774,7 @@ begin
        else t:=t+'32';
     if GetWin32Version(Major,Minor,Build)
        then t:=t+'-'+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
-  {$endif}
+  {$endif MSWindows}
   result:=t;
 end;
 

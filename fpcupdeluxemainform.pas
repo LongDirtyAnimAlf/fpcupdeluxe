@@ -31,6 +31,7 @@ type
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
     StatusMessage: TEdit;
+    Timer1: TTimer;
     TrunkBtn: TBitBtn;
     NPBtn: TBitBtn;
     FixesBtn: TBitBtn;
@@ -56,7 +57,6 @@ type
     SynEdit1: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
-    procedure FormShow(Sender: TObject);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
@@ -80,6 +80,7 @@ type
     procedure SynEdit1MouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { private declarations }
     FPCupManager:TFPCupManager;
@@ -309,7 +310,7 @@ begin
     Form2:=TForm2.Create(Form1);
 
     // tricky ... due to arm quircks when cross-compiling : GetDistro (ExecuteCommand) gives errors if used in CreateForm
-    Self.OnShow:=@FormShow;
+    Timer1.Enabled:=True;
   end
   else
   begin
@@ -1140,6 +1141,17 @@ begin
   finally
     DisEnable(Sender,True);
   end;
+end;
+
+procedure TForm1.Timer1Timer(Sender: TObject);
+begin
+  TTimer(Sender).Enabled:=false;
+  // only run once !!
+  // FPC cross-quirck : GetDistro (ExecuteCommand) gives errors if used in CreateForm
+  {$ifdef RemoteLog}
+  aDataClient.UpInfo.UpDistro:=GetDistro;
+  {$endif}
+  InitFPCupManager;
 end;
 
 procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);
@@ -2120,18 +2132,6 @@ begin
   sInstallDir:=InstallDirEdit.Text;
   GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
-
-procedure TForm1.FormShow(Sender: TObject);
-begin
-  // only run once !!
-  // FPC cross-quirck : GetDistro (ExecuteCommand) gives errors if used in CreateForm
-  Self.OnShow:=nil;
-  {$ifdef RemoteLog}
-  aDataClient.UpInfo.UpDistro:=GetDistro;
-  {$endif}
-  InitFPCupManager;
-end;
-
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin

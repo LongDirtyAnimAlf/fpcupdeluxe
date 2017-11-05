@@ -93,6 +93,8 @@ type
   TFPCInstaller = class(TInstaller)
   private
     FBinPath: string; // path where generated compiler lives
+    FTargetCompilerName: string;
+    FIntermediateCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -137,6 +139,10 @@ type
     // This is required information for setting make file options
     property CompilerOverrideVersionCheck: boolean read FBootstrapCompilerOverrideVersionCheck;
     // Uninstall module
+
+    property TargetCompilerName: string read FTargetCompilerName;
+    property IntermediateCompilerName: string read FIntermediateCompilerName;
+
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
@@ -160,12 +166,16 @@ type
   { TFPCCrossInstaller }
 
   TFPCCrossInstaller = class(TFPCInstaller)
+  private
+    FCrossCompilerName: string;
   protected
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
     constructor Create;
     destructor Destroy; override;
+    procedure SetTarget(aCPU,aOS,aSubArch:string);override;
+    property CrossCompilerName: string read FCrossCompilerName;
   end;
 
 
@@ -398,16 +408,33 @@ end;
 
 { TFPCCrossInstaller }
 
+constructor TFPCCrossInstaller.Create;
+begin
+  inherited Create;
+  //if Self is TFPCCrossInstaller then
+  //Self.
+  FCrossCompilerName:='invalid';
+end;
+
+destructor TFPCCrossInstaller.Destroy;
+begin
+  inherited Destroy;
+end;
+
+procedure TFPCCrossInstaller.SetTarget(aCPU,aOS,aSubArch:string);
+begin
+  inherited;
+  if Assigned(CrossInstaller) then FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+end;
+
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // Runs make/make install for cross compiler.
 // Error out on problems; unless module considered optional, i.e. in
 // crosswin32-64 and crosswin64-32 steps.
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
-  CrossInstaller:TCrossInstaller;
   CrossOptions:String;
   ChosenCompiler:String; //Compiler to be used for cross compiling
-  IntermediateCompiler:string;
   i:integer;
   OldPath:String;
   Options:String;
@@ -429,11 +456,7 @@ begin
   make all install CROSSCOMPILE=1??? find out?
   }
 
-  IntermediateCompiler:='intermediate_'+GetCompilerName(GetTargetCPU);
-
   result:=false; //fail by default
-
-  CrossInstaller:=GetCrossInstaller;
 
   if assigned(CrossInstaller) then
   begin
@@ -498,8 +521,8 @@ begin
       else //ctBootstrap
       begin
         infoln(infotext+'Using the original bootstrapper to compile and build the cross-compiler',etInfo);
-        if FileExists(ExtractFilePath(FCompiler)+IntermediateCompiler)
-           then ChosenCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler
+        if FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName)
+           then ChosenCompiler:=ExtractFilePath(FCompiler)+IntermediateCompilerName
            else ChosenCompiler:=FCompiler;
       end;
 
@@ -551,12 +574,12 @@ begin
 
         Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
         Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
-        Processor.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
-        Processor.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+        Processor.Parameters.Add('OS_TARGET='+CrossOS_Target); //cross compile for different OS...
+        Processor.Parameters.Add('CPU_TARGET='+CrossCPU_Target); // and processor.
         //Processor.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
         Processor.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
 
-        if Length(FCrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
+        if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
         Options:=FCompilerOptions;
 
         // Error checking for some known problems with cross compilers
@@ -713,9 +736,9 @@ begin
         {$endif win64}
         FCompiler:='////\\\Error trying to compile FPC\|!';
         if result then
-          infoln(infotext+'Running cross compiler fpc make all for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed with an error code. Optional module; continuing regardless.', etInfo)
+          infoln(infotext+'Running cross compiler fpc make all for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
         else
-          infoln(infotext+'Running cross compiler fpc make all for '+FCrossCPU_Target+'-'+FCrossOS_Target+' failed with an error code.',etError);
+          infoln(infotext+'Running cross compiler fpc make all for '+GetFPCTarget(false)+' failed with an error code.',etError);
         // No use in going on, but
         // do make sure installation continues if this happened with optional crosscompiler:
         exit(result);
@@ -757,12 +780,12 @@ begin
         Processor.Parameters.Add('crossinstall');
         Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
         Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
-        Processor.Parameters.Add('OS_TARGET='+FCrossOS_Target); //cross compile for different OS...
-        Processor.Parameters.Add('CPU_TARGET='+FCrossCPU_Target); // and processor.
+        Processor.Parameters.Add('OS_TARGET='+CrossOS_Target); //cross compile for different OS...
+        Processor.Parameters.Add('CPU_TARGET='+CrossCPU_Target); // and processor.
         Processor.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
         // suppress hints
         Processor.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS);
-        if Length(FCrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
+        if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
 
         CrossOptions:='';
 
@@ -810,32 +833,29 @@ begin
             result:=true;
           {$endif win64}
           if result then
-            infoln(infotext+'Problem installing crosscompiler for '+FCrossCPU_Target+'-'+FCrossOS_Target+'. Optional module; continuing regardless.', etInfo)
+            infoln(infotext+'Problem installing crosscompiler for '+GetFPCTarget(false)+'. Optional module; continuing regardless.', etInfo)
           else
-            infoln(infotext+'Problem installing crosscompiler for '+FCrossCPU_Target+'-'+FCrossOS_Target+'.', etError);
+            infoln(infotext+'Problem installing crosscompiler for '+GetFPCTarget(false)+'.', etError);
           FCompiler:='////\\\Error trying to compile FPC\|!';
         end
         else
         begin
 
-          // get the name of the cross-compiler we just built.
-          IntermediateCompiler:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-
           {$IFDEF UNIX}
 
           {$ifdef Darwin}
           // on Darwin, the normal compiler names are used for the final cross-target compiler !!
-          // tricky !
+          // very tricky !
           s:=GetCompilerName(CrossInstaller.TargetCPU);
           {$else}
           s:=GetCrossCompilerName(CrossInstaller.TargetCPU);
           {$endif}
 
           // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
-          if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+IntermediateCompiler) then
+          if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName) then
           begin
-            infoln(infotext+'Copy cross-compiler ('+IntermediateCompiler+') into: '+FBinPath,etInfo);
-            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+IntermediateCompiler,
+            infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
+            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName,
               IncludeTrailingPathDelimiter(FBinPath)+s);
             fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
           end;
@@ -843,7 +863,7 @@ begin
           {$ENDIF}
 
           // delete cross-compiler in source-directory
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+IntermediateCompiler);
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName);
 
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
@@ -853,11 +873,11 @@ begin
              then s:=CrossInstaller.FPCCFGSnippet+LineEnding
              else s:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
           InsertFPCCFGSnippet(FPCCfg,
-            SnipMagicBegin+FCrossCPU_target+'-'+FCrossOS_target+LineEnding+
+            SnipMagicBegin+CrossCPU_target+'-'+CrossOS_target+LineEnding+
             '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
             '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-            '#IFDEF CPU'+uppercase(FCrossCPU_Target+LineEnding)+
-            '#IFDEF '+uppercase(FCrossOS_Target)+LineEnding+
+            '#IFDEF CPU'+uppercase(CrossCPU_Target+LineEnding)+
+            '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
             '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
             s+
             '#ENDIF'+LineEnding+
@@ -876,26 +896,15 @@ begin
       end;
     end;
 
-    RemoveStaleBuildDirectories(FSourceDirectory,FCrossCPU_Target,FCrossOS_Target);
+    RemoveStaleBuildDirectories(FSourceDirectory,CrossCPU_Target,CrossOS_Target);
 
   end
   else
   begin
-    infoln(infotext+'Can''t find cross installer for '+FCrossCPU_Target+'-'+FCrossOS_Target+' !!!',etError);
+    infoln(infotext+'Can''t find cross installer for '+GetFPCTarget(false)+' !!!',etError);
     result:=false;
   end;
 
-end;
-
-
-constructor TFPCCrossInstaller.Create;
-begin
-  inherited create;
-end;
-
-destructor TFPCCrossInstaller.Destroy;
-begin
-  inherited Destroy;
 end;
 
 { TFPCNativeInstaller }
@@ -1982,8 +1991,6 @@ end;
 function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   bIntermediateNeeded:boolean;
-  IntermediateCompiler:string;
-  TargetCompiler:string;
   ICSVNCommand:string;
   RequiredBootstrapVersion:string;
   RequiredBootstrapVersionLow:string;
@@ -2007,9 +2014,6 @@ begin
   infoln(infotext+'Building module '+ModuleName+'...',etInfo);
 
   bIntermediateNeeded:=false;
-
-  TargetCompiler:=GetCompilerName(GetTargetCPU);
-  IntermediateCompiler:='intermediate_'+TargetCompiler;
 
   infoln(infotext+'We have a FPC source (@ '+FSourceDirectory+') with version: '+GetCompilerVersionFromSource(FSourceDirectory),etInfo);
 
@@ -2079,20 +2083,20 @@ begin
     if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersion) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
     begin
       // we need an intermediate compiler !!
-      if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompiler) then
+      if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName) then
       begin
         bIntermediateNeeded:=true;
       end
       else
       begin
-        if (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompiler)<>RequiredBootstrapVersion) then
+        if (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)<>RequiredBootstrapVersion) then
         begin
           bIntermediateNeeded:=true;
         end
         else
         begin
-          infoln(infotext+'Using available FPC '+GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompiler)+' intermediate compiler.',etInfo);
-          FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
+          infoln(infotext+'Using available FPC '+GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)+' intermediate compiler.',etInfo);
+          FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompilerName;
           FBootstrapCompilerOverrideVersionCheck:=False;
         end;
       end;
@@ -2254,18 +2258,18 @@ begin
           if ReturnCode=1 then infoln(infotext+'Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
         end;
 
-        infoln(infotext+'Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompiler + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompiler,etInfo);
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompiler,
-          ExtractFilePath(FCompiler)+IntermediateCompiler);
+        infoln(infotext+'Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompilerName + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompilerName,etInfo);
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompilerName,
+          ExtractFilePath(FCompiler)+IntermediateCompilerName);
 
         //Make executable
         {$ifdef unix}
-        OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateCompiler, &755)=0); //rwxr-xr-x
-        if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateCompiler,etError);
+        OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateCompilerName, &755)=0); //rwxr-xr-x
+        if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateCompilerName,etError);
         {$endif}
 
         // Now we can change the compiler from the stable one to the one in our FPC repo:
-        FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompiler;
+        FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompilerName;
         FBootstrapCompilerOverrideVersionCheck:=False;
       end
       else
@@ -2322,7 +2326,7 @@ begin
     {$ifdef darwin}
     if pos('ppcuniversal',FCompiler)>0 then //need to build ppcxxx before
     begin
-      infoln(infotext+'We have ppcuniversal. We need '+TargetCompiler+'. So make it !',etInfo);
+      infoln(infotext+'We have ppcuniversal. We need '+TargetCompilerName+'. So make it !',etInfo);
       Processor.Executable := Make;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
@@ -2336,7 +2340,7 @@ begin
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      infoln(infotext+'Running make cycle for FPC '+TargetCompiler+' bootstrap compiler only',etInfo);
+      infoln(infotext+'Running make cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
       Processor.Execute;
       if Processor.ExitStatus <> 0 then
       begin
@@ -2346,12 +2350,12 @@ begin
       end;
 
       // copy over the fresh bootstrapper, if any
-      if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler) then
+      if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName) then
       begin
         // Now we can change the compiler from the ppcuniversal to the target compiler:
-        FCompiler:=ExtractFilePath(FCompiler)+TargetCompiler;
-        infoln(infotext+'Copy fresh compiler ('+TargetCompiler+') into: '+ExtractFilePath(FCompiler),etDebug);
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler,
+        FCompiler:=ExtractFilePath(FCompiler)+TargetCompilerName;
+        infoln(infotext+'Copy fresh compiler ('+TargetCompilerName+') into: '+ExtractFilePath(FCompiler),etDebug);
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName,
           FCompiler);
         fpChmod(FCompiler,&755);
       end;
@@ -2367,12 +2371,12 @@ begin
   begin
     // copy the freshly created compiler to the bin/$fpctarget directory so that
     // fpc can find it
-    if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler) then
+    if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName) then
     begin
-      infoln(infotext+'Copy compiler ('+TargetCompiler+') into: '+FBinPath,etDebug);
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler,
-        IncludeTrailingPathDelimiter(FBinPath)+TargetCompiler);
-      fpChmod(IncludeTrailingPathDelimiter(FBinPath)+TargetCompiler,&755);
+      infoln(infotext+'Copy compiler ('+TargetCompilerName+') into: '+FBinPath,etDebug);
+      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName,
+        IncludeTrailingPathDelimiter(FBinPath)+TargetCompilerName);
+      fpChmod(IncludeTrailingPathDelimiter(FBinPath)+TargetCompilerName,&755);
     end;
 
     // create link 'units' below FSourceDirectory to
@@ -2587,10 +2591,10 @@ begin
   if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
   oldlog:=Processor.OnErrorM; //current error handler, if any
-  CrossCompiling:=(FCrossOS_Target<>'') and (FCrossCPU_Target<>'');
+  CrossCompiling:=(CrossOS_Target<>'') and (CrossCPU_Target<>'');
   if CrossCompiling then
   begin
-    CPU_OSSignature:=FCrossCPU_Target+'-'+FCrossOS_Target;
+    CPU_OSSignature:=GetFPCTarget(false);
     // Delete any existing buildstamp file
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPU_OSSignature);
   end else CPU_OSSignature:=GetFPCTarget(true);
@@ -2629,9 +2633,9 @@ begin
       {$ENDIF}
       if Self is TFPCCrossInstaller then
       begin  // clean out the correct compiler
-        Processor.Parameters.Add('OS_TARGET='+FCrossOS_Target);
-        Processor.Parameters.Add('CPU_TARGET='+FCrossCPU_Target);
-        if Length(FCrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+FCrossOS_SubArch);
+        Processor.Parameters.Add('OS_TARGET='+CrossOS_Target);
+        Processor.Parameters.Add('CPU_TARGET='+CrossCPU_Target);
+        if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
       end
       else
       begin
@@ -2639,13 +2643,13 @@ begin
         Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
       end;
       Processor.Parameters.Add('distclean');
-      if (FCrossOS_Target='') and (FCrossCPU_Target='') then
+      if (CrossOS_Target='') and (CrossCPU_Target='') then
       begin
         infoln(infotext+'Running make distclean twice',etInfo);
       end
       else
       begin
-        infoln(infotext+'Running make distclean twice (OS_TARGET='+FCrossOS_Target+'/CPU_TARGET='+FCrossCPU_Target+')',etInfo);
+        infoln(infotext+'Running make distclean twice (OS_TARGET='+CrossOS_Target+'/CPU_TARGET='+CrossCPU_Target+')',etInfo);
       end;
       try
         writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
@@ -2921,6 +2925,9 @@ begin
   FCompiler := '';
   FSVNDirectory := '';
   FMakeDir :='';
+
+  FTargetCompilerName:=GetCompilerName(GetTargetCPU);
+  FIntermediateCompilerName:='intermediate_'+FTargetCompilerName;
 
   InitDone:=false;
 end;

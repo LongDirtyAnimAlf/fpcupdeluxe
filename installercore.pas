@@ -118,6 +118,9 @@ type
   private
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
+    FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
+    FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
+    FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=armv7em
     procedure SetURL(value:string);
     function GetMake: string;
     procedure SetHTTPProxyHost(AValue: string);
@@ -125,6 +128,8 @@ type
     procedure SetHTTPProxyPort(AValue: integer);
     procedure SetHTTPProxyUser(AValue: string);
     function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
+    // Get fpcup registred cross-compiler, if any, if not, return nil
+    function GetCrossInstaller: TCrossInstaller;
   protected
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
@@ -132,10 +137,7 @@ type
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
-    FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOPT: string; //options passed (only) when cross-compiling
-    FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
-    FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=armv7em
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
     FDesiredRevision: string;
@@ -209,8 +211,6 @@ type
     {$ENDIF}
     // Finds compiler in fpcdir path if TFPCInstaller descendant
     function GetCompiler: string;
-    // Get fpcup registred cross-compiler, if any, if not, return nil
-    function GetCrossInstaller: TCrossInstaller;
     // Returns CPU-OS in the format used by the FPC bin directory, e.g. x86_64-win64:
     function GetFPCTarget(Native: boolean): string;
     // Get currently set path
@@ -238,13 +238,13 @@ type
     // Compiler options passed on to make as OPT=
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
-    property CrossCPU_Target: string read FCrossCPU_Target write FCrossCPU_Target;
+    property CrossCPU_Target: string read FCrossCPU_Target;
     // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
     property CrossOPT: string read FCrossOPT write FCrossOPT;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
-    property CrossOS_Target: string read FCrossOS_Target write FCrossOS_Target;
+    property CrossOS_Target: string read FCrossOS_Target;
     // SubArch for target embedded
-    property CrossOS_SubArch: string read FCrossOS_SubArch write FCrossOS_SubArch;
+    property CrossOS_SubArch: string read FCrossOS_SubArch;
     property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision
@@ -281,6 +281,10 @@ type
     property Verbose: boolean write FVerbose;
     // use wget as downloader ??
     property UseWget: boolean write FUseWget;
+    // get cross-installer
+    property CrossInstaller:TCrossInstaller read GetCrossInstaller;
+    // set cross-target
+    procedure SetTarget(aCPU,aOS,aSubArch:string);virtual;
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
@@ -1809,6 +1813,13 @@ begin
   {$ENDIF UNIX}
 end;
 
+procedure TInstaller.SetTarget(aCPU,aOS,aSubArch:string);
+begin
+  FCrossCPU_Target:=aCPU;
+  FCrossOS_Target:=aOS;
+  FCrossOS_SubArch:=aSubArch;
+end;
+
 function TInstaller.BuildModule(ModuleName: string): boolean;
 begin
   result:=false;
@@ -1922,6 +1933,10 @@ begin
   //FLogVerbose: TLogger.Create;
   FErrorLog := TStringList.Create;
   Processor.OnErrorM:=@(ProcessError);
+
+  FCrossCPU_Target:='invalid';
+  FCrossOS_Target:='invalid';
+  FCrossOS_SubArch:=''
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
