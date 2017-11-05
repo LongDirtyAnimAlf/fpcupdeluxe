@@ -1,0 +1,64 @@
+Index: lcl/interfaces/customdrawn/customdrawnlclintf_cocoa.inc
+===================================================================
+--- lcl/interfaces/customdrawn/customdrawnlclintf_cocoa.inc	(revision 56166)
++++ lcl/interfaces/customdrawn/customdrawnlclintf_cocoa.inc	(working copy)
+@@ -162,6 +162,7 @@
+   lScreenRawImage: TRawImage;
+   lDataLength: SizeInt;
+ begin
++  {$if (MAC_OS_X_VERSION_MIN_REQUIRED>=1060)}
+   Result := True;
+ 
+   ARawImage.Init;
+@@ -179,6 +180,9 @@
+   ARawImage.CreateData(False);
+   lDataLength := Min(Int64(lScreenRawImage.DataSize), Int64(ARawImage.DataSize));
+   System.Move(lScreenRawImage.Data^, ARawImage.Data^, lDataLength);
++  {$else}
++  Result := False;
++  {$endif}
+ end;
+ 
+ procedure TCDWidgetset.ShowVirtualKeyboard();
+Index: lcl/interfaces/cocoa/cocoalclintf.inc
+===================================================================
+--- lcl/interfaces/cocoa/cocoalclintf.inc	(revision 56166)
++++ lcl/interfaces/cocoa/cocoalclintf.inc	(working copy)
+@@ -484,6 +484,7 @@
+ begin
+   Result := False;
+ 
++  {$if (MAC_OS_X_VERSION_MIN_REQUIRED>=1060)}
+   // Verifies if we are getting the rawimage from a normal DC as opposed to a
+   // desktop DC
+   if CheckDC(ADC, 'RawImage_FromDevice') and (CBC is TCocoaBitmapContext) then
+@@ -512,6 +513,7 @@
+   CGImageRelease(ScreenImage);
+ 
+   Result := True;
++  {$endif}
+ end;
+ 
+ {------------------------------------------------------------------------------
+Index: lcl/interfaces/cocoa/cocoawinapi.inc
+===================================================================
+--- lcl/interfaces/cocoa/cocoawinapi.inc	(revision 56166)
++++ lcl/interfaces/cocoa/cocoawinapi.inc	(working copy)
+@@ -395,6 +395,7 @@
+ 
+   lDataType := ccdtNonStandard;
+   // See PredefinedClipboardMimeTypes for the most common mime-types
++  {$if (MAC_OS_X_VERSION_MIN_REQUIRED>=1060)}
+   case AMimeType of
+   'text/plain':
+   begin
+@@ -414,6 +415,9 @@
+     lDataType := ccdtBitmap;
+   end;
+   else
++  {$else}
++  begin
++  {$endif}
+     lNSStr := NSStringUtf8(AMimeType);
+     lDataType := ccdtNonStandard;
+   end;

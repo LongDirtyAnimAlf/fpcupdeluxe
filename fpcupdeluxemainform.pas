@@ -1635,14 +1635,14 @@ begin
     if (FPCupManager.CrossOS_Target='java') then IncludeLCL:=false;
     if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;
     if (FPCupManager.CrossOS_Target='embedded') then IncludeLCL:=false;
-    // AFAIK, on Darwin, LCL Carbon and Cocoa are only supported for i386 and x86_64 ... but again I stand corrected if wrong
-    if (FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target<>'x86_64') AND (FPCupManager.CrossCPU_Target<>'i386') then IncludeLCL:=false;
+    // AFAIK, on Darwin, LCL Carbon and Cocoa are only for MACOSX
+    if (FPCupManager.CrossOS_Target='darwin') AND ((FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64')) then IncludeLCL:=false;
 
     if IncludeLCL then
     begin
       FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
-      // if Darwin x64, only cocoa (but also qt5) will work.
-      if ((FPCupManager.CrossOS_Target='darwin') AND (FPCupManager.CrossCPU_Target='x86_64'))
+      // if Darwin cpu64, only cocoa (but also qt5) will work.
+      if ((FPCupManager.CrossOS_Target='darwin') AND ((FPCupManager.CrossCPU_Target='x86_64') OR (FPCupManager.CrossCPU_Target='powerpc64')))
           then FPCupManager.CrossLCL_Platform:='cocoa';
     end
     else

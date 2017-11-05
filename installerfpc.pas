@@ -1689,7 +1689,7 @@ begin
           if aLocalBootstrapVersion='2.4.4' then aCompilerArchive:='universal-darwin-ppcuniversal.tar.bz2'; //ppcuniversal
           if aLocalBootstrapVersion='2.6.0' then aCompilerArchive:='universal-darwin-ppcuniversal.tar.bz2'; //ppcuniversal
           if aLocalBootstrapVersion='2.6.4' then aCompilerArchive:='universal-macosx-10.5-ppcuniversal.tar.bz2'; //ppcuniversal
-          {$IFDEF CPUX86_64}
+          {$IF defined(CPUX86_64) OR defined(CPUPOWERPC64)}
           if aLocalBootstrapVersion='3.0.0' then aCompilerArchive:='x86_64-macosx-10.7-ppcx64.tar.bz2'; // ppcx64
           {$ENDIF}
           {$ENDIF}
@@ -1983,6 +1983,7 @@ function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 var
   bIntermediateNeeded:boolean;
   IntermediateCompiler:string;
+  TargetCompiler:string;
   ICSVNCommand:string;
   RequiredBootstrapVersion:string;
   RequiredBootstrapVersionLow:string;
@@ -2006,7 +2007,9 @@ begin
   infoln(infotext+'Building module '+ModuleName+'...',etInfo);
 
   bIntermediateNeeded:=false;
-  IntermediateCompiler:='intermediate_'+GetCompilerName(GetTargetCPU);
+
+  TargetCompiler:=GetCompilerName(GetTargetCPU);
+  IntermediateCompiler:='intermediate_'+TargetCompiler;
 
   infoln(infotext+'We have a FPC source (@ '+FSourceDirectory+') with version: '+GetCompilerVersionFromSource(FSourceDirectory),etInfo);
 
@@ -2251,8 +2254,8 @@ begin
           if ReturnCode=1 then infoln(infotext+'Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
         end;
 
-        infoln(infotext+'Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(GetTargetCPU) + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompiler,etInfo);
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+GetCompilerName(GetTargetCPU),
+        infoln(infotext+'Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompiler + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompiler,etInfo);
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompiler,
           ExtractFilePath(FCompiler)+IntermediateCompiler);
 
         //Make executable
@@ -2317,9 +2320,9 @@ begin
     end;
     {$endif win64}
     {$ifdef darwin}
-    if pos('ppcuniversal',FCompiler)>0 then //need to build ppc386 before
+    if pos('ppcuniversal',FCompiler)>0 then //need to build ppcxxx before
     begin
-      infoln(infotext+'We have ppcuniversal. We need ppc386. So make it !',etInfo);
+      infoln(infotext+'We have ppcuniversal. We need '+TargetCompiler+'. So make it !',etInfo);
       Processor.Executable := Make;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
@@ -2327,23 +2330,31 @@ begin
       if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
       Processor.Parameters.Add('FPC='+FCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Parameters.Add('CPU_TARGET=i386');
+      Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
+      Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
       Processor.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS);
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      infoln(infotext+'Running make cycle for Darwin FPC i386:',etInfo);
+      infoln(infotext+'Running make cycle for FPC '+TargetCompiler+' bootstrap compiler only',etInfo);
       Processor.Execute;
       if Processor.ExitStatus <> 0 then
       begin
         result := False;
-        WritelnLog(etError, infotext+'Failed to build ppc386 bootstrap compiler.');
+        WritelnLog(etError, infotext+'Failed to build '+s+' bootstrap compiler.');
         exit;
       end;
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/ppc386',
-        ExtractFilePath(FCompiler)+'ppc386');
-      FCompiler:=ExtractFilePath(FCompiler)+'ppc386';
-      fpChmod(FCompiler,&755);
+
+      // copy over the fresh bootstrapper, if any
+      if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler) then
+      begin
+        // Now we can change the compiler from the ppcuniversal to the target compiler:
+        FCompiler:=ExtractFilePath(FCompiler)+TargetCompiler;
+        infoln(infotext+'Copy fresh compiler ('+TargetCompiler+') into: '+ExtractFilePath(FCompiler),etDebug);
+        FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler,
+          FCompiler);
+        fpChmod(FCompiler,&755);
+      end;
     end;
     {$endif darwin}
   end;//(NOT (Self is TFPCCrossInstaller))
@@ -2356,13 +2367,12 @@ begin
   begin
     // copy the freshly created compiler to the bin/$fpctarget directory so that
     // fpc can find it
-    s:=GetCompilerName(GetTargetCPU);
-    if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s) then
+    if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler) then
     begin
-      infoln(infotext+'Copy compiler ('+s+') into: '+FBinPath,etDebug);
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s,
-        IncludeTrailingPathDelimiter(FBinPath)+s);
-      fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
+      infoln(infotext+'Copy compiler ('+TargetCompiler+') into: '+FBinPath,etDebug);
+      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompiler,
+        IncludeTrailingPathDelimiter(FBinPath)+TargetCompiler);
+      fpChmod(IncludeTrailingPathDelimiter(FBinPath)+TargetCompiler,&755);
     end;
 
     // create link 'units' below FSourceDirectory to

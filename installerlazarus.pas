@@ -485,7 +485,7 @@ begin
             {$ifdef LCLCOCOA}
               NothingToBeDone:=(FCrossLCL_Platform='cocoa');
             {$else}
-              {$ifdef CPUX64}
+              {$ifdef CPU64}
                 {$ifdef LCLQT5}
                   NothingToBeDone:=(FCrossLCL_Platform='qt5');
                 {$else}
@@ -1209,7 +1209,7 @@ begin
           {$ifdef LCLCOCOA}
             NothingToBeDone:=(FCrossLCL_Platform='cocoa');
           {$else}
-            {$ifdef CPUX64}
+            {$ifdef CPU64}
               {$ifdef LCLQT5}
                 NothingToBeDone:=(FCrossLCL_Platform='qt5');
               {$else}
