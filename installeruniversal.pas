@@ -583,15 +583,15 @@ begin
     end;
     {$endif}
 
-    {$ifdef CPUAARCH64}
-    // the package macroscript is not working on aarch64 (and perhaps others) !
+    {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
+    // the package macroscript (depending on PascalScript) is only suitable for i386, x86_64 and arm !
     // so skip in case package was included.
     if (Pos('editormacroscript',PackagePath)>0) then
     begin
       infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
       continue;
     end;
-    {$endif CPUAARCH64}
+    {$endif}
 
     {
     if (NOT FileExists(PackagePath)) OR (PackagePath='') then
@@ -702,6 +702,16 @@ begin
        else exec:=GetValue(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
+
+    if (Pos('fpgui',exec)>0) then
+     begin
+       {$ifdef MSWindows}
+       if (Pos('x11',exec)>0) then continue;
+       {$else}
+       if (Pos('gdi',exec)>0) then continue;
+       {$endif}
+     end;
+
     j:=Pos('lazbuild',lowerCase(exec));
     if j>0 then
     begin
