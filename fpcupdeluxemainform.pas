@@ -5,10 +5,9 @@ unit fpcupdeluxemainform;
 interface
 
 uses
-  Classes, SysUtils, FileUtil,
-  Forms, Controls, Graphics, Dialogs, StdCtrls, ExtCtrls, Types, Buttons, Menus,
-  SynEdit, SynEditPopup, SynEditMiscClasses, SynEditMarkupSpecialLine,
-  installerManager
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, Types, Buttons, Menus, SynEdit, SynEditPopup, SynEditMiscClasses,
+  SynGutterCodeFolding, installerManager{$ifdef usealternateui},alternateui{$endif}
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
   {$endif}
@@ -81,6 +80,12 @@ type
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
+
+    {$ifdef usealternateui}
+    procedure alternateuibutClick(Sender: TObject);
+    procedure alternateuibutEnter(Sender: TObject);
+    procedure alternateuibutLeave(Sender: TObject);
+    {$endif}
   private
     { private declarations }
     FPCupManager:TFPCupManager;
@@ -107,10 +112,18 @@ type
     function SetFPCUPSettings(IniDirectory:string):boolean;
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
     procedure InitFPCupManager;
+    {$ifdef usealternateui}
+    {$else}
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
+    {$endif}
+
   public
     { public declarations }
+    {$ifdef usealternateui}
+    property FPCTarget:string read FFPCTarget write SetFPCTarget;
+    property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
+    {$endif}
   end;
 
 var
@@ -344,6 +357,9 @@ begin
   RealFPCURL.Width:=(w-4);
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
+  {$ifdef usealternateui}
+  alternateui_resize;
+  {$endif}
 end;
 
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
@@ -1152,6 +1168,10 @@ begin
   aDataClient.UpInfo.UpDistro:=GetDistro;
   {$endif}
   InitFPCupManager;
+  {$ifdef usealternateui}
+  // This must only be called once.
+  If Not Alternate_ui_created then alternateui_Create_Controls;
+  {$endif}
 end;
 
 procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);
@@ -2133,6 +2153,21 @@ begin
   GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
+{$ifdef usealternateui}
+procedure TForm1.alternateuibutClick(Sender: TObject);
+begin
+  alteranteui_ClickHandler(Sender);
+end;
+procedure TForm1.alternateuibutEnter(Sender: TObject);
+begin
+  alteranteui_EnterHandler(Sender);
+end;
+procedure TForm1.alternateuibutLeave(Sender: TObject);
+begin
+  alteranteui_LeaveHandler(Sender);
+end;
+{$endif}
+
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   // set last used install directory
@@ -2193,6 +2228,9 @@ begin
     if c = SynEdit1 then continue;
     if c = memoSummary then continue;
     c.Enabled := value;
+    {$ifdef usealternateui}
+    if ((pos('Halt',c.name)>0) or (pos('Halt',c.caption)>0)) then c.Enabled:=true;
+    {$endif}
   end;
 end;
 

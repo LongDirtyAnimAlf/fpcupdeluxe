@@ -108,6 +108,7 @@ uses
 {$R *.res}
 
 begin
+  Application.Title:='fpcupdeluxeremote';
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);

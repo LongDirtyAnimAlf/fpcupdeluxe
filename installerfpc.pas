@@ -295,7 +295,8 @@ begin
     DeleteList.Free;
   end;
   }
-
+  OldPath:=IncludeTrailingPathDelimiter(aBaseDir);
+  DeleteFilesNameSubdirs(OldPath,'.stackdump');
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils';
   DeleteFilesNameSubdirs(OldPath,aArch+'.fpm');
   DeleteFilesNameSubdirs(OldPath,'-'+aOS+'.fpm');
