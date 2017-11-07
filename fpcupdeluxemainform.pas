@@ -445,10 +445,11 @@ begin
         if aRadiogroup_CPU='powerpc64' then aRadiogroup_CPU:='ppc64';
         if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
 
-        if aOS='windows' then
+        if (aOS='windows') or (aOS='win32') or (aOS='win64') then
         begin
           if aCPU='i386' then aOS:='win32';
           if aCPU='x86_64' then aOS:='win64';
+          aRadiogroup_OS:='windows';
         end;
 
         {$ifdef win32}
@@ -1400,6 +1401,7 @@ begin
     s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
     if s='ppc' then s:='powerpc';
     if s='ppc64' then s:='powerpc64';
+    if s='x8664' then s:='x86_64';
     FPCupManager.CrossCPU_Target:=s;
   end;
   if radgrpOS.ItemIndex<>-1 then

@@ -18,6 +18,7 @@ program fpcupdeluxe;
     Michalis Kamburelis
     Marius Maximus
     Josh (alternateui)
+    Ondrej Kelle
 
 *)
 (*
