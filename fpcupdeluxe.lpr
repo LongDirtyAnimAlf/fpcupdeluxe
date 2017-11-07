@@ -17,6 +17,7 @@ program fpcupdeluxe;
     Maciej Izak (hnb)
     Michalis Kamburelis
     Marius Maximus
+    Josh (alternateui)
 
 *)
 (*
@@ -108,7 +109,6 @@ uses
 {$R *.res}
 
 begin
-  Application.Title:='fpcupdeluxeremote';
   RequireDerivedFormResource:=True;
   Application.Initialize;
   Application.CreateForm(TForm1, Form1);

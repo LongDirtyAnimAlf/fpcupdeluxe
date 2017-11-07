@@ -165,7 +165,11 @@ begin
 
   {$ifdef RemoteLog}
   aDataClient:=TDataClient.Create;
+  {$ifdef usealternateui}
+  aDataClient.UpInfo.UpVersion:=DELUXEVERSION+'+';
+  {$else}
   aDataClient.UpInfo.UpVersion:=DELUXEVERSION;
+  {$endif}
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
   {$endif}
 
@@ -229,7 +233,11 @@ begin
   {$endif}
 
   Self.Caption:=
-    'FPCUPdeluxe V'+
+  {$ifdef usealternateui}
+  'FPCUPdeluxery V'+
+  {$else}
+  'FPCUPdeluxe V'+
+  {$endif}
     DELUXEVERSION+
     ' base fpcup'+
     RevisionStr+
