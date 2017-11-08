@@ -542,8 +542,6 @@ begin
      TString(ListBoxLazPatch.Items.Objects[i]).Free;
      ListBoxLazPatch.Items.Objects[i] := nil;
   end;
-
-
 end;
 
 procedure TForm2.RadioGroup3SelectionChanged(Sender: TObject);

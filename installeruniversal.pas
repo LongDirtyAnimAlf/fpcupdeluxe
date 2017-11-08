@@ -1160,6 +1160,7 @@ begin
         Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
 
         try
+          result := false;
           Processor.Execute;
           result := Processor.ExitStatus=0;
           if result then
@@ -1170,15 +1171,17 @@ begin
           else
             WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
               'Details: '+FErrorLog.Text+LineEnding+'Going to remove this module from Lazarus !',true);
-            UnInstallModule(ModuleName);
         except
           on E: Exception do
-            begin
+          begin
             WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
               'Details: '+E.Message,true);
             result:=false;
-            end;
+          end;
         end;
+
+        if (NOT result) then UnInstallModule(ModuleName);
+
       end;
     end
   else

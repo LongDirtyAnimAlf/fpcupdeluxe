@@ -2215,10 +2215,6 @@ begin
     Free;
   end;
 
-  // localize FPCUPSettings if possible
-  if (NOT SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir)))
-     then SetFPCUPSettings(SafeGetApplicationPath);
-
   CloseAction:=caFree;
 end;
 
@@ -2440,6 +2436,11 @@ begin
 
   AddMessage('Please stand back and enjoy !');
   AddMessage('');
+
+  //create install directory
+  if (NOT DirectoryExists(FPCupManager.BaseDirectory)) then ForceDirectories(FPCupManager.BaseDirectory);
+  //save install settings in install directory
+  SetFPCUPSettings(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory));
 
   Application.ProcessMessages;
 
