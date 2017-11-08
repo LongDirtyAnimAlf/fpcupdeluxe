@@ -1169,7 +1169,8 @@ begin
           end
           else
             WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
-              'Details: '+FErrorLog.Text,true);
+              'Details: '+FErrorLog.Text+LineEnding+'Going to remove this module from Lazarus !',true);
+            UnInstallModule(ModuleName);
         except
           on E: Exception do
             begin

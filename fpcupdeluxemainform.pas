@@ -2242,6 +2242,9 @@ begin
     if ((pos('Halt',c.name)>0) or (pos('Halt',c.caption)>0)) then c.Enabled:=true;
     {$endif}
   end;
+  {$ifdef usealternateui}
+  if value then alternateui_make_sure_images_on_buttons_are_not_enabled;
+  {$endif}
 end;
 
 procedure TForm1.PrepareRun;
