@@ -1180,7 +1180,7 @@ begin
           end;
         end;
 
-        if (NOT result) then UnInstallModule(ModuleName);
+        if (NOT result) then result:=UnInstallModule(ModuleName);
 
       end;
     end
