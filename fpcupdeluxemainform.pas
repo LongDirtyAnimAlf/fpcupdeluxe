@@ -239,11 +239,7 @@ begin
   'FPCUPdeluxe V'+
   {$endif}
     DELUXEVERSION+
-    ' base fpcup'+
-    RevisionStr+
-    ' ('+
-    VersionDate+
-    ') for ' +
+    ' for ' +
     GetTargetCPUOS+
     '-'+
     aTarget;

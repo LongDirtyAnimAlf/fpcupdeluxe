@@ -89,8 +89,10 @@ Const
   Control_LAZ_Install_Button='alternateLazarusInstallBtn';
   Control_FPC_And_LAZ_Install_Button='alternateFPCandLazarusInstallBtn';
   Control_Cross_Compiler_Select_Button='alternateCrossCompilerSelectBtn';
+  Control_Cross_Compiler_Install_Button='alternateCrossCompilerInstallBtn';
   Control_Cross_Compiler_Update_Button='alternateCrossCompilerUpdateBtn';
   Control_Components_Select_Button='alternateComponentsSelectBtn';
+  Control_Components_Install_Button='alternateComponentsInstallBtn';
   Control_Install_Directory_Button='alternateInstallDirBtn';
   Control_Auto_Clear_Button='alternateAutoClearBtn';
   Control_Clear_Log_Button='alternateClearLogBtn';
@@ -129,6 +131,20 @@ Var alternateui_Languages:Array[0..Number_Of_Languages] of alternateui_Language_
 
     alternateui_number_of_images_on_buttons:Integer=0;
     buttons_with_images_on:array[0..alternateui_max_controls_with_images] of AnsiString;
+
+    alternateui_Version:AnsiString='AUI V 1.0.4';
+    alternateui_Title:AnsiString='';
+    alternateui_Form1_title:AnsiString='';
+
+    alternateui_label_font_size:real=12.0;
+    alternateui_button_font_size:real=11.0;
+
+
+    {$ifdef unix}           // should be ok for linux and darwin
+    alternateui_font_ratio:Real=0.9;
+    {$else}
+    alternateui_font_ratio:Real=1.0;
+    {$endif}
 
 procedure alternateui_set_language(LA:AnsiString);Forward;
 
@@ -268,11 +284,12 @@ begin
 end;
 
 
-procedure alternateui_set_Selected_Components;
+procedure alternateui_set_Selected_Components(AKeep:Boolean);
 Var i:Integer=0;
 begin
   while Form1.FindComponent('ComponentSelect_btn'+alternateui_IntToString(i))<>nil do
   begin
+    if Akeep=false then Form1.ListModules.Selected[i]:=false;
     tbcbutton(Form1.FindComponent('ComponentSelect_btn'+alternateui_IntToString(i))).Down:=Form1.ListModules.Selected[i];
     inc(i);
   end;
@@ -287,6 +304,7 @@ begin
   disp_control:=not alternateui_inuse;
   if alternateui_inuse then
   begin
+    Form1.Caption:=alternateui_title;
     Form1.listModules.MultiSelect:=true;
     Form1.Color:=form_BackGround_color;
     Form1.memoSummary.Color:=form_memo_summary_BackGround_color;
@@ -316,10 +334,11 @@ begin
     alternateui_set_CPUTarget_btn;
     alternateui_set_FPCtarget_btn;
     alternateui_set_Laztarget_btn;
-    alternateui_set_Selected_Components;
+    alternateui_set_Selected_Components(True);
   end
   else
   begin
+    Form1.Caption:=alternateui_Form1_title;
     Form1.listModules.MultiSelect:=False;
     Form1.Color:=clDefault;
     Form1.memoSummary.Color:=clDefault;
@@ -443,11 +462,14 @@ Begin
       end
     end;
   end;
+  if Form1.FindComponent(pn+'Panel')<> nil then
+  begin
   with (Form1.FindComponent(pn+'Panel')) as tpanel do
   begin
     Visible:=disp_pan;
     if disp_pan then bringtofront;
   end;
+end;
 end;
 
 procedure alteranteui_ClickHandler(Sender:TObject);
@@ -513,6 +535,7 @@ begin
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
       tbcbutton(sender).Down:=true;
+      alternateui_Display_Hide_Panels('Blank',false);
       case itm of
         0:Form1.QuickBtnClick(Form1.TrunkBtn);
         1:Form1.QuickBtnClick(Form1.NPBtn);
@@ -610,20 +633,33 @@ begin
       tbcbutton(sender).Down:=False;
     end
     else
-    if sender_name='alternateComponentsInstallBtn' then
+    if sender_name=Control_Components_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       (Form1.FindComponent('ComponentSelect_Panel') as TPanel).Visible:=False;
+      alternateui_Display_Hide_Panels('Blank',false);
       application.ProcessMessages;
       Form1.btnInstallModuleClick(Form1.btnInstallModule);
       tbcbutton(sender).Down:=False;
+      // now remove any selected buttons
+       alternateui_set_Selected_Components(False);
     end
     else
     if sender_name=Control_Cross_Compiler_Select_Button then
     begin
       tbcbutton(sender).Down:=Not tbcbutton(sender).Down;
       alternateui_Display_Hide_Panels('alternateUICrossCompiler_',tbcbutton(sender).Down);
+    end
+    else
+    if sender_name=Control_Cross_Compiler_Install_Button then
+    begin
+      tbcbutton(sender).Down:=true;
+      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_Display_Hide_Panels('Blank',false);
+      application.ProcessMessages;
+      Form1.ButtonInstallCrossCompilerClick(Form1.ButtonInstallCrossCompiler);
+      tbcbutton(sender).Down:=false;
     end
     else
     if sender_name=Control_Cross_Compiler_Update_Button then
@@ -726,6 +762,7 @@ begin
       Fontex.FontQuality:=fqFineAntialiasing;
       Fontex.Color:=Label_Font_Color;
       Fontex.TextAlignment:=bcaCenter;
+      Fontex.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
       Name:=base_name+'Title';
       Parent:=(Form1.FindComponent(base_name+'Panel') as TPanel);
       caption:=base_title;
@@ -783,6 +820,7 @@ begin
     statenormal.FontEx.Color:=button_normal_font_color;
     statenormal.FontEx.FontQuality:=fqFineAntialiasing;
     statenormal.FontEx.Shadow:=False;
+    statenormal.FontEx.Height:=round(alternateui_button_font_size*alternateui_font_ratio);
     statenormal.FontEx.Style:=[];
     statenormal.Border.Width:=button_normal_border_width;
     if button_normal_border_use then statenormal.Border.Style:=bboSolid
@@ -793,6 +831,7 @@ begin
     statehover.FontEx.Color:=button_hover_font_color;
     statehover.FontEx.FontQuality:=fqFineAntialiasing;
     statehover.FontEx.Shadow:=False;
+    statehover.FontEx.Height:=round(alternateui_button_font_size*alternateui_font_ratio);
     statehover.FontEx.Style:=[];
     stateHover.Border.Width:=button_hover_border_width;
     if button_Hover_border_use then statehover.Border.Style:=bboSolid
@@ -803,6 +842,7 @@ begin
     stateClicked.FontEx.Color:=button_clicked_font_color;
     stateClicked.FontEx.FontQuality:=fqFineAntialiasing;
     stateClicked.FontEx.Shadow:=False;
+    stateclicked.FontEx.Height:=round(alternateui_button_font_size*alternateui_font_ratio);
     stateClicked.FontEx.Style:=[];
     stateClicked.Border.Width:=button_clicked_border_width;
     if button_clicked_border_use then stateClicked.Border.Style:=bboSolid
@@ -1252,6 +1292,12 @@ var    flagt:integer;
        flagl:integer;
 
 begin
+  // Memorize Title
+  alternateui_Form1_title:=Form1.Caption;
+
+  alternateui_title:=StringReplace(alternateui_Form1_title,'for','('+AlternateUi_Version+') for',[rfReplaceAll]);
+
+
   // create a button on Form1 to activate interface
   with TImage.Create(Form1) do
   begin
@@ -1347,6 +1393,7 @@ begin
     Fontex.WordBreak:=True;
     Fontex.Shadow:=False;
     Fontex.Style:=[];
+    FontEx.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
     Fontex.FontQuality:=fqFineAntialiasing;
     Fontex.Color:=master_Panel_Info_display_Font_Color;
     Fontex.TextAlignment:=bcaCenterTop;
@@ -1371,6 +1418,7 @@ begin
     Fontex.SingleLine:=False;
     Fontex.WordBreak:=True;
     Fontex.Shadow:=False;
+    FontEx.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
     Fontex.Style:=[];
     Fontex.FontQuality:=fqFineAntialiasing;
     Fontex.Color:=master_Panel_Info_display_Font_Color;
@@ -1449,8 +1497,8 @@ begin
 
   // Components Section
   alternateui_create_a_button(Control_Components_Select_Button,(wi div 2)-(120 div 2),24,120,48,'Select Components','alternateUIComponentInstallationBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_MODULES',icon_size,icon_size);
-  alternateui_create_a_button('alternateComponentsInstallBtn',((tpanel(Form1.FindComponent('ComponentSelect_Panel')).width)-140) div 2,tpanel(Form1.FindComponent('ComponentSelect_Panel')).height,140,40,'Install Modules','ComponentSelect_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','',0,0);
-  with (Form1.FindComponent('alternateComponentsInstallBtn') as tbcbutton) do
+  alternateui_create_a_button(Control_Components_Install_Button,((tpanel(Form1.FindComponent('ComponentSelect_Panel')).width)-140) div 2,tpanel(Form1.FindComponent('ComponentSelect_Panel')).height,140,40,'Install Modules','ComponentSelect_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','',0,0);
+  with (Form1.FindComponent(Control_Components_Install_Button) as tbcbutton) do
   begin
     statenormal.FontEx.SingleLine:=False;
     statenormal.FontEx.WordBreak:=True;
@@ -1460,14 +1508,14 @@ begin
     stateClicked.FontEx.WordBreak:=True;
     Caption:='Install'+slinebreak+'Modules';
   end;
-  alternateui_add_title_and_glyph('alternateComponentsInstallBtn','AUI_GO','Install Components',Form1.btnInstallModule.Hint);
+  alternateui_add_title_and_glyph(Control_Components_Install_Button,'AUI_GO','Install Components',Form1.btnInstallModule.Hint);
   tpanel(Form1.FindComponent('ComponentSelect_Panel')).height:=tpanel(Form1.FindComponent('ComponentSelect_Panel')).height+48;
   tbgrashape(Form1.FindComponent('ComponentSelect_Shape')).height:=tbgrashape(Form1.FindComponent('ComponentSelect_Shape')).height+48;
 
   // Cross Compilers
   alternateui_create_a_button(Control_Cross_Compiler_Select_Button,10,24,120,48,'Cross Compiler','alternateUICrossCompilerBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_CROSS_COMPILER',110,icon_size);
-  alternateui_create_a_button('alternateCrossCompilerInstallBtn',((tpanel(Form1.FindComponent('alternateUICrossCompiler_Panel')).Width)-140) div 2,tpanel(Form1.FindComponent('alternateUICrossCompiler_Panel')).Height-46,140,40,'Install Compiler','alternateUICrossCompiler_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','',0,0);
-  alternateui_add_title_and_glyph('alternateCrossCompilerInstallBtn','AUI_GO','Install Compiler',Form1.ButtonInstallCrossCompiler.Hint);
+  alternateui_create_a_button(Control_Cross_Compiler_Install_Button,((tpanel(Form1.FindComponent('alternateUICrossCompiler_Panel')).Width)-140) div 2,tpanel(Form1.FindComponent('alternateUICrossCompiler_Panel')).Height-46,140,40,'Install Compiler','alternateUICrossCompiler_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','',0,0);
+  alternateui_add_title_and_glyph(Control_Cross_Compiler_Install_Button,'AUI_GO','Install Compiler',Form1.ButtonInstallCrossCompiler.Hint);
   alternateui_create_a_button(Control_Cross_Compiler_Update_Button,wi-120-lm,24,120,48,'Update Compilers','alternateUICrossCompilerBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_UPDATE',icon_size,icon_size);
   Alternate_ui_created:=true;
   alternateui_resize;
