@@ -6,7 +6,7 @@ uses
   Classes, SysUtils{$ifdef windows},windows{$endif}{$ifdef usealternateui},Controls, Dialogs,Graphics, Forms, StdCtrls,ExtCtrls, BCLabel, BCTypes, BCButton, BGRAShape,BGRABitmapTypes,lresources{$endif};
 
 {$ifdef usealternateui}
-Var Alternate_ui_created:boolean=False;
+Var Alternate_ui_created:boolean=false;
 
 Procedure alternateui_Create_Controls;
 procedure alteranteui_LeaveHandler(Sender:TObject);
@@ -21,7 +21,7 @@ implementation
 uses fpcupdeluxemainform;
 {$R alternateui.res}
 Const
-  name_of_button_for_Form1='alternate_ui_activate_button';
+  name_of_button_for_form1='alternate_ui_activate_button';
   Master_Panel_Border_Color=$00FFFFFF;
   Master_Panel_One_Button_Border_Color=$000000EC;
   Master_Panel_Custom_Border_Color=$001D911A;
@@ -35,19 +35,19 @@ Const
   master_Panel_Info_display_Border_Color=$00BBBBBB;
   icon_size=30;
   drop_arrow_true=True;
-  drop_arrow_False=False;
+  drop_arrow_false=False;
   button_uses_leave_and_enter_true=True;
   button_uses_leave_and_enter_False=False;
-  form_BackGround_color=$00080808;//$002F0000;
-  form_memo_summary_BackGround_color=$00000000;
+  form_background_color=$00080808;//$002F0000;
+  form_memo_summary_background_color=$00000000;
   form_memo_summary_font_color=$00FFC6C6;
   form_instalDirEdit_BackGround_Color=$00000000;
   form_instalDirEdit_font_Color=$0000D2D2;
-  form_statusmessage_BackGround_color=$00000000;
+  form_statusmessage_background_color=$00000000;
   form_statusmessage_font_color=$00FFC6C6;
-  form_realfpc_BackGround_color=$00000000;
+  form_realfpc_background_color=$00000000;
   form_realfpc_font_color=$00FFC6C6;
-  form_reallaz_BackGround_color=$00000000;
+  form_reallaz_background_color=$00000000;
   form_reallaz_font_color=$00FFC6C6;
   button_panel_color=$0044120D;
   shape_border_green=$0000D700;
@@ -74,7 +74,7 @@ Const
   button_clicked_border_use=true;
   button_panel_title_font_color=$00FFFFF;
   button_cursor=crHandPoint;
-  Initial_Visibility=False;
+  Initial_Visibility=false;
   but_gap=4;
   Buttons_Left_margin=8;
   Close_Button_Size=20;
@@ -89,8 +89,10 @@ Const
   Control_LAZ_Install_Button='alternateLazarusInstallBtn';
   Control_FPC_And_LAZ_Install_Button='alternateFPCandLazarusInstallBtn';
   Control_Cross_Compiler_Select_Button='alternateCrossCompilerSelectBtn';
+  Control_Cross_Compiler_Install_Button='alternateCrossCompilerInstallBtn';
   Control_Cross_Compiler_Update_Button='alternateCrossCompilerUpdateBtn';
   Control_Components_Select_Button='alternateComponentsSelectBtn';
+  Control_Components_Install_Button='alternateComponentsInstallBtn';
   Control_Install_Directory_Button='alternateInstallDirBtn';
   Control_Auto_Clear_Button='alternateAutoClearBtn';
   Control_Clear_Log_Button='alternateClearLogBtn';
@@ -119,7 +121,7 @@ Type
                               end;
 
 Var alternateui_Languages:Array[0..Number_Of_Languages] of alternateui_Language_Type;
-    alternateui_inuse:boolean=False;
+    alternateui_inuse:boolean=false;
     Info_Display_Default_Text,Settings_Help_Text,OnButtonInstaller_Help_Text,NewUI_Help_Text,SelectFPC_Help_Text,SelectLazarus_Help_Text,InstallFPC_Help_Text:AnsiString;
     InstallLazarus_Help_Text,InstallFPCAndLazarus_Help_Text,SelectCrossCompiler_Help_Text,UpdateCrossCompiler_Help_Text,SelectComponents_Help_Text,SetInstallDireectory_Help_Text:AnsiString;
     AUtoClear_Help_Text,ClearLog_Help_Text,Lang_fpc_target,lang_laz_target:ansistring;
@@ -130,15 +132,29 @@ Var alternateui_Languages:Array[0..Number_Of_Languages] of alternateui_Language_
     alternateui_number_of_images_on_buttons:Integer=0;
     buttons_with_images_on:array[0..alternateui_max_controls_with_images] of AnsiString;
 
+    alternateui_Version:AnsiString='AUI V 1.0.4';
+    alternateui_Title:AnsiString='';
+    alternateui_form1_title:AnsiString='';
+
+    alternateui_label_font_size:real=12.0;
+    alternateui_button_font_size:real=11.0;
+
+
+    {$ifdef unix}           // should be ok for linux and darwin
+    alternateui_font_ratio:Real=0.9;
+    {$else}
+    alternateui_font_ratio:Real=1.0;
+    {$endif}
+
 procedure alternateui_set_language(LA:AnsiString);Forward;
 
 procedure alternateui_make_sure_images_on_buttons_are_not_enabled;
 var i:integer;
 begin
-  // need to make sure that after fpupdeluxe disenable routine that the image placed on buttons are not enabled.
+  // need to make sure that after fpupdeluxe disEnable routine that the image placed on buttons are not enabled.
   for i:=0 to alternateui_number_of_images_on_buttons do
   begin
-    if buttons_with_images_on[i]<>'' then TImage(Form1.FindComponent(buttons_with_images_on[i])).enabled:=False;
+    if buttons_with_images_on[i]<>'' then timage(form1.FindComponent(buttons_with_images_on[i])).enabled:=false;
   end;
 end;
 
@@ -192,16 +208,16 @@ const fade_interval=20;
 begin
   if sleep_interval<>0 then
   begin
-    if Form1.FindComponent(na+'Shape')<>nil then
+    if form1.FindComponent(na+'Shape')<>nil then
     begin
-      with Form1.FindComponent(na+'Shape') as tbgrashape do
+      with form1.FindComponent(na+'Shape') as tbgrashape do
       begin
         if fade_up then
         begin
           bringtofront;
           FillOpacity:=255;
           application.ProcessMessages;
-          (Form1.FindComponent(na+'Panel') as TPanel).Visible:=true;
+          (form1.FindComponent(na+'Panel') as TPanel).Visible:=true;
           while fillopacity>128 do
           begin
             fillopacity:=fillopacity-fade_interval;
@@ -211,7 +227,7 @@ begin
         end
         else
         begin
-          if (Form1.FindComponent(na+'Panel') as TPanel).Visible=true then
+          if (form1.FindComponent(na+'Panel') as TPanel).Visible=true then
           begin
             bringtofront;
             FillOpacity:=128;
@@ -221,7 +237,7 @@ begin
               application.processmessages;
               sleep(sleep_interval);
             end;
-            (Form1.FindComponent(na+'Panel') as TPanel).Visible:=False;
+            (form1.FindComponent(na+'Panel') as TPanel).Visible:=False;
           end;
         end;
         fillopacity:=shape_fill_opacity;
@@ -231,27 +247,27 @@ begin
   end
   else
   begin
-    (Form1.FindComponent(na+'Panel') as TPanel).Visible:=fade_up;
+    (form1.FindComponent(na+'Panel') as TPanel).Visible:=fade_up;
   end;
 end;
 
 procedure alternateui_set_FPCtarget_btn;
 begin
-  tbcbutton(Form1.FindComponent(Control_FPC_Select_Button)).Caption:=Lang_FPC_target+slinebreak+Form1.ListBoxFPCTarget.Items.Strings[Form1.ListBoxFPCTarget.ItemIndex];
+  tbcbutton(form1.FindComponent(Control_FPC_Select_Button)).Caption:=Lang_FPC_target+slinebreak+form1.ListBoxFPCTarget.Items.Strings[form1.ListBoxFPCTarget.ItemIndex];
 end;
 
 procedure alternateui_set_LAZtarget_btn;
 begin
-  tbcbutton(Form1.FindComponent(Control_LAZ_Select_Button)).Caption:=Lang_laz_target+slinebreak+Form1.ListBoxLazarusTarget.Items.Strings[Form1.ListBoxLazarusTarget.ItemIndex];
+  tbcbutton(form1.FindComponent(Control_LAZ_Select_Button)).Caption:=Lang_laz_target+slinebreak+form1.ListBoxLazarusTarget.Items.Strings[form1.ListBoxLazarusTarget.ItemIndex];
 end;
 
 procedure alternateui_set_OSTarget_btn;
 var i:integer=0;
 begin
-  while Form1.FindComponent('OSTarget_btn'+alternateui_IntToString(i))<>nil do
+  while form1.findcomponent('OSTarget_btn'+alternateui_IntToString(i))<>nil do
   begin
-    tbcbutton(Form1.FindComponent('OSTarget_btn'+alternateui_IntToString(i))).Down:=i=Form1.radgrpOS.ItemIndex;
-    tbcbutton(Form1.FindComponent('OSTarget_btn'+alternateui_IntToString(i))).Enabled:=Form1.radgrpOS.Enabled;
+    tbcbutton(form1.findcomponent('OSTarget_btn'+alternateui_IntToString(i))).Down:=i=form1.radgrpOS.ItemIndex;
+    tbcbutton(form1.findcomponent('OSTarget_btn'+alternateui_IntToString(i))).Enabled:=form1.radgrpOS.Enabled;
     inc(i);
   end
 end;
@@ -259,21 +275,22 @@ end;
 procedure alternateui_set_CPUTarget_btn;
 Var i:Integer=0;
 begin
-  while Form1.FindComponent('CPUTarget_btn'+alternateui_IntToString(i))<>nil do
+  while form1.findcomponent('CPUTarget_btn'+alternateui_IntToString(i))<>nil do
   begin
-    tbcbutton(Form1.FindComponent('CPUTarget_btn'+alternateui_IntToString(i))).Down:=i=Form1.radgrpCPU.ItemIndex;
-    tbcbutton(Form1.FindComponent('CPUTarget_btn'+alternateui_IntToString(i))).Enabled:=Form1.radgrpCPU.Enabled;
+    tbcbutton(form1.findcomponent('CPUTarget_btn'+alternateui_IntToString(i))).Down:=i=form1.radgrpCPU.ItemIndex;
+    tbcbutton(form1.findcomponent('CPUTarget_btn'+alternateui_IntToString(i))).Enabled:=form1.radgrpCPU.Enabled;
     inc(i);
   end;
 end;
 
 
-procedure alternateui_set_Selected_Components;
+procedure alternateui_set_Selected_Components(AKeep:Boolean);
 Var i:Integer=0;
 begin
-  while Form1.FindComponent('ComponentSelect_btn'+alternateui_IntToString(i))<>nil do
+  while form1.findcomponent('ComponentSelect_btn'+alternateui_IntToString(i))<>nil do
   begin
-    tbcbutton(Form1.FindComponent('ComponentSelect_btn'+alternateui_IntToString(i))).Down:=Form1.ListModules.Selected[i];
+    if Akeep=false then Form1.ListModules.Selected[i]:=false;
+    tbcbutton(form1.findcomponent('ComponentSelect_btn'+alternateui_IntToString(i))).Down:=Form1.ListModules.Selected[i];
     inc(i);
   end;
 end;
@@ -287,85 +304,87 @@ begin
   disp_control:=not alternateui_inuse;
   if alternateui_inuse then
   begin
-    Form1.listModules.MultiSelect:=true;
-    Form1.Color:=form_BackGround_color;
-    Form1.memoSummary.Color:=form_memo_summary_BackGround_color;
-    Form1.memoSummary.Font.Color:=form_memo_summary_font_color;
-    Form1.Constraints.MinWidth:=1052;
-    Form1.Constraints.MinHeight:=631;
-    Form1.DoubleBuffered:=true;
-    Form1.InstallDirEdit.Color:=form_instalDirEdit_BackGround_Color;
-    Form1.InstallDirEdit.Font.Color:=form_instalDirEdit_font_Color;
-    Form1.StatusMessage.Color:=form_instalDirEdit_BackGround_Color;
-    Form1.StatusMessage.font.Color:=form_instalDirEdit_font_Color;
-    Form1.RealFPCURL.Color:=form_realfpc_BackGround_color;
-    Form1.RealFPCURL.Font.Color:=form_realfpc_font_color;
-    Form1.RealLAZURL.Color:=form_reallaz_BackGround_color;
-    Form1.RealLAZURL.Font.Color:=form_reallaz_font_color;
-    Form1.CheckAutoClear.AnchorSideRight.Control:=(Form1.FindComponent(Control_Clear_Log_Button) as TBCButton);
-    Form1.StatusMessage.AnchorSideRight.Control:=(Form1.FindComponent(Control_Auto_Clear_Button) as TBCButton);
-    with (Form1.FindComponent(Control_Auto_Clear_Button) as tbcbutton) do
+    form1.Caption:=alternateui_title;
+    form1.listModules.MultiSelect:=true;
+    form1.Color:=form_background_color;
+    form1.memoSummary.Color:=form_memo_summary_background_color;
+    form1.memoSummary.Font.Color:=form_memo_summary_font_color;
+    form1.Constraints.MinWidth:=1052;
+    form1.Constraints.MinHeight:=631;
+    form1.DoubleBuffered:=true;
+    form1.InstallDirEdit.Color:=form_instalDirEdit_BackGround_Color;
+    form1.InstallDirEdit.Font.Color:=form_instalDirEdit_font_Color;
+    form1.StatusMessage.Color:=form_instalDirEdit_BackGround_Color;
+    form1.StatusMessage.font.Color:=form_instalDirEdit_font_Color;
+    form1.RealFPCURL.Color:=form_realfpc_background_color;
+    form1.RealFPCURL.Font.Color:=form_realfpc_font_color;
+    form1.RealLAZURL.Color:=form_reallaz_background_color;
+    form1.RealLAZURL.Font.Color:=form_reallaz_font_color;
+    form1.CheckAutoClear.AnchorSideRight.Control:=(form1.FindComponent(Control_Clear_Log_Button) as TBCButton);
+    form1.StatusMessage.AnchorSideRight.Control:=(form1.FindComponent(Control_Auto_Clear_Button) as TBCButton);
+    with (form1.FindComponent(Control_Auto_Clear_Button) as tbcbutton) do
     begin
-      down:=Form1.CheckAutoClear.Checked;
+      down:=form1.CheckAutoClear.Checked;
       //adjust glyph
-      if Down then alternateui_Get_Png_from_resource(Form1.FindComponent(Control_Auto_Clear_Button) as tbcbutton,'AUI_GREEN_TICK_SMALL')
-      else alternateui_Get_Png_from_resource(Form1.FindComponent(Control_Auto_Clear_Button) as tbcbutton,'AUI_RED_CROSS_SMALL');
+      if Down then alternateui_Get_Png_from_resource(form1.findcomponent(Control_Auto_Clear_Button) as tbcbutton,'AUI_GREEN_TICK_SMALL')
+      else alternateui_Get_Png_from_resource(form1.findcomponent(Control_Auto_Clear_Button) as tbcbutton,'AUI_RED_CROSS_SMALL');
     end;
     // set the cross compiler options
     alternateui_set_OSTarget_btn;
     alternateui_set_CPUTarget_btn;
     alternateui_set_FPCtarget_btn;
     alternateui_set_Laztarget_btn;
-    alternateui_set_Selected_Components;
+    alternateui_set_Selected_Components(True);
   end
   else
   begin
-    Form1.listModules.MultiSelect:=False;
-    Form1.Color:=clDefault;
-    Form1.memoSummary.Color:=clDefault;
-    Form1.memoSummary.Font.Color:=clDefault;
-    Form1.Constraints.MinWidth:=0;
-    Form1.Constraints.MinHeight:=0;
-    Form1.InstallDirEdit.Color:=clDefault;
-    Form1.InstallDirEdit.Font.Color:=clRed;
-    Form1.StatusMessage.Color:=clDefault;
-    Form1.StatusMessage.font.Color:=clDefault;
-    Form1.RealFPCURL.Color:=clDefault;
-    Form1.RealFPCURL.Font.Color:=clDefault;
-    Form1.RealLAZURL.Color:=clDefault;
-    Form1.RealLAZURL.Font.Color:=clDefault;
-    Form1.CheckAutoClear.AnchorSideRight.Control:=Form1.btnClearLog;
-    Form1.StatusMessage.AnchorSideRight.Control:=Form1.CheckAutoClear;
+    form1.Caption:=alternateui_form1_title;
+    form1.listModules.MultiSelect:=false;
+    form1.Color:=clDefault;
+    form1.memoSummary.Color:=clDefault;
+    form1.memoSummary.Font.Color:=clDefault;
+    form1.Constraints.MinWidth:=0;
+    form1.Constraints.MinHeight:=0;
+    form1.InstallDirEdit.Color:=clDefault;
+    form1.InstallDirEdit.Font.Color:=clRed;
+    form1.StatusMessage.Color:=clDefault;
+    form1.StatusMessage.font.Color:=clDefault;
+    form1.RealFPCURL.Color:=clDefault;
+    form1.RealFPCURL.Font.Color:=clDefault;
+    form1.RealLAZURL.Color:=clDefault;
+    form1.RealLAZURL.Font.Color:=clDefault;
+    form1.CheckAutoClear.AnchorSideRight.Control:=form1.btnClearLog;
+    form1.StatusMessage.AnchorSideRight.Control:=form1.CheckAutoClear;
     // hide all panels
-    for i:=0 to 4 do alternateui_animate_panel(pan_list[i],False);
-    for i:=0 to 4 do tbcbutton(Form1.FindComponent(but_list[i])).Down:=False;
+    for i:=0 to 4 do alternateui_animate_panel(pan_list[i],false);
+    for i:=0 to 4 do tbcbutton(form1.FindComponent(but_list[i])).Down:=false;
 
   end;
   if not alternateui_inuse then alternateui_animate_panel('alternateUIMaster_',alternateui_inuse);
-  Form1.ListBoxFPCTarget.Visible:=disp_control;
-  Form1.ListBoxLazarusTarget.Visible:=disp_control;
-  Form1.BitBtnFPCOnly.Visible:=disp_control;
-  Form1.BitBtnLazarusOnly.Visible:=disp_control;
-  Form1.btnSetupPlus.Visible:=disp_control;
-  Form1.BitBtnFPCandLazarus.Visible:=disp_control;
-  Form1.listModules.Visible:=disp_control;
-  (Form1.FindComponent(Control_Install_Directory_Button) as TBCButton).Visible:=Not Disp_control;
-  (Form1.FindComponent(Control_Clear_Log_Button) as TBCButton).Visible:=Not Disp_control;
-  (Form1.FindComponent(Control_Auto_Clear_Button) as TBCButton).Visible:=Not Disp_control;
-  Form1.btnInstallDirSelect.Visible:=disp_control;
-  Form1.btnClearLog.Visible:=disp_control;
-  Form1.CheckAutoClear.Visible:=disp_control;
-  Form1.ButtonInstallCrossCompiler.Visible:=disp_control;
-  Form1.AutoCrossUpdate.Visible:=disp_control;
-  Form1.listModules.Visible:=disp_control;
-  Form1.btnInstallModule.Visible:=disp_control;
-  Form1.FPCVersionLabel.Visible:=disp_control;
-  Form1.LazarusVersionLabel.Visible:=disp_control;
-  Form1.radgrpCPU.Visible:=disp_control;
-  Form1.radgrpOS.Visible:=disp_control;
-  Form1.Panel1.Visible:=disp_control;
+  form1.ListBoxFPCTarget.Visible:=disp_control;
+  form1.ListBoxLazarusTarget.Visible:=disp_control;
+  form1.BitBtnFPCOnly.Visible:=disp_control;
+  form1.BitBtnLazarusOnly.Visible:=disp_control;
+  form1.btnSetupPlus.Visible:=disp_control;
+  form1.BitBtnFPCandLazarus.Visible:=disp_control;
+  form1.listModules.Visible:=disp_control;
+  (form1.FindComponent(Control_Install_Directory_Button) as TBCButton).Visible:=Not Disp_control;
+  (form1.FindComponent(Control_Clear_Log_Button) as TBCButton).Visible:=Not Disp_control;
+  (form1.FindComponent(Control_Auto_Clear_Button) as TBCButton).Visible:=Not Disp_control;
+  form1.btnInstallDirSelect.Visible:=disp_control;
+  form1.btnClearLog.Visible:=disp_control;
+  form1.CheckAutoClear.Visible:=disp_control;
+  form1.ButtonInstallCrossCompiler.Visible:=disp_control;
+  form1.AutoCrossUpdate.Visible:=disp_control;
+  form1.listModules.Visible:=disp_control;
+  form1.btnInstallModule.Visible:=disp_control;
+  form1.FPCVersionLabel.Visible:=disp_control;
+  form1.LazarusVersionLabel.Visible:=disp_control;
+  form1.radgrpCPU.Visible:=disp_control;
+  form1.radgrpOS.Visible:=disp_control;
+  form1.Panel1.Visible:=disp_control;
   if alternateui_inuse then alternateui_animate_panel('alternateUIMaster_',alternateui_inuse);
-  Form1.Invalidate;
+  form1.Invalidate;
   application.ProcessMessages;
 end;
 
@@ -375,20 +394,20 @@ begin
   if Sender is TBCBUtton then
   begin
     na:=tbcbutton(Sender).Name;
-    with Form1.FindComponent(Control_Display_Help_Text) as TBCLabel do
+    with form1.FindComponent(Control_Display_Help_Text) as TBCLabel do
     begin
       case na of
-        Control_One_Button_Install    :Caption:=OnButtonInstaller_Help_Text;
-        Control_Settings_Button              :Caption:=Settings_Help_Text;
+        Control_One_Button_Install            :Caption:=OnButtonInstaller_Help_Text;
+        Control_Settings_Button               :Caption:=Settings_Help_Text;
         Control_FPC_Select_Button             :Caption:=SelectFPC_Help_Text;
         Control_LAZ_Select_Button             :Caption:=SelectLazarus_Help_Text;
         Control_FPC_Install_Button            :Caption:=InstallFPC_Help_Text;
-        Control_LAZ_Install_Button        :Caption:=InstallLazarus_Help_Text;
-        Control_FPC_And_LAZ_Install_Button  :Caption:=InstallFPCAndLazarus_Help_Text;
-        Control_Cross_Compiler_Select_Button   :Caption:=SelectCrossCompiler_Help_Text;
-        Control_Cross_Compiler_Update_Button   :Caption:=UpdateCrossCompiler_Help_Text;
+        Control_LAZ_Install_Button            :Caption:=InstallLazarus_Help_Text;
+        Control_FPC_And_LAZ_Install_Button    :Caption:=InstallFPCAndLazarus_Help_Text;
+        Control_Cross_Compiler_Select_Button  :Caption:=SelectCrossCompiler_Help_Text;
+        Control_Cross_Compiler_Update_Button  :Caption:=UpdateCrossCompiler_Help_Text;
         Control_Components_Select_Button      :Caption:=SelectComponents_Help_Text;
-        Control_Install_Directory_Button            :Caption:=SetInstallDireectory_Help_Text;
+        Control_Install_Directory_Button      :Caption:=SetInstallDireectory_Help_Text;
         Control_Auto_Clear_Button             :Caption:=AUtoClear_Help_Text;
         Control_Clear_Log_Button              :Caption:=ClearLog_Help_Text;
       end;
@@ -397,23 +416,23 @@ begin
   If Sender is TImage then
   Begin
     na:=TImage(Sender).name;
-    if na=name_of_button_for_Form1 then
+    if na=name_of_button_for_form1 then
     begin
-      (Form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=NewUI_Help_Text;
-      alternateui_Get_Png_from_resource(Form1.FindComponent(name_of_button_for_Form1) as TImage,'AUI_NEW_UI_HOVER');
+      (form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=NewUI_Help_Text;
+      alternateui_Get_Png_from_resource(form1.findcomponent(name_of_button_for_form1) as timage,'AUI_NEW_UI_HOVER');
     end;
   end;
 end;
 
 procedure alteranteui_LeaveHandler(Sender:TObject);
 Begin
-   If Sender is TBCButton then (Form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=Info_Display_Default_Text;
+   If Sender is TBCButton then (form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=Info_Display_Default_Text;
    If Sender is TIMage then
    begin
-     if TImage(sender).name=name_of_button_for_Form1 then
+     if timage(sender).name=name_of_button_for_form1 then
      begin
-       (Form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=Info_Display_Default_Text;
-       alternateui_Get_Png_from_resource(Form1.FindComponent(name_of_button_for_Form1) as TImage,'AUI_NEW_UI');
+       (form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=Info_Display_Default_Text;
+       alternateui_Get_Png_from_resource(form1.findcomponent(name_of_button_for_form1) as timage,'AUI_NEW_UI');
      end;
    end;
 end;
@@ -428,7 +447,7 @@ Begin
       if pan_list[i]=pn then
       begin
         alternateui_animate_panel(pan_list[i],true);
-        tbcbutton(Form1.FindComponent(but_list[i])).Down:=disp_pan;
+        tbcbutton(form1.findcomponent(but_list[i])).Down:=disp_pan;
       end
     end;
   end;
@@ -438,15 +457,18 @@ Begin
     begin
       if pan_list[i]<>pn then
       begin
-        alternateui_animate_panel(pan_list[i],False);
-        tbcbutton(Form1.FindComponent(but_list[i])).Down:=False;
+        alternateui_animate_panel(pan_list[i],false);
+        tbcbutton(form1.findcomponent(but_list[i])).Down:=false;
       end
     end;
   end;
-  with (Form1.FindComponent(pn+'Panel')) as tpanel do
+  if form1.FindComponent(pn+'Panel')<> nil then
   begin
-    Visible:=disp_pan;
-    if disp_pan then bringtofront;
+    with (form1.findcomponent(pn+'Panel')) as tpanel do
+    begin
+      Visible:=disp_pan;
+      if disp_pan then bringtofront;
+    end;
   end;
 end;
 
@@ -459,13 +481,13 @@ var co:integer=0;
 begin
   If Sender is tbcbutton then
   begin
-    sender_Name:=tbcbutton(sender).Name;
+    sender_name:=tbcbutton(sender).Name;
     na:=copy(sender_name,1,length(sender_name)-3);
     if ((na='FPCTarget_btn') or (na='LazTarget_btn')) then
     begin
-      while Form1.FindComponent(na+alternateui_IntToString(co))<>nil do
+      while form1.findcomponent(na+alternateui_IntToString(co))<>nil do
       begin
-        tbcbutton(Form1.FindComponent(na+alternateui_IntToString(co))).down:=False;
+        tbcbutton(form1.findcomponent(na+alternateui_IntToString(co))).down:=false;
         inc(co);
       end;
       with sender as tbcbutton do
@@ -474,24 +496,24 @@ begin
         if na='FPCTarget_btn' then
         begin
           itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
-          Form1.FPCTarget:=caption;
-          Form1.ListBoxFPCTarget.ItemIndex:=itm;
+          form1.FPCTarget:=caption;
+          form1.ListBoxFPCTarget.ItemIndex:=itm;
           alternateui_set_FPCtarget_btn;
         end;
         if na='LazTarget_btn' then
         begin
           itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
           Form1.LazarusTarget:=caption;
-          Form1.ListBoxLazarusTarget.ItemIndex:=itm;
+          form1.ListBoxLazarusTarget.ItemIndex:=itm;
           alternateui_set_Laztarget_btn;
-     end;
+        end;
       end;
     end
     else
     if na='CPUTarget_btn' then
     begin
       itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
-      Form1.radgrpCPU.ItemIndex:=itm;
+      form1.radgrpCPU.ItemIndex:=itm;
       application.ProcessMessages;
       alternateui_set_CPUTarget_btn;
       application.ProcessMessages;
@@ -501,7 +523,7 @@ begin
     if na='OSTarget_btn' then
     begin
       itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
-      Form1.radgrpOS.ItemIndex:=itm;
+      form1.radgrpOS.ItemIndex:=itm;
       application.ProcessMessages;
       alternateui_set_OSTarget_btn;
       application.ProcessMessages;
@@ -510,49 +532,50 @@ begin
     else
     if na='OneButtonSelect_btn' then
     begin
-      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
       tbcbutton(sender).Down:=true;
+      alternateui_Display_Hide_Panels('Blank',false);
       case itm of
-        0:Form1.QuickBtnClick(Form1.TrunkBtn);
-        1:Form1.QuickBtnClick(Form1.NPBtn);
-        2:Form1.QuickBtnClick(Form1.FixesBtn);
-        3:Form1.QuickBtnClick(Form1.StableBtn);
-        4:Form1.QuickBtnClick(Form1.OldBtn);
-        5:Form1.QuickBtnClick(Form1.DinoBtn);
-        6:Form1.QuickBtnClick(Form1.mORMotBtn);
-        7:Form1.BitBtnHaltClick(Form1.BitBtnHalt);
+        0:form1.QuickBtnClick(form1.TrunkBtn);
+        1:form1.QuickBtnClick(form1.NPBtn);
+        2:form1.QuickBtnClick(form1.FixesBtn);
+        3:form1.QuickBtnClick(form1.StableBtn);
+        4:form1.QuickBtnClick(form1.OldBtn);
+        5:form1.QuickBtnClick(form1.DinoBtn);
+        6:form1.QuickBtnClick(form1.mORMotBtn);
+        7:form1.BitBtnHaltClick(form1.BitBtnHalt);
       end;
-      (Form1.FindComponent(Control_One_Button_Install) as TBCButton).Down:=False;
-      tbcbutton(sender).Down:=False;
-      (Form1.FindComponent('OneButtonSelect_Panel') as TPanel).Visible:=False;
+      (form1.FindComponent(Control_One_Button_Install) as TBCButton).Down:=False;
+      tbcbutton(sender).Down:=false;
+      (form1.FindComponent('OneButtonSelect_Panel') as TPanel).Visible:=False;
     end
     else
     if sender_name=Control_Settings_Button then
     begin
       tbcbutton(sender).Down:=true;
       application.ProcessMessages;
-      Form1.btnSetupPlusClick(Form1.btnSetupPlus);
-      tbcbutton(sender).Down:=False;
+      form1.btnSetupPlusClick(form1.btnSetupPlus);
+      tbcbutton(sender).Down:=false;
     end
     else
     if sender_name=Control_Install_Directory_Button then
     begin
-      Form1.btnInstallDirSelectClick(Form1.btnInstallDirSelect);
+      form1.btnInstallDirSelectClick(form1.btnInstallDirSelect);
     end
     else
     if sender_name=Control_Clear_Log_Button then
     begin
-      Form1.btnClearLogClick(Form1.btnClearLog);
+      form1.btnClearLogClick(form1.btnClearLog);
     end
     else
     if sender_name=Control_Auto_Clear_Button then
     begin
       tbcbutton(sender).Down:=Not tbcbutton(sender).Down;
       // now adjust the glyph
-      if tbcbutton(sender).Down then alternateui_Get_Png_from_resource(Form1.FindComponent(sender_name),'AUI_GREEN_TICK_SMALL')
-      else alternateui_Get_Png_from_resource(Form1.FindComponent(sender_name),'AUI_RED_CROSS_SMALL');
-      Form1.CheckAutoClear.Checked:=tbcbutton(sender).Down;
+      if tbcbutton(sender).Down then alternateui_Get_Png_from_resource(form1.findcomponent(sender_name),'AUI_GREEN_TICK_SMALL')
+      else alternateui_Get_Png_from_resource(form1.findcomponent(sender_name),'AUI_RED_CROSS_SMALL');
+      form1.CheckAutoClear.Checked:=tbcbutton(sender).Down;
     end
     else
     if sender_name=Control_One_Button_Install then
@@ -586,38 +609,41 @@ begin
     if sender_name=Control_FPC_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
-      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       application.ProcessMessages;
-      Form1.FPCOnlyClick(Form1.BitBtnFPCOnly);
-      tbcbutton(sender).Down:=False;
+      form1.FPCOnlyClick(form1.BitBtnFPCOnly);
+      tbcbutton(sender).Down:=false;
     end
     else
     if sender_name=Control_LAZ_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
-      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       application.ProcessMessages;
-      Form1.LazarusOnlyClick(Form1.BitBtnLazarusOnly);
-      tbcbutton(sender).Down:=False;
+      form1.LazarusOnlyClick(form1.BitBtnLazarusOnly);
+      tbcbutton(sender).Down:=false;
     end
     else
     if sender_name=Control_FPC_And_LAZ_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
-      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       application.ProcessMessages;
-      Form1.BitBtnFPCandLazarusClick(Form1.BitBtnFPCandLazarus);
-      tbcbutton(sender).Down:=False;
+      form1.BitBtnFPCandLazarusClick(form1.BitBtnFPCandLazarus);
+      tbcbutton(sender).Down:=false;
     end
     else
-    if sender_name='alternateComponentsInstallBtn' then
+    if sender_name=Control_Components_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
-      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
-      (Form1.FindComponent('ComponentSelect_Panel') as TPanel).Visible:=False;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      (form1.FindComponent('ComponentSelect_Panel') as TPanel).Visible:=False;
+      alternateui_Display_Hide_Panels('Blank',false);
       application.ProcessMessages;
-      Form1.btnInstallModuleClick(Form1.btnInstallModule);
-      tbcbutton(sender).Down:=False;
+      form1.btnInstallModuleClick(form1.btnInstallModule);
+      tbcbutton(sender).Down:=false;
+      // now remove any selected buttons
+       alternateui_set_Selected_Components(False);
     end
     else
     if sender_name=Control_Cross_Compiler_Select_Button then
@@ -626,13 +652,23 @@ begin
       alternateui_Display_Hide_Panels('alternateUICrossCompiler_',tbcbutton(sender).Down);
     end
     else
+    if sender_name=Control_Cross_Compiler_Install_Button then
+    begin
+      tbcbutton(sender).Down:=true;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_Display_Hide_Panels('Blank',false);
+      application.ProcessMessages;
+      form1.ButtonInstallCrossCompilerClick(form1.ButtonInstallCrossCompiler);
+      tbcbutton(sender).Down:=false;
+    end
+    else
     if sender_name=Control_Cross_Compiler_Update_Button then
     begin
       tbcbutton(sender).Down:=true;
-      (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      (form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
       application.ProcessMessages;
-      Form1.ButtonAutoUpdateCrossCompiler(Form1.AutoCrossUpdate);
-      tbcbutton(sender).Down:=False;
+      form1.ButtonAutoUpdateCrossCompiler(form1.AutoCrossUpdate);
+      tbcbutton(sender).Down:=false;
     end
     else
     begin
@@ -641,31 +677,31 @@ begin
       if na='ComponentSelect_btn' then
       begin
         itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
-        Form1.listmodules.Selected[itm]:=tbcbutton(sender).Down;
+        form1.listmodules.Selected[itm]:=tbcbutton(sender).Down;
       end;
     end;
   end
   else
   begin
-    If Sender is TImage then
+    If Sender is timage then
     begin
-      sender_Name:=TImage(sender).Name;
+      sender_name:=timage(sender).Name;
       // check to see if its a close button
       if upcase(copy(sender_name,length(sender_name)-4,5))='CLOSE' then
       begin
         na:=copy(sender_name,1,pos('_',sender_name));
-        alternateui_animate_panel(na,False);
-        (Form1.FindComponent(na+'panel') as tpanel).Visible:=False;
+        alternateui_animate_panel(na,false);
+        (form1.FindComponent(na+'panel') as tpanel).Visible:=false;
         // also set the activating button to up
         for i:=0 to 4 do
         begin
-          if pan_list[i]=na then tbcbutton(Form1.FindComponent(but_list[i])).Down:=False;
+          if pan_list[i]=na then tbcbutton(form1.findcomponent(but_list[i])).Down:=False;
         end;
       end
       else
       begin
-        If sender_name=name_of_button_for_Form1 then alternateui_toggle_new_ui;
-        if sender_name='alternateuiHalt' then Form1.BitBtnHaltClick(Form1.BitBtnHalt);
+        If sender_name=name_of_button_for_form1 then alternateui_toggle_new_ui;
+        if sender_name='alternateuiHalt' then form1.BitBtnHaltClick(form1.BitBtnHalt);
         case sender_name of
           'alternateuiLangEN':alternateui_set_language('EN');
           'alternateuiLangRU':alternateui_set_language('RU');
@@ -674,30 +710,30 @@ begin
       end;
     end;
   end;
-  (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=False;
+  (form1.FindComponent('alternateuiHalt') as TImage).Visible:=False;
 end;
 
-procedure alternateui_Create_Button_Container(base_name:string;base_left,base_top,base_width,base_height:integer;base_title,base_Parent:shortstring;base_close:boolean;Panel_Color,Shape_color,Shape_Border_Color,Shape_Border_Width,Label_Color,Label_Font_Color,Label_Border_Color:TColor;Label_Border_Width:Integer;label_bold,Label_Clear_Color:Boolean);
+procedure alternateui_Create_Button_Container(base_name:string;base_left,base_top,base_width,base_height:integer;base_title,base_parent:shortstring;base_close:boolean;Panel_Color,Shape_color,Shape_Border_Color,Shape_Border_Width,Label_Color,Label_Font_Color,Label_Border_Color:TColor;Label_Border_Width:Integer;label_bold,Label_Clear_Color:Boolean);
 begin
   with tpanel.Create(Form1) do
   begin
-    SetBounds(base_Left,base_top,base_width,base_height);
+    setbounds(base_Left,base_top,base_width,base_height);
     color:=Panel_Color;
     BevelInner:=bvNone;
     BevelOuter:=bvNone;
     BorderWidth:=0;
     BorderStyle:=bsNone;
-    Name:=base_name+'Panel';
+    name:=base_name+'Panel';
     doublebuffered:=true;
-    if Form1.FindComponent(base_Parent) is TPanel then
+    if form1.findcomponent(base_parent) is TPanel then
     begin
-      Parent:=(Form1.FindComponent(base_Parent) as TPanel);
-      Visible:=true;
+      parent:=(form1.FindComponent(base_parent) as TPanel);
+      visible:=true;
     end
     else
     begin
-      Parent:=Form1;
-      Visible:=Initial_Visibility;
+      parent:=Form1;
+      visible:=Initial_Visibility;
     end;
     caption:='';
     bringtofront;
@@ -707,36 +743,37 @@ begin
     // create the title
     with tbclabel.Create(Form1) do
     begin
-      SetBounds(Label_Border_Width,shape_border_rounding_size,base_width-(Label_Border_Width*2),Close_Button_Size);
-      BackGround.color:=Label_Color;
-      if Label_Clear_Color then BackGround.style:=bbsClear
-      else BackGround.style:=bbsColor;
-      Border.Color:=Label_Border_Color;
-      AutoSize:=False;
-      if label_border_width=0 then Border.Style:=bboNone
+      setbounds(Label_Border_Width,shape_border_rounding_size,base_width-(Label_Border_Width*2),Close_Button_Size);
+      background.color:=Label_Color;
+      if Label_Clear_Color then background.style:=bbsClear
+      else background.style:=bbsColor;
+      border.Color:=Label_Border_Color;
+      autosize:=false;
+      if label_border_width=0 then border.Style:=bboNone
       else
       begin
-        Border.Style:=bboSolid;
-        Border.Width:=Label_Border_Width;
+        border.Style:=bboSolid;
+        border.Width:=Label_Border_Width;
       end;
-      enabled:=False;
-      Fontex.Shadow:=False;
-      if label_bold then Fontex.Style:=[fsbold]
-      else Fontex.Style:=[];
-      Fontex.FontQuality:=fqFineAntialiasing;
-      Fontex.Color:=Label_Font_Color;
-      Fontex.TextAlignment:=bcaCenter;
-      Name:=base_name+'Title';
-      Parent:=(Form1.FindComponent(base_name+'Panel') as TPanel);
+      enabled:=false;
+      fontex.Shadow:=False;
+      if label_bold then fontex.Style:=[fsbold]
+      else fontex.Style:=[];
+      fontex.FontQuality:=fqFineAntialiasing;
+      fontex.Color:=Label_Font_Color;
+      fontex.TextAlignment:=bcaCenter;
+      fontex.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
+      name:=base_name+'Title';
+      parent:=(form1.FindComponent(base_name+'Panel') as TPanel);
       caption:=base_title;
-      Visible:=true;
+      visible:=true;
       bringtofront;
     end;
   end;
   // Create the Shape / Border
   with TBGRAShape.Create(Form1) do
   begin
-    SetBounds(0,0,base_width,base_height);
+    setbounds(0,0,base_width,base_height);
     Angle:=45;
     bordercolor:=Shape_Border_Color;
     borderstyle:=psSolid;
@@ -744,45 +781,46 @@ begin
     RoundRadius:=shape_border_rounding_size;
     ShapeType:=stRegularPolygon;
     SideCount:=4;
-    UseBorderGradient:=False;
+    UseBorderGradient:=false;
     UseFillGradient:=False;
     fillcolor:=Shape_color;
     FillOpacity:=shape_fill_opacity;
-    Name:=base_name+'Shape';
-    Parent:=(Form1.FindComponent(base_name+'Panel') as TPanel);
-    Visible:=true;
+    name:=base_name+'Shape';
+    parent:=(form1.FindComponent(base_name+'Panel') as TPanel);
+    visible:=true;
     sendtoback;
   end;
   if base_close then
   begin
     // Create the Close Button
-    with TImage.Create(Form1) do
+    with timage.Create(form1) do
     begin
      // picture.Bitmap.LoadFromLazarusResource('CLOSE_BUTTON');
-      Parent:=(Form1.FindComponent(base_name+'Panel') as TPanel);
+      parent:=(form1.FindComponent(base_name+'Panel') as TPanel);
       AntiAliasingMode:=amOn;
       Stretch:=True;
-      Cursor:=button_Cursor;
-      OnClick:=@Form1.alternateuibutClick;
-      Name:=base_name+'Close';
-      SetBounds(base_Width-Close_Button_Size-shape_border_rounding_size,shape_border_rounding_size,Close_Button_Size,Close_Button_Size);
+      cursor:=button_Cursor;
+      onclick:=@form1.alternateuibutClick;
+      name:=base_name+'Close';
+      setbounds(base_Width-Close_Button_Size-shape_border_rounding_size,shape_border_rounding_size,Close_Button_Size,Close_Button_Size);
     end;
-    alternateui_Get_Png_from_resource(Form1.FindComponent(base_name+'Close') as TImage,'AUI_CLOSE_BUTTON');
+    alternateui_Get_Png_from_resource(form1.findcomponent(base_name+'Close') as timage,'AUI_CLOSE_BUTTON');
   end;
 end;
 
-procedure alternateui_create_a_button(but_name:string;but_left,but_top,but_width,but_height:integer;but_caption,but_Parent:shortstring;but_drop_arrow,but_use_mouse_enter:boolean;but_glyph,but_add_image:ansistring;but_add_image_width,but_add_image_height:integer);
+procedure alternateui_create_a_button(but_name:string;but_left,but_top,but_width,but_height:integer;but_caption,but_parent:shortstring;but_drop_arrow,but_use_mouse_enter:boolean;but_glyph,but_add_image:ansistring;but_add_image_width,but_add_image_height:integer);
 begin
-  with tbcbutton.Create(Form1) do
+  with tbcbutton.Create(form1) do
   begin
-    SetBounds(But_Left,but_top,but_width,but_height);
-    down:=False;
+    setbounds(But_Left,but_top,but_width,but_height);
+    down:=false;
     statenormal.Background.Color:=button_normal_color;
     statenormal.Background.style:=bbsColor;
     statenormal.Border.Color:=button_normal_border_color;
     statenormal.FontEx.Color:=button_normal_font_color;
     statenormal.FontEx.FontQuality:=fqFineAntialiasing;
     statenormal.FontEx.Shadow:=False;
+    statenormal.FontEx.Height:=round(alternateui_button_font_size*alternateui_font_ratio);
     statenormal.FontEx.Style:=[];
     statenormal.Border.Width:=button_normal_border_width;
     if button_normal_border_use then statenormal.Border.Style:=bboSolid
@@ -793,6 +831,7 @@ begin
     statehover.FontEx.Color:=button_hover_font_color;
     statehover.FontEx.FontQuality:=fqFineAntialiasing;
     statehover.FontEx.Shadow:=False;
+    statehover.FontEx.Height:=round(alternateui_button_font_size*alternateui_font_ratio);
     statehover.FontEx.Style:=[];
     stateHover.Border.Width:=button_hover_border_width;
     if button_Hover_border_use then statehover.Border.Style:=bboSolid
@@ -803,6 +842,7 @@ begin
     stateClicked.FontEx.Color:=button_clicked_font_color;
     stateClicked.FontEx.FontQuality:=fqFineAntialiasing;
     stateClicked.FontEx.Shadow:=False;
+    stateclicked.FontEx.Height:=round(alternateui_button_font_size*alternateui_font_ratio);
     stateClicked.FontEx.Style:=[];
     stateClicked.Border.Width:=button_clicked_border_width;
     if button_clicked_border_use then stateClicked.Border.Style:=bboSolid
@@ -813,46 +853,46 @@ begin
     End;
     Rounding.RoundX:=button_rounding_size;
     Rounding.RoundY:=button_rounding_size;
-    if Form1.FindComponent(but_Parent) is TPanel then Parent:=(Form1.FindComponent(but_Parent) as TPanel)
-    else Parent:=Form1;
+    if form1.findcomponent(but_parent) is TPanel then parent:=(form1.FindComponent(but_parent) as TPanel)
+    else parent:=Form1;
     caption:=but_caption;
-    Name:=but_name;
-    OnClick:=@Form1.alternateuibutClick;//(self);
+    name:=but_name;
+    onclick:=@form1.alternateuibutClick;//(self);
     if but_use_mouse_enter then
     begin
-      OnMouseEnter:=@Form1.alternateuibutEnter;
-      OnMouseLeave:=@Form1.alternateuibutLeave;
+      OnMouseEnter:=@form1.alternateuibutEnter;
+      OnMouseLeave:=@form1.alternateuibutLeave;
     end;
-    Cursor:=button_Cursor;
-    Visible:=true;
+    cursor:=button_Cursor;
+    visible:=true;
   end;
   if but_glyph<>'' then
   begin
-    alternateui_Get_Png_from_resource(Form1.FindComponent(but_name),but_glyph);
+    alternateui_Get_Png_from_resource(form1.findcomponent(but_name),but_glyph);
   end;
   if but_add_image<>'' then
   begin
     // add an image to location and change text position
-    with TImage.Create(Form1) do
+    with timage.Create(form1) do
     begin
-      SetBounds(But_Left+((but_width div 2)-(but_add_image_width div 2)),but_top+4,but_add_image_width,but_add_image_height);
-      if Form1.FindComponent(but_Parent) is TPanel then Parent:=(Form1.FindComponent(but_Parent) as TPanel)
-      else Parent:=Form1;
-      Name:=but_name+'img';
+      setbounds(But_Left+((but_width div 2)-(but_add_image_width div 2)),but_top+4,but_add_image_width,but_add_image_height);
+      if form1.findcomponent(but_parent) is TPanel then parent:=(form1.FindComponent(but_parent) as TPanel)
+      else parent:=Form1;
+      name:=but_name+'img';
       AntiAliasingMode:=amOn;
       Stretch:=True;
-      Cursor:=button_Cursor;
-      enabled:=False;
-      OnClick:=@Form1.alternateuibutClick;//(self);
+      cursor:=button_Cursor;
+      enabled:=false;
+      onclick:=@form1.alternateuibutClick;//(self);
       if but_use_mouse_enter then
       begin
-        OnMouseEnter:=@Form1.alternateuibutEnter;
-        OnMouseLeave:=@Form1.alternateuibutLeave;
+        OnMouseEnter:=@form1.alternateuibutEnter;
+        OnMouseLeave:=@form1.alternateuibutLeave;
       end;
-     end;
-    alternateui_Get_Png_from_resource(Form1.FindComponent(but_name+'img') as TImage,but_add_image);
+    end;
+    alternateui_Get_Png_from_resource(form1.findcomponent(but_name+'img') as timage,but_add_image);
     // now change text poistion of button
-    with  Form1.FindComponent(but_name) as TBCButton do
+    with  form1.FindComponent(but_name) as TBCButton do
     begin
       statenormal.FontEx.TextAlignment:=bcaCenterBottom;
       stateHover.FontEx.TextAlignment:=bcaCenterBottom;
@@ -878,15 +918,15 @@ var control_base_name:shortstring='';
     Panel_border:tcolor;
 begin
   panel_border:=Master_Panel_Components_Border_Color;
-  control_base_Name:=copy(base_btn,1,pos('_',base_btn));
+  control_base_name:=copy(base_btn,1,pos('_',base_btn));
   if ((control_base_name='CPUTarget_') or (control_base_name='OSTarget_')) then
   begin
     b_panel:='alternateUICrossCompiler_Panel';
-    need_close:=False;
+    need_close:=false;
     panel_border:=Master_Panel_Cross_Compilers_Border_Color;
   end
   else b_panel:=control_base_name;
-  alternateui_Create_Button_Container(control_base_name,150,60,200,100,title_caption,b_panel,need_close,button_panel_color,shape_fill_color,panel_border,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Components_Border_Color,0,False,true);
+  alternateui_Create_Button_Container(control_base_name,150,60,200,100,title_caption,b_panel,need_close,button_panel_color,shape_fill_color,panel_border,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Components_Border_Color,0,false,true);
   // Create the Actual Button
   but_count:=0;
   itm_count:=0;
@@ -900,17 +940,17 @@ begin
     if base_btn='OneButtonSelect_btn' then hm:=7;
     for aloop:=0 to hm do
     begin
-     // with tbcbutton.Create(Form1) do
+     // with tbcbutton.Create(form1) do
       begin
         if but_count=How_many_Across then
         begin
           sy:=sy+Height_Of_Buttons+but_gap;
           but_count:=0;
         end;
-        if btn_caps_list=nil then alternateui_create_a_button(base_btn+alternateui_IntToString(aloop),Buttons_Left_margin+((Width_Of_Buttons+but_gap)*but_count),sy,Width_Of_Buttons,Height_Of_Buttons,btn_caps_list_from_radio.Items.Strings[aloop],b_panel,False,False,'','',0,0)
-        else alternateui_create_a_button(base_btn+alternateui_IntToString(aloop),Buttons_Left_margin+((Width_Of_Buttons+but_gap)*but_count),sy,Width_Of_Buttons,Height_Of_Buttons,btn_caps_list.Items[aloop],b_panel,False,False,'','',0,0);
+        if btn_caps_list=nil then alternateui_create_a_button(base_btn+alternateui_IntToString(aloop),Buttons_Left_margin+((Width_Of_Buttons+but_gap)*but_count),sy,Width_Of_Buttons,Height_Of_Buttons,btn_caps_list_from_radio.Items.Strings[aloop],b_panel,false,false,'','',0,0)
+        else alternateui_create_a_button(base_btn+alternateui_IntToString(aloop),Buttons_Left_margin+((Width_Of_Buttons+but_gap)*but_count),sy,Width_Of_Buttons,Height_Of_Buttons,btn_caps_list.Items[aloop],b_panel,false,false,'','',0,0);
         inc(but_count);
-        with  Form1.FindComponent(base_btn+alternateui_IntToString(aloop)) as tbcbutton do
+        with  form1.FindComponent(base_btn+alternateui_IntToString(aloop)) as tbcbutton do
         begin
           if btn_caps_list=nil then Down :=btn_caps_list_from_radio.ItemIndex=aloop
           else Down :=btn_caps_list.Selected[aloop];
@@ -918,32 +958,32 @@ begin
      end;
     end;
    //adjust the panel dimensions;
-    with  Form1.FindComponent(control_base_name+'Panel') as TPanel do
+    with  form1.FindComponent(control_base_name+'Panel') as TPanel do
     begin
       pan_height:=sy+Height_Of_Buttons+4+but_gap;//height;
       pan_width:=Buttons_Left_margin+((Width_Of_Buttons+but_gap)*How_Many_Across)+Buttons_Left_margin-but_gap;//width;
-      SetBounds(left,top,pan_width,pan_height);
+      setbounds(left,top,pan_width,pan_height);
     end;
     //assign image to close button
-    if Form1.FindComponent(control_base_name+'Close')<>nil then
+    if form1.FindComponent(control_base_name+'Close')<>nil then
     begin
-      with  Form1.FindComponent(control_base_name+'Close') as TImage do
+      with  form1.FindComponent(control_base_name+'Close') as TImage do
       begin
-        SetBounds(Pan_Width-Close_Button_Size-shape_border_rounding_size,shape_border_rounding_size,Close_Button_Size,Close_Button_Size);
+        setbounds(Pan_Width-Close_Button_Size-shape_border_rounding_size,shape_border_rounding_size,Close_Button_Size,Close_Button_Size);
         bringtofront;
       end;
     end;
     // adjust posution based on panel dimensions
-    if Form1.FindComponent(control_base_name+'Title')<>nil then
+    if form1.FindComponent(control_base_name+'Title')<>nil then
     begin
-      with  Form1.FindComponent(control_base_name+'Title') as TBCLabel do
+      with  form1.FindComponent(control_base_name+'Title') as TBCLabel do
       begin
-        SetBounds(Close_Button_Size+2,shape_border_rounding_size,pan_width-((close_button_size+2)*2),close_button_size);
+        setbounds(Close_Button_Size+2,shape_border_rounding_size,pan_width-((close_button_size+2)*2),close_button_size);
       end;
     end;
-    with  Form1.FindComponent(control_base_name+'Shape') as TBGRAShape do
+    with  form1.FindComponent(control_base_name+'Shape') as TBGRAShape do
     begin
-      SetBounds(0,0,pan_width,pan_height);
+      setbounds(0,0,pan_width,pan_height);
       sendtoback;
     end;
   end;
@@ -955,21 +995,21 @@ begin
   begin
     if alternateui_inuse then
     begin
-      tbcbutton(Form1.FindComponent(Control_Clear_Log_Button)).Left:=Form1.width-84;//.btnClearLog.Left;
-      tbcbutton(Form1.FindComponent(Control_Auto_Clear_Button)).Left:=Form1.width-170;//CheckAutoClear.Left;
+      tbcbutton(form1.FindComponent(Control_Clear_Log_Button)).Left:=form1.width-84;//.btnClearLog.Left;
+      tbcbutton(form1.FindComponent(Control_Auto_Clear_Button)).Left:=form1.width-170;//CheckAutoClear.Left;
     end;
   end;
 end;
 
 procedure alternateui_add_title_and_glyph(bm:ansistring;gl:ansistring;ca:ansistring;hi:ansistring);
 begin
-  with (Form1.FindComponent(bm) as tbcbutton) do
+  with (form1.FindComponent(bm) as tbcbutton) do
   begin
     caption:=ca;
     hint:=hi;
     if hi<>'' then showhint:=true;
     if gl='' then glyph:=nil
-    else alternateui_Get_Png_from_resource(Form1.FindComponent(bm) as tbcbutton,gl);
+    else alternateui_Get_Png_from_resource(form1.findcomponent(bm) as tbcbutton,gl);
   end;
 end;
 
@@ -1183,7 +1223,7 @@ end;
 
 Procedure alternateui_set_Button_Values(Bm:ShorTstRING;lang_num,idx:Integer);
 begin
-  with Form1.FindComponent(bm) as tbcbutton do
+  with form1.FindComponent(bm) as tbcbutton do
   begin
     caption:=alternateui_Languages[lang_num].Controls[idx].Caption;
     hint:=alternateui_Languages[lang_num].Controls[idx].hint;
@@ -1230,15 +1270,15 @@ begin
       alternateui_Set_Button_Values(Control_Clear_Log_Button,itm,12);
       NewUI_Help_Text:=controls[13].Info;
       // adjust button title captions
-      TBCLabel(Form1.FindComponent('alternateUIOneButBox_Title')).Caption:=One_Button_Title_Text;
-      TBCLabel(Form1.FindComponent('alternateUICustomInstallationBox_Title')).Caption:=Custom_Title_Text;
-      TBCLabel(Form1.FindComponent('alternateUIComponentInstallationBox_Title')).Caption:=Component_Title_Text;
-      TBCLabel(Form1.FindComponent('alternateUICrossCompilerBox_Title')).Caption:=Compiler_Title_Text;
-      IF La='EN' then alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangEN') as TImage,'AUI_LANG_EN_ON') else alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangEN') as TImage,'AUI_LANG_EN');
-      IF La='RU' then alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangRU') as TImage,'AUI_LANG_RU_ON') else alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangRU') as TImage,'AUI_LANG_RU');
-      IF La='FR' then alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangFR') as TImage,'AUI_LANG_FR_ON') else alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangFR') as TImage,'AUI_LANG_FR');
+      TBCLabel(form1.findcomponent('alternateUIOneButBox_Title')).Caption:=One_Button_Title_Text;
+      TBCLabel(form1.findcomponent('alternateUICustomInstallationBox_Title')).Caption:=Custom_Title_Text;
+      TBCLabel(form1.findcomponent('alternateUIComponentInstallationBox_Title')).Caption:=Component_Title_Text;
+      TBCLabel(form1.findcomponent('alternateUICrossCompilerBox_Title')).Caption:=Compiler_Title_Text;
+      IF La='EN' then alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangEN') as timage,'AUI_LANG_EN_ON') else alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangEN') as timage,'AUI_LANG_EN');
+      IF La='RU' then alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangRU') as timage,'AUI_LANG_RU_ON') else alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangRU') as timage,'AUI_LANG_RU');
+      IF La='FR' then alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangFR') as timage,'AUI_LANG_FR_ON') else alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangFR') as timage,'AUI_LANG_FR');
     end;
-    (Form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=Info_Display_Default_Text;
+    (form1.FindComponent(Control_Display_Help_Text) as TBCLabel).Caption:=Info_Display_Default_Text;
     alternateui_set_FPCtarget_btn;
     alternateui_set_Laztarget_btn;
     application.ProcessMessages;
@@ -1252,181 +1292,189 @@ var    flagt:integer;
        flagl:integer;
 
 begin
-  // create a button on Form1 to activate interface
-  with TImage.Create(Form1) do
+  // Memorize Title
+  alternateui_form1_title:=form1.Caption;
+
+  alternateui_title:=StringReplace(alternateui_form1_title,'base','('+AlternateUi_Version+') base',[rfReplaceAll]);
+
+
+  // create a button on form1 to activate interface
+  with timage.Create(form1) do
   begin
-    Parent:=Form1;//(Form1.FindComponent(control_base_name+'Panel') as TPanel);
+    parent:=Form1;//(form1.FindComponent(control_base_name+'Panel') as TPanel);
     AntiAliasingMode:=amOn;
     Stretch:=True;
-    Cursor:=button_Cursor;
-    OnClick:=@Form1.alternateuibutClick;
-    OnMouseEnter:=@Form1.alternateuibutEnter;
-    OnMouseLeave:=@Form1.alternateuibutLeave;
-    Name:=name_of_button_for_Form1;//
-    SetBounds(Form1.btnInstallDirSelect.Left+Form1.btnInstallDirSelect.Width+12,4,trunc(Close_Button_Size*1.5),trunc(Close_Button_Size*1.5));
+    cursor:=button_Cursor;
+    onclick:=@form1.alternateuibutClick;
+    OnMouseEnter:=@form1.alternateuibutEnter;
+    OnMouseLeave:=@form1.alternateuibutLeave;
+    name:=name_of_button_for_form1;//
+    setbounds(form1.btnInstallDirSelect.Left+form1.btnInstallDirSelect.Width+12,4,trunc(Close_Button_Size*1.5),trunc(Close_Button_Size*1.5));
   end;
-  alternateui_Get_Png_from_resource(Form1.FindComponent(name_of_button_for_Form1) as TImage,'AUI_NEW_UI');
+  alternateui_Get_Png_from_resource(form1.findcomponent(name_of_button_for_form1) as timage,'AUI_NEW_UI');
 
    // create the buttons, panels, etc required for the popup menus.
   alternateui_Create_Buttons_for_Container('FPCTarget_btn',Form1.ListBoxFPCtarget,nil,'Please select the Free Pascal Compiler you wish to Install',7,18,120);
   alternateui_Create_Buttons_for_Container('LazTarget_btn',Form1.ListBoxLazarusTarget,nil,'Please select the Lazarus you wish to Install',7,18,120);
   alternateui_Create_Buttons_for_Container('ComponentSelect_btn',Form1.ListModules,nil,'Please select the Component(s) you wish to install.',7,18,120);
   alternateui_Create_Buttons_for_Container('OneButtonSelect_btn',Form1.ListModules,nil,'',8,34,120);
-  with  Form1.FindComponent('OneButtonSelect_Panel') as TPanel do
+  with  form1.FindComponent('OneButtonSelect_Panel') as TPanel do
   begin
     left:=14;
     top:=116;
   end;
-  with  Form1.FindComponent('OneButtonSelect_Shape') as TBGRAShape do
+  with  form1.FindComponent('OneButtonSelect_Shape') as TBGRAShape do
   begin
     bordercolor:=button_clicked_border_color;
     fillcolor:=select_shape_fill_color;
   end;
-  with  Form1.FindComponent('FPCTarget_Panel') as TPanel do
+  with  form1.FindComponent('FPCTarget_Panel') as TPanel do
   begin
     left:=14;
     top:=182;
   end;
-  with  Form1.FindComponent('FPCTarget_Shape') as TBGRAShape do
+  with  form1.FindComponent('FPCTarget_Shape') as TBGRAShape do
   begin
     bordercolor:=button_clicked_border_color;
     fillcolor:=select_shape_fill_color;
   end;
-  with  Form1.FindComponent('LAZTarget_Panel') as TPanel do
+  with  form1.FindComponent('LAZTarget_Panel') as TPanel do
   begin
     left:=14;
     top:=182;
   end;
-  with  Form1.FindComponent('LAZTarget_Shape') as TBGRAShape do
+  with  form1.FindComponent('LAZTarget_Shape') as TBGRAShape do
   begin
     bordercolor:=button_clicked_border_color;
     fillcolor:=select_shape_fill_color;
   end;
-  with  Form1.FindComponent('ComponentSelect_Panel') as TPanel do
+  with  form1.FindComponent('ComponentSelect_Panel') as TPanel do
   begin
     left:=138;
     top:=172;
   end;
-  with  Form1.FindComponent('ComponentSelect_Shape') as TBGRAShape do
+  with  form1.FindComponent('ComponentSelect_Shape') as TBGRAShape do
   begin
     bordercolor:=button_clicked_border_color;
     fillcolor:=select_shape_fill_color;
   end;
 
   // Add Titles to OneButton
-  alternateui_add_title_and_glyph('OneButtonSelect_btn000','AUI_TRUNK',Form1.trunkbtn.Caption,Form1.TrunkBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn001','AUI_NEW_PASCAL',Form1.NPBtn.Caption,Form1.NPBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn002','AUI_FIXES',Form1.FixesBtn.Caption,Form1.FixesBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn003','AUI_STABLE',Form1.StableBtn.Caption,Form1.StableBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn004','AUI_OLD',Form1.OldBtn.Caption,Form1.OldBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn005','AUI_DINO',Form1.DinoBtn.Caption,Form1.DinoBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn006','AUI_MORMOT',Form1.mORMotBtn.Caption,Form1.mORMotBtn.Hint);
-  alternateui_add_title_and_glyph('OneButtonSelect_btn007','AUI_HALT',Form1.BitBtnHalt.Caption,Form1.BitBtnHalt.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn000','AUI_TRUNK',form1.trunkbtn.Caption,form1.TrunkBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn001','AUI_NEW_PASCAL',form1.NPBtn.Caption,form1.NPBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn002','AUI_FIXES',form1.FixesBtn.Caption,form1.FixesBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn003','AUI_STABLE',form1.StableBtn.Caption,form1.StableBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn004','AUI_OLD',form1.OldBtn.Caption,form1.OldBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn005','AUI_DINO',form1.DinoBtn.Caption,form1.DinoBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn006','AUI_MORMOT',form1.mORMotBtn.Caption,form1.mORMotBtn.Hint);
+  alternateui_add_title_and_glyph('OneButtonSelect_btn007','AUI_HALT',form1.BitBtnHalt.Caption,form1.BitBtnHalt.Hint);
 
   //Create Panels to Hold Functional Buttons
-  alternateui_Create_Button_Container('alternateUIMaster_',4,40,360,564,'','',False,button_panel_color,shape_fill_color,Master_Panel_Border_Color,2,master_Panel_Info_display_BackGround_Color,Master_Panel_Title_Font_Color,master_Panel_Info_display_Border_Color,1,False,False);
-  alternateui_Create_Button_Container('alternateUIOneButBox_',110,2,140,80,'Quick Installer','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_One_Button_Border_Color,4,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_One_Button_Border_Color,2,False,False);
-  alternateui_Create_Button_Container('alternateUICustomInstallationBox_',4,(tpanel(Form1.FindComponent('alternateUIOneButBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUIOneButBox_Panel')).height)+4,wi,114,'Custom Installation','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_Custom_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Custom_Border_Color,1,False,False);
-  alternateui_Create_Button_Container('alternateUIComponentInstallationBox_',4,(tpanel(Form1.FindComponent('alternateUICustomInstallationBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUICustomInstallationBox_Panel')).height)+4,wi,76,'Install Additional Components','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_Components_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Components_Border_Color,1,False,False);
-  alternateui_Create_Button_Container('alternateUICrossCompilerBox_',4,(tpanel(Form1.FindComponent('alternateUIComponentInstallationBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUIComponentInstallationBox_Panel')).height)+4,wi,76,'Custom Cross Compilers','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_Cross_Compilers_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Cross_Compilers_Border_Color,1,False,False);
+  alternateui_Create_Button_Container('alternateUIMaster_',4,40,360,564,'','',false,button_panel_color,shape_fill_color,Master_Panel_Border_Color,2,master_Panel_Info_display_BackGround_Color,Master_Panel_Title_Font_Color,master_Panel_Info_display_Border_Color,1,false,false);
+  alternateui_Create_Button_Container('alternateUIOneButBox_',110,2,140,80,'Quick Installer','alternateUIMaster_Panel',false,button_panel_color,shape_fill_color,Master_Panel_One_Button_Border_Color,4,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_One_Button_Border_Color,2,false,false);
+  alternateui_Create_Button_Container('alternateUICustomInstallationBox_',4,(tpanel(form1.FindComponent('alternateUIOneButBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUIOneButBox_Panel')).height)+4,wi,114,'Custom Installation','alternateUIMaster_Panel',false,button_panel_color,shape_fill_color,Master_Panel_Custom_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Custom_Border_Color,1,false,false);
+  alternateui_Create_Button_Container('alternateUIComponentInstallationBox_',4,(tpanel(form1.FindComponent('alternateUICustomInstallationBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUICustomInstallationBox_Panel')).height)+4,wi,76,'Install Additional Components','alternateUIMaster_Panel',false,button_panel_color,shape_fill_color,Master_Panel_Components_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Components_Border_Color,1,false,false);
+  alternateui_Create_Button_Container('alternateUICrossCompilerBox_',4,(tpanel(form1.FindComponent('alternateUIComponentInstallationBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUIComponentInstallationBox_Panel')).height)+4,wi,76,'Custom Cross Compilers','alternateUIMaster_Panel',false,button_panel_color,shape_fill_color,Master_Panel_Cross_Compilers_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Cross_Compilers_Border_Color,1,false,false);
 
   // Create the Lower Notes Label Control
   with tbclabel.Create(Form1) do
   begin
-    SetBounds(4,
-    (tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+4,
+    setbounds(4,
+    (tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+4,
     wi,
-    (tpanel(Form1.FindComponent('alternateUIMaster_Panel')).height)-((tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+4)-4);
-    BackGround.Color:=master_Panel_Info_display_BackGround_Color1;
-    BackGround.style:=bbsColor;
-    AutoSize:=False;
-    Border.Style:=bboSolid;
-    Border.Color:=master_Panel_Info_display_Border_Color;
-    enabled:=False;
-    Fontex.SingleLine:=False;
-    Fontex.WordBreak:=True;
-    Fontex.Shadow:=False;
-    Fontex.Style:=[];
-    Fontex.FontQuality:=fqFineAntialiasing;
-    Fontex.Color:=master_Panel_Info_display_Font_Color;
-    Fontex.TextAlignment:=bcaCenterTop;
-    Name:='alternateUIMaster_Info_Display';
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);
+    (tpanel(form1.FindComponent('alternateUIMaster_Panel')).height)-((tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+4)-4);
+    background.Color:=master_Panel_Info_display_BackGround_Color1;
+    background.style:=bbsColor;
+    autosize:=false;
+    border.Style:=bboSolid;
+    border.Color:=master_Panel_Info_display_Border_Color;
+    enabled:=false;
+    fontex.SingleLine:=False;
+    fontex.WordBreak:=True;
+    fontex.Shadow:=False;
+    fontex.Style:=[];
+    FontEx.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
+    fontex.FontQuality:=fqFineAntialiasing;
+    fontex.Color:=master_Panel_Info_display_Font_Color;
+    fontex.TextAlignment:=bcaCenterTop;
+    name:='alternateUIMaster_Info_Display';
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);
     caption:='';//Info_Display_Default_Text;
-    Visible:=true;
+    visible:=true;
     bringtofront;
   end;
   with tbclabel.Create(Form1) do
   begin
-    SetBounds(8,
-    (tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+8,
+    setbounds(8,
+    (tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+8,
     wi-8,
-    (tpanel(Form1.FindComponent('alternateUIMaster_Panel')).height)-((tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+4)-12);
-    BackGround.Color:=master_Panel_Info_display_BackGround_Color;
-    BackGround.style:=bbsColor;
-    AutoSize:=False;
-    Border.Style:=bboNone;
-    Border.Color:=master_Panel_Info_display_Border_Color;
-    enabled:=False;
-    Fontex.SingleLine:=False;
-    Fontex.WordBreak:=True;
-    Fontex.Shadow:=False;
-    Fontex.Style:=[];
-    Fontex.FontQuality:=fqFineAntialiasing;
-    Fontex.Color:=master_Panel_Info_display_Font_Color;
-    Fontex.TextAlignment:=bcaCenterTop;
-    Name:=Control_Display_Help_Text;
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);
+    (tpanel(form1.FindComponent('alternateUIMaster_Panel')).height)-((tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUICrossCompilerBox_Panel')).height)+4)-12);
+    background.Color:=master_Panel_Info_display_BackGround_Color;
+    background.style:=bbsColor;
+    autosize:=false;
+    border.Style:=bboNone;
+    border.Color:=master_Panel_Info_display_Border_Color;
+    enabled:=false;
+    fontex.SingleLine:=False;
+    fontex.WordBreak:=True;
+    fontex.Shadow:=False;
+    FontEx.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
+    fontex.Style:=[];
+    fontex.FontQuality:=fqFineAntialiasing;
+    fontex.Color:=master_Panel_Info_display_Font_Color;
+    fontex.TextAlignment:=bcaCenterTop;
+    name:=Control_Display_Help_Text;
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);
     caption:=Info_Display_Default_Text;
-    Visible:=true;
+    visible:=true;
     bringtofront;
   end;
 
   // Create Panels for Cross Compiler
-  alternateui_Create_Button_Container('alternateUICrossCompiler_',370,40,600,564,'Install Cross Compilers','',true,button_panel_color,shape_fill_color,Master_Panel_Border_Color,1,master_Panel_Info_display_BackGround_Color,Master_Panel_Title_Font_Color,master_Panel_Info_display_Border_Color,0,False,true);
-  alternateui_Create_Buttons_for_Container('CPUTarget_btn',nil,Form1.radgrpCPU,'Select CPU',1,18,120);
-  alternateui_Create_Buttons_for_Container('OSTarget_btn',nil,Form1.radgrpOS,'Select OS',1,18,120);
-  with  Form1.FindComponent('alternateUICrossCompiler_Shape') as TBGRAShape do
+  alternateui_Create_Button_Container('alternateUICrossCompiler_',370,40,600,564,'Install Cross Compilers','',true,button_panel_color,shape_fill_color,Master_Panel_Border_Color,1,master_Panel_Info_display_BackGround_Color,Master_Panel_Title_Font_Color,master_Panel_Info_display_Border_Color,0,false,true);
+  alternateui_Create_Buttons_for_Container('CPUTarget_btn',nil,form1.radgrpCPU,'Select CPU',1,18,120);
+  alternateui_Create_Buttons_for_Container('OSTarget_btn',nil,form1.radgrpOS,'Select OS',1,18,120);
+  with  form1.FindComponent('alternateUICrossCompiler_Shape') as TBGRAShape do
   begin
     bordercolor:=button_clicked_border_color;
     fillcolor:=select_shape_fill_color;
     borderwidth:=2;
   end;
-  with Form1.FindComponent('CPUTarget_Panel') as TPanel do
+  with form1.FindComponent('CPUTarget_Panel') as TPanel do
   begin
     left:=20;
     top:=30
   end;
-  with Form1.FindComponent('OSTarget_Panel') as TPanel do
+  with form1.FindComponent('OSTarget_Panel') as TPanel do
   begin
-    left:=20+TPanel(Form1.FindComponent('CPUTarget_Panel')).Width+20;
+    left:=20+TPanel(form1.FindComponent('CPUTarget_Panel')).Width+20;
     top:=30;
   end;
-  with Form1.FindComponent('alternateUICrossCompiler_Panel') as TPanel do
+  with form1.FindComponent('alternateUICrossCompiler_Panel') as TPanel do
   begin
     left:=138;
     top:=192;
-    width:=TPanel(Form1.FindComponent('OSTarget_Panel')).Left+TPanel(Form1.FindComponent('OSTarget_Panel')).Width+20;
-    if TPanel(Form1.FindComponent('CPUTarget_Panel')).Height>TPanel(Form1.FindComponent('OSTarget_Panel')).Height then height:=TPanel(Form1.FindComponent('CPUTarget_Panel')).Height+80
-    else height:=TPanel(Form1.FindComponent('OSTarget_Panel')).Height+80;
-    tbgrashape(Form1.FindComponent('alternateUICrossCompiler_Shape')).Height:=height;
-    tbgrashape(Form1.FindComponent('alternateUICrossCompiler_Shape')).Width:=Width;
-    tbclabel(Form1.FindComponent('alternateUICrossCompiler_Title')).Width:=Width;
-    Timage(Form1.FindComponent('alternateUICrossCompiler_Close')).left:=Width-Close_Button_Size-shape_border_rounding_size
+    width:=TPanel(form1.FindComponent('OSTarget_Panel')).Left+TPanel(form1.FindComponent('OSTarget_Panel')).Width+20;
+    if TPanel(form1.FindComponent('CPUTarget_Panel')).Height>TPanel(form1.FindComponent('OSTarget_Panel')).Height then height:=TPanel(form1.FindComponent('CPUTarget_Panel')).Height+80
+    else height:=TPanel(form1.FindComponent('OSTarget_Panel')).Height+80;
+    tbgrashape(form1.FindComponent('alternateUICrossCompiler_Shape')).Height:=height;
+    tbgrashape(form1.FindComponent('alternateUICrossCompiler_Shape')).Width:=Width;
+    tbclabel(form1.FindComponent('alternateUICrossCompiler_Title')).Width:=Width;
+    Timage(form1.FindComponent('alternateUICrossCompiler_Close')).left:=Width-Close_Button_Size-shape_border_rounding_size
   end;
 
   // Now add buttons to Containers
   // One Button Panel and Settings Button
-  alternateui_create_a_button(Control_Settings_Button,wi-96-2,32,96,48,'Settings','alternateUIMaster_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_SETTINGS',icon_size,icon_size);
-  alternateui_create_a_button(Control_One_Button_Install,10,26,120,48,'One Button Installer','alternateUIOneButBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_QUICK',icon_size,icon_size);
+  alternateui_create_a_button(Control_Settings_Button,wi-96-2,32,96,48,'Settings','alternateUIMaster_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_SETTINGS',icon_size,icon_size);
+  alternateui_create_a_button(Control_One_Button_Install,10,26,120,48,'One Button Installer','alternateUIOneButBox_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_QUICK',icon_size,icon_size);
 
   // Custom Installation Section
   alternateui_create_a_button(Control_FPC_Select_Button,10,24,120,32,'FPC Version','alternateUICustomInstallationBox_Panel',drop_arrow_True,button_uses_leave_and_enter_true,'','',0,0);
   alternateui_create_a_button(Control_LAZ_Select_Button,wi-120-lm,24,120,32,'Lazarus Version','alternateUICustomInstallationBox_Panel',drop_arrow_True,button_uses_leave_and_enter_true,'','',0,0);
-  alternateui_create_a_button(Control_FPC_Install_Button,10,62,70,48,'Install FPC','alternateUICustomInstallationBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_FPC',icon_size,icon_size);
-  alternateui_create_a_button(Control_LAZ_Install_Button,wi-70-lm,62,70,48,'Install Lazarus','alternateUICustomInstallationBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_LAZ',icon_size,icon_size);
-  alternateui_create_a_button(Control_FPC_And_LAZ_Install_Button,(wi div 2)-(120 div 2),62,120,48,'Install FPC & Lazarus','alternateUICustomInstallationBox_Panel',False,button_uses_leave_and_enter_true,'','AUI_FPC_LAZ',110,icon_size);
-  with (Form1.FindComponent(Control_FPC_Select_Button) as tbcbutton) do
+  alternateui_create_a_button(Control_FPC_Install_Button,10,62,70,48,'Install FPC','alternateUICustomInstallationBox_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_FPC',icon_size,icon_size);
+  alternateui_create_a_button(Control_LAZ_Install_Button,wi-70-lm,62,70,48,'Install Lazarus','alternateUICustomInstallationBox_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_LAZ',icon_size,icon_size);
+  alternateui_create_a_button(Control_FPC_And_LAZ_Install_Button,(wi div 2)-(120 div 2),62,120,48,'Install FPC & Lazarus','alternateUICustomInstallationBox_Panel',false,button_uses_leave_and_enter_true,'','AUI_FPC_LAZ',110,icon_size);
+  with (form1.FindComponent(Control_FPC_Select_Button) as tbcbutton) do
   begin
     statenormal.FontEx.SingleLine:=False;
     statenormal.FontEx.WordBreak:=True;
@@ -1436,7 +1484,7 @@ begin
     stateClicked.FontEx.WordBreak:=True;
     Caption:='FPC Version'+slinebreak+'';
   end;
-  with (Form1.FindComponent(Control_LAZ_Select_Button) as tbcbutton) do
+  with (form1.FindComponent(Control_LAZ_Select_Button) as tbcbutton) do
   begin
     statenormal.FontEx.SingleLine:=False;
     statenormal.FontEx.WordBreak:=True;
@@ -1448,9 +1496,9 @@ begin
   end;
 
   // Components Section
-  alternateui_create_a_button(Control_Components_Select_Button,(wi div 2)-(120 div 2),24,120,48,'Select Components','alternateUIComponentInstallationBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_MODULES',icon_size,icon_size);
-  alternateui_create_a_button('alternateComponentsInstallBtn',((tpanel(Form1.FindComponent('ComponentSelect_Panel')).width)-140) div 2,tpanel(Form1.FindComponent('ComponentSelect_Panel')).height,140,40,'Install Modules','ComponentSelect_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','',0,0);
-  with (Form1.FindComponent('alternateComponentsInstallBtn') as tbcbutton) do
+  alternateui_create_a_button(Control_Components_Select_Button,(wi div 2)-(120 div 2),24,120,48,'Select Components','alternateUIComponentInstallationBox_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_MODULES',icon_size,icon_size);
+  alternateui_create_a_button(Control_Components_Install_Button,((tpanel(form1.FindComponent('ComponentSelect_Panel')).width)-140) div 2,tpanel(form1.FindComponent('ComponentSelect_Panel')).height,140,40,'Install Modules','ComponentSelect_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','',0,0);
+  with (form1.FindComponent(Control_Components_Install_Button) as tbcbutton) do
   begin
     statenormal.FontEx.SingleLine:=False;
     statenormal.FontEx.WordBreak:=True;
@@ -1460,94 +1508,94 @@ begin
     stateClicked.FontEx.WordBreak:=True;
     Caption:='Install'+slinebreak+'Modules';
   end;
-  alternateui_add_title_and_glyph('alternateComponentsInstallBtn','AUI_GO','Install Components',Form1.btnInstallModule.Hint);
-  tpanel(Form1.FindComponent('ComponentSelect_Panel')).height:=tpanel(Form1.FindComponent('ComponentSelect_Panel')).height+48;
-  tbgrashape(Form1.FindComponent('ComponentSelect_Shape')).height:=tbgrashape(Form1.FindComponent('ComponentSelect_Shape')).height+48;
+  alternateui_add_title_and_glyph(Control_Components_Install_Button,'AUI_GO','Install Components',form1.btnInstallModule.Hint);
+  tpanel(form1.FindComponent('ComponentSelect_Panel')).height:=tpanel(form1.FindComponent('ComponentSelect_Panel')).height+48;
+  tbgrashape(form1.FindComponent('ComponentSelect_Shape')).height:=tbgrashape(form1.FindComponent('ComponentSelect_Shape')).height+48;
 
   // Cross Compilers
-  alternateui_create_a_button(Control_Cross_Compiler_Select_Button,10,24,120,48,'Cross Compiler','alternateUICrossCompilerBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_CROSS_COMPILER',110,icon_size);
-  alternateui_create_a_button('alternateCrossCompilerInstallBtn',((tpanel(Form1.FindComponent('alternateUICrossCompiler_Panel')).Width)-140) div 2,tpanel(Form1.FindComponent('alternateUICrossCompiler_Panel')).Height-46,140,40,'Install Compiler','alternateUICrossCompiler_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','',0,0);
-  alternateui_add_title_and_glyph('alternateCrossCompilerInstallBtn','AUI_GO','Install Compiler',Form1.ButtonInstallCrossCompiler.Hint);
-  alternateui_create_a_button(Control_Cross_Compiler_Update_Button,wi-120-lm,24,120,48,'Update Compilers','alternateUICrossCompilerBox_Panel',drop_arrow_False,button_uses_leave_and_enter_true,'','AUI_UPDATE',icon_size,icon_size);
+  alternateui_create_a_button(Control_Cross_Compiler_Select_Button,10,24,120,48,'Cross Compiler','alternateUICrossCompilerBox_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_CROSS_COMPILER',110,icon_size);
+  alternateui_create_a_button(Control_Cross_Compiler_Install_Button,((tpanel(form1.FindComponent('alternateUICrossCompiler_Panel')).Width)-140) div 2,tpanel(form1.FindComponent('alternateUICrossCompiler_Panel')).Height-46,140,40,'Install Compiler','alternateUICrossCompiler_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','',0,0);
+  alternateui_add_title_and_glyph(Control_Cross_Compiler_Install_Button,'AUI_GO','Install Compiler',form1.ButtonInstallCrossCompiler.Hint);
+  alternateui_create_a_button(Control_Cross_Compiler_Update_Button,wi-120-lm,24,120,48,'Update Compilers','alternateUICrossCompilerBox_Panel',drop_arrow_false,button_uses_leave_and_enter_true,'','AUI_UPDATE',icon_size,icon_size);
   Alternate_ui_created:=true;
   alternateui_resize;
 
   // create buttons to replace normal buttons
-  alternateui_create_a_button(Control_Install_Directory_Button,Form1.btnInstallDirSelect.Left,Form1.btnInstallDirSelect.Top,Form1.btnInstallDirSelect.Width,Form1.btnInstallDirSelect.Height,'Set InstDir','',drop_arrow_False,button_uses_leave_and_enter_true,'AUI_EXCLAMATION','',0,0);
-  (Form1.FindComponent(Control_Install_Directory_Button) as TBCButton).Visible:=False;
-  alternateui_create_a_button(Control_Clear_Log_Button,Form1.btnClearLog.Left,Form1.btnClearLog.Top,Form1.btnClearLog.Width,Form1.btnClearLog.Height,'Clear Log','',drop_arrow_False,button_uses_leave_and_enter_true,'AUI_CLEAR','',0,0);
-  (Form1.FindComponent(Control_Clear_Log_Button) as TBCButton).Visible:=False;
-  alternateui_create_a_button(Control_Auto_Clear_Button,Form1.CheckAutoClear.Left,Form1.btnClearLog.Top,Form1.CheckAutoClear.Width+4,Form1.btnClearLog.Height,'Auto Clear','',drop_arrow_False,button_uses_leave_and_enter_true,'AUI_GREEN_TICK_SMALL','',0,0);
-  (Form1.FindComponent(Control_Auto_Clear_Button) as TBCButton).Visible:=False;
-  (Form1.FindComponent(Control_Auto_Clear_Button) as TBCButton).Down:=True;
+  alternateui_create_a_button(Control_Install_Directory_Button,form1.btnInstallDirSelect.Left,form1.btnInstallDirSelect.Top,form1.btnInstallDirSelect.Width,form1.btnInstallDirSelect.Height,'Set InstDir','',drop_arrow_false,button_uses_leave_and_enter_true,'AUI_EXCLAMATION','',0,0);
+  (form1.FindComponent(Control_Install_Directory_Button) as TBCButton).Visible:=False;
+  alternateui_create_a_button(Control_Clear_Log_Button,form1.btnClearLog.Left,form1.btnClearLog.Top,form1.btnClearLog.Width,form1.btnClearLog.Height,'Clear Log','',drop_arrow_false,button_uses_leave_and_enter_true,'AUI_CLEAR','',0,0);
+  (form1.FindComponent(Control_Clear_Log_Button) as TBCButton).Visible:=False;
+  alternateui_create_a_button(Control_Auto_Clear_Button,form1.CheckAutoClear.Left,form1.btnClearLog.Top,form1.CheckAutoClear.Width+4,form1.btnClearLog.Height,'Auto Clear','',drop_arrow_false,button_uses_leave_and_enter_true,'AUI_GREEN_TICK_SMALL','',0,0);
+  (form1.FindComponent(Control_Auto_Clear_Button) as TBCButton).Visible:=False;
+  (form1.FindComponent(Control_Auto_Clear_Button) as TBCButton).Down:=True;
 
   // create image for logo
-  with TImage.Create(Form1) do
+  with timage.Create(form1) do
   begin
-    SetBounds(10,00,90,90);
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(Form1.FindComponent(control_base_name+'Panel') as TPanel);
-    Name:='alternateuiLogo';
+    setbounds(10,00,90,90);
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(form1.FindComponent(control_base_name+'Panel') as TPanel);
+    name:='alternateuiLogo';
     AntiAliasingMode:=amOn;
     Stretch:=True;
-    Visible:=true;
+    visible:=true;
   end;
-  alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLogo') as TImage,'AUI_GLOBE');
+  alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLogo') as timage,'AUI_GLOBE');
 
   // create image for HALT
-  with TImage.Create(Form1) do
+  with timage.Create(form1) do
   begin
-    SetBounds(110,390,140,140);
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(Form1.FindComponent(control_base_name+'Panel') as TPanel);
-    Name:='alternateuiHalt';
+    setbounds(110,390,140,140);
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(form1.FindComponent(control_base_name+'Panel') as TPanel);
+    name:='alternateuiHalt';
     AntiAliasingMode:=amOn;
     Stretch:=True;
-    Visible:=False;
-    Cursor:=button_Cursor;
-    OnClick:=@Form1.alternateuibutClick;
+    visible:=false;
+    cursor:=button_Cursor;
+    onclick:=@form1.alternateuibutClick;
   end;
-  alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiHalt') as TImage,'AUI_STOP');
+  alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiHalt') as timage,'AUI_STOP');
 
   // create image for FLAGS
   flagt:=4;
   flagl:=wi-96-2;
-  with TImage.Create(Form1) do
+  with timage.Create(form1) do
   begin
-    SetBounds(flagl,flagt,24,16);
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(Form1.FindComponent(control_base_name+'Panel') as TPanel);
-    Name:='alternateuiLangEN';
+    setbounds(flagl,flagt,24,16);
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(form1.FindComponent(control_base_name+'Panel') as TPanel);
+    name:='alternateuiLangEN';
     AntiAliasingMode:=amOn;
     Stretch:=True;
-    Visible:=true;
-    Cursor:=button_Cursor;
-    OnClick:=@Form1.alternateuibutClick;
+    visible:=true;
+    cursor:=button_Cursor;
+    onclick:=@form1.alternateuibutClick;
   end;
-  alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangEN') as TImage,'AUI_LANG_EN');
+  alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangEN') as timage,'AUI_LANG_EN');
   flagl:=flagl+24;
-  with TImage.Create(Form1) do
+  with timage.Create(form1) do
   begin
-    SetBounds(flagl,flagt,24,16);
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(Form1.FindComponent(control_base_name+'Panel') as TPanel);
-    Name:='alternateuiLangRU';
+    setbounds(flagl,flagt,24,16);
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(form1.FindComponent(control_base_name+'Panel') as TPanel);
+    name:='alternateuiLangRU';
     AntiAliasingMode:=amOn;
     Stretch:=True;
-    Visible:=true;
-    Cursor:=button_Cursor;
-    OnClick:=@Form1.alternateuibutClick;
+    visible:=true;
+    cursor:=button_Cursor;
+    onclick:=@form1.alternateuibutClick;
   end;
-  alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangRU') as TImage,'AUI_LANG_RU');
+  alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangRU') as timage,'AUI_LANG_RU');
   flagl:=flagl+24;
-  with TImage.Create(Form1) do
+  with timage.Create(form1) do
   begin
-    SetBounds(flagl,flagt,24,16);
-    Parent:=(Form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(Form1.FindComponent(control_base_name+'Panel') as TPanel);
-    Name:='alternateuiLangFR';
+    setbounds(flagl,flagt,24,16);
+    parent:=(form1.FindComponent('alternateUIMaster_Panel') as TPanel);//(form1.FindComponent(control_base_name+'Panel') as TPanel);
+    name:='alternateuiLangFR';
     AntiAliasingMode:=amOn;
     Stretch:=True;
-    Visible:=true;
-    Cursor:=button_Cursor;
-    OnClick:=@Form1.alternateuibutClick;
+    visible:=true;
+    cursor:=button_Cursor;
+    onclick:=@form1.alternateuibutClick;
   end;
-  alternateui_Get_Png_from_resource(Form1.FindComponent('alternateuiLangFR') as TImage,'AUI_LANG_FR');
+  alternateui_Get_Png_from_resource(form1.findcomponent('alternateuiLangFR') as timage,'AUI_LANG_FR');
 
   //Set Help Text;
   alternateui_set_text_variables;
@@ -1555,4 +1603,3 @@ begin
 end;
 {$endif}
 end.
-
