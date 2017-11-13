@@ -534,16 +534,16 @@ begin
       ExitCode := Processor.ExitStatus;
       if ExitCode <> 0 then
       begin
+        WritelnLog(etError, infotext+ExtractFileName(Processor.Executable)+' returned error code #'+IntToStr(ExitCode), true);
         OperationSucceeded := false;
         Result := false;
-        WritelnLog(etError, infotext+'Error running make!' + LineEnding + 'Details: exit code ' + IntToStr(ExitCode), true);
       end;
     except
       on E: Exception do
       begin
+        WritelnLog(etError, infotext+ExtractFileName(Processor.Executable)+' exception.'+LineEnding+'Exception details: '+E.Message, true);
         OperationSucceeded := false;
         Result := false;
-        WritelnLog(etError, infotext+'Exception running make!' + LineEnding + 'Details: ' + E.Message, true);
       end;
     end;
 
@@ -622,7 +622,7 @@ begin
           Processor.Execute;
           if Processor.ExitStatus <> 0 then
           begin
-            writelnlog(etError, infotext+'Make/lazbuild returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
+            writelnlog(etError, infotext+ExtractFileName(Processor.Executable)+' returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
               'Details: ' + FErrorLog.Text, true);
             OperationSucceeded := false;
           end;
@@ -630,7 +630,7 @@ begin
           on E: Exception do
           begin
             OperationSucceeded := false;
-            WritelnLog(etError, infotext+'Exception running lazbuild to get IDE with user-specified packages!' + LineEnding +
+            WritelnLog(etError, infotext+'Exception running '+ExtractFileName(Processor.Executable)+' to get IDE with user-specified packages!' + LineEnding +
               'Details: ' + E.Message, true);
           end;
         end;

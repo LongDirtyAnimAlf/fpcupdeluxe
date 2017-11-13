@@ -1867,6 +1867,17 @@ begin
   {$IFDEF MSWINDOWS}
       if (SSLLibHandle = 0) then
         SSLLibHandle := LoadLib(DLLSSLName2);
+      {$IFDEF CPU32}
+      if (SSLUtilHandle = 0) then
+        SSLUtilHandle := LoadLib('libcrypto-1_1.dll');
+      if (SSLLibHandle = 0) then
+        SSLLibHandle := LoadLib('libssl-1_1.dll');
+      {$ELSE}
+      if (SSLUtilHandle = 0) then
+        SSLUtilHandle := LoadLib('libcrypto-1_1-x64.dll');
+      if (SSLLibHandle = 0) then
+        SSLLibHandle := LoadLib('libssl-1_1-x64.dll');
+      {$ENDIF}
   {$ENDIF}
 {$ENDIF}
       if (SSLLibHandle <> 0) and (SSLUtilHandle <> 0) then

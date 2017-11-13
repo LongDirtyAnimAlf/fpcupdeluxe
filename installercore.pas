@@ -477,15 +477,18 @@ begin
 
     if OperationSucceeded then
     begin
-      // check availability of OpenSSL libraries. Just continue in case of error
-      if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll') then
+      if InitSSLInterface then SSLImplementation := TSSLOpenSSL else
       begin
-        infoln(localinfotext+'Found OpenSLL library files.',etDebug);
-      end
-      else
-      begin
-        infoln(localinfotext+'No OpenSLL library files available. Going to download them',etWarning);
-        DownloadOpenSSL;
+        // check availability of OpenSSL libraries. Just continue in case of error
+        if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll') then
+        begin
+          infoln(localinfotext+'Found OpenSLL library files.',etDebug);
+        end
+        else
+        begin
+          infoln(localinfotext+'No OpenSLL library files available. Going to download them',etWarning);
+          DownloadOpenSSL;
+        end;
       end;
     end;
 
