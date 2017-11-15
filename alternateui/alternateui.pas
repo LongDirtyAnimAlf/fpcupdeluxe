@@ -14,12 +14,12 @@ procedure alteranteui_EnterHandler(Sender:TObject);
 procedure alteranteui_ClickHandler(Sender:TObject);
 procedure alternateui_resize;
 procedure alternateui_make_sure_images_on_buttons_are_not_enabled;
-procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
+procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false; const aMessageColor:TColor=clBlack);
 {$endif}
 
 implementation
 {$ifdef usealternateui}
-uses fpcupdeluxemainform;
+uses fpcupdeluxemainform,RGBCIEUtils;
 {$R alternateui.res}
 Const
   name_of_button_for_Form1='alternate_ui_activate_button';
@@ -146,7 +146,7 @@ Var alternateui_Languages:Array[0..Number_Of_Languages] of alternateui_Language_
     alternateui_bars_name:Array[0..9] of AnsiString=('alternateui_Bar_fpcbootstrap','alternateui_Bar_compiling','alternateui_Bar_linking','alternateui_Bar_make','alternateui_Bar_install','Executing','fpcsrc','Extracted','Other','');
     alternateui_bars_values:Array[0..9] of integer=(0,0,0,0,0,0,0,0,0,0);
     alternateui_bars_left:Array[0..9] of integer=(0,0,0,0,0,0,0,0,0,0);
-    alternateui_bars_color:Array[0..9] of TColor=(clred,clGreen,clBlue,clAqua,clYellow,clLime,clNavy,clSilver,clMaroon,0);
+    alternateui_bars_color:Array[0..9] of TColor=(clRed,clGreen,TColor($FF8C00),clAqua,clYellow,clLime,clNavy,TColor($AF10FF),clMaroon,clBlack);
 
     alternateui_bars_max_height:Integer=190;
     alternateui_bars_increment:integer=4;
@@ -490,10 +490,14 @@ end;
 end;
 
 procedure alternateui_update_bar(Avalue:Integer);
+var
+  aBarComponent:TComponent;
 begin
+  aBarComponent:=Form1.FindComponent(alternateui_bars_name[Avalue]);
+  if NOT Assigned(aBarComponent) then exit;
   inc(alternateui_bars_values[Avalue],alternateui_bars_increment);
   if alternateui_bars_values[Avalue]>alternateui_bars_max_height then alternateui_bars_values[Avalue]:=0;
-  tbgrashape(form1.FindComponent(alternateui_bars_name[Avalue])).SetBounds(alternateui_bars_left[aValue],alternateui_bars_bottom-(alternateui_bars_max_height div 2)-(alternateui_bars_values[aValue] div 2),alternateui_bars_width,alternateui_bars_values[aValue]);
+  tbgrashape(aBarComponent).SetBounds(alternateui_bars_left[aValue],alternateui_bars_bottom-(alternateui_bars_max_height div 2)-(alternateui_bars_values[aValue] div 2),alternateui_bars_width,alternateui_bars_values[aValue]);
 end;
 
 procedure alternateui_show_progress_bars(Vis:Boolean);
@@ -1096,9 +1100,36 @@ begin
   end;
 end;
 
-procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
-
+procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false; const aMessageColor:TColor=clBlack);
+var
+  i,j,olddist,newdist,r,g,b : byte;
+  l1, a1, b1: double;
+  l2, a2, b2: double;
+  DeltaE,OldDeltaE:double;
 begin
+  if Length(amessage)=0 then exit;
+
+  RGBToLab(aMessageColor, l1, a1, b1);
+
+  j:=0;
+  OldDeltaE:=MaxInt;
+  for i:=0 to 9 do
+  begin
+    if aMessageColor=alternateui_bars_color[i] then
+    begin
+      j:=i;
+      break;
+    end;
+    RGBToLab(alternateui_bars_color[i], l2, a2, b2);
+    DeltaE:=CalcDeltaE(l1, a1, b1, l2, a2, b2);
+    if DeltaE<OldDeltaE then
+    begin
+      j:=i;
+      OldDeltaE:=DeltaE;
+    end;
+  end;
+  if (Alternate_ui_created) then alternateui_update_bar(j);
+  {
   if Alternate_ui_created then
   begin
     if amessage<>'' then
@@ -1124,7 +1155,7 @@ begin
 
 
     end;
-  end;
+  end;}
 end;
 
 procedure alternateui_add_title_and_glyph(bm:ansistring;gl:ansistring;ca:ansistring;hi:ansistring);

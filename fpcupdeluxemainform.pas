@@ -845,10 +845,6 @@ begin
       memoSummary.Lines.Append(SynEdit1.Lines[x+2]);
     end;
   end;
-  {$ifdef usealternateui}
-  alternateui_AddMessage(s);
-  {$endif}
-
 end;
 
 procedure TForm1.SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
@@ -1056,6 +1052,13 @@ begin
     Markup.Background:=BG;
     Markup.Foreground:=FG;
   end;
+
+  {$ifdef usealternateui}
+  if Special
+     then alternateui_AddMessage(s,false,FG)
+     else alternateui_AddMessage(s,false,clLime);
+  {$endif}
+
 
 end;
 
