@@ -457,12 +457,12 @@ begin
 
         if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
         begin
-          AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+          if (Sender=nil) then AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
           if (Sender<>nil) then
           begin
             SynEdit1.Clear;
-            memoSummary.Lines.Append('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-            memoSummary.Lines.Append('Going to update cross-compiler.');
+            AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+            AddMessage('Going to update cross-compiler.');
             radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
             radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
             success:=InstallCrossCompiler(nil);

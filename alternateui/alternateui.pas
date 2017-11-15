@@ -146,7 +146,7 @@ Var alternateui_Languages:Array[0..Number_Of_Languages] of alternateui_Language_
     alternateui_bars_name:Array[0..9] of AnsiString=('alternateui_Bar_fpcbootstrap','alternateui_Bar_compiling','alternateui_Bar_linking','alternateui_Bar_make','alternateui_Bar_install','Executing','fpcsrc','Extracted','Other','');
     alternateui_bars_values:Array[0..9] of integer=(0,0,0,0,0,0,0,0,0,0);
     alternateui_bars_left:Array[0..9] of integer=(0,0,0,0,0,0,0,0,0,0);
-    alternateui_bars_color:Array[0..9] of TColor=(clRed,clGreen,TColor($FF8C00),clAqua,clYellow,clLime,clNavy,TColor($AF10FF),clMaroon,clBlack);
+    alternateui_bars_color:Array[0..9] of TColor=(clRed,TColor($00A5FF),TColor($FF8C00),clAqua,clYellow,clLime,clNavy,TColor($AF10FF),clMaroon,clBlack);
 
     alternateui_bars_max_height:Integer=190;
     alternateui_bars_increment:integer=4;
