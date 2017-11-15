@@ -69,6 +69,7 @@ icons/
 bin/
 serverbin/
 mORMot/
+!mORMot/place_your_mormot_source_here.txt
 crosstools/
 bootstrappers/
 deluxebin/

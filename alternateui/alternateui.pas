@@ -14,6 +14,7 @@ procedure alteranteui_EnterHandler(Sender:TObject);
 procedure alteranteui_ClickHandler(Sender:TObject);
 procedure alternateui_resize;
 procedure alternateui_make_sure_images_on_buttons_are_not_enabled;
+procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
 {$endif}
 
 implementation
@@ -100,6 +101,8 @@ Const
 
   alternateui_max_controls_with_images=20;
 
+  alternateui_MessageDelay=1200;
+
 
 Type
     Control_Type=record
@@ -132,12 +135,25 @@ Var alternateui_Languages:Array[0..Number_Of_Languages] of alternateui_Language_
     alternateui_number_of_images_on_buttons:Integer=0;
     buttons_with_images_on:array[0..alternateui_max_controls_with_images] of AnsiString;
 
-    alternateui_Version:AnsiString='AUI V 1.0.4';
+    alternateui_Version:AnsiString='AUI v1.0.6';
     alternateui_Title:AnsiString='';
     alternateui_Form1_title:AnsiString='';
 
     alternateui_label_font_size:real=12.0;
     alternateui_button_font_size:real=11.0;
+
+    alternateui_bars_bottom:Integer=556;
+    alternateui_bars_name:Array[0..9] of AnsiString=('alternateui_Bar_fpcbootstrap','alternateui_Bar_compiling','alternateui_Bar_linking','alternateui_Bar_make','alternateui_Bar_install','Executing','fpcsrc','Extracted','Other','');
+    alternateui_bars_values:Array[0..9] of integer=(0,0,0,0,0,0,0,0,0,0);
+    alternateui_bars_left:Array[0..9] of integer=(0,0,0,0,0,0,0,0,0,0);
+    alternateui_bars_color:Array[0..9] of TColor=(clred,clGreen,clBlue,clAqua,clYellow,clLime,clNavy,clSilver,clMaroon,0);
+
+    alternateui_bars_max_height:Integer=190;
+    alternateui_bars_increment:integer=4;
+    alternateui_bars_start_left:Integer=12;
+    alternateui_bars_width:integer=18;
+    alternateui_bars_gap:integer=2;
+
 
 
     {$ifdef unix}           // should be ok for linux and darwin
@@ -393,6 +409,7 @@ procedure alteranteui_EnterHandler(Sender:TObject);
 begin
   if Sender is TBCBUtton then
   begin
+    (form1.FindComponent(Control_Display_Help_Text) as TBCLabel).fontex.Height:=round(alternateui_label_font_size*alternateui_font_ratio);
     na:=tbcbutton(Sender).Name;
     with Form1.FindComponent(Control_Display_Help_Text) as TBCLabel do
     begin
@@ -472,6 +489,43 @@ Begin
 end;
 end;
 
+procedure alternateui_update_bar(Avalue:Integer);
+begin
+  inc(alternateui_bars_values[Avalue],alternateui_bars_increment);
+  if alternateui_bars_values[Avalue]>alternateui_bars_max_height then alternateui_bars_values[Avalue]:=0;
+  tbgrashape(form1.FindComponent(alternateui_bars_name[Avalue])).SetBounds(alternateui_bars_left[aValue],alternateui_bars_bottom-(alternateui_bars_max_height div 2)-(alternateui_bars_values[aValue] div 2),alternateui_bars_width,alternateui_bars_values[aValue]);
+end;
+
+procedure alternateui_show_progress_bars(Vis:Boolean);
+var i:integer;
+begin
+  for i:=0 to 9 do
+  begin
+    alternateui_bars_values[i]:=0;
+    if alternateui_bars_name[i]<>'' then
+    begin
+      tbgrashape(form1.FindComponent(alternateui_bars_name[i])).Visible:=Vis;
+      if vis then
+      begin
+        tbgrashape(form1.FindComponent(alternateui_bars_name[i])).BringToFront;
+        alternateui_update_bar(i);
+      end;
+    end;
+  end;
+end;
+
+procedure alternateui_ShowMessage(MyMessage:AnsiString);
+begin
+  with (form1.FindComponent(Control_Display_Help_Text) as TBCLabel) do
+  begin
+    fontex.Height:=round((alternateui_label_font_size*alternateui_font_ratio)*1.5);
+    caption:=MyMessage;
+    application.ProcessMessages;
+    (form1.FindComponent('alternateuiHalt') as TImage).Visible:=False;
+    alternateui_show_progress_bars(False);
+  end;
+end;
+
 procedure alteranteui_ClickHandler(Sender:TObject);
 var co:integer=0;
     na:shortstring;
@@ -533,6 +587,7 @@ begin
     if na='OneButtonSelect_btn' then
     begin
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       itm:=strtoint(copy(tbutton(sender).Name,length(tbutton(sender).Name)-2,3));
       tbcbutton(sender).Down:=true;
       alternateui_Display_Hide_Panels('Blank',false);
@@ -549,6 +604,7 @@ begin
       (Form1.FindComponent(Control_One_Button_Install) as TBCButton).Down:=False;
       tbcbutton(sender).Down:=False;
       (Form1.FindComponent('OneButtonSelect_Panel') as TPanel).Visible:=False;
+      alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     if sender_name=Control_Settings_Button then
@@ -610,33 +666,40 @@ begin
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       application.ProcessMessages;
       Form1.FPCOnlyClick(Form1.BitBtnFPCOnly);
       tbcbutton(sender).Down:=False;
+      alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     if sender_name=Control_LAZ_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       application.ProcessMessages;
       Form1.LazarusOnlyClick(Form1.BitBtnLazarusOnly);
       tbcbutton(sender).Down:=False;
+      alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     if sender_name=Control_FPC_And_LAZ_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       application.ProcessMessages;
       Form1.BitBtnFPCandLazarusClick(Form1.BitBtnFPCandLazarus);
       tbcbutton(sender).Down:=False;
+      alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     if sender_name=Control_Components_Install_Button then
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       (Form1.FindComponent('ComponentSelect_Panel') as TPanel).Visible:=False;
       alternateui_Display_Hide_Panels('Blank',false);
       application.ProcessMessages;
@@ -644,6 +707,7 @@ begin
       tbcbutton(sender).Down:=False;
       // now remove any selected buttons
        alternateui_set_Selected_Components(False);
+       alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     if sender_name=Control_Cross_Compiler_Select_Button then
@@ -656,19 +720,23 @@ begin
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       alternateui_Display_Hide_Panels('Blank',false);
       application.ProcessMessages;
       Form1.ButtonInstallCrossCompilerClick(Form1.ButtonInstallCrossCompiler);
       tbcbutton(sender).Down:=false;
+      alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     if sender_name=Control_Cross_Compiler_Update_Button then
     begin
       tbcbutton(sender).Down:=true;
       (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=True;
+      alternateui_show_progress_bars(True);
       application.ProcessMessages;
       Form1.ButtonAutoUpdateCrossCompiler(Form1.AutoCrossUpdate);
       tbcbutton(sender).Down:=False;
+      alternateui_ShowMessage(form1.StatusMessage.Text);
     end
     else
     begin
@@ -711,6 +779,33 @@ begin
     end;
   end;
   (Form1.FindComponent('alternateuiHalt') as TImage).Visible:=False;
+  alternateui_show_progress_bars(False);
+end;
+
+
+Procedure alternateui_create_color_shape(Ctrl_name:ansistring;L,T,W,H:Integer;BackColor:TColor;Panel_name:ansistring;shape_fill_opacity:Integer);
+begin
+  // Create the Shape / Border
+  with TBGRAShape.Create(Form1) do
+  begin
+    setbounds(L,T,W,H);
+    Angle:=45;
+  //  bordercolor:=Shape_Border_Color;
+    borderstyle:=psClear;
+    borderwidth:=1;
+    RoundRadius:=1;
+    ShapeType:=stRegularPolygon;
+    SideCount:=4;
+    UseBorderGradient:=false;
+    UseFillGradient:=False;
+    fillcolor:=BackColor;
+    FillOpacity:=shape_fill_opacity;
+    name:=Ctrl_name;
+    parent:=(form1.FindComponent(Panel_name) as TPanel);
+    visible:=false;
+    BringToFront;
+  end;
+
 end;
 
 procedure alternateui_Create_Button_Container(base_name:string;base_left,base_top,base_width,base_height:integer;base_title,base_Parent:shortstring;base_close:boolean;Panel_Color,Shape_color,Shape_Border_Color,Shape_Border_Width,Label_Color,Label_Font_Color,Label_Border_Color:TColor;Label_Border_Width:Integer;label_bold,Label_Clear_Color:Boolean);
@@ -997,6 +1092,37 @@ begin
     begin
       tbcbutton(Form1.FindComponent(Control_Clear_Log_Button)).Left:=Form1.width-84;//.btnClearLog.Left;
       tbcbutton(Form1.FindComponent(Control_Auto_Clear_Button)).Left:=Form1.width-170;//CheckAutoClear.Left;
+    end;
+  end;
+end;
+
+procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
+
+begin
+  if Alternate_ui_created then
+  begin
+    if amessage<>'' then
+    begin
+      if pos('pcbootstrap',amessage)>0 then alternateui_update_bar(0)
+      else
+        if pos('ompiling',amessage)>0 then alternateui_update_bar(1)
+        else
+          if pos('inking',amessage)>0 then alternateui_update_bar(2)
+          else
+            if pos('ake',amessage)>0 then alternateui_update_bar(3)
+            else
+              if pos('nstall',amessage)>0 then alternateui_update_bar(4)
+              else
+                if pos('xecuting',amessage)>0 then alternateui_update_bar(5)
+                else
+                  if pos('pcsrc',amessage)>0 then alternateui_update_bar(6)
+                  else
+                    if pos('xtracted',amessage)>0 then alternateui_update_bar(7)
+                    else
+                      alternateui_update_bar(8);
+
+
+
     end;
   end;
 end;
@@ -1290,12 +1416,13 @@ Const  lm=10;
        wi=352;
 var    flagt:integer;
        flagl:integer;
+       le,i:integer;
 
 begin
   // Memorize Title
   alternateui_Form1_title:=Form1.Caption;
-
-  alternateui_title:=StringReplace(alternateui_Form1_title,'for','('+AlternateUi_Version+') for',[rfReplaceAll]);
+  if pos('base',alternateui_form1_title)>0 then alternateui_title:=StringReplace(alternateui_form1_title,'base','('+AlternateUi_Version+') base',[rfReplaceAll])
+  else alternateui_title:=StringReplace(alternateui_form1_title,'for','('+AlternateUi_Version+') for',[rfReplaceAll]);
 
 
   // create a button on Form1 to activate interface
@@ -1348,11 +1475,6 @@ begin
     bordercolor:=button_clicked_border_color;
     fillcolor:=select_shape_fill_color;
   end;
-  with  Form1.FindComponent('ComponentSelect_Panel') as TPanel do
-  begin
-    left:=138;
-    top:=172;
-  end;
   with  Form1.FindComponent('ComponentSelect_Shape') as TBGRAShape do
   begin
     bordercolor:=button_clicked_border_color;
@@ -1373,8 +1495,19 @@ begin
   alternateui_Create_Button_Container('alternateUIMaster_',4,40,360,564,'','',False,button_panel_color,shape_fill_color,Master_Panel_Border_Color,2,master_Panel_Info_display_BackGround_Color,Master_Panel_Title_Font_Color,master_Panel_Info_display_Border_Color,1,False,False);
   alternateui_Create_Button_Container('alternateUIOneButBox_',110,2,140,80,'Quick Installer','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_One_Button_Border_Color,4,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_One_Button_Border_Color,2,False,False);
   alternateui_Create_Button_Container('alternateUICustomInstallationBox_',4,(tpanel(Form1.FindComponent('alternateUIOneButBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUIOneButBox_Panel')).height)+4,wi,114,'Custom Installation','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_Custom_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Custom_Border_Color,1,False,False);
-  alternateui_Create_Button_Container('alternateUIComponentInstallationBox_',4,(tpanel(Form1.FindComponent('alternateUICustomInstallationBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUICustomInstallationBox_Panel')).height)+4,wi,76,'Install Additional Components','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_Components_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Components_Border_Color,1,False,False);
+  alternateui_Create_Button_Container('alternateUIComponentInstallationBox_',4,
+  (tpanel(form1.FindComponent('alternateUICustomInstallationBox_Panel')).top)+(tpanel(form1.FindComponent('alternateUICustomInstallationBox_Panel')).height)+4,
+  wi,76,'Install Additional Components','alternateUIMaster_Panel',false,button_panel_color,shape_fill_color,Master_Panel_Components_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Components_Border_Color,1,false,false);
   alternateui_Create_Button_Container('alternateUICrossCompilerBox_',4,(tpanel(Form1.FindComponent('alternateUIComponentInstallationBox_Panel')).top)+(tpanel(Form1.FindComponent('alternateUIComponentInstallationBox_Panel')).height)+4,wi,76,'Custom Cross Compilers','alternateUIMaster_Panel',False,button_panel_color,shape_fill_color,Master_Panel_Cross_Compilers_Border_Color,2,Master_Panel_Title_Background_Color,Master_Panel_Title_Font_Color,Master_Panel_Cross_Compilers_Border_Color,1,False,False);
+
+
+  // Centralize the Components Panel
+  with  form1.FindComponent('ComponentSelect_Panel') as TPanel do
+  begin
+    left:=138;
+    top:=(tpanel(form1.FindComponent('alternateUIMaster_Panel')).Height-Height) div 2; //170
+  end;
+
 
   // Create the Lower Notes Label Control
   with tbclabel.Create(Form1) do
@@ -1600,6 +1733,19 @@ begin
   //Set Help Text;
   alternateui_set_text_variables;
   alternateui_set_language('EN');
+
+  //Add some bars for progress      in     alternateUIMaster_Info_Display
+  le:=10;
+  for i:=0 to 9 do
+  begin
+    if alternateui_bars_name[i]<>'' then
+    begin
+      alternateui_bars_left[i]:=le;
+      alternateui_create_color_shape(alternateui_bars_name[i],le,10,alternateui_bars_width,0,alternateui_bars_color[i],'alternateUIMaster_Panel',192);
+      le:=le+alternateui_bars_width+alternateui_bars_gap;
+      if i=4 then le:=le+140;
+    end;
+  end;
 end;
 {$endif}
 end.
