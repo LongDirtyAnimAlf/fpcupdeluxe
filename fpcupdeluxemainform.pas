@@ -1823,6 +1823,18 @@ begin
           begin
             LibsURL:=StringReplace(LibsURL,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
           end;
+
+          // ARM is special: can be hard or softfloat (Windows only binutils yet)
+          {$ifdef MSWINDOWS}
+          if (FPCupManager.CrossCPU_Target='arm') then
+          begin
+            if (Pos('SOFT',UpperCase(FPCupManager.CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCupManager.FPCOPT))>0) then
+            begin
+              // use softfloat binutils
+              BinsURL:=StringReplace(LibsURL,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
+            end;
+          end;
+          {$endif}
         end;
 
 
@@ -2030,6 +2042,7 @@ begin
             FPCVersionLabel.Font.Color:=clDefault;
             LazarusVersionLabel.Font.Color:=clDefault;
             AddMessage('Got all tools now. New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target,True);
+            memoSummary.Lines.Append('New try building a cross-compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target);
             if Assigned(FPCupManager.Sequencer) then FPCupManager.Sequencer.ResetAllExecuted;
             RealRun;
           end;
