@@ -218,7 +218,7 @@ type
     procedure LogError(Sender: TProcessEx; IsException: boolean);
     // Sets the search/binary path to NewPath or adds NewPath before or after existing path:
     procedure SetPath(NewPath: string; Prepend: boolean; Append: boolean);
-    function GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
+    function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
   public
     InfoText: string;
     LocalInfoText: string;
@@ -477,19 +477,30 @@ begin
 
     if OperationSucceeded then
     begin
-      if InitSSLInterface then SSLImplementation := TSSLOpenSSL else
-      begin
-        // check availability of OpenSSL libraries. Just continue in case of error
-        if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll') then
-        begin
-          infoln(localinfotext+'Found OpenSLL library files.',etDebug);
-        end
-        else
-        begin
-          infoln(localinfotext+'No OpenSLL library files available. Going to download them',etWarning);
-          DownloadOpenSSL;
-        end;
-      end;
+      if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll')
+         then infoln(localinfotext+'Found OpenSLL library files.',etDebug)
+         else
+         begin
+           if FUseWget then
+           begin
+             DestroySSLInterface; // disable ssl and release libs
+             OperationSucceeded:=DownloadOpenSSL; // libcurl+wget need these libs for https
+           end
+           else
+           begin
+             OperationSucceeded:=InitSSLInterface;
+             if OperationSucceeded then SSLImplementation:=TSSLOpenSSL else
+             begin
+               // no system wide opensssl libs found: try to get them
+               OperationSucceeded:=DownloadOpenSSL;
+               if OperationSucceeded then
+               begin
+                 OperationSucceeded:=InitSSLInterface;
+                 if OperationSucceeded then SSLImplementation:=TSSLOpenSSL;
+               end;
+             end;
+           end;
+         end;
     end;
 
     // Get patch binary from default binutils URL
@@ -1479,24 +1490,25 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-  OperationSucceeded := false;
+  infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them',etWarning);
 
-  ForceDirectoriesUTF8(SafeGetApplicationPath);
+  OperationSucceeded := false;
 
   OpenSSLZip := SysUtils.GetTempFileName + '.zip';
 
   try
-    OperationSucceeded:=GetFile(SourceURL,OpenSSLZip);
+    //always get this file with the native downloader !!
+    OperationSucceeded:=GetFile(SourceURL,OpenSSLZip,true,true);
     if (NOT OperationSucceeded) then
     begin
       // try one more time
       SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded:=GetFile(SourceURL,OpenSSLZip);
+      OperationSucceeded:=GetFile(SourceURL,OpenSSLZip,true,true);
       if (NOT OperationSucceeded) then
       begin
         // try one more time on failsafe URL
         SysUtils.DeleteFile(OpenSSLZip);
-        OperationSucceeded:=GetFile(SourceURLfailsafe,OpenSSLZip);
+        OperationSucceeded:=GetFile(SourceURLfailsafe,OpenSSLZip,true,true);
       end;
     end;
   except
@@ -1513,8 +1525,17 @@ begin
     with TNormalUnzipper.Create do
     begin
       try
-        resultcode:=1;
-        if DoUnZip(OpenSSLZip,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
+        resultcode:=2;
+        SysUtils.Deletefile(SafeGetApplicationPath+'libeay32.dll');
+        if GetLastOSError<>5 then // no access denied
+        begin
+          SysUtils.Deletefile(SafeGetApplicationPath+'ssleay32.dll');
+          if GetLastOSError<>5 then // no access denied
+          begin
+            resultcode:=1;
+            if DoUnZip(OpenSSLZip,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
+          end;
+        end;
       finally
         Free;
       end;
@@ -1523,21 +1544,17 @@ begin
     if resultcode <> 0 then
     begin
       OperationSucceeded := false;
-      writelnlog(etError, localinfotext + 'Download OpenSSL error: unzip returned result code: ' + IntToStr(ResultCode));
+      if resultcode=2 then writelnlog(etWarning, localinfotext + 'Download OpenSSL error: could not delete/overwrite existing files.');
+      if resultcode=1 then writelnlog(etError, localinfotext + 'Download OpenSSL error: could not unzip files.');
     end;
   end;
 
-  if OperationSucceeded then
-  begin
-    WritelnLog(localinfotext + 'OpenSLL download and unpacking ok.', true);
-    SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
-  end else infoln(localinfotext+'Could not install openssl library', etError);
+  if OperationSucceeded
+     then WritelnLog(localinfotext + 'OpenSLL download and unpacking ok.', true)
+     else infoln(localinfotext+'Could not download/install openssl library', etError);
+  SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
   Result := OperationSucceeded;
-
-  //SslLibraryInit;
-  if InitSSLInterface then
-      SSLImplementation := TSSLOpenSSL;
-end;
+ end;
 
 {$ENDIF}
 
@@ -1942,14 +1959,19 @@ begin
   FCrossOS_SubArch:=''
 end;
 
-function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false):boolean;
+function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
+var
+  aUseWget:boolean;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (GetFile): ';
+  aUseWget:=FUseWget;
+  if forcenative then aUseWget:=false;
   result:=((FileExists(aFile)) AND (NOT forceoverwrite) AND (FileSize(aFile)>0));
   if (NOT result) then
   begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
-    result:=Download(FUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
+    infoln(localinfotext+'Downloading ' + aURL,etInfo);
+    result:=Download(aUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
     if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etWarning);
   end;
 end;

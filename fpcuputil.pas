@@ -50,7 +50,7 @@ unit fpcuputil;
 {$endif}
 {$ifdef Windows}
 // Do not use wget and family under Windows
-{$undef ENABLEWGET}
+{.$undef ENABLEWGET}
 {$endif}
 
 {$if not defined(ENABLEWGET) and not defined(ENABLENATIVE)}
@@ -214,6 +214,8 @@ type
   {$ifdef ENABLEWGET}
   TUseWGetDownloader = Class(TBasicDownLoader)
   private
+    FCURLOk:boolean;
+    FWGETOk:boolean;
     function WGetDownload(Const URL : String; Dest : TStream):boolean;
     function LibCurlDownload(Const URL : String; Dest : TStream):boolean;
     function WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
@@ -361,25 +363,35 @@ const
   CURLUSERAGENT='curl/7.51.0';
 
 
+function GetStringFromBuffer(const field:PChar):string;
+begin
+  if ( field <> nil ) then
+  begin
+    //strpas(field);
+    result:=field;
+    UniqueString(result);
+    SetLength(result,strlen(field));
+  end else result:='';
+end;
+
 {$ifdef mswindows}
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 var
   Info: TOSVersionInfo;
 begin
-Info.dwOSVersionInfoSize := SizeOf(Info);
-if GetVersionEx(Info) then
-begin
-  with Info do
+  Info.dwOSVersionInfoSize := SizeOf(Info);
+  if GetVersionEx(Info) then
   begin
-    Win32Platform:=dwPlatformId;
-    Major:=dwMajorVersion;
-    Minor:=dwMinorVersion;
-    Build:=dwBuildNumber;
-    result:=true
-  end;
-end
-else
-  result:=false;
+    with Info do
+    begin
+      Win32Platform:=dwPlatformId;
+      Major:=dwMajorVersion;
+      Minor:=dwMinorVersion;
+      Build:=dwBuildNumber;
+      result:=true
+    end;
+  end
+  else result:=false;
 end;
 
 function IsWindows64: boolean;
@@ -1492,7 +1504,7 @@ begin
       if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
-        infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
+        if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +
           ExeName + ' exists but shows no (' + ExpectOutput + ') in its output.',Level);
         OperationSucceeded := false;
       end
@@ -1505,14 +1517,14 @@ begin
     else
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
+      if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
       OperationSucceeded := false;
     end;
   except
     on E: Exception do
     begin
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
-      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
+      if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + 'Exception: ' + E.ClassName + '/' + E.Message + ')', Level);
       OperationSucceeded := false;
     end;
   end;
@@ -2560,25 +2572,15 @@ end;
 // proxy still to do !!
 
 constructor TUseWGetDownloader.Create;
-var
-  success:boolean;
 begin
   Inherited;
 
-  success:=LoadCurlLibrary;
-  if NOT success then
-  begin
-    infoln('Libcurl error: Could not initialize the libcurl library: expect failures !',etWarning);
-  end;
+  FCURLOk:=LoadCurlLibrary;
+  FWGETOk:=CheckExecutable('wget', '-V', '', etCustom);
 
-  success:=CheckExecutable('wget', '-V', '');
-  if NOT success then
+  if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
-    {$IFDEF OPENBSD}
-    infoln('Wget: Could not find a wget executable: expect fatal errors !',etError);
-    {$ELSE}
-    infoln('Wget error: Could not find a wget executable: expect failures if used !',etWarning);
-    {$ENDIF}
+    infoln('Could not initialize either libcurl or wget: expect severe failures !',etError);
   end;
 end;
 
@@ -2588,6 +2590,8 @@ var
   Count : Integer;
 begin
   result:=false;
+  if (NOT FWGETOk) then exit;
+
   With TProcess.Create(Self) do
   try
     CommandLine:='wget -q --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
@@ -2617,8 +2621,12 @@ var
   hCurl : pCurl;
   res: CURLcode;
   UserPass:string;
+  aBuffer:PChar;
+  location:string;
+  response:sizeint;
 begin
   result:=false;
+  if (NOT FCURLOk) then exit;
 
   if LoadCurlLibrary then
   begin
@@ -2644,16 +2652,47 @@ begin
         if Length(UserPass)>0 then if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_USERPWD, pointer(UserPass));
 
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_TCP_KEEPALIVE,1);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_FOLLOWLOCATION, 1);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_MAXREDIRS,50);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_NOPROGRESS,1);
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_FOLLOWLOCATION, 1);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_MAXREDIRS,5);
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_NOPROGRESS,1);
+        {$ifdef MSWINDOWS}
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER, 0);
+        {$else}
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
+        {$endif}
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(URL));
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(Dest));
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(CURLUSERAGENT));
 
         if res=CURLE_OK then res := curl_easy_perform(hCurl);
+
+        if res=CURLE_OK then
+        begin
+          while true do
+          begin
+            res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
+            // not needed anymore ... we set CURLOPT_FOLLOWLOCATION !
+            (*
+            if ( (res=CURLE_OK) AND ((response DIV 100)=3) ) then // we have a redirect !!
+            begin
+              res:=curl_easy_getinfo(hCurl, CURLINFO_REDIRECT_URL, aBuffer);
+              location:=GetStringFromBuffer(aBuffer);
+              if ( (res=CURLE_OK) AND (Length(location)>0) ) then
+              begin
+                res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(location));
+                if res=CURLE_OK then
+                begin
+                  Dest.Position:=0;
+                  res := curl_easy_perform(hCurl);
+                end;
+              end;
+            end
+            else
+            *)
+            break;
+          end;
+        end;
 
         result:=((res=CURLE_OK) AND (Dest.Size>0));
 
@@ -2700,6 +2739,8 @@ var
   P : String;
 begin
   result:=false;
+  if (NOT FWGETOk) then exit;
+
   URI:=ParseURI(URL);
   P:=URI.Protocol;
   if CompareText(P,'ftp')=0 then
@@ -2742,6 +2783,7 @@ var
   UserPass :string;
 begin
   result:=false;
+  if (NOT FCURLOk) then exit;
 
   URI:=ParseURI(URL);
   s:=URI.Protocol;
@@ -2777,6 +2819,10 @@ begin
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,CURLUSERAGENT);
+            {$ifdef MSWINDOWS}
+            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER, 0);
+            {$endif}
+
             if res=CURLE_OK then res:=curl_easy_perform(hCurl);
 
             result:=(res=CURLE_OK);
@@ -2846,6 +2892,9 @@ function TUseWGetDownloader.checkURL(const URL:string):boolean;
 var
   Output:string;
 begin
+  result:=false;
+  if (NOT FWGETOk) then exit;
+
   Output:='';
   result:=(ExecuteCommand('wget --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
   if result then

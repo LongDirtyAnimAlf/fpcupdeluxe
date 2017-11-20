@@ -320,7 +320,8 @@ begin
     Free;
   end;
 
-  {$IF (defined(MSWINDOWS)) OR (defined(Darwin)) OR (defined(OpenBSD))}
+  //{$IF (defined(MSWINDOWS)) OR (defined(Darwin)) OR (defined(OpenBSD))}
+  {$IF (defined(Darwin)) OR (defined(OpenBSD))}
   // there are default setings for the downloader, so disable user access
   CheckUseWget.Enabled:=False;
   {$endif}

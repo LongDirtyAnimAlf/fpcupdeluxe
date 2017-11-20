@@ -481,23 +481,18 @@ begin
           {$ifdef Darwin}
             {$ifdef LCLCOCOA}
               NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-            {$else}
-              {$ifdef CPU64}
-                {$ifdef LCLQT5}
-                  NothingToBeDone:=(FCrossLCL_Platform='qt5');
-                {$else}
-                  NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-                {$endif}
+            {$endif}
+            {$ifdef CPU64}
+              {$ifndef LCLQT5}
+                NothingToBeDone:=(FCrossLCL_Platform='cocoa');
               {$endif}
             {$endif}
           {$endif}
-          {$ifdef Haiku}
-            {$ifdef LCLQT}
-              NothingToBeDone:=(FCrossLCL_Platform='qt');
-            {$endif}
-            {$ifdef LCLQT5}
-              NothingToBeDone:=(FCrossLCL_Platform='qt5');
-            {$endif}
+          {$ifdef LCLQT}
+            NothingToBeDone:=(FCrossLCL_Platform='qt');
+          {$endif}
+          {$ifdef LCLQT5}
+            NothingToBeDone:=(FCrossLCL_Platform='qt5');
           {$endif}
         end;
         if (NOT NothingToBeDone) then
@@ -642,13 +637,10 @@ begin
         // Somewhat strange that this is necessary: should be done by lazbuild with widgetset defined ...
         LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
         try
-          {$ifdef Darwin}
           i:=LazarusConfig.GetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Count',0);
-          if i=0
-            then infoln(infotext+'No build profiles in '+MiscellaneousConfig, etWarning)
-            else infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig, etInfo);
 
           {$ifdef LCLQT5}
+          if i>0 then infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for QT5', etInfo);
           for j:=0 to (i-1) do
           begin
             LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', 'qt5');
@@ -681,12 +673,11 @@ begin
           {$endif}
 
           {$ifdef LCLCOCOA}
+          if i>0 then infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for cocoa', etInfo);
           for j:=0 to (i-1) do
           begin
             LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', 'cocoa');
           end;
-          {$endif}
-
           {$endif}
 
           j:=LazarusConfig.GetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count',0);
@@ -726,12 +717,10 @@ begin
             LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar2/Button11/Name', 'Step out');
           end;
 
-
         finally
           LazarusConfig.Destroy;
         end;
       end;
-
 
       // ... build startlazarus if it doesn't exist
       // (even an old version left over by make distclean is probably ok)
@@ -1203,15 +1192,18 @@ begin
         {$ifdef Darwin}
           {$ifdef LCLCOCOA}
             NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-          {$else}
-            {$ifdef CPU64}
-              {$ifdef LCLQT5}
-                NothingToBeDone:=(FCrossLCL_Platform='qt5');
-              {$else}
-                NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-              {$endif}
+          {$endif}
+          {$ifdef CPU64}
+            {$ifndef LCLQT5}
+              NothingToBeDone:=(FCrossLCL_Platform='cocoa');
             {$endif}
           {$endif}
+        {$endif}
+        {$ifdef LCLQT}
+          NothingToBeDone:=(FCrossLCL_Platform='qt');
+        {$endif}
+        {$ifdef LCLQT5}
+          NothingToBeDone:=(FCrossLCL_Platform='qt5');
         {$endif}
       end;
       if (NOT NothingToBeDone) then

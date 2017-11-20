@@ -1687,7 +1687,12 @@ begin
       FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
       // if Darwin cpu64, only cocoa (but also qt5) will work.
       if ((FPCupManager.CrossOS_Target='darwin') AND ((FPCupManager.CrossCPU_Target='x86_64') OR (FPCupManager.CrossCPU_Target='powerpc64')))
-          then FPCupManager.CrossLCL_Platform:='cocoa';
+      {$ifdef LCLQT5}
+      then FPCupManager.CrossLCL_Platform:='qt5';
+      {$else}
+      then FPCupManager.CrossLCL_Platform:='cocoa';
+      {$endif}
+
     end
     else
     begin
@@ -2370,27 +2375,22 @@ begin
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;
 
+  // Set default LCL platforms
   {$ifdef Darwin}
     {$ifdef LCLCOCOA}
-      FPCupManager.CrossLCL_Platform:='cocoa';
-    {$else}
-      {$ifdef CPU64}
-        {$ifdef LCLQT5}
-          FPCupManager.CrossLCL_Platform:='qt5';
-        {$else}
-          FPCupManager.CrossLCL_Platform:='cocoa';
-        {$endif}
+      FPCupManager.CrossLCL_Platform:='cocoa');
+    {$endif}
+    {$ifdef CPU64}
+      {$ifndef LCLQT5}
+        FPCupManager.CrossLCL_Platform:='cocoa');
       {$endif}
     {$endif}
   {$endif}
-
-  {$ifdef Haiku}
-    {$ifdef LCLQT}
-      FPCupManager.CrossLCL_Platform:='qt';
-    {$endif}
-    {$ifdef LCLQT5}
-      FPCupManager.CrossLCL_Platform:='qt5';
-    {$endif}
+  {$ifdef LCLQT}
+    FPCupManager.CrossLCL_Platform:='qt');
+  {$endif}
+  {$ifdef LCLQT5}
+    FPCupManager.CrossLCL_Platform:='qt5');
   {$endif}
 
   RealFPCURL.Text:='';

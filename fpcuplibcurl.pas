@@ -28,6 +28,8 @@ unit fpcuplibcurl;
 
 {$ifdef libcurlstatic}
 {$ifdef win32}
+  {$linklib .\libs\win32\libcrypto.a}
+  {$linklib .\libs\win32\libssl.a}
   {$linklib .\libs\win32\libcurl.a}
   {$linklib .\libs\win32\libadvapi32.a}
   {$linklib .\libs\win32\libws2_32.a}
@@ -44,6 +46,7 @@ interface
 
 {$IFDEF WINDOWS}
 uses
+  Windows,
   SysUtils,
   ctypes;
 
@@ -800,9 +803,6 @@ implementation
 
 {$ifndef libcurlstatic}
 
-uses
-  DynLibs;
-
 var
   libcurl: TLibHandle = NilHandle;
 {$endif}
@@ -817,7 +817,8 @@ begin
   if result then exit;
 
   try
-    libcurl:= LoadLibrary(External_library+'.'+SharedSuffix);
+
+    if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix);
     {$ifdef MSWINDOWS}
     if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'-4.'+SharedSuffix);
     {$endif}
