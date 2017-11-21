@@ -696,7 +696,7 @@ begin
   result:=true; //not finding any instructions at all should not be a problem.
   BaseWorkingdir:=GetValue('Workingdir',sl);
   for i:=0 to MAXINSTRUCTIONS do
-    begin
+  begin
     if i=0
        then exec:=GetValue(Directive,sl)
        else exec:=GetValue(Directive+IntToStr(i),sl);
@@ -757,12 +757,12 @@ begin
       end;
     except
       on E: Exception do
-        begin
+      begin
         WritelnLog(etError, localinfotext+'Exception trying to execute '+exec+LineEnding+
           'Details: '+E.Message,true);
-        end;
+      end;
     end;
-    end;
+  end;
 end;
 
 {$ifndef FPCONLY}
@@ -1036,7 +1036,7 @@ begin
   {$ifndef FPCONLY}
   idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
   if idx>=0 then
-    begin
+  begin
       sl:=TStringList(UniModuleList.Objects[idx]);
       // Process AddPackage
       // Compile a package and add it to the list of user-installed packages.
@@ -1174,22 +1174,27 @@ begin
         except
           on E: Exception do
           begin
-            WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
-              'Details: '+E.Message,true);
             result:=false;
+            WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
+              'Details: '+E.Message+LineEnding+'Going to remove this module from Lazarus !',true);
           end;
         end;
 
-        if (NOT result) then result:=UnInstallModule(ModuleName);
+        if (NOT result) then
+        begin
+          //uninstall all modules in case of error except suggestedpackages
+          //if LowerCase(ModuleName)<>'suggestedpackages' then result:=UnInstallModule(ModuleName);
+          if LowerCase(ModuleName)<>'suggestedpackages' then result:=RemovePackages(sl);
+        end;
 
       end;
-    end
+  end
   else
-    begin
+  begin
     // Could not find module in module list
     writelnlog(etError, infotext+'Could not find specified module '+ModuleName,true);
     result:=false;
-    end;
+  end;
   {$endif}
 end;
 

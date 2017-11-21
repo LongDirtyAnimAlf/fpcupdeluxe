@@ -23,6 +23,7 @@ type
     BitBtnFPCOnly: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
     AutoCrossUpdate: TButton;
+    btnUninstallModule: TButton;
     btnSetupPlus: TButton;
     btnClearLog: TButton;
     CheckAutoClear: TCheckBox;
@@ -69,6 +70,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure SynEdit1Change(Sender: TObject);
     procedure SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
@@ -364,6 +366,23 @@ begin
   {$ifdef usealternateui}
   alternateui_resize;
   {$endif}
+end;
+
+procedure TForm1.listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
+var
+  Index : integer;
+  Item : string;
+  aList:TListBox;
+begin
+  // for future use: show description of package as hint !!
+  aList:=TListBox(Sender);
+  Index:=aList.ItemAtPos(HintInfo^.CursorPos, True);
+  if (HintInfo^.HintControl=aList) and (Index > -1) then
+  begin
+    Item:=aList.Items[Index];
+    HintInfo^.HintStr:=Item;
+    HintInfo^.CursorRect:=aList.ItemRect(Index);
+  end;
 end;
 
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
@@ -1266,7 +1285,15 @@ begin
     modules:='';
     for i:=0 to listModules.Count-1 do
     begin
-      if listModules.Selected[i] then modules:=modules+listModules.Items[i]+',';
+      if listModules.Selected[i] then
+      begin
+        modules:=modules+listModules.Items[i];
+        if Sender=btnUninstallModule then modules:=modules+'uninstall';
+        modules:=modules+',';
+        {$ifdef RemoteLog}
+        aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items[i]);
+        {$endif}
+      end;
     end;
 
     if Length(modules)>0 then
@@ -1274,14 +1301,26 @@ begin
       // delete stale trailing comma
       Delete(modules,Length(modules),1);
       FPCupManager.OnlyModules:=modules;
-      AddMessage('Limiting installation/update to '+FPCupManager.OnlyModules);
-      AddMessage('');
-      AddMessage('Going to install selected modules with given options.');
-      sStatus:='Going to install/update selected modules.';
-      {$ifdef RemoteLog}
-      aDataClient.UpInfo.UpFunction:=ufInstallModule;
-      aDataClient.AddExtraData('module',modules);
-      {$endif}
+
+      if Sender=btnInstallModule then
+      begin
+        AddMessage('Limiting installation/update to '+FPCupManager.OnlyModules);
+        AddMessage('');
+        AddMessage('Going to install selected modules with given options.');
+        sStatus:='Going to install/update selected modules.';
+        {$ifdef RemoteLog}
+        aDataClient.UpInfo.UpFunction:=ufInstallModule;
+        {$endif}
+      end
+      else
+      begin
+        AddMessage('Going to remove selected modules.');
+        sStatus:='Going to remove selected modules.';
+        {$ifdef RemoteLog}
+        aDataClient.UpInfo.UpFunction:=ufUninstallModule;
+        {$endif}
+      end;
+
       RealRun;
     end;
   finally
@@ -2378,19 +2417,19 @@ begin
   // Set default LCL platforms
   {$ifdef Darwin}
     {$ifdef LCLCOCOA}
-      FPCupManager.CrossLCL_Platform:='cocoa');
+      FPCupManager.CrossLCL_Platform:='cocoa';
     {$endif}
     {$ifdef CPU64}
       {$ifndef LCLQT5}
-        FPCupManager.CrossLCL_Platform:='cocoa');
+        FPCupManager.CrossLCL_Platform:='cocoa';
       {$endif}
     {$endif}
   {$endif}
   {$ifdef LCLQT}
-    FPCupManager.CrossLCL_Platform:='qt');
+    FPCupManager.CrossLCL_Platform:='qt';
   {$endif}
   {$ifdef LCLQT5}
-    FPCupManager.CrossLCL_Platform:='qt5');
+    FPCupManager.CrossLCL_Platform:='qt5';
   {$endif}
 
   RealFPCURL.Text:='';

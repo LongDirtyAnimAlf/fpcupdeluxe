@@ -1,6 +1,7 @@
 program fpcupdeluxe;
 
 {$mode objfpc}{$H+}
+{$APPTYPE GUI}
 
 (*
   The Initial Developer of the FPCUPdeluxe code is:

@@ -1452,18 +1452,18 @@ begin
       begin
       if (not crosscompiling and (FInstaller is TLazarusNativeInstaller)) or
         (crosscompiling and (FInstaller is TLazarusCrossInstaller)) then
-        begin
+      begin
         exit; //all fine, continue with current FInstaller
-        end
+      end
       else
         FInstaller.free; // get rid of old FInstaller
       end;
     if CrossCompiling then
-      begin
+    begin
       FInstaller:=TLazarusCrossInstaller.Create;
       FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
       FInstaller.CrossOPT:=FParent.CrossOPT;
-      end
+    end
     else
       FInstaller:=TLazarusNativeInstaller.Create;
     // source- and install-dir are the same for Lazarus ... could be changed
@@ -1723,52 +1723,52 @@ var
   seq:string;
 
 begin
-AddToModuleList('ONLY',Length(FStateMachine));
-while Onlymodules<>'' do
+  AddToModuleList('ONLY',Length(FStateMachine));
+  while Onlymodules<>'' do
   begin
-  i:=pos(',',Onlymodules);
-  if i>0 then
-    seq:=copy(Onlymodules,1,i-1)
-  else
-    seq:=Onlymodules;
-  delete(Onlymodules,1,length(seq)+1);
-  // We could build a sequence string and have it parsed by AddSequence.
-  // Pro: no dependency on FStateMachine structure
-  // Con: dependency on sequence format; double parsing
-  if seq<>'' then
+    i:=pos(',',Onlymodules);
+    if i>0 then
+      seq:=copy(Onlymodules,1,i-1)
+    else
+      seq:=Onlymodules;
+    delete(Onlymodules,1,length(seq)+1);
+    // We could build a sequence string and have it parsed by AddSequence.
+    // Pro: no dependency on FStateMachine structure
+    // Con: dependency on sequence format; double parsing
+    if seq<>'' then
     begin
-    i:=Length(FStateMachine);
-    SetLength(FStateMachine,i+1);
-    FStateMachine[i].instr:=SMdo;
-    FStateMachine[i].param:=seq;
+      i:=Length(FStateMachine);
+      SetLength(FStateMachine,i+1);
+      FStateMachine[i].instr:=SMdo;
+      FStateMachine[i].param:=seq;
     end;
   end;
-i:=Length(FStateMachine);
-SetLength(FStateMachine,i+1);
-FStateMachine[i].instr:=SMend;
-FStateMachine[i].param:='';
-result:=true;
+  i:=Length(FStateMachine);
+  SetLength(FStateMachine,i+1);
+  FStateMachine[i].instr:=SMend;
+  FStateMachine[i].param:='';
+  result:=true;
 end;
 
 function TSequencer.DeleteOnly: boolean;
 var i,idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
-idx:=FParent.FModuleList.IndexOf('ONLY');
-if (idx >0) then
+  idx:=FParent.FModuleList.IndexOf('ONLY');
+  if (idx >0) then
   begin
-  SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
-  i:=SeqAttr^.EntryPoint;
-  while i<length(FStateMachine) do
+    SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
+    i:=SeqAttr^.EntryPoint;
+    while i<length(FStateMachine) do
     begin
-    FStateMachine[i].param:='';
-    i:=i+1;
+      FStateMachine[i].param:='';
+      i:=i+1;
     end;
-  SetLength(FStateMachine,SeqAttr^.EntryPoint);
-  Freemem(FParent.FModuleList.Objects[idx]);
-  FParent.FModuleList.Delete(idx);
+    SetLength(FStateMachine,SeqAttr^.EntryPoint);
+    Freemem(FParent.FModuleList.Objects[idx]);
+    FParent.FModuleList.Delete(idx);
   end;
-result:=true;
+  result:=true;
 end;
 
 function TSequencer.Run(SequenceName: string): boolean;
@@ -1790,26 +1790,26 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+SequenceName+'): ';
   if not assigned(FParent.FModuleList) then
-    begin
+  begin
     result:=false;
     FParent.WritelnLog(etError,localinfotext+'No sequences loaded while trying to find sequence name ' + SequenceName);
     exit;
-    end;
+  end;
   // --clean or --install ??
   if FParent.Uninstall then  // uninstall overrides clean
-    begin
+  begin
     if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-8,9))<>'UNINSTALL') then
       SequenceName:=SequenceName+'uninstall';
-    end
+  end
   else if FParent.Clean  then
-    begin
+  begin
     if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-4,5))<>'CLEAN') then
       SequenceName:=SequenceName+'clean';
-    end;
+  end;
   // find sequence
   idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
   if (idx>=0) then
-    begin
+  begin
     result:=true;
     SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
     // Don't run sequence if already run
@@ -1829,7 +1829,7 @@ begin
     EntryPoint:=InstructionPointer;
     // run sequence until end or failure
     while true do
-      begin
+    begin
       //For debugging state machine sequence:
       {$IFDEF DEBUG}
       infoln(localinfotext+'State machine running sequence '+SequenceName,etDebug);
@@ -1879,13 +1879,13 @@ begin
         CleanUpInstaller;
         exit; //success
       end;
-      end;
-    end
+    end;
+  end
   else
-    begin
+  begin
     result:=false;  // sequence not found
     FParent.WritelnLog(localinfotext+'Failed to load sequence :' + SequenceName);
-    end;
+  end;
 end;
 
 constructor TSequencer.Create;

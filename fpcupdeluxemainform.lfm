@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 302
+  Left = 34
   Height = 631
-  Top = 215
+  Top = 211
   Width = 1052
   Anchors = []
   Caption = 'Form1'
@@ -1577,7 +1577,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnInstallModule
     Left = 168
-    Height = 86
+    Height = 90
     Top = 422
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
@@ -1585,6 +1585,8 @@ object Form1: TForm1
     BorderSpacing.Bottom = 8
     Constraints.MinHeight = 80
     ItemHeight = 0
+    OnShowHint = listModulesShowHint
+    ParentShowHint = False
     ScrollWidth = 191
     Sorted = True
     TabOrder = 6
@@ -2939,16 +2941,33 @@ object Form1: TForm1
     TabOrder = 14
   end
   object btnInstallModule: TButton
+    AnchorSideLeft.Control = listModules
     AnchorSideBottom.Control = Panel1
-    Left = 167
-    Height = 29
-    Top = 516
-    Width = 191
+    Left = 168
+    Height = 25
+    Top = 520
+    Width = 101
     Anchors = [akLeft, akBottom]
+    AutoSize = True
     BorderSpacing.Bottom = 6
-    Caption = 'Install module from list'
+    Caption = 'Install module'
     OnClick = btnInstallModuleClick
     TabOrder = 7
+  end
+  object btnUninstallModule: TButton
+    AnchorSideRight.Control = listModules
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = Panel1
+    Left = 290
+    Height = 25
+    Top = 520
+    Width = 68
+    Anchors = [akLeft, akRight, akBottom]
+    AutoSize = True
+    BorderSpacing.Bottom = 6
+    Caption = 'Uninstall'
+    OnClick = btnInstallModuleClick
+    TabOrder = 22
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]

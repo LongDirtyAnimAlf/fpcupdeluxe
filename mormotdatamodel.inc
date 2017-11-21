@@ -7,7 +7,8 @@ type
         ufInstallLAZ,
         ufInstallFPCLAZ,
         ufInstallCross,
-        ufInstallModule
+        ufInstallModule,
+        ufUninstallModule
       );
 
   // keep it very simple: all in one record !!
