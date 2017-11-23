@@ -216,6 +216,7 @@ type
   private
     FCURLOk:boolean;
     FWGETOk:boolean;
+    WGETBinary:string;
     function WGetDownload(Const URL : String; Dest : TStream):boolean;
     function LibCurlDownload(Const URL : String; Dest : TStream):boolean;
     function WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
@@ -2576,7 +2577,21 @@ begin
   Inherited;
 
   FCURLOk:=LoadCurlLibrary;
-  FWGETOk:=CheckExecutable('wget', '-V', '', etCustom);
+
+  {$ifdef MSWINDOWS}
+  WGETBinary:='wget.exe';
+  FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+  {$ifdef CPU64}
+  if (NOT FWGETOk) then
+  begin
+    WGETBinary:='wget64.exe';
+    FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+  end;
+  {$endif}
+  {$else MSWINDOWS}
+  WGETBinary:='wget';
+  FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+  {$endif MSWINDOWS}
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
@@ -2594,7 +2609,7 @@ begin
 
   With TProcess.Create(Self) do
   try
-    CommandLine:='wget -q --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
+    CommandLine:=WGETBinary+' -q --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
     Options:=[poUsePipes,poNoConsole];
     Execute;
     while Running do
@@ -2747,7 +2762,7 @@ begin
   begin
     aURL:=URL;
     if aURL[Length(aURL)]<>'/' then aURL:=aURL+'/';
-    result:=(ExecuteCommand('wget -q --no-remove-listing --tries='+InttoStr(MaxRetries)+' --spider '+aURL,false)=0);
+    result:=(ExecuteCommand(WGETBinary+' -q --no-remove-listing --tries='+InttoStr(MaxRetries)+' --spider '+aURL,false)=0);
     if result then
     begin
       if FileExists(WGETFTPLISTFILE) then
@@ -2896,7 +2911,7 @@ begin
   if (NOT FWGETOk) then exit;
 
   Output:='';
-  result:=(ExecuteCommand('wget --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
+  result:=(ExecuteCommand(WGETBinary+' --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
   if result then
   begin
     result:=(Pos('Remote file exists',Output)>0);

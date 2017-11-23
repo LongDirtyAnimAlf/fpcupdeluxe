@@ -198,7 +198,7 @@ function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Returns success (snippet inserted or added) or failure
 var
   ConfigText: TStringList;
-  i:integer;
+  i,j:integer;
   SnipBegin,SnipEnd,SnipEndLastResort: integer;
   SnippetText: TStringList;
 begin
@@ -239,10 +239,25 @@ begin
         else
           SnipEnd:=i;
       end;
-      for i:=SnipEnd downto SnipBegin do
+
+      //find a CPU define
+      for j:=SnipBegin to SnipEnd do
       begin
-        ConfigText.Delete(i);
+        if Pos('#IFDEF CPU',ConfigText.Strings[j])>0 then
+        begin
+          // we have a CPU define ...
+          if (Pos(ConfigText.Strings[j],Snippet)>0) then
+          begin
+            // we have the same CPU type: delete snipped from config-file to replace !!!
+            for i:=SnipEnd downto SnipBegin do
+            begin
+              ConfigText.Delete(i);
+            end;
+          end;
+          break;
+        end;
       end;
+
     end;
     // Add snippet at bottom after blank line
     if ConfigText[ConfigText.Count-1]<>'' then
@@ -461,6 +476,8 @@ begin
 
   if assigned(CrossInstaller) then
   begin
+
+    CrossInstaller.Reset;
 
     {$ifdef win32}
     if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
@@ -870,14 +887,28 @@ begin
           // always add this, to be able to detect which cross-compilers are installed
           // helpfull for later bulk-update of all cross-compilers
           FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+
+          Options:=UpperCase(CrossCPU_Target);
+          if Options='ARM' then
+          begin
+            i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
+            if i<>-1 then
+            begin
+              // we have a special CPU setting: use it for the fpc.cfg
+              s:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
+              while (not CharInSet(s[Length(s)],['0'..'9'])) do s:=Copy(s,1,Length(s)-1);
+              Options:=s;
+            end;
+          end;
+
           if CrossInstaller.FPCCFGSnippet<>''
              then s:=CrossInstaller.FPCCFGSnippet+LineEnding
              else s:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
           InsertFPCCFGSnippet(FPCCfg,
-            SnipMagicBegin+CrossCPU_target+'-'+CrossOS_target+LineEnding+
+            SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
             '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
             '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-            '#IFDEF CPU'+uppercase(CrossCPU_Target+LineEnding)+
+            '#IFDEF CPU'+Options+LineEnding+
             '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
             '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
             s+

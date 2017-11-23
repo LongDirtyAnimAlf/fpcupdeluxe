@@ -474,6 +474,8 @@ begin
         if aOS='win64' then continue;
         {$endif}
 
+        // take into account that there are more ARM CPU settings !!
+        // important todo
         if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
         begin
           if (Sender=nil) then AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
@@ -814,10 +816,10 @@ begin
   end;
 
   // RAM errors
-  if (ExistWordInString(PChar(s),'Can''t call the assembler',[soDown])) then
+  if (ExistWordInString(PChar(s),'Can''t call the assembler',[soDown])) OR (ExistWordInString(PChar(s),'Can''t call the resource compiler',[soDown])) then
   begin
     memoSummary.Lines.Append(BeginSnippet+' Most likely, there is not enough RAM (swap) to finish this operation.');
-    memoSummary.Lines.Append(BeginSnippet+' Please add some swap-space (1GB) and re-run fpcupdeluxe.');
+    memoSummary.Lines.Append(BeginSnippet+' Please add some RAM or swap-space (+1GB) and re-run fpcupdeluxe.');
   end;
 
   // warn for time consuming help files
@@ -1741,8 +1743,12 @@ begin
     FPCupManager.FPCURL:='skip';
     FPCupManager.LazarusURL:='skip';
 
-    FPCupManager.CrossLibraryDirectory:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-    FPCupManager.CrossToolsDirectory:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+    s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+    s:=Trim(s);
+    if Length(s)>0 then FPCupManager.CrossLibraryDirectory:=s;
+    s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+    s:=Trim(s);
+    if Length(s)>0 then FPCupManager.CrossToolsDirectory:=s;
 
     AddMessage('Going to install a cross-compiler from available sources.');
 
@@ -2273,6 +2279,8 @@ begin
   finally
     Free;
   end;
+
+  SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 
   CloseAction:=caFree;
 end;

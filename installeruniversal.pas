@@ -1,4 +1,5 @@
 unit installerUniversal;
+
 { Universal (external) installer unit driven by .ini file directives
 Copyright (C) 2012-2013 Ludo Brands, Reinier Olislagers
 
@@ -1170,22 +1171,29 @@ begin
           end
           else
             WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
-              'Details: '+FErrorLog.Text+LineEnding+'Going to remove this module from Lazarus !',true);
+              'Details: '+FErrorLog.Text,true);
         except
           on E: Exception do
           begin
             result:=false;
             WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
-              'Details: '+E.Message+LineEnding+'Going to remove this module from Lazarus !',true);
+              'Details: '+E.Message,true);
           end;
         end;
 
+        (*
+        // still does not work as expected: disable for now !
         if (NOT result) then
         begin
-          //uninstall all modules in case of error except suggestedpackages
-          //if LowerCase(ModuleName)<>'suggestedpackages' then result:=UnInstallModule(ModuleName);
-          if LowerCase(ModuleName)<>'suggestedpackages' then result:=RemovePackages(sl);
+          //uninstall module in case of error except suggestedpackages
+          if LowerCase(ModuleName)<>'suggestedpackages' then
+          begin
+            WritelnLog(etWarning,infotext+'Going to remove '+ModuleName+' from Lazarus !',true);
+            //result:=UnInstallModule(ModuleName);
+            result:=RemovePackages(sl);
+          end;
         end;
+        *)
 
       end;
   end

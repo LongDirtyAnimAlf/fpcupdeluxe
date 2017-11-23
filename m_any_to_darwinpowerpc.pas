@@ -105,7 +105,7 @@ begin
           aOption:='-WM'+'10.'+InttoStr(aVersion);
           FCrossOpts.Add(aOption+' ');
           ShowInfo('Did not find any -WM; using '+aOption+'.',etInfo);
-        end else aOption:=Trim(FCrossOpts[aVersion]);
+        end else aOption:=Trim(FCrossOpts[i]);
         AddFPCCFGSnippet(aOption);
         break;
       end;

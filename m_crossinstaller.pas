@@ -99,6 +99,7 @@ type
     // Pass subarch if any
     procedure SetSubArch(SubArch: string);
     procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
+    procedure Reset;
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
@@ -371,15 +372,28 @@ begin
   {$endif}
 end;
 
+procedure TCrossInstaller.Reset;
+begin
+  FFPCCFGSnippet:='';
+  FLibsFound:=false;
+  FBinsFound:=false;
+  FCrossOptsAdded:=false;
+  FCrossOpts.Clear;
+  FSubArch:='';
+  FBinUtilsPath:='';
+  FLibsPath:='';
+end;
+
 constructor TCrossInstaller.Create;
 begin
+  FCrossOpts:=TStringList.Create;
+
   // Help ensure our implementers do the right thing with the variables
   // in their extensions
   FCompilerUsed:=ctBootstrap; //use bootstrap compiler for cross compiling by default
   FBinUtilsPath:='Error: cross compiler extension must set FBinUtilsPath: the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.';
   FBinutilsPathInPath:=false; //don't add binutils directory to path when cross compiling
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
-  FCrossOpts:=TStringList.Create;
   FFPCCFGSnippet:='Error: cross compiler extension must set FFPCCFGSnippet: this can be quite short but must exist';
   FLibsPath:='Error: cross compiler extension must set FLibsPath: path for target environment libraries';
   FTargetCPU:='Error: cross compiler extension must set FTargetCPU: cpu for the target environment. Follows FPC names.';
