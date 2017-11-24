@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 34
+  Left = 261
   Height = 631
-  Top = 211
+  Top = 125
   Width = 1052
   Anchors = []
   Caption = 'Form1'
@@ -1643,6 +1643,7 @@ object Form1: TForm1
     Top = 4
     Width = 313
     BorderSpacing.Top = 4
+    OnDblClick = RealURLDblClick
     ReadOnly = True
     TabOrder = 11
   end
@@ -1658,6 +1659,7 @@ object Form1: TForm1
     Width = 351
     BorderSpacing.Left = 8
     BorderSpacing.Right = 12
+    OnDblClick = RealURLDblClick
     ReadOnly = True
     TabOrder = 12
   end

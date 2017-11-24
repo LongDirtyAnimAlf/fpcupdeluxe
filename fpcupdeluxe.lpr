@@ -1,7 +1,9 @@
 program fpcupdeluxe;
 
 {$mode objfpc}{$H+}
+{$ifdef Windows}
 {$APPTYPE GUI}
+{$endif}
 
 (*
   The Initial Developer of the FPCUPdeluxe code is:

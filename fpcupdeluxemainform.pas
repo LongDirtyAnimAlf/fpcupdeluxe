@@ -71,6 +71,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
+    procedure RealURLDblClick(Sender: TObject);
     procedure SynEdit1Change(Sender: TObject);
     procedure SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
@@ -113,6 +114,7 @@ type
     function GetFPCUPSettings(IniDirectory:string):boolean;
     function SetFPCUPSettings(IniDirectory:string):boolean;
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
+    procedure SetTarget(aListBox:TListBox;aTarget:string);
     procedure InitFPCupManager;
     {$ifdef usealternateui}
     {$else}
@@ -385,6 +387,31 @@ begin
   end;
 end;
 
+procedure TForm1.RealURLDblClick(Sender: TObject);
+var
+  aEdit:TEdit;
+begin
+  if Sender=RealFPCURL then SetFPCTarget('');
+  if Sender=RealLazURL then SetLazarusTarget('');
+
+  (*
+  aEdit:=TEdit(Sender);
+  if aEdit.Tag=Ord(False) then aEdit.Tag:=Ord(True) else aEdit.Tag:=Ord(False);
+  if aEdit.Tag=Ord(False) then
+  begin
+    aEdit.Color:=clDefault;
+    aEdit.ReadOnly:=True;
+    aEdit.Text:='';
+  end
+  else
+  begin
+    aEdit.Color:=clRed;
+    aEdit.ReadOnly:=False;
+  end;
+  *)
+  //if Sender=RealURL
+end;
+
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
 begin
   AutoUpdateCrossCompiler(Sender);
@@ -593,8 +620,8 @@ end;
 
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
 begin
-  if Sender=ListBoxFPCTarget then FFPCTarget:=ListBoxFPCTarget.Items[ListBoxFPCTarget.ItemIndex];
-  if Sender=ListBoxLazarusTarget then FLazarusTarget:=ListBoxLazarusTarget.Items[ListBoxLazarusTarget.ItemIndex];
+  if (Sender=ListBoxFPCTarget) AND (ListBoxFPCTarget.ItemIndex<>-1) then FPCTarget:=ListBoxFPCTarget.Items[ListBoxFPCTarget.ItemIndex];
+  if (Sender=ListBoxLazarusTarget) AND (ListBoxLazarusTarget.ItemIndex<>-1) then LazarusTarget:=ListBoxLazarusTarget.Items[ListBoxLazarusTarget.ItemIndex];
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -1212,8 +1239,8 @@ var
 begin
   if (ListBoxFPCTarget.ItemIndex=-1) or (ListBoxLazarusTarget.ItemIndex=-1) then
   begin
-    ShowMessage('Please select a FPC and Lazarus version first');
-    exit;
+    //ShowMessage('Please select a FPC and Lazarus version first');
+    //exit;
   end;
 
   {$ifdef CPUAARCH64}
@@ -1608,7 +1635,7 @@ begin
       else
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
-        FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
+        FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 ';
       end
       else
       begin
@@ -1623,8 +1650,8 @@ begin
         //   http://repo.or.cz/openal-soft/android.git or
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
-            then FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 ' //-CfVFPV
-            else FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+            then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
+            else FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
       end;
     end;
 
@@ -1673,9 +1700,8 @@ begin
         // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
         // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-
-        FPCupManager.CrossOPT:='-CpARMV7A -CfVFPV3 -OoFASTMATH -CaEABIHF ';
-        FPCupManager.CrossOS_SubArch:='armv7m';
+        FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+        FPCupManager.CrossOS_SubArch:=DEFAULTARMCPU+'M';
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin
@@ -2362,7 +2388,9 @@ begin
 
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
-  // set default values for FPC and Lazarus URL ... can still be changed inside the real run button onclicks
+  // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
+
+  if RealFPCURL.Tag=Ord(True) then FPCTarget:=RealFPCURL.Text;
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
   begin
@@ -2373,6 +2401,7 @@ begin
        then FPCupManager.FPCDesiredBranch:='freepascal';
   end;
 
+  if RealLazURL.Tag=Ord(True) then LazarusTarget:=RealLazURL.Text;
   FPCupManager.LazarusURL:=LazarusTarget;
   if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
   begin
@@ -2716,36 +2745,61 @@ begin
 end;
 
 procedure TForm1.SetFPCTarget(aFPCTarget:string);
-var
-  i:integer;
 begin
-  if aFPCTarget<>FFPCTarget then
-  begin
-    FFPCTarget:=aFPCTarget;
-    i:=ListBoxFPCTarget.Items.IndexOf(FFPCTarget);
-    if i<>-1 then
-    begin
-      ListBoxFPCTarget.Selected[i]:=true;
-      ListBoxFPCTarget.Invalidate;
-    end;
-  end;
+  SetTarget(ListBoxFPCTarget,aFPCTarget);
 end;
 
 procedure TForm1.SetLazarusTarget(aLazarusTarget:string);
+begin
+  SetTarget(ListBoxLazarusTarget,aLazarusTarget);
+end;
+
+procedure TForm1.SetTarget(aListBox:TListBox;aTarget:string);
 var
   i:integer;
+  aEdit:TEdit;
+  change:boolean;
 begin
-  if aLazarusTarget<>FLazarusTarget then
+  aEdit:=nil;
+  change:=false;
+  if aListBox=ListBoxFPCTarget then
   begin
-    FLazarusTarget:=aLazarusTarget;
-    i:=ListBoxLazarusTarget.Items.IndexOf(FLazarusTarget);
+    aEdit:=RealFPCURL;
+    change:=(aTarget<>FFPCTarget);
+    if change then FFPCTarget:=aTarget;
+  end;
+  if aListBox=ListBoxLazarusTarget then
+  begin
+    aEdit:=RealLazURL;
+    change:=(aTarget<>FLazarusTarget);
+    if change then FLazarusTarget:=aTarget;
+  end;
+
+  if change then
+  begin
+    i:=aListBox.Items.IndexOf(aTarget);
     if i<>-1 then
     begin
-      ListBoxLazarusTarget.Selected[i]:=true;
-      ListBoxLazarusTarget.Invalidate;
+      aListBox.Selected[i]:=true;
+      if aEdit=nil then exit;
+      aEdit.Text:='';
+      aEdit.Tag:=Ord(False);
+      aEdit.Color:=clDefault;
+      aEdit.ReadOnly:=True;
+    end
+    else
+    begin
+      aListBox.ClearSelection;
+      if aEdit=nil then exit;
+      aEdit.Text:=aTarget;
+      aEdit.Tag:=Ord(True);
+      aEdit.Color:=clRed;
+      aEdit.ReadOnly:=False;
     end;
+    aListBox.Invalidate;
   end;
 end;
+
 
 end.
 

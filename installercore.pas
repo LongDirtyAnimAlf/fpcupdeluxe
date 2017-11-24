@@ -83,6 +83,8 @@ const
   DEFAULTFPCVERSION = '3.0.2';
   DEFAULTLAZARUSVERSION = '1.6.4';
 
+  DEFAULTARMCPU = 'ARMV7';
+
   {$IFDEF DEBUG}
   STANDARDCOMPILEROPTIONS='-vewh';
   //STANDARDCOMPILEROPTIONS='-va';
@@ -120,7 +122,7 @@ type
     FReApplyLocalChanges: boolean;
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
-    FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=armv7em
+    FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
     procedure SetURL(value:string);
     function GetMake: string;
     procedure SetHTTPProxyHost(AValue: string);
