@@ -803,6 +803,8 @@ implementation
 
 {$ifndef libcurlstatic}
 
+uses dynlibs;
+
 var
   libcurl: TLibHandle = NilHandle;
 {$endif}
