@@ -149,11 +149,9 @@ function TAny_Embeddedavr.GetBinUtils(Basepath:string): boolean;
 const
   DirName='avr-embedded';
 var
-  AsFile: string;
+  AsFile,aOption: string;
   BinPrefixTry: string;
-  {$ifdef unix}
   i:integer;
-  {$endif}
 begin
   result:=inherited;
   if result then exit;
@@ -222,17 +220,20 @@ begin
   begin
     FBinsFound:=true;
 
-    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
+    // Configuration snippet for FPC
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+
+    i:=StringListStartsWith(FCrossOpts,'-Cp');
+    if i=-1 then
     begin
-      FCrossOpts.Add('-Cpavr5'); // Teensy default
+      aOption:='-Cpavr5';
+      FCrossOpts.Add(aOption+' ');
+      //When compiling for avr-embedded, a sub-architecture (e.g. SUBARCH=avr25 or SUBARCH=avr35) must be defined)
       FSubArch:='avr5';
       ShowInfo('Did not find any -Cp architecture parameter; using -Cpavr5 and SUBARCH=avr5.');
-    end;
-
-    // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
   end;
 end;
 

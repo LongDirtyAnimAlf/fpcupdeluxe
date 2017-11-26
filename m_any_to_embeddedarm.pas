@@ -28,22 +28,6 @@ along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
 
-{
-Setup: based on cross binaries from
-http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/
-with binutils 2.22
-
-Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
-Then place the binaries in c:\development\cross\bin\arm-embedded
-Binaries include
-arm-embedded-ar.exe
-arm-embedded-as.exe
-arm-embedded-ld.exe
-arm-embedded-objcopy.exe
-arm-embedded-objdump.exe
-arm-embedded-strip.exe
-}
-
 {$mode objfpc}{$H+}
 
 interface
@@ -52,6 +36,11 @@ uses
   Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
+
+const
+  ARCH='arm';
+  OS='embedded';
+
 type
 
 { TAny_Embeddedarm }
@@ -72,7 +61,7 @@ end;
 
 function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
-  DirName='arm-embedded';
+  DirName=ARCH+'-'+OS;
   LibName='libgcc.a';  // is this correct ??
 begin
   // Arm-embedded does not need libs by default, but user can add them.
@@ -119,13 +108,11 @@ end;
 
 function TAny_Embeddedarm.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='arm-embedded';
+  DirName=ARCH+'-'+OS;
 var
-  AsFile: string;
+  AsFile,aOption: string;
   BinPrefixTry: string;
-  {$ifdef unix}
   i:integer;
-  {$endif}
 begin
   result:=inherited;
   if result then exit;
@@ -193,30 +180,35 @@ begin
     -Cparmv7m
     }
 
-    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
-    begin
-      FCrossOpts.Add('-Cparmv7em'); // Teensy default
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cparmv7em (Teensy default).');
-    end;
-
     // Configuration snippet for FPC
-    //http://wiki.freepascal.org/Setup_Cross_Compile_For_ARM#Make_FPC_able_to_cross_compile_for_arm-embedded
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+
+    // Set some defaults if user hasn't specified otherwise
+    // Architecture: e.g. ARMv6, ARMv7,...
+    i:=StringListStartsWith(FCrossOpts,'-Cp');
+    if i=-1 then
+    begin
+      aOption:='-CpARMV7M';  // cortex-m3/embed default
+      FCrossOpts.Add(aOption+' ');
+      // When compiling for arm-embedded, a sub-architecture (e.g. SUBARCH=armv4t or SUBARCH=armv7m) must be defined)
+      FSubArch:='armv7m';
+      ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+' (cortex-m3/embed default).');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
   end;
 end;
 
 constructor TAny_Embeddedarm.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='arm-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
+  FTargetCPU:=ARCH;
+  FTargetOS:=OS;
+  FBinUtilsPrefix:=ARCH+'-'+OS+'-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   //FCompilerUsed:=ctInstalled;
   FLibsPath:='';
-  FTargetCPU:='arm';
-  FTargetOS:='embedded';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

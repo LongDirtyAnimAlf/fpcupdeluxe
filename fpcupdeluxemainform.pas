@@ -351,7 +351,6 @@ begin
   {$ifdef RemoteLog}
   FreeAndNil(aDataClient);
   {$endif}
-  FreeAndNil(FPCupManager);
   (* using CloseFile will ensure that all pending output is flushed *)
   CloseFile(System.Output);
   System.Output := oldoutput;
@@ -1700,13 +1699,13 @@ begin
         // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
         // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-        FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
-        FPCupManager.CrossOS_SubArch:=DEFAULTARMCPU+'M';
+        FPCupManager.CrossOPT:='-CpARMV7M ';
+        FPCupManager.CrossOS_SubArch:='armv7m';
+        //-Cparmv7em ... -Wpmk20dx256XXX7
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin
-        //FPCupManager.CrossOPT:='-Cppic32 ';
-        FPCupManager.CrossOPT:='-Cpmips32 -Wppic32mx110f016b';
+        FPCupManager.CrossOPT:='-Cpmips32 ';
         FPCupManager.CrossOS_SubArch:='pic32mx';
       end;
     end;
@@ -2271,42 +2270,44 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
-  // set last used install directory
-  if (NOT Assigned(FPCupManager)) then exit;
+  if Assigned(FPCupManager) then
+  begin
+    with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
+    try
+      WriteString('General','InstallDirectory',sInstallDir);
 
-  with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
-  try
-    WriteString('General','InstallDirectory',sInstallDir);
+      WriteBool('General','AutoClear',CheckAutoClear.Checked);
 
-    WriteBool('General','AutoClear',CheckAutoClear.Checked);
+      Application.MainForm.Cursor:=crHourGlass;
 
-    Application.MainForm.Cursor:=crHourGlass;
+      WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
+      WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
+      WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
+      WriteString('ProxySettings','HTTPProxyPass',FPCupManager.HTTPProxyPassword);
 
-    WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
-    WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
-    WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
-    WriteString('ProxySettings','HTTPProxyPass',FPCupManager.HTTPProxyPassword);
+      WriteInteger('General','CommandFontSize',SynEdit1.Font.Size);
 
-    WriteInteger('General','CommandFontSize',SynEdit1.Font.Size);
+      if Self.WindowState=wsNormal then
+      begin
+        WriteInteger('General','Top',Self.Top);
+        WriteInteger('General','Left',Self.Left);
+        WriteInteger('General','Width',Self.Width);
+        WriteInteger('General','Height',Self.Height);
+        WriteBool('General','Maximized',False);
+      end
+      else
+      begin
+        WriteBool('General','Maximized',True);
+      end;
 
-    if Self.WindowState=wsNormal then
-    begin
-      WriteInteger('General','Top',Self.Top);
-      WriteInteger('General','Left',Self.Left);
-      WriteInteger('General','Width',Self.Width);
-      WriteInteger('General','Height',Self.Height);
-      WriteBool('General','Maximized',False);
-    end
-    else
-    begin
-      WriteBool('General','Maximized',True);
+    finally
+      Free;
     end;
 
-  finally
-    Free;
-  end;
+    SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 
-  SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
+    FPCupManager.Free;
+  end;
 
   CloseAction:=caFree;
 end;

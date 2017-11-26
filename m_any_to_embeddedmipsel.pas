@@ -112,8 +112,9 @@ function TAny_Embeddedmipsel.GetBinUtils(Basepath:string): boolean;
 const
   DirName='mipsel-embedded';
 var
-  AsFile: string;
+  AsFile,aOption: string;
   BinPrefixTry: string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -177,18 +178,21 @@ begin
   begin
     FBinsFound:=true;
 
-    (*
-    if StringListStartsWith(FCrossOpts,'-Cp')=-1 then
-    begin
-      FCrossOpts.Add('-Cppic32'); // Teensy default
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cppic32.');
-    end;
-    *)
-
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+
+    i:=StringListStartsWith(FCrossOpts,'-Cp');
+    if i=-1 then
+    begin
+      aOption:='-Cpmips32';
+      FCrossOpts.Add(aOption+' ');
+      //When compiling for mipsel-embedded, a sub-architecture (e.g. SUBARCH=pic32mx) must be defined)
+      FSubArch:='pic32mx';
+      ShowInfo('Did not find any -Cp architecture parameter; using -Cpmips32 and SUBARCH=pic32mx.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+
   end;
 end;
 

@@ -1,6 +1,9 @@
 unit m_crossinstaller;
-{ General crossinstaller/updater module
+{
+General crossinstaller/updater module
+
 Copyright (C) 2012-2013 Reinier Olislagers, Ludo Brands
+Copyright (C) 2015-2017 Alfred Glänzer
 
 This library is free software; you can redistribute it and/or modify it
 under the terms of the GNU Library General Public License as published by
@@ -51,6 +54,42 @@ const
   UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
   UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
   {$endif}
+  DEFAULTARMCPU = 'ARMV7A';
+
+  NEWPASCALGITREPO='https://github.com/newpascal';
+  FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
+
+  {$ifdef MSWINDOWS}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
+  {$endif}
+  {$ifdef Linux}
+  {$ifdef CPUX86}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxi386crossbins_v1.0';
+  {$endif CPUX86}
+  {$ifdef CPUX64}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
+  {$endif CPUX64}
+  {$ifdef CPUARM}
+  FPCUPBINSURL='';
+  {$endif CPUARM}
+  {$ifdef CPUAARCH64}
+  FPCUPBINSURL='';
+  {$endif CPUAARCH64}
+  {$endif}
+  {$ifdef FreeBSD}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/freebsdx64crossbins_v1.0';
+  {$endif}
+  {$ifdef OpenBSD}
+  FPCUPBINSURL='';
+  {$endif}
+  {$ifdef Darwin}
+  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
+  {$endif}
+  {$ifdef Haiku}
+  FPCUPBINSURL='';
+  {$endif}
+
+  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.1';
 
 type
   CompilerType=(ctBootstrap,ctInstalled);
@@ -99,7 +138,8 @@ type
     // Pass subarch if any
     procedure SetSubArch(SubArch: string);
     procedure ShowInfo(info: string = ''; Level: TEventType = etInfo);
-    procedure Reset;
+    // Reset some variables to default values
+    procedure Reset; virtual;
     // Which compiler should be used for cross compilation.
     // Normally the bootstrap compiler, but cross compilers may need the installed compiler
     // (often a trunk version, though there's no tests yet that check trunk is installed)
@@ -380,29 +420,26 @@ begin
   FCrossOptsAdded:=false;
   FCrossOpts.Clear;
   FSubArch:='';
-  FBinUtilsPath:='';
-  FLibsPath:='';
+  FBinutilsPathInPath:=false; //don't add binutils directory to path when cross compiling
+
+  FBinUtilsPath:='Error: cross compiler extension must set FBinUtilsPath: the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.';
+  FLibsPath:='Error: cross compiler extension must set FLibsPath: path for target environment libraries';
 end;
 
 constructor TCrossInstaller.Create;
 begin
   FCrossOpts:=TStringList.Create;
 
-  // Help ensure our implementers do the right thing with the variables
-  // in their extensions
-  FCompilerUsed:=ctBootstrap; //use bootstrap compiler for cross compiling by default
-  FBinUtilsPath:='Error: cross compiler extension must set FBinUtilsPath: the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.';
-  FBinutilsPathInPath:=false; //don't add binutils directory to path when cross compiling
-  FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
-  FFPCCFGSnippet:='Error: cross compiler extension must set FFPCCFGSnippet: this can be quite short but must exist';
-  FLibsPath:='Error: cross compiler extension must set FLibsPath: path for target environment libraries';
   FTargetCPU:='Error: cross compiler extension must set FTargetCPU: cpu for the target environment. Follows FPC names.';
   FTargetOS:='Error: cross compiler extension must set FTargetOS: operating system for the target environment. Follows FPC names';
-  FSubArch:='';
+
+  FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
+
+  FCompilerUsed:=ctBootstrap; //use bootstrap compiler for cross compiling by default
+
   FCrossModuleNamePrefix:='TAny';
-  FLibsFound:=false;
-  FBinsFound:=false;
-  FCrossOptsAdded:=false;
+
+  Reset;
 end;
 
 destructor TCrossInstaller.Destroy;

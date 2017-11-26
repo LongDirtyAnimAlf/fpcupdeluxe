@@ -406,7 +406,7 @@ begin
     i:=StringListStartsWith(FCrossOpts,'-Cp');
     if i=-1 then
     begin
-      aOption:='-CpARMV7A';
+      aOption:='-Cp'+DEFAULTARMCPU;
       FCrossOpts.Add(aOption+' ');
       ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+'.');
     end else aOption:=Trim(FCrossOpts[i]);

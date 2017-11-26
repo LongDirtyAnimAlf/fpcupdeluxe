@@ -198,14 +198,14 @@ function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Returns success (snippet inserted or added) or failure
 var
   ConfigText: TStringList;
-  i,j:integer;
+  i:integer;
   SnipBegin,SnipEnd,SnipEndLastResort: integer;
   SnippetText: TStringList;
 begin
   result:=false;
   SnipBegin:=-1;
-  SnipEnd:=maxint;
-  SnipEndLastResort:=SnipEnd;
+  SnipEnd:=MaxInt;
+  SnipEndLastResort:=MaxInt;
   ConfigText:=TStringList.Create;
   SnippetText:=TStringList.Create;
   try
@@ -215,7 +215,6 @@ begin
     SnipBegin:=ConfigText.IndexOf(SnippetText.Strings[0]);
     if SnipBegin>-1 then
     begin
-      infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Found existing snippet in '+FPCCFG+'. Deleting it and writing new version.',etInfo);
       for i:=(SnipBegin+1) to ConfigText.Count-1 do
       begin
         // Once again, look exactly for this text:
@@ -227,42 +226,55 @@ begin
         // in case of failure, store beginning of next (magic) config segment
         if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
         begin
-          SnipEndLastResort:=i;
+          SnipEndLastResort:=i-1;
         end;
       end;
-      if SnipEnd=maxint then
+      if SnipEnd=MaxInt then
       begin
-        //apparently snippet was not closed
-        infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed. Replacing it anyway. Please check your fpc.cfg.',etWarning);
-        if SnipEndLastResort<>maxint then
-          SnipEnd:=(SnipEndLastResort-1)
-        else
-          SnipEnd:=i;
+        //apparently snippet was not closed correct
+        if SnipEndLastResort<>MaxInt then
+        begin
+          SnipEnd:=(SnipEndLastResort);
+          infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
+        end;
+      end;
+      if SnipEnd=MaxInt then
+      begin
+        //apparently snippet was not closed at all: severe error
+        infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
+        exit;
       end;
 
+
       //find a CPU define
-      for j:=SnipBegin to SnipEnd do
+      for i:=SnipBegin to SnipEnd do
       begin
-        if Pos('#IFDEF CPU',ConfigText.Strings[j])>0 then
+        if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
         begin
           // we have a CPU define ...
-          if (Pos(ConfigText.Strings[j],Snippet)>0) then
+          if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
           begin
             // we have the same CPU type: delete snipped from config-file to replace !!!
-            for i:=SnipEnd downto SnipBegin do
-            begin
-              ConfigText.Delete(i);
-            end;
+            result:=true;
           end;
           break;
         end;
       end;
-
     end;
-    // Add snippet at bottom after blank line
-    if ConfigText[ConfigText.Count-1]<>'' then
-      ConfigText.Add(LineEnding);
-    ConfigText.Add(Snippet);
+
+    // Add snippet
+    if result then
+    begin
+      infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
+      for i:=SnipEnd downto SnipBegin do ConfigText.Delete(i);
+      ConfigText.Insert(SnipBegin,Snippet)
+    end
+    else
+    begin
+      infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Adding settings into '+FPCCFG+'.',etInfo);
+      if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add(LineEnding);
+      ConfigText.Add(Snippet);
+    end;
 
     //{$ifndef Darwin}
     {$ifdef MSWINDOWS}
@@ -889,27 +901,34 @@ begin
           FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
 
           Options:=UpperCase(CrossCPU_Target);
-          if Options='ARM' then
+
+          // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
+          if (UpperCase(CrossCPU_Target)='ARM') AND (UpperCase(CrossOS_Target)='LINUX') then
           begin
             i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
             if i<>-1 then
             begin
               // we have a special CPU setting: use it for the fpc.cfg
               s:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
-              while (not CharInSet(s[Length(s)],['0'..'9'])) do s:=Copy(s,1,Length(s)-1);
-              Options:=s;
+              if s<>DEFAULTARMCPU then
+              begin
+                //remove trailing cpu denominators that are not needed
+                //while (not CharInSet(s[Length(s)],['0'..'9'])) do s:=Copy(s,1,Length(s)-1);
+                Options:=s;
+              end;
             end;
           end;
 
           if CrossInstaller.FPCCFGSnippet<>''
              then s:=CrossInstaller.FPCCFGSnippet+LineEnding
              else s:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+
           InsertFPCCFGSnippet(FPCCfg,
             SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
             '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
             '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-            '#IFDEF CPU'+Options+LineEnding+
             '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
+            '#IFDEF CPU'+Options+LineEnding+
             '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
             s+
             '#ENDIF'+LineEnding+

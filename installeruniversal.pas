@@ -875,26 +875,25 @@ begin
   if (ExtractFileName(PackagePath)<>PackagePath) then
   begin
     if FVerbose then WritelnLog(localinfotext+'Checking lpl file for '+ExtractFileName(PackagePath),true);
-    lpkdoc:=TConfig.Create(PackageAbsolutePath);
-    key:='Package/';
-    try
-      lpkversion.FileVersion:=lpkdoc.GetValue(key+'Version',0);
-    except
-      lpkversion.FileVersion:=2;// On error assume version 2.
-    end;
-    key:='Package/Name/';
-    lpkversion.Name:=lpkdoc.GetValue(key+'Value','');
-    if (length(lpkversion.Name)>0) then
+    if FileExists(PackageAbsolutePath) then
     begin
-      key:='Package/Version/';
-      lpkversion.GetVersion(lpkdoc,key);
-      PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusDir)+
-                             'packager'+DirectorySeparator+
-                             'globallinks'+DirectorySeparator+
-                             LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
-
-      if FileExists(PackageAbsolutePath) then
+      lpkdoc:=TConfig.Create(PackageAbsolutePath);
+      key:='Package/';
+      try
+        lpkversion.FileVersion:=lpkdoc.GetValue(key+'Version',0);
+      except
+        lpkversion.FileVersion:=2;// On error assume version 2.
+      end;
+      key:='Package/Name/';
+      lpkversion.Name:=lpkdoc.GetValue(key+'Value','');
+      if (length(lpkversion.Name)>0) then
       begin
+        key:='Package/Version/';
+        lpkversion.GetVersion(lpkdoc,key);
+        PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusDir)+
+                               'packager'+DirectorySeparator+
+                               'globallinks'+DirectorySeparator+
+                               LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
         if SysUtils.DeleteFile(PackageAbsolutePath) then
           infoln(localinfotext+'Package '+PackageAbsolutePath+' deleted',etInfo);
       end;

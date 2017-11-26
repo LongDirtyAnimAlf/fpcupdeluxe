@@ -390,11 +390,11 @@ begin
   FFilename:=AFilename;
   FNew:=not(FileExistsUTF8(AFileName));
   if FNew then
-    begin
+  begin
     Doc:=TXMLDocument.Create;
     // CONFIG node present in all Lazarus configs=>we ensure the config file gets created if it doesn't exist yet:
     Doc.AppendChild(Doc.CreateElement('CONFIG'));
-    end
+  end
   else
     ReadXMLFile(Doc,AFilename,[xrfAllowLowerThanInAttributeValue,xrfAllowSpecialCharsInAttributeValue,xrfAllowSpecialCharsInComments]);
   bChanged:=false;

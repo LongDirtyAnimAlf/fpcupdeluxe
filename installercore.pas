@@ -31,41 +31,6 @@ uses
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
 const
-  NEWPASCALGITREPO='https://github.com/newpascal';
-  FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
-
-  {$ifdef MSWINDOWS}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';
-  {$endif}
-  {$ifdef Linux}
-  {$ifdef CPUX86}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxi386crossbins_v1.0';
-  {$endif CPUX86}
-  {$ifdef CPUX64}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/linuxx64crossbins_v1.0';
-  {$endif CPUX64}
-  {$ifdef CPUARM}
-  FPCUPBINSURL='';
-  {$endif CPUARM}
-  {$ifdef CPUAARCH64}
-  FPCUPBINSURL='';
-  {$endif CPUAARCH64}
-  {$endif}
-  {$ifdef FreeBSD}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/freebsdx64crossbins_v1.0';
-  {$endif}
-  {$ifdef OpenBSD}
-  FPCUPBINSURL='';
-  {$endif}
-  {$ifdef Darwin}
-  FPCUPBINSURL=FPCUPGITREPO+'/releases/download/darwinx64crossbins_v1.0';
-  {$endif}
-  {$ifdef Haiku}
-  FPCUPBINSURL='';
-  {$endif}
-
-  FPCUPLIBSURL=FPCUPGITREPO+'/releases/download/crosslibs_v1.1';
-
   FPCTRUNKVERSION  = '3.1.1';
   LAZARUSTRUNKVERSION  = '1.9';
 
@@ -82,8 +47,6 @@ const
 
   DEFAULTFPCVERSION = '3.0.2';
   DEFAULTLAZARUSVERSION = '1.6.4';
-
-  DEFAULTARMCPU = 'ARMV7';
 
   {$IFDEF DEBUG}
   STANDARDCOMPILEROPTIONS='-vewh';
