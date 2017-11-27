@@ -203,74 +203,86 @@ var
   SnippetText: TStringList;
 begin
   result:=false;
-  SnipBegin:=-1;
-  SnipEnd:=MaxInt;
-  SnipEndLastResort:=MaxInt;
+
   ConfigText:=TStringList.Create;
   SnippetText:=TStringList.Create;
   try
     SnippetText.Text:=Snippet;
     ConfigText.LoadFromFile(FPCCFG);
-    // Look for exactly this string:
-    SnipBegin:=ConfigText.IndexOf(SnippetText.Strings[0]);
-    if SnipBegin>-1 then
+
+    SnipBegin:=0;
+    while (SnipBegin<ConfigText.Count) do
     begin
-      for i:=(SnipBegin+1) to ConfigText.Count-1 do
+      // Look for exactly this string:
+      if (CompareText(ConfigText.Strings[SnipBegin],SnippetText.Strings[0])=0) then
       begin
-        // Once again, look exactly for this text:
-        if ConfigText.Strings[i]=SnipMagicEnd then
-        begin
-          SnipEnd:=i;
-          break;
-        end;
-        // in case of failure, store beginning of next (magic) config segment
-        if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
-        begin
-          SnipEndLastResort:=i-1;
-        end;
-      end;
-      if SnipEnd=MaxInt then
-      begin
-        //apparently snippet was not closed correct
-        if SnipEndLastResort<>MaxInt then
-        begin
-          SnipEnd:=(SnipEndLastResort);
-          infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
-        end;
-      end;
-      if SnipEnd=MaxInt then
-      begin
-        //apparently snippet was not closed at all: severe error
-        infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
-        exit;
-      end;
+        // found correct OS and basic CPU ; now try to find end of OS and CPU snippet
 
+        SnipEnd:=MaxInt;
+        SnipEndLastResort:=MaxInt;
 
-      //find a CPU define
-      for i:=SnipBegin to SnipEnd do
-      begin
-        if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+        for i:=(SnipBegin+1) to ConfigText.Count-1 do
         begin
-          // we have a CPU define ...
-          if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
+          // Once again, look exactly for this text:
+          if ConfigText.Strings[i]=SnipMagicEnd then
           begin
-            // we have the same CPU type: delete snipped from config-file to replace !!!
-            result:=true;
+            SnipEnd:=i;
+            break;
           end;
-          break;
+          // in case of failure, find beginning of next (magic) config segment
+          if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
+          begin
+             SnipEndLastResort:=i-1;
+             break;
+          end;
         end;
+        if SnipEnd=MaxInt then
+        begin
+          //apparently snippet was not closed correct
+          if SnipEndLastResort<>MaxInt then
+          begin
+            SnipEnd:=SnipEndLastResort;
+            infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
+          end;
+        end;
+        if SnipEnd=MaxInt then
+        begin
+          //apparently snippet was not closed at all: severe error
+          infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
+          exit;
+        end;
+
+        // found end of OS and CPU snippet ; now check detailed CPU setting
+        for i:=SnipBegin to SnipEnd do
+        begin
+          // do we have a CPU define ...
+          if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+          begin
+
+            if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
+            begin
+              // we have exactly the same CPU type: delete snipped from config-file to replace !!!
+              result:=true;
+            end;
+            break;
+          end;
+        end;
+
       end;
+      if result then break;
+      SnipBegin:=SnipBegin+1;
     end;
 
-    // Add snippet
     if result then
     begin
+      // Replace snippet
       infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
       for i:=SnipEnd downto SnipBegin do ConfigText.Delete(i);
       ConfigText.Insert(SnipBegin,Snippet)
     end
     else
     begin
+      // Add snippet
       infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Adding settings into '+FPCCFG+'.',etInfo);
       if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add(LineEnding);
       ConfigText.Add(Snippet);
@@ -710,18 +722,12 @@ begin
         {$endif}
 
         {$if not defined(FPC_HAS_TYPE_EXTENDED)}
-        (*
         // soft 80 bit float if available
         if (CrossInstaller.TargetCPU='i386') OR ((CrossInstaller.TargetCPU='i8086')) then
         begin
           infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support.',etInfo);
           Options:=Options+' -dFPC_SOFT_FPUX80';
-          // needed at this moment ... the makefile is yet to be adjusted
-          Options:=Options+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\systems';
-          Options:=Options+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\inc';
-          Options:=Options+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
         end;
-        *)
         {$endif}
 
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
@@ -925,7 +931,7 @@ begin
 
           InsertFPCCFGSnippet(FPCCfg,
             SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
-            '#cross compile settings dependent on both target OS and target CPU'+LineEnding+
+            '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
             '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
             '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
             '#IFDEF CPU'+Options+LineEnding+
@@ -1009,19 +1015,10 @@ begin
   s:=s+' -dREVINC';
 
   {$if not defined(FPC_HAS_TYPE_EXTENDED)}
+  //{$if defined(win64)}
   // soft 80 bit float if available
-  (*
   infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support.',etInfo);
   s:=s+' -dFPC_SOFT_FPUX80';
-  // needed at this moment ... the makefile is yet to be adjusted
-  s:=s+' -Fi'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\x86_64';
-  s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\x86_64';
-  s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\x86_64';
-  s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\x86';
-  s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\systems';
-  s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl\inc';
-  s:=s+' -Fu'+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler';
-  *)
   {$endif}
 
   Processor.Parameters.Add('OPT='+s);

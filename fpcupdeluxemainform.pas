@@ -428,6 +428,8 @@ var
   aRadiogroup_CPU,aRadiogroup_OS: string;
   CheckAutoClearStore:boolean;
   success:boolean;
+  SnipBegin,i:integer;
+  s:string;
 begin
   aOS := GetTargetOS;
   aCPU := GetTargetCPU;
@@ -459,12 +461,74 @@ begin
     memoSummary.Clear;
   end;
 
+  success:=true;
+
   ConfigText:=TStringList.Create;
   try
     ConfigText.LoadFromFile(FPCCFG);
 
-    success:=true;
+    SnipBegin:=0;
+    while (SnipBegin<ConfigText.Count) do
+    begin
+      if Pos(SnipMagicBegin,ConfigText.Strings[SnipBegin])>0 then
+      begin
+        s:=ConfigText.Strings[SnipBegin];
+        Delete(s,1,Length(SnipMagicBegin));
+        i:=Pos('-',s);
+        if i>0 then
+        begin
+          aCPU:=Copy(s,1,i-1);
+          aOS:=Trim(Copy(s,i+1,MaxInt));
 
+          aRadiogroup_CPU:=aCPU;
+          aRadiogroup_OS:=aOS;
+          if aRadiogroup_CPU='powerpc' then aRadiogroup_CPU:='ppc';
+          if aRadiogroup_CPU='powerpc64' then aRadiogroup_CPU:='ppc64';
+          if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
+
+          if (aOS='windows') or (aOS='win32') or (aOS='win64') then
+          begin
+            if aCPU='i386' then aOS:='win32';
+            if aCPU='x86_64' then aOS:='win64';
+            aRadiogroup_OS:='windows';
+          end;
+
+          //this chek is redundant, but ok for a final check ... ;-)
+          if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
+          begin
+            // list all available compilers
+            if (Sender=nil) then AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+            // build all available compilers
+            if (Sender<>nil) then
+            begin
+              {$ifdef win32}
+              // On win32, we always build a win64 cross-compiler.
+              // So, if the win32 install is updated, this cross-compiler is also updated already auto-magically.
+              // We can skip it here, in that case.
+              if aOS='win64' then
+              begin
+                Inc(SnipBegin);
+                continue;
+              end;
+              {$endif}
+              SynEdit1.Clear;
+              AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+              AddMessage('Going to update cross-compiler.');
+              radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
+              radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
+              success:=InstallCrossCompiler(nil);
+              if success
+                then memoSummary.Lines.Append('Cross-compiler update ok.')
+                else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
+              memoSummary.Lines.Append('');
+            end;
+          end;
+        end;
+      end;
+      Inc(SnipBegin);
+    end;
+
+    (*
     for OSType := Low(TOS) to High(TOS) do
     begin
 
@@ -502,9 +566,12 @@ begin
 
         // take into account that there are more ARM CPU settings !!
         // important todo
+
         if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
         begin
+          // list all available compilers
           if (Sender=nil) then AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+          // build all available compilers
           if (Sender<>nil) then
           begin
             SynEdit1.Clear;
@@ -521,7 +588,7 @@ begin
         end;
       end;
     end;
-
+    *)
     if (Sender<>nil) then
     begin
       radgrpCPU.ItemIndex:=-1;
@@ -779,9 +846,11 @@ begin
         x:=Pos('80 bit extended floating point',LowerCase(s));
         if x>0 then
         begin
-          memoSummary.Lines.Append('Please use trunk that has 80-bit float type using soft float unit.');
-          memoSummary.Lines.Append('FPC revisions 37294 - 37306 add this soft float feature.');
-          memoSummary.Lines.Append('So update your FPC trunk to a revision > 37306 !!');
+          memoSummary.Lines.Append('Please use trunk that has 80-bit float type using soft float unit !');
+          memoSummary.Lines.Append('FPC revisions 37294 - 37306 and 37621 add this soft float feature.');
+          memoSummary.Lines.Append('So update your FPC trunk to a revision >= 37621 !!');
+          //memoSummary.Lines.Append('See: https://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=37621');
+          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32502');
           //memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
           //memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
         end;
