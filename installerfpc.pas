@@ -1750,6 +1750,9 @@ begin
           if aLocalBootstrapVersion='3.0.0' then aCompilerArchive:='x86_64-macosx-10.7-ppcx64.tar.bz2'; // ppcx64
           {$ENDIF}
           {$ENDIF}
+          {$IFDEF win32}
+          if aLocalBootstrapVersion='3.0.2' then aCompilerArchive:='ppc386-i386-win32.zip';
+          {$endif}
 
           s:=FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/';
 

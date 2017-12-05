@@ -423,7 +423,7 @@ var
   FPCCfg:string;
   BinPath:string;
   ConfigText: TStringList;
-  aCPU, aOS: string;
+  aCPU, aOS, aArch: string;
   // tricky: to be changed; todo
   aRadiogroup_CPU,aRadiogroup_OS: string;
   CheckAutoClearStore:boolean;
@@ -479,6 +479,24 @@ begin
         begin
           aCPU:=Copy(s,1,i-1);
           aOS:=Trim(Copy(s,i+1,MaxInt));
+
+          aArch:='';
+          // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
+          if (UpperCase(aCPU)='ARM') AND (UpperCase(aOS)='LINUX') then
+          begin
+            for i:=SnipBegin to SnipBegin+5 do
+            begin
+              if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+              begin
+                s:=ConfigText.Strings[i];
+                Delete(s,1,Length('#IFDEF CPU'));
+                aArch:=s;
+                //Still todo: add this architecture into the cross-compile options [-Cp...]
+                //FPCupManager.CrossOPT:='-Cp'+s+' ';
+                break;
+              end;
+            end;
+          end;
 
           aRadiogroup_CPU:=aCPU;
           aRadiogroup_OS:=aOS;
