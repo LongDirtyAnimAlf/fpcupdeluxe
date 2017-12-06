@@ -2709,56 +2709,61 @@ begin
   AddMessage('Running on '+GetDistro);
   AddMessage('');
 
-  if result then with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
-  try
-
-    AddMessage('Got settings from install directory');
-    AddMessage('');
-
-    // get names of cross-compilers
-    AutoUpdateCrossCompiler(nil);
-
-    FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
-
-    FPCTarget:=ReadString('URL','fpcURL','stable');
-    if FPCTarget='' then FPCTarget:='stable';
-    LazarusTarget:=ReadString('URL','lazURL','stable');
-    if LazarusTarget='' then LazarusTarget:='stable';
-
-    Form2.FPCOptions:=ReadString('General','FPCOptions','');
-    Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
-    Form2.FPCRevision:=ReadString('General','FPCRevision','');
-    Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
-
-    Form2.SplitFPC:=ReadBool('General','SplitFPC',True);
-    Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
-
-    Form2.UseWget:=ReadBool('General','UseWget',False);
-
-    Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
-
-    Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
-    Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
-
-    Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',True);
-
-    listModules.ClearSelection;
-    SortedModules:=TStringList.Create;
+  if result then
+  begin
+    with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
     try
-      SortedModules.CommaText:=ReadString('General','Modules','');
-      for i:=0 to SortedModules.Count-1 do
-      begin
-        j:=listModules.Items.IndexOf(SortedModules[i]);
-        if j<>-1 then listModules.Selected[j]:=true;
+
+      AddMessage('Got settings from install directory');
+      AddMessage('');
+
+      // get names of cross-compilers
+      AutoUpdateCrossCompiler(nil);
+
+      FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
+
+      FPCTarget:=ReadString('URL','fpcURL','stable');
+      if FPCTarget='' then FPCTarget:='stable';
+      LazarusTarget:=ReadString('URL','lazURL','stable');
+      if LazarusTarget='' then LazarusTarget:='stable';
+
+      Form2.FPCOptions:=ReadString('General','FPCOptions','');
+      Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
+      Form2.FPCRevision:=ReadString('General','FPCRevision','');
+      Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
+
+      Form2.SplitFPC:=ReadBool('General','SplitFPC',True);
+      Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
+
+      Form2.UseWget:=ReadBool('General','UseWget',False);
+
+      Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
+
+      Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
+      Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
+
+      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',True);
+
+      listModules.ClearSelection;
+      SortedModules:=TStringList.Create;
+      try
+        SortedModules.CommaText:=ReadString('General','Modules','');
+        for i:=0 to SortedModules.Count-1 do
+        begin
+          j:=listModules.Items.IndexOf(SortedModules[i]);
+          if j<>-1 then listModules.Selected[j]:=true;
+        end;
+      finally
+        SortedModules.Free;
       end;
+
     finally
-      SortedModules.Free;
+      Free;
     end;
 
-  finally
-    Free;
-  end;
+    Form2.SetInstallDir(IniDirectory);
 
+  end;
 end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;

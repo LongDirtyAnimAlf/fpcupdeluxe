@@ -117,6 +117,7 @@ type
     procedure RadioGroup3SelectionChanged(Sender: TObject);
   private
     FCrossUtils:TCrossUtils;
+    FInstallPath:string;
 
     function  GetPatches(const Lazarus:boolean=false):string;
     procedure SetPatches(value:string;const Lazarus:boolean=false);
@@ -166,6 +167,8 @@ type
     procedure SetLazPatches(value:string);
 
   public
+    procedure SetInstallDir(const aInstallDir:string='');
+
     function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 
     function GetLibraryDirectory(aCPU,aOS:string):string;
@@ -303,22 +306,11 @@ begin
     end;
     EditHTTPProxyPassword.Text:=s;
 
-    for OS := Low(TOS) to High(TOS) do
-    begin
-      for CPU := Low(TCPU) to High(TCPU) do
-      begin
-        s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
-        FCrossUtils[CPU,OS].Setting:=TCrossSetting(ReadInteger(s,'Setting',Ord(fpcup)));
-        FCrossUtils[CPU,OS].LibDir:=ReadString(s,'LibPath','');
-        FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
-        FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
-        FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
-      end;
-    end;
-
   finally
     Free;
   end;
+
+  SetInstallDir;// for backwards compatibility
 
   //{$IF (defined(MSWINDOWS)) OR (defined(Darwin)) OR (defined(OpenBSD))}
   {$IF (defined(Darwin)) OR (defined(OpenBSD))}
@@ -339,6 +331,35 @@ begin
   CheckSendInfo.Enabled:=false;
   {$endif}
 
+end;
+
+procedure TForm2.SetInstallDir(const aInstallDir:string='');
+var
+  CPU:TCPU;
+  OS:TOS;
+  s:string;
+begin
+  if (Length(aInstallDir)>0)
+     then FInstallPath:=IncludeTrailingPathDelimiter(aInstallDir)
+     else FInstallPath:=SafeGetApplicationPath;
+
+  with TIniFile.Create(FInstallPath+DELUXEFILENAME) do
+  try
+    for OS := Low(TOS) to High(TOS) do
+    begin
+      for CPU := Low(TCPU) to High(TCPU) do
+      begin
+        s:=GetEnumName(TypeInfo(TCPU),Ord(CPU))+'-'+GetEnumName(TypeInfo(TOS),Ord(OS));
+        FCrossUtils[CPU,OS].Setting:=TCrossSetting(ReadInteger(s,'Setting',Ord(fpcup)));
+        FCrossUtils[CPU,OS].LibDir:=ReadString(s,'LibPath','');
+        FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
+        FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
+        FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
+      end;
+    end;
+  finally
+    Free;
+  end;
 end;
 
 procedure TForm2.ComboBoxCPUOSChange(Sender: TObject);
@@ -503,6 +524,12 @@ begin
     end;
     WriteString('ProxySettings','HTTPProxyPass',s);
 
+  finally
+    Free;
+  end;
+
+  with TIniFile.Create(FInstallPath+DELUXEFILENAME) do
+  try
     for OS := Low(TOS) to High(TOS) do
     begin
       for CPU := Low(TCPU) to High(TCPU) do
@@ -528,7 +555,6 @@ begin
         WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
       end;
     end;
-
   finally
     Free;
   end;

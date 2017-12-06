@@ -1280,8 +1280,8 @@ begin
   // for trunk i.e. , also 3.0.2 is allowed
   // but online, only official 3.0.0 bootstrapper available
 
-  if s=FPCTRUNKVERSION then result:='3.0.0'
-  else if s='3.0.4' then result:='3.0.0'
+  if s=FPCTRUNKVERSION then result:='3.0.2'
+  else if s='3.0.4' then result:='3.0.2'
   else if s='3.0.3' then result:='3.0.0'
   else if (s='3.0.2')  or (s='3.0.1') then result:='3.0.0'
   //else if (s='3.0.2') or (s='3.0.1') then result:='2.6.4'
@@ -1652,7 +1652,7 @@ var
   aCompilerArchive,aStandardCompilerArchive:string;
   aCompilerFound:boolean;
   {$IFDEF FREEBSD}
-  FreeBSDVersion:integer;
+  k,l,FreeBSDVersion:integer;
   {$ENDIF}
   s,s1:string;
   ReturnCode:integer;
@@ -1786,25 +1786,32 @@ begin
 
             {$IFDEF FREEBSD}
             // FreeBSD : special because of versions
-            FreeBSDVersion:=0;
+            FreeBSDVersion:=-1;
+            s:=GetTargetCPUOS;
             for i:=0 to Pred(aCompilerList.Count) do
             begin
               infoln(localinfotext+'Found online '+aLocalBootstrapVersion+' bootstrap compiler: '+aCompilerList[i],etDebug);
-              if Pos(GetTargetCPUOS,aCompilerList[i])=1 then
+              j:=Pos(s,aCompilerList[i]);
+              if j>0 then
               begin
                 aCompilerFound:=True;
-                // get the latest available version
-                FreeBSDVersion:=Max(FreeBSDVersion,StrToIntDef(aCompilerList[i][Length(GetTargetCPUOS)+1],0));
+                k:=j+Length(s);
+                l:=0;
+                while (Length(aCompilerList[i])>=k) AND (aCompilerList[i][k] in ['0'..'9']) do
+                begin
+                  l:=l*10+Ord(aCompilerList[i][k])-$30;
+                  Inc(k);
+                end;
+                if l>FreeBSDVersion then
+                begin
+                  // get the highest version available ... this will not always be ok, but fpcupdeluxe = bleeding edge ... ;-)
+                  aCompilerArchive:=aCompilerList[i];
+                  FreeBSDVersion:=l;
+                end;
               end;
             end;
             if (aCompilerFound) then
             begin
-              if FreeBSDVersion>0
-                 then aCompilerArchive:=GetTargetCPUOS+InttoStr(FreeBSDVersion)+'-'+GetCompilerName(GetTargetCPU)
-                 else aCompilerArchive:=GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
-              // remove file extension
-              aCompilerArchive:=ChangeFileExt(aCompilerArchive,'');
-              aCompilerArchive:=aCompilerArchive+'.bz2';
               infoln(localinfotext+'Got a correct bootstrap compiler from official FPC bootstrap sources',etDebug);
               break;
             end;
