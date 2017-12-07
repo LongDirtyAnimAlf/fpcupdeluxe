@@ -101,6 +101,7 @@ type
     MissingTools:boolean;
     InternalError:string;
     {$ifdef RemoteLog}
+    sConsentWarning:boolean;
     aDataClient:TDataClient;
     {$endif}
     function InstallCrossCompiler(Sender: TObject):boolean;
@@ -264,6 +265,9 @@ begin
   with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
+    {$ifdef RemoteLog}
+    sConsentWarning:=ReadBool('General','ConsentWarning',true);
+    {$endif}
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
     SynEdit1.Font.Size := ReadInteger('General','CommandFontSize',SynEdit1.Font.Size);
     if ReadBool('General','Maximized',False) then
@@ -1305,6 +1309,8 @@ begin
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
+var
+  aModalResult:TModalResult;
 begin
   TTimer(Sender).Enabled:=false;
   // only run once !!
@@ -1316,6 +1322,28 @@ begin
   {$ifdef usealternateui}
   // This must only be called once.
   If Not Alternate_ui_created then alternateui_Create_Controls;
+  {$endif}
+  {$ifdef RemoteLog}
+  if (sConsentWarning) OR (Form2.SendInfo) then
+  begin
+    AddMessage('Fpcupdeluxe logging info:');
+    AddMessage('http://54.194.211.233:8880/root/getinfohtml',true);
+    AddMessage('http://54.194.211.233:8880/root/getinfohtml?ShowErrors=yes');
+    if (sConsentWarning) then
+    begin
+      aModalResult:=(MessageDlg(
+                   'Attention !'+sLineBreak+
+                   sLineBreak +
+                   'Fpcupdeluxe is able to log some install info.' + sLineBreak +
+                   'This data is send towards a server,' + sLineBreak +
+                   'where it is available to anybody.' + sLineBreak +
+                   '(see URL shown in screen and statusbar)' + sLineBreak +
+                   sLineBreak +
+                   'Do you want logging info to be gathered ?'
+                 ,mtConfirmation,[mbYes, mbNo],0));
+      if aModalResult=mrYes then Form2.SendInfo:=True;;
+    end;
+  end;
   {$endif}
 end;
 
@@ -2359,14 +2387,13 @@ procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
   if Assigned(FPCupManager) then
   begin
+    Application.MainForm.Cursor:=crHourGlass;
     with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
     try
       WriteString('General','InstallDirectory',sInstallDir);
-
-      WriteBool('General','AutoClear',CheckAutoClear.Checked);
-
-      Application.MainForm.Cursor:=crHourGlass;
-
+      {$ifdef RemoteLog}
+      WriteBool('General','ConsentWarning',false);
+      {$endif}
       WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
       WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
       WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);

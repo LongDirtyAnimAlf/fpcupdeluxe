@@ -143,6 +143,7 @@ type
     procedure SetAutoSwitchURL(value:boolean);
 
     function GetSendInfo:boolean;
+    procedure SetSendInfo(value:boolean);
 
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
@@ -190,7 +191,7 @@ type
     property UseWget:boolean read GetUseWget write SetUseWget;
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
     property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
-    property SendInfo:boolean read GetSendInfo;
+    property SendInfo:boolean read GetSendInfo write SetSendInfo;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -282,8 +283,6 @@ begin
 
     {$ifdef RemoteLog}
     CheckSendInfo.Checked:=ReadBool('General','SendInfo',True);
-    {$else}
-    CheckSendInfo.Checked:=ReadBool('General','SendInfo',False);
     {$endif}
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
@@ -328,9 +327,9 @@ begin
   {$endif CPUARM}
 
   {$ifndef RemoteLog}
+  CheckSendInfo.Checked:=False;
   CheckSendInfo.Enabled:=false;
   {$endif}
-
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
@@ -743,6 +742,10 @@ end;
 function TForm2.GetSendInfo:boolean;
 begin
   result:=CheckSendInfo.Checked;
+end;
+procedure TForm2.SetSendInfo(value:boolean);
+begin
+  CheckSendInfo.Checked:=value;
 end;
 
 function TForm2.GetFPCOptions:string;
