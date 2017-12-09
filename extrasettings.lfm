@@ -329,12 +329,14 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 254
-      Width = 206
+      Width = 209
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Auto-switch repo URL (default=no)'
+      Caption = 'Auto-switch repo URL (default=yes)'
+      Checked = True
       ParentShowHint = False
       ShowHint = True
+      State = cbChecked
       TabOrder = 10
     end
     object CheckSendInfo: TCheckBox

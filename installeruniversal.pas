@@ -148,7 +148,8 @@ type
   function GetModuleList:string;
   // gets alias for keywords in Dictionary.
   //The keyword 'list' is reserved and returns the list of keywords as commatext
-  function GetAlias(Dictionary,keyword: string): string;
+  function GetAlias(aDictionary,aKeyword: string): string;
+  function GetKeyword(aDictionary,aAlias: string): string;
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
   function SetConfigFile(aConfigFile: string):boolean;
@@ -1706,7 +1707,41 @@ begin
     TStringList(UniModuleList.Objects[i]).free;
 end;
 
-function GetAlias(Dictionary,KeyWord: string): string;
+function GetKeyword(aDictionary,aAlias: string): string;
+var
+  ini:TMemIniFile;
+  sl:TStringList;
+  e:Exception;
+  i:integer;
+begin
+  result:='';
+
+  sl:=TStringList.Create;
+
+  ini:=TMemIniFile.Create(CurrentConfigFile);
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  ini.Options:=ini.Options-[ifoCaseSensitive];
+  {$ELSE}
+  ini.CaseSensitive:=false;
+  {$ENDIF}
+
+  try
+    ini.ReadSectionValues('ALIAS'+aDictionary,sl);
+    for i:=0 to sl.Count-1 do
+    begin
+      if sl.ValueFromIndex[i]=aAlias then
+      begin
+        result:=sl.Names[i];
+        break;
+      end;
+    end;
+  finally
+    ini.Free;
+    sl.free;
+  end;
+end;
+
+function GetAlias(aDictionary,aKeyWord: string): string;
 var
   ini:TMemIniFile;
   sl:TStringList;
@@ -1722,27 +1757,26 @@ begin
   {$ENDIF}
 
   try
-    ini.ReadSection('ALIAS'+Dictionary,sl);
-    if Uppercase(KeyWord)='LIST' then
+    ini.ReadSection('ALIAS'+aDictionary,sl);
+    if Uppercase(aKeyWord)='LIST' then
       result:=sl.CommaText
     else
     begin
-      result:=ini.ReadString('ALIAS'+Dictionary,KeyWord,'');
+      result:=ini.ReadString('ALIAS'+aDictionary,aKeyWord,'');
       if result='' then
       begin
-        if Uppercase(KeyWord)='SKIP' then result:='SKIP';
         if (result='') then
         begin
           infoln('InstallerUniversal (GetAlias): no source alias found: using fpcup default',etInfo);
-          if Dictionary='fpcURL' then result:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='fpcURL' then result:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
-          if Dictionary='lazURL' then result:=FPCSVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='lazURL' then result:=FPCSVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
 
         if (result='') then
         begin
-          e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[Dictionary,KeyWord,sl.CommaText]);
+          e:=Exception.CreateFmt('--%s=%s : Invalid keyword. Accepted keywords are: %s',[aDictionary,aKeyWord,sl.CommaText]);
           raise e;
         end;
       end;

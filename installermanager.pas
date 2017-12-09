@@ -713,7 +713,7 @@ end;
 procedure TFPCupManager.SetFPCURL(AValue: string);
 begin
   if FFPCURL=AValue then Exit;
-  if pos('//',AValue)>0 then
+  if pos('://',AValue)>0 then
     FFPCURL:=AValue
   else
     FFPCURL:=installerUniversal.GetAlias('fpcURL',AValue);
@@ -741,7 +741,7 @@ end;
 procedure TFPCupManager.SetLazarusURL(AValue: string);
 begin
   if FLazarusURL=AValue then Exit;
-  if pos('//',AValue)>0 then
+  if pos('://',AValue)>0 then
     FLazarusURL:=AValue
   else
     FLazarusURL:=installerUniversal.GetAlias('lazURL',AValue);

@@ -71,6 +71,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
+    procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
     procedure SynEdit1Change(Sender: TObject);
     procedure SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
@@ -115,7 +116,7 @@ type
     function GetFPCUPSettings(IniDirectory:string):boolean;
     function SetFPCUPSettings(IniDirectory:string):boolean;
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
-    procedure SetTarget(aListBox:TListBox;aTarget:string);
+    procedure SetTarget(aControl:TControl;const aTarget:string='');
     procedure InitFPCupManager;
     {$ifdef usealternateui}
     {$else}
@@ -287,32 +288,20 @@ begin
   end;
 
   IniFilesOk:=
-  (SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini'))
-  AND
-  (SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME));
+    (SaveInisFromResource(SafeGetApplicationPath+installerUniversal.SETTTINGSFILENAME,'settings_ini'))
+    AND
+    (SetConfigFile(SafeGetApplicationPath+installerUniversal.CONFIGFILENAME));
 
   aTarget:='';
   if IniFilesOk then
   begin
-    aTarget:='stable';
     if ListBoxFPCTarget.Count=0 then
     begin
       ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
-      {$ifdef CPUAARCH64}
-      aTarget:='trunk';
-      {$endif}
-      FPCTarget:=aTarget;
     end;
     if ListBoxLazarusTarget.Count=0 then
     begin
       ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
-      {$ifdef LCLQT5}
-      aTarget:='trunk';
-      {$endif}
-      {$ifdef LCLCOCOA}
-      aTarget:='trunk';
-      {$endif}
-      LazarusTarget:=aTarget;
     end;
 
     sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
@@ -390,29 +379,17 @@ begin
   end;
 end;
 
+procedure TForm1.RealURLChange(Sender: TObject);
+begin
+  SetTarget(TEdit(Sender));
+end;
+
 procedure TForm1.RealURLDblClick(Sender: TObject);
 var
   aEdit:TEdit;
 begin
-  if Sender=RealFPCURL then SetFPCTarget('');
-  if Sender=RealLazURL then SetLazarusTarget('');
-
-  (*
-  aEdit:=TEdit(Sender);
-  if aEdit.Tag=Ord(False) then aEdit.Tag:=Ord(True) else aEdit.Tag:=Ord(False);
-  if aEdit.Tag=Ord(False) then
-  begin
-    aEdit.Color:=clDefault;
-    aEdit.ReadOnly:=True;
-    aEdit.Text:='';
-  end
-  else
-  begin
-    aEdit.Color:=clRed;
-    aEdit.ReadOnly:=False;
-  end;
-  *)
-  //if Sender=RealURL
+  TEdit(Sender).Color:=clRed;
+  TEdit(Sender).ReadOnly:=false;
 end;
 
 procedure TForm1.ButtonAutoUpdateCrossCompiler(Sender: TObject);
@@ -708,8 +685,8 @@ end;
 
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
 begin
-  if (Sender=ListBoxFPCTarget) AND (ListBoxFPCTarget.ItemIndex<>-1) then FPCTarget:=ListBoxFPCTarget.Items[ListBoxFPCTarget.ItemIndex];
-  if (Sender=ListBoxLazarusTarget) AND (ListBoxLazarusTarget.ItemIndex<>-1) then LazarusTarget:=ListBoxLazarusTarget.Items[ListBoxLazarusTarget.ItemIndex];
+  if (NOT User) then exit;
+  SetTarget(TListBox(Sender));
 end;
 
 procedure TForm1.MenuItem1Click(Sender: TObject);
@@ -1274,10 +1251,8 @@ begin
     if Sender=mORMotBtn then
     begin
       s:='Going to install de special version of mORMot for FPC ';
-      FPCTarget:='skip';
-      LazarusTarget:='skip';
-      FPCupManager.OnlyModules:='mORMotFPC';
-      //FPCupManager.OnlyModules:='mORMotFPC,zeos';
+      FPCupManager.OnlyModules:='mORMot';
+      //FPCupManager.OnlyModules:='mORMot,zeos';
     end;
 
     FPCupManager.FPCURL:=FPCTarget;
@@ -1341,7 +1316,7 @@ begin
                    sLineBreak +
                    'Do you want logging info to be gathered ?'
                  ,mtConfirmation,[mbYes, mbNo],0));
-      if aModalResult=mrYes then Form2.SendInfo:=True;;
+      if aModalResult=mrYes then Form2.SendInfo:=True;
     end;
   end;
   {$endif}
@@ -1351,10 +1326,11 @@ procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);
 var
   FModuleList: TStringList;
 begin
-  if (ListBoxFPCTarget.ItemIndex=-1) or (ListBoxLazarusTarget.ItemIndex=-1) then
+
+  if (Length(FPCTarget)=0) or (Length(LazarusTarget)=0) then
   begin
-    //ShowMessage('Please select a FPC and Lazarus version first');
-    //exit;
+    ShowMessage('Please select a FPC and Lazarus version first');
+    exit;
   end;
 
   {$ifdef CPUAARCH64}
@@ -1880,9 +1856,6 @@ begin
       if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
     end;
 
-    FPCupManager.FPCURL:='skip';
-    FPCupManager.LazarusURL:='skip';
-
     s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
     s:=Trim(s);
     if Length(s)>0 then FPCupManager.CrossLibraryDirectory:=s;
@@ -2257,9 +2230,9 @@ end;
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
 begin
-  if (ListBoxFPCTarget.ItemIndex=-1) then
+  if (Length(FPCTarget)=0) then
   begin
-    ShowMessage('Please select a FPC version first');
+    ShowMessage('Please select a FPC target first');
     exit;
   end;
   DisEnable(Sender,False);
@@ -2273,8 +2246,6 @@ begin
        {$else}
        else FPCupManager.OnlyModules:='fpc';
        {$endif}
-
-    FPCupManager.LazarusURL:='skip';
 
     if NOT Form2.IncludeHelp then
       FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc';
@@ -2294,9 +2265,9 @@ end;
 
 procedure TForm1.LazarusOnlyClick(Sender: TObject);
 begin
-  if (ListBoxLazarusTarget.ItemIndex=-1) then
+  if (Length(LazarusTarget)=0) then
   begin
-    ShowMessage('Please select a Lazarus version first');
+    ShowMessage('Please select a Lazarus target first');
     exit;
   end;
 
@@ -2317,8 +2288,6 @@ begin
       FPCupManager.OnlyModules:='lazarus';
       {$endif}
     end;
-
-    FPCupManager.FPCURL:='skip';
 
     if (NOT Form2.IncludeHelp) then
       FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus'
@@ -2456,6 +2425,11 @@ begin
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;
 
+  RealFPCURL.Color:=clDefault;
+  RealFPCURL.ReadOnly:=true;
+  RealLazURL.Color:=clDefault;
+  RealLazURL.ReadOnly:=true;
+
   if CheckAutoClear.Checked then btnClearLog.Click;
 
   FPCupManager.Sequencer.ResetAllExecuted;
@@ -2505,7 +2479,6 @@ begin
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
 
-  if RealFPCURL.Tag=Ord(True) then FPCTarget:=RealFPCURL.Text;
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
   begin
@@ -2516,7 +2489,6 @@ begin
        then FPCupManager.FPCDesiredBranch:='freepascal';
   end;
 
-  if RealLazURL.Tag=Ord(True) then LazarusTarget:=RealLazURL.Text;
   FPCupManager.LazarusURL:=LazarusTarget;
   if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
   begin
@@ -2584,9 +2556,6 @@ begin
     FPCupManager.CrossLCL_Platform:='qt5';
   {$endif}
 
-  RealFPCURL.Text:='';
-  RealLazURL.Text:='';
-
   {$ifdef RemoteLog}
   aDataClient.Enabled:=Form2.SendInfo;
   aDataClient.UpInfo.UpFunction:=ufUnknown;
@@ -2623,22 +2592,14 @@ begin
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
   {$endif}
 
-  if FPCupManager.FPCURL<>'SKIP' then
-  begin
-    AddMessage('FPC URL:               '+FPCupManager.FPCURL);
-    AddMessage('FPC options:           '+FPCupManager.FPCOPT);
-    AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
-    AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
-    RealFPCURL.Text:=FPCupManager.FPCURL;
-  end else RealFPCURL.Text:='Skipping FPC';
+  AddMessage('FPC URL:               '+FPCupManager.FPCURL);
+  AddMessage('FPC options:           '+FPCupManager.FPCOPT);
+  AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
+  AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
 
-  if FPCupManager.LazarusURL<>'SKIP' then
-  begin
-    AddMessage('Lazarus URL:        '+FPCupManager.LazarusURL);
-    AddMessage('Lazarus options:    '+FPCupManager.LazarusOPT);
-    AddMessage('Lazarus directory:  '+FPCupManager.LazarusDirectory);
-    RealLazURL.Text:=FPCupManager.LazarusURL;
-  end else RealLazURL.Text:='Skipping Lazarus';
+  AddMessage('Lazarus URL:        '+FPCupManager.LazarusURL);
+  AddMessage('Lazarus options:    '+FPCupManager.LazarusOPT);
+  AddMessage('Lazarus directory:  '+FPCupManager.LazarusDirectory);
 
   AddMessage('Please stand back and enjoy !');
   AddMessage('');
@@ -2692,20 +2653,18 @@ begin
       AddMessage('');
       AddMessage('SUCCESS: Fpcupdeluxe ended without errors.');
       AddMessage('');
-      if (FPCupManager.LazarusURL<>'SKIP') then
-      begin
-        {$ifdef MSWINDOWS}
-        AddMessage('Fpcupdeluxe has created a desktop shortcut to start Lazarus.');
-        AddMessage('Shortcut-name: '+FPCupManager.ShortCutNameLazarus);
-        AddMessage('Lazarus by fpcupdeluxe MUST be started with this shortcut !!');
-        {$else}
-        AddMessage('Fpcupdeluxe has created a shortcut link in your home-directory to start Lazarus.');
-        AddMessage('Shortcut-link: '+FPCupManager.ShortCutNameLazarus);
-        AddMessage('Lazarus MUST be started with this link !!');
-        AddMessage('Fpcupdeluxe has also (tried to) create a desktop shortcut with the same name.');
-        {$endif}
-        AddMessage('');
-      end;
+      {$ifdef MSWINDOWS}
+      AddMessage('Fpcupdeluxe has [created] a desktop shortcut to start Lazarus.');
+      AddMessage('Shortcut-name: '+FPCupManager.ShortCutNameLazarus);
+      AddMessage('Lazarus by fpcupdeluxe MUST be started with this shortcut !!');
+      {$else}
+      AddMessage('Fpcupdeluxe has [created] a shortcut link in your home-directory to start Lazarus.');
+      AddMessage('Shortcut-link: '+FPCupManager.ShortCutNameLazarus);
+      AddMessage('Lazarus MUST be started with this link !!');
+      AddMessage('Fpcupdeluxe has also (tried to) create a desktop shortcut with the same name.');
+      {$endif}
+      AddMessage('');
+
       FPCVersionLabel.Font.Color:=clLime;
       LazarusVersionLabel.Font.Color:=clLime;
       StatusMessage.Text:='That went well !!!';
@@ -2726,6 +2685,7 @@ function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   i,j:integer;
   SortedModules:TStringList;
+  aTarget,aURL:string;
 begin
   result:=FileExists(IniDirectory+DELUXEFILENAME);
 
@@ -2749,10 +2709,28 @@ begin
 
       FPCupManager.ExportOnly:=(NOT ReadBool('General','GetRepo',True));
 
-      FPCTarget:=ReadString('URL','fpcURL','stable');
-      if FPCTarget='' then FPCTarget:='stable';
-      LazarusTarget:=ReadString('URL','lazURL','stable');
-      if LazarusTarget='' then LazarusTarget:='stable';
+      aTarget:='stable';
+      {$ifdef CPUAARCH64}
+      aTarget:='trunk';
+      {$endif}
+      aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
+      aURL:=ReadString('URL','fpcURL',aURL);
+      // correct for [unsafe] URL in old fpcup.ini
+      if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
+      aURL:=ExcludeTrailingPathDelimiter(aURL);
+      FPCTarget:=aURL;
+      {$ifdef LCLQT5}
+      aTarget:='trunk';
+      {$endif}
+      {$ifdef LCLCOCOA}
+      aTarget:='trunk';
+      {$endif}
+      aURL:=installerUniversal.GetAlias('lazURL',aTarget);
+      aURL:=ReadString('URL','lazURL',aURL);
+      // correct for [unsafe] URL in old fpcup.ini
+      if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
+      aURL:=ExcludeTrailingPathDelimiter(aURL);
+      LazarusTarget:=aURL;
 
       Form2.FPCOptions:=ReadString('General','FPCOptions','');
       Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
@@ -2866,57 +2844,90 @@ end;
 
 procedure TForm1.SetFPCTarget(aFPCTarget:string);
 begin
-  SetTarget(ListBoxFPCTarget,aFPCTarget);
+  SetTarget(RealFPCURL,aFPCTarget);
 end;
 
 procedure TForm1.SetLazarusTarget(aLazarusTarget:string);
 begin
-  SetTarget(ListBoxLazarusTarget,aLazarusTarget);
+  SetTarget(RealLazURL,aLazarusTarget);
 end;
 
-procedure TForm1.SetTarget(aListBox:TListBox;aTarget:string);
+procedure TForm1.SetTarget(aControl:TControl;const aTarget:string='');
 var
   i:integer;
   aEdit:TEdit;
   change:boolean;
+  aLocalTarget:string;
+  aKeyword:string;
 begin
   aEdit:=nil;
   change:=false;
-  if aListBox=ListBoxFPCTarget then
+  aLocalTarget:=aTarget;
+
+  if (aControl is TEdit) then
   begin
-    aEdit:=RealFPCURL;
-    change:=(aTarget<>FFPCTarget);
-    if change then FFPCTarget:=aTarget;
+    aEdit:=TEdit(aControl);
+    if (Length(aLocalTarget)=0) then aLocalTarget:=aEdit.Text;
+  end
+  else
+  begin
+    if aControl=ListBoxFPCTarget then
+    begin
+      aEdit:=RealFPCURL;
+      if (ListBoxFPCTarget.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=ListBoxFPCTarget.GetSelectedText;
+    end;
+    if aControl=ListBoxLazarusTarget then
+    begin
+      aEdit:=RealLazURL;
+      if (ListBoxLazarusTarget.ItemIndex<>-1) AND (Length(aLocalTarget)=0) then aLocalTarget:=ListBoxLazarusTarget.GetSelectedText;
+    end;
   end;
-  if aListBox=ListBoxLazarusTarget then
+
+  if Length(aLocalTarget)=0 then exit;
+
+  if pos('://',aLocalTarget)=0 then
   begin
-    aEdit:=RealLazURL;
-    change:=(aTarget<>FLazarusTarget);
-    if change then FLazarusTarget:=aTarget;
+    // translate keyword into a real URL
+    if aEdit=RealFPCURL then aLocalTarget:=installerUniversal.GetAlias('fpcURL',aLocalTarget);
+    if aEdit=RealLazURL then aLocalTarget:=installerUniversal.GetAlias('lazURL',aLocalTarget);
+  end;
+
+  if aEdit=RealFPCURL then
+  begin
+    change:=(aLocalTarget<>FFPCTarget);
+    if change then FFPCTarget:=aLocalTarget;
+  end;
+  if aEdit=RealLazURL then
+  begin
+    change:=(aLocalTarget<>FLazarusTarget);
+    if change then FLazarusTarget:=aLocalTarget;
   end;
 
   if change then
   begin
-    i:=aListBox.Items.IndexOf(aTarget);
-    if i<>-1 then
+    if (aControl is TEdit) OR (Length(aTarget)>0) then
     begin
-      aListBox.Selected[i]:=true;
-      if aEdit=nil then exit;
-      aEdit.Text:='';
-      aEdit.Tag:=Ord(False);
-      aEdit.Color:=clDefault;
-      aEdit.ReadOnly:=True;
-    end
-    else
-    begin
-      aListBox.ClearSelection;
-      if aEdit=nil then exit;
-      aEdit.Text:=aTarget;
-      aEdit.Tag:=Ord(True);
-      aEdit.Color:=clRed;
-      aEdit.ReadOnly:=False;
+      if aEdit=RealFPCURL then
+      begin
+        aKeyword:=installerUniversal.GetKeyword('fpcURL',aLocalTarget);
+        i:=ListBoxFPCTarget.Items.IndexOf(aKeyword);
+        if i<>-1
+           then ListBoxFPCTarget.Selected[i]:=true
+           else ListBoxFPCTarget.ClearSelection;
+      end;
+      if aEdit=RealLazURL then
+      begin
+        aKeyword:=installerUniversal.GetKeyword('lazURL',aLocalTarget);
+        i:=ListBoxLazarusTarget.Items.IndexOf(aKeyword);
+        if i<>-1
+           then ListBoxLazarusTarget.Selected[i]:=true
+           else ListBoxLazarusTarget.ClearSelection;
+      end;
     end;
-    aListBox.Invalidate;
+    if (aControl is TListBox) OR (Length(aTarget)>0) then
+    begin
+      aEdit.Text:=aLocalTarget;
+    end;
   end;
 end;
 
