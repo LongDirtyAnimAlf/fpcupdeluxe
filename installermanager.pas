@@ -1429,7 +1429,7 @@ begin
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FFPCPatches;
-    FInstaller.Compiler:='';  //bootstrap used
+    FInstaller.Compiler:=FParent.CompilerName;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;

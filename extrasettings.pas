@@ -31,6 +31,7 @@ type
     BinDir:string;
     CrossBuildOptions:string;
     CrossSubArch:string;
+    Compiler:string;
   end;
 
   TCrossUtils = array[TCPU,TOS] of TCrossUtil;
@@ -53,6 +54,7 @@ type
     btnRemFPCPatch: TButton;
     btnAddLazPatch: TButton;
     btnRemLazPatch: TButton;
+    btnSelectCompiler: TButton;
     Button1: TButton;
     CheckAutoSwitchURL: TCheckBox;
     CheckSendInfo: TCheckBox;
@@ -78,6 +80,7 @@ type
     EditLazarusRevision: TEdit;
     EditLibLocation: TEdit;
     EditBinLocation: TEdit;
+    EditCompilerOverride: TEdit;
     GroupBox1: TGroupBox;
     GroupBox2: TGroupBox;
     GroupBox4: TGroupBox;
@@ -93,6 +96,7 @@ type
     Label4: TLabel;
     LabelCrossBuildOptions: TLabel;
     LabelCrossSubArch: TLabel;
+    LabelCompilerOverride: TLabel;
     LabelFPCbranch: TLabel;
     LabelFPCOptions: TLabel;
     LabelFPCRevision: TLabel;
@@ -107,8 +111,10 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     procedure btnAddPatchClick(Sender: TObject);
     procedure btnRemPatchClick(Sender: TObject);
+    procedure btnSelectFile(Sender: TObject);
     procedure Button1Click(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
+    procedure EditDblClickDelete(Sender: TObject);
     procedure EditCrossBuildOptionsChange(Sender: TObject);
     procedure EditCrossSubArchChange(Sender: TObject);
     procedure FormCreate(Sender: TObject);
@@ -176,6 +182,8 @@ type
     function GetToolsDirectory(aCPU,aOS:string):string;
     function GetCrossBuildOptions(aCPU,aOS:string):string;
     function GetCrossSubArch(aCPU,aOS:string):string;
+    function GetCompiler(aCPU, aOS: string): string;
+
 
     property Repo:boolean read GetRepo;
     property PackageRepo:boolean read GetPackageRepo;
@@ -282,7 +290,7 @@ begin
     CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 
     {$ifdef RemoteLog}
-    CheckSendInfo.Checked:=ReadBool('General','SendInfo',True);
+    CheckSendInfo.Checked:=ReadBool('General','SendInfo',False);
     {$endif}
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
@@ -354,6 +362,7 @@ begin
         FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
         FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
         FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
+        FCrossUtils[CPU,OS].Compiler:=ReadString(s,'Compiler','');
       end;
     end;
   finally
@@ -369,6 +378,8 @@ begin
   RadioGroup3.Enabled:=e;
   EditCrossBuildOptions.Enabled:=e;
   EditCrossSubArch.Enabled:=e;
+  EditCompilerOverride.Enabled:=e;
+  btnSelectCompiler.Enabled:=e;
   if e then
   begin
     EditLibLocation.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].LibDir;
@@ -376,6 +387,20 @@ begin
     EditCrossBuildOptions.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossBuildOptions;
     EditCrossSubArch.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossSubArch;
     RadioGroup3.ItemIndex:=Ord(FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Setting);
+    EditCompilerOverride.Text:=FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Compiler;
+  end;
+end;
+
+procedure TForm2.EditDblClickDelete(Sender: TObject);
+begin
+  TEdit(Sender).Text:='';
+  if (ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1) then
+  begin
+    if Sender=EditCompilerOverride then FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Compiler:='';
+    if Sender=EditLibLocation then FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].LibDir:='';
+    if Sender=EditBinLocation then FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].BinDir:='';
+    if Sender=EditCrossBuildOptions then FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossBuildOptions:='';
+    if Sender=EditCrossSubArch then FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].CrossSubArch:='';
   end;
 end;
 
@@ -395,6 +420,7 @@ var
   FullPatchPath: string;
   aListBox:TListBox;
 begin
+  OpenDialog1.FilterIndex:=1;
   if OpenDialog1.Execute then
   begin
     FullPatchPath := OpenDialog1.FileName;
@@ -430,6 +456,26 @@ begin
         aListBox.Items.Delete(i);
       end;
     end;
+  end;
+end;
+
+procedure TForm2.btnSelectFile(Sender: TObject);
+begin
+  if Sender=btnSelectCompiler then
+  begin
+    OpenDialog1.InitialDir:=EditCompilerOverride.Text;
+    OpenDialog1.FilterIndex:=3;
+  end;
+
+  if OpenDialog1.Execute then
+  begin
+    if Sender=btnSelectCompiler then EditCompilerOverride.Text:=OpenDialog1.FileName;
+  end;
+
+  if (ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1) then
+  begin
+    if Sender=btnSelectCompiler then
+       FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Compiler:=OpenDialog1.FileName;
   end;
 end;
 
@@ -470,6 +516,12 @@ begin
         begin
           if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
           InfoForm.Memo1.Lines.Append('  subarch : '+FCrossUtils[CPU,OS].CrossSubArch);
+        end;
+
+        if Length(FCrossUtils[CPU,OS].Compiler)>0 then
+        begin
+          if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
+          InfoForm.Memo1.Lines.Append('  compiler : '+FCrossUtils[CPU,OS].Compiler);
         end;
 
         if x<>InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append('');
@@ -552,6 +604,7 @@ begin
         WriteString(s,'BinPath',FCrossUtils[CPU,OS].BinDir);
         WriteString(s,'CrossBuildOptions',FCrossUtils[CPU,OS].CrossBuildOptions);
         WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
+        WriteString(s,'Compiler',FCrossUtils[CPU,OS].Compiler);
       end;
     end;
   finally
@@ -668,6 +721,15 @@ begin
   xCPUOS:=GetCPUOSCombo(aCPU,aOS);
   result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch;
 end;
+
+function TForm2.GetCompiler(aCPU, aOS: string): string;
+var
+  xCPUOS:TCPUOS;
+begin
+  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler;
+end;
+
 
 function TForm2.GetRepo:boolean;
 begin

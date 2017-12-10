@@ -55,6 +55,7 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
       BorderSpacing.Right = 12
+      OnDblClick = EditDblClickDelete
       TabOrder = 0
     end
     object Label2: TLabel
@@ -83,6 +84,7 @@ object Form2: TForm2
       Width = 90
       Anchors = [akTop, akLeft, akRight]
       NumbersOnly = True
+      OnDblClick = EditDblClickDelete
       TabOrder = 1
     end
     object Label3: TLabel
@@ -107,6 +109,7 @@ object Form2: TForm2
       Top = 73
       Width = 140
       BorderSpacing.Top = 4
+      OnDblClick = EditDblClickDelete
       TabOrder = 2
     end
     object Label4: TLabel
@@ -135,6 +138,7 @@ object Form2: TForm2
       Width = 118
       Anchors = [akTop, akLeft, akRight]
       EchoMode = emPassword
+      OnDblClick = EditDblClickDelete
       PasswordChar = '*'
       TabOrder = 3
     end
@@ -369,7 +373,7 @@ object Form2: TForm2
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
-    Caption = 'Cross tools location and build options'
+    Caption = 'Custom tools location and build options'
     ClientHeight = 384
     ClientWidth = 312
     TabOrder = 4
@@ -453,6 +457,7 @@ object Form2: TForm2
       BorderSpacing.Top = 4
       BorderSpacing.Right = 12
       Enabled = False
+      OnDblClick = EditDblClickDelete
       ReadOnly = True
       TabOrder = 4
     end
@@ -470,6 +475,7 @@ object Form2: TForm2
       BorderSpacing.Top = 6
       BorderSpacing.Right = 12
       Enabled = False
+      OnDblClick = EditDblClickDelete
       ReadOnly = True
       TabOrder = 6
     end
@@ -529,6 +535,7 @@ object Form2: TForm2
       BorderSpacing.Right = 14
       Enabled = False
       OnChange = EditCrossBuildOptionsChange
+      OnDblClick = EditDblClickDelete
       TabOrder = 8
     end
     object LabelCrossBuildOptions: TLabel
@@ -588,7 +595,59 @@ object Form2: TForm2
       BorderSpacing.Right = 14
       Enabled = False
       OnChange = EditCrossSubArchChange
+      OnDblClick = EditDblClickDelete
       TabOrder = 9
+    end
+    object EditCompilerOverride: TEdit
+      AnchorSideLeft.Control = GroupBox4
+      AnchorSideTop.Control = LabelCompilerOverride
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = btnSelectLibDir
+      Left = 4
+      Height = 23
+      Top = 279
+      Width = 210
+      Anchors = [akTop, akLeft, akRight]
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      BorderSpacing.Right = 12
+      Enabled = False
+      OnDblClick = EditDblClickDelete
+      ReadOnly = True
+      TabOrder = 10
+    end
+    object btnSelectCompiler: TButton
+      AnchorSideLeft.Control = EditLibLocation
+      AnchorSideLeft.Side = asrBottom
+      AnchorSideTop.Control = EditCompilerOverride
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
+      Left = 226
+      Height = 25
+      Top = 279
+      Width = 80
+      Anchors = [akTop, akRight]
+      AutoSize = True
+      BorderSpacing.Left = 8
+      BorderSpacing.Right = 6
+      Caption = 'Compiler'
+      Constraints.MinWidth = 80
+      Enabled = False
+      OnClick = btnSelectFile
+      TabOrder = 11
+    end
+    object LabelCompilerOverride: TLabel
+      AnchorSideLeft.Control = GroupBox4
+      AnchorSideTop.Control = EditCrossSubArch
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 15
+      Top = 260
+      Width = 97
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Compiler Override'
+      ParentColor = False
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
@@ -622,6 +681,7 @@ object Form2: TForm2
       Width = 112
       BorderSpacing.Top = 4
       Enabled = False
+      OnDblClick = EditDblClickDelete
       TabOrder = 0
     end
     object LabelFPCbranch: TLabel
@@ -643,6 +703,7 @@ object Form2: TForm2
       Top = 23
       Width = 104
       BorderSpacing.Top = 4
+      OnDblClick = EditDblClickDelete
       TabOrder = 1
     end
     object LabelFPCRevision: TLabel
@@ -676,6 +737,7 @@ object Form2: TForm2
       Width = 112
       BorderSpacing.Top = 4
       Enabled = False
+      OnDblClick = EditDblClickDelete
       TabOrder = 2
     end
     object LabelLazarusRevision: TLabel
@@ -698,6 +760,7 @@ object Form2: TForm2
       Top = 73
       Width = 104
       BorderSpacing.Top = 4
+      OnDblClick = EditDblClickDelete
       TabOrder = 3
     end
   end
@@ -740,6 +803,7 @@ object Form2: TForm2
       Top = 23
       Width = 120
       BorderSpacing.Top = 4
+      OnDblClick = EditDblClickDelete
       TabOrder = 0
     end
     object LabelLazarusOptions: TLabel
@@ -762,6 +826,7 @@ object Form2: TForm2
       Top = 73
       Width = 120
       BorderSpacing.Top = 4
+      OnDblClick = EditDblClickDelete
       TabOrder = 1
     end
   end

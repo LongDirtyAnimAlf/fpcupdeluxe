@@ -106,6 +106,8 @@ type
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
     function GetCompilerVersion(CompilerPath: string): string;
+    function GetCompilerTargetOS(CompilerPath: string): string;
+    function GetCompilerTargetCPU(CompilerPath: string): string;
     function GetCompilerVersionFromUrl(aUrl: string): string;
     function GetCompilerVersionFromSource(aSourcePath: string): string;
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
@@ -993,6 +995,12 @@ begin
   {$ELSE}
   Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  //Processor.Parameters.Add('OS_SOURCE=win32');
+  //Processor.Parameters.Add('CPU_SOURCE=i386');
+  //Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
+  //Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
+  Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
+  Processor.Parameters.Add('CPU_TARGET='+GetTargetCPU);
   {$ENDIF}
 
   Processor.Parameters.Add('REVSTR='+ActualRevision);
@@ -1149,6 +1157,40 @@ begin
   end;
 end;
 
+function TFPCInstaller.GetCompilerTargetOS(CompilerPath: string): string;
+var
+  Output: string;
+begin
+  Result:='unknown';
+  if CompilerPath='' then exit;
+  try
+    Output:='';
+    if (ExecuteCommand(CompilerPath+ ' -iTO', Output, FVerbose)=0) then
+    begin
+      Output:=TrimRight(Output);
+      if Length(Output)>0 then Result:=Output;
+    end;
+  except
+  end;
+end;
+
+function TFPCInstaller.GetCompilerTargetCPU(CompilerPath: string): string;
+var
+  Output: string;
+begin
+  Result:='unknown';
+  if CompilerPath='' then exit;
+  try
+    Output:='';
+    if (ExecuteCommand(CompilerPath+ ' -iTP', Output, FVerbose)=0) then
+    begin
+      Output:=TrimRight(Output);
+      if Length(Output)>0 then Result:=Output;
+    end;
+  except
+  end;
+end;
+
 function TFPCInstaller.GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
 var
   VersionSnippet:string;
@@ -1281,6 +1323,7 @@ begin
   // but online, only official 3.0.0 bootstrapper available
 
   if s=FPCTRUNKVERSION then result:='3.0.2'
+  else if s='3.0.5' then result:='3.0.2'
   else if s='3.0.4' then result:='3.0.2'
   else if s='3.0.3' then result:='3.0.0'
   else if (s='3.0.2')  or (s='3.0.1') then result:='3.0.0'
@@ -1590,7 +1633,7 @@ begin
     else
     begin
       // no archive but a normal executable
-      infoln(localinfotext+'Going to copy '+BootstrapArchive+' to '+FBootstrapCompiler,etWarning);
+      infoln(localinfotext+'Going to copy '+BootstrapArchive+' to '+FBootstrapCompiler,etInfo);
       SysUtils.DeleteFile(FBootstrapCompiler); //ignore errors
       OperationSucceeded:=FileUtil.CopyFile(BootstrapArchive, FBootstrapCompiler);
       SysUtils.DeleteFile(BootstrapArchive);
@@ -1650,15 +1693,15 @@ var
   aCompilerList:TStringList;
   i,j:integer;
   aCompilerArchive,aStandardCompilerArchive:string;
-  aCompilerFound:boolean;
+  aCompilerFound,aFPCUPCompilerFound:boolean;
   {$IFDEF FREEBSD}
   k,l,FreeBSDVersion:integer;
   {$ENDIF}
   s,s1:string;
   ReturnCode:integer;
-  aLocalBootstrapVersion:string;
+  aLocalBootstrapVersion,aLocalFPCUPBootstrapVersion:string;
   aIntermediateBootstrapCompiler:string;
-  aGithubBootstrapURL:string;
+  aFPCUPBootstrapURL:string;
   aDownLoader: TBasicDownLoader;
 begin
   result := true;
@@ -1854,64 +1897,81 @@ begin
         end;
       end;
 
-
       // second, try the FPCUP binaries from release
-      if (NOT aCompilerFound) then
+      if (NOT aCompilerFound) OR (FBootstrapCompilerOverrideVersionCheck) then
       begin
 
-        infoln(localinfotext+'Slight panic: No official FPC bootstrapper found.',etError);
-        infoln(localinfotext+'Now looking for last resort bootstrap compiler from Github FPCUP(deluxe) releases.',etError);
+        if (NOT FBootstrapCompilerOverrideVersionCheck) then
+        begin
+          infoln(localinfotext+'Slight panic: No official FPC bootstrapper found.',etError);
+          infoln(localinfotext+'Now looking for last resort bootstrap compiler from Github FPCUP(deluxe) releases.',etError);
+        end
+        else
+        begin
+          infoln(localinfotext+'Now looking for a better [version] bootstrap compiler from Github FPCUP(deluxe) releases.',etInfo);
+        end;
 
-        aGithubBootstrapURL:='';
-
-        aLocalBootstrapVersion:=aBootstrapVersion;
-        FBootstrapCompilerOverrideVersionCheck:=false;
+        aFPCUPBootstrapURL:='';
+        aLocalFPCUPBootstrapVersion:=aBootstrapVersion;
+        aFPCUPCompilerFound:=false;
 
         aCompilerList:=TStringList.Create;
         try
           aCompilerList.Clear;
 
           if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-          while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>0)) do
+          while ((NOT aFPCUPCompilerFound) AND (GetNumericalVersion(aLocalFPCUPBootstrapVersion)>0)) do
           begin
-            infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
-            aGithubBootstrapURL:=FPCUPGITREPO+
+            infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalFPCUPBootstrapVersion,etInfo);
+
+            {$IFDEF FREEBSD}
+            aFPCUPBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
-              'fpcup-'+StringReplace(aLocalBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
-            infoln(localinfotext+'Checking existence of: '+aGithubBootstrapURL,etDebug);
+              'fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'11-'+GetCompilerName(GetTargetCPU);
+            {$ELSE}
+            aFPCUPBootstrapURL:=FPCUPGITREPO+
+              '/releases/download/bootstrappers_v1.0/'+
+              'fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
+            {$ENDIF}
 
-            aCompilerFound:=aDownLoader.checkURL(aGithubBootstrapURL);
+            infoln(localinfotext+'Checking existence of: '+aFPCUPBootstrapURL,etDebug);
 
-            if aCompilerFound then
+            aFPCUPCompilerFound:=aDownLoader.checkURL(aFPCUPBootstrapURL);
+
+            if aFPCUPCompilerFound then
             begin
-              aCompilerList.Add(aGithubBootstrapURL);
-              infoln(localinfotext+'Success: found a FPCUP(deluxe) bootstrapper with version '+aLocalBootstrapVersion,etInfo);
+              aCompilerList.Add(aFPCUPBootstrapURL);
+              infoln(localinfotext+'Success: found a FPCUP(deluxe) bootstrapper with version '+aLocalFPCUPBootstrapVersion,etInfo);
             end
             else
             begin
               // look for a previous (fitting) compiler if not found, and use overrideversioncheck
               FBootstrapCompilerOverrideVersionCheck:=true;
-              s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
-              if aLocalBootstrapVersion<>s
-                 then aLocalBootstrapVersion:=s
+              s:=GetBootstrapCompilerVersionFromVersion(aLocalFPCUPBootstrapVersion);
+              if aLocalFPCUPBootstrapVersion<>s
+                 then aLocalFPCUPBootstrapVersion:=s
                  else break;
             end;
           end;
 
-          if NOT aCompilerFound then
+          if NOT aFPCUPCompilerFound then
           begin
             aCompilerList.Sorted:=true;
             for i:=0 to Pred(aCompilerList.Count) do
             begin
+              {$IFDEF FREEBSD}
+              if Pos(GetTargetCPUOS+'11-'+GetCompilerName(GetTargetCPU),aCompilerList[i])>0 then
+              {$ELSE}
               if Pos(GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU),aCompilerList[i])>0 then
+              {$ENDIF}
               begin
-                aGithubBootstrapURL:=aCompilerList[i];
+                aFPCUPBootstrapURL:=aCompilerList[i];
                 FBootstrapCompilerOverrideVersionCheck:=true;
-                aCompilerFound:=true;
-                j:=Pos('fpcup-',aGithubBootstrapURL);
-                aLocalBootstrapVersion := Copy(aGithubBootstrapURL,7,5);
-                aLocalBootstrapVersion := StringReplace(aLocalBootstrapVersion,'_','.',[rfReplaceAll]);
-                infoln(localinfotext+'Got last resort FPCUP(deluxe) bootstrapper with version: '+aLocalBootstrapVersion,etInfo);
+                aFPCUPCompilerFound:=true;
+                j:=Pos('fpcup-',aFPCUPBootstrapURL);
+                aLocalFPCUPBootstrapVersion := Copy(aFPCUPBootstrapURL,7,5);
+                aLocalFPCUPBootstrapVersion := StringReplace(aLocalFPCUPBootstrapVersion,'_','.',[rfReplaceAll]);
+                infoln(localinfotext+'Got FPCUP(deluxe) bootstrapper with version: '+aLocalFPCUPBootstrapVersion,etInfo);
                 break;
               end;
             end;
@@ -1922,17 +1982,26 @@ begin
         end;
 
         // found a less official FPCUP bootstrapper !
-        if (aCompilerFound) then
+        if (aFPCUPCompilerFound) then
         begin
           if FBootstrapCompilerURL='' then
           begin
-            infoln(localinfotext+'Got a bootstrap compiler from FPCUP(deluxe) bootstrap sources.',etInfo);
-            FBootstrapCompilerURL := aGithubBootstrapURL;
+            infoln(localinfotext+'Got a bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
+            FBootstrapCompilerURL := aFPCUPBootstrapURL;
+          end
+          else
+          begin
+            if GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) then
+            begin
+              infoln(localinfotext+'Got a better [version] bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
+              FBootstrapCompilerURL:=aFPCUPBootstrapURL;
+              aLocalBootstrapVersion:=aLocalFPCUPBootstrapVersion;
+            end;
           end;
         end;
-
       end;
 
+      // go ahead with compiler found !!
       // get compiler version (if any)
       s:=GetCompilerVersion(FCompiler);
 
@@ -1987,28 +2056,8 @@ begin
   FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
-  s:='';
-  // preserve cygwin and msys(2) paths when setting path
-  {
-  aCompilerList:=TStringList.Create;
-  try
-    aCompilerList.Delimiter:=PathSeparator;
-    aCompilerList.StrictDelimiter:=True;
-    aCompilerList.DelimitedText:=GetPath;
-    for i:=0 to aCompilerList.Count-1 do
-    begin
-      s1:=aCompilerList[i];
-      if (Pos('cygwin',LowerCase(s1))>0) OR (Pos('msys',LowerCase(s1))>0) OR (Pos('msys2',LowerCase(s1))>0) then
-      begin
-        s:=PathSeparator+s1+s;
-      end;
-    end;
-  finally
-    aCompilerList.Free;
-  end;
-  }
   if Length(FSVNDirectory)>0
-     then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory)+s;
+     then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
   // add install/fpc/utils to solve data2inc not found by fpcmkcfg
   // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
@@ -2120,17 +2169,19 @@ begin
     begin
       // get the bootstrapper, among other things (binutils)
       // start with the lowest requirement, due to limited availability of online bootstrappers ??!!
-      RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
+      RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
+
       result:=InitModule(RequiredBootstrapVersion);
+
       if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersion)
         then infoln(infotext+'To compile this FPC, we will use a fresh compiler with version : '+RequiredBootstrapVersion,etInfo)
         else
         begin
-          // check if we have a higher acceptable requirement for the bootstrapper
-          if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersionHigh) then
+          // check if we have a lower acceptable requirement for the bootstrapper
+          if (GetCompilerVersion(FCompiler)=RequiredBootstrapVersionLow) then
           begin
             // if so, set bootstrapper to lower one !!
-            RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
+            RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
             infoln(infotext+'To compile this FPC, we can also (and will) use (required) a fresh compiler with version : '+RequiredBootstrapVersion,etInfo);
           end;
         end;
@@ -2349,7 +2400,7 @@ begin
 
     {$ifdef win64}
     // Deals dynamically with either ppc386.exe or native ppcx64.exe
-    if pos('ppc386.exe',FCompiler)>0 then //need to build ppcx64 before
+    if (Pos('ppc386.exe',FCompiler)>0) OR (GetCompilerTargetOS(FCompiler)='win32') then //need to build ppcx64 before
     begin
       infoln('We have ppc386. We need ppcx64. So make it !',etInfo);
       Processor.Executable := Make;
@@ -2375,10 +2426,10 @@ begin
         WritelnLog(etError, infotext+'Failed to build ppcx64 bootstrap compiler.');
         exit;
       end;
-      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\ppcx64.exe',
-        ExtractFilePath(FCompiler)+'ppcx64.exe');
       // Now we can change the compiler from the i386 to the x64 compiler:
-      FCompiler:=ExtractFilePath(FCompiler)+'ppcx64.exe';
+      FCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+'ppcx64.exe';
+      FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler\ppcx64.exe',FCompiler,[cffOverwriteFile]);
+      FBootstrapCompilerOverrideVersionCheck:=True;
     end;
     {$endif win64}
     {$ifdef darwin}

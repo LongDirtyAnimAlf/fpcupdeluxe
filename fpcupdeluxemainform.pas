@@ -1316,7 +1316,9 @@ begin
                    sLineBreak +
                    'Do you want logging info to be gathered ?'
                  ,mtConfirmation,[mbYes, mbNo],0));
-      if aModalResult=mrYes then Form2.SendInfo:=True;
+      if aModalResult=mrYes
+         then Form2.SendInfo:=True
+         else Form2.SendInfo:=False;
     end;
   end;
   {$endif}
@@ -2477,8 +2479,10 @@ begin
 
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
-  // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
+  // set custom FPC compiler by special user input through setup+
+  FPCupManager.CompilerName:=Form2.GetCompiler(GetTargetCPU,GetTargetOS);
 
+  // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
   begin
@@ -2575,6 +2579,8 @@ begin
 end;
 
 function TForm1.RealRun:boolean;
+var
+  aVersion:string;
 begin
   result:=false;
 
@@ -2612,8 +2618,14 @@ begin
   Application.ProcessMessages;
 
   {$ifdef RemoteLog}
-  aDataClient.UpInfo.FPCVersion:=FPCTarget;
-  aDataClient.UpInfo.LazarusVersion:=LazarusTarget;
+  aVersion:=FPCTarget;
+  if (ListBoxFPCTarget.ItemIndex<>-1) then aVersion:=ListBoxFPCTarget.GetSelectedText;
+  aDataClient.UpInfo.FPCVersion:=aVersion;
+
+  aVersion:=LazarusTarget;
+  if (ListBoxLazarusTarget.ItemIndex<>-1) then aVersion:=ListBoxLazarusTarget.GetSelectedText;
+  aDataClient.UpInfo.LazarusVersion:=aVersion;
+
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
   {$endif}
 

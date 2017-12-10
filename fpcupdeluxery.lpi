@@ -31,7 +31,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -74,7 +74,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -109,7 +109,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -145,7 +145,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -176,7 +176,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -207,7 +207,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -241,7 +241,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)-cocoa"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -275,7 +275,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)-qt5"/>
+            <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -406,7 +406,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="deluxebin\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
+      <Filename Value="deluxebin\deluxery\$NameOnly($(ProjFile))ry-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);mORMot"/>
