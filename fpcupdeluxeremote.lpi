@@ -85,8 +85,6 @@
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
             <Optimizations>
               <OptimizationLevel Value="0"/>
             </Optimizations>
@@ -424,12 +422,15 @@
           </Other>
         </CompilerOptions>
       </Item13>
-      <Item14 Name="darwin32">
+      <Item14 Name="darwin32carbon">
+        <MacroValues Count="1">
+          <Macro7 Name="LCLWidgetType" Value="carbon"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-carbon"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -523,7 +524,7 @@
           </Other>
         </CompilerOptions>
       </Item16>
-      <Item17 Name="darwin64QT">
+      <Item17 Name="darwin64QT5">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -687,7 +688,10 @@
           </Other>
         </CompilerOptions>
       </Item20>
-      <Item21 Name="darwinppc">
+      <Item21 Name="darwinppccarbon">
+        <MacroValues Count="1">
+          <Macro7 Name="LCLWidgetType" Value="carbon"/>
+        </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -718,7 +722,7 @@
           </Other>
         </CompilerOptions>
       </Item21>
-      <Item22 Name="darwinppc64">
+      <Item22 Name="darwinppc64cocoa">
         <MacroValues Count="1">
           <Macro6 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -785,13 +789,14 @@
           </Other>
         </CompilerOptions>
       </Item23>
-      <SharedMatrixOptions Count="6">
+      <SharedMatrixOptions Count="7">
         <Item1 ID="178210829291" Modes="darwin64cocoa,darwin32cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item2 ID="784204643275" Modes="DefaultQT,darwin64QT" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item2 ID="784204643275" Modes="DefaultQT,darwin64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item3 ID="477497289322" Modes="haikui386QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item4 ID="853392633372" Modes="linuxx64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item5 ID="384042782265" Modes="linuxi386QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item6 ID="322994045052" Modes="darwinppc64" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item6 ID="322994045052" Modes="darwinppc64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item7 ID="015223611220" Modes="darwin32carbon,darwinppccarbon" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

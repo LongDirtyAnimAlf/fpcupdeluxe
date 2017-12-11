@@ -995,13 +995,11 @@ begin
   {$ELSE}
   Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
-  //Processor.Parameters.Add('OS_SOURCE=win32');
-  //Processor.Parameters.Add('CPU_SOURCE=i386');
-  //Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
-  //Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
-  Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
-  Processor.Parameters.Add('CPU_TARGET='+GetTargetCPU);
   {$ENDIF}
+  Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+  Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
+  Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
+  Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
 
   Processor.Parameters.Add('REVSTR='+ActualRevision);
   Processor.Parameters.Add('REVINC=force');
@@ -1988,14 +1986,18 @@ begin
           begin
             infoln(localinfotext+'Got a bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
             FBootstrapCompilerURL := aFPCUPBootstrapURL;
+            // set standard bootstrap compilername
+            FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
           end
           else
           begin
             if GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) then
             begin
               infoln(localinfotext+'Got a better [version] bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
-              FBootstrapCompilerURL:=aFPCUPBootstrapURL;
               aLocalBootstrapVersion:=aLocalFPCUPBootstrapVersion;
+              FBootstrapCompilerURL:=aFPCUPBootstrapURL;
+              // set standard bootstrap compilername
+              FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
             end;
           end;
         end;
@@ -2031,6 +2033,8 @@ begin
         begin
           infoln(localinfotext+'No correct bootstrapper. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
           result:=DownloadBootstrapCompiler;
+          // always use the newly downloaded bootstrapper !!
+          if result then FCompiler:=FBootstrapCompiler;
         end;
       end;
 
@@ -2139,8 +2143,8 @@ begin
       begin
         infoln(infotext+'Could not determine required bootstrap compiler version. Should not happen. Aborting.',etError);
         exit(false);
-      end else infoln(infotext+'To compile this FPC, we use a compiler with (lowest) version : '+RequiredBootstrapVersionLow,etInfo);
-    end else infoln(infotext+'To compile this FPC, we need (required) a compiler with (lowest) version : '+RequiredBootstrapVersionLow,etInfo);
+      end else infoln(infotext+'To compile this FPC, we use a compiler with version : '+RequiredBootstrapVersionLow,etInfo);
+    end else infoln(infotext+'To compile this FPC, we need (required) a compiler with version : '+RequiredBootstrapVersionLow,etInfo);
 
     OperationSucceeded:=false;
 
@@ -2168,7 +2172,7 @@ begin
     else
     begin
       // get the bootstrapper, among other things (binutils)
-      // start with the lowest requirement, due to limited availability of online bootstrappers ??!!
+      // start with the highest requirement ??!!
       RequiredBootstrapVersion:=RequiredBootstrapVersionHigh;
 
       result:=InitModule(RequiredBootstrapVersion);
@@ -2443,6 +2447,8 @@ begin
       if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
       Processor.Parameters.Add('FPC='+FCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
+      Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
       Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
       Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
       Processor.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS);
@@ -2462,11 +2468,12 @@ begin
       if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName) then
       begin
         // Now we can change the compiler from the ppcuniversal to the target compiler:
-        FCompiler:=ExtractFilePath(FCompiler)+TargetCompilerName;
+        FCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+TargetCompilerName;
         infoln(infotext+'Copy fresh compiler ('+TargetCompilerName+') into: '+ExtractFilePath(FCompiler),etDebug);
         FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+TargetCompilerName,
           FCompiler);
         fpChmod(FCompiler,&755);
+        FBootstrapCompilerOverrideVersionCheck:=True;
       end;
     end;
     {$endif darwin}

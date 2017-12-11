@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 466
+  Left = 390
   Height = 631
-  Top = 129
+  Top = 209
   Width = 1052
   Anchors = []
   Caption = 'Form1'
@@ -1640,12 +1640,15 @@ object Form1: TForm1
     AnchorSideTop.Control = Owner
     Left = 368
     Height = 23
+    Hint = 'Double click to allow editing'
     Top = 4
     Width = 313
     BorderSpacing.Top = 4
     OnChange = RealURLChange
     OnDblClick = RealURLDblClick
+    ParentShowHint = False
     ReadOnly = True
+    ShowHint = True
     TabOrder = 11
   end
   object RealLazURL: TEdit
@@ -1656,13 +1659,16 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 689
     Height = 23
+    Hint = 'Double click to allow editing'
     Top = 4
     Width = 351
     BorderSpacing.Left = 8
     BorderSpacing.Right = 12
     OnChange = RealURLChange
     OnDblClick = RealURLDblClick
+    ParentShowHint = False
     ReadOnly = True
+    ShowHint = True
     TabOrder = 12
   end
   object Panel1: TPanel

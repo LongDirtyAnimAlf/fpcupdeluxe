@@ -450,6 +450,7 @@ object Form2: TForm2
       AnchorSideRight.Control = btnSelectLibDir
       Left = 4
       Height = 23
+      Hint = 'Double click to clear'
       Top = 100
       Width = 210
       Anchors = [akTop, akLeft, akRight]
@@ -458,7 +459,9 @@ object Form2: TForm2
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
+      ParentShowHint = False
       ReadOnly = True
+      ShowHint = True
       TabOrder = 4
     end
     object EditBinLocation: TEdit
@@ -468,6 +471,7 @@ object Form2: TForm2
       AnchorSideRight.Control = btnSelectBinDir
       Left = 4
       Height = 23
+      Hint = 'Double click to clear'
       Top = 129
       Width = 210
       Anchors = [akTop, akLeft, akRight]
@@ -476,7 +480,9 @@ object Form2: TForm2
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
+      ParentShowHint = False
       ReadOnly = True
+      ShowHint = True
       TabOrder = 6
     end
     object btnSelectLibDir: TButton
@@ -605,6 +611,7 @@ object Form2: TForm2
       AnchorSideRight.Control = btnSelectLibDir
       Left = 4
       Height = 23
+      Hint = 'Double click to clear'
       Top = 279
       Width = 210
       Anchors = [akTop, akLeft, akRight]
@@ -613,7 +620,9 @@ object Form2: TForm2
       BorderSpacing.Right = 12
       Enabled = False
       OnDblClick = EditDblClickDelete
+      ParentShowHint = False
       ReadOnly = True
+      ShowHint = True
       TabOrder = 10
     end
     object btnSelectCompiler: TButton

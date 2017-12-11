@@ -2544,6 +2544,9 @@ begin
 
   // Set default LCL platforms
   {$ifdef Darwin}
+    {$ifdef LCLCARBON}
+      FPCupManager.CrossLCL_Platform:='carbon';
+    {$endif}
     {$ifdef LCLCOCOA}
       FPCupManager.CrossLCL_Platform:='cocoa';
     {$endif}

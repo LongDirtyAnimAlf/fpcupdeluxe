@@ -479,6 +479,9 @@ begin
         begin
           NothingToBeDone:=false;
           {$ifdef Darwin}
+            {$ifdef LCLCARBON}
+              NothingToBeDone:=(FCrossLCL_Platform='carbon');
+            {$endif}
             {$ifdef LCLCOCOA}
               NothingToBeDone:=(FCrossLCL_Platform='cocoa');
             {$endif}
@@ -677,6 +680,13 @@ begin
           for j:=0 to (i-1) do
           begin
             LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', 'cocoa');
+          end;
+          {$endif}
+          {$ifdef LCLCARBON}
+          if i>0 then infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for carbon', etInfo);
+          for j:=0 to (i-1) do
+          begin
+            LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', 'carbon');
           end;
           {$endif}
 
@@ -1190,6 +1200,9 @@ begin
       begin
         NothingToBeDone:=false;
         {$ifdef Darwin}
+          {$ifdef LCLCARBON}
+            NothingToBeDone:=(FCrossLCL_Platform='carbon');
+          {$endif}
           {$ifdef LCLCOCOA}
             NothingToBeDone:=(FCrossLCL_Platform='cocoa');
           {$endif}

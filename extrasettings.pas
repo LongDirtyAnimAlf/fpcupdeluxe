@@ -13,7 +13,7 @@ Const
   DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mipsel,avr,jvm,i8086);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos,haiku);
 
   TCPUOS = record
@@ -594,6 +594,7 @@ begin
         if (CPU=powerpc) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
+        if (CPU=mips) AND (OS<>linux) then continue;
         if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android)) then continue;
         if (CPU=avr) AND (OS<>embedded) then continue;
         if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
