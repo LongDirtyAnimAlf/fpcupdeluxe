@@ -2193,7 +2193,7 @@ begin
 
     // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
     // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
-    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersion) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
+    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
     begin
       // we need an intermediate compiler !!
       if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName) then
@@ -2202,7 +2202,7 @@ begin
       end
       else
       begin
-        if (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)<>RequiredBootstrapVersion) then
+        if (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)<>RequiredBootstrapVersionHigh) then
         begin
           bIntermediateNeeded:=true;
         end
@@ -2222,6 +2222,8 @@ begin
 
     if (bIntermediateNeeded) then
     begin
+      // always build the lowest version allowed
+      RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
       infoln(infotext+'We need to build an FPC ' + RequiredBootstrapVersion + ' intermediate compiler.',etInfo);
 
       // get the correct binutils (Windows only)

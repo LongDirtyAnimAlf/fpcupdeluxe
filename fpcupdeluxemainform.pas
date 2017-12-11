@@ -118,8 +118,7 @@ type
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
     procedure SetTarget(aControl:TControl;const aTarget:string='');
     procedure InitFPCupManager;
-    {$ifdef usealternateui}
-    {$else}
+    {$ifndef usealternateui}
     property FPCTarget:string read FFPCTarget write SetFPCTarget;
     property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
     {$endif}
