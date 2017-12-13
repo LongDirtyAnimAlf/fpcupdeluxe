@@ -443,7 +443,9 @@ begin
 
     if OperationSucceeded then
     begin
-      if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll')
+      if NOT IsSSLloaded then
+      begin
+        if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll')
          then infoln(localinfotext+'Found OpenSLL library files.',etDebug)
          else
          begin
@@ -467,6 +469,7 @@ begin
              end;
            end;
          end;
+      end;
     end;
 
     // Get patch binary from default binutils URL

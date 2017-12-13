@@ -180,11 +180,14 @@ begin
 
   {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
   // disable some features
-  FixesBtn.Visible:=False;
-  StableBtn.Visible:=False;
   OldBtn.Visible:=False;
   DinoBtn.Visible:=False;
   ButtonInstallCrossCompiler.Visible:=False;
+  {$endif}
+  {$IF defined(CPUAARCH64)}
+  // disable some features
+  FixesBtn.Visible:=False;
+  StableBtn.Visible:=False;
   {$endif}
 
   AutoCrossUpdate.Visible:=ButtonInstallCrossCompiler.Visible;
@@ -398,8 +401,8 @@ end;
 
 function TForm1.AutoUpdateCrossCompiler(Sender: TObject):boolean;
 var
-  CPUType:TCPU;
-  OSType:TOS;
+  //CPUType:TCPU;
+  //OSType:TOS;
   FPCCfg:string;
   BinPath:string;
   ConfigText: TStringList;

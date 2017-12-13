@@ -43,154 +43,142 @@ var
 
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
-  i,j:cardinal;
-  lineready:boolean;
+  i:cardinal;
   subline,line:string;
+  outputline:boolean;
 begin
-  lineready:=false;
   subline:=StrPas(aBuf);
   linestore:=linestore+subline;
 
-  i:=1;
-  j:=Length(linestore);
-
-  while (i<=j) do
+  i:=Pos(LineEnding,linestore);
+  while (i>0) do
   begin
-    case DefaultTextLineBreakStyle of
-      tlbsLF:
-      begin
-        lineready:=(linestore[i]=#10);
-      end;
-      tlbsCRLF:
-      begin
-        lineready:=((i>1) AND (linestore[i]=#10) AND (linestore[i-1]=#13));
-      end;
-      tlbsCR:
-      begin
-        lineready:=(linestore[i]=#13);
-      end;
-    end;
+    outputline:=(NOT filteroutput);
 
-    if lineready then
+    if i=1 then
     begin
+      line:='';
+      outputline:=true;
+    end else line:=Copy(linestore,1,i-1);
 
-      line:=Copy(linestore,1,i);
-      line:=Trim(line);
-      Delete(linestore,1,i);
+    i:=i+Length(LineEnding);
+    Delete(linestore,1,i-1);
 
-      while filteroutput do
+    // get new line-ending to be used by next loop
+    i:=Pos(LineEnding,linestore);
+
+    {$ifdef Darwin}
+    // suppress all setfocus errors on Darwin, always
+    if AnsiContainsText(line,'.setfocus') then continue;
+    {$endif}
+
+    if (NOT outputline) then
+    begin
+      // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
+      // will be a bit redundant , but just to be sure !
+      if (AnsiContainsText(line,'error:'))
+         OR (AnsiContainsText(line,'donalf:'))
+         OR (AnsiContainsText(line,'fatal:'))
+         OR (AnsiContainsText(line,'fpcupdeluxe:'))
+         OR (AnsiContainsText(line,'execute:'))
+         OR (AnsiContainsText(line,'executing:'))
+         OR ((AnsiContainsText(line,'compiling ')) AND (NOT AnsiContainsText(line,'when compiling target')))
+         OR (AnsiContainsText(line,'linking '))
+      then outputline:=true;
+
+      if (NOT outputline) then
       begin
-        // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!
-        // will be a bit redundant , but just to be sure !
-        if (AnsiContainsText(line,'error:'))
-           OR (AnsiContainsText(line,'donalf:'))
-           OR (AnsiContainsText(line,'fatal:'))
-           OR (AnsiContainsText(line,'fpcupdeluxe:'))
-           OR (AnsiContainsText(line,'execute:'))
-           OR (AnsiContainsText(line,'executing:'))
-           OR ((AnsiContainsText(line,'compiling ')) AND (NOT AnsiContainsText(line,'when compiling target')))
-           OR (AnsiContainsText(line,'linking '))
-        then
-        begin
-          lineready:=false;
-          break;
-        end;
         // remove hints and other "trivial"* warnings from output
         // these line are not that interesting for the average user of fpcupdeluxe !
-        if AnsiContainsText(line,'hint: ') then break;
-        if AnsiContainsText(line,'verbose: ') then break;
-        if AnsiContainsText(line,'note: ') then break;
-        if AnsiContainsText(line,'assembling ') then break;
-        if AnsiContainsText(line,': entering directory ') then break;
-        if AnsiContainsText(line,': leaving directory ') then break;
+        if AnsiContainsText(line,'hint: ') then continue;
+        if AnsiContainsText(line,'verbose: ') then continue;
+        if AnsiContainsText(line,'note: ') then continue;
+        if AnsiContainsText(line,'assembling ') then continue;
+        if AnsiContainsText(line,': entering directory ') then continue;
+        if AnsiContainsText(line,': leaving directory ') then continue;
         // when generating help
-        if AnsiContainsText(line,'illegal XML element: ') then break;
-        if AnsiContainsText(line,'parsing used unit ') then break;
-        if AnsiContainsText(line,'extracting ') then break;        
+        if AnsiContainsText(line,'illegal XML element: ') then continue;
+        if AnsiContainsText(line,'parsing used unit ') then continue;
+        if AnsiContainsText(line,'extracting ') then continue;
 
         // during building of lazarus components, default compiler switches cause version and copyright info to be shown
         // do not know if this is allowed, but this version / copyright info is very redundant as it is shown everytime the compiler is called ...
         // I stand corrected if this has to be changed !
-        if AnsiContainsText(line,'Copyright (c) 1993-') then break;
-        if AnsiContainsText(line,'Free Pascal Compiler version ') then break;
-
+        if AnsiContainsText(line,'Copyright (c) 1993-') then continue;
+        if AnsiContainsText(line,'Free Pascal Compiler version ') then continue;
+        // harmless make error
+        if AnsiContainsText(line,'make') then
+        begin
+          if AnsiContainsText(line,'error 1') then continue;
+          if AnsiContainsText(line,'(e=1)') then continue;
+          if AnsiContainsText(line,'error 87') then continue;
+          if AnsiContainsText(line,'(e=87)') then continue;
+        end;
         if AnsiContainsText(line,'Warning: ') then
         begin
-          if AnsiContainsText(line,'is not portable') then break;
-          if AnsiContainsText(line,'is deprecated') then break;
-          if AnsiContainsText(line,'implicit string type conversion') then break;
-          if AnsiContainsText(line,'function result does not seem to be set') then break;
-          if AnsiContainsText(line,'comparison might be always') then break;
-          //if AnsiContainsText(line,'unreachable code') then break;
-          if AnsiContainsText(line,'converting pointers to signed integers') then break;
-          if AnsiContainsText(line,'does not seem to be initialized') then break;
-          if AnsiContainsText(line,'an inherited method is hidden') then break;
-          if AnsiContainsText(line,'with abstract method') then break;
-          if AnsiContainsText(line,'comment level 2 found') then break;
-          if AnsiContainsText(line,'did you forget -T') then break;
-          if AnsiContainsText(line,'is not recommended') then break;
-          if AnsiContainsText(line,'were not initialized') then break;
-          if AnsiContainsText(line,'which is not available for the') then break;
-          if AnsiContainsText(line,'argument unused during compilation') then break;
-          if AnsiContainsText(line,'invalid unitname') then break;
-          if AnsiContainsText(line,'procedure type "FAR" ignored') then break;
-          if AnsiContainsText(line,'duplicate unit') then break;
-          if AnsiContainsText(line,'is ignored for the current target platform') then break;
-          if AnsiContainsText(line,'Inlining disabled') then break;
-          if AnsiContainsText(line,'not yet supported inside inline procedure/function') then break;
-          if AnsiContainsText(line,'Check size of memory operand') then break;
-          if AnsiContainsText(line,'User defined: TODO') then break;
-          if AnsiContainsText(line,'Circular dependency detected when compiling target') then break;
-          if AnsiContainsText(line,'overriding recipe for target') then break;
-          if AnsiContainsText(line,'ignoring old recipe for target') then break;
+          if AnsiContainsText(line,'is not portable') then continue;
+          if AnsiContainsText(line,'is deprecated') then continue;
+          if AnsiContainsText(line,'implicit string type conversion') then continue;
+          if AnsiContainsText(line,'function result does not seem to be set') then continue;
+          if AnsiContainsText(line,'comparison might be always') then continue;
+          //if AnsiContainsText(line,'unreachable code') then continue;
+          if AnsiContainsText(line,'converting pointers to signed integers') then continue;
+          if AnsiContainsText(line,'does not seem to be initialized') then continue;
+          if AnsiContainsText(line,'an inherited method is hidden') then continue;
+          if AnsiContainsText(line,'with abstract method') then continue;
+          if AnsiContainsText(line,'comment level 2 found') then continue;
+          if AnsiContainsText(line,'did you forget -T') then continue;
+          if AnsiContainsText(line,'is not recommended') then continue;
+          if AnsiContainsText(line,'were not initialized') then continue;
+          if AnsiContainsText(line,'which is not available for the') then continue;
+          if AnsiContainsText(line,'argument unused during compilation') then continue;
+          if AnsiContainsText(line,'invalid unitname') then continue;
+          if AnsiContainsText(line,'procedure type "FAR" ignored') then continue;
+          if AnsiContainsText(line,'duplicate unit') then continue;
+          if AnsiContainsText(line,'is ignored for the current target platform') then continue;
+          if AnsiContainsText(line,'Inlining disabled') then continue;
+          if AnsiContainsText(line,'not yet supported inside inline procedure/function') then continue;
+          if AnsiContainsText(line,'Check size of memory operand') then continue;
+          if AnsiContainsText(line,'User defined: TODO') then continue;
+          if AnsiContainsText(line,'Circular dependency detected when compiling target') then continue;
+          if AnsiContainsText(line,'overriding recipe for target') then continue;
+          if AnsiContainsText(line,'ignoring old recipe for target') then continue;
           // when generating help
-          if AnsiContainsText(line,'is unknown') then break;
+          if AnsiContainsText(line,'is unknown') then continue;
           {$ifdef MSWINDOWS}
-          if AnsiContainsText(line,'unable to determine the libgcc path') then break;
+          if AnsiContainsText(line,'unable to determine the libgcc path') then continue;
           {$endif}
         end;
         // suppress "trivial"* build commands
         {$ifdef MSWINDOWS}
-        if AnsiContainsText(line,'rm.exe ') then break;
-        if AnsiContainsText(line,'mkdir.exe ') then break;
-        if AnsiContainsText(line,'mv.exe ') then break;
-        if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then break;
+        if AnsiContainsText(line,'rm.exe ') then continue;
+        if AnsiContainsText(line,'mkdir.exe ') then continue;
+        if AnsiContainsText(line,'mv.exe ') then continue;
+        if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then continue;
         {$endif}
         {$ifdef UNIX}
-        if AnsiContainsText(line,'rm -f') then break;
-        if AnsiContainsText(line,'rm -rf ') then break;
-        if AnsiContainsText(line,'mkdir ') then break;
-        if AnsiContainsText(line,'mv ') then break;
-        if (AnsiContainsText(line,'cp ')) AND (AnsiContainsText(line,'.compiled')) then break;
+        if AnsiContainsText(line,'rm -f') then continue;
+        if AnsiContainsText(line,'rm -rf ') then continue;
+        if AnsiContainsText(line,'mkdir ') then continue;
+        if AnsiContainsText(line,'mv ') then continue;
+        if (AnsiContainsText(line,'cp ')) AND (AnsiContainsText(line,'.compiled')) then continue;
         {$endif}
-        lineready:=false;
-        break;
-        // * = trivial for a normal user.
+        outputline:=true;
       end;
-
-      if ((NOT lineready) OR (NOT filteroutput))
-      // do not add empty lines ... :-)
-      // AND (Length(line>0))
-      {$ifdef Darwin}
-      // suppress all setfocus errors on Darwin, always
-      AND (NOT AnsiContainsText(line,'.setfocus'))
-      {$endif}
-      then
-      begin
-        Self.Append(line);
-        Self.CaretX:=0;
-        Self.CaretY:=Self.Lines.Count;
-        // the below is needed:
-        // onchange is no longer called, when appending a line ... bug or feature ?!!
-        Self.OnChange(Self);
-      end;
-      i:=0;
-      j:=Length(linestore);
-      lineready:=false;
     end;
-    Inc(I);
-  end;
 
+    // output line !!
+    if (outputline) then
+    begin
+      Self.Append(line);
+      Self.CaretX:=0;
+      Self.CaretY:=Self.Lines.Count;
+      // the below is needed:
+      // onchange is no longer called, when appending a line ... bug or feature ?!!
+      Self.OnChange(Self);
+    end;
+
+  end;
 end;
 
 function EditWrite(var F: TTextRec): Integer;
