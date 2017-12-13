@@ -723,13 +723,11 @@ begin
         Options:=Options+' -ap';
         {$endif}
 
-        {$if not defined(FPC_HAS_TYPE_EXTENDED)}
+        {$if NOT defined(FPC_HAS_TYPE_EXTENDED)}
         // soft 80 bit float if available
-        if (CrossInstaller.TargetCPU='i386') OR ((CrossInstaller.TargetCPU='i8086')) then
-        begin
-          infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support.',etInfo);
-          Options:=Options+' -dFPC_SOFT_FPUX80';
-        end;
+        infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+        infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
+        Options:=Options+' -dFPC_SOFT_FPUX80';
         {$endif}
 
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
@@ -1020,10 +1018,9 @@ begin
 
   s:=s+' -dREVINC';
 
-  {$if not defined(FPC_HAS_TYPE_EXTENDED)}
-  //{$if defined(win64)}
+  {$if NOT defined(FPC_HAS_TYPE_EXTENDED)}
   // soft 80 bit float if available
-  infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support.',etInfo);
+  infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
   s:=s+' -dFPC_SOFT_FPUX80';
   {$endif}
 
@@ -1317,15 +1314,9 @@ begin
 
   result:='0.0.0';
 
-  // for trunk i.e. , also 3.0.2 is allowed
-  // but online, only official 3.0.0 bootstrapper available
-
-  if s=FPCTRUNKVERSION then result:='3.0.2'
-  else if s='3.0.5' then result:='3.0.2'
-  else if s='3.0.4' then result:='3.0.2'
-  else if s='3.0.3' then result:='3.0.0'
-  else if (s='3.0.2')  or (s='3.0.1') then result:='3.0.0'
-  //else if (s='3.0.2') or (s='3.0.1') then result:='2.6.4'
+  if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
+  else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'
+  else if ((s='3.0.3') OR (s='3.0.2') OR (s='3.0.1')) then result:='3.0.0'
   else if s='3.0.0' then result:='2.6.4'
   else if s='2.6.4' then result:='2.6.2'
   else if s='2.6.2' then result:='2.6.0'
@@ -1895,7 +1886,7 @@ begin
         end;
       end;
 
-      // second, try the FPCUP binaries from release
+      // second, try the FPCUP binaries from release, perhaps it is a better version
       if (NOT aCompilerFound) OR (FBootstrapCompilerOverrideVersionCheck) then
       begin
 
@@ -1922,15 +1913,18 @@ begin
           begin
             infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalFPCUPBootstrapVersion,etInfo);
 
-            {$IFDEF FREEBSD}
+            s:=GetTargetCPU;
+            {$ifdef CPUARMHF}
+            s:=s+'hf';
+            {$endif CPUARMHF}
+            s:=s+'-'+GetTargetOS;
+            {$ifdef FREEBSD}
+            s:=s+'11'; // version 11 only for now
+            {$endif FREEBSD}
+
             aFPCUPBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
-              'fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'11-'+GetCompilerName(GetTargetCPU);
-            {$ELSE}
-            aFPCUPBootstrapURL:=FPCUPGITREPO+
-              '/releases/download/bootstrappers_v1.0/'+
-              'fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
-            {$ENDIF}
+              'fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+'-'+GetCompilerName(GetTargetCPU);
 
             infoln(localinfotext+'Checking existence of: '+aFPCUPBootstrapURL,etDebug);
 
@@ -1957,11 +1951,15 @@ begin
             aCompilerList.Sorted:=true;
             for i:=0 to Pred(aCompilerList.Count) do
             begin
-              {$IFDEF FREEBSD}
-              if Pos(GetTargetCPUOS+'11-'+GetCompilerName(GetTargetCPU),aCompilerList[i])>0 then
-              {$ELSE}
-              if Pos(GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU),aCompilerList[i])>0 then
-              {$ENDIF}
+              s:=GetTargetCPU;
+              {$ifdef CPUARMHF}
+              s:=s+'hf';
+              {$endif CPUARMHF}
+              s:=s+'-'+GetTargetOS;
+              {$ifdef FREEBSD}
+              s:=s+'11'; // version 11 only for now
+              {$endif FREEBSD}
+              if Pos(s+'-'+GetCompilerName(GetTargetCPU),aCompilerList[i])>0 then
               begin
                 aFPCUPBootstrapURL:=aCompilerList[i];
                 FBootstrapCompilerOverrideVersionCheck:=true;
@@ -2144,7 +2142,7 @@ begin
         infoln(infotext+'Could not determine required bootstrap compiler version. Should not happen. Aborting.',etError);
         exit(false);
       end else infoln(infotext+'To compile this FPC, we use a compiler with version : '+RequiredBootstrapVersionLow,etInfo);
-    end else infoln(infotext+'To compile this FPC, we need (required) a compiler with version : '+RequiredBootstrapVersionLow,etInfo);
+    end else infoln(infotext+'To compile this FPC, we need (required) a compiler with version '+RequiredBootstrapVersionLow+' or '+RequiredBootstrapVersionHigh,etInfo);
 
     OperationSucceeded:=false;
 
@@ -2640,11 +2638,11 @@ begin
       Write(TxtFile,';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu');
       //Write(TxtFile,';'+'/usr/lib/'+TargetCPU+'-'+TargetOS+'-gnu');
       {$IFDEF cpuarm}
-      {$IFDEF cpuarmhf}
+      {$IFDEF CPUARMHF}
       Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabihf');
       {$ELSE}
       Write(TxtFile,';'+'/usr/lib/$FPCTARGET-gnueabi');
-      {$ENDIF cpuarmhf}
+      {$ENDIF CPUARMHF}
       {$ENDIF cpuarm}
       {$IF (defined(BSD)) and (not defined(Darwin))}
       Write(TxtFile,';'+'/usr/local/lib'+';'+'/usr/X11R6/lib');

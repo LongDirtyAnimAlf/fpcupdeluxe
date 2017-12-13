@@ -31,7 +31,8 @@ uses
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
 const
-  FPCTRUNKVERSION  = '3.1.1';
+  FPCTRUNKVERSION      = '3.1.1';
+  FPCTRUNKBOOTVERSION  = '3.0.2';
   LAZARUSTRUNKVERSION  = '1.9';
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';

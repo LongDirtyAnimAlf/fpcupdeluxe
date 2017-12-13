@@ -457,7 +457,11 @@ var
   x:integer;
   {$endif}
 begin
+ {$ifdef LCL}
  StartPath:=Application.ExeName;
+ {$else}
+ StartPath:=Paramstr(0);
+ {$endif}
  {$ifdef Darwin}
  // we need the .app itself !!
  x:=pos('/Contents/MacOS',StartPath);
