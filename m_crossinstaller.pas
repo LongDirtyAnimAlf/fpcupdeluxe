@@ -58,6 +58,7 @@ const
 
   NEWPASCALGITREPO='https://github.com/newpascal';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
+  FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
   {$ifdef MSWINDOWS}
   FPCUPBINSURL=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0';

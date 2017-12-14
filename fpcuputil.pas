@@ -325,6 +325,7 @@ function GetTargetOS:string;
 function GetTargetCPUOS:string;
 function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
 function GetDistro:string;
+function GetFreeBSDVersion:byte;
 
 implementation
 
@@ -1795,6 +1796,27 @@ begin
   result:=t;
 end;
 
+function GetFreeBSDVersion:byte;
+var
+  s:string;
+  i,j:integer;
+begin
+  result:=0;
+  s:=GetDistro;
+  if Length(s)>0 then
+  begin
+    i:=1;
+    while (Length(s)>=i) AND (NOT (s[i] in ['0'..'9'])) do Inc(i);
+    j:=0;
+    while (Length(s)>=i) AND (s[i] in ['0'..'9']) do
+    begin
+      j:=j*10+Ord(s[i])-$30;
+      Inc(i);
+    end;
+    result:=j;
+  end;
+end;
+
 function GetTargetCPUOS:string;
 begin
   result:=GetTargetCPU+'-'+GetTargetOS;
@@ -2309,18 +2331,21 @@ begin
       H:=Copy(H,1,Pos('"',H)-1);
     end;
 
-    writeln('Authorization required. Remote site says: ',H);
-    write('Enter username (empty quits): ');
-    readLn(UN);
-    RepeatRequest:=(UN<>'');
-    if RepeatRequest then
+    writeln('Authorization required !');
+    if Length(H)>1 then
     begin
-      write('Enter password: ');
-      readln(PW);
-      TFPHTTPClient(Sender).UserName:=UN;
-      TFPHTTPClient(Sender).Password:=PW;
+      writeln('Remote site says: ',H);
+      writeln('Enter username (empty quits): ');
+      readln(UN);
+      RepeatRequest:=(UN<>'');
+      if RepeatRequest then
+      begin
+        writeln('Enter password: ');
+        readln(PW);
+        TFPHTTPClient(Sender).UserName:=UN;
+        TFPHTTPClient(Sender).Password:=PW;
+      end;
     end;
-
   end;
 end;
 
@@ -2613,7 +2638,7 @@ begin
 
   With TProcess.Create(Self) do
   try
-    CommandLine:=WGETBinary+' -q --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
+    CommandLine:=WGETBinary+' -q --no-check-certificate --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
     Options:=[poUsePipes,poNoConsole];
     Execute;
     while Running do
@@ -2912,10 +2937,15 @@ var
   Output:string;
 begin
   result:=false;
-  if (NOT FWGETOk) then exit;
+
+  if (NOT FWGETOk) then
+  begin
+    infoln('No wget binary found: donwload will fail !!', etDebug);
+    exit;
+  end;
 
   Output:='';
-  result:=(ExecuteCommand(WGETBinary+' --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
+  result:=(ExecuteCommand(WGETBinary+' --no-check-certificate --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
   if result then
   begin
     result:=(Pos('Remote file exists',Output)>0);
@@ -2924,6 +2954,7 @@ begin
   begin
     // on github, we get a 403 forbidden for an existing file !!
     result:=(Pos('github',Output)>0) AND (Pos('403 Forbidden',Output)>0);
+    if (NOT result) then result:=(Pos('https://',Output)>0) AND (Pos('401 Unauthorized',Output)>0)
   end;
 end;
 

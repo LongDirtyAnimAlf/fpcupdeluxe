@@ -269,12 +269,12 @@ end;
 
 procedure alternateui_set_FPCtarget_btn;
 begin
-  tbcbutton(Form1.FindComponent(Control_FPC_Select_Button)).Caption:=Lang_FPC_target+slinebreak+Form1.ListBoxFPCTarget.Items.Strings[Form1.ListBoxFPCTarget.ItemIndex];
+  if (Form1.ListBoxFPCTarget.ItemIndex<>-1) then tbcbutton(Form1.FindComponent(Control_FPC_Select_Button)).Caption:=Lang_FPC_target+slinebreak+Form1.ListBoxFPCTarget.Items.Strings[Form1.ListBoxFPCTarget.ItemIndex];
 end;
 
 procedure alternateui_set_LAZtarget_btn;
 begin
-  tbcbutton(Form1.FindComponent(Control_LAZ_Select_Button)).Caption:=Lang_laz_target+slinebreak+Form1.ListBoxLazarusTarget.Items.Strings[Form1.ListBoxLazarusTarget.ItemIndex];
+  if (Form1.ListBoxLazarusTarget.ItemIndex<>-1) then tbcbutton(Form1.FindComponent(Control_LAZ_Select_Button)).Caption:=Lang_laz_target+slinebreak+Form1.ListBoxLazarusTarget.Items.Strings[Form1.ListBoxLazarusTarget.ItemIndex];
 end;
 
 procedure alternateui_set_OSTarget_btn;

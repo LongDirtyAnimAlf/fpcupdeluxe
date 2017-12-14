@@ -65,7 +65,7 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog -dDEBUG -dusealternateui"/>
+            <CustomOptions Value="-dDEBUG -dusealternateui"/>
           </Other>
         </CompilerOptions>
       </Item2>

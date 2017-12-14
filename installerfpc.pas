@@ -1922,6 +1922,7 @@ begin
             {$endif CPUARMHF}
             s:=s+'-'+GetTargetOS;
             {$ifdef FREEBSD}
+            j:=GetFreeBSDVersion;
             s:=s+'11'; // version 11 only for now
             {$endif FREEBSD}
 
@@ -1930,8 +1931,16 @@ begin
               'fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+'-'+GetCompilerName(GetTargetCPU);
 
             infoln(localinfotext+'Checking existence of: '+aFPCUPBootstrapURL,etDebug);
-
             aFPCUPCompilerFound:=aDownLoader.checkURL(aFPCUPBootstrapURL);
+
+            if NOT aFPCUPCompilerFound then
+            begin
+              // also try the privately hosted repo of fpcupdeluxe for locations where GitHub is blocked.
+              aFPCUPBootstrapURL:=FPCUPPRIVATEGITREPO+
+                '/fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+'-'+GetCompilerName(GetTargetCPU);
+              infoln(localinfotext+'Checking existence of: '+aFPCUPBootstrapURL,etDebug);
+              aFPCUPCompilerFound:=aDownLoader.checkURL(aFPCUPBootstrapURL);
+            end;
 
             if aFPCUPCompilerFound then
             begin
@@ -1960,6 +1969,7 @@ begin
               {$endif CPUARMHF}
               s:=s+'-'+GetTargetOS;
               {$ifdef FREEBSD}
+              j:=GetFreeBSDVersion;
               s:=s+'11'; // version 11 only for now
               {$endif FREEBSD}
               if Pos(s+'-'+GetCompilerName(GetTargetCPU),aCompilerList[i])>0 then
@@ -1985,6 +1995,7 @@ begin
         begin
           if FBootstrapCompilerURL='' then
           begin
+            aCompilerFound:=true;
             infoln(localinfotext+'Got a bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
             FBootstrapCompilerURL := aFPCUPBootstrapURL;
             // set standard bootstrap compilername
@@ -1994,6 +2005,7 @@ begin
           begin
             if GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) then
             begin
+              aCompilerFound:=true;
               infoln(localinfotext+'Got a better [version] bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
               aLocalBootstrapVersion:=aLocalFPCUPBootstrapVersion;
               FBootstrapCompilerURL:=aFPCUPBootstrapURL;
