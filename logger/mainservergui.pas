@@ -42,7 +42,7 @@ begin
   TSynLogTestLog := TSQLLog; // share the same log file with whole mORMot
   {$endif}
   DataServer := TDataServer.Create(ExtractFilePath(paramstr(0))+'data');
-  HTTPServer := TSQLHttpServer.Create(InttoStr(PORT_DEFAULT),[DataServer]);
+  HTTPServer := TSQLHttpServer.Create(InttoStr(PORT_DEFAULT),[DataServer],'+',useHttpSocket);
   {$ifdef WITHLOG}
   TSQLLog.Family.EchoToConsole := LOG_VERBOSE;
   {$endif}

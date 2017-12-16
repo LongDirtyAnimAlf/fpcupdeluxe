@@ -22,7 +22,7 @@
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="serverbin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="bin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="mORMot;$(ProjOutDir)"/>
@@ -63,7 +63,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="serverbin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+      <Filename Value="bin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="mORMot;$(ProjOutDir)"/>

@@ -45,7 +45,7 @@
     <Version Value="11"/>
     <PathDelim Value="\"/>
     <Target>
-      <Filename Value="serverbin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+      <Filename Value="bin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir);mORMot"/>
@@ -68,8 +68,6 @@
     <Linking>
       <Debugging>
         <UseHeaptrc Value="True"/>
-        <StripSymbols Value="True"/>
-        <UseExternalDbgSyms Value="True"/>
       </Debugging>
       <Options>
         <Win32>
