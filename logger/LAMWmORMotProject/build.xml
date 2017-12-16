@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="LAMWmORMotProject" default="help">
+  <property name="java.target" value="1.7"/>
+  <property name="java.source" value="1.7"/>
+  <property name="sdk.dir" location="C:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-sdk-windows\"/>
+  <property name="target" value="android-21"/>
+  <property file="ant.properties"/>
+  <fail message="sdk.dir is missing." unless="sdk.dir"/>
+  <!-- Tags required to enable conditional compilation in java sources -->
+  <property name="src.dir" location=".\src\org\mormot\lamwmormotproject\"/>
+  <property name="source.dir" value="${src.dir}/${target}"/>
+  <import file="${sdk.dir}/tools/ant/build.xml"/>
+  <!-- API version properties, modify according to your API level -->
+  <property name="api10" value="true"/>
+  <property name="api11" value="true"/>
+  <property name="api12" value="true"/>
+  <property name="api13" value="true"/>
+  <property name="api14" value="true"/>
+  <property name="api15" value="true"/>
+  <property name="api16" value="true"/>
+  <property name="api17" value="true"/>
+  <property name="api18" value="true"/>
+  <property name="api19" value="true"/>
+  <property name="api20" value="true"/>
+  <property name="api21" value="true"/>
+  <property name="api22" value="false"/>
+  <property name="api23" value="false"/>
+  <property name="api24" value="false"/>
+  <property name="api25" value="false"/>
+  <!-- API conditions, do not modify -->
+  <condition property="ifdef_api10up" value="/*">
+    <equals arg1="${api10}" arg2="false"/>
+  </condition>
+  <condition property="endif_api10up" value="*/">
+    <equals arg1="${api10}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api10up" value=""/>
+  <property name="endif_api10up" value=""/>
+  <condition property="ifdef_api11up" value="/*">
+    <equals arg1="${api11}" arg2="false"/>
+  </condition>
+  <condition property="endif_api11up" value="*/">
+    <equals arg1="${api11}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api11up" value=""/>
+  <property name="endif_api11up" value=""/>
+  <condition property="ifdef_api12up" value="/*">
+    <equals arg1="${api12}" arg2="false"/>
+  </condition>
+  <condition property="endif_api12up" value="*/">
+    <equals arg1="${api12}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api12up" value=""/>
+  <property name="endif_api12up" value=""/>
+  <condition property="ifdef_api13up" value="/*">
+    <equals arg1="${api13}" arg2="false"/>
+  </condition>
+  <condition property="endif_api13up" value="*/">
+    <equals arg1="${api13}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api13up" value=""/>
+  <property name="endif_api13up" value=""/>
+  <condition property="ifdef_api14up" value="/*">
+    <equals arg1="${api14}" arg2="false"/>
+  </condition>
+  <condition property="endif_api14up" value="*/">
+    <equals arg1="${api14}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api14up" value=""/>
+  <property name="endif_api14up" value=""/>
+  <condition property="ifdef_api15up" value="/*">
+    <equals arg1="${api15}" arg2="false"/>
+  </condition>
+  <condition property="endif_api15up" value="*/">
+    <equals arg1="${api15}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api15up" value=""/>
+  <property name="endif_api15up" value=""/>
+  <condition property="ifdef_api16up" value="/*">
+    <equals arg1="${api16}" arg2="false"/>
+  </condition>
+  <condition property="endif_api16up" value="*/">
+    <equals arg1="${api16}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api16up" value=""/>
+  <property name="endif_api16up" value=""/>
+  <condition property="ifdef_api17up" value="/*">
+    <equals arg1="${api17}" arg2="false"/>
+  </condition>
+  <condition property="endif_api17up" value="*/">
+    <equals arg1="${api17}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api17up" value=""/>
+  <property name="endif_api17up" value=""/>
+  <condition property="ifdef_api18up" value="/*">
+    <equals arg1="${api18}" arg2="false"/>
+  </condition>
+  <condition property="endif_api18up" value="*/">
+    <equals arg1="${api18}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api18up" value=""/>
+  <property name="endif_api18up" value=""/>
+  <condition property="ifdef_api19up" value="/*">
+    <equals arg1="${api19}" arg2="false"/>
+  </condition>
+  <condition property="endif_api19up" value="*/">
+    <equals arg1="${api19}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api19up" value=""/>
+  <property name="endif_api19up" value=""/>
+  <condition property="ifdef_api20up" value="/*">
+    <equals arg1="${api20}" arg2="false"/>
+  </condition>
+  <condition property="endif_api20up" value="*/">
+    <equals arg1="${api20}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api20up" value=""/>
+  <property name="endif_api20up" value=""/>
+  <condition property="ifdef_api21up" value="/*">
+    <equals arg1="${api21}" arg2="false"/>
+  </condition>
+  <condition property="endif_api21up" value="*/">
+    <equals arg1="${api21}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api21up" value=""/>
+  <property name="endif_api21up" value=""/>
+  <condition property="ifdef_api22up" value="/*">
+    <equals arg1="${api22}" arg2="false"/>
+  </condition>
+  <condition property="endif_api22up" value="*/">
+    <equals arg1="${api22}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api22up" value=""/>
+  <property name="endif_api22up" value=""/>
+  <condition property="ifdef_api23up" value="/*">
+    <equals arg1="${api23}" arg2="false"/>
+  </condition>
+  <condition property="endif_api23up" value="*/">
+    <equals arg1="${api23}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api23up" value=""/>
+  <property name="endif_api23up" value=""/>
+  <condition property="ifdef_api24up" value="/*">
+    <equals arg1="${api24}" arg2="false"/>
+  </condition>
+  <condition property="endif_api24up" value="*/">
+    <equals arg1="${api24}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api24up" value=""/>
+  <property name="endif_api24up" value=""/>
+  <condition property="ifdef_api25up" value="/*">
+    <equals arg1="${api25}" arg2="false"/>
+  </condition>
+  <condition property="endif_api25up" value="*/">
+    <equals arg1="${api25}" arg2="false"/>
+  </condition>
+  <property name="ifdef_api25up" value=""/>
+  <property name="endif_api25up" value=""/>
+  <!-- Copy & filter java sources for defined Android target, do not modify -->
+  <copy todir="${src.dir}/${target}">
+    <fileset dir="${src.dir}">
+      <include name="*.java"/>
+    </fileset>
+    <filterset begintoken="//[" endtoken="]">
+      <filter token="ifdef_api10up" value="${ifdef_api10up}"/>
+      <filter token="endif_api10up" value="${endif_api10up}"/>
+      <filter token="ifdef_api11up" value="${ifdef_api11up}"/>
+      <filter token="endif_api11up" value="${endif_api11up}"/>
+      <filter token="ifdef_api12up" value="${ifdef_api12up}"/>
+      <filter token="endif_api12up" value="${endif_api12up}"/>
+      <filter token="ifdef_api13up" value="${ifdef_api13up}"/>
+      <filter token="endif_api13up" value="${endif_api13up}"/>
+      <filter token="ifdef_api14up" value="${ifdef_api14up}"/>
+      <filter token="endif_api14up" value="${endif_api14up}"/>
+      <filter token="ifdef_api15up" value="${ifdef_api15up}"/>
+      <filter token="endif_api15up" value="${endif_api15up}"/>
+      <filter token="ifdef_api16up" value="${ifdef_api16up}"/>
+      <filter token="endif_api16up" value="${endif_api16up}"/>
+      <filter token="ifdef_api17up" value="${ifdef_api17up}"/>
+      <filter token="endif_api17up" value="${endif_api17up}"/>
+      <filter token="ifdef_api18up" value="${ifdef_api18up}"/>
+      <filter token="endif_api18up" value="${endif_api18up}"/>
+      <filter token="ifdef_api19up" value="${ifdef_api19up}"/>
+      <filter token="endif_api19up" value="${endif_api19up}"/>
+      <filter token="ifdef_api20up" value="${ifdef_api20up}"/>
+      <filter token="endif_api20up" value="${endif_api20up}"/>
+      <filter token="ifdef_api21up" value="${ifdef_api21up}"/>
+      <filter token="endif_api21up" value="${endif_api21up}"/>
+      <filter token="ifdef_api22up" value="${ifdef_api22up}"/>
+      <filter token="endif_api22up" value="${endif_api22up}"/>
+      <filter token="ifdef_api23up" value="${ifdef_api23up}"/>
+      <filter token="endif_api23up" value="${endif_api23up}"/>
+      <filter token="ifdef_api24up" value="${ifdef_api24up}"/>
+      <filter token="endif_api24up" value="${endif_api24up}"/>
+      <filter token="ifdef_api25up" value="${ifdef_api25up}"/>
+      <filter token="endif_api25up" value="${endif_api25up}"/>
+    </filterset>
+  </copy>
+</project>

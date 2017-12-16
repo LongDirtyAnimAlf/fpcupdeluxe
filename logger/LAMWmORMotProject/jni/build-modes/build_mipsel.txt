@@ -1,0 +1,3 @@
+<Libraries Value="C:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-ndk-r10e\platforms\android-15\arch-mips\usr\lib;C:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-ndk-r10e\toolchains\mipsel-linux-android-4.9\prebuilt\windows\lib\gcc\mipsel-linux-android\4.9"/>
+<TargetCPU Value="mipsel"/>
+<CustomOptions Value="-Xd -XPmipsel-linux-android- -FDC:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-ndk-r10e\toolchains\mipsel-linux-android-4.9\prebuilt\windows\bin"/>

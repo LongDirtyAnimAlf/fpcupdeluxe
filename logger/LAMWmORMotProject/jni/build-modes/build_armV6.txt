@@ -1,0 +1,3 @@
+<Libraries Value="C:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-ndk-r10e\platforms\android-15\arch-arm\usr\lib;C:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-ndk-r10e\toolchains\arm-linux-androideabi-4.9\prebuilt\windows\lib\gcc\arm-linux-androideabi\4.9"/>
+<TargetCPU Value="arm"/>
+<CustomOptions Value="-Xd -CfVFPv3 -CpARMV6 -XParm-linux-androideabi- -FDC:\Users\Public\Documents\Embarcadero\Studio\17.0\PlatformSDKs\android-ndk-r10e\toolchains\arm-linux-androideabi-4.9\prebuilt\windows\bin"/>

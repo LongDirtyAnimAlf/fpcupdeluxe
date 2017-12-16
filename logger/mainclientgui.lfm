@@ -11,53 +11,33 @@ object Form1: TForm1
   LCLVersion = '1.9.0.0'
   object btnConnect: TButton
     Left = 7
-    Height = 53
+    Height = 32
     Top = 8
-    Width = 137
+    Width = 791
     Caption = 'Connect'
     OnClick = btnConnectClick
     TabOrder = 0
   end
-  object mmoQuery: TMemo
-    Left = 7
-    Height = 346
-    Top = 128
-    Width = 137
-    Anchors = [akTop, akLeft, akBottom]
-    Lines.Strings = (
-      'SELECT * FROM Up;'
-    )
-    TabOrder = 1
-  end
   object DrawGrid1: TDrawGrid
-    Left = 153
+    Left = 7
     Height = 313
-    Top = 10
-    Width = 645
+    Top = 48
+    Width = 791
     AlternateColor = clDefault
     Anchors = [akTop, akLeft, akRight, akBottom]
     ExtendedSelect = False
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goThumbTracking, goSmoothScroll]
     PopupMenu = PopupMenu1
-    TabOrder = 2
-  end
-  object btnExecuteSQL: TButton
-    Left = 6
-    Height = 32
-    Top = 75
-    Width = 138
-    Caption = 'Execute SQL'
-    OnClick = btnExecuteSQLClick
-    TabOrder = 3
+    TabOrder = 1
   end
   object Memo1: TMemo
-    Left = 153
-    Height = 143
-    Top = 331
-    Width = 645
+    Left = 7
+    Height = 106
+    Top = 368
+    Width = 791
     Anchors = [akLeft, akRight, akBottom]
     ScrollBars = ssAutoVertical
-    TabOrder = 4
+    TabOrder = 2
   end
   object PopupMenu1: TPopupMenu
     Left = 147

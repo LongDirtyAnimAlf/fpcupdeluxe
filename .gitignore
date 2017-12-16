@@ -58,7 +58,7 @@ Temporary Items
 *.bak
 *.local
 
-secrets.inc
+logger/secrets.inc
 
 *.log
 libfpcup/
@@ -67,12 +67,14 @@ libfpclazupdeluxe/
 backup/
 icons/
 bin/
-serverbin/
-mORMot/
-!mORMot/place_your_mormot_source_here.txt
+logger/mORMot/
+!logger/mORMot/place_your_mormot_source_here.txt
+logger/LAMWmORMotProject/src/
+logger/LAMWmORMotProject/obj/
+logger/LAMWmORMotProject/lamwdesigner/
+logger/LAMWmORMotProject/gen/
 crosstools/
 bootstrappers/
 deluxebin/
-deluxebinqt/
 lib/
 lib*/

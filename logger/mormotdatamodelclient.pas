@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  variants,fphttpclient;
+  dateutils,variants,fphttpclient;
 
 constructor TDataClient.Create;
 var
@@ -123,7 +123,7 @@ begin
   if Connected then
   begin
     ClientGetInfo;
-    FUpInfo.DateOfUse:=Now;
+    FUpInfo.DateOfUse:=LocalTimeToUniversal(Now);
     Add(FUpInfo,True);
   end;
 end;

@@ -1729,7 +1729,7 @@ begin
       else
       if (FPCupManager.CrossOS_Target='darwin') then
       begin
-        FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 ';
+        FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
       end
       else
       begin
