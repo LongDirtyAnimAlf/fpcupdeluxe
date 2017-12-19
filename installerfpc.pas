@@ -579,7 +579,7 @@ begin
         Processor.Executable := Make;
         Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
-        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
         Processor.Parameters.Add('FPC='+ChosenCompiler);
         Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
@@ -801,7 +801,7 @@ begin
         Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
         infoln(infotext+'Running Make crossinstall (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')', etinfo);
-        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
         Processor.Parameters.Add('FPC='+ChosenCompiler);
         Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
@@ -984,7 +984,7 @@ begin
   FErrorLog.Clear;
   Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
-  if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+  if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   Processor.Parameters.Add('FPC='+FCompiler);
   Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
   {$IFDEF DEBUG}
@@ -1053,7 +1053,7 @@ begin
     if Processor.ExitStatus <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Error running make failed with exit code '+inttostr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, infotext+'Error running make failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
@@ -2256,7 +2256,7 @@ begin
         Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
         Processor.Parameters.Clear;
         Processor.Parameters.Add('clean');
-        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
         Processor.Parameters.Add('FPC='+FCompiler);
         Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
 
@@ -2347,7 +2347,7 @@ begin
           begin
             Processor.Parameters.Add('DATA2INC=echo');
           end;
-          if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+          if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
           Processor.Parameters.Add('FPC='+FCompiler);
           Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
 
@@ -2426,7 +2426,7 @@ begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
       Processor.Parameters.Add('compiler_cycle');
-      if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Parameters.Add('FPC='+FCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Parameters.Add('OS_SOURCE=win32');
@@ -2459,7 +2459,7 @@ begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
       Processor.Parameters.Add('compiler_cycle');
-      if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Parameters.Add('FPC='+FCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
@@ -2576,7 +2576,7 @@ begin
       if Processor.ExitStatus <> 0 then
       begin
         OperationSucceeded := False;
-        WritelnLog(etError, infotext+'Running fpcmkcfg failed with exit code '+inttostr(Processor.ExitStatus),true);
+        WritelnLog(etError, infotext+'Running fpcmkcfg failed with exit code '+IntToStr(Processor.ExitStatus),true);
       end;
 
       // if, for one reason or another, there is no cfg file, create a minimal one by ourselves
@@ -2752,7 +2752,7 @@ begin
       Processor.Executable := Make;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
-      if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+      if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Parameters.Add('FPC='+FCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
@@ -2850,41 +2850,13 @@ end;
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
   BeforeRevision: string;
-  PatchFilePath:string;
-  Output: string = '';
-  LocalPatchCmd : string;
   UpdateWarnings: TStringList;
-  ReturnCode,i: integer;
-  //MakefileSL:TStringList;
-  DiffFileSL:TStringList;
   aRepoClient:TRepoClient;
 begin
   result:=inherited;
   result:=InitModule;
-  if not result then exit;
 
-  {
-  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile') then
-  begin
-    // try to prevent the building o the FPC IDE
-    // reset makefile
-    MakefileSL:=TStringList.Create;
-    MakefileSL.TextLineBreakStyle:=tlbsLF;
-    //DefaultTextLineBreakStyle
-    //sLineBreak
-    //MakefileSL.SkipLastLineBreak:=;
-    try
-      MakefileSL.LoadFromFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile');
-      for i:=0 to Pred(MakefileSL.Count) do
-      begin
-        if MakefileSL.Strings[i]='# FPCUPCHANGE IDE=1' then MakefileSL.Strings[i]:='IDE=1';
-      end;
-      MakefileSL.SaveToFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile');
-    finally
-      MakefileSL.free;
-    end;
-  end;
-  }
+  if not result then exit;
 
   // not so elegant check to see what kind of client we need ...
   if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) )
@@ -2916,103 +2888,10 @@ begin
       infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
   end;
 
-  {
-  if result AND FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile') then
-  begin
-    // try to prevent the building o the FPC IDE
-    MakefileSL:=TStringList.Create;
-    MakefileSL.TextLineBreakStyle:=tlbsLF;
-    try
-      MakefileSL.LoadFromFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile');
-      for i:=0 to Pred(MakefileSL.Count) do
-      begin
-        if MakefileSL.Strings[i]='IDE=1' then MakefileSL.Strings[i]:='# FPCUPCHANGE IDE=1';
-      end;
-      MakefileSL.SaveToFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile');
-    finally
-      MakefileSL.free;
-    end;
-  end;
-  }
-
   if (NOT Result) then
     infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
 
-  if result then
-  begin
-    if Length(FSourcePatches)>0 then
-    begin
-      UpdateWarnings:=TStringList.Create;
-      try
-        UpdateWarnings.CommaText := FSourcePatches;
-        for i:=0 to (UpdateWarnings.Count-1) do
-        begin
-          infoln(infotext+'Trying to patch ' + ModuleName + ' with '+UpdateWarnings[i],etInfo);
-          PatchFilePath:=SafeExpandFileName(UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
-          if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+UpdateWarnings[i]);
-          if FileExists(PatchFilePath) then
-          begin
-            // check for default values
-            if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-              {$IF defined(BSD) and not defined(DARWIN)}
-              then LocalPatchCmd:=FPatchCmd + ' -p0 -N -i '
-              {$else}
-              then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
-              {$endif}
-               else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-            {$IFDEF MSWINDOWS}
-            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
-            {$ELSE}
-            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
-            {$ENDIF}
-
-            if ReturnCode<>0 then
-            begin
-              // Patching can go wrong when line endings are not compatible
-              // Try to circumvent this problem by trick below (replacing line enddings)
-              if Pos('different line endings',Output)>0 then
-              begin
-                DiffFileSL:=TStringList.Create();
-                try
-                  {$IFDEF MSWINDOWS}
-                  DiffFileSL.TextLineBreakStyle:=tlbsLF;
-                  {$ELSE}
-                  DiffFileSL.TextLineBreakStyle:=tlbsCRLF;
-                  {$ENDIF}
-                  DiffFileSL.LoadFromFile(PatchFilePath);
-                  DiffFileSL.TextLineBreakStyle:=DefaultTextLineBreakStyle;
-                  DiffFileSL.SaveToFile(PatchFilePath);
-                finally
-                  DiffFileSL.Free();
-                end;
-                {$IFDEF MSWINDOWS}
-                ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
-                {$ELSE}
-                ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFilePath, FSourceDirectory, Output, True);
-                {$ENDIF}
-              end;
-            end;
-
-            if ReturnCode=0
-               then infoln(infotext+ModuleName + ' has been patched successfully with '+UpdateWarnings[i],etInfo)
-               else
-               begin
-                 writelnlog(etError, infotext+ModuleName+' Patching ' + ModuleName + ' with ' + UpdateWarnings[i] + ' failed.', true);
-                 writelnlog(infotext+ModuleName+' patch output: ' + Output, true);
-               end;
-          end
-          else
-          begin
-            infoln(infotext+'Strange: could not find patchfile '+PatchFilePath, etWarning);
-            writelnlog(etError, infotext+'Patching ' + ModuleName + ' with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
-          end;
-        end;
-      finally
-        UpdateWarnings.Free;
-      end;
-    end;
-  end;
+  if result then PatchModule(ModuleName);
 end;
 
 function TFPCInstaller.CheckModule(ModuleName: string): boolean;
@@ -3026,6 +2905,7 @@ function TFPCInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   result:=inherited;
   result:=InitModule;
+
   if not result then exit;
 
   //sanity check

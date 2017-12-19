@@ -943,9 +943,9 @@ begin
   if Verbose then
     if GetWin32Version(Major,Minor,Build) then
     begin
-      infoln('Windows major version: '+inttostr(Major),etInfo);
-      infoln('Windows minor version: '+inttostr(Minor),etInfo);
-      infoln('Windows build number:  '+inttostr(Build),etInfo);
+      infoln('Windows major version: '+IntToStr(Major),etInfo);
+      infoln('Windows minor version: '+IntToStr(Minor),etInfo);
+      infoln('Windows build number:  '+IntToStr(Build),etInfo);
     end
     else
       infoln('Could not retrieve Windows version using GetWin32Version.',etWarning);
@@ -1604,7 +1604,7 @@ begin
   begin
     // todo: add translation of instr
     result:=result+
-      'Instruction number: '+inttostr(ord(FStateMachine[i].instr))+' '+
+      'Instruction number: '+IntToStr(ord(FStateMachine[i].instr))+' '+
       FStateMachine[i].param;
     if i<High(FStateMachine) then
       result:=result+LineEnding;

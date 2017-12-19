@@ -763,7 +763,7 @@ begin
         BuildResult:=Processor.ExitStatus;
         if BuildResult <> 0 then
         begin
-          writelnlog(etError,ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+inttostr(BuildResult), true);
+          writelnlog(etError,ModuleName+': error creating chm help docs. build_lcl_docs exit status: '+IntToStr(BuildResult), true);
           OperationSucceeded := False;
         end;
       end;

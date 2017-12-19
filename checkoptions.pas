@@ -495,7 +495,7 @@ begin
       if FInstaller.HTTPProxyHost<>'' then
       begin
         writeln('HTTP proxy host:  '+FInstaller.HTTPProxyHost);
-        writeln('HTTP proxy port:  '+inttostr(FInstaller.HTTPProxyPort));
+        writeln('HTTP proxy port:  '+IntToStr(FInstaller.HTTPProxyPort));
         writeln('HTTP proxy user:  '+FInstaller.HTTPProxyUser);
         writeln('HTTP proxy pass:  <SECURITY:REDACTED>');
       end;

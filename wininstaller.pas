@@ -247,7 +247,7 @@ begin
   if Processor.ExitStatus <> 0 then
   begin
     result := False;
-    WritelnLog(ClassName+': Failed to create installer; '+Processor.Executable+' returned '+inttostr(Processor.ExitStatus)+LineEnding+
+    WritelnLog(ClassName+': Failed to create installer; '+Processor.Executable+' returned '+IntToStr(Processor.ExitStatus)+LineEnding+
       'Installer log at '+IncludeTrailingPathDelimiter(InstallerBatchDir)+'installer.log',true);
   end
   else

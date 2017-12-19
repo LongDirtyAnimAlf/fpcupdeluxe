@@ -597,7 +597,7 @@ begin
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
     {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: exit status: '+inttostr(Result));
+    writeln('ExecuteCommandInDir: exit status: '+IntToStr(Result));
     {$ENDIF DEBUGCONSOLE}
   finally
     PE.Free;
@@ -623,7 +623,7 @@ begin
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
     {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: exit status: '+inttostr(Result));
+    writeln('ExecuteCommandInDir: exit status: '+IntToStr(Result));
     {$ENDIF DEBUGCONSOLE}
   finally
     PE.Free;

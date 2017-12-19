@@ -922,7 +922,7 @@ begin
   begin
     result:='--config-option servers:global:http-proxy-host='+FHTTPProxyHost;
     if FHTTPProxyPort<>0 then
-      result:=result+' --config-option servers:global:http-proxy-port='+inttostr(FHTTPProxyPort);
+      result:=result+' --config-option servers:global:http-proxy-port='+IntToStr(FHTTPProxyPort);
     if FHTTPProxyUser<>'' then
       result:=result+' --config-option servers:global:http-proxy-username='+FHTTPProxyUser;
     if FHTTPProxyPassword<>'' then

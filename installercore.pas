@@ -97,7 +97,7 @@ type
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
   protected
-    FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) itself
+    FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
     FCompiler: string; // Compiler executable
@@ -239,7 +239,7 @@ type
     // URL for download. HTTP, ftp or svn
     property URL: string write SetURL;
     // patches
-    property SourcePatches: string read FSourcePatches write FSourcePatches;
+    property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;
@@ -268,6 +268,8 @@ type
     function GetModule(ModuleName: string): boolean; virtual;
     // Perform some checks on the sources
     function CheckModule(ModuleName: string): boolean; virtual;
+    // Patch sources
+    function PatchModule(ModuleName: string): boolean; virtual;
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
     constructor Create;
@@ -1285,7 +1287,7 @@ begin
 
       if not Result then
       begin
-        writelnlog(localinfotext+'SVN gave error code: '+inttostr(CheckoutOrUpdateReturnCode));
+        writelnlog(localinfotext+'SVN gave error code: '+IntToStr(CheckoutOrUpdateReturnCode));
         writelnlog(localinfotext+'SVN gave error message: '+FSVNClient.ReturnOutput);
       end;
 
@@ -1815,18 +1817,21 @@ begin
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
 end;
+
 function TInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=false;
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
 end;
+
 function TInstaller.ConfigModule(ModuleName: string): boolean;
 begin
   result:=false;
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (ConfigModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
 end;
+
 function TInstaller.GetModule(ModuleName: string): boolean;
 begin
   result:=false;
@@ -1896,6 +1901,154 @@ begin
     end;
   end;
 end;
+
+function TInstaller.PatchModule(ModuleName: string): boolean;
+var
+  PatchList:TStringList;
+  PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
+  LocalPatchCmd:string;
+  Output: string = '';
+  ReturnCode,i,j: integer;
+  LocalSourcePatches:string;
+  PatchFPC:boolean;
+  {$ifndef FPCONLY}
+  PatchLaz:boolean;
+  {$endif}
+begin
+  result:=false;
+
+  PatchFPC:=(UpperCase(ModuleName)='FPC');
+  {$ifndef FPCONLY}
+  PatchLaz:=(UpperCase(ModuleName)='LAZARUS');
+  {$endif}
+
+  if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc' else
+     {$ifndef FPCONLY}
+     if PatchLaz then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchlazarus' else
+     {$endif}
+        PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpcup';
+
+  // always remove the previous patches when updating the source !!!
+  if (DirectoryExists(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
+
+  LocalSourcePatches:=FSourcePatches;
+
+  if resourcefiles.Count>0 then
+  begin
+    for i:=0 to resourcefiles.Count-1 do
+    begin
+      PatchFilePath:=resourcefiles[i];
+      if PatchFPC then j:=Pos('_FPCPATCH',PatchFilePath) else
+         {$ifndef FPCONLY}
+         if PatchLaz then j:=Pos('_LAZPATCH',PatchFilePath) else
+         {$endif}
+            j:=Pos('_FPCUPPATCH',PatchFilePath);
+
+      {$if defined(Darwin) and defined(LCLQT5)}
+      {$else}
+      if PatchFilePath='DARWINQT5HACK_LAZPATCH' then j:=0;
+      {$endif}
+
+      {$if NOT defined(MSWINDOWS)}
+      if PatchFilePath='OPENSSL_FPCPATCH' then j:=0;
+      {$endif}
+
+      if j>0 then
+      begin
+        if (NOT DirectoryExists(PatchDirectory)) then ForceDirectories(PatchDirectory);
+        SaveFileFromResource(PatchDirectory+DirectorySeparator+PatchFilePath+'.patch',resourcefiles[i]);
+      end;
+    end;
+  end;
+
+  if (DirectoryExists(PatchDirectory)) then
+  begin
+    PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
+    try
+      if (PatchList.Count>0) then
+      begin
+        //add standard patches by fpcup(deluxe)
+        LocalSourcePatches:=LocalSourcePatches+','+PatchList.CommaText;
+      end;
+    finally
+      PatchList.Free;
+    end;
+  end;
+
+  if Length(LocalSourcePatches)>0 then
+  begin
+    PatchList:=TStringList.Create;
+    try
+      PatchList.CommaText := LocalSourcePatches;
+      for i:=0 to (PatchList.Count-1) do
+      begin
+        infoln(infotext+'Trying to patch ' + ModuleName + ' with '+PatchList[i],etInfo);
+        PatchFilePath:=SafeExpandFileName(PatchList[i]);
+        if NOT FileExists(PatchFilePath) then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+PatchList[i]);
+        if NOT FileExists(PatchFilePath) then
+        begin
+          if PatchFPC then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpc'+DirectorySeparator+PatchList[i])
+             {$ifndef FPCONLY}
+             else if PatchLaz then PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+PatchList[i])
+             {$endif}
+                else PatchFilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchfpcup'+DirectorySeparator+PatchList[i]);
+        end;
+        if FileExists(PatchFilePath) then
+        begin
+          // check for default values
+          if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
+            {$IF defined(BSD) and not defined(DARWIN)}
+            then LocalPatchCmd:=FPatchCmd + ' -p0 -N -i '
+            {$else}
+            then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
+            {$endif}
+             else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
+
+          // always correct for line-endings while patch is very sensitive for that
+          PatchFileCorrectedPath:=SysUtils.GetTempDir+ExtractFileName(PatchFilePath);
+          if FileCorrectLineEndings(PatchFilePath,PatchFileCorrectedPath) then
+          begin
+            // revert to original file in case of file not found
+            if (NOT FileExists(PatchFileCorrectedPath)) then PatchFileCorrectedPath:=PatchFilePath;
+            {$IFDEF MSWINDOWS}
+            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, Output, True);
+            {$ELSE}
+            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, Output, True);
+            {$ENDIF}
+            // remove the temporary file
+            if (PatchFileCorrectedPath<>PatchFilePath) then DeleteFile(PatchFileCorrectedPath);
+            if ReturnCode=0  then
+            begin
+              result:=true;
+              infoln(infotext+ModuleName + ' has been patched successfully with '+PatchList[i],etInfo);
+            end
+            else
+            begin
+              result:=false;
+              writelnlog(etError, infotext+ModuleName+' Patching ' + ModuleName + ' with ' + PatchList[i] + ' failed.', true);
+              writelnlog(infotext+ModuleName+' patch output: ' + Output, true);
+            end;
+          end;
+        end
+        else
+        begin
+          result:=false;
+          infoln(infotext+'Strange: could not find patchfile '+PatchFilePath, etWarning);
+          writelnlog(etError, infotext+'Patching ' + ModuleName + ' with ' + PatchList[i] + ' failed due to missing patch file.', true);
+        end;
+      end;
+    finally
+      PatchList.Free;
+    end;
+  end
+  else
+  begin
+    result:=true;
+    infoln(infotext+'No ' + ModuleName + ' patches defined.',etInfo);
+  end;
+end;
+
+
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   result:=false;

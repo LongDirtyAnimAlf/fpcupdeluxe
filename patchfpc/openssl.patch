@@ -1,0 +1,22 @@
+Index: packages/openssl/src/openssl.pas
+===================================================================
+--- packages/openssl/src/openssl.pas	(revision 37752)
++++ packages/openssl/src/openssl.pas	(working copy)
+@@ -4747,6 +4747,17 @@
+   {$IFDEF MSWINDOWS}
+   if (SSLLibHandle = 0) then
+     SSLLibHandle := LoadLib(DLLSSLName2);
++  {$IFDEF CPU32}
++  if (SSLUtilHandle = 0) then
++    SSLUtilHandle := LoadLib('libcrypto-1_1.dll');
++  if (SSLLibHandle = 0) then
++    SSLLibHandle := LoadLib('libssl-1_1.dll');
++  {$ELSE}
++  if (SSLUtilHandle = 0) then
++    SSLUtilHandle := LoadLib('libcrypto-1_1-x64.dll');
++  if (SSLLibHandle = 0) then
++    SSLLibHandle := LoadLib('libssl-1_1-x64.dll');
++  {$ENDIF}
+   {$ELSE MSWINDOWS}
+    {$IFDEF OS2}
+   if (SSLUtilHandle = 0) then

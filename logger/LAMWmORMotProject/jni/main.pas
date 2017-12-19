@@ -16,16 +16,22 @@ type
 
   TAndroidModule1 = class(jForm)
     jButton1: jButton;
+    jEditText1: jEditText;
     jListView1: jListView;
+    jScrollView1: jScrollView;
     procedure AndroidModule1Create(Sender: TObject);
     procedure AndroidModule1Destroy(Sender: TObject);
+    procedure AndroidModule1JNIPrompt(Sender: TObject);
     procedure jButton1Click(Sender: TObject);
+    procedure jListView1ClickItem(Sender: TObject; itemIndex: integer;
+      itemCaption: string);
   private
     {private declarations}
     aModel:TSQLModel;
     aClient:TSQLHttpClient;
     FConnected:boolean;
     aDataRecord:TSQLUp;
+    procedure GetRowData(aRow: integer);
     procedure ShowData;
   public
     {public declarations}
@@ -37,7 +43,6 @@ var
 implementation
   
 {$R *.lfm}
-
 
 { TAndroidModule1 }
 
@@ -58,6 +63,29 @@ begin
   ShowData;
 end;
 
+procedure TAndroidModule1.jListView1ClickItem(Sender: TObject;
+  itemIndex: integer; itemCaption: string);
+begin
+  GetRowData(itemIndex+1);
+end;
+
+procedure TAndroidModule1.GetRowData(aRow: integer);
+begin
+  jEditText1.DispatchOnChangedEvent(False);
+  jScrollView1.SmoothScrollTo(0,0);
+  if (aRow=0) OR (aRow>aDataRecord.FillTable.RowCount) then
+  begin
+    jEditText1.Text:='';
+  end
+  else
+  begin
+    aDataRecord.FillRow(aRow);
+    jEditText1.Text:=aDataRecord.LogEntry;
+  end;
+  jEditText1.DispatchOnChangedEvent(True);
+end;
+
+
 procedure TAndroidModule1.AndroidModule1Create(Sender: TObject);
 begin
   FConnected:=false;
@@ -72,6 +100,11 @@ begin
   FreeAndNil(aModel);
 end;
 
+procedure TAndroidModule1.AndroidModule1JNIPrompt(Sender: TObject);
+begin
+  jEditText1.Clear;
+end;
+
 procedure TAndroidModule1.ShowData;
 var
   aSQL:RawUTF8;
@@ -82,6 +115,7 @@ begin
     jListView1.Refresh;
     jListView1.UpdateLayout;
     jListView1.Clear;
+    GetRowData(0);
 
     aSQL:=FormatUTF8('DateOfUse > ?',[],[DateToSQL(Now-5)]); // show only last 5 days
 
@@ -93,10 +127,11 @@ begin
       if FillRewind then
       begin
         ShowMessage('Got some data from server');
+        GetRowData(1);
         while FillOne do
         begin
           s:=LogEntry;
-          if s<>'Success !' then s:='Install failure';
+          if s<>'Success !' then s:='Install failure: click for details.';
           jListView1.Add(
           UpVersion+
           '('+

@@ -144,7 +144,7 @@ type
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
     constructor Create;
-    destructor Destroy; virtual;
+    destructor Destroy; override;
   end;
 
 

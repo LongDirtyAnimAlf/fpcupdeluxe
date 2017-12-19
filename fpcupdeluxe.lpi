@@ -13,12 +13,14 @@
         <DpiAware Value="Per-monitor"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="5">
+      <Resources Count="7">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="applicationbundle.pas" Type="RCDATA" ResourceName="APPLICATIONBUNDLE"/>
         <Resource_4 FileName="debugmanager.pas" Type="RCDATA" ResourceName="DEBUGMANAGER"/>
+        <Resource_5 FileName="patchfpc\openssl.patch" Type="RCDATA" ResourceName="OPENSSL_FPCPATCH"/>
+        <Resource_6 FileName="patchlazarus\darwinqt5hack.patch" Type="RCDATA" ResourceName="DARWINQT5HACK_LAZPATCH"/>
       </Resources>
     </General>
     <i18n>

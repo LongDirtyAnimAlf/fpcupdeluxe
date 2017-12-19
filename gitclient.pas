@@ -499,7 +499,7 @@ begin
   if FHTTPProxyHost<>'' then
   begin
     s:=FHTTPProxyHost;
-    if FHTTPProxyPort<>0 then s:=s+':'+inttostr(FHTTPProxyPort);
+    if FHTTPProxyPort<>0 then s:=s+':'+IntToStr(FHTTPProxyPort);
     if FHTTPProxyUser<>'' then
     begin
       s:='@'+s;

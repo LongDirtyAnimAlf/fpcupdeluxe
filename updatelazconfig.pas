@@ -466,11 +466,11 @@ begin
             Version:='';
             if FLazarusMajorVer<>-1 then
             begin
-              Version:=Version+inttostr(FLazarusMajorVer);
+              Version:=Version+IntToStr(FLazarusMajorVer);
               if FLazarusMinor<>-1 then
               begin
-                Version:=Version+'.'+inttostr(FLazarusMinor);
-                if FLazarusRelease<>-1 then Version:=Version+'.'+inttostr(FLazarusRelease);
+                Version:=Version+'.'+IntToStr(FLazarusMinor);
+                if FLazarusRelease<>-1 then Version:=Version+'.'+IntToStr(FLazarusRelease);
               end;
             end;
             // If we don't add these, we trigger an upgrade process on first start on Lazarus 1.1+.

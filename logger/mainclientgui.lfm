@@ -14,8 +14,16 @@ object Form1: TForm1
     Height = 32
     Top = 8
     Width = 791
+    Anchors = [akTop, akLeft, akRight]
     Caption = 'Connect'
+    Font.CharSet = ANSI_CHARSET
+    Font.Height = -21
+    Font.Name = 'Arial'
+    Font.Pitch = fpVariable
+    Font.Quality = fqDraft
+    Font.Style = [fsBold]
     OnClick = btnConnectClick
+    ParentFont = False
     TabOrder = 0
   end
   object DrawGrid1: TDrawGrid
@@ -25,9 +33,12 @@ object Form1: TForm1
     Width = 791
     AlternateColor = clDefault
     Anchors = [akTop, akLeft, akRight, akBottom]
+    ColCount = 1
     ExtendedSelect = False
+    FixedRows = 0
     Options = [goFixedVertLine, goFixedHorzLine, goVertLine, goHorzLine, goThumbTracking, goSmoothScroll]
     PopupMenu = PopupMenu1
+    RowCount = 1
     TabOrder = 1
   end
   object Memo1: TMemo

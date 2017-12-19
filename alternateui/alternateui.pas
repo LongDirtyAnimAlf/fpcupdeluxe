@@ -213,9 +213,9 @@ end;
 
 Function alternateui_IntToString(AInt:Integer):ShortString;
 begin
-  if AInt<10 then result:='00'+inttostr(aInt)
-  else if AInt<100 then result:='0'+inttostr(aInt)
-  else result:=inttostr(aint);
+  if AInt<10 then result:='00'+IntToStr(aInt)
+  else if AInt<100 then result:='0'+IntToStr(aInt)
+  else result:=IntToStr(aint);
 end;
 
 procedure alternateui_animate_panel(na:shortstring;fade_up:boolean);

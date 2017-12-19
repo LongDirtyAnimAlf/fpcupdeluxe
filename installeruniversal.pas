@@ -1012,7 +1012,7 @@ var
       while k>0 do
         begin //replace # with current count
         delete(key,k,1);
-        insert(inttostr(count),key,k);
+        insert(IntToStr(count),key,k);
         k:=pos('#',key);
         end;
       LazarusConfig.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))));

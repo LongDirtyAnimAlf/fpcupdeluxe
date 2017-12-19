@@ -1,6 +1,6 @@
 object AndroidModule1: TAndroidModule1
-  Left = 511
-  Top = 176
+  Left = 485
+  Top = 195
   Width = 320
   Height = 400
   MarginLeft = 0
@@ -14,18 +14,19 @@ object AndroidModule1: TAndroidModule1
   ActivityMode = actMain
   BackgroundColor = colbrDefault
   ActionBarTitle = abtDefault
+  OnJNIPrompt = AndroidModule1JNIPrompt
   object jListView1: jListView
-    Left = 0
-    Top = 0
-    Width = 320
-    Height = 340
-    MarginLeft = 0
-    MarginTop = 0
-    MarginRight = 0
-    MarginBottom = 0
+    Left = 5
+    Top = 5
+    Width = 310
+    Height = 234
+    MarginLeft = 5
+    MarginTop = 5
+    MarginRight = 5
+    MarginBottom = 5
     Enabled = True
     Visible = True
-    Anchor = jButton1
+    Anchor = jScrollView1
     Id = 1
     PosRelativeToAnchor = [raAbove]
     PosRelativeToParent = []
@@ -45,6 +46,7 @@ object AndroidModule1: TAndroidModule1
     ItemPaddingTop = 40
     ItemPaddingBottom = 40
     WidgetTextColor = colbrDefault
+    OnClickItem = jListView1ClickItem
   end
   object jButton1: jButton
     Left = 5
@@ -68,5 +70,60 @@ object AndroidModule1: TAndroidModule1
     FontSize = 0
     FontSizeUnit = unitDefault
     OnClick = jButton1Click
+  end
+  object jScrollView1: jScrollView
+    Left = 5
+    Top = 249
+    Width = 310
+    Height = 86
+    MarginLeft = 5
+    MarginTop = 5
+    MarginRight = 5
+    MarginBottom = 5
+    Enabled = True
+    Visible = True
+    Anchor = jButton1
+    Id = 3
+    PosRelativeToAnchor = [raAbove]
+    PosRelativeToParent = []
+    LayoutParamWidth = lpMatchParent
+    LayoutParamHeight = lpOneQuarterOfParent
+    FillViewportEnabled = False
+    ScrollSize = 500
+    BackgroundColor = colbrDefault
+    object jEditText1: jEditText
+      Left = 5
+      Top = 5
+      Width = 300
+      Height = 76
+      MarginLeft = 5
+      MarginTop = 5
+      MarginRight = 5
+      MarginBottom = 5
+      Enabled = True
+      Visible = True
+      Id = 4
+      PosRelativeToAnchor = []
+      PosRelativeToParent = []
+      LayoutParamWidth = lpMatchParent
+      LayoutParamHeight = lpMatchParent
+      Text = 'jEditText1'
+      Alignment = taLeft
+      InputTypeEx = itxMultiLine
+      MaxTextLength = 500
+      BackgroundColor = colbrDefault
+      FontColor = colbrDefault
+      FontSize = 0
+      HintTextColor = colbrDefault
+      ScrollBarStyle = scrNone
+      MaxLines = 500
+      HorScrollBar = False
+      VerScrollBar = False
+      WrappingLine = True
+      Editable = False
+      FontSizeUnit = unitDefault
+      CloseSoftInputOnEnter = True
+      CapSentence = False
+    end
   end
 end

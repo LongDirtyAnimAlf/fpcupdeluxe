@@ -386,7 +386,7 @@ function THGClient.GetProxyCommand: string;
 begin
   if FHTTPProxyHost<>'' then
   begin
-    result:='--config http_proxy.host='+FHTTPProxyHost+':'+inttostr(FHTTPProxyPort);
+    result:='--config http_proxy.host='+FHTTPProxyHost+':'+IntToStr(FHTTPProxyPort);
     if FHTTPProxyUser<>'' then
       result:=result+' --config http_proxy.user='+FHTTPProxyUser;
     if FHTTPProxyPassword<>'' then

@@ -268,7 +268,7 @@ begin
         Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
         {$IFDEF lazarus_parallel_make}
-        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
         {$ENDIF}
         Processor.Parameters.Add('FPC=' + FCompiler);
         Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -424,7 +424,7 @@ begin
     Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     Processor.Parameters.Clear;
     {$IFDEF lazarus_parallel_make}
-    if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+    if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
     {$ENDIF}
     Processor.Parameters.Add('FPC=' + FCompiler);
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -1160,7 +1160,7 @@ begin
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
   {$IFDEF lazarus_parallel_make}
-  if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+inttostr(FCPUCount));
+  if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   {$ENDIF}
   Processor.Parameters.Add('FPC=' + FCompiler + '');
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
@@ -1354,19 +1354,13 @@ const
 var
   AfterRevision: string;
   BeforeRevision: string;
-  Counter: integer;
-  Errors: integer;
   UpdateWarnings: TStringList;
-  FilePath:string;
-  LocalPatchCmd:string;
-  Output: string = '';
-  ReturnCode,i: integer;
   RevisionIncText: Text;
   ConstStart: string;
   aRepoClient:TRepoClient;
   {$ifdef Darwin}
   {$ifdef LCLQT5}
-  fs:TMemoryStream;
+  FilePath:string;
   {$endif}
   {$endif}
 begin
@@ -1477,43 +1471,6 @@ begin
   if DirCopy(FilePath+'/Contents/Plugins',ExcludeTrailingPathDelimiter(FSourceDirectory)+'/startlazarus.app/Contents/Plugins')
     then infoln(infotext+'Adding QT5 libqcocoa.dylib success.',etInfo)
     else infoln(infotext+'Adding QT5 libqcocoa.dylib failure.',etError);
-
-  // Replace applicationbundle.pas with a version that adds the necessary files into the app-bundle
-  // This is dirty
-  fs:=TMemoryStream.Create;
-  try
-    with TResourceStream.Create(hInstance, 'APPLICATIONBUNDLE', RT_RCDATA) do
-    try
-      Savetostream(fs);
-    finally
-      Free;
-    end;
-    fs.Position:=0;
-    SysUtils.DeleteFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/applicationbundle.pas');
-    if (NOT FileExists(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/applicationbundle.pas')) then
-       fs.SaveToFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/applicationbundle.pas');
-  finally
-    fs.Free;
-  end;
-
-  // Replace debugmanager.pas with a version that always creates the app-bundle
-  // This is very dirty
-  fs:=TMemoryStream.Create;
-  try
-    with TResourceStream.Create(hInstance, 'DEBUGMANAGER', RT_RCDATA) do
-    try
-      Savetostream(fs);
-    finally
-      Free;
-    end;
-    fs.Position:=0;
-    SysUtils.DeleteFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/debugmanager.pas');
-    if (NOT FileExists(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/debugmanager.pas')) then
-       fs.SaveToFile(ExcludeTrailingPathDelimiter(FSourceDirectory)+'/ide/debugmanager.pas');
-  finally
-    fs.Free;
-  end;
-
   {$endif}
   {$endif}
 
@@ -1555,55 +1512,7 @@ begin
   end;
   *)
 
-  if result then
-  begin
-    if Length(FSourcePatches)>0 then
-    begin
-      infoln(infotext+'Found Lazarus patch file(s).',etInfo);
-      UpdateWarnings:=TStringList.Create;
-      try
-        UpdateWarnings.CommaText := FSourcePatches;
-        for i:=0 to (UpdateWarnings.Count-1) do
-        begin
-          infoln(infotext+'Trying to patch Lazarus with '+UpdateWarnings[i],etInfo);
-          FilePath:=SafeExpandFileName(UpdateWarnings[i]);
-          if NOT FileExists(FilePath) then FilePath:=SafeExpandFileName(SafeGetApplicationPath+UpdateWarnings[i]);
-          if NOT FileExists(FilePath) then FilePath:=SafeExpandFileName(SafeGetApplicationPath+'patchlazarus'+DirectorySeparator+UpdateWarnings[i]);
-          if FileExists(FilePath) then
-          begin
-            // check for default values
-            if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-              {$IF defined(BSD) and not defined(DARWIN)}
-              then LocalPatchCmd:=FPatchCmd + ' -p0 -N -i '
-              {$else}
-              then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
-              {$endif}
-               else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-            {$IFDEF MSWINDOWS}
-            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + FilePath, FSourceDirectory, Output, True);
-            {$ELSE}
-            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + FilePath, FSourceDirectory, Output, True);
-            {$ENDIF}
-            if ReturnCode=0
-               then infoln(infotext+'Lazarus has been patched successfully with '+UpdateWarnings[i],etInfo)
-               else
-               begin
-                 writelnlog(infotext+'ERROR: Patching Lazarus with ' + UpdateWarnings[i] + ' failed.', true);
-                 writelnlog(infotext+'Patch output: ' + Output, true);
-               end;
-          end
-          else
-          begin
-            infoln(infotext+'Strange: could not find patchfile '+FilePath, etWarning);
-            writelnlog(etError, infotext+'Patching Lazarus with ' + UpdateWarnings[i] + ' failed due to missing patch file.', true);
-          end;
-        end;
-      finally
-        UpdateWarnings.Free;
-      end;
-    end else infoln(infotext+'No Lazarus patches defined.',etInfo);
-  end;
-
+  if result then PatchModule(ModuleName);
 end;
 
 function TLazarusInstaller.CheckModule(ModuleName: string): boolean;

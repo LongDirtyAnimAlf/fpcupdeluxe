@@ -231,10 +231,10 @@ begin
   x2 := value and $FFFF;
   y1 := x1 div $100;
   y2 := x1 mod $100;
-  Result := inttostr(y1) + '.' + inttostr(y2) + '.';
+  Result := IntToStr(y1) + '.' + IntToStr(y2) + '.';
   y1 := x2 div $100;
   y2 := x2 mod $100;
-  Result := Result + inttostr(y1) + '.' + inttostr(y2);
+  Result := Result + IntToStr(y1) + '.' + IntToStr(y2);
 end;
 
 {==============================================================================}

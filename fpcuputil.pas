@@ -285,6 +285,8 @@ function GetLocalAppDataPath: string;
 procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
+// Correct line-endings
+function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
 // Like ExpandFilenameUTF8 but does not expand an empty string to current directory
@@ -293,6 +295,7 @@ function SafeExpandFileNameUTF8 (Const FileName : String): String;
 function SafeGetApplicationName: String;
 // Get application path
 function SafeGetApplicationPath: String;
+function SaveFileFromResource(filename,resourcename:string):boolean;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
 // to application directory
 function SaveInisFromResource(filename,resourcename:string):boolean;
@@ -326,6 +329,9 @@ function GetTargetCPUOS:string;
 function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
 function GetDistro:string;
 function GetFreeBSDVersion:byte;
+
+var
+  resourcefiles:TStringList;
 
 implementation
 
@@ -364,7 +370,6 @@ const
   //USERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)';
   CURLUSERAGENT='curl/7.51.0';
 
-
 function GetStringFromBuffer(const field:PChar):string;
 begin
   if ( field <> nil ) then
@@ -374,6 +379,40 @@ begin
     UniqueString(result);
     SetLength(result,strlen(field));
   end else result:='';
+end;
+
+function ResNameProc({%H-}ModuleHandle : TFPResourceHMODULE; {%H-}ResourceType, ResourceName : PChar; {%H-}lParam : PtrInt) : LongBool; stdcall;
+var
+  aName:string;
+begin
+  if Assigned(resourcefiles) then
+  begin
+    if Is_IntResource(ResourceName)
+       then aName:=InttoStr({%H-}PtrUInt(ResourceName))
+       else aName:=GetStringFromBuffer(ResourceName);
+    resourcefiles.Append(aName);
+  end;
+  Result:=true;
+end;
+
+function ResTypeProc(ModuleHandle : TFPResourceHMODULE; ResourceType : PChar; lParam : PtrInt) : LongBool; stdcall;
+var
+  aType:string;
+  RT:integer;
+begin
+  if Is_IntResource(ResourceType) then RT:={%H-}PtrUInt(ResourceType) else
+  begin
+    aType:=GetStringFromBuffer(ResourceType);
+    RT:=StrToIntDef(aType,0);
+  end;
+  // get only the plain files (resource type 10)
+  if RT=10 then EnumResourceNames(ModuleHandle,ResourceType,@ResNameProc,lParam);
+  Result:=true;
+end;
+
+procedure DoEnumResources;
+begin
+  EnumResourceTypes(HINSTANCE,@ResTypeProc,0);
 end;
 
 {$ifdef mswindows}
@@ -514,6 +553,32 @@ begin
  result:=AppendPathDelim(result);
 end;
 
+function SaveFileFromResource(filename,resourcename:string):boolean;
+var
+  fs:Tfilestream;
+begin
+  result:=false;
+  try
+    if FileExists(filename) then SysUtils.DeleteFile(filename);
+    with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
+    try
+      try
+        fs:=Tfilestream.Create(filename,fmCreate);
+        Savetostream(fs);
+      finally
+        fs.Free;
+      end;
+    finally
+      Free;
+    end;
+    result:=FileExists(filename);
+  except
+    on E: Exception do
+      infoln('File from resource creation error: '+E.Message,etError);
+  end;
+end;
+
+
 function SaveInisFromResource(filename,resourcename:string):boolean;
 var
   fs:Tfilestream;
@@ -527,22 +592,10 @@ begin
   try
     if NOT FileExists(filename) then
     begin
-      // create inifile
-      with TResourceStream.Create(hInstance, resourcename, RT_RCDATA) do
-      try
-        try
-          fs:=Tfilestream.Create(filename,fmCreate);
-          Savetostream(fs);
-        finally
-          fs.Free;
-        end;
-      finally
-        Free;
-      end;
+      result:=SaveFileFromResource(filename,resourcename);
     end
     else
     begin
-
       // create memory stream of resource
       ms:=TMemoryStream.Create;
       try
@@ -883,19 +936,19 @@ begin
         begin
           // Directory; exit with failure on error
           if not DeleteDirectoryEx(CurFilename) then
-            begin
+          begin
             FindCloseUTF8(FileInfo);
             exit;
-            end;
+          end;
         end
         else
         begin
           // File; exit with failure on error
           if not DeleteFileUTF8(CurFilename) then
-            begin
+          begin
             FindCloseUTF8(FileInfo);
             exit;
-            end;
+          end;
         end;
       end;
     until FindNextUTF8(FileInfo)<>0;
@@ -1199,9 +1252,9 @@ function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // We might (in theory) be moving files across partitions so we cannot use renamefile
 begin
   try
-    if FileExistsUTF8(SrcFileName) then
+    if FileExists(SrcFileName) then
     begin
-      if FileUtil.CopyFile(SrcFilename, DestFileName) then Sysutils.DeleteFile(SrcFileName);
+      if FileUtil.CopyFile(SrcFilename, DestFileName) then SysUtils.DeleteFile(SrcFileName);
       result:=true;
     end
     else
@@ -1211,6 +1264,28 @@ begin
     end;
   except
     result:=false;
+  end;
+end;
+
+function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
+var
+  FileSL:TStringList;
+begin
+  result:=false;
+  try
+    if FileExists(SrcFileName) then
+    begin
+      FileSL:=TStringList.Create;
+      try
+        FileSL.LoadFromFile(SrcFileName);
+        SysUtils.DeleteFile(DestFilename);
+        FileSL.SaveToFile(DestFilename);
+        result:=true;
+      finally
+        FileSL.Free;
+      end;
+    end;
+  except
   end;
 end;
 
@@ -2994,6 +3069,13 @@ end;
 
 
 {$ENDIF ENABLEWGET}
+
+initialization
+  resourcefiles:=TStringList.Create;
+  DoEnumResources;
+
+finalization
+  resourcefiles.Free;
 
 end.
 

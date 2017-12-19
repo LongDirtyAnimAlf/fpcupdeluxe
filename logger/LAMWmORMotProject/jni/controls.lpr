@@ -427,7 +427,19 @@ begin
     ), position, widgetText);
 end;
 
-const NativeMethods: array[0..45] of JNINativeMethod = (
+{ Class:     org_mormot_lamwmormotproject_Controls
+  Method:    pOnScrollViewChanged
+  Signature: (JIIIIII)V }
+procedure pOnScrollViewChanged(PEnv: PJNIEnv; this: JObject; pasobj: JLong;
+  currenthorizontal: JInt; currentVertical: JInt; previousHorizontal: JInt;
+  previousVertical: JInt; onPosition: JInt; scrolldiff: JInt); cdecl;
+begin
+  Java_Event_pOnScrollViewChanged(PEnv, this, TObject(pasobj),
+    currenthorizontal, currentVertical, previousHorizontal, previousVertical,
+    onPosition, scrolldiff);
+end;
+
+const NativeMethods: array[0..46] of JNINativeMethod = (
    (name: 'pAppOnCreate';
     signature: '(Landroid/content/Context;Landroid/widget/RelativeLayout;'
       +'Landroid/content/Intent;)V';
@@ -566,7 +578,10 @@ const NativeMethods: array[0..45] of JNINativeMethod = (
     fnPtr: @pOnListViewDrawItemWidgetTextColor; ),
    (name: 'pOnListViewDrawItemWidgetImage';
     signature: '(JILjava/lang/String;)Landroid/graphics/Bitmap;';
-    fnPtr: @pOnListViewDrawItemWidgetImage; )
+    fnPtr: @pOnListViewDrawItemWidgetImage; ),
+   (name: 'pOnScrollViewChanged';
+    signature: '(JIIIIII)V';
+    fnPtr: @pOnScrollViewChanged; )
 );
 
 function RegisterNativeMethodsArray(PEnv: PJNIEnv; className: PChar;
@@ -699,7 +714,9 @@ exports
   pOnListViewDrawItemWidgetTextColor name 'Java_org_mormot_lamwmormotproject_'
     +'Controls_pOnListViewDrawItemWidgetTextColor',
   pOnListViewDrawItemWidgetImage name 'Java_org_mormot_lamwmormotproject_'
-    +'Controls_pOnListViewDrawItemWidgetImage';
+    +'Controls_pOnListViewDrawItemWidgetImage',
+  pOnScrollViewChanged name 'Java_org_mormot_lamwmormotproject_Controls_'
+    +'pOnScrollViewChanged';
 
 {%endregion}
   
