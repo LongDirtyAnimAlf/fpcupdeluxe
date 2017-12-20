@@ -319,7 +319,7 @@ function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
-function DoubleQuoteIfNeeded(FileName: string): string;
+function DoubleQuoteIfNeeded(s: string): string;
 function GetNumericalVersion(aVersion: string): word;
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
@@ -1692,17 +1692,10 @@ begin
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
 
-function DoubleQuoteIfNeeded(FileName: string): string;
+function DoubleQuoteIfNeeded(s: string): string;
 begin
-  {$IFDEF MSWINDOWS}
-  // Unfortunately, we need to double quote in case there's spaces in the path and it's e.g. a .cmd file
-  result:=Trim(FileName);
-  if Pos(' ',result)>0 then
-  //if Copy(FileName, 1, 1) <> '"' then
-     Result := '"' + Result + '"';
-  {$ELSE}
-  Result := filename;
-  {$ENDIF}
+  result:=Trim(s);
+  if (Pos(' ',result)<>0) AND (Pos('"',result)=0) then result:='"'+result+'"';
 end;
 
 function GetNumericalVersion(aVersion: string): word;

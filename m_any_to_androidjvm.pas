@@ -52,7 +52,7 @@ Tany_androidjvm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
-  function GetLibs(Basepath:string):boolean;override;
+  function GetLibs({%H-}Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;

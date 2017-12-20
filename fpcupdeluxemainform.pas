@@ -109,7 +109,7 @@ type
     function AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
-    procedure DisEnable(Sender: TObject;value:boolean);
+    procedure DisEnable({%H-}Sender: TObject;value:boolean);
     procedure Edit1Change(Sender: TObject);
     procedure PrepareRun;
     function RealRun:boolean;
@@ -387,8 +387,6 @@ begin
 end;
 
 procedure TForm1.RealURLDblClick(Sender: TObject);
-var
-  aEdit:TEdit;
 begin
   TEdit(Sender).Color:=clRed;
   TEdit(Sender).ReadOnly:=false;

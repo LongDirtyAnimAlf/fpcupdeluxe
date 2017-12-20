@@ -318,7 +318,7 @@ procedure RemoveStaleBuildDirectories(aBaseDir,aCPU,aOS:string);
 var
   OldPath:string;
   FileInfo: TSearchRec;
-  DeleteList:TStringList;
+  //DeleteList:TStringList;
   aArch:string;
 begin
 
@@ -1443,6 +1443,7 @@ var
   FPCCompiler:String;
   {$ENDIF UNIX}
 begin
+  result:=true;
   {$IFDEF UNIX}
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateFPCScript): ';
   FPCCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt;

@@ -192,7 +192,7 @@ type
     // Get processor for termination of running processes
     property Processor: TProcessEx read FProcessEx;
     // Get processerrors and put them into FErrorLog
-    procedure ProcessError(Sender:TProcessEx;IsException:boolean);
+    procedure ProcessError(Sender:TProcessEx; {%H-}IsException:boolean);
     // Source directory for installation (fpcdir, lazdir,... option)
     property SourceDirectory: string write FSourceDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
@@ -1186,7 +1186,9 @@ var
   RepoExists: boolean;
   LocalPatchCmd : string;
   Output: string = '';
+  {$IFNDEF MSWINDOWS}
   DiffFileSL:TStringList;
+  {$ENDIF}
 begin
   result:=true;
 

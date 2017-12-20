@@ -1473,7 +1473,21 @@ begin
       FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
     else
       FInstaller.Compiler:=FParent.CompilerName;
+
+    if Length(Trim(FParent.LazarusOPT))=0 then
+    begin
+      //defaults !!
+      {$IFDEF Darwin}
+      FParent.LazarusOPT:='-gw -gl -godwarfsets -gh -gt -Co -Ci -Sa';
+      {$ELSE}
+      FParent.LazarusOPT:='-gw -gl -godwarfsets -gh -gt -Co -Cr -Ci -Sa';
+      {$ENDIF}
+    end
+    else
+      // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
+      FParent.LazarusOPT:=StringReplace(FParent.LazarusOPT,'-g ','-gw ',[]);
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
+
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;
     FInstaller.DesiredBranch:=FParent.LazarusDesiredBranch;
     // CrossLCL_Platform is only used when building LCL, but the Lazarus module
@@ -1773,7 +1787,10 @@ end;
 
 function TSequencer.Run(SequenceName: string): boolean;
 var
-  EntryPoint,InstructionPointer:integer;
+  {$IFDEF DEBUG}
+  EntryPoint:integer;
+  {$ENDIF DEBUG}
+  InstructionPointer:integer;
   idx:integer;
   SeqAttr:^TSequenceAttributes;
   localinfotext:string;
@@ -1826,7 +1843,9 @@ begin
       end;
     // Get entry point in FStateMachine
     InstructionPointer:=SeqAttr^.EntryPoint;
+    {$IFDEF DEBUG}
     EntryPoint:=InstructionPointer;
+    {$ENDIF DEBUG}
     // run sequence until end or failure
     while true do
     begin

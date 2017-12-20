@@ -317,7 +317,7 @@ begin
         // Quiet:=ConsoleVerbosity<=-3;
         Processor.Parameters.Add('--quiet');
         {$ENDIF}
-        Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
+        Processor.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
 
         // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
         // So, use this test to prevent a rebuild !!!
@@ -407,7 +407,6 @@ var
   i,j,ExitCode: integer;
   LazBuildApp: string;
   OperationSucceeded: boolean;
-  sCmpOpt: string;
   NothingToBeDone:boolean;
   LazarusConfig: TUpdateLazConfig;
 begin
@@ -433,11 +432,7 @@ begin
     Processor.Parameters.Add('FPCDIR=' + FFPCSourceDir); //Make sure our FPC units can be found by Lazarus
     Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
-    // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
-    sCmpOpt:=StringReplace(FCompilerOptions,'-g ','-gw ',[]);
-    sCmpOpt:=StringReplace(sCmpOpt,'  ',' ',[rfReplaceAll]);
-    sCmpOpt:=Trim(sCmpOpt);
-    Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + sCmpOpt);
+    Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + FCompilerOptions);
 
     case UpperCase(ModuleName) of
       'IDE':
@@ -527,7 +522,7 @@ begin
       if FCrossLCL_Platform<>'' then Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
     end;
     try
-      writelnlog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+      WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
       Processor.Execute;
       ExitCode := Processor.ExitStatus;
       if ExitCode <> 0 then
@@ -550,7 +545,7 @@ begin
     begin
       if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt, '--help', 'lazbuild') = false then
       begin
-        writelnlog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
+        WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
         Result := false;
         exit;
       end;
@@ -568,7 +563,7 @@ begin
     LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
     if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
     begin
-      writelnlog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
+      WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
       Result := false;
       exit;
     end
@@ -586,7 +581,7 @@ begin
       // Quiet:=ConsoleVerbosity<=-3;
       Processor.Parameters.Add('--quiet');
       {$ENDIF}
-      Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
+      Processor.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
       Processor.Parameters.Add('--cpu=' + GetTargetCPU);
       Processor.Parameters.Add('--os=' + GetTargetOS);
 
@@ -596,7 +591,7 @@ begin
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
       // Assume new Laz version on failure getting revision
-      if strtointdef(Revision, 38971) >= 38971 then
+      if StrToIntDef(Revision, 38971) >= 38971 then
       begin
         Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FCompilerOptions);
       end
@@ -605,8 +600,8 @@ begin
         // Fallback - depends on hardcoded "Normal IDE" build mode being present
         // We can specify a build mode; otherwise probably the latest build mode will be used
         // which could well be a stripped IDE
-        // Let's see how/if FCompilerOptions clashes with the settings in normal build mode
-        writelnlog(infotext+'LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
+        // Let's see how/if CompilerOptions clashes with the settings in normal build mode
+        WritelnLog(infotext+'LazBuild: building UserIDE but falling back to --build-mode="Normal IDE"', true);
         Processor.Parameters.Add('--build-ide= ' + FCompilerOptions);
         Processor.Parameters.Add('--build-mode="Normal IDE"');
       end;
@@ -616,11 +611,11 @@ begin
       begin
         infoln(infotext+'Running lazbuild to get IDE with user-specified packages', etInfo);
         try
-          writelnlog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+          WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
           Processor.Execute;
           if Processor.ExitStatus <> 0 then
           begin
-            writelnlog(etError, infotext+ExtractFileName(Processor.Executable)+' returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
+            WritelnLog(etError, infotext+ExtractFileName(Processor.Executable)+' returned error code ' + IntToStr(Processor.ExitStatus) + LineEnding +
               'Details: ' + FErrorLog.Text, true);
             OperationSucceeded := false;
           end;
@@ -751,15 +746,15 @@ begin
           {$ELSE}
           Processor.Parameters.Add('--quiet');
           {$ENDIF}
-          Processor.Parameters.Add('--pcp=' + FPrimaryConfigPath);
+          Processor.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FPrimaryConfigPath));
           Processor.Parameters.Add('--cpu=' + GetTargetCPU);
           Processor.Parameters.Add('--os=' + GetTargetOS);
 
           if FCrossLCL_Platform <> '' then
             Processor.Parameters.Add('--ws=' + FCrossLCL_Platform);
 
-          Processor.Parameters.Add(IncludeTrailingPathDelimiter(FSourceDirectory)+
-            'ide'+DirectorySeparator+'startlazarus.lpi');
+          Processor.Parameters.Add(DoubleQuoteIfNeeded(IncludeTrailingPathDelimiter(FSourceDirectory)+
+            'ide'+DirectorySeparator+'startlazarus.lpi'));
 
           infoln(infotext+'Compiling startlazarus to make sure it is present:', etInfo);
           try

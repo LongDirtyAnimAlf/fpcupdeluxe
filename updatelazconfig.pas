@@ -68,7 +68,8 @@ I now get InPath="C:\development\fpcbootstrap\ppc386.exe" instead of the fpc\bin
 interface
 
 uses
-  Classes, SysUtils, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
+  Classes, SysUtils, Laz_XMLCfg, Laz2_DOM, Laz2_XMLRead, Laz2_XMLWrite;
+
 const
   // Some fixed configuration files.
   // General options:
@@ -175,7 +176,7 @@ procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig
 implementation
 
 uses
-  FileUtil, LazFileUtils, LazUTF8, math, installercore, fpcuputil;
+  FileUtil, LazFileUtils, LazUTF8, fpcuputil;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var
@@ -269,7 +270,7 @@ begin
   AttrName:='';
   Node:=Doc.FindNode('CONFIG');
   while assigned(Node) and (pos('/',APath)>0) do //walk in tree until no more /
-    begin
+  begin
     NodeName:=copy(APath,1,pos('/',APath)-1);
     Delete(APath,1,length(NodeName)+1);
     Parent:=Node;
@@ -279,12 +280,12 @@ begin
       Node:=Doc.CreateElement(NodeName);
       Parent.AppendChild(Node);
       end;
-    end;
+  end;
   if assigned(Node) then
-    begin
+  begin
     AttrName:=APath;
     result:=Node;
-    end;
+  end;
 end;
 
 function TConfig.GetValue(const APath, ADefault: String): String;

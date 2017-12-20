@@ -19,9 +19,9 @@ type
     FileLabel: TLabel;
   private
   public
-    procedure DoOnZipProgress(Sender: TObject; Pct: double);
-    procedure DoOnZipFile(Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
-    procedure DoOnZipCompleted(Sender: TObject);
+    procedure DoOnZipProgress({%H-}Sender: TObject; Pct: double);
+    procedure DoOnZipFile({%H-}Sender: TObject; aFile: string; FileCnt, TotalFileCnt:cardinal);
+    procedure DoOnZipCompleted({%H-}Sender: TObject);
   end;
 
 var

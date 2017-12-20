@@ -910,8 +910,6 @@ begin
 end;
 
 function THelpLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
-var
-  LazarusConfig: TUpdateLazConfig;
 begin
   Result:=inherited UnInstallModule(ModuleName);
   // Removing config not needed anymore since we use the default

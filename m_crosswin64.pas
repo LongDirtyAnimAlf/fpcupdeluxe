@@ -44,7 +44,7 @@ TWin64 = class(TCrossInstaller)
 private
 
 public
-  function GetLibs(Basepath:string):boolean;override;
+  function GetLibs({%H-}Basepath:string):boolean;override;
   function GetBinUtils(Basepath:string):boolean;override;
   constructor Create;
   destructor Destroy; override;

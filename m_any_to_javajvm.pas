@@ -56,7 +56,7 @@ Tany_javajvm = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
-  function GetLibs(Basepath:string):boolean;override;
+  function GetLibs({%H-}Basepath:string):boolean;override;
   {$ifndef FPCONLY}
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
   {$endif}

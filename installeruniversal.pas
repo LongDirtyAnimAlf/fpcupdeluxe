@@ -95,7 +95,6 @@ type
     // For now Windows-only; could be extended to generic cross platform installer class once this works
     function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
     {$ENDIF MSWINDOWS}
-    function FirstSpaceAfterCommand(CommandLine: string): integer;
     // Get a value for a key=value pair. Case-insensitive for keys. Expands macros in values.
     function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
@@ -170,7 +169,7 @@ Const
   MAXSYSMODULES=200;
   MAXUSERMODULES=20;
   // Allow enough instructions per module:
-  MAXINSTRUCTIONS=200;
+  MAXINSTRUCTIONS=255;
   MAXRECURSIONS=10;
 
 var
@@ -254,11 +253,11 @@ begin
         // so strip them out if they are there.
         if macro='BASEDIR' then
           macro:=ExcludeTrailingPathDelimiter(FBaseDirectory)
-        else if macro='FPCDIR' then //$(FPCDIR)
+        else if macro='FPCDIR' then
           macro:=ExcludeTrailingPathDelimiter(FFPCDir)
-        else if macro='FPCBINDIR' then //$(FPCBINDIR)
+        else if macro='FPCBINDIR' then
             macro:=ExcludeTrailingPathDelimiter(FBinPath)
-        else if macro='TOOLDIR' then //$(TOOLDIR)
+        else if macro='TOOLDIR' then
           {$IFDEF MSWINDOWS}
           // make is a binutil and should be located in the make dir
           macro:=ExcludeTrailingPathDelimiter(FMakeDir)
@@ -267,15 +266,15 @@ begin
           // Strip can be anywhere in the path
           macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('make')))
           {$ENDIF}
-        else if macro='GETEXEEXT' then //$(GETEXEEXT)
+        else if macro='GETEXEEXT' then
           macro:=GetExeExt
         {$ifndef FPCONLY}
-        else if macro='LAZARUSDIR' then //$(LAZARUSDIR)
+        else if macro='LAZARUSDIR' then
           macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
-        else if macro='LAZARUSPRIMARYCONFIGPATH' then //$(LAZARUSPRIMARYCONFIGPATH)
+        else if macro='LAZARUSPRIMARYCONFIGPATH' then
           macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
         {$endif}
-        else if macro='STRIPDIR' then //$(STRIPDIR)
+        else if macro='STRIPDIR' then
           {$IFDEF MSWINDOWS}
           // Strip is a binutil and should be located in the make dir
           macro:=ExcludeTrailingPathDelimiter(FMakeDir)
@@ -396,14 +395,13 @@ begin
   {$ELSE}
   Processor.Parameters.Add('--quiet');
   {$ENDIF}
-  Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
+  Processor.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
   Processor.Parameters.Add('--cpu=' + GetTargetCPU);
   Processor.Parameters.Add('--os=' + GetTargetOS);
-  Processor.Parameters.Add('--add-package');
   if FLCL_Platform <> '' then
             Processor.Parameters.Add('--ws=' + FLCL_Platform);
-
-  Processor.Parameters.Add(PackageAbsolutePath);
+  Processor.Parameters.Add('--add-package');
+  Processor.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
     Processor.Execute;
     result := Processor.ExitStatus=0;
@@ -492,31 +490,13 @@ begin
 end;
 {$endif}
 
-function TUniversalInstaller.FirstSpaceAfterCommand(CommandLine: string): integer;
-  var
-    j: integer;
-  begin
-    //split off command and parameters
-    j:=1;
-    while j<=length(CommandLine) do
-      begin
-      if CommandLine[j]='"' then
-        repeat  //skip until next quote
-          j:=j+1;
-        until (CommandLine[j]='"') or (j=length(CommandLine));
-      j:=j+1;
-      if CommandLine[j]=' ' then break;
-      end;
-    Result:=j;
-  end;
-
 function TUniversalInstaller.AddPackages(sl:TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
   Location='Workingdir';
 var
-  i,j:integer;
+  i:integer;
   PackagePath:string;
   Workingdir:string;
   BaseWorkingdir:string;
@@ -957,18 +937,19 @@ var
   LazarusConfig:TUpdateLazConfig;
   directive,xmlfile,key:string;
 
-  function AddToLazXML(xmlfile:string):boolean;
-  var
-    i,j,k:integer;
-    exec,key,counter,oldcounter,filename:string;
-    count:integer;
-  begin
+function AddToLazXML(xmlfile:string):boolean;
+var
+  i,j,k:integer;
+  exec,key,counter,oldcounter,filename:string;
+  count:integer;
+begin
+  result:=true;
   //filename:=xmlfile;
   //if rightstr(filename,4)<>'.xml' then
   filename:=xmlfile+'.xml';
   oldcounter:='';
   for i:=0 to MAXINSTRUCTIONS do
-    begin
+  begin
     // Read command, e.g. AddToHelpOptions1
     // and deduce which XML settings file to update
     if i=0
@@ -979,10 +960,10 @@ var
     //split off key and value
     j:=1;
     while j<=length(exec) do
-      begin
+    begin
       j:=j+1;
       if exec[j]=':' then break;
-      end;
+    end;
     key:=trim(copy(exec,1,j-1));
     { Use @ as a prefix in your keys to indicate a counter of subsections.
     The key afterwards is used to determine the variable that keeps the count.
@@ -999,28 +980,27 @@ var
     if k<=0 then
       LazarusConfig.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))))
     else //we got a counter
-      begin
+    begin
       counter:= trim(copy(key,k+1,length(key)));
       key:=trim(copy(key,1,k-1));
       if oldcounter<>counter then //read write counter only once
-        begin
+      begin
         count:=LazarusConfig.GetVariable(filename,counter,0)+1;
         LazarusConfig.SetVariable(filename,counter,count);
         oldcounter:=counter;
-        end;
+      end;
       k:=pos('#',key);
       while k>0 do
-        begin //replace # with current count
+      begin //replace # with current count
         delete(key,k,1);
         insert(IntToStr(count),key,k);
         k:=pos('#',key);
-        end;
-      LazarusConfig.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))));
       end;
-    if not result then
-      break;
+      LazarusConfig.SetVariable(filename,key,trim(copy(exec,j+1,length(exec))));
     end;
+    if (not result) then break;
   end;
+end;
 {$endif}
 begin
 // Add values to lazarus config files. Syntax:
@@ -1057,24 +1037,24 @@ begin
           // Process special directives
           Directive:=GetValue('RegisterExternalTool',sl);
           if Directive<>'' then
-            begin
+          begin
             xmlfile:=EnvironmentConfig;
             key:='EnvironmentOptions/ExternalTools/Count';
             cnt:=LazarusConfig.GetVariable(xmlfile,key,0);
             // check if tool is already registered
             i:=cnt;
             while i>0 do
-              begin
+            begin
               if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')
                 =ModuleName then
                   break;
               i:=i-1;
-              end;
+            end;
             if i<1 then //not found
-              begin
+            begin
               cnt:=cnt+1;
               LazarusConfig.SetVariable(xmlfile,key,cnt);
-              end
+            end
             else
               cnt:=i;
             key:='EnvironmentOptions/ExternalTools/Tool'+IntToStr(cnt)+'/';
@@ -1106,7 +1086,7 @@ begin
               LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value','False')
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
-            end;
+          end;
 
           Directive:=GetValue('RegisterHelpViewer',sl);
           if Directive<>'' then
@@ -1918,8 +1898,8 @@ end;
 function CheckIncludeModule(ModuleName: string):boolean;
 var
   ini:TMemIniFile;
-  j,k:integer;
-  os,cpu,s:string;
+  j:integer;
+  os,cpu:string;
   AddModule,NegativeList:boolean;
   sl:TStringList;
   e:Exception;
