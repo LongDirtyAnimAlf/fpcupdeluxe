@@ -29,7 +29,7 @@ uses
 
 {$ifdef usealternateui}
 
-Const alternateui_Version='AUI v1.1.7';
+Const alternateui_Version='AUI v1.1.9';
 
 Var Alternate_ui_created:boolean=False;
 
@@ -38,6 +38,7 @@ procedure alteranteui_LeaveHandler(Sender:TObject);
 procedure alteranteui_EnterHandler(Sender:TObject);
 procedure alteranteui_ClickHandler(Sender:TObject);
 procedure alternateui_resize;
+procedure alternateui_update_interface_buttons;
 procedure alternateui_AddMessage(const aMessage:string; const UpdateStatus:boolean=false; const aMessageColor:TColor=clBlack);
 {$endif}
 
@@ -293,6 +294,42 @@ begin
   end;
 end;
 
+procedure alternateui_update_laz_fpc_popup_options;
+var i:integer=0;
+begin
+  while form1.findcomponent('FPCTarget_btn'+alternateui_IntToString(i)) <> nil do
+  begin
+    with form1.findcomponent('FPCTarget_btn'+alternateui_IntToString(i)) as TAlternateUiButton do
+    begin
+      down:=caption=Form1.ListBoxFPCTarget.Items.Strings[Form1.ListBoxFPCTarget.ItemIndex];
+    end;
+    inc(i);
+  end;
+  i:=0;
+  while form1.findcomponent('LAZTarget_btn'+alternateui_IntToString(i)) <> nil do
+  begin
+    with form1.findcomponent('LAZTarget_btn'+alternateui_IntToString(i)) as TAlternateUiButton do
+    begin
+      down:=caption=Form1.ListBoxLazarusTarget.Items.Strings[Form1.ListBoxLazarusTarget.ItemIndex];
+    end;
+    inc(i);
+  end;
+end;
+
+procedure alternateui_update_interface_buttons;
+begin
+  if alternateui_inuse then
+  begin
+    // set the cross compiler options
+    alternateui_set_OSTarget_btn;
+    alternateui_set_CPUTarget_btn;
+    alternateui_set_FPCtarget_btn;
+    alternateui_set_Laztarget_btn;
+    alternateui_set_Selected_Components(True);
+
+    alternateui_update_laz_fpc_popup_options;
+  end;
+end;
 
 procedure alternateui_toggle_new_ui;
 var disp_control:boolean;
@@ -328,11 +365,12 @@ begin
       else alternateui_Get_Png_from_resource(Form1.FindComponent(Control_Auto_Clear_Button) as TAlternateUiButton,'AUI_RED_CROSS_SMALL');
     end;
     // set the cross compiler options
-    alternateui_set_OSTarget_btn;
+    alternateui_update_interface_buttons;
+{    alternateui_set_OSTarget_btn;
     alternateui_set_CPUTarget_btn;
     alternateui_set_FPCtarget_btn;
     alternateui_set_Laztarget_btn;
-    alternateui_set_Selected_Components(True);
+    alternateui_set_Selected_Components(True);}
   end
   else
   begin

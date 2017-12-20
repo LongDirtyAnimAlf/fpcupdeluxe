@@ -2780,6 +2780,9 @@ begin
 
     Form2.SetInstallDir(IniDirectory);
 
+    {$ifdef usealternateui}
+    alternateui_update_interface_buttons;
+    {$endif}
   end;
 end;
 
