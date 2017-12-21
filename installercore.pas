@@ -200,7 +200,7 @@ type
     // Source directory for installation (fpcdir, lazdir,... option)
     property InstallDirectory: string write FInstallDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
-    property Compiler: string read GetCompiler write FCompiler;
+    property Compiler: string {read GetCompiler} write FCompiler;
     // Compiler options passed on to make as OPT=
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
@@ -293,7 +293,6 @@ uses
   ;
 
 { TInstaller }
-
 
 function TInstaller.GetCompiler: string;
 begin

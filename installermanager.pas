@@ -1446,9 +1446,9 @@ begin
     begin
       //defaults !!
       {$IFDEF Darwin}
-      FParent.LazarusOPT:='-gw -gl -godwarfsets -gh -gt -Co -Ci -Sa';
+      FParent.LazarusOPT:='-gw -gl -godwarfsets -O1 -Co -Ci -Sa';
       {$ELSE}
-      FParent.LazarusOPT:='-gw -gl -godwarfsets -gh -gt -Co -Cr -Ci -Sa';
+      FParent.LazarusOPT:='-gw -gl -godwarfsets -O1 -Co -Cr -Ci -Sa';
       {$ENDIF}
     end
     else
@@ -1549,10 +1549,13 @@ begin
     FInstaller.PatchCmd:=FParent.PatchCmd;
     FInstaller.Verbose:=FParent.Verbose;
 
-    if FParent.CompilerOverride='' then
-      FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
-    else
-      FInstaller.Compiler:=FParent.CompilerOverride;
+    if FInstaller.InheritsFrom(TFPCInstaller) then
+    begin
+      // override bootstrapper only for FPC if needed
+      if FParent.CompilerOverride<>''
+         then FInstaller.Compiler:=FParent.CompilerOverride
+         else FInstaller.Compiler:=''; // always use bootstrapper
+    end else FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory); // use FPC compiler itself
 
     // only curl / wget works on OpenBSD (yet)
     {$IFDEF OPENBSD}

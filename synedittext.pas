@@ -163,6 +163,7 @@ begin
         if AnsiContainsText(line,'mv ') then continue;
         if (AnsiContainsText(line,'cp ')) AND (AnsiContainsText(line,'.compiled')) then continue;
         {$endif}
+        if AnsiContainsText(line,'is up to date.') then continue;
         outputline:=true;
       end;
     end;

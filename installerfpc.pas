@@ -1499,7 +1499,11 @@ begin
 
   OperationSucceeded:=true;
 
-  if FBootstrapCompilerURL='' then exit;
+  if FBootstrapCompilerURL='' then
+  begin
+    infoln(localinfotext+'No URL supplied. Fatal error. Should not happen !', etError);
+    exit(false);
+  end;
 
   if OperationSucceeded then
   begin
@@ -1752,15 +1756,11 @@ begin
        else aDownLoader:=TNativeDownLoader.Create;
 
     try
-
       // first, try official FPC binaries
-
       aCompilerList:=TStringList.Create;
       try
-
         while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
         begin
-
           infoln(localinfotext+'Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
 
           // set initial standard achive name
@@ -1790,7 +1790,7 @@ begin
 
           s:=FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/';
 
-          infoln(localinfotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etInfo);
+          infoln(localinfotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etDebug);
 
           aCompilerList.Clear;
 
@@ -1815,7 +1815,7 @@ begin
 
             if FVerbose then
             begin
-              if aCompilerList.Count>0 then infoln(localinfotext+'Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etInfo);
+              if aCompilerList.Count>0 then infoln(localinfotext+'Found FPC v'+aLocalBootstrapVersion+' online bootstrappers: '+aCompilerList.CommaText,etDebug);
             end;
 
             {$IFDEF FREEBSD}
@@ -2130,8 +2130,9 @@ var
   Output: string = '';
   ReturnCode: integer;
 begin
-  result := inherited;
-  result := InitModule;
+  result:=inherited;
+  result:=InitModule;
+
   if not result then exit;
 
   infoln(infotext+'Building module '+ModuleName+'...',etInfo);
@@ -2715,7 +2716,7 @@ var
   aCleanupCompiler:string;
   S : string;
 begin
-  result := inherited;
+  result:=inherited;
   result:=InitModule;
 
   if not result then exit;
