@@ -39,7 +39,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = ButtonInstallCrossCompiler
     AnchorSideRight.Side = asrBottom
-    Left = 152
+    Left = 154
     Height = 28
     Hint = 'Auto-update all installed cross-compilers'
     Top = 382
@@ -53,12 +53,15 @@ object Form1: TForm1
     TabOrder = 21
   end
   object radgrpCPU: TRadioGroup
+    AnchorSideLeft.Control = ListBoxFPCTarget
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = FPCVersionLabel
-    Left = 152
+    Left = 154
     Height = 304
     Top = 40
     Width = 100
     AutoFill = True
+    BorderSpacing.Left = 12
     Caption = 'CPU'
     ChildSizing.LeftRightSpacing = 6
     ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
@@ -69,6 +72,7 @@ object Form1: TForm1
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 284
     ClientWidth = 96
+    Constraints.MaxWidth = 150
     Items.Strings = (
       'i386'
       'x86_64'
@@ -91,7 +95,7 @@ object Form1: TForm1
     AnchorSideTop.Control = radgrpCPU
     AnchorSideBottom.Control = radgrpCPU
     AnchorSideBottom.Side = asrBottom
-    Left = 256
+    Left = 258
     Height = 304
     Top = 40
     Width = 106
@@ -108,6 +112,7 @@ object Form1: TForm1
     ChildSizing.ControlsPerLine = 1
     ClientHeight = 284
     ClientWidth = 102
+    Constraints.MaxWidth = 150
     Items.Strings = (
       'windows'
       'linux'
@@ -1573,14 +1578,17 @@ object Form1: TForm1
     ParentFont = False
   end
   object listModules: TListBox
+    AnchorSideLeft.Control = BitBtnFPCandLazarus
+    AnchorSideLeft.Side = asrBottom
     AnchorSideTop.Control = AutoCrossUpdate
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnInstallModule
-    Left = 168
+    Left = 167
     Height = 90
     Top = 422
     Width = 190
     Anchors = [akTop, akLeft, akBottom]
+    BorderSpacing.Left = 8
     BorderSpacing.Top = 12
     BorderSpacing.Bottom = 8
     Constraints.MinHeight = 80
@@ -1626,7 +1634,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = radgrpOS
     AnchorSideRight.Side = asrBottom
-    Left = 152
+    Left = 154
     Height = 28
     Top = 350
     Width = 210
@@ -2953,7 +2961,7 @@ object Form1: TForm1
   object btnInstallModule: TButton
     AnchorSideLeft.Control = listModules
     AnchorSideBottom.Control = Panel1
-    Left = 168
+    Left = 167
     Height = 25
     Top = 520
     Width = 101
@@ -2971,7 +2979,7 @@ object Form1: TForm1
     Left = 290
     Height = 25
     Top = 520
-    Width = 68
+    Width = 67
     Anchors = [akLeft, akRight, akBottom]
     AutoSize = True
     BorderSpacing.Bottom = 6

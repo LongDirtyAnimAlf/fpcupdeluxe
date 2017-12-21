@@ -125,8 +125,6 @@ type
   public
     //Directory that has compiler needed to compile compiler sources. If compiler doesn't exist, it will be downloaded
     property BootstrapCompilerDirectory: string write FBootstrapCompilerDirectory;
-    //Optional; URL from which to download bootstrap FPC compiler if it doesn't exist yet.
-    property BootstrapCompilerURL: string write FBootstrapCompilerURL;
     // Build module
     function BuildModule(ModuleName:string): boolean; override;
     // Clean up environment
@@ -2714,10 +2712,12 @@ var
   FileCounter:word;
   DeleteList: TStringList;
   CPU_OSSignature:string;
+  aCleanupCompiler:string;
   S : string;
 begin
   result := inherited;
   result:=InitModule;
+
   if not result then exit;
 
   if not DirectoryExistsUTF8(FSourceDirectory) then exit;
@@ -2729,6 +2729,7 @@ begin
     CPU_OSSignature:=GetFPCTarget(false);
     // Delete any existing buildstamp file
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPU_OSSignature);
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'base.build-stamp.'+CPU_OSSignature);
   end else CPU_OSSignature:=GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
@@ -2745,7 +2746,11 @@ begin
   end;
   {$ENDIF}
 
-  if FileExists(FCompiler) then
+  if FileExists(FCompiler)
+     then aCleanupCompiler:=FCompiler
+     else aCleanupCompiler:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+
+  if FileExists(aCleanupCompiler) then
   begin
 
     Processor.OnErrorM:=nil;  //don't want to log errors in distclean
@@ -2754,7 +2759,7 @@ begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
       if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-      Processor.Parameters.Add('FPC='+FCompiler);
+      Processor.Parameters.Add('FPC='+aCleanupCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
       {$IFDEF MSWINDOWS}
@@ -2803,15 +2808,15 @@ begin
   end
   else
   begin
-    infoln(infotext+'Running make distclean failed: could not find compiler ('+FCompiler+')',etWarning);
+    infoln(infotext+'Running make distclean failed: could not find cleanup compiler ('+aCleanupCompiler+')',etWarning);
   end;
 
   // Delete any existing fpc.cfg files
-  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.cfg');
+  if (NOT CrossCompiling) then Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPU_OSSignature+DirectorySeparator+'fpc.cfg');
 
   {$IFDEF UNIX}
   // Delete any fpc.sh shell scripts
-  Sysutils.DeleteFile(ExtractFilePath(FCompiler)+'fpc.sh');
+  if (NOT CrossCompiling) then Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPU_OSSignature+DirectorySeparator+'fpc.sh');
   // Delete units
   DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
   DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+GetFPCVersion+'/units');

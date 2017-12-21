@@ -408,7 +408,7 @@ type
 
   { TFPCupManager }
 
-  TFPCupManager=class(Tobject)
+  TFPCupManager=class(TObject)
   private
     FResultSet:TResultSet;
     FSVNExecutable: string;
@@ -418,11 +418,10 @@ type
     FHTTPProxyUser: string;
     FPersistentOptions: string;
     FBaseDirectory: string;
+    FCompilerOverride: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
-    FBootstrapCompilerURL: string;
     FClean: boolean;
-    FCompilerName: string;
     FConfigFile: string;
     FCrossCPU_Target: string;
     {$ifndef FPCONLY}
@@ -502,7 +501,6 @@ type
     property ShortCutNameFpcup:string read FShortCutNameFpcup write FShortCutNameFpcup; //Name of the shortcut that points to fpcup
     // Full path+filename of SVN executable. Use empty to search for default locations.
     property SVNExecutable: string read FSVNExecutable write FSVNExecutable;
-    property CompilerName: string read FCompilerName write FCompilerName;
     // Options that are to be saved in shortcuts/batch file/shell scripts.
     // Excludes temporary options like --verbose
     property PersistentOptions: string read FPersistentOptions write FPersistentOptions;
@@ -511,8 +509,8 @@ type
     property BaseDirectory: string read FBaseDirectory write SetBaseDirectory;
     // Directory where bootstrap compiler is installed/downloaded
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
-    // URL to download the bootstrap compiler from
-    property BootstrapCompilerURL: string read FBootstrapCompilerURL write FBootstrapCompilerURL;
+    // Compiler override
+    property CompilerOverride: string read FCompilerOverride write FCompilerOverride;
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
@@ -1119,55 +1117,31 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   var
     InstalledLazarus:string;
   begin
-  result:=true;
-  if FParent.ShortCutNameLazarus<>EmptyStr then
-  begin
-    infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
-    try
-      // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
-      InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
-      {$IFDEF MSWINDOWS}
-      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
-      {$ENDIF MSWINDOWS}
-      {$IFDEF UNIX}
-      {$IFDEF DARWIN}
-      CreateHomeStartLink(IncludeLeadingPathDelimiter(InstalledLazarus)+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
-      // Create shortcut on Desktop and in Applications
-      fpSystem('/usr/bin/osascript << EOF'+#10+
-               'tell application "Finder"'+#10+
-               'set myLazApp to POSIX file "'+IncludeLeadingPathDelimiter(InstalledLazarus)+'.app" as alias'+#10+
-               'try'+#10+
-                 'set myLazDeskShort to (path to desktop folder as string) & "'+FParent.ShortCutNameLazarus+'" as alias'+#10+
-               'on error'+#10+
-                 'make new alias to myLazApp at (path to desktop folder as text)'+#10+
-                 'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
-               'end try'+#10+
-
-               'try'+#10+
-                 'set myLazAppShort to (path to applications folder as string) & "'+FParent.ShortCutNameLazarus+'" as alias'+#10+
-               'on error'+#10+
-                 'make new alias to myLazApp at (path to applications folder as text)'+#10+
-                 'set name of result to "'+FParent.ShortCutNameLazarus+'"'+#10+
-               'end try'+#10+
-
-               'end tell'+#10+
-               'EOF');
-      {$ELSE}
-      CreateHomeStartLink(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
-      {$ENDIF DARWIN}
-      {$IF (defined(LINUX)) or (defined(BSD))}
-      // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
-      CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
-      CreateHomeStartLink('"'+InstalledLazarus+'"','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
-      {$ENDIF (defined(LINUX)) or (defined(BSD))}
-      {$ENDIF UNIX}
-    except
-      // Ignore problems creating shortcut
-      infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
+    result:=true;
+    if FParent.ShortCutNameLazarus<>EmptyStr then
+    begin
+      infoln('TSequencer.DoExec (Lazarus): creating desktop shortcut:',etInfo);
+      try
+        // Create shortcut; we don't care very much if it fails=>don't mess with OperationSucceeded
+        InstalledLazarus:=IncludeTrailingPathDelimiter(FParent.LazarusDirectory)+'lazarus'+GetExeExt;
+        {$IFDEF MSWINDOWS}
+        CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
+        {$ENDIF MSWINDOWS}
+        {$IFDEF UNIX}
+        {$IFDEF DARWIN}
+        CreateHomeStartLink(IncludeLeadingPathDelimiter(InstalledLazarus)+'.app/Contents/MacOS/lazarus','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
+        {$ELSE}
+        CreateHomeStartLink('"'+InstalledLazarus+'"','--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortcutNameLazarus);
+        {$ENDIF DARWIN}
+        // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
+        CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
+        {$ENDIF UNIX}
+      except
+        // Ignore problems creating shortcut
+        infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
+      end;
     end;
   end;
-  end;
-
   function DeleteLazarusScript:boolean;
   begin
   result:=true;
@@ -1427,9 +1401,7 @@ begin
     FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
     FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
-    (FInstaller as TFPCInstaller).BootstrapCompilerURL:=FParent.BootstrapCompilerURL;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FFPCPatches;
-    FInstaller.Compiler:=FParent.CompilerName;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
@@ -1467,12 +1439,8 @@ begin
     else
       FInstaller:=TLazarusNativeInstaller.Create;
     // source- and install-dir are the same for Lazarus ... could be changed
-    FInstaller.SourceDirectory:=FParent.LazarusDirectory ;
-    FInstaller.InstallDirectory:=FParent.LazarusDirectory ;
-    if FParent.CompilerName='' then
-      FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
-    else
-      FInstaller.Compiler:=FParent.CompilerName;
+    FInstaller.SourceDirectory:=FParent.LazarusDirectory;
+    FInstaller.InstallDirectory:=FParent.LazarusDirectory;
 
     if Length(Trim(FParent.LazarusOPT))=0 then
     begin
@@ -1517,10 +1485,6 @@ begin
         end;
       FInstaller:=THelpFPCInstaller.Create;
       FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
-      if FParent.CompilerName='' then
-        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
-      else
-        FInstaller.Compiler:=FParent.CompilerName;
   end
   {$ifndef FPCONLY}
   else if uppercase(ModuleName)='HELPLAZARUS'
@@ -1539,10 +1503,6 @@ begin
       FInstaller.SourceDirectory:=FParent.LazarusDirectory;
       // the same ... may change in the future
       FInstaller.InstallDirectory:=FParent.LazarusDirectory;
-      if FParent.CompilerName='' then
-        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
-      else
-        FInstaller.Compiler:=FParent.CompilerName;
       (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingBackslash(FParent.FPCInstallDirectory);// + 'bin' + DirectorySeparator + FInstaller.SourceCPU + '-' + FInstaller.SourceOS;
       (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=FParent.FPCSourceDirectory;
       (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
@@ -1573,12 +1533,7 @@ begin
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.CrossLCL_Platform;
       {$endif}
-      if FParent.CompilerName='' then
-        FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
-      else
-        FInstaller.Compiler:=FParent.CompilerName;
   end;
-
 
   if assigned(FInstaller) then
   begin
@@ -1593,6 +1548,12 @@ begin
     FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
     FInstaller.PatchCmd:=FParent.PatchCmd;
     FInstaller.Verbose:=FParent.Verbose;
+
+    if FParent.CompilerOverride='' then
+      FInstaller.Compiler:=FInstaller.GetCompilerInDir(FParent.FPCInstallDirectory)
+    else
+      FInstaller.Compiler:=FParent.CompilerOverride;
+
     // only curl / wget works on OpenBSD (yet)
     {$IFDEF OPENBSD}
     FInstaller.UseWget:=True;

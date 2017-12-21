@@ -954,9 +954,16 @@ begin
     then
     begin
       // print the error itself and the next 2 lines (good or lucky guess)
-      memoSummary.Lines.Append(BeginSnippet+' Start of special error summary.');
+      memoSummary.Lines.Append(BeginSnippet+' Start of special error summary:');
       memoSummary.Lines.Append(SynEdit1.Lines[x]);
       memoSummary.Lines.Append(SynEdit1.Lines[x+1]);
+      //temporary for trunk
+      if Pos('BuildUnit_cocoaint.pp',SynEdit1.Lines[x+1])>0 then
+      begin
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32809');
+        memoSummary.Lines.Append('');
+      end else
       memoSummary.Lines.Append(SynEdit1.Lines[x+2]);
     end;
   end;
@@ -2477,7 +2484,7 @@ begin
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerName:=Form2.GetCompiler(GetTargetCPU,GetTargetOS);
+  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTargetCPU,GetTargetOS);
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;

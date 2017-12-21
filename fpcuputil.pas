@@ -353,7 +353,7 @@ uses
     ,windows, shlobj {for special folders}, ActiveX, ComObj
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
-  ,baseunix
+  ,unix,baseunix
   {$ENDIF}
   {$IFDEF ENABLEWGET}
   // for wget downloader
@@ -690,6 +690,7 @@ end;
 {$ENDIF MSWINDOWS}
 
 {$IFDEF UNIX}
+{$IFNDEF DARWIN}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 var
   OperationSucceeded: boolean;
@@ -740,6 +741,31 @@ begin
     XdgDesktopContent.Free;
   end;
 end;
+{$ELSE DARWIN}
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+begin
+  // Create shortcut on Desktop and in Applications
+  fpSystem(
+    '/usr/bin/osascript << EOF'+#10+
+    'tell application "Finder"'+#10+
+      'set myLazApp to POSIX file "'+IncludeLeadingPathDelimiter(Target)+'.app" as alias'+#10+
+      'try'+#10+
+          'set myLazDeskShort to (path to desktop folder as string) & "'+ShortcutName+'" as alias'+#10+
+          'on error'+#10+
+             'make new alias to myLazApp at (path to desktop folder as text)'+#10+
+             'set name of result to "'+ShortcutName+'"'+#10+
+      'end try'+#10+
+      'try'+#10+
+          'set myLazAppShort to (path to applications folder as string) & "'+ShortcutName+'" as alias'+#10+
+          'on error'+#10+
+             'make new alias to myLazApp at (path to applications folder as text)'+#10+
+             'set name of result to "'+ShortcutName+'"'+#10+
+      'end try'+#10+
+
+    'end tell'+#10+
+    'EOF');
+end;
+{$ENDIF DARWIN}
 {$ENDIF UNIX}
 
 procedure CreateHomeStartLink(Target, TargetArguments,
@@ -749,7 +775,7 @@ var
   ScriptFile: string;
 begin
   {$IFDEF MSWINDOWS}
-  infoln('Todo: write me (CreateHomeStartLink)!', etInfo);
+  infoln('Todo: write me (CreateHomeStartLink)!', etDebug);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist

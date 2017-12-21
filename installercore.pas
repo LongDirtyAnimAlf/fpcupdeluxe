@@ -297,10 +297,9 @@ uses
 
 function TInstaller.GetCompiler: string;
 begin
-  if (Self is TFPCNativeInstaller) or (Self is TFPCInstaller) then
-    Result := GetCompilerInDir(FInstallDirectory)
-  else
-    Result := FCompiler;
+  if (Self is TFPCNativeInstaller) or (Self is TFPCInstaller)
+    then Result := GetCompilerInDir(FInstallDirectory)
+    else Result := FCompiler;
 end;
 
 function TInstaller.GetCrossInstaller: TCrossInstaller;
@@ -1792,11 +1791,8 @@ end;
 
 
 function TInstaller.GetCompilerInDir(Dir: string): string;
-var
-  ExeName: string;
 begin
-  ExeName := 'fpc' + GetExeExt;
-  Result := IncludeTrailingBackslash(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + ExeName;
+  Result := IncludeTrailingBackslash(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
   {$IFDEF UNIX}
   if FileExistsUTF8(Result + '.sh') then
   begin
