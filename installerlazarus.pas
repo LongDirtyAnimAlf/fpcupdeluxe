@@ -113,12 +113,14 @@ const
     'Declare LazarusCrossWin32-64;' +
     'SetCPU x86_64;' + 'SetOS win64;' +
     'Do LCL;'+
+    'SetCPU i386;'+ 'SetOS win32;'+
     'End;' +
     {$endif}
     {$ifdef win64}
     'Declare LazarusCrossWin64-32;' +
     'SetCPU i386;'+ 'SetOS win32;'+
     'Do LCL;'+
+    'SetCPU x86_64;' + 'SetOS win64;' +
     'End;' +
     {$endif}
 

@@ -177,6 +177,7 @@ begin
       // the below is needed:
       // onchange is no longer called, when appending a line ... bug or feature ?!!
       Self.OnChange(Self);
+      Application.ProcessMessages;
     end;
 
   end;

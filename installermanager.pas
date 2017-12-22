@@ -87,6 +87,7 @@ Const
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
     {$endif}
     'Do fpc;'+
+    'Do FPCCrossWin32-64;'+
     {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
@@ -98,15 +99,6 @@ Const
     // universal installer are compiled into the IDE:
     'Do USERIDE;'+
     'Do LCLCross;'+
-    {$endif}
-    'Do crosswin32-64;'+  //this has to be the last. All TExecState reset!
-    'End;'+
-
-    //cross sequence for win32. Note: if changing this name,
-    //also change checks for this in skipmodules etc.
-    'Declare crosswin32-64;'+
-    'Do FPCCrossWin32-64;'+
-    {$ifndef FPCONLY}
     'Do LazarusCrossWin32-64;'+
     {$endif}
     'End;'+
@@ -120,6 +112,7 @@ Const
     'Exec CheckDevLibs;'+
     {$endif}
     'Do fpc;'+
+    'Do FPCCrossWin64-32;'+
     {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
     'Do lazbuild;'+
@@ -131,28 +124,13 @@ Const
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
     'Do LCLCross;'+
-    {$endif}
-    'Do crosswin64-32;'+  //this has to be the last. All TExecState reset!
-    {$ifndef FPCONLY}
-    {$endif}
-    'End;'+
-
-    //cross sequence for win32. Note: if changing this name,
-    //also change checks for this in skipmodules etc.
-    'Declare crosswin64-32;'+
-    'SetCPU i386;'+
-    'SetOS win32;'+
-    //Getmodule has already been done
-    'Cleanmodule fpc;'+
-    'Buildmodule fpc;'+
-    {$ifndef FPCONLY}
-    'Do LCL;'+
+    'Do LazarusCrossWin64-32;'+
     {$endif}
     'End;'+
     {$endif win64}
 
-    //default sequence for ARM: some packages give errors and memory is limited, so keep it simple
-    'Declare defaultARM;'+
+    //default simple sequence: some packages give errors and memory is limited, so keep it simple
+    'Declare DefaultSimple;'+
     {$ifndef FPCONLY}
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
     {$endif}
@@ -899,12 +877,13 @@ end;
 
 
 function TFPCupManager.Run: boolean;
-{$IFDEF MSWINDOWS}
 var
+  aSequence:string;
+  {$IFDEF MSWINDOWS}
   Major:integer=0;
   Minor:integer=0;
   Build:integer=0;
-{$ENDIF}
+  {$ENDIF}
 begin
   result:=false;
 
@@ -965,47 +944,31 @@ begin
   end
   else
   begin
-    {$if defined(win32)}
+    aSequence:='Default';
+    {$ifdef win32}
     // Run Windows specific cross compiler or regular version
-    if pos('CROSSWIN32-64',UpperCase(SkipModules))>0 then begin
-      infoln('InstallerManager: going to run sequencer for sequence: Default.',etDebug);
-      result:=FSequencer.Run('Default');
-    end
-    else
-    begin
-      infoln('InstallerManager: going to run sequencer for sequence: DefaultWin32.',etDebug);
-      result:=FSequencer.Run('DefaultWin32');
-    end;
-    // We would like to have a win64=>win32 crosscompiler, but at least with current
-    // FPC trunk that won't work due to errors like
-    // fpcdefs.inc(216,2) Error: User defined: Cross-compiling from systems
-    // without support for an 80 bit extended floating point type to i386 is
-    // not yet supported at this time. If it is, uncomment until the else conditional:
-    //{$elseif defined(win64)}
-    {
-    if pos('CROSSWIN64-32',UpperCase(SkipModules))>0 then
-      result:=FSequencer.Run('Default')
-    else
-      result:=FSequencer.Run('DefaultWin64');
-    }
-    {$else}
-
-    // Linux, OSX
+    if pos('CROSSWIN32-64',UpperCase(SkipModules))=0 then aSequence:='DefaultWin32';
+    {$endif}
+    {$ifdef win64}
+    //not yet
+    //if pos('CROSSWIN64-32',UpperCase(SkipModules))=0 then aSequence:='DefaultWin64';
+    {$endif}
     {$ifdef CPUAARCH64}
-    // some default packages do not work yet on aarch64 (03-2016)
-    infoln('InstallerManager: going to run fpc+lazarus sequencer for sequence ARM64 (just plain Lazarus)',etDebug);
-    result:=FSequencer.Run('defaultARM');
-    {$else}
-      {$ifdef cpuarm}
-      infoln('InstallerManager: going to run sequencer for sequence ARM (without help files)',etDebug);
-      result:=FSequencer.Run('defaultARM');
-      {$else}
-      infoln('InstallerManager: going to run sequencer for sequence Default.',etDebug);
-      result:=FSequencer.Run('Default');
-      {$endif}
+    aSequence:='DefaultSimple';
+    {$endif}
+    {$ifdef cpuarm}
+    aSequence:='DefaultSimple';
+    {$endif}
+    {$ifdef cpuarmhf}
+    aSequence:='DefaultSimple';
+    {$endif}
+    {$ifdef HAIKU}
+    aSequence:='DefaultSimple';
     {$endif}
 
-    {$endif}
+    infoln('InstallerManager: going to run sequencer for sequence: '+aSequence,etDebug);
+    result:=FSequencer.Run(aSequence);
+
     if (FIncludeModules<>'') and (result) then
     begin
       // run specified additional modules using the only mechanism
@@ -1330,7 +1293,9 @@ end;
 function TSequencer.DoSetCPU(CPU: string): boolean;
 begin
   infoln('TSequencer: DoSetCPU for CPU '+CPU+' called.',etDebug);
-  FParent.CrossCPU_Target:=CPU;
+  if LowerCase(CPU)=GetTargetCPU
+     then FParent.CrossCPU_Target:=''
+     else FParent.CrossCPU_Target:=CPU;
   ResetAllExecuted;
   result:=true;
 end;
@@ -1338,7 +1303,9 @@ end;
 function TSequencer.DoSetOS(OS: string): boolean;
 begin
   infoln('TSequencer: DoSetOS for OS '+OS+' called.',etDebug);
-  FParent.CrossOS_Target:=OS;
+  if LowerCase(OS)=GetTargetOS
+     then FParent.CrossOS_Target:=''
+     else FParent.CrossOS_Target:=OS;
   ResetAllExecuted;
   result:=true;
 end;

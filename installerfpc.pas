@@ -57,18 +57,26 @@ Const
     'Uninstallmodule FPC;'+
     'End;'+
 
-    {$ifdef MSWINDOWS}
+    {$ifdef win32}
     // Crosscompile build
     'Declare FPCCrossWin32-64;'+
-    // Needs to be run after regular compile because of CPU/OS switch
-    'SetCPU x86_64;'+
-    'SetOS win64;'+
+    'SetCPU x86_64;' + 'SetOS win64;' +
     // Getmodule has already been done
-    'Cleanmodule fpc;'+
-    'Buildmodule fpc;'+
+    'Cleanmodule FPC;'+
+    'Buildmodule FPC;'+
+    'SetCPU i386;'+ 'SetOS win32;'+
     'End;'+
     {$endif}
-
+    {$ifdef win64}
+    // Crosscompile build
+    'Declare FPCCrossWin64-32;'+
+    'SetCPU i386;'+ 'SetOS win32;'+
+    // Getmodule has already been done
+    'Cleanmodule FPC;'+
+    'Buildmodule FPC;'+
+    'SetCPU x86_64;' + 'SetOS win64;' +
+    'End;'+
+    {$endif}
 
     //selective actions triggered with --only=SequenceName
     'Declare FPCCheckOnly;'+'Checkmodule FPC;'+'End;'+
@@ -2055,7 +2063,6 @@ begin
     end;
 
   end;
-
 
   if FCompiler='' then   //!!!Don't use Compiler here. GetCompiler returns installed compiler.
     FCompiler:=FBootstrapCompiler;

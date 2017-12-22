@@ -1,0 +1,49 @@
+Index: components/pas2js/pjsdsgnregister.pas
+===================================================================
+--- components/pas2js/pjsdsgnregister.pas	(revision 56816)
++++ components/pas2js/pjsdsgnregister.pas	(working copy)
+@@ -231,6 +231,7 @@
+   RunParams : TAbstractRunParamsOptions;
+ 
+   NewSource: String;
++  Compiler: string;
+ begin
+   Result:=inherited InitProject(AProject);
+ 
+@@ -244,8 +245,12 @@
+   CompOpts.Win32GraphicApp:=false;
+   CompOpts.UnitOutputDirectory:='js';
+   CompOpts.TargetFilename:='project1';
++  if Length(PJSOptions.CompilerFilename)=0 then
++    Compiler:='$MakeExe(pas2js)'
++  else
++    Compiler:=AnsiQuotedStr(PJSOptions.CompilerFilename, '"');
+   CompOpts.SetAlternativeCompile(
+-    '$MakeExe(pas2js) -Jc -Jminclude -Tnodejs "-Fu$(ProjUnitPath)" $Name($(ProjFile))',true);
++    Compiler+' -Jc -Jminclude -Tnodejs "-Fu$(ProjUnitPath)" $Name($(ProjFile))',true);
+   RunParams:=AProject.RunParameters;
+   //RunParams.UseLaunchingApplication:=True;
+   //RunParams.LaunchingApplicationPathPlusParams:='$(Pas2JSNodeJS) "$MakeDir($(ProjPath))$NameOnly($(ProjFile)).js"';
+@@ -482,7 +487,7 @@
+   MainFile : TLazProjectFile;
+   CompOpts: TLazCompilerOptions;
+   RunParams : TAbstractRunParamsOptions;
+-
++  Compiler : string;
+ begin
+   Result:=inherited InitProject(AProject);
+ 
+@@ -496,8 +501,12 @@
+   CompOpts.Win32GraphicApp:=false;
+   CompOpts.UnitOutputDirectory:='js';
+   CompOpts.TargetFilename:='project1';
++  if Length(PJSOptions.CompilerFilename)=0 then
++    Compiler:='$MakeExe(pas2js)'
++  else
++    Compiler:=AnsiQuotedStr(PJSOptions.CompilerFilename, '"');
+   CompOpts.SetAlternativeCompile(
+-    '$MakeExe(pas2js) -Jirtl.js -Jc -Jminclude -Tbrowser "-Fu$(ProjUnitPath)" $Name($(ProjFile))',true);
++    Compiler+' -Jirtl.js -Jc -Jminclude -Tbrowser "-Fu$(ProjUnitPath)" $Name($(ProjFile))',true);
+   RunParams:=AProject.RunParameters;
+   //RunParams.UseLaunchingApplication:=True;
+   //RunParams.LaunchingApplicationPathPlusParams:=GetBrowserCommand(CompOpts.TargetFileName);

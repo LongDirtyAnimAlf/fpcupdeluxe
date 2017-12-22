@@ -256,7 +256,7 @@ begin
   Result := False;
   while Output.NumBytesAvailable > 0 do
   begin
-    ReadBytes := {%H-}Output.Read(Buffer, BufSize);
+    ReadBytes := Output.Read({%H-}Buffer, BufSize);
     FOutStream.Write(Buffer, ReadBytes);
     if Assigned(FOnOutput) then
       FOnOutput(Self,copy(pchar(@buffer[0]),1,ReadBytes));
