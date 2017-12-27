@@ -24,7 +24,7 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <BuildModes Count="23">
+    <BuildModes Count="24">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -790,6 +790,37 @@
           </Other>
         </CompilerOptions>
       </Item23>
+      <Item24 Name="linuxppc64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="powerpc64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item24>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Modes="DefaultQT,darwin64QT5,haikui386QT5,linuxx64QT5,linuxi386QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwinppc64cocoa,darwin32cocoa,darwin64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>

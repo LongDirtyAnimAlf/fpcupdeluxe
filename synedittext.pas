@@ -44,9 +44,10 @@ var
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
   i:cardinal;
-  subline,line:string;
+  subline,line,s:string;
   outputline:boolean;
 begin
+  outputline:=false;
   subline:=StrPas(aBuf);
   linestore:=linestore+subline;
 
@@ -106,6 +107,7 @@ begin
         // I stand corrected if this has to be changed !
         if AnsiContainsText(line,'Copyright (c) 1993-') then continue;
         if AnsiContainsText(line,'Free Pascal Compiler version ') then continue;
+
         // harmless make error
         if AnsiContainsText(line,'make') then
         begin
@@ -114,7 +116,9 @@ begin
           if AnsiContainsText(line,'error 87') then continue;
           if AnsiContainsText(line,'(e=87)') then continue;
         end;
-        if AnsiContainsText(line,'Warning: ') then
+
+        // filter warnings
+        if AnsiContainsText(line,'warning: ') then
         begin
           if AnsiContainsText(line,'is not portable') then continue;
           if AnsiContainsText(line,'is deprecated') then continue;
@@ -154,16 +158,24 @@ begin
         if AnsiContainsText(line,'rm.exe ') then continue;
         if AnsiContainsText(line,'mkdir.exe ') then continue;
         if AnsiContainsText(line,'mv.exe ') then continue;
+        if AnsiContainsText(line,'cmp.exe ') then continue;
         if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then continue;
         {$endif}
         {$ifdef UNIX}
-        if AnsiContainsText(line,'rm -f') then continue;
-        if AnsiContainsText(line,'rm -rf ') then continue;
-        if AnsiContainsText(line,'mkdir ') then continue;
-        if AnsiContainsText(line,'mv ') then continue;
-        if (AnsiContainsText(line,'cp ')) AND (AnsiContainsText(line,'.compiled')) then continue;
+        s:='rm -f ';
+        if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
+        s:='rm -rf ';
+        if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
+        s:='mkdir ';
+        if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
+        s:='mv ';
+        if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
+        s:='cp ';
+        if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND AnsiContainsText(line,'.compiled') ) then continue;
         {$endif}
         if AnsiContainsText(line,'is up to date.') then continue;
+        if AnsiContainsText(line,'searching ') then continue;
+        // found modified files
         outputline:=true;
       end;
     end;
@@ -250,8 +262,9 @@ begin
   begin
     Handle := UnusedHandle;
     Mode := fmClosed;
-    BufSize := SizeOf(Buffer)-1;
     BufPtr := @Buffer;
+    BufSize := SizeOf(Buffer)-1; //this -1 is very important: line-edings are missed without it !!
+    //BufSize := TextRecBufSize-1;
     OpenFunc := @EditOpen;
     CloseFunc := @EditIgnore;
     case DefaultTextLineBreakStyle of

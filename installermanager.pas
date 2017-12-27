@@ -965,6 +965,9 @@ begin
     {$ifdef HAIKU}
     aSequence:='DefaultSimple';
     {$endif}
+    {$ifdef CPUPOWERPC64}
+    aSequence:='DefaultSimple';
+    {$endif}
 
     infoln('InstallerManager: going to run sequencer for sequence: '+aSequence,etDebug);
     result:=FSequencer.Run(aSequence);

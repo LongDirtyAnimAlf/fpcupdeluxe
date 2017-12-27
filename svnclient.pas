@@ -252,7 +252,7 @@ begin
   if Pos('emptystring',Command)>0 then
   begin
     Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
-    TempOutputFile := SysUtils.GetTempFileName+'.svn';
+    TempOutputFile := SysUtils.GetTempFileName('','FPCUPTMP')+'.svn';
     Command:=Command+' &> '+TempOutputFile;
     ExecuteSpecialDue2EmptyString:=True;
   end;
@@ -397,7 +397,7 @@ begin
   if Pos('emptystring',Command)>0 then
   begin
     Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
-    TempOutputFile := SysUtils.GetTempFileName+'.svn';
+    TempOutputFile := SysUtils.GetTempFileName('','FPCUPTMP')+'.svn';
     Command:=Command + ' &> '+TempOutputFile;
     ExecuteSpecialDue2EmptyString:=True;
   end;

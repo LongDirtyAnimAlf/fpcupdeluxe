@@ -1309,7 +1309,7 @@ begin
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
-      TempArchive := SysUtils.GetTempFileName+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
+      TempArchive := SysUtils.GetTempFileName('','FPCUPTMP')+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
       WritelnLog(infotext+'Going to download '+RemoteURL+' into '+TempArchive,false);
       try
         result:=Download(FUseWget, RemoteURL, TempArchive);

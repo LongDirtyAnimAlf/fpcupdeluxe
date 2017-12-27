@@ -178,13 +178,13 @@ begin
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
   {$endif}
 
-  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR defined(Haiku)}
+  {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)) OR defined(Haiku)}
   // disable some features
   OldBtn.Visible:=False;
   DinoBtn.Visible:=False;
   ButtonInstallCrossCompiler.Visible:=False;
   {$endif}
-  {$IF defined(CPUAARCH64)}
+  {$IF defined(CPUAARCH64) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2))}
   // disable some features
   FixesBtn.Visible:=False;
   StableBtn.Visible:=False;
@@ -1191,14 +1191,6 @@ var
   LazarusRevision,LazarusBranch:string;
 begin
 
-  {$ifdef CPUAARCH64}
-  if (Sender<>TrunkBtn) AND (Sender<>NPBtn) then
-  begin
-    MessageDlg('Aarch64 is only supported by FPC trunk (or NewPascal).',mtError,[],0);
-    exit;
-  end;
-  {$endif CPUAARCH64}
-
   DisEnable(Sender,False);
   try
     PrepareRun;
@@ -1482,8 +1474,12 @@ var
   fileList: TStringList;
   {$endif}
 begin
-
   result:=false;
+
+  // no cross-bins available
+  {$ifndef FPCUPBINSURL}
+  ShowMessage('No tools available online. You could do a feature request ... ;-)');
+  {$else}
 
   if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
   begin
@@ -2024,14 +2020,6 @@ begin
 
           if MissingCrossBins then
           begin
-
-            // no cross-bins available
-            if (Length(FPCUPBINSURL)=0) then
-            begin
-              ShowMessage('No tools available online. You could do a feature request ... ;-)');
-              exit;
-            end;
-
             success:=false;
             AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
 
@@ -2235,6 +2223,7 @@ begin
 
   result:=success;
 
+  {$endif}
 end;
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
@@ -2732,6 +2721,10 @@ begin
       {$ifdef CPUAARCH64}
       aTarget:='trunk';
       {$endif}
+      {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
+      aTarget:='trunk';
+      {$ENDIF}
+
       aURL:=installerUniversal.GetAlias('fpcURL',aTarget);
       aURL:=ReadString('URL','fpcURL',aURL);
       // correct for [unsafe] URL in old fpcup.ini

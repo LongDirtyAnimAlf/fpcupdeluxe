@@ -1021,6 +1021,7 @@ begin
   s:=STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
   s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
   s:=Trim(s);
+
   {$IFDEF UNIX}
   s:='-Sg '+s;
   {$ENDIF}
@@ -1321,6 +1322,12 @@ begin
   exit;
   {$ENDIF}
 
+  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
+  if (s=FPCTRUNKVERSION) then result:=FPCTRUNKVERSION
+  else result:='0.0.0';
+  exit;
+  {$ENDIF}
+
   result:='0.0.0';
 
   if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
@@ -1359,6 +1366,11 @@ begin
   result:='0.0.0';
 
   {$IFDEF CPUAARCH64}
+  result:=FPCTRUNKVERSION;
+  exit;
+  {$ENDIF}
+
+  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
   result:=FPCTRUNKVERSION;
   exit;
   {$ENDIF}
@@ -1519,7 +1531,7 @@ begin
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
-  BootstrapArchive := SysUtils.GetTempFileName;
+  BootstrapArchive := SysUtils.GetTempFileName('','FPCUPTMP');
   if OperationSucceeded then
   begin
     OperationSucceeded:=Download(FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
@@ -1932,6 +1944,9 @@ begin
             j:=GetFreeBSDVersion;
             s:=s+'11'; // version 11 only for now
             {$endif FREEBSD}
+            {$IF DEFINED(CPUPOWERPC64) AND DEFINED(LINUX) AND DEFINED(FPC_ABI_ELFV2)}
+            s:=s+'le';
+            {$ENDIF}
 
             aFPCUPBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
@@ -2236,9 +2251,13 @@ begin
     end else infoln(infotext+'Available bootstrapper has correct version !',etInfo);
 
     {$IFDEF CPUAARCH64}
-    // we build with >3.0 (trunk), while aarch64 is not available for FPC =< 3.0
+  // we build with >=3.1.1 (trunk), while aarch64 is not available for FPC =< 3.1.1
     FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF CPUAARCH64}
+  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
+  // we build with >=3.1.1 (trunk), while ppc64le is not available for FPC =< 3.1.1
+  FBootstrapCompilerOverrideVersionCheck:=true;
+  {$ENDIF}
 
     if (bIntermediateNeeded) then
     begin

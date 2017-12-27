@@ -1037,7 +1037,7 @@ function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; va
 var
   BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
-  DiffFile: String;
+  DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
   DiffFileSL:TStringList;
   Output: string = '';
@@ -1118,40 +1118,28 @@ begin
 
          ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
 
-         {$IFNDEF MSWINDOWS}
          if ReturnCode<>0 then
          begin
            // Patching can go wrong when line endings are not compatible
            // This happens e.g. with bgracontrols that have CRLF in the source files
-           // Try to circumvent this problem by trick below (replacing line enddings)
+           // Try to circumvent this problem by replacing line enddings
            if Pos('different line endings',Output)>0 then
            begin
-             ReturnCode:=ExecuteCommandInDir('unix2dos '+DiffFile, FSourceDirectory, FVerbose);
-             if ReturnCode<>0 then
+             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
+             //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
+
+             DiffFileCorrectedPath:=SysUtils.GetTempDir+ExtractFileName(DiffFile);
+             if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
              begin
-               DiffFileSL:=TStringList.Create();
-               try
-                 DiffFileSL.LoadFromFile(DiffFile);
-                 DiffFileSL.TextLineBreakStyle:=tlbsCRLF;
-                 DiffFileSL.SaveToFile(DiffFile);
-                 ReturnCode:=0;
-               finally
-                 DiffFileSL.Free();
+               if FileExists(DiffFileCorrectedPath) then
+               begin
+                 ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFileCorrectedPath, FSourceDirectory, Output, FVerbose);
+                 DeleteFile(DiffFileCorrectedPath);
                end;
-               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
-               //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
-             end;
-             if ReturnCode=0 then
-             begin
-               // check for default values
-               if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
-                  then LocalPatchCmd:=FPatchCmd + ' -p0 --binary -i '
-                  else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
-               ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + DiffFile, FSourceDirectory, Output, FVerbose);
              end;
            end;
          end;
-         {$ENDIF}
+
          // Report error, but continue !
          if ReturnCode<>0 then
          begin
@@ -1394,7 +1382,7 @@ begin
 
   ForceDirectoriesUTF8(FSVNDirectory);
 
-  SVNZip := SysUtils.GetTempFileName + '.zip';
+  SVNZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
   try
     if OperationSucceeded then
     begin
@@ -1465,7 +1453,7 @@ begin
 
   OperationSucceeded := false;
 
-  OpenSSLZip := SysUtils.GetTempFileName + '.zip';
+  OpenSSLZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
 
   try
     //always get this file with the native downloader !!
@@ -1548,7 +1536,7 @@ begin
   if NOT FileExists(JasminDir+'jasmin.jar') then
   begin
     OperationSucceeded := false;
-    JasminZip := SysUtils.GetTempFileName + '.zip';
+    JasminZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
     try
       OperationSucceeded:=GetFile(SourceURL,JasminZip);
       if (NOT OperationSucceeded) then
@@ -1622,10 +1610,10 @@ begin
   if FVerbose then
   begin
     // Set up initial output
-    if Assigned(FLogVerbose)=false then
+    if (NOT Assigned(FLogVerbose)) then
     begin
       FLogVerbose:=TLogger.Create;
-      FLogVerbose.LogFile:=SysUtils.GetTempFileName;
+      FLogVerbose.LogFile:=SysUtils.GetTempFileName('','FPCUPLOG');
       WritelnLog(localinfotext+'Verbose output saved to ' + FLogVerbose.LogFile, false);
     end;
     FLogVerbose.WriteLog(Output,false);
@@ -1715,7 +1703,7 @@ var
   TempFileName: string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+': ';
-  TempFileName := SysUtils.GetTempFileName;
+  TempFileName := SysUtils.GetTempFileName('','FPCUPDUMP');
   if IsException then
   begin
     WritelnLog(etError, localinfotext+'Exception raised running ' + Sender.ResultingCommand, true);
@@ -1926,6 +1914,7 @@ begin
         PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpcup';
 
   // always remove the previous patches when updating the source !!!
+  // to be decided if this is (always) correct: for now, we delete the whole directory
   if (DirectoryExists(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
 
   LocalSourcePatches:=FSourcePatches;
@@ -2017,21 +2006,19 @@ begin
             if ReturnCode=0  then
             begin
               result:=true;
-              infoln(infotext+ModuleName + ' has been patched successfully with '+PatchList[i],etInfo);
+              writelnlog(etInfo, infotext+ModuleName+ ' has been patched successfully with '+PatchList[i] + '.', true);
             end
             else
             begin
-              result:=false;
-              writelnlog(etError, infotext+ModuleName+' Patching ' + ModuleName + ' with ' + PatchList[i] + ' failed.', true);
-              writelnlog(infotext+ModuleName+' patch output: ' + Output, true);
+              writelnlog(etError, infotext+ModuleName+' patching with ' + PatchList[i] + ' failed.', true);
+              writelnlog(etError, infotext+ModuleName+' patch output: ' + Output, true);
             end;
           end;
         end
         else
         begin
-          result:=false;
-          infoln(infotext+'Strange: could not find patchfile '+PatchFilePath, etWarning);
-          writelnlog(etError, infotext+'Patching ' + ModuleName + ' with ' + PatchList[i] + ' failed due to missing patch file.', true);
+          result:=true;
+          writelnlog(etWarning, infotext+ModuleName+ ' patching with ' + PatchList[i] + ' failed due to missing patch file ('+PatchFilePath+').', true);
         end;
       end;
     finally

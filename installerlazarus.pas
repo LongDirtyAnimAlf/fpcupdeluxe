@@ -98,7 +98,7 @@ const
     'Cleanmodule lazarus;' +
     'Buildmodule lazbuild;' +
     'ConfigModule lazarus;' +
-    'Do UniversalDefault;'+
+    //'Do UniversalDefault;'+
     'Do USERIDE;'+
     'End;' +
 
@@ -691,7 +691,7 @@ begin
           if j=0 then
           begin
             LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count', 2);
-            LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Width/Value', 250);
+            LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Width/Value', 260);
 
             LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Version', 1);
             LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/ToolBar1/Count', 12);

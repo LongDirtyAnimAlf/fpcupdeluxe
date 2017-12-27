@@ -405,7 +405,7 @@ begin
     aType:=GetStringFromBuffer(ResourceType);
     RT:=StrToIntDef(aType,0);
   end;
-  // get only the plain files (resource type 10)
+  // get only the plain files (resource type 10; RT_RCDATA)
   if RT=10 then EnumResourceNames(ModuleHandle,ResourceType,@ResNameProc,lParam);
   Result:=true;
 end;
@@ -886,7 +886,7 @@ begin
   end;
   if found then Major:=j;
 
-  // move towards first numerical
+  // move towards second numerical
   while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
   // get minor version
   j:=0;
@@ -899,7 +899,7 @@ begin
   end;
   if found then Minor:=j;
 
-  // move towards first numerical
+  // move towards third numerical
   while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
   // get build version
   j:=0;
