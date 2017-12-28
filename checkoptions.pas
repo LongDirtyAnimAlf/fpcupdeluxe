@@ -76,6 +76,7 @@ begin
           LeftOverOptions.Add('uninstall');
           LeftOverOptions.Add('getfullrepo');
           LeftOverOptions.Add('getfilesonly');
+          LeftOverOptions.Add('rebuildonly');
           LeftOverOptions.Add('disablejobs');
           LeftOverOptions.Add('usewget');
           LeftOverOptions.Add('fpcsplit');
@@ -318,6 +319,10 @@ begin
       // getfullrepo is a depreciated option ... left here for compatibility only
       Options.GetOptionNoParam('','getfullrepo',false);
       FInstaller.ExportOnly:=(Options.GetOptionNoParam('','getfilesonly'));
+      if (Options.GetOptionNoParam('','rebuildonly')) then
+      begin
+        FInstaller.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
+      end;
       FInstaller.NoJobs:=Options.GetOptionNoParam('','disablejobs');
       FInstaller.UseGitClient:=Options.GetOptionNoParam('','usegitclient',false);
       FInstaller.UseWget:=Options.GetOptionNoParam('','usewget');

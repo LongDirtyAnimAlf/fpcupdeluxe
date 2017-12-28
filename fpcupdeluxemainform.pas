@@ -1466,20 +1466,16 @@ end;
 
 function TForm1.InstallCrossCompiler(Sender: TObject):boolean;
 var
-  BinsURL,LibsURL,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
+  BinsFileName,LibsFileName,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   i:integer;
   {$ifdef Unix}
   fileList: TStringList;
   {$endif}
+  BaseBinsURL,BaseLibsURL:string;
 begin
   result:=false;
-
-  // no cross-bins available
-  {$ifndef FPCUPBINSURL}
-  ShowMessage('No tools available online. You could do a feature request ... ;-)');
-  {$else}
 
   if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
   begin
@@ -1926,37 +1922,37 @@ begin
                    end;
         end;
 
-        BinsURL:='';
+        BinsFileName:='';
 
         AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
-        if FPCupManager.CrossCPU_Target='arm' then BinsURL:='ARM';
-        if FPCupManager.CrossCPU_Target='aarch64' then BinsURL:='Aarch64';
-        if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='x64';
-        if FPCupManager.CrossCPU_Target='i386' then BinsURL:='i386';
-        if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='PowerPC';
-        if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='PowerPC64';
-        if FPCupManager.CrossCPU_Target='mips' then BinsURL:='Mips';
-        if FPCupManager.CrossCPU_Target='mipsel' then BinsURL:='Mipsel';
-        if FPCupManager.CrossCPU_Target='sparc' then BinsURL:='Sparc';
-        if FPCupManager.CrossCPU_Target='avr' then BinsURL:='AVR';
-        if FPCupManager.CrossCPU_Target='i8086' then BinsURL:='i8086';
+        if FPCupManager.CrossCPU_Target='arm' then BinsFileName:='ARM';
+        if FPCupManager.CrossCPU_Target='aarch64' then BinsFileName:='Aarch64';
+        if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x64';
+        if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='i386';
+        if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='PowerPC';
+        if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='PowerPC64';
+        if FPCupManager.CrossCPU_Target='mips' then BinsFileName:='Mips';
+        if FPCupManager.CrossCPU_Target='mipsel' then BinsFileName:='Mipsel';
+        if FPCupManager.CrossCPU_Target='sparc' then BinsFileName:='Sparc';
+        if FPCupManager.CrossCPU_Target='avr' then BinsFileName:='AVR';
+        if FPCupManager.CrossCPU_Target='i8086' then BinsFileName:='i8086';
 
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          if FPCupManager.CrossCPU_Target='i386' then BinsURL:='x86';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsURL:='x86';
-          if FPCupManager.CrossCPU_Target='powerpc' then BinsURL:='powerpc';
-          if FPCupManager.CrossCPU_Target='powerpc64' then BinsURL:='powerpc';
+          if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='x86';
+          if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x86';
+          if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='powerpc';
+          if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
         end;
 
-        if FPCupManager.CrossOS_Target='freebsd' then BinsURL:='FreeBSD'+BinsURL else
-          if FPCupManager.CrossOS_Target='openbsd' then BinsURL:='OpenBSD'+BinsURL else
-            if FPCupManager.CrossOS_Target='msdos' then BinsURL:='MSDos'+BinsURL else
-              BinsURL:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsURL;
+        if FPCupManager.CrossOS_Target='freebsd' then BinsFileName:='FreeBSD'+BinsFileName else
+          if FPCupManager.CrossOS_Target='openbsd' then BinsFileName:='OpenBSD'+BinsFileName else
+            if FPCupManager.CrossOS_Target='msdos' then BinsFileName:='MSDos'+BinsFileName else
+              BinsFileName:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsFileName;
 
         // normally, we have the same names for libs and bins URL
-        LibsURL:=BinsURL;
+        LibsFileName:=BinsFileName;
 
         // normally, we have the standard names for libs and bins paths
         LibPath:=DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target;
@@ -1980,7 +1976,7 @@ begin
           if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
           begin
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
-            LibsURL:=StringReplace(LibsURL,'Aarch64','ARM',[rfIgnoreCase]);
+            LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
           end;
         end;
 
@@ -1989,7 +1985,7 @@ begin
           // PowerPC64 is special: only little endian libs for now
           if (FPCupManager.CrossCPU_Target='powerpc64') then
           begin
-            LibsURL:=StringReplace(LibsURL,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
+            LibsFileName:=StringReplace(LibsFileName,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
           end;
 
           // ARM is special: can be hard or softfloat (Windows only binutils yet)
@@ -1999,7 +1995,7 @@ begin
             if (Pos('SOFT',UpperCase(FPCupManager.CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCupManager.FPCOPT))>0) then
             begin
               // use softfloat binutils
-              BinsURL:=StringReplace(LibsURL,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
+              BinsFileName:=StringReplace(LibsFileName,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
             end;
           end;
           {$endif}
@@ -2020,13 +2016,45 @@ begin
 
           if MissingCrossBins then
           begin
+            BaseBinsURL:='';
+
+            if GetTargetOS='win32' then BaseBinsURL:='wincrossbins_v1.0'
+            else
+               if GetTargetOS='win64' then BaseBinsURL:='wincrossbins_v1.0'
+               else
+                  if GetTargetOS='linux' then
+                  begin
+                    if GetTargetCPU='i386' then BaseBinsURL:='linuxi386crossbins_v1.0';
+                    if GetTargetCPU='x86_64' then BaseBinsURL:='linuxx64crossbins_v1.0';
+                  end
+                  else
+                    if GetTargetOS='freebsd' then
+                    begin
+                      if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins_v1.0';
+                    end
+                    else
+                      if GetTargetOS='darwin' then
+                      begin
+                        if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins_v1.0';
+                        if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins_v1.0';
+                      end;
+
+            // no cross-bins available
+            if (Length(BaseBinsURL)=0) then
+            begin
+              ShowMessage('No tools available online. You could do a feature request ... ;-)');
+              exit;
+            end;
+
             success:=false;
             AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
 
+            BaseBinsURL:=FPCUPGITREPO+'/releases/download/'+BaseBinsURL;
+
             {$ifdef MSWINDOWS}
-            DownloadURL:=FPCUPBINSURL+'/'+'WinCrossBins'+BinsURL;
+            DownloadURL:=BaseBinsURL+'/'+'WinCrossBins'+BinsFileName;
             {$else}
-            DownloadURL:=FPCUPBINSURL+'/'+'CrossBins'+BinsURL;
+            DownloadURL:=BaseBinsURL+'/'+'CrossBins'+BinsFileName;
             {$endif MSWINDOWS}
 
             //default to zip
@@ -2121,8 +2149,10 @@ begin
 
           if MissingCrossLibs then
           begin
+            BaseLibsURL:=FPCUPGITREPO+'/releases/download/crosslibs_v1.1';
+
             AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
-            DownloadURL:=FPCUPLIBSURL+'/'+'CrossLibs'+LibsURL;
+            DownloadURL:=BaseLibsURL+'/'+'CrossLibs'+LibsFileName;
 
             // default to zip
             DownloadURL:=DownloadURL+'.zip';
@@ -2222,8 +2252,6 @@ begin
   end;
 
   result:=success;
-
-  {$endif}
 end;
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
