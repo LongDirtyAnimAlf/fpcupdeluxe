@@ -1939,14 +1939,14 @@ begin
             {$ifdef CPUARMHF}
             s:=s+'hf';
             {$endif CPUARMHF}
+            {$IF DEFINED(CPUPOWERPC64) AND DEFINED(LINUX) AND DEFINED(FPC_ABI_ELFV2)}
+            s:=s+'le';
+            {$ENDIF}
             s:=s+'-'+GetTargetOS;
             {$ifdef FREEBSD}
             j:=GetFreeBSDVersion;
             s:=s+'11'; // version 11 only for now
             {$endif FREEBSD}
-            {$IF DEFINED(CPUPOWERPC64) AND DEFINED(LINUX) AND DEFINED(FPC_ABI_ELFV2)}
-            s:=s+'le';
-            {$ENDIF}
 
             aFPCUPBootstrapURL:=FPCUPGITREPO+
               '/releases/download/bootstrappers_v1.0/'+
@@ -1955,7 +1955,7 @@ begin
             infoln(localinfotext+'Checking existence of: '+aFPCUPBootstrapURL,etDebug);
             aFPCUPCompilerFound:=aDownLoader.checkURL(aFPCUPBootstrapURL);
 
-            if NOT aFPCUPCompilerFound then
+            if (NOT aFPCUPCompilerFound) then
             begin
               // also try the privately hosted repo of fpcupdeluxe for locations where GitHub is blocked.
               aFPCUPBootstrapURL:=FPCUPPRIVATEGITREPO+
@@ -1980,7 +1980,7 @@ begin
             end;
           end;
 
-          if NOT aFPCUPCompilerFound then
+          if (NOT aFPCUPCompilerFound) then
           begin
             aCompilerList.Sorted:=true;
             for i:=0 to Pred(aCompilerList.Count) do
@@ -1989,6 +1989,9 @@ begin
               {$ifdef CPUARMHF}
               s:=s+'hf';
               {$endif CPUARMHF}
+              {$IF DEFINED(CPUPOWERPC64) AND DEFINED(LINUX) AND DEFINED(FPC_ABI_ELFV2)}
+              s:=s+'le';
+              {$ENDIF}
               s:=s+'-'+GetTargetOS;
               {$ifdef FREEBSD}
               j:=GetFreeBSDVersion;
@@ -2251,13 +2254,13 @@ begin
     end else infoln(infotext+'Available bootstrapper has correct version !',etInfo);
 
     {$IFDEF CPUAARCH64}
-  // we build with >=3.1.1 (trunk), while aarch64 is not available for FPC =< 3.1.1
+    // we build with >=3.1.1 (trunk), while aarch64 is not available for FPC =< 3.1.1
     FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF CPUAARCH64}
-  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-  // we build with >=3.1.1 (trunk), while ppc64le is not available for FPC =< 3.1.1
-  FBootstrapCompilerOverrideVersionCheck:=true;
-  {$ENDIF}
+    {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
+    // we build with >=3.1.1 (trunk), while ppc64le is not available for FPC =< 3.1.1
+    FBootstrapCompilerOverrideVersionCheck:=true;
+    {$ENDIF}
 
     if (bIntermediateNeeded) then
     begin
