@@ -1026,7 +1026,7 @@ begin
   s:='-Sg '+s;
   {$ENDIF}
 
-  s:=s+' -dREVINC';
+  //s:=s+' -dREVINC';
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
   // soft 80 bit float if available
@@ -1334,6 +1334,7 @@ begin
   else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'
   else if ((s='3.0.3') OR (s='3.0.2') OR (s='3.0.1')) then result:='3.0.0'
   else if s='3.0.0' then result:='2.6.4'
+  else if s='2.6.5' then result:='2.6.2'
   else if s='2.6.4' then result:='2.6.2'
   else if s='2.6.2' then result:='2.6.0'
   else if s='2.6.0' then result:='2.4.4'
@@ -2181,7 +2182,13 @@ begin
       begin
         infoln(infotext+'Could not determine required bootstrap compiler version. Should not happen. Aborting.',etError);
         exit(false);
-      end else infoln(infotext+'To compile this FPC, we use a compiler with version : '+RequiredBootstrapVersionLow,etInfo);
+      end
+      else
+      begin
+        infoln(infotext+'To compile this FPC, we use a compiler with version : '+RequiredBootstrapVersionLow,etInfo);
+        // we always build with the highest bootstrapper, so, in this case, make high = low !!
+        RequiredBootstrapVersionHigh:=RequiredBootstrapVersionLow;
+      end;
     end else infoln(infotext+'To compile this FPC, we need (required) a compiler with version '+RequiredBootstrapVersionLow+' or '+RequiredBootstrapVersionHigh,etInfo);
 
     OperationSucceeded:=false;
