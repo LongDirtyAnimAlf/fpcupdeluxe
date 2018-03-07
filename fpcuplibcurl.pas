@@ -826,6 +826,10 @@ begin
     {$endif}
     if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.4');
     if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.3');
+
+    if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'-gnutls.'+SharedSuffix+'.4');
+    if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'-gnutls.'+SharedSuffix+'.3');
+
     if libcurl = NilHandle then libcurl:= LoadLibrary(External_library+'.'+SharedSuffix+'.0');
 
     if (libcurl <> NilHandle) then

@@ -63,10 +63,8 @@ uses
   Classes, SysUtils, strutils,
   typinfo,
   zipper,
-  {$ifdef ENABLENATIVE}
-  fphttpclient,
   //sslsockets, fpopenssl,
-  {$endif}
+  fphttpclient, // for github api file list and others
   //fpftpclient,
   eventlog;
 
@@ -1207,14 +1205,14 @@ end;
 
 procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
 var
-  Http: TFPHttpClient;
+  Http: TFPHTTPClient;
   Content : string;
   Json : TJSONData;
   JsonObject : TJSONObject;
   JsonArray: TJSONArray;
   i,j:integer;
 begin
-  Http:=TFPHttpClient.Create(Nil);
+  Http:=TFPHTTPClient.Create(Nil);
   try
      Http.AddHeader('User-Agent',USERAGENT);
      Http.AllowRedirect:=true;
