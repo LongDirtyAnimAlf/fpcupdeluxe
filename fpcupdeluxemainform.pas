@@ -338,7 +338,6 @@ begin
     AddMessage('');
     DisEnable(nil,False);
   end;
-
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -2562,6 +2561,7 @@ begin
 
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;
+  FPCupManager.NativeFPCBootstrapCompiler:=(NOT Form2.FpcupBootstrappersOnly);
 
   // Set default LCL platforms
   {$ifdef Darwin}
@@ -2789,6 +2789,8 @@ begin
 
       Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',True);
 
+      Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
+
       listModules.ClearSelection;
       SortedModules:=TStringList.Create;
       try
@@ -2847,6 +2849,8 @@ begin
       WriteString('Patches','LazarusPatches',Form2.LazPatches);
 
       WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
+
+      WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       modules:='';
       for i:=0 to listModules.Count-1 do

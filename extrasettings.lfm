@@ -359,6 +359,22 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 11
     end
+    object CheckFpcupBootstrappersOnly: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckSendInfo
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Location and install info will be send to public central fpcupdeluxe server.'
+      Top = 304
+      Width = 246
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Only use fpcup bootstrappers (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 12
+    end
   end
   object GroupBox4: TGroupBox
     AnchorSideLeft.Control = GroupBox2

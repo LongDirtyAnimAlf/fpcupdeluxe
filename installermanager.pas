@@ -446,6 +446,7 @@ type
     FNoJobs:boolean;
     FUseGitClient:boolean;
     FSwitchURL:boolean;
+    FNativeFPCBootstrapCompiler:boolean;
     FSequencer: TSequencer;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
@@ -552,6 +553,8 @@ type
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
+    property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
+
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS: boolean;
@@ -994,6 +997,7 @@ begin
   ExportOnly:=false;
   NoJobs:=false;
   UseGitClient:=false;
+  FNativeFPCBootstrapCompiler:=true;
 
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
@@ -1371,7 +1375,8 @@ begin
     FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
     FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
-    (FInstaller as TFPCInstaller).SourcePatches:=FParent.FFPCPatches;
+    (FInstaller as TFPCInstaller).SourcePatches:=FParent.FPCPatches;
+    (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=FParent.NativeFPCBootstrapCompiler;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;

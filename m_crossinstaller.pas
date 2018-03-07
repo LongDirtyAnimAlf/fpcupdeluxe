@@ -58,6 +58,11 @@ const
 
   NEWPASCALGITREPO='https://github.com/newpascal';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
+
+  BOOTSTRAPPERVERSION='bootstrappers_v1.0';
+  FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
+  FPCUPGITREPOBOOTSTRAPPERAPI='https://api.github.com/repos/newpascal/fpcupdeluxe/releases/tags/'+BOOTSTRAPPERVERSION;
+
   FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
 type

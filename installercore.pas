@@ -47,7 +47,7 @@ const
   CHM_URL_LATEST_SVN = FPCSVNURL + '/lazarus/binaries/docs/chm';
 
   DEFAULTFPCVERSION = '3.0.4';
-  DEFAULTLAZARUSVERSION = '1.8.0';
+  DEFAULTLAZARUSVERSION = '1.8.2';
 
   {$IFDEF DEBUG}
   STANDARDCOMPILEROPTIONS='-vewh';
@@ -1960,7 +1960,9 @@ begin
       if (PatchList.Count>0) then
       begin
         //add standard patches by fpcup(deluxe)
-        LocalSourcePatches:=LocalSourcePatches+','+PatchList.CommaText;
+        if Length(LocalSourcePatches)>0
+           then LocalSourcePatches:=LocalSourcePatches+','+PatchList.CommaText
+           else LocalSourcePatches:=PatchList.CommaText;
       end;
     finally
       PatchList.Free;

@@ -270,6 +270,7 @@ procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
 {$IFDEF MSWINDOWS}
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
@@ -347,6 +348,7 @@ uses
   ftplist,
   {$endif}
   FileUtil, LazFileUtils, LazUTF8,
+  fpjson, jsonparser,
   uriparser
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
@@ -1200,6 +1202,38 @@ begin
     result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   finally
     aDownLoader.Destroy;
+  end;
+end;
+
+procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
+var
+  Http: TFPHttpClient;
+  Content : string;
+  Json : TJSONData;
+  JsonObject : TJSONObject;
+  JsonArray: TJSONArray;
+  i,j:integer;
+begin
+  Http:=TFPHttpClient.Create(Nil);
+  try
+     Http.AddHeader('User-Agent',USERAGENT);
+     Http.AllowRedirect:=true;
+     Content:=Http.Get(aURL);
+     Json:=GetJSON(Content);
+     try
+       JsonArray:=Json.FindPath('assets') as TJSONArray;
+       i:=JsonArray.Count;
+       while (i>0) do
+       begin
+         Dec(i);
+         JsonObject := JsonArray.Objects[i];
+         fileurllist.Add(JsonObject.Get('browser_download_url'));
+       end;
+     finally
+       Json.Free;
+     end;
+  finally
+    Http.Free;
   end;
 end;
 

@@ -72,6 +72,8 @@ begin
     // suppress all setfocus errors on Darwin, always
     if AnsiContainsText(line,'.setfocus') then continue;
     {$endif}
+    // suppress all SynEdit PaintLock errors, always
+    if AnsiContainsText(line,'PaintLock') then continue;
 
     if (NOT outputline) then
     begin

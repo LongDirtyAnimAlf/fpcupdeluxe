@@ -68,6 +68,7 @@ type
     CheckPackageRepo: TCheckBox;
     CheckUseLatestGDB: TCheckBox;
     CheckExtraVerbose: TCheckBox;
+    CheckFpcupBootstrappersOnly: TCheckBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditCrossBuildOptions: TEdit;
@@ -151,6 +152,9 @@ type
     function GetSendInfo:boolean;
     procedure SetSendInfo(value:boolean);
 
+    function GetFpcupBootstrappersOnly:boolean;
+    procedure SetFpcupBootstrappersOnly(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -200,6 +204,7 @@ type
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
     property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
+    property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -810,6 +815,16 @@ procedure TForm2.SetSendInfo(value:boolean);
 begin
   CheckSendInfo.Checked:=value;
 end;
+
+function TForm2.GetFpcupBootstrappersOnly:boolean;
+begin
+  result:=CheckFpcupBootstrappersOnly.Checked;
+end;
+procedure TForm2.SetFpcupBootstrappersOnly(value:boolean);
+begin
+  CheckFpcupBootstrappersOnly.Checked:=value;
+end;
+
 
 function TForm2.GetFPCOptions:string;
 begin
