@@ -284,10 +284,11 @@ implementation
 uses
   FileUtil, LazFileUtils, LazUTF8
   {$ifndef Haiku}
-  ,ssl_openssl
+  //,ssl_openssl
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
-  ,blcksock, ssl_openssl_lib
+  //,blcksock, ssl_openssl_lib
+  ,fpopenssl,openssl
   {$ENDIF}
   {$ENDIF}
   ;
@@ -443,33 +444,18 @@ begin
 
     if OperationSucceeded then
     begin
-      if NOT IsSSLloaded then
+      // always get ssl libs if they are not there: sometimes system wide libs do not work
+      if (NOT FileExists(SafeGetApplicationPath+'libeay32.dll')) OR (NOT FileExists(SafeGetApplicationPath+'ssleay32.dll')) then
       begin
-        if FileExists(SafeGetApplicationPath+'libeay32.dll') AND FileExists(SafeGetApplicationPath+'ssleay32.dll')
-         then infoln(localinfotext+'Found OpenSLL library files.',etDebug)
-         else
-         begin
-           if FUseWget then
-           begin
-             DestroySSLInterface; // disable ssl and release libs
-             OperationSucceeded:=DownloadOpenSSL; // libcurl+wget need these libs for https
-           end
-           else
-           begin
-             OperationSucceeded:=InitSSLInterface;
-             if OperationSucceeded then SSLImplementation:=TSSLOpenSSL else
-             begin
-               // no system wide opensssl libs found: try to get them
-               OperationSucceeded:=DownloadOpenSSL;
-               if OperationSucceeded then
-               begin
-                 OperationSucceeded:=InitSSLInterface;
-                 if OperationSucceeded then SSLImplementation:=TSSLOpenSSL;
-               end;
-             end;
-           end;
-         end;
+        infoln(localinfotext+'Getting OpenSLL library files.',etInfo);
+        DownloadOpenSSL;
+        DestroySSLInterface; // disable ssl and release libs
+      end
+      else
+      begin
+        infoln(localinfotext+'Found OpenSLL library files.',etDebug);
       end;
+      if (NOT IsSSLloaded) then InitSSLInterface;
     end;
 
     // Get patch binary from default binutils URL

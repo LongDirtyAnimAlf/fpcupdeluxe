@@ -63,8 +63,8 @@ uses
   Classes, SysUtils, strutils,
   typinfo,
   zipper,
-  //sslsockets, fpopenssl,
   fphttpclient, // for github api file list and others
+  fpopenssl,openssl,
   //fpftpclient,
   eventlog;
 
