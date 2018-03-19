@@ -80,6 +80,7 @@ object Form1: TForm1
       'aarch64'
       'ppc'
       'ppc64'
+      'mips'
       'mipsel'
       'avr'
       'jvm'

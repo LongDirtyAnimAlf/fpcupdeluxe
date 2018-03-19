@@ -53,6 +53,7 @@ uses
   m_any_to_androidjvm,
   m_any_to_androidaarch64, //not yet available !!
   m_any_to_linuxarm,
+  m_any_to_linuxmips,
   m_any_to_linuxmipsel,
   m_any_to_linuxpowerpc64,
   m_any_to_linuxaarch64,

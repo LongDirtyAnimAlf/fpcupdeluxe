@@ -1597,18 +1597,9 @@ begin
 
   if (NOT FPCupManager.CheckValidCPUOS) then
   begin
-    if Sender<>nil then
-    begin
-      Application.MessageBox(PChar('FPC source: No valid CPU / OS target.'), PChar('Configuration error'), MB_ICONERROR);
-    end
-    else
-    begin
-      memoSummary.Lines.Append('');
-      memoSummary.Lines.Append('FPC source: No valid CPU / OS target. Skipping');
-    end;
-    FPCupManager.CrossOS_Target:=''; // cleanup
-    FPCupManager.CrossCPU_Target:=''; // cleanup
-    exit;
+    memoSummary.Lines.Append('');
+    memoSummary.Lines.Append('FPC source (fpmkunit.pp): No valid CPU / OS target.');
+    memoSummary.Lines.Append('Cross-building will continue, but with great changes of errors !!');
   end;
 
   if assigned(CrossInstallers) then
