@@ -354,6 +354,9 @@ uses
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   ,unix,baseunix
+  {$ifdef darwin}
+  ,ns_url_request
+  {$endif}
   {$ENDIF}
   {$IFDEF ENABLEWGET}
   // for wget downloader
@@ -1190,9 +1193,45 @@ end;
 
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 var
+  {$ifdef Darwin}
+  Http:TNSHTTPSendAndReceive;
+  Ms: TMemoryStream;
+  Headers: TStringList;
+  {$else}
   aDownLoader:TBasicDownLoader;
+  {$endif}
 begin
   result:=false;
+
+  {$ifdef Darwin}
+  // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
+  // So, use client by Phil, a Lazarus forum member
+  // See: https://macpgmr.github.io/
+  Http:=TNSHTTPSendAndReceive.Create;
+  try
+    Http.Address := URL;
+    Headers := TStringList.Create;
+    try
+      Headers.Add('User-Agent=Mozilla/5.0 (compatible; fpweb)');
+      Headers.Add('Content-Type=application/json');
+      Ms := TMemoryStream.Create;
+      try
+        if Http.SendAndReceive(nil, Ms, Headers) then
+        begin
+          SysUtils.DeleteFile(TargetFile); // overwrite targetfile
+          Ms.SaveToFile(TargetFile);
+          result:=true;
+        end;
+      finally
+        Ms.Free;
+      end;
+    finally
+      Headers.Free;
+    end;
+  finally
+    Http.Free;
+  end;
+  {$else}
   if UseWget
      then aDownLoader:=TWGetDownLoader.Create
      else aDownLoader:=TNativeDownLoader.Create;
@@ -1201,37 +1240,76 @@ begin
   finally
     aDownLoader.Destroy;
   end;
+  {$endif}
 end;
 
 procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
 var
+  {$ifdef Darwin}
+  Http:TNSHTTPSendAndReceive;
+  Ms: TMemoryStream;
+  Headers: TStringList;
+  {$else}
   Http: TFPHTTPClient;
+  {$endif}
   Content : string;
   Json : TJSONData;
   JsonObject : TJSONObject;
   JsonArray: TJSONArray;
-  i,j:integer;
+  i:integer;
 begin
+  {$ifdef Darwin}
+  // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
+  // So, use client by Phil, a Lazarus forum member
+  // See: https://macpgmr.github.io/
+  Http:=TNSHTTPSendAndReceive.Create;
+  try
+    Http.Address := aURL;
+    Headers := TStringList.Create;
+    try
+      Headers.Add('User-Agent=Mozilla/5.0 (compatible; fpweb)');
+      Headers.Add('Content-Type=application/json');
+      Ms := TMemoryStream.Create;
+      try
+        if Http.SendAndReceive(nil, Ms, Headers) then
+        begin
+          SetLength(Content, Ms.Size);
+          if Ms.Size > 0 then
+              Ms.Read(Content[1], Ms.Size);
+        end;
+      finally
+        Ms.Free;
+      end;
+    finally
+      Headers.Free;
+    end;
+  finally
+    Http.Free;
+  end;
+  {$else}
   Http:=TFPHTTPClient.Create(Nil);
   try
      Http.AddHeader('User-Agent',USERAGENT);
+     Http.AddHeader('Content-Type', 'application/json');
+     Http.IOTimeout:=5000;
      Http.AllowRedirect:=true;
      Content:=Http.Get(aURL);
-     Json:=GetJSON(Content);
-     try
-       JsonArray:=Json.FindPath('assets') as TJSONArray;
-       i:=JsonArray.Count;
-       while (i>0) do
-       begin
-         Dec(i);
-         JsonObject := JsonArray.Objects[i];
-         fileurllist.Add(JsonObject.Get('browser_download_url'));
-       end;
-     finally
-       Json.Free;
-     end;
   finally
     Http.Free;
+  end;
+  {$endif}
+  Json:=GetJSON(Content);
+  try
+    JsonArray:=Json.FindPath('assets') as TJSONArray;
+    i:=JsonArray.Count;
+    while (i>0) do
+    begin
+      Dec(i);
+      JsonObject := JsonArray.Objects[i];
+      fileurllist.Add(JsonObject.Get('browser_download_url'));
+    end;
+  finally
+    Json.Free;
   end;
 end;
 
