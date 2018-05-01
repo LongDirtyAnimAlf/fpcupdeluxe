@@ -19,7 +19,8 @@ interface
 
 uses 
   SysUtils,
-  Classes, 
+  Classes,
+  httpdefs,
 {$IF DEFINED(IPHONESIM) OR DEFINED(CPUARM) OR DEFINED(CPUAARCH64)}  //iOS
  {$IFDEF NoiPhoneAll}
   Foundation,
@@ -36,55 +37,204 @@ uses
   NSHelpers;
 
 type
-  TNSHTTPSendAndReceive = class(TObject)
+  // to be done
+  TProxyData = Class (TPersistent)
+  private
+    FHost: string;
+    FPassword: String;
+    FPort: Word;
+    FUserName: String;
+  Public
+    Property Host: string Read FHost Write FHost;
+    Property Port: Word Read FPort Write FPort;
+    Property UserName : String Read FUserName Write FUserName;
+    Property Password : String Read FPassword Write FPassword;
+  end;
+
+  TCustomNSHTTPSendAndReceive = class(TObject)
   private
     FAddress : string;
     FMethod : string;
+    FRequestHeaders: TStringList;
+    FResponseHeaders: TStringList;    // to be done
+    FUserName : string;               // to be done
+    FPassword : string;               // to be done
+    FProxy : TProxyData;              // to be done
     FTimeOut : Integer;
     FLastErrMsg : string;
+    FResponseStatusCode : NSInteger;
+    procedure SetRequestHeaders(const AValue: TStringList);
+    function GetProxy: TProxyData;
+    procedure SetProxy(AValue: TProxyData);
+    function CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean;
+  protected
+    property RequestHeaders : TStringList Read FRequestHeaders Write SetRequestHeaders;
+    property ResponseHeaders : TStringList Read FResponseHeaders;
+    property UserName : String Read FUserName Write FUserName;
+    property Password : String Read FPassword Write FPassword;
+    property Proxy : TProxyData Read GetProxy Write SetProxy;
   public
     property Address : string read FAddress write FAddress;
     property Method : string read FMethod write FMethod;
     property TimeOut : Integer read FTimeOut write FTimeOut;
     property LastErrMsg : string read FLastErrMsg;
+    property ResponseStatusCode: NSInteger read FResponseStatusCode;
     constructor Create;
-    function SendAndReceive(ARequest  : TStream;
-                            AResponse : TStream; 
-                            Headers   : TStringList) : Boolean; overload;
-    function SendAndReceive(out AResponse : string) : Boolean; overload;
-    function PostForm(const FormFields : string;
-                        out AResponse  : string) : Boolean; overload;
+    destructor Destroy;override;
+    procedure AddHeader(const AHeader, AValue: String);
+    function IndexOfHeader(const AHeader: String): Integer;
+    function GetHeader(const AHeader: String): String;
+    function SendAndReceive(ARequest  : TStream; AResponse : TStream; aMethod:string='GET') : Boolean;
+    procedure HTTPMethod(const AMethod, AURL: String; {%H-}Stream: TStream; const {%H-}AllowedResponseCodes: array of Integer);
+    function Get(const AURL: String): String;
+    procedure Get(const AURL: String; const LocalFileName: String);
   end;
 
+  TNSHTTPSendAndReceive = Class(TCustomNSHTTPSendAndReceive)
+  published
+    property RequestHeaders;
+    property ResponseHeaders;
+    property UserName;
+    property Password;
+    property Proxy;
+  end;
+
+  EHTTPClient = Class(EHTTP);
 
 implementation
 
-constructor TNSHTTPSendAndReceive.Create;
+constructor TCustomNSHTTPSendAndReceive.Create;
 begin
   inherited Create;
-  FMethod := 'GET';
   FTimeOut := 30;
+  FRequestHeaders := TStringList.Create;
+  FRequestHeaders.Add('User-Agent=Mozilla/5.0 (compatible; fpweb)');
+  FResponseHeaders := TStringList.Create;
+  FResponseStatusCode := 0;
 end;
 
-function TNSHTTPSendAndReceive.SendAndReceive(ARequest  : TStream;
-                                              AResponse : TStream; 
-                                              Headers   : TStringList) : Boolean;
+destructor TCustomNSHTTPSendAndReceive.Destroy;
+begin
+  FreeAndNil(FProxy);
+  FreeAndNil(FRequestHeaders);
+  FreeAndNil(FResponseHeaders);
+  inherited Destroy;
+end;
+
+procedure TCustomNSHTTPSendAndReceive.SetRequestHeaders(const AValue: TStringList);
+begin
+  if FRequestHeaders=AValue then exit;
+  FRequestHeaders.Assign(AValue);
+end;
+
+function TCustomNSHTTPSendAndReceive.GetProxy: TProxyData;
+begin
+  If not Assigned(FProxy) then
+  begin
+    FProxy:=TProxyData.Create;
+  end;
+  Result:=FProxy;
+end;
+
+procedure TCustomNSHTTPSendAndReceive.SetProxy(AValue: TProxyData);
+begin
+  if (AValue=FProxy) then exit;
+  Proxy.Assign(AValue);
+end;
+
+function TCustomNSHTTPSendAndReceive.CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean;
+var
+  I : Integer;
+begin
+  Result:=(High(AllowedResponseCodes)=-1);
+  if not Result then
+  begin
+    I:=Low(AllowedResponseCodes);
+    While (Not Result) and (I<=High(AllowedResponseCodes)) do
+    begin
+      Result:=(AllowedResponseCodes[i]=ACode);
+      Inc(I);
+    end
+  end;
+  {
+  If (Not Result) then
+  begin
+    if AllowRedirect then
+      Result:=IsRedirect(ACode);
+    If (ACode=401) then
+      Result:=Assigned(FOnPassword);
+  end;
+  }
+end;
+
+procedure TCustomNSHTTPSendAndReceive.AddHeader(const AHeader, AValue: String);
+var
+  J: Integer;
+begin
+  j:=IndexOfHeader(AHeader);
+  if (J<>-1) then
+    FRequestHeaders.Delete(j);
+  FRequestHeaders.Add(AHeader+': '+Avalue);
+end;
+
+function TCustomNSHTTPSendAndReceive.IndexOfHeader(const AHeader: String): Integer;
+var
+  LH : Integer;
+  H : String;
+begin
+  H:=LowerCase(AHeader);
+  LH:=Length(AHeader);
+  Result:=FRequestHeaders.Count-1;
+  While (Result>=0) and ((LowerCase(Copy(FRequestHeaders[Result],1,LH)))<>H) do
+    Dec(Result);
+end;
+
+function TCustomNSHTTPSendAndReceive.GetHeader(const AHeader: String): String;
+var
+  I : Integer;
+begin
+  I:=IndexOfHeader(AHeader);
+  if (I=-1) then
+    Result:=''
+  else
+    begin
+      Result:=FRequestHeaders[i];
+      I:=Pos(':',Result);
+      if (I=0) then
+        I:=Length(Result);
+      System.Delete(Result,1,I);
+      Result:=TrimLeft(Result);
+    end;
+end;
+
+procedure TCustomNSHTTPSendAndReceive.HTTPMethod(const AMethod, AURL: String;
+  Stream: TStream; const AllowedResponseCodes: array of Integer);
+begin
+  FMethod := AMethod;
+  Address := AURL;
+  SendAndReceive(nil,Stream);
+  if not CheckResponseCode(ResponseStatusCode,AllowedResponseCodes) then
+  begin
+    Raise EHTTPClient.CreateFmt('Unexpected response status code: %d',[ResponseStatusCode]);
+  end;
+end;
+
+function TCustomNSHTTPSendAndReceive.SendAndReceive(ARequest : TStream; AResponse : TStream; aMethod : string = 'GET') : Boolean;
  {Send HTTP request to current Address URL, returning downloaded data 
    in AResponse stream and True as function result. If error occurs, 
    return False and set LastErrMsg.
-  Optional ARequest stream can be used to set the HTTP request body.
-  Optional Headers list of name-value pairs can be used to set 
-   HTTP headers.}
+  Optional ARequest stream can be used to set the HTTP request body.}
 var
   urlRequest  : NSMutableURLRequest;
   requestData : NSMutableData;
   HdrNum      : Integer;
-  urlResponse : NSURLResponse;
+  urlResponse : NSHTTPURLResponse;
   error       : NSError;
   urlData     : NSData;
 begin
   Result := False;
   try
+    FMethod := aMethod;
     urlRequest := NSMutableURLRequest.requestWithURL_cachePolicy_timeoutInterval(
                    NSURL.URLWithString(StrToNSStr(Address)), 
                    NSURLRequestUseProtocolCachePolicy, Timeout);
@@ -93,7 +243,7 @@ begin
       urlRequest.setHTTPMethod(StrToNSStr(Method));
 
     if Assigned(ARequest) and (ARequest.Size > 0) then
-      begin
+    begin
       try
         requestData := NSMutableData.alloc.initWithLength(ARequest.Size);
         ARequest.Position := 0;
@@ -101,25 +251,27 @@ begin
         urlRequest.setHTTPBody(requestData);
       finally
         requestData.release;
-        end;
       end;
+    end;
 
-    if Assigned(Headers) then
+    if Assigned(RequestHeaders) then
+    begin
+      for HdrNum := 0 to RequestHeaders.Count-1 do
       begin
-      for HdrNum := 0 to Headers.Count-1 do
-        begin
-        urlRequest.addValue_forHTTPHeaderField(StrToNSStr(Headers.ValueFromIndex[HdrNum]),
-                                               StrToNSStr(Headers.Names[HdrNum]));
-        end;
+        urlRequest.addValue_forHTTPHeaderField(StrToNSStr(RequestHeaders.ValueFromIndex[HdrNum]),
+                                               StrToNSStr(RequestHeaders.Names[HdrNum]));
       end;
+    end;
 
     urlData := NSURLConnection.sendSynchronousRequest_returningResponse_error(
                 urlRequest, @urlResponse, @error);
     if not Assigned(urlData) then
-      begin
+    begin
       FLastErrMsg := NSStrToStr(error.localizedDescription);
       Exit;
-      end;
+    end;
+
+    FResponseStatusCode:=urlResponse.statusCode;
 
     AResponse.Position := 0;
     AResponse.WriteBuffer(urlData.bytes^, urlData.length);
@@ -128,69 +280,35 @@ begin
 
   except
     on E : Exception do
-      begin
+    begin
       FLastErrMsg := E.Message;
-      end;
+    end;
   end;
 end;
 
-
-function TNSHTTPSendAndReceive.SendAndReceive(out AResponse : string) : Boolean;
- {Send HTTP request to current Address URL, returning downloaded data 
-   in AResponse string and True as function result. If error occurs, 
-   return False and set LastErrMsg.}
+function TCustomNSHTTPSendAndReceive.Get(const AURL: String): String;
 var
-  Data : TMemoryStream;
+  SS : TStringStream;
 begin
-  Data := TMemoryStream.Create;
+  SS:=TStringStream.Create('');
   try
-    Result := SendAndReceive(nil, Data, nil);
-    if Result then
-      begin
-      SetLength(AResponse, Data.Size);
-      if Data.Size > 0 then
-        Data.Read(AResponse[1], Data.Size);
-      end;
+    HTTPMethod('GET', AURL, SS, [200]);
+    Result:=SS.Datastring;
   finally
-    Data.Free;
+    SS.Free;
   end;
 end;
 
-
-function TNSHTTPSendAndReceive.PostForm(const FormFields : string;
-                                          out AResponse  : string) : Boolean;
- {Post FormFields to current Address URL, returning downloaded data 
-   in AResponse string and True as function result. If error occurs, 
-   return False and set LastErrMsg.
-  Note FormFields must be in URL query string form (for example,
-   'name1=value1&name2=value2') and URL encoded.}
+procedure TCustomNSHTTPSendAndReceive.Get(const AURL: String; const LocalFileName: String);
 var
-  Request : TMemoryStream;
-  Headers : TStringList;
-  Data    : TMemoryStream;
+  F : TFileStream;
 begin
-  Request := TMemoryStream.Create;
-  Headers := TStringList.Create;
-  Data := TMemoryStream.Create;
+  F:=TFileStream.Create(LocalFileName,fmCreate);
   try
-    FMethod := 'POST';
-    if FormFields <> '' then
-      Request.Write(FormFields[1], Length(FormFields));
-    Headers.Add('Content-Type=application/x-www-form-urlencoded');
-    Headers.Add('Content-Length=' + IntToStr(Request.Size));
-    Result := SendAndReceive(Request, Data, Headers);
-    if Result then
-      begin
-      SetLength(AResponse, Data.Size);
-      if Data.Size > 0 then
-        Data.Read(AResponse[1], Data.Size);
-      end;
+    HTTPMethod('GET', AURL, F, [200]);
   finally
-    Request.Free;
-    Headers.Free;
-    Data.Free;
+    F.Free;
   end;
 end;
-
 
 end.
