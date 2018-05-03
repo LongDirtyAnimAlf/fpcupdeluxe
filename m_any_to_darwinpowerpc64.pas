@@ -134,8 +134,8 @@ begin
   if result then
   begin
     FLibsFound:=True;
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath);
+
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
 
     // specialities for osxcross
     //if Pos('osxcross',FLibsPath)>0 then

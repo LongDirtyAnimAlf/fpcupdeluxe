@@ -936,6 +936,12 @@ begin
             end;
           end;
 
+          // try to distinguish between 32 and 64 bit powerpc
+          if (UpperCase(CrossCPU_Target)='POWERPC') then
+          begin
+            Options:='POWERPC32';
+          end;
+
           if CrossInstaller.FPCCFGSnippet<>''
              then s:=CrossInstaller.FPCCFGSnippet+LineEnding
              else s:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
