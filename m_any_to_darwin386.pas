@@ -59,7 +59,7 @@ const
   LibName='libc.dylib';
 var
   s:string;
-  i:integer;
+  i,j:integer;
 begin
 
   result:=FLibsFound;
@@ -87,13 +87,31 @@ begin
   // also for osxcross
   if not result then
   begin
-    for i:=15 downto 10 do
+    for i:=15 downto 3 do
     begin
       s:='MacOSX10.'+InttoStr(i);
       result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
       if not result then
          result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib','libc.tbd');
-      if result then break;
+
+      if result then
+      begin
+        {$ifndef Darwin}
+        j:=StringListStartsWith(FCrossOpts,'-WM');
+        if j=-1 then
+        begin
+          // any SDK version setting >8 gives errors ... possible FPC bug ?
+          j:=i;
+          if j>8 then j:=8;
+          s:='-WM'+'10.'+InttoStr(j);
+          FCrossOpts.Add(s+' ');
+          ShowInfo('Did not find any -WM; using '+s+'.',etInfo);
+        end else s:=Trim(FCrossOpts[j]);
+        AddFPCCFGSnippet(s);
+        {$endif}
+        break;
+      end;
+
     end;
   end;
 

@@ -31,9 +31,12 @@ uses
   processutils, m_crossinstaller, fpcuputil, cpucount;
 
 const
-  FPCTRUNKVERSION      = '3.1.1';
-  FPCTRUNKBOOTVERSION  = '3.0.2';
-  LAZARUSTRUNKVERSION  = '1.9';
+  DEFAULTFPCVERSION     = '3.0.4';
+  DEFAULTLAZARUSVERSION = '1.8.2';
+
+  FPCTRUNKVERSION       = '3.1.1';
+  FPCTRUNKBOOTVERSION   = '3.0.2';
+  LAZARUSTRUNKVERSION   = '1.9';
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc/dist';
@@ -46,8 +49,6 @@ const
 
   CHM_URL_LATEST_SVN = FPCSVNURL + '/lazarus/binaries/docs/chm';
 
-  DEFAULTFPCVERSION = '3.0.4';
-  DEFAULTLAZARUSVERSION = '1.8.2';
 
   {$IFDEF DEBUG}
   STANDARDCOMPILEROPTIONS='-vewh';
