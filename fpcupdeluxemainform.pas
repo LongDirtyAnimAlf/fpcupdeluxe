@@ -1805,6 +1805,17 @@ begin
       end;
     end;
 
+    //ppc64 predefined settings
+    if (FPCupManager.CrossCPU_Target='powerpc64') then
+    begin
+      if (FPCupManager.CrossOS_Target='linux') then
+      begin
+        // for now, little endian only on Linux (IBM CPU's) !!
+        FPCupManager.CrossOPT:='-Cb- -Caelfv2 ';
+      end;
+    end;
+
+
     // recheck / override / set custom FPC options by special user input through setup+
     s:=Form2.FPCOptions;
     s:=Trim(s);
