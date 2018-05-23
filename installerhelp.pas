@@ -316,8 +316,13 @@ const
   CHM_URL_LASTRESORT_1_6='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6/doc-chm-fpc3.0.0-laz1.6.zip';
   CHM_URL_LASTRESORT_1_6_4='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.6.4/doc-chm-fpc3.0.2-laz1.6.zip';
   // Laz 1.8 version:
-  CHM_URL_1_8='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.8.0/doc-chm-fpc3.0.2-laz1.8.zip/download';
-  CHM_URL_LASTRESORT_1_8='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.8.0/doc-chm-fpc3.0.2-laz1.8.zip';
+  // fpc 3.0.2
+  //CHM_URL_1_8='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.8.0/doc-chm-fpc3.0.2-laz1.8.zip/download';
+  //CHM_URL_LASTRESORT_1_8='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.8.0/doc-chm-fpc3.0.2-laz1.8.zip';
+  // fpc 3.0.4
+  CHM_URL_1_8='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation/Lazarus%201.8.4/doc-chm-fpc3.0.4-laz1.8.zip/download';
+  CHM_URL_LASTRESORT_1_8='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation/Lazarus%201.8.0/doc-chm-fpc3.0.4-laz1.8.zip';
+
   CHM_URL_LATEST=CHM_URL_1_8;
   CHM_URL_LASTRESORT_LATEST=CHM_URL_LASTRESORT_1_8;
 

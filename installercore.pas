@@ -32,7 +32,7 @@ uses
 
 const
   DEFAULTFPCVERSION     = '3.0.4';
-  DEFAULTLAZARUSVERSION = '1.8.2';
+  DEFAULTLAZARUSVERSION = '1.8.4';
 
   FPCTRUNKVERSION       = '3.1.1';
   FPCTRUNKBOOTVERSION   = '3.0.2';
@@ -1502,7 +1502,7 @@ begin
   end;
 
   if OperationSucceeded
-     then WritelnLog(localinfotext + 'OpenSLL download and unpacking ok.', true)
+     then infoln(localinfotext+'OpenSLL library files download and unpacking ok',etWarning)
      else infoln(localinfotext+'Could not download/install openssl library', etError);
   SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
   Result := OperationSucceeded;

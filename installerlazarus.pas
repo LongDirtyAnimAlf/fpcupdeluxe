@@ -1009,6 +1009,9 @@ begin
       {$IFDEF DARWIN}
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('make')); //assume in path
 
+      //Available in latest trunk:
+      //LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
+
       // extra gdb settings
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
       // for newer versions Mac OSX versions (>=10.8) perhaps needed:

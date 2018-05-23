@@ -139,8 +139,8 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
-  aOption:string;
-  i:integer;
+  //aOption:string;
+  //i:integer;
 begin
   result:=inherited;
   if result then exit;
