@@ -961,7 +961,7 @@ begin
           {$IFDEF UNIX}
           result:=CreateFPCScript;
           {$ENDIF UNIX}
-          GetCompiler;
+          FCompiler:=GetCompiler;
         end;
       end;
 
@@ -989,6 +989,7 @@ var
   {$IFDEF MSWINDOWS}
   FileCounter:integer;
   {$ENDIF}
+  dirindex,compilerindex:integer;
   s:string;
 begin
   result:=inherited;
@@ -999,8 +1000,8 @@ begin
   Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-  Processor.Parameters.Add('FPC='+FCompiler);
-  Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+  compilerindex:=Processor.Parameters.Add('FPC='+FCompiler);
+  dirindex:=Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
   {$IFDEF DEBUG}
   Processor.Parameters.Add('-d');
   {$ENDIF}
@@ -1062,8 +1063,6 @@ begin
   end;
 
   try
-    // At least on 2.7.1 we get access violations running fpc make
-    // perhaps this try..except isolates that
     Processor.Execute;
     if Processor.ExitStatus <> 0 then
     begin
@@ -1092,7 +1091,7 @@ begin
   // Let everyone know of our shiny new compiler:
   if OperationSucceeded then
   begin
-    GetCompiler;
+    FCompiler:=GetCompiler;
     // Verify it exists
     if not(FileExistsUTF8(FCompiler)) then
     begin
@@ -1106,9 +1105,34 @@ begin
     FCompiler:='////\\\Error trying to compile FPC\|!';
   end;
 
-  {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin
+    Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
+    if (FileExists(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake.pp')) //AND (NOT FileExists(IncludeTrailingPathDelimiter(FBinPath)+'pas2js'+GetExeExt))
+    then
+    begin
+      // build pas2js utils
+      Processor.Parameters.Strings[compilerindex]:='FPC='+FCompiler;
+      Processor.Parameters.Strings[dirindex]:='--directory='+Processor.CurrentDirectory;
+      // first run fpcmake to generate correct makefile
+      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake'+GetExeExt);
+      ExecuteCommandInDir(IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt,Processor.CurrentDirectory,FVerbose);
+      // run make itself
+      try
+        Processor.Execute;
+        if Processor.ExitStatus <> 0 then
+        begin
+          WritelnLog(etError, infotext+'Running make for pas2js failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+        end;
+      except
+        on E: Exception do
+        begin
+          WritelnLog(etError, infotext+'Running make for pas2js failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
+        end;
+      end;
+    end;
+
+    {$IFDEF MSWINDOWS}
     //Copy over binutils to new CompilerName bin directory
     try
       for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
@@ -1127,8 +1151,9 @@ begin
         OperationSucceeded:=false;
       end;
     end;
+    {$ENDIF MSWINDOWS}
+
   end;
-  {$ENDIF MSWINDOWS}
   result:=OperationSucceeded;
 end;
 

@@ -277,9 +277,6 @@ type
     destructor Destroy; override;
   end;
 
-  TFPCNativeInstaller = class(TInstaller);
-  TFPCInstaller = class(TInstaller);
-
 implementation
 
 uses
@@ -298,7 +295,7 @@ uses
 
 function TInstaller.GetCompiler: string;
 begin
-  if (Self is TFPCNativeInstaller) or (Self is TFPCInstaller)
+  if (Self.ClassNameIs('TFPCNativeInstaller')) or (Self.ClassNameIs('TFPCInstaller'))
     then Result := GetCompilerInDir(FInstallDirectory)
     else Result := FCompiler;
 end;
