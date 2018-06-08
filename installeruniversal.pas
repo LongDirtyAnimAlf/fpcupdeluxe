@@ -163,7 +163,7 @@ Const
 implementation
 
 uses
-  StrUtils,inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil;
+  StrUtils,inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil, process;
 
 Const
   MAXSYSMODULES=200;
@@ -209,6 +209,7 @@ function TUniversalInstaller.GetValue(Key: string; sl: TStringList;
 var
   i,len:integer;
   s,macro:string;
+  doublequote:boolean;
 begin
   Key:=UpperCase(Key);
   s:='';
@@ -239,9 +240,10 @@ begin
       s:='';
       end;
 //expand macros
+  doublequote:=true;
   if s<>'' then
     while pos('$(',s)>0 do
-      begin
+    begin
       i:=pos('$(',s);
       macro:=copy(s,i+2,length(s));
       if pos(')',macro)>0 then
@@ -283,21 +285,38 @@ begin
           // Strip can be anywhere in the path
           macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('strip')))
           {$ENDIF}
+        else if macro='REMOVEINSTALLDIRECTORY' then
+        begin
+          doublequote:=false;
+          {$IFDEF MSWINDOWS}
+          macro:='cmd /c rmdir '+'$(Installdir)'+' /s /q';
+          {$ENDIF}
+          {$IFDEF UNIX}
+          macro:='rm -Rf '+'$(Installdir)';
+          {$ENDIF}
+        end
         else macro:=GetValue(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
-        if pos(' ',macro)>0 then
-          macro:='"'+macro+'"';
+        if doublequote then
+        begin
+          if pos(' ',macro)>0 then macro:='"'+macro+'"';
+        end;
         delete(s,i,len);
         insert(macro,s,i);
-        end;
       end;
+    end;
   // correct path delimiter
   if (pos('URL',Key)<=0) and (pos('ADDTO',Key)<>1)then
-    begin
-    for i:=1 to length(s) do
-      if (s[i]='/') or (s[i]='\') then
+  begin
+    {$IFDEF MSWINDOWS}
+    len:=2;
+    {$ELSE}
+    len:=1;
+    {$ENDIF}
+    for i:=len to length(s) do
+      if ((s[i]='/') or (s[i]='\')){$IFDEF MSWINDOWS} AND (s[i-1]<>' '){$ENDIF} then
         s[i]:=DirectorySeparator;
-    end;
+  end;
   result:=s;
 end;
 
@@ -714,11 +733,16 @@ begin
     end;
     Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
-    if FVerbose then WritelnLog(localinfotext+'Running ExecuteCommandInDir for '+exec,true);
+    if FVerbose then WritelnLog(localinfotext+'Running ExecuteCommand[InDir] for '+exec,true);
     try
-      result:=ExecuteCommandInDir(exec,Workingdir,output,FPath,FVerbose)=0;
-      if result then
+      result:=false;
+      if Length(WorkingDir)>0 then
+        j:=ExecuteCommandInDir(exec,Workingdir,output,FPath,FVerbose)
+      else
+        j:=ExecuteCommand(exec,output,FVerbose);
+      if j=0 then
       begin
+        result:=true;
         {$ifndef FPCONLY}
         // If it is likely user used lazbuid to compile a package, assume
         // it is design-time (except when returning an runtime message) and mark IDE for rebuild
@@ -734,7 +758,9 @@ begin
       end
       else
       begin
-        WritelnLog(etWarning, localinfotext+'Running '+exec+' returned an error.',true);
+        WritelnLog(etError, localinfotext+'Running '+exec+' returned with an error.',true);
+        WritelnLog(etError, localinfotext+'Error-code: '+InttoStr(j),true);
+        WritelnLog(etError, localinfotext+'Error message (if any): '+output,true);
         break;
       end;
     except

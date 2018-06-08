@@ -989,7 +989,6 @@ var
   {$IFDEF MSWINDOWS}
   FileCounter:integer;
   {$ENDIF}
-  dirindex,compilerindex:integer;
   s:string;
 begin
   result:=inherited;
@@ -997,11 +996,9 @@ begin
 
   Processor.Executable := Make;
   FErrorLog.Clear;
-  Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-  compilerindex:=Processor.Parameters.Add('FPC='+FCompiler);
-  dirindex:=Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
+  Processor.Parameters.Add('FPC='+FCompiler);
   {$IFDEF DEBUG}
   Processor.Parameters.Add('-d');
   {$ENDIF}
@@ -1048,112 +1045,104 @@ begin
   case UpperCase(ModuleName) of
     'FPC':
     begin
-      Processor.Parameters.Add('all');
-      Processor.Parameters.Add('install');
-      infoln(infotext+'Running make all install',etInfo);
+      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+      Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
     end;
-    else //raise error;
+    'PAS2JS':
     begin
-      Processor.Parameters.Add('--help'); // this should render make harmless
-      WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
-      OperationSucceeded := false;
-      Result := false;
-      exit;
+      Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
+      Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
+      // first run fpcmake to generate correct makefile
+      // is this still needed !!??
+      //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake'+GetExeExt);
+      //ExecuteCommandInDir(IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt,Processor.CurrentDirectory,FVerbose);
     end;
   end;
+
+  if (NOT DirectoryExists(Processor.CurrentDirectory)) then
+  begin
+    Processor.Parameters.Add('--help'); // this should render make harmless
+    WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
+    OperationSucceeded := false;
+    Result := false;
+    exit;
+  end;
+
+  Processor.Parameters.Add('all');
+  Processor.Parameters.Add('install');
+  infoln(infotext+'Running make all install for '+ModuleName,etInfo);
 
   try
     Processor.Execute;
     if Processor.ExitStatus <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Error running make failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, infotext+'Error running make for '+ModuleName+' failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Running fpc make failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
+      WritelnLog(etError, infotext+'Running fpc make for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
     end;
   end;
 
-  {$IFDEF UNIX}
-  if OperationSucceeded then
+  if UpperCase(ModuleName)='FPC' then
+  begin
+    {$IFDEF UNIX}
+    if OperationSucceeded then
     begin
-    if FVerbose then
-      infoln(infotext+'Creating fpc script:',etInfo)
-    else
-      infoln(infotext+'Creating fpc script:',etDebug);
-    OperationSucceeded:=CreateFPCScript;
+      if FVerbose then
+        infoln(infotext+'Creating fpc script:',etInfo)
+      else
+        infoln(infotext+'Creating fpc script:',etDebug);
+      OperationSucceeded:=CreateFPCScript;
     end;
-  {$ENDIF UNIX}
+    {$ENDIF UNIX}
 
-  // Let everyone know of our shiny new compiler:
-  if OperationSucceeded then
-  begin
-    FCompiler:=GetCompiler;
-    // Verify it exists
-    if not(FileExistsUTF8(FCompiler)) then
+    // Let everyone know of our shiny new compiler:
+    if OperationSucceeded then
     begin
-      WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
-      OperationSucceeded:=false;
-    end;
-  end
-  else
-  begin
-    infoln(infotext+'Error trying to compile FPC.',etDebug);
-    FCompiler:='////\\\Error trying to compile FPC\|!';
-  end;
-
-  if OperationSucceeded then
-  begin
-    Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
-    if (FileExists(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake.pp')) //AND (NOT FileExists(IncludeTrailingPathDelimiter(FBinPath)+'pas2js'+GetExeExt))
-    then
-    begin
-      // build pas2js utils
-      Processor.Parameters.Strings[compilerindex]:='FPC='+FCompiler;
-      Processor.Parameters.Strings[dirindex]:='--directory='+Processor.CurrentDirectory;
-      // first run fpcmake to generate correct makefile
-      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake'+GetExeExt);
-      ExecuteCommandInDir(IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt,Processor.CurrentDirectory,FVerbose);
-      // run make itself
-      try
-        Processor.Execute;
-        if Processor.ExitStatus <> 0 then
-        begin
-          WritelnLog(etError, infotext+'Running make for pas2js failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
-        end;
-      except
-        on E: Exception do
-        begin
-          WritelnLog(etError, infotext+'Running make for pas2js failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
-        end;
+      FCompiler:=GetCompiler;
+      // Verify it exists
+      if not(FileExistsUTF8(FCompiler)) then
+      begin
+        WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
+        OperationSucceeded:=false;
       end;
+    end
+    else
+    begin
+      infoln(infotext+'Error trying to compile FPC.',etDebug);
+      FCompiler:='////\\\Error trying to compile FPC\|!';
     end;
 
     {$IFDEF MSWINDOWS}
-    //Copy over binutils to new CompilerName bin directory
-    try
-      for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
-      begin
-        if FUtilFiles[FileCounter].Category=ucBinutil then
-          FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
-            IncludeTrailingPathDelimiter(FBinPath)+FUtilFiles[FileCounter].FileName);
-      end;
-      // Also, we can change the make/binutils path to our new environment
-      // Will modify fmake as well.
-      FMakeDir:=FBinPath;
-    except
-      on E: Exception do
-      begin
-        writelnlog(infotext+'Error copying binutils: '+E.Message,true);
-        OperationSucceeded:=false;
+    if OperationSucceeded then
+    begin
+      //Copy over binutils to new CompilerName bin directory
+      try
+        for FileCounter:=low(FUtilFiles) to high(FUtilFiles) do
+        begin
+          if FUtilFiles[FileCounter].Category=ucBinutil then
+            FileUtil.CopyFile(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[FileCounter].FileName,
+              IncludeTrailingPathDelimiter(FBinPath)+FUtilFiles[FileCounter].FileName);
+        end;
+        // Also, we can change the make/binutils path to our new environment
+        // Will modify fmake as well.
+        FMakeDir:=FBinPath;
+      except
+        on E: Exception do
+        begin
+          writelnlog(infotext+'Error copying binutils: '+E.Message,true);
+          OperationSucceeded:=false;
+        end;
       end;
     end;
     {$ENDIF MSWINDOWS}
 
   end;
+
   result:=OperationSucceeded;
 end;
 
@@ -2738,6 +2727,9 @@ begin
       infoln(infotext+'fpc.cfg already exists; leaving it alone.',etInfo);
     end;
   end;
+
+  // build pas2js
+  if OperationSucceeded then BuildModuleCustom('PAS2JS');
 
   RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
 
