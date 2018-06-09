@@ -1042,24 +1042,23 @@ begin
 
   Processor.Parameters.Add('OPT='+s);
 
+  Processor.CurrentDirectory:='';
   case UpperCase(ModuleName) of
     'FPC':
     begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
     end;
     'PAS2JS':
     begin
       Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
-      Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
       // first run fpcmake to generate correct makefile
-      // is this still needed !!??
+      // is this still needed !!?? No !!
       //SysUtils.DeleteFile(IncludeTrailingPathDelimiter(Processor.CurrentDirectory)+'fpmake'+GetExeExt);
       //ExecuteCommandInDir(IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt,Processor.CurrentDirectory,FVerbose);
     end;
   end;
 
-  if (NOT DirectoryExists(Processor.CurrentDirectory)) then
+  if (Length(Processor.CurrentDirectory)=0) OR (NOT DirectoryExists(Processor.CurrentDirectory)) then
   begin
     Processor.Parameters.Add('--help'); // this should render make harmless
     WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
@@ -1068,6 +1067,7 @@ begin
     exit;
   end;
 
+  Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
   Processor.Parameters.Add('all');
   Processor.Parameters.Add('install');
   infoln(infotext+'Running make all install for '+ModuleName,etInfo);
@@ -2728,8 +2728,8 @@ begin
     end;
   end;
 
-  // build pas2js
-  if OperationSucceeded then BuildModuleCustom('PAS2JS');
+  // do not build pas2js: separate install ... use the module with rtl
+  // if OperationSucceeded then BuildModuleCustom('PAS2JS');
 
   RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
 

@@ -285,6 +285,16 @@ begin
           // Strip can be anywhere in the path
           macro:=ExcludeTrailingPathDelimiter(ExtractFilePath(Which('strip')))
           {$ENDIF}
+        else if macro='REMOVEDIRECTORY' then
+        begin
+          doublequote:=false;
+          {$IFDEF MSWINDOWS}
+          macro:='cmd /c rmdir /s /q';
+          {$ENDIF}
+          {$IFDEF UNIX}
+          macro:='rm -Rf';
+          {$ENDIF}
+        end
         else if macro='REMOVEINSTALLDIRECTORY' then
         begin
           doublequote:=false;
