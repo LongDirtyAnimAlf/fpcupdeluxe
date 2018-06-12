@@ -259,6 +259,8 @@ begin
           macro:=ExcludeTrailingPathDelimiter(FFPCDir)
         else if macro='FPCBINDIR' then
             macro:=ExcludeTrailingPathDelimiter(FBinPath)
+        else if macro='FPCBIN' then
+            macro:=ExcludeTrailingPathDelimiter(FCompiler)
         else if macro='TOOLDIR' then
           {$IFDEF MSWINDOWS}
           // make is a binutil and should be located in the make dir
