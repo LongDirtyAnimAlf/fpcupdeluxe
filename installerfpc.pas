@@ -2883,15 +2883,22 @@ begin
     DeleteList.Clear;
 
     FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
-    FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
-    FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'utils', '*'+GetExeExt, True);
+    if (NOT CrossCompiling) then
+    begin
+      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
+      FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'utils', '*'+GetExeExt, True);
+    end;
     if DeleteList.Count > 0 then
     begin
       for FileCounter := 0 to (DeleteList.Count-1) do
       begin
         if ExtractFileExt(DeleteList.Strings[FileCounter])=GetExeExt then
         begin
-          if Pos('Makefile',DeleteList.Strings[FileCounter])=0 then DeleteFile(DeleteList.Strings[FileCounter]);
+          if Pos('Makefile',DeleteList.Strings[FileCounter])=0 then
+          begin
+            infoln(infotext+'Deleting [stray] executable: '+DeleteList.Strings[FileCounter],etInfo);
+            DeleteFile(DeleteList.Strings[FileCounter]);
+          end;
         end;
       end;
     end;

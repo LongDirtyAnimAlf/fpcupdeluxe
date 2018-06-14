@@ -492,38 +492,60 @@ function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
+  Location='Workingdir';
 var
   Failure: boolean;
   i:integer;
+  RealDirective:string;
   PackagePath:string;
   Workingdir:string;
   BaseWorkingdir:string;
+  RegisterOnly:boolean;
 begin
   Failure:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
-  BaseWorkingdir:=GetValue('Workingdir',sl);
-  // Go backward; reverse order to deal with any dependencies
-  for i:=MAXINSTRUCTIONS downto 0 do
+
+  BaseWorkingdir:=GetValue(Location,sl);
+  Workingdir:=BaseWorkingdir;
+
+  for RegisterOnly:=false to true do
   begin
-    if i=0
-       then PackagePath:=GetValue(Directive,sl)
-       else PackagePath:=GetValue(Directive+IntToStr(i),sl);
-    // Skip over missing numbers:
-    if PackagePath='' then continue;
-    if NOT FileExists(PackagePath) then
+
+    // Go backward; reverse order to deal with any dependencies
+    for i:=MAXINSTRUCTIONS downto -1 do
     begin
-      infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
-      UnInstallPackage(PackagePath);
-      continue;
+      if RegisterOnly then
+        RealDirective:=Directive+'Link'
+      else
+        RealDirective:=Directive;
+
+      if i>=0 then
+      begin
+        RealDirective:=RealDirective+IntToStr(i);
+        Workingdir:=GetValue(Location+IntToStr(i),sl);
+      end else
+      begin
+        Workingdir:=BaseWorkingdir;
+      end;
+
+      PackagePath:=GetValue(RealDirective,sl);
+
+      // Skip over missing numbers:
+      if PackagePath='' then continue;
+      if NOT FileExists(PackagePath) then
+      begin
+        infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+        UnInstallPackage(PackagePath);
+        continue;
+      end;
+      if Workingdir='' then Workingdir:=BaseWorkingdir;
+      // Try to uninstall everything, even if some of these fail.
+      // Note: UninstallPackage used to have a WorkingDir parameter but
+      // I'm wondering how to implement that as we have PackagePath already.
+      if UnInstallPackage(PackagePath)=false then Failure:=true;
     end;
-    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
-    if Workingdir='' then Workingdir:=BaseWorkingdir;
-    // Try to uninstall everything, even if some of these fail.
-    // Note: UninstallPackage used to have a WorkingDir parameter but
-    // I'm wondering how to implement that as we have PackagePath already.
-    if UnInstallPackage(PackagePath)=false then Failure:=true;
+    result:=Failure;
   end;
-  result:=Failure;
 end;
 {$endif}
 
@@ -542,30 +564,32 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages): ';
 
+  BaseWorkingdir:=GetValue(Location,sl);
+  Workingdir:=BaseWorkingdir;
 
   for RegisterOnly:=false to true do
   begin
 
-    if RegisterOnly then
-      RealDirective:=Directive+'Link'
-    else
-      RealDirective:=Directive;
-
-    PackagePath:=GetValue(RealDirective,sl);
-    BaseWorkingdir:=GetValue(Location,sl);
-
     // trick: run from -1 to allow the above basic statements to be processed first
     for i:=-1 to MAXINSTRUCTIONS do
     begin
-      if i>=0 then
+      if RegisterOnly then
+        RealDirective:=Directive+'Link'
+      else
+        RealDirective:=Directive;
+
+      if (i>=0) then
       begin
-        if RegisterOnly then
-          RealDirective:=Directive+'Link'+IntToStr(i)
-        else
-          RealDirective:=Directive+IntToStr(i);
-        PackagePath:=GetValue(RealDirective,sl);
+        RealDirective:=RealDirective+IntToStr(i);
         Workingdir:=GetValue(Location+IntToStr(i),sl);
+      end
+      else
+      begin
+        Workingdir:=BaseWorkingdir;
       end;
+
+      PackagePath:=GetValue(RealDirective,sl);
+
       // Skip over missing data:
       if (PackagePath='') then continue;
       if NOT FileExists(PackagePath) then
