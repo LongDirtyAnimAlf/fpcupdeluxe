@@ -1437,7 +1437,7 @@ begin
         WritelnLog(infotext+'Download ok',True);
         // Extract, overwrite
         case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
-           '.ZIP':
+           '.ZIP','.TMP':
               begin
                 //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
                 with TNormalUnzipper.Create do

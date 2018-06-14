@@ -2437,6 +2437,7 @@ begin
   with aFPHTTPClient do
   begin
     AllowRedirect:=True;
+    //ConnectTimeout:=10000;
     FMaxRetries:=DefMaxRetries;
     //RequestHeaders.Add('Connection: Close');
     // User-Agent needed for sourceforge and GitHub
