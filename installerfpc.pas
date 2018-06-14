@@ -2869,16 +2869,33 @@ begin
   {$ENDIF}
 
   // finally ... if something is still still still floating around ... delete it !!
-  DeleteList := FindAllFiles(FSourceDirectory, '*.ppu; *.a; *.o', True);
+  DeleteList := TStringList.Create;
   try
+    FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.a; *.o', True);
     if DeleteList.Count > 0 then
     begin
       for FileCounter := 0 to (DeleteList.Count-1) do
       begin
-        S:=IncludeTrailingPathDelimiter(FSourceDirectory) + DeleteList.Strings[FileCounter];
-        if Pos(CPU_OSSignature,S)>0 then DeleteFile(S);
+        if Pos(CPU_OSSignature,DeleteList.Strings[FileCounter])>0 then DeleteFile(DeleteList.Strings[FileCounter]);
       end;
     end;
+
+    DeleteList.Clear;
+
+    FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
+    FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'utils', '*'+GetExeExt, False);
+    FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'utils', '*'+GetExeExt, True);
+    if DeleteList.Count > 0 then
+    begin
+      for FileCounter := 0 to (DeleteList.Count-1) do
+      begin
+        if ExtractFileExt(DeleteList.Strings[FileCounter])=GetExeExt then
+        begin
+          if Pos('Makefile',DeleteList.Strings[FileCounter])=0 then DeleteFile(DeleteList.Strings[FileCounter]);
+        end;
+      end;
+    end;
+
   finally
     DeleteList.Free;
   end;

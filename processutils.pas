@@ -109,13 +109,13 @@ type
       FOnErrorM: TErrorMethod;
       FOnOutput: TDumpFunc;
       FOnOutputM: TDumpMethod;
-      FOutputStrings: TstringList;
+      FOutputStrings: TStringList;
       FOutStream: TMemoryStream;
       FProcessEnvironment:TProcessEnvironment;
       function GetResultingCommand: string;
       function GetExceptionInfo: string;
       function GetOutputString: string;
-      function GetOutputStrings: TstringList;
+      function GetOutputStrings: TStringList;
       function GetParametersString: String;
       function GetProcessEnvironment: TProcessEnvironment;
       procedure SetOnError(AValue: TErrorFunc);
@@ -140,7 +140,7 @@ type
       property OnOutput:TDumpFunc read FOnOutput write SetOnOutput;
       property OnOutputM:TDumpMethod read FOnOutputM write SetOnOutputM;
       property OutputString:string read GetOutputString;
-      property OutputStrings:TstringList read GetOutputStrings;
+      property OutputStrings:TStringList read GetOutputStrings;
       constructor Create(AOwner : TComponent); override;
       destructor Destroy; override;
     end;
@@ -179,13 +179,14 @@ begin
   result:=OutputStrings.Text;
 end;
 
-function TProcessEx.GetOutputStrings: TstringList;
+function TProcessEx.GetOutputStrings: TStringList;
 begin
   if (FOutputStrings.Count=0) and (FOutStream.Size>0) then
-    begin
+  begin
     FOutStream.Position := 0;
     FOutputStrings.LoadFromStream(FOutStream);
-    end;
+    FOutStream.Clear;
+  end;
   result:=FOutputStrings;
 end;
 

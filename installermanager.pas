@@ -896,7 +896,8 @@ begin
     (lowercase(FSequencer.FParent.CrossOS_Target)=GetTargetOS)
   then
   begin
-    infoln('No crosscompiling to own target !!',etError);
+    infoln('No crosscompiling to own target !',etError);
+    infoln('Native [CPU-OS] version is already installed !!',etError);
     exit;
   end;
 

@@ -102,7 +102,7 @@ type
     function InitModule:boolean;
     {$ifndef FPCONLY}
     // Installs a single package:
-    function InstallPackage(PackagePath, WorkingDir: string): boolean;
+    function InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean=false): boolean;
     // Scans for and removes all packages specfied in a (module's) stringlist with commands:
     function RemovePackages(sl:TStringList): boolean;
     // Uninstall a single package:
@@ -375,7 +375,7 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string): boolean;
+function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean=false): boolean;
 var
   PackageName,PackageAbsolutePath: string;
   Path: String;
@@ -431,7 +431,10 @@ begin
   Processor.Parameters.Add('--os=' + GetTargetOS);
   if FLCL_Platform <> '' then
             Processor.Parameters.Add('--ws=' + FLCL_Platform);
-  Processor.Parameters.Add('--add-package');
+  if RegisterOnly then
+    Processor.Parameters.Add('--add-package-link')
+  else
+    Processor.Parameters.Add('--add-package');
   Processor.Parameters.Add(DoubleQuoteIfNeeded(PackageAbsolutePath));
   try
     Processor.Execute;
@@ -439,22 +442,25 @@ begin
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
     begin
-      infoln('Marking Lazarus for rebuild based on package install for '+PackageAbsolutePath,etDebug);
-      FLazarusNeedsRebuild:=true; //Mark IDE for rebuild
+      if (NOT RegisterOnly) then
+      begin
+        infoln('Marking Lazarus for rebuild based on package install for '+PackageAbsolutePath,etDebug);
+        FLazarusNeedsRebuild:=true; //Mark IDE for rebuild
+      end;
     end
     else
     begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
-      if Pos('only for runtime',Processor.OutputString)>0
+      if (Pos('only for runtime',Processor.OutputString)>0) OR (RegisterOnly)
          then result:=True
          else WritelnLog(localinfotext+'Error trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
-      begin
+    begin
       WritelnLog(localinfotext+'Exception trying to add package '+PackageName+LineEnding+
         'Details: '+E.Message,true);
-      end;
+    end;
   end;
 
   // all ok AND a filepath is given --> check / add lpl file to inform Lazarus of package excistence and location
@@ -532,107 +538,121 @@ var
   Workingdir:string;
   BaseWorkingdir:string;
   RealDirective:string;
+  RegisterOnly:boolean;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages): ';
 
-  RealDirective:=Directive;
-  PackagePath:=GetValue(RealDirective,sl);
-  BaseWorkingdir:=GetValue(Location,sl);
 
-  // trick: run from -1 to allow the above basic statements to be processed first
-  for i:=-1 to MAXINSTRUCTIONS do
+  for RegisterOnly:=false to true do
   begin
-    if i>=0 then
-    begin
-      RealDirective:=Directive+IntToStr(i);
-      PackagePath:=GetValue(RealDirective,sl);
-      Workingdir:=GetValue(Location+IntToStr(i),sl);
-    end;
-    // Skip over missing data:
-    if (PackagePath='') then continue;
-    if NOT FileExists(PackagePath) then
-    begin
-      infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
-      {$ifndef FPCONLY}
-      UnInstallPackage(PackagePath);
-      {$endif}
-      continue;
-    end;
 
-    {$ifdef OpenBSD}
-    // the packages lazdatadict and lazdbexport are not suitable for OpenBSD: their FPC units are not included !
-    // so skip them in case they are included.
-    if (Pos('lazdatadict',PackagePath)>0) OR (Pos('lazdbexport',PackagePath)>0) then
-    begin
-      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-      continue;
-    end;
-    {$endif}
+    if RegisterOnly then
+      RealDirective:=Directive+'Link'
+    else
+      RealDirective:=Directive;
 
-    {$ifdef Darwin}
-    {$ifdef CPUX64}
-    // the packages [onlinepackagemanager and] editormacroscript are not suitable for Darwin 64 bit !
-    // so skip them in case they are included.
-    if
-      {$ifdef LCLCOCOA}
-      // added in Lazarus revision 55937
-      // (Pos('onlinepackagemanager',PackagePath)>0) OR
-      {$endif}
-      (Pos('editormacroscript',PackagePath)>0) then
-    begin
-      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-      continue;
-    end;
-    {$endif}
-    {$endif}
+    PackagePath:=GetValue(RealDirective,sl);
+    BaseWorkingdir:=GetValue(Location,sl);
 
-    {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
-    // the package PascalScript is only suitable for i386, x86_64 and arm !
-    // so skip in case package was included.
-    if (Pos('pascalscript',PackagePath)>0) then
+    // trick: run from -1 to allow the above basic statements to be processed first
+    for i:=-1 to MAXINSTRUCTIONS do
     begin
-      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-      continue;
-    end;
-    {$endif}
-
-    {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
-    // the package macroscript (depending on PascalScript) is only suitable for i386, x86_64 and arm !
-    // so skip in case package was included.
-    if (Pos('editormacroscript',PackagePath)>0) then
-    begin
-      infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-      continue;
-    end;
-    {$endif}
-
-    {
-    if (NOT FileExists(PackagePath)) OR (PackagePath='') then
-    begin
-      for j:=0 to sl.Count-1 do
+      if i>=0 then
       begin
-        if (Pos(RealDirective+'=',StrUtils.DelSpace(sl[j]))>0) then
-        begin
-          sl.Delete(j);
-          break;
-        end;
+        if RegisterOnly then
+          RealDirective:=Directive+'Link'+IntToStr(i)
+        else
+          RealDirective:=Directive+IntToStr(i);
+        PackagePath:=GetValue(RealDirective,sl);
+        Workingdir:=GetValue(Location+IntToStr(i),sl);
       end;
-      continue;
-    end;
-    }
+      // Skip over missing data:
+      if (PackagePath='') then continue;
+      if NOT FileExists(PackagePath) then
+      begin
+        infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+        {$ifndef FPCONLY}
+        UnInstallPackage(PackagePath);
+        {$endif}
+        continue;
+      end;
 
-    if Workingdir='' then Workingdir:=BaseWorkingdir;
+      {$ifdef OpenBSD}
+      // the packages lazdatadict and lazdbexport are not suitable for OpenBSD: their FPC units are not included !
+      // so skip them in case they are included.
+      if (Pos('lazdatadict',PackagePath)>0) OR (Pos('lazdbexport',PackagePath)>0) then
+      begin
+        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+        continue;
+      end;
+      {$endif}
 
-    {$ifndef FPCONLY}
-    result:=InstallPackage(PackagePath,WorkingDir);
-    if not result then
-    begin
-      infoln(localinfotext+'Error while installing package '+PackagePath+'.',etWarning);
-      if FVerbose then WritelnLog(localinfotext+'Error while installing package '+PackagePath+'.',false);
-      break;
+      {$ifdef Darwin}
+      {$ifdef CPUX64}
+      // the packages [onlinepackagemanager and] editormacroscript are not suitable for Darwin 64 bit !
+      // so skip them in case they are included.
+      if
+        {$ifdef LCLCOCOA}
+        // added in Lazarus revision 55937
+        // (Pos('onlinepackagemanager',PackagePath)>0) OR
+        {$endif}
+        (Pos('editormacroscript',PackagePath)>0) then
+      begin
+        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+        continue;
+      end;
+      {$endif}
+      {$endif}
+
+      {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
+      // the package PascalScript is only suitable for i386, x86_64 and arm !
+      // so skip in case package was included.
+      if (Pos('pascalscript',PackagePath)>0) then
+      begin
+        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+        continue;
+      end;
+      {$endif}
+
+      {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
+      // the package macroscript (depending on PascalScript) is only suitable for i386, x86_64 and arm !
+      // so skip in case package was included.
+      if (Pos('editormacroscript',PackagePath)>0) then
+      begin
+        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
+        continue;
+      end;
+      {$endif}
+
+      {
+      if (NOT FileExists(PackagePath)) OR (PackagePath='') then
+      begin
+        for j:=0 to sl.Count-1 do
+        begin
+          if (Pos(RealDirective+'=',StrUtils.DelSpace(sl[j]))>0) then
+          begin
+            sl.Delete(j);
+            break;
+          end;
+        end;
+        continue;
+      end;
+      }
+
+      if Workingdir='' then Workingdir:=BaseWorkingdir;
+
+      {$ifndef FPCONLY}
+      result:=InstallPackage(PackagePath,WorkingDir,RegisterOnly);
+      if not result then
+      begin
+        infoln(localinfotext+'Error while installing package '+PackagePath+'.',etWarning);
+        if FVerbose then WritelnLog(localinfotext+'Error while installing package '+PackagePath+'.',false);
+        break;
+      end;
+      {$endif}
     end;
-    {$endif}
   end;
+
 end;
 
 {$IFDEF MSWINDOWS}
@@ -959,10 +979,37 @@ begin
 end;
 
 function TUniversalInstaller.CleanModule(ModuleName: string): boolean;
+//var
+//  DeleteList:TStringList;
+//  FileCounter:integer;
 begin
   result:=inherited;
   result:=InitModule;
   if not result then exit;
+
+  (*
+  if (Length(FSourceDirectory)>0) AND (DirectoryExists(FSourceDirectory)) then
+  begin
+    DeleteList := TStringList.Create;
+    try
+      FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.compiled; *.o', True);
+      if DeleteList.Count > 0 then
+      begin
+        for FileCounter := 0 to (DeleteList.Count-1) do
+        begin
+          if Pos(GetTargetCPUOS,DeleteList.Strings[FileCounter])>0 then
+          begin
+            DeleteFile(DeleteList.Strings[FileCounter]);
+            infoln(infotext+'Deleting '+DeleteList.Strings[FileCounter],etDebug);
+          end;
+        end;
+      end;
+    finally
+      DeleteList.Free;
+    end;
+  end;
+  *)
+
   result:=true;
 end;
 

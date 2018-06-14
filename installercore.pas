@@ -1326,6 +1326,9 @@ end;
 {$IFDEF MSWINDOWS}
 function TInstaller.DownloadSVN: boolean;
 const
+  // See: http://subversion.apache.org/download/
+  // for latest version !!
+
   //SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
   // Changed to https
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
@@ -1336,8 +1339,9 @@ const
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.4.zip';
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.5.zip';
-  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.7.zip';
-  //SourceURL = 'https://sourceforge.net/projects/win32svn/files/1.8.15/apache24/svn-win32-1.8.15-ap24.zip/download';
+  // SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.7.zip';
+  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.10.0.zip';
+  SourceURL_LastResort = 'https://sourceforge.net/projects/win32svn/files/1.8.15/apache24/svn-win32-1.8.17-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
@@ -1361,30 +1365,28 @@ begin
   with subdirs bin and licenses. No further subdirs
   However, doesn't work on Windows 2K.
   Decided to use this anyway.}
-  OperationSucceeded := true;
+  OperationSucceeded := false;
 
   // This svn version won't work on windows 2K
   if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
   begin
     writelnlog(etError, localinfotext + 'It seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
-    exit(false);
+    exit(OperationSucceeded);
   end;
 
   ForceDirectoriesUTF8(FSVNDirectory);
 
   SVNZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
+
   try
-    if OperationSucceeded then
-    begin
-      OperationSucceeded := Download(
-        FUseWget,
-        SourceURL,
-        SVNZip,
-        FHTTPProxyUser,
-        FHTTPProxyPort,
-        FHTTPProxyUser,
-        FHTTPProxyPassword);
-    end;
+    OperationSucceeded := Download(
+      FUseWget,
+      SourceURL,
+      SVNZip,
+      FHTTPProxyUser,
+      FHTTPProxyPort,
+      FHTTPProxyUser,
+      FHTTPProxyPassword);
   except
     // Deal with timeouts, wrong URLs etc
     on E: Exception do
@@ -1393,6 +1395,34 @@ begin
       writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL, true);
     end;
   end;
+
+  if (NOT OperationSucceeded) then
+  begin
+    writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL, true);
+
+    SysUtils.Deletefile(SVNZip); //Get rid of temp zip if any.
+
+    try
+      OperationSucceeded := Download(
+        FUseWget,
+        SourceURL_LastResort,
+        SVNZip,
+        FHTTPProxyUser,
+        FHTTPProxyPort,
+        FHTTPProxyUser,
+        FHTTPProxyPassword);
+    except
+      // Deal with timeouts, wrong URLs etc
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL_LastResort, true);
+      end;
+    end;
+    if (NOT OperationSucceeded) then
+      writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL_LastResort, true);
+  end;
+
 
   if OperationSucceeded then
   begin
@@ -1406,10 +1436,6 @@ begin
         Free;
       end;
     end;
-  end
-  else
-  begin
-    writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL, true);
   end;
 
   if OperationSucceeded then
