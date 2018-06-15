@@ -382,9 +382,11 @@ var
   lpkdoc:TConfig;
   lpkversion:TAPkgVersion;
   TxtFile:TextFile;
+  RegisterPackageFeature:boolean;
 begin
   result:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InstallPackage): ';
+
   PackageName:=ExtractFileNameWithoutExt(ExtractFileNameOnly(PackagePath));
 
   // Convert any relative path to absolute path, if it's not just a file/package name:
@@ -417,6 +419,33 @@ begin
      else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
 
   Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+
+  RegisterPackageFeature:=false;
+
+  // get lazbuild version to see if we can register packages (available from version 1.7 and up)
+  Processor.Parameters.Clear;
+  Processor.Parameters.Add('--version');
+  try
+    Processor.Execute;
+    result := (Processor.ExitStatus=0);
+    if result then RegisterPackageFeature:=(GetNumericalVersionSafe(Processor.OutputString)>=(1*10000+7*100+0));
+  except
+    on E: Exception do
+    begin
+      result:=false;
+      WritelnLog(localinfotext+'Exception trying to getting lazbuild version. Details: '+E.Message,true);
+    end;
+  end;
+
+  if (NOT result) then
+  begin
+    WritelnLog(localinfotext+'Error trying to add package '+PackageName,true);
+    exit;
+  end;
+
+  if RegisterPackageFeature then RegisterPackageFeature:=RegisterOnly;
+
+  Processor.Parameters.Clear;
   FErrorLog.Clear;
   if WorkingDir<>'' then
     Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(WorkingDir);
@@ -431,7 +460,7 @@ begin
   Processor.Parameters.Add('--os=' + GetTargetOS);
   if FLCL_Platform <> '' then
             Processor.Parameters.Add('--ws=' + FLCL_Platform);
-  if RegisterOnly then
+  if RegisterPackageFeature then
     Processor.Parameters.Add('--add-package-link')
   else
     Processor.Parameters.Add('--add-package');
@@ -442,7 +471,7 @@ begin
     // runtime packages will return false, but output will have info about package being "only for runtime"
     if result then
     begin
-      if (NOT RegisterOnly) then
+      if (NOT RegisterPackageFeature) then
       begin
         infoln('Marking Lazarus for rebuild based on package install for '+PackageAbsolutePath,etDebug);
         FLazarusNeedsRebuild:=true; //Mark IDE for rebuild
@@ -451,15 +480,14 @@ begin
     else
     begin
       // if the package is only for runtime, just add an lpl file to inform Lazarus of its existence and location ->> set result to true
-      if (Pos('only for runtime',Processor.OutputString)>0) OR (RegisterOnly)
+      if (Pos('only for runtime',Processor.OutputString)>0) OR (RegisterPackageFeature)
          then result:=True
-         else WritelnLog(localinfotext+'Error trying to add package '+PackageName+LineEnding+'Details: '+FErrorLog.Text,true);
+         else WritelnLog(localinfotext+'Error trying to add package '+PackageName+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
     begin
-      WritelnLog(localinfotext+'Exception trying to add package '+PackageName+LineEnding+
-        'Details: '+E.Message,true);
+      WritelnLog(localinfotext+'Exception trying to add package '+PackageName+'. Details: '+E.Message,true);
     end;
   end;
 

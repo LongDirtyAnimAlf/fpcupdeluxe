@@ -842,7 +842,7 @@ begin
   // if Win7 or higher: use modern (2.4.0 and higher) binutils
   if aMajor>5 then
   begin
-    if (GetNumericalVersion(aVersion)<(2*10000+4*100+0)) then
+    if (GetNumericalVersionSafe(aVersion)<(2*10000+4*100+0)) then
        aVersion:='2.4.0';
   end;
 

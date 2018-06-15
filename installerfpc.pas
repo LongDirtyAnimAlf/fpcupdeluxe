@@ -516,7 +516,7 @@ begin
     {$ifdef win32}
     if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
     begin
-      if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+2)) then
+      if (GetNumericalVersionSafe(GetFPCVersion)<(2*10000+4*100+2)) then
       begin
         result:=true;
         exit;
@@ -1017,7 +1017,7 @@ begin
   Processor.Parameters.Add('REVSTR='+ActualRevision);
   Processor.Parameters.Add('REVINC=force');
 
-  if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+4)) then
+  if (GetNumericalVersionSafe(GetFPCVersion)<(2*10000+4*100+4)) then
   begin
     Processor.Parameters.Add('DATA2INC=echo');
   end;
@@ -1804,7 +1804,7 @@ begin
         // first, try official FPC binaries
         aCompilerList:=TStringList.Create;
         try
-          while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
+          while ((NOT aCompilerFound) AND (GetNumericalVersionSafe(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
           begin
             infoln(localinfotext+'Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
 
@@ -1966,7 +1966,7 @@ begin
             infoln(localinfotext+'Found online bootstrap compiler: '+aCompilerList[i],etDebug);
           end;
 
-          while ((NOT aFPCUPCompilerFound) AND (GetNumericalVersion(aLocalFPCUPBootstrapVersion)>0)) do
+          while ((NOT aFPCUPCompilerFound) AND (GetNumericalVersionSafe(aLocalFPCUPBootstrapVersion)>0)) do
           begin
             infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalFPCUPBootstrapVersion,etInfo);
 
@@ -2028,7 +2028,7 @@ begin
           end
           else
           begin
-            if GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) then
+            if GetNumericalVersionSafe(aLocalFPCUPBootstrapVersion)>GetNumericalVersionSafe(aLocalBootstrapVersion) then
             begin
               aCompilerFound:=true;
               infoln(localinfotext+'Got a better [version] bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
@@ -2237,7 +2237,7 @@ begin
 
     // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
     // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
-    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
+    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersionSafe(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
     begin
       // we need an intermediate compiler !!
       if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName) then
@@ -2378,7 +2378,7 @@ begin
              then Processor.Parameters.Add('clean')
              else Processor.Parameters.Add('compiler_cycle');
           // not sure if this needed here, but better safe than sorry
-          if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
+          if (GetNumericalVersionSafe(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
           begin
             Processor.Parameters.Add('DATA2INC=echo');
           end;

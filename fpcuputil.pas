@@ -325,7 +325,7 @@ function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
 function DoubleQuoteIfNeeded(s: string): string;
-function GetNumericalVersion(aVersion: string): word;
+function GetNumericalVersionSafe(VersionSnippet: string): word;
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
@@ -1793,15 +1793,52 @@ begin
   if (Pos(' ',result)<>0) AND (Pos('"',result)=0) then result:='"'+result+'"';
 end;
 
-function GetNumericalVersion(aVersion: string): word;
+function GetNumericalVersionSafe(VersionSnippet: string): word;
+var
+  i,j:integer;
+  found:boolean;
 begin
-  result := 0;
-  if length(aVersion)=5 then
+  result:=0;
+  i:=1;
+
+  // move towards first numerical
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // get major version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
   begin
-    result := ((ord(aVersion[1])-ord('0')) * 10000)+
-                ((ord(aVersion[3])-ord('0')) * 100)+
-                (ord(aVersion[5])-ord('0'));
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
   end;
+  if found then result:=result+(j*10000) else exit;
+
+  // move towards second numerical
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // get minor version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
+  begin
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
+  end;
+  if found then result:=result+(j*100) else exit;
+
+  // move towards third numerical
+  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // get build version
+  j:=0;
+  found:=false;
+  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
+  begin
+    found:=true;
+    j:=j*10+Ord(VersionSnippet[i])-$30;
+    Inc(i);
+  end;
+  if found then result:=result+(j*1);
 end;
 
 function UppercaseFirstChar(s: String): String;
