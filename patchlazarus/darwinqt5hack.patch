@@ -2,7 +2,7 @@ Index: ide/applicationbundle.pas
 ===================================================================
 --- ide/applicationbundle.pas	(revision 56789)
 +++ ide/applicationbundle.pas	(working copy)
-@@ -55,12 +55,21 @@
+@@ -55,6 +55,8 @@
    ContentsDirName = 'Contents';
    MacOSDirName = 'MacOS';
    ResourcesDirName = 'Resources';
@@ -11,6 +11,7 @@ Index: ide/applicationbundle.pas
    PropertyListFileName = 'Info.plist';
    PackageInfoFileName = 'PkgInfo';
    PackageInfoHeader = 'APPL????';
+@@ -61,6 +63,13 @@
    
  implementation
  
@@ -131,7 +132,7 @@ Index: ide/debugmanager.pas
 ===================================================================
 --- ide/debugmanager.pas	(revision 56789)
 +++ ide/debugmanager.pas	(working copy)
-@@ -2161,7 +2161,11 @@
+@@ -2171,7 +2171,11 @@
    *)
    if NewDebuggerClass.RequiresLocalExecutable then begin
  
@@ -143,7 +144,7 @@ Index: ide/debugmanager.pas
      begin
        // it is Application Bundle (darwin only)
  
-@@ -2170,10 +2174,14 @@
+@@ -2180,10 +2184,14 @@
          if not PromptOnError then
            ClearPathAndExe
          else
