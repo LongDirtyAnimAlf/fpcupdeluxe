@@ -223,8 +223,8 @@ begin
     SnipBegin:=0;
     while (SnipBegin<ConfigText.Count) do
     begin
-      // Look for exactly this string:
-      if (CompareText(ConfigText.Strings[SnipBegin],SnippetText.Strings[0])=0) then
+      // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
+      if (ConfigText.Strings[SnipBegin]=SnippetText.Strings[0]) then
       begin
         // found correct OS and basic CPU ; now try to find end of OS and CPU snippet
 
@@ -280,22 +280,26 @@ begin
 
       end;
       if result then break;
-      SnipBegin:=SnipBegin+1;
+      Inc(SnipBegin);
     end;
 
     if result then
     begin
       // Replace snippet
       infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
-      for i:=SnipEnd downto SnipBegin do ConfigText.Delete(i);
-      ConfigText.Insert(SnipBegin,Snippet)
+      for i:=SnipBegin to SnipEnd do ConfigText.Delete(SnipBegin);
     end
     else
     begin
       // Add snippet
       infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Adding settings into '+FPCCFG+'.',etInfo);
-      if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add(LineEnding);
-      ConfigText.Add(Snippet);
+      if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add('');
+      SnipBegin:=ConfigText.Count;
+    end;
+    for i:=0 to (SnippetText.Count-1) do
+    begin
+      ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
+      Inc(SnipBegin);
     end;
 
     //{$ifndef Darwin}
@@ -2585,8 +2589,7 @@ begin
     end;
   end;
 
-  //todo: after fpcmkcfg create a config file for fpkpkg or something
-  if OperationSucceeded then
+  if (NOT (Self is TFPCCrossInstaller)) AND (OperationSucceeded) then
   begin
     // Create fpc.cfg if needed
     if FileExists(FPCCfg) = False then
@@ -2789,10 +2792,9 @@ begin
       ConfigText.Free;
     end;
 
+    // do not build pas2js [yet]: separate install ... use the module with rtl
+    // if OperationSucceeded then BuildModuleCustom('PAS2JS');
   end;
-
-  // do not build pas2js [yet]: separate install ... use the module with rtl
-  // if OperationSucceeded then BuildModuleCustom('PAS2JS');
 
   RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
 
@@ -2825,7 +2827,7 @@ begin
   if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
   oldlog:=Processor.OnErrorM; //current error handler, if any
-  CrossCompiling:=(CrossOS_Target<>'') and (CrossCPU_Target<>'');
+  CrossCompiling:=((CrossOS_Target<>'') AND (CrossOS_Target<>'invalid') AND (CrossCPU_Target<>'') AND (CrossCPU_Target<>'invalid'));
   if CrossCompiling then
   begin
     CPU_OSSignature:=GetFPCTarget(false);
@@ -2882,7 +2884,7 @@ begin
         Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
       end;
       Processor.Parameters.Add('distclean');
-      if (CrossOS_Target='') and (CrossCPU_Target='') then
+      if (NOT CrossCompiling) then
       begin
         infoln(infotext+'Running make distclean twice',etInfo);
       end

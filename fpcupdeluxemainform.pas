@@ -1186,18 +1186,11 @@ end;
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var
   s:string;
-  FPCRevision,FPCBranch:string;
-  LazarusRevision,LazarusBranch:string;
 begin
 
   DisEnable(Sender,False);
   try
     PrepareRun;
-
-    FPCBranch:=FPCupManager.FPCDesiredBranch;
-    LazarusBranch:=FPCupManager.LazarusDesiredBranch;
-    FPCRevision:=FPCupManager.FPCDesiredRevision;
-    LazarusRevision:=FPCupManager.LazarusDesiredRevision;
 
     if Sender=TrunkBtn then
     begin
@@ -1255,11 +1248,6 @@ begin
 
     FPCupManager.FPCURL:=FPCTarget;
     FPCupManager.LazarusURL:=LazarusTarget;
-
-    FPCupManager.FPCDesiredBranch:=FPCBranch;
-    FPCupManager.LazarusDesiredBranch:=LazarusBranch;
-    FPCupManager.FPCDesiredRevision:=FPCRevision;
-    FPCupManager.LazarusDesiredRevision:=LazarusRevision;
 
     if (NOT Form2.IncludeHelp) then
       FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus'
@@ -2445,6 +2433,8 @@ begin
 end;
 
 procedure TForm1.PrepareRun;
+var
+  s:string;
 begin
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;
@@ -2482,6 +2472,11 @@ begin
   FPCupManager.CrossLibraryDirectory:='';
   FPCupManager.CrossToolsDirectory:='';
 
+  FPCupManager.FPCDesiredBranch:='';
+  FPCupManager.LazarusDesiredBranch:='';
+  FPCupManager.FPCDesiredRevision:='';
+  FPCupManager.LazarusDesiredRevision:='';
+
   {$IFDEF DEBUG}
   FPCupManager.Verbose:=True;
   SetVerbosity(True);
@@ -2490,12 +2485,11 @@ begin
   SetVerbosity((Form2.ExtraVerbose) AND (FPCupManager.Verbose));
   {$ENDIF}
 
-  FPCupManager.FPCDesiredBranch:=Form2.FPCBranch;
-  FPCupManager.FPCDesiredRevision:=Form2.FPCRevision;
+  // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
+  FPCupManager.FPCURL:=FPCTarget;
+  FPCupManager.LazarusURL:=LazarusTarget;
 
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
-  FPCupManager.LazarusDesiredBranch:=Form2.LazarusBranch;
-  FPCupManager.LazarusDesiredRevision:=Form2.LazarusRevision;
 
   FPCupManager.UseWget:=Form2.UseWget;
 
@@ -2503,31 +2497,6 @@ begin
 
   // set custom FPC compiler by special user input through setup+
   FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTargetCPU,GetTargetOS);
-
-  // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
-  FPCupManager.FPCURL:=FPCTarget;
-  (*
-  if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
-  begin
-    FPCupManager.FPCDesiredBranch:='release';
-    // use NewPascal git mirror for trunk sources
-    // set branch to get latest freepascal
-    if FPCTarget='trunkgit'
-       then FPCupManager.FPCDesiredBranch:='freepascal';
-  end;
-  *)
-
-  FPCupManager.LazarusURL:=LazarusTarget;
-  (*
-  if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
-  begin
-    FPCupManager.LazarusDesiredBranch:='release';
-    // use NewPascal git mirror for trunk sources
-    // set branch to get latest lazarus
-    if LazarusTarget='trunkgit'
-       then FPCupManager.LazarusDesiredBranch:='lazarus';
-  end;
-  *)
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
@@ -2610,7 +2579,10 @@ end;
 
 function TForm1.RealRun:boolean;
 var
-  s,aVersion:string;
+  {$ifdef RemoteLog}
+  aVersion:string;
+  {$endif}
+  s:string;
   aLazarusVersion:word;
 begin
   result:=false;
@@ -2629,6 +2601,26 @@ begin
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
   {$endif}
 
+  // default branch and revision overrides
+  // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
+  if (Pos('github.com/graemeg',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
+  if (Pos('github.com/graemeg',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
+  // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
+  if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='release';
+  if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='release';
+
+  // branch and revision overrides from setup+
+  s:=Form2.FPCBranch;
+  if Length(s)>0 then FPCupManager.FPCDesiredBranch:=s;
+  s:=Form2.FPCRevision;
+  if Length(s)>0 then FPCupManager.FPCDesiredRevision:=s;
+
+  s:=Form2.LazarusBranch;
+  if Length(s)>0 then FPCupManager.LazarusDesiredBranch:=s;
+  s:=Form2.LazarusRevision;
+  if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
+
+  // overrides for old versions of Lazarus
   aLazarusVersion:=GetNumericalVersionSafe(LazarusTarget);
   if (aLazarusVersion<>0) AND (aLazarusVersion<(1*10000+0*100+0)) then
   begin
