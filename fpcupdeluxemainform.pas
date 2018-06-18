@@ -1209,11 +1209,11 @@ begin
     if Sender=NPBtn then
     begin
       s:='Going to install NewPascal release';
-      FPCTarget:='newpascal';
-      FPCBranch:='release';
-      LazarusTarget:='newpascal';
-      LazarusBranch:='release';
-      //FPCupManager.IncludeModules:='mORMotFPC,zeos';
+      FPCTarget:='newpascalgit';
+      //FPCBranch:='release';
+      LazarusTarget:='newpascalgit';
+      //LazarusBranch:='release';
+      FPCupManager.IncludeModules:='mORMot,zeos';
     end;
 
     if Sender=FixesBtn then
@@ -2506,6 +2506,7 @@ begin
 
   // set default values for FPC and Lazarus URL ... can still be changed inside the quick real run button onclicks
   FPCupManager.FPCURL:=FPCTarget;
+  (*
   if (Pos('freepascal.git',lowercase(FPCupManager.FPCURL))>0) then
   begin
     FPCupManager.FPCDesiredBranch:='release';
@@ -2514,8 +2515,10 @@ begin
     if FPCTarget='trunkgit'
        then FPCupManager.FPCDesiredBranch:='freepascal';
   end;
+  *)
 
   FPCupManager.LazarusURL:=LazarusTarget;
+  (*
   if (Pos('lazarus.git',lowercase(FPCupManager.LazarusURL))>0) then
   begin
     FPCupManager.LazarusDesiredBranch:='release';
@@ -2524,6 +2527,7 @@ begin
     if LazarusTarget='trunkgit'
        then FPCupManager.LazarusDesiredBranch:='lazarus';
   end;
+  *)
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
@@ -2606,7 +2610,8 @@ end;
 
 function TForm1.RealRun:boolean;
 var
-  aVersion:string;
+  s,aVersion:string;
+  aLazarusVersion:word;
 begin
   result:=false;
 
@@ -2623,6 +2628,25 @@ begin
   FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib';
   FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
   {$endif}
+
+  aLazarusVersion:=GetNumericalVersionSafe(LazarusTarget);
+  if (aLazarusVersion<>0) AND (aLazarusVersion<(1*10000+0*100+0)) then
+  begin
+    s:=FPCupManager.OnlyModules;
+    if (Length(s)>0) then
+    begin
+      if Pos('oldlazarus',s)=0 then s:=StringReplace(s,'lazarus','oldlazarus',[]);
+      s:=StringReplace(s,'FPCCrossWin32-64','',[]);
+      s:=StringReplace(s,'LazarusCrossWin32-64','',[]);
+      FPCupManager.OnlyModules:=s;
+    end
+    else
+    begin
+      FPCupManager.OnlyModules:='fpc,oldlazarus';
+    end;
+    AddMessage('Detected a very old version of Lazarus !');
+    AddMessage('Switching towards old lazarus sequence !!');
+  end;
 
   AddMessage('FPC URL:               '+FPCupManager.FPCURL);
   AddMessage('FPC options:           '+FPCupManager.FPCOPT);

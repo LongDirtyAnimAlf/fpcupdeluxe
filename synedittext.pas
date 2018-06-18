@@ -75,6 +75,9 @@ begin
     // suppress all SynEdit PaintLock errors, always
     if AnsiContainsText(line,'PaintLock') then continue;
 
+    // suppress some GIT errors, always
+    if AnsiContainsText(line,'fatal: not a git repository') then continue;
+
     if (NOT outputline) then
     begin
       // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!

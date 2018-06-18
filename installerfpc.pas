@@ -2672,12 +2672,14 @@ begin
       end;
     end;
 
+    // at this point, a default fpc.cfg does exist
+    // modify it to suit fpcup[deluxe]
     ConfigText:=TStringList.Create;
     try
-
       ConfigText.LoadFromFile(FPCCfg);
       ReturnCode:=ConfigText.Count;
 
+      // cleanup previous fpcup settings
       repeat
         x:=-1;
         if x=-1 then
@@ -2698,7 +2700,7 @@ begin
 
         if x<>-1 then
         begin
-          // delete previous settings by fpcup[deluxe] by looking for magic ... ;-)
+          // delete previous settings by fpcup[deluxe] by looking for some magic ... ;-)
           x:=0;
           while (x<ConfigText.Count) do
           begin
@@ -2725,17 +2727,15 @@ begin
       // insert new config on right spot
       x:=ReturnCode;
 
-      if Length(ConfigText.Strings[x-1])>0 then
-      begin
-        // insert empty line
-        ConfigText.Insert(x,''); Inc(x);
-      end;
+      // insert empty line
+      if Length(ConfigText.Strings[x-1])>0 then ConfigText.Insert(x,''); Inc(x);
 
+      // add magic
       ConfigText.Insert(x,SnipMagicBegin+FPCUPMAGIC); Inc(x);
+
       ConfigText.Insert(x,'# Adding binary tools paths to'); Inc(x);
       ConfigText.Insert(x,'# plain bin dir and architecture bin dir so'); Inc(x);
       ConfigText.Insert(x,'# fpc 3.1+ fpcres etc can be found.'); Inc(x);
-
 
       // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
       // Adding this won't hurt on Windows.
@@ -2766,7 +2766,7 @@ begin
       {$ifndef FPCONLY}
         {$ifdef Darwin}
           {$ifdef LCLQT5}
-          ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty'); Inc(x);
+          ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
           ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
           ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
           ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
@@ -2779,7 +2779,9 @@ begin
         {$endif}
       {$endif}
 
+      // add magic
       ConfigText.Insert(x,SnipMagicEnd); Inc(x);
+      // insert empty line
       ConfigText.Insert(x,'');
       ConfigText.SaveToFile(FPCCfg);
 
@@ -2789,14 +2791,14 @@ begin
 
   end;
 
-  // do not build pas2js: separate install ... use the module with rtl
+  // do not build pas2js [yet]: separate install ... use the module with rtl
   // if OperationSucceeded then BuildModuleCustom('PAS2JS');
 
   RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
 
   if OperationSucceeded then
   begin
-    WritelnLog(infotext+'Update/build succeeded.',false);
+    WritelnLog(infotext+'Update/build/config succeeded.',false);
   end;
   Result := OperationSucceeded;
 end;

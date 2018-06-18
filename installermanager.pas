@@ -1422,9 +1422,9 @@ begin
     begin
       //defaults !!
       {$IFDEF Darwin}
-      FParent.LazarusOPT:='-gw -gl -godwarfsets -O1 -Co -Ci -Sa';
+      FParent.LazarusOPT:='-gw -gl -O1 -Co -Ci -Sa';
       {$ELSE}
-      FParent.LazarusOPT:='-gw -gl -godwarfsets -O1 -Co -Cr -Ci -Sa';
+      FParent.LazarusOPT:='-gw -gl -O1 -Co -Cr -Ci -Sa';
       {$ENDIF}
     end
     else

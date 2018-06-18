@@ -383,7 +383,7 @@ function TInstaller.CheckAndGetTools: boolean;
 var
   AllThere: boolean;
   OperationSucceeded: boolean;
-  Output: string;
+  aURL,Output: string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
 
@@ -569,24 +569,30 @@ begin
     if Assigned(FGitClient)
        then FGit:=FGitClient.RepoExecutableName
        else FGit:=Which('git');
-    if Not FileExists(FGit) then FGit := IncludeTrailingPathDelimiter(FMakeDir) + 'git\bin\git.exe';
+    if Not FileExists(FGit) then FGit:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
     if Not FileExists(FGit) then
     begin
       //Source:
       //https://github.com/git-for-windows/git/releases/download/v2.13.2.windows.1/Git-2.13.2-32-bit.exe
+
       ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'git');
       {$ifdef win32}
-      Output:='git32.7z';
+      //Output:='git32.7z';
+      Output:='git32.zip';
+      aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
       {$else}
-      Output:='git64.7z';
+      //Output:='git64.7z';
+      Output:='git64.zip';
+      aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
       {$endif}
-      infoln(localinfotext+'GIT not found. Download it (may take time) from '+FPCUPGITREPO+'/releases/download/Git-2.13.2',etInfo);
-      OperationSucceeded:=GetFile(FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+      //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
+      infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
+      OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
       if NOT OperationSucceeded then
       begin
         // try one more time
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-        OperationSucceeded:=GetFile(FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+        OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
       end;
       if OperationSucceeded then
       begin
@@ -1451,12 +1457,12 @@ end;
 function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-x64_86-win64.zip';
-  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2j-x64_86-win64.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2o-x64_86-win64.zip';
+  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2o-x64_86-win64.zip';
   {$endif}
   {$ifdef win32}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2j-i386-win32.zip';
-  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2j-i386-win32.zip';
+  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2o-i386-win32.zip';
+  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2o-i386-win32.zip';
   {$endif}
 var
   OperationSucceeded: boolean;
