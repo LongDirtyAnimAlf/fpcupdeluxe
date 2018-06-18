@@ -206,6 +206,8 @@ uses
 function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
 // Returns success (snippet inserted or added) or failure
+const
+  INFOTEXT='FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): ';
 var
   ConfigText: TStringList;
   i:integer;
@@ -252,13 +254,13 @@ begin
           if SnipEndLastResort<>MaxInt then
           begin
             SnipEnd:=SnipEndLastResort;
-            infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
+            infoln(INFOTEXT+'Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
           end;
         end;
         if SnipEnd=MaxInt then
         begin
           //apparently snippet was not closed at all: severe error
-          infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
+          infoln(INFOTEXT+'Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
           exit;
         end;
 
@@ -286,13 +288,13 @@ begin
     if result then
     begin
       // Replace snippet
-      infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
+      infoln(INFOTEXT+'Found existing snippet in '+FPCCFG+'. Replacing it with new version.',etInfo);
       for i:=SnipBegin to SnipEnd do ConfigText.Delete(SnipBegin);
     end
     else
     begin
       // Add snippet
-      infoln('FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): Adding settings into '+FPCCFG+'.',etInfo);
+      infoln(INFOTEXT+'Adding settings into '+FPCCFG+'.',etInfo);
       if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add('');
       SnipBegin:=ConfigText.Count;
     end;
@@ -323,6 +325,8 @@ begin
     ConfigText.Free;
     SnippetText.Free;
   end;
+
+  infoln(INFOTEXT+'Inserting snippet in '+FPCCFG+' done.',etInfo);
 end;
 
 // remove stale compiled files
@@ -2563,8 +2567,7 @@ begin
   FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
 
   // Find out where fpcmkcfg lives - only if necessary.
-  if OperationSucceeded and
-    (FileExists(FPCCfg)=false) then
+  if OperationSucceeded AND (FileExists(FPCCfg)=false) then
   begin
     fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg'+GetExeExt;
     if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
@@ -2589,7 +2592,8 @@ begin
     end;
   end;
 
-  if (NOT (Self is TFPCCrossInstaller)) AND (OperationSucceeded) then
+  // only touch fpc.cfg when NOT crosscompiling !
+  if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
   begin
     // Create fpc.cfg if needed
     if FileExists(FPCCfg) = False then
@@ -2827,7 +2831,9 @@ begin
   if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
   oldlog:=Processor.OnErrorM; //current error handler, if any
-  CrossCompiling:=((CrossOS_Target<>'') AND (CrossOS_Target<>'invalid') AND (CrossCPU_Target<>'') AND (CrossCPU_Target<>'invalid'));
+
+  CrossCompiling:=(Self is TFPCCrossInstaller);
+
   if CrossCompiling then
   begin
     CPU_OSSignature:=GetFPCTarget(false);
@@ -2915,7 +2921,8 @@ begin
     infoln(infotext+'Running make distclean failed: could not find cleanup compiler ('+aCleanupCompiler+')',etWarning);
   end;
 
-  // Delete any existing fpc.cfg files
+  // Delete any existing fpc.cfg file
+  // We could keep it, but this is the original behavior
   if (NOT CrossCompiling) then Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPU_OSSignature+DirectorySeparator+'fpc.cfg');
 
   {$IFDEF UNIX}
