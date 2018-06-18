@@ -1213,7 +1213,7 @@ begin
       //FPCBranch:='release';
       LazarusTarget:='newpascalgit';
       //LazarusBranch:='release';
-      FPCupManager.IncludeModules:='mORMot,zeos';
+      //FPCupManager.IncludeModules:='mORMot';
     end;
 
     if Sender=FixesBtn then
