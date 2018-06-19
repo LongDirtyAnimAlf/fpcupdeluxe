@@ -2564,39 +2564,41 @@ begin
   end;
   {$ENDIF UNIX}
 
-  FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-
-  // Find out where fpcmkcfg lives - only if necessary.
-  if OperationSucceeded AND (FileExists(FPCCfg)=false) then
-  begin
-    fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg'+GetExeExt;
-    if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
-    begin
-      // Newer 3.1 trunk versions put fpcmkcfg in bin itself ??!!
-      // todo check !!
-      // base or install directory
-      infoln(infotext+'Did not find '+fpcmkcfg+'. Now looking in '+
-        IncludeTrailingPathDelimiter(FInstallDirectory)+'bin.',etDebug);
-      fpcmkcfg:=IncludeTrailingPathDelimiter(FInstallDirectory)+
-        'bin'+DirectorySeparator+'fpcmkcfg'+GetExeExt;
-      if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
-      begin
-        infoln(infotext+'Could not find fpcmkcfg in '+fpcmkcfg+'. Aborting.',etError);
-        fpcmkcfg:='';
-        OperationSucceeded:=false;
-      end
-      else
-      begin
-        infoln(infotext+'Found valid fpcmkcfg executable: '+fpcmkcfg,etInfo);
-      end;
-    end;
-  end;
 
   // only touch fpc.cfg when NOT crosscompiling !
   if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
   begin
+
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+
+    // Find out where fpcmkcfg lives - only if necessary.
+    if (OperationSucceeded) AND (FileExists(FPCCfg)=false) then
+    begin
+      fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg'+GetExeExt;
+      if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
+      begin
+        // Newer 3.1 trunk versions put fpcmkcfg in bin itself ??!!
+        // todo check !!
+        // base or install directory
+        infoln(infotext+'Did not find '+fpcmkcfg+'. Now looking in '+
+          IncludeTrailingPathDelimiter(FInstallDirectory)+'bin.',etDebug);
+        fpcmkcfg:=IncludeTrailingPathDelimiter(FInstallDirectory)+
+          'bin'+DirectorySeparator+'fpcmkcfg'+GetExeExt;
+        if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
+        begin
+          infoln(infotext+'Could not find fpcmkcfg in '+fpcmkcfg+'. Aborting.',etError);
+          fpcmkcfg:='';
+          OperationSucceeded:=false;
+        end
+        else
+        begin
+          infoln(infotext+'Found valid fpcmkcfg executable: '+fpcmkcfg,etInfo);
+        end;
+      end;
+    end;
+
     // Create fpc.cfg if needed
-    if FileExists(FPCCfg) = False then
+    if (OperationSucceeded) AND (FileExists(FPCCfg)=False) then
     begin
       Processor.Executable := fpcmkcfg;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
@@ -2679,121 +2681,125 @@ begin
       end;
     end;
 
-    // at this point, a default fpc.cfg does exist
+    // at this point, a default fpc.cfg should exist
     // modify it to suit fpcup[deluxe]
-    ConfigText:=TStringList.Create;
-    try
-      ConfigText.LoadFromFile(FPCCfg);
-      ReturnCode:=ConfigText.Count;
+    if (FileExists(FPCCfg)=true) then
+    begin
+      ConfigText:=TStringList.Create;
+      try
+        ConfigText.LoadFromFile(FPCCfg);
+        ReturnCode:=ConfigText.Count;
 
-      // cleanup previous fpcup settings
-      repeat
-        x:=-1;
-        if x=-1 then
-        begin
-          s:='# fpcup:';
-          x:=ConfigText.IndexOf(s);
-        end;
-        if x=-1 then
-        begin
-          s:='# Fpcup[deluxe]:';
-          x:=ConfigText.IndexOf(s);
-        end;
-        if x=-1 then
-        begin
-          s:=SnipMagicBegin+FPCUPMAGIC;
-          x:=ConfigText.IndexOf(s);
-        end;
-
-        if x<>-1 then
-        begin
-          // delete previous settings by fpcup[deluxe] by looking for some magic ... ;-)
-          x:=0;
-          while (x<ConfigText.Count) do
+        // cleanup previous fpcup settings
+        repeat
+          x:=-1;
+          if x=-1 then
           begin
-            if ConfigText.Strings[x]=s then
-            begin
-              ConfigText.Delete(x);
-              while (x<ConfigText.Count) do
-              begin
-                if (Length(ConfigText.Strings[x])>0) AND (ConfigText.Strings[x]<>SnipMagicEnd) AND (Pos(SnipMagicBegin,ConfigText.Strings[x])=0) then
-                  ConfigText.Delete(x)
-                else
-                  break;
-              end;
-              while (x<ConfigText.Count) AND ((ConfigText.Strings[x]=SnipMagicEnd) OR (Length(ConfigText.Strings[x])=0)) do ConfigText.Delete(x);
-              ReturnCode:=x;
-              break;
-            end;
-            Inc(x);
+            s:='# fpcup:';
+            x:=ConfigText.IndexOf(s);
           end;
+          if x=-1 then
+          begin
+            s:='# Fpcup[deluxe]:';
+            x:=ConfigText.IndexOf(s);
+          end;
+          if x=-1 then
+          begin
+            s:=SnipMagicBegin+FPCUPMAGIC;
+            x:=ConfigText.IndexOf(s);
+          end;
+
+          if x<>-1 then
+          begin
+            // save position
+            ReturnCode:=x;
+
+            // delete previous settings by fpcup[deluxe] by looking for some magic ... ;-)
+            ConfigText.Delete(x);
+            while (x<ConfigText.Count) do
+            begin
+              if (Length(ConfigText.Strings[x])>0) AND (ConfigText.Strings[x]<>SnipMagicEnd) AND (Pos(SnipMagicBegin,ConfigText.Strings[x])=0) then
+                ConfigText.Delete(x)
+              else
+                break;
+            end;
+            // remove endmagic if any
+            if (ConfigText.Strings[x]=SnipMagicEnd) then ConfigText.Delete(x);
+            // remove empty lines if any
+            while (x<ConfigText.Count) AND (Length(ConfigText.Strings[x])=0) do ConfigText.Delete(x);
+          end;
+
+        until x=-1;
+
+        // insert new config on right spot
+        x:=ReturnCode;
+
+        // insert empty line before
+        if Length(ConfigText.Strings[x-1])>0 then
+        begin
+          ConfigText.Insert(x,''); Inc(x);
         end;
 
-      until x=-1;
+        // add magic
+        ConfigText.Insert(x,SnipMagicBegin+FPCUPMAGIC); Inc(x);
 
-      // insert new config on right spot
-      x:=ReturnCode;
+        // add settings
+        ConfigText.Insert(x,'# Adding binary tools paths to'); Inc(x);
+        ConfigText.Insert(x,'# plain bin dir and architecture bin dir so'); Inc(x);
+        ConfigText.Insert(x,'# fpc 3.1+ fpcres etc can be found.'); Inc(x);
 
-      // insert empty line
-      if Length(ConfigText.Strings[x-1])>0 then ConfigText.Insert(x,''); Inc(x);
+        // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
+        // Adding this won't hurt on Windows.
+        // Adjust for that
+        PlainBinPath:=ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'));
+        s:='-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath);
+        ConfigText.Insert(x,s); Inc(x);
+        {$IFDEF UNIX}
+        // Need to add appropriate library search path
+        // where it is e.g /usr/lib/arm-linux-gnueabihf...
+        ConfigText.Insert(x,'# library search path'); Inc(x);
+        s:='-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu';
+        s:=s+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
+        {$IFDEF cpuarm}
+        {$IFDEF CPUARMHF}
+        s:=s+';'+'/usr/lib/$FPCTARGET-gnueabihf';
+        {$ELSE}
+        s:=s+';'+'/usr/lib/$FPCTARGET-gnueabi';
+        {$ENDIF CPUARMHF}
+        {$ENDIF cpuarm}
+        {$IF (defined(BSD)) and (not defined(Darwin))}
+        s:=s+';'+'/usr/local/lib'+';'+'/usr/X11R6/lib';
+        {$endif}
+        s:=s+';'+GetGCCDirectory;
+        ConfigText.Insert(x,s); Inc(x);
+        {$ENDIF UNIX}
 
-      // add magic
-      ConfigText.Insert(x,SnipMagicBegin+FPCUPMAGIC); Inc(x);
-
-      ConfigText.Insert(x,'# Adding binary tools paths to'); Inc(x);
-      ConfigText.Insert(x,'# plain bin dir and architecture bin dir so'); Inc(x);
-      ConfigText.Insert(x,'# fpc 3.1+ fpcres etc can be found.'); Inc(x);
-
-      // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
-      // Adding this won't hurt on Windows.
-      // Adjust for that
-      PlainBinPath:=ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'));
-      s:='-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath);
-      ConfigText.Insert(x,s); Inc(x);
-      {$IFDEF UNIX}
-      // Need to add appropriate library search path
-      // where it is e.g /usr/lib/arm-linux-gnueabihf...
-      ConfigText.Insert(x,'# library search path'); Inc(x);
-      s:='-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu';
-      s:=s+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
-      {$IFDEF cpuarm}
-      {$IFDEF CPUARMHF}
-      s:=s+';'+'/usr/lib/$FPCTARGET-gnueabihf';
-      {$ELSE}
-      s:=s+';'+'/usr/lib/$FPCTARGET-gnueabi';
-      {$ENDIF CPUARMHF}
-      {$ENDIF cpuarm}
-      {$IF (defined(BSD)) and (not defined(Darwin))}
-      s:=s+';'+'/usr/local/lib'+';'+'/usr/X11R6/lib';
-      {$endif}
-      s:=s+';'+GetGCCDirectory;
-      ConfigText.Insert(x,s); Inc(x);
-      {$ENDIF UNIX}
-
-      {$ifndef FPCONLY}
-        {$ifdef Darwin}
-          {$ifdef LCLQT5}
-          ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
-          ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
-          ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-          ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-          ConfigText.Insert(x,'-k-rpath'); Inc(x);
-          ConfigText.Insert(x,'-k@executable_path/../Frameworks'); Inc(x);
-          ConfigText.Insert(x,'-k-rpath'); Inc(x);
-          ConfigText.Insert(x,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-          ConfigText.Insert(x,'#ENDIF'); Inc(x);
+        {$ifndef FPCONLY}
+          {$ifdef Darwin}
+            {$ifdef LCLQT5}
+            ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
+            ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+            ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
+            ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
+            ConfigText.Insert(x,'-k-rpath'); Inc(x);
+            ConfigText.Insert(x,'-k@executable_path/../Frameworks'); Inc(x);
+            ConfigText.Insert(x,'-k-rpath'); Inc(x);
+            ConfigText.Insert(x,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
+            ConfigText.Insert(x,'#ENDIF'); Inc(x);
+            {$endif}
           {$endif}
         {$endif}
-      {$endif}
 
-      // add magic
-      ConfigText.Insert(x,SnipMagicEnd); Inc(x);
-      // insert empty line
-      ConfigText.Insert(x,'');
-      ConfigText.SaveToFile(FPCCfg);
+        // add magic
+        ConfigText.Insert(x,SnipMagicEnd); Inc(x);
+        // add empty line
+        ConfigText.Insert(x,'');
 
-    finally
-      ConfigText.Free;
+        ConfigText.SaveToFile(FPCCfg);
+      finally
+        ConfigText.Free;
+      end;
+
     end;
 
     // do not build pas2js [yet]: separate install ... use the module with rtl
