@@ -2819,7 +2819,7 @@ var
   CrossCompiling: boolean;
   FileCounter:word;
   DeleteList: TStringList;
-  CPU_OSSignature:string;
+  CPUOS_Signature:string;
   aCleanupCompiler:string;
   S : string;
 begin
@@ -2836,11 +2836,11 @@ begin
 
   if CrossCompiling then
   begin
-    CPU_OSSignature:=GetFPCTarget(false);
+    CPUOS_Signature:=GetFPCTarget(false);
     // Delete any existing buildstamp file
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPU_OSSignature);
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'base.build-stamp.'+CPU_OSSignature);
-  end else CPU_OSSignature:=GetFPCTarget(true);
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'build-stamp.'+CPUOS_Signature);
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'base.build-stamp.'+CPUOS_Signature);
+  end else CPUOS_Signature:=GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
   // Remove all fpmakes
@@ -2850,7 +2850,7 @@ begin
   DeleteList:=TStringList.Create;
   try
     DeleteList.Add('fpmake'+GetExeExt);
-    DeleteFilesSubDirs(IncludeTrailingPathDelimiter(FSourceDirectory),DeleteList,CPU_OSSignature);
+    DeleteFilesSubDirs(IncludeTrailingPathDelimiter(FSourceDirectory),DeleteList,CPUOS_Signature);
   finally
     DeleteList.Free;
   end;
@@ -2921,13 +2921,18 @@ begin
     infoln(infotext+'Running make distclean failed: could not find cleanup compiler ('+aCleanupCompiler+')',etWarning);
   end;
 
-  // Delete any existing fpc.cfg file
-  // We could keep it, but this is the original behavior
-  if (NOT CrossCompiling) then Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPU_OSSignature+DirectorySeparator+'fpc.cfg');
+  if (NOT CrossCompiling) then
+  begin
+    // Delete any existing fpc.cfg file
+    // We could keep it, but this is the original behavior
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.cfg');
+    {$IFDEF UNIX}
+    // Delete any fpc.sh shell scripts
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
+    {$ENDIF UNIX}
+  end;
 
   {$IFDEF UNIX}
-  // Delete any fpc.sh shell scripts
-  if (NOT CrossCompiling) then Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPU_OSSignature+DirectorySeparator+'fpc.sh');
   // Delete units
   DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'units');
   DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'lib/fpc/'+GetFPCVersion+'/units');
@@ -2937,23 +2942,33 @@ begin
   // delete the units directory !!
   // this is needed due to the fact that make distclean will not cleanout this units directory
   // make distclean will only remove the results of a make, not a make install
-  DeleteDirectoryEx(IncludeTrailingPathDelimiter(FSourceDirectory)+'units'+DirectorySeparator+CPU_OSSignature);
+  DeleteDirectoryEx(IncludeTrailingPathDelimiter(FSourceDirectory)+'units'+DirectorySeparator+CPUOS_Signature);
   {$ENDIF}
+
 
   // finally ... if something is still still still floating around ... delete it !!
   DeleteList := TStringList.Create;
   try
+    (*
     FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.a; *.o', True);
     if DeleteList.Count > 0 then
     begin
       for FileCounter := 0 to (DeleteList.Count-1) do
       begin
-        if Pos(CPU_OSSignature,DeleteList.Strings[FileCounter])>0 then DeleteFile(DeleteList.Strings[FileCounter]);
+        if Pos(CPUOS_Signature,DeleteList.Strings[FileCounter])>0 then DeleteFile(DeleteList.Strings[FileCounter]);
       end;
     end;
+    *)
+
+    // delete stray unit and (static) object files, if any !!
+    DeleteList.Add('.ppu');
+    DeleteList.Add('.a');
+    DeleteList.Add('.o');
+    DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
 
     DeleteList.Clear;
 
+    // delete stray executables, if any !!
     FindAllFiles(DeleteList,IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler', '*'+GetExeExt, False);
     if (NOT CrossCompiling) then
     begin

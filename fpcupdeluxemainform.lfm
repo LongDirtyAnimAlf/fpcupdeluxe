@@ -12,7 +12,7 @@ object Form1: TForm1
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   OnResize = FormResize
-  Position = poDesktopCenter
+  Position = poDefault
   LCLVersion = '1.9.0.0'
   Visible = True
   object btnSetupPlus: TButton
