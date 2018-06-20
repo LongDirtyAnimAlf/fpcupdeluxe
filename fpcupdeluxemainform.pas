@@ -1250,9 +1250,15 @@ begin
     FPCupManager.LazarusURL:=LazarusTarget;
 
     if (NOT Form2.IncludeHelp) then
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus'
+    begin
+      if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus';
+    end
     else
+    begin
+      if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
+    end;
 
     AddMessage(s+'.');
 
@@ -1355,9 +1361,15 @@ begin
     else
     begin
       if (NOT Form2.IncludeHelp) then
+      begin
+        if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
         FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus'
+      end
       else
+      begin
+        if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
         FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
+      end;
     end;
 
     {$ifdef RemoteLog}
@@ -2263,7 +2275,10 @@ begin
        {$endif}
 
     if NOT Form2.IncludeHelp then
+    begin
+      if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
       FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc';
+    end;
 
     sStatus:='Going to install/update FPC only.';
 
@@ -2305,9 +2320,15 @@ begin
     end;
 
     if (NOT Form2.IncludeHelp) then
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus'
+    begin
+      if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus';
+    end
     else
+    begin
+      if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
       FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
+    end;
 
     sStatus:='Going to install/update Lazarus only.';
 

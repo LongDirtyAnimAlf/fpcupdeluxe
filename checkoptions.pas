@@ -79,6 +79,7 @@ begin
           LeftOverOptions.Add('rebuildonly');
           LeftOverOptions.Add('disablejobs');
           LeftOverOptions.Add('usewget');
+          LeftOverOptions.Add('includehelp');
           LeftOverOptions.Add('fpcsplit');
           //LeftOverOptions.Add('lazsplit');
           LeftOverOptions.Add('verbose');
@@ -293,6 +294,20 @@ begin
       FInstaller.IncludeModules:=Options.GetOption('','include','',false);
       FInstaller.SkipModules:=Options.GetOption('','skip','',false);
       FInstaller.OnlyModules:=Options.GetOption('','only','',false);
+
+      if (NOT Options.GetOptionNoParam('','includehelp')) then
+      begin
+        if Length(FInstaller.SkipModules)>0 then FInstaller.SkipModules:=FInstaller.SkipModules+',';
+        FInstaller.SkipModules:=FInstaller.SkipModules+'helpfpc';
+        {$ifndef FPCONLY}
+        FInstaller.SkipModules:=FInstaller.SkipModules+',helplazarus';
+        {$endif}
+      end
+      else
+      begin
+        if Length(FInstaller.IncludeModules)>0 then FInstaller.IncludeModules:=FInstaller.IncludeModules+',';
+        FInstaller.IncludeModules:=FInstaller.IncludeModules+'lhelp';
+      end;
 
       FInstaller.FPCPatches:=Options.GetOption('','fpcpatch','',false);
       {$ifndef FPCONLY}

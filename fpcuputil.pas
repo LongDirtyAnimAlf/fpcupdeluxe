@@ -1814,8 +1814,10 @@ begin
   end;
   if found then result:=result+(j*10000) else exit;
 
-  // move towards second numerical
-  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip random symbols to move towards next digit
+  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip a single random symbol to move towards next digit
+  if (Length(VersionSnippet)>=i) then Inc(i);
   // get minor version
   j:=0;
   found:=false;
@@ -1827,8 +1829,10 @@ begin
   end;
   if found then result:=result+(j*100) else exit;
 
-  // move towards third numerical
-  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip random symbols to move towards next digit
+  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip a single random symbol to move towards next digit
+  if (Length(VersionSnippet)>=i) then Inc(i);
   // get build version
   j:=0;
   found:=false;
