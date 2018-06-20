@@ -1711,7 +1711,8 @@ begin
 
       if (FPCupManager.CrossOS_Target='wince') then
       begin
-        FPCupManager.CrossOPT:='-CpARMV6 ';
+        //Disable for now : setting ARMV6 gives problems with FPC 3.0.4 and lower
+        //FPCupManager.CrossOPT:='-CpARMV6 ';
       end
       else
       if (FPCupManager.CrossOS_Target='darwin') then

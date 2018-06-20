@@ -562,7 +562,7 @@ begin
       if PackagePath='' then continue;
       if NOT FileExists(PackagePath) then
       begin
-        infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+        infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etInfo);
         UnInstallPackage(PackagePath);
         continue;
       end;
@@ -622,7 +622,7 @@ begin
       if (PackagePath='') then continue;
       if NOT FileExists(PackagePath) then
       begin
-        infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etWarning);
+        infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etInfo);
         {$ifndef FPCONLY}
         UnInstallPackage(PackagePath);
         {$endif}
