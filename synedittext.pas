@@ -78,6 +78,13 @@ begin
     // suppress some GIT errors, always
     if AnsiContainsText(line,'fatal: not a git repository') then continue;
 
+    // suppress some lazbuild errors, always
+    if AnsiContainsText(line,'lazbuild') then
+    begin
+      if AnsiContainsText(line,'only for runtime') then continue;
+      if AnsiContainsText(line,'lpk file expected') then continue;
+    end;
+
     if (NOT outputline) then
     begin
       // to be absolutely sure not to miss errors and fatals and fpcupdeluxe messages !!

@@ -102,7 +102,7 @@ type
     function InitModule:boolean;
     {$ifndef FPCONLY}
     // Installs a single package:
-    function InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean=false): boolean;
+    function InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean; Silent:boolean=false): boolean;
     // Scans for and removes all packages specfied in a (module's) stringlist with commands:
     function RemovePackages(sl:TStringList): boolean;
     // Uninstall a single package:
@@ -375,7 +375,7 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean=false): boolean;
+function TUniversalInstaller.InstallPackage(PackagePath, WorkingDir: string; RegisterOnly:boolean; Silent:boolean=false): boolean;
 var
   PackageName,PackageAbsolutePath: string;
   Path: String;
@@ -383,6 +383,9 @@ var
   lpkversion:TAPkgVersion;
   TxtFile:TextFile;
   RegisterPackageFeature:boolean;
+  i,ReqCount:integer;
+  ReqPackage:string;
+  PackageFiles: TStringList;
 begin
   result:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InstallPackage): ';
@@ -391,32 +394,76 @@ begin
 
   // Convert any relative path to absolute path, if it's not just a file/package name:
   if ExtractFileName(PackagePath)=PackagePath then
+    // we have a relative path or packagename: let Lazarus handle it
     PackageAbsolutePath:=PackagePath
   else
+   // Just use absolute path
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
 
-  // if only a filename (without path) is given, then lazarus will handle everything by itself
-  // set lpkversion.Name to 'unknown' to flag this case
-  // if not, get some extra info from package file !!
+  // find a Lazarus component, if any
+  // all other packages will be ignored
+  if (NOT FileExists(PackageAbsolutePath)) then
+  begin
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(LazarusDir)+'components', PackageName+'.lpk' , true);
+    if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
+    PackageFiles.Free;
+  end;
+
   lpkversion.Name:='unknown';
-  if (ExtractFileName(PackagePath)<>PackagePath) then
+  if FileExists(PackageAbsolutePath) then
   begin
     lpkdoc:=TConfig.Create(PackageAbsolutePath);
     try
-      Path:='Package/';
-      lpkversion.FileVersion:=lpkdoc.GetValue(Path+'Version',0);
-      Path:='Package/Name/';
-      lpkversion.Name:=lpkdoc.GetValue(Path+'Value','unknown');
-      Path:='Package/Version/';
-      lpkversion.GetVersion(lpkdoc,Path);
+      // if only a filename (without path) is given, then lazarus will handle everything by itself
+      // set lpkversion.Name to 'unknown' to flag this case
+      // if not, get some extra info from package file !!
+      if (ExtractFileName(PackagePath)<>PackagePath) then
+      begin
+        Path:='Package/';
+        lpkversion.FileVersion:=lpkdoc.GetValue(Path+'Version',0);
+        Path:='Package/Name/';
+        lpkversion.Name:=lpkdoc.GetValue(Path+'Value','unknown');
+        Path:='Package/Version/';
+        lpkversion.GetVersion(lpkdoc,Path);
+      end;
+
+      // get package requirements
+      Path:='Package/RequiredPkgs/';
+      ReqCount:=lpkdoc.GetValue(Path+'Count',0);
+      for i:=1 to ReqCount do
+      begin
+        Path:='Package/RequiredPkgs/';
+        ReqPackage:=lpkdoc.GetValue(Path+'Item'+InttoStr(i)+'/PackageName/Value','unknown');
+        // try to auto-resolve dependencies, but skip trivial packages
+        // not very elegant, but working
+        if (ReqPackage<>'unknown') AND
+           (ReqPackage<>'LCL') AND
+           (ReqPackage<>'LazControls') AND
+           (ReqPackage<>'IDEIntf') AND
+           (ReqPackage<>'FCL') AND
+           (ReqPackage<>'LCLBase') AND
+           (ReqPackage<>'LazControlDsgn') AND
+           (ReqPackage<>'LazUtils') AND
+           (ReqPackage<>'Printer4Lazarus') AND
+           (ReqPackage<>'cairocanvas_pkg') AND
+           (ReqPackage<>'SynEdit') AND
+           (ReqPackage<>'RunTimeTypeInfoControls') AND
+           (ReqPackage<>'CodeTools') then
+        begin
+          InstallPackage(ReqPackage, WorkingDir, RegisterOnly, true);
+        end;
+      end;
     finally
       lpkdoc.Free;
     end;
   end;
 
-  if lpkversion.Name='unknown'
-     then WritelnLog(localinfotext+'Installing '+PackageName,True)
-     else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
+  //if (NOT Silent){ OR FVerbose} then
+  begin
+    if lpkversion.Name='unknown'
+       then WritelnLog(localinfotext+'Installing '+PackageName,True)
+       else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
+  end;
 
   Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
 
