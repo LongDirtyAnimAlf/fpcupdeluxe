@@ -2643,7 +2643,7 @@ begin
   if Length(s)>0 then FPCupManager.LazarusDesiredRevision:=s;
 
   // overrides for old versions of Lazarus
-  aLazarusVersion:=GetNumericalVersionSafe(LazarusTarget);
+  aLazarusVersion:=GetNumericalVersion(LazarusTarget);
   if (aLazarusVersion<>0) AND (aLazarusVersion<(1*10000+0*100+0)) then
   begin
     s:=FPCupManager.OnlyModules;

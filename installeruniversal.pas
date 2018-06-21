@@ -448,6 +448,8 @@ begin
            (ReqPackage<>'cairocanvas_pkg') AND
            (ReqPackage<>'SynEdit') AND
            (ReqPackage<>'RunTimeTypeInfoControls') AND
+           (ReqPackage<>'DebuggerIntf') AND
+           (ReqPackage<>'LazDebuggerGdbmi') AND
            (ReqPackage<>'CodeTools') then
         begin
           InstallPackage(ReqPackage, WorkingDir, RegisterOnly, true);
@@ -475,7 +477,7 @@ begin
   try
     Processor.Execute;
     result := (Processor.ExitStatus=0);
-    if result then RegisterPackageFeature:=(GetNumericalVersionSafe(Processor.OutputString)>=(1*10000+7*100+0));
+    if result then RegisterPackageFeature:=(GetNumericalVersion(Processor.OutputString)>=(1*10000+7*100+0));
   except
     on E: Exception do
     begin

@@ -268,9 +268,10 @@ function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensi
 // only if filename contains specfied part somewhere
 function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
 function GetFileNameFromURL(URL:string):string;
-function GetVersionFromUrl(URL:string): string;
 function StripUrl(URL:string): string;
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
+function GetNumericalVersion(VersionSnippet: string): word;
+function GetVersionFromUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
@@ -325,7 +326,7 @@ function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
 function GetCrossCompilerName(Cpu_Target:string):string;
 function DoubleQuoteIfNeeded(s: string): string;
-function GetNumericalVersionSafe(VersionSnippet: string): word;
+
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
@@ -819,51 +820,6 @@ begin
   result:=URI.Document;
 end;
 
-function GetVersionFromUrl(URL:string): string;
-var
-  VersionSnippet:string;
-  i:integer;
-  VersionList : TStringList;
-  MajorVersion,MinorVersion,ReleaseVersion : string;
-begin
-  if Pos('trunk',URL)>0 then result:='trunk' else
-  begin
-    MajorVersion := '0';
-    MinorVersion := '0';
-    ReleaseVersion := '0';
-
-    VersionSnippet:=UpperCase(URL);
-
-    // find first occurence of _ and delete everything before it
-    // if url contains a version, this version always starts with first _
-
-    i := Pos('_',VersionSnippet);
-    if i>0 then
-    begin
-      Delete(VersionSnippet,1,i);
-      // ignore release candidate numbering
-      i := Pos('_RC',VersionSnippet);
-      if i>0 then Delete(VersionSnippet,i,200);
-      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
-    end;
-
-    if Length(VersionSnippet)>0 then
-    begin
-      VersionList := TStringList.Create;
-      try
-        VersionList.CommaText := VersionSnippet;
-        if VersionList.Count>0 then MajorVersion := VersionList[0];
-        if VersionList.Count>1 then MinorVersion := VersionList[1];
-        if VersionList.Count>2 then ReleaseVersion := VersionList[2];
-      finally
-        VersionList.Free;
-      end;
-    end;
-    result:=MajorVersion+'.'+MinorVersion+'.'+ReleaseVersion;
-
-  end;
-end;
-
 function StripUrl(URL:string): string;
 var
   URI:TURI;
@@ -892,8 +848,10 @@ begin
   end;
   if found then Major:=j;
 
-  // move towards second numerical
-  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip random symbols to move towards next digit
+  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip a single random symbol to move towards next digit
+  if (Length(VersionSnippet)>=i) then Inc(i);
   // get minor version
   j:=0;
   found:=false;
@@ -905,8 +863,10 @@ begin
   end;
   if found then Minor:=j;
 
-  // move towards third numerical
-  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip random symbols to move towards next digit
+  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
+  // skip a single random symbol to move towards next digit
+  if (Length(VersionSnippet)>=i) then Inc(i);
   // get build version
   j:=0;
   found:=false;
@@ -919,6 +879,61 @@ begin
   if found then Build:=j;
 end;
 
+function GetNumericalVersion(VersionSnippet: string): word;
+var
+  Major,Minor,Build: Integer;
+begin
+  Major:=0;
+  Minor:=0;
+  Build:=0;
+  GetVersionFromString(VersionSnippet,Major,Minor,Build);
+  result:=Major*10000+Minor*100+Build;
+end;
+
+function GetVersionFromUrl(URL:string): string;
+var
+  VersionSnippet:string;
+  i:integer;
+  VersionList : TStringList;
+begin
+  result:='0.0.0';
+
+  if Pos('trunk',URL)>0 then result:='trunk' else
+  if Pos('newpascal',URL)>0 then result:='trunk' else
+  if Pos('freepascal.git',URL)>0 then result:='trunk' else
+  if Pos('lazarus.git',URL)>0 then result:='trunk' else
+  begin
+    VersionSnippet:=UpperCase(URL);
+
+    // find first occurence of _ and delete everything before it
+    // if url contains a version, this version always starts with first _
+    i := Pos('_',VersionSnippet);
+    if i>0 then
+    begin
+      Delete(VersionSnippet,1,i);
+      // ignore release candidate numbering
+      i := Pos('_RC',VersionSnippet);
+      if i>0 then Delete(VersionSnippet,i,200);
+      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
+    end;
+
+    if Length(VersionSnippet)>0 then
+    begin
+      VersionList := TStringList.Create;
+      try
+        VersionList.CommaText := VersionSnippet;
+        if VersionList.Count>0 then
+        begin
+          result:=VersionList[0];
+          if VersionList.Count>1 then result:=result+'.'+VersionList[1];
+          if VersionList.Count>2 then result:=result+'.'+VersionList[2];
+        end;
+      finally
+        VersionList.Free;
+      end;
+    end;
+  end;
+end;
 
 {$IFDEF MSWINDOWS}
 procedure DeleteDesktopShortcut(ShortcutName: string);
@@ -1791,58 +1806,6 @@ function DoubleQuoteIfNeeded(s: string): string;
 begin
   result:=Trim(s);
   if (Pos(' ',result)<>0) AND (Pos('"',result)=0) then result:='"'+result+'"';
-end;
-
-function GetNumericalVersionSafe(VersionSnippet: string): word;
-var
-  i,j:integer;
-  found:boolean;
-begin
-  result:=0;
-  i:=1;
-
-  // move towards first numerical
-  while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
-  // get major version
-  j:=0;
-  found:=false;
-  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
-  begin
-    found:=true;
-    j:=j*10+Ord(VersionSnippet[i])-$30;
-    Inc(i);
-  end;
-  if found then result:=result+(j*10000) else exit;
-
-  // skip random symbols to move towards next digit
-  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
-  // skip a single random symbol to move towards next digit
-  if (Length(VersionSnippet)>=i) then Inc(i);
-  // get minor version
-  j:=0;
-  found:=false;
-  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
-  begin
-    found:=true;
-    j:=j*10+Ord(VersionSnippet[i])-$30;
-    Inc(i);
-  end;
-  if found then result:=result+(j*100) else exit;
-
-  // skip random symbols to move towards next digit
-  //while (Length(VersionSnippet)>=i) AND (NOT (VersionSnippet[i] in ['0'..'9'])) do Inc(i);
-  // skip a single random symbol to move towards next digit
-  if (Length(VersionSnippet)>=i) then Inc(i);
-  // get build version
-  j:=0;
-  found:=false;
-  while (Length(VersionSnippet)>=i) AND (VersionSnippet[i] in ['0'..'9']) do
-  begin
-    found:=true;
-    j:=j*10+Ord(VersionSnippet[i])-$30;
-    Inc(i);
-  end;
-  if found then result:=result+(j*1);
 end;
 
 function UppercaseFirstChar(s: String): String;

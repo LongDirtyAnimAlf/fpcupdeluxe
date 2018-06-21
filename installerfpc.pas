@@ -524,7 +524,7 @@ begin
     {$ifdef win32}
     if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
     begin
-      if (GetNumericalVersionSafe(GetFPCVersion)<(2*10000+4*100+2)) then
+      if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+2)) then
       begin
         result:=true;
         exit;
@@ -1025,7 +1025,7 @@ begin
   Processor.Parameters.Add('REVSTR='+ActualRevision);
   Processor.Parameters.Add('REVINC=force');
 
-  if (GetNumericalVersionSafe(GetFPCVersion)<(2*10000+4*100+4)) then
+  if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+4)) then
   begin
     Processor.Parameters.Add('DATA2INC=echo');
   end;
@@ -1228,21 +1228,16 @@ end;
 
 function TFPCInstaller.GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
 var
-  VersionSnippet:string;
-  VersionList : TStringList;
+  Major,Minor,Build: Integer;
 begin
   result:=-1;
-  VersionSnippet:=StringReplace(aVersion,'.',',',[rfReplaceAll]);
-  if Length(VersionSnippet)>0 then
-  begin
-    VersionList := TStringList.Create;
-    try
-      VersionList.CommaText := VersionSnippet;
-      if VersionList.Count>index then result := StrToIntDef(VersionList[index], -1);
-    finally
-      VersionList.Free;
-    end;
-  end;
+  Major:=-1;
+  Minor:=-1;
+  Build:=-1;
+  GetVersionFromString(aVersion,Major,Minor,Build);
+  if index=0 then result:=Major;
+  if index=1 then result:=Minor;
+  if index=2 then result:=Build;
 end;
 
 function TFPCInstaller.GetCompilerVersionFromUrl(aUrl: string): string;
@@ -1258,22 +1253,22 @@ var
   TxtFile:Text;
   version_nr:string;
   release_nr:string;
-  patch_nr:string;
+  build_nr:string;
   found_version_nr:boolean;
   found_release_nr:boolean;
-  found_patch_nr:boolean;
+  found_build_nr:boolean;
   s:string;
   x,y:integer;
 begin
+  result := '0.0.0';
 
-  //cheap (or expensive) coding ... but effective ... ;-)
-  version_nr:='0';
-  release_nr:='0';
-  patch_nr:='0';
+  version_nr:='';
+  release_nr:='';
+  build_nr:='';
 
   found_version_nr:=false;
   found_release_nr:=false;
-  found_patch_nr:=false;
+  found_build_nr:=false;
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas';
 
@@ -1289,55 +1284,62 @@ begin
       x:=Pos('version_nr',s);
       if x>0 then
       begin
-        for y:=x+Length('version_nr') to Length(s) do
+        y:=x+Length('version_nr');
+        // move towards first numerical
+        while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
+        // get version
+        while (Length(s)>=y) AND (s[y] in ['0'..'9']) do
         begin
-          if Ord(s[y]) in [ord('0')..ord('9')] then
-          begin
-            version_nr:=s[y];
-            found_version_nr:=true;
-            break;
-          end;
+          version_nr:=version_nr+s[y];
+          found_version_nr:=true;
+          Inc(y);
         end;
       end;
 
       x:=Pos('release_nr',s);
       if x>0 then
       begin
-        for y:=x+Length('release_nr') to Length(s) do
+        y:=x+Length('release_nr');
+        // move towards first numerical
+        while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
+        // get version
+        while (Length(s)>=y) AND (s[y] in ['0'..'9']) do
         begin
-          if Ord(s[y]) in [ord('0')..ord('9')] then
-          begin
-            release_nr:=s[y];
-            found_release_nr:=true;
-            break;
-          end;
+          release_nr:=release_nr+s[y];
+          found_release_nr:=true;
+          Inc(y);
         end;
       end;
 
       x:=Pos('patch_nr',s);
       if x>0 then
       begin
-        for y:=x+Length('patch_nr') to Length(s) do
+        y:=x+Length('patch_nr');
+        // move towards first numerical
+        while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
+        // get version
+        while (Length(s)>=y) AND (s[y] in ['0'..'9']) do
         begin
-          if Ord(s[y]) in [ord('0')..ord('9')] then
-          begin
-            patch_nr:=s[y];
-            found_patch_nr:=true;
-            break;
-          end;
+          build_nr:=build_nr+s[y];
+          found_build_nr:=true;
+          Inc(y);
         end;
       end;
 
       // check if ready
-      if found_version_nr AND found_release_nr AND found_patch_nr then break;
-
+      if found_version_nr AND found_release_nr AND found_build_nr then break;
     end;
 
     CloseFile(TxtFile);
 
-  end else infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
+    if found_version_nr then
+    begin
+      result:=version_nr;
+      if found_release_nr then result:=result+'.'+release_nr;
+      if found_build_nr then result:=result+'.'+build_nr;
+    end;
 
-  result:=version_nr+'.'+release_nr+'.'+patch_nr;
+  end else infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
@@ -1388,6 +1390,9 @@ begin
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
+const
+  REQ1='REQUIREDVERSION=';
+  REQ2='REQUIREDVERSION2=';
 var
   TxtFile:Text;
   s:string;
@@ -1408,11 +1413,10 @@ begin
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
 
-  RequiredVersion:=0;
-  RequiredVersion2:=0;
-
   if FileExists(s) then
   begin
+    RequiredVersion:=0;
+    RequiredVersion2:=0;
 
     AssignFile(TxtFile,s);
     Reset(TxtFile);
@@ -1420,59 +1424,43 @@ begin
     begin
       Readln(TxtFile,s);
 
-      x:=Pos('REQUIREDVERSION=',s);
+      x:=Pos(REQ1,s);
       if x>0 then
       begin
-        x:=x+Length('REQUIREDVERSION=');
-        if (x<=Length(s)) then
-        begin
-          RequiredVersion:=RequiredVersion+(Ord(s[x])-Ord('0'))*10000;
-          inc(x,2);
-          if (x<=Length(s)) then
-          begin
-            RequiredVersion:=RequiredVersion+(Ord(s[x])-Ord('0'))*100;
-            inc(x,2);
-            if (x<=Length(s)) then RequiredVersion:=RequiredVersion+(Ord(s[x])-Ord('0'))*1;
-          end;
-        end;
+        Delete(s,1,x+Length(REQ1)-1);
+        RequiredVersion:=GetNumericalVersion(s);
       end;
-
-      // REQUIREDVERSION2 is optional; could be empty
-      x:=Pos('REQUIREDVERSION2=',s);
+      x:=Pos(REQ2,s);
       if x>0 then
       begin
-        x:=x+Length('REQUIREDVERSION2=');
-        if (x<=Length(s)) then
-        begin
-          RequiredVersion2:=RequiredVersion2+(Ord(s[x])-Ord('0'))*10000;
-          inc(x,2);
-          if (x<=Length(s)) then
-          begin
-            RequiredVersion2:=RequiredVersion2+(Ord(s[x])-Ord('0'))*100;
-            inc(x,2);
-            if (x<=Length(s)) then RequiredVersion2:=RequiredVersion2+(Ord(s[x])-Ord('0'))*1;
-          end;
-        end;
+        Delete(s,1,x+Length(REQ2)-1);
+        RequiredVersion2:=GetNumericalVersion(s);
       end;
 
       if ((RequiredVersion>0) AND (RequiredVersion2>0)) then break;
-
-    end;
-
-    if GetLowestRequirement then
-    begin
-      if ( (RequiredVersion2>RequiredVersion) OR (RequiredVersion2=0))
-          then FinalVersion:=RequiredVersion
-          else FinalVersion:=RequiredVersion2;
-    end
-    else
-    begin
-      if (RequiredVersion2>RequiredVersion)
-          then FinalVersion:=RequiredVersion2
-          else FinalVersion:=RequiredVersion;
     end;
 
     CloseFile(TxtFile);
+
+    if (RequiredVersion2=0) then
+      FinalVersion:=RequiredVersion
+    else
+      begin
+        if GetLowestRequirement then
+        begin
+          if RequiredVersion < RequiredVersion2 then
+            FinalVersion := RequiredVersion
+          else
+            FinalVersion := RequiredVersion2;
+        end
+        else
+        begin
+          if RequiredVersion > RequiredVersion2 then
+            FinalVersion := RequiredVersion
+          else
+            FinalVersion := RequiredVersion2;
+        end;
+      end;
 
     result:=InttoStr(FinalVersion DIV 10000);
     FinalVersion:=FinalVersion MOD 10000;
@@ -1481,7 +1469,6 @@ begin
     result:=result+'.'+InttoStr(FinalVersion);
 
   end else infoln('Tried to get required bootstrap compiler version from Makefile.fpc, but no Makefile.fpc found',etError);
-
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
@@ -1812,7 +1799,7 @@ begin
         // first, try official FPC binaries
         aCompilerList:=TStringList.Create;
         try
-          while ((NOT aCompilerFound) AND (GetNumericalVersionSafe(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
+          while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
           begin
             infoln(localinfotext+'Looking for official FPC bootstrapper with version '+aLocalBootstrapVersion,etInfo);
 
@@ -1974,7 +1961,7 @@ begin
             infoln(localinfotext+'Found online bootstrap compiler: '+aCompilerList[i],etDebug);
           end;
 
-          while ((NOT aFPCUPCompilerFound) AND (GetNumericalVersionSafe(aLocalFPCUPBootstrapVersion)>0)) do
+          while ((NOT aFPCUPCompilerFound) AND (GetNumericalVersion(aLocalFPCUPBootstrapVersion)>0)) do
           begin
             infoln(localinfotext+'Looking online for a FPCUP(deluxe) bootstrapper with version '+aLocalFPCUPBootstrapVersion,etInfo);
 
@@ -2036,7 +2023,7 @@ begin
           end
           else
           begin
-            if GetNumericalVersionSafe(aLocalFPCUPBootstrapVersion)>GetNumericalVersionSafe(aLocalBootstrapVersion) then
+            if GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) then
             begin
               aCompilerFound:=true;
               infoln(localinfotext+'Got a better [version] bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
@@ -2258,7 +2245,7 @@ begin
 
     // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
     // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
-    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersionSafe(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
+    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
     begin
       // we need an intermediate compiler !!
       if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName) then
@@ -2399,7 +2386,7 @@ begin
              then Processor.Parameters.Add('clean')
              else Processor.Parameters.Add('compiler_cycle');
           // not sure if this needed here, but better safe than sorry
-          if (GetNumericalVersionSafe(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
+          if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
           begin
             Processor.Parameters.Add('DATA2INC=echo');
           end;
