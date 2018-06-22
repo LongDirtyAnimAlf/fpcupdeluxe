@@ -1,0 +1,178 @@
+Index: lcl/interfaces/wince/wincewsbuttons.pp
+===================================================================
+--- lcl/interfaces/wince/wincewsbuttons.pp	(revision 58374)
++++ lcl/interfaces/wince/wincewsbuttons.pp	(working copy)
+@@ -59,7 +59,7 @@
+ 
+ implementation
+ 
+-uses WinCEInt, WinCEExtra;
++uses ImgList, WinCEInt, WinCEExtra;
+ 
+ type
+   TBitBtnAceess = class(TCustomBitBtn)
+@@ -97,6 +97,7 @@
+   DrawRect: TRect;
+   ButtonCaption: PWideChar;
+   ButtonState: TButtonState;
++  AImageRes: TScaledImageListResolution;
+ 
+   procedure DrawBitmap;
+   var
+@@ -113,12 +114,14 @@
+ 
+     if (srcWidth <> 0) and (srcHeight <> 0) then
+     begin
+-      TBitBtnAceess(BitBtn).FButtonGlyph.GetImageIndexAndEffect(ButtonState, AIndex, AEffect);
++      TBitBtnAceess(BitBtn).FButtonGlyph.GetImageIndexAndEffect(ButtonState, BitBtn.Font.PixelsPerInch, 1,
++        AImageRes, AIndex, AEffect);
++
+       
+       w := TBitBtnAceess(BitBtn).FButtonGlyph.Images.Width;
+       h := TBitBtnAceess(BitBtn).FButtonGlyph.Images.Height;
+ 
+-      TWinCEWSCustomImageList.DrawToDC(TBitBtnAceess(BitBtn).FButtonGlyph.Images, AIndex,
++      TWinCEWSCustomImageListResolution.DrawToDC(AImageRes.Resolution, AIndex,
+         DrawStruct^._hDC, Rect(XDestBitmap, YDestBitmap, w, h),
+         TBitBtnAceess(BitBtn).FButtonGlyph.Images.BkColor,
+         TBitBtnAceess(BitBtn).FButtonGlyph.Images.BlendColor, AEffect,
+Index: lcl/interfaces/wince/wincewsimglist.pp
+===================================================================
+--- lcl/interfaces/wince/wincewsimglist.pp	(revision 58374)
++++ lcl/interfaces/wince/wincewsimglist.pp	(working copy)
+@@ -32,7 +32,7 @@
+ 
+ type
+ 
+-  { TWinCEWSCustomImageList }
++  { TWinCEWSCustomImageListResolution }
+ 
+   TWinCEWSCustomImageListResolution = class(TWSCustomImageListResolution)
+   private
+@@ -91,7 +91,7 @@
+   ReleaseDC(0, DC);
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.AddData(AListHandle: TLCLIntfHandle; ACount, AReplaceIndex, AWidth, AHeight: Integer; AData: PRGBAQuad);
++class procedure TWinCEWSCustomImageListResolution.AddData(AListHandle: TLCLIntfHandle; ACount, AReplaceIndex, AWidth, AHeight: Integer; AData: PRGBAQuad);
+ 
+   procedure DoAdd;
+   var
+@@ -167,14 +167,14 @@
+   DoAdd;
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.Clear(AList: TCustomImageListResolution);
++class procedure TWinCEWSCustomImageListResolution.Clear(AList: TCustomImageListResolution);
+ begin
+   if not WSCheckReferenceAllocated(AList, 'Clear')
+   then Exit;
+   ImageList_SetImageCount(AList.Reference._Handle, 0);
+ end;
+ 
+-class function TWinCEWSCustomImageList.CreateReference(AList: TCustomImageListResolution;
++class function TWinCEWSCustomImageListResolution.CreateReference(AList: TCustomImageListResolution;
+   ACount, AGrow, AWidth, AHeight: Integer; AData: PRGBAQuad): TWSCustomImageListReference;
+ var
+   Flags: DWord;
+@@ -185,7 +185,7 @@
+   then AddData(Result._Handle, ACount, -1, AWidth, AHeight, AData);
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.Delete(AList: TCustomImageListResolution;
++class procedure TWinCEWSCustomImageListResolution.Delete(AList: TCustomImageListResolution;
+   AIndex: Integer);
+ begin
+   if not WSCheckReferenceAllocated(AList, 'Delete')
+@@ -193,14 +193,14 @@
+   ImageList_Remove(AList.Reference._Handle, AIndex);
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.DestroyReference(AComponent: TComponent);
++class procedure TWinCEWSCustomImageListResolution.DestroyReference(AComponent: TComponent);
+ begin
+   if not WSCheckReferenceAllocated(TCustomImageListResolution(AComponent), 'DestroyReference')
+   then Exit;
+   ImageList_Destroy(TCustomImageListResolution(AComponent).Reference._Handle);
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.Draw(AList: TCustomImageListResolution; AIndex: Integer;
++class procedure TWinCEWSCustomImageListResolution.Draw(AList: TCustomImageListResolution; AIndex: Integer;
+   ACanvas: TCanvas; ABounds: TRect; ABkColor, ABlendColor: TColor; ADrawEffect: TGraphicsDrawEffect; AStyle: TDrawingStyle; AImageType: TImageType);
+ begin
+   if not WSCheckReferenceAllocated(AList, 'Draw')
+@@ -208,7 +208,7 @@
+   DrawToDC(AList, AIndex, ACanvas.Handle, ABounds, ABkColor, ABlendColor, ADrawEffect, AStyle, AImageType);
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.DrawToDC(AList: TCustomImageListResolution;
++class procedure TWinCEWSCustomImageListResolution.DrawToDC(AList: TCustomImageListResolution;
+   AIndex: Integer; ADC: HDC; ABounds: TRect; ABkColor, ABlendColor: TColor;
+   ADrawEffect: TGraphicsDrawEffect; AStyle: TDrawingStyle;
+   AImageType: TImageType);
+@@ -255,7 +255,7 @@
+   end;
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.Insert(AList: TCustomImageListResolution;
++class procedure TWinCEWSCustomImageListResolution.Insert(AList: TCustomImageListResolution;
+   AIndex: Integer; AData: PRGBAQuad);
+ var
+   ImageList: HImageList;
+@@ -275,7 +275,7 @@
+   end;
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.Move(AList: TCustomImageListResolution;
++class procedure TWinCEWSCustomImageListResolution.Move(AList: TCustomImageListResolution;
+   ACurIndex, ANewIndex: Integer);
+ var
+   n: integer;
+@@ -299,7 +299,7 @@
+   end;
+ end;
+ 
+-class procedure TWinCEWSCustomImageList.Replace(AList: TCustomImageListResolution;
++class procedure TWinCEWSCustomImageListResolution.Replace(AList: TCustomImageListResolution;
+   AIndex: Integer; AData: PRGBAQuad);
+ var
+   ImageList: HImageList;
+Index: lcl/interfaces/wince/wincewinapi.inc
+===================================================================
+--- lcl/interfaces/wince/wincewinapi.inc	(revision 58374)
++++ lcl/interfaces/wince/wincewinapi.inc	(working copy)
+@@ -266,7 +266,7 @@
+ 
+     LM_GETDLGCODE:
+     begin
+-      TLMessage(Message).Result := CallDefaultWindowProc(Handle, WM_GETDLGCODE, WPARAM, 0);
++      TLMessage(Message).Result := CallDefaultWindowProc(Handle, WM_GETDLGCODE, TLMessage(Message).WParam, 0);
+     end;
+ 
+   else
+Index: lcl/interfaces/wince/wincepagecontrol.inc
+===================================================================
+--- lcl/interfaces/wince/wincepagecontrol.inc	(revision 58374)
++++ lcl/interfaces/wince/wincepagecontrol.inc	(working copy)
+@@ -243,7 +243,7 @@
+   Result := Params.Window;
+ 
+   if TCustomTabControl(AWinControl).Images <> nil then
+-    SendMessage(Result, TCM_SETIMAGELIST, 0, TCustomTabControl(AWinControl).Images.Reference._Handle);
++    SendMessage(Result, TCM_SETIMAGELIST, 0, TCustomImageListResolution(TCustomTabControl(AWinControl).Images).Reference._Handle);
+ 
+   // although we may be child of tabpage, cut the paint chain
+   // to improve speed and possible paint anomalities
+Index: lcl/interfaces/wince/wincewscomctrls.pp
+===================================================================
+--- lcl/interfaces/wince/wincewscomctrls.pp	(revision 58374)
++++ lcl/interfaces/wince/wincewscomctrls.pp	(working copy)
+@@ -64,7 +64,7 @@
+     class function GetTabRect(const ATabControl: TCustomTabControl; const AIndex: Integer): TRect; override;
+     class function GetCapabilities: TCTabControlCapabilities;override;
+     class function GetDesignInteractive(const AWinControl: TWinControl; AClientPos: TPoint): Boolean; override;
+-    class procedure SetImageList(const ATabControl: TCustomTabControl; const AImageList: TCustomImageList); override;
++    class procedure SetImageList(const ATabControl: TCustomTabControl; const AImageList: TCustomImageList);
+     class procedure SetPageIndex(const ATabControl: TCustomTabControl; const AIndex: integer); override;
+     class procedure SetTabPosition(const ATabControl: TCustomTabControl; const ATabPosition: TTabPosition); override;
+     class procedure ShowTabs(const ATabControl: TCustomTabControl; AShowTabs: boolean); override;
