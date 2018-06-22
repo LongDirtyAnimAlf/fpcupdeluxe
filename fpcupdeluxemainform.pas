@@ -1517,7 +1517,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') then
+        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') {and (s<>'x8664') and (s<>'x86_64') and (s<>'aarch64')} then
         begin
           success:=false;
         end;

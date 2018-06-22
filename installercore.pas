@@ -45,6 +45,7 @@ const
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
   //FPC prebuilt binaries of the GNU Binutils
   PREBUILTBINUTILSURL = BINUTILSURL + '/binaries/i386-win32';
+  PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
   CHM_URL_LATEST_SVN = FPCSVNURL + '/lazarus/binaries/docs/chm';

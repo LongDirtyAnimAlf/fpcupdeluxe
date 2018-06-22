@@ -34,10 +34,6 @@ Setup: based on cross binaries from
 http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/
 with binutils 2.22
 
-- superseding those from
-ftp://ftp.freepascal.org/pub/fpc/contrib/cross/binutils-2.15.94-win32-arm-wince.zip
-(ftp version: make sure cygwin1.dll is in your path or put it in the c:\development\cross\bin\arm-wince directory)
-
 Add a cross directory under the fpcup "root" installdir directory (e.g. c:\development\cross, and e.g. regular fpc sources in c:\development\fpc)
 Then place the binaries in c:\development\cross\bin\arm-wince
 Binaries include
@@ -132,7 +128,7 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Search for FTP (old) version
+  // try another prefix
   if not result then
   begin
     BinPrefixTry:='arm-wince-pe-';
