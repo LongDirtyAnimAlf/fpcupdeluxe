@@ -39,7 +39,7 @@ const
   LAZARUSTRUNKVERSION   = '1.9';
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';
-  FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc/dist';
+  FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
 
   {$IFDEF MSWINDOWS}
   BINUTILSURL = FPCSVNURL + '/fpcbuild';

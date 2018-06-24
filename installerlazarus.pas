@@ -131,6 +131,35 @@ const
     'Buildmodule LCLCross;' +
     'End';
 
+  DEFAULTLPI =
+  '<?xml version="1.0" encoding="UTF-8"?>'#013#010+
+  '<CONFIG>'#013#010+
+  '  <ProjectOptions>'#013#010+
+  '    <General>'#013#010+
+  '      <SessionStorage Value="InProjectDir"/>'#013#010+
+  '      <MainUnit Value="0"/>'#013#010+
+  '      <Title Value="project1"/>'#013#010+
+  '    </General>'#013#010+
+  '    <BuildModes Count="1">'#013#010+
+  '      <Item1 Name="Default" Default="True"/>'#013#010+
+  '    </BuildModes>'#013#010+
+  '    <Units Count="1">'#013#010+
+  '      <Unit0>'#013#010+
+  '        <Filename Value="project1.lpr"/>'#013#010+
+  '        <IsPartOfProject Value="True"/>'#013#010+
+  '      </Unit0>'#013#010+
+  '    </Units>'#013#010+
+  '  </ProjectOptions>'#013#010+
+  '</CONFIG>';
+
+  DEFAULTLPR =
+  'program project1;'#013#010+
+  ''#013#010+
+  'begin'#013#010+
+  '  writeln(''Hello world from fpcupdeluxe !'');'#013#010+
+  'end.';
+
+
 type
 
   { TLazarusInstaller }
@@ -1010,7 +1039,7 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('make')); //assume in path
 
       //Available in latest trunk:
-      //LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
+      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/DisableStartupShell', 'True');
 
       // extra gdb settings
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/ClassTGDBMIDebugger/Properties/WarnOnTimeOut', 'False');
@@ -1081,6 +1110,21 @@ begin
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
       // Set file history towards default project directory
       LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
+
+      // Create a default project
+      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
+      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpr');
+      PCPSnippet:=TStringList.Create;
+      try
+        PCPSnippet.Clear;
+        PCPSnippet.Text:=DEFAULTLPI;
+        PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
+        PCPSnippet.Clear;
+        PCPSnippet.Text:=DEFAULTLPR;
+        PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpr');
+      finally
+        PCPSnippet.Free;
+      end;
 
     except
       on E: Exception do

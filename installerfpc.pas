@@ -1828,7 +1828,7 @@ begin
             if aLocalBootstrapVersion='3.0.2' then aCompilerArchive:='ppc386-i386-win32.zip';
             {$endif}
 
-            s:=FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/';
+            s:=FPCFTPURL+'/dist/'+aLocalBootstrapVersion+'/bootstrap/';
 
             infoln(localinfotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etDebug);
 
@@ -1924,7 +1924,7 @@ begin
           if FBootstrapCompilerURL='' then
           begin
             infoln(localinfotext+'Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
-            FBootstrapCompilerURL := FPCFTPURL+'/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
+            FBootstrapCompilerURL := FPCFTPURL+'/dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
           end;
         end;
 

@@ -194,18 +194,18 @@ end;
 procedure TCrossInstaller.SearchLibraryInfo(found:boolean; const extrainfo:string='');
 begin
   if found then
-    infoln(CrossModuleName + ': found correct library in directory '+FLibsPath, etInfo)
+    infoln(CrossModuleName + ': Found correct library in directory '+FLibsPath, etInfo)
   else
-    infoln(CrossModuleName + ': searched but did not find any library !!', etError);
+    infoln(CrossModuleName + ': Searched but did not find any library !!', etError);
   if Length(extrainfo)>0 then infoln(CrossModuleName + ' libs : '+extrainfo, etInfo);
 end;
 
 procedure TCrossInstaller.SearchBinUtilsInfo(found:boolean; const extrainfo:string='');
 begin
   if found then
-    infoln(CrossModuleName + ': found correct binary utilities in directory '+FBinUtilsPath, etInfo)
+    infoln(CrossModuleName + ': Found correct binary utilities in directory '+FBinUtilsPath, etInfo)
   else
-    infoln(CrossModuleName + ': searched but did not find any binary utilities !!', etError);
+    infoln(CrossModuleName + ': Searched but did not find any binary utilities !!', etError);
   if Length(extrainfo)>0 then infoln(CrossModuleName + ' bins : '+extrainfo, etInfo);
 end;
 
