@@ -897,7 +897,7 @@ var
   i,j:integer;
   LazBuildApp:string;
   TxtFile:Text;
-  VersionFile:string;
+  aFileName:string;
 begin
   Result := inherited;
   Result := true;
@@ -935,10 +935,10 @@ begin
 
   if Length(VersionSnippet)=0 then
   begin
-    VersionFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
-    if FileExists(VersionFile) then
+    aFileName:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+    if FileExists(aFileName) then
     begin
-      AssignFile(TxtFile,VersionFile);
+      AssignFile(TxtFile,aFileName);
       Reset(TxtFile);
       Readln(TxtFile,VersionSnippet);
       // remove quotes from string
@@ -1108,22 +1108,33 @@ begin
       DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
       ForceDirectoriesUTF8(DebuggerPath);
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
+
       // Set file history towards default project directory
       LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
 
+      aFileName:=IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi';
+
       // Create a default project
-      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
-      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpr');
+      SysUtils.DeleteFile(aFileName);
+      SysUtils.DeleteFile(ChangeFileExt(aFileName,'.lpr'));
       PCPSnippet:=TStringList.Create;
       try
         PCPSnippet.Clear;
         PCPSnippet.Text:=DEFAULTLPI;
-        PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi');
+        PCPSnippet.SaveToFile(aFileName);
         PCPSnippet.Clear;
         PCPSnippet.Text:=DEFAULTLPR;
-        PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpr');
+        PCPSnippet.SaveToFile(ChangeFileExt(aFileName,'.lpr'));
       finally
         PCPSnippet.Free;
+      end;
+
+      if FileExists(aFileName) then
+      begin
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/AlreadyPopulated', 'True');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/ProjectFiles/Count', '1');
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/ProjectFiles/Item1/Value', aFileName);
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', aFileName);
       end;
 
     except

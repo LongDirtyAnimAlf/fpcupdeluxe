@@ -59,7 +59,9 @@ const
   STANDARDCOMPILEROPTIONS='-vw-n-h-l-d-u-t-p-c-';
   {$ENDIF}
 
-  NASMURL='http://www.nasm.us/pub/nasm/releasebuilds/2.13.01';
+  NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win32/nasm-2.13-win32.zip';
+  NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
+  NASMFPCURL=BINUTILSURL + '/trunk/install/crossbinmsdos/nasm.exe';
 
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
