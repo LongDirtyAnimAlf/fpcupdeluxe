@@ -41,15 +41,15 @@ const
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
 
-  {$IFDEF MSWINDOWS}
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
+
+  {$IFDEF MSWINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
   PREBUILTBINUTILSURL = BINUTILSURL + '/binaries/i386-win32';
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
   CHM_URL_LATEST_SVN = FPCSVNURL + '/lazarus/binaries/docs/chm';
-
 
   {$IFDEF DEBUG}
   STANDARDCOMPILEROPTIONS='-vewh';

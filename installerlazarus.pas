@@ -1112,6 +1112,11 @@ begin
       // Set file history towards default project directory
       LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
 
+
+      {$IFDEF DARWIN}
+      {$IFDEF CPUX86_64}
+      {$IFDEF LCLCOCOA}
+      // Prevent crash on Darwin Cocoa: set and make available initial project
       aFileName:=IncludeTrailingPathDelimiter(DebuggerPath)+'project1.lpi';
 
       // Create a default project
@@ -1136,6 +1141,9 @@ begin
         LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Recent/ProjectFiles/Item1/Value', aFileName);
         LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/AutoSave/LastSavedProjectFile', aFileName);
       end;
+      {$ENDIF LCLCOCOA}
+      {$ENDIF CPUX86_64}
+      {$ENDIF DARWIN}
 
     except
       on E: Exception do
