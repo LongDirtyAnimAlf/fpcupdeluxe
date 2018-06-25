@@ -117,8 +117,8 @@ type
     function GetCompilerVersion(CompilerPath: string): string;
     function GetCompilerTargetOS(CompilerPath: string): string;
     function GetCompilerTargetCPU(CompilerPath: string): string;
-    function GetCompilerVersionFromUrl(aUrl: string): string;
-    function GetCompilerVersionFromSource(aSourcePath: string): string;
+    function GetFPCVersionFromUrl(aUrl: string): string;
+    function GetFPCVersionFromSource(aSourcePath: string): string;
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
     function GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
     // Creates fpc proxy script that masks general fpc.cfg
@@ -1240,7 +1240,7 @@ begin
   if index=2 then result:=Build;
 end;
 
-function TFPCInstaller.GetCompilerVersionFromUrl(aUrl: string): string;
+function TFPCInstaller.GetFPCVersionFromUrl(aUrl: string): string;
 var
   aVersion: string;
 begin
@@ -1248,7 +1248,7 @@ begin
   if aVersion='trunk' then result:=FPCTRUNKVERSION else result:=aVersion;
 end;
 
-function TFPCInstaller.GetCompilerVersionFromSource(aSourcePath: string): string;
+function TFPCInstaller.GetFPCVersionFromSource(aSourcePath: string): string;
 var
   TxtFile:Text;
   version_nr:string;
@@ -1708,9 +1708,18 @@ begin
   end
   else
   begin
-    result:=GetCompilerVersionFromSource(FSourceDirectory);
-    if result='0.0.0' then result:=GetCompilerVersionFromUrl(FURL);
+    result:=GetFPCVersionFromSource(FSourceDirectory);
+    if result='0.0.0' then result:=GetFPCVersionFromUrl(FURL);
   end;
+
+  if result<>'0.0.0' then
+  begin
+    FMajorVersion:=0;
+    FMinorVersion:=0;
+    FReleaseVersion:=0;
+    GetVersionFromString(result,FMajorVersion,FMinorVersion,FReleaseVersion);
+  end;
+
 end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
@@ -2162,7 +2171,7 @@ begin
 
   bIntermediateNeeded:=false;
 
-  infoln(infotext+'We have a FPC source (@ '+FSourceDirectory+') with version: '+GetCompilerVersionFromSource(FSourceDirectory),etInfo);
+  infoln(infotext+'We have a FPC source (@ '+FSourceDirectory+') with version: '+GetFPCVersionFromSource(FSourceDirectory),etInfo);
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
@@ -2177,9 +2186,9 @@ begin
     // So, try something else !
     if RequiredBootstrapVersionLow='0.0.0' then RequiredBootstrapVersionHigh:='0.0.0';
     if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(FSourceDirectory));
+       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetFPCVersionFromSource(FSourceDirectory));
     if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromUrl(FURL));
+       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetFPCVersionFromUrl(FURL));
 
     if RequiredBootstrapVersionLow='0.0.0' then
     begin
@@ -2358,7 +2367,7 @@ begin
         RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory);
         if RequiredBootstrapBootstrapVersion='0.0.0' then
         begin
-          RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetCompilerVersionFromSource(BootstrapDirectory));
+          RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetFPCVersionFromSource(BootstrapDirectory));
           infoln(infotext+'To compile this bootstrap FPC, we should use a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
         end else infoln(infotext+'To compile this bootstrap FPC, we need (required) a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
 
@@ -2454,7 +2463,7 @@ begin
     begin
       // get the correct binutils (Windows only)
       //CreateBinutilsList(GetBootstrapCompilerVersionFromSource(FSourceDirectory));
-      //CreateBinutilsList(GetCompilerVersionFromSource(FSourceDirectory));
+      //CreateBinutilsList(GetFPCVersionFromSource(FSourceDirectory));
       CreateBinutilsList(RequiredBootstrapVersion);
       result:=CheckAndGetNeededBinUtils;
       //if not result then exit;
@@ -3012,6 +3021,7 @@ var
   BeforeRevision: string;
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
+  VersionSnippet:string;
 begin
   result:=inherited;
   result:=InitModule;
@@ -3051,7 +3061,20 @@ begin
   if (NOT Result) then
     infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
 
-  if result then PatchModule(ModuleName);
+  if result then
+  begin
+    VersionSnippet:=GetFPCVersionFromSource(FSourceDirectory);
+    if VersionSnippet='0.0.0' then GetFPCVersionFromURL(FURL);
+    if VersionSnippet<>'0.0.0' then
+    begin
+      FMajorVersion:=0;
+      FMinorVersion:=0;
+      FReleaseVersion:=0;
+      GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+    end;
+    PatchModule(ModuleName);
+  end;
+
 end;
 
 function TFPCInstaller.CheckModule(ModuleName: string): boolean;

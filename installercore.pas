@@ -135,7 +135,6 @@ type
     FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
     FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
-    FCandidateVersion: integer; //RC part of the version number, e.g. 2 for 1.0.8RC2, or -1 if unknown
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
     FNoJobs: boolean;
@@ -325,7 +324,6 @@ begin
   FMajorVersion := -1;
   FMinorVersion := -1;
   FReleaseVersion := -1;
-  FCandidateVersion := -1;
 end;
 
 function TInstaller.GetMake: string;
@@ -1960,11 +1958,13 @@ begin
       if PatchFilePath='DARWINQT5HACK_LAZPATCH' then j:=0;
       {$endif}
 
-      {$if NOT defined(MSWINDOWS)}
-      if PatchFilePath='OPENSSL_FPCPATCH' then j:=0;
-      {$endif}
+      // In general, only patch trunk !
+      // This can be changed to take care of versions ... but not for now !
+      // Should be removed in future fpcup versions !!
+      if PatchFPC then if (FMajorVersion*10000+FMinorVersion*100+FReleaseVersion)<(GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
+      if PatchLaz then if (FMajorVersion*10000+FMinorVersion*100+FReleaseVersion)<(GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
 
-      if j>0 then
+      if (j>0) then
       begin
         if (NOT DirectoryExists(PatchDirectory)) then ForceDirectories(PatchDirectory);
         SaveFileFromResource(PatchDirectory+DirectorySeparator+PatchFilePath+'.patch',resourcefiles[i]);
@@ -2089,7 +2089,11 @@ begin
 
   FCrossCPU_Target:='invalid';
   FCrossOS_Target:='invalid';
-  FCrossOS_SubArch:=''
+  FCrossOS_SubArch:='';
+
+  FMajorVersion := -1;
+  FMinorVersion := -1;
+  FReleaseVersion := -1;
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
