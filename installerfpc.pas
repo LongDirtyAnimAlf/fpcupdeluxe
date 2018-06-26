@@ -586,7 +586,7 @@ begin
            else ChosenCompiler:=FCompiler;
       end;
 
-      s:=GetCompilerVersion(FCompiler);
+      s:=GetCompilerVersion(ChosenCompiler);
       if s<>'0.0.0' then infoln('FPC cross-builder: Using cross-compiler with version: '+s, etInfo);
 
       // Add binutils path to path if necessary
