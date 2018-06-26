@@ -750,6 +750,11 @@ begin
     end;
   end;
 
+  if (ExistWordInString(PChar(s),'Detected source version',[soDown])) then
+  begin
+    memoSummary.Lines.Append(s);
+  end;
+
   if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
     memoSummary.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');

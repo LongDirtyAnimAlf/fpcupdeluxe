@@ -7,6 +7,7 @@ object Form1: TForm1
   Caption = 'Form1'
   ClientHeight = 611
   ClientWidth = 1052
+  Constraints.MinHeight = 620
   Menu = MainMenu1
   OnClose = FormClose
   OnCreate = FormCreate

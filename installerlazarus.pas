@@ -1018,10 +1018,30 @@ begin
 end;
 
 function TLazarusInstaller.BuildModule(ModuleName: string): boolean;
+var
+  s,VersionSnippet:string;
 begin
   Result := inherited;
   Result := InitModule;
   if not Result then exit;
+  VersionSnippet:=GetLazarusVersionFromSource(FSourceDirectory);
+  if VersionSnippet='0.0.0' then VersionSnippet:=GetLazarusVersionFromUrl(FURL);
+  if VersionSnippet<>'0.0.0' then
+  begin
+    FMajorVersion:=0;
+    FMinorVersion:=0;
+    FReleaseVersion:=0;
+    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+    // only report once
+    if (ModuleName='lazbuild') OR ((Self is TLazarusCrossInstaller) AND (ModuleName='LCL')) then
+    begin
+      if (Self is TLazarusCrossInstaller) then
+        s:='Lazarus cross-builder: Detected source version Lazarus: '
+      else
+        s:='Lazarus builder: Detected source version Lazarus: ';
+      infoln(s+VersionSnippet, etInfo);
+    end;
+  end;
   Result := BuildModuleCustom(ModuleName);
 end;
 
@@ -1043,15 +1063,6 @@ begin
   begin
     if ForceDirectoriesUTF8(FPrimaryConfigPath) then
       infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
-  end;
-
-  VersionSnippet:=GetLazarusVersion;
-  if VersionSnippet<>'0.0.0' then
-  begin
-    FMajorVersion:=0;
-    FMinorVersion:=0;
-    FReleaseVersion:=0;
-    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
   end;
 
   // Set up a minimal config so we can use LazBuild

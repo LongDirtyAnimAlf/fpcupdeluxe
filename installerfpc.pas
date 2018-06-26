@@ -1744,15 +1744,6 @@ begin
     result:=GetFPCVersionFromSource(FSourceDirectory);
     if result='0.0.0' then result:=GetFPCVersionFromUrl(FURL);
   end;
-
-  if result<>'0.0.0' then
-  begin
-    FMajorVersion:=0;
-    FMinorVersion:=0;
-    FReleaseVersion:=0;
-    GetVersionFromString(result,FMajorVersion,FMinorVersion,FReleaseVersion);
-  end;
-
 end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
@@ -2194,6 +2185,7 @@ var
   x:integer;
   Output: string = '';
   ReturnCode: integer;
+  VersionSnippet:string;
 begin
   result:=inherited;
   result:=InitModule;
@@ -2202,9 +2194,24 @@ begin
 
   infoln(infotext+'Building module '+ModuleName+'...',etInfo);
 
-  bIntermediateNeeded:=false;
+  VersionSnippet:='0.0.0';
+  if (Self is TFPCCrossInstaller) then VersionSnippet:=GetCompilerVersion(GetCompilerInDir(FInstallDirectory));
+  if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromSource(FSourceDirectory);
+  if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromUrl(FURL);
+  if VersionSnippet<>'0.0.0' then
+  begin
+    FMajorVersion:=0;
+    FMinorVersion:=0;
+    FReleaseVersion:=0;
+    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+    if (Self is TFPCCrossInstaller) then
+      s:='FPC cross-builder: Detected source version FPC (compiler): '
+    else
+      s:='FPC builder: Detected source version FPC: ';
+    infoln(s+VersionSnippet, etInfo);
+  end;
 
-  infoln(infotext+'We have a FPC source (@ '+FSourceDirectory+') with version: '+GetFPCVersionFromSource(FSourceDirectory),etInfo);
+  bIntermediateNeeded:=false;
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
@@ -3044,18 +3051,8 @@ begin
 end;
 
 function TFPCInstaller.ConfigModule(ModuleName: string): boolean;
-var
-  VersionSnippet:string;
 begin
   result:=inherited;
-  VersionSnippet:=GetFPCVersion;
-  if VersionSnippet<>'0.0.0' then
-  begin
-    FMajorVersion:=0;
-    FMinorVersion:=0;
-    FReleaseVersion:=0;
-    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
-  end;
   result:=true;
 end;
 
