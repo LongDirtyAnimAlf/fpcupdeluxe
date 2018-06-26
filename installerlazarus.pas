@@ -1034,6 +1034,7 @@ var
   LazarusConfig: TUpdateLazConfig;
   PCPSnippet: TStringList;
   i,j:integer;
+  aFileName:string;
 begin
   Result := inherited;
   Result := true;

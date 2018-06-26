@@ -3044,8 +3044,18 @@ begin
 end;
 
 function TFPCInstaller.ConfigModule(ModuleName: string): boolean;
+var
+  VersionSnippet:string;
 begin
   result:=inherited;
+  VersionSnippet:=GetFPCVersion;
+  if VersionSnippet<>'0.0.0' then
+  begin
+    FMajorVersion:=0;
+    FMinorVersion:=0;
+    FReleaseVersion:=0;
+    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+  end;
   result:=true;
 end;
 
