@@ -1019,11 +1019,12 @@ end;
 
 function TLazarusInstaller.BuildModule(ModuleName: string): boolean;
 var
-  s,VersionSnippet:string;
+  s,CompilerVersion,VersionSnippet:string;
 begin
   Result := inherited;
   Result := InitModule;
   if not Result then exit;
+  CompilerVersion:=GetCompilerVersion(FCompiler);
   VersionSnippet:=GetLazarusVersionFromSource(FSourceDirectory);
   if VersionSnippet='0.0.0' then VersionSnippet:=GetLazarusVersionFromUrl(FURL);
   if VersionSnippet<>'0.0.0' then
@@ -1036,10 +1037,15 @@ begin
     if (ModuleName='lazbuild') OR ((Self is TLazarusCrossInstaller) AND (ModuleName='LCL')) then
     begin
       if (Self is TLazarusCrossInstaller) then
-        s:='Lazarus cross-builder: Detected source version Lazarus: '
+      begin
+        s:='Lazarus cross-builder: ';
+      end
       else
-        s:='Lazarus builder: Detected source version Lazarus: ';
-      infoln(s+VersionSnippet, etInfo);
+      begin
+        s:='Lazarus builder: ';
+      end;
+      infoln(s+'Detected source version Lazarus: '+VersionSnippet, etInfo);
+      infoln(s+'Using FPC compiler with version: '+CompilerVersion, etInfo);
     end;
   end;
   Result := BuildModuleCustom(ModuleName);

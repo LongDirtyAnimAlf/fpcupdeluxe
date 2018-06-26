@@ -114,7 +114,6 @@ type
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
-    function GetCompilerVersion(CompilerPath: string): string;
     function GetCompilerTargetOS(CompilerPath: string): string;
     function GetCompilerTargetCPU(CompilerPath: string): string;
     function GetFPCVersionFromUrl(aUrl: string): string;
@@ -587,6 +586,9 @@ begin
            else ChosenCompiler:=FCompiler;
       end;
 
+      s:=GetCompilerVersion(FCompiler);
+      if s<>'0.0.0' then infoln('FPC cross-builder: Using cross-compiler with version: '+s, etInfo);
+
       // Add binutils path to path if necessary
       OldPath:=GetPath;
       try
@@ -982,21 +984,22 @@ begin
             begin
               if (FUtilFiles[Counter].Category=ucDebuggerWince) then
               begin
-                s:=IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\';
-                if NOT FileExists(s+'gdb.exe') then
+                if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
                 begin
+                  s:=SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
                   if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s) then
                   begin
                     with TNormalUnzipper.Create do
                     begin
                       try
-                        if DoUnZip(FUtilFiles[Counter].FileName,s,[]) then
-                          infoln(localinfotext+'Downloading and installing GDB debugger ' + FUtilFiles[Counter].FileName + ' for WinCE into ' + ExtractFileDir(s) + ' success.',etInfo);
+                        if DoUnZip(s,IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\',[]) then
+                          infoln(localinfotext+'Downloading and installing GDB debugger (' + FUtilFiles[Counter].FileName + ') for WinCE success.',etInfo);
                       finally
                         Free;
                       end;
                     end;
                   end;
+                  SysUtils.Deletefile(s);
                 end;
               end;
             end;
@@ -1034,6 +1037,9 @@ var
 begin
   result:=inherited;
   OperationSucceeded:=true;
+
+  s:=GetCompilerVersion(FCompiler);
+  if s<>'0.0.0' then infoln('FPC builder: Using FPC bootstrap compiler with version: '+s, etInfo);
 
   Processor.Executable := Make;
   FErrorLog.Clear;
@@ -1204,25 +1210,6 @@ begin
   result:=true;
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (BuildModuleCustom: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
-end;
-
-function TFPCInstaller.GetCompilerVersion(CompilerPath: string): string;
-var
-  Output: string;
-begin
-  Result:='0.0.0';
-  if CompilerPath='' then exit;
-  try
-    Output:='';
-    // -iW does not work on older compilers : use -iV
-    if (ExecuteCommand(CompilerPath+ ' -iV', Output, FVerbose)=0) then
-    //-iVSPTPSOTO
-    begin
-      Output:=TrimRight(Output);
-      if Length(Output)>0 then Result:=Output;
-    end;
-  except
-  end;
 end;
 
 function TFPCInstaller.GetCompilerTargetOS(CompilerPath: string): string;

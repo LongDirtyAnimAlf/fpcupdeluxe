@@ -295,13 +295,15 @@ begin
 end;
 
 procedure alternateui_update_laz_fpc_popup_options;
-var i:integer=0;
+var
+  i:integer;
 begin
+  i:=0;
   while form1.findcomponent('FPCTarget_btn'+alternateui_IntToString(i)) <> nil do
   begin
     with form1.findcomponent('FPCTarget_btn'+alternateui_IntToString(i)) as TAlternateUiButton do
     begin
-      down:=caption=Form1.ListBoxFPCTarget.Items.Strings[Form1.ListBoxFPCTarget.ItemIndex];
+      if Form1.ListBoxFPCTarget.ItemIndex<>-1 then down:=caption=Form1.ListBoxFPCTarget.Items.Strings[Form1.ListBoxFPCTarget.ItemIndex];
     end;
     inc(i);
   end;
@@ -310,7 +312,7 @@ begin
   begin
     with form1.findcomponent('LAZTarget_btn'+alternateui_IntToString(i)) as TAlternateUiButton do
     begin
-      down:=caption=Form1.ListBoxLazarusTarget.Items.Strings[Form1.ListBoxLazarusTarget.ItemIndex];
+      if Form1.ListBoxLazarusTarget.ItemIndex<>-1 then down:=caption=Form1.ListBoxLazarusTarget.Items.Strings[Form1.ListBoxLazarusTarget.ItemIndex];
     end;
     inc(i);
   end;

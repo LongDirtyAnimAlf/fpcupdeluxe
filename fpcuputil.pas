@@ -269,6 +269,7 @@ function DeleteFilesExtensionsSubdirs(const DirectoryName: string; const Extensi
 function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas: string): boolean;
 function GetFileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
+function GetCompilerVersion(CompilerPath: string): string;
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
 function GetNumericalVersion(VersionSnippet: string): word;
 function GetVersionFromUrl(URL:string): string;
@@ -826,6 +827,25 @@ var
 begin
   URI:=ParseURI(URL);
   result:=URI.Host+URI.Path;
+end;
+
+function GetCompilerVersion(CompilerPath: string): string;
+var
+  Output: string;
+begin
+  Result:='0.0.0';
+  if CompilerPath='' then exit;
+  try
+    Output:='';
+    // -iW does not work on older compilers : use -iV
+    if (ExecuteCommand(CompilerPath+ ' -iV', Output, false)=0) then
+    //-iVSPTPSOTO
+    begin
+      Output:=TrimRight(Output);
+      if Length(Output)>0 then Result:=Output;
+    end;
+  except
+  end;
 end;
 
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);

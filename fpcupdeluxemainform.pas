@@ -750,7 +750,7 @@ begin
     end;
   end;
 
-  if (ExistWordInString(PChar(s),'Detected source version',[soDown])) then
+  if (ExistWordInString(PChar(s),' builder: ',[soDown])) OR (ExistWordInString(PChar(s),' cross-builder: ',[soDown])) then
   begin
     memoSummary.Lines.Append(s);
   end;
