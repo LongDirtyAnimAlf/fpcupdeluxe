@@ -1691,9 +1691,9 @@ begin
   if not Result then exit;
 
   //sanity check
-  if FileExistsUTF8(IncludeTrailingBackslash(FSourceDirectory) + 'Makefile') and DirectoryExistsUTF8(
-    IncludeTrailingBackslash(FSourceDirectory) + 'ide') and DirectoryExistsUTF8(IncludeTrailingBackslash(FSourceDirectory) + 'lcl') and
-    ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FSourceDirectory)) then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory) + 'Makefile') and DirectoryExistsUTF8(
+    IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
+    ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
   begin
     Result := DeleteDirectoryEx(FSourceDirectory);
     if not (Result) then
@@ -1707,8 +1707,8 @@ begin
 
   // Sanity check so we don't try to delete random directories
   // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
-  if Result and FileExistsUTF8(IncludeTrailingBackslash(FPrimaryConfigPath) + EnvironmentConfig) and
-    ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FPrimaryConfigPath)) then
+  if Result and FileExistsUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath) + EnvironmentConfig) and
+    ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FPrimaryConfigPath)) then
   begin
     Result := DeleteDirectoryEx(FPrimaryConfigPath) = false;
     if not (Result) then

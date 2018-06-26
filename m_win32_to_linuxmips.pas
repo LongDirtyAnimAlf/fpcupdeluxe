@@ -162,8 +162,8 @@ end;
 var
   Win32_linuxmips:Twin32_linuxmips;
 
-{$IFDEF MSWINDOWS)}
-// Even though it's officially for x86, x64 may work
+{$IF (DEFINED (WIN32)) OR (DEFINED(WIN64))}
+// Even though it's officially for Win32, win64 can run x86 binaries without problem, so allow it.
 initialization
   Win32_linuxmips:=Twin32_linuxmips.Create;
   RegisterExtension(Win32_linuxmips.TargetCPU+'-'+Win32_linuxmips.TargetOS,Win32_linuxmips);

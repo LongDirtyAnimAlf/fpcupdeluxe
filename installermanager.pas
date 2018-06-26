@@ -1479,7 +1479,7 @@ begin
       FInstaller.SourceDirectory:=FParent.LazarusDirectory;
       // the same ... may change in the future
       FInstaller.InstallDirectory:=FParent.LazarusDirectory;
-      (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingBackslash(FParent.FPCInstallDirectory);// + 'bin' + DirectorySeparator + FInstaller.SourceCPU + '-' + FInstaller.SourceOS;
+      (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingPathDelimiter(FParent.FPCInstallDirectory);// + 'bin' + DirectorySeparator + FInstaller.SourceCPU + '-' + FInstaller.SourceOS;
       (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=FParent.FPCSourceDirectory;
       (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
   end

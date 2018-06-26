@@ -497,6 +497,7 @@ var
   OldPath:String;
   Options:String;
   s:string;
+  Counter:integer;
   LibsAvailable,BinsAvailable:boolean;
 
 begin
@@ -576,7 +577,7 @@ begin
       if CrossInstaller.CompilerUsed=ctInstalled then
       begin
         infoln(infotext+'Using FPC itself to compile and build the cross-compiler',etInfo);
-        ChosenCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt {todo if this does not work use ppc386.exe etc}
+        ChosenCompiler:=GetCompilerInDir(FInstallDirectory);
       end
       else //ctBootstrap
       begin
@@ -970,6 +971,38 @@ begin
           result:=CreateFPCScript;
           {$ENDIF UNIX}
           FCompiler:=GetCompiler;
+
+          {$ifdef MSWINDOWS}
+          CreateBinutilsList(GetCompilerVersion(ChosenCompiler));
+
+          // get wince debugger
+          if (CrossCPU_Target='arm') AND (CrossOS_Target='wince') then
+          begin
+            for Counter := low(FUtilFiles) to high(FUtilFiles) do
+            begin
+              if (FUtilFiles[Counter].Category=ucDebuggerWince) then
+              begin
+                s:=IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\';
+                if NOT FileExists(s+'gdb.exe') then
+                begin
+                  if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s) then
+                  begin
+                    with TNormalUnzipper.Create do
+                    begin
+                      try
+                        if DoUnZip(FUtilFiles[Counter].FileName,s,[]) then
+                          infoln(localinfotext+'Downloading and installing GDB debugger ' + FUtilFiles[Counter].FileName + ' for WinCE into ' + ExtractFileDir(s) + ' success.',etInfo);
+                      finally
+                        Free;
+                      end;
+                    end;
+                  end;
+                end;
+              end;
+            end;
+          end;
+          {$endif}
+
         end;
       end;
 
@@ -3092,10 +3125,10 @@ begin
   if not result then exit;
 
   //sanity check
-  if FileExistsUTF8(IncludeTrailingBackslash(FSourceDirectory)+'Makefile') and
-    DirectoryExistsUTF8(IncludeTrailingBackslash(FSourceDirectory)+'compiler') and
-    DirectoryExistsUTF8(IncludeTrailingBackslash(FSourceDirectory)+'rtl') and
-    ParentDirectoryIsNotRoot(IncludeTrailingBackslash(FSourceDirectory)) then
+  if FileExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile') and
+    DirectoryExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
+    DirectoryExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
+    ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
     begin
     if DeleteDirectoryEx(FSourceDirectory)=false then
     begin

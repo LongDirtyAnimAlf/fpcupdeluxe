@@ -70,6 +70,7 @@ type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
     ucDebugger32 {Debugger (support) files 32bit},
     ucDebugger64 {Debugger (support) files 64bit},
+    ucDebuggerWince {Debugger (support) files for wince},
     ucQtFile {e.g. Qt binding},
     ucOther {unknown});
 
@@ -840,7 +841,7 @@ var
 begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
-  {$IFDEF MSWINDOWS}
+  {$ifdef MSWINDOWS}
 
   // default
   if aVersion='' then aVersion:=DEFAULTFPCVERSION;
@@ -941,7 +942,11 @@ begin
   //No equivalent for Win64...
   //AddNewUtil('Qt4Pas5.dll',SourceURL64_Qt,'',ucQtFile);
   {$endif win64}
-  {$ENDIF MSWINDOWS}
+
+  // add wince gdb
+  AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'/contrib/cross/','',ucDebuggerWince);
+
+  {$endif MSWINDOWS}
 end;
 
 procedure TInstaller.CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
@@ -1677,8 +1682,8 @@ var
   searchResult: TSearchRec;
 begin
   result:='';
-  WritelnLog('Going to search for SVN client in ' + IncludeTrailingBackSlash(dirName)+'*');
-  if FindFirst(IncludeTrailingBackSlash(dirName)+'*', faAnyFile, searchResult)=0 then
+  WritelnLog('Going to search for SVN client in ' + IncludeTrailingPathDelimiter(dirName)+'*');
+  if FindFirst(IncludeTrailingPathDelimiter(dirName)+'*', faAnyFile, searchResult)=0 then
   begin
     try
       repeat
@@ -1686,11 +1691,11 @@ begin
         begin
           if SameText(searchResult.Name, FSVNClient.RepoExecutableName + GetExeExt) then
           begin
-            FSVNClient.RepoExecutable:=IncludeTrailingBackSlash(dirName)+searchResult.Name;
+            FSVNClient.RepoExecutable:=IncludeTrailingPathDelimiter(dirName)+searchResult.Name;
           end;
         end else if (searchResult.Name<>'.') and (searchResult.Name<>'..') then
         begin
-          FileSearch(IncludeTrailingBackSlash(dirName)+searchResult.Name);
+          FileSearch(IncludeTrailingPathDelimiter(dirName)+searchResult.Name);
         end;
       until ( (FindNext(searchResult)<>0) OR (Length(FSVNClient.RepoExecutable)<>0) );
     finally
@@ -1802,7 +1807,7 @@ end;
 
 function TInstaller.GetCompilerInDir(Dir: string): string;
 begin
-  Result := IncludeTrailingBackslash(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
+  Result := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
   {$IFDEF UNIX}
   if FileExistsUTF8(Result + '.sh') then
   begin

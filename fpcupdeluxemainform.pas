@@ -2259,32 +2259,6 @@ begin
 
     end;
 
-    {$ifdef MSWINDOWS}
-    if success then
-    begin
-      if (FPCupManager.CrossCPU_Target='arm') AND (FPCupManager.CrossOS_Target='wince') then
-      begin
-        // get arm-wince gdb
-        TargetFile:='gdb-6.4-win32-arm-wince.zip';
-        TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory)+'gdb\arm-wince\';
-        if NOT FileExists(TargetPath+'gdb.exe') then
-        begin
-          DownloadURL:=FPCFTPURL+'/contrib/cross/'+TargetFile;
-          success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-          with TNormalUnzipper.Create do
-          begin
-            try
-              DoUnZip(TargetFile,TargetPath,[]);
-            finally
-              Free;
-            end;
-          end;
-        end;
-      end;
-    end;
-    {$endif}
-
-
   finally
     DisEnable(Sender,True);
   end;
