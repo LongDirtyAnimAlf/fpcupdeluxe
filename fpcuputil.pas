@@ -923,7 +923,20 @@ begin
   if Pos('freepascal.git',URL)>0 then result:='trunk' else
   if Pos('lazarus.git',URL)>0 then result:='trunk' else
   begin
-    VersionSnippet:=UpperCase(URL);
+
+    VersionSnippet := UpperCase(URL);
+    i := Length(VersionSnippet);
+
+    // remove trailing delimiter
+    if (i>0) and CharInSet(VersionSnippet[i],['\','/']) then
+    begin
+      Dec(i);
+      SetLength(VersionSnippet,i);
+    end;
+
+    // extract last part of URL, the part that should contain the version
+    while (i > 0) and (not CharInSet(VersionSnippet[i],['\','/'])) do Dec(i);
+    VersionSnippet := Copy(VersionSnippet, i + 1, MaxInt);
 
     // find first occurence of _ and delete everything before it
     // if url contains a version, this version always starts with first _

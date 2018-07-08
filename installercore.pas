@@ -1340,7 +1340,6 @@ function TInstaller.DownloadSVN: boolean;
 const
   // See: http://subversion.apache.org/download/
   // for latest version !!
-
   //SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
   // Changed to https
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
@@ -1353,7 +1352,7 @@ const
   //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.5.zip';
   // SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.7.zip';
   SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.10.0.zip';
-  SourceURL_LastResort = 'https://sourceforge.net/projects/win32svn/files/1.8.15/apache24/svn-win32-1.8.17-ap24.zip/download';
+  SourceURL_LastResort = 'https://sourceforge.net/projects/win32svn/files/1.8.17/apache24/svn-win32-1.8.17-ap24.zip/download';
   // confirmed by winetricks bug report that this is the only one left...
   // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
