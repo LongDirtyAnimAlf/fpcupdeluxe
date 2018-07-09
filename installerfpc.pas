@@ -587,7 +587,7 @@ begin
       end;
 
       s:=GetCompilerVersion(ChosenCompiler);
-      if s<>'0.0.0' then infoln('FPC cross-builder: Using cross-compiler with version: '+s, etInfo);
+      if s<>'0.0.0' then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using cross-compiler with version: '+s, etInfo);
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
@@ -2192,7 +2192,7 @@ begin
     FReleaseVersion:=0;
     GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
     if (Self is TFPCCrossInstaller) then
-      s:='FPC cross-builder: Detected source version FPC (compiler): '
+      s:='FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Detected source version FPC (compiler): '
     else
       s:='FPC builder: Detected source version FPC: ';
     infoln(s+VersionSnippet, etInfo);

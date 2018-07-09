@@ -1038,7 +1038,7 @@ begin
     begin
       if (Self is TLazarusCrossInstaller) then
       begin
-        s:='Lazarus cross-builder: ';
+        s:='Lazarus '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: ';
       end
       else
       begin
