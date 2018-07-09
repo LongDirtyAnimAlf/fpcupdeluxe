@@ -341,7 +341,17 @@ begin
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
+var
+  i:integer;
 begin
+  for i:=(listModules.Count-1) downto 0 do
+  begin
+    if Assigned(listModules.Items.Objects[i]) then
+    begin
+      StrDispose(Pchar(listModules.Items.Objects[i]));
+    end;
+  end;
+
   {$ifdef RemoteLog}
   FreeAndNil(aDataClient);
   {$endif}
@@ -368,15 +378,20 @@ var
   Index : integer;
   Item : string;
   aList:TListBox;
+  aObject:TObject;
 begin
   // for future use: show description of package as hint !!
   aList:=TListBox(Sender);
   Index:=aList.ItemAtPos(HintInfo^.CursorPos, True);
   if (HintInfo^.HintControl=aList) and (Index > -1) then
   begin
-    Item:=aList.Items[Index];
-    HintInfo^.HintStr:=Item;
-    HintInfo^.CursorRect:=aList.ItemRect(Index);
+    aObject:=aList.Items.Objects[Index];
+    if Assigned(aObject) then
+    begin
+      Item:=PChar(aObject);
+      HintInfo^.HintStr:=Item;
+      HintInfo^.CursorRect:=aList.ItemRect(Index);
+    end;
   end;
 end;
 
@@ -606,7 +621,7 @@ procedure TForm1.InitFPCupManager;
 var
   SortedModules: TStringList;
   i:integer;
-  s:string;
+  s,v:string;
 begin
   FPCupManager:=TFPCupManager.Create;
 
@@ -628,22 +643,25 @@ begin
     try
       for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
       begin
-        s:=FPCupManager.ModulePublishedList[i];
+        s:=FPCupManager.ModulePublishedList.Names[i];
+        v:=FPCupManager.ModulePublishedList.ValueFromIndex[i];
         // tricky ... get out the modules that are packages only
         // not nice, but needed to keep list clean of internal commands
-        if (FPCupManager.ModulePublishedList.IndexOf(s+'clean')<>-1)
-            AND (FPCupManager.ModulePublishedList.IndexOf(s+'uninstall')<>-1)
+        if (FPCupManager.ModulePublishedList.IndexOfName(s+'clean')<>-1)
+            AND (FPCupManager.ModulePublishedList.IndexOfName(s+'uninstall')<>-1)
             AND (s<>'FPC')
             AND (s<>'lazarus')
             AND (s<>'default')
             AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
             then
         begin
-          SortedModules.Add(s);
+          SortedModules.AddPair(s,v);
         end;
       end;
-      listModules.Items.AddStrings(SortedModules);
-
+      for i:=0 to (SortedModules.Count-1) do
+      begin
+        listModules.Items.AddObject(SortedModules.Names[i],TObject(pointer(StrNew(Pchar(SortedModules.ValueFromIndex[i])))));
+      end;
     finally
       SortedModules.Free;
     end;

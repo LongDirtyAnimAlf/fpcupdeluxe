@@ -1589,7 +1589,8 @@ function TSequencer.AddSequence(Sequence: string): boolean;
 //our mini parser
 var
   line,key,param:string;
-  i:integer;
+  PackageSettings:TStringList;
+  i,j:integer;
   instr:TKeyword;
   sequencename:string='';
 
@@ -1662,7 +1663,19 @@ begin
         sequencename:=param;
       end;
       if instr = SMdeclare then
-        FParent.FModulePublishedList.Add(param);
+      begin
+        key:='';
+        if (Pos('clean',param)=0) AND (Pos('uninstall',param)=0) AND (Pos('default',param)=0) then
+        begin
+          j:=UniModuleList.IndexOf(UpperCase(param));
+          if j>=0 then
+          begin
+            PackageSettings:=TStringList(UniModuleList.Objects[j]);
+            key:=PackageSettings.Values['Description'];
+          end;
+        end;
+        FParent.FModulePublishedList.AddPair(param,key);
+      end;
     end;
   end;
 end;

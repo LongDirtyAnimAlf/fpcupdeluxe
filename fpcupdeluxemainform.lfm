@@ -1599,6 +1599,7 @@ object Form1: TForm1
     OnShowHint = listModulesShowHint
     ParentShowHint = False
     ScrollWidth = 191
+    ShowHint = True
     Sorted = True
     TabOrder = 6
   end

@@ -155,6 +155,7 @@ type
 
 var
   sequences:string;
+  UniModuleList:TStringList=nil;
 
 Const
   CONFIGFILENAME='fpcup.ini';
@@ -175,7 +176,6 @@ Const
 var
   CurrentConfigFile:string;
   IniGeneralSection:TStringList=nil;
-  UniModuleList:TStringList=nil;
   UniModuleEnabledList:TStringlist=nil;
 
 {$ifndef FPCONLY}

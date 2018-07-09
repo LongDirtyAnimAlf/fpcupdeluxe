@@ -449,7 +449,7 @@ begin
         LeftOverOptions:=TStringList.Create;
         for i:=0 to Options.RestArguments.Count-1 do begin
           iCurrentOption:=LeftOverOptions.Add(copy(Options.RestArguments[i],length('--')+1,length(Options.RestArguments[i])));
-          if (FInstaller.ModulePublishedList.IndexOf(LeftOverOptions.Names[iCurrentOption])<>-1) then
+          if (FInstaller.ModulePublishedList.IndexOfName(LeftOverOptions.Names[iCurrentOption])<>-1) then
             case (uppercase(LeftOverOptions.ValueFromIndex[iCurrentOption])) of
               '-1','1','TRUE','YES','INSTALL','ENABLE', 'ON': begin
                 if CheckIncludeModule(LeftOverOptions.Names[iCurrentOption])
