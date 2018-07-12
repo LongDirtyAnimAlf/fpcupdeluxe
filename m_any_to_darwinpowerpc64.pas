@@ -148,6 +148,8 @@ begin
       AddFPCCFGSnippet('-k-framework -kAppKit');
       AddFPCCFGSnippet('-k-framework -kFoundation');
       AddFPCCFGSnippet('-k-framework -kCoreFoundation');
+      //AddFPCCFGSnippet('-k-framework -kQuartz');
+      AddFPCCFGSnippet('-k-framework -kApplicationServices');
       AddFPCCFGSnippet('-k-syslibroot -k'+s);
       AddFPCCFGSnippet('-k-arch -kppc64');
 
