@@ -70,6 +70,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure listModulesSelectionChange(Sender: TObject; User: boolean);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
@@ -373,6 +374,28 @@ begin
   {$endif}
 end;
 
+procedure TForm1.listModulesSelectionChange(Sender: TObject; User: boolean);
+var
+  Index : integer;
+  Item : string;
+  aList:TListBox;
+  aObject:TObject;
+begin
+  if (NOT User) then exit;
+  StatusMessage.Text:='';
+  StatusMessage.Color:=clDefault;
+  aList:=TListBox(Sender);
+  Index:=aList.ItemIndex;
+  aObject:=aList.Items.Objects[Index];
+  if Assigned(aObject) then
+  begin
+    Item:=PChar(aObject);
+    StatusMessage.Text:=Item;
+    StatusMessage.Color:=clLime;
+  end;
+end;
+
+
 procedure TForm1.listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
 var
   Index : integer;
@@ -380,7 +403,6 @@ var
   aList:TListBox;
   aObject:TObject;
 begin
-  // for future use: show description of package as hint !!
   aList:=TListBox(Sender);
   Index:=aList.ItemAtPos(HintInfo^.CursorPos, True);
   if (HintInfo^.HintControl=aList) and (Index > -1) then
@@ -2623,6 +2645,7 @@ begin
   {$endif}
 
   sStatus:='Sitting and waiting';
+  StatusMessage.Color:=clDefault;
   StatusMessage.Text:=sStatus;
 
   if CheckAutoClear.Checked then memoSummary.Lines.Clear;
@@ -2717,11 +2740,11 @@ begin
   {$ifdef RemoteLog}
   aVersion:=FPCTarget;
   if (ListBoxFPCTarget.ItemIndex<>-1) then aVersion:=ListBoxFPCTarget.GetSelectedText;
-  aDataClient.UpInfo.FPCVersion:=aVersion;
+  aDataClient.UpInfo.FPCVersion:=ExtractFileName(aVersion);
 
   aVersion:=LazarusTarget;
   if (ListBoxLazarusTarget.ItemIndex<>-1) then aVersion:=ListBoxLazarusTarget.GetSelectedText;
-  aDataClient.UpInfo.LazarusVersion:=aVersion;
+  aDataClient.UpInfo.LazarusVersion:=ExtractFileName(aVersion);
 
   aDataClient.UpInfo.UpInstallDir:=FPCupManager.BaseDirectory;
   {$endif}
@@ -2787,6 +2810,7 @@ begin
   except
     // just swallow exceptions
     StatusMessage.Text:='Got an unexpected exception ... don''t know what to do unfortunately.';
+    StatusMessage.Color:=clRed;
   end;
 end;
 

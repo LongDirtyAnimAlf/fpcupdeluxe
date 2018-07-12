@@ -23,7 +23,7 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <BuildModes Count="24">
+    <BuildModes Count="23">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -687,41 +687,7 @@
           </Other>
         </CompilerOptions>
       </Item20>
-      <Item21 Name="darwinppccarbon">
-        <MacroValues Count="1">
-          <Macro3 Name="LCLWidgetType" Value="carbon"/>
-        </MacroValues>
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-carbon"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="powerpc"/>
-            <TargetOS Value="darwin"/>
-            <Optimizations>
-              <OptimizationLevel Value="0"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <UseExternalDbgSyms Value="True"/>
-            </Debugging>
-          </Linking>
-          <Other>
-            <CustomOptions Value="-dRemoteLog"/>
-          </Other>
-        </CompilerOptions>
-      </Item21>
-      <Item22 Name="darwinppc64cocoa">
+      <Item21 Name="darwinppc64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -754,8 +720,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item22>
-      <Item23 Name="linuxarmv6">
+      </Item21>
+      <Item22 Name="linuxarmv6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -787,8 +753,8 @@
 -CpARMV6"/>
           </Other>
         </CompilerOptions>
-      </Item23>
-      <Item24 Name="linuxppc64">
+      </Item22>
+      <Item23 Name="linuxppc64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -818,11 +784,11 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item24>
+      </Item23>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Modes="DefaultQT,darwin64QT5,haikui386QT5,linuxx64QT5,linuxi386QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwinppc64cocoa,darwin32cocoa,darwin64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item3 ID="015223611220" Modes="darwin32carbon,darwinppccarbon" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
+        <Item3 ID="015223611220" Modes="darwin32carbon" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

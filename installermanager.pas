@@ -1671,7 +1671,7 @@ begin
           if j>=0 then
           begin
             PackageSettings:=TStringList(UniModuleList.Objects[j]);
-            key:=PackageSettings.Values['Description'];
+            key:=StringReplace(PackageSettings.Values['Description'],'"','',[rfReplaceAll]);;
           end;
         end;
         FParent.FModulePublishedList.AddPair(param,key);
