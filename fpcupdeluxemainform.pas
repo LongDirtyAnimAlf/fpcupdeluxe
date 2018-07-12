@@ -3031,17 +3031,21 @@ begin
       begin
         aKeyword:=installerUniversal.GetKeyword('fpcURL',aLocalTarget);
         i:=ListBoxFPCTarget.Items.IndexOf(aKeyword);
-        if i<>-1
-           then ListBoxFPCTarget.Selected[i]:=true
-           else ListBoxFPCTarget.ClearSelection;
+        if i<>-1 then
+        begin
+          ListBoxFPCTarget.Selected[i]:=true;
+          if i>5 then ListBoxFPCTarget.TopIndex:=(i-1);
+        end else ListBoxFPCTarget.ClearSelection;
       end;
       if aEdit=RealLazURL then
       begin
         aKeyword:=installerUniversal.GetKeyword('lazURL',aLocalTarget);
         i:=ListBoxLazarusTarget.Items.IndexOf(aKeyword);
-        if i<>-1
-           then ListBoxLazarusTarget.Selected[i]:=true
-           else ListBoxLazarusTarget.ClearSelection;
+        if i<>-1 then
+        begin
+          ListBoxLazarusTarget.Selected[i]:=true;
+          if i>5 then ListBoxLazarusTarget.TopIndex:=(i-1);
+        end else ListBoxLazarusTarget.ClearSelection;
       end;
     end;
     if (aControl is TListBox) OR (Length(aTarget)>0) then

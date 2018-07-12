@@ -93,6 +93,7 @@ type
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
     procedure SetURL(value:string);
+    procedure SetSourceDirectory(value:string);
     function GetMake: string;
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
@@ -198,7 +199,7 @@ type
     // Get processerrors and put them into FErrorLog
     procedure ProcessError(Sender:TProcessEx; {%H-}IsException:boolean);
     // Source directory for installation (fpcdir, lazdir,... option)
-    property SourceDirectory: string write FSourceDirectory;
+    property SourceDirectory: string write SetSourceDirectory;
     //Base directory for fpc(laz)up(deluxe) itself
     property BaseDirectory: string write FBaseDirectory;
     // Source directory for installation (fpcdir, lazdir,... option)
@@ -322,6 +323,14 @@ end;
 procedure TInstaller.SetURL(value:string);
 begin
   FURL:=value;
+  FMajorVersion := -1;
+  FMinorVersion := -1;
+  FReleaseVersion := -1;
+end;
+
+procedure TInstaller.SetSourceDirectory(value:string);
+begin
+  FSourceDirectory:=value;
   FMajorVersion := -1;
   FMinorVersion := -1;
   FReleaseVersion := -1;
