@@ -278,6 +278,7 @@ function GetVersionFromUrl(URL:string): string;
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
 {$IFDEF MSWINDOWS}
+function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 function IsWindows64: boolean;
@@ -1355,6 +1356,12 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
+function DownloadByPowerShell(URL, TargetFile: string): boolean;
+var
+  Output:string;
+begin
+  result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+end;
 
 function GetLocalAppDataPath: string;
 var

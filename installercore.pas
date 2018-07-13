@@ -1369,7 +1369,7 @@ const
 var
   MajorVersion,MinorVersion,BuildNumber: integer;
   OperationSucceeded: boolean;
-  SVNZip: string;
+  SVNZip,Output: string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadSVN): ';
 
@@ -1409,6 +1409,20 @@ begin
       FHTTPProxyPort,
       FHTTPProxyUser,
       FHTTPProxyPassword);
+
+      if NOT OperationSucceeded then
+      try
+        SysUtils.Deletefile(SVNZip); //Get rid of temp zip if any.
+        // use powershell
+        OperationSucceeded := DownloadByPowerShell(SourceURL,SVNZip);
+      except
+        on E: Exception do
+        begin
+          OperationSucceeded := false;
+          writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN', true);
+        end;
+      end;
+
   except
     // Deal with timeouts, wrong URLs etc
     on E: Exception do
@@ -1433,6 +1447,20 @@ begin
         FHTTPProxyPort,
         FHTTPProxyUser,
         FHTTPProxyPassword);
+
+        if NOT OperationSucceeded then
+        try
+          SysUtils.Deletefile(SVNZip); //Get rid of temp zip if any.
+          // use powershell
+          OperationSucceeded := DownloadByPowerShell(SourceURL_LastResort,SVNZip);
+        except
+          on E: Exception do
+          begin
+            OperationSucceeded := false;
+            writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN', true);
+          end;
+        end;
+
     except
       // Deal with timeouts, wrong URLs etc
       on E: Exception do
@@ -1444,7 +1472,6 @@ begin
     if (NOT OperationSucceeded) then
       writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL_LastResort, true);
   end;
-
 
   if OperationSucceeded then
   begin
@@ -1525,7 +1552,7 @@ begin
     for i:=0 to (Length(NewSourceURL)-1) do
     try
       SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded := (ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+NewSourceURL[i]+''','''+OpenSSLZip+''')"', Output, False)=0);
+      OperationSucceeded := DownloadByPowerShell(NewSourceURL[i],OpenSSLZip);
       if OperationSucceeded then break;
     except
       on E: Exception do
