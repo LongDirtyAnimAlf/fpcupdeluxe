@@ -145,6 +145,7 @@ type
     FTar: string;
     FBunzip2: string;
     F7zip: string;
+    FWget: string;
     FUnrar: string;
     FGit: string;
     FProcessEx: TProcessEx;
@@ -173,6 +174,7 @@ type
     {$IFDEF MSWINDOWS}
     function DownloadSVN: boolean;
     function DownloadOpenSSL: boolean;
+    function DownloadWget: boolean;
     {$ENDIF}
     function DownloadJasmin: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
@@ -410,12 +412,14 @@ begin
     FTar := '';
     FUnrar := '';
     F7zip := '';
+    FWget := '';
     FGit := '';
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
     FTar := 'tar';
     F7zip := '7za';
+    FWget := 'wget';
     FUnrar := 'unrar';
     FGit := 'git';
     {$ENDIF LINUX}
@@ -424,12 +428,14 @@ begin
     FBunzip2 := ''; //not really necessary now
     FTar := 'bsdtar'; //gnutar is not available by default on Mavericks
     F7zip := '7za';
+    FWget := 'wget';
     FUnrar := 'unrar';
     FGit := 'git';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     F7zip := '7za';
+    FWget := 'wget';
     FUnrar := 'unrar';
     FGit := 'git';
     {$ENDIF DARWIN}
@@ -465,6 +471,17 @@ begin
         infoln(localinfotext+'Found OpenSLL library files.',etDebug);
       end;
       if (NOT IsSSLloaded) then InitSSLInterface;
+    end;
+
+    FWget:=Which('wget');
+    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + '\wget\wget.exe';
+    if Not FileExists(FWget) then
+    begin
+      infoln(localinfotext+'Getting Wget.',etInfo);
+      DownloadWget;
+      OperationSucceeded:=FileExists(FWget);
+      // do not fail
+      OperationSucceeded:=True;
     end;
 
     // Get patch binary from default binutils URL
@@ -1599,6 +1616,75 @@ begin
   SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
   Result := OperationSucceeded;
  end;
+
+function TInstaller.DownloadWget: boolean;
+const
+  {$ifdef win64}
+  NewSourceURL : array [0..0] of string = (
+    'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
+    );
+  {$endif}
+  {$ifdef win32}
+  NewSourceURL : array [0..0] of string = (
+    'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
+    );
+  {$endif}
+var
+  OperationSucceeded: boolean;
+  WgetExe: string;
+  i:integer;
+begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadWget): ';
+
+  infoln(localinfotext+'No Wget found. Going to download it.',etWarning);
+
+  OperationSucceeded := false;
+
+  if ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
+  begin
+
+    WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
+
+    for i:=0 to (Length(NewSourceURL)-1) do
+    try
+      //always get this file with the native downloader !!
+      OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(WgetExe);
+        OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
+      end;
+      if OperationSucceeded then break;
+    except
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Wget', true);
+      end;
+    end;
+
+    if NOT OperationSucceeded then
+    begin
+      // use Windows PowerShell !!
+      for i:=0 to (Length(NewSourceURL)-1) do
+      try
+        SysUtils.DeleteFile(WgetExe);
+        OperationSucceeded := DownloadByPowerShell(NewSourceURL[i],WgetExe);
+        if OperationSucceeded then break;
+      except
+        on E: Exception do
+        begin
+          OperationSucceeded := false;
+          writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading Wget', true);
+        end;
+      end;
+    end;
+  end;
+
+  if NOT OperationSucceeded then SysUtils.Deletefile(WgetExe);
+  Result := OperationSucceeded;
+end;
 
 {$ENDIF}
 

@@ -231,6 +231,7 @@ type
     function HTTPDownload(Const URL : String; Dest : TStream):boolean;
   public
     constructor Create;override;
+    constructor Create(aWGETBinary:string);
     function getFile(const URL,filename:string):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
@@ -2823,9 +2824,16 @@ begin
 
   FCURLOk:=LoadCurlLibrary;
 
-  {$ifdef MSWINDOWS}
-  WGETBinary:='wget.exe';
+  if Length(WGETBinary)=0 then WGETBinary:='wget';
+
   FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+
+  {$ifdef MSWINDOWS}
+  if (NOT FWGETOk) then
+  begin
+    WGETBinary:='wget.exe';
+    FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+  end;
   {$ifdef CPU64}
   if (NOT FWGETOk) then
   begin
@@ -2833,15 +2841,18 @@ begin
     FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
   end;
   {$endif}
-  {$else MSWINDOWS}
-  WGETBinary:='wget';
-  FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
   {$endif MSWINDOWS}
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
     infoln('Could not initialize either libcurl or wget: expect severe failures !',etError);
   end;
+end;
+
+constructor TUseWGetDownloader.Create(aWGETBinary:string);
+begin
+  WGETBinary:=aWGETBinary;
+  inherited Create;
 end;
 
 function TUseWGetDownloader.WGetDownload(Const URL : String; Dest : TStream):boolean;
