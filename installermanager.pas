@@ -1674,7 +1674,7 @@ begin
             key:=StringReplace(PackageSettings.Values['Description'],'"','',[rfReplaceAll]);;
           end;
         end;
-        FParent.FModulePublishedList.AddPair(param,key);
+        with FParent.FModulePublishedList do Add(Concat(param, NameValueSeparator, key));
       end;
     end;
   end;

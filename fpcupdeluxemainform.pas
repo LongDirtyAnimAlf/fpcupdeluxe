@@ -677,7 +677,7 @@ begin
             AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
             then
         begin
-          SortedModules.AddPair(s,v);
+          with SortedModules do Add(Concat(s, NameValueSeparator, v));
         end;
       end;
       for i:=0 to (SortedModules.Count-1) do

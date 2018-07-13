@@ -1473,17 +1473,24 @@ end;
 function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2o-x64_86-win64.zip';
-  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2o-x64_86-win64.zip';
+  NewSourceURL : array [0..2] of string = (
+    'http://indy.fulgan.com/SSL/openssl-1.0.2o-x64_86-win64.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2o-win64.zip',
+    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip'
+    );
   {$endif}
   {$ifdef win32}
-  SourceURL = 'http://indy.fulgan.com/SSL/openssl-1.0.2o-i386-win32.zip';
-  SourceURLfailsafe = 'http://packages.lazarus-ide.org/openssl-1.0.2o-i386-win32.zip';
+  NewSourceURL : array [0..2] of string = (
+    'http://indy.fulgan.com/SSL/openssl-1.0.2o-i386-win32.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2o-win32.zip',
+    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip'
+    );
   {$endif}
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
-  OpenSSLZip: string;
+  OpenSSLZip,Output: string;
+  i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
@@ -1493,26 +1500,39 @@ begin
 
   OpenSSLZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
 
+  for i:=0 to (Length(NewSourceURL)-1) do
   try
     //always get this file with the native downloader !!
-    OperationSucceeded:=GetFile(SourceURL,OpenSSLZip,true,true);
+    OperationSucceeded:=GetFile(NewSourceURL[i],OpenSSLZip,true,true);
     if (NOT OperationSucceeded) then
     begin
       // try one more time
       SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded:=GetFile(SourceURL,OpenSSLZip,true,true);
-      if (NOT OperationSucceeded) then
-      begin
-        // try one more time on failsafe URL
-        SysUtils.DeleteFile(OpenSSLZip);
-        OperationSucceeded:=GetFile(SourceURLfailsafe,OpenSSLZip,true,true);
-      end;
+      OperationSucceeded:=GetFile(NewSourceURL[i],OpenSSLZip,true,true);
     end;
+    if OperationSucceeded then break;
   except
     on E: Exception do
     begin
       OperationSucceeded := false;
       writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
+    end;
+  end;
+
+  if NOT OperationSucceeded then
+  begin
+    // use Windows PowerShell !!
+    for i:=0 to (Length(NewSourceURL)-1) do
+    try
+      SysUtils.DeleteFile(OpenSSLZip);
+      OperationSucceeded := (ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+NewSourceURL[i]+''','''+OpenSSLZip+''')"', Output, False)=0);
+      if OperationSucceeded then break;
+    except
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
+      end;
     end;
   end;
 
