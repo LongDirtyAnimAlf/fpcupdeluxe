@@ -692,11 +692,15 @@ begin
       {$IFDEF MSWINDOWS}
       if (NOT AllThere) OR (FForceLocalSVNClient) then
       begin
-        infoln(localinfotext+'Going to download SVN',etInfo);
-        // Download will look in and below FSVNDirectory
-        // and set FSVNClient.SVNExecutable if succesful
         FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
-        AllThere := DownloadSVN;
+        AllThere:=FindSVNSubDirs;
+        if (NOT AllThere) then
+        begin
+          infoln(localinfotext+'Going to download SVN',etInfo);
+          // Download will look in and below FSVNDirectory
+          // and set FSVNClient.SVNExecutable if succesful
+          AllThere := DownloadSVN;
+        end;
       end;
       {$ENDIF}
 

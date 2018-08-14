@@ -1269,6 +1269,12 @@ begin
 end;
 
 function TFPCInstaller.GetFPCVersionFromSource(aSourcePath: string): string;
+const
+  VNO='version_nr';
+  RNO='release_nr';
+  PNO='patch_nr';
+  MAKEVERSION='version=';
+  //MAKEVERSION='PACKAGE_VERSION=';
 var
   TxtFile:Text;
   version_nr:string;
@@ -1291,7 +1297,6 @@ begin
   found_build_nr:=false;
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'compiler' + DirectorySeparator + 'version.pas';
-
   if FileExists(s) then
   begin
 
@@ -1301,10 +1306,10 @@ begin
     begin
       Readln(TxtFile,s);
 
-      x:=Pos('version_nr',s);
+      x:=Pos(VNO,s);
       if x>0 then
       begin
-        y:=x+Length('version_nr');
+        y:=x+Length(VNO);
         // move towards first numerical
         while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
         // get version
@@ -1316,10 +1321,10 @@ begin
         end;
       end;
 
-      x:=Pos('release_nr',s);
+      x:=Pos(RNO,s);
       if x>0 then
       begin
-        y:=x+Length('release_nr');
+        y:=x+Length(RNO);
         // move towards first numerical
         while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
         // get version
@@ -1331,10 +1336,10 @@ begin
         end;
       end;
 
-      x:=Pos('patch_nr',s);
+      x:=Pos(PNO,s);
       if x>0 then
       begin
-        y:=x+Length('patch_nr');
+        y:=x+Length(PNO);
         // move towards first numerical
         while (Length(s)>=y) AND (NOT (s[y] in ['0'..'9'])) do Inc(y);
         // get version
@@ -1359,7 +1364,30 @@ begin
       if found_build_nr then result:=result+'.'+build_nr;
     end;
 
-  end else infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
+  end
+  else
+  begin
+    infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
+    // fail-over ... not very reliable however
+    s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
+    if FileExists(s) then
+    begin
+      AssignFile(TxtFile,s);
+      Reset(TxtFile);
+      while NOT EOF (TxtFile) do
+      begin
+        Readln(TxtFile,s);
+        x:=Pos(MAKEVERSION,s);
+        if x>0 then
+        begin
+          Delete(s,1,x+Length(MAKEVERSION)-1);
+          result:=s;
+        end;
+      end;
+      CloseFile(TxtFile);
+    end else infoln('Tried to get FPC version from Makefile.fpc, but no Makefile.fpc found',etError);
+
+  end;
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
