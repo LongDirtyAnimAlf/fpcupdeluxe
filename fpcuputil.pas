@@ -277,7 +277,7 @@ function GetVersionFromUrl(URL:string): string;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
-procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
+procedure GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string='');
 {$IFDEF MSWINDOWS}
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
@@ -1259,7 +1259,7 @@ begin
   end;
 end;
 
-procedure GetGitHubFileList(aURL:string;fileurllist:TStringList);
+procedure GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string='');
 var
   {$ifdef Darwin}
   Http:TNSHTTPSendAndReceive;
@@ -1281,6 +1281,16 @@ begin
   try
     Http.Address := aURL;
     Http.AddHeader('Content-Type', 'application/json');
+    if Length(HTTPProxyHost)>0 then
+    begin
+      with Http do
+      begin
+        Proxy.Host:=HTTPProxyHost;
+        Proxy.Port:=HTTPProxyPort;
+        Proxy.UserName:=HTTPProxyUser;
+        Proxy.Password:=HTTPProxyPassword;
+      end;
+    end;
     Ms := TMemoryStream.Create;
     try
       if Http.SendAndReceive(nil, Ms) then
@@ -1302,6 +1312,20 @@ begin
      Http.AddHeader('Content-Type', 'application/json');
      Http.IOTimeout:=5000;
      Http.AllowRedirect:=true;
+
+    if Length(HTTPProxyHost)>0 then
+    begin
+      with Http do
+      begin
+        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+        Proxy.Host:=HTTPProxyHost;
+        Proxy.Port:=HTTPProxyPort;
+        Proxy.UserName:=HTTPProxyUser;
+        Proxy.Password:=HTTPProxyPassword;
+        {$endif}
+      end;
+    end;
+
      Content:=Http.Get(aURL);
   finally
     Http.Free;

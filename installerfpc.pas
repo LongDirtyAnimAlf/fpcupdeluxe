@@ -2002,8 +2002,7 @@ begin
         aCompilerList:=TStringList.Create;
         try
           aCompilerList.Clear;
-
-          GetGitHubFileList(FPCUPGITREPOBOOTSTRAPPERAPI,aCompilerList);
+          GetGitHubFileList(FPCUPGITREPOBOOTSTRAPPERAPI,aCompilerList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
           for i:=0 to Pred(aCompilerList.Count) do
           begin
             infoln(localinfotext+'Found online bootstrap compiler: '+aCompilerList[i],etDebug);

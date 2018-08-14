@@ -350,7 +350,7 @@ begin
   {$endif}
 
   {$ifndef Windows}
-  CheckForceLocalSVNClient.Checked:=False
+  CheckForceLocalSVNClient.Checked:=False;
   CheckForceLocalSVNClient.Enabled:=False;
   {$endif}
 end;
