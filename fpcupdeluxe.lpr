@@ -22,6 +22,7 @@ program fpcupdeluxe;
     Marius Maximus
     Josh (alternateui)
     Ondrej Kelle
+    Marco van de Voort (marcov)
 
 *)
 (*

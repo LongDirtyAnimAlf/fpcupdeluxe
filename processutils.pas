@@ -295,9 +295,12 @@ begin
           FExceptionInfoStrings.Add('Invalid directory: '+CurrentDirectory);
           FExitStatus:=PROC_INTERNALEXCEPTION;
           if (Assigned(OnError) or Assigned(OnErrorM)) then
-            OnError(Self,false)
-          else
-            OnErrorM(Self,false);
+          begin
+            if Assigned(OnError) then
+              OnError(Self,false)
+            else
+              OnErrorM(Self,false);
+          end;
           exit;
         end;
       end;
@@ -337,11 +340,14 @@ begin
       // Note also bug 22055 TProcess ExitStatus is zero when the called process Seg Faults
     end;
 
-    if (FExitStatus<>0) and (Assigned(OnError) or Assigned(OnErrorM))  then
+    if (FExitStatus<>0) and (Assigned(OnError) or Assigned(OnErrorM)) then
+    begin
       if Assigned(OnError) then
         OnError(Self,false)
       else
         OnErrorM(Self,false);
+    end;
+
   except
     on E: Exception do
     begin
