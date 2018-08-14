@@ -2614,6 +2614,7 @@ begin
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;
   FPCupManager.NativeFPCBootstrapCompiler:=(NOT Form2.FpcupBootstrappersOnly);
+  FPCupManager.ForceLocalSVNClient:=Form2.ForceLocalSVNClient;
 
   // Set default LCL platforms
   {$ifdef Darwin}
@@ -2888,6 +2889,8 @@ begin
 
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
+      Form2.ForceLocalSVNClient:=ReadBool('General','ForceLocalSVNClient',False);
+
       listModules.ClearSelection;
       SortedModules:=TStringList.Create;
       try
@@ -2948,6 +2951,8 @@ begin
       WriteBool('General','AutoSwitchURL',Form2.AutoSwitchURL);
 
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
+
+      WriteBool('General','ForceLocalSVNClient',Form2.ForceLocalSVNClient);
 
       modules:='';
       for i:=0 to listModules.Count-1 do

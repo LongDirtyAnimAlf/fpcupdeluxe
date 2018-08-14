@@ -1,10 +1,10 @@
 object Form2: TForm2
-  Left = 465
-  Height = 644
-  Top = 124
+  Left = 398
+  Height = 670
+  Top = 22
   Width = 756
   Caption = 'Advanced settings'
-  ClientHeight = 644
+  ClientHeight = 670
   ClientWidth = 756
   OnCreate = FormCreate
   OnDestroy = FormDestroy
@@ -149,7 +149,7 @@ object Form2: TForm2
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = GroupBox4
     Left = 8
-    Height = 404
+    Height = 430
     Top = 140
     Width = 416
     Anchors = [akTop, akLeft, akRight, akBottom]
@@ -157,7 +157,7 @@ object Form2: TForm2
     BorderSpacing.Top = 8
     BorderSpacing.Right = 8
     Caption = 'Miscellaneous settings'
-    ClientHeight = 384
+    ClientHeight = 410
     ClientWidth = 412
     TabOrder = 3
     object CheckRepo: TCheckBox
@@ -375,6 +375,22 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 12
     end
+    object CheckForceLocalSVNClient: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckFpcupBootstrappersOnly
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Use SVN client by fpcupdeluxe.'
+      Top = 329
+      Width = 194
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Use local SVN client (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 13
+    end
   end
   object GroupBox4: TGroupBox
     AnchorSideLeft.Control = GroupBox2
@@ -383,14 +399,14 @@ object Form2: TForm2
     AnchorSideRight.Control = Owner
     AnchorSideRight.Side = asrBottom
     Left = 432
-    Height = 404
+    Height = 430
     Top = 140
     Width = 316
     Anchors = [akTop, akRight, akBottom]
     BorderSpacing.Left = 8
     BorderSpacing.Right = 8
     Caption = 'Custom tools location and build options'
-    ClientHeight = 384
+    ClientHeight = 410
     ClientWidth = 312
     TabOrder = 4
     object ComboBoxOS: TComboBox
@@ -861,7 +877,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 8
     Height = 65
-    Top = 568
+    Top = 594
     Width = 170
     Anchors = [akLeft, akBottom]
     BorderSpacing.Left = 8
@@ -877,7 +893,7 @@ object Form2: TForm2
     AnchorSideTop.Control = ListBoxFPCPatch
     Left = 184
     Height = 25
-    Top = 570
+    Top = 596
     Width = 120
     AutoSize = True
     BorderSpacing.Left = 6
@@ -895,7 +911,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 184
     Height = 25
-    Top = 606
+    Top = 632
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -915,7 +931,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 310
     Height = 65
-    Top = 568
+    Top = 594
     Width = 170
     Anchors = [akLeft, akBottom]
     BorderSpacing.Left = 6
@@ -931,7 +947,7 @@ object Form2: TForm2
     AnchorSideTop.Control = ListBoxLazPatch
     Left = 486
     Height = 25
-    Top = 570
+    Top = 596
     Width = 120
     AutoSize = True
     BorderSpacing.Left = 6
@@ -949,7 +965,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 486
     Height = 25
-    Top = 606
+    Top = 632
     Width = 120
     Anchors = [akLeft, akBottom]
     AutoSize = True
@@ -968,7 +984,7 @@ object Form2: TForm2
     AnchorSideBottom.Side = asrBottom
     Left = 650
     Height = 89
-    Top = 547
+    Top = 573
     Width = 98
     Anchors = [akRight, akBottom]
     BorderSpacing.Right = 8
@@ -1022,13 +1038,13 @@ object Form2: TForm2
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 80
-    Top = 480
+    Left = 464
+    Top = 472
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Patch|*.patch|Diff|*.diff|All|*.*'
     Options = [ofFileMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail, ofAutoPreview]
-    Left = 248
-    Top = 480
+    Left = 536
+    Top = 472
   end
 end

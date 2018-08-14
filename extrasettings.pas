@@ -57,6 +57,7 @@ type
     btnSelectCompiler: TButton;
     Button1: TButton;
     CheckAutoSwitchURL: TCheckBox;
+    CheckForceLocalSVNClient: TCheckBox;
     CheckSendInfo: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
@@ -155,6 +156,9 @@ type
     function GetFpcupBootstrappersOnly:boolean;
     procedure SetFpcupBootstrappersOnly(value:boolean);
 
+    function GetForceLocalSVNClient:boolean;
+    procedure SetForceLocalSVNClient(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -205,6 +209,7 @@ type
     property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
     property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
+    property ForceLocalSVNClient:boolean read GetForceLocalSVNClient write SetForceLocalSVNClient;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -341,7 +346,12 @@ begin
 
   {$ifndef RemoteLog}
   CheckSendInfo.Checked:=False;
-  CheckSendInfo.Enabled:=false;
+  CheckSendInfo.Enabled:=False;
+  {$endif}
+
+  {$ifndef Windows}
+  CheckForceLocalSVNClient.Checked:=False
+  CheckForceLocalSVNClient.Enabled:=False;
   {$endif}
 end;
 
@@ -825,6 +835,14 @@ begin
   CheckFpcupBootstrappersOnly.Checked:=value;
 end;
 
+function TForm2.GetForceLocalSVNClient:boolean;
+begin
+  result:=CheckForceLocalSVNClient.Checked;
+end;
+procedure TForm2.SetForceLocalSVNClient(value:boolean);
+begin
+  CheckForceLocalSVNClient.Checked:=value;
+end;
 
 function TForm2.GetFPCOptions:string;
 begin

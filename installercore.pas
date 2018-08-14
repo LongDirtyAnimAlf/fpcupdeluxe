@@ -139,6 +139,7 @@ type
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
+    FForceLocalSVNClient: boolean;
     FNoJobs: boolean;
     FVerbose: boolean;
     FUseWget: boolean;
@@ -249,6 +250,7 @@ type
     property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
+    property ForceLocalSVNClient: boolean write FForceLocalSVNClient;
     property NoJobs: boolean write FNoJobs;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
@@ -688,7 +690,7 @@ begin
       end;
 
       {$IFDEF MSWINDOWS}
-      if NOT AllThere then
+      if (NOT AllThere) OR (FForceLocalSVNClient) then
       begin
         infoln(localinfotext+'Going to download SVN',etInfo);
         // Download will look in and below FSVNDirectory
@@ -2229,6 +2231,7 @@ begin
   // List of binutils that can be downloaded:
   // CreateBinutilsList;
   FNeededExecutablesChecked:=false;
+  FForceLocalSVNClient:=false;
   // Set up verbose log: will be done in dumpoutput
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;

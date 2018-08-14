@@ -447,6 +447,7 @@ type
     FUseGitClient:boolean;
     FSwitchURL:boolean;
     FNativeFPCBootstrapCompiler:boolean;
+    FForceLocalSVNClient:boolean;
     FSequencer: TSequencer;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
@@ -554,6 +555,7 @@ type
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
+    property ForceLocalSVNClient:boolean read FForceLocalSVNClient write FForceLocalSVNClient;
 
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
@@ -999,6 +1001,7 @@ begin
   NoJobs:=false;
   UseGitClient:=false;
   FNativeFPCBootstrapCompiler:=true;
+  ForceLocalSVNClient:=false;
 
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
@@ -1543,6 +1546,7 @@ begin
     FInstaller.NoJobs:=FParent.NoJobs;
     FInstaller.Log:=FParent.FLog;
     {$IFDEF MSWINDOWS}
+    FInstaller.ForceLocalSVNClient:=FParent.ForceLocalSVNClient;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
     FInstaller.SwitchURL:=FParent.SwitchURL;
