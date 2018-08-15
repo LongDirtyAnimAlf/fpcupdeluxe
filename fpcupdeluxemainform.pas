@@ -671,15 +671,16 @@ begin
         // not nice, but needed to keep list clean of internal commands
         if (FPCupManager.ModulePublishedList.IndexOfName(s+'clean')<>-1)
             AND (FPCupManager.ModulePublishedList.IndexOfName(s+'uninstall')<>-1)
-            AND (s<>'FPC')
-            AND (s<>'lazarus')
-            AND (s<>'default')
+            AND (UpperCase(s)<>'FPC')
+            AND (UpperCase(s)<>'LAZARUS')
+            AND (UpperCase(s)<>'DEFAULT')
             AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
             then
         begin
           with SortedModules do Add(Concat(s, NameValueSeparator, v));
         end;
       end;
+      SortedModules.Sort;
       for i:=0 to (SortedModules.Count-1) do
       begin
         listModules.Items.AddObject(SortedModules.Names[i],TObject(pointer(StrNew(Pchar(SortedModules.ValueFromIndex[i])))));
@@ -2817,8 +2818,6 @@ end;
 
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
-  i,j:integer;
-  SortedModules:TStringList;
   aTarget,aURL:string;
 begin
   result:=FileExists(IniDirectory+DELUXEFILENAME);
@@ -2891,19 +2890,6 @@ begin
 
       Form2.ForceLocalSVNClient:=ReadBool('General','ForceLocalSVNClient',False);
 
-      listModules.ClearSelection;
-      SortedModules:=TStringList.Create;
-      try
-        SortedModules.CommaText:=ReadString('General','Modules','');
-        for i:=0 to SortedModules.Count-1 do
-        begin
-          j:=listModules.Items.IndexOf(SortedModules[i]);
-          if j<>-1 then listModules.Selected[j]:=true;
-        end;
-      finally
-        SortedModules.Free;
-      end;
-
     finally
       Free;
     end;
@@ -2917,9 +2903,6 @@ begin
 end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
-var
-  i:integer;
-  modules:string;
 begin
   result:=DirectoryExists(ExtractFileDir(IniDirectory+DELUXEFILENAME));
 
@@ -2953,16 +2936,6 @@ begin
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
       WriteBool('General','ForceLocalSVNClient',Form2.ForceLocalSVNClient);
-
-      modules:='';
-      for i:=0 to listModules.Count-1 do
-      begin
-        if listModules.Selected[i] then modules:=modules+listModules.Items[i]+',';
-      end;
-      // delete stale trailing comma, if any
-      if Length(modules)>0 then
-      Delete(modules,Length(modules),1);
-      WriteString('General','Modules',modules);
 
     finally
       Free;
