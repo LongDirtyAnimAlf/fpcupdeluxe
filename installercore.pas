@@ -148,7 +148,7 @@ type
     F7zip: string;
     FWget: string;
     FUnrar: string;
-    FGit: string;
+    //FGit: string;
     FProcessEx: TProcessEx;
     FSwitchURL: boolean;
     property Make: string read GetMake;
@@ -415,7 +415,6 @@ begin
     FUnrar := '';
     F7zip := '';
     FWget := '';
-    FGit := '';
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
@@ -423,7 +422,6 @@ begin
     F7zip := '7za';
     FWget := 'wget';
     FUnrar := 'unrar';
-    FGit := 'git';
     {$ENDIF LINUX}
     {$IFDEF BSD} //OSX, *BSD
     {$IFDEF DARWIN}
@@ -432,14 +430,12 @@ begin
     F7zip := '7za';
     FWget := 'wget';
     FUnrar := 'unrar';
-    FGit := 'git';
     {$ELSE} //FreeBSD, OpenBSD, NetBSD
     FBunzip2 := 'bunzip2';
     FTar := 'tar'; //At least FreeBSD tar apparently takes some gnu tar options nowadays.
     F7zip := '7za';
     FWget := 'wget';
     FUnrar := 'unrar';
-    FGit := 'git';
     {$ENDIF DARWIN}
     {$ENDIF BSD}
 
@@ -596,57 +592,121 @@ begin
       OperationSucceeded:=True;
     end;
 
-    if Assigned(FGitClient)
-       then FGit:=FGitClient.RepoExecutableName
-       else FGit:=Which('git');
-    if Not FileExists(FGit) then FGit:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
-    if Not FileExists(FGit) then
+    with FGitClient do
     begin
-      //Source:
-      //https://github.com/git-for-windows/git/releases/download/v2.13.2.windows.1/Git-2.13.2-32-bit.exe
+      // try to find systemwide GIT
+      RepoExecutable:=Which(RepoExecutableName+'.exe');
+      // try to find fpcupdeluxe GIT
+      if Not FileExists(RepoExecutable) then RepoExecutable:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
+      if Not FileExists(RepoExecutable) then
+      begin
+        //Source:
+        //https://github.com/git-for-windows/git/releases/download/v2.13.2.windows.1/Git-2.13.2-32-bit.exe
 
-      ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'git');
-      {$ifdef win32}
-      //Output:='git32.7z';
-      Output:='git32.zip';
-      aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
-      {$else}
-      //Output:='git64.7z';
-      Output:='git64.zip';
-      aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
-      {$endif}
-      //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
-      infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
-      OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-      if NOT OperationSucceeded then
-      begin
-        // try one more time
-        SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+        ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+        {$ifdef win32}
+        //Output:='git32.7z';
+        Output:='git32.zip';
+        aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
+        {$else}
+        //Output:='git64.7z';
+        Output:='git64.zip';
+        aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
+        {$endif}
+        //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
+        infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
         OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-      end;
-      if OperationSucceeded then
-      begin
-        infoln(localinfotext+'GIT download ready: unpacking (may take time).',etInfo);
-        OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
         if NOT OperationSucceeded then
         begin
-          OperationSucceeded:=(ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
-        end;
-        if NOT OperationSucceeded then
-        begin
-          OperationSucceeded:=(ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+          // try one more time
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+          OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
         end;
         if OperationSucceeded then
         begin
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-          OperationSucceeded:=FileExists(FGit);
+          infoln(localinfotext+'GIT download ready: unpacking (may take time).',etInfo);
+          OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+          if NOT OperationSucceeded then
+          begin
+            OperationSucceeded:=(ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+          end;
+          if NOT OperationSucceeded then
+          begin
+            OperationSucceeded:=(ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+          end;
+          if OperationSucceeded then
+          begin
+            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+            OperationSucceeded:=FileExists(RepoExecutable);
+          end;
         end;
       end;
-      // do not fail ... perhaps there is another git available in the path
+      if (NOT OperationSucceeded) then RepoExecutable:=RepoExecutableName+'.exe';
+      if RepoExecutable <> EmptyStr then
+      begin
+        // check exe, but do not fail: GIT is not 100% essential !
+        CheckExecutable(RepoExecutable, '--version', '');
+      end;
+      // do not fail: GIT is not 100% essential !
       OperationSucceeded:=True;
     end;
-    if FileExists(FGit) AND Assigned(FGitClient) then FGitClient.RepoExecutable:=FGit;
+
+
+    with FHGClient do
+    begin
+      // try to find systemwide HG
+      RepoExecutable:=Which(RepoExecutableName+'.exe');
+      // try to find fpcupdeluxe HG
+      if Not FileExists(RepoExecutable) then RepoExecutable:=IncludeTrailingPathDelimiter(FMakeDir)+'hg\hg.exe';
+      if Not FileExists(RepoExecutable) then
+      begin
+        {$ifdef win32}
+        Output:='hg32.zip';
+        {$else}
+        Output:='hg64.zip';
+        {$endif}
+        aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
+        ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
+        infoln(localinfotext+'HG not found. Downloading it (may take time) from '+aURL,etInfo);
+        OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+        if NOT OperationSucceeded then
+        begin
+          // try one more time
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+          OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+        end;
+        if OperationSucceeded then
+        begin
+          infoln(localinfotext+'HG download ready: unpacking (may take time).',etInfo);
+          OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,FVerbose)=0);
+          if NOT OperationSucceeded then
+          begin
+            OperationSucceeded:=(ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,FVerbose)=0);
+          end;
+          if NOT OperationSucceeded then
+          begin
+            OperationSucceeded:=(ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,FVerbose)=0);
+          end;
+          if OperationSucceeded then
+          begin
+            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
+            OperationSucceeded:=FileExists(RepoExecutable);
+          end;
+        end;
+      end;
+      if (NOT OperationSucceeded) then RepoExecutable:=RepoExecutableName+'.exe';
+      if RepoExecutable <> EmptyStr then
+      begin
+        // check exe, but do not fail: HG is not 100% essential !
+        CheckExecutable(RepoExecutable, '--version', '');
+      end;
+      // do not fail: HG is not 100% essential !
+      OperationSucceeded:=True;
+    end;
+
+
     {$ENDIF}
+
 
     {$IF defined(LINUX) or (defined(BSD) and (not defined(DARWIN)))} //Linux,FreeBSD,NetBSD,OpenBSD, but not OSX
     //todo: check if we need as on OSX as well
@@ -730,16 +790,6 @@ begin
       if FTar <> EmptyStr then
       begin
         OperationSucceeded := CheckExecutable(FTar, '--version', '');
-      end;
-    end;
-
-    if OperationSucceeded then
-    begin
-      // Check for valid tar executable, if it is needed
-      if FGit <> EmptyStr then
-      begin
-        // check exe, but do not fail: GIT is not always needed
-        CheckExecutable(FGit, '--version', '');
       end;
     end;
 
