@@ -1517,8 +1517,10 @@ begin
   if assigned(FInstaller) then
   begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
-    if Assigned(FInstaller.SVNClient) then
-      FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
+    FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
+    {$IFDEF MSWINDOWS}
+    FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalSVNClient;
+    {$ENDIF}
     FInstaller.HTTPProxyHost:=FParent.HTTPProxyHost;
     FInstaller.HTTPProxyPort:=FParent.HTTPProxyPort;
     FInstaller.HTTPProxyUser:=FParent.HTTPProxyUser;
@@ -1546,7 +1548,6 @@ begin
     FInstaller.NoJobs:=FParent.NoJobs;
     FInstaller.Log:=FParent.FLog;
     {$IFDEF MSWINDOWS}
-    FInstaller.ForceLocalSVNClient:=FParent.ForceLocalSVNClient;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
     FInstaller.SwitchURL:=FParent.SwitchURL;

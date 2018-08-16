@@ -67,6 +67,7 @@ type
     FVerbose: boolean;
     FModuleName: string;
     FExportOnly: boolean;
+    FForceLocal: boolean;
     //Performs a checkout/initial download
     //Note: it's often easier to call CheckOutOrUpdate
     procedure CheckOut(UseForce:boolean=false); virtual;
@@ -141,6 +142,7 @@ type
     property Verbose: boolean read FVerbose write SetVerbose;
     property ModuleName: string read FModuleName write FModuleName;
     property ExportOnly: boolean read FExportOnly write SetExportOnly;
+    property ForceLocal: boolean read FForceLocal write FForceLocal;
     property ValidClient: boolean read GetValidClient;
     property RepoExecutableName: string read GetRepoExecutableName;
     constructor Create;
@@ -321,6 +323,7 @@ end;
 
 function TRepoClient.LocalRepositoryExists: boolean;
 begin
+  result:=False;
   raise Exception.Create('TRepoClient descendants must implement LocalRepositoryExists by themselves.');
 end;
 
@@ -334,6 +337,7 @@ begin
   FReturnCode := 0;
   FReturnOutput := '';
   FRepoExecutable := '';
+  FForceLocal := False;
   FindRepoExecutable;
 end;
 

@@ -139,7 +139,6 @@ type
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
-    FForceLocalSVNClient: boolean;
     FNoJobs: boolean;
     FVerbose: boolean;
     FUseWget: boolean;
@@ -197,6 +196,8 @@ type
     InfoText: string;
     LocalInfoText: string;
     property SVNClient: TSVNClient read FSVNClient;
+    property GitClient: TGitClient read FGitClient;
+    property HGClient: THGClient read FHGClient;
     // Get processor for termination of running processes
     property Processor: TProcessEx read FProcessEx;
     // Get processerrors and put them into FErrorLog
@@ -250,7 +251,6 @@ type
     property SourcePatches: string write FSourcePatches;
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
-    property ForceLocalSVNClient: boolean write FForceLocalSVNClient;
     property NoJobs: boolean write FNoJobs;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
@@ -398,7 +398,7 @@ function TInstaller.CheckAndGetTools: boolean;
 var
   AllThere: boolean;
   OperationSucceeded: boolean;
-  aURL,Output: string;
+  aURL,aLocalClientBinary,Output: string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
 
@@ -594,11 +594,21 @@ begin
 
     with FGitClient do
     begin
+      OperationSucceeded:=False;
+      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
       // try to find systemwide GIT
-      RepoExecutable:=Which(RepoExecutableName+'.exe');
+      if (NOT ForceLocal) then
+      begin
+        RepoExecutable:=Which(RepoExecutableName+'.exe');
+        OperationSucceeded:=FileExists(RepoExecutable);
+      end;
       // try to find fpcupdeluxe GIT
-      if Not FileExists(RepoExecutable) then RepoExecutable:=IncludeTrailingPathDelimiter(FMakeDir)+'git\cmd\git.exe';
-      if Not FileExists(RepoExecutable) then
+      if (NOT OperationSucceeded) then
+      begin
+        OperationSucceeded:=FileExists(aLocalClientBinary);
+        if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
+      end;
+      if (NOT OperationSucceeded) then
       begin
         //Source:
         //https://github.com/git-for-windows/git/releases/download/v2.13.2.windows.1/Git-2.13.2-32-bit.exe
@@ -624,24 +634,23 @@ begin
         end;
         if OperationSucceeded then
         begin
-          infoln(localinfotext+'GIT download ready: unpacking (may take time).',etInfo);
-          OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
-          if NOT OperationSucceeded then
+          infoln(localinfotext+'GIT client download ready: unpacking (may take time).',etInfo);
+          with TNormalUnzipper.Create do
           begin
-            OperationSucceeded:=(ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
-          end;
-          if NOT OperationSucceeded then
-          begin
-            OperationSucceeded:=(ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,FVerbose)=0);
+            try
+              OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\',[]);
+            finally
+              Free;
+            end;
           end;
           if OperationSucceeded then
           begin
             SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-            OperationSucceeded:=FileExists(RepoExecutable);
+            OperationSucceeded:=FileExists(aLocalClientBinary);
           end;
         end;
+        if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
       end;
-      if (NOT OperationSucceeded) then RepoExecutable:=RepoExecutableName+'.exe';
       if RepoExecutable <> EmptyStr then
       begin
         // check exe, but do not fail: GIT is not 100% essential !
@@ -651,15 +660,25 @@ begin
       OperationSucceeded:=True;
     end;
 
-
     with FHGClient do
     begin
+      OperationSucceeded:=False;
+      aLocalClientBinary:=IncludeTrailingPathDelimiter(FMakeDir)+'hg\hg.exe';
       // try to find systemwide HG
-      RepoExecutable:=Which(RepoExecutableName+'.exe');
-      // try to find fpcupdeluxe HG
-      if Not FileExists(RepoExecutable) then RepoExecutable:=IncludeTrailingPathDelimiter(FMakeDir)+'hg\hg.exe';
-      if Not FileExists(RepoExecutable) then
+      if (NOT ForceLocal) then
       begin
+        RepoExecutable:=Which(RepoExecutableName+'.exe');
+        OperationSucceeded:=FileExists(RepoExecutable);
+      end;
+      // try to find fpcupdeluxe HG
+      if (NOT OperationSucceeded) then
+      begin
+        OperationSucceeded:=FileExists(aLocalClientBinary);
+        if OperationSucceeded then RepoExecutable:=aLocalClientBinary;
+      end;
+      if (NOT OperationSucceeded) then
+      begin
+        //original source from : https://www.mercurial-scm.org/
         {$ifdef win32}
         Output:='hg32.zip';
         {$else}
@@ -667,7 +686,7 @@ begin
         {$endif}
         aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
         ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
-        infoln(localinfotext+'HG not found. Downloading it (may take time) from '+aURL,etInfo);
+        infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
         OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
         if NOT OperationSucceeded then
         begin
@@ -678,23 +697,22 @@ begin
         if OperationSucceeded then
         begin
           infoln(localinfotext+'HG download ready: unpacking (may take time).',etInfo);
-          OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,FVerbose)=0);
-          if NOT OperationSucceeded then
+          with TNormalUnzipper.Create do
           begin
-            OperationSucceeded:=(ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,FVerbose)=0);
-          end;
-          if NOT OperationSucceeded then
-          begin
-            OperationSucceeded:=(ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+'" '+IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,FVerbose)=0);
+            try
+              OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'hg\',[]);
+            finally
+              Free;
+            end;
           end;
           if OperationSucceeded then
           begin
             SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
-            OperationSucceeded:=FileExists(RepoExecutable);
+            OperationSucceeded:=FileExists(aLocalClientBinary);
           end;
         end;
+        if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
       end;
-      if (NOT OperationSucceeded) then RepoExecutable:=RepoExecutableName+'.exe';
       if RepoExecutable <> EmptyStr then
       begin
         // check exe, but do not fail: HG is not 100% essential !
@@ -703,7 +721,6 @@ begin
       // do not fail: HG is not 100% essential !
       OperationSucceeded:=True;
     end;
-
 
     {$ENDIF}
 
@@ -750,7 +767,7 @@ begin
       end;
 
       {$IFDEF MSWINDOWS}
-      if (NOT AllThere) OR (FForceLocalSVNClient) then
+      if (NOT AllThere) OR (FSVNClient.ForceLocal) then
       begin
         FSVNDirectory := IncludeTrailingPathDelimiter(FMakeDir) + FSVNClient.RepoExecutableName + DirectorySeparator;
         AllThere:=FindSVNSubDirs;
@@ -2285,7 +2302,6 @@ begin
   // List of binutils that can be downloaded:
   // CreateBinutilsList;
   FNeededExecutablesChecked:=false;
-  FForceLocalSVNClient:=false;
   // Set up verbose log: will be done in dumpoutput
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;
