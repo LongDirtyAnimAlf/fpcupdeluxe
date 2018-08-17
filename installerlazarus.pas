@@ -1281,10 +1281,15 @@ var
 begin
   Result := inherited;
 
-  Result := InitModule;
-  if not Result then exit;
+  if not DirectoryExistsUTF8(FSourceDirectory) then
+  begin
+    infoln(infotext+'No Lazarus source [yet] ... nothing to be done',etInfo);
+    exit(true);
+  end;
 
-  if not DirectoryExistsUTF8(FSourceDirectory) then exit;
+  Result := InitModule;
+
+  if not Result then exit;
 
   // If cleaning primary config:
   if (FCrossLCL_Platform = '') and (CrossCPU_Target = '') then

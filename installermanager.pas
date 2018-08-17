@@ -1149,7 +1149,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
 
   const
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so');
-    QTLIBS:TLibList = ('libQt4Pas.so','','','');
+    QTLIBS:TLibList = ('libQt5Pas.so','','','');
   var
     i:integer;
     pll:^TLibList;
@@ -1176,7 +1176,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
 
     // these libs are always needed !!
-    AdvicedLibs:='make gdb binutils unrar patch wget ';
+    AdvicedLibs:='make gdb binutils unrar unzip patch wget subversion';
 
     Output:=GetDistro;
     if (AnsiContainsText(Output,'arch') OR AnsiContainsText(Output,'manjaro')) then

@@ -2890,11 +2890,16 @@ var
   S : string;
 begin
   result:=inherited;
+
+  if not DirectoryExistsUTF8(FSourceDirectory) then
+  begin
+    infoln(infotext+'No FPC source [yet] ... nothing to be done',etInfo);
+    exit(true);
+  end;
+
   result:=InitModule;
 
   if not result then exit;
-
-  if not DirectoryExistsUTF8(FSourceDirectory) then exit;
 
   oldlog:=Processor.OnErrorM; //current error handler, if any
 

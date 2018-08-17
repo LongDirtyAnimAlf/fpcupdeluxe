@@ -169,6 +169,11 @@ var
 begin
   FPCupManager:=nil;
 
+  {$IF defined(LCLQT) OR defined(LCLQT5)}
+  // due to a bugger in QT[5]
+  Self.Position:=poDesigned;
+  {$endif}
+
   {$ifdef RemoteLog}
   aDataClient:=TDataClient.Create;
   {$ifdef usealternateui}

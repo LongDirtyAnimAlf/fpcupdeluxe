@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 250
+  Left = 330
   Height = 631
-  Top = 68
+  Top = 55
   Width = 1052
   Anchors = []
   Caption = 'Form1'
@@ -25,6 +25,7 @@ object Form1: TForm1
     AnchorSideBottom.Control = btnInstallModule
     Left = 11
     Height = 28
+    Hint = 'Open the extended settings form.'
     Top = 434
     Width = 131
     Anchors = [akTop, akLeft, akRight]
@@ -32,6 +33,8 @@ object Form1: TForm1
     BorderSpacing.Bottom = 8
     Caption = 'Setup+'
     OnClick = btnSetupPlusClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 15
   end
   object AutoCrossUpdate: TButton
@@ -42,7 +45,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 154
     Height = 28
-    Hint = 'Auto-update all installed cross-compilers'
+    Hint = 'Auto-update all installed cross-compilers.'
     Top = 382
     Width = 210
     Anchors = [akTop, akLeft, akRight]
@@ -187,6 +190,7 @@ object Form1: TForm1
     AnchorSideBottom.Control = Panel1
     Left = 6
     Height = 75
+    Hint = 'Will install/update the selected version of both FPC and Lazarus.'
     Top = 470
     Width = 153
     Anchors = [akTop, akLeft, akBottom]
@@ -681,6 +685,8 @@ object Form1: TForm1
     }
     Layout = blGlyphTop
     OnClick = BitBtnFPCandLazarusClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 20
   end
   object BitBtnLazarusOnly: TBitBtn
@@ -690,7 +696,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 79
     Height = 60
-    Hint = 'Only install/update Lazarus'
+    Hint = 'Only install/update selected Lazarus version.'
     Top = 366
     Width = 63
     Anchors = [akTop, akLeft, akRight]
@@ -830,6 +836,8 @@ object Form1: TForm1
     }
     Layout = blGlyphTop
     OnClick = LazarusOnlyClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 19
   end
   object BitBtnFPCOnly: TBitBtn
@@ -838,7 +846,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     Left = 11
     Height = 60
-    Hint = 'Only install/update FPC'
+    Hint = 'Only install/update selected FPC version.'
     Top = 366
     Width = 60
     BorderSpacing.Top = 16
@@ -977,6 +985,8 @@ object Form1: TForm1
     }
     Layout = blGlyphTop
     OnClick = FPCOnlyClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 18
   end
   object ListBoxFPCTarget: TListBox
@@ -1640,12 +1650,15 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     Left = 154
     Height = 28
+    Hint = 'Install the selected CPU-OS cross-compiler.'
     Top = 350
     Width = 210
     Anchors = [akTop, akLeft, akRight]
     BorderSpacing.Top = 6
     Caption = 'Install cross-compiler'
     OnClick = ButtonInstallCrossCompilerClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 10
   end
   object RealFPCURL: TEdit
@@ -1710,7 +1723,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 10
       Height = 42
-      Hint = 'Will install/update trunk version of both FPC and Lazarus'
+      Hint = 'Will install/update trunk version of both FPC and Lazarus.'
       Top = 8
       Width = 93
       AutoSize = True
@@ -1861,7 +1874,7 @@ object Form1: TForm1
       AnchorSideTop.Control = Panel1
       Left = 111
       Height = 42
-      Hint = 'Will install/update NewPascal and the mORMot for FPC'
+      Hint = 'Will install/update NewPascal.'
       Top = 8
       Width = 119
       AutoSize = True
@@ -2967,6 +2980,7 @@ object Form1: TForm1
     AnchorSideBottom.Control = Panel1
     Left = 167
     Height = 25
+    Hint = 'Install the selected module.'
     Top = 520
     Width = 101
     Anchors = [akLeft, akBottom]
@@ -2974,6 +2988,8 @@ object Form1: TForm1
     BorderSpacing.Bottom = 6
     Caption = 'Install module'
     OnClick = btnInstallModuleClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 7
   end
   object btnUninstallModule: TButton
@@ -2982,6 +2998,7 @@ object Form1: TForm1
     AnchorSideBottom.Control = Panel1
     Left = 290
     Height = 25
+    Hint = 'Uninstall the selected module.'
     Top = 520
     Width = 67
     Anchors = [akLeft, akRight, akBottom]
@@ -2989,6 +3006,8 @@ object Form1: TForm1
     BorderSpacing.Bottom = 6
     Caption = 'Uninstall'
     OnClick = btnInstallModuleClick
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 22
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
