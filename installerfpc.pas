@@ -1381,6 +1381,9 @@ begin
         if x>0 then
         begin
           Delete(s,1,x+Length(MAKEVERSION)-1);
+          y:=Length(s);
+          while (y>0) AND (NOT (s[y] in ['0'..'9','.'])) do Dec(y);
+          if (y<Length(s)) then Delete(s,(y+1),MaxInt);
           result:=s;
         end;
       end;
