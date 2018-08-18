@@ -34,8 +34,8 @@ const
   DEFAULTFPCVERSION     = '3.0.4';
   DEFAULTLAZARUSVERSION = '1.8.4';
 
-  FPCTRUNKVERSION       = '3.1.1';
-  FPCTRUNKBOOTVERSION   = '3.0.2';
+  FPCTRUNKVERSION       = '3.3.1';
+  FPCTRUNKBOOTVERSION   = '3.0.4';
   LAZARUSTRUNKVERSION   = '1.9';
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';

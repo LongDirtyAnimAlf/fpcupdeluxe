@@ -1697,6 +1697,21 @@ begin
         exit;
       end;
     end;
+    if (FPCupManager.CrossOS_Target='wince') then
+    begin
+      success:=CheckExecutable('gcc', '-v', '');
+      if (NOT success) then
+      begin
+        s:=
+        'Gcc cannot be found !!'+ sLineBreak +
+        'Gcc need to be installed to be able to cross-compile towards wince !'+ sLineBreak +
+        'Install gcc and retry !!';
+        Application.MessageBox(PChar(s), PChar('Missing gcc'), MB_ICONERROR);
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append('To get gcc: sudo apt-get install gcc');
+        exit;
+      end;
+    end;
     {$endif}
 
     if (FPCupManager.CrossOS_Target='java') then

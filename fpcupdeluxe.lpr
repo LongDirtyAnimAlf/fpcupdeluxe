@@ -67,10 +67,13 @@ uses
   m_any_to_javajvm,
   m_any_to_aixpowerpc,
   m_any_to_msdosi8086,
-  {$IFDEF LINUX}
+  {$ifdef LINUX}
+  //{$ifdef CPUX86}
   m_linux386_to_mips,
-  {$ENDIF}
-  {$IFDEF Darwin}
+  m_linux386_to_wincearm,
+  //{$endif}
+  {$endif}
+  {$ifdef Darwin}
   m_crossdarwin64,
   m_crossdarwin32,
   m_crossdarwinpowerpc,
