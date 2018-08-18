@@ -84,6 +84,8 @@ const
   FPCDefines='fpcdefines.xml';
   // File history:
   History='inputhistory.xml';
+  // Pas2js configuration options:
+  Pas2jsConfig='pas2jsdsgnoptions.xml';
   // Versions used when new config files are generated.
   // Lazarus pre 1.0: 106
   // We can assume Lazarus trunk can parse this version:

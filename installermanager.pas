@@ -1351,20 +1351,20 @@ begin
   if (uppercase(ModuleName)='FPC') then
   begin
     if assigned(FInstaller) then
-      begin
+    begin
       // Check for existing normal compiler, or exact same cross compiler
-      if (not crosscompiling and (FInstaller is TFPCNativeInstaller)) or
-        ( crosscompiling and
+      if (not CrossCompiling and (FInstaller is TFPCNativeInstaller)) or
+        ( CrossCompiling and
         (FInstaller is TFPCCrossInstaller) and
         (FInstaller.CrossOS_Target=FParent.CrossOS_Target) and
         (FInstaller.CrossCPU_Target=FParent.CrossCPU_Target)
         ) then
-        begin
+      begin
         exit; //all fine, continue with current FInstaller
-        end
+      end
       else
         FInstaller.free; // get rid of old FInstaller
-      end;
+    end;
     if CrossCompiling then
     begin
       FInstaller:=TFPCCrossInstaller.Create;
@@ -1490,15 +1490,15 @@ begin
   else       // this is a universal module
   begin
       if assigned(FInstaller) then
-        begin
+      begin
         if (FInstaller is TUniversalInstaller) and
-          (FCurrentModule= ModuleName) then
-          begin
+          (FCurrentModule=ModuleName) then
+        begin
           exit; //all fine, continue with current FInstaller
-          end
+        end
         else
           FInstaller.free; // get rid of old FInstaller
-        end;
+      end;
       FInstaller:=TUniversalInstaller.Create;
       FCurrentModule:=ModuleName;
       //assign properties
