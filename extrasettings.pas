@@ -57,7 +57,7 @@ type
     btnSelectCompiler: TButton;
     Button1: TButton;
     CheckAutoSwitchURL: TCheckBox;
-    CheckForceLocalSVNClient: TCheckBox;
+    CheckForceLocalRepoClient: TCheckBox;
     CheckSendInfo: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
@@ -156,8 +156,8 @@ type
     function GetFpcupBootstrappersOnly:boolean;
     procedure SetFpcupBootstrappersOnly(value:boolean);
 
-    function GetForceLocalSVNClient:boolean;
-    procedure SetForceLocalSVNClient(value:boolean);
+    function GetForceLocalRepoClient:boolean;
+    procedure SetForceLocalRepoClient(value:boolean);
 
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
@@ -209,7 +209,7 @@ type
     property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
     property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
-    property ForceLocalSVNClient:boolean read GetForceLocalSVNClient write SetForceLocalSVNClient;
+    property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -350,8 +350,8 @@ begin
   {$endif}
 
   {$ifndef Windows}
-  CheckForceLocalSVNClient.Checked:=False;
-  CheckForceLocalSVNClient.Enabled:=False;
+  CheckForceLocalRepoClient.Checked:=False;
+  CheckForceLocalRepoClient.Enabled:=False;
   {$endif}
 end;
 
@@ -835,13 +835,13 @@ begin
   CheckFpcupBootstrappersOnly.Checked:=value;
 end;
 
-function TForm2.GetForceLocalSVNClient:boolean;
+function TForm2.GetForceLocalRepoClient:boolean;
 begin
-  result:=CheckForceLocalSVNClient.Checked;
+  result:=CheckForceLocalRepoClient.Checked;
 end;
-procedure TForm2.SetForceLocalSVNClient(value:boolean);
+procedure TForm2.SetForceLocalRepoClient(value:boolean);
 begin
-  CheckForceLocalSVNClient.Checked:=value;
+  CheckForceLocalRepoClient.Checked:=value;
 end;
 
 function TForm2.GetFPCOptions:string;

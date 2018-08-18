@@ -2620,7 +2620,7 @@ begin
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;
   FPCupManager.NativeFPCBootstrapCompiler:=(NOT Form2.FpcupBootstrappersOnly);
-  FPCupManager.ForceLocalSVNClient:=Form2.ForceLocalSVNClient;
+  FPCupManager.ForceLocalRepoClient:=Form2.ForceLocalRepoClient;
 
   // Set default LCL platforms
   {$ifdef Darwin}
@@ -2893,7 +2893,7 @@ begin
 
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
-      Form2.ForceLocalSVNClient:=ReadBool('General','ForceLocalSVNClient',False);
+      Form2.ForceLocalRepoClient:=ReadBool('General','ForceLocalRepoClient',False);
 
     finally
       Free;
@@ -2940,7 +2940,7 @@ begin
 
       WriteBool('General','FpcupBootstrappersOnly',Form2.FpcupBootstrappersOnly);
 
-      WriteBool('General','ForceLocalSVNClient',Form2.ForceLocalSVNClient);
+      WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 
     finally
       Free;

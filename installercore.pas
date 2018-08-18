@@ -611,17 +611,19 @@ begin
       if (NOT OperationSucceeded) then
       begin
         //Source:
-        //https://github.com/git-for-windows/git/releases/download/v2.13.2.windows.1/Git-2.13.2-32-bit.exe
+        //https://github.com/git-for-windows
 
         ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'git');
         {$ifdef win32}
         //Output:='git32.7z';
         Output:='git32.zip';
-        aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
+        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
+        aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
         {$else}
         //Output:='git64.7z';
         Output:='git64.zip';
-        aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
+        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
+        aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
         {$endif}
         //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
         infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);

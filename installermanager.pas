@@ -447,7 +447,7 @@ type
     FUseGitClient:boolean;
     FSwitchURL:boolean;
     FNativeFPCBootstrapCompiler:boolean;
-    FForceLocalSVNClient:boolean;
+    FForceLocalRepoClient:boolean;
     FSequencer: TSequencer;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
@@ -555,7 +555,7 @@ type
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
-    property ForceLocalSVNClient:boolean read FForceLocalSVNClient write FForceLocalSVNClient;
+    property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
 
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
@@ -1001,7 +1001,7 @@ begin
   NoJobs:=false;
   UseGitClient:=false;
   FNativeFPCBootstrapCompiler:=true;
-  ForceLocalSVNClient:=false;
+  ForceLocalRepoClient:=false;
 
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
@@ -1519,7 +1519,9 @@ begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
     FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
     {$IFDEF MSWINDOWS}
-    FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalSVNClient;
+    FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalRepoClient;
+    FInstaller.GitClient.ForceLocal:=FParent.ForceLocalRepoClient;
+    FInstaller.HGClient.ForceLocal:=FParent.ForceLocalRepoClient;
     {$ENDIF}
     FInstaller.HTTPProxyHost:=FParent.HTTPProxyHost;
     FInstaller.HTTPProxyPort:=FParent.HTTPProxyPort;

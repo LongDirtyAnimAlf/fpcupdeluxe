@@ -375,18 +375,18 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 12
     end
-    object CheckForceLocalSVNClient: TCheckBox
+    object CheckForceLocalRepoClient: TCheckBox
       AnchorSideLeft.Control = GroupBox2
       AnchorSideTop.Control = CheckFpcupBootstrappersOnly
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 19
-      Hint = 'Use SVN client by fpcupdeluxe.'
+      Hint = 'Use the repo-client by fpcupdeluxe.'
       Top = 329
-      Width = 194
+      Width = 198
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Use local SVN client (default=no)'
+      Caption = 'Use local repo-client (default=no)'
       ParentShowHint = False
       ShowHint = True
       TabOrder = 13
