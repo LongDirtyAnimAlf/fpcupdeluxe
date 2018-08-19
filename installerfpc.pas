@@ -27,6 +27,7 @@ You should have received a copy of the GNU Library General Public License
 along with this library; if not, write to the Free Software Foundation,
 Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 }
+
 {$mode objfpc}{$H+}
 
 interface
@@ -587,7 +588,10 @@ begin
       end;
 
       s:=GetCompilerVersion(ChosenCompiler);
-      if s<>'0.0.0' then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using cross-compiler with version: '+s, etInfo);
+
+      if s<>'0.0.0'
+        then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using cross-compiler with version: '+s, etInfo)
+        else infoln(infotext+'FPC cross-compiler version error: '+s+' ! Should never happen: expect many errors !!', etError);
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
@@ -1039,7 +1043,16 @@ begin
   OperationSucceeded:=true;
 
   s:=GetCompilerVersion(FCompiler);
-  if s<>'0.0.0' then infoln('FPC builder: Using FPC bootstrap compiler with version: '+s, etInfo);
+  if s<>'0.0.0'
+    then infoln('FPC builder: Using FPC bootstrap compiler with version: '+s, etInfo)
+    else infoln(infotext+'FPC bootstrap version error: '+s+' ! Should never happen: expect many errors !!', etError);
+
+  //if clean failed (due to missing compiler), try again !
+  if (NOT FCleanModuleSuccess) then
+  begin
+    infoln(infotext+'Running CleanModule once more before building FPC from sources, due to previous CleanModule failure.',etInfo);
+    CleanModule(ModuleName);
+  end;
 
   Processor.Executable := Make;
   FErrorLog.Clear;
@@ -1381,9 +1394,9 @@ begin
         if x>0 then
         begin
           Delete(s,1,x+Length(MAKEVERSION)-1);
-          y:=Length(s);
-          while (y>0) AND (NOT (s[y] in ['0'..'9','.'])) do Dec(y);
-          if (y<Length(s)) then Delete(s,(y+1),MaxInt);
+          y:=1;
+          while ((y<=Length(s)) AND (s[y] in ['0'..'9','.'])) do Inc(y);
+          if (y<=Length(s)) then Delete(s,y,MaxInt);
           result:=s;
         end;
       end;
@@ -2975,9 +2988,14 @@ begin
       try
         writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
         Processor.Execute;
-        Sleep(100); //now do it again
-        writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
-        Processor.Execute;
+        result:=(Processor.ExitStatus=0);
+        if result then
+        begin
+          Sleep(100); //now do it again
+          writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+          Processor.Execute;
+          result:=(Processor.ExitStatus=0);
+       end;
       except
         on E: Exception do
         begin
@@ -2992,7 +3010,8 @@ begin
   end
   else
   begin
-    infoln(infotext+'Running make distclean failed: could not find cleanup compiler ('+aCleanupCompiler+')',etWarning);
+    result:=false;
+    infoln(infotext+'Running make distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
 
   if (NOT CrossCompiling) then
@@ -3068,7 +3087,9 @@ begin
   finally
     DeleteList.Free;
   end;
-
+  // store result !
+  FCleanModuleSuccess:=result;
+  // do not fail !
   result:=true;
 end;
 

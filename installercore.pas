@@ -103,6 +103,7 @@ type
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
   protected
+    FCleanModuleSuccess: boolean;
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
@@ -1593,22 +1594,22 @@ function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
   NewSourceURL : array [0..2] of string = (
-    'http://indy.fulgan.com/SSL/openssl-1.0.2o-x64_86-win64.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2o-win64.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2o-x64_86-win64.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2p-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip'
     );
   {$endif}
   {$ifdef win32}
   NewSourceURL : array [0..2] of string = (
-    'http://indy.fulgan.com/SSL/openssl-1.0.2o-i386-win32.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2o-win32.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2o-i386-win32.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2p-win32.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip'
     );
   {$endif}
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
-  OpenSSLZip,Output: string;
+  OpenSSLZip,Output,aSourceURL: string;
   i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
@@ -1621,13 +1622,14 @@ begin
 
   for i:=0 to (Length(NewSourceURL)-1) do
   try
+    aSourceURL:=NewSourceURL[i];
     //always get this file with the native downloader !!
-    OperationSucceeded:=GetFile(NewSourceURL[i],OpenSSLZip,true,true);
+    OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
     if (NOT OperationSucceeded) then
     begin
       // try one more time
       SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded:=GetFile(NewSourceURL[i],OpenSSLZip,true,true);
+      OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
     end;
     if OperationSucceeded then break;
   except
@@ -1643,8 +1645,9 @@ begin
     // use Windows PowerShell !!
     for i:=0 to (Length(NewSourceURL)-1) do
     try
+      aSourceURL:=NewSourceURL[i];
       SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded := DownloadByPowerShell(NewSourceURL[i],OpenSSLZip);
+      OperationSucceeded := DownloadByPowerShell(aSourceURL,OpenSSLZip);
       if OperationSucceeded then break;
     except
       on E: Exception do
@@ -1686,7 +1689,7 @@ begin
   end;
 
   if OperationSucceeded
-     then infoln(localinfotext+'OpenSLL library files download and unpacking ok',etWarning)
+     then infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok',etInfo)
      else infoln(localinfotext+'Could not download/install openssl library', etError);
   SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
   Result := OperationSucceeded;
@@ -1711,7 +1714,7 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadWget): ';
 
-  infoln(localinfotext+'No Wget found. Going to download it.',etWarning);
+  infoln(localinfotext+'No Wget found. Going to download it.',etInfo);
 
   OperationSucceeded := false;
 
@@ -2052,6 +2055,7 @@ end;
 function TInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=false;
+  FCleanModuleSuccess:=false;
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
 end;
@@ -2304,6 +2308,7 @@ begin
   // List of binutils that can be downloaded:
   // CreateBinutilsList;
   FNeededExecutablesChecked:=false;
+  FCleanModuleSuccess:=false;
   // Set up verbose log: will be done in dumpoutput
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;
@@ -2332,7 +2337,7 @@ begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
     infoln(localinfotext+'Downloading ' + aURL,etInfo);
     result:=Download(aUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etWarning);
+    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etInfo);
   end;
 end;
 

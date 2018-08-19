@@ -1711,6 +1711,7 @@ begin
         memoSummary.Lines.Append('To get gcc: sudo apt-get install gcc');
         exit;
       end;
+      (*
       {$ifdef CPU64}
       if (NOT FileExists('/lib/ld-linux-x86-64.so.2')) then
       begin
@@ -1723,6 +1724,7 @@ begin
         memoSummary.Lines.Append(s);
       end;
       {$endif}
+      *)
     end;
     {$endif}
 
