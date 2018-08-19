@@ -179,7 +179,6 @@ begin
   FTargetOS:=OS;
   FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
-  FCompilerUsed:=ctBootstrap;
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FAlreadyWarned:=false;

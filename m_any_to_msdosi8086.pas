@@ -208,7 +208,6 @@ begin
   Works around faulty makefile in some versions of fpc that call nasm without
   specifying the directory it is in}
   FBinutilsPathInPath:=true;
-  FCompilerUsed:=ctInstalled;
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
   FAlreadyWarned:=false;

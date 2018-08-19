@@ -82,7 +82,6 @@ begin
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
   FCrossModuleNamePrefix:='TWin64';
-  FCompilerUsed:=ctInstalled; // use installed due to potential availability of (needed) softfloat in starting compiler
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';

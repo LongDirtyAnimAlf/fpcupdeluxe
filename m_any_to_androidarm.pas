@@ -426,7 +426,6 @@ begin
   FTargetOS:=OS;
   FBinUtilsPrefix:=ARCH+'-linux-'+OS+'eabi-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
-  FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FAlreadyWarned:=false;

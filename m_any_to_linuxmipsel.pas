@@ -226,7 +226,6 @@ begin
   { Use current trunk compiler to build, not stable bootstrap, e.g. in light of bug
    http://bugs.freepascal.org/view.php?id=25399
   }
-  FCompilerUsed:=ctInstalled;
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='mipsel';

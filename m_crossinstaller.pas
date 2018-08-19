@@ -409,7 +409,10 @@ begin
 
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
 
-  FCompilerUsed:=ctBootstrap; //use bootstrap compiler for cross compiling by default
+  // use installed source compiler for cross compiling by default
+  // bootstrap compiler was only usefull in some cornercases
+  // see: http://lists.freepascal.org/pipermail/fpc-devel/2018-August/039494.html
+  FCompilerUsed:=ctInstalled;
 
   FCrossModuleNamePrefix:='TAny';
 

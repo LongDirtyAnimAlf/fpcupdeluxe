@@ -202,7 +202,6 @@ begin
   FBinUtilsPrefix:='mipsel-embedded-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
-  //FCompilerUsed:=ctInstalled;
   FLibsPath:='';
   FTargetCPU:='mipsel';
   FTargetOS:='embedded';

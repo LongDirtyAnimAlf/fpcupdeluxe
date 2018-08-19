@@ -174,7 +174,6 @@ begin
   // binutilsprefix can be modified later in GetBinUtils
   FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
-  FCompilerUsed:=ctInstalled;
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='mips';

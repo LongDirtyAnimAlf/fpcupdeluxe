@@ -398,7 +398,6 @@ begin
   // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
   FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
-  FCompilerUsed:=ctInstalled; //Use current trunk compiler to build, not stable bootstrap
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FAlreadyWarned:=false;

@@ -207,7 +207,6 @@ begin
   FBinUtilsPrefix:=ARCH+'-'+OS+'-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
-  //FCompilerUsed:=ctInstalled;
   FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;

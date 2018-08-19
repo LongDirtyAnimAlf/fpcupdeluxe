@@ -167,7 +167,6 @@ begin
   FTargetCPU:='arm';
   FTargetOS:='wince';
   FAlreadyWarned:=false;
-  FCompilerUsed:=ctInstalled; //Use current compiler to build, not bootstrapper
   ShowInfo;
 end;
 
