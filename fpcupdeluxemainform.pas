@@ -1711,6 +1711,18 @@ begin
         memoSummary.Lines.Append('To get gcc: sudo apt-get install gcc');
         exit;
       end;
+      {$ifdef CPU64}
+      if (NOT FileExists('/lib/ld-linux-x86-64.so.2')) then
+      begin
+        s:=
+        'The current wince binutils need /lib/ld-linux-x86-64.so.2 !' + sLineBreak +
+        'If so, add this symlink and point it towards /lib/x86_64-linux-gnu/ld-2.24.so' + sLineBreak +
+        'sudo ln -s /lib/x86_64-linux-gnu/ld-2.24.so /lib/ld-linux-x86-64.so.2';
+        Application.MessageBox(PChar(s), PChar('Dynamic linker/loader'), MB_ICONWARNING);
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append(s);
+      end;
+      {$endif}
     end;
     {$endif}
 
