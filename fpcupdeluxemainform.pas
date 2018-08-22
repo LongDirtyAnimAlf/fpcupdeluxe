@@ -1345,8 +1345,8 @@ begin
   if (sConsentWarning) OR (Form2.SendInfo) then
   begin
     AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('http://54.194.211.233:8880/root/getinfohtml',true);
-    AddMessage('http://54.194.211.233:8880/root/getinfohtml?ShowErrors=yes');
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
     if (sConsentWarning) then
     begin
       aModalResult:=(MessageDlg(

@@ -590,8 +590,8 @@ begin
       s:=GetCompilerVersion(ChosenCompiler);
 
       if s<>'0.0.0'
-        then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using cross-compiler with version: '+s, etInfo)
-        else infoln(infotext+'FPC cross-compiler version error: '+s+' ! Should never happen: expect many errors !!', etError);
+        then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using compiler with version: '+s, etInfo)
+        else infoln(infotext+'FPC compiler version error: '+s+' ! Should never happen: expect many errors !!', etError);
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;

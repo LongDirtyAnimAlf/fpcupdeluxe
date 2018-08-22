@@ -54,7 +54,9 @@ type
   end;
 
 const
-  AWS_HOST_IP  = '54.194.211.233';
+  //AWS_HOST_IP  = '54.194.211.233';
+  //AWS_HOST_IP  = '52.50.101.131';
+  AWS_HOST_IP  = 'fpcuplogger.batterybutcher.com';
   IP_DEFAULT   = AWS_HOST_IP;
   //IP_DEFAULT   = '127.0.0.1';
   PORT_DEFAULT = 8880;
