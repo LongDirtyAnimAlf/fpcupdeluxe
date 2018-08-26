@@ -1002,6 +1002,7 @@ begin
   UseGitClient:=false;
   FNativeFPCBootstrapCompiler:=true;
   ForceLocalRepoClient:=false;
+  FPatchCmd:='patch';
 
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
@@ -1678,7 +1679,7 @@ begin
           if j>=0 then
           begin
             PackageSettings:=TStringList(UniModuleList.Objects[j]);
-            key:=StringReplace(PackageSettings.Values['Description'],'"','',[rfReplaceAll]);;
+            key:=StringReplace(PackageSettings.Values[installerUniversal.INIKEYWORD_DESCRIPTION],'"','',[rfReplaceAll]);;
           end;
         end;
         with FParent.FModulePublishedList do Add(Concat(param, NameValueSeparator, key));

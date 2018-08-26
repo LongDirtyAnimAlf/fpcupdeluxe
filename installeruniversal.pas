@@ -160,6 +160,11 @@ var
 Const
   CONFIGFILENAME='fpcup.ini';
   SETTTINGSFILENAME='settings.ini';
+  DELUXEFILENAME='fpcupdeluxe.ini';
+
+  INIKEYWORD_NAME='Name';
+  INIKEYWORD_CATEGORY='Category';
+  INIKEYWORD_DESCRIPTION='Description';
 
 implementation
 
@@ -1582,7 +1587,7 @@ begin
           // we have an archive from github ... this archive adds an extra path (name-branch) when unpacking the master.zip
           // so replace package path and package installer with the right path !!
 
-          PackageName:=GetValue('Name',PackageSettings);
+          PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
           if Pos('/'+PackageName+'/',RemoteURL)=0 then
           begin
             // we must build the name from ArchiveURL ... :-(
@@ -1596,7 +1601,7 @@ begin
               if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
             end;
             // there was something wrong ... back to default ... cheap and dirty coding ...
-            if i=0 then PackageName:=GetValue('Name',PackageSettings);
+            if i=0 then PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
           end;
 
           for i:=-1 to MAXINSTRUCTIONS do
@@ -1632,7 +1637,7 @@ begin
           // we have an archive from sourceforge ... this archive adds an extra path (name) when unpacking the zip
           // so replace package path and package installer with the right path !!
 
-          PackageName:=GetValue('Name',PackageSettings);
+          PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
           if Pos('/'+PackageName+'/',lowercase(RemoteURL))=0 then
           begin
             PackageName:=RemoteURL;
@@ -1643,7 +1648,7 @@ begin
               i:=RPos('/',PackageName);
               if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
             end;
-            if i=0 then PackageName:=GetValue('Name',PackageSettings);
+            if i=0 then PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
           end;
 
           for i:=-1 to MAXINSTRUCTIONS do
@@ -1965,7 +1970,7 @@ var
     sl:TStringList;
     li:integer;
   begin
-    name:=ini.ReadString(ModuleName,'Name','');
+    name:=ini.ReadString(ModuleName,INIKEYWORD_NAME,'');
     result:=name<>'';
     if result then
     begin
@@ -1983,6 +1988,10 @@ var
       begin
         if (TrimLeft(sl.Strings[li])[1]=';') OR (TrimLeft(sl.Strings[li])[1]='#') then sl.Delete(li);
       end;
+      with sl do
+      begin
+        if IndexOfName(INIKEYWORD_CATEGORY)=-1 then Add(Concat(INIKEYWORD_CATEGORY, NameValueSeparator, 'miscellaneous'));
+      end;
       UniModuleList.AddObject(name,TObject(sl));
     end;
   end;
@@ -1992,7 +2001,7 @@ var
     name,req:string;
   begin
     result:='';
-    name:=ini.ReadString(ModuleName,'Name','');
+    name:=ini.ReadString(ModuleName,INIKEYWORD_NAME,'');
     if name<>'' then
       begin
       req:=ini.ReadString(ModuleName,'requires','');

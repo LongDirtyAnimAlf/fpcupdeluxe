@@ -149,6 +149,7 @@ uses
   //LazFileUtils,
   AboutFrm,
   extrasettings,
+  modulesettings,
   //checkoptions,
   installerCore,
   installerUniversal,
@@ -156,9 +157,6 @@ uses
   fpcuputil,
   processutils,
   synedittext;
-
-Const
-  DELUXEFILENAME='fpcupdeluxe.ini';
 
 { TForm1 }
 
@@ -271,7 +269,7 @@ begin
   SetCurrentDir(ExcludeTrailingPathDelimiter(SafeGetApplicationPath));
   {$endif}
   // get last used install directory, proxy and visual settings
-  with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
+  with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
     {$ifdef RemoteLog}
@@ -330,6 +328,7 @@ begin
     // create settings form
     // must be done here, to enable local storage/access of some setttings !!
     Form2:=TForm2.Create(Form1);
+    Form3:=TForm3.Create(Form1);
 
     // tricky ... due to arm quircks when cross-compiling : GetDistro (ExecuteCommand) gives errors if used in CreateForm
     Timer1.Enabled:=True;
@@ -662,33 +661,37 @@ begin
 
   //CheckFPCUPOptions(FPCupManager);
 
-  FPCupManager.PatchCmd:='patch';
-
   if listModules.Count=0 then
   begin
     SortedModules:=TStringList.Create;
     try
-      for i:=0 to FPCupManager.ModulePublishedList.Count-1 do
+      SortedModules.Delimiter:=';';
+      SortedModules.StrictDelimiter:=true;
+      SortedModules.DelimitedText:=GetModuleList;
+      // filter modulelist from trivial entries
+      for i:=(SortedModules.Count-1) downto 0 do
       begin
-        s:=FPCupManager.ModulePublishedList.Names[i];
-        v:=FPCupManager.ModulePublishedList.ValueFromIndex[i];
-        // tricky ... get out the modules that are packages only
-        // not nice, but needed to keep list clean of internal commands
-        if (FPCupManager.ModulePublishedList.IndexOfName(s+'clean')<>-1)
-            AND (FPCupManager.ModulePublishedList.IndexOfName(s+'uninstall')<>-1)
-            AND (UpperCase(s)<>'FPC')
-            AND (UpperCase(s)<>'LAZARUS')
-            AND (UpperCase(s)<>'DEFAULT')
-            AND (FPCupManager.ModuleEnabledList.IndexOf(s)=-1)
-            then
+        s:=SortedModules[i];
+        if Pos('Declare ',s)=0 then
         begin
-          with SortedModules do Add(Concat(s, NameValueSeparator, v));
+          SortedModules.Delete(i);
+          continue;
+        end;
+        if (RightStr(s,Length('clean'))='clean') OR (RightStr(s,Length('uninstall'))='uninstall') then
+        begin
+          SortedModules.Delete(i);
+          continue;
         end;
       end;
       SortedModules.Sort;
       for i:=0 to (SortedModules.Count-1) do
       begin
-        listModules.Items.AddObject(SortedModules.Names[i],TObject(pointer(StrNew(Pchar(SortedModules.ValueFromIndex[i])))));
+        s:=SortedModules[i];
+        Delete(s,1,Length('Declare '));
+        // get module descriptions
+        v:=FPCupManager.ModulePublishedList.Values[s];
+        // add to list
+        listModules.Items.AddObject(s,TObject(pointer(StrNew(Pchar(v)))));
       end;
     finally
       SortedModules.Free;
@@ -1439,8 +1442,18 @@ var
   i:integer;
   modules:string;
 begin
+  //Form3.ShowModal;
+
   DisEnable(Sender,False);
+
   try
+    {
+    if Form3.ModalResult=mrYes then
+    begin
+
+    end;
+    exit;
+    }
 
     if listModules.SelCount=0 then
     begin
@@ -2484,7 +2497,7 @@ begin
   if Assigned(FPCupManager) then
   begin
     Application.MainForm.Cursor:=crHourGlass;
-    with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
+    with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
     try
       WriteString('General','InstallDirectory',sInstallDir);
       {$ifdef RemoteLog}
@@ -2722,6 +2735,8 @@ begin
   // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
   if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='release';
   if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='release';
+  //if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='freepascal';
+  //if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='lazarus';
 
   // branch and revision overrides from setup+
   s:=Form2.FPCBranch;
@@ -2854,7 +2869,7 @@ function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aTarget,aURL:string;
 begin
-  result:=FileExists(IniDirectory+DELUXEFILENAME);
+  result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
   SynEdit1.Clear;
 
@@ -2865,7 +2880,7 @@ begin
 
   if result then
   begin
-    with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
+    with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
 
       AddMessage('Got settings from install directory');
@@ -2938,12 +2953,12 @@ end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
 begin
-  result:=DirectoryExists(ExtractFileDir(IniDirectory+DELUXEFILENAME));
+  result:=DirectoryExists(ExtractFileDir(IniDirectory+installerUniversal.DELUXEFILENAME));
 
   if not result then exit;
 
   try
-    with TIniFile.Create(IniDirectory+DELUXEFILENAME) do
+    with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
     try
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
@@ -2975,12 +2990,12 @@ begin
       Free;
     end;
 
-    result:=FileExists(IniDirectory+DELUXEFILENAME);
+    result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
   except
     on E: Exception do
     begin
-      //infoln(DELUXEFILENAME+': File creation error: '+E.Message,etError);
+      //infoln(installerUniversal.DELUXEFILENAME+': File creation error: '+E.Message,etError);
     end;
   end;
 

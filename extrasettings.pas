@@ -9,7 +9,6 @@ uses
   Dialogs;
 
 Const
-  DELUXEFILENAME='fpcupdeluxe.ini';
   DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
@@ -240,6 +239,7 @@ uses
   //DCPrc4,
   DCPsha256,
   fpcuputil,
+  installerUniversal,
   IniFiles,
   typinfo;
 
@@ -291,7 +291,7 @@ begin
     end;
   end;
 
-  with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
+  with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     CheckRepo.Checked:=ReadBool('General','GetRepo',True);
     CheckPackageRepo.Checked:=ReadBool('General','GetPackageRepo',False);
@@ -365,7 +365,7 @@ begin
      then FInstallPath:=IncludeTrailingPathDelimiter(aInstallDir)
      else FInstallPath:=SafeGetApplicationPath;
 
-  with TIniFile.Create(FInstallPath+DELUXEFILENAME) do
+  with TIniFile.Create(FInstallPath+installerUniversal.DELUXEFILENAME) do
   try
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -558,7 +558,7 @@ var
   //Cipher: TDCP_rc4;
   Cipher: TDCP_DES;
 begin
-  with TIniFile.Create(SafeGetApplicationPath+DELUXEFILENAME) do
+  with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     WriteBool('General','GetRepo',Repo);
     WriteBool('General','GetPackageRepo',PackageRepo);
@@ -594,7 +594,7 @@ begin
     Free;
   end;
 
-  with TIniFile.Create(FInstallPath+DELUXEFILENAME) do
+  with TIniFile.Create(FInstallPath+installerUniversal.DELUXEFILENAME) do
   try
     for OS := Low(TOS) to High(TOS) do
     begin

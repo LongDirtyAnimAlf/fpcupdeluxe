@@ -2189,7 +2189,9 @@ begin
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!
       if PatchFPC then if (FMajorVersion*10000+FMinorVersion*100+FReleaseVersion)<(GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
+      {$ifndef FPCONLY}
       if PatchLaz then if (FMajorVersion*10000+FMinorVersion*100+FReleaseVersion)<(GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
+      {$endif}
 
       if (j>0) then
       begin

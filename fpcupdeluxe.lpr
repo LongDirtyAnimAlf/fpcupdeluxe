@@ -46,7 +46,8 @@ program fpcupdeluxe;
 uses
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, sysutils,
-  fpcupdeluxemainform, extrasettings, unzipprogress, infounit,
+  fpcupdeluxemainform, extrasettings, modulesettings,
+  unzipprogress, infounit,
   fpcuputil, commandline, installerUniversal, installerManager,
   m_crossinstaller,
   m_any_to_androidarm,
