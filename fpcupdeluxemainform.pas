@@ -1875,9 +1875,7 @@ begin
         // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
         // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
         FPCupManager.FPCOPT:='-dFPC_ARMHF ';
-        FPCupManager.CrossOPT:='-CpARMV7M ';
-        FPCupManager.CrossOS_SubArch:='armv7m';
-        //-Cparmv7em ... -Wpmk20dx256XXX7
+        FPCupManager.CrossOS_SubArch:='armv6m';
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin

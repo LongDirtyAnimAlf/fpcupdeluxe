@@ -70,8 +70,8 @@ begin
   if result then exit;
 
   if length(FSubArch)>0
-     then ShowInfo('We have a subarch: '+FSubArch)
-     else ShowInfo('No subarch defined');
+     then ShowInfo('Cross-libs: We have a subarch: '+FSubArch)
+     else ShowInfo('Cross-libs: No subarch defined. Expect fatal errors.',etError);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LibName);
@@ -170,20 +170,37 @@ begin
   else
   begin
     FBinsFound:=true;
-    { for Teensy 3.0 and 3.1 and 3.2 add
-    -Cparmv7em ... -Wpmk20dx256XXX7
 
-    for NXP LPC 2124 add
-    -Cparmv4
-
-    for mbed add
-    -Cparmv7m
-    }
+    if length(FSubArch)>0 then
+    begin
+      ShowInfo('Cross-bins: We have a subarch: '+FSubArch);
+      i:=StringListStartsWith(FCrossOpts,'-Cp');
+      if i=-1 then
+      begin
+        aOption:='-Cp'+FSubArch;
+        FCrossOpts.Add(aOption+' ');
+        ShowInfo('Did not find any -Cp architecture parameter; using '+aOption);
+      end else aOption:=Trim(FCrossOpts[i]);
+      AddFPCCFGSnippet(aOption);
+    end else ShowInfo('Cross-bins: No subarch defined. Expect fatal errors.',etError);
 
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
 
+    (*
+    if length(FSubArch)=0 then
+    begin
+      aOption:='armv6m';
+      ShowInfo('Did not find any subarch definition; using '+aOption+' (cortex-m0/embed default).');
+      FSubArch:=aOption;
+      aOption:='-Cp'+aOption;
+      FCrossOpts.Add(aOption+' ');
+      AddFPCCFGSnippet(aOption);
+    end;
+    *)
+
+    (*
     // Set some defaults if user hasn't specified otherwise
     // Architecture: e.g. ARMv6, ARMv7,...
     i:=StringListStartsWith(FCrossOpts,'-Cp');
@@ -196,6 +213,7 @@ begin
       ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+' (cortex-m3/embed default).');
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
+    *)
   end;
 end;
 

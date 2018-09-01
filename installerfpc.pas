@@ -646,7 +646,7 @@ begin
         //Processor.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
         Processor.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
 
-        if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
+        if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
         Options:=FCompilerOptions;
 
         // Error checking for some known problems with cross compilers
@@ -847,7 +847,7 @@ begin
         Processor.Parameters.Add('NOGDBMI=1'); // prevent building of IDE to be 100% sure
         // suppress hints
         Processor.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS);
-        if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
+        if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
 
         CrossOptions:='';
 
@@ -2969,6 +2969,7 @@ begin
       begin  // clean out the correct compiler
         Processor.Parameters.Add('OS_TARGET='+CrossOS_Target);
         Processor.Parameters.Add('CPU_TARGET='+CrossCPU_Target);
+        //if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
         if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
       end
       else
