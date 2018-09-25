@@ -2711,6 +2711,7 @@ begin
   // for https://github.com/graemeg (FPC/Lazarus mirrors of GitHub) ... always get the right branch
   if (Pos('github.com/graemeg',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
   if (Pos('github.com/graemeg',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
+
   // for https://github.com/newpascal (FPC/Lazarus NP mirrors of GitHub) ... always get the right branch
   if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='release';
   if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='release';
@@ -2901,6 +2902,8 @@ begin
       Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
       Form2.FPCRevision:=ReadString('General','FPCRevision','');
       Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
+      Form2.FPCBranch:=ReadString('General','FPCBranch','');
+      Form2.LazarusBranch:=ReadString('General','LazarusBranch','');
 
       Form2.SplitFPC:=ReadBool('General','SplitFPC',True);
       Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
@@ -2949,6 +2952,8 @@ begin
       WriteString('General','LazarusOptions',Form2.LazarusOptions);
       WriteString('General','FPCRevision',Form2.FPCRevision);
       WriteString('General','LazarusRevision',Form2.LazarusRevision);
+      WriteString('General','FPCBranch',Form2.FPCBranch);
+      WriteString('General','LazarusBranch',Form2.LazarusBranch);
 
       WriteBool('General','SplitFPC',Form2.SplitFPC);
       WriteBool('General','SplitLazarus',Form2.SplitLazarus);

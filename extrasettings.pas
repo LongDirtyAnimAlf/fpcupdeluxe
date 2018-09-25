@@ -257,6 +257,8 @@ begin
 end;
 
 procedure TForm2.OnDirectorySelect(Sender: TObject);
+var
+  xCPUOS:TCPUOS;
 begin
   if Sender=btnSelectLibDir then SelectDirectoryDialog1.InitialDir:=EditLibLocation.Text;
   if Sender=btnSelectBinDir then SelectDirectoryDialog1.InitialDir:=EditBinLocation.Text;
@@ -267,10 +269,11 @@ begin
   end;
   if (ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1) then
   begin
+    xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
     if Sender=btnSelectLibDir then
-       FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].LibDir:=SelectDirectoryDialog1.FileName;
+       FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir:=SelectDirectoryDialog1.FileName;
     if Sender=btnSelectBinDir then
-       FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].BinDir:=SelectDirectoryDialog1.FileName;
+       FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir:=SelectDirectoryDialog1.FileName;
   end;
 end;
 
@@ -692,11 +695,13 @@ procedure TForm2.RadioGroup3SelectionChanged(Sender: TObject);
 var
   e:boolean;
   i:integer;
+  xCPUOS:TCPUOS;
 begin
   i:=(Sender AS TRadioGroup).ItemIndex;
   if (ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1) then
   begin
-    FCrossUtils[TCPU(ComboBoxCPU.ItemIndex),TOS(ComboBoxOS.ItemIndex)].Setting:=TCrossSetting(i);
+    xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
+    FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting:=TCrossSetting(i);
   end;
   e:=(i=2);
   EditLibLocation.Enabled:=e;

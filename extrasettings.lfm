@@ -721,8 +721,6 @@ object Form2: TForm2
       Top = 23
       Width = 112
       BorderSpacing.Top = 4
-      Enabled = False
-      OnDblClick = EditDblClickDelete
       TabOrder = 0
     end
     object LabelFPCbranch: TLabel
@@ -732,7 +730,6 @@ object Form2: TForm2
       Width = 61
       BorderSpacing.Top = 4
       Caption = 'FPC branch'
-      Enabled = False
       ParentColor = False
     end
     object EditFPCRevision: TEdit
@@ -744,7 +741,6 @@ object Form2: TForm2
       Top = 23
       Width = 104
       BorderSpacing.Top = 4
-      OnDblClick = EditDblClickDelete
       TabOrder = 1
     end
     object LabelFPCRevision: TLabel
@@ -765,7 +761,6 @@ object Form2: TForm2
       Width = 79
       BorderSpacing.Top = 8
       Caption = 'Lazarus branch'
-      Enabled = False
       ParentColor = False
     end
     object EditLazarusBranch: TEdit
@@ -777,8 +772,6 @@ object Form2: TForm2
       Top = 73
       Width = 112
       BorderSpacing.Top = 4
-      Enabled = False
-      OnDblClick = EditDblClickDelete
       TabOrder = 2
     end
     object LabelLazarusRevision: TLabel
@@ -801,7 +794,6 @@ object Form2: TForm2
       Top = 73
       Width = 104
       BorderSpacing.Top = 4
-      OnDblClick = EditDblClickDelete
       TabOrder = 3
     end
   end
