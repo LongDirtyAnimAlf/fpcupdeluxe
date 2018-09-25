@@ -90,7 +90,7 @@ const
   // Lazarus pre 1.0: 106
   // We can assume Lazarus trunk can parse this version:
   TrunkVersionNewEnvironmentConfig='110';
-  TrunkLazarusNewEnvironmentConfig='1.9.0';
+  TrunkLazarusNewEnvironmentConfig='2.1.0';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
   VersionNewPackageConfig='2';
@@ -500,13 +500,18 @@ begin
                 6 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '109'); //for version 1.6
                 7 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.7
                 8 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.8 (fixes)
-              else
-                begin //-1 or higher than 8 set to trunk version
-                  NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
-                  NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
-                end;
+                9 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 1.9 (old trunk)
               end
-            else { 2 or higher? keep latest known, we can leave lazarus version though }
+            else if FLazarusMajorVer=2 then
+              case FLazarusMinor of
+                0 : NewConfig.SetValue('EnvironmentOptions/Version/Value', '110'); //for version 2.0
+                else
+                  begin
+                    NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
+                    NewConfig.SetValue('EnvironmentOptions/Version/Lazarus', TrunkLazarusNewEnvironmentConfig);
+                  end;
+              end
+            else { 3 or higher? keep latest known, we can leave lazarus version though }
             begin
               NewConfig.SetValue('EnvironmentOptions/Version/Value', TrunkVersionNewEnvironmentConfig);
             end;

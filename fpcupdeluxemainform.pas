@@ -143,6 +143,7 @@ uses
   IniFiles,
   strutils,
   LCLType, // for MessageBox
+  InterfaceBase, // for WidgetSet
   {$ifdef UNIX}
   baseunix,
   {$endif UNIX}
@@ -213,32 +214,7 @@ begin
   Reset(System.Input);
   Rewrite(System.Output);
 
-  aTarget:=''
-  {$ifdef LCLWin32}
-  +'win32'
-  {$endif}
-  {$ifdef LCLWin64}
-  +'win64'
-  {$endif}
-  {$ifdef LCLGtk}
-  +'gtk'
-  {$endif}
-  {$ifdef LCLGtk2}
-  +'gtk2'
-  {$endif}
-  {$ifdef LCLCARBON}
-  +'carbon'
-  {$endif}
-  {$ifdef LCLCOCOA}
-  +'cocoa'
-  {$endif}
-  {$ifdef LCLQT5}
-  +'qt5'
-  {$endif}
-  {$ifdef LCLQT}
-  +'qt'
-  {$endif}
-  ;
+  aTarget:=GetLCLWidgetTypeName;
 
   {$ifdef RemoteLog}
   aDataClient.UpInfo.UpWidget:=aTarget;
@@ -1118,6 +1094,8 @@ begin
   if (NOT Special)
   AND
   (
+    (ExistWordInString(PChar(s),'HEAD is now at ',[soDown])) // for GIT info
+    OR
     (ExistWordInString(PChar(s),'lines compiled,',[soDown]))
     OR
     (ExistWordInString(PChar(s),'issued',[soWholeWord,soDown]))
@@ -1128,9 +1106,9 @@ begin
     OR
     (ExistWordInString(PChar(s),'make: ',[soDown]))
     OR
-    (ExistWordInString(PChar(s),'echo ',[soDown]))
+    ( ExistWordInString(PChar(s),'echo ',[soDown]) AND ExistWordInString(PChar(s),'revision.inc',[soDown]) )
     OR
-    (ExistWordInString(PChar(s),'now ',[soDown]))
+    ( ExistWordInString(PChar(s),'Start ',[soDown]) AND ExistWordInString(PChar(s),'now ',[soDown]) )
     OR
     (ExistWordInString(PChar(s),'this could take some time',[soDown]))
     OR
@@ -1382,7 +1360,7 @@ begin
   end;
 
   {$ifdef CPUAARCH64}
-  if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
+  if (MessageDlg('Be forwarned: this will only work with FPC 3.2 or trunk (or NewPascal).' + sLineBreak +
                  'An aarch64 fpcupdeluxe bootstrapper wil be used.' + sLineBreak +
                  'Do you want to continue ?'
                  ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
@@ -1712,6 +1690,7 @@ begin
     end;
     if (FPCupManager.CrossOS_Target='wince') then
     begin
+      (*
       success:=CheckExecutable('gcc', '-v', '');
       if (NOT success) then
       begin
@@ -1722,8 +1701,10 @@ begin
         Application.MessageBox(PChar(s), PChar('Missing gcc'), MB_ICONERROR);
         memoSummary.Lines.Append('');
         memoSummary.Lines.Append('To get gcc: sudo apt-get install gcc');
+        //memoSummary.Lines.Append('Cross-building will continue, but with great changes of winres errors !!');
         exit;
       end;
+      *)
       (*
       {$ifdef CPU64}
       if (NOT FileExists('/lib/ld-linux-x86-64.so.2')) then
@@ -1780,7 +1761,7 @@ begin
     OR (FPCupManager.CrossOS_Target='haiku')
     then
     begin
-      if (MessageDlg('Be forwarned: this will only work with FPC trunk (or NewPascal).' + sLineBreak +
+      if (MessageDlg('Be forwarned: this will only work with FPC 3.2 or trunk (or NewPascal).' + sLineBreak +
                      'Do you want to continue ?'
                      ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
                      begin
@@ -1969,7 +1950,7 @@ begin
 
     AddMessage('Going to install a cross-compiler from available sources.');
 
-    sStatus:='Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+    sStatus:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
     if FPCupManager.FPCOPT<>'' then
     begin
       sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';

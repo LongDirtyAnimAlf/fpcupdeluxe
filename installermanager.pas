@@ -1422,6 +1422,7 @@ begin
     FInstaller.SourceDirectory:=FParent.LazarusDirectory;
     FInstaller.InstallDirectory:=FParent.LazarusDirectory;
 
+    {
     if Length(Trim(FParent.LazarusOPT))=0 then
     begin
       //defaults !!
@@ -1433,7 +1434,11 @@ begin
     end
     else
       // replace -g by -gw if encountered: http://lists.lazarus.freepascal.org/pipermail/lazarus/2015-September/094238.html
-      FParent.LazarusOPT:=StringReplace(FParent.LazarusOPT,'-g ','-gw ',[]);
+      FParent.LazarusOPT:=StringReplace(FParent.LazarusOPT,'-g ','-gw ',[]);}
+
+    // always add debug
+    if Length(Trim(FParent.LazarusOPT))=0 then FParent.LazarusOPT:='-g -gl -O1';
+
     FInstaller.CompilerOptions:=FParent.LazarusOPT;
 
     FInstaller.DesiredRevision:=FParent.LazarusDesiredRevision;

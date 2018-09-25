@@ -354,6 +354,11 @@ begin
   }
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir);
   DeleteFilesNameSubdirs(OldPath,'.stackdump');
+
+  // patch residues
+  //DeleteFilesNameSubdirs(OldPath,'.rej');
+  //DeleteFilesNameSubdirs(OldPath,'.orig');
+
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils';
   DeleteFilesNameSubdirs(OldPath,aArch+'.fpm');
   DeleteFilesNameSubdirs(OldPath,'-'+aOS+'.fpm');
@@ -1414,12 +1419,14 @@ begin
 
   {$IFDEF CPUAARCH64}
   if (s=FPCTRUNKVERSION) then result:=FPCTRUNKVERSION
+  else if s='3.2.0' then result:='3.2.0'
   else result:='0.0.0';
   exit;
   {$ENDIF}
 
   {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
   if (s=FPCTRUNKVERSION) then result:=FPCTRUNKVERSION
+  else if s='3.2.0' then result:='3.2.0'
   else result:='0.0.0';
   exit;
   {$ENDIF}
@@ -1427,6 +1434,7 @@ begin
   result:='0.0.0';
 
   if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
+  else if s='3.2.0' then result:='3.0.4'
   else if ((s='3.0.5') OR (s='3.0.4')) then result:='3.0.2'
   else if ((s='3.0.3') OR (s='3.0.2') OR (s='3.0.1')) then result:='3.0.0'
   else if s='3.0.0' then result:='2.6.4'

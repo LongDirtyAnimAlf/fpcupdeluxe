@@ -36,7 +36,7 @@ const
 
   FPCTRUNKVERSION       = '3.3.1';
   FPCTRUNKBOOTVERSION   = '3.0.4';
-  LAZARUSTRUNKVERSION   = '1.9';
+  LAZARUSTRUNKVERSION   = '2.1.0';
 
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
@@ -1182,6 +1182,9 @@ begin
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   aClient.CheckOutOrUpdate;
 
+  //add a dummy newline for better output parsing of command results
+  writeln;
+
   ReturnCode := aClient.ReturnCode;
   case ReturnCode of
     FRET_LOCAL_REMOTE_URL_NOMATCH:
@@ -2138,6 +2141,8 @@ begin
 end;
 
 function TInstaller.PatchModule(ModuleName: string): boolean;
+const
+  STRIPMAGIC='fpcupstrip';
 var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
@@ -2237,12 +2242,19 @@ begin
         end;
         if FileExists(PatchFilePath) then
         begin
+
+          j:=Pos(STRIPMAGIC,PatchFilePath);
+          if j>0 then
+          begin
+            j:=StrToIntDef(PatchFilePath[j+Length(STRIPMAGIC)],0);
+          end else j:=0;
+
           // check for default values
           if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
             {$IF defined(BSD) and not defined(DARWIN)}
-            then LocalPatchCmd:=FPatchCmd + ' -p0 -N -i '
+            then LocalPatchCmd:=FPatchCmd + ' -p' + InttoStr(j) + ' -N -i '
             {$else}
-            then LocalPatchCmd:=FPatchCmd + ' -p0 -N --no-backup-if-mismatch -i '
+            then LocalPatchCmd:=FPatchCmd + ' -p' + InttoStr(j) + ' -N --no-backup-if-mismatch -i '
             {$endif}
              else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
 

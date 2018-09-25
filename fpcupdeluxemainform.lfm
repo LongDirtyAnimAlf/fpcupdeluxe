@@ -14,7 +14,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnResize = FormResize
   Position = poDefault
-  LCLVersion = '1.9.0.0'
+  LCLVersion = '2.1.0.0'
   Visible = True
   object btnSetupPlus: TButton
     AnchorSideLeft.Control = BitBtnFPCOnly
@@ -2812,6 +2812,7 @@ object Form1: TForm1
       AnchorSideRight.Side = asrBottom
       Left = 943
       Height = 42
+      Hint = 'Try to quit fpcupdeluxe'
       Top = 8
       Width = 84
       Anchors = [akTop, akRight]
@@ -2953,6 +2954,8 @@ object Form1: TForm1
         0000000000000000000000000000000000000000000000000000
       }
       OnClick = BitBtnHaltClick
+      ParentShowHint = False
+      ShowHint = True
       TabOrder = 7
     end
   end
@@ -2972,7 +2975,6 @@ object Form1: TForm1
     ParentShowHint = False
     ReadOnly = True
     ScrollBars = ssAutoVertical
-    ShowHint = True
     TabOrder = 14
   end
   object btnInstallModule: TButton
