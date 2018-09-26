@@ -30,6 +30,7 @@ type
     MainMenu1: TMainMenu;
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
+    EmbeddedBtn: TBitBtn;
     StatusMessage: TEdit;
     Timer1: TTimer;
     TrunkBtn: TBitBtn;
@@ -780,9 +781,13 @@ begin
     memoSummary.Lines.Append(s);
   end;
 
-  if (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
+  if (
+    (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown]))
+    OR
+    (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
+  ) then
   begin
-    memoSummary.Lines.Append('Performing a SVN/GIT checkout ... please wait, could take some time.');
+    memoSummary.Lines.Append('Performing a SVN/GIT/HG checkout ... please wait, could take some time.');
   end;
 
   if (ExistWordInString(PChar(s),'switch',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
@@ -1269,6 +1274,13 @@ begin
       //LazarusTarget:='0.9.4';
       LazarusTarget:='0.9.16';
       FPCupManager.OnlyModules:='fpc,oldlazarus';
+    end;
+
+    if Sender=EmbeddedBtn then
+    begin
+      s:='Going to install FPC and Lazarus for SAM embedded ';
+      FPCTarget:='embedded';
+      LazarusTarget:='embedded';
     end;
 
     if Sender=mORMotBtn then
@@ -2717,6 +2729,8 @@ begin
   if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='release';
   //if (Pos('github.com/newpascal',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='freepascal';
   //if (Pos('github.com/newpascal',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='lazarus';
+  if (Pos('github.com/LongDirtyAnimAlf',FPCTarget)>0) then FPCupManager.FPCDesiredBranch:='master';
+  if (Pos('github.com/LongDirtyAnimAlf',LazarusTarget)>0) then FPCupManager.LazarusDesiredBranch:='upstream';
 
   // branch and revision overrides from setup+
   s:=Form2.FPCBranch;

@@ -1890,7 +1890,7 @@ begin
     end
     else
     begin
-      infoln(localinfotext+'Could not find svn executable in or under ' + FSVNDirectory,etWarning);
+      infoln(localinfotext+'Could not find svn executable in or under ' + FSVNDirectory,etInfo);
       OperationSucceeded := false;
     end;
   finally
