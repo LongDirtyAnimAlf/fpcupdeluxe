@@ -1281,6 +1281,7 @@ begin
       s:='Going to install FPC and Lazarus for SAM embedded ';
       FPCTarget:='embedded';
       LazarusTarget:='embedded';
+      FPCupManager.IncludeModules:='mbf,pxl';
     end;
 
     if Sender=mORMotBtn then
@@ -1523,9 +1524,7 @@ var
   success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   i:integer;
-  {$ifdef Unix}
-  fileList: TStringList;
-  {$endif}
+  aList: TStringList;
   BaseBinsURL,BaseLibsURL:string;
 begin
   result:=false;
@@ -1912,9 +1911,26 @@ begin
     if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
 
     // override / set custom FPC cross-subarch by special user input through setup+
-    s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
-    s:=Trim(s);
-    if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
+    if (FPCupManager.CrossOS_Target='embedded') then
+    begin
+      s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+      s:=Trim(s);
+      if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
+      try
+        aList:=FPCupManager.ParseSubArchsFromSource;
+        if (aList.Count > 0) then
+        begin
+          for i:=0 to (aList.Count-1) do
+          begin
+            //AddMessage(aList.Strings[i]);
+            AddMessage('Valid subarch(s) are:');
+            if aList.Names[i]=FPCupManager.CrossCPU_Target then AddMessage(aList.ValueFromIndex[i]);
+          end;
+        end;
+      finally
+        aList.Free;
+      end;
+    end;
 
     // use the available source to build the cross-compiler ... change nothing about source and url !!
     FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
@@ -2221,17 +2237,17 @@ begin
               if success then
               begin
                 {$IFDEF UNIX}
-                fileList:=FindAllFiles(TargetPath);
+                aList:=FindAllFiles(TargetPath);
                 try
-                  if (fileList.Count > 0) then
+                  if (aList.Count > 0) then
                   begin
-                    for i:=0 to Pred(fileList.Count) do
+                    for i:=0 to Pred(aList.Count) do
                     begin
-                      fpChmod(fileList.Strings[i],&755);
+                      fpChmod(aList.Strings[i],&755);
                     end;
                   end;
                 finally
-                  fileList.Free;
+                  aList.Free;
                 end;
                 {$ENDIF}
               end;

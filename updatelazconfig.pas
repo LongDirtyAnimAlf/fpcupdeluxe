@@ -139,6 +139,7 @@ private
   FLazarusMajorVer: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
   FLazarusMinor: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
   FLazarusRelease: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
+  FLazarusPatch: integer; //candidate part of the version number, e.g. 2 for 1.0.8RC2, or -1 if unknown
   function GetConfig(const ConfigFile: string): TConfig;
   procedure WriteConfig;
 public
@@ -169,7 +170,8 @@ public
   constructor Create(ConfigPath: string;
     LazarusMajorVersion: integer=-1;
     LazarusMinorVersion: integer=-1;
-    LazarusReleaseVersion: integer=-1);
+    LazarusReleaseVersion: integer=-1;
+    LazarusPatchVersion: integer=-1);
   destructor Destroy; override;
 end;
 
@@ -473,9 +475,15 @@ begin
               if FLazarusMinor<>-1 then
               begin
                 Version:=Version+'.'+IntToStr(FLazarusMinor);
-                if FLazarusRelease<>-1 then Version:=Version+'.'+IntToStr(FLazarusRelease);
+                if FLazarusRelease<>-1 then
+                Version:=Version+'.'+IntToStr(FLazarusRelease);
               end;
             end;
+            if FLazarusPatch>0 then
+            begin
+              Version:=Version+'RC'+IntToStr(FLazarusPatch);
+            end;
+
             // If we don't add these, we trigger an upgrade process on first start on Lazarus 1.1+.
             NewConfig.SetValue('EnvironmentOptions/Version/Lazarus',Version);
             if FLazarusMajorVer=-1 then
@@ -628,11 +636,13 @@ end;
 constructor TUpdateLazConfig.Create(ConfigPath: string;
     LazarusMajorVersion: integer=-1;
     LazarusMinorVersion: integer=-1;
-    LazarusReleaseVersion: integer=-1);
+    LazarusReleaseVersion: integer=-1;
+    LazarusPatchVersion: integer=-1);
 begin
   FLazarusMajorVer:=LazarusMajorVersion;
   FLazarusMinor:=LazarusMinorVersion;
   FLazarusRelease:=LazarusReleaseVersion;
+  FLazarusPatch:=LazarusPatchVersion;
   FConfigs:=TStringList.Create;
   FConfigs.Sorted:=true;
   FConfigs.Duplicates:=dupError;

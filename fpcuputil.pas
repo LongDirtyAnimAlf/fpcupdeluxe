@@ -274,6 +274,7 @@ function GetCompilerVersion(CompilerPath: string): string;
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
 function GetNumericalVersion(VersionSnippet: string): word;
 function GetVersionFromUrl(URL:string): string;
+function GetReleaseCandidateFromUrl(aURL:string): integer;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
@@ -969,6 +970,36 @@ begin
     end;
   end;
 end;
+
+function GetReleaseCandidateFromUrl(aURL:string): integer;
+const
+  RC_MAGIC='_RC';
+var
+  VersionSnippet:string;
+  i:integer;
+begin
+  result:=-1;
+
+  VersionSnippet := UpperCase(aURL);
+  i := Length(VersionSnippet);
+
+  // remove trailing delimiter
+  if (i>0) and CharInSet(VersionSnippet[i],['\','/']) then
+  begin
+    Dec(i);
+    SetLength(VersionSnippet,i);
+  end;
+
+  // find last occurence of _RC
+  // if url contains a RC, this always starts with _RC
+  i := RPos(RC_MAGIC,VersionSnippet);
+  if i>0 then
+  begin
+    Delete(VersionSnippet,1,i+Length(RC_MAGIC)-1);
+    result:=StrToIntDef(VersionSnippet,-1);
+  end;
+end;
+
 
 {$IFDEF MSWINDOWS}
 procedure DeleteDesktopShortcut(ShortcutName: string);

@@ -152,6 +152,7 @@ type
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
   function SetConfigFile(aConfigFile: string):boolean;
+  function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 
 var
   sequences:string;
@@ -169,7 +170,7 @@ Const
 implementation
 
 uses
-  StrUtils,inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil, process;
+  StrUtils, typinfo,inifiles, FileUtil, LazFileUtils, LazUTF8, fpcuputil, process;
 
 Const
   MAXSYSMODULES=200;
@@ -2287,6 +2288,43 @@ begin
   // Create fpcup.ini from resource if it doesn't exist yet
   if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
      result:=SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
+end;
+
+function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+var
+  xCPU:TCPU;
+  xOS:TOS;
+  aLocalCPU,aLocalOS:string;
+begin
+  aLocalCPU:=aCPU;
+
+  if length(aLocalCPU)>0 then
+  begin
+    if aLocalCPU='ppc' then aLocalCPU:='powerpc';
+    if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
+
+    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aLocalCPU));
+    if Ord(xCPU) < 0 then
+      raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
+    result.CPU:=xCPU;
+  end;
+
+  aLocalOS:=aOS;
+  if length(aLocalOS)>0 then
+  begin
+    if aLocalOS='win32' then aLocalOS:='windows';
+    if aLocalOS='win64' then aLocalOS:='windows';
+    if aLocalOS='i-sim' then aLocalOS:='iphonesim';
+    if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
+    if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
+    if aLocalOS='iphonesimulator' then aLocalOS:='iphonesim';
+
+    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aLocalOS));
+    if Ord(xOS) < 0 then
+      raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
+    result.OS:=xOS;
+  end;
+
 end;
 
 initialization

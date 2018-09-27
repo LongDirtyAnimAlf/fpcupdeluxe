@@ -560,6 +560,7 @@ type
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
     function CheckValidCPUOS: boolean;
+    function ParseSubArchsFromSource: TStringList;
     // Stop talking. Do it! Returns success status
     function Run: boolean;
 
@@ -876,8 +877,66 @@ begin
     CloseFile(TxtFile);
 
   end else infoln('Tried to get CPU OS combo from source, but failed.',etInfo);
-
 end;
+
+
+function TFPCupManager.ParseSubArchsFromSource: TStringList;
+const
+  REQ1='ifeq ($(ARCH),';
+  REQ2='ifeq ($(SUBARCH),';
+var
+  TxtFile:Text;
+  s,arch,subarch:string;
+  x:integer;
+begin
+  Result := TStringList.Create;
+  Result.Sorted := True;
+  Result.Duplicates := dupIgnore;
+
+  s:=IncludeTrailingPathDelimiter(FPCSourceDirectory)+'rtl'+DirectorySeparator+'embedded'+DirectorySeparator+'Makefile';
+
+  if FileExists(s) then
+  begin
+    AssignFile(TxtFile,s);
+    Reset(TxtFile);
+    while NOT EOF (TxtFile) do
+    begin
+
+      Readln(TxtFile,s);
+      x:=Pos(REQ1,s);
+      if x=1 then
+      begin
+        arch:=s;
+        Delete(arch,1,x+Length(REQ1)-1);
+        x:=Pos(')',arch);
+        if x>0 then
+        begin
+          Delete(arch,x,MaxInt);
+        end;
+      end;
+
+      if Length(arch)>0 then
+      begin
+        x:=Pos(REQ2,s);
+        if x=1 then
+        begin
+          subarch:=s;
+          Delete(subarch,1,x+Length(REQ2)-1);
+          x:=Pos(')',subarch);
+          if x>0 then
+          begin
+            Delete(subarch,x,MaxInt);
+            if Length(subarch)>0 then with Result {%H-}do Add(Concat(arch, NameValueSeparator, subarch));
+          end;
+        end;
+      end;
+    end;
+
+    CloseFile(TxtFile);
+
+  end else infoln('Tried to get subarchs from Makefile, but no Makefile found',etWarning);
+end;
+
 
 
 

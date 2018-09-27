@@ -173,6 +173,8 @@ type
     InitDone: boolean;
     function GetLazarusVersionFromSource(aSourceDirectory:string):string;
     function GetLazarusVersionFromUrl(aURL:string):string;
+    function GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
+    function GetLazarusReleaseCandidateFromUrl(aURL:string):integer;
   protected
     FFPCInstallDir: string;
     FFPCSourceDir: string;
@@ -928,6 +930,113 @@ begin
 
 end;
 
+function TLazarusInstaller.GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
+const
+  VERSIONMAGIC='LazarusVersionStr';
+  VERSIONMAGIC2='laz_patch';
+var
+  s,aFileName:string;
+  TxtFile:Text;
+  x,y:integer;
+begin
+  result:=-1;
+
+  aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+  if FileExists(aFileName) then
+  begin
+    AssignFile(TxtFile,aFileName);
+    Reset(TxtFile);
+    Readln(TxtFile,s);
+    // remove quotes from string
+    //VersionSnippet:=DelChars(s, '''');
+    s:=TrimSet(s, [#39]);
+    s:=Trim(s);
+    if Length(s)>0 then
+    begin
+      x:=Pos('RC',s);
+      if x>0 then
+      begin
+        s:=Copy(s,x,MaxInt);
+        result:=StrToIntDef(s,-1);
+      end;
+    end;
+    CloseFile(TxtFile);
+  end;
+
+  if result=-1 then
+  begin
+    aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
+    if FileExists(aFileName) then
+    begin
+      AssignFile(TxtFile,aFileName);
+      Reset(TxtFile);
+
+      while NOT EOF (TxtFile) do
+      begin
+        Readln(TxtFile,s);
+        x:=Pos(VERSIONMAGIC,s);
+        if x>0 then
+        begin
+          x:=x+Length(VERSIONMAGIC);
+          while (Length(s)>=x) AND (s[x]<>'''') do Inc(x);
+          y:=x+1;
+          while (Length(s)>=y) AND (s[y]<>'''') do Inc(y);
+          if (y>(x+1)) then
+          begin
+            s:=Copy(s,x,(y-x+1));
+            s:=TrimSet(s, [#39]);
+            if Length(s)>0 then
+            begin
+              x:=Pos('RC',s);
+              if x>0 then
+              begin
+                s:=Copy(s,x,MaxInt);
+                result:=StrToIntDef(s,-1);
+              end;
+            end;
+          end;
+          break;
+        end;
+      end;
+      CloseFile(TxtFile);
+    end;
+  end;
+
+  if result=-1 then
+  begin
+    aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
+    if FileExists(aFileName) then
+    begin
+      AssignFile(TxtFile,aFileName);
+      Reset(TxtFile);
+
+      while NOT EOF (TxtFile) do
+      begin
+        Readln(TxtFile,s);
+        x:=Pos(VERSIONMAGIC2,s);
+        if x>0 then
+        begin
+          x:=x+Length(VERSIONMAGIC2);
+          // move towards first numerical
+          while (Length(s)>=x) AND (NOT (s[x] in ['0'..'9'])) do Inc(x);
+          // get RC version
+          y:=0;
+          while (Length(s)>=x) AND (s[x] in ['0'..'9']) do
+          begin
+            y:=y*10+Ord(s[x])-$30;
+            Inc(x);
+          end;
+          // a valid or usefull RC is always >0
+          if y>0 then result:=y;
+          break;
+        end;
+      end;
+      CloseFile(TxtFile);
+    end;
+  end;
+
+end;
+
 function TLazarusInstaller.GetLazarusVersionFromUrl(aURL:string):string;
 var
   aVersion: string;
@@ -937,6 +1046,11 @@ begin
     result:=LAZARUSTRUNKVERSION
   else
     result:=aVersion;
+end;
+
+function TLazarusInstaller.GetLazarusReleaseCandidateFromUrl(aURL:string):integer;
+begin
+  result:=GetReleaseCandidateFromUrl(aURL);
 end;
 
 
@@ -1045,6 +1159,8 @@ begin
     FMinorVersion:=0;
     FReleaseVersion:=0;
     GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+    FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
+
     // only report once
     if (ModuleName='lazbuild') OR ((Self is TLazarusCrossInstaller) AND (ModuleName='LCL')) then
     begin
@@ -1084,7 +1200,7 @@ begin
   end;
 
   // Set up a minimal config so we can use LazBuild
-  LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, FMajorVersion, FMinorVersion, FReleaseVersion);
+  LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, FMajorVersion, FMinorVersion, FReleaseVersion, FPatchVersion);
   try
     try
       // Lazarus 1.2RC1+ and trunk support specifying the primary-config-path that should be used
@@ -1705,6 +1821,7 @@ begin
       FMinorVersion:=0;
       FReleaseVersion:=0;
       GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+      FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
     end;
     PatchModule(ModuleName);
   end;

@@ -5,21 +5,13 @@ unit extrasettings;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
-  Dialogs;
+  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls, Dialogs,
+  installerCore;
 
 Const
   DELUXEKEY='fpcupdeluxeishereforyou';
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
-  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos,haiku);
-
-  TCPUOS = record
-    CPU:TCPU;
-    OS:TOS;
-  end;
-
   TCrossSetting = (fpcup,auto,custom);
 
   TCrossUtil = record
@@ -180,8 +172,6 @@ type
     function GetLazPatches:string;
     procedure SetLazPatches(value:string);
 
-    function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
-
     function GetCPUFromComboBox:TCPU;
     function GetOSFromComboBox:TOS;
 
@@ -245,8 +235,7 @@ uses
   DCPsha256,
   fpcuputil,
   installerUniversal,
-  IniFiles,
-  typinfo;
+  IniFiles;
 
 { TForm2 }
 
@@ -293,7 +282,7 @@ begin
     SortedList.Clear;
     SortedList.Sorted:=False;
     for OS := Low(TOS) to High(TOS) do
-      SortedList.Add(GetEnumName(TypeInfo(TOS),Ord(OS)));
+      SortedList.Add(GetEnumNameSimple(TypeInfo(TOS),Ord(OS)));
     SortedList.Sort;
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -304,7 +293,7 @@ begin
     SortedList.Clear;
     SortedList.Sorted:=False;
     for CPU := Low(TCPU) to High(TCPU) do
-      SortedList.Add(GetEnumName(TypeInfo(TCPU),Ord(CPU)));
+      SortedList.Add(GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU)));
     SortedList.Sort;
     for CPU := Low(TCPU) to High(TCPU) do
     begin
@@ -318,8 +307,8 @@ begin
   begin
     for CPU := Low(TCPU) to High(TCPU) do
     begin
-      FCrossUtils[CPU,OS].CPU:=GetEnumName(TypeInfo(TCPU),Ord(CPU));
-      FCrossUtils[CPU,OS].OS:=GetEnumName(TypeInfo(TOS),Ord(OS));
+      FCrossUtils[CPU,OS].CPU:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU));
+      FCrossUtils[CPU,OS].OS:=GetEnumNameSimple(TypeInfo(TOS),Ord(OS));
     end;
   end;
 
@@ -708,43 +697,6 @@ begin
   EditBinLocation.Enabled:=e;
   btnSelectLibDir.Enabled:=e;
   btnSelectBinDir.Enabled:=e;
-end;
-
-function TForm2.GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
-var
-  xCPU:TCPU;
-  xOS:TOS;
-  aLocalCPU,aLocalOS:string;
-begin
-  aLocalCPU:=aCPU;
-
-  if length(aLocalCPU)>0 then
-  begin
-    if aLocalCPU='ppc' then aLocalCPU:='powerpc';
-    if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
-
-    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aLocalCPU));
-    if Ord(xCPU) < 0 then
-      raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
-    result.CPU:=xCPU;
-  end;
-
-  aLocalOS:=aOS;
-  if length(aLocalOS)>0 then
-  begin
-    if aLocalOS='win32' then aLocalOS:='windows';
-    if aLocalOS='win64' then aLocalOS:='windows';
-    if aLocalOS='i-sim' then aLocalOS:='iphonesim';
-    if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
-    if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
-    if aLocalOS='iphonesimulator' then aLocalOS:='iphonesim';
-
-    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aLocalOS));
-    if Ord(xOS) < 0 then
-      raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
-    result.OS:=xOS;
-  end;
-
 end;
 
 function TForm2.GetCPUFromComboBox:TCPU;

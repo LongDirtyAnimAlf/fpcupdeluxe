@@ -67,6 +67,14 @@ const
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
 
 type
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos,haiku);
+
+  TCPUOS = record
+    CPU:TCPU;
+    OS:TOS;
+  end;
+
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
     ucDebugger32 {Debugger (support) files 32bit},
     ucDebugger64 {Debugger (support) files 64bit},
@@ -138,6 +146,7 @@ type
     FMajorVersion: integer; //major part of the version number, e.g. 1 for 1.0.8, or -1 if unknown
     FMinorVersion: integer; //minor part of the version number, e.g. 0 for 1.0.8, or -1 if unknown
     FReleaseVersion: integer; //release part of the version number, e.g. 8 for 1.0.8, or -1 if unknown
+    FPatchVersion: integer; //release candidate part of the version number, e.g. 3 for 1.0.8_RC3, or -1 if unknown
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
     FNoJobs: boolean;
@@ -331,6 +340,7 @@ begin
   FMajorVersion := -1;
   FMinorVersion := -1;
   FReleaseVersion := -1;
+  FPatchVersion := -1;
 end;
 
 procedure TInstaller.SetSourceDirectory(value:string);
@@ -339,6 +349,7 @@ begin
   FMajorVersion := -1;
   FMinorVersion := -1;
   FReleaseVersion := -1;
+  FPatchVersion := -1;
 end;
 
 function TInstaller.GetMake: string;
@@ -619,12 +630,14 @@ begin
         //Output:='git32.7z';
         Output:='git32.zip';
         //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
-        aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
+        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
+        aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
         {$else}
         //Output:='git64.7z';
         Output:='git64.zip';
         //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
-        aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
+        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
+        aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
         {$endif}
         //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
         infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
@@ -1596,17 +1609,19 @@ end;
 function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
-  NewSourceURL : array [0..2] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2o-x64_86-win64.zip',
+  NewSourceURL : array [0..3] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2p-x64_86-win64.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2p-win64.zip',
-    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip'
+    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2o-x64_86-win64.zip'
     );
   {$endif}
   {$ifdef win32}
-  NewSourceURL : array [0..2] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2o-i386-win32.zip',
+  NewSourceURL : array [0..3] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2p-i386-win32.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2p-win32.zip',
-    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip'
+    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2o-i386-win32.zip'
     );
   {$endif}
 var
@@ -2336,6 +2351,7 @@ begin
   FMajorVersion := -1;
   FMinorVersion := -1;
   FReleaseVersion := -1;
+  FPatchVersion := -1;
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
@@ -2354,7 +2370,6 @@ begin
     if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etInfo);
   end;
 end;
-
 
 destructor TInstaller.Destroy;
 begin
