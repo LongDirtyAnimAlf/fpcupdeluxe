@@ -781,13 +781,30 @@ begin
     memoSummary.Lines.Append(s);
   end;
 
-  if (
-    (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown]))
-    OR
-    (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
-  ) then
+
+  // warn about time consuming module operations
+  if ExistWordInString(PChar(s),'UniversalInstaller (GetModule:',[soWholeWord,soDown]) then
   begin
-    memoSummary.Lines.Append('Performing a SVN/GIT/HG checkout ... please wait, could take some time.');
+    searchstring:=': Getting module ';
+    x:=Pos(searchstring,s);
+    if x>0 then
+    begin
+      x:=x+Length(searchstring);
+      InternalError:=Copy(s,x,MaxInt);
+      memoSummary.Lines.Append('Getting '+InternalError+' sources ... please wait, could take some time.');
+    end;
+  end
+  else
+  begin
+    // warn about time consuming FPC and Lazarus operations
+    if (
+      (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown]))
+      OR
+      (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
+    ) then
+    begin
+      memoSummary.Lines.Append('Performing a SVN/GIT/HG checkout ... please wait, could take some time.');
+    end;
   end;
 
   if (ExistWordInString(PChar(s),'switch',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
@@ -1871,7 +1888,7 @@ begin
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin
-        FPCupManager.CrossOPT:='-Cpmips32 ';
+        //FPCupManager.CrossOPT:='-Cpmips32 ';
         FPCupManager.CrossOS_SubArch:='pic32mx';
       end;
     end;
@@ -1920,11 +1937,15 @@ begin
         aList:=FPCupManager.ParseSubArchsFromSource;
         if (aList.Count > 0) then
         begin
+          s:='';
           for i:=0 to (aList.Count-1) do
           begin
-            //AddMessage(aList.Strings[i]);
-            AddMessage('Valid subarch(s) are:');
-            if aList.Names[i]=FPCupManager.CrossCPU_Target then AddMessage(aList.ValueFromIndex[i]);
+            if aList.Names[i]=FPCupManager.CrossCPU_Target then s:=s+aList.ValueFromIndex[i]+', ';
+          end;
+          if Length(s)>0 then
+          begin
+            Delete(s,Length(s)-1,2);
+            memoSummary.Lines.Append('Valid subarch(s) for '+FPCupManager.CrossCPU_Target+' embedded are: '+s);
           end;
         end;
       finally
@@ -2965,8 +2986,12 @@ end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
 begin
-  result:=DirectoryExists(ExtractFileDir(IniDirectory+installerUniversal.DELUXEFILENAME));
+  result:=false;
 
+  if NOT Assigned(FPCupManager) then exit;
+  if NOT Assigned(Form2) then exit;
+
+  result:=DirectoryExists(ExtractFileDir(IniDirectory+installerUniversal.DELUXEFILENAME));
   if not result then exit;
 
   try

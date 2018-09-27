@@ -283,7 +283,7 @@ begin
   if ExportOnly then exit;
   if NOT ValidClient then exit;
   //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --git ', LocalRepository, Result, Verbose);
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff -p ', LocalRepository, Result, Verbose);
+  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' diff --no-prefix -p ', LocalRepository, Result, Verbose);
 end;
 
 procedure TGitClient.Log(var Log: TStringList);
