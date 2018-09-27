@@ -1530,6 +1530,7 @@ function GetGCCDirectory:string;
 var
   output,s1,s2:string;
   i,j:integer;
+  ReturnCode: integer;
 begin
 
   {$IF (defined(BSD)) and (not defined(Darwin))}
@@ -1540,64 +1541,87 @@ begin
   output:='';
 
   try
-    ExecuteCommand('gcc -v', Output, false);
+    ReturnCode:=ExecuteCommand('gcc -v', Output, false);
 
-    s1:=' --libdir=';
-    i:=Ansipos(s1, Output);
-    if i > 0 then
+    if (ReturnCode=0) then
     begin
-      s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-      // find space as delimiter
-      i:=Ansipos(' ', s2);
-      // find lf as delimiter
-      j:=Ansipos(#10, s2);
-      if (j>0) AND (j<i) then i:=j;
-      // find cr as delimiter
-      j:=Ansipos(#13, s2);
-      if (j>0) AND (j<i) then i:=j;
-      if i > 0 then delete(s2,i,MaxInt);
-      result:=IncludeTrailingPathDelimiter(s2);
+      s1:=' --libdir=';
+      i:=Ansipos(s1, Output);
+      if i > 0 then
+      begin
+        s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+        // find space as delimiter
+        i:=Ansipos(' ', s2);
+        // find lf as delimiter
+        j:=Ansipos(#10, s2);
+        if (j>0) AND (j<i) then i:=j;
+        // find cr as delimiter
+        j:=Ansipos(#13, s2);
+        if (j>0) AND (j<i) then i:=j;
+        if i > 0 then delete(s2,i,MaxInt);
+        result:=IncludeTrailingPathDelimiter(s2);
+      end;
+
+      i:=Ansipos('gcc', result);
+      if i=0 then result:=result+'gcc'+DirectorySeparator;
+
+      s1:=' --build=';
+      i:=Ansipos(s1, Output);
+      if i > 0 then
+      begin
+        s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+        // find space as delimiter
+        i:=Ansipos(' ', s2);
+        // find lf as delimiter
+        j:=Ansipos(#10, s2);
+        if (j>0) AND (j<i) then i:=j;
+        // find cr as delimiter
+        j:=Ansipos(#13, s2);
+        if (j>0) AND (j<i) then i:=j;
+        if i > 0 then delete(s2,i,MaxInt);
+        result:=result+s2+DirectorySeparator;
+      end;
+
+      s1:='gcc version ';
+      i:=Ansipos(s1, Output);
+      if i > 0 then
+      begin
+        s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+        // find space as delimiter
+        i:=Ansipos(' ', s2);
+        // find lf as delimiter
+        j:=Ansipos(#10, s2);
+        if (j>0) AND (j<i) then i:=j;
+        // find cr as delimiter
+        j:=Ansipos(#13, s2);
+        if (j>0) AND (j<i) then i:=j;
+        if i > 0 then delete(s2,i,MaxInt);
+        result:=result+s2;
+      end;
     end;
 
-    i:=Ansipos('gcc', result);
-    if i=0 then result:=result+'gcc'+DirectorySeparator;
-
-    s1:=' --build=';
-    i:=Ansipos(s1, Output);
-    if i > 0 then
-    begin
-      s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-      // find space as delimiter
-      i:=Ansipos(' ', s2);
-      // find lf as delimiter
-      j:=Ansipos(#10, s2);
-      if (j>0) AND (j<i) then i:=j;
-      // find cr as delimiter
-      j:=Ansipos(#13, s2);
-      if (j>0) AND (j<i) then i:=j;
-      if i > 0 then delete(s2,i,MaxInt);
-      result:=result+s2+DirectorySeparator;
-    end;
-
-    s1:='gcc version ';
-    i:=Ansipos(s1, Output);
-    if i > 0 then
-    begin
-      s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-      // find space as delimiter
-      i:=Ansipos(' ', s2);
-      // find lf as delimiter
-      j:=Ansipos(#10, s2);
-      if (j>0) AND (j<i) then i:=j;
-      // find cr as delimiter
-      j:=Ansipos(#13, s2);
-      if (j>0) AND (j<i) then i:=j;
-      if i > 0 then delete(s2,i,MaxInt);
-      result:=result+s2;
-    end;
   except
     // ignore errors
   end;
+
+  if ReturnCode<>0 then
+  begin
+    output:=result+'/'+GetTargetCPUOS+'-gnu/7';
+    if DirectoryExists(output) then result:=output else
+    begin
+      output:=result+'/'+GetTargetCPUOS+'-gnu/6';
+      if DirectoryExists(output) then result:=output else
+      begin
+        output:=result+'/'+GetTargetCPUOS+'-gnu/5';
+        if DirectoryExists(output) then result:=output else
+        begin
+          output:=result+'/'+GetTargetCPUOS+'-gnu/4';
+          if DirectoryExists(output) then result:=output;
+        end;
+      end;
+    end;
+  end;
+
 end;
 {$ENDIF UNIX}
 

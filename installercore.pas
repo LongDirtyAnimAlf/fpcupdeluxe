@@ -1158,10 +1158,14 @@ var
 begin
   Result := false;
 
-  // check if we do have a client !!
-  if NOT aClient.ValidClient then exit;
-
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+Copy(aClient.ClassName,2,MaxInt)+': '+ModuleName+'): ';
+
+  // check if we do have a client !!
+  if NOT aClient.ValidClient then
+  begin
+    infoln(localinfotext+aClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etError);
+    exit;
+  end;
 
   //todo: check if we need to add forcedirectoriesutf8 to create local repo dir if it doesn't exist
   BeforeRevision := 'failure';
@@ -1296,6 +1300,13 @@ begin
   result:=true;
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromSVN: '+ModuleName+'): ';
+
+  // check if we do have a client !!
+  if NOT FSVNClient.ValidClient then
+  begin
+    infoln(localinfotext+FSVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etError);
+    exit;
+  end;
 
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
