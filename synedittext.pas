@@ -51,6 +51,16 @@ begin
   subline:=StrPas(aBuf);
   linestore:=linestore+subline;
 
+  {$ifdef Windows}
+  for i:=2 to Length(linestore) do
+  begin
+    if ((linestore[i]=#10) AND (linestore[i-1]<>#13)) then
+    begin
+      Insert(#13,linestore,i);
+    end;
+  end;
+  {$endif}
+
   i:=Pos(LineEnding,linestore);
   while (i>0) do
   begin
