@@ -415,6 +415,7 @@ begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckAndGetTools): ';
 
   OperationSucceeded := true;
+
   if not FNeededExecutablesChecked then
   begin
     // The extractors used depend on the bootstrap compiler URL/file we download
@@ -814,6 +815,7 @@ begin
         that returns an error message e.g. can't read from cp
         }
         OperationSucceeded := CheckExecutable(FBunzip2, '--help', '');
+        if (NOT OperationSucceeded) then infoln(localinfotext+FBunzip2+' not found.',etDebug);
       end;
     end;
 
@@ -823,6 +825,7 @@ begin
       if FTar <> EmptyStr then
       begin
         OperationSucceeded := CheckExecutable(FTar, '--version', '');
+        if (NOT OperationSucceeded) then infoln(localinfotext+FTar+' not found.',etDebug);
       end;
     end;
 
@@ -830,6 +833,8 @@ begin
     if OperationSucceeded then
     begin
       OperationSucceeded := CheckExecutable(Make, '-v', '');
+      if (NOT OperationSucceeded) then infoln(localinfotext+Make+' not found.',etDebug);
+
       // expand make path ... not needed
       //if OperationSucceeded then FMake:=FindDefaultExecutablePath(Make);
       {

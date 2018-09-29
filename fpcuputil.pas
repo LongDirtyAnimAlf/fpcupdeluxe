@@ -325,6 +325,7 @@ function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: 
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
+function IsExecutable(Executable: string):boolean;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function ExtractFileNameOnly(const AFilename: string): string;
 function GetCompilerName(Cpu_Target:string):string;
@@ -1784,6 +1785,28 @@ begin
   *)
 end;
 
+function IsExecutable(Executable: string):boolean;
+var
+  aPath:string;
+begin
+  result:=false;
+  //aPath:=FindDefaultExecutablePath(Executable);
+  aPath:=Executable;
+  if NOT FileExists(aPath) then exit;
+  {$ifdef Windows}
+  //if ExtractFileExt(aPath)='' then aPath:=aPath+'.exe';
+  {$endif}
+  if ExtractFileExt(aPath)=GetExeExt then
+  begin
+    {$ifdef Windows}
+    result:=true;
+    {$else}
+    result:=(fpAccess(aPath,X_OK)=0);
+    {$endif}
+  end;
+end;
+
+
 {$IFDEF UNIX}
 //Adapted from sysutils; Unix/Linux only
 Function XdgConfigHome: String;
@@ -1809,7 +1832,14 @@ begin
   try
     Output:='';
     ExeName := ExtractFileName(Executable);
+    {$IFDEF DEBUG}
+    ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, True);
+    {$ELSE}
     ResultCode := ExecuteCommand(Executable + ' ' + Parameters, Output, False);
+    {$ENDIF}
+    {$IFDEF DEBUG}
+    infoln(Executable + ': Result code was: ' + IntToStr(ResultCode),etDebug);
+    {$ENDIF}
     if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
       if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
@@ -1827,8 +1857,12 @@ begin
     end
     else
     begin
+      {$IFDEF DEBUG}
+      infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',etDebug);
+      {$ELSE}
       // This is not a warning/error message as sometimes we can use multiple different versions of executables
       if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application (' + ExeName + ' result code was: ' + IntToStr(ResultCode) + ')',Level);
+      {$ENDIF}
       OperationSucceeded := false;
     end;
   except
@@ -1846,7 +1880,9 @@ end;
 
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 begin
-  result:=CheckExecutable(Executable, Parameters, ExpectOutput, etInfo);
+  //result:=IsExecutable(Executable);
+  //if result then
+    result:=CheckExecutable(Executable, Parameters, ExpectOutput, etInfo);
 end;
 
 function ExtractFileNameOnly(const AFilename: string): string;

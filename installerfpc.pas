@@ -3082,7 +3082,7 @@ begin
     begin
       for FileCounter := 0 to (DeleteList.Count-1) do
       begin
-        if ExtractFileExt(DeleteList.Strings[FileCounter])=GetExeExt then
+        if IsExecutable(DeleteList.Strings[FileCounter]) then
         begin
           if Pos('Makefile',DeleteList.Strings[FileCounter])=0 then
           begin
