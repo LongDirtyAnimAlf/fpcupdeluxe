@@ -135,6 +135,16 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  // Now also allow for mipsel-elf- binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:='mipsel-elf-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   // Now also allow for pic32- binutilsprefix
   if not result then
   begin

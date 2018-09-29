@@ -791,7 +791,7 @@ begin
     begin
       x:=x+Length(searchstring);
       InternalError:=Copy(s,x,MaxInt);
-      memoSummary.Lines.Append('Getting '+InternalError+' sources ... please wait, could take some time.');
+      memoSummary.Lines.Append(BeginSnippet + ' Getting '+InternalError+' sources ... please wait, could take some time.');
     end;
   end
   else
@@ -803,13 +803,13 @@ begin
       (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
     ) then
     begin
-      memoSummary.Lines.Append('Performing a SVN/GIT/HG checkout ... please wait, could take some time.');
+      memoSummary.Lines.Append(BeginSnippet + ' Performing a SVN/GIT/HG checkout ... please wait, could take some time.');
     end;
   end;
 
   if (ExistWordInString(PChar(s),'switch',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown])) then
   begin
-    memoSummary.Lines.Append('Performing a SVN repo URL switch ... please wait, could take some time.');
+    memoSummary.Lines.Append(BeginSnippet + ' Performing a SVN repo URL switch ... please wait, could take some time.');
   end;
 
   // github error
@@ -2889,11 +2889,15 @@ begin
       {$endif}
 
     end;
+
+
   except
     // just swallow exceptions
     StatusMessage.Text:='Got an unexpected exception ... don''t know what to do unfortunately.';
     StatusMessage.Color:=clRed;
   end;
+
+  memoSummary.Lines.Append({BeginSnippet + }'Done !!');
 end;
 
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
