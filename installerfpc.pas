@@ -2196,6 +2196,7 @@ begin
   FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
+  s:='';
   if Length(FSVNDirectory)>0
      then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
   // Try to ignore existing make.exe, fpc.exe by setting our own path:
@@ -2210,13 +2211,21 @@ begin
     IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
     IncludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
     IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
+    IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+
     s,
     false,false);
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   // add install/fpc/utils to solve data2inc not found by fpcmkcfg
   // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
+  s:='';
+  {$ifdef Darwin}
+  s1:=GetSDKVersion('macosx');
+  if CompareVersionStrings(s1,'10.14')>=0 then
+  begin
+    s:=PathSeparator+'/Library/Developer/CommandLineTools/usr/bin';
+  end;
+  {$endif}
   SetPath(
     FBinPath+PathSeparator+
     FBootstrapCompilerDirectory+PathSeparator+
@@ -2228,7 +2237,9 @@ begin
     IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
     // pwd is located in /bin ... the makefile needs it !!
     // tools are located in /usr/bin ... the makefile needs it !!
-    '/bin'+PathSeparator+'/usr/bin',
+    '/bin'+PathSeparator+
+    '/usr/bin'+
+    s,
     true,false);
   {$ENDIF UNIX}
   InitDone:=result;
@@ -2896,8 +2907,20 @@ begin
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
             ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
-            ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs in non-standard directory'); Inc(x);
+            ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs in new, yet non-standard directory'); Inc(x);
+            ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
+            ConfigText.Insert(x,'#ifdef cpui386'); Inc(x);
+            ConfigText.Insert(x,'-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib'); Inc(x);
+            ConfigText.Insert(x,'#endif'); Inc(x);
+            ConfigText.Insert(x,'#ifndef cpui386'); Inc(x);
+            ConfigText.Insert(x,'#ifndef cpupowerpc'); Inc(x);
+            ConfigText.Insert(x,'#ifndef cpupowerpc64'); Inc(x);
             ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
+            ConfigText.Insert(x,'#endif'); Inc(x);
+            ConfigText.Insert(x,'#endif'); Inc(x);
+            ConfigText.Insert(x,'#endif'); Inc(x);
+            //ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
+            //ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
             ConfigText.Insert(x,'#ENDIF'); Inc(x);
           end;
           {$ifndef FPCONLY}
