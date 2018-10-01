@@ -2158,13 +2158,13 @@ begin
 
       infoln(infotext+'switching source URL',etInfo);
 
-      FSVNClient.Verbose:=FVerbose;
-      FSVNClient.ExportOnly:=FExportOnly;
-      FSVNClient.ModuleName:=ModuleName;
-      FSVNClient.LocalRepository:=FSourceDirectory;
-      FSVNClient.Repository:=FURL;
+      aRepoClient.Verbose:=FVerbose;
+      aRepoClient.ExportOnly:=FExportOnly;
+      aRepoClient.ModuleName:=ModuleName;
+      aRepoClient.LocalRepository:=FSourceDirectory;
+      aRepoClient.Repository:=FURL;
 
-      FSVNClient.SwitchURL;
+      aRepoClient.SwitchURL;
 
       result:=true;
     end;
