@@ -498,10 +498,10 @@ var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossOptions:String;
   ChosenCompiler:String; //Compiler to be used for cross compiling
-  i:integer;
+  i,j:integer;
   OldPath:String;
   Options:String;
-  s:string;
+  s1,s2:string;
   Counter:integer;
   LibsAvailable,BinsAvailable:boolean;
 
@@ -592,11 +592,11 @@ begin
            else ChosenCompiler:=FCompiler;
       end;
 
-      s:=GetCompilerVersion(ChosenCompiler);
+      s1:=GetCompilerVersion(ChosenCompiler);
 
-      if s<>'0.0.0'
-        then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using compiler with version: '+s, etInfo)
-        else infoln(infotext+'FPC compiler version error: '+s+' ! Should never happen: expect many errors !!', etError);
+      if s1<>'0.0.0'
+        then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using compiler with version: '+s1, etInfo)
+        else infoln(infotext+'FPC compiler version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
@@ -706,8 +706,8 @@ begin
            {$ifdef Darwin}
            if (CrossInstaller.TargetOS='macos') OR (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
            begin
-             s:=ResolveDots(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
-             CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s);
+             s1:=ResolveDots(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
+             CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
            end
            else
            begin
@@ -764,12 +764,12 @@ begin
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
 
-        s:=STANDARDCOMPILEROPTIONS+' '+Options;
+        s1:=STANDARDCOMPILEROPTIONS+' '+Options;
         {$ifdef DEBUG}
         //s:=s+' -g -gl -dEXTDEBUG'; //-va+
         //s:=s+' -dEXTDEBUG'; //-va+
         {$endif}
-        Processor.Parameters.Add('OPT='+s);
+        Processor.Parameters.Add('OPT='+s1);
 
         try
           if CrossOptions='' then
@@ -816,11 +816,11 @@ begin
         // fpc bug ?!!
         // fpcupdeluxe bug !!?
         // see infoln for problem description
-        s:=GetCompilerName(CrossInstaller.TargetCPU);
-        if (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s)) AND (s=GetCompilerName(GetTargetCPU)) then
+        s1:=GetCompilerName(CrossInstaller.TargetCPU);
+        if (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s1)) AND (s1=GetCompilerName(GetTargetCPU)) then
         begin
           infoln(infotext+'Non-native cross-compiler has same same as native compiler ... delete non-native cross-compiler to prevent overwriting of native compiler !!',etInfo);
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s);
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+s1);
         end;
         {$ENDIF}
         // Install crosscompiler: make crossinstall
@@ -913,9 +913,9 @@ begin
           {$ifdef Darwin}
           // on Darwin, the normal compiler names are used for the final cross-target compiler !!
           // very tricky !
-          s:=GetCompilerName(CrossInstaller.TargetCPU);
+          s1:=GetCompilerName(CrossInstaller.TargetCPU);
           {$else}
-          s:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+          s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
           {$endif}
 
           // copy over the cross-compiler towards the FPC bin-directory, with the right compilername.
@@ -923,14 +923,14 @@ begin
           begin
             infoln(infotext+'Copy cross-compiler ('+CrossCompilerName+') into: '+FBinPath,etInfo);
             FileUtil.CopyFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName,
-              IncludeTrailingPathDelimiter(FBinPath)+s);
-            fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s,&755);
+              IncludeTrailingPathDelimiter(FBinPath)+s1);
+            fpChmod(IncludeTrailingPathDelimiter(FBinPath)+s1,&755);
           end;
 
           {$ENDIF}
 
           // delete cross-compiler in source-directory
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+CrossCompilerName);
+          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+CrossCompilerName);
 
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
@@ -946,12 +946,12 @@ begin
             if i<>-1 then
             begin
               // we have a special CPU setting: use it for the fpc.cfg
-              s:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
-              if s<>DEFAULTARMCPU then
+              s1:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
+              if s1<>DEFAULTARMCPU then
               begin
                 //remove trailing cpu denominators that are not needed
-                //while (not CharInSet(s[Length(s)],['0'..'9'])) do s:=Copy(s,1,Length(s)-1);
-                Options:=s;
+                //while (not CharInSet(s1[Length(s1)],['0'..'9'])) do s1:=Copy(s1,1,Length(s1)-1);
+                Options:=s1;
               end;
             end;
           end;
@@ -963,8 +963,8 @@ begin
           end;
 
           if CrossInstaller.FPCCFGSnippet<>''
-             then s:=CrossInstaller.FPCCFGSnippet+LineEnding
-             else s:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+             then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
+             else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
 
           InsertFPCCFGSnippet(FPCCfg,
             SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
@@ -973,7 +973,7 @@ begin
             '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
             '#IFDEF CPU'+Options+LineEnding+
             '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
-            s+
+            s1+
             '#ENDIF'+LineEnding+
             '#ENDIF'+LineEnding+
             '#ENDIF'+LineEnding+
@@ -995,25 +995,58 @@ begin
               begin
                 if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
                 begin
-                  s:=SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
-                  if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s) then
+                  s1:=SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
+                  if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s1) then
                   begin
                     with TNormalUnzipper.Create do
                     begin
                       try
-                        if DoUnZip(s,IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\',[]) then
+                        if DoUnZip(s1,IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\',[]) then
                           infoln(localinfotext+'Downloading and installing GDB debugger (' + FUtilFiles[Counter].FileName + ') for WinCE success.',etInfo);
                       finally
                         Free;
                       end;
                     end;
                   end;
-                  SysUtils.Deletefile(s);
+                  SysUtils.Deletefile(s1);
                 end;
               end;
             end;
           end;
+
           {$endif}
+
+          // move arm-embedded debugger, if any
+          if (CrossCPU_Target='arm') AND (CrossOS_Target='embedded') then
+          begin
+            if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+DirectorySeparator+'arm-embedded'+DirectorySeparator+'gdb'+GetExeExt) then
+            begin
+              //Get cross-binaries directory
+              i:=Pos('-FD',CrossInstaller.FPCCFGSnippet);
+              if i>0 then
+              begin
+                j:=Pos(#13,CrossInstaller.FPCCFGSnippet,i);
+                if j=0 then j:=Pos(#10,CrossInstaller.FPCCFGSnippet,i);
+                s1:=Copy(CrossInstaller.FPCCFGSnippet,i+3,j-(i+3));
+                s1:=IncludeTrailingPathDelimiter(s1);
+                //Get cross-binaries prefix
+                i:=Pos('-XP',CrossInstaller.FPCCFGSnippet);
+                if i>0 then
+                begin
+                  j:=Pos(#13,CrossInstaller.FPCCFGSnippet,i);
+                  if j=0 then j:=Pos(#10,CrossInstaller.FPCCFGSnippet,i);
+                  s2:=Copy(CrossInstaller.FPCCFGSnippet,i+3,j-(i+3));
+                  s1:=s1+s2+'gdb'+GetExeExt;
+                  if FileExists(s1) then
+                  begin
+                    s2:=IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+DirectorySeparator+'arm-embedded'+DirectorySeparator;
+                    ForceDirectories(s2);
+                    FileUtil.CopyFile(s1,s2+'gdb'+GetExeExt);
+                  end;
+                end;
+              end;
+            end;
+          end;
 
         end;
       end;
@@ -2858,11 +2891,19 @@ begin
         ConfigText.Insert(x,s); Inc(x);
         {$ENDIF UNIX}
 
-        {$ifndef FPCONLY}
-          {$ifdef Darwin}
-            {$ifdef LCLQT5}
-            ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
+        {$ifdef Darwin}
+          s:=GetSDKVersion('macosx');
+          if CompareVersionStrings(s,'10.14')>=0 then
+          begin
             ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+            ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs in non-standard directory'); Inc(x);
+            ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
+            ConfigText.Insert(x,'#ENDIF'); Inc(x);
+          end;
+          {$ifndef FPCONLY}
+            {$ifdef LCLQT5}
+            ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+            ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
             ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
             ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
             ConfigText.Insert(x,'-k-rpath'); Inc(x);

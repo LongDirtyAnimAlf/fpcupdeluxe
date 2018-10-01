@@ -1660,7 +1660,7 @@ begin
   result:=(ExecuteCommand('sw_vers -productVersion', Output, False)=0);
   if result then
   begin
-    if Length(Output)>0 then GetVersionFromString(Output,Major,Minor,Build);
+    if Length(Output)>0 then GetVersionFromString(Output,Major,Minor,Build) else result:=false;
   end;
 end;
 
