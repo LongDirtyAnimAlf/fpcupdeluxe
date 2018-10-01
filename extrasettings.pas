@@ -46,7 +46,7 @@ type
     btnAddLazPatch: TButton;
     btnRemLazPatch: TButton;
     btnSelectCompiler: TButton;
-    Button1: TButton;
+    btnListCustomOptions: TButton;
     CheckAutoSwitchURL: TCheckBox;
     CheckForceLocalRepoClient: TCheckBox;
     CheckSendInfo: TCheckBox;
@@ -58,7 +58,7 @@ type
     CheckUpdateOnly: TCheckBox;
     CheckRepo: TCheckBox;
     CheckPackageRepo: TCheckBox;
-    CheckUseLatestGDB: TCheckBox;
+    CheckUseMakeJobs: TCheckBox;
     CheckExtraVerbose: TCheckBox;
     CheckFpcupBootstrappersOnly: TCheckBox;
     ComboBoxOS: TComboBox;
@@ -105,7 +105,7 @@ type
     procedure btnAddPatchClick(Sender: TObject);
     procedure btnRemPatchClick(Sender: TObject);
     procedure btnSelectFile(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure btnListCustomOptionsClick(Sender: TObject);
     procedure ComboBoxCPUOSChange(Sender: TObject);
     procedure EditDblClickDelete(Sender: TObject);
     procedure EditCrossBuildOptionsChange(Sender: TObject);
@@ -134,6 +134,9 @@ type
 
     function GetUseWget:boolean;
     procedure SetUseWget(value:boolean);
+
+    function GetMakeJobs:boolean;
+    procedure SetMakeJobs(value:boolean);
 
     function GetExtraVerbose:boolean;
     procedure SetExtraVerbose(value:boolean);
@@ -199,6 +202,7 @@ type
     property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
 
     property UseWget:boolean read GetUseWget write SetUseWget;
+    property MakeJobs:boolean read GetMakeJobs write SetMakeJobs;
     property ExtraVerbose:boolean read GetExtraVerbose write SetExtraVerbose;
     property AutoSwitchURL:boolean read GetAutoSwitchURL write SetAutoSwitchURL;
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
@@ -309,6 +313,12 @@ begin
     begin
       FCrossUtils[CPU,OS].CPU:=GetEnumNameSimple(TypeInfo(TCPU),Ord(CPU));
       FCrossUtils[CPU,OS].OS:=GetEnumNameSimple(TypeInfo(TOS),Ord(OS));
+      FCrossUtils[CPU,OS].Setting:=TCrossSetting.fpcup;
+      FCrossUtils[CPU,OS].LibDir:='';
+      FCrossUtils[CPU,OS].BinDir:='';
+      FCrossUtils[CPU,OS].CrossBuildOptions:='';
+      FCrossUtils[CPU,OS].CrossSubArch:='';
+      FCrossUtils[CPU,OS].Compiler:='';
     end;
   end;
 
@@ -535,7 +545,7 @@ begin
   end;
 end;
 
-procedure TForm2.Button1Click(Sender: TObject);
+procedure TForm2.btnListCustomOptionsClick(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
@@ -651,7 +661,7 @@ begin
         if (CPU=powerpc64) AND ((OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;
         if (CPU=mips) AND (OS<>linux) then continue;
-        if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android)) then continue;
+        if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android) AND (OS<>embedded)) then continue;
         if (CPU=avr) AND (OS<>embedded) then continue;
         if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
 
@@ -714,8 +724,6 @@ begin
     result:=GetCPUOSCombo('',ComboBoxOS.Items[ComboBoxOS.ItemIndex]).OS;
   end;
 end;
-
-
 
 function TForm2.GetLibraryDirectory(aCPU,aOS:string):string;
 var
@@ -827,6 +835,16 @@ procedure TForm2.SetUseWget(value:boolean);
 begin
   CheckUseWget.Checked:=value;
 end;
+
+function TForm2.GetMakeJobs:boolean;
+begin
+  result:=CheckUseMakeJobs.Checked;
+end;
+procedure TForm2.SetMakeJobs(value:boolean);
+begin
+  CheckUseMakeJobs.Checked:=value;
+end;
+
 
 function TForm2.GetExtraVerbose:boolean;
 begin

@@ -1888,7 +1888,7 @@ begin
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
       begin
-        //FPCupManager.CrossOPT:='-Cpmips32 ';
+        FPCupManager.CrossOPT:='-Cpmips32 ';
         FPCupManager.CrossOS_SubArch:='pic32mx';
       end;
     end;
@@ -1933,6 +1933,8 @@ begin
       s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
       s:=Trim(s);
       if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
+
+      //present list of valid subarch targets, just to infrm the user.
       try
         aList:=FPCupManager.ParseSubArchsFromSource;
         if (aList.Count > 0) then
@@ -2646,6 +2648,8 @@ begin
 
   FPCupManager.UseWget:=Form2.UseWget;
 
+  FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
+
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
   // set custom FPC compiler by special user input through setup+
@@ -2964,6 +2968,7 @@ begin
       Form2.SplitLazarus:=ReadBool('General','SplitLazarus',False);
 
       Form2.UseWget:=ReadBool('General','UseWget',False);
+      Form2.MakeJobs:=ReadBool('General','MakeJobs',True);
 
       Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
 
@@ -3018,6 +3023,7 @@ begin
       WriteBool('General','SplitLazarus',Form2.SplitLazarus);
 
       WriteBool('General','UseWget',Form2.UseWget);
+      WriteBool('General','MakeJobs',Form2.MakeJobs);
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);

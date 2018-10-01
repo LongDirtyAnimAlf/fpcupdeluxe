@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 398
+  Left = 485
   Height = 670
-  Top = 22
+  Top = 30
   Width = 756
   Caption = 'Advanced settings'
   ClientHeight = 670
@@ -292,7 +292,7 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 7
     end
-    object CheckUseLatestGDB: TCheckBox
+    object CheckUseMakeJobs: TCheckBox
       AnchorSideLeft.Control = GroupBox2
       AnchorSideTop.Control = CheckUseWget
       AnchorSideTop.Side = asrBottom
@@ -300,18 +300,19 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 204
-      Width = 194
+      Width = 215
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Use (get) latest GDB (default=no)'
-      Enabled = False
+      Caption = 'Use jobs for GNU make (default=yes)'
+      Checked = True
       ParentShowHint = False
       ShowHint = True
+      State = cbChecked
       TabOrder = 8
     end
     object CheckExtraVerbose: TCheckBox
       AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckUseLatestGDB
+      AnchorSideTop.Control = CheckUseMakeJobs
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 19
@@ -589,7 +590,7 @@ object Form2: TForm2
       Caption = 'Cross Build Options Override (i.e. -CfSoft)'
       ParentColor = False
     end
-    object Button1: TButton
+    object btnListCustomOptions: TButton
       AnchorSideTop.Control = ComboBoxOS
       AnchorSideRight.Control = GroupBox4
       AnchorSideRight.Side = asrBottom
@@ -601,7 +602,7 @@ object Form2: TForm2
       AutoSize = True
       BorderSpacing.Right = 6
       Caption = 'List'
-      OnClick = Button1Click
+      OnClick = btnListCustomOptionsClick
       TabOrder = 2
     end
     object LabelCrossSubArch: TLabel
