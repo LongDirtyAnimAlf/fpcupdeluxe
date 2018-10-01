@@ -2610,7 +2610,7 @@ begin
   {$ifdef win64}
   FPCupManager.NoJobs:=true;
   {$else}
-  FPCupManager.NoJobs:=false;
+  FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
   {$endif}
 
   FPCupManager.OnlyModules:='';
@@ -2647,8 +2647,6 @@ begin
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
 
   FPCupManager.UseWget:=Form2.UseWget;
-
-  FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
 
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
