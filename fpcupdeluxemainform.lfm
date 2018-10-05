@@ -1020,7 +1020,7 @@ object Form1: TForm1
     ScrollWidth = 133
     TabOrder = 3
   end
-  inline SynEdit1: TSynEdit
+  inline CommandOutputScreen: TSynEdit
     AnchorSideTop.Control = StatusMessage
     AnchorSideTop.Side = asrBottom
     AnchorSideRight.Control = Owner
@@ -1046,7 +1046,7 @@ object Form1: TForm1
     ParentColor = False
     ParentFont = False
     TabOrder = 5
-    OnMouseWheel = SynEdit1MouseWheel
+    OnMouseWheel = CommandOutputScreenMouseWheel
     Gutter.AutoSize = False
     Gutter.Visible = False
     Gutter.Width = 55
@@ -1514,8 +1514,8 @@ object Form1: TForm1
     LineHighlightColor.Background = clNone
     LineHighlightColor.Foreground = clNone
     LineHighlightColor.FrameEdges = sfeNone
-    OnChange = SynEdit1Change
-    OnSpecialLineMarkup = SynEdit1SpecialLineMarkup
+    OnChange = CommandOutputScreenChange
+    OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
     inline SynLeftGutterPartList1: TSynGutterPartList
       object SynGutterMarks1: TSynGutterMarks
         Width = 0

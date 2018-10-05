@@ -704,7 +704,7 @@ begin
            {$endif}
 
            {$ifdef Darwin}
-           if (CrossInstaller.TargetOS='macos') OR (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
+           if (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
            begin
              s1:=ResolveDots(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
              CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
@@ -741,15 +741,61 @@ begin
           CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
         end;
 
+        {$ifdef Darwin}
+        Options:=Options+' -ap';
+        {$endif}
+
+        //Add minimum required OSX version to prevent "crti not found" errors.
+        //Add it to both FPC options (for building compiler) as well as FPC cross-options (for rtl and inclusion into fpc.cfg).
+        if (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
+        begin
+          if (CrossInstaller.TargetCPU='aarch64') OR (CrossInstaller.TargetCPU='arm') then
+          begin
+            if (CrossInstaller.TargetCPU='aarch64') then CrossOptions:=CrossOptions+' -CaAARCH64IOS';
+            {$ifdef Darwin}
+            s2:=GetSDKVersion('iphoneos');
+            if Length(s2)>0 then
+            begin
+              s1:='-WP'+s2;
+              Options:=Options+' '+s1;
+              CrossOptions:=CrossOptions+' '+s1;
+            end;
+            {$endif}
+          end;
+          if (CrossInstaller.TargetCPU='i386') OR (CrossInstaller.TargetCPU='x86_64') OR (CrossInstaller.TargetCPU='powerpc') OR (CrossInstaller.TargetCPU='powerpc64') then
+          begin
+            if (CrossInstaller.TargetOS='iphonesimulator') then
+            begin
+              {$ifdef Darwin}
+              s2:=GetSDKVersion('iphonesimulator');
+              if Length(s2)>0 then
+              begin
+                s1:='-WP'+s2;
+                Options:=Options+' '+s1;
+                CrossOptions:=CrossOptions+' '+s1;
+              end;
+              {$endif}
+            end
+            else
+            begin
+              {$ifdef Darwin}
+              s2:=GetSDKVersion('macosx');
+              if Length(s2)>0 then
+              begin
+                s1:='-WM'+s2;
+                Options:=Options+' '+s1;
+                CrossOptions:=CrossOptions+' '+s1;
+              end;
+              {$endif}
+            end;
+          end;
+        end;
+
         CrossOptions:=Trim(CrossOptions);
         if CrossOptions<>'' then
         begin
           Processor.Parameters.Add('CROSSOPT='+CrossOptions);
         end;
-
-        {$ifdef Darwin}
-        Options:=Options+' -ap';
-        {$endif}
 
         {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
         // soft 80 bit float if available
@@ -1075,15 +1121,15 @@ var
   {$IFDEF MSWINDOWS}
   FileCounter:integer;
   {$ENDIF}
-  s:string;
+  s1,s2:string;
 begin
   result:=inherited;
   OperationSucceeded:=true;
 
-  s:=GetCompilerVersion(FCompiler);
-  if s<>'0.0.0'
-    then infoln('FPC builder: Using FPC bootstrap compiler with version: '+s, etInfo)
-    else infoln(infotext+'FPC bootstrap version error: '+s+' ! Should never happen: expect many errors !!', etError);
+  s1:=GetCompilerVersion(FCompiler);
+  if s1<>'0.0.0'
+    then infoln('FPC builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
+    else infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
   //if clean failed (due to missing compiler), try again !
   if (NOT FCleanModuleSuccess) then
@@ -1122,23 +1168,39 @@ begin
 
   if FBootstrapCompilerOverrideVersionCheck then
     Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  s:=STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
-  s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
-  s:=Trim(s);
+  s1:=STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
+  s1:=StringReplace(s1,'  ',' ',[rfReplaceAll]);
+  s1:=Trim(s1);
 
   {$IFDEF UNIX}
-  s:='-Sg '+s;
+  s1:='-Sg '+s1;
   {$ENDIF}
 
-  //s:=s+' -dREVINC';
+  {$IFDEF DARWIN}
+  //Add minimum required OSX version to prevent "crti not found" errors.
+  s2:=GetSDKVersion('macosx');
+  if Length(s2)>0 then
+  begin
+    s1:='-WM'+s2+' '+s1;
+    {
+    if CompareVersionStrings(s2,'10.14')>=0 then
+    begin
+      s1:='-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib '+s1;
+    end;
+    }
+  end;
+  {$ENDIF}
+
+  //s1:=s1+' -dREVINC';
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
   // soft 80 bit float if available
   infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-  s:=s+' -dFPC_SOFT_FPUX80';
+  s1:=s1+' -dFPC_SOFT_FPUX80';
   {$endif}
 
-  Processor.Parameters.Add('OPT='+s);
+  s1:=Trim(s1);
+  Processor.Parameters.Add('OPT='+s1);
 
   Processor.CurrentDirectory:='';
   case UpperCase(ModuleName) of
@@ -2903,11 +2965,16 @@ begin
         {$ENDIF UNIX}
 
         {$ifdef Darwin}
-          s:=GetSDKVersion('macosx');
+        s:=GetSDKVersion('macosx');
+        if Length(s)>0 then
+        begin
+          ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+          ConfigText.Insert(x,'# Add minimum required OSX version for native compiling'); Inc(x);
+          ConfigText.Insert(x,'# Prevents crti not found errors'); Inc(x);
+          ConfigText.Insert(x,'-WM'+s); Inc(x);
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
-            ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
-            ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs in new, yet non-standard directory'); Inc(x);
+            ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory'); Inc(x);
             ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
             ConfigText.Insert(x,'#ifdef cpui386'); Inc(x);
             ConfigText.Insert(x,'-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib'); Inc(x);
@@ -2921,22 +2988,23 @@ begin
             ConfigText.Insert(x,'#endif'); Inc(x);
             //ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
             //ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
-            ConfigText.Insert(x,'#ENDIF'); Inc(x);
           end;
-          {$ifndef FPCONLY}
-            {$ifdef LCLQT5}
-            ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
-            ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
-            ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-            ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-            ConfigText.Insert(x,'-k-rpath'); Inc(x);
-            ConfigText.Insert(x,'-k@executable_path/../Frameworks'); Inc(x);
-            ConfigText.Insert(x,'-k-rpath'); Inc(x);
-            ConfigText.Insert(x,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-            ConfigText.Insert(x,'#ENDIF'); Inc(x);
-            {$endif}
-          {$endif}
-        {$endif}
+          ConfigText.Insert(x,'#ENDIF'); Inc(x);
+        end;
+        {$ifndef FPCONLY}
+        {$ifdef LCLQT5}
+        ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+        ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
+        ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
+        ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
+        ConfigText.Insert(x,'-k-rpath'); Inc(x);
+        ConfigText.Insert(x,'-k@executable_path/../Frameworks'); Inc(x);
+        ConfigText.Insert(x,'-k-rpath'); Inc(x);
+        ConfigText.Insert(x,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
+        ConfigText.Insert(x,'#ENDIF'); Inc(x);
+        {$endif FPCONLY}
+        {$endif LCLQT5}
+        {$endif Darwin}
 
         // add magic
         ConfigText.Insert(x,SnipMagicEnd); Inc(x);

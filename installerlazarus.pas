@@ -1183,15 +1183,18 @@ function TLazarusInstaller.ConfigModule(ModuleName: string): boolean;
 const
   LazarusCFG = 'lazarus.cfg'; //file to store primary config argument in
 var
-  DebuggerPath: string;
+  DebuggerPath,DebuggerType: string;
   VersionSnippet: string;
   LazarusConfig: TUpdateLazConfig;
   PCPSnippet: TStringList;
   i,j:integer;
-  aFileName:string;
+  s,aFileName:string;
 begin
   Result := inherited;
   Result := true;
+
+  //Set GDB as standard debugger
+  DebuggerType:='TGDBMIDebugger';
 
   if DirectoryExistsUTF8(FPrimaryConfigPath) = false then
   begin
@@ -1218,6 +1221,8 @@ begin
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Language/ID', 'en');
       // Set Lazarus directory
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FInstallDirectory);
+
+
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
       // the platform specific compiler. In order to be able to cross compile
@@ -1257,12 +1262,31 @@ begin
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
       DebuggerPath := '/usr/local/bin/gdb';
       if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, '--version', 'GNU gdb')) then DebuggerPath := which('gdb');
+
+      {$IF (defined(Darwin))}
+      if Length(DebuggerPath)=0 then
+      begin
+        //Check for newest lldb debugger ... could work !!
+        DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
+        if FileExists(DebuggerPath) then
+          DebuggerType:='TLldbDebugger'
+        else
+          DebuggerPath:='';
+      end;
+      {$endif}
+
       {$ELSE}//other *nix
       DebuggerPath := which('gdb');  //assume in path
       {$ENDIF FREEBSD}
-      if Length(DebuggerPath)>0
-         then LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', DebuggerPath)
-         else infoln(infotext+'No GNU gdb found.' + FPrimaryConfigPath, etWarning);
+
+      if Length(DebuggerPath)>0 then
+      begin
+        LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value', DebuggerPath)
+      end
+      else
+      begin
+        infoln(infotext+'No debugger found.' + FPrimaryConfigPath, etWarning);
+      end;
 
       {$IFDEF BSD}
       {$IFDEF DARWIN}
@@ -1313,13 +1337,15 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('gmake')); //GNU make; assume in path
       {$ENDIF DARWIN}
       {$ENDIF BSD}
+
       {$ENDIF UNIX}
+
+      // Debugger type needs to be specified at least since Lazarus 1.1
+      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', DebuggerType);
 
       // Source dir in stock Lazarus on windows is something like
       // $(LazarusDir)fpc\$(FPCVer)\source\
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FPCSourceDirectory/Value', FFPCSourceDir);
-      // Debugger type needs to be specified at least since Lazarus 1.1
-      LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Debugger/Class', 'TGDBMIDebugger');
       // Add <lazarus>\docs\xml to fpdoc editor paths
       LazDocPathAdd(IncludeTrailingPathDelimiter(FInstallDirectory) + 'docs'+DirectorySeparator+'xml', LazarusConfig);
 

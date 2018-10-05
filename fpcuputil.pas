@@ -318,7 +318,6 @@ function GetGCCDirectory:string;
 {$ENDIF UNIX}
 {$IFDEF DARWIN}
 function GetSDKVersion(aSDK: string):string;
-function GetDarwinVersion(out Major,Minor,Build : Integer): Boolean;
 {$ENDIF DARWIN}
 function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
@@ -1649,19 +1648,26 @@ begin
         s:=s+Output[i];
         Inc(i);
       end;
+    end
+    else
+    begin
+      //xcodebuild not working ... try something completely different ...
+      if aSDK='macosx' then
+      begin
+        ExecuteCommand('sw_vers -productVersion', Output, False);
+        if (Length(Output)>0) then
+        begin
+          i:=1;
+          while (Length(Output)>i) AND (Output[i] in ['0'..'9','.']) do
+          begin
+            s:=s+Output[i];
+            Inc(i);
+          end;
+        end;
+      end;
     end;
   end;
   result:=s;
-end;
-function GetDarwinVersion(out Major,Minor,Build: Integer): Boolean;
-var
-  output:string;
-begin
-  result:=(ExecuteCommand('sw_vers -productVersion', Output, False)=0);
-  if result then
-  begin
-    if Length(Output)>0 then GetVersionFromString(Output,Major,Minor,Build) else result:=false;
-  end;
 end;
 
 {$ENDIF DARWIN}
@@ -2103,8 +2109,14 @@ begin
         if Length(s)>0 then t:=Trim(s);
       end;
       if Length(s)=0 then t:=GetTargetOS;
-      if GetDarwinVersion(Major,Minor,Build)
-         then t:=t+' '+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
+      if (ExecuteCommand('sw_vers -productVersion', s, false)=0) then
+      begin
+        if Length(s)>0 then
+        begin
+          GetVersionFromString(s,Major,Minor,Build);
+          t:=t+' '+InttoStr(Major)+'.'+InttoStr(Minor)+'.'+InttoStr(Build);
+        end;
+      end;
     {$endif Darwin}
   {$endif Unix}
 

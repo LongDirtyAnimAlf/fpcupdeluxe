@@ -55,7 +55,7 @@ type
     radgrpOS: TRadioGroup;
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
-    SynEdit1: TSynEdit;
+    CommandOutputScreen: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure LazarusOnlyClick(Sender: TObject);
@@ -75,14 +75,14 @@ type
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
-    procedure SynEdit1Change(Sender: TObject);
-    procedure SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
+    procedure CommandOutputScreenChange(Sender: TObject);
+    procedure CommandOutputScreenSpecialLineMarkup(Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click(Sender: TObject);
     procedure radgrpCPUClick(Sender: TObject);
     procedure radgrpOSClick(Sender: TObject);
-    procedure SynEdit1MouseWheel(Sender: TObject; Shift: TShiftState;
+    procedure CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
     procedure Timer1Timer(Sender: TObject);
@@ -211,7 +211,7 @@ begin
   {$endif Darwin}
 
   oldoutput := System.Output;
-  AssignSynEdit(System.Output, SynEdit1);
+  AssignSynEdit(System.Output, CommandOutputScreen);
   Reset(System.Input);
   Rewrite(System.Output);
 
@@ -253,7 +253,7 @@ begin
     sConsentWarning:=ReadBool('General','ConsentWarning',true);
     {$endif}
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
-    SynEdit1.Font.Size := ReadInteger('General','CommandFontSize',SynEdit1.Font.Size);
+    CommandOutputScreen.Font.Size := ReadInteger('General','CommandFontSize',CommandOutputScreen.Font.Size);
     if ReadBool('General','Maximized',False) then
     begin
       Self.WindowState:=wsMaximized;
@@ -346,7 +346,7 @@ procedure TForm1.FormResize(Sender: TObject);
 var
   w:integer;
 begin
-  w:=(SynEdit1.Width DIV 2);
+  w:=(CommandOutputScreen.Width DIV 2);
   RealFPCURL.Width:=(w-4);
   RealLazURL.Width:=RealFPCURL.Width;
   RealLazURL.Left:=RealFPCURL.Left+(w+4);
@@ -527,7 +527,7 @@ begin
                 continue;
               end;
               {$endif}
-              SynEdit1.Clear;
+              CommandOutputScreen.Clear;
               AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
               AddMessage('Going to update cross-compiler.');
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
@@ -590,7 +590,7 @@ begin
           // build all available compilers
           if (Sender<>nil) then
           begin
-            SynEdit1.Clear;
+            CommandOutputScreen.Clear;
             AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
             AddMessage('Going to update cross-compiler.');
             radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
@@ -744,23 +744,23 @@ begin
   end;
 end;
 
-procedure TForm1.SynEdit1MouseWheel(Sender: TObject; Shift: TShiftState;
+procedure TForm1.CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
   WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
 begin
   if ssCtrl in Shift then
   begin
-    if (WheelDelta>0) AND (SynEdit1.Font.Size<48) then SynEdit1.Font.Size:=SynEdit1.Font.Size+1;
-    if (WheelDelta<0)  AND (SynEdit1.Font.Size>2) then SynEdit1.Font.Size:=SynEdit1.Font.Size-1;
+    if (WheelDelta>0) AND (CommandOutputScreen.Font.Size<48) then CommandOutputScreen.Font.Size:=CommandOutputScreen.Font.Size+1;
+    if (WheelDelta<0)  AND (CommandOutputScreen.Font.Size>2) then CommandOutputScreen.Font.Size:=CommandOutputScreen.Font.Size-1;
   end;
 end;
 
-procedure TForm1.SynEdit1Change(Sender: TObject);
+procedure TForm1.CommandOutputScreenChange(Sender: TObject);
 var
   s,searchstring:string;
   x:integer;
 begin
-  s:=SynEdit1.LineText;
-  //if Length(s)=0 then s:=SynEdit1.Lines[SynEdit1.CaretY-2];
+  s:=CommandOutputScreen.LineText;
+  //if Length(s)=0 then s:=CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2];
   s:=Trim(s);
   if Length(s)=0 then exit;
 
@@ -852,7 +852,7 @@ begin
       InternalError:=Copy(s,x+1,MaxInt);
       memoSummary.Lines.Append('URL: '+InternalError);
       memoSummary.Lines.Append('Please check your connection. Or run the SVN command to try yourself:');
-      memoSummary.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
     end;
   end;
 
@@ -919,17 +919,22 @@ begin
     else if ((ExistWordInString(PChar(s),'CheckAndGetTools',[soDown])) OR (ExistWordInString(PChar(s),'Required package is not installed',[soDown]))) then
     begin
       MissingTools:=true;
-      memoSummary.Lines.Append('Missing some tools: please install !');
+      {$ifdef Darwin}
+      memoSummary.Lines.Append('Missing some tools: please install Xcode command line tools !');
+      memoSummary.Lines.Append('xcode-select --install');
+      {$else}
+      memoSummary.Lines.Append('Missing some tools: please install missing tools!');
+      {$endif}
     end
     else if (Pos('error: 256',lowercase(s))>0) AND (Pos('svn',lowercase(s))>0) then
     begin
       memoSummary.Lines.Append('We have had a SVN connection failure. Just start again !');
-      memoSummary.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
     end
     else if (ExistWordInString(PChar(s),'fatal:',[soDown])) then
     begin
       memoSummary.Lines.Append(s);
-      memoSummary.Lines.Append(SynEdit1.Lines[SynEdit1.CaretY-2]);
+      memoSummary.Lines.Append(CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2]);
     end
     else if (ExistWordInString(PChar(s),'error:',[soDown])) then
     begin
@@ -989,10 +994,10 @@ begin
   end;
 
   // go back a few lines to find a special error case
-  x:=(SynEdit1.CaretY-4);
+  x:=(CommandOutputScreen.CaretY-4);
   if (x>0) then
   begin
-    s:=SynEdit1.Lines[x];
+    s:=CommandOutputScreen.Lines[x];
     s:=Trim(s);
     s:=LowerCase(s);
     if Length(s)=0 then exit;
@@ -1006,27 +1011,27 @@ begin
     begin
       // print the error itself and the next 2 lines (good or lucky guess)
       memoSummary.Lines.Append(BeginSnippet+' Start of special error summary:');
-      memoSummary.Lines.Append(SynEdit1.Lines[x]);
-      memoSummary.Lines.Append(SynEdit1.Lines[x+1]);
+      memoSummary.Lines.Append(CommandOutputScreen.Lines[x]);
+      memoSummary.Lines.Append(CommandOutputScreen.Lines[x+1]);
       //temporary for trunk
-      if Pos('BuildUnit_cocoaint.pp',SynEdit1.Lines[x+1])>0 then
+      if Pos('BuildUnit_cocoaint.pp',CommandOutputScreen.Lines[x+1])>0 then
       begin
         memoSummary.Lines.Append('');
         memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32809');
         memoSummary.Lines.Append('');
       end else
-      memoSummary.Lines.Append(SynEdit1.Lines[x+2]);
+      memoSummary.Lines.Append(CommandOutputScreen.Lines[x+2]);
     end;
   end;
 end;
 
-procedure TForm1.SynEdit1SpecialLineMarkup(Sender: TObject; Line: integer;
+procedure TForm1.CommandOutputScreenSpecialLineMarkup(Sender: TObject; Line: integer;
   var Special: boolean; Markup: TSynSelectedColor);
 var
   FG, BG: TColor;
   s:string;
 begin
-  s:=SynEdit1.Lines[Line-1];
+  s:=CommandOutputScreen.Lines[Line-1];
   s:=Trim(s);
   if Length(s)=0 then exit;
 
@@ -1839,35 +1844,6 @@ begin
       end;
     end;
 
-    //darwin predefined settings
-    if (FPCupManager.CrossOS_Target='darwin') then
-    begin
-      if (FPCupManager.CrossCPU_Target='aarch64') OR (FPCupManager.CrossCPU_Target='arm') then
-      begin
-        if (FPCupManager.CrossCPU_Target='aarch64') then FPCupManager.CrossOPT:='-CaAARCH64IOS ';
-        {$ifdef Darwin}
-        FPCupManager.CrossOPT:='-WP'+GetSDKVersion('iphoneos')+' '+FPCupManager.CrossOPT;
-        {$endif}
-      end;
-      if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') OR (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
-      begin
-        {$ifdef Darwin}
-        FPCupManager.CrossOPT:='-WM'+GetSDKVersion('macosx')+' '+FPCupManager.CrossOPT;
-        {$endif}
-      end;
-    end;
-
-    //iphonesim i386+x86_64 predefined settings
-    if (FPCupManager.CrossOS_Target='iphonesim') then
-    begin
-      if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') then
-      begin
-        {$ifdef Darwin}
-        FPCupManager.CrossOPT:='-WP'+GetSDKVersion('iphonesimulator')+' '+FPCupManager.CrossOPT;
-        {$endif}
-      end;
-    end;
-
     //embedded predefined settings
     if (FPCupManager.CrossOS_Target='embedded') then
     begin
@@ -2491,7 +2467,7 @@ end;
 
 procedure TForm1.btnClearLogClick(Sender: TObject);
 begin
-  SynEdit1.Clear;
+  CommandOutputScreen.Clear;
   memoSummary.Clear;
 end;
 
@@ -2538,7 +2514,7 @@ begin
       WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
       WriteString('ProxySettings','HTTPProxyPass',FPCupManager.HTTPProxyPassword);
 
-      WriteInteger('General','CommandFontSize',SynEdit1.Font.Size);
+      WriteInteger('General','CommandFontSize',CommandOutputScreen.Font.Size);
 
       if Self.WindowState=wsNormal then
       begin
@@ -2578,7 +2554,7 @@ begin
     if c is TPanel then continue;
     if c is TGroupBox then continue;
     if c = BitBtnHalt then continue;
-    if c = SynEdit1 then continue;
+    if c = CommandOutputScreen then continue;
     if c = memoSummary then continue;
     c.Enabled := value;
     {$ifdef usealternateui}
@@ -2892,14 +2868,14 @@ begin
 
     end;
 
+    memoSummary.Lines.Append(BeginSnippet+' Done !!');
 
   except
     // just swallow exceptions
-    StatusMessage.Text:='Got an unexpected exception ... don''t know what to do unfortunately.';
+    StatusMessage.Text:=BeginSnippet+' Got an unexpected exception ... don''t know what to do unfortunately.';
     StatusMessage.Color:=clRed;
   end;
 
-  memoSummary.Lines.Append({BeginSnippet + }'Done !!');
 end;
 
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
@@ -2908,7 +2884,7 @@ var
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
-  SynEdit1.Clear;
+  CommandOutputScreen.Clear;
 
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
@@ -3050,9 +3026,9 @@ end;
 
 procedure TForm1.AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
 begin
-  SynEdit1.Append(aMessage);
-  SynEdit1.CaretX:=0;
-  SynEdit1.CaretY:=SynEdit1.Lines.Count;
+  CommandOutputScreen.Append(aMessage);
+  CommandOutputScreen.CaretX:=0;
+  CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
   if UpdateStatus then StatusMessage.Text:=aMessage;
   {$ifdef usealternateui}
   alternateui_AddMessage(amessage,updatestatus);
