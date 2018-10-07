@@ -328,7 +328,10 @@ begin
     CheckPackageRepo.Checked:=ReadBool('General','GetPackageRepo',False);
     CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',False);
 
-    CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
+    //Disable this feature for now.
+    //Building just a cross-compiler for FPC itseld is enough.
+    //The LCL will be build by Lazarus if needed.
+    //CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
 
     {$ifdef RemoteLog}
     CheckSendInfo.Checked:=ReadBool('General','SendInfo',False);

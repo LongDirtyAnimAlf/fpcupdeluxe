@@ -13,11 +13,12 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="4">
+      <Resources Count="5">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="patchlazarus\darwinqt5hack.patch" Type="RCDATA" ResourceName="DARWINQT5HACK_LAZPATCH"/>
+        <Resource_4 FileName="patchfpc\darwinmakefile.patch" Type="RCDATA" ResourceName="DARWINMAKEFILE_FPCPATCH"/>
       </Resources>
     </General>
     <i18n>

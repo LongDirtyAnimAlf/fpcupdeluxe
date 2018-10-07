@@ -13,6 +13,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil;
+
 type
 
 { TDarwinaarch64 }
@@ -58,6 +61,8 @@ end;
 function TDarwinaarch64.GetBinUtils(Basepath:string): boolean;
 var
   IOS_BASE:string;
+  aOption:string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -74,10 +79,20 @@ begin
   if DirectoryExists(IOS_BASE) then
   begin
     FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
-    '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
+    AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(IOS_BASE));
   end;
+
+  // Set some defaults if user hasn't specified otherwise
+  i:=StringListStartsWith(FCrossOpts,'-Ca');
+  if i=-1 then
+  begin
+    aOption:='-CaAARCH64IOS';
+    FCrossOpts.Add(aOption+' ');
+    ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
+  end else aOption:=Trim(FCrossOpts[i]);
+  AddFPCCFGSnippet(aOption);
+
 end;
 
 constructor TDarwinaarch64.Create;
@@ -87,7 +102,7 @@ begin
   FTargetCPU:='aarch64';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 

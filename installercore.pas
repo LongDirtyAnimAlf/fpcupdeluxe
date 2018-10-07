@@ -2221,6 +2221,11 @@ begin
       if PatchFilePath='DARWINQT5HACK_LAZPATCH' then j:=0;
       {$endif}
 
+      {$ifndef Darwin}
+      //if PatchFilePath='DARWINMAKEFILE_FPCPATCH' then j:=0;
+      {$endif}
+
+
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!

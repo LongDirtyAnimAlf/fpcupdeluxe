@@ -316,9 +316,9 @@ function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex
 function XdgConfigHome: String;
 function GetGCCDirectory:string;
 {$ENDIF UNIX}
-{$IFDEF DARWIN}
+{$ifdef Darwin}
 function GetSDKVersion(aSDK: string):string;
-{$ENDIF DARWIN}
+{$endif}
 function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
@@ -1625,7 +1625,7 @@ begin
 end;
 {$ENDIF UNIX}
 
-{$IFDEF DARWIN}
+{$ifdef Darwin}
 function GetSDKVersion(aSDK: string):string;
 const
   SearchTarget='SDKVersion: ';
@@ -1669,8 +1669,7 @@ begin
   end;
   result:=s;
 end;
-
-{$ENDIF DARWIN}
+{$endif}
 
 // 1on1 copy from unit cutils from the fpc compiler;
 function CompareVersionStrings(s1,s2: string): longint;

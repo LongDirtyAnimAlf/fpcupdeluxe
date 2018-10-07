@@ -198,11 +198,9 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-XX'+LineEnding+
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XX');
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
   end;
 end;
 

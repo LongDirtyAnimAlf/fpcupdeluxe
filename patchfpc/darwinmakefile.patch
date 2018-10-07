@@ -1,0 +1,17 @@
+diff --git packages/Makefile packages/Makefile
+index 5c1a4524b0..3dec93eb5b 100644
+--- packages/Makefile
++++ packages/Makefile
+@@ -1712,6 +1712,12 @@ FPMAKE_OPT+=$(FPMAKEOPT)
+ endif
+ FPMAKE_OPT+=--localunitdir=..
+ FPMAKE_OPT+=$(FPC_TARGETOPT)
++ifeq ($(OS_SOURCE),darwin)
++ifdef CROSSCOMPILE
++override FPCOPT:=$(filter-out -WM%,$(FPCOPT))
++override FPCOPT:=$(filter-out -WP%,$(FPCOPT))
++endif
++endif
+ FPMAKE_OPT+=$(addprefix -o ,$(FPCOPT))
+ FPMAKE_OPT+=--compiler=$(FPC)
+ FPMAKE_OPT+=-bu

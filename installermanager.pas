@@ -214,39 +214,10 @@ Const
     'End;';
 
 type
-
-  // from systems.inc
-  tsystemcpu=
-         (
-               cpu_no,                       { 0 }
-               cpu_i386,                     { 1 }
-               cpu_m68k,                     { 2 }
-               cpu_alpha,                    { 3 }
-               cpu_powerpc,                  { 4 }
-               cpu_sparc,                    { 5 }
-               cpu_vm,                       { 6 }
-               cpu_iA64,                     { 7 }
-               cpu_x86_64,                   { 8 }
-               cpu_mipseb,                   { 9 }
-               cpu_arm,                      { 10 }
-               cpu_powerpc64,                { 11 }
-               cpu_avr,                      { 12 }
-               cpu_mipsel,                   { 13 }
-               cpu_jvm,                      { 14 }
-               cpu_i8086,                    { 15 }
-               cpu_aarch64,                  { 16 }
-               cpu_wasm,                     { 17 }
-               cpu_sparc64                   { 18 }
-         );
-
-
-  // from fpmake + fpmkunit !
-
   TCpu=(cpuNone,
       i386,m68k,powerpc,sparc,x86_64,arm,powerpc64,avr,armeb,
       mips,mipsel,jvm,i8086,aarch64
     );
-  TCPUS = Set of TCPU;
   TOS=(osNone,
       linux,go32v2,win32,os2,freebsd,beos,netbsd,
       amiga,atari, solaris, qnx, netware, openbsd,wdosx,
@@ -255,71 +226,7 @@ type
       aix,java,android,nativent,msdos,wii,aros,dragonfly,
       win16
     );
-  TOSes = Set of TOS;
 
-Const
-  // Aliases
-  Amd64   = X86_64;
-  PPC = PowerPC;
-  PPC64 = PowerPC64;
-  DOS = Go32v2;
-  MacOSX = Darwin;
-
-  AllOSes = [Low(TOS)..High(TOS)];
-  AllCPUs = [Low(TCPU)..High(TCPU)];
-  AllUnixOSes  = [Linux,FreeBSD,NetBSD,OpenBSD,Darwin,QNX,BeOS,Solaris,Haiku,iphonesim,aix,Android,dragonfly];
-  AllBSDOSes      = [FreeBSD,NetBSD,OpenBSD,Darwin,iphonesim,dragonfly];
-  AllWindowsOSes  = [Win32,Win64,WinCE];
-  AllAmigaLikeOSes = [Amiga,MorphOS,AROS];
-  AllLimit83fsOses = [go32v2,os2,emx,watcom,msdos,win16];
-
-  AllSmartLinkLibraryOSes = [Linux,msdos,amiga,morphos,aros,win16]; // OSes that use .a library files for smart-linking
-  AllImportLibraryOSes = AllWindowsOSes + [os2,emx,netwlibc,netware,watcom,go32v2,macos,nativent,msdos,win16];
-
-  OSCPUSupported : array[TOS,TCpu] of boolean = (
-    { os          none   i386    m68k  ppc    sparc  x86_64 arm    ppc64  avr    armeb  mips   mipsel jvm    i8086  aarch64 }
-    { none }    ( false, false, false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { linux }   ( false, true,  true,  true,  true,  true,  true,  true,  false, true , true , true , false, false, true ),
-    { go32v2 }  ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { win32 }   ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { os2 }     ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { freebsd } ( false, true,  true,  false, false, true,  false, false, false, false, false, false, false, false, false),
-    { beos }    ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { netbsd }  ( false, true,  true,  true,  true,  true,  false, false, false, false, false, false, false, false, false),
-    { amiga }   ( false, false, true,  true,  false, false, false, false, false, false, false, false, false, false, false),
-    { atari }   ( false, false, true,  false, false, false, false, false, false, false, false, false, false, false, false),
-    { solaris } ( false, true,  false, false, true,  true,  false, false, false, false, false, false, false, false, false),
-    { qnx }     ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { netware } ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { openbsd } ( false, true,  true,  false, false, true,  false, false, false, false, false, false, false, false, false),
-    { wdosx }   ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { palmos }  ( false, false, true,  false, false, false, true,  false, false, false, false, false, false, false, false),
-    { macos }   ( false, false, false, true,  false, false, false, false, false, false, false, false, false, false, false),
-    { darwin }  ( false, true,  false, true,  false, true,  true,  true,  false, false, false, false, false, false, true ),
-    { emx }     ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { watcom }  ( false, true,  false, false, false ,false, false, false, false, false, false, false, false, false, false),
-    { morphos } ( false, false, false, true,  false ,false, false, false, false, false, false, false, false, false, false),
-    { netwlibc }( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { win64   } ( false, false, false, false, false, true,  false, false, false, false, false, false, false, false, false),
-    { wince    }( false, true,  false, false, false, false, true,  false, false, false, false, false, false, false, false),
-    { gba    }  ( false, false, false, false, false, false, true,  false, false, false, false, false, false, false, false),
-    { nds    }  ( false, false, false, false, false, false, true,  false, false, false, false, false, false, false, false),
-    { embedded }( false, true,  true,  true,  true,  true,  true,  true,  true,  true , false, false, false, true , false),
-    { symbian } ( false, true,  false, false, false, false, true,  false, false, false, false, false, false, false, false),
-    { haiku }   ( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { iphonesim}( false, true,  false, false, false, true,  false, false, false, false, false, false, false, false, false),
-    { aix    }  ( false, false, false, true,  false, false, false, true,  false, false, false, false, false, false, false),
-    { java }    ( false, false, false, false, false, false, false, false, false, false, false, false, true , false, false),
-    { android } ( false, true,  false, false, false, false, true,  false, false, false, false, true,  true , false, false),
-    { nativent }( false, true,  false, false, false, false, false, false, false, false, false, false, false, false, false),
-    { msdos }   ( false, false, false, false, false, false, false, false, false, false, false, false, false, true , false),
-    { wii }     ( false, false, false, true , false, false, false, false, false, false, false, false, false, false, false),
-    { aros }    ( true,  false, false, false, false, false, true,  false, false, false, false, false, false, false, false),
-    { dragonfly}( false, false, false, false, false, true,  false, false, false, false, false, false, false, false, false),
-    { win16 }   ( false, false, false, false, false, false, false, false, false, false, false, false, false, true , false)
-  );
-
-type
   //TCPUBase = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm,sparc,aix,mips,avr,m68k);
   TCPUBaseSet = set of TCPU;
   //TOSBase  = (windows,linux,android,darwin,freebsd,netbsd,ios,iphonesim,wince,java,embedded,dos,aros,haiku,go32,os2,solaris,amiga,atari);

@@ -636,19 +636,23 @@ function TUniversalInstaller.AddPackages(sl:TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
-  Location='Workingdir';
+  LOCATIONMAGIC='Workingdir';
+  NAMEMAGIC='Name';
 var
   i:integer;
+  s:string;
   PackagePath:string;
+  ModuleName:string;
   Workingdir:string;
   BaseWorkingdir:string;
   RealDirective:string;
   RegisterOnly:boolean;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages): ';
-
-  BaseWorkingdir:=GetValue(Location,sl);
+  BaseWorkingdir:=GetValue(LOCATIONMAGIC,sl);
   Workingdir:=BaseWorkingdir;
+  ModuleName:=GetValue(NAMEMAGIC,sl);
+
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
 
   for RegisterOnly:=false to true do
   begin
@@ -664,7 +668,7 @@ begin
       if (i>=0) then
       begin
         RealDirective:=RealDirective+IntToStr(i);
-        Workingdir:=GetValue(Location+IntToStr(i),sl);
+        Workingdir:=GetValue(LOCATIONMAGIC+IntToStr(i),sl);
       end
       else
       begin
@@ -684,67 +688,100 @@ begin
         continue;
       end;
 
-      {$ifdef OpenBSD}
-      // the packages lazdatadict and lazdbexport are not suitable for OpenBSD: their FPC units are not included !
-      // so skip them in case they are included.
-      if (Pos('lazdatadict',PackagePath)>0) OR (Pos('lazdbexport',PackagePath)>0) then
-      begin
-        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-        continue;
-      end;
-      {$endif}
+      //Suggested packages are added by fpcupdeluxe itself
+      //So, take responsibility of correct install
+      //All other packages are users responsibility !
 
-      {$ifdef Darwin}
-      {$ifdef CPUX64}
-      // the packages [onlinepackagemanager and] editormacroscript are not suitable for Darwin 64 bit !
-      // so skip them in case they are included.
-      if
-        {$ifdef LCLCOCOA}
-        // added in Lazarus revision 55937
-        // (Pos('onlinepackagemanager',PackagePath)>0) OR
-        {$endif}
-        (Pos('editormacroscript',PackagePath)>0) then
+      if LowerCase(ModuleName)='suggestedpackages' then
       begin
-        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-        continue;
-      end;
-      {$endif}
-      {$endif}
 
-      {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
-      // the package PascalScript is only suitable for i386, x86_64 and arm !
-      // so skip in case package was included.
-      if (Pos('pascalscript',PackagePath)>0) then
-      begin
-        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-        continue;
-      end;
-      {$endif}
-
-      {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
-      // the package macroscript (depending on PascalScript) is only suitable for i386, x86_64 and arm !
-      // so skip in case package was included.
-      if (Pos('editormacroscript',PackagePath)>0) then
-      begin
-        infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etWarning);
-        continue;
-      end;
-      {$endif}
-
-      {
-      if (NOT FileExists(PackagePath)) OR (PackagePath='') then
-      begin
-        for j:=0 to sl.Count-1 do
+        {$ifdef OpenBSD}
+        // the packages lazdatadict and lazdbexport are not suitable for OpenBSD: their FPC units are not included !
+        // so skip them in case they are included.
+        if (Pos('lazdatadict',PackagePath)>0) OR (Pos('lazdbexport',PackagePath)>0) then
         begin
-          if (Pos(RealDirective+'=',StrUtils.DelSpace(sl[j]))>0) then
+          infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etInfo);
+          continue;
+        end;
+        {$endif}
+
+        {$ifdef Darwin}
+        {$ifdef CPUX64}
+
+        {$ifdef LCLCOCOA}
+        //Some packages are not suitable [yet] for newest Darwin 64 bit !
+        //So skip them in case they are included.
+        s:=GetSDKVersion('macosx');
+        if Length(s)>0 then
+        begin
+          if CompareVersionStrings(s,'10.14')>=0 then
+          //Prevent osprinters from being build for newest Darwin 64 bit !
+          //PMPaperGetName is not available anymore !
           begin
-            sl.Delete(j);
-            break;
+            if
+              (Pos('tachartprint',PackagePath)>0) OR
+              (Pos('syneditdsgn',PackagePath)>0) OR
+              (Pos('runtimetypeinfocontrols',PackagePath)>0) OR
+              (Pos('lazdbexport',PackagePath)>0) OR
+              (Pos('lazreport',PackagePath)>0) OR
+              (Pos('printer4lazarus',PackagePath)>0) OR
+              (Pos('printers4lazide',PackagePath)>0) then
+            begin
+              infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etInfo);
+              continue;
+            end;
           end;
         end;
-        continue;
+        {$endif}
+
+        // some packages are not suitable [yet] for Darwin x64 !
+        // so skip them in case they are included.
+        if
+          (Pos('editormacroscript',PackagePath)>0) then
+        begin
+          infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etInfo);
+          continue;
+        end;
+
+        {$endif CPUX64}
+        {$endif Darwin}
+
+        {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
+        // the package PascalScript is only suitable for i386, x86_64 and arm !
+        // so skip in case package was included.
+        if (Pos('pascalscript',PackagePath)>0) then
+        begin
+          infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etInfo);
+          continue;
+        end;
+        {$endif}
+
+        {$if (NOT defined(CPUI386)) AND (NOT defined(CPUX86_64)) AND (NOT defined(CPUARM))}
+        // the package macroscript (depending on PascalScript) is only suitable for i386, x86_64 and arm !
+        // so skip in case package was included.
+        if (Pos('editormacroscript',PackagePath)>0) then
+        begin
+          infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etInfo);
+          continue;
+        end;
+        {$endif}
+
+        {
+        if (NOT FileExists(PackagePath)) OR (PackagePath='') then
+        begin
+          for j:=0 to sl.Count-1 do
+          begin
+            if (Pos(RealDirective+'=',StrUtils.DelSpace(sl[j]))>0) then
+            begin
+              sl.Delete(j);
+              break;
+            end;
+          end;
+          continue;
+        end;
+        }
+
       end;
-      }
 
       if Workingdir='' then Workingdir:=BaseWorkingdir;
 

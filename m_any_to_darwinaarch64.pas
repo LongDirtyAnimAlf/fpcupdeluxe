@@ -34,9 +34,12 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
+
+uses
+  fileutil,fpcuputil;
 
 const
   ARCH='aarch64';
@@ -177,6 +180,7 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
+  aOption:string;
   i:integer;
 begin
   result:=inherited;
@@ -223,12 +227,21 @@ begin
   if result then
   begin
     FBinsFound:=true;
+
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    //'-Xr/usr/lib';//+LineEnding+ {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    '-XX'+LineEnding+
-    '-XP'+FBinUtilsPrefix+LineEnding {Prepend the binutils names};
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XX');
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+
+    // Set some defaults if user hasn't specified otherwise
+    i:=StringListStartsWith(FCrossOpts,'-Ca');
+    if i=-1 then
+    begin
+      aOption:='-CaAARCH64IOS';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any -Ca architecture parameter; using '+aOption+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
   end;
 end;
 

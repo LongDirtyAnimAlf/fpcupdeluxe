@@ -205,6 +205,7 @@ object Form2: TForm2
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
       Caption = 'Include LCL with cross-compiler (default=no)'
+      Enabled = False
       ParentShowHint = False
       ShowHint = True
       TabOrder = 2
