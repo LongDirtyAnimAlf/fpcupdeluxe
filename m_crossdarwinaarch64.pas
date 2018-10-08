@@ -93,6 +93,8 @@ begin
   end else aOption:=Trim(FCrossOpts[i]);
   AddFPCCFGSnippet(aOption);
 
+  aOption:=GetSDKVersion('iphoneos');
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 end;
 
 constructor TDarwinaarch64.Create;

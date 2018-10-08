@@ -13,6 +13,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil;
+
 type
 
 { TDarwin64 }
@@ -40,6 +43,8 @@ begin
 end;
 
 function TDarwin64.GetBinUtils(Basepath:string): boolean;
+var
+  aOption:string;
 begin
   result:=inherited;
   if result then exit;
@@ -47,6 +52,8 @@ begin
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
   FBinsFound:=true;
+  aOption:=GetSDKVersion('macosx');
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
 end;
 
 constructor TDarwin64.Create;
@@ -56,7 +63,7 @@ begin
   FTargetCPU:='x86_64';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 

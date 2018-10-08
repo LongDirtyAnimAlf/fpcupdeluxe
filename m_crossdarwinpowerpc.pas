@@ -13,6 +13,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil;
+
 type
 
 { TDarwinpowerpc }
@@ -39,6 +42,8 @@ begin
 end;
 
 function TDarwinpowerpc.GetBinUtils(Basepath:string): boolean;
+var
+  aOption:string;
 begin
   result:=inherited;
   if result then exit;
@@ -46,6 +51,8 @@ begin
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
   FBinsFound:=true;
+  aOption:=GetSDKVersion('macosx');
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
 end;
 
 constructor TDarwinpowerpc.Create;
@@ -55,7 +62,7 @@ begin
   FTargetCPU:='powerpc';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 

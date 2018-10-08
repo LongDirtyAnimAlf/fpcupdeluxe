@@ -1694,10 +1694,7 @@ begin
 
   if not Result then exit;
 
-  // not so elegant check to see what kind of client we need ...
-  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) )
-     then aRepoClient:=FGitClient
-     else aRepoClient:=FSVNClient;
+  aRepoClient:=GetSuitableRepoClient;
 
   infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 

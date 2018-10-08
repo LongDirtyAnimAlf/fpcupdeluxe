@@ -13,6 +13,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil;
+
 type
 
 { TDarwinarm }
@@ -83,6 +86,7 @@ end;
 function TDarwinarm.GetBinUtils(Basepath:string): boolean;
 var
   IOS_BASE:string;
+  aOption:string;
 begin
   result:=inherited;
   if result then exit;
@@ -105,9 +109,8 @@ begin
     '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
   end;
   *)
-
-
-
+  aOption:=GetSDKVersion('iphoneos');
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 end;
 
 constructor TDarwinarm.Create;
@@ -117,7 +120,7 @@ begin
   FTargetCPU:='arm';
   FTargetOS:='darwin';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 

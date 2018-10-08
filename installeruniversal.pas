@@ -450,10 +450,8 @@ begin
            (ReqPackage<>'LCLBase') AND
            (ReqPackage<>'LazControlDsgn') AND
            (ReqPackage<>'LazUtils') AND
-           (ReqPackage<>'Printer4Lazarus') AND
            (ReqPackage<>'cairocanvas_pkg') AND
            (ReqPackage<>'SynEdit') AND
-           (ReqPackage<>'RunTimeTypeInfoControls') AND
            (ReqPackage<>'DebuggerIntf') AND
            (ReqPackage<>'LazDebuggerGdbmi') AND
            (ReqPackage<>'CodeTools') then
@@ -707,32 +705,6 @@ begin
 
         {$ifdef Darwin}
         {$ifdef CPUX64}
-
-        {$ifdef LCLCOCOA}
-        //Some packages are not suitable [yet] for newest Darwin 64 bit !
-        //So skip them in case they are included.
-        s:=GetSDKVersion('macosx');
-        if Length(s)>0 then
-        begin
-          if CompareVersionStrings(s,'10.14')>=0 then
-          //Prevent osprinters from being build for newest Darwin 64 bit !
-          //PMPaperGetName is not available anymore !
-          begin
-            if
-              (Pos('tachartprint',PackagePath)>0) OR
-              (Pos('syneditdsgn',PackagePath)>0) OR
-              (Pos('runtimetypeinfocontrols',PackagePath)>0) OR
-              (Pos('lazdbexport',PackagePath)>0) OR
-              (Pos('lazreport',PackagePath)>0) OR
-              (Pos('printer4lazarus',PackagePath)>0) OR
-              (Pos('printers4lazide',PackagePath)>0) then
-            begin
-              infoln(localinfotext+'Incompatible package '+ExtractFileName(PackagePath)+' skipped.',etInfo);
-              continue;
-            end;
-          end;
-        end;
-        {$endif}
 
         // some packages are not suitable [yet] for Darwin x64 !
         // so skip them in case they are included.
@@ -1424,11 +1396,12 @@ var
   BeforeRevision: string='';
   AfterRevision: string='';
   UpdateWarnings: TStringList;
-  TempArchive:string;
+  FilesList: TStringList;
+  aFile:string;
   ResultCode: longint;
   SourceOK:boolean;
   PackageName:string;
-  ExtensionName:string;
+  aName:string;
   Direction:string;
 begin
   result:=inherited;
@@ -1442,6 +1415,7 @@ begin
 
     WritelnLog(infotext+'Getting module '+ModuleName,True);
     InstallDir:=GetValue('InstallDir',PackageSettings);
+    InstallDir:=ExcludeTrailingPathDelimiter(InstallDir);
     FSourceDirectory:=InstallDir;
 
     if InstallDir<>'' then
@@ -1538,10 +1512,10 @@ begin
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
-      TempArchive := SysUtils.GetTempFileName('','FPCUPTMP')+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
-      WritelnLog(infotext+'Going to download '+RemoteURL+' into '+TempArchive,false);
+      aFile := SysUtils.GetTempFileName('','FPCUPTMP')+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
+      WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
       try
-        result:=Download(FUseWget, RemoteURL, TempArchive);
+        result:=Download(FUseWget, RemoteURL, aFile);
       except
         on E: Exception do
         begin
@@ -1555,15 +1529,19 @@ begin
       if result then
       begin
         WritelnLog(infotext+'Download ok',True);
+
+        //Delete existing files from install directory
+        DeleteDirectory(InstallDir,True);
+
         // Extract, overwrite
-        case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
+        case UpperCase(sysutils.ExtractFileExt(aFile)) of
            '.ZIP','.TMP':
               begin
-                //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TempArchive,FVerbose);
+                //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+aFile,FVerbose);
                 with TNormalUnzipper.Create do
                 begin
                   try
-                    ResultCode:=Ord(NOT DoUnZip(TempArchive,IncludeTrailingPathDelimiter(InstallDir),[]));
+                    ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(InstallDir),[]));
                   finally
                     Free;
                   end;
@@ -1571,149 +1549,74 @@ begin
               end;
            '.7Z':
               begin
-                ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+                ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
                 {$ifdef MSWINDOWS}
                 // try winrar
                 if ResultCode <> 0 then
                 begin
-                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
                 end;
                 {$endif}
                 if ResultCode <> 0 then
                 begin
-                  ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+                  ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
                 end;
                 if ResultCode <> 0 then
                 begin
-                  ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+                  ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
                 end;
               end;
            '.rar':
               begin
-                ResultCode:=ExecuteCommand(FUnrar+' x "'+TempArchive+'" "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                ResultCode:=ExecuteCommand(FUnrar+' x "'+aFile+'" "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
                 {$ifdef MSWINDOWS}
                 // try winrar
                 if ResultCode <> 0 then
                 begin
-                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
                 end;
                 {$endif}
               end;
 
            else {.tar and all others}
-              ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
+              ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
            end;
         if ResultCode <> 0 then
         begin
           result := False;
-          infoln(infotext+'Unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+          infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etWarning);
         end;
       end;
-      SysUtils.Deletefile(TempArchive); //Get rid of temp file.
+      SysUtils.Deletefile(aFile); //Get rid of temp file.
       SourceOK:=result;
       if SourceOK then
       begin
         infoln(infotext+'Download from archive ok.',etInfo);
 
-        // check specials for GitHub !!
-        // tricky, but necessary unfortunately ...
-        if (Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) then
+        // Check specials : sometimes, an extra path is added when unpacking, installing
+        // Move files up ... tricky, but necessary unfortunately ...
+        if ((Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) OR (Pos('sourceforge.net',RemoteURL)>0)) then
         begin
-
-          ExtensionName:=fpcuputil.ExtractFileNameOnly(GetFileNameFromURL(RemoteURL));
-
-          // we have an archive from github ... this archive adds an extra path (name-branch) when unpacking the master.zip
-          // so replace package path and package installer with the right path !!
-
-          PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
-          if Pos('/'+PackageName+'/',RemoteURL)=0 then
+          //There should be a single directory !
+          FilesList:=FindAllDirectories(InstallDir,False);
+          if FilesList.Count=1 then
           begin
-            // we must build the name from ArchiveURL ... :-(
-            // /..../bgracontrols/archive/branch.zip
-            // ...../^^^^^^^^^^^^/.....
-            i:=RPos('/archive/',RemoteURL);
-            if (i>0) then
+            infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
+            aName:=FilesList[0];
+            FilesList.Free;
+            FilesList:=FindAllFiles(aName, '', True);
+            for i:=0 to (FilesList.Count-1) do
             begin
-              Delete(PackageName,i,MaxInt);
-              i:=RPos('/',PackageName);
-              if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
+              aFile:=FilesList[i];
+              aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
+              aFile:=ResolveDots(aFile);
+              if NOT DirectoryExists(ExtractFileDir(aFile)) then CreateDir(ExtractFileDir(aFile));
+              SysUtils.RenameFile(FilesList[i],aFile);
             end;
-            // there was something wrong ... back to default ... cheap and dirty coding ...
-            if i=0 then PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
-          end;
-
-          for i:=-1 to MAXINSTRUCTIONS do
-          begin
-            if i>=0 then Direction:='AddPackage'+InttoStr(i)+'=' else Direction:='AddPackage=';
-            for j:=0 to PackageSettings.Count-1 do
-            begin
-              // find directive, but only rewrite once
-              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName+'-'+ExtensionName,PackageSettings[j])=0) then
-              begin
-                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
-                break;
-              end;
-            end;
-            if i>=0 then Direction:='InstallExecute'+InttoStr(i)+'=' else Direction:='InstallExecute=';
-            for j:=0 to PackageSettings.Count-1 do
-            begin
-              // find directive, but only rewrite once
-              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName+'-'+ExtensionName,PackageSettings[j])=0) then
-              begin
-                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName+'-'+ExtensionName,[rfIgnoreCase]);
-                break;
-              end;
-            end;
+            DeleteDirectory(aName,False);
+            FilesList.Free;
           end;
         end;
-
-        // check specials for SourceForge !!
-        // tricky, but necessary unfortunately ...
-        if (Pos('sourceforge.net',RemoteURL)>0) then
-        begin
-
-          // we have an archive from sourceforge ... this archive adds an extra path (name) when unpacking the zip
-          // so replace package path and package installer with the right path !!
-
-          PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
-          if Pos('/'+PackageName+'/',lowercase(RemoteURL))=0 then
-          begin
-            PackageName:=RemoteURL;
-            i:=RPos('/',PackageName);
-            if i>0 then
-            begin
-              Delete(PackageName,i,MaxInt);
-              i:=RPos('/',PackageName);
-              if (i>0) then PackageName:=Copy(PackageName,i+1,MaxInt)
-            end;
-            if i=0 then PackageName:=GetValue(INIKEYWORD_NAME,PackageSettings);
-          end;
-
-          for i:=-1 to MAXINSTRUCTIONS do
-          begin
-            if i>=0 then Direction:='AddPackage'+InttoStr(i)+'=' else Direction:='AddPackage=';
-            for j:=0 to PackageSettings.Count-1 do
-            begin
-              // find directive, but only rewrite once
-              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName,PackageSettings[j])=0) then
-              begin
-                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
-                break;
-              end;
-            end;
-            if i>=0 then Direction:='InstallExecute'+InttoStr(i)+'=' else Direction:='InstallExecute=';
-            for j:=0 to PackageSettings.Count-1 do
-            begin
-              // find directive, but only rewrite once
-              if (Pos(Direction,PackageSettings[j])>0) AND (Pos(PackageName,PackageSettings[j])=0) then
-              begin
-                PackageSettings[j]:=StringReplace(PackageSettings[j],'$(Installdir)','$(Installdir)/'+PackageName,[rfIgnoreCase]);
-                break;
-              end;
-            end;
-          end;
-        end;
-
       end else infoln(infotext+'Getting archive failed. Trying another source, if available.',etInfo)
     end;
 
@@ -1721,14 +1624,14 @@ begin
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download from archive path '+RemoteURL,etInfo);
-      TempArchive := RemoteURL;
-      case UpperCase(sysutils.ExtractFileExt(TempArchive)) of
+      aFile := RemoteURL;
+      case UpperCase(sysutils.ExtractFileExt(aFile)) of
          '.ZIP':
          begin
            with TNormalUnzipper.Create do
            begin
              try
-               ResultCode:=Ord(NOT DoUnZip(TempArchive,IncludeTrailingPathDelimiter(InstallDir),[]));
+               ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(InstallDir),[]));
              finally
                Free;
              end;
@@ -1736,30 +1639,30 @@ begin
          end;
          '.7Z':
          begin
-           ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+           ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
            {$ifdef MSWINDOWS}
            // try winrar
            if ResultCode <> 0 then
            begin
-             ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TempArchive+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+             ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
            end;
            {$endif}
            if ResultCode <> 0 then
            begin
-             ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+             ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
            end;
            if ResultCode <> 0 then
            begin
-             ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+TempArchive,FVerbose);
+             ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
            end;
          end;
          else {.tar and all others}
-            ResultCode:=ExecuteCommand(FTar+' -xf '+TempArchive +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
+            ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
          end;
       if ResultCode <> 0 then
       begin
         result := False;
-        infoln(infotext+'Unpack of '+TempArchive+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
+        infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
       end;
 
       if result then infoln(infotext+'Download from archive path ok.',etInfo);

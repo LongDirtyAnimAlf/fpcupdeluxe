@@ -273,6 +273,7 @@ type
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
+    function GetSuitableRepoClient:TRepoClient;
     // Build module
     function BuildModule(ModuleName: string): boolean; virtual;
     // Clean up environment
@@ -2079,6 +2080,14 @@ begin
   FCrossOS_SubArch:=aSubArch;
 end;
 
+function TInstaller.GetSuitableRepoClient:TRepoClient;
+begin
+  // not so elegant check to see what kind of client we need ...
+  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) )
+     then result:=FGitClient
+     else result:=FSVNClient;
+end;
+
 function TInstaller.BuildModule(ModuleName: string): boolean;
 begin
   result:=false;
@@ -2220,11 +2229,6 @@ begin
       {$else}
       if PatchFilePath='DARWINQT5HACK_LAZPATCH' then j:=0;
       {$endif}
-
-      {$ifndef Darwin}
-      //if PatchFilePath='DARWINMAKEFILE_FPCPATCH' then j:=0;
-      {$endif}
-
 
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !

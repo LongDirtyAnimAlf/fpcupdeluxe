@@ -2927,7 +2927,7 @@ begin
         s:=GetSDKVersion('macosx');
         if Length(s)>0 then
         begin
-          //ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+          ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
           ConfigText.Insert(x,'# Add minimum required OSX version for native compiling'); Inc(x);
           ConfigText.Insert(x,'# Prevents crti not found errors'); Inc(x);
           ConfigText.Insert(x,'-WM'+s); Inc(x);
@@ -2948,7 +2948,7 @@ begin
             //ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
             //ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
           end;
-          //ConfigText.Insert(x,'#ENDIF'); Inc(x);
+          ConfigText.Insert(x,'#ENDIF'); Inc(x);
         end;
         {$ifndef FPCONLY}
         {$ifdef LCLQT5}
@@ -3200,21 +3200,22 @@ begin
 end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
+const
+  DARWINCHECKMAGIC='FPMAKE_OPT+=$(addprefix -o ,$(FPCOPT))';
+  DARWINHACKMAGIC='override FPCOPT:=$(filter-out -WM%,$(FPCOPT))';
 var
   BeforeRevision: string;
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
   VersionSnippet:string;
+  aIndex:integer;
 begin
   result:=inherited;
   result:=InitModule;
 
   if not result then exit;
 
-  // not so elegant check to see what kind of client we need ...
-  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) )
-     then aRepoClient:=FGitClient
-     else aRepoClient:=FSVNClient;
+  aRepoClient:=GetSuitableRepoClient;
 
   infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
@@ -3257,6 +3258,38 @@ begin
     end;
     PatchModule(ModuleName);
   end;
+
+  {$ifdef Darwin}
+  //dirty hack for newest Darwin versions ... to be removed later
+  if result then
+  begin
+    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+'packages'+DirectorySeparator+'Makefile';
+    if FileExists(VersionSnippet) then
+    begin
+      UpdateWarnings:=TStringList.Create;
+      try
+        UpdateWarnings.LoadFromFile(VersionSnippet);
+        aIndex:=UpdateWarnings.IndexOf(DARWINHACKMAGIC);
+        if aIndex=-1 then
+        begin
+          aIndex:=UpdateWarnings.IndexOf(DARWINCHECKMAGIC);
+          if aIndex<>-1 then
+          begin
+            UpdateWarnings.Insert(aIndex,'endif');
+            UpdateWarnings.Insert(aIndex,'endif');
+            UpdateWarnings.Insert(aIndex,DARWINHACKMAGIC);
+            UpdateWarnings.Insert(aIndex,'ifdef CROSSCOMPILE');
+            UpdateWarnings.Insert(aIndex,'ifeq ($(OS_SOURCE),darwin)');
+            UpdateWarnings.SaveToFile(VersionSnippet);
+            infoln(infotext+ModuleName + 'packages Makefile dirty hack for Darwin applied ',etInfo);
+          end;
+        end;
+      finally
+        UpdateWarnings.Free;
+      end;
+    end;
+  end;
+  {$endif}
 
 end;
 

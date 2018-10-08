@@ -41,6 +41,9 @@ uses
 
 implementation
 
+uses
+  fpcuputil;
+
 const
   ARCH='i386';
   OS='iphonesim';
@@ -94,6 +97,7 @@ end;
 function TDarwin386iphonesim.GetBinUtils(Basepath:string): boolean;
 var
   IOS_BASE:string;
+  aOption:string;
 begin
   result:=inherited;
   if result then exit;
@@ -114,10 +118,11 @@ begin
   if DirectoryExists(IOS_BASE) then
   begin
     FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
-    '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
+    AddFPCCFGSnippet('-FD'+FBinUtilsPath); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(IOS_BASE));
   end;
+  aOption:=GetSDKVersion('iphonesimulator');
+  if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
 end;
 
 constructor TDarwin386iphonesim.Create;
@@ -127,7 +132,7 @@ begin
   FTargetCPU:=ARCH;
   FTargetOS:=OS;
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
+  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 
