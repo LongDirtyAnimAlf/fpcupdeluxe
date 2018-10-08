@@ -651,7 +651,8 @@ begin
           Processor.Executable := Make;
           Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
           Processor.Parameters.Clear;
-          if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+          //Using jobs can give problems on some systems ... disable for now.
+          //if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
           Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           // Tell make where to find the target binutils if cross-compiling:
