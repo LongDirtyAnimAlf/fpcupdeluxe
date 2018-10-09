@@ -1448,7 +1448,7 @@ begin
       end;
       if SourceOK
          then infoln(infotext+'Download/update from GIT repository ok.',etInfo)
-         else infoln(infotext+'Getting GIT repo failed. Trying another source, if available.',etInfo)
+         else infoln(infotext+'Getting GIT repo failed. Trying another source, if available.',etWarning)
     end;
 
 
@@ -1477,7 +1477,7 @@ begin
       end;
       if SourceOK
          then infoln(infotext+'Download/update from SVN repository ok.',etInfo)
-         else infoln(infotext+'Getting SVN repo failed. Trying another source, if available.',etInfo)
+         else infoln(infotext+'Getting SVN repo failed. Trying another source, if available.',etWarning)
     end;
 
     // Handle HG URLs
@@ -1505,7 +1505,7 @@ begin
       end;
       if SourceOK
          then infoln(infotext+'Download/update from HG repository ok.',etInfo)
-         else infoln(infotext+'Getting HG repo failed. Trying another source, if available.',etInfo)
+         else infoln(infotext+'Getting HG repo failed. Trying another source, if available.',etWarning)
     end;
 
     RemoteURL:=GetValue('ArchiveURL',PackageSettings);
@@ -1658,7 +1658,8 @@ begin
          end;
          else {.tar and all others}
             ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
-         end;
+      end;
+
       if ResultCode <> 0 then
       begin
         result := False;
@@ -1668,7 +1669,6 @@ begin
       if result then infoln(infotext+'Download from archive path ok.',etInfo);
 
       // todo patch package if correct patch is available in patch directory
-
     end;
 
   end

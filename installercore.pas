@@ -1169,7 +1169,7 @@ begin
   // check if we do have a client !!
   if NOT aClient.ValidClient then
   begin
-    infoln(localinfotext+aClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etError);
+    infoln(localinfotext+aClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
     exit;
   end;
 
@@ -1310,7 +1310,7 @@ begin
   // check if we do have a client !!
   if NOT FSVNClient.ValidClient then
   begin
-    infoln(localinfotext+FSVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etError);
+    infoln(localinfotext+FSVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
     exit;
   end;
 

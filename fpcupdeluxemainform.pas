@@ -1592,7 +1592,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') {and (s<>'x8664') and (s<>'x86_64') and (s<>'aarch64')} then
+        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') and (s<>'aarch64') {and (s<>'x8664') and (s<>'x86_64')} then
         begin
           success:=false;
         end;
@@ -1788,18 +1788,28 @@ begin
     end;
     {$endif}
 
+    s:='';
     if (FPCupManager.CrossCPU_Target='aarch64')
     {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target='darwin'){$endif}
     OR (FPCupManager.CrossOS_Target='msdos')
     OR (FPCupManager.CrossOS_Target='haiku')
     then
     begin
-      if (MessageDlg('Be forwarned: this will only work with FPC 3.2 or trunk (or NewPascal).' + sLineBreak +
-                     'Do you want to continue ?'
-                     ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-                     begin
-                       exit;
-                     end;
+      s:='Be forwarned: this will only work with FPC 3.2 / embedded / trunk / NewPascal.' + sLineBreak +
+         'Do you want to continue ?';
+    end;
+    if (FPCupManager.CrossCPU_Target='aarch64') AND (FPCupManager.CrossOS_Target='android')
+    then
+    begin
+      s:='Be forwarned: this will only work with trunk.' + sLineBreak +
+         'Do you want to continue ?';
+    end;
+    if length(s)>0 then
+    begin
+      if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
+      begin
+        exit;
+      end;
     end;
   end;
 
