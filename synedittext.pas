@@ -202,6 +202,10 @@ begin
         {$endif}
         if AnsiContainsText(line,'is up to date.') then continue;
         if AnsiContainsText(line,'searching ') then continue;
+
+        //Remove some Lazarus info
+        if AnsiContainsText(line,'Info: (lazarus)') then continue;
+
         // found modified files
         outputline:=true;
       end;

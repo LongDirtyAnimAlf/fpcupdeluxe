@@ -272,6 +272,7 @@ function GetFileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
 function GetCompilerVersion(CompilerPath: string): string;
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
+function CalculateFullVersion(Major,Minor,Release:integer):dword;
 function GetNumericalVersion(VersionSnippet: string): word;
 function GetVersionFromUrl(URL:string): string;
 function GetReleaseCandidateFromUrl(aURL:string): integer;
@@ -902,6 +903,11 @@ begin
   if found then Build:=j;
 end;
 
+function CalculateFullVersion(Major,Minor,Release:integer):dword;
+begin
+  result:=(Major *  100 + Minor) * 100 + Release;
+end;
+
 function GetNumericalVersion(VersionSnippet: string): word;
 var
   Major,Minor,Build: Integer;
@@ -910,7 +916,7 @@ begin
   Minor:=0;
   Build:=0;
   GetVersionFromString(VersionSnippet,Major,Minor,Build);
-  result:=Major*10000+Minor*100+Build;
+  result:=CalculateFullVersion(Major,Minor,Build);
 end;
 
 function GetVersionFromUrl(URL:string): string;

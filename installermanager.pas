@@ -66,15 +66,14 @@ Const
     {$endif}
     'Do fpc;'+ //keyword Do means run the specified declared sequence
     {$ifndef FPCONLY}
-    // Lazbuild: make sure we can at least compile LCL programs
-    'Do lazbuild;'+
     'Do helplazarus;'+
     //'Do DOCEDITOR;'+
-    //Get default external packages/universal modules
-    'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    //'Buildmodule lazbuild;' +
+    //Get default external packages/universal modules
+    //'Do UniversalDefault;'+
     //Any cross compilation; must be at end because it resets state machine run memory
     'Do LCLCross;'+
     {$endif}
@@ -93,11 +92,12 @@ Const
     'Do lazbuild;'+
     'Do helplazarus;'+
     //'Do DOCEDITOR;'+
-    // Get default external packages/universal modules
-    'Do UniversalDefault;'+
     // Recompile user IDE so any packages selected by the
     // universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    'Buildmodule lazbuild;' +
+    // Get default external packages/universal modules
+    //'Do UniversalDefault;'+
     'Do LCLCross;'+
     'Do LazarusCrossWin32-64;'+
     {$endif}
@@ -115,14 +115,14 @@ Const
     'Do FPCCrossWin64-32;'+
     {$ifndef FPCONLY}
     // Lazbuild: make sure we can at least compile LCL programs
-    'Do lazbuild;'+
     'Do helplazarus;'+
     //'Do DOCEDITOR;'+
-    //Get default external packages/universal modules
-    'Do UniversalDefault;'+
     //Recompile user IDE so any packages selected by the
     //universal installer are compiled into the IDE:
     'Do USERIDE;'+
+    'Buildmodule lazbuild;' +
+    //Get default external packages/universal modules
+    //'Do UniversalDefault;'+
     'Do LCLCross;'+
     'Do LazarusCrossWin64-32;'+
     {$endif}
@@ -1358,6 +1358,7 @@ begin
   // Lazarus:
   else
     if (uppercase(ModuleName)='LAZARUS')
+    or (uppercase(ModuleName)='STARTLAZARUS')
     or (uppercase(ModuleName)='LAZBUILD')
     or (uppercase(ModuleName)='LCL')
     or (uppercase(ModuleName)='LCLCROSS')

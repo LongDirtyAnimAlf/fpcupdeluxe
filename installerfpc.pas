@@ -673,6 +673,8 @@ begin
 
           Options:=FCompilerOptions;
 
+          //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
+
           case MakeCycle of
             0:
             begin
@@ -742,6 +744,9 @@ begin
           end;
 
           Processor.Parameters.Add('CROSSINSTALL=1');
+
+          //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
+          //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
           Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
           Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
@@ -837,8 +842,6 @@ begin
           {$ifdef Darwin}
           Options:=Options+' -ap';
           {$endif}
-
-
 
           for i:=0 to CrossInstaller.CrossOpt.Count-1 do
           begin

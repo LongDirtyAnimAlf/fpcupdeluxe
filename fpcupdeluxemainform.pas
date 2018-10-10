@@ -757,7 +757,7 @@ end;
 procedure TForm1.CommandOutputScreenChange(Sender: TObject);
 var
   s,searchstring:string;
-  x:integer;
+  x,y:integer;
 begin
   s:=CommandOutputScreen.LineText;
   //if Length(s)=0 then s:=CommandOutputScreen.Lines[CommandOutputScreen.CaretY-2];
@@ -840,6 +840,38 @@ begin
     end;
   end;
   *)
+
+  searchstring:='make (e=';
+  if (ExistWordInString(PChar(s),searchstring,[soDown])) then
+  begin
+    memoSummary.Lines.Append('Make has generated an error.');
+    x:=Pos('): ',LowerCase(s));
+    if x>0 then
+    begin
+      x:=x+3;
+      InternalError:=Copy(s,x,MaxInt);
+      memoSummary.Lines.Append('Make error: '+InternalError);
+    end;
+
+    //Get make error code
+    x:=Pos(searchstring,LowerCase(s));
+    if x>0 then
+    begin
+      x:=x+Length(searchstring);
+      y:=0;
+      while s[x] in ['0'..'9'] do
+      begin
+        y:=y*10+Ord(s[x])-$30;
+        Inc(x);
+      end;
+      // if error=2 then most probable cause: bad checkout of sources.
+      if y=2 then
+      begin
+        memoSummary.Lines.Append('Most probable cause: bad checkout of sources !');
+        memoSummary.Lines.Append('Most successfull approach: delete sources and run again.');
+      end;
+    end;
+  end;
 
   searchstring:='unable to connect to a repository at url';
   if (ExistWordInString(PChar(s),searchstring,[soDown])) then
@@ -1165,6 +1197,16 @@ begin
     FG      := clFuchsia;
     BG      := clBlack;
     Special := True;
+  end;
+
+  if (ExistWordInString(PChar(s),'make (e=',[soDown])) then
+  begin
+    // make fatal messages ...
+    begin
+      FG      := clRed;
+      BG      := clBlue;
+      Special := True;
+    end;
   end;
 
   if (NOT Special) AND (ExistWordInString(PChar(s),'make.exe ',[soDown]) OR ExistWordInString(PChar(s),'make ',[soDown]) OR ExistWordInString(PChar(s),'gmake ',[soDown])) then

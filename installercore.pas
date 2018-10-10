@@ -110,6 +110,7 @@ type
     function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
+    function GetFullVersion:dword;
   protected
     FCleanModuleSuccess: boolean;
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
@@ -269,6 +270,7 @@ type
     // get cross-installer
     property CrossInstaller:TCrossInstaller read GetCrossInstaller;
     // set cross-target
+    property NumericalVersion:dword read GetFullVersion;
     procedure SetTarget(aCPU,aOS,aSubArch:string);virtual;
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
@@ -2395,6 +2397,12 @@ begin
     if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etInfo);
   end;
 end;
+
+function TInstaller.GetFullVersion:dword;
+begin
+  result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,Self.FReleaseVersion);
+end;
+
 
 destructor TInstaller.Destroy;
 begin
