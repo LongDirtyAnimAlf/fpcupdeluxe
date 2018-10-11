@@ -869,9 +869,9 @@ begin
     Installer:=TWinInstaller.Create(InstallDir,FCompiler,FVerbose);
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
-      Installer.FPCDir:=FPCDir;
+      Installer.FPCDir:=FPCInstallDir;
       {$ifndef FPCONLY}
-      Installer.LazarusDir:=FLazarusDir;
+      Installer.LazarusDir:=FLazarusInstallDir;
       // todo: following not strictly needed:?!?
       Installer.LazarusPrimaryConfigPath:=FLazarusPrimaryConfigPath;
       {$endif}
