@@ -82,6 +82,12 @@ begin
     // suppress all setfocus errors on Darwin, always
     if AnsiContainsText(line,'.setfocus') then continue;
     {$endif}
+
+    {$ifdef Unix}
+    // suppress all Kb Used messages, always
+    if AnsiContainsText(line,'Kb Used') then continue;
+    {$endif}
+
     // suppress all SynEdit PaintLock errors, always
     if AnsiContainsText(line,'PaintLock') then continue;
 

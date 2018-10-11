@@ -59,9 +59,7 @@ interface
 
 uses
   Classes, SysUtils,
-  process,
-  //UTF8Process,
-  strutils;
+  process;
 
 const
   // Internal error code/result codes:
@@ -116,7 +114,6 @@ type
       function GetExceptionInfo: string;
       function GetOutputString: string;
       function GetOutputStrings: TStringList;
-      function GetParametersString: String;
       function GetProcessEnvironment: TProcessEnvironment;
       procedure SetOnError(AValue: TErrorFunc);
       procedure SetOnErrorM(AValue: TErrorMethod);
@@ -124,7 +121,7 @@ type
       procedure SetOnOutputM(AValue: TDumpMethod);
     public
       // Run executable with parameters etc. Comes in place of inherited execute.
-      {%H-}procedure Execute;
+      procedure Execute;override;
       // Executable+parameters. Use Executable and Parameters/ParametersString to assign
       property ResultingCommand: string read GetResultingCommand;
       // All environment variables, e.g. PATH
@@ -152,26 +149,23 @@ function ExecuteCommand(Commandline: string; Verbose:boolean): integer; overload
 // Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommand(Commandline: string; out Output:string; Verbose:boolean): integer; overload;
 // Runs command, returns result code. Negative codes are processutils internal error codes
-function ExecuteCommand(Commandline: string; Output : TStream; Verbose:boolean): integer; overload;
-// Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose:boolean): integer; overload;
 // Runs command, returns result code. Negative codes are processutils internal error codes
 function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; Verbose:boolean): integer; overload;
 // Runs command, returns result code. Negative codes are processutils internal error codes
 // PrependPath is prepended to existing path. If empty, keep current path
 function ExecuteCommandInDir(Commandline, Directory: string; out Output:string; PrependPath: string; Verbose:boolean): integer; overload;
-// Don't process comamndline
-function ExecutePlainCommand(Commandline: string; out Output: string; Verbose: boolean): integer;
 // Writes output to console
 procedure DumpConsole(Sender:TProcessEx; output:string);
 
 implementation
 
-{$ifdef LCL}
 uses
-  Forms,Controls;
-{$endif}
-
+  fpcuputil
+  {$ifdef LCL}
+  ,Forms,Controls
+  {$endif}
+  ;
 { TProcessEx }
 
 function TProcessEx.GetOutputString: string;
@@ -190,11 +184,6 @@ begin
   result:=FOutputStrings;
 end;
 
-function TProcessEx.GetParametersString: String;
-begin
-  result:=AnsiReplaceStr(Parameters.text, LineEnding, ' ');
-end;
-
 function TProcessEx.GetExceptionInfo: string;
 begin
   result:=FExceptionInfoStrings.Text;
@@ -205,10 +194,9 @@ var i:integer;
 begin
   //this is not the command as executed. The quotes are surrounding individual params.
   //the actual quoting is platform dependent
-  //perhaps better to use another quoting character to make this clear to the user.
   result:=Executable;
   for i:=0 to Parameters.Count-1 do
-    result:=result+' "'+Parameters[i]+'"';
+    result:=result+' '+MaybeQuoted(Parameters[i]);
 end;
 
 function TProcessEx.GetProcessEnvironment: TProcessEnvironment;
@@ -307,6 +295,10 @@ begin
       {$ifdef LCL}
       i:=0;
       {$endif}
+      {$IFDEF DEBUGCONSOLE}
+      writeln('ExecuteCommand: executable '+Self.Executable);
+      writeln('ExecuteCommand: params     '+Self.Parameters.Text);
+      {$ENDIF DEBUGCONSOLE}
       inherited Execute;
       while Running do
       begin
@@ -360,6 +352,9 @@ begin
       OnErrorM(Self,false);
     end;
   end;
+  {$IFDEF DEBUGCONSOLE}
+  writeln('ExecuteCommand: exit status: '+IntToStr(FExitStatus));
+  {$ENDIF DEBUGCONSOLE}
 end;
 
 constructor TProcessEx.Create(AOwner : TComponent);
@@ -501,14 +496,6 @@ begin
   Result:=ExecuteCommandInDir(Commandline,'',Output,Verbose);
 end;
 
-function ExecuteCommand(Commandline: string; Output : TStream;
-  Verbose: boolean): integer;
-begin
-  // to be done
-  //Result:=ExecuteCommandInDir(Commandline,'',Output,Verbose);
-end;
-
-
 function ExecuteCommandInDir(Commandline, Directory: string; Verbose: boolean
   ): integer;
 var
@@ -530,42 +517,48 @@ var
   PE:TProcessEx;
   s:string;
 
-  function GetFirstWord:string;
-  var
-    i:integer;
-    LastQuote:char=#0;
-    InQuote:boolean;
-  const
-    QUOTES = ['"',''''];
+  Function GetNextWord : TProcessString;
+
+  Const
+    WhiteSpace = [' ',#9,#10,#13];
+    Literals = ['"',''''];
+
+  Var
+    Wstart,wend : Integer;
+    InLiteral : Boolean;
+    LastLiteral : TProcessChar;
+
   begin
-  Commandline:=trim(Commandline);
-  i:=1;
-  InQuote:=false;
-  while (i<=length(Commandline)) and (InQuote or (Commandline[i]>' ')) do
-    begin
-    // Check first and last quote:
-    if Commandline[i] in QUOTES then
-      if InQuote then
-        begin
-        if Commandline[i]=LastQuote then
+    WStart:=1;
+    While (WStart<=Length(Commandline)) and charinset(Commandline[WStart],WhiteSpace) do
+      Inc(WStart);
+    WEnd:=WStart;
+    InLiteral:=False;
+    LastLiteral:=#0;
+    While (Wend<=Length(Commandline)) and (Not charinset(Commandline[Wend],WhiteSpace) or InLiteral) do
+      begin
+      if charinset(Commandline[Wend],Literals) then
+        If InLiteral then
+          InLiteral:=Not (Commandline[Wend]=LastLiteral)
+        else
           begin
-          InQuote:=false;
-          delete(Commandline,i,1);
-          i:=i-1;
+          InLiteral:=True;
+          LastLiteral:=Commandline[Wend];
           end;
-        end
-      else
-        begin
-        InQuote:=True;
-        LastQuote:=Commandline[i];
-        delete(Commandline,i,1);
-        i:=i-1;
-        end;
-    i:=i+1;
-    end;
-  // Copy found word and remove it from remaining command line
-  result:=trim(copy(Commandline,1,i));
-  delete(Commandline,1,i);
+       inc(wend);
+       end;
+
+     Result:=Copy(Commandline,WStart,WEnd-WStart);
+
+     if  (Length(Result) > 0)
+     and (Result[1] = Result[Length(Result)]) // if 1st char = last char and..
+     and (Result[1] in Literals) then // it's one of the literals, then
+       Result:=Copy(Result, 2, Length(Result) - 2); //delete the 2 (but not others in it)
+
+     While (WEnd<=Length(Commandline)) and (Commandline[Wend] in WhiteSpace) do
+       inc(Wend);
+     Delete(Commandline,1,WEnd-1);
+
   end;
 
 begin
@@ -583,55 +576,23 @@ begin
       else
         PE.Environment.SetVar(PATHVARNAME, PrependPath);
     end;
-    PE.Executable:=GetFirstWord;
-    s:=GetFirstWord;
+    s:=GetNextWord;
+    PE.Executable:=s;
+    s:=GetNextWord;
     while s<>'' do
       begin
       if s<>'emptystring'
          then PE.Parameters.Add(s)
          else PE.Parameters.Add('""');
-      s:=GetFirstWord;
+      s:=GetNextWord;
       end;
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;
-    {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: executable '+PE.Executable);
-    writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
-    {$ENDIF DEBUGCONSOLE}
     PE.Execute;
 
     Output:=PE.OutputString;
     Result:=PE.ExitStatus;
-    {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: exit status: '+IntToStr(Result));
-    {$ENDIF DEBUGCONSOLE}
-  finally
-    PE.Free;
-  end;
-end;
-
-function ExecutePlainCommand(Commandline: string; out Output: string; Verbose: boolean): integer;
-var
-  PE:TProcessEx;
-  s:string;
-begin
-  PE:=TProcessEx.Create(nil);
-  try
-    PE.CommandLine:=Commandline;
-    PE.ShowWindow := swoHIDE;
-    if Verbose then
-      PE.OnOutput:=@DumpConsole;
-    {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: executable '+PE.Executable);
-    writeln('ExecuteCommandInDir: params     '+PE.Parameters.Text);
-    {$ENDIF DEBUGCONSOLE}
-    PE.Execute;
-    Output:=PE.OutputString;
-    Result:=PE.ExitStatus;
-    {$IFDEF DEBUGCONSOLE}
-    writeln('ExecuteCommandInDir: exit status: '+IntToStr(Result));
-    {$ENDIF DEBUGCONSOLE}
   finally
     PE.Free;
   end;

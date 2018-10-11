@@ -68,14 +68,16 @@ type
   TUniversalInstaller = class(TInstaller)
   private
     FBinPath:string; //Path where compiler is
-    // FPC base directory - directory where FPC is (to be) installed:
-    FFPCDir:string;
+    // FPC base directories
+    FFPCSourceDir:string;
+    FFPCInstallDir:string;
     {$ifndef FPCONLY}
     // Compiler options chosen by user to build Lazarus. There is a CompilerOptions property,
     // but let's leave that for use with FPC.
     FLazarusCompilerOptions:string;
-    // Lazarus base directory - directory where Lazarus is (to be) installed:
-    FLazarusDir:string;
+    // Lazarus base directories
+    FLazarusSourceDir:string;
+    FLazarusInstallDir:string;
     // Keep track of whether Lazarus needs to be rebuilt after package installation
     // or running lazbuild with an .lpk
     FLazarusNeedsRebuild:boolean;
@@ -86,6 +88,7 @@ type
     {$endif}
     FPath:string; //Path to be used within this session (e.g. including compiler path)
     InitDone:boolean;
+    function RebuildLazarus:boolean;
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
@@ -111,15 +114,17 @@ type
     // Filters (a module's) sl stringlist and runs all <Directive> commands:
     function RunCommands(Directive:string;sl:TStringList):boolean;
   public
-    // FPC base directory
-    property FPCDir:string read FFPCDir write FFPCDir;
+    // FPC base directories
+    property FPCSourceDir:string read FFPCSourceDir write FFPCSourceDir;
+    property FPCInstallDir:string read FFPCInstallDir write FFPCInstallDir;
     {$ifndef FPCONLY}
     // Compiler options user chose to compile Lazarus with (coming from fpcup).
     property LazarusCompilerOptions: string write FLazarusCompilerOptions;
     // Lazarus primary config path
     property LazarusPrimaryConfigPath:string read FLazarusPrimaryConfigPath write FLazarusPrimaryConfigPath;
-    // Lazarus base directory
-    property LazarusDir:string read FLazarusDir write FLazarusDir;
+    // Lazarus base directories
+    property LazarusSourceDir:string read FLazarusSourceDir write FLazarusSourceDir;
+    property LazarusInstallDir:string read FLazarusInstallDir write FLazarusInstallDir;
     // LCL widget set to be built
     property LCL_Platform: string read FLCL_Platform write FLCL_Platform;
     {$endif}
@@ -208,6 +213,58 @@ end;
 
 { TUniversalInstaller }
 
+function TUniversalInstaller.RebuildLazarus:boolean;
+begin
+  result:=false;
+
+  infoln(infotext+'Going to rebuild Lazarus because packages were installed or removed.',etInfo);
+
+  Processor.Executable := Make;
+  Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
+  Processor.Parameters.Clear;
+
+  {$IFDEF lazarus_parallel_make}
+  if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+  {$ENDIF}
+  Processor.Parameters.Add('FPC=' + FCompiler);
+  Processor.Parameters.Add('USESVN2REVISIONINC=0');
+  Processor.Parameters.Add('--directory=.');
+  Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir)); //Make sure our FPC units can be found by Lazarus
+  Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+  Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+
+  {$ifdef Windows}
+  Processor.Parameters.Add('OPT="' + FLazarusCompilerOptions+'"');
+  {$else}
+  //Processor.Parameters.Add('OPT=' + FLazarusCompilerOptions);
+  {$endif}
+
+  if FLCL_Platform <> '' then
+    Processor.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
+
+  Processor.Parameters.Add('useride');
+
+  try
+    WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
+    Processor.Execute;
+    result := Processor.ExitStatus=0;
+    if result then
+    begin
+      infoln(infotext+'Lazarus rebuild succeeded',etDebug);
+      FLazarusNeedsRebuild:=false;
+    end
+    else
+      WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
+        'Details: '+FErrorLog.Text,true);
+  except
+    on E: Exception do
+    begin
+      result:=false;
+      WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
+        'Details: '+E.Message,true);
+    end;
+  end;
+end;
 
 function TUniversalInstaller.GetValue(Key: string; sl: TStringList;
   recursion: integer): string;
@@ -262,7 +319,7 @@ begin
         if macro='BASEDIR' then
           macro:=ExcludeTrailingPathDelimiter(FBaseDirectory)
         else if macro='FPCDIR' then
-          macro:=ExcludeTrailingPathDelimiter(FFPCDir)
+          macro:=ExcludeTrailingPathDelimiter(FFPCInstallDir)
         else if macro='FPCBINDIR' then
             macro:=ExcludeTrailingPathDelimiter(FBinPath)
         else if macro='FPCBIN' then
@@ -280,7 +337,7 @@ begin
           macro:=GetExeExt
         {$ifndef FPCONLY}
         else if macro='LAZARUSDIR' then
-          macro:=ExcludeTrailingPathDelimiter(FLazarusDir)
+          macro:=ExcludeTrailingPathDelimiter(FLazarusInstallDir)
         else if macro='LAZARUSPRIMARYCONFIGPATH' then
           macro:=ExcludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)
         {$endif}
@@ -359,8 +416,8 @@ begin
     infoln(localinfotext+'Missing required executables. Aborting.',etError);
 
   // Add fpc architecture bin and plain paths
-  FBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
-  PlainBinPath:=IncludeTrailingPathDelimiter(FFPCDir)+'bin';
+  FBinPath:=IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  PlainBinPath:=IncludeTrailingPathDelimiter(FFPCInstallDir);
   // Need to remember because we don't always use ProcessEx
   FPath:=FBinPath+PathSeparator+
   {$IFDEF DARWIN}
@@ -410,7 +467,7 @@ begin
   // all other packages will be ignored
   if (NOT FileExists(PackageAbsolutePath)) then
   begin
-    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(LazarusDir)+'components', PackageName+'.lpk' , true);
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(LazarusInstallDir)+'components', PackageName+'.lpk' , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
     PackageFiles.Free;
   end;
@@ -471,7 +528,7 @@ begin
        else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
   end;
 
-  Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
+  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+'lazbuild'+GetExeExt;
 
   RegisterPackageFeature:=false;
 
@@ -550,7 +607,7 @@ begin
   if (result) AND (lpkversion.Name<>'unknown') then
   begin
     if FVerbose then WritelnLog(localinfotext+'Checking lpl file for '+PackageName,true);
-    Path := IncludeTrailingPathDelimiter(LazarusDir)+
+    Path := IncludeTrailingPathDelimiter(LazarusInstallDir)+
             'packager'+DirectorySeparator+
             'globallinks'+DirectorySeparator+
             LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
@@ -1045,7 +1102,7 @@ begin
       begin
         key:='Package/Version/';
         lpkversion.GetVersion(lpkdoc,key);
-        PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusDir)+
+        PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusInstallDir)+
                                'packager'+DirectorySeparator+
                                'globallinks'+DirectorySeparator+
                                LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
@@ -1319,64 +1376,7 @@ begin
       end;
 
       // If Lazarus was marked for rebuild, do so:
-      if FLazarusNeedsRebuild then
-      begin
-        infoln(infotext+'Going to rebuild Lazarus because packages were installed.',etInfo);
-        Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
-        FErrorLog.Clear;
-        Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
-        Processor.Parameters.Clear;
-        {$IFDEF DEBUG}
-        Processor.Parameters.Add('--verbose');
-        {$ELSE}
-        // See compileroptions.pp
-        Processor.Parameters.Add('--quiet');
-        {$ENDIF}
-        Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
-        Processor.Parameters.Add('--cpu=' + GetTargetCPU);
-        Processor.Parameters.Add('--os=' + GetTargetOS);
-
-        if FLCL_Platform <> '' then
-          Processor.Parameters.Add('--ws=' + FLCL_Platform);
-
-        Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
-
-        try
-          result := false;
-          Processor.Execute;
-          result := Processor.ExitStatus=0;
-          if result then
-          begin
-            infoln(infotext+'Lazarus rebuild succeeded',etDebug);
-            FLazarusNeedsRebuild:=false;
-          end
-          else
-            WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
-              'Details: '+FErrorLog.Text,true);
-        except
-          on E: Exception do
-          begin
-            result:=false;
-            WritelnLog(etError, infotext+'Exception trying to rebuild Lazarus '+LineEnding+
-              'Details: '+E.Message,true);
-          end;
-        end;
-
-        (*
-        // still does not work as expected: disable for now !
-        if (NOT result) then
-        begin
-          //uninstall module in case of error except suggestedpackages
-          if LowerCase(ModuleName)<>'suggestedpackages' then
-          begin
-            WritelnLog(etWarning,infotext+'Going to remove '+ModuleName+' from Lazarus !',true);
-            //result:=UnInstallModule(ModuleName);
-            result:=RemovePackages(sl);
-          end;
-        end;
-        *)
-
-      end;
+      if FLazarusNeedsRebuild then result:=RebuildLazarus;
   end
   else
   begin
@@ -1755,45 +1755,7 @@ begin
     end;
 
     // If Lazarus was marked for rebuild, do so:
-    if FLazarusNeedsRebuild then
-    begin
-      infoln(infotext+'Going to rebuild Lazarus because packages were uninstalled.',etInfo);
-      Processor.Executable := IncludeTrailingPathDelimiter(LazarusDir)+'lazbuild'+GetExeExt;
-      FErrorLog.Clear;
-      Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(LazarusDir);
-      Processor.Parameters.Clear;
-      {$IFDEF DEBUG}
-      Processor.Parameters.Add('--verbose');
-      {$ELSE}
-      // See compileroptions.pp
-      Processor.Parameters.Add('--quiet');
-      {$ENDIF}
-      Processor.Parameters.Add('--pcp=' + FLazarusPrimaryConfigPath);
-      Processor.Parameters.Add('--cpu=' + GetTargetCPU);
-      Processor.Parameters.Add('--os=' + GetTargetOS);
-      if FLCL_Platform <> '' then
-        Processor.Parameters.Add('--ws=' + FLCL_Platform);
-      Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FLazarusCompilerOptions);
-      try
-        Processor.Execute;
-        result := Processor.ExitStatus=0;
-        if result then
-        begin
-          infoln(infotext+'Lazarus rebuild succeeded',etDebug);
-          FLazarusNeedsRebuild:=false;
-        end
-        else
-          WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
-            'Details: '+FErrorLog.Text,true);
-      except
-        on E: Exception do
-          begin
-          WritelnLog(etError,infotext+'Exception trying to rebuild Lazarus '+LineEnding+
-            'Details: '+E.Message,true);
-          result:=false;
-          end;
-      end;
-    end;
+    if FLazarusNeedsRebuild then result:=RebuildLazarus;
   end
   else
     result:=false;

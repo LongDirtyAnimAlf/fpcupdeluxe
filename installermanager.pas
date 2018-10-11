@@ -66,15 +66,7 @@ Const
     {$endif}
     'Do fpc;'+ //keyword Do means run the specified declared sequence
     {$ifndef FPCONLY}
-    'Do helplazarus;'+
-    //'Do DOCEDITOR;'+
-    //Recompile user IDE so any packages selected by the
-    //universal installer are compiled into the IDE:
-    'Do USERIDE;'+
-    //'Buildmodule lazbuild;' +
-    //Get default external packages/universal modules
-    //'Do UniversalDefault;'+
-    //Any cross compilation; must be at end because it resets state machine run memory
+    'Do lazarus;'+
     'Do LCLCross;'+
     {$endif}
     'End;'+ //keyword End specifies the end of the sequence
@@ -88,16 +80,7 @@ Const
     'Do fpc;'+
     'Do FPCCrossWin32-64;'+
     {$ifndef FPCONLY}
-    // Lazbuild: make sure we can at least compile LCL programs
-    'Do lazbuild;'+
-    'Do helplazarus;'+
-    //'Do DOCEDITOR;'+
-    // Recompile user IDE so any packages selected by the
-    // universal installer are compiled into the IDE:
-    'Do USERIDE;'+
-    'Buildmodule lazbuild;' +
-    // Get default external packages/universal modules
-    //'Do UniversalDefault;'+
+    'Do lazarus;'+
     'Do LCLCross;'+
     'Do LazarusCrossWin32-64;'+
     {$endif}
@@ -114,15 +97,7 @@ Const
     'Do fpc;'+
     'Do FPCCrossWin64-32;'+
     {$ifndef FPCONLY}
-    // Lazbuild: make sure we can at least compile LCL programs
-    'Do helplazarus;'+
-    //'Do DOCEDITOR;'+
-    //Recompile user IDE so any packages selected by the
-    //universal installer are compiled into the IDE:
-    'Do USERIDE;'+
-    'Buildmodule lazbuild;' +
-    //Get default external packages/universal modules
-    //'Do UniversalDefault;'+
+    'Do lazarus;'+
     'Do LCLCross;'+
     'Do LazarusCrossWin64-32;'+
     {$endif}
@@ -1475,13 +1450,15 @@ begin
       FInstaller:=TUniversalInstaller.Create;
       FCurrentModule:=ModuleName;
       //assign properties
-      (FInstaller as TUniversalInstaller).FPCDir:=FParent.FPCInstallDirectory;
+      (FInstaller as TUniversalInstaller).FPCInstallDir:=FParent.FPCInstallDirectory;
+      (FInstaller as TUniversalInstaller).FPCSourceDir:=FParent.FPCSourceDirectory;
       // Use compileroptions for chosen FPC compile options...
       FInstaller.CompilerOptions:=FParent.FPCOPT;
       // ... but more importantly, pass Lazarus compiler options needed for IDE rebuild
       {$ifndef FPCONLY}
+      (FInstaller as TUniversalInstaller).LazarusSourceDir:=FParent.FLazarusDirectory;
+      (FInstaller as TUniversalInstaller).LazarusInstallDir:=FParent.FLazarusDirectory;
       (FInstaller as TUniversalInstaller).LazarusCompilerOptions:=FParent.FLazarusOPT;
-      (FInstaller as TUniversalInstaller).LazarusDir:=FParent.FLazarusDirectory;
       (FInstaller as TUniversalInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
       (FInstaller as TUniversalInstaller).LCL_Platform:=FParent.CrossLCL_Platform;
       {$endif}

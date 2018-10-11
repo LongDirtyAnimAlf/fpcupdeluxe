@@ -298,6 +298,9 @@ procedure infoln(Message: string; Level: TEventType);
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // Correct line-endings
 function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
+// Correct directory separators
+function FixPath(const s:string):string;
+function MaybeQuoted(const s:string):string;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
 // Like ExpandFilenameUTF8 but does not expand an empty string to current directory
@@ -1500,6 +1503,78 @@ begin
   except
   end;
 end;
+
+function FixPath(const s:string):string;
+var
+  i : longint;
+begin
+  { Fix separator }
+  result:=s;
+  for i:=1 to length(s) do
+   if s[i] in ['/','\'] then
+    result[i]:=DirectorySeparator;
+end;
+
+function MaybeQuoted(const s:string):string;
+const
+  FORBIDDEN_CHARS_DOS = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+                     '{', '}', '''', '`', '~'];
+  FORBIDDEN_CHARS_OTHER = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')',
+                     '{', '}', '''', ':', '\', '`', '~'];
+var
+  forbidden_chars: set of char;
+  i  : integer;
+  quote_char: ansichar;
+  quoted : boolean;
+begin
+  {$ifdef Windows}
+  forbidden_chars:=FORBIDDEN_CHARS_DOS;
+  quote_char:='"';
+  {$else}
+  forbidden_chars:=FORBIDDEN_CHARS_OTHER;
+  include(forbidden_chars,'"');
+  quote_char:='''';
+  {$endif}
+
+  quoted:=false;
+  result:=quote_char;
+  for i:=1 to length(s) do
+   begin
+     if s[i]=quote_char then
+       begin
+         quoted:=true;
+         result:=result+'\'+quote_char;
+       end
+     else case s[i] of
+       '\':
+         begin
+           {$ifdef UNIX}
+           result:=result+'\\';
+           quoted:=true;
+           {$else}
+           result:=result+'\';
+           {$endif}
+         end;
+       ' ',
+       #128..#255 :
+         begin
+           quoted:=true;
+           result:=result+s[i];
+         end;
+       else begin
+         if s[i] in forbidden_chars then
+           quoted:=True;
+         result:=result+s[i];
+       end;
+     end;
+   end;
+  if quoted then
+    result:=result+quote_char
+  else
+    result:=s;
+end;
+
+
 
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
 var

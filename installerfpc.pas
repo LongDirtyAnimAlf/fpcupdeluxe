@@ -2231,10 +2231,10 @@ begin
     FBinPath+PathSeparator+ {compiler for current architecture}
     FMakeDir+PathSeparator+
     FBootstrapCompilerDirectory+PathSeparator+
-    IncludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
+    ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
     IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
     IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
+    ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
     IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
     IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+
     s,
@@ -2254,10 +2254,10 @@ begin
   SetPath(
     FBinPath+PathSeparator+
     FBootstrapCompilerDirectory+PathSeparator+
-    IncludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
+    ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
     IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
     IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
+    ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
     IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
     IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
     // pwd is located in /bin ... the makefile needs it !!

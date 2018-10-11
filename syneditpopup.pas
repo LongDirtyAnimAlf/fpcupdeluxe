@@ -21,6 +21,8 @@ type
     procedure CopyUpdate(Sender: TObject);
     procedure SelectAllExecute(Sender: TObject);
     procedure SelectAllUpdate(Sender: TObject);
+    procedure SelectCopyAllExecute(Sender: TObject);
+    procedure SelectCopyAllUpdate(Sender: TObject);
     procedure SetPopupMenu_(const Value: TPopupMenu);
     function  GetPopupMenu_: TPopupMenu;
   public
@@ -58,6 +60,17 @@ begin
  TAction(Sender).Enabled :=Self.Lines.Text<>'';
 end;
 
+procedure TSynEdit.SelectCopyAllExecute(Sender: TObject);
+begin
+ Self.SelectAll;
+ Self.CopyToClipboard;
+end;
+
+procedure TSynEdit.SelectCopyAllUpdate(Sender: TObject);
+begin
+ TAction(Sender).Enabled :=Self.Lines.Text<>'';
+end;
+
 constructor TSynEdit.Create(AOwner: TComponent);
 begin
   inherited;
@@ -87,7 +100,9 @@ procedure TSynEdit.CreateActns;
 begin
   AddActItem('&Copy',Menus.ShortCut(Word('C'), [ssCtrl]),False, @CopyExecute, @CopyUpdate);
   AddActItem('-',0,False,nil,nil);
-  AddActItem('Select &All',Menus.ShortCut(Word('A'), [ssCtrl]),False, @SelectAllExecute, @SelectAllUpdate);
+  AddActItem('&Select All',Menus.ShortCut(Word('S'), [ssCtrl]),False, @SelectAllExecute, @SelectAllUpdate);
+  AddActItem('-',0,False,nil,nil);
+  AddActItem('Select and Copy &All',Menus.ShortCut(Word('A'), [ssCtrl]),False, @SelectCopyAllExecute, @SelectCopyAllUpdate);
 end;
 
 procedure TSynEdit.SetPopupMenu_(const Value: TPopupMenu);
