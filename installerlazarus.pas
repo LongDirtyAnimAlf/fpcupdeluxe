@@ -307,7 +307,11 @@ begin
         // Tell make where to find the target binutils if cross-compiling:
         if CrossInstaller.BinUtilsPath <> '' then
           Processor.Parameters.Add('CROSSBINDIR=' + ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
-        Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
+
+        {$ifdef Windows}
+        Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+        Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+        {$endif}
 
         Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
         Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
@@ -470,8 +474,10 @@ begin
     Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
     //Processor.Parameters.Add('FPCFPMAKE='+FCompiler);
 
+    {$ifdef Windows}
     Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+    {$endif}
 
     if FCrossLCL_Platform <> '' then
       Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
@@ -1546,8 +1552,10 @@ begin
   {$ENDIF}
   Processor.Parameters.Add('FPC=' + FCompiler + '');
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-  Processor.Parameters.Add('UPXPROG=echo');  //Don't use UPX
-  Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+  {$ifdef Windows}
+  Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
+  Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
+  {$endif}
   Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
 
