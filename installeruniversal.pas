@@ -214,6 +214,8 @@ end;
 { TUniversalInstaller }
 
 function TUniversalInstaller.RebuildLazarus:boolean;
+var
+  LazBuildApp:string;
 begin
   result:=false;
 
@@ -230,19 +232,23 @@ begin
   Processor.Parameters.Add('USESVN2REVISIONINC=0');
   Processor.Parameters.Add('--directory=.');
   Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir)); //Make sure our FPC units can be found by Lazarus
+  Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
+  Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
   Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
 
-  {$ifdef Windows}
-  Processor.Parameters.Add('OPT="' + FLazarusCompilerOptions+'"');
-  {$else}
-  //Processor.Parameters.Add('OPT=' + FLazarusCompilerOptions);
-  {$endif}
+  //Set options
+  //Processor.Parameters.Add('OPT=' + Trim(FLazarusCompilerOptions));
 
   if FLCL_Platform <> '' then
     Processor.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
 
-  Processor.Parameters.Add('useride');
+  LazBuildApp := IncludeTrailingPathDelimiter(LazarusInstallDir) + 'lazbuild' + GetExeExt;
+  //If we do not [yet] have lazbuild, include it in make
+  if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
+    Processor.Parameters.Add('lazbuild useride')
+  else
+    Processor.Parameters.Add('useride');
 
   try
     WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);

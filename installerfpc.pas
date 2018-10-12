@@ -654,6 +654,9 @@ begin
           //Using jobs can give problems on some systems ... disable for now.
           //if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
           Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
+          Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+          Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
+          Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
           Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           // Tell make where to find the target binutils if cross-compiling:
           if CrossInstaller.BinUtilsPath<>'' then
@@ -1109,6 +1112,9 @@ begin
   {$IFDEF DEBUG}
   Processor.Parameters.Add('-d');
   {$ENDIF}
+  Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
+  Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+  Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$IFDEF UNIX}
   Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -3061,6 +3067,9 @@ begin
       if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Parameters.Add('FPC='+aCleanupCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
+      Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
+      Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+      Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
       {$IFDEF MSWINDOWS}
       Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX

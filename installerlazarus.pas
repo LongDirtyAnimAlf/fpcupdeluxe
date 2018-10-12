@@ -46,11 +46,11 @@ const
     'Checkmodule lazarus;' +
     'Getmodule lazarus;' +
     'ConfigModule lazarus;' +
-    'Do helplazarus;'+
+    'Buildmodule lazbuild;' +
     'Buildmodule USERIDE;' +
     'Buildmodule startlazarus;' +
-    'Buildmodule lazbuild;' +
     'Do UniversalDefault;'+
+    'Do helplazarus;'+
     'Exec CreateLazarusScript;' +
     'End;' +
 
@@ -61,16 +61,6 @@ const
     'Buildmodule lazarus;' +
     'ConfigModule lazarus;' +
     'Exec CreateLazarusScript;' +
-    'End;' +
-
-    //Nogui widgetset+Lazbuild:
-    'Declare lazbuild;' +
-    'Cleanmodule lazarus;' +
-    'Checkmodule lazarus;' +
-    'Getmodule lazarus;' +
-    'Buildmodule lazbuild;' +
-    //config lazarus, so lazbuild will work:
-    'ConfigModule lazarus;' +
     'End;' +
 
     //standard uninstall
@@ -88,9 +78,9 @@ const
     'Declare LazCleanAndBuildOnly;' +
     'Cleanmodule lazarus;' +
     'ConfigModule lazarus;' +
+    'Buildmodule lazbuild;' +
     'Buildmodule USERIDE;' +
     'Buildmodule startlazarus;' +
-    'Buildmodule lazbuild;' +
     'Exec CreateLazarusScript;' +
     'End;' +
 
@@ -307,6 +297,12 @@ begin
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
         Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir)); //Make sure our FPC units can be found by Lazarus
+        //Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir)); //Make sure our FPC units can be found by Lazarus
+        Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
+        Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+
+        //Processor.Parameters.Add('FPCFPMAKE='+FCompiler);
+
 
         // Tell make where to find the target binutils if cross-compiling:
         if CrossInstaller.BinUtilsPath <> '' then
@@ -321,6 +317,7 @@ begin
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
+        //Set options
         Options := FCompilerOptions;
         if CrossInstaller.LibsPath <> '' then
           Options := Options + ' -Xd -Fl' + CrossInstaller.LibsPath;
@@ -331,7 +328,8 @@ begin
         end;
         Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         Options:=Trim(Options);
-        //Processor.Parameters.Add('OPT="' + STANDARDCOMPILEROPTIONS + ' ' + Options+'"');
+        //Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + Options);
+
         Processor.Parameters.Add('registration');
         Processor.Parameters.Add('lazutils');
         Processor.Parameters.Add('lcl');
@@ -447,7 +445,7 @@ begin
 
   OperationSucceeded := true;
 
-  //Note: available in recent Lazarus : use "make lazbuild useride" to build ide with installed packages
+  //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
   if ((ModuleName<>'USERIDE') OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
   begin
     // Make all (should include lcl & ide), lazbuild, lcl etc
@@ -467,25 +465,37 @@ begin
     Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
     Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir)); //Make sure our FPC units can be found by Lazarus
+    //Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir)); //Make sure our FPC units can be found by Lazarus
+    Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
+    Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+    //Processor.Parameters.Add('FPCFPMAKE='+FCompiler);
 
     Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
     Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
 
-    {$ifdef Windows}
-    Processor.Parameters.Add('OPT="' + STANDARDCOMPILEROPTIONS + ' ' + FCompilerOptions+'"');
-    {$else}
-    //Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + FCompilerOptions);
-    {$endif}
-
     if FCrossLCL_Platform <> '' then
       Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+
+    //Set options
+    s:=StringReplace(FCompilerOptions,'  ',' ',[rfReplaceAll]);
+    s:=Trim(s);
+    //Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + s);
 
     case UpperCase(ModuleName) of
       'USERIDE':
       begin
-        Processor.Parameters.Add('lazbuild');
-        Processor.Parameters.Add('useride');
-        infoln(infotext+'Running make lazbuild useride', etInfo);
+        LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
+        //If we do not [yet] have lazbuild, include it in make
+        if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
+        begin
+          Processor.Parameters.Add('lazbuild useride');
+          infoln(infotext+'Running make lazbuild useride', etInfo);
+        end
+        else
+        begin
+          Processor.Parameters.Add('useride');
+          infoln(infotext+'Running make useride', etInfo);
+        end;
       end;
       'IDE':
       begin
@@ -516,6 +526,13 @@ begin
       end;
       'LAZBUILD':
       begin
+        if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt) then
+        begin
+          infoln(infotext+'Lazbuild already available ... skip building it.', etInfo);
+          OperationSucceeded := true;
+          Result := true;
+          exit;
+        end;
         Processor.Parameters.Add('lazbuild');
         infoln(infotext+'Running make lazbuild', etInfo);
       end;
@@ -619,7 +636,7 @@ begin
   end
   else
   begin
-    // useride; using lazbuild. Note: in recent Lazarus we could also run make lazbuild useride
+    // useride; using lazbuild. Note: in recent Lazarus we use make
     // ... but that apparently calls lazbuild internally anyway.
 
     // Check for valid lazbuild.
