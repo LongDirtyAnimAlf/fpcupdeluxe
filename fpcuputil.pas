@@ -72,8 +72,7 @@ uses
   eventlog;
 
 Const
-  // Maximum retries when downloading a file
-  DefMaxRetries = 5;
+  MAXCONNECTIONRETRIES=5;
   {$ifdef LCL}
   BeginSnippet='fpcupdeluxe:'; //helps identify messages as coming from fpcupdeluxe instead of make etc
   {$else}
@@ -170,7 +169,7 @@ type
     procedure parseFTPHTMLListing(F:TStream;filelist:TStringList);
   protected
     procedure SetVerbose(aValue:boolean);virtual;
-    property MaxRetries : Byte Read FMaxRetries Write FMaxRetries default DefMaxRetries;
+    property MaxRetries : Byte Read FMaxRetries Write FMaxRetries;
     property Username: string read FUsername;
     property Password: string read FPassword;
     property HTTPProxyHost: string read FHTTPProxyHost;
@@ -192,7 +191,7 @@ type
   {$ifdef ENABLENATIVE}
   TUseNativeDownLoader = Class(TBasicDownLoader)
   private
-    {$ifdef Darwin}
+    {$ifdef Darwinn}
     aFPHTTPClient:TNSHTTPSendAndReceive;
     {$else}
     aFPHTTPClient:TFPHTTPClient;
@@ -296,6 +295,8 @@ function GetLocalAppDataPath: string;
 procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
+//Get a temp file
+Function GetTempFileNameExt(Const Dir,Prefix,Ext : String) : String;
 // Correct line-endings
 function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
 // Correct directory separators
@@ -817,13 +818,14 @@ begin
 end;
 
 function GetFileNameFromURL(URL:string):string;
+const
+  URLMAGIC='/download';
 var
   URI:TURI;
   aURL:string;
 begin
-  if AnsiEndsStr('/download',URL)
-     then aURL:=Copy(URL,1,Length(URL)-9)
-     else aURL:=URL;
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   result:=URI.Document;
 end;
@@ -1462,6 +1464,31 @@ begin
     end;
 {$ENDIF NOCONSOLE}
 end;
+
+Function GetTempFileNameExt(Const Dir,Prefix,Ext : String) : String;
+Var
+  I : Integer;
+  Start,Extension : String;
+begin
+  if (Dir='') then
+    Start:=GetTempDir
+  else
+    Start:=IncludeTrailingPathDelimiter(Dir);
+  if (Prefix='') then
+    Start:=Start+'TMP'
+  else
+    Start:=Start+Prefix;
+  if (Ext='') then
+    Extension:='tmp'
+  else
+    Extension:=Ext;
+  i:=0;
+  repeat
+    Result:=Format('%s%.5d.'+Extension,[Start,i]);
+    Inc(i);
+  until not FileExists(Result);
+end;
+
 
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // We might (in theory) be moving files across partitions so we cannot use renamefile
@@ -2603,6 +2630,7 @@ end;
 constructor TBasicDownLoader.Create(AOwner: TComponent);
 begin
   inherited;
+  FMaxRetries:=MAXCONNECTIONRETRIES;
   FVerbose:=False;
   FUsername:='';
   FPassword:='';
@@ -2679,18 +2707,22 @@ end;
 constructor TUseNativeDownLoader.Create;
 begin
   Inherited;
-  {$ifdef Darwin}
+  FMaxRetries:=MAXCONNECTIONRETRIES;
+  {$ifdef Darwinn}
   // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
   // So, use client by Phil, a Lazarus forum member
   // See: https://macpgmr.github.io/
   aFPHTTPClient:=TNSHTTPSendAndReceive.Create;
+  with aFPHTTPClient do
+  begin
+    TimeOut:=10000;
+  end;
   {$else}
   aFPHTTPClient:=TFPHTTPClient.Create(Nil);
   with aFPHTTPClient do
   begin
     AllowRedirect:=True;
     //ConnectTimeout:=10000;
-    FMaxRetries:=DefMaxRetries;
     //RequestHeaders.Add('Connection: Close');
     // User-Agent needed for sourceforge and GitHub
     AddHeader('User-Agent',USERAGENT);

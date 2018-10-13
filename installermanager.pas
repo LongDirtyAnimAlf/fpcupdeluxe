@@ -875,63 +875,62 @@ begin
       infoln('Could not retrieve Windows version using GetWin32Version.',etWarning);
   {$ENDIF}
 
-  FSequencer.FSkipList:=nil;
-  if SkipModules<>'' then
-  begin
-    FSequencer.FSkipList:=TStringList.Create;
-    FSequencer.FSkipList.Delimiter:=',';
-    FSequencer.FSkipList.DelimitedText:=SkipModules;
-  end;
-
-  if FOnlyModules<>'' then
-  begin
-    FSequencer.CreateOnly(FOnlyModules);
-    result:=FSequencer.Run('Only');
-    FSequencer.DeleteOnly;
-  end
-  else
-  begin
-    aSequence:='Default';
-    {$ifdef win32}
-    // Run Windows specific cross compiler or regular version
-    if pos('CROSSWIN32-64',UpperCase(SkipModules))=0 then aSequence:='DefaultWin32';
-    {$endif}
-    {$ifdef win64}
-    //not yet
-    //if pos('CROSSWIN64-32',UpperCase(SkipModules))=0 then aSequence:='DefaultWin64';
-    {$endif}
-    {$ifdef CPUAARCH64}
-    aSequence:='DefaultSimple';
-    {$endif}
-    {$ifdef cpuarm}
-    aSequence:='DefaultSimple';
-    {$endif}
-    {$ifdef cpuarmhf}
-    aSequence:='DefaultSimple';
-    {$endif}
-    {$ifdef HAIKU}
-    aSequence:='DefaultSimple';
-    {$endif}
-    {$ifdef CPUPOWERPC64}
-    aSequence:='DefaultSimple';
-    {$endif}
-
-    infoln('InstallerManager: going to run sequencer for sequence: '+aSequence,etDebug);
-    result:=FSequencer.Run(aSequence);
-
-    if (FIncludeModules<>'') and (result) then
+  try
+    if SkipModules<>'' then
     begin
-      // run specified additional modules using the only mechanism
-      infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
-      FSequencer.CreateOnly(FIncludeModules);
-      result:=FSequencer.Run('Only');
-      FSequencer.DeleteOnly;
+      FSequencer.FSkipList:=TStringList.Create;
+      FSequencer.FSkipList.Delimiter:=',';
+      FSequencer.FSkipList.DelimitedText:=SkipModules;
     end;
+
+    if FOnlyModules<>'' then
+    begin
+      FSequencer.CreateOnly(FOnlyModules);
+      result:=FSequencer.Run('Only');
+    end
+    else
+    begin
+      aSequence:='Default';
+      {$ifdef win32}
+      // Run Windows specific cross compiler or regular version
+      if pos('CROSSWIN32-64',UpperCase(SkipModules))=0 then aSequence:='DefaultWin32';
+      {$endif}
+      {$ifdef win64}
+      //not yet
+      //if pos('CROSSWIN64-32',UpperCase(SkipModules))=0 then aSequence:='DefaultWin64';
+      {$endif}
+      {$ifdef CPUAARCH64}
+      aSequence:='DefaultSimple';
+      {$endif}
+      {$ifdef cpuarm}
+      aSequence:='DefaultSimple';
+      {$endif}
+      {$ifdef cpuarmhf}
+      aSequence:='DefaultSimple';
+      {$endif}
+      {$ifdef HAIKU}
+      aSequence:='DefaultSimple';
+      {$endif}
+      {$ifdef CPUPOWERPC64}
+      aSequence:='DefaultSimple';
+      {$endif}
+
+      infoln('InstallerManager: going to run sequencer for sequence: '+aSequence,etDebug);
+      result:=FSequencer.Run(aSequence);
+
+      if (FIncludeModules<>'') and (result) then
+      begin
+        // run specified additional modules using the only mechanism
+        infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
+        FSequencer.CreateOnly(FIncludeModules);
+        result:=FSequencer.Run('Only');
+      end;
+    end;
+    //FResultSet:=FSequencer.FInstaller;
+  finally
+    if assigned(FSequencer.FSkipList) then FreeAndNil(FSequencer.FSkipList);
+    FSequencer.DeleteOnly;
   end;
-
-  //FResultSet:=FSequencer.FInstaller;
-
-  if assigned(FSequencer.FSkipList) then FSequencer.FSkipList.Free;
 end;
 
 constructor TFPCupManager.Create;
@@ -1716,104 +1715,108 @@ var
 
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+SequenceName+'): ';
-  if not assigned(FParent.FModuleList) then
-  begin
-    result:=false;
-    FParent.WritelnLog(etError,localinfotext+'No sequences loaded while trying to find sequence name ' + SequenceName);
-    exit;
-  end;
-  // --clean or --install ??
-  if FParent.Uninstall then  // uninstall overrides clean
-  begin
-    if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-8,9))<>'UNINSTALL') then
-      SequenceName:=SequenceName+'uninstall';
-  end
-  else if FParent.Clean  then
-  begin
-    if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-4,5))<>'CLEAN') then
-      SequenceName:=SequenceName+'clean';
-  end;
-  // find sequence
-  idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
-  if (idx>=0) then
-  begin
-    result:=true;
-    SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
-    // Don't run sequence if already run
-    case SeqAttr^.Executed of
-      ESFailed : begin
-        infoln(localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
-        result:=false;
-        exit;
-        end;
-      ESSucceeded : begin
-        infoln(localinfotext+'Already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
-        exit;
-        end;
-      end;
-    // Get entry point in FStateMachine
-    InstructionPointer:=SeqAttr^.EntryPoint;
-    {$IFDEF DEBUG}
-    EntryPoint:=InstructionPointer;
-    {$ENDIF DEBUG}
-    // run sequence until end or failure
-    while true do
+  try
+    if not assigned(FParent.FModuleList) then
     begin
-      //For debugging state machine sequence:
-      {$IFDEF DEBUG}
-      infoln(localinfotext+'State machine running sequence '+SequenceName,etDebug);
-      infoln(localinfotext+'State machine [instr]: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr)),etDebug);
-      infoln(localinfotext+'State machine [param]: '+FStateMachine[InstructionPointer].param,etDebug);
-      {$ENDIF DEBUG}
-      case FStateMachine[InstructionPointer].instr of
-        SMdeclare     :;
-        SMdeclareHidden :;
-        SMdo          : if not IsSkipped(FStateMachine[InstructionPointer].param) then
-                          result:=Run(FStateMachine[InstructionPointer].param);
-        SMrequire     : result:=Run(FStateMachine[InstructionPointer].param);
-        SMexec        : result:=DoExec(FStateMachine[InstructionPointer].param);
-        SMend         : begin
-                          SeqAttr^.Executed:=ESSucceeded;
-                          CleanUpInstaller;
-                          exit; //success
-                        end;
-        SMcleanmodule : result:=DoCleanModule(FStateMachine[InstructionPointer].param);
-        SMgetmodule   : result:=DoGetModule(FStateMachine[InstructionPointer].param);
-        SMbuildmodule : result:=DoBuildModule(FStateMachine[InstructionPointer].param);
-        SMcheckmodule : result:=DoCheckModule(FStateMachine[InstructionPointer].param);
-        SMuninstallmodule: result:=DoUnInstallModule(FStateMachine[InstructionPointer].param);
-        SMconfigmodule: result:=DoConfigModule(FStateMachine[InstructionPointer].param);
-        {$ifndef FPCONLY}
-        SMResetLCL    : DoResetLCL;
-        {$endif}
-        SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
-        SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
-      end;
-      if not result then
-      begin
-        SeqAttr^.Executed:=ESFailed;
-        {$IFDEF DEBUG}
-        FParent.WritelnLog(etError,localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName+
-          '; instr: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr))+
-          '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
-          ', param: '+FStateMachine[InstructionPointer].param);
-        {$ENDIF DEBUG}
-        CleanUpInstaller;
-        exit; //failure, bail out
-      end;
-      InstructionPointer:=InstructionPointer+1;
-      if InstructionPointer>=length(FStateMachine) then  //somebody forgot end
-      begin
-        SeqAttr^.Executed:=ESSucceeded;
-        CleanUpInstaller;
-        exit; //success
-      end;
+      result:=false;
+      FParent.WritelnLog(etError,localinfotext+'No sequences loaded while trying to find sequence name ' + SequenceName);
+      exit;
     end;
-  end
-  else
-  begin
-    result:=false;  // sequence not found
-    FParent.WritelnLog(localinfotext+'Failed to load sequence :' + SequenceName);
+    // --clean or --install ??
+    if FParent.Uninstall then  // uninstall overrides clean
+    begin
+      if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-8,9))<>'UNINSTALL') then
+        SequenceName:=SequenceName+'uninstall';
+    end
+    else if FParent.Clean  then
+    begin
+      if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-4,5))<>'CLEAN') then
+        SequenceName:=SequenceName+'clean';
+    end;
+    // find sequence
+    idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
+    if (idx>=0) then
+    begin
+      result:=true;
+      SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
+      // Don't run sequence if already run
+      case SeqAttr^.Executed of
+        ESFailed : begin
+          infoln(localinfotext+'Already ran sequence name '+SequenceName+' ending in failure. Not running again.',etWarning);
+          result:=false;
+          exit;
+          end;
+        ESSucceeded : begin
+          infoln(localinfotext+'Already succesfully ran sequence name '+SequenceName+'. Not running again.',etInfo);
+          exit;
+          end;
+        end;
+      // Get entry point in FStateMachine
+      InstructionPointer:=SeqAttr^.EntryPoint;
+      {$IFDEF DEBUG}
+      EntryPoint:=InstructionPointer;
+      {$ENDIF DEBUG}
+      // run sequence until end or failure
+      while true do
+      begin
+        //For debugging state machine sequence:
+        {$IFDEF DEBUG}
+        infoln(localinfotext+'State machine running sequence '+SequenceName,etDebug);
+        infoln(localinfotext+'State machine [instr]: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr)),etDebug);
+        infoln(localinfotext+'State machine [param]: '+FStateMachine[InstructionPointer].param,etDebug);
+        {$ENDIF DEBUG}
+        case FStateMachine[InstructionPointer].instr of
+          SMdeclare     :;
+          SMdeclareHidden :;
+          SMdo          : if not IsSkipped(FStateMachine[InstructionPointer].param) then
+                            result:=Run(FStateMachine[InstructionPointer].param);
+          SMrequire     : result:=Run(FStateMachine[InstructionPointer].param);
+          SMexec        : result:=DoExec(FStateMachine[InstructionPointer].param);
+          SMend         : begin
+                            SeqAttr^.Executed:=ESSucceeded;
+                            CleanUpInstaller;
+                            exit; //success
+                          end;
+          SMcleanmodule : result:=DoCleanModule(FStateMachine[InstructionPointer].param);
+          SMgetmodule   : result:=DoGetModule(FStateMachine[InstructionPointer].param);
+          SMbuildmodule : result:=DoBuildModule(FStateMachine[InstructionPointer].param);
+          SMcheckmodule : result:=DoCheckModule(FStateMachine[InstructionPointer].param);
+          SMuninstallmodule: result:=DoUnInstallModule(FStateMachine[InstructionPointer].param);
+          SMconfigmodule: result:=DoConfigModule(FStateMachine[InstructionPointer].param);
+          {$ifndef FPCONLY}
+          SMResetLCL    : DoResetLCL;
+          {$endif}
+          SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
+          SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
+        end;
+        if not result then
+        begin
+          SeqAttr^.Executed:=ESFailed;
+          {$IFDEF DEBUG}
+          FParent.WritelnLog(etError,localinfotext+'Failure running '+BeginSnippet+' error executing sequence '+SequenceName+
+            '; instr: '+GetEnumNameSimple(TypeInfo(TKeyword),Ord(FStateMachine[InstructionPointer].instr))+
+            '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
+            ', param: '+FStateMachine[InstructionPointer].param);
+          {$ENDIF DEBUG}
+          CleanUpInstaller;
+          exit; //failure, bail out
+        end;
+        InstructionPointer:=InstructionPointer+1;
+        if InstructionPointer>=length(FStateMachine) then  //somebody forgot end
+        begin
+          SeqAttr^.Executed:=ESSucceeded;
+          CleanUpInstaller;
+          exit; //success
+        end;
+      end;
+    end
+    else
+    begin
+      result:=false;  // sequence not found
+      FParent.WritelnLog(localinfotext+'Failed to load sequence :' + SequenceName);
+    end;
+  finally
+    infoln(localinfotext+'Run ready.',etDebug);
   end;
 end;
 

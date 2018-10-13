@@ -1550,7 +1550,11 @@ begin
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
-      aFile := SysUtils.GetTempFileName('','FPCUPTMP')+SysUtils.ExtractFileExt(GetFileNameFromURL(RemoteURL));
+      aName:=GetFileNameFromURL(RemoteURL);
+      if Length(aName)>0 then aName:=SysUtils.ExtractFileExt(aName);
+      //If no extension, assume zip
+      if Length(aName)=0 then aName:='zip';
+      aFile := GetTempFileNameExt('','FPCUPTMP',aName);
       WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
       try
         result:=Download(FUseWget, RemoteURL, aFile);
@@ -1636,12 +1640,13 @@ begin
         if ((Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) OR (Pos('sourceforge.net',RemoteURL)>0)) then
         begin
           //There should be a single directory !
+          aName:='';
           FilesList:=FindAllDirectories(InstallDir,False);
-          if FilesList.Count=1 then
+          if FilesList.Count=1 then aName:=FilesList[0];
+          FreeAndNil(FilesList);
+          if Length(aName)>0 then
           begin
             infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
-            aName:=FilesList[0];
-            FilesList.Free;
             FilesList:=FindAllFiles(aName, '', True);
             for i:=0 to (FilesList.Count-1) do
             begin
@@ -1652,7 +1657,7 @@ begin
               SysUtils.RenameFile(FilesList[i],aFile);
             end;
             DeleteDirectory(aName,False);
-            FilesList.Free;
+            FreeAndNil(FilesList);
           end;
         end;
       end else infoln(infotext+'Getting archive failed. Trying another source, if available.',etInfo)

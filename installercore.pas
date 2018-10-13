@@ -1526,7 +1526,7 @@ begin
 
   ForceDirectoriesUTF8(FSVNDirectory);
 
-  SVNZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
+  SVNZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
   try
     OperationSucceeded := Download(
@@ -1655,7 +1655,7 @@ begin
 
   OperationSucceeded := false;
 
-  OpenSSLZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
+  OpenSSLZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
   for i:=0 to (Length(NewSourceURL)-1) do
   try
@@ -1822,7 +1822,7 @@ begin
   if NOT FileExists(JasminDir+'jasmin.jar') then
   begin
     OperationSucceeded := false;
-    JasminZip := SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
+    JasminZip := GetTempFileNameExt('','FPCUPTMP','zip');
     try
       OperationSucceeded:=GetFile(SourceURL,JasminZip);
       if (NOT OperationSucceeded) then
@@ -1899,7 +1899,7 @@ begin
     if (NOT Assigned(FLogVerbose)) then
     begin
       FLogVerbose:=TLogger.Create;
-      FLogVerbose.LogFile:=SysUtils.GetTempFileName('','FPCUPLOG');
+      FLogVerbose.LogFile:=GetTempFileNameExt('','FPCUPLOG','log');
       WritelnLog(localinfotext+'Verbose output saved to ' + FLogVerbose.LogFile, false);
     end;
     FLogVerbose.WriteLog(Output,false);
@@ -1989,7 +1989,7 @@ var
   TempFileName: string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+': ';
-  TempFileName := SysUtils.GetTempFileName('','FPCUPDUMP');
+  TempFileName := GetTempFileNameExt('','FPCUPDUMP','dump');
   if IsException then
   begin
     WritelnLog(etError, localinfotext+'Exception raised running ' + Sender.ResultingCommand, true);

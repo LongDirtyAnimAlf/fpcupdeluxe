@@ -1009,7 +1009,7 @@ begin
               begin
                 if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
                 begin
-                  s1:=SysUtils.GetTempFileName('','FPCUPTMP') + '.zip';
+                  s1:=GetTempFileNameExt('','FPCUPTMP','zip');
                   if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s1) then
                   begin
                     with TNormalUnzipper.Create do
@@ -1689,7 +1689,7 @@ begin
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
-  BootstrapArchive := SysUtils.GetTempFileName('','FPCUPTMP');
+  BootstrapArchive := GetTempFileNameExt('','FPCUPTMP','zip');
   if OperationSucceeded then
   begin
     OperationSucceeded:=Download(FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);

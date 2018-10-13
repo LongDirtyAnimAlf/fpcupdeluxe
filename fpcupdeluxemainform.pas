@@ -1522,6 +1522,9 @@ begin
     FPCupManager.ExportOnly:=(NOT Form2.CheckPackageRepo.Checked);
 
     modules:='';
+
+    //No multi-select for now
+    {
     for i:=0 to listModules.Count-1 do
     begin
       if listModules.Selected[i] then
@@ -1534,11 +1537,15 @@ begin
         {$endif}
       end;
     end;
+    }
+
+    //Single select
+    if (listModules.ItemIndex<>-1) then modules:=listModules.Items.Strings[listModules.ItemIndex];
 
     if Length(modules)>0 then
     begin
-      // delete stale trailing comma
-      Delete(modules,Length(modules),1);
+      //Delete stale trailing comma, if any
+      if RightStr(modules,1)=',' then SetLength(modules,Length(modules)-1);
       FPCupManager.OnlyModules:=modules;
 
       if Sender=btnInstallModule then
