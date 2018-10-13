@@ -296,13 +296,11 @@ begin
         Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
-        Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir)); //Make sure our FPC units can be found by Lazarus
-        //Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir)); //Make sure our FPC units can be found by Lazarus
+        //Make sure our FPC units can be found by Lazarus
+        Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
+        //Make sure Lazarus does not pick up these tools from other installs
         Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
         Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
-
-        //Processor.Parameters.Add('FPCFPMAKE='+FCompiler);
-
 
         // Tell make where to find the target binutils if cross-compiling:
         if CrossInstaller.BinUtilsPath <> '' then
@@ -322,7 +320,7 @@ begin
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
         //Set options
-        Options := FCompilerOptions;
+        Options := STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
         if CrossInstaller.LibsPath <> '' then
           Options := Options + ' -Xd -Fl' + CrossInstaller.LibsPath;
         if CrossInstaller.BinUtilsPrefix <> '' then
@@ -330,9 +328,12 @@ begin
           Options := Options + ' -XP' + CrossInstaller.BinUtilsPrefix;
           Processor.Parameters.Add('BINUTILSPREFIX=' + CrossInstaller.BinUtilsPrefix);
         end;
-        Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+        while Pos('  ',Options)>0 do
+        begin
+          Options:=StringReplace(Options,'  ',' ',[]);
+        end;
         Options:=Trim(Options);
-        //Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + Options);
+        if Length(Options)>0 then Processor.Parameters.Add('FPCOPT='+Options);
 
         Processor.Parameters.Add('registration');
         Processor.Parameters.Add('lazutils');
@@ -458,7 +459,6 @@ begin
     Processor.Executable := Make;
     Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     Processor.Parameters.Clear;
-    //Processor.Parameters.Add('-p');
     {$IFDEF lazarus_parallel_make}
     if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
     {$ENDIF}
@@ -467,12 +467,11 @@ begin
     //Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
     Processor.Parameters.Add('--directory=.');
     Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-
-    Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir)); //Make sure our FPC units can be found by Lazarus
-    //Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCInstallDir)); //Make sure our FPC units can be found by Lazarus
+    //Make sure our FPC units can be found by Lazarus
+    Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
+    //Make sure Lazarus does not pick up these tools from other installs
     Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
     Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
-    //Processor.Parameters.Add('FPCFPMAKE='+FCompiler);
 
     {$ifdef Windows}
     Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -483,9 +482,13 @@ begin
       Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
     //Set options
-    s:=StringReplace(FCompilerOptions,'  ',' ',[rfReplaceAll]);
+    s := STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
+    while Pos('  ',s)>0 do
+    begin
+      s:=StringReplace(s,'  ',' ',[]);
+    end;
     s:=Trim(s);
-    //Processor.Parameters.Add('OPT=' + STANDARDCOMPILEROPTIONS + ' ' + s);
+    if Length(s)>0 then Processor.Parameters.Add('FPCOPT='+s);
 
     case UpperCase(ModuleName) of
       'USERIDE':

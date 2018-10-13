@@ -71,6 +71,8 @@ type
     // FPC base directories
     FFPCSourceDir:string;
     FFPCInstallDir:string;
+    FPath:string; //Path to be used within this session (e.g. including compiler path)
+    InitDone:boolean;
     {$ifndef FPCONLY}
     // Compiler options chosen by user to build Lazarus. There is a CompilerOptions property,
     // but let's leave that for use with FPC.
@@ -85,10 +87,8 @@ type
     FLazarusPrimaryConfigPath:string;
     // LCL widget set to be built
     FLCL_Platform: string;
-    {$endif}
-    FPath:string; //Path to be used within this session (e.g. including compiler path)
-    InitDone:boolean;
     function RebuildLazarus:boolean;
+    {$endif}
   protected
     // Scans for and adds all packages specified in a (module's) stringlist with commands:
     function AddPackages(sl:TStringList): boolean;
@@ -99,7 +99,7 @@ type
     function CreateInstallers(Directive:string;sl:TStringList;ModuleName:string):boolean;
     {$ENDIF MSWINDOWS}
     // Get a value for a key=value pair. Case-insensitive for keys. Expands macros in values.
-    function GetValue(Key:string;sl:TStringList;recursion:integer=0):string;
+    function GetValueFromKey(Key:string;sl:TStringList;recursion:integer=0):string;
     // internal initialisation, called from BuildModule,CleanModule,GetModule
     // and UnInstallModule but executed only once
     function InitModule:boolean;
@@ -213,13 +213,13 @@ end;
 
 { TUniversalInstaller }
 
+{$ifndef FPCONLY}
 function TUniversalInstaller.RebuildLazarus:boolean;
 var
-  LazBuildApp:string;
+  s:string;
 begin
   result:=false;
-
-  infoln(infotext+'Going to rebuild Lazarus because packages were installed or removed.',etInfo);
+  FLazarusNeedsRebuild:=false;
 
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
@@ -246,11 +246,17 @@ begin
     Processor.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
 
   //Set options
-  //Processor.Parameters.Add('OPT=' + Trim(FLazarusCompilerOptions));
+  s := FLazarusCompilerOptions;
+  while Pos('  ',s)>0 do
+  begin
+    s:=StringReplace(s,'  ',' ',[]);
+  end;
+  s:=Trim(s);
+  if Length(s)>0 then Processor.Parameters.Add('FPCOPT='+s);
 
-  LazBuildApp := IncludeTrailingPathDelimiter(LazarusInstallDir) + 'lazbuild' + GetExeExt;
+  s := IncludeTrailingPathDelimiter(LazarusInstallDir) + 'lazbuild' + GetExeExt;
   //If we do not [yet] have lazbuild, include it in make
-  if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
+  if CheckExecutable(s, '--help', 'lazbuild') = false then
     Processor.Parameters.Add('lazbuild useride')
   else
     Processor.Parameters.Add('useride');
@@ -262,7 +268,6 @@ begin
     if result then
     begin
       infoln(infotext+'Lazarus rebuild succeeded',etDebug);
-      FLazarusNeedsRebuild:=false;
     end
     else
       WritelnLog(etError,infotext+'Failure trying to rebuild Lazarus. '+LineEnding+
@@ -276,8 +281,9 @@ begin
     end;
   end;
 end;
+{$endif}
 
-function TUniversalInstaller.GetValue(Key: string; sl: TStringList;
+function TUniversalInstaller.GetValueFromKey(Key: string; sl: TStringList;
   recursion: integer): string;
 // Look for entries with Key and process macros etc in value
 var
@@ -381,11 +387,12 @@ begin
           macro:='rm -Rf '+'$(Installdir)';
           {$ENDIF}
         end
-        else macro:=GetValue(macro,sl,recursion+1); //user defined value
+        else macro:=GetValueFromKey(macro,sl,recursion+1); //user defined value
         // quote if containing spaces
         if doublequote then
         begin
-          if pos(' ',macro)>0 then macro:='"'+macro+'"';
+          //if pos(' ',macro)>0 then macro:='"'+macro+'"';
+          macro:=MaybeQuoted(macro);
         end;
         delete(s,i,len);
         insert(macro,s,i);
@@ -549,7 +556,7 @@ begin
   try
     Processor.Execute;
     result := (Processor.ExitStatus=0);
-    if result then RegisterPackageFeature:=(GetNumericalVersion(Processor.OutputString)>=(1*10000+7*100+0));
+    if result then RegisterPackageFeature:=(GetNumericalVersion(Processor.OutputString)>=CalculateFullVersion(1,7,0));
   except
     on E: Exception do
     begin
@@ -654,7 +661,8 @@ begin
   Failure:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
 
-  BaseWorkingdir:=GetValue(Location,sl);
+  BaseWorkingdir:=GetValueFromKey(Location,sl);
+  BaseWorkingdir:=FixPath(BaseWorkingdir);
   Workingdir:=BaseWorkingdir;
 
   for RegisterOnly:=false to true do
@@ -671,13 +679,15 @@ begin
       if i>=0 then
       begin
         RealDirective:=RealDirective+IntToStr(i);
-        Workingdir:=GetValue(Location+IntToStr(i),sl);
+        Workingdir:=GetValueFromKey(Location+IntToStr(i),sl);
+        Workingdir:=FixPath(Workingdir);
       end else
       begin
         Workingdir:=BaseWorkingdir;
       end;
 
-      PackagePath:=GetValue(RealDirective,sl);
+      PackagePath:=GetValueFromKey(RealDirective,sl);
+      PackagePath:=FixPath(PackagePath);
 
       // Skip over missing numbers:
       if PackagePath='' then continue;
@@ -714,9 +724,10 @@ var
   RealDirective:string;
   RegisterOnly:boolean;
 begin
-  BaseWorkingdir:=GetValue(LOCATIONMAGIC,sl);
+  BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+  BaseWorkingdir:=FixPath(BaseWorkingdir);
   Workingdir:=BaseWorkingdir;
-  ModuleName:=GetValue(NAMEMAGIC,sl);
+  ModuleName:=GetValueFromKey(NAMEMAGIC,sl);
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
 
@@ -734,14 +745,16 @@ begin
       if (i>=0) then
       begin
         RealDirective:=RealDirective+IntToStr(i);
-        Workingdir:=GetValue(LOCATIONMAGIC+IntToStr(i),sl);
+        Workingdir:=GetValueFromKey(LOCATIONMAGIC+IntToStr(i),sl);
+        Workingdir:=FixPath(Workingdir);
       end
       else
       begin
         Workingdir:=BaseWorkingdir;
       end;
 
-      PackagePath:=GetValue(RealDirective,sl);
+      PackagePath:=GetValueFromKey(RealDirective,sl);
+      PackagePath:=FixPath(PackagePath);
 
       // Skip over missing data:
       if (PackagePath='') then continue;
@@ -853,15 +866,18 @@ begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateInstallers): ';
 
   result:=true; //succeed by default
-  BaseWorkingdir:=GetValue('Workingdir',sl);
+  BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
+  BaseWorkingdir:=FixPath(BaseWorkingdir);
+
   for i:=0 to MAXINSTRUCTIONS do
     begin
     if i=0
-       then exec:=GetValue(Directive,sl)
-       else exec:=GetValue(Directive+IntToStr(i),sl);
+       then exec:=GetValueFromKey(Directive,sl)
+       else exec:=GetValueFromKey(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
-    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
+    Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
+    Workingdir:=FixPath(Workingdir);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
     case uppercase(exec) of
       'WINDOWS','WINDOWS32','WIN32','WINX86': {good name};
@@ -874,7 +890,8 @@ begin
 
     if FVerbose then WritelnLog(localinfotext+'Running CreateInstallers for '+exec,true);
     // Convert any relative path to absolute path:
-    InstallDir:=IncludeTrailingPathDelimiter(SafeExpandFileName(GetValue('InstallDir',sl)));
+    InstallDir:=IncludeTrailingPathDelimiter(SafeExpandFileName(GetValueFromKey('InstallDir',sl)));
+    InstallDir:=FixPath(InstallDir);
     if InstallDir<>'' then
       ForceDirectoriesUTF8(InstallDir);
     Installer:=TWinInstaller.Create(InstallDir,FCompiler,FVerbose);
@@ -911,14 +928,17 @@ begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RunCommands: '+Directive+'): ';
 
   result:=true; //not finding any instructions at all should not be a problem.
-  BaseWorkingdir:=GetValue('Workingdir',sl);
+  BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
+  BaseWorkingdir:=FixPath(BaseWorkingdir);
   for i:=0 to MAXINSTRUCTIONS do
   begin
     if i=0
-       then exec:=GetValue(Directive,sl)
-       else exec:=GetValue(Directive+IntToStr(i),sl);
+       then exec:=GetValueFromKey(Directive,sl)
+       else exec:=GetValueFromKey(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
+
+    exec:=FixPath(exec);
 
     if (Pos('fpgui',exec)>0) then
      begin
@@ -947,7 +967,8 @@ begin
       exec:=StringReplace(exec,'lazbuild','lazbuild --quiet',[rfIgnoreCase]);
       {$ENDIF}
     end;
-    Workingdir:=GetValue('Workingdir'+IntToStr(i),sl);
+    Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
+    Workingdir:=FixPath(Workingdir);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
     if FVerbose then WritelnLog(localinfotext+'Running ExecuteCommand[InDir] for '+exec,true);
     try
@@ -1222,8 +1243,8 @@ begin
     // Read command, e.g. AddToHelpOptions1
     // and deduce which XML settings file to update
     if i=0
-       then exec:=GetValue('AddTo'+xmlfile,sl)
-       else exec:=GetValue('AddTo'+xmlfile+IntToStr(i),sl);
+       then exec:=GetValueFromKey('AddTo'+xmlfile,sl)
+       else exec:=GetValueFromKey('AddTo'+xmlfile+IntToStr(i),sl);
     // Skip over missing numbers:
     if exec='' then continue;
     //split off key and value
@@ -1304,7 +1325,7 @@ begin
           AddToLazXML('miscellaneousoptions'); //e.g. list of packages to be installed on recompile
           AddToLazXML('packagefiles'); //e.g. list of available packages
           // Process special directives
-          Directive:=GetValue('RegisterExternalTool',sl);
+          Directive:=GetValueFromKey('RegisterExternalTool',sl);
           if Directive<>'' then
           begin
             xmlfile:=EnvironmentConfig;
@@ -1334,30 +1355,30 @@ begin
 
             // If we're registering external tools, we should look for associated/
             // detailed directives as well:
-            Directive:=GetValue('RegisterExternalToolCmdLineParams',sl);
+            Directive:=GetValueFromKey('RegisterExternalToolCmdLineParams',sl);
             if Directive<>'' then
               LazarusConfig.SetVariable(xmlfile,key+'CmdLineParams/Value',Directive);
-            Directive:=GetValue('RegisterExternalToolWorkingDirectory',sl);
+            Directive:=GetValueFromKey('RegisterExternalToolWorkingDirectory',sl);
             if Directive<>'' then
               LazarusConfig.SetVariable(xmlfile,key+'WorkingDirectory/Value',Directive);
-            Directive:=GetValue('RegisterExternalToolScanOutputForFPCMessages',sl);
+            Directive:=GetValueFromKey('RegisterExternalToolScanOutputForFPCMessages',sl);
             if (Directive<>'') and (Directive<>'0') then // default = false
               LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForFPCMessages/Value','True')
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForFPCMessages/Value');
-            Directive:=GetValue('RegisterExternalToolScanOutputForMakeMessages',sl);
+            Directive:=GetValueFromKey('RegisterExternalToolScanOutputForMakeMessages',sl);
             if (Directive<>'') and (Directive<>'0') then // default = false
               LazarusConfig.SetVariable(xmlfile,key+'ScanOutputForMakeMessages/Value','True')
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'ScanOutputForMakeMessages/Value');
-            Directive:=GetValue('RegisterExternalToolHideMainForm',sl);
+            Directive:=GetValueFromKey('RegisterExternalToolHideMainForm',sl);
             if Directive='0' then // default = true
               LazarusConfig.SetVariable(xmlfile,key+'HideMainForm/Value','False')
             else
               LazarusConfig.DeleteVariable(xmlfile,key+'HideMainForm/Value');
           end;
 
-          Directive:=GetValue('RegisterHelpViewer',sl);
+          Directive:=GetValueFromKey('RegisterHelpViewer',sl);
           if Directive<>'' then
             begin
             xmlfile:=HelpConfig;
@@ -1367,7 +1388,7 @@ begin
             end;
 
           // Register path to help source if given
-          Directive:=GetValue('RegisterLazDocPath',sl);
+          Directive:=GetValueFromKey('RegisterLazDocPath',sl);
           if Directive<>'' then
             begin
             infoln(infotext+'Going to add docpath '+Directive,etDebug);
@@ -1387,7 +1408,11 @@ begin
       end;
 
       // If Lazarus was marked for rebuild, do so:
-      if FLazarusNeedsRebuild then result:=RebuildLazarus;
+      if FLazarusNeedsRebuild then
+      begin
+        infoln(infotext+'Going to rebuild Lazarus because packages were installed.',etInfo);
+        result:=RebuildLazarus;
+      end;
   end
   else
   begin
@@ -1425,7 +1450,8 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
 
     WritelnLog(infotext+'Getting module '+ModuleName,True);
-    InstallDir:=GetValue('InstallDir',PackageSettings);
+    InstallDir:=GetValueFromKey('InstallDir',PackageSettings);
+    InstallDir:=FixPath(InstallDir);
     InstallDir:=ExcludeTrailingPathDelimiter(InstallDir);
     FSourceDirectory:=InstallDir;
 
@@ -1433,11 +1459,11 @@ begin
       ForceDirectoriesUTF8(InstallDir);
 
     // Common keywords for all repo methods
-    FDesiredRevision:=GetValue('Revision',PackageSettings);
-    FDesiredBranch:=GetValue('Branch',PackageSettings);
+    FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
+    FDesiredBranch:=GetValueFromKey('Branch',PackageSettings);
 
     // Handle Git URLs
-    RemoteURL:=GetValue('GITURL',PackageSettings);
+    RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download/update from GIT repository '+RemoteURL,etInfo);
@@ -1464,7 +1490,7 @@ begin
 
 
     // Handle SVN urls
-    RemoteURL:=GetValue('SVNURL',PackageSettings);
+    RemoteURL:=GetValueFromKey('SVNURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download/update from SVN repository '+RemoteURL,etInfo);
@@ -1475,8 +1501,8 @@ begin
         FSVNClient.ModuleName:=ModuleName;
         FSVNClient.Verbose:=FVerbose;
         FSVNClient.ExportOnly:=FExportOnly;
-        FSVNClient.UserName:=GetValue('UserName',PackageSettings);
-        FSVNClient.Password:=GetValue('Password',PackageSettings);
+        FSVNClient.UserName:=GetValueFromKey('UserName',PackageSettings);
+        FSVNClient.Password:=GetValueFromKey('Password',PackageSettings);
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
         SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
         if UpdateWarnings.Count>0 then
@@ -1492,7 +1518,7 @@ begin
     end;
 
     // Handle HG URLs
-    RemoteURL:=GetValue('HGURL',PackageSettings);
+    RemoteURL:=GetValueFromKey('HGURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download/update from HG repository '+RemoteURL,etInfo);
@@ -1519,7 +1545,7 @@ begin
          else infoln(infotext+'Getting HG repo failed. Trying another source, if available.',etWarning)
     end;
 
-    RemoteURL:=GetValue('ArchiveURL',PackageSettings);
+    RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
@@ -1631,7 +1657,7 @@ begin
       end else infoln(infotext+'Getting archive failed. Trying another source, if available.',etInfo)
     end;
 
-    RemoteURL:=GetValue('ArchivePATH',PackageSettings);
+    RemoteURL:=GetValueFromKey('ArchivePATH',PackageSettings);
     if (RemoteURL<>'') AND (NOT SourceOK) then
     begin
       infoln(infotext+'Going to download from archive path '+RemoteURL,etInfo);
@@ -1724,7 +1750,7 @@ begin
     LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
     try
       // Process specials
-      Directive:=GetValue('RegisterExternalTool',sl);
+      Directive:=GetValueFromKey('RegisterExternalTool',sl);
       if Directive<>'' then
       begin
         xmlfile:=EnvironmentConfig;
@@ -1753,7 +1779,7 @@ begin
         end;
       end;
 
-      Directive:=GetValue('RegisterHelpViewer',sl);
+      Directive:=GetValueFromKey('RegisterHelpViewer',sl);
       if Directive<>'' then
       begin
         xmlfile:=HelpConfig;
@@ -1766,7 +1792,11 @@ begin
     end;
 
     // If Lazarus was marked for rebuild, do so:
-    if FLazarusNeedsRebuild then result:=RebuildLazarus;
+    if FLazarusNeedsRebuild then
+    begin
+      infoln(infotext+'Going to rebuild Lazarus because packages were removed.',etInfo);
+      result:=RebuildLazarus;
+    end;
   end
   else
     result:=false;

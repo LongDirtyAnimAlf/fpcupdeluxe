@@ -531,7 +531,7 @@ begin
     {$ifdef win32}
     if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
     begin
-      if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+2)) then
+      if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,2)) then
       begin
         result:=true;
         exit;
@@ -676,6 +676,8 @@ begin
 
           Options:=FCompilerOptions;
 
+          //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
+          //Todo: to be investigated
           //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
           case MakeCycle of
@@ -747,9 +749,6 @@ begin
           end;
 
           Processor.Parameters.Add('CROSSINSTALL=1');
-
-          //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
-          //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
           Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
           Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
@@ -1115,6 +1114,11 @@ begin
   Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
   Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
   Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+
+  //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
+  //Todo: to be investigated
+  //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
+
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$IFDEF UNIX}
   Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
@@ -1130,7 +1134,7 @@ begin
   Processor.Parameters.Add('REVSTR='+ActualRevision);
   Processor.Parameters.Add('REVINC=force');
 
-  if (GetNumericalVersion(GetFPCVersion)<(2*10000+4*100+4)) then
+  if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
   begin
     Processor.Parameters.Add('DATA2INC=echo');
   end;
@@ -2407,7 +2411,7 @@ begin
 
     // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
     // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
-    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersion(RequiredBootstrapVersion)>=(2*10000+0*100+0)) then
+    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersion(RequiredBootstrapVersion)>=CalculateFullVersion(2,0,0)) then
     begin
       // we need an intermediate compiler !!
       if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName) then
@@ -2548,7 +2552,7 @@ begin
              then Processor.Parameters.Add('clean')
              else Processor.Parameters.Add('compiler_cycle');
           // not sure if this needed here, but better safe than sorry
-          if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<(2*10000+4*100+4)) then
+          if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<CalculateFullVersion(2,4,4)) then
           begin
             Processor.Parameters.Add('DATA2INC=echo');
           end;

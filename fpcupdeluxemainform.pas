@@ -2814,7 +2814,7 @@ begin
 
   // overrides for old versions of Lazarus
   aLazarusVersion:=GetNumericalVersion(LazarusTarget);
-  if (aLazarusVersion<>0) AND (aLazarusVersion<(1*10000+0*100+0)) then
+  if (aLazarusVersion<>0) AND (aLazarusVersion<CalculateFullVersion(1,0,0)) then
   begin
     s:=FPCupManager.OnlyModules;
     if (Length(s)>0) then

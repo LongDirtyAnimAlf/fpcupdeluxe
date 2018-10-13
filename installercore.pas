@@ -221,7 +221,7 @@ type
     property InstallDirectory: string write FInstallDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string {read GetCompiler} write FCompiler;
-    // Compiler options passed on to make as OPT=
+    // Compiler options passed on to make as OPT= or FPCOPT=
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
     property CrossCPU_Target: string read FCrossCPU_Target;
@@ -975,7 +975,7 @@ begin
   // if Win7 or higher: use modern (2.4.0 and higher) binutils
   if aMajor>5 then
   begin
-    if (GetNumericalVersion(aVersion)<(2*10000+4*100+0)) then
+    if (GetNumericalVersion(aVersion)<CalculateFullVersion(2,4,0)) then
        aVersion:='2.4.0';
   end;
 
@@ -2235,9 +2235,9 @@ begin
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!
-      if PatchFPC then if (FMajorVersion*10000+FMinorVersion*100+FReleaseVersion)<(GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
+      if PatchFPC then if (GetFullVersion<GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
       {$ifndef FPCONLY}
-      if PatchLaz then if (FMajorVersion*10000+FMinorVersion*100+FReleaseVersion)<(GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
+      if PatchLaz then if (GetFullVersion<GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
       {$endif}
 
       if (j>0) then
