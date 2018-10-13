@@ -236,6 +236,7 @@ begin
   //Make sure Lazarus does not pick up these tools from other installs
   Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
   Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+  Processor.Parameters.Add('CFGFILE=' + IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+'idemake.cfg');
 
   {$ifdef Windows}
   Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
@@ -252,7 +253,7 @@ begin
     s:=StringReplace(s,'  ',' ',[]);
   end;
   s:=Trim(s);
-  if Length(s)>0 then Processor.Parameters.Add('FPCOPT='+s);
+  if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
 
   s := IncludeTrailingPathDelimiter(LazarusInstallDir) + 'lazbuild' + GetExeExt;
   //If we do not [yet] have lazbuild, include it in make

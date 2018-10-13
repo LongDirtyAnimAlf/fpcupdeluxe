@@ -698,7 +698,8 @@ begin
 
   if Assigned(FPCupManager.Sequencer.Installer) then
   begin
-    FPCupManager.Sequencer.Installer.Processor.Terminate(-1);
+    FPCupManager.Sequencer.Installer.Processor.Terminate(0);
+    FPCupManager.Sequencer.Installer.Processor.WaitOnExit(5000);
   end;
   // brute force ... nothing better at the moment
   // but still does not work when downloading from SVN

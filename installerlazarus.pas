@@ -301,6 +301,8 @@ begin
         //Make sure Lazarus does not pick up these tools from other installs
         Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
         Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+        Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
+        if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
         // Tell make where to find the target binutils if cross-compiling:
         if CrossInstaller.BinUtilsPath <> '' then
@@ -319,6 +321,11 @@ begin
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
+        //Set config-file
+        //To be investigated if necessary
+        //Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
+        //if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
+
         //Set options
         Options := STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
         if CrossInstaller.LibsPath <> '' then
@@ -333,7 +340,7 @@ begin
           Options:=StringReplace(Options,'  ',' ',[]);
         end;
         Options:=Trim(Options);
-        if Length(Options)>0 then Processor.Parameters.Add('FPCOPT='+Options);
+        if Length(Options)>0 then Processor.Parameters.Add('OPT='+Options);
 
         Processor.Parameters.Add('registration');
         Processor.Parameters.Add('lazutils');
@@ -481,6 +488,18 @@ begin
     if FCrossLCL_Platform <> '' then
       Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
+    //Set config-file
+    s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
+    if (ModuleName='USERIDE') then
+    begin
+      Processor.Parameters.Add('CFGFILE=' + s);
+    end
+    else
+    begin
+      //To be investigated if necessary
+      //if FileExists(s) then Processor.Parameters.Add('CFGFILE=' + s);
+    end;
+
     //Set options
     s := STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
     while Pos('  ',s)>0 do
@@ -488,7 +507,8 @@ begin
       s:=StringReplace(s,'  ',' ',[]);
     end;
     s:=Trim(s);
-    if Length(s)>0 then Processor.Parameters.Add('FPCOPT='+s);
+
+    if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
 
     case UpperCase(ModuleName) of
       'USERIDE':
