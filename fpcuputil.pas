@@ -724,8 +724,9 @@ begin
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
-    XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments);
+    XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
     XdgDesktopContent.Add('Name='+ShortcutName);
+    XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;');
     XdgDesktopContent.Add('Keywords=editor;Pascal;IDE;FreePascal;fpc;Design;Designer;');
     //XdgDesktopContent.Add('StartupWMClass=Lazarus');

@@ -696,10 +696,9 @@ begin
                exit;
              end;
 
-  if Assigned(FPCupManager.Sequencer.Installer) then
+  if Assigned(FPCupManager.Sequencer) then
   begin
-    FPCupManager.Sequencer.Installer.Processor.Terminate(0);
-    FPCupManager.Sequencer.Installer.Processor.WaitOnExit(5000);
+    FPCupManager.Sequencer.Kill;
   end;
   // brute force ... nothing better at the moment
   // but still does not work when downloading from SVN
@@ -1540,7 +1539,11 @@ begin
     }
 
     //Single select
-    if (listModules.ItemIndex<>-1) then modules:=listModules.Items.Strings[listModules.ItemIndex];
+    if (listModules.ItemIndex<>-1) then
+    begin
+      modules:=listModules.Items.Strings[listModules.ItemIndex];
+      if Sender=btnUninstallModule then modules:=modules+'uninstall';
+    end;
 
     if Length(modules)>0 then
     begin
@@ -2787,9 +2790,9 @@ begin
   AddMessage('FPCUP(deluxe) is starting up.');
   AddMessage('');
   {$IFDEF MSWINDOWS}
-  AddMessage('Binutils/make dir:  '+FPCupManager.MakeDirectory);
+  AddMessage('Binutils/make dir:     '+FPCupManager.MakeDirectory);
   {$ENDIF MSWINDOWS}
-  AddMessage('Bootstrap dir:      '+FPCupManager.BootstrapCompilerDirectory);
+  AddMessage('Bootstrap dir:         '+FPCupManager.BootstrapCompilerDirectory);
 
   {$IF (defined(BSD)) and (not defined(Darwin))}
   FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib';
@@ -2845,10 +2848,11 @@ begin
   AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
   AddMessage('FPC install directory: '+FPCupManager.FPCInstallDirectory);
 
-  AddMessage('Lazarus URL:        '+FPCupManager.LazarusURL);
-  AddMessage('Lazarus options:    '+FPCupManager.LazarusOPT);
-  AddMessage('Lazarus directory:  '+FPCupManager.LazarusDirectory);
+  AddMessage('Lazarus URL:           '+FPCupManager.LazarusURL);
+  AddMessage('Lazarus options:       '+FPCupManager.LazarusOPT);
+  AddMessage('Lazarus directory:     '+FPCupManager.LazarusDirectory);
 
+  AddMessage('');
   AddMessage('Please stand back and enjoy !');
   AddMessage('');
 
@@ -2907,16 +2911,20 @@ begin
       AddMessage('');
       AddMessage('SUCCESS: Fpcupdeluxe ended without errors.');
       AddMessage('');
-      {$ifdef MSWINDOWS}
-      AddMessage('Fpcupdeluxe has [created] a desktop shortcut to start Lazarus.');
-      AddMessage('Shortcut-name: '+FPCupManager.ShortCutNameLazarus);
-      AddMessage('Lazarus by fpcupdeluxe MUST be started with this shortcut !!');
-      {$else}
-      AddMessage('Fpcupdeluxe has [created] a shortcut link in your home-directory to start Lazarus.');
-      AddMessage('Shortcut-link: '+FPCupManager.ShortCutNameLazarus);
-      AddMessage('Lazarus MUST be started with this link !!');
-      AddMessage('Fpcupdeluxe has also (tried to) create a desktop shortcut with the same name.');
-      {$endif}
+
+      if FPCupManager.ShortcutCreated then
+      begin
+        {$ifdef MSWINDOWS}
+        AddMessage('Fpcupdeluxe has created a desktop shortcut to start Lazarus.');
+        AddMessage('Shortcut-name: '+FPCupManager.ShortCutNameLazarus);
+        AddMessage('Lazarus by fpcupdeluxe MUST be started with this shortcut !!');
+        {$else}
+        AddMessage('Fpcupdeluxe has created a shortcut link in your home-directory to start Lazarus.');
+        AddMessage('Shortcut-link: '+FPCupManager.ShortCutNameLazarus);
+        AddMessage('Lazarus MUST be started with this link !!');
+        AddMessage('Fpcupdeluxe has also (tried to) create a desktop shortcut with the same name.');
+        {$endif}
+      end;
       AddMessage('');
 
       FPCVersionLabel.Font.Color:=clLime;

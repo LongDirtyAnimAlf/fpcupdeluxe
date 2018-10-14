@@ -347,6 +347,7 @@ type
     procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
   protected
+    FShortcutCreated:boolean;
     FLog:TLogger;
     FModuleList:TStringList;
     FModuleEnabledList:TStringList;
@@ -355,6 +356,7 @@ type
     procedure WritelnLog(msg:string;ToConsole:boolean=true);overload;
     procedure WritelnLog(EventType: TEventType;msg:string;ToConsole:boolean=true);overload;
  public
+    property ShortcutCreated:boolean read FShortcutCreated;
     property ResultSet: TResultSet read FResultSet;
     property Sequencer: TSequencer read FSequencer;
    {$ifndef FPCONLY}
@@ -471,10 +473,12 @@ type
   { TSequencer }
 
   TSequencer=class(TObject)
-    protected
+    private
       FParent:TFPCupManager;
-      FCurrentModule:String;
       FInstaller:TInstaller;  //current installer
+      property Installer:TInstaller read FInstaller;
+    protected
+      FCurrentModule:String;
       FSkipList:TStringList;
       FStateMachine:array of TState;
       procedure AddToModuleList(ModuleName:string;EntryPoint:integer);
@@ -499,8 +503,6 @@ type
     public
       // set Executed to ESNever for all sequences
       procedure ResetAllExecuted(SkipFPC:boolean=false);
-      property Parent:TFPCupManager write FParent;
-      property Installer:TInstaller read FInstaller;
       // Text representation of sequence; for diagnostic purposes
       property Text:String read GetText;
       // parse a sequence source code and append to the FStateMachine
@@ -511,7 +513,9 @@ type
       function DeleteOnly:boolean;
       // run the FStateMachine starting at SequenceName
       function Run(SequenceName:string):boolean;
-      constructor Create;
+      // Force quit
+      function Kill: boolean;
+      constructor Create(aParent:TFPCupManager);
       destructor Destroy; override;
     end;
 
@@ -833,6 +837,8 @@ var
 begin
   result:=false;
 
+  FShortcutCreated:=false;
+
   if
     (lowercase(FSequencer.FParent.CrossCPU_Target)=GetTargetCPU)
     AND
@@ -947,8 +953,7 @@ begin
   FModuleList:=TStringList.Create;
   FModuleEnabledList:=TStringList.Create;
   FModulePublishedList:=TStringList.Create;
-  FSequencer:=TSequencer.create;
-  FSequencer.Parent:=Self;
+  FSequencer:=TSequencer.Create(Self);
   FLog:=TLogger.Create;
   // Log filename will be set on first log write
 end;
@@ -1016,12 +1021,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     // Link to fpcup itself, with all options as passed when invoking it:
     if FParent.ShortCutNameFpcup<>EmptyStr then
     begin
-     {$IFDEF MSWINDOWS}
+      {$IFDEF MSWINDOWS}
       CreateDesktopShortCut(SafeGetApplicationPath+ExtractFileName(paramstr(0)),FParent.PersistentOptions,FParent.ShortCutNameFpcup);
-     {$ELSE}
+      {$ELSE}
       FParent.PersistentOptions:=FParent.PersistentOptions+' $*';
       CreateHomeStartLink('"'+SafeGetApplicationPath+ExtractFileName(paramstr(0))+'"',FParent.PersistentOptions,FParent.ShortCutNameFpcup);
-     {$ENDIF MSWINDOWS}
+      {$ENDIF MSWINDOWS}
+      FParent.FShortcutCreated:=true;
     end;
   end;
 
@@ -1051,6 +1057,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
         // Desktop shortcut creation will not always work. As a fallback, create the link in the home directory:
         CreateDesktopShortCut(InstalledLazarus,'--pcp="'+FParent.LazarusPrimaryConfigPath+'"',FParent.ShortCutNameLazarus);
         {$ENDIF UNIX}
+        FParent.FShortcutCreated:=true;
       except
         // Ignore problems creating shortcut
         infoln('CreateLazarusScript: Error creating shortcuts/links to Lazarus. Continuing.',etWarning);
@@ -1230,10 +1237,10 @@ begin
     result:=CheckDevLibs(FParent.CrossLCL_Platform)
   {$endif}
   else
-    begin
+  begin
     result:=false;
     FParent.WritelnLog('Error: Trying to execute a non existing function: ' + FunctionName);
-    end;
+  end;
 end;
 
 function TSequencer.DoGetModule(ModuleName: string): boolean;
@@ -1820,9 +1827,19 @@ begin
   end;
 end;
 
-constructor TSequencer.Create;
+function TSequencer.Kill: boolean;
 begin
+  result:=false;
+  if Assigned(Installer) then
+  begin
+    result:=Installer.Processor.Terminate(0);
+    Installer.Processor.WaitOnExit(5000);
+  end;
+end;
 
+constructor TSequencer.Create(aParent:TFPCupManager);
+begin
+  FParent:=aParent;
 end;
 
 destructor TSequencer.Destroy;

@@ -1045,7 +1045,6 @@ begin
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
     try
-
       xmlfile:=PackageConfig;
       cnt:=LazarusConfig.GetVariable(xmlfile, PACKAGE_KEYSTART+'Count', 0);
       // check if package is already registered
@@ -1123,24 +1122,28 @@ begin
     if FileExists(PackageAbsolutePath) then
     begin
       lpkdoc:=TConfig.Create(PackageAbsolutePath);
-      key:='Package/';
       try
-        lpkversion.FileVersion:=lpkdoc.GetValue(key+'Version',0);
-      except
-        lpkversion.FileVersion:=2;// On error assume version 2.
-      end;
-      key:='Package/Name/';
-      lpkversion.Name:=lpkdoc.GetValue(key+'Value','');
-      if (length(lpkversion.Name)>0) then
-      begin
-        key:='Package/Version/';
-        lpkversion.GetVersion(lpkdoc,key);
-        PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusInstallDir)+
-                               'packager'+DirectorySeparator+
-                               'globallinks'+DirectorySeparator+
-                               LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
-        if SysUtils.DeleteFile(PackageAbsolutePath) then
-          infoln(localinfotext+'Package '+PackageAbsolutePath+' deleted',etInfo);
+        key:='Package/';
+        try
+          lpkversion.FileVersion:=lpkdoc.GetValue(key+'Version',0);
+        except
+          lpkversion.FileVersion:=2;// On error assume version 2.
+        end;
+        key:='Package/Name/';
+        lpkversion.Name:=lpkdoc.GetValue(key+'Value','');
+        if (length(lpkversion.Name)>0) then
+        begin
+          key:='Package/Version/';
+          lpkversion.GetVersion(lpkdoc,key);
+          PackageAbsolutePath := IncludeTrailingPathDelimiter(LazarusInstallDir)+
+                                 'packager'+DirectorySeparator+
+                                 'globallinks'+DirectorySeparator+
+                                 LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
+          if SysUtils.DeleteFile(PackageAbsolutePath) then
+            infoln(localinfotext+'Package '+PackageAbsolutePath+' deleted',etInfo);
+        end;
+      finally
+        lpkdoc.Free;
       end;
     end;
   end;
