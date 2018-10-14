@@ -57,7 +57,7 @@ Const
     'Buildmodule helpfpc;'+
     'End;'+
     //Remove FPC help:
-    'Declare helpfpcuninstall;'+
+    'Declare helpfpc'+SEQUENCER_UNINSTALL_KEYWORD+';'+
     'CleanModule helpfpc;'+
     'UninstallModule helpfpc;'+
     'End;'+
@@ -80,7 +80,7 @@ Const
     'ConfigModule helplazarus;'+
     'End;'+
     //Remove Lazarus help:
-    'Declare helplazarusuninstall;'+
+    'Declare helplazarus'+SEQUENCER_UNINSTALL_KEYWORD+';'+
     'CleanModule helplazarus;'+
     'UninstallModule helplazarus;'+
     'End;'+
@@ -89,7 +89,7 @@ Const
     'Cleanmodule helpfpc;'+
     'End;'+
 
-    'Declare helplazarusclean;'+
+    'Declare helplazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
     // This cleaning sequence will be called by --clean
     'Cleanmodule helplazarus;'+
     'End;'+

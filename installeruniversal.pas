@@ -1969,10 +1969,10 @@ var
           'Buildmodule '+ name +';' +
           'Configmodule '+ name +';' +
           'End;'+
-          'Declare '+ name + 'clean;'+
+          'Declare '+ name + SEQUENCER_CLEAN_KEYWORD + ';'+
           'Cleanmodule '+ name +';' +
           'End;'+
-          'Declare '+ name + 'uninstall;'+
+          'Declare '+ name + SEQUENCER_UNINSTALL_KEYWORD + ';'+
           'Uninstallmodule '+ name +';' +
           'End;';
       end;
@@ -2026,17 +2026,17 @@ begin
       end;
 
     // create the sequences for default modules
-    result:=result+'DeclareHidden UniversalDefault;';
+    result:=result+'DeclareHidden Universal'+SEQUENCER_DEFAULT_KEYWORD+';';
     for i:=0 to UniModuleEnabledList.Count-1 do
         result:=result+'Do '+UniModuleEnabledList[i]+';';
     result:=result+'End;';
-    result:=result+'DeclareHidden UniversalDefaultClean;';
+    result:=result+'DeclareHidden Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';';
     for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+'Do '+UniModuleEnabledList[i]+'Clean;';
+      result:=result+'Do '+UniModuleEnabledList[i]+SEQUENCER_CLEAN_KEYWORD+';';
     result:=result+'End;';
-    result:=result+'DeclareHidden UniversalDefaultUninstall;';
+    result:=result+'DeclareHidden Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';';
     for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+'Do '+UniModuleEnabledList[i]+'Uninstall;';
+      result:=result+'Do '+UniModuleEnabledList[i]+SEQUENCER_UNINSTALL_KEYWORD+';';
     result:=result+'End;';
   finally
     ini.Free;

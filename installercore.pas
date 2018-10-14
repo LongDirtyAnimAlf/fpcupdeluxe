@@ -66,6 +66,11 @@ const
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
 
+  SEQUENCER_DEFAULT_KEYWORD='Default';
+  SEQUENCER_CLEAN_KEYWORD='Clean';
+  SEQUENCER_UNINSTALL_KEYWORD='Uninstall';
+  SEQUENCER_ONLY_KEYWORD='Only';
+
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,wince,iphonesim,embedded,java,msdos,haiku);

@@ -59,7 +59,7 @@ Const
   Sequences=
     //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
-    'Declare default;'+ //keyword Declare gives a name to a sequence of commands
+    'Declare '+SEQUENCER_DEFAULT_KEYWORD+';'+ //keyword Declare gives a name to a sequence of commands
     {$ifndef FPCONLY}
     // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
     'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
@@ -116,13 +116,13 @@ Const
     'End;'+
 
 //default clean sequence
-    'Declare defaultclean;'+
-    'Do fpcclean;'+
+    'Declare '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';'+
+    'Do fpc'+SEQUENCER_CLEAN_KEYWORD+';'+
     {$ifndef FPCONLY}
-    'Do lazarusclean;'+
-    'Do helplazarusclean;'+
+    'Do lazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
+    'Do helplazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
     //'CleanModule DOCEDITOR;'+
-    'Do UniversalDefaultClean;'+
+    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';'+
     {$endif}
     'End;'+
     (*
@@ -131,18 +131,18 @@ Const
 // course Lazarus won't work either.
 // Workaround: don't clean up.
 //default clean sequence for win32
-    'Declare defaultwin32clean;'+
-    'Do fpcclean;'+
+    'Declare defaultwin32'+SEQUENCER_CLEAN_KEYWORD+';'+
+    'Do fpc'+SEQUENCER_CLEAN_KEYWORD+';'+
     {$ifndef FPCONLY}
-    'Do lazarusclean;'+
-    'Do helplazarusclean;'+
+    'Do lazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
+    'Do helplazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
     //'CleanModule DOCEDITOR;'+
-    'Do UniversalDefaultClean;'+
+    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';'+
     {$endif}
-    'Do crosswin32-64Clean;'+   //this has to be the last. All TExecState reset!
+    'Do crosswin32-64'+SEQUENCER_CLEAN_KEYWORD+';'+   //this has to be the last. All TExecState reset!
     'End;'+
 //default cross clean sequence for win32
-    'Declare crosswin32-64Clean;'+
+    'Declare crosswin32-64'+SEQUENCER_CLEAN_KEYWORD+';'+
     'SetCPU x86_64;'+
     'SetOS win64;'+
     'Cleanmodule fpc;'+
@@ -151,7 +151,7 @@ Const
     {$endif}
     'End;'+
 //default cross clean sequence for win64
-    'Declare crosswin64-32Clean;'+
+    'Declare crosswin64-32'+SEQUENCER_CLEAN_KEYWORD+';'+
     'SetCPU i386;'+
     'SetOS win32;'+
     'Cleanmodule fpc;'+
@@ -162,22 +162,22 @@ Const
     *)
 
 //default uninstall sequence
-    'Declare defaultuninstall;'+
-    'Do fpcuninstall;'+
+    'Declare '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Do fpc'+SEQUENCER_UNINSTALL_KEYWORD+';'+
     {$ifndef FPCONLY}
-    'Do lazarusuninstall;'+
-    'Do helpuninstall;'+
+    'Do lazarus'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Do help'+SEQUENCER_UNINSTALL_KEYWORD+';'+
     //'UninstallModule DOCEDITOR;'+
-    'Do UniversalDefaultUnInstall;'+
+    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
     {$endif}
     'End;'+
 //default uninstall sequence for win32
-    'Declare defaultwin32uninstall;'+
-    'Do defaultuninstall;'+
+    'Declare defaultwin32'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Do '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
     'End;'+
 //default uninstall sequence for win64
-    'Declare defaultwin64uninstall;'+
-    'Do defaultuninstall;'+
+    'Declare defaultwin64'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Do '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
     'End;'+
 
 //default check sequence
@@ -896,7 +896,7 @@ begin
     end
     else
     begin
-      aSequence:='Default';
+      aSequence:=SEQUENCER_DEFAULT_KEYWORD;
       {$ifdef win32}
       // Run Windows specific cross compiler or regular version
       if pos('CROSSWIN32-64',UpperCase(SkipModules))=0 then aSequence:='DefaultWin32';
@@ -929,7 +929,7 @@ begin
         // run specified additional modules using the only mechanism
         infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
         FSequencer.CreateOnly(FIncludeModules);
-        result:=FSequencer.Run('Only');
+        result:=FSequencer.Run(SEQUENCER_ONLY_KEYWORD);
       end;
     end;
     //FResultSet:=FSequencer.FInstaller;
@@ -1628,7 +1628,7 @@ begin
       if instr = SMdeclare then
       begin
         key:='';
-        if (Pos('clean',param)=0) AND (Pos('uninstall',param)=0) AND (Pos('default',param)=0) then
+        if (Pos(SEQUENCER_CLEAN_KEYWORD,param)=0) AND (Pos(SEQUENCER_UNINSTALL_KEYWORD,param)=0) AND (Pos(SEQUENCER_DEFAULT_KEYWORD,param)=0) then
         begin
           j:=UniModuleList.IndexOf(UpperCase(param));
           if j>=0 then
@@ -1732,13 +1732,13 @@ begin
     // --clean or --install ??
     if FParent.Uninstall then  // uninstall overrides clean
     begin
-      if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-8,9))<>'UNINSTALL') then
-        SequenceName:=SequenceName+'uninstall';
+      if (UpperCase(SequenceName)<>UpperCase(SEQUENCER_ONLY_KEYWORD)) and (NOT AnsiEndsText(SEQUENCER_UNINSTALL_KEYWORD,SequenceName)) then
+        SequenceName:=SequenceName+SEQUENCER_UNINSTALL_KEYWORD;
     end
     else if FParent.Clean  then
     begin
-      if (UpperCase(SequenceName)<>'ONLY') and (uppercase(copy(SequenceName,length(SequenceName)-4,5))<>'CLEAN') then
-        SequenceName:=SequenceName+'clean';
+      if (UpperCase(SequenceName)<>UpperCase(SEQUENCER_ONLY_KEYWORD)) and (NOT AnsiEndsText(SEQUENCER_CLEAN_KEYWORD,SequenceName)) then
+        SequenceName:=SequenceName+SEQUENCER_CLEAN_KEYWORD;
     end;
     // find sequence
     idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));

@@ -654,7 +654,7 @@ begin
           SortedModules.Delete(i);
           continue;
         end;
-        if (RightStr(s,Length('clean'))='clean') OR (RightStr(s,Length('uninstall'))='uninstall') then
+        if (AnsiEndsText(SEQUENCER_CLEAN_KEYWORD,s)) OR (AnsiEndsText(SEQUENCER_UNINSTALL_KEYWORD,s)) then
         begin
           SortedModules.Delete(i);
           continue;
@@ -1385,8 +1385,10 @@ begin
 end;
 
 procedure TForm1.Timer1Timer(Sender: TObject);
+{$ifdef RemoteLog}
 var
   aModalResult:TModalResult;
+{$endif}
 begin
   TTimer(Sender).Enabled:=false;
   // only run once !!
@@ -1529,7 +1531,7 @@ begin
       if listModules.Selected[i] then
       begin
         modules:=modules+listModules.Items[i];
-        if Sender=btnUninstallModule then modules:=modules+'uninstall';
+        if Sender=btnUninstallModule then modules:=modules+SEQUENCER_UNINSTALL_KEYWORD;
         modules:=modules+',';
         {$ifdef RemoteLog}
         aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items[i]);
@@ -1542,7 +1544,7 @@ begin
     if (listModules.ItemIndex<>-1) then
     begin
       modules:=listModules.Items.Strings[listModules.ItemIndex];
-      if Sender=btnUninstallModule then modules:=modules+'uninstall';
+      if Sender=btnUninstallModule then modules:=modules+SEQUENCER_UNINSTALL_KEYWORD;
     end;
 
     if Length(modules)>0 then

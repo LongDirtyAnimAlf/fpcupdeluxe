@@ -54,7 +54,7 @@ Const
     'End;'+
 
 //standard uninstall
-    'Declare FPCuninstall;'+
+    'Declare FPC'+SEQUENCER_UNINSTALL_KEYWORD+';'+
     'Uninstallmodule FPC;'+
     'End;'+
 
@@ -86,7 +86,7 @@ Const
     'Declare FPCBuildOnly;'+'Buildmodule FPC;'+'End;'+
 
     //standard clean
-    'Declare FPCclean;'+
+    'Declare FPC'+SEQUENCER_CLEAN_KEYWORD+';'+
     'Cleanmodule FPC;'+
     'End;'+
 

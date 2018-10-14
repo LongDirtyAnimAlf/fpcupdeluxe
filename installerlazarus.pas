@@ -49,7 +49,7 @@ const
     'Buildmodule lazbuild;' +
     'Buildmodule USERIDE;' +
     'Buildmodule startlazarus;' +
-    'Do UniversalDefault;'+
+    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+';'+
     'Do helplazarus;'+
     'Exec CreateLazarusScript;' +
     'End;' +
@@ -64,10 +64,14 @@ const
     'End;' +
 
     //standard uninstall
-    'Declare lazarusuninstall;' + 'Uninstallmodule lazarus;' + 'Exec DeleteLazarusScript;' + 'End;' +
+    'Declare lazarus'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Uninstallmodule lazarus;' +
+    'Exec DeleteLazarusScript;' + 'End;' +
 
     //standard clean
-    'Declare lazarusclean;' + 'Cleanmodule lazarus;' + 'End;' +
+    'Declare lazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
+    'Cleanmodule lazarus;' +
+    'End;' +
 
     //selective actions triggered with --only=SequenceName
     'Declare LazarusCheckOnly;' + 'Checkmodule lazarus;' + 'End;' +
