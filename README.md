@@ -76,10 +76,10 @@ Install data collection
 Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central server.
 For this, it uses the famous mORMot framework.
 You can check this data yourself:
-http://54.194.211.233:8880/root/getinfohtml
-http://54.194.211.233:8880/root/getinfojson
-http://54.194.211.233:8880/root/getinfohtml?Country=China
-http://54.194.211.233:8880/root/getinfohtml?FPCVersion=trunk
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml
+http://fpcuplogger.batterybutcher.com:8880/root/getinfojson
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?Country=China
+http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?FPCVersion=trunk
 
 The data collection can be disabled by a setting in setup+
 
