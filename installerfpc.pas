@@ -80,21 +80,20 @@ Const
     {$endif}
 
     //selective actions triggered with --only=SequenceName
-    'Declare FPCCheckOnly;'+'Checkmodule FPC;'+'End;'+
-    'Declare FPCCleanOnly;'+'Cleanmodule FPC;'+'End;'+
-    'Declare FPCGetOnly;'+'Getmodule FPC;'+'End;'+
-    'Declare FPCBuildOnly;'+'Buildmodule FPC;'+'End;'+
+    'Declare FPCCheck'+SEQUENCER_ONLY_KEYWORD+';'+'Checkmodule FPC;'+'End;'+
+    'Declare FPCClean'+SEQUENCER_ONLY_KEYWORD+';'+'Cleanmodule FPC;'+'End;'+
+    'Declare FPCGet'+SEQUENCER_ONLY_KEYWORD+';'+'Getmodule FPC;'+'End;'+
+    'Declare FPCBuild'+SEQUENCER_ONLY_KEYWORD+';'+'Buildmodule FPC;'+'End;'+
 
     //standard clean
     'Declare FPC'+SEQUENCER_CLEAN_KEYWORD+';'+
     'Cleanmodule FPC;'+
     'End;'+
 
-    'Declare FPCCleanAndBuildOnly;'+
+    'Declare FPCCleanAndBuild'+SEQUENCER_ONLY_KEYWORD+';'+
     'Cleanmodule FPC;'+
     'Buildmodule FPC;'+
     'End';
-
 
 type
   { TFPCInstaller }
@@ -3094,6 +3093,7 @@ begin
         Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
       end;
       Processor.Parameters.Add('distclean');
+
       if (NOT CrossCompiling) then
       begin
         infoln(infotext+'Running make distclean twice',etInfo);

@@ -111,7 +111,7 @@ Const
     {$endif}
     'Do fpc;'+
     {$ifndef FPCONLY}
-    'Do lazarus;'+
+    'Do oldlazarus;'+
     {$endif}
     'End;'+
 
@@ -1653,7 +1653,7 @@ var
   seq:string;
 
 begin
-  AddToModuleList('ONLY',Length(FStateMachine));
+  AddToModuleList(SEQUENCER_ONLY_KEYWORD,Length(FStateMachine));
   while Onlymodules<>'' do
   begin
     i:=pos(',',Onlymodules);
@@ -1684,7 +1684,7 @@ function TSequencer.DeleteOnly: boolean;
 var i,idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
-  idx:=FParent.FModuleList.IndexOf('ONLY');
+  idx:=FParent.FModuleList.IndexOf(SEQUENCER_ONLY_KEYWORD);
   if (idx >0) then
   begin
     SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));

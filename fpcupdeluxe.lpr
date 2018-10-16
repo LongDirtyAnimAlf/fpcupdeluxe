@@ -44,6 +44,11 @@ program fpcupdeluxe;
 *)
 
 uses
+  {$IFDEF UNIX}
+  //for threaded auto-updater-notifier
+  //cthreads,
+  //cmem,  // the c memory manager is on some systems much faster for multi-threading
+  {$ENDIF}
   Interfaces, // this includes the LCL widgetset
   Forms, Classes, sysutils,
   fpcupdeluxemainform, extrasettings, modulesettings,
@@ -115,7 +120,7 @@ uses
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_win64;
 
-{$i revision.inc}
+//{$i revision.inc}
 
 {$R *.res}
 

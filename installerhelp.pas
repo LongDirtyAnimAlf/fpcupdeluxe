@@ -85,7 +85,7 @@ Const
     'UninstallModule helplazarus;'+
     'End;'+
     //selective actions triggered with --only=SequenceName
-    'Declare HelpFPCCleanOnly;'+
+    'Declare HelpFPC'+SEQUENCER_CLEAN_KEYWORD+SEQUENCER_ONLY_KEYWORD+';'+
     'Cleanmodule helpfpc;'+
     'End;'+
 
@@ -95,32 +95,32 @@ Const
     'End;'+
     {$endif}
 
-    'Declare HelpFPCGetOnly;'+
+    'Declare HelpFPCGet'+SEQUENCER_ONLY_KEYWORD+';'+
     'Getmodule helpfpc;'+
     'End;'+
     {$ifndef FPCONLY}
-    'Declare HelpLazarusGetOnly;'+
+    'Declare HelpLazarusGet'+SEQUENCER_ONLY_KEYWORD+';'+
     'Getmodule helplazarus;'+
     'End;'+
     {$endif}
-    'Declare HelpFPCBuildOnly;'+
+    'Declare HelpFPCBuild'+SEQUENCER_ONLY_KEYWORD+';'+
     'Buildmodule helpfpc;'+
     'End;'+
 
-    'Declare HelpFPCBuildOnly;'+
+    'Declare HelpFPCBuild'+SEQUENCER_ONLY_KEYWORD+';'+
     'Buildmodule helpfpc;'+
     'End;'+
     {$ifndef FPCONLY}
-    'Declare HelpLazarusBuildOnly;'+
+    'Declare HelpLazarusBuild'+SEQUENCER_ONLY_KEYWORD+';'+
     'Buildmodule helplazarus;'+
     'End;'+
     {$endif}
-    'Declare HelpFPCConfigOnly;'+
+    'Declare HelpFPCConfig'+SEQUENCER_ONLY_KEYWORD+';'+
     'Configmodule helpfpc;'+
     'End;'
     {$ifndef FPCONLY}
     +
-    'Declare HelpLazarusConfigOnly;'+
+    'Declare HelpLazarusConfig'+SEQUENCER_ONLY_KEYWORD+';'+
     'Configmodule helplazarus;'+
     'End'
     {$endif}

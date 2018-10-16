@@ -74,17 +74,19 @@ const
     'End;' +
 
     //selective actions triggered with --only=SequenceName
-    'Declare LazarusCheckOnly;' + 'Checkmodule lazarus;' + 'End;' +
-    'Declare LazarusCleanOnly;' + 'Cleanmodule lazarus;' + 'End;' +
-    'Declare LazarusGetOnly;' + 'Getmodule lazarus;' + 'End;' +
-    'Declare LazarusBuildOnly;' + 'Buildmodule lazarus;' + 'End;' +
-    'Declare LazarusConfigOnly;' + 'Configmodule lazarus;' + 'End;' +
-    'Declare LazCleanAndBuildOnly;' +
+    'Declare LazarusCheck'+SEQUENCER_ONLY_KEYWORD+';' + 'Checkmodule lazarus;' + 'End;' +
+    'Declare LazarusClean'+SEQUENCER_ONLY_KEYWORD+';' + 'Cleanmodule lazarus;' + 'End;' +
+    'Declare LazarusGet'+SEQUENCER_ONLY_KEYWORD+';' + 'Getmodule lazarus;' + 'End;' +
+    'Declare LazarusBuild'+SEQUENCER_ONLY_KEYWORD+';' + 'Buildmodule lazarus;' + 'End;' +
+    'Declare LazarusConfig'+SEQUENCER_ONLY_KEYWORD+';' + 'Configmodule lazarus;' + 'End;' +
+
+    'Declare LazCleanAndBuild'+SEQUENCER_ONLY_KEYWORD+';' +
     'Cleanmodule lazarus;' +
     'ConfigModule lazarus;' +
     'Buildmodule lazbuild;' +
     'Buildmodule USERIDE;' +
     'Buildmodule startlazarus;' +
+    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+';'+
     'Exec CreateLazarusScript;' +
     'End;' +
 
@@ -118,33 +120,32 @@ const
     'End';
 
   DEFAULTLPI =
-  '<?xml version="1.0" encoding="UTF-8"?>'#013#010+
-  '<CONFIG>'#013#010+
-  '  <ProjectOptions>'#013#010+
-  '    <General>'#013#010+
-  '      <SessionStorage Value="InProjectDir"/>'#013#010+
-  '      <MainUnit Value="0"/>'#013#010+
-  '      <Title Value="project1"/>'#013#010+
-  '    </General>'#013#010+
-  '    <BuildModes Count="1">'#013#010+
-  '      <Item1 Name="Default" Default="True"/>'#013#010+
-  '    </BuildModes>'#013#010+
-  '    <Units Count="1">'#013#010+
-  '      <Unit0>'#013#010+
-  '        <Filename Value="project1.lpr"/>'#013#010+
-  '        <IsPartOfProject Value="True"/>'#013#010+
-  '      </Unit0>'#013#010+
-  '    </Units>'#013#010+
-  '  </ProjectOptions>'#013#010+
-  '</CONFIG>';
+    '<?xml version="1.0" encoding="UTF-8"?>'+LineEnding+
+    '<CONFIG>'+LineEnding+
+    '  <ProjectOptions>'+LineEnding+
+    '    <General>'+LineEnding+
+    '      <SessionStorage Value="InProjectDir"/>'+LineEnding+
+    '      <MainUnit Value="0"/>'+LineEnding+
+    '      <Title Value="project1"/>'+LineEnding+
+    '    </General>'+LineEnding+
+    '    <BuildModes Count="1">'+LineEnding+
+    '      <Item1 Name="Default" Default="True"/>'+LineEnding+
+    '    </BuildModes>'+LineEnding+
+    '    <Units Count="1">'+LineEnding+
+    '      <Unit0>'+LineEnding+
+    '        <Filename Value="project1.lpr"/>'+LineEnding+
+    '        <IsPartOfProject Value="True"/>'+LineEnding+
+    '      </Unit0>'+LineEnding+
+    '    </Units>'+LineEnding+
+    '  </ProjectOptions>'+LineEnding+
+    '</CONFIG>';
 
   DEFAULTLPR =
-  'program project1;'#013#010+
-  ''#013#010+
-  'begin'#013#010+
-  '  writeln(''Hello world from fpcupdeluxe !'');'#013#010+
-  'end.';
-
+    'program project1;'+LineEnding+
+    ''+LineEnding+
+    'begin'+LineEnding+
+    '  writeln(''Hello world from fpcupdeluxe !'');'+LineEnding+
+    'end.';
 
 type
 

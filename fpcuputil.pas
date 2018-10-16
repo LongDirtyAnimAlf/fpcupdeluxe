@@ -212,6 +212,7 @@ type
     function getFile(const URL,filename:string):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
+    function checkGithubRelease(const aURL:string):string;
   end;
   {$endif}
 
@@ -280,17 +281,16 @@ function GetReleaseCandidateFromUrl(aURL:string): integer;
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 procedure GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string='');
 {$IFDEF MSWINDOWS}
+function CheckFileSignature(aFilePath: string): boolean;
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 function IsWindows64: boolean;
-{$ENDIF}
-//check if there is at least one directory between Dir and root
-function ParentDirectoryIsNotRoot(Dir:string):boolean;
-{$IFDEF MSWINDOWS}
 // Get path for Windows per user storage of application data. Useful for storing settings
 function GetLocalAppDataPath: string;
 {$ENDIF MSWINDOWS}
+//check if there is at least one directory between Dir and root
+function ParentDirectoryIsNotRoot(Dir:string):boolean;
 // Shows non-debug messages on screen (no logging); also shows debug messages if DEBUG defined
 procedure infoln(Message: string; Level: TEventType);
 // Moves file if it exists, overwriting destination file
@@ -385,6 +385,8 @@ const
   //USERAGENT = 'Mozilla/5.0 (compatible; fpweb)';
   //USERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)';
   CURLUSERAGENT='curl/7.51.0';
+
+{$i revision.inc}
 
 function GetStringFromBuffer(const field:PChar):string;
 begin
@@ -1423,7 +1425,40 @@ begin
     end;
 end;
 
+
 {$IFDEF MSWINDOWS}
+function CheckFileSignature(aFilePath: string): boolean;
+var
+  s:TFileStream;
+  magic:word;
+  offset:integer;
+begin
+  result:=true;
+  if NOT FileExists(aFilePath) then exit;
+  s:=TFileStream.Create(aFilePath,fmOpenRead);
+  try
+    s.Position:=0;
+    magic:=s.ReadWord;
+    if magic<>$5A4D then exit;
+    s.Seek(60,soBeginning);
+    offset:=0;
+    s.ReadBuffer(offset,4);
+    s.Seek(offset,soBeginning);
+    magic:=s.ReadWord;
+    if magic<>$4550 then exit;
+    s.Seek(offset+4,soBeginning);
+    magic:=s.ReadWord;
+  finally
+    s.Free;
+  end;
+  {$ifdef win32}
+  result:=(magic=$014C);
+  {$endif}
+  {$ifdef win64}
+  result:=((magic=$0200) OR (magic=$8664));
+  {$endif}
+end;
+
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 var
   Output:string;
@@ -2265,7 +2300,6 @@ begin
   result:=GetTargetCPU+'-'+GetTargetOS;
 end;
 
-
 function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
 var
   processorname, os: string;
@@ -3034,6 +3068,71 @@ begin
     end;
   end;
 end;
+
+function TUseNativeDownLoader.checkGithubRelease(const aURL:string):string;
+var
+  s,RawData: string;
+  Json : TJSONData;
+  JsonObject : TJSONObject;
+  Releases : TJSONArray;
+  NewVersion:boolean;
+  i:integer;
+begin
+  NewVersion:=false;
+  result:='';
+  if (Length(aURL)>0) then
+  begin
+    with aFPHTTPClient do
+    begin
+      IOTimeout:=1000;
+      try
+        RawData:=Get(aURL);
+        Json:=GetJSON(RawData);
+        try
+          JsonObject := TJSONObject(Json);
+          // Example ---
+          // tag_name: "1.6.2b"
+          // name: "Release v1.6.2b of fpcupdeluxe"
+          s:=JsonObject.Get('tag_name');
+          if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
+          if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
+          begin
+            if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
+          end;
+          if NewVersion then
+          begin
+            s:=JsonObject.Get('prerelease');//Should be False
+            NewVersion:=(s='False');
+          end;
+          //YES !!!
+          if NewVersion then
+          begin
+            //Assets is an array of binaries belonging to a release
+            Releases:=JsonObject.Get('assets',TJSONArray(nil));
+            for i:=0 to (Releases.Count-1) do
+            begin
+              JsonObject := TJSONObject(Releases[i]);
+              // Example ---
+              // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
+              // name: "fpcupdeluxe-aarch64-linux"
+              // created_at: "2018-10-14T06:58:44Z"
+              s:=JsonObject.Get('name');
+              if (Pos('fpcupdeluxe-'+GetTargetCPUOS,s)=1) then
+              begin
+                result:=JsonObject.Get('browser_download_url');
+                break;
+              end;
+            end;
+          end;
+        finally
+          Json.Free;
+        end;
+      except
+      end;
+    end;
+  end;
+end;
+
 
 function TUseNativeDownLoader.Download(const URL: String; filename:string):boolean;
 Var

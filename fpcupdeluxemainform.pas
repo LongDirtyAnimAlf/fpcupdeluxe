@@ -107,6 +107,8 @@ type
     sConsentWarning:boolean;
     aDataClient:TDataClient;
     {$endif}
+    procedure InitFpcupdeluxe({%H-}Data: PtrInt);
+    procedure CheckForUpdates({%H-}Data: PtrInt);
     function InstallCrossCompiler(Sender: TObject):boolean;
     function AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
@@ -308,7 +310,7 @@ begin
     Form3:=TForm3.Create(Form1);
 
     // tricky ... due to arm quircks when cross-compiling : GetDistro (ExecuteCommand) gives errors if used in CreateForm
-    Timer1.Enabled:=True;
+    //Timer1.Enabled:=True;
   end
   else
   begin
@@ -320,6 +322,7 @@ begin
     AddMessage('');
     DisEnable(nil,False);
   end;
+  Application.QueueAsyncCall(@InitFpcupdeluxe,0);
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -840,6 +843,13 @@ begin
     end;
   end;
   *)
+
+  if (ExistWordInString(PChar(s),'Error 217',[soDown])) then
+  begin
+    memoSummary.Lines.Append('We have a fatal FPC runtime error 217: Unhandled exception occurred.');
+    memoSummary.Lines.Append('See: https://www.freepascal.org/docs-html/user/userap4.html');
+    memoSummary.Lines.Append('Can be caused by anything unknown. No clues about cause whatsoever.');
+  end;
 
   searchstring:='make (e=';
   if (ExistWordInString(PChar(s),searchstring,[soDown])) then
@@ -1545,6 +1555,9 @@ begin
     begin
       modules:=listModules.Items.Strings[listModules.ItemIndex];
       if Sender=btnUninstallModule then modules:=modules+SEQUENCER_UNINSTALL_KEYWORD;
+      {$ifdef RemoteLog}
+      aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items.Strings[listModules.ItemIndex]);
+      {$endif}
     end;
 
     if Length(modules)>0 then
@@ -1703,7 +1716,9 @@ begin
 
   if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
   if (FPCupManager.CrossOS_Target='msdos') then FPCupManager.CrossCPU_Target:='i8086';
+  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
   if (FPCupManager.CrossCPU_Target='i8086') then FPCupManager.CrossOS_Target:='msdos';
+  if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:='i386';
 
   if FPCupManager.CrossOS_Target='windows' then
   begin
@@ -3198,6 +3213,69 @@ begin
     begin
       aEdit.Text:=aLocalTarget;
     end;
+  end;
+end;
+
+procedure TForm1.InitFpcupdeluxe(Data: PtrInt);
+{$ifdef RemoteLog}
+var
+  aModalResult:TModalResult;
+{$endif}
+begin
+  // FPC cross-quirck : GetDistro (ExecuteCommand) gives errors if used in CreateForm
+  {$ifdef RemoteLog}
+  aDataClient.UpInfo.UpDistro:=GetDistro;
+  {$endif}
+  InitFPCupManager;
+  {$ifdef usealternateui}
+  // This must only be called once.
+  If Not Alternate_ui_created then alternateui_Create_Controls;
+  {$endif}
+  {$ifdef RemoteLog}
+  if (sConsentWarning) OR (Form2.SendInfo) then
+  begin
+    AddMessage('Fpcupdeluxe logging info:');
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
+    if (sConsentWarning) then
+    begin
+      aModalResult:=(MessageDlg(
+                   'Attention !'+sLineBreak+
+                   sLineBreak +
+                   'Fpcupdeluxe is able to log some install info.' + sLineBreak +
+                   'This data is send towards a server,' + sLineBreak +
+                   'where it is available to anybody.' + sLineBreak +
+                   '(see URL shown in screen and statusbar)' + sLineBreak +
+                   sLineBreak +
+                   'Do you want logging info to be gathered ?'
+                 ,mtConfirmation,[mbYes, mbNo],0));
+      if aModalResult=mrYes
+         then Form2.SendInfo:=True
+         else Form2.SendInfo:=False;
+    end;
+  end;
+  {$endif}
+  Application.QueueAsyncCall(@CheckForUpdates,0);
+end;
+
+procedure TForm1.CheckForUpdates(Data: PtrInt);
+var
+  aDownLoader:TNativeDownLoader;
+  s:string;
+begin
+  AddMessage('Please wait. Checking for updates.');
+  aDownLoader:=TNativeDownLoader.Create;
+  try
+    s:=aDownLoader.checkGithubRelease('https://api.github.com/repos/newpascal/fpcupdeluxe/releases/latest');
+    if Length(s)>0 then
+    begin
+      AddMessage('New version available');
+      AddMessage('See: https://github.com/newpascal/fpcupdeluxe/releases/latest');
+      AddMessage('See: '+s);
+      memoSummary.Lines.Append('New fpcupdeluxe version available');
+    end else AddMessage('No updates found.');
+  finally
+    aDownLoader.Free;
   end;
 end;
 

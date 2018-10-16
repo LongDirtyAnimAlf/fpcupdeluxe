@@ -175,8 +175,6 @@ type
     procedure CreateBinutilsList(aVersion:string='');
     // Get a diff of all modified files in and below the directory and save it
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
-    // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
-    function DownloadBinUtils: boolean;
     // Clone/update using HG; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromHG(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
@@ -188,6 +186,8 @@ type
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     {$IFDEF MSWINDOWS}
+    // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
+    function DownloadBinUtils: boolean;
     function DownloadSVN: boolean;
     function DownloadOpenSSL: boolean;
     function DownloadWget: boolean;
@@ -488,6 +488,16 @@ begin
       else
       begin
         infoln(localinfotext+'Found OpenSLL library files.',etDebug);
+        infoln(localinfotext+'Checking for correct signature.',etDebug);
+        if (NOT CheckFileSignature(SafeGetApplicationPath+'libeay32.dll')) OR (NOT CheckFileSignature(SafeGetApplicationPath+'ssleay32.dll')) then
+        begin
+          infoln(localinfotext+'OpenSLL library files have wrong CPU signature.',etWarning);
+          DeleteFile(SafeGetApplicationPath+'libeay32.dll');
+          DeleteFile(SafeGetApplicationPath+'ssleay32.dll');
+          infoln(localinfotext+'Getting correct OpenSLL library files.',etInfo);
+          DownloadOpenSSL;
+          DestroySSLInterface; // disable ssl and release libs
+        end;
       end;
       if (NOT IsSSLloaded) then InitSSLInterface;
     end;
@@ -1111,54 +1121,6 @@ begin
   UpdateWarnings.Add('Diff with last revision stored in ' + DiffFileName);
 end;
 
-function TInstaller.DownloadBinUtils: boolean;
-  // Download binutils. For now, only makes sense on Windows...
-var
-  Counter: integer;
-  Errors: integer = 0;
-  DownloadSuccess:boolean;
-  InstallPath:string;
-begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
-  //Parent directory of files. Needs trailing backslash.
-  ForceDirectoriesUTF8(FMakeDir);
-  Result := true;
-  for Counter := low(FUtilFiles) to high(FUtilFiles) do
-  begin
-    if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
-    begin
-      InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
-
-      if (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
-      begin
-        if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
-        if (FUtilFiles[Counter].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
-        ForceDirectoriesUTF8(InstallPath);
-      end;
-
-      InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
-
-      if (FileExists(InstallPath)) then continue;
-
-      DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
-
-      if NOT DownloadSuccess then
-      begin
-        infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
-        Errors := Errors + 1;
-      end else infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
-
-    end;
-
-  end;
-
-  if Errors > 0 then
-  begin
-    Result := false;
-    WritelnLog(localinfotext+IntToStr(Errors) + ' error(s) downloading binutils.', true);
-  end;
-end;
-
 function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision,
   AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
 var
@@ -1480,6 +1442,123 @@ begin
 end;
 
 {$IFDEF MSWINDOWS}
+function TInstaller.DownloadBinUtils: boolean;
+var
+  Counter: integer;
+  Errors: integer = 0;
+  DownloadSuccess:boolean;
+  InstallPath:string;
+begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+  //Parent directory of files. Needs trailing backslash.
+  ForceDirectoriesUTF8(FMakeDir);
+  Result := true;
+  for Counter := low(FUtilFiles) to high(FUtilFiles) do
+  begin
+    if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
+    begin
+      InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
+
+      if (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
+      begin
+        if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
+        if (FUtilFiles[Counter].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
+        ForceDirectoriesUTF8(InstallPath);
+      end;
+
+      InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
+
+      if (FileExists(InstallPath)) then continue;
+
+      DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
+
+      if NOT DownloadSuccess then
+      begin
+        infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
+        Errors := Errors + 1;
+      end else infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
+
+    end;
+
+  end;
+
+  if Errors > 0 then
+  begin
+    Result := false;
+    WritelnLog(localinfotext+IntToStr(Errors) + ' error(s) downloading binutils.', true);
+  end;
+end;
+
+{$ifdef win64444}
+function TInstaller.DownloadBinUtils: boolean;
+var
+  SourceURL,BinsZip:string;
+  OperationSucceeded:boolean;
+begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+  //Parent directory of files. Needs trailing backslash.
+  ForceDirectoriesUTF8(FMakeDir);
+  Result := true;
+  OperationSucceeded := false;
+  SourceURL:=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0/Win64Bins.zip';
+  BinsZip := GetTempFileNameExt('','FPCUPTMP','zip');
+  try
+    OperationSucceeded := Download(
+      FUseWget,
+      SourceURL,
+      BinsZip,
+      FHTTPProxyUser,
+      FHTTPProxyPort,
+      FHTTPProxyUser,
+      FHTTPProxyPassword);
+
+      if NOT OperationSucceeded then
+      try
+        SysUtils.Deletefile(BinsZip); //Get rid of temp zip if any.
+        // use powershell
+        OperationSucceeded := DownloadByPowerShell(SourceURL,BinsZip);
+      except
+        on E: Exception do
+        begin
+          OperationSucceeded := false;
+          writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading Win64 binutils', true);
+        end;
+      end;
+
+  except
+    // Deal with timeouts, wrong URLs etc
+    on E: Exception do
+    begin
+      OperationSucceeded := false;
+      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Win64 binutils from ' + SourceURL, true);
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    // Extract, overwrite
+    with TNormalUnzipper.Create do
+    begin
+      try
+        OperationSucceeded:=DoUnZip(BinsZip,IncludeTrailingPathDelimiter(FMakeDir),[]);
+      finally
+        Free;
+      end;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    WritelnLog(localinfotext + 'Win64 binutils download and unpacking ok.', true);
+    OperationSucceeded := FindSVNSubDirs;
+    if OperationSucceeded then
+      SysUtils.Deletefile(BinsZip); //Get rid of temp zip if success.
+  end;
+
+  Result := OperationSucceeded;
+end;
+{$endif}
+
 function TInstaller.DownloadSVN: boolean;
 const
   // See: http://subversion.apache.org/download/
