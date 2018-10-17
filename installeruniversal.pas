@@ -1949,32 +1949,35 @@ var
     end;
   end;
 
-  function CreateModuleSequence(ModuleName:string):string;
+  function CreateModuleSequence(aModuleName:string):string;
   var
-    name,req:string;
+    ModuleName,RequiredModules:string;
   begin
     result:='';
-    name:=ini.ReadString(ModuleName,INIKEYWORD_NAME,'');
-    if name<>'' then
+    ModuleName:=ini.ReadString(aModuleName,INIKEYWORD_NAME,'');
+    if ModuleName<>'' then
       begin
-      req:=ini.ReadString(ModuleName,'requires','');
-      if req<>'' then
-        begin
-        req:='Requires '+req+';';
-        req:=StringReplace(req, ',', '; Requires ', [rfReplaceAll,rfIgnoreCase]);
-        end;
-      result:='Declare '+ name + ';' + req +
-          'Cleanmodule '+ name +';' +
-          'Getmodule '+ name +';' +
-          'Buildmodule '+ name +';' +
-          'Configmodule '+ name +';' +
-          'End;'+
-          'Declare '+ name + SEQUENCER_CLEAN_KEYWORD + ';'+
-          'Cleanmodule '+ name +';' +
-          'End;'+
-          'Declare '+ name + SEQUENCER_UNINSTALL_KEYWORD + ';'+
-          'Uninstallmodule '+ name +';' +
-          'End;';
+      RequiredModules:=ini.ReadString(ModuleName,Trim(_REQUIRES),'');
+      if RequiredModules<>'' then
+      begin
+        RequiredModules:=_REQUIRES + RequiredModules + _SEP;
+        RequiredModules:=StringReplace(RequiredModules, ',', _SEP+_REQUIRES, [rfReplaceAll,rfIgnoreCase]);
+      end;
+
+      result:=
+          _DECLARE+ ModuleName + _SEP +
+          RequiredModules +
+          _CLEANMODULE + ModuleName +_SEP +
+          _GETMODULE + ModuleName +_SEP +
+          _BUILDMODULE + ModuleName +_SEP +
+          _CONFIGMODULE + ModuleName +_SEP +
+          _END +
+          _DECLARE + ModuleName + _CLEAN + _SEP +
+          _CLEANMODULE + ModuleName +_SEP +
+          _END +
+          _DECLARE + ModuleName + _UNINSTALL + _SEP +
+          _UNINSTALLMODULE + ModuleName +_SEP +
+          _END;
       end;
   end;
 
@@ -2026,18 +2029,19 @@ begin
       end;
 
     // create the sequences for default modules
-    result:=result+'DeclareHidden Universal'+SEQUENCER_DEFAULT_KEYWORD+';';
+    result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_SEP;
     for i:=0 to UniModuleEnabledList.Count-1 do
-        result:=result+'Do '+UniModuleEnabledList[i]+';';
-    result:=result+'End;';
-    result:=result+'DeclareHidden Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';';
+        result:=result+_DO+UniModuleEnabledList[i]+_SEP;
+    result:=result+_END;
+    result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_CLEAN+_SEP;
     for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+'Do '+UniModuleEnabledList[i]+SEQUENCER_CLEAN_KEYWORD+';';
-    result:=result+'End;';
-    result:=result+'DeclareHidden Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';';
+      result:=result+_DO+UniModuleEnabledList[i]+_CLEAN+_SEP;
+    result:=result+_END;
+    result:=result+_DECLAREHIDDEN+_UNIVERSALDEFAULT+_UNINSTALL+_SEP;
     for i:=0 to UniModuleEnabledList.Count-1 do
-      result:=result+'Do '+UniModuleEnabledList[i]+SEQUENCER_UNINSTALL_KEYWORD+';';
-    result:=result+'End;';
+      result:=result+_DO+UniModuleEnabledList[i]+_UNINSTALL+_SEP;
+    result:=result+_END;
+
   finally
     ini.Free;
   end;

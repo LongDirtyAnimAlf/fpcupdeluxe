@@ -59,134 +59,87 @@ Const
   Sequences=
     //default sequence. Using declare makes this show up in the module list given by fpcup --help
     // If you don't want that, use DeclareHidden
-    'Declare '+SEQUENCER_DEFAULT_KEYWORD+';'+ //keyword Declare gives a name to a sequence of commands
+    _DECLARE+_DEFAULT+_SEP+ //keyword Declare gives a name to a sequence of commands
     {$ifndef FPCONLY}
     // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
-    'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
+    _EXECUTE+_CHECKDEVLIBS+_SEP+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
     {$endif}
-    'Do fpc;'+ //keyword Do means run the specified declared sequence
+    _DO+_FPC+_SEP+ //keyword Do means run the specified declared sequence
     {$ifndef FPCONLY}
-    'Do lazarus;'+
-    'Do LCLCross;'+
+    _DO+_LAZARUS+_SEP+
+    _DO+_LCLCROSS+_SEP+
     {$endif}
-    'End;'+ //keyword End specifies the end of the sequence
+    _END+ //keyword End specifies the end of the sequence
 
+    {$ifdef mswindows}
     {$ifdef win32}
     //default sequences for win32
-    'Declare defaultwin32;'+
-    {$ifndef FPCONLY}
-    'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
-    {$endif}
-    'Do fpc;'+
-    'Do FPCCrossWin32-64;'+
-    {$ifndef FPCONLY}
-    'Do lazarus;'+
-    'Do LCLCross;'+
-    'Do LazarusCrossWin32-64;'+
-    {$endif}
-    'End;'+
+    _DECLARE+_DEFAULT+'win32'+_SEP+
     {$endif win32}
-
-    //default sequences for win64
     {$ifdef win64}
-    'Declare defaultwin64;'+
-    {$ifndef FPCONLY}
-    // CheckDevLibs has stubs for anything except Linux, where it does check development library presence
-    'Exec CheckDevLibs;'+
-    {$endif}
-    'Do fpc;'+
-    'Do FPCCrossWin64-32;'+
-    {$ifndef FPCONLY}
-    'Do lazarus;'+
-    'Do LCLCross;'+
-    'Do LazarusCrossWin64-32;'+
-    {$endif}
-    'End;'+
+    _DECLARE+_DEFAULT+'win64'+_SEP+
     {$endif win64}
+    _DO+_FPC+_SEP+
+    _DO+_FPC+_CROSSWIN+_SEP+
+    {$ifndef FPCONLY}
+    _DO+_LAZARUS+_SEP+
+    _DO+_LCLCROSS+_SEP+
+    _DO+_LAZARUS+_CROSSWIN+_SEP+
+    {$endif FPCONLY}
+    _END+
+    {$endif mswindows}
 
     //default simple sequence: some packages give errors and memory is limited, so keep it simple
-    'Declare DefaultSimple;'+
+    _DECLARE+_DEFAULT+'Simple'+_SEP+
     {$ifndef FPCONLY}
-    'Exec CheckDevLibs;'+ //keyword Exec executes a function/procedure; must be defined in TSequencer.DoExec
+    _EXECUTE+_CHECKDEVLIBS+_SEP+
     {$endif}
-    'Do fpc;'+
+    _DO+_FPC+_SEP+
     {$ifndef FPCONLY}
-    'Do oldlazarus;'+
+    _DO+'oldlazarus'+_SEP+
     {$endif}
-    'End;'+
+    _END+
 
 //default clean sequence
-    'Declare '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';'+
-    'Do fpc'+SEQUENCER_CLEAN_KEYWORD+';'+
+    _DECLARE+_DEFAULT+_CLEAN+_SEP+
+    _DO+_FPC+_CLEAN+_SEP+
     {$ifndef FPCONLY}
-    'Do lazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'Do helplazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
-    //'CleanModule DOCEDITOR;'+
-    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';'+
+    _DO+_LAZARUS+_CLEAN+_SEP+
+    _DO+_HELPLAZARUS+_CLEAN+_SEP+
+    //_CLEANMODULE+'DOCEDITOR'+_SEP+
+    _DO+_UNIVERSALDEFAULT+_CLEAN+_SEP+
     {$endif}
-    'End;'+
-    (*
-// Currently, make distclean LCL removes lazbuild.exe/lazarus.exe as well
-// Then, universal installer won't work because of missing lazbuild, and of
-// course Lazarus won't work either.
-// Workaround: don't clean up.
-//default clean sequence for win32
-    'Declare defaultwin32'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'Do fpc'+SEQUENCER_CLEAN_KEYWORD+';'+
-    {$ifndef FPCONLY}
-    'Do lazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'Do helplazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
-    //'CleanModule DOCEDITOR;'+
-    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_CLEAN_KEYWORD+';'+
-    {$endif}
-    'Do crosswin32-64'+SEQUENCER_CLEAN_KEYWORD+';'+   //this has to be the last. All TExecState reset!
-    'End;'+
-//default cross clean sequence for win32
-    'Declare crosswin32-64'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'SetCPU x86_64;'+
-    'SetOS win64;'+
-    'Cleanmodule fpc;'+
-    {$ifndef FPCONLY}
-    'Cleanmodule lazarus;'+
-    {$endif}
-    'End;'+
-//default cross clean sequence for win64
-    'Declare crosswin64-32'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'SetCPU i386;'+
-    'SetOS win32;'+
-    'Cleanmodule fpc;'+
-    {$ifndef FPCONLY}
-    'Cleanmodule lazarus;'+
-    {$endif}
-    'End;'+
-    *)
+    _END+
 
 //default uninstall sequence
-    'Declare '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'Do fpc'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    _DECLARE+_DEFAULT+_UNINSTALL+_SEP+
+    _DO+_FPC+_UNINSTALL+_SEP+
     {$ifndef FPCONLY}
-    'Do lazarus'+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'Do help'+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    //'UninstallModule DOCEDITOR;'+
-    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    _DO+_LAZARUS+_UNINSTALL+_SEP+
+    _DO+'help'+_UNINSTALL+_SEP+
+    //'UninstallModule DOCEDITOR'+_SEP+
+    _DO+_UNIVERSALDEFAULT+_UNINSTALL+_SEP+
     {$endif}
-    'End;'+
+    _END+
+
 //default uninstall sequence for win32
-    'Declare defaultwin32'+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'Do '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'End;'+
+    _DECLARE+_DEFAULT+'win32'+_UNINSTALL+_SEP+
+    _DO+_DEFAULT+_UNINSTALL+_SEP+
+    _END+
+
 //default uninstall sequence for win64
-    'Declare defaultwin64'+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'Do '+SEQUENCER_DEFAULT_KEYWORD+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'End;'+
+    _DECLARE+_DEFAULT+'win64'+_UNINSTALL+_SEP+
+    _DO+_DEFAULT+_UNINSTALL+_SEP+
+    _END+
 
 //default check sequence
-    'Declare defaultcheck;'+
-    'Checkmodule fpc;'+
+    _DECLARE+_DEFAULT+_CHECK+_SEP+
+    _CHECKMODULE+_FPC+_SEP+
     {$ifndef FPCONLY}
-    'Checkmodule lazarus;'+
+    _CHECKMODULE+_LAZARUS+_SEP+
     {$endif}
-    'End;';
+
+    _ENDFINAL;
 
 type
   TCpu=(cpuNone,
@@ -892,18 +845,18 @@ begin
     if FOnlyModules<>'' then
     begin
       FSequencer.CreateOnly(FOnlyModules);
-      result:=FSequencer.Run('Only');
+      result:=FSequencer.Run(_ONLY);
     end
     else
     begin
-      aSequence:=SEQUENCER_DEFAULT_KEYWORD;
+      aSequence:=_DEFAULT;
       {$ifdef win32}
       // Run Windows specific cross compiler or regular version
-      if pos('CROSSWIN32-64',UpperCase(SkipModules))=0 then aSequence:='DefaultWin32';
+      if pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin32';
       {$endif}
       {$ifdef win64}
       //not yet
-      //if pos('CROSSWIN64-32',UpperCase(SkipModules))=0 then aSequence:='DefaultWin64';
+      //if pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin64';
       {$endif}
       {$ifdef CPUAARCH64}
       aSequence:='DefaultSimple';
@@ -929,7 +882,7 @@ begin
         // run specified additional modules using the only mechanism
         infoln('InstallerManager: going to run sequencer for include modules '+FIncludeModules,etDebug);
         FSequencer.CreateOnly(FIncludeModules);
-        result:=FSequencer.Run(SEQUENCER_ONLY_KEYWORD);
+        result:=FSequencer.Run(_ONLY);
       end;
     end;
     //FResultSet:=FSequencer.FInstaller;
@@ -1226,14 +1179,14 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   {$endif}
 begin
   infoln('TSequencer: DoExec for function '+FunctionName+' called.',etDebug);
-  if UpperCase(FunctionName)='CREATEFPCUPSCRIPT' then
+  if FunctionName=_CREATEFPCUPSCRIPT then
     result:=CreateFpcupScript
   {$ifndef FPCONLY}
-  else if UpperCase(FunctionName)='CREATELAZARUSSCRIPT' then
+  else if FunctionName=_CREATELAZARUSSCRIPT then
     result:=CreateLazarusScript
-  else if UpperCase(FunctionName)='DELETELAZARUSSCRIPT' then
+  else if FunctionName=_DELETELAZARUSSCRIPT then
     result:=DeleteLazarusScript
-  else if UpperCase(FunctionName)='CHECKDEVLIBS' then
+  else if FunctionName=_CHECKDEVLIBS then
     result:=CheckDevLibs(FParent.CrossLCL_Platform)
   {$endif}
   else
@@ -1296,7 +1249,7 @@ begin
   //check if this is a known module:
 
   // FPC:
-  if (uppercase(ModuleName)='FPC') then
+  if (ModuleName=_FPC) then
   begin
     if assigned(FInstaller) then
     begin
@@ -1338,14 +1291,14 @@ begin
   {$ifndef FPCONLY}
   // Lazarus:
   else
-    if (uppercase(ModuleName)='LAZARUS')
-    or (uppercase(ModuleName)='STARTLAZARUS')
-    or (uppercase(ModuleName)='LAZBUILD')
-    or (uppercase(ModuleName)='LCL')
-    or (uppercase(ModuleName)='LCLCROSS')
-    or (uppercase(ModuleName)='IDE')
-    or (uppercase(ModuleName)='BIGIDE')
-    or (uppercase(ModuleName)='USERIDE')
+    if (ModuleName=_LAZARUS)
+    or (ModuleName=_STARTLAZARUS)
+    or (ModuleName=_LAZBUILD)
+    or (ModuleName=_LCL)
+    or (ModuleName=_LCLCROSS)
+    or (ModuleName=_IDE)
+    or (ModuleName=_BIGIDE)
+    or (ModuleName=_USERIDE)
   then
   begin
     if assigned(FInstaller) then
@@ -1559,38 +1512,38 @@ var
 
   function KeyStringToKeyword(Key:string):TKeyword;
   begin
-    if key='DECLARE' then result:=SMdeclare
-    else if key='DECLAREHIDDEN' then result:=SMdeclareHidden
-    else if key='DO' then result:=SMdo
-    else if key='REQUIRES' then result:=SMrequire
-    else if key='EXEC' then result:=SMexec
-    else if key='END' then result:=SMend
-    else if key='CLEANMODULE' then result:=SMcleanmodule
-    else if key='GETMODULE' then result:=SMgetmodule
-    else if key='BUILDMODULE' then result:=SMbuildmodule
-    else if key='CHECKMODULE' then result:=SMcheckmodule
-    else if key='UNINSTALLMODULE' then result:=SMuninstallmodule
-    else if key='CONFIGMODULE' then result:=SMconfigmodule
+    if key=Trim(_DECLARE) then result:=SMdeclare
+    else if key=Trim(_DECLAREHIDDEN) then result:=SMdeclareHidden
+    else if key=Trim(_DO) then result:=SMdo
+    else if key=Trim(_REQUIRES) then result:=SMrequire
+    else if key=Trim(_EXECUTE) then result:=SMexec
+    else if key=Trim(_ENDFINAL) then result:=SMend
+    else if key=Trim(_CLEANMODULE) then result:=SMcleanmodule
+    else if key=Trim(_GETMODULE) then result:=SMgetmodule
+    else if key=Trim(_BUILDMODULE) then result:=SMbuildmodule
+    else if key=Trim(_CHECKMODULE) then result:=SMcheckmodule
+    else if key=Trim(_UNINSTALLMODULE) then result:=SMuninstallmodule
+    else if key=Trim(_CONFIGMODULE) then result:=SMconfigmodule
     {$ifndef FPCONLY}
-    else if key='RESETLCL' then result:=SMResetLCL
+    else if key=Trim(_RESETLCL) then result:=SMResetLCL
     {$endif}
-    else if key='SETOS' then result:=SMSetOS
-    else if key='SETCPU' then result:=SMSetCPU
+    else if key=Trim(_SETOS) then result:=SMSetOS
+    else if key=Trim(_SETCPU) then result:=SMSetCPU
     else result:=SMInvalid;
   end;
 
   //remove white space and line terminator
   function NoWhite(s:string):string;
   begin
-    while (s[1]<=' ') or (s[1]=';') do delete(s,1,1);
-    while (s[length(s)]<=' ') or (s[length(s)]=';') do delete(s,length(s),1);
+    while (s[1]<=' ') or (s[1]=_SEP) do delete(s,1,1);
+    while (s[length(s)]<=' ') or (s[length(s)]=_SEP) do delete(s,length(s),1);
     result:=s;
   end;
 
 begin
 while Sequence<>'' do
 begin
-  i:=pos(';',Sequence);
+  i:=pos(_SEP,Sequence);
   if i>0 then
     line:=copy(Sequence,1,i-1)
   else
@@ -1615,7 +1568,7 @@ begin
     begin
       i:=Length(FStateMachine);
       SetLength(FStateMachine,i+1);
-      instr:=KeyStringToKeyword(Uppercase(Key));
+      instr:=KeyStringToKeyword(Trim(Key));
       FStateMachine[i].instr:=instr;
       if instr=SMInvalid then
         FParent.WritelnLog('Invalid instruction '+Key+' in sequence '+sequencename);
@@ -1628,7 +1581,7 @@ begin
       if instr = SMdeclare then
       begin
         key:='';
-        if (Pos(SEQUENCER_CLEAN_KEYWORD,param)=0) AND (Pos(SEQUENCER_UNINSTALL_KEYWORD,param)=0) AND (Pos(SEQUENCER_DEFAULT_KEYWORD,param)=0) then
+        if (Pos(_CLEAN,param)=0) AND (Pos(_UNINSTALL,param)=0) AND (Pos(_DEFAULT,param)=0) then
         begin
           j:=UniModuleList.IndexOf(UpperCase(param));
           if j>=0 then
@@ -1653,7 +1606,7 @@ var
   seq:string;
 
 begin
-  AddToModuleList(SEQUENCER_ONLY_KEYWORD,Length(FStateMachine));
+  AddToModuleList(_ONLY,Length(FStateMachine));
   while Onlymodules<>'' do
   begin
     i:=pos(',',Onlymodules);
@@ -1684,7 +1637,7 @@ function TSequencer.DeleteOnly: boolean;
 var i,idx:integer;
   SeqAttr:^TSequenceAttributes;
 begin
-  idx:=FParent.FModuleList.IndexOf(SEQUENCER_ONLY_KEYWORD);
+  idx:=FParent.FModuleList.IndexOf(_ONLY);
   if (idx >0) then
   begin
     SeqAttr:=PSequenceAttributes(pointer(FParent.FModuleList.Objects[idx]));
@@ -1732,13 +1685,13 @@ begin
     // --clean or --install ??
     if FParent.Uninstall then  // uninstall overrides clean
     begin
-      if (UpperCase(SequenceName)<>UpperCase(SEQUENCER_ONLY_KEYWORD)) and (NOT AnsiEndsText(SEQUENCER_UNINSTALL_KEYWORD,SequenceName)) then
-        SequenceName:=SequenceName+SEQUENCER_UNINSTALL_KEYWORD;
+      if (UpperCase(SequenceName)<>UpperCase(_ONLY)) and (NOT AnsiEndsText(_UNINSTALL,SequenceName)) then
+        SequenceName:=SequenceName+_UNINSTALL;
     end
     else if FParent.Clean  then
     begin
-      if (UpperCase(SequenceName)<>UpperCase(SEQUENCER_ONLY_KEYWORD)) and (NOT AnsiEndsText(SEQUENCER_CLEAN_KEYWORD,SequenceName)) then
-        SequenceName:=SequenceName+SEQUENCER_CLEAN_KEYWORD;
+      if (UpperCase(SequenceName)<>UpperCase(_ONLY)) and (NOT AnsiEndsText(_CLEAN,SequenceName)) then
+        SequenceName:=SequenceName+_CLEAN;
     end;
     // find sequence
     idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));

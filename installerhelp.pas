@@ -57,7 +57,7 @@ Const
     'Buildmodule helpfpc;'+
     'End;'+
     //Remove FPC help:
-    'Declare helpfpc'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Declare helpfpc'+_UNINSTALL+';'+
     'CleanModule helpfpc;'+
     'UninstallModule helpfpc;'+
     'End;'+
@@ -80,47 +80,47 @@ Const
     'ConfigModule helplazarus;'+
     'End;'+
     //Remove Lazarus help:
-    'Declare helplazarus'+SEQUENCER_UNINSTALL_KEYWORD+';'+
+    'Declare helplazarus'+_UNINSTALL+';'+
     'CleanModule helplazarus;'+
     'UninstallModule helplazarus;'+
     'End;'+
     //selective actions triggered with --only=SequenceName
-    'Declare HelpFPC'+SEQUENCER_CLEAN_KEYWORD+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpFPC'+_CLEAN+_ONLY+';'+
     'Cleanmodule helpfpc;'+
     'End;'+
 
-    'Declare helplazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
+    'Declare helplazarus'+_CLEAN+';'+
     // This cleaning sequence will be called by --clean
     'Cleanmodule helplazarus;'+
     'End;'+
     {$endif}
 
-    'Declare HelpFPCGet'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpFPCGet'+_ONLY+';'+
     'Getmodule helpfpc;'+
     'End;'+
     {$ifndef FPCONLY}
-    'Declare HelpLazarusGet'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpLazarusGet'+_ONLY+';'+
     'Getmodule helplazarus;'+
     'End;'+
     {$endif}
-    'Declare HelpFPCBuild'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpFPCBuild'+_ONLY+';'+
     'Buildmodule helpfpc;'+
     'End;'+
 
-    'Declare HelpFPCBuild'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpFPCBuild'+_ONLY+';'+
     'Buildmodule helpfpc;'+
     'End;'+
     {$ifndef FPCONLY}
-    'Declare HelpLazarusBuild'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpLazarusBuild'+_ONLY+';'+
     'Buildmodule helplazarus;'+
     'End;'+
     {$endif}
-    'Declare HelpFPCConfig'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpFPCConfig'+_ONLY+';'+
     'Configmodule helpfpc;'+
     'End;'
     {$ifndef FPCONLY}
     +
-    'Declare HelpLazarusConfig'+SEQUENCER_ONLY_KEYWORD+';'+
+    'Declare HelpLazarusConfig'+_ONLY+';'+
     'Configmodule helplazarus;'+
     'End'
     {$endif}

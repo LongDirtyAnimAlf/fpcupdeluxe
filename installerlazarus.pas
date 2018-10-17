@@ -41,83 +41,87 @@ uses
 const
   Sequences =
     //standard lazarus build
-    'Declare lazarus;' +
-    'Cleanmodule lazarus;' +
-    'Checkmodule lazarus;' +
-    'Getmodule lazarus;' +
-    'ConfigModule lazarus;' +
-    'Buildmodule lazbuild;' +
-    'Buildmodule USERIDE;' +
-    'Buildmodule startlazarus;' +
-    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+';'+
-    'Do helplazarus;'+
-    'Exec CreateLazarusScript;' +
-    'End;' +
+    _DECLARE+_LAZARUS+_SEP +
+    _CLEANMODULE+_LAZARUS+_SEP +
+    _CHECKMODULE+_LAZARUS+_SEP +
+    _GETMODULE+_LAZARUS+_SEP +
+    _CONFIGMODULE+_LAZARUS+_SEP +
+    _BUILDMODULE+_LAZBUILD+_SEP +
+    _BUILDMODULE+_USERIDE+_SEP +
+    _BUILDMODULE+_STARTLAZARUS+_SEP +
+    _DO+_UNIVERSALDEFAULT+_SEP+
+    _DO+_HELPLAZARUS+_SEP+
+    _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
+    _END +
 
-    'Declare oldlazarus;' +
-    'Cleanmodule lazarus;' +
-    'Checkmodule lazarus;' +
-    'Getmodule lazarus;' +
-    'Buildmodule lazarus;' +
-    'ConfigModule lazarus;' +
-    'Exec CreateLazarusScript;' +
-    'End;' +
+    _DECLARE+'oldlazarus'+_SEP +
+    _CLEANMODULE+_LAZARUS+_SEP +
+    _CHECKMODULE+_LAZARUS+_SEP +
+    _GETMODULE+_LAZARUS+_SEP +
+    _BUILDMODULE+_LAZARUS+_SEP +
+    _CONFIGMODULE+_LAZARUS+_SEP +
+    _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
+    _END +
 
     //standard uninstall
-    'Declare lazarus'+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'Uninstallmodule lazarus;' +
-    'Exec DeleteLazarusScript;' + 'End;' +
+    _DECLARE+_LAZARUS+_UNINSTALL+_SEP+
+    _UNINSTALLMODULE+_LAZARUS+_SEP +
+    _EXECUTE+_DELETELAZARUSSCRIPT+_SEP +
+    _END +
 
     //standard clean
-    'Declare lazarus'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'Cleanmodule lazarus;' +
-    'End;' +
+    _DECLARE+_LAZARUS+_CLEAN+_SEP+
+    _CLEANMODULE+_LAZARUS+_SEP +
+    _END +
 
     //selective actions triggered with --only=SequenceName
-    'Declare LazarusCheck'+SEQUENCER_ONLY_KEYWORD+';' + 'Checkmodule lazarus;' + 'End;' +
-    'Declare LazarusClean'+SEQUENCER_ONLY_KEYWORD+';' + 'Cleanmodule lazarus;' + 'End;' +
-    'Declare LazarusGet'+SEQUENCER_ONLY_KEYWORD+';' + 'Getmodule lazarus;' + 'End;' +
-    'Declare LazarusBuild'+SEQUENCER_ONLY_KEYWORD+';' + 'Buildmodule lazarus;' + 'End;' +
-    'Declare LazarusConfig'+SEQUENCER_ONLY_KEYWORD+';' + 'Configmodule lazarus;' + 'End;' +
+    _DECLARE+_LAZARUS+_CHECK+_ONLY+_SEP + _CHECKMODULE+_LAZARUS+_SEP + _END +
+    _DECLARE+_LAZARUS+_CLEAN+_ONLY+_SEP + _CLEANMODULE+_LAZARUS+_SEP + _END +
+    _DECLARE+_LAZARUS+_GET+_ONLY+_SEP + _GETMODULE+_LAZARUS+_SEP + _END +
+    _DECLARE+_LAZARUS+_BUILD+_ONLY+_SEP + _BUILDMODULE+_LAZARUS+_SEP + _END +
+    _DECLARE+_LAZARUS+_CONFIG+_ONLY+_SEP + _CONFIGMODULE+_LAZARUS+_SEP + _END +
 
-    'Declare LazCleanAndBuild'+SEQUENCER_ONLY_KEYWORD+';' +
-    'Cleanmodule lazarus;' +
-    'ConfigModule lazarus;' +
-    'Buildmodule lazbuild;' +
-    'Buildmodule USERIDE;' +
-    'Buildmodule startlazarus;' +
-    'Do Universal'+SEQUENCER_DEFAULT_KEYWORD+';'+
-    'Exec CreateLazarusScript;' +
-    'End;' +
+    _DECLARE+_LAZARUSCLEANBUILDONLY+_SEP +
+    _CLEANMODULE+_LAZARUS+_SEP +
+    _CONFIGMODULE+_LAZARUS+_SEP +
+    _BUILDMODULE+_LAZBUILD+_SEP +
+    _BUILDMODULE+_USERIDE+_SEP +
+    _BUILDMODULE+_STARTLAZARUS+_SEP +
+    _DO+_UNIVERSALDEFAULT+_SEP+
+    _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
+    _END +
 
     // Compile only LCL
-    'Declare LCL;' +
-    'CleanModule LCL;'+
-    'Buildmodule LCL;' +
-    'End;' +
+    _DECLARE+_LCL+_SEP +
+    _CLEANMODULE+_LCL+_SEP+
+    _BUILDMODULE+_LCL+_SEP +
+    _END +
 
+    {$ifdef mswindows}
     {$ifdef win32}
     // Crosscompile build
-    'Declare LazarusCrossWin32-64;' +
-    'SetCPU x86_64;' + 'SetOS win64;' +
-    'Do LCL;'+
-    'SetCPU i386;'+ 'SetOS win32;'+
-    'End;' +
+    _DECLARE+_LAZARUS+_CROSSWIN+_SEP +
+    _SETCPU+'x86_64'+_SEP + _SETOS+'win64'+_SEP +
+    _DO+_LCL+_SEP+
+    _SETCPU+'i386'+_SEP+ _SETOS+'win32'+_SEP+
+    _END +
     {$endif}
     {$ifdef win64}
-    'Declare LazarusCrossWin64-32;' +
-    'SetCPU i386;'+ 'SetOS win32;'+
-    'Do LCL;'+
-    'SetCPU x86_64;' + 'SetOS win64;' +
-    'End;' +
+    _DECLARE+_LAZARUS+_CROSSWIN+_SEP +
+    _SETCPU+'i386'+_SEP+ _SETOS+'win32'+_SEP+
+    _DO+_LCL+_SEP+
+    _SETCPU+'x86_64'+_SEP + _SETOS+'win64'+_SEP +
+    _END +
     {$endif}
+    {$endif mswindows}
 
     // Crosscompile only LCL native widgetset (needs to be run at end
-    'Declare LCLCross;' +
-    'ResetLCL;' + //module code itself will select proper widgetset
-    'CleanModule LCLCross;'+
-    'Buildmodule LCLCross;' +
-    'End';
+    _DECLARE+_LCLCROSS+_SEP +
+    _RESETLCL+_SEP + //module code itself will select proper widgetset
+    _CLEANMODULE+_LCLCROSS+_SEP+
+    _BUILDMODULE+_LCLCROSS+_SEP +
+
+    _ENDFINAL;
 
   DEFAULTLPI =
     '<?xml version="1.0" encoding="UTF-8"?>'+LineEnding+
@@ -463,7 +467,7 @@ begin
   OperationSucceeded := true;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
-  if ((ModuleName<>'USERIDE') OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
+  if ((ModuleName<>_USERIDE) OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
   begin
     // Make all (should include lcl & ide), lazbuild, lcl etc
     // distclean was already run; otherwise specify make clean all
@@ -495,7 +499,7 @@ begin
 
     //Set config-file
     s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
-    if (ModuleName='USERIDE') then
+    if (ModuleName=_USERIDE) then
     begin
       Processor.Parameters.Add('CFGFILE=' + s);
     end
@@ -515,8 +519,8 @@ begin
 
     if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
 
-    case UpperCase(ModuleName) of
-      'USERIDE':
+    case ModuleName of
+      _USERIDE:
       begin
         LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
         //If we do not [yet] have lazbuild, include it in make
@@ -531,22 +535,22 @@ begin
           infoln(infotext+'Running make useride', etInfo);
         end;
       end;
-      'IDE':
+      _IDE:
       begin
         Processor.Parameters.Add('idepkg');
         infoln(infotext+'Running make idepkg', etInfo);
       end;
-      'BIGIDE':
+      _BIGIDE:
       begin
         Processor.Parameters.Add('idebig');
         infoln(infotext+'Running make idebig', etInfo);
       end;
-      'LAZARUS':
+      _LAZARUS:
       begin
         Processor.Parameters.Add('all');
         infoln(infotext+'Running make all', etInfo);
       end;
-      'STARTLAZARUS':
+      _STARTLAZARUS:
       begin
         if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
         begin
@@ -558,7 +562,7 @@ begin
         Processor.Parameters.Add('starter');
         infoln(infotext+'Running make starter', etInfo);
       end;
-      'LAZBUILD':
+      _LAZBUILD:
       begin
         if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt) then
         begin
@@ -570,7 +574,7 @@ begin
         Processor.Parameters.Add('lazbuild');
         infoln(infotext+'Running make lazbuild', etInfo);
       end;
-      'LCL':
+      _LCL:
       begin
         // April 2012: lcl now requires lazutils and registration
         // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
@@ -582,7 +586,7 @@ begin
         //if FCrossLCL_Platform<>'' then Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
         infoln(infotext+'Running make registration lazutils lcl', etInfo);
       end;
-      'LCLCROSS':
+      _LCLCROSS:
       begin
         NothingToBeDone:=true;
         if FCrossLCL_Platform<>'' then
@@ -657,7 +661,7 @@ begin
     end;
 
     //Special check for lazbuild as that is known to go wrong
-    if (OperationSucceeded) and (UpperCase(ModuleName) = 'LAZBUILD') then
+    if (OperationSucceeded) and (ModuleName=_LAZBUILD) then
     begin
       if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt, '--help', 'lazbuild') = false then
       begin
@@ -806,7 +810,7 @@ begin
     end;
   end;
 
-  if (ModuleName='USERIDE') then
+  if (ModuleName=_USERIDE) then
   begin
     if OperationSucceeded then
     begin
@@ -1254,7 +1258,7 @@ begin
     FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
 
     // only report once
-    if (ModuleName='lazbuild') OR ((Self is TLazarusCrossInstaller) AND (ModuleName='LCL')) then
+    if (ModuleName=_LAZBUILD) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
     begin
       if (Self is TLazarusCrossInstaller) then
       begin
@@ -1590,14 +1594,14 @@ begin
   CleanDirectory:='';
   CleanCommand:='';
   case UpperCase(ModuleName) of
-    'IDE':
+    _IDE:
     begin
       CleanCommand:='cleanide';
       CleanDirectory:=DirectorySeparator+'ide';
     end;
-    'BIGIDE': CleanCommand:='cleanbigide';
-    'LAZARUS': CleanCommand:='distclean';
-    'LCL':
+    _BIGIDE: CleanCommand:='cleanbigide';
+    _LAZARUS: CleanCommand:='distclean';
+    _LCL:
     begin
       CleanDirectory:=DirectorySeparator+'lcl';
       if (Self is TLazarusCrossInstaller) AND (FCrossLCL_Platform <> '') then
@@ -1610,7 +1614,7 @@ begin
         CleanCommand:='clean';
       end;
     end;
-    'LCLCROSS':
+    _LCLCROSS:
     begin
       CleanDirectory:=DirectorySeparator+'lcl';
       NothingToBeDone:=true;

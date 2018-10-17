@@ -37,63 +37,63 @@ uses
 
 Const
   Sequences=
-// convention: FPC sequences start with 'FPC'.
+// convention: FPC sequences start with 'FPC' [constant _FPC].
 //standard fpc build
-    'Declare FPC;'+
-    'Cleanmodule FPC;'+
+    _DECLARE+_FPC+_SEP+
+    _CLEANMODULE+_FPC+_SEP+
     // Create the link early so invalid previous
     // versions are overwritten:
-    'Exec CreateFpcupScript;'+
-    'Checkmodule FPC;'+
-    'Getmodule FPC;'+
-    'Buildmodule FPC;'+
-    'End;'+
-
-    'Declare FPCscripttest;'+
-    'Exec CreateFpcupScript;'+
-    'End;'+
+    _EXECUTE+_CREATEFPCUPSCRIPT+_SEP+
+    _CHECKMODULE+_FPC+_SEP+
+    _GETMODULE+_FPC+_SEP+
+    _BUILDMODULE+_FPC+_SEP+
+    _END+
 
 //standard uninstall
-    'Declare FPC'+SEQUENCER_UNINSTALL_KEYWORD+';'+
-    'Uninstallmodule FPC;'+
-    'End;'+
+    _DECLARE+_FPC+_UNINSTALL+_SEP+
+    _UNINSTALLMODULE+_FPC+_SEP+
+    _END+
 
+    {$ifdef mswindows}
     {$ifdef win32}
     // Crosscompile build
-    'Declare FPCCrossWin32-64;'+
-    'SetCPU x86_64;' + 'SetOS win64;' +
+    _DECLARE+_FPC+_CROSSWIN+_SEP+
+    _SETCPU+'x86_64'+_SEP +_SETOS+'win64'+_SEP +
     // Getmodule has already been done
-    'Cleanmodule FPC;'+
-    'Buildmodule FPC;'+
-    'SetCPU i386;'+ 'SetOS win32;'+
-    'End;'+
+    _CLEANMODULE+_FPC+_SEP+
+    _BUILDMODULE+_FPC+_SEP+
+    _SETCPU+'i386'+_SEP+_SETOS+'win32'+_SEP+
+    _END+
     {$endif}
+
     {$ifdef win64}
     // Crosscompile build
-    'Declare FPCCrossWin64-32;'+
-    'SetCPU i386;'+ 'SetOS win32;'+
+    _DECLARE+_FPC+_CROSSWIN+_SEP+
+    _SETCPU+'i386'+_SEP+_SETOS+'win32+'_SEP+
     // Getmodule has already been done
-    'Cleanmodule FPC;'+
-    'Buildmodule FPC;'+
-    'SetCPU x86_64;' + 'SetOS win64;' +
-    'End;'+
+    _CLEANMODULE+_FPC+_SEP+
+    _BUILDMODULE+_FPC+_SEP+
+    _SETCPU+'x86_64'+_SEP+_SETOS+'win64'+_SEP+
+    _END+
     {$endif}
+    {$endif mswindows}
 
     //selective actions triggered with --only=SequenceName
-    'Declare FPCCheck'+SEQUENCER_ONLY_KEYWORD+';'+'Checkmodule FPC;'+'End;'+
-    'Declare FPCClean'+SEQUENCER_ONLY_KEYWORD+';'+'Cleanmodule FPC;'+'End;'+
-    'Declare FPCGet'+SEQUENCER_ONLY_KEYWORD+';'+'Getmodule FPC;'+'End;'+
-    'Declare FPCBuild'+SEQUENCER_ONLY_KEYWORD+';'+'Buildmodule FPC;'+'End;'+
+    _DECLARE+_FPC+_CHECK+_ONLY+_SEP+_CHECKMODULE+_FPC+_SEP+_END+
+    _DECLARE+_FPC+_CLEAN+_ONLY+_SEP+_CLEANMODULE+_FPC+_SEP+_END+
+    _DECLARE+_FPC+_GET+_ONLY+_SEP+_GETMODULE+_FPC+_SEP+_END+
+    _DECLARE+_FPC+_BUILD+_ONLY+_SEP+_BUILDMODULE+_FPC+_SEP+_END+
 
     //standard clean
-    'Declare FPC'+SEQUENCER_CLEAN_KEYWORD+';'+
-    'Cleanmodule FPC;'+
-    'End;'+
+    _DECLARE+_FPC+_CLEAN+_SEP+
+    _CLEANMODULE+_FPC+_SEP+
+    _END+
 
-    'Declare FPCCleanAndBuild'+SEQUENCER_ONLY_KEYWORD+';'+
-    'Cleanmodule FPC;'+
-    'Buildmodule FPC;'+
-    'End';
+    _DECLARE+_FPCCLEANBUILDONLY+_SEP+
+    _CLEANMODULE+_FPC+_SEP+
+    _BUILDMODULE+_FPC+_SEP+
+
+    _ENDFINAL;
 
 type
   { TFPCInstaller }
@@ -1175,12 +1175,12 @@ begin
   Processor.Parameters.Add('OPT='+s1);
 
   Processor.CurrentDirectory:='';
-  case UpperCase(ModuleName) of
-    'FPC':
+  case ModuleName of
+    _FPC:
     begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     end;
-    'PAS2JS':
+    _PAS2JS:
     begin
       Processor.CurrentDirectory:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'pas2js';
       // first run fpcmake to generate correct makefile
@@ -1219,7 +1219,7 @@ begin
     end;
   end;
 
-  if UpperCase(ModuleName)='FPC' then
+  if ModuleName=_FPC then
   begin
     {$IFDEF UNIX}
     if OperationSucceeded then

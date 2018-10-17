@@ -657,7 +657,7 @@ begin
           SortedModules.Delete(i);
           continue;
         end;
-        if (AnsiEndsText(SEQUENCER_CLEAN_KEYWORD,s)) OR (AnsiEndsText(SEQUENCER_UNINSTALL_KEYWORD,s)) then
+        if (AnsiEndsText(_CLEAN,s)) OR (AnsiEndsText(_UNINSTALL,s)) then
         begin
           SortedModules.Delete(i);
           continue;
@@ -1347,7 +1347,7 @@ begin
       FPCTarget:='2.0.2';
       //LazarusTarget:='0.9.4';
       LazarusTarget:='0.9.16';
-      FPCupManager.OnlyModules:='fpc,oldlazarus';
+      FPCupManager.OnlyModules:=_FPC+','+_OLDLAZARUS;
     end;
 
     if Sender=EmbeddedBtn then
@@ -1541,7 +1541,7 @@ begin
       if listModules.Selected[i] then
       begin
         modules:=modules+listModules.Items[i];
-        if Sender=btnUninstallModule then modules:=modules+SEQUENCER_UNINSTALL_KEYWORD;
+        if Sender=btnUninstallModule then modules:=modules+_UNINSTALL;
         modules:=modules+',';
         {$ifdef RemoteLog}
         aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items[i]);
@@ -1554,7 +1554,7 @@ begin
     if (listModules.ItemIndex<>-1) then
     begin
       modules:=listModules.Items.Strings[listModules.ItemIndex];
-      if Sender=btnUninstallModule then modules:=modules+SEQUENCER_UNINSTALL_KEYWORD;
+      if Sender=btnUninstallModule then modules:=modules+_UNINSTALL;
       {$ifdef RemoteLog}
       aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items.Strings[listModules.ItemIndex]);
       {$endif}
@@ -2458,13 +2458,18 @@ begin
   try
     PrepareRun;
 
-    if Form2.UpdateOnly
-       then FPCupManager.OnlyModules:='FPCCleanAndBuildOnly'
-       {$ifdef win32}
-       else FPCupManager.OnlyModules:='fpc,FPCCrossWin32-64';
-       {$else}
-       else FPCupManager.OnlyModules:='fpc';
-       {$endif}
+    if Form2.UpdateOnly then
+    begin
+      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
+    end
+    else
+    begin
+      {$ifdef win32}
+      FPCupManager.OnlyModules:=_FPC+','+_FPC+_CROSSWIN;
+      {$else}
+      FPCupManager.OnlyModules:=_FPC;
+      {$endif}
+    end;
 
     if NOT Form2.IncludeHelp then
     begin
@@ -2500,14 +2505,14 @@ begin
 
     if Form2.UpdateOnly then
     begin
-      FPCupManager.OnlyModules:='LazCleanAndBuildOnly';
+      FPCupManager.OnlyModules:=_LAZARUSCLEANBUILDONLY;
     end
     else
     begin
       {$ifdef win32}
-      FPCupManager.OnlyModules:='lazarus,LazarusCrossWin32-64';
+      FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
       {$else}
-      FPCupManager.OnlyModules:='lazarus';
+      FPCupManager.OnlyModules:=_LAZARUS;
       {$endif}
     end;
 

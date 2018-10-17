@@ -66,10 +66,70 @@ const
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
 
-  SEQUENCER_DEFAULT_KEYWORD='Default';
-  SEQUENCER_CLEAN_KEYWORD='Clean';
-  SEQUENCER_UNINSTALL_KEYWORD='Uninstall';
-  SEQUENCER_ONLY_KEYWORD='Only';
+  _SEP                     = ';';
+
+  _FPC                     = 'FPC';
+  _LAZARUS                 = 'Lazarus';
+
+  _DEFAULT                 = 'Default';
+
+  _CLEAN                   = 'Clean';
+  _CHECK                   = 'Check';
+  _GET                     = 'Get';
+  _CONFIG                  = 'Config';
+  _BUILD                   = 'Build';
+  _UNINSTALL               = 'Uninstall';
+  _RESET                   = 'Reset';
+  _ONLY                    = 'Only';
+
+  _CLEANMODULE             = _CLEAN+'Module ';
+  _CHECKMODULE             = _CHECK+'Module ';
+  _GETMODULE               = _GET+'Module ';
+  _CONFIGMODULE            = _CONFIG+'Module ';
+  _BUILDMODULE             = _BUILD+'Module ';
+  _UNINSTALLMODULE         = _UNINSTALL+'Module ';
+
+  _CREATEFPCUPSCRIPT       = 'CreateFpcupScript';
+  _CREATELAZARUSSCRIPT     = 'CreateLazarusScript';
+  _DELETELAZARUSSCRIPT     = 'DeleteLazarusScript';
+  _CHECKDEVLIBS            = 'CheckDevLibs';
+
+  _LAZBUILD                = 'Lazbuild';
+  _STARTLAZARUS            = 'StartLazarus';
+  _HELPLAZARUS             = 'HelpLazarus';
+  _LCL                     = 'LCL';
+  _IDE                     = 'IDE';
+  _BIGIDE                  = 'BigIDE';
+  _USERIDE                 = 'UserIDE';
+  _OLDLAZARUS              = 'OldLazarus';
+  _PAS2JS                  = 'Pas2JS';
+
+  _DO                      = 'Do ';
+  _DECLARE                 = 'Declare ';
+  _EXECUTE                 = 'Exec ';
+  _SETCPU                  = 'SetCPU ';
+  _SETOS                   = 'SetOS ';
+  _REQUIRES                = 'Requires ';
+  _DECLAREHIDDEN           = 'DeclareHidden ';
+
+
+  _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
+  _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
+  _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
+
+  {$ifdef win32}
+  _CROSSWIN                = 'CrossWin32-64';
+  {$endif}
+  {$ifdef win64}
+  _CROSSWIN                = 'CrossWin64-32';
+  {$endif}
+
+  _RESETLCL                = 'ResetLCL';
+  _LCLCROSS                = 'LCLCross';
+
+  _ENDFINAL                = 'End';
+  _END                     = _ENDFINAL+_SEP;
+
 
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
@@ -2283,9 +2343,9 @@ var
 begin
   result:=false;
 
-  PatchFPC:=(UpperCase(ModuleName)='FPC');
+  PatchFPC:=(ModuleName=_FPC);
   {$ifndef FPCONLY}
-  PatchLaz:=(UpperCase(ModuleName)='LAZARUS');
+  PatchLaz:=(ModuleName=_LAZARUS);
   {$endif}
 
   if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc' else
