@@ -1521,13 +1521,6 @@ begin
     exit;
     }
 
-    {
-    PrepareRun;
-    FPCupManager.OnlyModules:=_HELPLAZARUS;
-    RealRun;
-    exit;
-    }
-
     if listModules.SelCount=0 then
     begin
       AddMessage('Please select a module / package.');

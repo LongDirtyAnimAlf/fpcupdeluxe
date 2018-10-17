@@ -1957,7 +1957,7 @@ var
     ModuleName:=ini.ReadString(aModuleName,INIKEYWORD_NAME,'');
     if ModuleName<>'' then
       begin
-      RequiredModules:=ini.ReadString(ModuleName,Trim(_REQUIRES),'');
+      RequiredModules:=ini.ReadString(aModuleName,Trim(_REQUIRES),'');
       if RequiredModules<>'' then
       begin
         RequiredModules:=_REQUIRES + RequiredModules + _SEP;

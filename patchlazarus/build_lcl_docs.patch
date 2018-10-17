@@ -1,0 +1,13 @@
+Index: docs/html/build_lcl_docs.lpr
+===================================================================
+--- docs/html/build_lcl_docs.lpr	(revision 59315)
++++ docs/html/build_lcl_docs.lpr	(working copy)
+@@ -9,7 +9,7 @@
+ {$ENDIF}
+ 
+ uses
+-  Classes, Sysutils, GetOpts, LazFileUtils, FileUtil, UTF8Process, LazUtilities,
++  Classes, Sysutils, GetOpts, LazFileUtils, FileUtil, UTF8Process, LazUtilities, LazStringUtils,
+   Process;
+ 
+ var

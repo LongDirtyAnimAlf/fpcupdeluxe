@@ -3173,15 +3173,18 @@ begin
 end;
 
 function TUseNativeDownLoader.Download(const URL: String; filename:string):boolean;
+const
+  URLMAGIC='/download';
 Var
-  URI : TURI;
-  P : String;
+  URI    : TURI;
+  aURL,P : String;
 begin
   result:=false;
-  URI:=ParseURI(URL);
-  P:=GetFileNameFromURL(URL);
-  infoln('Native downloader: Getting ' + P + ' from '+URI.Host,etInfo);
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
   P:=URI.Protocol;
+  infoln('Native downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etInfo);
   If CompareText(P,'ftp')=0 then
     result:=FTPDownload(URL,filename)
   else if CompareText(P,'http')=0 then

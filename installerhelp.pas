@@ -333,10 +333,10 @@ begin
     until (i>High(HELPSOURCEURL));
 
 
-    if Length(HelpUrl)>0 then
+    if Length(HelpUrl)=0 then
     begin
       //Help version determination failed.
-      //Get help from Lazarus 1.8.4, the latest stable !!
+      //Get help from the latest stable !!
       for i:=High(HELPSOURCEURL) downto Low(HELPSOURCEURL) do
       begin
         LazarusVersion:=HELPSOURCEURL[i,0];
@@ -348,14 +348,14 @@ begin
       end;
     end;
 
-    if Length(HelpUrl)>0 then
+    if Length(HelpUrl)=0 then
     begin
       //Help version determination failed totally.
       //Get help from latest !!
       HelpUrl:=HELPSOURCEURL[High(HELPSOURCEURL),1];
     end;
 
-    ForceDirectories(FTargetDirectory);
+    ForceDirectories(ExcludeTrailingPathDelimiter(FTargetDirectory));
     DocsZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
     OperationSucceeded:=true;
@@ -431,7 +431,7 @@ begin
       begin
         Flat:=True;
         try
-          OperationSucceeded:=DoUnZip(DocsZip,IncludeTrailingPathDelimiter(FTargetDirectory),[]);
+          OperationSucceeded:=DoUnZip(DocsZip,FTargetDirectory,[]);
         finally
           Free;
         end;
@@ -439,7 +439,7 @@ begin
       if (NOT OperationSucceeded) then writelnlog(etError, 'Download docs error: unzip failed due to unknown error.');
 
       {
-      ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+IncludeTrailingPathDelimiter(FTargetDirectory)+' '+DocsZip,FVerbose);
+      ResultCode:=ExecuteCommand(FUnzip+' -o -j -d '+FTargetDirectory+' '+DocsZip,FVerbose);
       if ResultCode <> 0 then
       begin
         OperationSucceeded := False;
@@ -689,13 +689,13 @@ begin
         Processor.Executable := BuildLCLDocsExe;
         // Make sure directory switched to that of the FPC docs,
         // otherwise paths to source files will not work.
-        Processor.CurrentDirectory:=FTargetDirectory;
+        Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FTargetDirectory);
         Processor.Parameters.Clear;
         // Instruct build_lcl_docs to cross-reference FPC documentation by specifying
         // the directory that contains the fcl and rtl .xct files.
         // If those .xct files are not present, FPC 2.7.1 fpdoc will throw an exception
         Processor.Parameters.Add('--fpcdocs');
-        Processor.Parameters.Add(FTargetDirectory);
+        Processor.Parameters.Add(ExcludeTrailingPathDelimiter(FTargetDirectory));
         // Let build_lcl_docs know which fpdoc application to use:
         Processor.Parameters.Add('--fpdoc');
         Processor.Parameters.Add(FPDocExe);

@@ -1029,7 +1029,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       DeleteDesktopShortCut(FParent.ShortCutNameLazarus);
       {$ENDIF MSWINDOWS}
       {$IFDEF UNIX}
-      DeleteFileUTF8(FParent.ShortcutNameLazarus);
+      SysUtils.DeleteFile(FParent.ShortcutNameLazarus);
       {$ENDIF UNIX}
     finally
       //Ignore problems deleting shortcut
