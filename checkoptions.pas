@@ -298,9 +298,9 @@ begin
       if (NOT Options.GetOptionNoParam('','includehelp')) then
       begin
         if Length(FInstaller.SkipModules)>0 then FInstaller.SkipModules:=FInstaller.SkipModules+',';
-        FInstaller.SkipModules:=FInstaller.SkipModules+'helpfpc';
+        FInstaller.SkipModules:=FInstaller.SkipModules+_HELPFPC;
         {$ifndef FPCONLY}
-        FInstaller.SkipModules:=FInstaller.SkipModules+',helplazarus';
+        FInstaller.SkipModules:=FInstaller.SkipModules+','+_HELPLAZARUS;
         {$endif}
       end
       else

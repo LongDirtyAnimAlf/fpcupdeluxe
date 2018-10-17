@@ -2913,7 +2913,7 @@ begin
         // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
         // Adding this won't hurt on Windows.
         // Adjust for that
-        PlainBinPath:=ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'));
+        PlainBinPath:=LazFileUtils.ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'+DirectorySeparator+'..'));
         s:='-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath);
         ConfigText.Insert(x,s); Inc(x);
         {$IFDEF UNIX}

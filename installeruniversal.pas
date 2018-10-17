@@ -436,7 +436,7 @@ begin
 
   // Add fpc architecture bin and plain paths
   FBinPath:=IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true);
-  PlainBinPath:=IncludeTrailingPathDelimiter(FFPCInstallDir);
+  PlainBinPath:=ExcludeTrailingPathDelimiter(FFPCInstallDir);
   // Need to remember because we don't always use ProcessEx
   FPath:=FBinPath+PathSeparator+
   {$IFDEF DARWIN}
@@ -1165,7 +1165,7 @@ begin
   if not result then exit;
   // Log to console only:
   infoln(infotext+'Building module '+ModuleName+'...',etInfo);
-  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
     begin
     sl:=TStringList(UniModuleList.Objects[idx]);
@@ -1309,7 +1309,7 @@ begin
   result:=InitModule;
   if not result then exit;
   {$ifndef FPCONLY}
-  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
   begin
       sl:=TStringList(UniModuleList.Objects[idx]);
@@ -1448,7 +1448,7 @@ begin
   result:=InitModule;
   if not result then exit;
   SourceOK:=false;
-  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
   begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
@@ -1744,7 +1744,7 @@ begin
   result:=InitModule;
   if not result then exit;
   {$ifndef FPCONLY}
-  idx:=UniModuleList.IndexOf(UpperCase(ModuleName));
+  idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
   begin
     sl:=TStringList(UniModuleList.Objects[idx]);

@@ -96,7 +96,6 @@ const
 
   _LAZBUILD                = 'Lazbuild';
   _STARTLAZARUS            = 'StartLazarus';
-  _HELPLAZARUS             = 'HelpLazarus';
   _LCL                     = 'LCL';
   _IDE                     = 'IDE';
   _BIGIDE                  = 'BigIDE';
@@ -116,6 +115,10 @@ const
   _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
   _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
+
+  _HELP                    = 'Help';
+  _HELPFPC                 = _HELP+_FPC;
+  _HELPLAZARUS             = _HELP+_LAZARUS;
 
   {$ifdef mswindows}
   {$ifdef win32}

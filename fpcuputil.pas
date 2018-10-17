@@ -271,6 +271,7 @@ function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas
 function GetFileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
 function GetCompilerVersion(CompilerPath: string): string;
+function GetLazbuildVersion(LazbuildPath: string): string;
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
 function GetNumericalVersion(VersionSnippet: string): word;
@@ -301,6 +302,7 @@ Function GetTempFileNameExt(Const Dir,Prefix,Ext : String) : String;
 function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
 // Correct directory separators
 function FixPath(const s:string):string;
+function FileIsReadOnly(const s:string):boolean;
 function MaybeQuoted(const s:string):string;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
@@ -846,7 +848,7 @@ var
   Output: string;
 begin
   Result:='0.0.0';
-  if CompilerPath='' then exit;
+  if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
   try
     Output:='';
     // -iW does not work on older compilers : use -iV
@@ -855,6 +857,38 @@ begin
     begin
       Output:=TrimRight(Output);
       if Length(Output)>0 then Result:=Output;
+    end;
+  except
+  end;
+end;
+
+function GetLazbuildVersion(LazbuildPath: string): string;
+var
+  Output: string;
+  OutputLines:TStringList;
+begin
+  Result:='0.0.0';
+  if ((LazbuildPath='') OR (NOT FileExists(LazbuildPath))) then exit;
+  try
+    Output:='';
+    // -iW does not work on older compilers : use -iV
+    if (ExecuteCommand(LazbuildPath+ ' --version', Output, false)=0) then
+    begin
+      Output:=TrimRight(Output);
+      if Length(Output)>0 then
+      begin
+        OutputLines:=TStringList.Create;
+        try
+          OutputLines.Text:=Output;
+          if OutputLines.Count>0 then
+          begin
+            // lazbuild outputs version info as last line
+            result:=OutputLines.Strings[OutputLines.Count-1];
+          end;
+        finally
+          OutputLines.Free;
+        end;
+      end;
     end;
   except
   end;
@@ -1576,6 +1610,11 @@ begin
   for i:=1 to length(s) do
    if s[i] in ['/','\'] then
     result[i]:=DirectorySeparator;
+end;
+
+function FileIsReadOnly(const s:string):boolean;
+begin
+  result:=((FileGetAttr(s) AND faReadOnly) > 0);
 end;
 
 function MaybeQuoted(const s:string):string;
@@ -3133,7 +3172,6 @@ begin
   end;
 end;
 
-
 function TUseNativeDownLoader.Download(const URL: String; filename:string):boolean;
 Var
   URI : TURI;
@@ -3141,7 +3179,8 @@ Var
 begin
   result:=false;
   URI:=ParseURI(URL);
-  infoln('Native downloader: Getting ' + URI.Document + ' from '+URI.Host+URI.Path,etInfo);
+  P:=GetFileNameFromURL(URL);
+  infoln('Native downloader: Getting ' + P + ' from '+URI.Host,etInfo);
   P:=URI.Protocol;
   If CompareText(P,'ftp')=0 then
     result:=FTPDownload(URL,filename)

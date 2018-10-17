@@ -84,8 +84,6 @@
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="win64"/>
             <Optimizations>
               <OptimizationLevel Value="0"/>
             </Optimizations>
@@ -900,7 +898,7 @@
     </Other>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="5">
+    <Exceptions Count="6">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -916,6 +914,9 @@
       <Item5>
         <Name Value="EInOutError"/>
       </Item5>
+      <Item6>
+        <Name Value="ESocketError"/>
+      </Item6>
     </Exceptions>
   </Debugging>
 </CONFIG>

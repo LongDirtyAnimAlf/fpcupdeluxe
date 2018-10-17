@@ -97,6 +97,11 @@ const
     _BUILDMODULE+_LCL+_SEP +
     _END +
 
+    //standard lazbuild build
+    _DECLARE+_LAZBUILD+_SEP +
+    _BUILDMODULE+_LAZBUILD+_SEP +
+    _END +
+
     {$ifdef mswindows}
     {$ifdef win32}
     // Crosscompile build
@@ -235,7 +240,7 @@ implementation
 uses
   fpcuputil, fileutil,
   repoclient,
-  lazfileutils {utf8 file functions},
+  LazFileUtils {for resolvedots},
   updatelazconfig
   {$ifdef Darwin}
   {$ifdef LCLQT5}
@@ -552,7 +557,7 @@ begin
       end;
       _STARTLAZARUS:
       begin
-        if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
+        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
         begin
           infoln(infotext+'StartLazarus already available ... skip building it.', etInfo);
           OperationSucceeded := true;
@@ -564,7 +569,7 @@ begin
       end;
       _LAZBUILD:
       begin
-        if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt) then
+        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt) then
         begin
           infoln(infotext+'Lazbuild already available ... skip building it.', etInfo);
           OperationSucceeded := true;
@@ -758,7 +763,7 @@ begin
       // (even an old version left over by make distclean is probably ok)
       if OperationSucceeded then
       begin
-        if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
+        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + 'startlazarus' + GetExeExt) then
         begin
           infoln(infotext+'Startlazarus exists already. Not compiling again.', etdebug);
         end
@@ -1176,7 +1181,7 @@ begin
       begin
         if Processor.OutputStrings.Count>0 then
         begin
-          // lazbuild outputs version info
+          // lazbuild outputs version info as last line
           result:=Processor.OutputStrings.Strings[Processor.OutputStrings.Count-1];
         end;
       end;
@@ -1215,7 +1220,7 @@ begin
   begin
     // Look for make etc in the current compiler directory:
     FBinPath := ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    PlainBinPath := ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..'));
+    PlainBinPath := LazFileUtils.ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..'));
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -1292,9 +1297,9 @@ begin
   //Set GDB as standard debugger
   DebuggerType:='TGDBMIDebugger';
 
-  if DirectoryExistsUTF8(FPrimaryConfigPath) = false then
+  if DirectoryExists(FPrimaryConfigPath) = false then
   begin
-    if ForceDirectoriesUTF8(FPrimaryConfigPath) then
+    if ForceDirectories(FPrimaryConfigPath) then
       infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
   end;
 
@@ -1308,7 +1313,7 @@ begin
       try
         // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
         PCPSnippet.Add('--primary-config-path=' + trim(ExcludeTrailingPathDelimiter(FPrimaryConfigPath)));
-        if not (FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + LazarusCFG)) then
+        if not (FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + LazarusCFG)) then
           PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(FInstallDirectory) + LazarusCFG);
       finally
         PCPSnippet.Free;
@@ -1326,12 +1331,12 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', ExtractFilePath(FCompiler) + 'fpc' + GetExeExt);
 
       // do we supply GDB in the installdir from mingw for win32 and/or win64
-      if FileExistsUTF8(IncludeTrailingPathDelimiter(FInstallDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
+      if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
           '$(LazarusDir)\..\mingw\$(TargetCPU)-$(TargetOS)\bin\gdb.exe')
 
       // have we downloaded GDB in the makedir for win32 and/or win64
-      else if FileExistsUTF8(IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + GetFPCTarget(true) + '\gdb.exe') then
+      else if FileExists(IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + GetFPCTarget(true) + '\gdb.exe') then
         LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/DebuggerFilename/Value',
           IncludeTrailingPathDelimiter(FMakeDir) + 'gdb\' + '$(TargetCPU)-$(TargetOS)\gdb.exe')
       else
@@ -1458,7 +1463,7 @@ begin
 
       // add default projects path
       DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
-      ForceDirectoriesUTF8(DebuggerPath);
+      ForceDirectories(DebuggerPath);
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
 
       // Set file history towards default project directory
@@ -1524,7 +1529,7 @@ var
 begin
   Result := inherited;
 
-  if not DirectoryExistsUTF8(FSourceDirectory) then
+  if not DirectoryExists(FSourceDirectory) then
   begin
     infoln(infotext+'No Lazarus source [yet] ... nothing to be done',etInfo);
     exit(true);
@@ -1561,7 +1566,7 @@ begin
 
   if CrossWin then
   begin
-    LHelpTemp:=GetTempFileNameUTF8('','');
+    LHelpTemp:=GetTempFileName('','');
     try
       CopyFile(
         IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
@@ -1906,7 +1911,7 @@ begin
     for Counter := low(FUtilFiles) to high(FUtilFiles) do
     begin
       if (FUtilFiles[Counter].Category = ucQtFile) and not
-        (FileExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory) + FUtilFiles[Counter].FileName)) then
+        (FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + FUtilFiles[Counter].FileName)) then
       begin
         infoln(infotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + FSourceDirectory, etDebug);
         try
@@ -1999,8 +2004,8 @@ begin
   if not Result then exit;
 
   //sanity check
-  if FileExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory) + 'Makefile') and DirectoryExistsUTF8(
-    IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
+  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'Makefile') and DirectoryExists(
+    IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
   begin
     Result := DeleteDirectoryEx(FSourceDirectory);
@@ -2015,7 +2020,7 @@ begin
 
   // Sanity check so we don't try to delete random directories
   // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
-  if Result and FileExistsUTF8(IncludeTrailingPathDelimiter(FPrimaryConfigPath) + EnvironmentConfig) and
+  if Result and FileExists(IncludeTrailingPathDelimiter(FPrimaryConfigPath) + EnvironmentConfig) and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FPrimaryConfigPath)) then
   begin
     Result := DeleteDirectoryEx(FPrimaryConfigPath) = false;

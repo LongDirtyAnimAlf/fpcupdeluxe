@@ -630,7 +630,6 @@ var
   s,v:string;
 begin
   FPCupManager:=TFPCupManager.Create;
-
   FPCupManager.ConfigFile:=SafeGetApplicationPath+installerUniversal.CONFIGFILENAME;
 
   FPCupManager.LoadFPCUPConfig;
@@ -645,14 +644,14 @@ begin
   begin
     SortedModules:=TStringList.Create;
     try
-      SortedModules.Delimiter:=';';
+      SortedModules.Delimiter:=_SEP;
       SortedModules.StrictDelimiter:=true;
       SortedModules.DelimitedText:=GetModuleList;
       // filter modulelist from trivial entries
       for i:=(SortedModules.Count-1) downto 0 do
       begin
         s:=SortedModules[i];
-        if Pos('Declare ',s)=0 then
+        if Pos(_DECLARE,s)=0 then
         begin
           SortedModules.Delete(i);
           continue;
@@ -667,7 +666,7 @@ begin
       for i:=0 to (SortedModules.Count-1) do
       begin
         s:=SortedModules[i];
-        Delete(s,1,Length('Declare '));
+        Delete(s,1,Length(_DECLARE));
         // get module descriptions
         v:=FPCupManager.ModulePublishedList.Values[s];
         // add to list
@@ -1371,7 +1370,7 @@ begin
     if (NOT Form2.IncludeHelp) then
     begin
       if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPFPC+','+_HELPLAZARUS;
     end
     else
     begin
@@ -1484,7 +1483,7 @@ begin
       if (NOT Form2.IncludeHelp) then
       begin
         if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-        FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc,helplazarus'
+        FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPFPC+','+_HELPLAZARUS
       end
       else
       begin
@@ -1519,6 +1518,13 @@ begin
     begin
 
     end;
+    exit;
+    }
+
+    {
+    PrepareRun;
+    FPCupManager.OnlyModules:=_HELPLAZARUS;
+    RealRun;
     exit;
     }
 
@@ -2475,7 +2481,7 @@ begin
     if NOT Form2.IncludeHelp then
     begin
       if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helpfpc';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPFPC;
     end;
 
     sStatus:='Going to install/update FPC only.';
@@ -2521,7 +2527,7 @@ begin
     if (NOT Form2.IncludeHelp) then
     begin
       if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+'helplazarus';
+      FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPLAZARUS;
     end
     else
     begin

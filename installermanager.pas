@@ -42,7 +42,7 @@ uses
   {$ifndef FPCONLY}
   installerLazarus,
   {$endif}
-  installerHelp, installerUniversal, fpcuputil, FileUtil, LazFileUtils
+  installerHelp, installerUniversal, fpcuputil, FileUtil
   {$ifdef UNIX}
   ,dynlibs,Unix
   {$endif UNIX}
@@ -116,7 +116,7 @@ Const
     _DO+_FPC+_UNINSTALL+_SEP+
     {$ifndef FPCONLY}
     _DO+_LAZARUS+_UNINSTALL+_SEP+
-    _DO+'help'+_UNINSTALL+_SEP+
+    _DO+_HELP+_UNINSTALL+_SEP+
     //'UninstallModule DOCEDITOR'+_SEP+
     _DO+_UNIVERSALDEFAULT+_UNINSTALL+_SEP+
     {$endif}
@@ -1357,41 +1357,41 @@ begin
   //Convention: help modules start with HelpFPC
   //or HelpLazarus
   {$endif}
-  else if uppercase(ModuleName)='HELPFPC'
+  else if ModuleName=_HELPFPC
   then
   begin
-      if assigned(FInstaller) then
-        begin
-        if (FInstaller is THelpFPCInstaller) then
-          begin
-          exit; //all fine, continue with current FInstaller
-          end
-        else
-          FInstaller.free; // get rid of old FInstaller
-        end;
-      FInstaller:=THelpFPCInstaller.Create;
-      FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
+    if assigned(FInstaller) then
+    begin
+      if (FInstaller is THelpFPCInstaller) then
+      begin
+        exit; //all fine, continue with current FInstaller
+      end
+      else
+        FInstaller.free; // get rid of old FInstaller
+      end;
+    FInstaller:=THelpFPCInstaller.Create;
+    FInstaller.SourceDirectory:=FParent.FPCSourceDirectory;
   end
   {$ifndef FPCONLY}
-  else if uppercase(ModuleName)='HELPLAZARUS'
+  else if ModuleName=_HELPLAZARUS
   then
   begin
-      if assigned(FInstaller) then
-        begin
-       if (FInstaller is THelpLazarusInstaller) then
-          begin
-          exit; //all fine, continue with current FInstaller
-          end
-        else
-          FInstaller.free; // get rid of old FInstaller
-        end;
-      FInstaller:=THelpLazarusInstaller.Create;
-      FInstaller.SourceDirectory:=FParent.LazarusDirectory;
-      // the same ... may change in the future
-      FInstaller.InstallDirectory:=FParent.LazarusDirectory;
-      (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingPathDelimiter(FParent.FPCInstallDirectory);// + 'bin' + DirectorySeparator + FInstaller.SourceCPU + '-' + FInstaller.SourceOS;
-      (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=FParent.FPCSourceDirectory;
-      (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
+    if assigned(FInstaller) then
+    begin
+      if (FInstaller is THelpLazarusInstaller) then
+      begin
+        exit; //all fine, continue with current FInstaller
+      end
+      else
+        FInstaller.free; // get rid of old FInstaller
+    end;
+    FInstaller:=THelpLazarusInstaller.Create;
+    FInstaller.SourceDirectory:=FParent.LazarusDirectory;
+    // the same ... may change in the future
+    FInstaller.InstallDirectory:=FParent.LazarusDirectory;
+    (FInstaller as THelpLazarusInstaller).FPCBinDirectory:=IncludeTrailingPathDelimiter(FParent.FPCInstallDirectory);
+    (FInstaller as THelpLazarusInstaller).FPCSourceDirectory:=IncludeTrailingPathDelimiter(FParent.FPCSourceDirectory);
+    (FInstaller as THelpLazarusInstaller).LazarusPrimaryConfigPath:=FParent.LazarusPrimaryConfigPath;
   end
   {$endif}
   else       // this is a universal module
@@ -1484,7 +1484,7 @@ end;
 function TSequencer.IsSkipped(ModuleName: string): boolean;
 begin
   try
-    result:=assigned(FSkipList) and (FSkipList.IndexOf(Uppercase(ModuleName))>=0);
+    result:=assigned(FSkipList) and (FSkipList.IndexOf(ModuleName)>=0);
   except
     result:=false;
   end;
@@ -1497,7 +1497,7 @@ begin
   for idx:=0 to FParent.FModuleList.Count -1 do
     // convention: FPC sequences that are to be skipped start with 'FPC'. Used in SetLCL.
     // todo: skip also help???? Who would call several help installs in one sequence? SubSequences?
-    if not SkipFPC or (pos('FPC',Uppercase(FParent.FModuleList[idx]))<>1) then
+    if not SkipFPC or (pos(_FPC,FParent.FModuleList[idx])<>1) then
       PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESNever;
 end;
 
@@ -1575,7 +1575,7 @@ begin
       FStateMachine[i].param:=param;
       if instr in [SMdeclare,SMdeclareHidden] then
       begin
-        AddToModuleList(uppercase(param),i);
+        AddToModuleList(param,i);
         sequencename:=param;
       end;
       if instr = SMdeclare then
@@ -1583,7 +1583,7 @@ begin
         key:='';
         if (Pos(_CLEAN,param)=0) AND (Pos(_UNINSTALL,param)=0) AND (Pos(_DEFAULT,param)=0) then
         begin
-          j:=UniModuleList.IndexOf(UpperCase(param));
+          j:=UniModuleList.IndexOf(param);
           if j>=0 then
           begin
             PackageSettings:=TStringList(UniModuleList.Objects[j]);
@@ -1685,16 +1685,16 @@ begin
     // --clean or --install ??
     if FParent.Uninstall then  // uninstall overrides clean
     begin
-      if (UpperCase(SequenceName)<>UpperCase(_ONLY)) and (NOT AnsiEndsText(_UNINSTALL,SequenceName)) then
+      if (SequenceName<>_ONLY) and (NOT AnsiEndsText(_UNINSTALL,SequenceName)) then
         SequenceName:=SequenceName+_UNINSTALL;
     end
     else if FParent.Clean  then
     begin
-      if (UpperCase(SequenceName)<>UpperCase(_ONLY)) and (NOT AnsiEndsText(_CLEAN,SequenceName)) then
+      if (SequenceName<>_ONLY) and (NOT AnsiEndsText(_CLEAN,SequenceName)) then
         SequenceName:=SequenceName+_CLEAN;
     end;
     // find sequence
-    idx:=FParent.FModuleList.IndexOf(Uppercase(SequenceName));
+    idx:=FParent.FModuleList.IndexOf(SequenceName);
     if (idx>=0) then
     begin
       result:=true;
