@@ -117,11 +117,13 @@ const
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
   _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
 
+  {$ifdef mswindows}
   {$ifdef win32}
   _CROSSWIN                = 'CrossWin32-64';
   {$endif}
   {$ifdef win64}
   _CROSSWIN                = 'CrossWin64-32';
+  {$endif}
   {$endif}
 
   _RESETLCL                = 'ResetLCL';

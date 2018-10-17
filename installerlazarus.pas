@@ -1593,7 +1593,7 @@ begin
 
   CleanDirectory:='';
   CleanCommand:='';
-  case UpperCase(ModuleName) of
+  case ModuleName of
     _IDE:
     begin
       CleanCommand:='cleanide';

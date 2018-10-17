@@ -2465,6 +2465,7 @@ begin
     else
     begin
       {$ifdef win32}
+      //Only auto-install win32 -> win64 crossutils
       FPCupManager.OnlyModules:=_FPC+','+_FPC+_CROSSWIN;
       {$else}
       FPCupManager.OnlyModules:=_FPC;
@@ -2510,6 +2511,7 @@ begin
     else
     begin
       {$ifdef win32}
+      //Only auto-install win32 -> win64 crossutils
       FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
       {$else}
       FPCupManager.OnlyModules:=_LAZARUS;
