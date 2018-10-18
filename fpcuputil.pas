@@ -2363,7 +2363,7 @@ var
   Webclient  : TAbstractWebClient;
   Req        : TWebClientRequest;
   Resp       : TWebClientResponse;
-  s          : string;
+  s,aFile    : string;
   Json       : TJSONData;
   JsonObject : TJSONObject;
   Releases   : TJSONArray;
@@ -2424,7 +2424,21 @@ begin
                 // name: "fpcupdeluxe-aarch64-linux"
                 // created_at: "2018-10-14T06:58:44Z"
                 s:=JsonObject.Get('name');
-                if (Pos('fpcupdeluxe-'+GetTargetCPUOS,s)=1) then
+
+                aFile:='fpcupdeluxe-'+GetTargetCPUOS;
+                {$ifdef Darwin}
+                {$ifdef LCLCARBON}
+                aFile:=aFile+'-carbon';
+                {$endif}
+                {$ifdef LCLCOCOA}
+                aFile:=aFile+'-cocoa';
+                {$endif}
+                {$endif}
+                {$if defined(LCLQT) or defined(LCLQT5)}
+                aFile:=aFile+'-qt5';
+                {$endif}
+
+                if (Pos(aFile,s)=1) then
                 begin
                   result:=JsonObject.Get('browser_download_url');
                   break;

@@ -69,7 +69,7 @@ Const
     {$ifdef win64}
     // Crosscompile build
     _DECLARE+_FPC+_CROSSWIN+_SEP+
-    _SETCPU+'i386'+_SEP+_SETOS+'win32+'_SEP+
+    _SETCPU+'i386'+_SEP+_SETOS+'win32'+_SEP+
     // Getmodule has already been done
     _CLEANMODULE+_FPC+_SEP+
     _BUILDMODULE+_FPC+_SEP+
