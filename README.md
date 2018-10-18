@@ -1,9 +1,9 @@
 fpcup / fpclazup / fpcupdeluxe
 
-Original: https://bitbucket.org/reiniero/fpcup/
-Updated : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup
-New (this) : https://github.com/newpascal/fpcupdeluxe
-Wiki : http://wiki.freepascal.org/fpcupdeluxe
+Original: https://bitbucket.org/reiniero/fpcup/  
+Updated : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup  
+New (this) : https://github.com/newpascal/fpcupdeluxe  
+Wiki : http://wiki.freepascal.org/fpcupdeluxe  
 
 Acknowledgement
 ===========
@@ -32,13 +32,13 @@ All use permitted, also commercial, but no warranties, express or implied.
 Prerequisites
 =============
 
-- Windows
+- Windows  
 =========
 - none
 If needed, the tool will download all needed binaries (bootstrap compiler, 
 binutils, svn executable)
 
-- Linux
+- Linux  
 =======
 - GNU make
 - the binutils (make etc); e.g. in a package called build-essential
@@ -52,11 +52,11 @@ binutils, svn executable)
 E.g. on Debian or Ubuntu, do something like:
 sudo aptitude install make binutils build-essential gdb subversion zip unzip libx11-dev libgtk2.0-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev
 
-- Apple OSX
+- Apple OSX  
 ===========
 - Xcode and Xcode command line tools
 
-- FreeBSD 9+
+- FreeBSD 9+  
 =============
 - none, but *strongly recommended* to use a newer gdb than the 6.1 version 
 supplied with the system, e.g. by
@@ -75,16 +75,16 @@ Install data collection
 =========================
 Fpcupdeluxe >= 1.6.0a sends some data about its installs towards a central server.
 For this, it uses the famous mORMot framework.
-You can check this data yourself:
-https://www.batterybutcher.com/fpcup/getinfohtml
-https://www.batterybutcher.com/fpcup/getinfojson
-https://www.batterybutcher.com/fpcup/getinfohtml?Country=China
-https://www.batterybutcher.com/fpcup/getinfohtml?FPCVersion=trunk
+You can check this data yourself:  
+https://www.batterybutcher.com/fpcup/getinfohtml  
+https://www.batterybutcher.com/fpcup/getinfojson  
+https://www.batterybutcher.com/fpcup/getinfohtml?Country=China  
+https://www.batterybutcher.com/fpcup/getinfohtml?FPCVersion=trunk  
 
 The data collection can be disabled by a setting in setup+
 
 
 Contact
 =======
-For reporting bugs, suggestions, patches.
+For reporting bugs, suggestions, patches.  
 https://github.com/newpascal/fpcupdeluxe/issues
