@@ -764,7 +764,7 @@ begin
     end;
   end;
 
-  if NOT OperationSucceeded then writelnlog(etError, ModuleName+': Fatal error. But I will continue !!', true);
+  if NOT OperationSucceeded then writelnlog(etWarning, ModuleName+': Something went wrong. But I will continue !!', true);
   //result:=OperationSucceeded;
   // always continue,  even when docs were not build !!
   result:=True;

@@ -32,7 +32,6 @@ type
     MenuItem1: TMenuItem;
     EmbeddedBtn: TBitBtn;
     StatusMessage: TEdit;
-    Timer1: TTimer;
     TrunkBtn: TBitBtn;
     NPBtn: TBitBtn;
     FixesBtn: TBitBtn;
@@ -85,7 +84,6 @@ type
     procedure CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
 
     {$ifdef usealternateui}
     procedure alternateuibutClick(Sender: TObject);
@@ -308,9 +306,7 @@ begin
     // must be done here, to enable local storage/access of some setttings !!
     Form2:=TForm2.Create(Form1);
     Form3:=TForm3.Create(Form1);
-
-    // tricky ... due to arm quircks when cross-compiling : GetDistro (ExecuteCommand) gives errors if used in CreateForm
-    //Timer1.Enabled:=True;
+    Application.QueueAsyncCall(@InitFpcupdeluxe,0);
   end
   else
   begin
@@ -322,7 +318,6 @@ begin
     AddMessage('');
     DisEnable(nil,False);
   end;
-  Application.QueueAsyncCall(@InitFpcupdeluxe,0);
 end;
 
 procedure TForm1.FormDestroy(Sender: TObject);
@@ -1391,49 +1386,6 @@ begin
   finally
     DisEnable(Sender,True);
   end;
-end;
-
-procedure TForm1.Timer1Timer(Sender: TObject);
-{$ifdef RemoteLog}
-var
-  aModalResult:TModalResult;
-{$endif}
-begin
-  TTimer(Sender).Enabled:=false;
-  // only run once !!
-  // FPC cross-quirck : GetDistro (ExecuteCommand) gives errors if used in CreateForm
-  {$ifdef RemoteLog}
-  aDataClient.UpInfo.UpDistro:=GetDistro;
-  {$endif}
-  InitFPCupManager;
-  {$ifdef usealternateui}
-  // This must only be called once.
-  If Not Alternate_ui_created then alternateui_Create_Controls;
-  {$endif}
-  {$ifdef RemoteLog}
-  if (sConsentWarning) OR (Form2.SendInfo) then
-  begin
-    AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
-    if (sConsentWarning) then
-    begin
-      aModalResult:=(MessageDlg(
-                   'Attention !'+sLineBreak+
-                   sLineBreak +
-                   'Fpcupdeluxe is able to log some install info.' + sLineBreak +
-                   'This data is send towards a server,' + sLineBreak +
-                   'where it is available to anybody.' + sLineBreak +
-                   '(see URL shown in screen and statusbar)' + sLineBreak +
-                   sLineBreak +
-                   'Do you want logging info to be gathered ?'
-                 ,mtConfirmation,[mbYes, mbNo],0));
-      if aModalResult=mrYes
-         then Form2.SendInfo:=True
-         else Form2.SendInfo:=False;
-    end;
-  end;
-  {$endif}
 end;
 
 procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);

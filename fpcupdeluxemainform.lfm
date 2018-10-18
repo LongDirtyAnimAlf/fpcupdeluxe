@@ -3176,11 +3176,4 @@ object Form1: TForm1
       OnClick = MenuItem1Click
     end
   end
-  object Timer1: TTimer
-    Enabled = False
-    Interval = 100
-    OnTimer = Timer1Timer
-    Left = 66
-    Top = 251
-  end
 end
