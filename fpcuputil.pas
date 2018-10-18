@@ -212,7 +212,6 @@ type
     function getFile(const URL,filename:string):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
-    function checkGithubRelease(const aURL:string):string;
   end;
   {$endif}
 
@@ -346,6 +345,7 @@ function GetTargetCPUOS:string;
 function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
 function GetDistro:string;
 function GetFreeBSDVersion:byte;
+function checkGithubRelease(const aURL:string):string;
 
 var
   resourcefiles:TStringList;
@@ -364,6 +364,7 @@ uses
   ftplist,
   {$endif}
   FileUtil, LazFileUtils, LazUTF8,
+  fpwebclient,fphttpwebclient,
   fpjson, jsonparser,
   uriparser
   {$IFDEF MSWINDOWS}
@@ -1412,6 +1413,7 @@ begin
   {$endif}
   Json:=GetJSON(Content);
   try
+    if Json=Nil then exit;
     JsonArray:=Json.FindPath('assets') as TJSONArray;
     i:=JsonArray.Count;
     while (i>0) do
@@ -2356,6 +2358,93 @@ begin
   Result := processorname + '-' + os;
 end;
 
+function checkGithubRelease(const aURL:string):string;
+var
+  Webclient  : TAbstractWebClient;
+  Req        : TWebClientRequest;
+  Resp       : TWebClientResponse;
+  s          : string;
+  Json       : TJSONData;
+  JsonObject : TJSONObject;
+  Releases   : TJSONArray;
+  NewVersion : boolean;
+  i          : integer;
+  aStream    : TStream;
+begin
+  NewVersion:=false;
+  result:='';
+  Req:=Nil;
+  Resp:=Nil;
+  if (Length(aURL)>0) then
+  begin
+    aStream:=TMemoryStream.Create;
+    try
+      WebClient:=TFPHTTPWebClient.Create(nil);
+      try
+        Req:=WebClient.CreateRequest;
+        Req.ResponseContent:=aStream;
+        Req.Headers.Add('User-Agent: '+USERAGENT);
+        Req.Headers.Add('Content-Type: application/json');
+        try
+          Resp:=WebClient.ExecuteRequest('GET', aURL, Req);
+        except
+          //Ignore exceptions
+        end;
+        if (Resp<>Nil) then
+        begin
+          aStream.Position:=0;
+          Json:=GetJSON(aStream);
+          try
+            if JSON=Nil then exit;
+            JsonObject := TJSONObject(Json);
+            // Example ---
+            // tag_name: "1.6.2b"
+            // name: "Release v1.6.2b of fpcupdeluxe"
+            s:=JsonObject.Get('tag_name');
+            if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
+            if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
+            begin
+              if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
+            end;
+            if NewVersion then
+            begin
+              s:=JsonObject.Get('prerelease');//Should be False
+              NewVersion:=(s='False');
+            end;
+            //YES !!!
+            if NewVersion then
+            begin
+              //Assets is an array of binaries belonging to a release
+              Releases:=JsonObject.Get('assets',TJSONArray(nil));
+              for i:=0 to (Releases.Count-1) do
+              begin
+                JsonObject := TJSONObject(Releases[i]);
+                // Example ---
+                // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
+                // name: "fpcupdeluxe-aarch64-linux"
+                // created_at: "2018-10-14T06:58:44Z"
+                s:=JsonObject.Get('name');
+                if (Pos('fpcupdeluxe-'+GetTargetCPUOS,s)=1) then
+                begin
+                  result:=JsonObject.Get('browser_download_url');
+                  break;
+                end;
+              end;
+            end;
+          finally
+            Json.Free;
+          end;
+        end;
+      finally
+        Resp.Free;
+        Req.Free;
+        WebClient.Free;
+      end;
+    finally
+      aStream.Free;
+    end;
+  end;
+end;
 
 {TThreadedUnzipper}
 
@@ -3104,70 +3193,6 @@ begin
     begin
       response:=IndexOfHeader(HTTPHEADER);
       if (response<>-1) then RequestHeaders.Delete(response);
-    end;
-  end;
-end;
-
-function TUseNativeDownLoader.checkGithubRelease(const aURL:string):string;
-var
-  s,RawData: string;
-  Json : TJSONData;
-  JsonObject : TJSONObject;
-  Releases : TJSONArray;
-  NewVersion:boolean;
-  i:integer;
-begin
-  NewVersion:=false;
-  result:='';
-  if (Length(aURL)>0) then
-  begin
-    with aFPHTTPClient do
-    begin
-      IOTimeout:=1000;
-      try
-        RawData:=Get(aURL);
-        Json:=GetJSON(RawData);
-        try
-          JsonObject := TJSONObject(Json);
-          // Example ---
-          // tag_name: "1.6.2b"
-          // name: "Release v1.6.2b of fpcupdeluxe"
-          s:=JsonObject.Get('tag_name');
-          if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
-          if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
-          begin
-            if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
-          end;
-          if NewVersion then
-          begin
-            s:=JsonObject.Get('prerelease');//Should be False
-            NewVersion:=(s='False');
-          end;
-          //YES !!!
-          if NewVersion then
-          begin
-            //Assets is an array of binaries belonging to a release
-            Releases:=JsonObject.Get('assets',TJSONArray(nil));
-            for i:=0 to (Releases.Count-1) do
-            begin
-              JsonObject := TJSONObject(Releases[i]);
-              // Example ---
-              // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
-              // name: "fpcupdeluxe-aarch64-linux"
-              // created_at: "2018-10-14T06:58:44Z"
-              s:=JsonObject.Get('name');
-              if (Pos('fpcupdeluxe-'+GetTargetCPUOS,s)=1) then
-              begin
-                result:=JsonObject.Get('browser_download_url');
-                break;
-              end;
-            end;
-          end;
-        finally
-          Json.Free;
-        end;
-      except
-      end;
     end;
   end;
 end;

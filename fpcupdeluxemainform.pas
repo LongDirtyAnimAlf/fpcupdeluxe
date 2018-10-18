@@ -3218,25 +3218,18 @@ end;
 
 procedure TForm1.CheckForUpdates(Data: PtrInt);
 var
-  aDownLoader:TNativeDownLoader;
   s:string;
 begin
   AddMessage('Please wait. Checking for updates.');
-  aDownLoader:=TNativeDownLoader.Create;
-  try
-    s:=aDownLoader.checkGithubRelease('https://api.github.com/repos/newpascal/fpcupdeluxe/releases/latest');
-    if Length(s)>0 then
-    begin
-      AddMessage('New version available');
-      AddMessage('See: https://github.com/newpascal/fpcupdeluxe/releases/latest');
-      AddMessage('See: '+s);
-      memoSummary.Lines.Append('New fpcupdeluxe version available');
-    end else AddMessage('No updates found.');
-  finally
-    aDownLoader.Free;
-  end;
+  s:=checkGithubRelease(FPCUPGITREPOAPI+'/latest');
+  if Length(s)>0 then
+  begin
+    AddMessage('New version available');
+    AddMessage('See: '+FPCUPGITREPO+'/releases/latest');
+    AddMessage('See: '+s);
+    memoSummary.Lines.Append('New fpcupdeluxe version available');
+  end else AddMessage('No updates found.');
 end;
-
 
 end.
 
