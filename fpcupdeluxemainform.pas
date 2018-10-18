@@ -1349,7 +1349,8 @@ begin
       s:='Going to install FPC and Lazarus for SAM embedded ';
       FPCTarget:='embedded';
       LazarusTarget:='embedded';
-      FPCupManager.IncludeModules:='mbf,pxl';
+      //FPCupManager.IncludeModules:='mbf,pxl';
+      FPCupManager.IncludeModules:='mbf';
     end;
 
     if Sender=mORMotBtn then
