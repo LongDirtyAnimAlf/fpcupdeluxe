@@ -3193,8 +3193,8 @@ begin
   if (sConsentWarning) OR (Form2.SendInfo) then
   begin
     AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
-    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
+    AddMessage('https://www.batterybutcher.com/fpcup/getinfohtml',true);
+    AddMessage('https://www.batterybutcher.com/fpcup/getinfohtml?ShowErrors=yes');
     if (sConsentWarning) then
     begin
       aModalResult:=(MessageDlg(
