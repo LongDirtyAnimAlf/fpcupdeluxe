@@ -922,7 +922,7 @@ function TUniversalInstaller.RunCommands(Directive: string;sl:TStringList): bool
 var
   i,j:integer;
   exec:string;
-  output:string='';
+  s:string;
   BaseWorkingdir:string;
   Workingdir:string;
 begin
@@ -958,15 +958,14 @@ begin
       if j>0 then exec:=StringReplace(exec,'lazbuild.exe','lazbuild',[rfIgnoreCase]);
       {$ENDIF}
 
-      // TODO
-      // should more options for lazbuild be added here, as is been done on other places !!??
-
+      //Set lazbuild options
       {$IFDEF DEBUG}
-      exec:=StringReplace(exec,'lazbuild','lazbuild --verbose',[rfIgnoreCase]);
+      s:='--verbose';
       {$ELSE}
-      // See compileroptions.pp
-      exec:=StringReplace(exec,'lazbuild','lazbuild --quiet',[rfIgnoreCase]);
+      s:='--quiet';
       {$ENDIF}
+      if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
+      exec:=StringReplace(exec,'lazbuild','lazbuild '+s,[rfIgnoreCase]);
     end;
     Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
     Workingdir:=FixPath(Workingdir);
@@ -975,9 +974,9 @@ begin
     try
       result:=false;
       if Length(WorkingDir)>0 then
-        j:=ExecuteCommandInDir(exec,Workingdir,output,FPath,FVerbose)
+        j:=ExecuteCommandInDir(exec,Workingdir,s,FPath,FVerbose)
       else
-        j:=ExecuteCommand(exec,output,FVerbose);
+        j:=ExecuteCommand(exec,s,FVerbose);
       if j=0 then
       begin
         result:=true;
@@ -986,7 +985,7 @@ begin
         // it is design-time (except when returning an runtime message) and mark IDE for rebuild
         if (pos('lazbuild',lowerCase(exec))>0) and
           (pos('.lpk',lowercase(exec))>0) and
-          (pos('only for runtime',lowercase(output))=0)
+          (pos('only for runtime',lowercase(s))=0)
         then
         begin
           infoln(localinfotext+'Marking Lazarus for rebuild based on exec line '+exec,etDebug);
@@ -998,7 +997,7 @@ begin
       begin
         WritelnLog(etError, localinfotext+'Running '+exec+' returned with an error.',true);
         WritelnLog(etError, localinfotext+'Error-code: '+InttoStr(j),true);
-        WritelnLog(etError, localinfotext+'Error message (if any): '+output,true);
+        WritelnLog(etError, localinfotext+'Error message (if any): '+s,true);
         break;
       end;
     except

@@ -124,7 +124,7 @@ object Form1: TForm1
       'android'
       'darwin'
       'freebsd'
-      'openbsd'
+      'aix'
       'wince'
       'embedded'
       'java'

@@ -1612,7 +1612,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') and (s<>'aarch64') {and (s<>'x8664') and (s<>'x86_64')} then
+        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') and (s<>'aarch64') and (s<>'x8664') and (s<>'x86_64') then
         begin
           success:=false;
         end;
@@ -1811,6 +1811,12 @@ begin
     {$endif}
 
     s:='';
+    if (FPCupManager.CrossOS_Target='aix')
+    then
+    begin
+      s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak +
+         'Do you want to continue ?';
+    end;
     if (FPCupManager.CrossCPU_Target='aarch64')
     {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target='darwin'){$endif}
     OR (FPCupManager.CrossOS_Target='msdos')
@@ -1820,7 +1826,7 @@ begin
       s:='Be forwarned: this will only work with FPC 3.2 / embedded / trunk / NewPascal.' + sLineBreak +
          'Do you want to continue ?';
     end;
-    if (FPCupManager.CrossCPU_Target='aarch64') AND (FPCupManager.CrossOS_Target='android')
+    if ((FPCupManager.CrossCPU_Target='aarch64') OR (FPCupManager.CrossCPU_Target='x86_64')) AND (FPCupManager.CrossOS_Target='android')
     then
     begin
       s:='Be forwarned: this will only work with trunk.' + sLineBreak +
@@ -1917,13 +1923,12 @@ begin
     //ppc64 predefined settings
     if (FPCupManager.CrossCPU_Target='powerpc64') then
     begin
-      if (FPCupManager.CrossOS_Target='linux') then
+      if ((FPCupManager.CrossOS_Target='linux') {OR (FPCupManager.CrossOS_Target='aix')}) then
       begin
         // for now, little endian only on Linux (IBM CPU's) !!
         FPCupManager.CrossOPT:='-Cb- -Caelfv2 ';
       end;
     end;
-
 
     // recheck / override / set custom FPC options by special user input through setup+
     s:=Form2.FPCOptions;
@@ -2086,16 +2091,25 @@ begin
 
         if FPCupManager.CrossOS_Target='darwin' then
         begin
+          // Darwin has some universal binaries and libs
           if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='x86';
           if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x86';
           if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='powerpc';
           if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
         end;
 
+        if FPCupManager.CrossOS_Target='aix' then
+        begin
+          // AIX has some universal binaries
+          if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='powerpc';
+          if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
+        end;
+
         if FPCupManager.CrossOS_Target='freebsd' then BinsFileName:='FreeBSD'+BinsFileName else
           if FPCupManager.CrossOS_Target='openbsd' then BinsFileName:='OpenBSD'+BinsFileName else
-            if FPCupManager.CrossOS_Target='msdos' then BinsFileName:='MSDos'+BinsFileName else
-              BinsFileName:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsFileName;
+            if FPCupManager.CrossOS_Target='aix' then BinsFileName:='AIX'+BinsFileName else
+              if FPCupManager.CrossOS_Target='msdos' then BinsFileName:='MSDos'+BinsFileName else
+                BinsFileName:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsFileName;
 
         // normally, we have the same names for libs and bins URL
         LibsFileName:=BinsFileName;

@@ -59,7 +59,7 @@ uses
   m_any_to_androidmipsel,
   m_any_to_androidjvm,
   m_any_to_androidaarch64,
-  m_any_to_androidx64,     //not yet available !!
+  m_any_to_androidx64,
   m_any_to_linuxarm,
   m_any_to_linuxmips,
   m_any_to_linuxmipsel,
@@ -72,6 +72,7 @@ uses
   m_any_to_embeddedmipsel,
   m_any_to_javajvm,
   m_any_to_aixpowerpc,
+  m_any_to_aixpowerpc64,
   m_any_to_msdosi8086,
   {$ifdef LINUX}
   //{$ifdef CPUX86}
