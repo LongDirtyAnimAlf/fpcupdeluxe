@@ -736,6 +736,8 @@ begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('compiler');
+              {$else}
+              continue;
               {$endif}
             end;
             5:
