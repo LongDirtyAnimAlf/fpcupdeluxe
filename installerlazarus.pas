@@ -315,7 +315,7 @@ begin
         //Make sure Lazarus does not pick up these tools from other installs
         Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
         Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
-        Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
+        Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
         // Tell make where to find the target binutils if cross-compiling:
@@ -337,7 +337,7 @@ begin
 
         //Set config-file
         //To be investigated if necessary
-        //Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
+        //Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         //if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
         //Set options
@@ -471,6 +471,8 @@ begin
 
   OperationSucceeded := true;
 
+  LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
+
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
   if ((ModuleName<>_USERIDE) OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
   begin
@@ -503,7 +505,7 @@ begin
       Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
     //Set config-file
-    s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+'idemake.cfg';
+    s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
     if (ModuleName=_USERIDE) then
     begin
       Processor.Parameters.Add('CFGFILE=' + s);
@@ -527,7 +529,6 @@ begin
     case ModuleName of
       _USERIDE:
       begin
-        LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
         //If we do not [yet] have lazbuild, include it in make
         if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
         begin
@@ -680,12 +681,9 @@ begin
   else
   begin
     // useride; using lazbuild. Note: in recent Lazarus we use make
-    // ... but that apparently calls lazbuild internally anyway.
-
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out
     // in the next steps.
-    LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
     if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
     begin
       WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
@@ -821,36 +819,8 @@ begin
     begin
       LazarusConfig:=TUpdateLazConfig.Create(FPrimaryConfigPath);
       try
-
-        // Change the build modes to reflect the default LCL widget set.
-        i:=LazarusConfig.GetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Count',0);
-
-        if i>0 then
-        begin
-          s:='';
-          {$ifdef LCLQT5}
-          s:='qt5';
-          {$endif}
-          {$ifdef LCLCOCOA}
-          s:='cocoa';
-          {$endif}
-          {$ifdef LCLCARBON}
-          s:='carbon';
-          {$endif}
-
-          if Length(s)>0 then
-          begin
-            infoln(infotext+'Changing default LCL_platforms for build-profiles in '+MiscellaneousConfig+' to build for '+s, etInfo);
-            for j:=0 to (i-1) do
-            begin
-              LazarusConfig.SetVariable(MiscellaneousConfig, 'MiscellaneousOptions/BuildLazarusOptions/Profiles/Profile'+InttoStr(j)+'/LCLPlatform/Value', s);
-            end;
-          end;
-        end;
-
         {$ifdef LCLQT5}
-
-        // also set default sizes and position
+        //Set default sizes and position
         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Left', '10');
         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Top', '30');
         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MainIDE/CustomPosition/Width', '900');

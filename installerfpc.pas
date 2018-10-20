@@ -30,6 +30,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+{.$define crosssimple}
+{$ifdef MSWindows}
+{$define buildnative}
+{$endif}
+
 interface
 
 uses
@@ -657,13 +662,15 @@ begin
           Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
           Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
           Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-          // Tell make where to find the target binutils if cross-compiling:
-          if CrossInstaller.BinUtilsPath<>'' then
-             Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
           {$IFDEF MSWINDOWS}
           Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
+          {$ELSE}
+          Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF}
+          // Tell make where to find the target binutils if cross-compiling:
+          if CrossInstaller.BinUtilsPath<>'' then
+             Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
 
           // will not happen often but if the compiler version is too low, add override
           if (CompareVersionStrings(GetCompilerVersion(ChosenCompiler),GetBootstrapCompilerVersionFromSource(FSourceDirectory,True))<0) then
@@ -679,6 +686,21 @@ begin
           //Todo: to be investigated
           //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
 
+          {$ifdef crosssimple}
+          Processor.Parameters.Add('FPC='+ChosenCompiler);
+          case MakeCycle of
+            0:
+            begin
+              Processor.Parameters.Add('all');
+            end;
+            1:
+            begin
+              Processor.Parameters.Add('crossinstall');
+            end;
+            //Crosssimple has only the above two steps: "make all" followed by "make crossinstall"
+            else continue;
+          end;
+          {$else}
           case MakeCycle of
             0:
             begin
@@ -710,25 +732,11 @@ begin
             end;
             4:
             begin
-              //This code is not needed [yet]
-              //But keep code here for future reference
-              continue;
-              {$ifdef Darwin}
-              if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
-              {$endif}
+              {$ifdef buildnative}
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              //Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-              Processor.Parameters.Add('FPC='+ChosenCompiler);
-
-              (*
-              Processor.Parameters.Add('-C');
-              Processor.Parameters.Add('utils/fpcm');
-              Processor.Parameters.Add('all');
-              *)
-              Processor.Parameters.Add('-C');
-              Processor.Parameters.Add('packages\fpmkunit');
-              Processor.Parameters.Add('bootstrap');
-              Processor.Parameters.Add('fpmake');
+              Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+              Processor.Parameters.Add('compiler');
+              {$endif}
             end;
             5:
             begin
@@ -748,6 +756,7 @@ begin
           end;
 
           Processor.Parameters.Add('CROSSINSTALL=1');
+          {$endif}
 
           Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
           Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);

@@ -2301,6 +2301,7 @@ begin
               end;
             end;
             SysUtils.DeleteFile(TargetFile);
+            if success then MissingCrossBins:=False;
           end;
 
           // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
@@ -2382,6 +2383,7 @@ begin
             SysUtils.DeleteFile(TargetFile);
             // as libraries are not needed for embedded, always end with success even if the above has failed
             if FPCupManager.CrossOS_Target='embedded' then success:=true;
+            if success then MissingCrossLibs:=False;
           end;
 
           if success then
