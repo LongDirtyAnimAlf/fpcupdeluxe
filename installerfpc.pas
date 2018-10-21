@@ -196,6 +196,7 @@ type
 implementation
 
 uses
+  StrUtils,
   fpcuputil,
   repoclient,
   FileUtil, LazFileUtils
@@ -733,9 +734,13 @@ begin
             4:
             begin
               {$ifdef buildnative}
-              s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-              Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-              Processor.Parameters.Add('compiler');
+              //Only native compiler for these OS
+              if AnsiIndexText(CrossInstaller.TargetOS,['win32','win64','linux','freebsd','netbsd','openbsd','darwin','qnx','beos','solaris','haiku','aix'{,'android'}])<>-1 then
+              begin
+                s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+                Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+                Processor.Parameters.Add('compiler');
+              end else continue;
               {$else}
               continue;
               {$endif}
@@ -888,9 +893,9 @@ begin
 
           try
             if CrossOptions='' then
-               infoln(infotext+'Running make (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
+               infoln(infotext+'Running make [step #'+InttoStr(MakeCycle)+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
             else
-              infoln(infotext+'Running make (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
+              infoln(infotext+'Running make [step #'+InttoStr(MakeCycle)+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
           except

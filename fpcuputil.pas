@@ -2131,6 +2131,8 @@ begin
     Result:=Result+'a64'
   else if SysUtils.CompareText(TargetCPU,'i8086')=0 then
     Result:=Result+'8086'
+  else if SysUtils.CompareText(TargetCPU,'jvm')=0 then
+    Result:=Result+'jvm'
   else
     Result:='fpc';
   Result:=Result+GetExeExt;

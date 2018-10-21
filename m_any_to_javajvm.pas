@@ -74,6 +74,8 @@ begin
 
   //FLibsPath:='where is jasmin.jar'
   //for now, jasmin.jar will be downloaded into normal bin-dir !!
+  ShowInfo('Libspath ignored; jasmin.jar will be downloaded into normal bin-dir.');
+  FLibsPath:='';
   result:=True;
   FLibsFound:=True;
 end;
