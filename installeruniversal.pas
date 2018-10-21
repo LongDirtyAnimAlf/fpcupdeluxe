@@ -216,14 +216,12 @@ end;
 {$ifndef FPCONLY}
 function TUniversalInstaller.RebuildLazarus:boolean;
 var
-  s,LazBuildApp:string;
+  s:string;
   LazarusConfig: TUpdateLazConfig;
   i,j:integer;
 begin
   result:=false;
   FLazarusNeedsRebuild:=false;
-
-  LazBuildApp:=IncludeTrailingPathDelimiter(LazarusInstallDir) + 'lazbuild' + GetExeExt;
 
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
@@ -233,6 +231,7 @@ begin
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   {$ENDIF}
   Processor.Parameters.Add('FPC=' + FCompiler);
+  Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('USESVN2REVISIONINC=0');
   Processor.Parameters.Add('--directory=.');
   //Make sure our FPC units can be found by Lazarus
@@ -259,11 +258,7 @@ begin
   s:=Trim(s);
   if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
 
-  //If we do not [yet] have lazbuild, include it in make
-  if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
-    Processor.Parameters.Add('lazbuild useride')
-  else
-    Processor.Parameters.Add('useride');
+  Processor.Parameters.Add('useride');
 
   try
     WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);

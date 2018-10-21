@@ -879,7 +879,7 @@ begin
           Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
           Options:=Trim(Options);
 
-          s1:=STANDARDCOMPILEROPTIONS+' '+Options;
+          s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+Options;
           {$ifdef DEBUG}
           //s:=s+' -g -gl -dEXTDEBUG'; //-va+
           //s:=s+' -dEXTDEBUG'; //-va+
@@ -1151,7 +1151,7 @@ begin
 
   if FBootstrapCompilerOverrideVersionCheck then
     Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-  s1:=STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
+  s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
   s1:=StringReplace(s1,'  ',' ',[rfReplaceAll]);
   s1:=Trim(s1);
 
@@ -2575,7 +2575,7 @@ begin
           // in CROSSOPT though, as the stable compiler likely will not understand them
           // if FCompilerOptions<>'' then Processor.Parameters.Add('CROSSOPT='+FCompilerOptions);
 
-          s:=STANDARDCOMPILEROPTIONS;
+          s:=STANDARDCOMPILERVERBOSITYOPTIONS;
           {$ifdef CPUARMHF}
           s:=s+' -dFPC_ARMHF';
           {$endif}
@@ -2685,7 +2685,7 @@ begin
       Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
       Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
       Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
-      Processor.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS);
+      Processor.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');

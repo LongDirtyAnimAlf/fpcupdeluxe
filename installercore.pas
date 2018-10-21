@@ -55,8 +55,8 @@ const
   STANDARDCOMPILEROPTIONS='-vewh';
   //STANDARDCOMPILEROPTIONS='-va';
   {$ELSE}
-  //STANDARDCOMPILEROPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
-  STANDARDCOMPILEROPTIONS='-vw-n-h-l-d-u-t-p-c-';
+  //STANDARDCOMPILERVERBOSITYOPTIONS='-vw-n-h-i-l-d-u-t-p-c-x-';
+  STANDARDCOMPILERVERBOSITYOPTIONS='-vw-n-h-l-d-u-t-p-c-';
   {$ENDIF}
 
   NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win32/nasm-2.13-win32.zip';

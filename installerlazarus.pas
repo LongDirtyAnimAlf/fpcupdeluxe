@@ -46,8 +46,7 @@ const
     _CHECKMODULE+_LAZARUS+_SEP +
     _GETMODULE+_LAZARUS+_SEP +
     _CONFIGMODULE+_LAZARUS+_SEP +
-    _BUILDMODULE+_LAZBUILD+_SEP +
-    _BUILDMODULE+_USERIDE+_SEP +
+    _DO+_USERIDE+_SEP +
     _BUILDMODULE+_STARTLAZARUS+_SEP +
     _DO+_UNIVERSALDEFAULT+_SEP+
     _DO+_HELPLAZARUS+_SEP+
@@ -84,8 +83,7 @@ const
     _DECLARE+_LAZARUSCLEANBUILDONLY+_SEP +
     _CLEANMODULE+_LAZARUS+_SEP +
     _CONFIGMODULE+_LAZARUS+_SEP +
-    _BUILDMODULE+_LAZBUILD+_SEP +
-    _BUILDMODULE+_USERIDE+_SEP +
+    _DO+_USERIDE+_SEP +
     _BUILDMODULE+_STARTLAZARUS+_SEP +
     _DO+_UNIVERSALDEFAULT+_SEP+
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
@@ -100,6 +98,12 @@ const
     //standard lazbuild build
     _DECLARE+_LAZBUILD+_SEP +
     _BUILDMODULE+_LAZBUILD+_SEP +
+    _END +
+
+    //standard useride build
+    _DECLARE+_USERIDE+_SEP +
+    _BUILDMODULE+_LAZBUILD+_SEP +
+    _BUILDMODULE+_USERIDE+_SEP +
     _END +
 
     {$ifdef mswindows}
@@ -306,6 +310,7 @@ begin
         if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
         {$ENDIF}
         Processor.Parameters.Add('FPC=' + FCompiler);
+        Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
         Processor.Parameters.Add('USESVN2REVISIONINC=0');
         Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
@@ -341,7 +346,7 @@ begin
         //if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
         //Set options
-        Options := STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
+        Options := STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
         if CrossInstaller.LibsPath <> '' then
           Options := Options + ' -Xd -Fl' + CrossInstaller.LibsPath;
         if CrossInstaller.BinUtilsPrefix <> '' then
@@ -486,6 +491,7 @@ begin
     if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
     {$ENDIF}
     Processor.Parameters.Add('FPC=' + FCompiler);
+    Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
     //Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
     Processor.Parameters.Add('--directory=.');
@@ -513,11 +519,26 @@ begin
     else
     begin
       //To be investigated if necessary
-      //if FileExists(s) then Processor.Parameters.Add('CFGFILE=' + s);
+      if FileExists(s) then Processor.Parameters.Add('CFGFILE=' + s);
     end;
 
     //Set options
-    s := STANDARDCOMPILEROPTIONS+' '+FCompilerOptions;
+    s:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
+
+    //Lazbuild MUST be build without giving any extra optimization options
+    //At least on Linux anything else gives errors when trying to use lazbuild ... :-(
+    if ModuleName=_LAZBUILD then
+    begin
+      i:=Pos('-O',s);
+      if i>0 then
+      begin
+        if s[i+2] in ['0'..'9'] then
+        begin
+          Delete(s,i,3);
+        end;
+      end;
+    end;
+
     while Pos('  ',s)>0 do
     begin
       s:=StringReplace(s,'  ',' ',[]);
@@ -529,17 +550,8 @@ begin
     case ModuleName of
       _USERIDE:
       begin
-        //If we do not [yet] have lazbuild, include it in make
-        if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
-        begin
-          Processor.Parameters.Add('lazbuild useride');
-          infoln(infotext+'Running make lazbuild useride', etInfo);
-        end
-        else
-        begin
-          Processor.Parameters.Add('useride');
-          infoln(infotext+'Running make useride', etInfo);
-        end;
+        Processor.Parameters.Add('useride');
+        infoln(infotext+'Running make useride', etInfo);
       end;
       _IDE:
       begin
@@ -1557,7 +1569,8 @@ begin
   {$IFDEF lazarus_parallel_make}
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   {$ENDIF}
-  Processor.Parameters.Add('FPC=' + FCompiler + '');
+  Processor.Parameters.Add('FPC=' + FCompiler);
+  Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$ifdef Windows}
   Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
