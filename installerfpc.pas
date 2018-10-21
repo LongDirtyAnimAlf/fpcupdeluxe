@@ -2652,7 +2652,7 @@ begin
       Processor.Parameters.Add('CPU_SOURCE=i386');
       Processor.Parameters.Add('OS_TARGET=win64');
       Processor.Parameters.Add('CPU_TARGET=x86_64');
-      Processor.Parameters.Add('OPT='+STANDARDCOMPILEROPTIONS);
+      Processor.Parameters.Add('OPT='+STANDARDCOMPILERVERBOSITYOPTIONS);
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');

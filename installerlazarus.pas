@@ -175,6 +175,7 @@ type
     function GetLazarusVersionFromUrl(aURL:string):string;
     function GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
     function GetLazarusReleaseCandidateFromUrl(aURL:string):integer;
+    function LCLCrossActionNeeded:boolean;
   protected
     FFPCInstallDir: string;
     FFPCSourceDir: string;
@@ -289,8 +290,8 @@ begin
       // - can deal with compiler options
       // - doesn't need existing lazbuild (+nogui LCL)
 
-      LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
-      if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
+      LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
+      if CheckExecutable(LazBuildApp, '--help', LAZBUILDNAME) = false then
       begin
         writelnlog(etWarning, infotext+'Lazbuild could not be found ... using make to cross-build '+ModuleName, true);
         LazBuildApp := '';
@@ -320,6 +321,7 @@ begin
         //Make sure Lazarus does not pick up these tools from other installs
         Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
         Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FFPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+
         Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
         if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
@@ -339,11 +341,6 @@ begin
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-
-        //Set config-file
-        //To be investigated if necessary
-        //Options:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-        //if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
         //Set options
         Options := STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
@@ -469,14 +466,13 @@ var
   i,j,ExitCode: integer;
   s,LazBuildApp,FPCDirStore: string;
   OperationSucceeded: boolean;
-  NothingToBeDone:boolean;
   LazarusConfig: TUpdateLazConfig;
 begin
   Result:=inherited;
 
   OperationSucceeded := true;
 
-  LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
+  LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
   if ((ModuleName<>_USERIDE) OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
@@ -519,7 +515,8 @@ begin
     else
     begin
       //To be investigated if necessary
-      if FileExists(s) then Processor.Parameters.Add('CFGFILE=' + s);
+      //At the moment, this gives errors when building lazbuild, so do not enable.
+      //if FileExists(s) then Processor.Parameters.Add('CFGFILE=' + s);
     end;
 
     //Set options
@@ -582,7 +579,7 @@ begin
       end;
       _LAZBUILD:
       begin
-        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt) then
+        if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt) then
         begin
           infoln(infotext+'Lazbuild already available ... skip building it.', etInfo);
           OperationSucceeded := true;
@@ -606,31 +603,7 @@ begin
       end;
       _LCLCROSS:
       begin
-        NothingToBeDone:=true;
-        if FCrossLCL_Platform<>'' then
-        begin
-          NothingToBeDone:=false;
-          {$ifdef Darwin}
-            {$ifdef LCLCARBON}
-              NothingToBeDone:=(FCrossLCL_Platform='carbon');
-            {$endif}
-            {$ifdef LCLCOCOA}
-              NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-            {$endif}
-            {$ifdef CPU64}
-              {$ifndef LCLQT5}
-                NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-              {$endif}
-            {$endif}
-          {$endif}
-          {$ifdef LCLQT}
-            NothingToBeDone:=(FCrossLCL_Platform='qt');
-          {$endif}
-          {$ifdef LCLQT5}
-            NothingToBeDone:=(FCrossLCL_Platform='qt5');
-          {$endif}
-        end;
-        if (NOT NothingToBeDone) then
+        if LCLCrossActionNeeded then
         begin
           // first: Processor.Parameters.Add('-C lcl'+DirectorySeparator+'interfaces'+DirectorySeparator+FCrossLCL_Platform);
           // followed by: make ideintf basecomponents bigidecomponents LCL_PLATFORM=qt
@@ -681,7 +654,7 @@ begin
     //Special check for lazbuild as that is known to go wrong
     if (OperationSucceeded) and (ModuleName=_LAZBUILD) then
     begin
-      if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt, '--help', 'lazbuild') = false then
+      if CheckExecutable(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt, '--help', LAZBUILDNAME) = false then
       begin
         WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
         Result := false;
@@ -696,7 +669,7 @@ begin
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out
     // in the next steps.
-    if CheckExecutable(LazBuildApp, '--help', 'lazbuild') = false then
+    if CheckExecutable(LazBuildApp, '--help', LAZBUILDNAME) = false then
     begin
       WritelnLog(etError, infotext+'Lazbuild could not be found, so cannot build USERIDE.', true);
       Result := false;
@@ -1150,7 +1123,7 @@ var
 begin
   result:='0.0.0';
 
-  aFileName:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild' + GetExeExt;
+  aFileName:=IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
   if FileExists(aFileName) then
   begin
     Processor.Executable := aFileName;
@@ -1507,7 +1480,6 @@ var
   {$endif}
   oldlog: TErrorMethod;
   CleanCommand,CleanDirectory:string;
-  NothingToBeDone:boolean;
 begin
   Result := inherited;
 
@@ -1605,31 +1577,7 @@ begin
     _LCLCROSS:
     begin
       CleanDirectory:=DirectorySeparator+'lcl';
-      NothingToBeDone:=true;
-      if FCrossLCL_Platform<>'' then
-      begin
-        NothingToBeDone:=false;
-        {$ifdef Darwin}
-          {$ifdef LCLCARBON}
-            NothingToBeDone:=(FCrossLCL_Platform='carbon');
-          {$endif}
-          {$ifdef LCLCOCOA}
-            NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-          {$endif}
-          {$ifdef CPU64}
-            {$ifndef LCLQT5}
-              NothingToBeDone:=(FCrossLCL_Platform='cocoa');
-            {$endif}
-          {$endif}
-        {$endif}
-        {$ifdef LCLQT}
-          NothingToBeDone:=(FCrossLCL_Platform='qt');
-        {$endif}
-        {$ifdef LCLQT5}
-          NothingToBeDone:=(FCrossLCL_Platform='qt5');
-        {$endif}
-      end;
-      if (NOT NothingToBeDone) then
+      if (LCLCrossActionNeeded) then
       begin
         Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
         CleanCommand:='cleanintf';
@@ -2015,6 +1963,37 @@ begin
     WritelnLog(infotext+'Error: invalid Lazarus FPrimaryConfigPath: ' + FPrimaryConfigPath);
     Result := false;
   end;
+end;
+
+function TLazarusInstaller.LCLCrossActionNeeded:boolean;
+var
+  NothingToBeDone:boolean;
+begin
+  NothingToBeDone:=true;
+  if FCrossLCL_Platform<>'' then
+  begin
+    NothingToBeDone:=false;
+    {$ifdef Darwin}
+      {$ifdef LCLCARBON}
+        NothingToBeDone:=(FCrossLCL_Platform='carbon');
+      {$endif}
+      {$ifdef LCLCOCOA}
+        NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+      {$endif}
+      {$ifdef CPU64}
+        {$ifndef LCLQT5}
+          NothingToBeDone:=(FCrossLCL_Platform='cocoa');
+        {$endif}
+      {$endif}
+    {$endif}
+    {$ifdef LCLQT}
+      NothingToBeDone:=(FCrossLCL_Platform='qt');
+    {$endif}
+    {$ifdef LCLQT5}
+      NothingToBeDone:=(FCrossLCL_Platform='qt5');
+    {$endif}
+  end;
+  result:=(NOT NothingToBeDone);
 end;
 
 constructor TLazarusInstaller.Create;

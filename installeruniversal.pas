@@ -575,7 +575,7 @@ begin
        else WritelnLog(localinfotext+'Installing '+PackageName+' version '+lpkversion.AsString,True);
   end;
 
-  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+'lazbuild'+GetExeExt;
+  Processor.Executable := IncludeTrailingPathDelimiter(LazarusInstallDir)+LAZBUILDNAME+GetExeExt;
 
   RegisterPackageFeature:=false;
 
@@ -978,12 +978,12 @@ begin
        {$endif}
      end;
 
-    j:=Pos('lazbuild',lowerCase(exec));
+    j:=Pos(LAZBUILDNAME,lowerCase(exec));
     if j>0 then
     begin
       {$IFDEF MSWINDOWS}
-      j:=Pos('lazbuild.exe',lowerCase(exec));
-      if j>0 then exec:=StringReplace(exec,'lazbuild.exe','lazbuild',[rfIgnoreCase]);
+      j:=Pos(LAZBUILDNAME+'.exe',lowerCase(exec));
+      if j>0 then exec:=StringReplace(exec,LAZBUILDNAME+'.exe',LAZBUILDNAME,[rfIgnoreCase]);
       {$ENDIF}
 
       //Set lazbuild options
@@ -993,7 +993,7 @@ begin
       s:='--quiet';
       {$ENDIF}
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
-      exec:=StringReplace(exec,'lazbuild','lazbuild '+s,[rfIgnoreCase]);
+      exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+' '+s,[rfIgnoreCase]);
     end;
     Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
     Workingdir:=FixPath(Workingdir);
@@ -1011,7 +1011,7 @@ begin
         {$ifndef FPCONLY}
         // If it is likely user used lazbuid to compile a package, assume
         // it is design-time (except when returning an runtime message) and mark IDE for rebuild
-        if (pos('lazbuild',lowerCase(exec))>0) and
+        if (pos(LAZBUILDNAME,lowerCase(exec))>0) and
           (pos('.lpk',lowercase(exec))>0) and
           (pos('only for runtime',lowercase(s))=0)
         then

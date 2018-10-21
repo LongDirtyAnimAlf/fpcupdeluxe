@@ -38,6 +38,8 @@ const
   FPCTRUNKBOOTVERSION   = '3.0.4';
   LAZARUSTRUNKVERSION   = '2.1.0';
 
+  LAZBUILDNAME          = 'lazbuild';
+
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
 
@@ -65,6 +67,8 @@ const
 
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
+
+  //Sequence contants for statemachine
 
   _SEP                     = ';';
 

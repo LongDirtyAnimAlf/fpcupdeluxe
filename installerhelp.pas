@@ -568,7 +568,7 @@ var
   FPDocExe: string;
   FPDocExes: TStringList;
   GeneratedLCLHelp: string;
-  LazbuildExe: string;
+  LazbuildApp: string;
   LCLDate: TDateTime;
   LHelpDirectory: string;
   OperationSucceeded:boolean;
@@ -621,8 +621,8 @@ begin
           // Check for valid lazbuild.
           // Note: we don't check if we have a valid primary config path, but that will come out
           // in the next steps.
-          LazbuildExe:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'lazbuild'+GetExeExt;
-          if CheckExecutable(LazbuildExe, '--help','lazbuild')=false then
+          LazbuildApp:=IncludeTrailingPathDelimiter(FInstallDirectory)+LAZBUILDNAME+GetExeExt;
+          if CheckExecutable(LazbuildApp, '--help',LAZBUILDNAME)=false then
           begin
             writelnlog(ModuleName+': No valid lazbuild executable found. Aborting.', true);
             OperationSucceeded:=false;
@@ -632,7 +632,7 @@ begin
           begin
             // We have a working lazbuild; let's hope it works with primary config path as well
             // Build Lazarus chm help compiler; will be used to compile fpdocs xml format into .chm help
-            Processor.Executable := LazBuildExe;
+            Processor.Executable := LazbuildApp;
             Processor.Parameters.Clear;
             Processor.Parameters.Add('--primary-config-path='+LazarusPrimaryConfigPath+'');
             Processor.Parameters.Add(FBuildLCLDocsExeDirectory+'build_lcl_docs.lpr');
