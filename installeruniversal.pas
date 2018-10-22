@@ -978,6 +978,7 @@ begin
        {$endif}
      end;
 
+    {$ifndef FPCONLY}
     j:=Pos(LAZBUILDNAME,lowerCase(exec));
     if j>0 then
     begin
@@ -995,6 +996,7 @@ begin
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
       exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+' '+s,[rfIgnoreCase]);
     end;
+    {$endif}
     Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
     Workingdir:=FixPath(Workingdir);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
@@ -1742,6 +1744,7 @@ begin
       if result then infoln(infotext+'Download from archive path ok.',etInfo);
 
       // todo patch package if correct patch is available in patch directory
+
     end;
 
   end

@@ -20,6 +20,7 @@ uses
  sysutils,
  strutils,
  FileUtil,
+ installerCore,
  installerUniversal,
  fpcuputil,
  commandline;
