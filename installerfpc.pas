@@ -735,7 +735,7 @@ begin
             begin
               {$ifdef buildnative}
               //Only native compiler for these OS
-              if AnsiIndexText(CrossInstaller.TargetOS,['win32','win64','linux','freebsd','netbsd','openbsd','darwin','qnx','beos','solaris','haiku','aix'{,'android'}])<>-1 then
+              if AnsiIndexText(CrossInstaller.TargetOS,['win32','win64','linux','freebsd','netbsd','openbsd','darwin','haiku'{,'qnx','beos','solaris','aix','android'}])<>-1 then
               begin
                 s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
                 Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);

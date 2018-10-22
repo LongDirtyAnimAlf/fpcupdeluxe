@@ -121,8 +121,6 @@ uses
   m_anyinternallinker_to_win386,
   m_anyinternallinker_to_win64;
 
-//{$i revision.inc}
-
 {$R *.res}
 
 begin
