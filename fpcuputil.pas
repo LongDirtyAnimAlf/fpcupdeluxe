@@ -305,8 +305,6 @@ function FileIsReadOnly(const s:string):boolean;
 function MaybeQuoted(const s:string):string;
 // Like ExpandFilename but does not expand an empty string to current directory
 function SafeExpandFileName (Const FileName : String): String;
-// Like ExpandFilenameUTF8 but does not expand an empty string to current directory
-function SafeExpandFileNameUTF8 (Const FileName : String): String;
 // Get application name
 function SafeGetApplicationName: String;
 // Get application path
@@ -333,10 +331,7 @@ function Which(Executable: string): string;
 function IsExecutable(Executable: string):boolean;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function ExtractFileNameOnly(const AFilename: string): string;
-function GetCompilerName(Cpu_Target:string):string;
-function GetCrossCompilerName(Cpu_Target:string):string;
 function DoubleQuoteIfNeeded(s: string): string;
-
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
@@ -363,7 +358,8 @@ uses
   {$else}
   ftplist,
   {$endif}
-  FileUtil, LazFileUtils, LazUTF8,
+  FileUtil,
+  LazFileUtils,
   fpwebclient,fphttpwebclient,
   fpjson, jsonparser,
   uriparser
@@ -503,14 +499,6 @@ begin
     result:=ExpandFileName(FileName);
 end;
 
-function SafeExpandFileNameUTF8 (Const FileName : String): String;
-begin
-  if FileName='' then
-    result:=''
-  else
-    result:=ExpandFileNameUTF8(FileName);
-end;
-
 function SafeGetApplicationName: String;
 var
   StartPath: String;
@@ -569,9 +557,9 @@ begin
  result:=ExtractFilePath(StartPath);
  *)
 
- if DirectoryExistsUTF8(result) then
+ if DirectoryExists(result) then
     result:=GetPhysicalFilename(result,pfeException);
- result:=AppendPathDelim(result);
+ result:=IncludeTrailingPathDelimiter(result);
 end;
 
 function SaveFileFromResource(filename,resourcename:string):boolean;
@@ -801,11 +789,11 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist
-  ForceDirectoriesUTF8(ExtractFilePath(IncludeTrailingPathDelimiter(SafeExpandFileNameUTF8('~'))+ShortcutName));
+  ForceDirectories(ExtractFilePath(IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName));
   ScriptText:=TStringList.Create;
   try
     // No quotes here, either, we're not in a shell, apparently...
-    ScriptFile:=IncludeTrailingPathDelimiter(SafeExpandFileNameUTF8('~'))+ShortcutName;
+    ScriptFile:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName;
     SysUtils.DeleteFile(ScriptFile); //Get rid of any existing remnants
     ScriptText.Add('#!/bin/sh');
     ScriptText.Add('# '+BeginSnippet+' home startlink script');
@@ -1077,13 +1065,13 @@ function DeleteDirectoryEx(DirectoryName: string): boolean;
 // - removes directory itself
 // Adapted from fileutil.DeleteDirectory, thanks to Paweł Dmitruk
 var
-  FileInfo: TSearchRec;
+  FileInfo: TRawByteSearchRec;
   CurSrcDir: String;
   CurFilename: String;
 begin
   Result:=false;
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1093,31 +1081,31 @@ begin
         CurFilename:=CurSrcDir+FileInfo.Name;
         // Remove read-only file attribute so we can delete it:
         if (FileInfo.Attr and faReadOnly)>0 then
-          FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
+          FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
         if ((FileInfo.Attr and faDirectory)>0) {$ifdef unix} and ((FileInfo.Attr and faSymLink)=0) {$endif unix} then
         begin
           // Directory; exit with failure on error
           if not DeleteDirectoryEx(CurFilename) then
           begin
-            FindCloseUTF8(FileInfo);
+            SysUtils.FindClose(FileInfo);
             exit;
           end;
         end
         else
         begin
           // File; exit with failure on error
-          if not DeleteFileUTF8(CurFilename) then
+          if not SysUtils.DeleteFile(CurFilename) then
           begin
-            FindCloseUTF8(FileInfo);
+            SysUtils.FindClose(FileInfo);
             exit;
           end;
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
+    until SysUtils.FindNext(FileInfo)<>0;
   end;
-  FindCloseUTF8(FileInfo);
+  SysUtils.FindClose(FileInfo);
   // Remove root directory; exit with failure on error:
-  if (not RemoveDirUTF8(DirectoryName)) then exit;
+  if (not RemoveDir(DirectoryName)) then exit;
   Result:=true;
 end;
 
@@ -1133,12 +1121,12 @@ var
   AllFiles: boolean;
   CurSrcDir: String;
   CurFilename: String;
-  FileInfo: TSearchRec;
+  FileInfo: TRawByteSearchRec;
 begin
   Result:=false;
   AllFiles:=(Names.Count=0);
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1151,7 +1139,7 @@ begin
           // Directory; call recursively exit with failure on error
           if not DeleteFilesSubDirs(CurFilename,Names,OnlyIfPathHas) then
           begin
-            FindCloseUTF8(FileInfo);
+            SysUtils.FindClose(FileInfo);
             exit;
           end;
         end
@@ -1168,19 +1156,19 @@ begin
             begin
               // Remove read-only file attribute so we can delete it:
               if (FileInfo.Attr and faReadOnly)>0 then
-                FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
-              if not DeleteFileUTF8(CurFilename) then
+                FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
+              if not SysUtils.DeleteFile(CurFilename) then
               begin
-                FindCloseUTF8(FileInfo);
+                SysUtils.FindClose(FileInfo);
                 exit;
               end;
             end;
           end;
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
+    until SysUtils.FindNext(FileInfo)<>0;
   end;
-  FindCloseUTF8(FileInfo);
+  SysUtils.FindClose(FileInfo);
   Result:=true;
 end;
 
@@ -1197,7 +1185,7 @@ var
   AllFiles: boolean;
   CurSrcDir: String;
   CurFilename: String;
-  FileInfo: TSearchRec;
+  FileInfo: TRawByteSearchRec;
   i: integer;
 begin
   Result:=false;
@@ -1208,7 +1196,7 @@ begin
   end;
   AllFiles:=(Extensions.Count=0) or (Extensions.IndexOf('.*')>=0);
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1221,7 +1209,7 @@ begin
           // Directory; call recursively exit with failure on error
           if not DeleteFilesExtensionsSubdirs(CurFilename, Extensions,OnlyIfPathHas) then
           begin
-            FindCloseUTF8(FileInfo);
+            SysUtils.FindClose(FileInfo);
             exit;
           end;
         end
@@ -1237,19 +1225,19 @@ begin
             begin
               // Remove read-only file attribute so we can delete it:
               if (FileInfo.Attr and faReadOnly)>0 then
-                FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
-              if not DeleteFileUTF8(CurFilename) then
+                FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
+              if not SysUtils.DeleteFile(CurFilename) then
               begin
-                FindCloseUTF8(FileInfo);
+                SysUtils.FindClose(FileInfo);
                 exit;
               end;
             end;
           end;
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
+    until SysUtils.FindNext(FileInfo)<>0;
   end;
-  FindCloseUTF8(FileInfo);
+  SysUtils.FindClose(FileInfo);
   Result:=true;
 end;
 
@@ -1262,7 +1250,7 @@ var
   AllFiles: boolean;
   CurSrcDir: String;
   CurFilename: String;
-  FileInfo: TSearchRec;
+  FileInfo: TRawByteSearchRec;
   i: integer;
 begin
   Result:=false;
@@ -1272,7 +1260,7 @@ begin
   if AllFiles then exit;
 
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
-  if FindFirstUTF8(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       // Ignore directories and files without name:
@@ -1285,7 +1273,7 @@ begin
           // Directory; call recursively exit with failure on error
           if not DeleteFilesNameSubdirs(CurFilename, OnlyIfNameHas) then
           begin
-            FindCloseUTF8(FileInfo);
+            SysUtils.FindClose(FileInfo);
             exit;
           end;
         end
@@ -1295,18 +1283,18 @@ begin
           begin
             // Remove read-only file attribute so we can delete it:
             if (FileInfo.Attr and faReadOnly)>0 then
-              FileSetAttrUTF8(CurFilename, FileInfo.Attr-faReadOnly);
-            if not DeleteFileUTF8(CurFilename) then
+              FileSetAttr(CurFilename, FileInfo.Attr-faReadOnly);
+            if not SysUtils.DeleteFile(CurFilename) then
             begin
-              FindCloseUTF8(FileInfo);
+              SysUtils.FindClose(FileInfo);
               exit;
             end;
           end;
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
+    until SysUtils.FindNext(FileInfo)<>0;
   end;
-  FindCloseUTF8(FileInfo);
+  SysUtils.FindClose(FileInfo);
   Result:=true;
 end;
 
@@ -1432,18 +1420,16 @@ function FileSize(FileName: string) : Int64;
 //function FileSizeUTF8(FileName: string) : Int64;
 var
   sr : TRawByteSearchRec;
-  //sr : TSearchRec;
+  //sr : TRawByteSearchRec;
 begin
 {$ifdef unix}
   result:=filesize(FileName);
 {$else}
   if SysUtils.FindFirst(FileName, faAnyFile, sr ) = 0 then
-  //if FindFirstUTF8(FileName, faAnyFile, sr ) = 0 then
      result := Int64(sr.FindData.nFileSizeHigh) shl Int64(32) + Int64(sr.FindData.nFileSizeLow)
   else
      result := 0;
   SysUtils.FindClose(sr);
-  //FindCloseUTF8(sr);
 {$endif}
 end;
 
@@ -2006,7 +1992,7 @@ Function XdgConfigHome: String;
 begin
   Result:=GetEnvironmentVariable('XDG_CONFIG_HOME');
   if (Result='') then
-    Result:=IncludeTrailingPathDelimiter(SafeExpandFileNameUTF8('~'))+'.config'+DirectorySeparator
+    Result:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'.config'+DirectorySeparator
   else
     Result:=IncludeTrailingPathDelimiter(Result);
 end;
@@ -2093,63 +2079,6 @@ begin
   Result:=copy(AFilename,StartPos,ExtPos-StartPos);
 end;
 
-// from Lazarus: unit DefineTemplates;
-function GetDefaultCompilerFilename(const TargetCPU: string;
-  Cross: boolean): string;
-begin
-  if Cross then
-    Result:='ppcross'
-  else
-    Result:='ppc';
-  if TargetCPU='' then
-    Result:='fpc'
-  else if SysUtils.CompareText(TargetCPU,'i386')=0 then
-    Result:=Result+'386'
-  else if SysUtils.CompareText(TargetCPU,'m68k')=0 then
-    Result:=Result+'86k'
-  else if SysUtils.CompareText(TargetCPU,'alpha')=0 then
-    Result:=Result+'apx'
-  else if SysUtils.CompareText(TargetCPU,'powerpc')=0 then
-    Result:=Result+'ppc'
-  else if SysUtils.CompareText(TargetCPU,'powerpc64')=0 then
-    Result:=Result+'ppc64'
-  else if SysUtils.CompareText(TargetCPU,'arm')=0 then
-    Result:=Result+'arm'
-  else if SysUtils.CompareText(TargetCPU,'armeb')=0 then
-    Result:=Result+'arm'
-  else if SysUtils.CompareText(TargetCPU,'avr')=0 then
-    Result:=Result+'avr'
-  else if SysUtils.CompareText(TargetCPU,'sparc')=0 then
-    Result:=Result+'sparc'
-  else if SysUtils.CompareText(TargetCPU,'sparc64')=0 then
-    Result:=Result+'sparc64'
-  else if SysUtils.CompareText(TargetCPU,'x86_64')=0 then
-    Result:=Result+'x64'
-  else if SysUtils.CompareText(TargetCPU,'ia64')=0 then
-    Result:=Result+'ia64'
-  else if SysUtils.CompareText(TargetCPU,'aarch64')=0 then
-    Result:=Result+'a64'
-  else if SysUtils.CompareText(TargetCPU,'i8086')=0 then
-    Result:=Result+'8086'
-  else if SysUtils.CompareText(TargetCPU,'jvm')=0 then
-    Result:=Result+'jvm'
-  else
-    Result:='fpc';
-  Result:=Result+GetExeExt;
-end;
-
-function GetCompilerName(Cpu_Target:string):string;
-begin
-  result:=GetDefaultCompilerFilename(Cpu_Target,false);
-end;
-
-function GetCrossCompilerName(Cpu_Target:string):string;
-begin
-  if Cpu_Target<>'jvm'
-     then result:=GetDefaultCompilerFilename(Cpu_Target,true)
-     else result:=GetDefaultCompilerFilename(Cpu_Target,false);
-end;
-
 function DoubleQuoteIfNeeded(s: string): string;
 begin
   result:=Trim(s);
@@ -2172,7 +2101,7 @@ end;
 
 function DirectoryIsEmpty(Directory: string): Boolean;
 var
-  SR: TSearchRec;
+  SR: TRawByteSearchRec;
   i: Integer;
 begin
   Result:=(NOT DirectoryExists(Directory));

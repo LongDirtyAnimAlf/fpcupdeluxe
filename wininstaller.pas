@@ -100,7 +100,7 @@ type
 implementation
 {$IFDEF MSWINDOWS}
 uses
-  FileUtil, LazFileUtils, LazUTF8;
+  FileUtil;
 
 const
   ClassName = 'TWinInstaller';
@@ -139,9 +139,9 @@ begin
       CompileCommand:=StringReplace(UpperCase(CompileCommand),'COMPIL32','ISCC',[rfReplaceAll]);
     if (CompileCommand='') then
       CompileCommand:=FindDefaultExecutablePath('Compil32.exe');
-    if (CompileCommand='') and (fileexistsutf8(ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler)) then
+    if (CompileCommand='') and (FileExists(ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler)) then
       CompileCommand:=ProgramFiles+'\Inno Setup 5\'+CommandLineCompiler;
-    if (CompileCommand='') and (fileexistsutf8(ProgramFilesx86+'\Inno Setup 5\'+CommandLineCompiler)) then
+    if (CompileCommand='') and (FileExists(ProgramFilesx86+'\Inno Setup 5\'+CommandLineCompiler)) then
       CompileCommand:=ProgramFilesx86+'\Inno Setup 5\'+CommandLineCompiler;
     if CompileCommand<>'' then
     begin
@@ -177,7 +177,7 @@ begin
   //checkout fpc build sources svn checkout
   //This repository includes the full FPC sources as well...
   if FVerbose then WritelnLog(ClassName+': Getting FPC build repository',true);
-  ForceDirectory(FFPCBuildDir);
+  ForceDirectories(FFPCBuildDir);
   FSVNClient.LocalRepository:=FFPCBuildDir;
   // Using the fixes version of FPC hardcoded; probably we officially need latest stable FPC...
   //todo: perhaps link this to the actual version of FPC used in the regular install?
@@ -194,7 +194,7 @@ begin
 
   // Lazbuilddir may not exist (or should be empty) - so if it is there, remove it
   FInstallerBuildDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'lazinstaller';
-  if DirectoryExistsUTF8(FInstallerBuildDir) then
+  if DirectoryExists(FInstallerBuildDir) then
   begin
     infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
     DeleteDirectory(FInstallerBuildDir,false);

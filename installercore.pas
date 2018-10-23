@@ -149,6 +149,18 @@ type
     OS:TOS;
   end;
 
+  //TTargetSet=array[tcpu,tos] of boolean;
+
+const
+  CpuStr : array[TCPU] of string=(
+    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086'
+  );
+
+  ppcSuffix : array[TCPU] of string=(
+    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086'
+  );
+
+type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
     ucDebugger32 {Debugger (support) files 32bit},
     ucDebugger64 {Debugger (support) files 64bit},
@@ -185,6 +197,7 @@ type
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
     function GetFullVersion:dword;
+    function GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
   protected
     FCleanModuleSuccess: boolean;
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
@@ -345,6 +358,8 @@ type
     property CrossInstaller:TCrossInstaller read GetCrossInstaller;
     // set cross-target
     property NumericalVersion:dword read GetFullVersion;
+    function GetCompilerName(Cpu_Target:string):string;
+    function GetCrossCompilerName(Cpu_Target:string):string;
     procedure SetTarget(aCPU,aOS,aSubArch:string);virtual;
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
@@ -375,7 +390,7 @@ type
 implementation
 
 uses
-  FileUtil, LazFileUtils, LazUTF8
+  FileUtil
   {$ifndef Haiku}
   //,ssl_openssl
   // for runtime init of openssl
@@ -530,7 +545,7 @@ begin
     {$ENDIF BSD}
 
     {$IFDEF MSWINDOWS}
-    ForceDirectoriesUTF8(FMakeDir);
+    ForceDirectories(FMakeDir);
 
     (*
     // check if we have make ... otherwise get it from standard URL
@@ -591,7 +606,7 @@ begin
     if Not FileExists(F7zip) then F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
     if Not FileExists(F7zip) then
     begin
-      ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
+      ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
@@ -647,8 +662,8 @@ begin
     FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
     if Not FileExists(FUnrar) then
     begin
-      ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
-      //ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
+      ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
+      //ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
@@ -713,7 +728,7 @@ begin
         //Source:
         //https://github.com/git-for-windows
 
-        ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+        ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'git');
         {$ifdef win32}
         //Output:='git32.7z';
         Output:='git32.zip';
@@ -789,7 +804,7 @@ begin
         Output:='hg64.zip';
         {$endif}
         aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
-        ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
+        ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
         infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
         OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
         if NOT OperationSucceeded then
@@ -1371,10 +1386,10 @@ begin
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
     writelnlog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
-    if not(DirectoryExistsUTF8(FSVNClient.LocalRepository)) then
+    if not(DirectoryExists(FSVNClient.LocalRepository)) then
     begin
       writelnlog(localinfotext+'Creating directory '+FSourceDirectory+' for SVN checkout.');
-      ForceDirectoriesUTF8(FSourceDirectory);
+      ForceDirectories(FSourceDirectory);
     end;
   end;
 
@@ -1520,7 +1535,7 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
-  ForceDirectoriesUTF8(FMakeDir);
+  ForceDirectories(FMakeDir);
   Result := true;
   for Counter := low(FUtilFiles) to high(FUtilFiles) do
   begin
@@ -1532,7 +1547,7 @@ begin
       begin
         if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
         if (FUtilFiles[Counter].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
-        ForceDirectoriesUTF8(InstallPath);
+        ForceDirectories(InstallPath);
       end;
 
       InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
@@ -1677,7 +1692,7 @@ begin
     exit(OperationSucceeded);
   end;
 
-  ForceDirectoriesUTF8(FSVNDirectory);
+  ForceDirectories(FSVNDirectory);
 
   SVNZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
@@ -1908,7 +1923,7 @@ begin
 
   OperationSucceeded := false;
 
-  if ForceDirectoriesUTF8(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
+  if ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
   begin
 
     WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
@@ -2094,7 +2109,7 @@ var
 begin
   result:='';
   WritelnLog('Going to search for SVN client in ' + IncludeTrailingPathDelimiter(dirName)+'*');
-  if FindFirst(IncludeTrailingPathDelimiter(dirName)+'*', faAnyFile, searchResult)=0 then
+  if SysUtils.FindFirst(IncludeTrailingPathDelimiter(dirName)+'*', faAnyFile, searchResult)=0 then
   begin
     try
       repeat
@@ -2108,9 +2123,9 @@ begin
         begin
           FileSearch(IncludeTrailingPathDelimiter(dirName)+searchResult.Name);
         end;
-      until ( (FindNext(searchResult)<>0) OR (Length(FSVNClient.RepoExecutable)<>0) );
+      until ( (SysUtils.FindNext(searchResult)<>0) OR (Length(FSVNClient.RepoExecutable)<>0) );
     finally
-      FindClose(searchResult);
+      SysUtils.FindClose(searchResult);
     end;
   end;
 end;
@@ -2220,7 +2235,7 @@ function TInstaller.GetCompilerInDir(Dir: string): string;
 begin
   Result := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
   {$IFDEF UNIX}
-  if FileExistsUTF8(Result + '.sh') then
+  if FileExists(Result + '.sh') then
   begin
     //Use our proxy if it is installed
     Result := Result + '.sh';
@@ -2555,6 +2570,41 @@ function TInstaller.GetFullVersion:dword;
 begin
   result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,Self.FReleaseVersion);
 end;
+
+function TInstaller.GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
+var
+  aCPU:TCPU;
+begin
+  Result:='fpc';
+  if TargetCPU<>'' then
+  begin
+    for aCPU:=Low(TCPU) to High(TCPU) do
+    begin
+      if TargetCPU=CpuStr[aCPU] then
+      begin
+        if Cross then
+          Result:='ppcross'+ppcSuffix[aCPU]
+        else
+          Result:='ppc'+ppcSuffix[aCPU];
+        break;
+      end;
+    end;
+  end;
+  Result:=Result+GetExeExt;
+end;
+
+function TInstaller.GetCompilerName(Cpu_Target:string):string;
+begin
+  result:=GetDefaultCompilerFilename(Cpu_Target,false);
+end;
+
+function TInstaller.GetCrossCompilerName(Cpu_Target:string):string;
+begin
+  if Cpu_Target<>'jvm'
+     then result:=GetDefaultCompilerFilename(Cpu_Target,true)
+     else result:=GetDefaultCompilerFilename(Cpu_Target,false);
+end;
+
 
 
 destructor TInstaller.Destroy;

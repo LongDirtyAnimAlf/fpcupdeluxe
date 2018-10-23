@@ -182,7 +182,7 @@ procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig
 implementation
 
 uses
-  FileUtil, LazFileUtils, LazUTF8, fpcuputil;
+  FileUtil, fpcuputil;
 
 procedure LazDocPathAdd(const PathToAdd: string; LazarusConfig: TUpdateLazConfig);
 var
@@ -395,7 +395,7 @@ var
   FileOnly: string;
 begin
   FFilename:=AFilename;
-  FNew:=not(FileExistsUTF8(AFileName));
+  FNew:=not(FileExists(AFileName));
   if FNew then
   begin
     Doc:=TXMLDocument.Create;
@@ -412,7 +412,7 @@ begin
   If bChanged then
   begin
     // Make sure path exists:
-    ForceDirectoriesUTF8(ExtractFilePath(FFilename));
+    ForceDirectories(ExtractFilePath(FFilename));
     Save;
   end;
   Doc.Free;

@@ -199,7 +199,7 @@ uses
   StrUtils,
   fpcuputil,
   repoclient,
-  FileUtil, LazFileUtils
+  FileUtil
   {$IFDEF UNIX}
     ,baseunix
   {$ENDIF UNIX}
@@ -390,7 +390,7 @@ begin
   RemoveDir(IncludeTrailingPathDelimiter(aBaseDir)+'ide'+DirectorySeparator+'bin');
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'packages'+DirectorySeparator;
-  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -401,12 +401,12 @@ begin
           RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
-    FindCloseUTF8(FileInfo);
+    until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'utils'+DirectorySeparator;
-  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -420,13 +420,13 @@ begin
           RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'bin');
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
-    FindCloseUTF8(FileInfo);
+    until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
 
   // for (very) old versions of FPC : fcl and fv directories
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fcl'+DirectorySeparator;
-  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -437,11 +437,11 @@ begin
           RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
-    FindCloseUTF8(FileInfo);
+    until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'fv'+DirectorySeparator;
-  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -452,12 +452,12 @@ begin
           RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
-    FindCloseUTF8(FileInfo);
+    until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
 
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir)+'compiler'+DirectorySeparator;
-  if FindFirstUTF8(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
+  if SysUtils.FindFirst(OldPath+'*',faDirectory{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
     repeat
       if (FileInfo.Name<>'.') and (FileInfo.Name<>'..') and (FileInfo.Name<>'') then
@@ -468,8 +468,8 @@ begin
           RemoveDir(OldPath+FileInfo.Name+DirectorySeparator+'units');
         end;
       end;
-    until FindNextUTF8(FileInfo)<>0;
-    FindCloseUTF8(FileInfo);
+    until SysUtils.FindNext(FileInfo)<>0;
+    SysUtils.FindClose(FileInfo);
   end;
 
 end;
@@ -826,7 +826,7 @@ begin
              {$ifdef Darwin}
              if (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
              begin
-               s1:=ResolveDots(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
+               s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
              end
              else
@@ -1253,7 +1253,7 @@ begin
     begin
       FCompiler:=GetCompiler;
       // Verify it exists
-      if not(FileExistsUTF8(FCompiler)) then
+      if not(FileExists(FCompiler)) then
       begin
         WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
         OperationSucceeded:=false;
@@ -1700,7 +1700,7 @@ begin
 
   if OperationSucceeded then
   begin
-    OperationSucceeded:=ForceDirectoriesUTF8(FBootstrapCompilerDirectory);
+    OperationSucceeded:=ForceDirectories(FBootstrapCompilerDirectory);
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
@@ -2929,7 +2929,7 @@ begin
         // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
         // Adding this won't hurt on Windows.
         // Adjust for that
-        PlainBinPath:=LazFileUtils.ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'+DirectorySeparator+'..'));
+        PlainBinPath:=SafeExpandFileName(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'+DirectorySeparator+'..'));
         s:='-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath);
         ConfigText.Insert(x,s); Inc(x);
         {$IFDEF UNIX}
@@ -3035,7 +3035,7 @@ var
 begin
   result:=inherited;
 
-  if not DirectoryExistsUTF8(FSourceDirectory) then
+  if not DirectoryExists(FSourceDirectory) then
   begin
     infoln(infotext+'No FPC source [yet] ... nothing to be done',etInfo);
     exit(true);
@@ -3341,9 +3341,9 @@ begin
   if not result then exit;
 
   //sanity check
-  if FileExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile') and
-    DirectoryExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
-    DirectoryExistsUTF8(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
+  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile') and
+    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
+    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
     begin
     if DeleteDirectoryEx(FSourceDirectory)=false then

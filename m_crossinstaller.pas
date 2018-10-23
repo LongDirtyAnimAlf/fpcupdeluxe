@@ -157,8 +157,7 @@ Var
 implementation
 
 uses
-  StrUtils,
-  LazFileUtils;
+  StrUtils;
 
 { TCrossInstaller }
 procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);

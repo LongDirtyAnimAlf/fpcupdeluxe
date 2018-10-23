@@ -527,7 +527,7 @@ begin
     {$IFDEF MSWINDOWS}
     FLog.LogFile:=SafeGetApplicationPath+'fpcup.log'; //exe directory
     {$ELSE}
-    FLog.LogFile:=SafeExpandFileNameUTF8('~')+DirectorySeparator+'fpcup.log'; //home directory
+    FLog.LogFile:=SafeExpandFileName('~')+DirectorySeparator+'fpcup.log'; //home directory
     {$ENDIF MSWINDOWS}
     end
   else

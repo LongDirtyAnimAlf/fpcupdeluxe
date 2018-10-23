@@ -197,7 +197,6 @@ uses
   fpcuputil, processutils, FileUtil,
   {$ifndef FPCONLY}
   updatelazconfig,
-  LazFileUtils,
   {$endif}
   dateutils;
 
@@ -224,11 +223,7 @@ begin
   begin
     // Look for make etc in the current compiler directory:
     BinPath:=ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    {$ifndef FPCONLY}
-    PlainBinPath:=LazFileUtils.ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(BinPath) + '..'+DirectorySeparator+'..'));
-    {$else}
     PlainBinPath:=SafeExpandFileName(IncludeTrailingPathDelimiter(BinPath) + '..'+DirectorySeparator+'..');
-    {$endif}
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect

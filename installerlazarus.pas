@@ -245,11 +245,11 @@ implementation
 uses
   fpcuputil, fileutil,
   repoclient,
-  LazFileUtils {for resolvedots},
   updatelazconfig
   {$ifdef Darwin}
   {$ifdef LCLQT5}
   ,baseunix
+  ,LazFileUtils
   {$endif LCLQT5}
   {$endif Darwin}
   ;
@@ -1175,7 +1175,7 @@ begin
   begin
     // Look for make etc in the current compiler directory:
     FBinPath := ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    PlainBinPath := LazFileUtils.ResolveDots(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..'));
+    PlainBinPath := SafeExpandFileName(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..'));
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect

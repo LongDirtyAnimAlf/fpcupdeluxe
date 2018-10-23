@@ -26,7 +26,7 @@ interface
 
 uses
   Classes, SysUtils, FPCAdds, Forms, Controls, Graphics, StdCtrls, Buttons,
-  ExtCtrls, ComCtrls, Menus, LCLIntf, Clipbrd, LazFileUtils;
+  ExtCtrls, ComCtrls, Menus, LCLIntf, Clipbrd;
 
 type
   { TScrollingText }

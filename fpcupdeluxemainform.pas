@@ -148,7 +148,6 @@ uses
   {$ifdef UNIX}
   baseunix,
   {$endif UNIX}
-  //LazFileUtils,
   AboutFrm,
   extrasettings,
   modulesettings,
