@@ -227,67 +227,62 @@ begin
     SnippetText.Text:=Snippet;
     ConfigText.LoadFromFile(FPCCFG);
 
-    SnipBegin:=0;
-    while (SnipBegin<ConfigText.Count) do
+
+    // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
+    i:=StringListStartsWith(ConfigText,SnippetText.Strings[0]);
+
+    if (i<>-1) then
     begin
-      // Look for exactly this string (first snippet-line always contains Magic + OS and CPU combo):
-      if (ConfigText.Strings[SnipBegin]=SnippetText.Strings[0]) then
+      SnipBegin:=i;
+
+      SnipEnd:=MaxInt;
+      SnipEndLastResort:=MaxInt;
+
+      for i:=(SnipBegin+1) to ConfigText.Count-1 do
       begin
-        // found correct OS and basic CPU ; now try to find end of OS and CPU snippet
-
-        SnipEnd:=MaxInt;
-        SnipEndLastResort:=MaxInt;
-
-        for i:=(SnipBegin+1) to ConfigText.Count-1 do
+        // Once again, look exactly for this text:
+        if ConfigText.Strings[i]=SnipMagicEnd then
         begin
-          // Once again, look exactly for this text:
-          if ConfigText.Strings[i]=SnipMagicEnd then
-          begin
-            SnipEnd:=i;
-            break;
-          end;
-          // in case of failure, find beginning of next (magic) config segment
-          if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
-          begin
-             SnipEndLastResort:=i-1;
-             break;
-          end;
+          SnipEnd:=i;
+          break;
         end;
-        if SnipEnd=MaxInt then
+        // in case of failure, find beginning of next (magic) config segment
+        if Pos(SnipMagicBegin,ConfigText.Strings[i])>0 then
         begin
-          //apparently snippet was not closed correct
-          if SnipEndLastResort<>MaxInt then
-          begin
-            SnipEnd:=SnipEndLastResort;
-            infoln(INFOTEXT+'Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
-          end;
+           SnipEndLastResort:=i-1;
+           break;
         end;
-        if SnipEnd=MaxInt then
-        begin
-          //apparently snippet was not closed at all: severe error
-          infoln(INFOTEXT+'Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
-          exit;
-        end;
-
-        // found end of OS and CPU snippet ; now check detailed CPU setting
-        for i:=SnipBegin to SnipEnd do
-        begin
-          // do we have a CPU define ...
-          if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
-          begin
-
-            if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
-            begin
-              // we have exactly the same CPU type: delete snipped from config-file to replace !!!
-              result:=true;
-            end;
-            break;
-          end;
-        end;
-
       end;
-      if result then break;
-      Inc(SnipBegin);
+      if SnipEnd=MaxInt then
+      begin
+        //apparently snippet was not closed correct
+        if SnipEndLastResort<>MaxInt then
+        begin
+          SnipEnd:=SnipEndLastResort;
+          infoln(INFOTEXT+'Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
+        end;
+      end;
+      if SnipEnd=MaxInt then
+      begin
+        //apparently snippet was not closed at all: severe error
+        infoln(INFOTEXT+'Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
+        exit;
+      end;
+
+      // found end of OS and CPU snippet ; now check detailed CPU setting
+      for i:=SnipBegin to SnipEnd do
+      begin
+        // do we have a CPU define ...
+        if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+        begin
+          if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
+          begin
+            // we have exactly the same CPU type: delete snipped from config-file to replace !!!
+            result:=true;
+          end;
+          break;
+        end;
+      end;
     end;
 
     if result then
@@ -303,6 +298,7 @@ begin
       if ConfigText[ConfigText.Count-1]<>'' then ConfigText.Add('');
       SnipBegin:=ConfigText.Count;
     end;
+
     for i:=0 to (SnippetText.Count-1) do
     begin
       ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
@@ -499,11 +495,11 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // Runs make/make install for cross compiler.
 // Error out on problems; unless module considered optional, i.e. in
 // crosswin32-64 and crosswin64-32 steps.
-const
+type
   {$ifdef crosssimple}
-  MAXCYCLE=1;
+  TSTEPS = (st_MakeAll,st_MakeCrossInstall);
   {$else}
-  MAXCYCLE=6;
+  TSTEPS = (st_Compiler,st_CompilerInstall,st_Rtl,st_RtlInstall,st_Packages,st_PackagesInstall,st_NativeCompiler);
   {$endif}
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
@@ -515,7 +511,7 @@ var
   s1,s2:string;
   Counter:integer;
   LibsAvailable,BinsAvailable:boolean;
-  MakeCycle:integer;
+  MakeCycle:TSTEPS;
   Minimum_OSX,Minimum_iOS:string;
 begin
   result:=inherited;
@@ -657,8 +653,72 @@ begin
           end;
         end else Minimum_iOS:=CrossInstaller.CrossOpt[i];
 
-        for MakeCycle:=0 to MAXCYCLE do
+        for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
+
+          // Modify fpc.cfg
+          // always add this, to be able to detect which cross-compilers are installed
+          // helpfull for later bulk-update of all cross-compilers
+
+          if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
+          begin
+
+            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+            Options:=UpperCase(CrossCPU_Target);
+
+            // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
+            if (UpperCase(CrossCPU_Target)='ARM') AND ((UpperCase(CrossOS_Target)='LINUX'){ OR (UpperCase(CrossOS_Target)='EMBEDDED')}) then
+            begin
+              i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
+              if i<>-1 then
+              begin
+                // we have a special CPU setting: use it for the fpc.cfg
+                s1:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
+                if s1<>DEFAULTARMCPU then
+                begin
+                  //remove trailing cpu denominators that are not needed
+                  //while (not CharInSet(s1[Length(s1)],['0'..'9'])) do s1:=Copy(s1,1,Length(s1)-1);
+                  Options:=s1;
+                end;
+              end;
+            end;
+
+            //Distinguish between 32 and 64 bit powerpc
+            if (UpperCase(CrossCPU_Target)='POWERPC') then
+            begin
+              Options:='POWERPC32';
+            end;
+
+            //Remove dedicated settings of config snippet
+            if MakeCycle=Low(TSTEPS) then
+            begin
+              infoln(infotext+'Removing fpc.cfg config snippet.',etInfo);
+              s1:='# dummy (blank) config just to remove dedicated settings during build of cross-compiler'+LineEnding;
+            end;
+
+            //Add config snippet
+            if (MakeCycle=High(TSTEPS)) then
+            begin
+              infoln(infotext+'Adding fpc.cfg config snippet.',etInfo);
+              if CrossInstaller.FPCCFGSnippet<>''
+                 then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
+                 else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+            end;
+
+            InsertFPCCFGSnippet(FPCCfg,
+              SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
+              '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
+              '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
+              '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
+              '#IFDEF CPU'+Options+LineEnding+
+              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
+              s1+
+              '#ENDIF'+LineEnding+
+              '#ENDIF'+LineEnding+
+              '#ENDIF'+LineEnding+
+              SnipMagicEnd);
+          end;
+
           Processor.Executable := Make;
           Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
           Processor.Parameters.Clear;
@@ -696,18 +756,18 @@ begin
           {$ifdef crosssimple}
           Processor.Parameters.Add('FPC='+ChosenCompiler);
           case MakeCycle of
-            0:
+            st_MakeAll:
             begin
               Processor.Parameters.Add('all');
             end;
-            1:
+            st_MakeCrossInstall:
             begin
               Processor.Parameters.Add('crossinstall');
             end;
           end;
           {$else}
           case MakeCycle of
-            0:
+            st_Compiler:
             begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
@@ -715,7 +775,7 @@ begin
               Processor.Parameters.Add('FPC='+ChosenCompiler);
               Processor.Parameters.Add('compiler_cycle');
             end;
-            1:
+            st_CompilerInstall:
             begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
@@ -723,19 +783,19 @@ begin
               Processor.Parameters.Add('FPC='+ChosenCompiler);
               Processor.Parameters.Add('compiler_install');
             end;
-            2:
+            st_Rtl:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('rtl');
             end;
-            3:
+            st_RtlInstall:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('rtl_install');
             end;
-            4:
+            st_Packages:
             begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
@@ -744,13 +804,13 @@ begin
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('packages');
             end;
-            5:
+            st_PackagesInstall:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('packages_install');
             end;
-            6:
+            st_NativeCompiler:
             begin
               {$ifdef buildnative}
               if (
@@ -767,7 +827,7 @@ begin
                 //Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
                 Processor.Parameters.Add('-C');
                 Processor.Parameters.Add('compiler');
-                Processor.Parameters.Add('all');
+                Processor.Parameters.Add('compiler');
               end else continue;
               {$else}
               continue;
@@ -885,9 +945,16 @@ begin
           end;
 
           CrossOptions:=Trim(CrossOptions);
-          //Do not add cross-options when building native compiler
-          //Correct options will be taken from fpc.cfg
-          if (CrossOptions<>'') AND (MakeCycle<>MAXCYCLE) then
+
+          if (
+            (CrossOptions<>'')
+            {$ifndef crosssimple}
+            //Do not add cross-options when building native compiler
+            //Correct options will be taken from fpc.cfg
+            AND
+            (MakeCycle<>st_NativeCompiler)
+            {$endif}
+            ) then
           begin
             Processor.Parameters.Add('CROSSOPT='+CrossOptions);
           end;
@@ -914,75 +981,41 @@ begin
 
           try
             if CrossOptions='' then
-               infoln(infotext+'Running make [step #'+InttoStr(MakeCycle)+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
+               infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
             else
-              infoln(infotext+'Running make [step #'+InttoStr(MakeCycle)+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
+              infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
           except
             on E: Exception do
             begin
-              WritelnLog(infotext+'Running cross compiler fpc make all failed with an exception!'+LineEnding+
-                'Details: '+E.Message,true);
+              WritelnLog(infotext+'Running cross compiler fpc make generated an exception!'+LineEnding+'Details: '+E.Message,true);
+              WritelnLog(infotext+'We are going to try again !',true);
+              exit(false);
+              //result:=false;
+            end;
+          end;
+
+          {
+          if NOT result then
+          try
+            WritelnLog(infotext+'Sometimes, running make again works !',true);
+            Processor.Execute;
+            result:=(Processor.ExitStatus=0);
+          except
+            on E: Exception do
+            begin
+              WritelnLog(infotext+'Running cross compiler fpc make failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+              WritelnLog(infotext+'Give up !',true);
               exit(false);
             end;
           end;
+          }
+
 
           if (not result) then break;
 
-          //Before building native compiler in final step (if applicable), add settings into fpc.cfg.
-          if MakeCycle=(MAXCYCLE-1) then
-          begin
-            // Modify fpc.cfg
-            // always add this, to be able to detect which cross-compilers are installed
-            // helpfull for later bulk-update of all cross-compilers
-            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-
-            Options:=UpperCase(CrossCPU_Target);
-
-            // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-            if (UpperCase(CrossCPU_Target)='ARM') AND (UpperCase(CrossOS_Target)='LINUX') then
-            begin
-              i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
-              if i<>-1 then
-              begin
-                // we have a special CPU setting: use it for the fpc.cfg
-                s1:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
-                if s1<>DEFAULTARMCPU then
-                begin
-                  //remove trailing cpu denominators that are not needed
-                  //while (not CharInSet(s1[Length(s1)],['0'..'9'])) do s1:=Copy(s1,1,Length(s1)-1);
-                  Options:=s1;
-                end;
-              end;
-            end;
-
-            // try to distinguish between 32 and 64 bit powerpc
-            if (UpperCase(CrossCPU_Target)='POWERPC') then
-            begin
-              Options:='POWERPC32';
-            end;
-
-            if CrossInstaller.FPCCFGSnippet<>''
-               then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
-               else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
-
-            InsertFPCCFGSnippet(FPCCfg,
-              SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
-              '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
-              '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-              '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
-              '#IFDEF CPU'+Options+LineEnding+
-              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
-              s1+
-              '#ENDIF'+LineEnding+
-              '#ENDIF'+LineEnding+
-              '#ENDIF'+LineEnding+
-              SnipMagicEnd);
-          end;
-
         end;// loop over MakeCycle
-
 
         if not(Result) then
         begin
