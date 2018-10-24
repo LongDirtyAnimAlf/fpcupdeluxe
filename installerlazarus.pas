@@ -1175,7 +1175,7 @@ begin
   begin
     // Look for make etc in the current compiler directory:
     FBinPath := ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
-    PlainBinPath := SafeExpandFileName(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..'));
+    PlainBinPath := SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..');
     {$IFDEF MSWINDOWS}
     // Try to ignore existing make.exe, fpc.exe by setting our own path:
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
@@ -1244,7 +1244,7 @@ var
   LazarusConfig: TUpdateLazConfig;
   PCPSnippet: TStringList;
   i,j:integer;
-  s,aFileName:string;
+  aFileName:string;
 begin
   Result := inherited;
   Result := true;
@@ -1320,14 +1320,17 @@ begin
       if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, '--version', 'GNU gdb')) then DebuggerPath := which('gdb');
 
       {$IF (defined(Darwin))}
-      if Length(DebuggerPath)=0 then
+      if (NumericalVersion>=CalculateFullVersion(2,0,0)) then
       begin
-        //Check for newest lldb debugger ... could work !!
-        DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
-        if FileExists(DebuggerPath) then
-          DebuggerType:='TLldbDebugger'
-        else
-          DebuggerPath:='';
+        if Length(DebuggerPath)=0 then
+        begin
+          //Check for newest lldb debugger ... does work !!
+          DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
+          if FileExists(DebuggerPath) then
+            DebuggerType:='TLldbDebugger'
+          else
+            DebuggerPath:='';
+        end;
       end;
       {$endif}
 

@@ -1417,10 +1417,8 @@ end;
 
 // returns file size in bytes or 0 if not found.
 function FileSize(FileName: string) : Int64;
-//function FileSizeUTF8(FileName: string) : Int64;
 var
   sr : TRawByteSearchRec;
-  //sr : TRawByteSearchRec;
 begin
 {$ifdef unix}
   result:=filesize(FileName);

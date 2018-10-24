@@ -499,6 +499,12 @@ function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // Runs make/make install for cross compiler.
 // Error out on problems; unless module considered optional, i.e. in
 // crosswin32-64 and crosswin64-32 steps.
+const
+  {$ifdef crosssimple}
+  MAXCYCLE=1;
+  {$else}
+  MAXCYCLE=6;
+  {$endif}
 var
   FPCCfg:String; //path+filename of the fpc.cfg configuration file
   CrossOptions:String;
@@ -651,7 +657,7 @@ begin
           end;
         end else Minimum_iOS:=CrossInstaller.CrossOpt[i];
 
-        for MakeCycle:=0 to 6 do
+        for MakeCycle:=0 to MAXCYCLE do
         begin
           Processor.Executable := Make;
           Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
@@ -698,8 +704,6 @@ begin
             begin
               Processor.Parameters.Add('crossinstall');
             end;
-            //Crosssimple has only the above two steps: "make all" followed by "make crossinstall"
-            else continue;
           end;
           {$else}
           case MakeCycle of
@@ -733,20 +737,6 @@ begin
             end;
             4:
             begin
-              {$ifdef buildnative}
-              //Only native compiler for these OS
-              if AnsiIndexText(CrossInstaller.TargetOS,['win32','win64','linux','freebsd','netbsd','openbsd','darwin','haiku'{,'qnx','beos','solaris','aix','android'}])<>-1 then
-              begin
-                s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
-                Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
-                Processor.Parameters.Add('compiler');
-              end else continue;
-              {$else}
-              continue;
-              {$endif}
-            end;
-            5:
-            begin
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
@@ -754,11 +744,34 @@ begin
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('packages');
             end;
-            6:
+            5:
             begin
               s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
               Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
               Processor.Parameters.Add('packages_install');
+            end;
+            6:
+            begin
+              {$ifdef buildnative}
+              if (
+                //Only native compiler if we have libs !!
+                (CrossInstaller.LibsPath<>'')
+                AND
+                //Only native compiler for these OS
+                (AnsiIndexText(CrossInstaller.TargetOS,['win32','win64','linux','freebsd','netbsd','openbsd','darwin','haiku','qnx','beos','solaris','aix'])<>-1)
+                )
+                then
+              begin
+                Processor.Parameters.Add('FPC='+ChosenCompiler);
+                //s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
+                //Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
+                Processor.Parameters.Add('-C');
+                Processor.Parameters.Add('compiler');
+                Processor.Parameters.Add('all');
+              end else continue;
+              {$else}
+              continue;
+              {$endif}
             end;
           end;
 
@@ -811,6 +824,12 @@ begin
 
           if CrossInstaller.LibsPath<>''then
           begin
+             // http://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
+             if (CrossInstaller.TargetOS='aix') then
+             begin
+               CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
+             end;
+
              {$ifndef Darwin}
              CrossOptions:=CrossOptions+' -Xd';
              CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
@@ -826,7 +845,7 @@ begin
              {$ifdef Darwin}
              if (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
              begin
-               s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'../../');
+               s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
              end
              else
@@ -866,7 +885,9 @@ begin
           end;
 
           CrossOptions:=Trim(CrossOptions);
-          if CrossOptions<>'' then
+          //Do not add cross-options when building native compiler
+          //Correct options will be taken from fpc.cfg
+          if (CrossOptions<>'') AND (MakeCycle<>MAXCYCLE) then
           begin
             Processor.Parameters.Add('CROSSOPT='+CrossOptions);
           end;
@@ -909,6 +930,57 @@ begin
 
           if (not result) then break;
 
+          //Before building native compiler in final step (if applicable), add settings into fpc.cfg.
+          if MakeCycle=(MAXCYCLE-1) then
+          begin
+            // Modify fpc.cfg
+            // always add this, to be able to detect which cross-compilers are installed
+            // helpfull for later bulk-update of all cross-compilers
+            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+
+            Options:=UpperCase(CrossCPU_Target);
+
+            // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
+            if (UpperCase(CrossCPU_Target)='ARM') AND (UpperCase(CrossOS_Target)='LINUX') then
+            begin
+              i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
+              if i<>-1 then
+              begin
+                // we have a special CPU setting: use it for the fpc.cfg
+                s1:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
+                if s1<>DEFAULTARMCPU then
+                begin
+                  //remove trailing cpu denominators that are not needed
+                  //while (not CharInSet(s1[Length(s1)],['0'..'9'])) do s1:=Copy(s1,1,Length(s1)-1);
+                  Options:=s1;
+                end;
+              end;
+            end;
+
+            // try to distinguish between 32 and 64 bit powerpc
+            if (UpperCase(CrossCPU_Target)='POWERPC') then
+            begin
+              Options:='POWERPC32';
+            end;
+
+            if CrossInstaller.FPCCFGSnippet<>''
+               then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
+               else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
+
+            InsertFPCCFGSnippet(FPCCfg,
+              SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
+              '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
+              '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
+              '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
+              '#IFDEF CPU'+Options+LineEnding+
+              '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
+              s1+
+              '#ENDIF'+LineEnding+
+              '#ENDIF'+LineEnding+
+              '#ENDIF'+LineEnding+
+              SnipMagicEnd);
+          end;
+
         end;// loop over MakeCycle
 
 
@@ -928,9 +1000,9 @@ begin
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';
           if result then
-            infoln(infotext+'Running cross compiler fpc make all for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
+            infoln(infotext+'Running cross compiler fpc make for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
-          infoln(infotext+'Running cross compiler fpc make all for '+GetFPCTarget(false)+' failed with an error code.',etError);
+          infoln(infotext+'Running cross compiler fpc make for '+GetFPCTarget(false)+' failed with an error code.',etError);
           // No use in going on, but
           // do make sure installation continues if this happened with optional crosscompiler:
           exit(result);
@@ -961,52 +1033,6 @@ begin
           // delete cross-compiler in source-directory
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+CrossCompilerName);
 
-          // Modify fpc.cfg
-          // always add this, to be able to detect which cross-compilers are installed
-          // helpfull for later bulk-update of all cross-compilers
-          FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-
-          Options:=UpperCase(CrossCPU_Target);
-
-          // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-          if (UpperCase(CrossCPU_Target)='ARM') AND (UpperCase(CrossOS_Target)='LINUX') then
-          begin
-            i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
-            if i<>-1 then
-            begin
-              // we have a special CPU setting: use it for the fpc.cfg
-              s1:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
-              if s1<>DEFAULTARMCPU then
-              begin
-                //remove trailing cpu denominators that are not needed
-                //while (not CharInSet(s1[Length(s1)],['0'..'9'])) do s1:=Copy(s1,1,Length(s1)-1);
-                Options:=s1;
-              end;
-            end;
-          end;
-
-          // try to distinguish between 32 and 64 bit powerpc
-          if (UpperCase(CrossCPU_Target)='POWERPC') then
-          begin
-            Options:='POWERPC32';
-          end;
-
-          if CrossInstaller.FPCCFGSnippet<>''
-             then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
-             else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
-
-          InsertFPCCFGSnippet(FPCCfg,
-            SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
-            '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
-            '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-            '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
-            '#IFDEF CPU'+Options+LineEnding+
-            '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
-            s1+
-            '#ENDIF'+LineEnding+
-            '#ENDIF'+LineEnding+
-            '#ENDIF'+LineEnding+
-            SnipMagicEnd);
           {$IFDEF UNIX}
           result:=CreateFPCScript;
           {$ENDIF UNIX}

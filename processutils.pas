@@ -99,7 +99,6 @@ type
   { TProcessEx }
 
   TProcessEx = class(TProcess)
-  //TProcessEx = class(TProcessUTF8)
     private
       FExceptionInfoStrings: TstringList;
       FExitStatus: integer; //result code/exit status that executable returned with

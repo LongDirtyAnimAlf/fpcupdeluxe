@@ -160,6 +160,10 @@ const
     '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086'
   );
 
+  OSStr : array[TOS] of string=(
+    'windows'{,'win32','win64'},'linux', 'android','darwin','freebsd','openbsd','aix','wince','iphonesim','embedded','java', 'msdos','haiku'
+  );
+
 type
   TUtilCategory = (ucBinutil {regular binutils like as.exe},
     ucDebugger32 {Debugger (support) files 32bit},
@@ -1226,7 +1230,6 @@ begin
     exit;
   end;
 
-  //todo: check if we need to add forcedirectoriesutf8 to create local repo dir if it doesn't exist
   BeforeRevision := 'failure';
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
@@ -1581,7 +1584,7 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
-  ForceDirectoriesUTF8(FMakeDir);
+  ForceDirectories(FMakeDir);
   Result := true;
   OperationSucceeded := false;
   SourceURL:=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0/Win64Bins.zip';
@@ -1645,23 +1648,8 @@ end;
 
 function TInstaller.DownloadSVN: boolean;
 const
-  // See: http://subversion.apache.org/download/
-  // for latest version !!
-  //SourceURL = 'http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
-  // Changed to https
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip';
-  //SourceURL = 'http://sourceforge.net/projects/win32svn/files/1.8.4/apache24/svn-win32-1.8.4-ap24.zip/download';
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.13.zip';
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.8.14.zip';
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.0.zip';
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.1.zip';
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.4.zip';
-  //SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.5.zip';
-  // SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.9.7.zip';
-  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.10.0.zip';
+  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.10.2.zip';
   SourceURL_LastResort = 'https://sourceforge.net/projects/win32svn/files/1.8.17/apache24/svn-win32-1.8.17-ap24.zip/download';
-  // confirmed by winetricks bug report that this is the only one left...
-  // this link seems down 'http://download.microsoft.com/download/vc60pro/update/1/w9xnt4/en-us/vc6redistsetup_enu.exe';
 var
   MajorVersion,MinorVersion,BuildNumber: integer;
   OperationSucceeded: boolean;
@@ -2574,8 +2562,9 @@ end;
 function TInstaller.GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
 var
   aCPU:TCPU;
+  s:string;
 begin
-  Result:='fpc';
+  s:='fpc';
   if TargetCPU<>'' then
   begin
     for aCPU:=Low(TCPU) to High(TCPU) do
@@ -2583,14 +2572,14 @@ begin
       if TargetCPU=CpuStr[aCPU] then
       begin
         if Cross then
-          Result:='ppcross'+ppcSuffix[aCPU]
+          s:='ppcross'+ppcSuffix[aCPU]
         else
-          Result:='ppc'+ppcSuffix[aCPU];
+          s:='ppc'+ppcSuffix[aCPU];
         break;
       end;
     end;
   end;
-  Result:=Result+GetExeExt;
+  Result:=s+GetExeExt;
 end;
 
 function TInstaller.GetCompilerName(Cpu_Target:string):string;

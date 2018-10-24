@@ -16,10 +16,9 @@ function CheckFPCUPOptions(FInstaller: TFPCupManager):integer;
 implementation
 
 uses
- classes,
- sysutils,
- strutils,
- FileUtil,
+ Classes,
+ SysUtils,
+ StrUtils,
  installerCore,
  installerUniversal,
  fpcuputil,
@@ -64,7 +63,7 @@ begin
       begin
         // Get setting, converting relative paths (including e.g. ~/bla.ini) to
         // absolute paths.
-        sIniFile:=SafeExpandFileNameUTF8(sIniFile);
+        sIniFile:=SafeExpandFileName(sIniFile);
         Options.IniFileSection:=Options.GetOption('','inisection','General');
         Options.CaseSensitive:=false; //easier when dealing with ini files
         try
@@ -139,34 +138,34 @@ begin
       end
       else
       begin
-        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(sInstallDir));
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','binutilsdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
+      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
       {$ELSE} //*nix
       if sInstallDir='' then
       begin
-        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8('~/development')); //fallback default
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName('~/development')); //fallback default
         bHaveInstalldir:=false;
       end
       else
       begin
         // Expand home dir etc
-        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(sInstallDir));
+        sInstallDir:=ExcludeTrailingPathDelimiter(SafeExpandFileName(sInstallDir));
         bHaveInstalldir:=true;
       end;
-      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','binutilsdir','')));
+      FInstaller.MakeDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','binutilsdir','')));
       {$ENDIF MSWINDOWS}
 
       FInstaller.BaseDirectory:=sInstallDir;
-      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
-      FInstaller.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
+      FInstaller.BootstrapCompilerDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcbootstrapdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpcbootstrap')));
+      FInstaller.FPCInstallDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','fpcdir',IncludeTrailingPathDelimiter(sInstallDir)+'fpc')));
       bFPCsplit:=Options.GetOptionNoParam('','fpcsplit');
       if bFPCsplit
                then FInstaller.FPCSourceDirectory:=FInstaller.FPCInstallDirectory+'src'
                else FInstaller.FPCSourceDirectory:=FInstaller.FPCInstallDirectory;
       {$ifndef FPCONLY}
-      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));
+      FInstaller.LazarusDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','lazdir',IncludeTrailingPathDelimiter(sInstallDir)+'lazarus')));
       {
       bLazsplit:=Options.GetOptionNoParam('','lazsplit');
       if bLazsplit
@@ -175,17 +174,17 @@ begin
       }
       {$endif}
 
-      FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','svnexe','')));
+      FInstaller.SVNExecutable := ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','svnexe','')));
 
-      FInstaller.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','crossbindir','')));
-      FInstaller.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileNameUTF8(Options.GetOption('','crosslibdir','')));
+      FInstaller.CrossToolsDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crossbindir','')));
+      FInstaller.CrossLibraryDirectory:=ExcludeTrailingPathDelimiter(SafeExpandFileName(Options.GetOption('','crosslibdir','')));
 
       sLogFile:=Options.GetOption('','logfilename','',true);
       if sLogFile='' then
         {$IFDEF MSWINDOWS}
         FInstaller.LogFileName:='fpcup.log'
         {$ELSE}
-        FInstaller.LogFileName:=SafeExpandFileNameUTF8('~/fpcup.log')
+        FInstaller.LogFileName:=SafeExpandFileName('~/fpcup.log')
         {$ENDIF MSWINDOWS}
       else
         FInstaller.LogFileName:=sLogFile;
@@ -638,7 +637,6 @@ begin
         end;
       end;
 
-      // Note: we don't have a unicode version of SafeExpandFileName; investigate consequences for Unicode paths!??!?
       // User could have specified relative paths so we're normalizing them.
       if (FInstaller.FPCDesiredRevision<>'') then
         writeln('WARNING: Reverting FPC to revision '+FInstaller.FPCDesiredRevision);

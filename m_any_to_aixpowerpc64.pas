@@ -78,6 +78,7 @@ function TAny_AIXPowerPC64.GetLibs(Basepath:string): boolean;
 const
   DirName=ARCH+'-'+OS;
   LibName='libc.so';
+  StaticLibName='libc.a';
 begin
 
   result:=FLibsFound;
@@ -89,15 +90,20 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LibName);
 
+  // do the same as above, but look for a static lib
+  result:=SearchLibrary(Basepath,StaticLibName);
+  // search local paths based on libbraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName);
+
+
   if result then
   begin
     FLibsFound:=true;
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
-    //todo: implement -Xr for other platforms if this setup works
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     // http://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
-    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     SearchLibraryInfo(result);
   end
@@ -180,9 +186,8 @@ begin
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
   end;
 end;
 
