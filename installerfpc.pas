@@ -986,6 +986,15 @@ begin
               infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
+
+            if ((NOT result) AND (MakeCycle=st_Packages)) then
+            begin
+              //Sometimes rerun gives good results (on AIX 32bit especially).
+              infoln(infotext+'Running make stage again ... could work !',etInfo);
+              Processor.Execute;
+              result:=(Processor.ExitStatus=0);
+            end;
+
           except
             on E: Exception do
             begin
@@ -995,22 +1004,6 @@ begin
               //result:=false;
             end;
           end;
-
-          {
-          if NOT result then
-          try
-            WritelnLog(infotext+'Sometimes, running make again works !',true);
-            Processor.Execute;
-            result:=(Processor.ExitStatus=0);
-          except
-            on E: Exception do
-            begin
-              WritelnLog(infotext+'Running cross compiler fpc make failed with an exception!'+LineEnding+'Details: '+E.Message,true);
-              WritelnLog(infotext+'Give up !',true);
-              exit(false);
-            end;
-          end;
-          }
 
 
           if (not result) then break;
