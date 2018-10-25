@@ -572,12 +572,15 @@ end;
 function TFPCupManager.CheckValidCPUOS: boolean;
 var
   TxtFile:Text;
-  s:string;
+  s,sourceline:string;
   x:integer;
   sl:TStringList;
-  cpuindex:integer;
+  cpuindex,osindex:integer;
 begin
   result:=false;
+
+  cpuindex:=-1;
+  osindex:=-1;
 
   //parsing fpmkunit.pp for valid CPU / OS combos
 
@@ -590,67 +593,131 @@ begin
     while NOT EOF (TxtFile) do
     begin
       Readln(TxtFile,s);
+      s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
+      //s:=DelSpace(s);
 
-      x:=Pos('OSCPUSupported : array[TOS,TCpu]',s);
+      x:=Pos('TCpu=(',s);
       if x>0 then
       begin
-        // read the line with all cpus
-        // { os          none   i386    m68k  ppc    sparc  x86_64 arm    ppc64  avr    armeb  mips   mipsel jvm    i8086 aarch64 sparc64}
-        Readln(TxtFile,s);
-        s:=DelChars(s,'{');
-        s:=DelChars(s,'}');
-        s:=Trim(s);
-        while true do
+        //We got the array with CPU defines: parse it (a bit rough)
+        sourceline:=s;
+        while NOT EOF (TxtFile) do
         begin
-          x:=Pos('  ',s);
-          if x>0 then Delete(s,x,1) else break;
+          Readln(TxtFile,s);
+          s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
+          sourceline:=sourceline+s;
+          x:=Pos(');',s);
+          if x>0 then
+          begin
+            sourceline:=StringReplace(sourceline, #13, '', [rfReplaceAll]);
+            sourceline:=StringReplace(sourceline, #10, '', [rfReplaceAll]);
+            break;
+          end;
+        end;
+        //Sourceline now holds a single line containing all CPU's available;
+        //E.g. : TCpu=(cpuNone,i386,m68k,...);
+        x:=Pos('=(',sourceline);
+        if x>0 then
+        begin
+          Delete(sourceline,1,x+2);
+        end;
+        x:=Pos(');',sourceline);
+        if x>0 then
+        begin
+          Delete(sourceline,x,MaxInt);
         end;
         sl:=TStringList.Create;
         try
-          sl.Delimiter:=' ';
+          sl.Delimiter:=',';
+          sl.StrictDelimiter:=true;
+          sl.DelimitedText:=sourceline;
+          cpuindex:=sl.IndexOf(CrossCPU_Target);
+        finally
+          sl.Free;
+        end;
+      end;
+
+      x:=Pos('TOS=(',s);
+      if x>0 then
+      begin
+        //We got the array with OS defines: parse it (a bit rough)
+        sourceline:=s;
+        while NOT EOF (TxtFile) do
+        begin
+          Readln(TxtFile,s);
+          s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
+          sourceline:=sourceline+s;
+          x:=Pos(');',s);
+          if x>0 then
+          begin
+            sourceline:=StringReplace(sourceline, #13, '', [rfReplaceAll]);
+            sourceline:=StringReplace(sourceline, #10, '', [rfReplaceAll]);
+            break;
+          end;
+        end;
+        //Sourceline now holds a single line containing all OS's available;
+        //E.g. : TOS=(osNone,linux,go32v2,win32,.....);
+        x:=Pos('=(',sourceline);
+        if x>0 then
+        begin
+          Delete(sourceline,1,x+2);
+        end;
+        x:=Pos(');',sourceline);
+        if x>0 then
+        begin
+          Delete(sourceline,x,MaxInt);
+        end;
+        sl:=TStringList.Create;
+        try
+          sl.Delimiter:=',';
+          sl.StrictDelimiter:=true;
+          sl.DelimitedText:=sourceline;
+          osindex:=sl.IndexOf(CrossOS_Target);
+        finally
+          sl.Free;
+        end;
+      end;
+
+      x:=Pos('OSCPUSupported:array[TOS,TCpu]',s);
+      if ((x>0) AND (cpuindex>=0) AND (osindex>=0)) then
+      begin
+        // read the dummy line with CPU-OS combo's
+        Readln(TxtFile,s);
+
+        // Read towards the correct OS line
+        while (osindex>=0) do
+        begin
+          Readln(TxtFile,s);
+          Dec(osindex);
+        end;
+
+        x:=Pos('(',s);
+        if x>0 then
+        begin
+          Delete(s,1,x);
+        end;
+        x:=Pos(')',s);
+        if x>0 then
+        begin
+          Delete(s,x,MaxInt);
+        end;
+        s:=StringReplace(s, ' ', '', [rfReplaceAll]); //Remove all spaces from string;
+        s:=Trim(s);
+
+        //We now have: "false,false,false,true,...."
+        sl:=TStringList.Create;
+        try
+          sl.Delimiter:=',';
           sl.StrictDelimiter:=true;
           sl.DelimitedText:=s;
-          // slcpu now contains i386,m68k,....
-          s:=CrossCPU_Target;
-          if s='powerpc' then s:='ppc';
-          if s='powerpc64' then s:='ppc64';
-          cpuindex:=sl.IndexOf(s);
-          sl.Clear;
-          if cpuindex>=0 then
+          if sl.Count>cpuindex then
           begin
-            repeat
-              // { none }    ( false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false),
-              Readln(TxtFile,s);
-
-              if Pos(');',s)>0 then break;
-              if Length(Trim(s))=0 then break;
-
-              s:=DelChars(s,'{');
-              s:=DelChars(s,'}');
-              s:=DelChars(s,'(');
-              s:=DelChars(s,')');
-              s:=StringReplace(s,',',' ',[rfReplaceAll]);
-              s:=Trim(s);
-              while true do
-              begin
-                x:=Pos('  ',s);
-                if x>0 then Delete(s,x,1) else break;
-              end;
-              sl.DelimitedText:=s;
-              if sl.Count>cpuindex then
-              begin
-                if sl[0]=CrossOS_Target then
-                begin
-                  if sl[cpuindex]='true' then
-                  begin
-                    result:=true;
-                    break;
-                  end;
-                end;
-              end;
-            until EOF(TxtFile);
+            if sl[cpuindex]='true' then
+            begin
+              result:=true;
+              break;
+            end;
           end;
-
         finally
           sl.Free;
         end;
