@@ -2273,7 +2273,13 @@ begin
           infoln(localinfotext+'No correct bootstrapper. Going to download bootstrapper from '+ FBootstrapCompilerURL,etInfo);
           result:=DownloadBootstrapCompiler;
           // always use the newly downloaded bootstrapper !!
-          if result then FCompiler:=FBootstrapCompiler;
+          if result then
+          begin
+            FCompiler:=FBootstrapCompiler;
+            s:=GetCompilerVersion(FCompiler);
+            //Check if version is correct: if so, disable overrideversioncheck !
+            if s=aBootstrapVersion then FBootstrapCompilerOverrideVersionCheck:=false;
+          end;
         end;
       end;
 

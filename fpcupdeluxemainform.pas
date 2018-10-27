@@ -1922,7 +1922,7 @@ begin
     //ppc64 predefined settings
     if (FPCupManager.CrossCPU_Target='powerpc64') then
     begin
-      if ((FPCupManager.CrossOS_Target='linux') {OR (FPCupManager.CrossOS_Target='aix')}) then
+      if ((FPCupManager.CrossOS_Target='linux')) then
       begin
         // for now, little endian only on Linux (IBM CPU's) !!
         FPCupManager.CrossOPT:='-Cb- -Caelfv2 ';
@@ -2136,6 +2136,16 @@ begin
           begin
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
             LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
+          end;
+        end;
+
+        if FPCupManager.CrossOS_Target='aix' then
+        begin
+          // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
+          if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+          begin
+            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
           end;
         end;
 

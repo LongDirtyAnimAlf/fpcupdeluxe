@@ -97,6 +97,18 @@ begin
     result:=SimpleSearchLibrary(BasePath,DirName,StaticLibName);
 
 
+  // universal libs: begin simple: check presence of library file in basedir
+  result:=SearchLibrary(Basepath,LibName);
+  // search local paths based on libbraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,ARCHUNIVERSAL+'-'+OS,LibName);
+
+  //  universal libs: do the same as above, but look for a static lib
+  result:=SearchLibrary(Basepath,StaticLibName);
+  // search local paths based on libbraries provided for or adviced by fpc itself
+  if not result then
+    result:=SimpleSearchLibrary(BasePath,ARCHUNIVERSAL+'-'+OS,StaticLibName);
+
   if result then
   begin
     FLibsFound:=true;
