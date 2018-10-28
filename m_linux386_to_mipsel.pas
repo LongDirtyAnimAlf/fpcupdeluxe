@@ -97,7 +97,6 @@ end;
 function TLinux386_mipsel.GetLibs(Basepath:string): boolean;
 const
   DirName='mipsel-linux';
-  LibName='libc.so';
 begin
   result:=FLibsFound;
   if result then exit;

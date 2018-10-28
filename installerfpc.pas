@@ -822,6 +822,7 @@ begin
                 )
                 then
               begin
+                infoln(infotext+'Building native compiler for '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+'.',etInfo);
                 Processor.Parameters.Add('FPC='+ChosenCompiler);
                 //s1:=GetCrossCompilerName(CrossInstaller.TargetCPU);
                 //Processor.Parameters.Add('FPC='+IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+s1);
@@ -1005,8 +1006,10 @@ begin
             end;
           end;
 
-
           if (not result) then break;
+
+          if MakeCycle=st_NativeCompiler then
+             infoln(infotext+'Building native compiler for finished.',etInfo)
 
         end;// loop over MakeCycle
 

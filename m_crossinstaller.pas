@@ -66,6 +66,8 @@ const
 
   FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
+  LIBCNAME='libc.so';
+
 type
   CompilerType=(ctBootstrap,ctInstalled);
   SearchMode=(smFPCUPOnly,smAuto,smManual);
@@ -213,11 +215,19 @@ end;
 function TCrossInstaller.SearchLibrary(Directory, LookFor: string): boolean;
 begin
   result:=SearchUtil(Directory, LookFor, true);
+  if NOT result then
+  begin
+    if LookFor=LIBCNAME then result:=SearchUtil(Directory, LIBCNAME+'.6', true);
+  end;
 end;
 
 function TCrossInstaller.SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
 begin
   result:=FPCUPToolsSearch(BasePath,DirName,true,LookFor);
+  if NOT result then
+  begin
+    if LookFor=LIBCNAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCNAME+'.6');
+  end;
 end;
 
 function TCrossInstaller.SearchBinUtil(Directory, LookFor: string): boolean;

@@ -34,17 +34,16 @@ end;
 function TFreeBSD64_FreeBSD386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-freebsd';
-  LibName='libc.so';
 begin
   result:=FLibsFound;
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LIBCNAME);
 
   // first search local paths based on libraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   //FLibsPath:='/usr/lib32';
   //result:=fileexists(FLibsPath+'/'+LibName);

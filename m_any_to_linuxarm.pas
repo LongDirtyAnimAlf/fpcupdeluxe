@@ -64,7 +64,6 @@ end;
 function Tany_linuxarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-linux';
-  LibName='libc.so';
 //var
 //  requirehardfloat:boolean;
 begin
@@ -74,17 +73,17 @@ begin
   //requirehardfloat:=(StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1);
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LIBCNAME);
 
   // local paths based on libraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
   // also check in the gnueabi directory
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LibName);
+     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabi',LIBCNAME);
   // also check in the gnueabihf directory
   if not result then
-     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LibName);
+     result:=SimpleSearchLibrary(BasePath,DirName+'-gnueabihf',LIBCNAME);
 
   SearchLibraryInfo(result);
 

@@ -96,17 +96,16 @@ end;
 function TLinux386_mips.GetLibs(Basepath:string): boolean;
 const
   DirName='mips-linux';
-  LibName='libc.so';
 begin
   result:=FLibsFound;
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LIBCNAME);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   if result then
   begin

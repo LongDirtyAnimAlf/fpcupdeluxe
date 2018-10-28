@@ -76,7 +76,6 @@ end;
 function TAny_AIXPowerPC.GetLibs(Basepath:string): boolean;
 const
   DirName=ARCH+'-'+OS;
-  LibName='libc.so';
   StaticLibName='libc.a';
 begin
 
@@ -84,10 +83,10 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LIBCNAME);
   // search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   // do the same as above, but look for a static lib
   result:=SearchLibrary(Basepath,StaticLibName);

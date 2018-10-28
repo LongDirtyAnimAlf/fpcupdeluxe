@@ -70,7 +70,6 @@ function TAny_Androidx64.GetLibs(Basepath:string): boolean;
 const
   DirName=ARCH+'-'+OS;
   // we presume, libc.so has to be present in a cross-library for arm
-  LibName='libc.so';
   // we presume, libandroid.so has to be present in a cross-library for arm
   //LibName='libandroid.so';
 var
@@ -82,7 +81,7 @@ begin
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LIBCNAME);
 
   // if binaries already found, search for library belonging to these binaries !!
   if (not result) AND (Length(FBinUtilsPath)>0) AND (SearchModeUsed=smAuto) then
@@ -109,7 +108,7 @@ begin
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   // search for a library provide by a standard android libraries install
 

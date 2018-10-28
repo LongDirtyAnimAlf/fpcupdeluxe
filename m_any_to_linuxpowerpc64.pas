@@ -59,24 +59,23 @@ end;
 function Tany_linuxpowerpc64.GetLibs(Basepath:string): boolean;
 const
   DirName='powerpc64-linux';
-  LibName='libc.so';
 begin
   result:=FLibsFound;
   if result then exit;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LibName);
+  result:=SearchLibrary(Basepath,LIBCNAME);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LibName);
+    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
   if not result then
   begin
     if (StringListStartsWith(FCrossOpts,'-Cb-')<>-1) then
     begin
       // we have little endian !!
-      result:=SimpleSearchLibrary(BasePath,'powerpc64le-linux',LibName);
+      result:=SimpleSearchLibrary(BasePath,'powerpc64le-linux',LIBCNAME);
     end;
   end;
 
