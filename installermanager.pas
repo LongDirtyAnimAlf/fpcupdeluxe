@@ -1784,7 +1784,11 @@ begin
   if Assigned(Installer) then
   begin
     result:=Installer.Processor.Terminate(0);
+    {$IF FPC_FULLVERSION < 30300}
+    Installer.Processor.WaitOnExit;
+    {$ELSE}
     Installer.Processor.WaitOnExit(5000);
+    {$ENDIF}
   end;
 end;
 

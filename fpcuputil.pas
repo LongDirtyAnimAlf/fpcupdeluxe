@@ -341,7 +341,9 @@ function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): str
 function GetDistro:string;
 function GetFreeBSDVersion:byte;
 function checkGithubRelease(const aURL:string):string;
-
+{$IF FPC_FULLVERSION < 30300}
+Function Pos(Const Substr : RawByteString; Const Source : RawByteString; Offset : Sizeint = 1) : SizeInt;
+{$ENDIF}
 var
   resourcefiles:TStringList;
 
@@ -2388,6 +2390,33 @@ begin
     end;
   end;
 end;
+
+{$IF FPC_FULLVERSION < 30300}
+Function Pos(Const Substr : RawByteString; Const Source : RawByteString; Offset : Sizeint = 1) : SizeInt;
+var
+  i,MaxLen : SizeInt;
+  pc : PAnsiChar;
+begin
+  Pos:=0;
+  if (Length(SubStr)>0) and (Offset>0) and (Offset<=Length(Source)) then
+   begin
+     MaxLen:=Length(source)-Length(SubStr);
+     i:=Offset-1;
+     pc:=@source[Offset];
+     while (i<=MaxLen) do
+      begin
+        inc(i);
+        if (SubStr[1]=pc^) and
+           (CompareByte(Substr[1],pc^,Length(SubStr))=0) then
+         begin
+           Pos:=i;
+           exit;
+         end;
+        inc(pc);
+      end;
+   end;
+end;
+{$ENDIF}
 
 {TThreadedUnzipper}
 
