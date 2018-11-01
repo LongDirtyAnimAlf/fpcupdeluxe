@@ -189,6 +189,7 @@ type
   end;
 
   {$ifdef ENABLENATIVE}
+
   TUseNativeDownLoader = Class(TBasicDownLoader)
   private
     {$ifdef Darwinn}
@@ -196,7 +197,10 @@ type
     {$else}
     aFPHTTPClient:TFPHTTPClient;
     {$endif}
+    StoredTickCount:QWord;
+    aFilename:string;
     procedure DoProgress(Sender: TObject; Const ContentLength, CurrentPos : Int64);
+    procedure DoOnWriteStream(Sender: TObject; APos: Int64);
     procedure DoHeaders(Sender : TObject);
     procedure DoPassword(Sender: TObject; var {%H-}RepeatRequest: Boolean);
     procedure ShowRedirect({%H-}ASender : TObject; Const ASrc : String; Var ADest : String);
@@ -388,6 +392,25 @@ const
   CURLUSERAGENT='curl/7.51.0';
 
 {$i revision.inc}
+
+type
+  TOnWriteStream = procedure(Sender: TObject; APos: Int64) of object;
+
+  TDownloadStream = class(TStream)
+  private
+    FOnWriteStream: TOnWriteStream;
+    FStream: TStream;
+  public
+    constructor Create(AStream: TStream);
+    destructor Destroy; override;
+    function Read(var Buffer; Count: LongInt): LongInt; override;
+    function Write(const Buffer; Count: LongInt): LongInt; override;
+    function Seek(Offset: LongInt; Origin: Word): LongInt; override;
+    procedure DoProgress;
+  published
+    property OnWriteStream: TOnWriteStream read FOnWriteStream write FOnWriteStream;
+  end;
+
 
 function GetStringFromBuffer(const field:PChar):string;
 begin
@@ -1457,28 +1480,33 @@ var
 begin
   result:=true;
   if NOT FileExists(aFilePath) then exit;
-  s:=TFileStream.Create(aFilePath,fmOpenRead);
   try
-    s.Position:=0;
-    magic:=s.ReadWord;
-    if magic<>$5A4D then exit;
-    s.Seek(60,soBeginning);
-    offset:=0;
-    s.ReadBuffer(offset,4);
-    s.Seek(offset,soBeginning);
-    magic:=s.ReadWord;
-    if magic<>$4550 then exit;
-    s.Seek(offset+4,soBeginning);
-    magic:=s.ReadWord;
-  finally
-    s.Free;
+    s:=TFileStream.Create(aFilePath,fmOpenRead);
+    try
+      s.Position:=0;
+      magic:=s.ReadWord;
+      if magic<>$5A4D then exit;
+      s.Seek(60,soBeginning);
+      offset:=0;
+      s.ReadBuffer(offset,4);
+      s.Seek(offset,soBeginning);
+      magic:=s.ReadWord;
+      if magic<>$4550 then exit;
+      s.Seek(offset+4,soBeginning);
+      magic:=s.ReadWord;
+    finally
+      s.Free;
+    end;
+
+    {$ifdef win32}
+    result:=(magic=$014C);
+    {$endif}
+    {$ifdef win64}
+    result:=((magic=$0200) OR (magic=$8664));
+    {$endif}
+  except
+    result:=true;
   end;
-  {$ifdef win32}
-  result:=(magic=$014C);
-  {$endif}
-  {$ifdef win64}
-  result:=((magic=$0200) OR (magic=$8664));
-  {$endif}
 end;
 
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
@@ -2898,6 +2926,67 @@ begin
     writeln('Reading data : ',CurrentPos,' Bytes of ',ContentLength);
 end;
 
+procedure TUseNativeDownLoader.DoOnWriteStream(Sender: TObject; APos: Int64);
+//From the mORMot !!
+function KB(bytes: Int64): string;
+const
+  _B: array[0..5] of string[3] = ('KB','MB','GB','TB','PB','EB');
+var
+  hi,rem,b: cardinal;
+begin
+  if bytes<1 shl 10-(1 shl 10) div 10 then begin
+    result:=Format('%d Byte',[integer(bytes)]);
+    exit;
+  end;
+  if bytes<1 shl 20-(1 shl 20) div 10 then begin
+    b := 0;
+    rem := bytes;
+    hi := bytes shr 10;
+  end else
+  if bytes<1 shl 30-(1 shl 30) div 10 then begin
+    b := 1;
+    rem := bytes shr 10;
+    hi := bytes shr 20;
+  end else
+  if bytes<Int64(1) shl 40-(Int64(1) shl 40) div 10 then begin
+    b := 2;
+    rem := bytes shr 20;
+    hi := bytes shr 30;
+  end else
+  if bytes<Int64(1) shl 50-(Int64(1) shl 50) div 10 then begin
+    b := 3;
+    rem := bytes shr 30;
+    hi := bytes shr 40;
+  end else
+  if bytes<Int64(1) shl 60-(Int64(1) shl 60) div 10 then begin
+    b := 4;
+    rem := bytes shr 40;
+    hi := bytes shr 50;
+  end else begin
+    b := 5;
+    rem := bytes shr 50;
+    hi := bytes shr 60;
+  end;
+  rem := rem and 1023;
+  if rem<>0 then
+    rem := rem div 102;
+  if rem=10 then begin
+    rem := 0;
+    inc(hi); // round up as expected by an human being
+  end;
+  if rem<>0 then
+    result:=Format('%d.%d %s',[hi,rem,_B[b]]) else
+    result:=Format('%d %s',[hi,_B[b]]);
+end;
+begin
+  //Show progress only every 5 seconds
+  if GetTickCount64>StoredTickCount+5000 then
+  begin
+    infoln('Downloading '+aFileName+': '+KB(APos),etInfo);
+    StoredTickCount:=GetTickCount64;
+  end;
+end;
+
 procedure TUseNativeDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
 Var
   H,UN,PW : String;
@@ -3050,6 +3139,7 @@ var
   aPort:integer;
 begin
   // we will use synapse TFTPSend ... FPHTTPClient does not support FTP (yet)
+  aFileName:=ExtractFileName(filename);
   result:=false;
   URI:=ParseURI(URL);
   aPort:=URI.Port;
@@ -3095,29 +3185,43 @@ function TUseNativeDownLoader.HTTPDownload(Const URL : String; filename:string):
 var
   tries:byte;
   response: Integer;
+  aStream:TDownloadStream;
 begin
+  aFileName:=ExtractFileName(filename);
   result:=false;
   tries:=0;
   SysUtils.DeleteFile(filename); // overwrite targetfile
-  with aFPHTTPClient do
-  begin
-    repeat
-      try
-        Get(URL,filename);
-        response:=ResponseStatusCode;
-        result:=(response=200);
-        //result:=(response>=100) and (response<300);
-        if (NOT result) then
-        begin
-          Inc(tries);
-          if FVerbose then
-            infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.',etDebug);
+
+  aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
+  aStream.FOnWriteStream:=@DoOnWriteStream;
+  StoredTickCount:=GetTickCount64;
+
+  try
+    with aFPHTTPClient do
+    begin
+      repeat
+        try
+          aStream.Position:=0;
+          aStream.Size:=0;
+          Get(URL,aStream);
+          response:=ResponseStatusCode;
+          result:=(response=200);
+          //result:=(response>=100) and (response<300);
+          if (NOT result) then
+          begin
+            Inc(tries);
+            if FVerbose then
+              infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.',etDebug);
+          end;
+        except
+          tries:=(MaxRetries+1);
         end;
-      except
-        tries:=(MaxRetries+1);
-      end;
-    until (result or (tries>MaxRetries));
+      until (result or (tries>MaxRetries));
+    end;
+  finally
+    aStream.Free;
   end;
+  if NOT result then SysUtils.DeleteFile(filename); // delete stray file in case of error
 end;
 
 function TUseNativeDownLoader.getFile(const URL,filename:string):boolean;
@@ -3599,6 +3703,43 @@ end;
 
 
 {$ENDIF ENABLEWGET}
+
+{ TDownloadStream }
+constructor TDownloadStream.Create(AStream: TStream);
+begin
+  inherited Create;
+  FStream := AStream;
+  FStream.Position := 0;
+end;
+
+destructor TDownloadStream.Destroy;
+begin
+  FStream.Free;
+  inherited Destroy;
+end;
+
+function TDownloadStream.Read(var Buffer; Count: LongInt): LongInt;
+begin
+  Result := FStream.Read(Buffer, Count);
+end;
+
+function TDownloadStream.Write(const Buffer; Count: LongInt): LongInt;
+begin
+  Result := FStream.Write(Buffer, Count);
+  DoProgress;
+end;
+
+function TDownloadStream.Seek(Offset: LongInt; Origin: Word): LongInt;
+begin
+  Result := FStream.Seek(Offset, Origin);
+end;
+
+procedure TDownloadStream.DoProgress;
+begin
+  if Assigned(FOnWriteStream) then
+    FOnWriteStream(Self, Self.Position);
+end;
+
 
 initialization
   resourcefiles:=TStringList.Create;
