@@ -192,7 +192,7 @@ type
 
   TUseNativeDownLoader = Class(TBasicDownLoader)
   private
-    {$ifdef Darwinn}
+    {$ifdef Darwin}
     aFPHTTPClient:TNSHTTPSendAndReceive;
     {$else}
     aFPHTTPClient:TFPHTTPClient;
@@ -2871,7 +2871,7 @@ constructor TUseNativeDownLoader.Create;
 begin
   Inherited;
   FMaxRetries:=MAXCONNECTIONRETRIES;
-  {$ifdef Darwinn}
+  {$ifdef Darwin}
   // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
   // So, use client by Phil, a Lazarus forum member
   // See: https://macpgmr.github.io/

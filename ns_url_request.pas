@@ -88,6 +88,7 @@ type
     procedure HTTPMethod(const AMethod, AURL: String; {%H-}Stream: TStream; const {%H-}AllowedResponseCodes: array of Integer);
     function Get(const AURL: String): String;
     procedure Get(const AURL: String; const LocalFileName: String);
+    procedure Get(const AURL: String; Stream: TStream);
   end;
 
   TNSHTTPSendAndReceive = Class(TCustomNSHTTPSendAndReceive)
@@ -310,5 +311,11 @@ begin
     F.Free;
   end;
 end;
+
+procedure TCustomNSHTTPSendAndReceive.Get(const AURL: String; Stream: TStream);
+begin
+  HTTPMethod('GET', AURL, Stream, [200]);
+end;
+
 
 end.
