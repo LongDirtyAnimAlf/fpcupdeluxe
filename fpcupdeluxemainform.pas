@@ -1970,9 +1970,7 @@ begin
     // use the available source to build the cross-compiler ... change nothing about source and url !!
     FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
 
-
-    // handle LCL setting
-
+    // handle inclusion of LCL when cross-compiling
     IncludeLCL:=Form2.IncludeLCL;
     if (FPCupManager.CrossOS_Target='java') then IncludeLCL:=false;
     if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;

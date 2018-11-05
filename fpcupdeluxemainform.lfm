@@ -14,7 +14,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnResize = FormResize
   Position = poDefault
-  LCLVersion = '2.1.0.0'
+  LCLVersion = '2.0.0.2'
   Visible = True
   object btnSetupPlus: TButton
     AnchorSideLeft.Control = BitBtnFPCOnly
