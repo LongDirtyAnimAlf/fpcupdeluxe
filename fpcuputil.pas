@@ -2980,10 +2980,10 @@ begin
 end;
 begin
   //Show progress only every 5 seconds
-  if GetTickCount64>StoredTickCount+5000 then
+  if SysUtils.GetTickCount64>StoredTickCount+5000 then
   begin
     infoln('Downloading '+aFileName+': '+KB(APos),etInfo);
-    StoredTickCount:=GetTickCount64;
+    StoredTickCount:=SysUtils.GetTickCount64;
   end;
 end;
 
@@ -3194,7 +3194,7 @@ begin
 
   aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
   aStream.FOnWriteStream:=@DoOnWriteStream;
-  StoredTickCount:=GetTickCount64;
+  StoredTickCount:=SysUtils.GetTickCount64;
 
   try
     with aFPHTTPClient do

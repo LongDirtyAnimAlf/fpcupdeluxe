@@ -145,10 +145,8 @@ begin
           if AnsiContainsText(line,'(e=87)') then continue;
         end;
 
-        {$ifdef Darwin}
         if AnsiContainsText(line,'~~~~~~~~') then continue;
-        if AnsiContainsText(line,'coalesced') then continue;
-        {$endif}
+        if AnsiContainsText(line,', coalesced') then continue;
 
         // filter warnings
         if AnsiContainsText(line,'warning: ') then
