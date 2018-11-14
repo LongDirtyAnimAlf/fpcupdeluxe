@@ -6,8 +6,8 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, Types, Buttons, Menus, SynEdit, SynEditPopup, SynEditMiscClasses,
-  SynGutterCodeFolding, installerManager{$ifdef usealternateui},alternateui{$endif}
+  ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
+  SynEditMiscClasses, SynGutterCodeFolding, installerManager{$ifdef usealternateui},alternateui{$endif}
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
   {$endif}
@@ -18,20 +18,34 @@ type
   { TForm1 }
 
   TForm1 = class(TForm)
-    BitBtnHalt: TBitBtn;
+    AutoCrossUpdate: TButton;
     BitBtnFPCandLazarus: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
+    BitBtnHalt: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
-    AutoCrossUpdate: TButton;
-    btnUninstallModule: TButton;
+    btnInstallModule: TButton;
     btnSetupPlus: TButton;
     btnClearLog: TButton;
+    btnUninstallModule: TButton;
+    ButtonInstallCrossCompiler: TButton;
     CheckAutoClear: TCheckBox;
+    FPCVersionLabel: TLabel;
+    LazarusVersionLabel: TLabel;
+    ListBoxFPCTarget: TListBox;
+    ListBoxLazarusTarget: TListBox;
+    listModules: TListBox;
     MainMenu1: TMainMenu;
+    Memo1: TMemo;
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
     EmbeddedBtn: TBitBtn;
+    PageControl1: TPageControl;
+    radgrpCPU: TRadioGroup;
+    radgrpOS: TRadioGroup;
     StatusMessage: TEdit;
+    BasicSheet: TTabSheet;
+    CrossSheet: TTabSheet;
+    ModuleSheet: TTabSheet;
     TrunkBtn: TBitBtn;
     NPBtn: TBitBtn;
     FixesBtn: TBitBtn;
@@ -39,19 +53,10 @@ type
     OldBtn: TBitBtn;
     DinoBtn: TBitBtn;
     mORMotBtn: TBitBtn;
-    btnInstallModule: TButton;
     btnInstallDirSelect: TButton;
-    ButtonInstallCrossCompiler: TButton;
     InstallDirEdit: TEdit;
     Panel1: TPanel;
     RealFPCURL: TEdit;
-    FPCVersionLabel: TLabel;
-    LazarusVersionLabel: TLabel;
-    ListBoxFPCTarget: TListBox;
-    ListBoxLazarusTarget: TListBox;
-    listModules: TListBox;
-    radgrpCPU: TRadioGroup;
-    radgrpOS: TRadioGroup;
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
