@@ -96,6 +96,7 @@ begin
           FUpInfo.Longitude:=doc.lon;
         end;
       except
+        //Swallow exceptions
       end;
     finally
       HTTPClient.Free;
@@ -106,9 +107,13 @@ end;
 
 procedure TDataClient.AddExtraData(aName,aValue:string);
 begin
-  if VarIsClear(FUpInfo.ExtraData)
-     then FUpInfo.ExtraData := JSONVariant('{'+StringToJSON(aName)+':'+StringToJSON(aValue)+'}')
-     else TJSONVariantData(FUpInfo.ExtraData)[aName]:=aValue;
+  try
+    if VarIsClear(FUpInfo.ExtraData)
+       then FUpInfo.ExtraData := JSONVariant('{'+StringToJSON(aName)+':'+StringToJSON(aValue)+'}')
+       else TJSONVariantData(FUpInfo.ExtraData)[aName]:=aValue;
+  except
+    //Swallow exceptions
+  end;
 end;
 
 procedure TDataClient.ClearExtraData;

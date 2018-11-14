@@ -226,10 +226,7 @@ begin
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
   Processor.Parameters.Clear;
-
-  {$IFDEF lazarus_parallel_make}
-  if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-  {$ENDIF}
+  //if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   Processor.Parameters.Add('FPC=' + FCompiler);
   Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('USESVN2REVISIONINC=0');

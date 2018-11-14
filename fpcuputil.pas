@@ -1418,12 +1418,12 @@ begin
         {$endif}
       end;
     end;
-
-     Content:=Http.Get(aURL);
+    Content:=Http.Get(aURL);
   finally
     Http.Free;
   end;
   {$endif}
+  if Length(Content)=0 then exit;
   Json:=GetJSON(Content);
   try
     if Json=Nil then exit;
@@ -2355,54 +2355,56 @@ begin
           Json:=GetJSON(aStream);
           try
             if JSON=Nil then exit;
-            JsonObject := TJSONObject(Json);
-            // Example ---
-            // tag_name: "1.6.2b"
-            // name: "Release v1.6.2b of fpcupdeluxe"
-            s:=JsonObject.Get('tag_name');
-            if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
-            if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
-            begin
-              if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
-            end;
-            if NewVersion then
-            begin
-              s:=JsonObject.Get('prerelease');//Should be False
-              NewVersion:=(s='False');
-            end;
-            //YES !!!
-            if NewVersion then
-            begin
-              //Assets is an array of binaries belonging to a release
-              Releases:=JsonObject.Get('assets',TJSONArray(nil));
-              for i:=0 to (Releases.Count-1) do
+            try
+              JsonObject := TJSONObject(Json);
+              // Example ---
+              // tag_name: "1.6.2b"
+              // name: "Release v1.6.2b of fpcupdeluxe"
+              s:=JsonObject.Get('tag_name');
+              if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
+              if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
               begin
-                JsonObject := TJSONObject(Releases[i]);
-                // Example ---
-                // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
-                // name: "fpcupdeluxe-aarch64-linux"
-                // created_at: "2018-10-14T06:58:44Z"
-                s:=JsonObject.Get('name');
-
-                aFile:='fpcupdeluxe-'+GetTargetCPUOS;
-                {$ifdef Darwin}
-                {$ifdef LCLCARBON}
-                aFile:=aFile+'-carbon';
-                {$endif}
-                {$ifdef LCLCOCOA}
-                aFile:=aFile+'-cocoa';
-                {$endif}
-                {$endif}
-                {$if defined(LCLQT) or defined(LCLQT5)}
-                aFile:=aFile+'-qt5';
-                {$endif}
-
-                if (Pos(aFile,s)=1) then
+                if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
+              end;
+              if NewVersion then
+              begin
+                s:=JsonObject.Get('prerelease');//Should be False
+                NewVersion:=(s='False');
+              end;
+              //YES !!!
+              if NewVersion then
+              begin
+                //Assets is an array of binaries belonging to a release
+                Releases:=JsonObject.Get('assets',TJSONArray(nil));
+                for i:=0 to (Releases.Count-1) do
                 begin
-                  result:=JsonObject.Get('browser_download_url');
-                  break;
+                  JsonObject := TJSONObject(Releases[i]);
+                  // Example ---
+                  // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
+                  // name: "fpcupdeluxe-aarch64-linux"
+                  // created_at: "2018-10-14T06:58:44Z"
+                  s:=JsonObject.Get('name');
+                  aFile:='fpcupdeluxe-'+GetTargetCPUOS;
+                  {$ifdef Darwin}
+                  {$ifdef LCLCARBON}
+                  aFile:=aFile+'-carbon';
+                  {$endif}
+                  {$ifdef LCLCOCOA}
+                  aFile:=aFile+'-cocoa';
+                  {$endif}
+                  {$endif}
+                  {$if defined(LCLQT) or defined(LCLQT5)}
+                  aFile:=aFile+'-qt5';
+                  {$endif}
+                  if (Pos(aFile,s)=1) then
+                  begin
+                    result:=JsonObject.Get('browser_download_url');
+                    break;
+                  end;
                 end;
               end;
+            except
+              //Swallow exceptions in case of failures: not important
             end;
           finally
             Json.Free;
