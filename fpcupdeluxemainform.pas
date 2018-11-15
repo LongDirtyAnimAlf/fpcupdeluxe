@@ -61,7 +61,7 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
-    procedure Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure Edit1KeyUp(Sender: TObject; {%H-}var Key: Word; {%H-}Shift: TShiftState);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
@@ -87,7 +87,7 @@ type
     procedure radgrpCPUClick(Sender: TObject);
     procedure radgrpOSClick(Sender: TObject);
     procedure CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
-      WheelDelta: Integer; MousePos: TPoint; var Handled: Boolean);
+      WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
 
     {$ifdef usealternateui}
@@ -192,23 +192,13 @@ begin
   // disable some features
   OldBtn.Visible:=False;
   DinoBtn.Visible:=False;
-  ButtonInstallCrossCompiler.Visible:=False;
+  CrossSheet.TabVisible:=false;
   {$endif}
   {$IF defined(CPUAARCH64) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2))}
   // disable some features
   FixesBtn.Visible:=False;
   StableBtn.Visible:=False;
   {$endif}
-
-  AutoCrossUpdate.Visible:=ButtonInstallCrossCompiler.Visible;
-  radgrpCPU.Visible:=ButtonInstallCrossCompiler.Visible;
-  radgrpOS.Visible:=ButtonInstallCrossCompiler.Visible;
-
-  if (NOT AutoCrossUpdate.Visible) then
-  begin
-    listModules.BorderSpacing.Top:=0;
-    listModules.AnchorSideTop.Control:=FPCVersionLabel;
-  end;
 
   {$ifdef Darwin}
   radgrpOS.Items.Strings[radgrpOS.Items.IndexOf('wince')]:='i-sim';
@@ -365,16 +355,14 @@ var
   aObject:TObject;
 begin
   if (NOT User) then exit;
-  StatusMessage.Text:='';
-  StatusMessage.Color:=clDefault;
   aList:=TListBox(Sender);
+  Memo1.Text:='';
   Index:=aList.ItemIndex;
   aObject:=aList.Items.Objects[Index];
   if Assigned(aObject) then
   begin
     Item:=PChar(aObject);
-    StatusMessage.Text:=Item;
-    StatusMessage.Color:=clLime;
+    Memo1.Text:=Item;
   end;
 end;
 
@@ -1462,7 +1450,7 @@ end;
 
 procedure TForm1.btnInstallModuleClick(Sender: TObject);
 var
-  i:integer;
+  //i:integer;
   modules:string;
 begin
   //Form3.ShowModal;
@@ -1491,7 +1479,7 @@ begin
     modules:='';
 
     //No multi-select for now
-    {
+    (*
     for i:=0 to listModules.Count-1 do
     begin
       if listModules.Selected[i] then
@@ -1504,7 +1492,7 @@ begin
         {$endif}
       end;
     end;
-    }
+    *)
 
     //Single select
     if (listModules.ItemIndex<>-1) then
@@ -2633,8 +2621,6 @@ begin
 end;
 
 procedure TForm1.PrepareRun;
-var
-  s:string;
 begin
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;

@@ -44,7 +44,10 @@ var
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
   i:cardinal;
-  subline,line,s:string;
+  {$ifdef UNIX}
+  s:string;
+  {$endif}
+  subline,line:string;
   outputline:boolean;
 begin
   outputline:=false;
