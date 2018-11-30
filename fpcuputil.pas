@@ -3063,7 +3063,7 @@ end;
 
 procedure TUseNativeDownLoader.setProxy(host:string;port:integer;user,pass:string);
 begin
-  inherited;
+  Inherited;// setProxy(host,port,user,pass);
   with aFPHTTPClient do
   begin
     {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}

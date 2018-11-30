@@ -424,12 +424,12 @@ begin
   e:=((ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1));
   RadioGroup3.Enabled:=e;
   EditCrossBuildOptions.Enabled:=e;
-  EditCrossSubArch.Enabled:=e;
   EditCompilerOverride.Enabled:=e;
   btnSelectCompiler.Enabled:=e;
   if e then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
+    if (xCPUOS.OS=TOS.embedded) then EditCrossSubArch.Enabled:=e;
     EditLibLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
     EditBinLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
     EditCrossBuildOptions.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions;
