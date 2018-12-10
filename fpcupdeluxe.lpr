@@ -60,6 +60,7 @@ uses
   m_any_to_androidjvm,
   m_any_to_androidaarch64,
   m_any_to_androidx64,
+  m_any_to_android386,
   m_any_to_linuxarm,
   m_any_to_linuxmips,
   m_any_to_linuxmipsel,

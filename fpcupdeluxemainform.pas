@@ -1818,7 +1818,7 @@ begin
       s:='Be forwarned: this will only work with FPC 3.2 / embedded / trunk / NewPascal.' + sLineBreak +
          'Do you want to continue ?';
     end;
-    if ((FPCupManager.CrossCPU_Target='aarch64') OR (FPCupManager.CrossCPU_Target='x86_64')) AND (FPCupManager.CrossOS_Target='android')
+    if ((FPCupManager.CrossCPU_Target='aarch64') {OR (FPCupManager.CrossCPU_Target='i386')} OR (FPCupManager.CrossCPU_Target='x86_64')) AND (FPCupManager.CrossOS_Target='android')
     then
     begin
       s:='Be forwarned: this will only work with trunk.' + sLineBreak +

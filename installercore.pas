@@ -1785,18 +1785,18 @@ function TInstaller.DownloadOpenSSL: boolean;
 const
   {$ifdef win64}
   NewSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2p-x64_86-win64.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2p-win64.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2q-x64_86-win64.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
-    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2o-x64_86-win64.zip'
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
     );
   {$endif}
   {$ifdef win32}
   NewSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2p-i386-win32.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2p-win32.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2q-i386-win32.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win32.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
-    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2o-i386-win32.zip'
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
     );
   {$endif}
 var
@@ -1825,29 +1825,21 @@ begin
       OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
     end;
     if OperationSucceeded then break;
+
+    //Try PowerShell on Windows
+    SysUtils.DeleteFile(OpenSSLZip);
+    OperationSucceeded := DownloadByPowerShell(aSourceURL,OpenSSLZip);
+    if OperationSucceeded then break;
+    if (NOT OperationSucceeded) then
+      SysUtils.DeleteFile(OpenSSLZip)
+    else
+      break;
+
   except
     on E: Exception do
     begin
       OperationSucceeded := false;
       writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
-    end;
-  end;
-
-  if NOT OperationSucceeded then
-  begin
-    // use Windows PowerShell !!
-    for i:=0 to (Length(NewSourceURL)-1) do
-    try
-      aSourceURL:=NewSourceURL[i];
-      SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded := DownloadByPowerShell(aSourceURL,OpenSSLZip);
-      if OperationSucceeded then break;
-    except
-      on E: Exception do
-      begin
-        OperationSucceeded := false;
-        writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library', true);
-      end;
     end;
   end;
 

@@ -56,7 +56,7 @@ const
   {$endif}
   DEFAULTARMCPU = 'ARMV7A';
 
-  NEWPASCALGITREPO='https://github.com/newpascal';
+  NEWPASCALGITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
 
   BOOTSTRAPPERVERSION='bootstrappers_v1.0';
