@@ -59,6 +59,7 @@ Temporary Items
 *.local
 
 logger/secrets.inc
+message.inc
 
 *.log
 libfpcup/
@@ -76,5 +77,6 @@ logger/LAMWmORMotProject/gen/
 crosstools/
 bootstrappers/
 deluxebin/
+!deluxebin/languages/*.po
 lib/
 lib*/

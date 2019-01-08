@@ -39,6 +39,9 @@ type
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
     EmbeddedBtn: TBitBtn;
+    MenuItem2: TMenuItem;
+    MEnglishlanguage: TMenuItem;
+    MChineeslanguage: TMenuItem;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
     radgrpOS: TRadioGroup;
@@ -62,6 +65,7 @@ type
     CommandOutputScreen: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; {%H-}var Key: Word; {%H-}Shift: TShiftState);
+    procedure FPCVersionLabelClick(Sender: TObject);
     procedure LazarusOnlyClick(Sender: TObject);
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
@@ -75,8 +79,11 @@ type
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure FormResize(Sender: TObject);
+    procedure LazarusVersionLabelClick(Sender: TObject);
     procedure listModulesSelectionChange(Sender: TObject; User: boolean);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
+    procedure MChineeslanguageClick(Sender: TObject);
+    procedure MEnglishlanguageClick(Sender: TObject);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
     procedure CommandOutputScreenChange(Sender: TObject);
@@ -97,10 +104,12 @@ type
     {$endif}
   private
     { private declarations }
+    MessageTrigger:boolean;
     FPCupManager:TFPCupManager;
     oldoutput: TextFile;
     sInstallDir:string;
     sStatus:string;
+    sLanguage:string;
     FFPCTarget,FLazarusTarget:string;
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
@@ -138,6 +147,18 @@ type
     {$endif}
   end;
 
+resourcestring
+  upCheckUpdate = 'Please wait. Checking for updates.';
+  upUpdateFound = 'New fpcupdeluxe version available';
+  upUpdateNotFound = 'No updates found.';
+  upBuildCrossCompiler = 'Going to install a cross-compiler from available sources.';
+  upBuildAllCrossCompilers = 'Going to auto-build all installed cross-compilers !';
+  upBuildAllCrossCompilersCheck = 'Checking FPC configfile [fpc.cfg] for cross-compilers in ';
+  upBuildAllCrossCompilersFound = 'Found crosscompiler for ';
+  upBuildAllCrossCompilersUpdate = 'Going to update cross-compiler.';
+
+
+
 var
   Form1: TForm1;
 
@@ -150,6 +171,9 @@ uses
   strutils,
   LCLType, // for MessageBox
   InterfaceBase, // for WidgetSet
+  Translations,
+  LCLTranslator,
+  LazUTF8,
   {$ifdef UNIX}
   baseunix,
   {$endif UNIX}
@@ -164,13 +188,61 @@ uses
   processutils,
   synedittext;
 
+{$I message.inc}
+
 { TForm1 }
+
+procedure Translate(const Language: string);
+var
+  Res: TResourceStream;
+  PoFileName:string;
+  aLanguage,Lang, FallbackLang, Dir: String;
+begin
+  aLanguage:=Language;
+
+  Lang:='';
+  FallbackLang:='';
+  LazGetLanguageIDs(Lang,FallbackLang); // in unit LazUTF8
+
+  if aLanguage='' then aLanguage:=FallbackLang;
+
+  PoFileName:='fpcupdeluxe.' + aLanguage + '.po';
+  //SysUtils.DeleteFile(PoFileName);
+
+  if NOT FileExists(PoFileName) then
+  begin
+    try
+      Res := TResourceStream.Create(HInstance, 'fpcupdeluxe.' + aLanguage, RT_RCDATA);
+      Res.SaveToFile(PoFileName);
+      Res.Free;
+    except
+    end;
+  end;
+
+  if FileExists(PoFileName) then
+  begin
+    SetDefaultLang(Language,'',true,'fpcupdeluxe');
+
+    //Dir := AppendPathDelim(AppendPathDelim(ExtractFileDir(ParamStr(0))) + 'languages');
+    //Translations.TranslateUnitResourceStrings('fpcupdeluxemainform',Dir+'fpcupdeluxemainform.%s.po',Lang,FallbackLang);
+
+    //Translations.TranslateResourceStrings(PoFileName,Lang,FallbackLang);
+
+    {$ifdef Windows}
+    //{%H-}GetLocaleFormatSettings($409, DefaultFormatSettings);
+    {$endif}
+  end;
+end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
   IniFilesOk:boolean;
   aTarget:string;
 begin
+  MessageTrigger:=false;
+
+  sLanguage:='en';
+
   FPCupManager:=nil;
 
   {$IF defined(LCLQT) OR defined(LCLQT5)}
@@ -243,6 +315,7 @@ begin
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
+    sLanguage:=ReadString('General','Language',sLanguage);
     {$ifdef RemoteLog}
     sConsentWarning:=ReadBool('General','ConsentWarning',true);
     {$endif}
@@ -347,6 +420,15 @@ begin
   {$endif}
 end;
 
+procedure TForm1.LazarusVersionLabelClick(Sender: TObject);
+begin
+  if MessageTrigger then
+  begin
+    MessageTrigger:=false;
+    Application.MessageBox(PChar(LOVEANDLIES),PChar(LOVEANDLIESHEADER), MB_ICONEXCLAMATION);
+  end;
+end;
+
 procedure TForm1.listModulesSelectionChange(Sender: TObject; User: boolean);
 var
   Index : integer;
@@ -386,6 +468,18 @@ begin
       HintInfo^.CursorRect:=aList.ItemRect(Index);
     end;
   end;
+end;
+
+procedure TForm1.MChineeslanguageClick(Sender: TObject);
+begin
+  sLanguage:='zh';
+  TransLate(sLanguage);
+end;
+
+procedure TForm1.MEnglishlanguageClick(Sender: TObject);
+begin
+  sLanguage:='en';
+  TransLate(sLanguage);
 end;
 
 procedure TForm1.RealURLChange(Sender: TObject);
@@ -439,8 +533,8 @@ begin
     if CheckAutoClearStore then btnClearLog.Click;
     CheckAutoClear.Checked:=false;
 
-    memoSummary.Lines.Append('Going to auto-build all installed cross-compilers !');
-    memoSummary.Lines.Append('Checking FPC configfile [fpc.cfg] for cross-compilers in ' + BinPath);
+    memoSummary.Lines.Append(upBuildAllCrossCompilers);
+    memoSummary.Lines.Append(upBuildAllCrossCompilersCheck + BinPath);
     memoSummary.Lines.Append('');
 
   end
@@ -503,7 +597,7 @@ begin
           if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
           begin
             // list all available compilers
-            if (Sender=nil) then AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
+            if (Sender=nil) then AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
             // build all available compilers
             if (Sender<>nil) then
             begin
@@ -518,8 +612,8 @@ begin
               end;
               {$endif}
               CommandOutputScreen.Clear;
-              AddMessage('Crosscompiler for '+aCPU + '-' + aOS+' found !');
-              AddMessage('Going to update cross-compiler.');
+              AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
+              AddMessage(upBuildAllCrossCompilersUpdate);
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
               radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
               success:=InstallCrossCompiler(nil);
@@ -2002,7 +2096,7 @@ begin
     s:=Trim(s);
     if Length(s)>0 then FPCupManager.CrossToolsDirectory:=s;
 
-    AddMessage('Going to install a cross-compiler from available sources.');
+    AddMessage(upBuildCrossCompiler);
 
     sStatus:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
     if FPCupManager.FPCOPT<>'' then
@@ -2160,7 +2254,6 @@ begin
           end;
           {$endif}
         end;
-
 
         // bit tricky ... if bins and libs are already there exit this retry ... ;-)
         if (
@@ -2540,6 +2633,11 @@ begin
   GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
+procedure TForm1.FPCVersionLabelClick(Sender: TObject);
+begin
+  MessageTrigger:=True;
+end;
+
 {$ifdef usealternateui}
 procedure TForm1.alternateuibutClick(Sender: TObject);
 begin
@@ -2566,6 +2664,8 @@ begin
       {$ifdef RemoteLog}
       WriteBool('General','ConsentWarning',false);
       {$endif}
+      WriteString('General','Language',sLanguage);
+
       WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
       WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
       WriteString('ProxySettings','HTTPProxyUser',FPCupManager.HTTPProxyUser);
@@ -3200,6 +3300,7 @@ begin
   aDataClient.UpInfo.UpDistro:=GetDistro;
   {$endif}
   InitFPCupManager;
+  TransLate(sLanguage);
   {$ifdef usealternateui}
   // This must only be called once.
   If Not Alternate_ui_created then alternateui_Create_Controls;
@@ -3235,15 +3336,15 @@ procedure TForm1.CheckForUpdates(Data: PtrInt);
 var
   s:string;
 begin
-  AddMessage('Please wait. Checking for updates.');
+  AddMessage(upCheckUpdate);
   s:=checkGithubRelease(FPCUPGITREPOAPI+'/latest');
   if Length(s)>0 then
   begin
-    AddMessage('New version available');
-    AddMessage('See: '+FPCUPGITREPO+'/releases/latest');
-    AddMessage('See: '+s);
-    memoSummary.Lines.Append('New fpcupdeluxe version available');
-  end else AddMessage('No updates found.');
+    AddMessage(upUpdateFound);
+    AddMessage(FPCUPGITREPO+'/releases/latest');
+    AddMessage(s);
+    memoSummary.Lines.Append(upUpdateFound);
+  end else AddMessage(upUpdateNotFound);
 end;
 
 end.

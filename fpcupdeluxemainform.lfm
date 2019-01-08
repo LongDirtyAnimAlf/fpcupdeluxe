@@ -2153,6 +2153,7 @@ object Form1: TForm1
         Font.Quality = fqDraft
         ParentColor = False
         ParentFont = False
+        OnClick = FPCVersionLabelClick
       end
       object ListBoxFPCTarget: TListBox
         AnchorSideLeft.Control = BasicSheet
@@ -2189,6 +2190,7 @@ object Form1: TForm1
         Font.Quality = fqDraft
         ParentColor = False
         ParentFont = False
+        OnClick = LazarusVersionLabelClick
       end
       object ListBoxLazarusTarget: TListBox
         AnchorSideLeft.Control = FPCVersionLabel
@@ -3030,14 +3032,14 @@ object Form1: TForm1
     end
     object CrossSheet: TTabSheet
       Caption = 'Cross'
-      ClientHeight = 443
+      ClientHeight = 441
       ClientWidth = 302
       object radgrpCPU: TRadioGroup
         AnchorSideLeft.Control = CrossSheet
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 341
+        Height = 339
         Top = 8
         Width = 130
         Anchors = [akTop, akLeft, akBottom]
@@ -3053,7 +3055,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 321
+        ClientHeight = 319
         ClientWidth = 126
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3081,7 +3083,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 164
-        Height = 341
+        Height = 339
         Top = 8
         Width = 130
         Anchors = [akTop, akRight, akBottom]
@@ -3097,7 +3099,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 321
+        ClientHeight = 319
         ClientWidth = 126
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -3127,7 +3129,7 @@ object Form1: TForm1
         Left = 8
         Height = 39
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 357
+        Top = 355
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
@@ -3148,7 +3150,7 @@ object Form1: TForm1
         Left = 8
         Height = 37
         Hint = 'Auto-update all installed cross-compilers.'
-        Top = 400
+        Top = 398
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 4
@@ -3254,6 +3256,17 @@ object Form1: TForm1
   object MainMenu1: TMainMenu
     Left = 928
     Top = 216
+    object MenuItem2: TMenuItem
+      Caption = 'Languages'
+      object MEnglishlanguage: TMenuItem
+        Caption = 'English'
+        OnClick = MEnglishlanguageClick
+      end
+      object MChineeslanguage: TMenuItem
+        Caption = 'Chinees'
+        OnClick = MChineeslanguageClick
+      end
+    end
     object MenuItem1: TMenuItem
       Caption = 'About'
       OnClick = MenuItem1Click

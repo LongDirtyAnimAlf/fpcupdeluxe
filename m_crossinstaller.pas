@@ -61,7 +61,7 @@ const
 
   BOOTSTRAPPERVERSION='bootstrappers_v1.0';
   FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
-  FPCUPGITREPOAPI='https://api.github.com/repos/newpascal/fpcupdeluxe/releases';
+  FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe/releases';
   FPCUPGITREPOBOOTSTRAPPERAPI=FPCUPGITREPOAPI+'/tags/'+BOOTSTRAPPERVERSION;
 
   FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
