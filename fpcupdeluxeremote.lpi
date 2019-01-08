@@ -19,13 +19,13 @@
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="patchlazarus\darwinqt5hack.patch" Type="RCDATA" ResourceName="DARWINQT5HACK_LAZPATCH"/>
         <Resource_4 FileName="patchlazarus\build_lcl_docs.patch" Type="RCDATA" ResourceName="BUILD_LCL_DOCS_LAZPATCH"/>
-        <Resource_5 FileName="deluxebin\languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
-        <Resource_6 FileName="deluxebin\languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
+        <Resource_5 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
+        <Resource_6 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
       </Resources>
     </General>
     <i18n>
       <EnableI18N Value="True" LFM="False"/>
-      <OutDir Value="deluxebin\languages"/>
+      <OutDir Value="languages"/>
     </i18n>
     <BuildModes Count="23">
       <Item1 Name="Default" Default="True"/>

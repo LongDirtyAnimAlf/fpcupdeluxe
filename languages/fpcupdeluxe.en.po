@@ -1,0 +1,235 @@
+msgid ""
+msgstr "Content-Type: text/plain; charset=UTF-8"
+
+#: fpcupdeluxemainform.upcheckupdate
+msgid "Please wait. Checking for updates."
+msgstr ""
+
+#: fpcupdeluxemainform.upupdatefound
+msgid "New fpcupdeluxe version available"
+msgstr ""
+
+#: fpcupdeluxemainform.upupdatenotfound
+msgid "No updates found."
+msgstr ""
+
+#: tform1.autocrossupdate.caption
+msgid "Auto-update compilers"
+msgstr ""
+
+#: tform1.autocrossupdate.hint
+msgid "Auto-update all installed cross-compilers."
+msgstr ""
+
+#: tform1.basicsheet.caption
+msgid "Basic"
+msgstr ""
+
+#: tform1.bitbtnfpcandlazarus.caption
+msgid "Install/update FPC+Laz"
+msgstr ""
+
+#: tform1.bitbtnfpcandlazarus.hint
+msgid "Will install/update the selected version of both FPC and Lazarus."
+msgstr ""
+
+#: tform1.bitbtnfpconly.caption
+msgctxt "tform1.bitbtnfpconly.caption"
+msgid "Only"
+msgstr ""
+
+#: tform1.bitbtnfpconly.hint
+msgid "Only install/update selected FPC version."
+msgstr ""
+
+#: tform1.bitbtnhalt.caption
+msgid "Halt"
+msgstr ""
+
+#: tform1.bitbtnhalt.hint
+msgid "Try to quit fpcupdeluxe"
+msgstr ""
+
+#: tform1.bitbtnlazarusonly.caption
+msgctxt "tform1.bitbtnlazarusonly.caption"
+msgid "Only"
+msgstr ""
+
+#: tform1.bitbtnlazarusonly.hint
+msgid "Only install/update selected Lazarus version."
+msgstr ""
+
+#: tform1.btnclearlog.caption
+msgid "Clear log"
+msgstr ""
+
+#: tform1.btninstalldirselect.caption
+msgid "Set InstallDir"
+msgstr ""
+
+#: tform1.btninstallmodule.caption
+msgid "Install module"
+msgstr ""
+
+#: tform1.btninstallmodule.hint
+msgid "Install the selected module."
+msgstr ""
+
+#: tform1.btnsetupplus.caption
+msgid "Setup+"
+msgstr ""
+
+#: tform1.btnsetupplus.hint
+msgid "Open the extended settings form."
+msgstr ""
+
+#: tform1.btnuninstallmodule.caption
+msgid "Uninstall module"
+msgstr ""
+
+#: tform1.btnuninstallmodule.hint
+msgid "Uninstall the selected module."
+msgstr ""
+
+#: tform1.buttoninstallcrosscompiler.caption
+msgid "Install cross-compiler"
+msgstr ""
+
+#: tform1.buttoninstallcrosscompiler.hint
+msgid "Install the selected CPU-OS cross-compiler."
+msgstr ""
+
+#: tform1.caption
+msgid "Form1"
+msgstr ""
+
+#: tform1.checkautoclear.caption
+msgid "AutoClear"
+msgstr ""
+
+#: tform1.crosssheet.caption
+msgid "Cross"
+msgstr ""
+
+#: tform1.dinobtn.caption
+msgid "2.0.2+0.9.16"
+msgstr ""
+
+#: tform1.dinobtn.hint
+msgid "Will install/update prehistoric FPC and Lazarus"
+msgstr ""
+
+#: tform1.embeddedbtn.caption
+msgid "Embedded"
+msgstr ""
+
+#: tform1.embeddedbtn.hint
+msgid "Get FPC for SAM embedded"
+msgstr ""
+
+#: tform1.fixesbtn.caption
+msgid "Fixes"
+msgstr ""
+
+#: tform1.fixesbtn.hint
+msgid "Will install/update current fixes versions of both FPC and Lazarus"
+msgstr ""
+
+#: tform1.fpcversionlabel.caption
+msgid "FPC version"
+msgstr ""
+
+#: tform1.installdiredit.hint
+msgid "Directory to install FPC and Lazarus"
+msgstr ""
+
+#: tform1.lazarusversionlabel.caption
+msgid "Lazarus version"
+msgstr ""
+
+#: tform1.mchineeslanguage.caption
+msgid "Chinees"
+msgstr ""
+
+#: tform1.memosummary.hint
+msgid "Will show error"
+msgstr ""
+
+#: tform1.menglishlanguage.caption
+msgid "English"
+msgstr ""
+
+#: tform1.menuitem1.caption
+msgid "About"
+msgstr ""
+
+#: tform1.menuitem2.caption
+msgid "Languages"
+msgstr ""
+
+#: tform1.modulesheet.caption
+msgid "Modules"
+msgstr ""
+
+#: tform1.mormotbtn.caption
+msgid "mORMot"
+msgstr ""
+
+#: tform1.mormotbtn.hint
+msgid "Get the mORMot for FPC"
+msgstr ""
+
+#: tform1.npbtn.caption
+msgid "NewPascal"
+msgstr ""
+
+#: tform1.npbtn.hint
+msgid "Will install/update NewPascal."
+msgstr ""
+
+#: tform1.oldbtn.caption
+msgid "2.6.4 + 1.4"
+msgstr ""
+
+#: tform1.oldbtn.hint
+msgid "Will install/update FPC 2.6.4 and Lazarus 1.4"
+msgstr ""
+
+#: tform1.radgrpcpu.caption
+msgid "CPU"
+msgstr ""
+
+#: tform1.radgrpos.caption
+msgid "OS"
+msgstr ""
+
+#: tform1.realfpcurl.hint
+msgctxt "tform1.realfpcurl.hint"
+msgid "Double click to allow editing"
+msgstr ""
+
+#: tform1.reallazurl.hint
+msgctxt "tform1.reallazurl.hint"
+msgid "Double click to allow editing"
+msgstr ""
+
+#: tform1.stablebtn.caption
+msgid "Stable"
+msgstr ""
+
+#: tform1.stablebtn.hint
+msgid "Will install/update stable versions of both FPC and Lazarus"
+msgstr ""
+
+#: tform1.statusmessage.text
+msgid "Sitting and waiting"
+msgstr ""
+
+#: tform1.trunkbtn.caption
+msgid "Trunk"
+msgstr ""
+
+#: tform1.trunkbtn.hint
+msgid "Will install/update trunk version of both FPC and Lazarus."
+msgstr ""
+

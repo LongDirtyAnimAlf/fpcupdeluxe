@@ -1,0 +1,216 @@
+﻿msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8"
+"Project-Id-Version: "
+"POT-Creation-Date: "
+"PO-Revision-Date: "
+"Last-Translator: 郑建平@夏宗萍 aka  robsean <robsean@126.com>"
+"Language-Team: "
+"MIME-Version: 1.0"
+"Content-Transfer-Encoding: 8bit"
+"Language: zh_CN"
+"X-Generator: Poedit 1.8.7.1"
+"X-Poedit-SourceCharset: UTF-8"
+
+#: fpcupdeluxemainform.upcheckupdate
+msgid "Please wait. Checking for updates."
+msgstr "gdfgsdg dfg sdfg"
+
+#: tform1.autocrossupdate.caption
+msgid "Auto-update compilers"
+msgstr "自动更新编译器"
+
+#: tform1.autocrossupdate.hint
+msgid "Auto-update all installed cross-compilers."
+msgstr "自动更新所有已安装的跨平台编译器"
+
+#: tform1.bitbtnfpcandlazarus.caption
+#, fuzzy
+#| msgid "Install/update FPC+Laz"
+msgid "Install/update FPC+Lazarus"
+msgstr "安装/更新FPC+Lazarus"
+
+#: tform1.bitbtnfpcandlazarus.hint
+msgid "Will install/update the selected version of both FPC and Lazarus."
+msgstr "将安装/更新选择的FPC和Lazarus版本"
+
+#: tform1.bitbtnfpconly.caption
+msgctxt "tform1.bitbtnfpconly.caption"
+msgid "Only"
+msgstr "仅"
+
+#: tform1.bitbtnfpconly.hint
+msgid "Only install/update selected FPC version."
+msgstr "仅安装/更新选择的FPC版本"
+
+#: tform1.bitbtnhalt.caption
+msgid "Halt"
+msgstr "停止"
+
+#: tform1.bitbtnhalt.hint
+msgid "Try to quit fpcupdeluxe"
+msgstr "尝试退出fpcupdeluxe"
+
+#: tform1.bitbtnlazarusonly.caption
+msgctxt "tform1.bitbtnlazarusonly.caption"
+msgid "Only"
+msgstr "仅"
+
+#: tform1.bitbtnlazarusonly.hint
+msgid "Only install/update selected Lazarus version."
+msgstr "仅安装/更新选择的Lazarus版本"
+
+#: tform1.btnclearlog.caption
+msgid "Clear log"
+msgstr "清理日志"
+
+#: tform1.btninstalldirselect.caption
+msgid "Set InstallDir"
+msgstr "设置安装目录"
+
+#: tform1.btninstallmodule.caption
+msgid "Install module"
+msgstr "安装模块"
+
+#: tform1.btninstallmodule.hint
+msgid "Install the selected module."
+msgstr "安装选择的模块。"
+
+#: tform1.btnsetupplus.caption
+msgid "Setup+"
+msgstr "安装程序"
+
+#: tform1.btnsetupplus.hint
+msgid "Open the extended settings form."
+msgstr "打开展开的设置窗体"
+
+#: tform1.btnuninstallmodule.caption
+msgid "Uninstall"
+msgstr "卸载"
+
+#: tform1.btnuninstallmodule.hint
+msgid "Uninstall the selected module."
+msgstr "卸载选择的模块。"
+
+#: tform1.buttoninstallcrosscompiler.caption
+msgid "Install cross-compiler"
+msgstr "安装跨平台编译器"
+
+#: tform1.buttoninstallcrosscompiler.hint
+msgid "Install the selected CPU-OS cross-compiler."
+msgstr "安装选择的CPU-OS跨平台编译器"
+
+#: tform1.caption
+msgid "Form1"
+msgstr ""
+
+#: tform1.checkautoclear.caption
+msgid "AutoClear"
+msgstr "自动清理"
+
+#: tform1.dinobtn.caption
+msgid "2.0.2+0.9.16"
+msgstr "2.0.2+0.9.16"
+
+#: tform1.dinobtn.hint
+msgid "Will install/update prehistoric FPC and Lazarus"
+msgstr "将安装/更新史前的FPC和Lazarus"
+
+#: tform1.embeddedbtn.caption
+msgid "Embedded"
+msgstr "嵌入的"
+
+#: tform1.embeddedbtn.hint
+msgid "Get FPC for SAM embedded"
+msgstr "获得FPC从SAM嵌入的"
+
+#: tform1.fixesbtn.caption
+msgid "Fixes"
+msgstr "修复"
+
+#: tform1.fixesbtn.hint
+msgid "Will install/update current fixes versions of both FPC and Lazarus"
+msgstr "将安装/更新FPC和Lazarus的当前修复版本"
+
+#: tform1.fpcversionlabel.caption
+msgid "FPC version"
+msgstr "FPC版本"
+
+#: tform1.installdiredit.hint
+msgid "Directory to install FPC and Lazarus"
+msgstr "安装FPC和Lazarus的目录"
+
+#: tform1.lazarusversionlabel.caption
+msgid "Lazarus version"
+msgstr "Lazarus版本"
+
+#: tform1.memosummary.hint
+msgid "Will show error"
+msgstr "将显示错误"
+
+#: tform1.menuitem1.caption
+msgid "About"
+msgstr "关于"
+
+#: tform1.mormotbtn.caption
+msgid "mORMot"
+msgstr "mORMot"
+
+#: tform1.mormotbtn.hint
+msgid "Get the mORMot for FPC"
+msgstr "为FPC获得mORMot"
+
+#: tform1.npbtn.caption
+msgid "NewPascal"
+msgstr "NewPascal"
+
+#: tform1.npbtn.hint
+msgid "Will install/update NewPascal."
+msgstr "将安装/更新NewPascal。"
+
+#: tform1.oldbtn.caption
+msgid "2.6.4 + 1.4"
+msgstr "2.6.4 + 1.4"
+
+#: tform1.oldbtn.hint
+msgid "Will install/update FPC 2.6.4 and Lazarus 1.4"
+msgstr "将安装/更新FPC 2.6.4和Lazarus 1.4"
+
+#: tform1.radgrpcpu.caption
+msgid "CPU"
+msgstr "CPU"
+
+#: tform1.radgrpos.caption
+msgid "OS"
+msgstr "操作系统"
+
+#: tform1.realfpcurl.hint
+msgctxt "tform1.realfpcurl.hint"
+msgid "Double click to allow editing"
+msgstr "双击来允许编辑"
+
+#: tform1.reallazurl.hint
+msgctxt "tform1.reallazurl.hint"
+msgid "Double click to allow editing"
+msgstr "双击来允许编辑"
+
+#: tform1.stablebtn.caption
+msgid "Stable"
+msgstr "稳定"
+
+#: tform1.stablebtn.hint
+msgid "Will install/update stable versions of both FPC and Lazarus"
+msgstr "将安装/更新FPC和Lazarus的稳定版本"
+
+#: tform1.statusmessage.text
+msgid "Sitting and waiting"
+msgstr "等待"
+
+#: tform1.trunkbtn.caption
+msgid "Trunk"
+msgstr "主干"
+
+#: tform1.trunkbtn.hint
+msgid "Will install/update trunk version of both FPC and Lazarus."
+msgstr "将安装/更新FPC和Lazarus的主干版本"
+
