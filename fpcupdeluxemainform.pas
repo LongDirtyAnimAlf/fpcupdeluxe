@@ -109,7 +109,9 @@ type
     oldoutput: TextFile;
     sInstallDir:string;
     sStatus:string;
+    {$ifdef EnableLanguages}
     sLanguage:string;
+    {$endif}
     FFPCTarget,FLazarusTarget:string;
     MissingCrossBins:boolean;
     MissingCrossLibs:boolean;
@@ -171,9 +173,11 @@ uses
   strutils,
   LCLType, // for MessageBox
   InterfaceBase, // for WidgetSet
+  {$ifdef EnableLanguages}
   Translations,
   LCLTranslator,
   LazUTF8,
+  {$endif}
   {$ifdef UNIX}
   baseunix,
   {$endif UNIX}
@@ -188,10 +192,11 @@ uses
   processutils,
   synedittext;
 
-{$I message.inc}
+//{$I message.inc}
 
 { TForm1 }
 
+{$ifdef EnableLanguages}
 procedure Translate(const Language: string);
 var
   Res: TResourceStream;
@@ -233,6 +238,7 @@ begin
     {$endif}
   end;
 end;
+{$endif}
 
 procedure TForm1.FormCreate(Sender: TObject);
 var
@@ -241,7 +247,9 @@ var
 begin
   MessageTrigger:=false;
 
+  {$ifdef EnableLanguages}
   sLanguage:='en';
+  {$endif}
 
   FPCupManager:=nil;
 
@@ -315,7 +323,9 @@ begin
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     sInstallDir:=ReadString('General','InstallDirectory',sInstallDir);
+    {$ifdef EnableLanguages}
     sLanguage:=ReadString('General','Language',sLanguage);
+    {$endif}
     {$ifdef RemoteLog}
     sConsentWarning:=ReadBool('General','ConsentWarning',true);
     {$endif}
@@ -425,7 +435,7 @@ begin
   if MessageTrigger then
   begin
     MessageTrigger:=false;
-    Application.MessageBox(PChar(LOVEANDLIES),PChar(LOVEANDLIESHEADER), MB_ICONEXCLAMATION);
+    //Application.MessageBox(PChar(LOVEANDLIES),PChar(LOVEANDLIESHEADER), MB_ICONEXCLAMATION);
   end;
 end;
 
@@ -472,14 +482,18 @@ end;
 
 procedure TForm1.MChineeslanguageClick(Sender: TObject);
 begin
+  {$ifdef EnableLanguages}
   sLanguage:='zh';
   TransLate(sLanguage);
+  {$endif}
 end;
 
 procedure TForm1.MEnglishlanguageClick(Sender: TObject);
 begin
+  {$ifdef EnableLanguages}
   sLanguage:='en';
   TransLate(sLanguage);
+  {$endif}
 end;
 
 procedure TForm1.RealURLChange(Sender: TObject);
@@ -2664,7 +2678,10 @@ begin
       {$ifdef RemoteLog}
       WriteBool('General','ConsentWarning',false);
       {$endif}
+
+      {$ifdef EnableLanguages}
       WriteString('General','Language',sLanguage);
+      {$endif}
 
       WriteString('ProxySettings','HTTPProxyURL',FPCupManager.HTTPProxyHost);
       WriteInteger('ProxySettings','HTTPProxyPort',FPCupManager.HTTPProxyPort);
@@ -3300,7 +3317,9 @@ begin
   aDataClient.UpInfo.UpDistro:=GetDistro;
   {$endif}
   InitFPCupManager;
+  {$ifdef EnableLanguages}
   TransLate(sLanguage);
+  {$endif}
   {$ifdef usealternateui}
   // This must only be called once.
   If Not Alternate_ui_created then alternateui_Create_Controls;
