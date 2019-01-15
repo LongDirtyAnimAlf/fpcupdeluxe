@@ -1648,113 +1648,46 @@ end;
 
 function TInstaller.DownloadSVN: boolean;
 const
-  SourceURL = 'https://www.visualsvn.com/files/Apache-Subversion-1.10.2.zip';
-  SourceURL_LastResort = 'https://sourceforge.net/projects/win32svn/files/1.8.17/apache24/svn-win32-1.8.17-ap24.zip/download';
+  NewSourceURL : array [0..2] of string = (
+    'https://www.visualsvn.com/files/Apache-Subversion-1.10.3.zip',
+    'https://www.visualsvn.com/files/Apache-Subversion-1.10.2.zip',
+    'https://sourceforge.net/projects/win32svn/files/1.8.17/apache24/svn-win32-1.8.17-ap24.zip/download'
+    );
 var
-  MajorVersion,MinorVersion,BuildNumber: integer;
   OperationSucceeded: boolean;
-  SVNZip,Output: string;
+  SVNZip,aSourceURL: string;
+  i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadSVN): ';
 
-  // Download SVN in make path. Not required for making FPC/Lazarus, but when downloading FPC/Lazarus from... SVN ;)
-  { Alternative 1: sourceforge packaged
-  This won't work, we'd get an .msi:
-  http://sourceforge.net/projects/win32svn/files/latest/download?source=files
-  We don't want msi/Windows installer - this way we can hopefully support Windows 2000, so use:
-  http://heanet.dl.sourceforge.net/project/win32svn/1.7.2/svn-win32-1.7.2.zip
-  This one requires msvcp60.dll which is horrific to install
-  }
-
-  {Alternative 2: use
-  http://www.visualsvn.com/files/Apache-Subversion-1.8.4.zip
-  with subdirs bin and licenses. No further subdirs
-  However, doesn't work on Windows 2K.
-  Decided to use this anyway.}
   OperationSucceeded := false;
-
-  // This svn version won't work on windows 2K
-  if GetWin32Version(MajorVersion,MinorVersion,BuildNumber) and (MajorVersion=5) and (Minorversion=0) then
-  begin
-    writelnlog(etError, localinfotext + 'It seems this PC is running Windows 2000. Cannot install svn.exe. Please manually install e.g. TortoiseSVN first.', true);
-    exit(OperationSucceeded);
-  end;
-
-  ForceDirectories(FSVNDirectory);
 
   SVNZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
-  try
-    OperationSucceeded := Download(
-      FUseWget,
-      SourceURL,
-      SVNZip,
-      FHTTPProxyUser,
-      FHTTPProxyPort,
-      FHTTPProxyUser,
-      FHTTPProxyPassword);
+  ForceDirectories(FSVNDirectory);
 
-      if NOT OperationSucceeded then
-      try
-        SysUtils.Deletefile(SVNZip); //Get rid of temp zip if any.
-        // use powershell
-        OperationSucceeded := DownloadByPowerShell(SourceURL,SVNZip);
-      except
-        on E: Exception do
-        begin
-          OperationSucceeded := false;
-          writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN', true);
-        end;
-      end;
+  for i:=0 to (Length(NewSourceURL)-1) do
+  try
+    aSourceURL:=NewSourceURL[i];
+    //always get this file with the native downloader !!
+    OperationSucceeded:=GetFile(aSourceURL,SVNZip,true,true);
+    if (NOT OperationSucceeded) then
+    begin
+      // try one more time
+      SysUtils.DeleteFile(SVNZip);
+      OperationSucceeded:=GetFile(aSourceURL,SVNZip,true,true);
+    end;
+    if (NOT OperationSucceeded) then
+      SysUtils.DeleteFile(SVNZip)
+    else
+      break;
 
   except
-    // Deal with timeouts, wrong URLs etc
     on E: Exception do
     begin
       OperationSucceeded := false;
-      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL, true);
+      writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client', true);
     end;
-  end;
-
-  if (NOT OperationSucceeded) then
-  begin
-    writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL, true);
-
-    SysUtils.Deletefile(SVNZip); //Get rid of temp zip if any.
-
-    try
-      OperationSucceeded := Download(
-        FUseWget,
-        SourceURL_LastResort,
-        SVNZip,
-        FHTTPProxyUser,
-        FHTTPProxyPort,
-        FHTTPProxyUser,
-        FHTTPProxyPassword);
-
-        if NOT OperationSucceeded then
-        try
-          SysUtils.Deletefile(SVNZip); //Get rid of temp zip if any.
-          // use powershell
-          OperationSucceeded := DownloadByPowerShell(SourceURL_LastResort,SVNZip);
-        except
-          on E: Exception do
-          begin
-            OperationSucceeded := false;
-            writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN', true);
-          end;
-        end;
-
-    except
-      // Deal with timeouts, wrong URLs etc
-      on E: Exception do
-      begin
-        OperationSucceeded := false;
-        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading SVN client from ' + SourceURL_LastResort, true);
-      end;
-    end;
-    if (NOT OperationSucceeded) then
-      writelnlog(etError, localinfotext + 'Downloading SVN client from ' + SourceURL_LastResort, true);
   end;
 
   if OperationSucceeded then
@@ -1824,12 +1757,6 @@ begin
       SysUtils.DeleteFile(OpenSSLZip);
       OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
     end;
-    if OperationSucceeded then break;
-
-    //Try PowerShell on Windows
-    SysUtils.DeleteFile(OpenSSLZip);
-    OperationSucceeded := DownloadByPowerShell(aSourceURL,OpenSSLZip);
-    if OperationSucceeded then break;
     if (NOT OperationSucceeded) then
       SysUtils.DeleteFile(OpenSSLZip)
     else
@@ -1884,12 +1811,14 @@ function TInstaller.DownloadWget: boolean;
 const
   {$ifdef win64}
   NewSourceURL : array [0..0] of string = (
-    'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
+    //'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
+    'https://eternallybored.org/misc/wget/1.20/64/wget.exe'
     );
   {$endif}
   {$ifdef win32}
   NewSourceURL : array [0..0] of string = (
-    'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
+    //'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
+    'https://eternallybored.org/misc/wget/1.20/32/wget.exe'
     );
   {$endif}
 var
@@ -1918,7 +1847,11 @@ begin
         SysUtils.DeleteFile(WgetExe);
         OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
       end;
-      if OperationSucceeded then break;
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(WgetExe)
+      else
+        break;
+
     except
       on E: Exception do
       begin
@@ -1927,22 +1860,6 @@ begin
       end;
     end;
 
-    if NOT OperationSucceeded then
-    begin
-      // use Windows PowerShell !!
-      for i:=0 to (Length(NewSourceURL)-1) do
-      try
-        SysUtils.DeleteFile(WgetExe);
-        OperationSucceeded := DownloadByPowerShell(NewSourceURL[i],WgetExe);
-        if OperationSucceeded then break;
-      except
-        on E: Exception do
-        begin
-          OperationSucceeded := false;
-          writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading Wget', true);
-        end;
-      end;
-    end;
   end;
 
   if NOT OperationSucceeded then SysUtils.Deletefile(WgetExe);
@@ -2540,9 +2457,16 @@ begin
   if (NOT result) then
   begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
-    infoln(localinfotext+'Downloading ' + aURL,etInfo);
+    infoln(localinfotext+'Downloading ' + aURL);
     result:=Download(aUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')',etInfo);
+    {$ifdef Windows}
+    if (not result) then
+    begin
+      infoln(localinfotext+'Using Windows PowerShell for download');
+      result:=DownloadByPowerShell(aURL,aFile);
+    end;
+    {$endif}
+    if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')');
   end;
 end;
 

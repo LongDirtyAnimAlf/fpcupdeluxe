@@ -296,7 +296,7 @@ function GetLocalAppDataPath: string;
 //check if there is at least one directory between Dir and root
 function ParentDirectoryIsNotRoot(Dir:string):boolean;
 // Shows non-debug messages on screen (no logging); also shows debug messages if DEBUG defined
-procedure infoln(Message: string; Level: TEventType);
+procedure infoln(Message: string; const Level: TEventType=etInfo);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 //Get a temp file
@@ -1526,7 +1526,7 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-procedure infoln(Message: string; Level: TEventType);
+procedure infoln(Message: string; const Level: TEventType=etInfo);
 begin
 {$IFNDEF NOCONSOLE}
   // Note: these strings should remain as is so any fpcupgui highlighter can pick it up
