@@ -301,6 +301,8 @@ procedure infoln(Message: string; const Level: TEventType=etInfo);
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 //Get a temp file
 Function GetTempFileNameExt(Const Dir,Prefix,Ext : String) : String;
+//Get a temp directory
+Function GetTempDirName(Const Dir,Prefix : String) : String;
 // Correct line-endings
 function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
 // Correct directory separators
@@ -1573,6 +1575,26 @@ begin
     Result:=Format('%s%.5d.'+Extension,[Start,i]);
     Inc(i);
   until not FileExists(Result);
+end;
+
+Function GetTempDirName(Const Dir,Prefix : String) : String;
+Var
+  I : Integer;
+  Start,Extension : String;
+begin
+  if (Dir='') then
+    Start:=GetTempDir
+  else
+    Start:=IncludeTrailingPathDelimiter(Dir);
+  if (Prefix='') then
+    Start:=Start+'TMP'
+  else
+    Start:=Start+Prefix;
+  i:=0;
+  repeat
+    Result:=Format('%s%.5d',[Start,i]);
+    Inc(i);
+  until not DirectoryExists(Result);
 end;
 
 

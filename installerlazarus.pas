@@ -472,9 +472,10 @@ begin
 
   OperationSucceeded := true;
 
-  //Gte Freetype for fpreport ... just to be sure
+  //Get Freetype and Zlib for ao fpreport ... just to be sure
   {$IFDEF MSWINDOWS}
   DownloadFreetype;
+  DownloadZlib;
   {$ENDIF}
 
   LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;

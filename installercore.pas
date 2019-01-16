@@ -278,6 +278,7 @@ type
     function DownloadOpenSSL: boolean;
     function DownloadWget: boolean;
     function DownloadFreetype: boolean;
+    function DownloadZlib: boolean;
     {$ENDIF}
     function DownloadJasmin: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
@@ -1946,94 +1947,173 @@ begin
   Result:=true; //never fail
 end;
 
-{$ENDIF}
-
-function TInstaller.DownloadJasmin: boolean;
+function TInstaller.DownloadZlib: boolean;
 const
-  JasminVersion = '2.4';
-  SourceURL = 'http://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JasminVersion+'/jasmin-'+JasminVersion+'.zip/download';
-  SourceURLfailsafe = 'https://github.com/davidar/jasmin/archive/'+JasminVersion+'.zip';
-  //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/branches/fixes_3_0/install/jvm/jasmin.jar';
-  //SourceURL = 'http://svn.freepascal.org/svn/fpcbuild/trunk/install/jvm/jasmin.jar';
+  TARGETNAME='zlib1.dll';
+  SOURCEURL : array [0..0] of string = (
+    'https://sourceforge.net/projects/gnuwin32/files/zlib/1.2.3/zlib-1.2.3-bin.zip/download'
+    );
 var
   OperationSucceeded: boolean;
-  JasminZip,JasminDir: string;
+  TargetDir,TargetBin,SourceBin,SourceZip,ZipDir: string;
+  i:integer;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadJasmin): ';
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (Download '+TARGETNAME+'): ';
 
-  // for now, just put jasmin.jar in bin directory ... easy and simple and working
-  JasminDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+  infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
 
-  if NOT FileExists(JasminDir+'jasmin.jar') then
+  OperationSucceeded := false;
+
+  TargetDir:=IncludeTrailingPathDelimiter(FInstallDirectory);
+  TargetBin:=TargetDir+TARGETNAME;
+
+  if NOT FileExists(TargetBin) then
   begin
-    OperationSucceeded := false;
-    JasminZip := GetTempFileNameExt('','FPCUPTMP','zip');
+
+    SourceZip := GetTempFileNameExt('','FPCUPTMP','zip');
+
+    for i:=0 to (Length(SOURCEURL)-1) do
     try
-      OperationSucceeded:=GetFile(SourceURL,JasminZip);
+      //always get this file with the native downloader !!
+      OperationSucceeded:=GetFile(SOURCEURL[i],SourceZip,true,true);
       if (NOT OperationSucceeded) then
       begin
         // try one more time
-        SysUtils.DeleteFile(JasminZip);
-        OperationSucceeded:=GetFile(SourceURL,JasminZip);
-        if (NOT OperationSucceeded) then
-        begin
-          // try one more time on failsafe URL
-          SysUtils.DeleteFile(JasminZip);
-          OperationSucceeded:=GetFile(SourceURLfailsafe,JasminZip);
-        end;
+        SysUtils.DeleteFile(SourceZip);
+        OperationSucceeded:=GetFile(SOURCEURL[i],SourceZip,true,true);
       end;
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(SourceZip)
+      else
+        break;
+
     except
       on E: Exception do
       begin
         OperationSucceeded := false;
-        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading jasmin.jar', true);
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading ' + TARGETNAME, true);
+      end;
+    end;
+
+  end;
+
+  if OperationSucceeded then
+  begin
+    ZipDir:=GetTempDirName('','FPCUPTMP');
+    // Extract
+    with TNormalUnzipper.Create do
+    begin
+      try
+        OperationSucceeded:=DoUnZip(SourceZip,ZipDir,[]);
+      finally
+        Free;
       end;
     end;
 
     if OperationSucceeded then
     begin
-      // Extract, overwrite
-      with TNormalUnzipper.Create do
+      //MoveFile
+      SourceBin:=ZipDir+DirectorySeparator+'bin'+DirectorySeparator+TARGETNAME;
+      OperationSucceeded := MoveFile(SourceBin,TargetBin);
+      if (NOT OperationSucceeded) then
       begin
-        try
-          OperationSucceeded:=DoUnZip(JasminZip,SysUtils.GetTempDir,[]);
-        finally
-          Free;
-        end;
-      end;
-
-      if OperationSucceeded then
-      begin
-        OperationSucceeded := MoveFile(IncludeTrailingPathDelimiter(SysUtils.GetTempDir) + 'jasmin-' + JasminVersion + DirectorySeparator + 'jasmin.jar',JasminDir+'jasmin.jar');
-        //MoveFile
-        if NOT OperationSucceeded then
-        begin
-          writelnlog(etError, localinfotext + 'Could not move jasmin.jar into '+JasminDir);
-        end;
+        writelnlog(etError, localinfotext + 'Could not move ' + SourceBin + ' towards '+TargetBin);
       end
+      else OperationSucceeded := FileExists(TargetBin);
+    end;
+  end;
+
+  SysUtils.Deletefile(SourceZip);
+  DeleteDirectoryEx(ZipDir+DirectorySeparator);
+  Result:=true; //never fail
+end;
+
+{$ENDIF}
+
+function TInstaller.DownloadJasmin: boolean;
+const
+  JASMINVERSION = '2.4';
+  TARGETNAME='jasmin.jar';
+  SOURCEURL : array [0..1] of string = (
+    'https://sourceforge.net/projects/jasmin/files/jasmin/jasmin-'+JASMINVERSION+'/jasmin-'+JASMINVERSION+'.zip/download',
+    'https://github.com/davidar/jasmin/archive/'+JASMINVERSION+'.zip'
+    //http://www.java2s.com/Code/JarDownload/jasmin/jasmin.jar.zip
+    //http://www.java2s.com/Code/JarDownload/jasmin/jasmin-3.0.3.jar.zip
+    );
+var
+  OperationSucceeded: boolean;
+  TargetDir,TargetBin,SourceBin,SourceZip,ZipDir: string;
+  i:integer;
+begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (Download '+TARGETNAME+'): ';
+
+  infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
+
+  OperationSucceeded := false;
+
+  // for now, just put jasmin.jar in FPC bin-directory ... easy and simple and working
+  TargetDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
+  TargetBin:=TargetDir+TARGETNAME;
+
+  if NOT FileExists(TargetBin) then
+  begin
+
+    SourceZip := GetTempFileNameExt('','FPCUPTMP','zip');
+
+    for i:=0 to (Length(SOURCEURL)-1) do
+    try
+      //always get this file with the native downloader !!
+      OperationSucceeded:=GetFile(SOURCEURL[i],SourceZip,true,true);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(SourceZip);
+        OperationSucceeded:=GetFile(SOURCEURL[i],SourceZip,true,true);
+      end;
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(SourceZip)
       else
+        break;
+
+    except
+      on E: Exception do
       begin
         OperationSucceeded := false;
-        writelnlog(etError, localinfotext + 'DownloadJasmin error: unzip failed due to unknown error.');
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading ' + TARGETNAME, true);
       end;
-    end
-    else
+    end;
+
+  end;
+
+  if OperationSucceeded then
+  begin
+    ZipDir:=GetTempDirName('','FPCUPTMP');
+    // Extract
+    with TNormalUnzipper.Create do
     begin
-      writelnlog(etError, localinfotext + 'Downloading Jasmin assembler from ' + SourceURL + ' failed.', true);
+      try
+        OperationSucceeded:=DoUnZip(SourceZip,ZipDir,[]);
+      finally
+        Free;
+      end;
     end;
 
     if OperationSucceeded then
     begin
-      WritelnLog(localinfotext + 'Jasmin assembler download and unpacking ok.', true);
-      if OperationSucceeded then
+      //MoveFile
+      SourceBin:=ZipDir+DirectorySeparator+'jasmin-' + JASMINVERSION + DirectorySeparator+TARGETNAME;
+      OperationSucceeded := MoveFile(SourceBin,TargetBin);
+      if (NOT OperationSucceeded) then
       begin
-        //Get rid of temp zip and dir if success.
-        SysUtils.Deletefile(JasminZip);
-        DeleteDirectoryEx(IncludeTrailingPathDelimiter(SysUtils.GetTempDir) + 'jasmin-' + JasminVersion + DirectorySeparator);
-      end;
+        writelnlog(etError, localinfotext + 'Could not move ' + SourceBin + ' towards '+TargetBin);
+      end
+      else OperationSucceeded := FileExists(TargetBin);
     end;
-    Result := OperationSucceeded;
-  end else Result:=True;
+  end;
+
+  SysUtils.Deletefile(SourceZip);
+  DeleteDirectoryEx(ZipDir+DirectorySeparator);
+  Result:=true; //never fail
 end;
 
 procedure TInstaller.DumpOutput(Sender: TProcessEx; output: string);
