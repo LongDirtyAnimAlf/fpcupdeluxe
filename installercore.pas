@@ -277,6 +277,7 @@ type
     function DownloadSVN: boolean;
     function DownloadOpenSSL: boolean;
     function DownloadWget: boolean;
+    function DownloadFreetype: boolean;
     {$ENDIF}
     function DownloadJasmin: boolean;
     procedure DumpOutput(Sender: TProcessEx; output: string);
@@ -1864,6 +1865,85 @@ begin
 
   if NOT OperationSucceeded then SysUtils.Deletefile(WgetExe);
   Result := OperationSucceeded;
+end;
+
+function TInstaller.DownloadFreetype: boolean;
+const
+  NewSourceURL : array [0..0] of string = (
+    'https://sourceforge.net/projects/gnuwin32/files/freetype/2.3.5-1/freetype-2.3.5-1-bin.zip/download'
+    );
+var
+  OperationSucceeded: boolean;
+  FreetypeDir,FreetypeBin,FreetypZip,FreetypZipDir: string;
+  i:integer;
+begin
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFreetype): ';
+
+  infoln(localinfotext+'No Freetype found. Going to download it.',etInfo);
+
+  OperationSucceeded := false;
+
+  FreetypeDir:=IncludeTrailingPathDelimiter(FInstallDirectory);
+  FreetypeBin:=FreetypeDir+'freetype-6.dll';
+
+  if NOT FileExists(FreetypeBin) then
+  begin
+
+    FreetypZip := GetTempFileNameExt('','FPCUPTMP','zip');
+
+    for i:=0 to (Length(NewSourceURL)-1) do
+    try
+      //always get this file with the native downloader !!
+      OperationSucceeded:=GetFile(NewSourceURL[i],FreetypZip,true,true);
+      if (NOT OperationSucceeded) then
+      begin
+        // try one more time
+        SysUtils.DeleteFile(FreetypZip);
+        OperationSucceeded:=GetFile(NewSourceURL[i],FreetypZip,true,true);
+      end;
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(FreetypZip)
+      else
+        break;
+
+    except
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading Freetype', true);
+      end;
+    end;
+
+  end;
+
+  if OperationSucceeded then
+  begin
+    FreetypZipDir:=IncludeTrailingPathDelimiter(SysUtils.GetTempDir)+'Freetype';
+    // Extract
+    with TNormalUnzipper.Create do
+    begin
+      try
+        OperationSucceeded:=DoUnZip(FreetypZip,FreetypZipDir,[]);
+      finally
+        Free;
+      end;
+    end;
+  end;
+
+  if OperationSucceeded then
+  begin
+    //MoveFile
+    OperationSucceeded := MoveFile(FreetypZipDir+DirectorySeparator+'bin'+DirectorySeparator+'freetype6.dll',FreetypeBin);
+    if NOT OperationSucceeded then
+    begin
+      writelnlog(etError, localinfotext + 'Could not move freetype6.dll into '+FreetypeBin);
+    end
+    else OperationSucceeded := FileExists(FreetypeBin);
+  end;
+
+  SysUtils.Deletefile(FreetypZip);
+  DeleteDirectoryEx(FreetypZipDir+DirectorySeparator);
+  Result:=true; //never fail
 end;
 
 {$ENDIF}

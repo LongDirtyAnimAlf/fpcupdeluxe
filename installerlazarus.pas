@@ -472,6 +472,11 @@ begin
 
   OperationSucceeded := true;
 
+  //Gte Freetype for fpreport ... just to be sure
+  {$IFDEF MSWINDOWS}
+  DownloadFreetype;
+  {$ENDIF}
+
   LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
