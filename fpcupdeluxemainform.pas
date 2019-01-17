@@ -2,16 +2,22 @@ unit fpcupdeluxemainform;
 
 {$mode objfpc}{$H+}
 
+
 interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
   SynEditMiscClasses, SynGutterCodeFolding, installerManager{$ifdef usealternateui},alternateui{$endif}
+  ,LCLVersion
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
   {$endif}
   ;
+
+{$if (lcl_fullversion >= 2010000)}
+{$define EnableLanguages}
+{$endif}
 
 type
 
@@ -226,7 +232,7 @@ begin
 
   if FileExists(PoFileName) then
   begin
-    SetDefaultLang(Language,'',true,'fpcupdeluxe');
+    SetDefaultLang(Language,'','fpcupdeluxe');
 
     //Dir := AppendPathDelim(AppendPathDelim(ExtractFileDir(ParamStr(0))) + 'languages');
     //Translations.TranslateUnitResourceStrings('fpcupdeluxemainform',Dir+'fpcupdeluxemainform.%s.po',Lang,FallbackLang);

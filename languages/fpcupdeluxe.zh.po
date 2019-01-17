@@ -12,10 +12,6 @@ msgstr ""
 "X-Generator: Poedit 1.8.7.1"
 "X-Poedit-SourceCharset: UTF-8"
 
-#: fpcupdeluxemainform.upcheckupdate
-msgid "Please wait. Checking for updates."
-msgstr "gdfgsdg dfg sdfg"
-
 #: tform1.autocrossupdate.caption
 msgid "Auto-update compilers"
 msgstr "自动更新编译器"
