@@ -653,10 +653,10 @@ begin
       begin
         // skip non-combi's to reduce size of ini-file
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
-        if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then continue;
+        if (OS=android) AND ((CPU<>arm) AND (CPU<>armel) AND (CPU<>armeb) AND (CPU<>armhf) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then continue;
         if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
-        if (OS=wince) AND (CPU<>arm) then continue;
-        if (OS=windows) AND ((CPU=arm) OR (CPU=aarch64)) then continue;
+        if (OS=wince) AND not (CPU in [arm,armel,armeb,armhf]) then continue;
+        if (OS=windows) AND ((CPU in [arm,armel,armeb,armhf]) OR (CPU=aarch64)) then continue;
         if (CPU=powerpc) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=powerpc64) AND ((OS<>aix) AND (OS<>linux) AND (OS<>darwin)) then continue;
         if (CPU=aarch64) AND ((OS<>linux) AND (OS<>darwin) AND (OS<>android)) then continue;

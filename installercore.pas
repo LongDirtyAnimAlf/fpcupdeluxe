@@ -141,7 +141,7 @@ const
 
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
+  TCPU = (i386,x86_64,arm,armel,armeb,armhf,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku);
 
   TCPUOS = record
@@ -153,11 +153,11 @@ type
 
 const
   CpuStr : array[TCPU] of string=(
-    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086'
+    'i386','x86_64','arm','arm','arm','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086'
   );
 
   ppcSuffix : array[TCPU] of string=(
-    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086'
+    '386','x64','arm','arm','arm','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086'
   );
 
   OSStr : array[TOS] of string=(

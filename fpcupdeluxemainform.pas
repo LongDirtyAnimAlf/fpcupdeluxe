@@ -584,7 +584,10 @@ begin
 
           aArch:='';
           // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-          if (UpperCase(aCPU)='ARM') AND (UpperCase(aOS)='LINUX') then
+          if ((UpperCase(aCPU)='ARM') or
+              (UpperCase(aCPU)='ARMEL') or
+              (UpperCase(aCPU)='ARMEB') or
+              (UpperCase(aCPU)='ARMHF')) AND (UpperCase(aOS)='LINUX') then
           begin
             for i:=SnipBegin to SnipBegin+5 do
             begin
@@ -1695,7 +1698,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'avr') and (s<>'arm') and (s<>'mipsel') then
+        if (s<>'avr') and (s<>'arm') and (s<>'armel') and (s<>'armeb') and(s<>'armhf') and (s<>'mipsel') then
         begin
           success:=false;
         end;
@@ -1718,7 +1721,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') and (s<>'aarch64') and (s<>'x8664') and (s<>'x86_64') then
+        if (s<>'i386') and (s<>'arm') and (s<>'armel') and (s<>'armeb') and (s<>'armhf') and (s<>'mipsel') and (s<>'jvm') and (s<>'aarch64') and (s<>'x8664') and (s<>'x86_64') then
         begin
           success:=false;
         end;
@@ -1952,13 +1955,24 @@ begin
   try
 
     //arm predefined settings
-    if (FPCupManager.CrossCPU_Target='arm') AND (FPCupManager.CrossOS_Target<>'embedded') then
+    if ((FPCupManager.CrossCPU_Target='arm') or
+        (FPCupManager.CrossCPU_Target='armel') or
+        (FPCupManager.CrossCPU_Target='armeb') or
+        (FPCupManager.CrossCPU_Target='armhf')) AND (FPCupManager.CrossOS_Target<>'embedded') then
     begin
       // default: armhf
       // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets
       // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
       // but I stand corrected if this assumption is wrong
-      FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+      if FPCupManager.CrossCPU_Target='arm' then begin
+       FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+      end else if FPCupManager.CrossCPU_Target='armel' then begin
+       FPCupManager.FPCOPT:='-dFPC_ARMEL ';
+      end else if FPCupManager.CrossCPU_Target='armeb' then begin
+       FPCupManager.FPCOPT:='-dFPC_ARMEB ';
+      end else if FPCupManager.CrossCPU_Target='armhf' then begin
+       FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+      end;
 
       if (FPCupManager.CrossOS_Target='wince') then
       begin
@@ -1984,7 +1998,15 @@ begin
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
             then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
-            else FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+            else begin
+              if FPCupManager.CrossCPU_Target='armel' then begin
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV2 -OoFASTMATH -CaDEFAULT ';
+              end else if FPCupManager.CrossCPU_Target='armeb' then begin
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV2 -OoFASTMATH -CaDEFAULT ';
+              end else begin
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+              end;
+            end;
       end;
     end;
 
@@ -1999,11 +2021,20 @@ begin
         FPCupManager.CrossOPT:='-Cpavr5 ';
         FPCupManager.CrossOS_SubArch:='avr5';
       end;
-      if (FPCupManager.CrossCPU_Target='arm') then
+      if (FPCupManager.CrossCPU_Target='arm') or
+         (FPCupManager.CrossCPU_Target='armel') or
+         (FPCupManager.CrossCPU_Target='armeb') or
+         (FPCupManager.CrossCPU_Target='armhf') then
       begin
-        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
-        // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
-        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+        if FPCupManager.CrossCPU_Target='armel' then begin
+          FPCupManager.FPCOPT:='-dFPC_ARMEL ';
+        end else if FPCupManager.CrossCPU_Target='armeb' then begin
+          FPCupManager.FPCOPT:='-dFPC_ARMEB ';
+        end else begin
+          // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
+          // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
+          FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+        end;
         FPCupManager.CrossOS_SubArch:='armv6m';
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
@@ -2042,7 +2073,7 @@ begin
     if Length(s)>0 then
     begin
       FPCupManager.FPCOPT:=s+' ';
-      if (Pos('-dFPC_ARMEL',s)>0) then
+      if (FPCupManager.CrossCPU_Target='arm') and (Pos('-dFPC_ARMEL',s)>0) then
       begin
         //Remove standard ARMHF option(s).
         if (Pos('-CaEABIHF',FPCupManager.CrossOPT)>0) then FPCupManager.CrossOPT:=StringReplace(FPCupManager.CrossOPT,'-CaEABIHF','',[rfIgnoreCase]);
@@ -2091,7 +2122,12 @@ begin
     if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;
     if (FPCupManager.CrossOS_Target='embedded') then IncludeLCL:=false;
     // AFAIK, on Darwin, LCL Carbon and Cocoa are only for MACOSX
-    if (FPCupManager.CrossOS_Target='darwin') AND ((FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64')) then IncludeLCL:=false;
+    if (FPCupManager.CrossOS_Target='darwin') AND
+        ((FPCupManager.CrossCPU_Target='arm') OR
+         (FPCupManager.CrossCPU_Target='armel') OR
+         (FPCupManager.CrossCPU_Target='armeb') OR
+         (FPCupManager.CrossCPU_Target='armhf') OR
+         (FPCupManager.CrossCPU_Target='aarch64')) then IncludeLCL:=false;
     if IncludeLCL then
     begin
       FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
@@ -2190,6 +2226,9 @@ begin
         AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
         if FPCupManager.CrossCPU_Target='arm' then BinsFileName:='ARM';
+        if FPCupManager.CrossCPU_Target='armel' then BinsFileName:='ARM';
+        if FPCupManager.CrossCPU_Target='armeb' then BinsFileName:='ARM';
+        if FPCupManager.CrossCPU_Target='armhf' then BinsFileName:='ARM';
         if FPCupManager.CrossCPU_Target='aarch64' then BinsFileName:='Aarch64';
         if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x64';
         if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='i386';
@@ -2245,7 +2284,11 @@ begin
           end;
 
           // Darwin is special: combined libs for arm and aarch64 with osxcross
-          if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
+          if (FPCupManager.CrossCPU_Target='arm') OR
+             (FPCupManager.CrossCPU_Target='armel') OR
+             (FPCupManager.CrossCPU_Target='armeb') OR
+             (FPCupManager.CrossCPU_Target='armhf') OR
+             (FPCupManager.CrossCPU_Target='aarch64') then
           begin
             LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
             LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
@@ -2272,9 +2315,14 @@ begin
 
           // ARM is special: can be hard or softfloat (Windows only binutils yet)
           {$ifdef MSWINDOWS}
-          if (FPCupManager.CrossCPU_Target='arm') then
+          if (FPCupManager.CrossCPU_Target='arm') or
+             (FPCupManager.CrossCPU_Target='armel') or
+             (FPCupManager.CrossCPU_Target='armeb') or
+             (FPCupManager.CrossCPU_Target='armhf') then
           begin
-            if (Pos('SOFT',UpperCase(FPCupManager.CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCupManager.FPCOPT))>0) then
+            if (Pos('SOFT',UpperCase(FPCupManager.CrossOPT))>0) OR
+               (Pos('FPC_ARMEL',UpperCase(FPCupManager.FPCOPT))>0) OR
+               (Pos('FPC_ARMEB',UpperCase(FPCupManager.FPCOPT))>0) then
             begin
               // use softfloat binutils
               BinsFileName:=StringReplace(LibsFileName,'BinsLinuxARM','BinsLinuxARMSoft',[rfIgnoreCase]);
