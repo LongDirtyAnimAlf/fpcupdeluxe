@@ -691,9 +691,6 @@
       </Optimizations>
     </CodeGeneration>
     <Linking>
-      <Debugging>
-        <GenerateDebugInfo Value="False"/>
-      </Debugging>
       <Options>
         <Win32>
           <GraphicApplication Value="True"/>
@@ -702,7 +699,7 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="6">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -715,6 +712,12 @@
       <Item4>
         <Name Value="EProcess"/>
       </Item4>
+      <Item5>
+        <Name Value="EResNotFound"/>
+      </Item5>
+      <Item6>
+        <Name Value="ESSLSocketError"/>
+      </Item6>
     </Exceptions>
   </Debugging>
 </CONFIG>

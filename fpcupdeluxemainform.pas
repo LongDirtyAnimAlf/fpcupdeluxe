@@ -1811,9 +1811,14 @@ begin
   if assigned(CrossInstallers) then
   begin
     success:=false;
+    s := GetFPCTargetCPUOS(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,false);
+    if (s = 'armel-linux') or (s = 'armeb-linux') or (s = 'armhf-linux') then
+    begin
+      s := 'arm-linux';
+    end;
     for i := 0 to CrossInstallers.Count - 1 do
     begin
-      success:=(CrossInstallers[i] = GetFPCTargetCPUOS(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,false));
+      success:=(CrossInstallers[i] = s);
       if success then break;
     end;
     if (NOT success) then
@@ -2000,9 +2005,9 @@ begin
             then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
             else begin
               if FPCupManager.CrossCPU_Target='armel' then begin
-                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV2 -OoFASTMATH -CaDEFAULT ';
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMEABICPU+' -CfVFPV2 -OoFASTMATH -CaDEFAULT ';
               end else if FPCupManager.CrossCPU_Target='armeb' then begin
-                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV2 -OoFASTMATH -CaDEFAULT ';
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMEABICPU+' -CfVFPV2 -OoFASTMATH -CaDEFAULT ';
               end else begin
                 FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
               end;

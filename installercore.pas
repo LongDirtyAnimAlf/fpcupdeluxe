@@ -190,6 +190,7 @@ type
     FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
     FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
     FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
+    function GetCrossCPU_TargetEx: string;
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
     function GetMake: string;
@@ -318,6 +319,7 @@ type
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
     property CrossCPU_Target: string read FCrossCPU_Target;
+    property CrossCPU_TargetEx: string read GetCrossCPU_TargetEx;
     // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
     property CrossOPT: string read FCrossOPT write FCrossOPT;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
@@ -439,6 +441,17 @@ begin
   FMinorVersion := -1;
   FReleaseVersion := -1;
   FPatchVersion := -1;
+end;
+
+function TInstaller.GetCrossCPU_TargetEx: string;
+begin
+  if (FCrossCPU_Target = 'armel') or
+     (FCrossCPU_Target = 'armeb') or
+     (FCrossCPU_Target = 'armhf') then begin
+    result := 'arm';
+  end else begin
+    result := FCrossCPU_Target;
+ end;
 end;
 
 procedure TInstaller.SetSourceDirectory(value:string);

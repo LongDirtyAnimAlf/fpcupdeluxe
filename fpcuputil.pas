@@ -341,6 +341,7 @@ function DoubleQuoteIfNeeded(s: string): string;
 function UppercaseFirstChar(s: String): String;
 function DirectoryIsEmpty(Directory: string): Boolean;
 function GetTargetCPU:string;
+function GetTargetCPUEx:string;
 function GetTargetOS:string;
 function GetTargetCPUOS:string;
 function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
@@ -2166,6 +2167,16 @@ end;
 function GetTargetCPU:string;
 begin
   result:=lowercase({$i %FPCTARGETCPU%});
+end;
+
+function GetTargetCPUEx:string;
+begin
+  result:=lowercase({$i %FPCTARGETCPU%});
+  if (result = 'armel') or (result = 'armeb') or (result = 'armhf') then
+  begin
+    result := 'arm';
+  end;
+
 end;
 
 function GetTargetOS:string;

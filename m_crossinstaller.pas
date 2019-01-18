@@ -54,6 +54,7 @@ const
   UnixBinDirs :array[0..2] of string = ('/usr/local/bin','/usr/bin','/bin');
   UnixLibDirs :array[0..2] of string = ('/usr/local/lib','/usr/lib','/lib');
   {$endif}
+  DEFAULTARMEABICPU = 'ARMV6';
   DEFAULTARMCPU = 'ARMV7A';
 
   NEWPASCALGITREPO='https://github.com/LongDirtyAnimAlf';

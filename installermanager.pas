@@ -233,6 +233,7 @@ type
     FForceLocalRepoClient:boolean;
     FSequencer: TSequencer;
     {$ifndef FPCONLY}
+    function GetCrossCPU_TargetEx: string;
     function GetLazarusPrimaryConfigPath: string;
     procedure SetLazarusDirectory(AValue: string);
     procedure SetLazarusURL(AValue: string);
@@ -279,6 +280,7 @@ type
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
     property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
+    property CrossCPU_TargetEx:string read GetCrossCPU_TargetEx;
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
     {$ifndef FPCONLY}
@@ -451,6 +453,18 @@ begin
   end;
   result:=FLazarusPrimaryConfigPath;
 end;
+
+function TFPCupManager.GetCrossCPU_TargetEx: string;
+begin
+  if (FCrossCPU_Target = 'armel') or
+     (FCrossCPU_Target = 'armeb') or
+     (FCrossCPU_Target = 'armhf') then begin
+    result := 'arm';
+  end else begin
+    result := FCrossCPU_Target;
+ end;
+end;
+
 {$endif}
 
 function TFPCupManager.GetLogFileName: string;
@@ -631,7 +645,14 @@ begin
           sl.Delimiter:=',';
           sl.StrictDelimiter:=true;
           sl.DelimitedText:=sourceline;
-          cpuindex:=sl.IndexOf(CrossCPU_Target);
+          if (CrossCPU_Target='armel') or (CrossCPU_Target='armeb') or (CrossCPU_Target='armhf') then
+          begin
+            cpuindex:=sl.IndexOf('arm');
+          end
+          else
+          begin
+            cpuindex:=sl.IndexOf(CrossCPU_Target);
+          end;
         finally
           sl.Free;
         end;
