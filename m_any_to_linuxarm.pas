@@ -309,7 +309,7 @@ begin
   else
   begin
     FBinsFound:=true;
-    if hardfloat then ShowInfo('Found hardfloat binary utilities. Please make sure you did NOT specified -dFPC_ARMEL in your FPCOPT !',etWarning);
+    //if hardfloat then ShowInfo('Found hardfloat binary utilities. Please make sure you did NOT specified -dFPC_ARMEL in your FPCOPT !',etWarning);
 
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));

@@ -9,7 +9,7 @@ object Form2: TForm2
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   Position = poMainFormCenter
-  LCLVersion = '2.0.0.2'
+  LCLVersion = '2.1.0.0'
   object GroupBox1: TGroupBox
     AnchorSideLeft.Control = Owner
     AnchorSideTop.Control = Owner
@@ -334,14 +334,12 @@ object Form2: TForm2
       Height = 19
       Hint = 'Download whole repository, or only latest files'
       Top = 254
-      Width = 209
+      Width = 206
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
-      Caption = 'Auto-switch repo URL (default=yes)'
-      Checked = True
+      Caption = 'Auto-switch repo URL (default=no)'
       ParentShowHint = False
       ShowHint = True
-      State = cbChecked
       TabOrder = 10
     end
     object CheckSendInfo: TCheckBox

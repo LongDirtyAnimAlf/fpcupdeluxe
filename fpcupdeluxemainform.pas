@@ -2039,7 +2039,15 @@ begin
     // recheck / override / set custom FPC options by special user input through setup+
     s:=Form2.FPCOptions;
     s:=Trim(s);
-    if Length(s)>0 then FPCupManager.FPCOPT:=s+' ';
+    if Length(s)>0 then
+    begin
+      FPCupManager.FPCOPT:=s+' ';
+      if (Pos('-dFPC_ARMEL',s)>0) then
+      begin
+        //Remove standard ARMHF option(s).
+        if (Pos('-CaEABIHF',FPCupManager.CrossOPT)>0) then FPCupManager.CrossOPT:=StringReplace(FPCupManager.CrossOPT,'-CaEABIHF','',[rfIgnoreCase]);
+      end;
+    end;
 
     // override / set custom FPC crossoptions by special user input through setup+
     s:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
@@ -3132,7 +3140,7 @@ begin
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
 
-      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',True);
+      Form2.AutoSwitchURL:=ReadBool('General','AutoSwitchURL',False);
 
       Form2.FpcupBootstrappersOnly:=ReadBool('General','FpcupBootstrappersOnly',False);
 
