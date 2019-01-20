@@ -719,11 +719,8 @@ begin
           Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF}
           // Tell make where to find the target binutils if cross-compiling:
-          //if (UpperCase(CrossOS_Target)<>'JAVA') then
-          begin
-            if CrossInstaller.BinUtilsPath<>'' then
-               Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
-          end;
+          if CrossInstaller.BinUtilsPath<>'' then
+             Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
 
           // will not happen often but if the compiler version is too low, add override
           if (CompareVersionStrings(GetCompilerVersion(ChosenCompiler),GetBootstrapCompilerVersionFromSource(FSourceDirectory,True))<0) then

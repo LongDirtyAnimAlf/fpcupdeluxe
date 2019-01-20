@@ -326,11 +326,8 @@ begin
         if FileExists(Options) then Processor.Parameters.Add('CFGFILE=' + Options);
 
         // Tell make where to find the target binutils if cross-compiling:
-        if (UpperCase(CrossOS_Target)<>'JAVA') then
-        begin
-          if CrossInstaller.BinUtilsPath <> '' then
-            Processor.Parameters.Add('CROSSBINDIR=' + ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
-        end;
+        if CrossInstaller.BinUtilsPath <> '' then
+          Processor.Parameters.Add('CROSSBINDIR=' + ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
 
         {$ifdef Windows}
         Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
