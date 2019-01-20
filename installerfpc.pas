@@ -32,7 +32,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {.$define crosssimple}
 {$ifdef MSWindows}
-{$define buildnative}
+{.$define buildnative}
 {$endif}
 
 interface
@@ -666,23 +666,6 @@ begin
             FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
             Options:=UpperCase(CrossCPU_Target);
 
-            // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-            if (UpperCase(CrossCPU_Target)='ARM') AND ((UpperCase(CrossOS_Target)='LINUX'){ OR (UpperCase(CrossOS_Target)='EMBEDDED')}) then
-            begin
-              i:=StringListStartsWith(CrossInstaller.CrossOpt,'-Cp');
-              if i<>-1 then
-              begin
-                // we have a special CPU setting: use it for the fpc.cfg
-                s1:=UpperCase(Copy(CrossInstaller.CrossOpt[i],4,MaxInt));
-                if s1<>DEFAULTARMCPU then
-                begin
-                  //remove trailing cpu denominators that are not needed
-                  //while (not CharInSet(s1[Length(s1)],['0'..'9'])) do s1:=Copy(s1,1,Length(s1)-1);
-                  Options:=s1;
-                end;
-              end;
-            end;
-
             //Distinguish between 32 and 64 bit powerpc
             if (UpperCase(CrossCPU_Target)='POWERPC') then
             begin
@@ -736,8 +719,11 @@ begin
           Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
           {$ENDIF}
           // Tell make where to find the target binutils if cross-compiling:
-          if CrossInstaller.BinUtilsPath<>'' then
-             Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
+          //if (UpperCase(CrossOS_Target)<>'JAVA') then
+          begin
+            if CrossInstaller.BinUtilsPath<>'' then
+               Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
+          end;
 
           // will not happen often but if the compiler version is too low, add override
           if (CompareVersionStrings(GetCompilerVersion(ChosenCompiler),GetBootstrapCompilerVersionFromSource(FSourceDirectory,True))<0) then

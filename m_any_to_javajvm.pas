@@ -41,9 +41,12 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
+
+uses
+  FileUtil, fpcuputil;
 
 const
   ARCH='jvm';
@@ -92,11 +95,13 @@ function Tany_javajvm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
-  result:=CheckExecutable('java', '-version', '');
+  result:=CheckJava;
   if result then
   begin
     FBinsFound:=true;
-    FBinUtilsPath:=ExtractFilePath(Which('java'+GetExeExt));
+    // On Windows, Java often resides inside a directory with spaces; FPC does not like spaces, so use DOS-names.
+    FBinUtilsPath:=ExtractShortPathNameUTF8(ExtractFilePath(GetJava));
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     SearchBinUtilsInfo(result);
   end
   else

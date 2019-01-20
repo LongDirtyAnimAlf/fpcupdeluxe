@@ -143,6 +143,7 @@ const
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku);
+  TARMARCH  = (default,armel,armeb,armhf);
 
   TCPUOS = record
     CPU:TCPU;
@@ -162,6 +163,10 @@ const
 
   OSStr : array[TOS] of string=(
     'windows'{,'win32','win64'},'linux', 'android','darwin','freebsd','openbsd','aix','wince','iphonesim','embedded','java', 'msdos','haiku'
+  );
+
+  ARMArchFPCStr : array[TARMARCH] of string=(
+    '','-dFPC_ARMEL','-dFPC_ARMEB','-dFPC_ARMHF'
   );
 
 type
@@ -2047,16 +2052,15 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (Download '+TARGETNAME+'): ';
 
-  infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
-
   OperationSucceeded := false;
 
   // for now, just put jasmin.jar in FPC bin-directory ... easy and simple and working
   TargetDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
   TargetBin:=TargetDir+TARGETNAME;
 
-  if NOT FileExists(TargetBin) then
+  if (NOT FileExists(TargetBin)) then
   begin
+    infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
 
     SourceZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
@@ -2622,10 +2626,18 @@ begin
     {$ifdef Windows}
     if (not result) then
     begin
-      infoln(localinfotext+'Using Windows PowerShell for download');
+      if SysUtils.FileExists(aFile) then SysUtils.DeleteFile(aFile);
+      infoln(localinfotext+'Download failed. Now using Windows PowerShell for download of '+aURL);
       result:=DownloadByPowerShell(aURL,aFile);
     end;
     {$endif}
+    if (not result) AND (NOT aUseWget) then
+    begin
+      if SysUtils.FileExists(aFile) then SysUtils.DeleteFile(aFile);
+      infoln(localinfotext+'Download failed. Now using wget/curl for download of '+aURL);
+      result:=Download(true,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
+    end;
+
     if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')');
   end;
 end;

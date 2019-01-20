@@ -1885,7 +1885,7 @@ begin
 
     if (FPCupManager.CrossOS_Target='java') then
     begin
-      success:=CheckExecutable('java', '-version', '');
+      success:=CheckJava;
       if (NOT success) then
       begin
         s:=
@@ -1958,7 +1958,11 @@ begin
       // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets
       // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
       // but I stand corrected if this assumption is wrong
-      FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+      s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+      if Length(s)=0 then
+        FPCupManager.FPCOPT:='-dFPC_ARMHF '
+      else
+        FPCupManager.FPCOPT:=s+' ';
 
       if (FPCupManager.CrossOS_Target='wince') then
       begin
@@ -1984,7 +1988,13 @@ begin
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
             then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
-            else FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF ';
+            else
+            begin
+              if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
+              else
+                FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH ';
+            end;
       end;
     end;
 
@@ -2001,9 +2011,12 @@ begin
       end;
       if (FPCupManager.CrossCPU_Target='arm') then
       begin
-        // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm (embedded) for Embedded
-        // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
-        FPCupManager.FPCOPT:='-dFPC_ARMHF ';
+        s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
+        if Length(s)=0 then
+          FPCupManager.FPCOPT:='-dFPC_ARMHF '
+        else
+          FPCupManager.FPCOPT:=s+' ';
+
         FPCupManager.CrossOS_SubArch:='armv6m';
       end;
       if (FPCupManager.CrossCPU_Target='mipsel') then
@@ -2042,11 +2055,6 @@ begin
     if Length(s)>0 then
     begin
       FPCupManager.FPCOPT:=s+' ';
-      if (Pos('-dFPC_ARMEL',s)>0) then
-      begin
-        //Remove standard ARMHF option(s).
-        if (Pos('-CaEABIHF',FPCupManager.CrossOPT)>0) then FPCupManager.CrossOPT:=StringReplace(FPCupManager.CrossOPT,'-CaEABIHF','',[rfIgnoreCase]);
-      end;
     end;
 
     // override / set custom FPC crossoptions by special user input through setup+

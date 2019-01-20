@@ -41,9 +41,12 @@ Adapt (add) for other setups
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller,fileutil, fpcuputil;
+  Classes, SysUtils, m_crossinstaller;
 
 implementation
+
+uses
+  FileUtil, fpcuputil;
 
 type
 
@@ -74,9 +77,20 @@ function Tany_androidjvm.GetBinUtils(Basepath:string): boolean;
 begin
   result:=inherited;
   if result then exit;
-  FBinUtilsPath:=ExtractFilePath(Which('java'+GetExeExt));
-  result:=True;
-  FBinsFound:=true;
+  result:=CheckJava;
+  if result then
+  begin
+    FBinsFound:=true;
+    // On Windows, Java often resides inside a directory with spaces; FPC does not like spaces, so use DOS-names.
+    FBinUtilsPath:=ExtractShortPathNameUTF8(ExtractFilePath(GetJava));
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
+    SearchBinUtilsInfo(result);
+  end
+  else
+  begin
+    FAlreadyWarned:=true;
+    ShowInfo('Java is needed. Please install java.');
+  end;
 end;
 
 constructor Tany_androidjvm.Create;

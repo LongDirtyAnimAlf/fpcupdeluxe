@@ -22,6 +22,7 @@ type
     BinDir:string;
     CrossBuildOptions:string;
     CrossSubArch:string;
+    CrossARMArch:string;
     Compiler:string;
   end;
 
@@ -100,6 +101,7 @@ type
     ListBoxLazPatch: TListBox;
     OpenDialog1: TOpenDialog;
     ButtonPanel: TPanel;
+    RadioGroupARMArch: TRadioGroup;
     RadioGroup3: TRadioGroup;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     procedure btnAddPatchClick(Sender: TObject);
@@ -114,6 +116,7 @@ type
     procedure FormDestroy(Sender: TObject);
     procedure OnDirectorySelect(Sender: TObject);
     procedure RadioGroup3SelectionChanged(Sender: TObject);
+    procedure RadioGroupARMArchSelectionChanged(Sender: TObject);
   private
     FCrossUtils:TCrossUtils;
     FInstallPath:string;
@@ -187,8 +190,9 @@ type
     function GetToolsDirectory(aCPU,aOS:string):string;
     function GetCrossBuildOptions(aCPU,aOS:string):string;
     function GetCrossSubArch(aCPU,aOS:string):string;
+    function GetCrossARMArch(aCPU,aOS:string):string;
+    function GetCrossARMFPCStr(aCPU, aOS: string): string;
     function GetCompiler(aCPU, aOS: string): string;
-
 
     property Repo:boolean read GetRepo;
     property PackageRepo:boolean read GetPackageRepo;
@@ -274,6 +278,7 @@ procedure TForm2.FormCreate(Sender: TObject);
 var
   CPU:TCPU;
   OS:TOS;
+  ARMArch:TARMARCH;
   s:string;
   SortedList: TStringList;
   //Cipher: TDCP_rc4;
@@ -303,9 +308,14 @@ begin
     begin
       ComboBoxCPU.Items.Add(SortedList[Ord(CPU)]);
     end;
+
   finally
     SortedList.Free;
   end;
+
+  // Fill ARM Arch radiogroup
+  for ARMArch := Low(TARMARCH) to High(TARMARCH) do
+    RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
 
   for OS := Low(TOS) to High(TOS) do
   begin
@@ -318,6 +328,7 @@ begin
       FCrossUtils[CPU,OS].BinDir:='';
       FCrossUtils[CPU,OS].CrossBuildOptions:='';
       FCrossUtils[CPU,OS].CrossSubArch:='';
+      FCrossUtils[CPU,OS].CrossARMArch:='';
       FCrossUtils[CPU,OS].Compiler:='';
     end;
   end;
@@ -407,7 +418,14 @@ begin
         FCrossUtils[CPU,OS].LibDir:=ReadString(s,'LibPath','');
         FCrossUtils[CPU,OS].BinDir:=ReadString(s,'BinPath','');
         FCrossUtils[CPU,OS].CrossBuildOptions:=ReadString(s,'CrossBuildOptions','');
-        FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
+        if OS=embedded then
+        begin
+          FCrossUtils[CPU,OS].CrossSubArch:=ReadString(s,'CrossSubArch','');
+        end;
+        if CPU=arm then
+        begin
+          FCrossUtils[CPU,OS].CrossARMArch:=ReadString(s,'CrossARMArch','');
+        end;
         FCrossUtils[CPU,OS].Compiler:=ReadString(s,'Compiler','');
       end;
     end;
@@ -425,16 +443,20 @@ begin
   RadioGroup3.Enabled:=e;
   EditCrossBuildOptions.Enabled:=e;
   EditCompilerOverride.Enabled:=e;
+  //EditCrossSubArch.Enabled:=e;
   btnSelectCompiler.Enabled:=e;
+  //RadioGroupARMArch.Enabled:=e;
   if e then
   begin
     xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
     if (xCPUOS.OS=TOS.embedded) then EditCrossSubArch.Enabled:=e;
+    if (xCPUOS.CPU=TCPU.arm) then RadioGroupARMArch.Enabled:=e;
     EditLibLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
     EditBinLocation.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
     EditCrossBuildOptions.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions;
     EditCrossSubArch.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch;
     RadioGroup3.ItemIndex:=Ord(FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting);
+    RadioGroupARMArch.ItemIndex:=Ord(GetARMArch(FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch));
     EditCompilerOverride.Text:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler;
   end;
 end;
@@ -578,10 +600,22 @@ begin
           InfoForm.Memo1.Lines.Append('  options : '+FCrossUtils[CPU,OS].CrossBuildOptions);
         end;
 
-        if Length(FCrossUtils[CPU,OS].CrossSubArch)>0 then
+        if OS=embedded then
         begin
-          if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
-          InfoForm.Memo1.Lines.Append('  subarch : '+FCrossUtils[CPU,OS].CrossSubArch);
+          if Length(FCrossUtils[CPU,OS].CrossSubArch)>0 then
+          begin
+            if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
+            InfoForm.Memo1.Lines.Append('  subarch : '+FCrossUtils[CPU,OS].CrossSubArch);
+          end;
+        end;
+
+        if CPU=arm then
+        begin
+          if Length(FCrossUtils[CPU,OS].CrossARMArch)>0 then
+          begin
+            if x=InfoForm.Memo1.Lines.Count then InfoForm.Memo1.Lines.Append(s);
+            InfoForm.Memo1.Lines.Append('  ARM Arch : '+FCrossUtils[CPU,OS].CrossARMArch);
+          end;
         end;
 
         if Length(FCrossUtils[CPU,OS].Compiler)>0 then
@@ -670,7 +704,14 @@ begin
         WriteString(s,'LibPath',FCrossUtils[CPU,OS].LibDir);
         WriteString(s,'BinPath',FCrossUtils[CPU,OS].BinDir);
         WriteString(s,'CrossBuildOptions',FCrossUtils[CPU,OS].CrossBuildOptions);
-        WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
+        if OS=embedded then
+        begin
+          WriteString(s,'CrossSubArch',FCrossUtils[CPU,OS].CrossSubArch);
+        end;
+        if CPU=arm then
+        begin
+          WriteString(s,'CrossARMArch',FCrossUtils[CPU,OS].CrossARMArch);
+        end;
         WriteString(s,'Compiler',FCrossUtils[CPU,OS].Compiler);
       end;
     end;
@@ -707,6 +748,27 @@ begin
   EditBinLocation.Enabled:=e;
   btnSelectLibDir.Enabled:=e;
   btnSelectBinDir.Enabled:=e;
+end;
+
+procedure TForm2.RadioGroupARMArchSelectionChanged(Sender: TObject);
+var
+  i:integer;
+  xCPUOS:TCPUOS;
+  xARMArch:TARMARCH;
+begin
+  if (ComboBoxOS.ItemIndex<>-1) AND (ComboBoxCPU.ItemIndex<>-1) then
+  begin
+    i:=(Sender AS TRadioGroup).ItemIndex;
+    if i=-1 then
+      xARMArch:=TARMARCH.default
+    else
+      xARMArch:=TARMARCH(i);
+    xCPUOS:=GetCPUOSCombo(ComboBoxCPU.Items[ComboBoxCPU.ItemIndex],ComboBoxOS.Items[ComboBoxOS.ItemIndex]);
+    if xARMArch=TARMARCH.default then
+      FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch:=''
+    else
+      FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch:=GetEnumNameSimple(TypeInfo(TARMARCH),Ord(xARMArch));
+  end;
 end;
 
 function TForm2.GetCPUFromComboBox:TCPU;
@@ -774,6 +836,28 @@ begin
   xCPUOS:=GetCPUOSCombo(aCPU,aOS);
   result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch;
 end;
+
+function TForm2.GetCrossARMArch(aCPU, aOS: string): string;
+var
+  xCPUOS:TCPUOS;
+begin
+  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch;
+end;
+
+function TForm2.GetCrossARMFPCStr(aCPU, aOS: string): string;
+var
+  xCPUOS:TCPUOS;
+  aARMArch:string;
+begin
+  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
+  aARMArch:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch;
+  if Length(aARMArch)=0 then
+    result:=''
+  else
+    result:=GetARMArchFPCDefine(GetARMArch(aARMArch));
+end;
+
 
 function TForm2.GetCompiler(aCPU, aOS: string): string;
 var

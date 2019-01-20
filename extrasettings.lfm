@@ -689,6 +689,34 @@ object Form2: TForm2
       Caption = 'Compiler Override'
       ParentColor = False
     end
+    object RadioGroupARMArch: TRadioGroup
+      AnchorSideLeft.Control = GroupBox4
+      AnchorSideTop.Control = EditCompilerOverride
+      AnchorSideTop.Side = asrBottom
+      AnchorSideRight.Control = GroupBox4
+      AnchorSideRight.Side = asrBottom
+      Left = 4
+      Height = 59
+      Top = 310
+      Width = 294
+      Anchors = [akTop, akLeft, akRight]
+      AutoFill = True
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 8
+      BorderSpacing.Right = 14
+      Caption = 'ARM target'
+      ChildSizing.LeftRightSpacing = 6
+      ChildSizing.EnlargeHorizontal = crsHomogenousChildResize
+      ChildSizing.EnlargeVertical = crsHomogenousChildResize
+      ChildSizing.ShrinkHorizontal = crsScaleChilds
+      ChildSizing.ShrinkVertical = crsScaleChilds
+      ChildSizing.Layout = cclLeftToRightThenTopToBottom
+      ChildSizing.ControlsPerLine = 4
+      Columns = 4
+      Enabled = False
+      OnSelectionChanged = RadioGroupARMArchSelectionChanged
+      TabOrder = 12
+    end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
     AnchorSideLeft.Control = GroupBoxCompileOptions
@@ -1029,13 +1057,13 @@ object Form2: TForm2
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofPathMustExist, ofFileMustExist, ofEnableSizing, ofViewDetail]
-    Left = 464
-    Top = 472
+    Left = 160
+    Top = 8
   end
   object OpenDialog1: TOpenDialog
     Filter = 'Patch|*.patch|Diff|*.diff|All|*.*'
     Options = [ofFileMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail, ofAutoPreview]
-    Left = 536
-    Top = 472
+    Left = 160
+    Top = 64
   end
 end

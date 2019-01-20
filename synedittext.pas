@@ -151,6 +151,9 @@ begin
         if AnsiContainsText(line,'~~~~~~~~') then continue;
         if AnsiContainsText(line,', coalesced') then continue;
 
+        // When building a java cross-compiler
+        if AnsiContainsText(line,'Generated: ') then continue;
+
         // filter warnings
         if AnsiContainsText(line,'warning: ') then
         begin
