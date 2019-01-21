@@ -119,10 +119,6 @@ msgstr ""
 msgid "Install the selected CPU-OS cross-compiler."
 msgstr ""
 
-#: tform1.caption
-msgid "Form1"
-msgstr ""
-
 #: tform1.checkautoclear.caption
 msgid "AutoClear"
 msgstr ""

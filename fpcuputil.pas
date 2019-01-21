@@ -2121,6 +2121,24 @@ var
 begin
   {$ifdef Windows}
   result:='';
+
+  s:=SysUtils.GetEnvironmentVariable('JAVA_HOME');
+  if s<>'' then
+  begin
+    s:=IncludeTrailingPathDelimiter(s);
+    JavaFiles := FindAllFiles(s, 'java.exe', true);
+    try
+      if JavaFiles.Count>0 then
+      begin
+        result:=JavaFiles[0];
+      end;
+    finally
+      JavaFiles.Free;
+    end;
+  end;
+
+  if result<>'' then exit;
+
   // When running a 32bit fpcupdeluxe the command below results in "C:\Program Files (x86)\"
   // When running a 64bit fpcupdeluxe the command below results in "C:\Program Files\"
   s:=GetWindowsSpecialDir(CSIDL_PROGRAM_FILES);
@@ -2132,6 +2150,7 @@ begin
     s:=StringReplace(s,' (x86)','',[]);
   end;
   {$endif win32}
+  s:=IncludeTrailingPathDelimiter(s)+'Java'+DirectorySeparator;
   JavaFiles := FindAllFiles(s, 'java.exe', true);
   try
     if JavaFiles.Count>0 then
@@ -2143,21 +2162,21 @@ begin
     JavaFiles.Free;
   end;
 
+  if result<>'' then exit;
+
   {$ifdef win32}
   //On Win32, try to find the 32bit version of java in the standard 32bit program directory
-  if result='' then
-  begin
-    s:=GetWindowsSpecialDir(CSIDL_PROGRAM_FILES);
-    JavaFiles := FindAllFiles(s, 'java.exe', true);
-    try
-      if JavaFiles.Count>0 then
-      begin
-        // Hack: get the latest java version ... ;-)
-        result:=JavaFiles[JavaFiles.Count-1];
-      end;
-    finally
-      JavaFiles.Free;
+  s:=GetWindowsSpecialDir(CSIDL_PROGRAM_FILES);
+  s:=IncludeTrailingPathDelimiter(s)+'Java'+DirectorySeparator;
+  JavaFiles := FindAllFiles(s, 'java.exe', true);
+  try
+    if JavaFiles.Count>0 then
+    begin
+      // Hack: get the latest java version ... ;-)
+      result:=JavaFiles[JavaFiles.Count-1];
     end;
+  finally
+    JavaFiles.Free;
   end;
   {$endif win32}
 
@@ -2166,8 +2185,6 @@ begin
   {$else Windows}
   result:=Which('java');
   {$endif Windows}
-
-  s:=result;
 end;
 
 function CheckJava: boolean;
