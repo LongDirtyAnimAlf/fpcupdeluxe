@@ -598,7 +598,7 @@ begin
     end;
 
     FWget:=Which('wget');
-    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + '\wget\wget.exe';
+    if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget.exe';
     if Not FileExists(FWget) then
     begin
       infoln(localinfotext+'Getting Wget.',etInfo);
@@ -607,6 +607,8 @@ begin
       // do not fail
       OperationSucceeded:=True;
     end;
+    //Set static wget binary location
+    TUseWGetDownloader.WGETBinary:=FWget;
 
     // Get patch binary from default binutils URL
     GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
@@ -1605,20 +1607,6 @@ begin
       FHTTPProxyPort,
       FHTTPProxyUser,
       FHTTPProxyPassword);
-
-      if NOT OperationSucceeded then
-      try
-        SysUtils.Deletefile(BinsZip); //Get rid of temp zip if any.
-        // use powershell
-        OperationSucceeded := DownloadByPowerShell(SourceURL,BinsZip);
-      except
-        on E: Exception do
-        begin
-          OperationSucceeded := false;
-          writelnlog(etError, localinfotext + 'PowerShell Exception ' + E.ClassName + '/' + E.Message + ' downloading Win64 binutils', true);
-        end;
-      end;
-
   except
     // Deal with timeouts, wrong URLs etc
     on E: Exception do
@@ -1747,7 +1735,7 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
 
-  infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them',etWarning);
+  infoln(localinfotext+'No OpenSLL library files available for SSL. Going to download them.',etWarning);
 
   OperationSucceeded := false;
 
@@ -1808,7 +1796,7 @@ begin
   end;
 
   if OperationSucceeded
-     then infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok',etInfo)
+     then infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok.',etWarning)
      else infoln(localinfotext+'Could not download/install openssl library', etError);
   SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
   Result := OperationSucceeded;
@@ -2623,21 +2611,6 @@ begin
     if ((forceoverwrite) AND (SysUtils.FileExists(aFile))) then SysUtils.DeleteFile(aFile);
     infoln(localinfotext+'Downloading ' + aURL);
     result:=Download(aUseWget,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    {$ifdef Windows}
-    if (not result) then
-    begin
-      if SysUtils.FileExists(aFile) then SysUtils.DeleteFile(aFile);
-      infoln(localinfotext+'Download failed. Now using Windows PowerShell for download of '+aURL);
-      result:=DownloadByPowerShell(aURL,aFile);
-    end;
-    {$endif}
-    if (not result) AND (NOT aUseWget) then
-    begin
-      if SysUtils.FileExists(aFile) then SysUtils.DeleteFile(aFile);
-      infoln(localinfotext+'Download failed. Now using wget/curl for download of '+aURL);
-      result:=Download(true,aURL,aFile,FHTTPProxyHost,FHTTPProxyPort,FHTTPProxyUser,FHTTPProxyPassword);
-    end;
-
     if (NOT result) then infoln(localinfotext+'Could not download file with URL ' + aURL +' into ' + ExtractFileDir(aFile) + ' (filename: ' + ExtractFileName(aFile) + ')');
   end;
 end;

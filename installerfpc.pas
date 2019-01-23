@@ -1745,7 +1745,7 @@ begin
   BootstrapArchive := GetTempFileNameExt('','FPCUPTMP','zip');
   if OperationSucceeded then
   begin
-    OperationSucceeded:=Download(FUseWget, FBootstrapCompilerURL, BootstrapArchive,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    OperationSucceeded:=GetFile(FBootstrapCompilerURL,BootstrapArchive,true);
     if FileExists(BootstrapArchive)=false then OperationSucceeded:=false;
   end;
 
@@ -2116,7 +2116,7 @@ begin
         begin
           if FBootstrapCompilerURL='' then
           begin
-            infoln(localinfotext+'Got a bootstrap compiler from official FPC bootstrap sources.',etInfo);
+            infoln(localinfotext+'Got a V'+aLocalBootstrapVersion+' bootstrap compiler from official FPC bootstrap sources.',etInfo);
             FBootstrapCompilerURL := FPCFTPURL+'/dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
           end;
         end;

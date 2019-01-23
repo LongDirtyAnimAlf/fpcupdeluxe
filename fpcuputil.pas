@@ -224,7 +224,7 @@ type
   private
     FCURLOk:boolean;
     FWGETOk:boolean;
-    WGETBinary:string;
+    //WGETBinary:string;
     function WGetDownload(Const URL : String; Dest : TStream):boolean;
     function LibCurlDownload(Const URL : String; Dest : TStream):boolean;
     function WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
@@ -233,6 +233,8 @@ type
     function FTPDownload(Const URL : String; Dest : TStream):boolean;
     function HTTPDownload(Const URL : String; Dest : TStream):boolean;
   public
+    class var
+        WGETBinary:string;
     constructor Create;override;
     constructor Create(aWGETBinary:string);
     function getFile(const URL,filename:string):boolean;override;
@@ -283,7 +285,7 @@ function GetReleaseCandidateFromUrl(aURL:string): integer;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
-procedure GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string='');
+function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
@@ -1332,11 +1334,10 @@ begin
   result:=false;
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   result:=aDownLoader.getFile(URL,TargetFile);
-  if (NOT result) then // try only once again in case of error
+  if (NOT result) then
   begin
     infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
     SysUtils.DeleteFile(TargetFile); // delete stale targetfile
-    result:=aDownLoader.getFile(URL,TargetFile);
   end;
 end;
 
@@ -1346,6 +1347,7 @@ var
   aDownLoader:TBasicDownLoader;
 begin
   result:=false;
+
   if UseWget
      then aDownLoader:=TWGetDownLoader.Create
      else aDownLoader:=TNativeDownLoader.Create;
@@ -1354,9 +1356,32 @@ begin
   finally
     aDownLoader.Destroy;
   end;
+
+  {$ifdef Windows}
+  //Second resort: use Windows PowerShell
+  if (NOT result) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    result:=DownloadByPowerShell(URL,TargetFile);
+  end;
+  {$endif}
+
+  //Final resort: use wget by force
+  if (NOT result) AND (NOT UseWget) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    aDownLoader:=TWGetDownLoader.Create;
+    try
+      result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    finally
+      aDownLoader.Destroy;
+    end;
+  end;
+
+  if (NOT result) then SysUtils.Deletefile(TargetFile);
 end;
 
-procedure GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string='');
+function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 var
   {$ifdef Darwin}
   Http:TNSHTTPSendAndReceive;
@@ -1364,12 +1389,17 @@ var
   {$else}
   Http: TFPHTTPClient;
   {$endif}
+  JSONFile:string;
+  JSONFileList:TStringList;
   Content : string;
   Json : TJSONData;
   JsonObject : TJSONObject;
   JsonArray: TJSONArray;
   i:integer;
 begin
+  result:=false;
+  Content:='';
+
   {$ifdef Darwin}
   // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
   // So, use client by Phil, a Lazarus forum member
@@ -1394,7 +1424,10 @@ begin
       begin
         SetLength(Content, Ms.Size);
         if Ms.Size > 0 then
-            Ms.Read(Content[1], Ms.Size);
+        begin
+          Ms.Read(Content[1], Ms.Size);
+          result:=true;
+        end;
       end;
     finally
       Ms.Free;
@@ -1403,31 +1436,61 @@ begin
     Http.Free;
   end;
   {$else}
-  Http:=TFPHTTPClient.Create(Nil);
-  try
-     Http.AddHeader('User-Agent',USERAGENT);
-     Http.AddHeader('Content-Type', 'application/json');
-     Http.IOTimeout:=5000;
-     Http.AllowRedirect:=true;
 
-    if Length(HTTPProxyHost)>0 then
+  if (NOT result) then
+  begin
+    JSONFile := GetTempFileNameExt('','FPCUPTMP','tmp');
+
+    result:=Download(
+          False,
+          aURL,
+          JSONFile,
+          HTTPProxyUser,
+          HTTPProxyPort,
+          HTTPProxyUser,
+          HTTPProxyPassword);
+    if result then
     begin
-      with Http do
-      begin
-        {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-        Proxy.Host:=HTTPProxyHost;
-        Proxy.Port:=HTTPProxyPort;
-        Proxy.UserName:=HTTPProxyUser;
-        Proxy.Password:=HTTPProxyPassword;
-        {$endif}
+      JSONFileList:=TStringList.Create;
+      try
+        JSONFileList.LoadFromFile(JSONFile);
+        Content:=JSONFileList.Text;
+      finally
+        JSONFileList.Free;
       end;
     end;
-    Content:=Http.Get(aURL);
-  finally
-    Http.Free;
+    SysUtils.Deletefile(JSONFile); //Get rid of temp file.
+  end;
+
+  if (NOT result) then
+  begin
+    Http:=TFPHTTPClient.Create(Nil);
+    try
+      Http.AddHeader('User-Agent',USERAGENT);
+      Http.AddHeader('Content-Type', 'application/json');
+      Http.IOTimeout:=5000;
+      Http.AllowRedirect:=true;
+
+      if Length(HTTPProxyHost)>0 then
+      begin
+        with Http do
+        begin
+          {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+          Proxy.Host:=HTTPProxyHost;
+          Proxy.Port:=HTTPProxyPort;
+          Proxy.UserName:=HTTPProxyUser;
+          Proxy.Password:=HTTPProxyPassword;
+          {$endif}
+        end;
+      end;
+      Content:=Http.Get(aURL);
+    finally
+      Http.Free;
+    end;
   end;
   {$endif}
-  if Length(Content)=0 then exit;
+
+  if (Length(Content)=0) OR (NOT result) then exit;
   Json:=GetJSON(Content);
   try
     if Json=Nil then exit;
@@ -1514,10 +1577,23 @@ begin
 end;
 
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
+const
+  URLMAGIC='/download';
 var
-  Output:string;
+  Output : String;
+  URI    : TURI;
+  aURL,P : String;
 begin
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+  infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etInfo);
   result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+  if result then
+  begin
+    result:=FileExists(TargetFile);
+  end;
 end;
 
 function GetLocalAppDataPath: string;
@@ -3416,16 +3492,14 @@ begin
 
   FCURLOk:=LoadCurlLibrary;
 
-  if Length(WGETBinary)=0 then WGETBinary:='wget';
+  if (Length(WGETBinary)=0) OR (NOT FileExists(WGETBinary)) then
+  begin
+    WGETBinary:='wget';
+  end;
 
   FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
 
   {$ifdef MSWINDOWS}
-  if (NOT FWGETOk) then
-  begin
-    WGETBinary:='wget.exe';
-    FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
-  end;
   {$ifdef CPU64}
   if (NOT FWGETOk) then
   begin
@@ -3433,6 +3507,11 @@ begin
     FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
   end;
   {$endif}
+  if (NOT FWGETOk) then
+  begin
+    WGETBinary:='wget.exe';
+    FWGETOk:=CheckExecutable(WGETBinary, '-V', '', etCustom);
+  end;
   {$endif MSWINDOWS}
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
@@ -3759,7 +3838,7 @@ begin
 
   if (NOT FWGETOk) then
   begin
-    infoln('No wget binary found: donwload will fail !!', etDebug);
+    infoln('No Wget binary found: download will fail !!', etDebug);
     exit;
   end;
 
@@ -3785,6 +3864,7 @@ begin
   result:=false;
   URI:=ParseURI(URL);
   P:=URI.Protocol;
+  infoln('Wget downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etInfo);
   If CompareText(P,'ftp')=0 then
     result:=FTPDownload(URL,Dest)
   else if CompareText(P,'http')=0 then
