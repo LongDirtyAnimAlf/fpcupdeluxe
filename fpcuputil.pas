@@ -1588,7 +1588,7 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etInfo);
+  infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
   if result then
   begin
@@ -2503,105 +2503,103 @@ end;
 
 function checkGithubRelease(const aURL:string):string;
 var
-  Webclient  : TAbstractWebClient;
-  Req        : TWebClientRequest;
-  Resp       : TWebClientResponse;
-  s,aFile    : string;
-  Json       : TJSONData;
-  JsonObject : TJSONObject;
-  Releases   : TJSONArray;
-  NewVersion : boolean;
-  i          : integer;
-  aStream    : TStream;
+  s,aFile      : string;
+  Json         : TJSONData;
+  JsonObject   : TJSONObject;
+  Releases     : TJSONArray;
+  NewVersion   : boolean;
+  i            : integer;
+  JSONFile     : string;
+  JSONFileList : TStringList;
+  Content      : string;
+  Success:boolean;
+
 begin
+  Success:=false;
   NewVersion:=false;
   result:='';
-  Req:=Nil;
-  Resp:=Nil;
   if (Length(aURL)>0) then
   begin
-    aStream:=TMemoryStream.Create;
-    try
-      WebClient:=TFPHTTPWebClient.Create(nil);
+
+    JSONFile := GetTempFileNameExt('','FPCUPTMP','tmp');
+
+    Success:=Download(
+             False,
+             aURL,
+             JSONFile);
+    if Success then
+    begin
+      JSONFileList:=TStringList.Create;
       try
-        Req:=WebClient.CreateRequest;
-        Req.ResponseContent:=aStream;
-        Req.Headers.Add('User-Agent: '+USERAGENT);
-        Req.Headers.Add('Content-Type: application/json');
+        JSONFileList.LoadFromFile(JSONFile);
+        Content:=JSONFileList.Text;
+      finally
+        JSONFileList.Free;
+      end;
+
+      if (Length(Content)>0) then
+      begin
+        Json:=GetJSON(Content);
         try
-          Resp:=WebClient.ExecuteRequest('GET', aURL, Req);
-        except
-          //Ignore exceptions
-        end;
-        if (Resp<>Nil) then
-        begin
-          aStream.Position:=0;
-          Json:=GetJSON(aStream);
+          if JSON=Nil then exit;
           try
-            if JSON=Nil then exit;
-            try
-              JsonObject := TJSONObject(Json);
-              // Example ---
-              // tag_name: "1.6.2b"
-              // name: "Release v1.6.2b of fpcupdeluxe"
-              s:=JsonObject.Get('tag_name');
-              if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
-              if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
+            JsonObject := TJSONObject(Json);
+            // Example ---
+            // tag_name: "1.6.2b"
+            // name: "Release v1.6.2b of fpcupdeluxe"
+            s:=JsonObject.Get('tag_name');
+            if GetNumericalVersion(s)>GetNumericalVersion(DELUXEVERSION) then NewVersion:=True;
+            if GetNumericalVersion(s)=GetNumericalVersion(DELUXEVERSION) then
+            begin
+              if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
+            end;
+            if NewVersion then
+            begin
+              s:=JsonObject.Get('prerelease');//Should be False
+              NewVersion:=(s='False');
+            end;
+            //YES !!!
+            if NewVersion then
+            begin
+              //Assets is an array of binaries belonging to a release
+              Releases:=JsonObject.Get('assets',TJSONArray(nil));
+              for i:=0 to (Releases.Count-1) do
               begin
-                if Ord(s[Length(s)])>Ord(DELUXEVERSION[Length(DELUXEVERSION)]) then NewVersion:=True;
-              end;
-              if NewVersion then
-              begin
-                s:=JsonObject.Get('prerelease');//Should be False
-                NewVersion:=(s='False');
-              end;
-              //YES !!!
-              if NewVersion then
-              begin
-                //Assets is an array of binaries belonging to a release
-                Releases:=JsonObject.Get('assets',TJSONArray(nil));
-                for i:=0 to (Releases.Count-1) do
+                JsonObject := TJSONObject(Releases[i]);
+                // Example ---
+                // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
+                // name: "fpcupdeluxe-aarch64-linux"
+                // created_at: "2018-10-14T06:58:44Z"
+                s:=JsonObject.Get('name');
+                aFile:='fpcupdeluxe-'+GetTargetCPUOS;
+                {$ifdef Darwin}
+                {$ifdef LCLCARBON}
+                aFile:=aFile+'-carbon';
+                {$endif}
+                {$ifdef LCLCOCOA}
+                aFile:=aFile+'-cocoa';
+                {$endif}
+                {$endif}
+                {$if defined(LCLQT) or defined(LCLQT5)}
+                aFile:=aFile+'-qt5';
+                {$endif}
+                if (Pos(aFile,s)=1) then
                 begin
-                  JsonObject := TJSONObject(Releases[i]);
-                  // Example ---
-                  // browser_download_url: "https://github.com/newpascal/fpcupdeluxe/releases/download/1.6.2b/fpcupdeluxe-aarch64-linux"
-                  // name: "fpcupdeluxe-aarch64-linux"
-                  // created_at: "2018-10-14T06:58:44Z"
-                  s:=JsonObject.Get('name');
-                  aFile:='fpcupdeluxe-'+GetTargetCPUOS;
-                  {$ifdef Darwin}
-                  {$ifdef LCLCARBON}
-                  aFile:=aFile+'-carbon';
-                  {$endif}
-                  {$ifdef LCLCOCOA}
-                  aFile:=aFile+'-cocoa';
-                  {$endif}
-                  {$endif}
-                  {$if defined(LCLQT) or defined(LCLQT5)}
-                  aFile:=aFile+'-qt5';
-                  {$endif}
-                  if (Pos(aFile,s)=1) then
-                  begin
-                    result:=JsonObject.Get('browser_download_url');
-                    break;
-                  end;
+                  result:=JsonObject.Get('browser_download_url');
+                  break;
                 end;
               end;
-            except
-              //Swallow exceptions in case of failures: not important
             end;
-          finally
-            Json.Free;
+          except
+            //Swallow exceptions in case of failures: not important
           end;
+        finally
+          Json.Free;
         end;
-      finally
-        Resp.Free;
-        Req.Free;
-        WebClient.Free;
       end;
-    finally
-      aStream.Free;
     end;
+    SysUtils.Deletefile(JSONFile); //Get rid of temp file.
+
   end;
 end;
 
@@ -3471,7 +3469,7 @@ begin
   if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
-  infoln('Native downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etInfo);
+  infoln('Native downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   If CompareText(P,'ftp')=0 then
     result:=FTPDownload(URL,filename)
   else if CompareText(P,'http')=0 then
@@ -3650,22 +3648,22 @@ end;
 function TUseWGetDownloader.FTPDownload(Const URL : String; Dest : TStream):boolean;
 begin
   result:=LibCurlDownload(URL,Dest);
-  if (result) then infoln('LibCurl FTP file download success !!!', etInfo);
+  if (result) then infoln('LibCurl FTP file download success !!!', etDebug);
   if (NOT result) then
   begin
     result:=WGetDownload(URL,Dest);
-    if (result) then infoln('Wget FTP file download success !', etInfo);
+    if (result) then infoln('Wget FTP file download success !', etDebug);
   end;
 end;
 
 function TUseWGetDownloader.HTTPDownload(Const URL : String; Dest : TStream):boolean;
 begin
   result:=LibCurlDownload(URL,Dest);
-  if (result) then infoln('LibCurl HTTP file download success !!!', etInfo);
+  if (result) then infoln('LibCurl HTTP file download success !!!', etDebug);
   if (NOT result) then
   begin
     result:=WGetDownload(URL,Dest);
-    if (result) then infoln('Wget HTTP file download success !', etInfo);
+    if (result) then infoln('Wget HTTP file download success !', etDebug);
   end;
 end;
 
@@ -3822,11 +3820,11 @@ end;
 function TUseWGetDownloader.getFTPFileList(const URL:string; filelist:TStringList):boolean;
 begin
   result:=LibCurlFTPFileList(URL,filelist);
-  if (result) then infoln('LibCurl FTP filelist success !!!!', etInfo);
+  if (result) then infoln('LibCurl FTP filelist success !!!!', etDebug);
   if (NOT result) then
   begin
     result:=WGetFTPFileList(URL,filelist);
-    if (result) then infoln('Wget FTP filelist success !!!!', etInfo);
+    if (result) then infoln('Wget FTP filelist success !!!!', etDebug);
   end;
 end;
 
@@ -3864,7 +3862,7 @@ begin
   result:=false;
   URI:=ParseURI(URL);
   P:=URI.Protocol;
-  infoln('Wget downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etInfo);
+  infoln('Wget downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   If CompareText(P,'ftp')=0 then
     result:=FTPDownload(URL,Dest)
   else if CompareText(P,'http')=0 then
