@@ -3514,7 +3514,7 @@ begin
 
   if (NOT FCURLOk) AND (NOT FWGETOk) then
   begin
-    infoln('Could not initialize either libcurl or wget: expect severe failures !',etError);
+    //infoln('Could not initialize either libcurl or wget: expect severe failures !',etError);
   end;
 end;
 
