@@ -3608,7 +3608,7 @@ begin
 
         //check the URL
         if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
-        if ( (res=CURLE_OK) AND (response<>404)) then
+        if ( (res=CURLE_OK) AND (response<>0) AND (response<>404) ) then
         begin
           res:=curl_easy_perform(hCurl);
           result:=((res=CURLE_OK) AND (Dest.Size>0));
