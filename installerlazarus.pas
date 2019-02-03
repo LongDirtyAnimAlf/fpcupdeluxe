@@ -474,8 +474,8 @@ begin
 
   //Get Freetype and Zlib for ao fpreport ... just to be sure
   {$IFDEF MSWINDOWS}
-  DownloadFreetype;
-  DownloadZlib;
+  //DownloadFreetype;
+  //DownloadZlib;
   {$ENDIF}
 
   LazBuildApp := IncludeTrailingPathDelimiter(FInstallDirectory) + LAZBUILDNAME + GetExeExt;

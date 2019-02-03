@@ -67,7 +67,7 @@ uses
   m_any_to_linuxpowerpc64,
   m_any_to_linuxaarch64,
   m_any_to_haiku386,
-  //m_any_to_haikux64,
+  m_any_to_haikux64,
   m_any_to_embeddedarm,
   m_any_to_embeddedavr,
   m_any_to_embeddedmipsel,

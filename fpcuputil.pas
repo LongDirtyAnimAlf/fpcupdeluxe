@@ -3566,6 +3566,7 @@ var
   response:sizeint;
 begin
   result:=false;
+
   if (NOT FCURLOk) then exit;
 
   if LoadCurlLibrary then
@@ -3605,36 +3606,13 @@ begin
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(Dest));
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(CURLUSERAGENT));
 
-        if res=CURLE_OK then res := curl_easy_perform(hCurl);
-
-        if res=CURLE_OK then
+        //check the URL
+        if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
+        if ( (res=CURLE_OK) AND (response<>404)) then
         begin
-          while true do
-          begin
-            res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
-            // not needed anymore ... we set CURLOPT_FOLLOWLOCATION !
-            (*
-            if ( (res=CURLE_OK) AND ((response DIV 100)=3) ) then // we have a redirect !!
-            begin
-              res:=curl_easy_getinfo(hCurl, CURLINFO_REDIRECT_URL, aBuffer);
-              location:=GetStringFromBuffer(aBuffer);
-              if ( (res=CURLE_OK) AND (Length(location)>0) ) then
-              begin
-                res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(location));
-                if res=CURLE_OK then
-                begin
-                  Dest.Position:=0;
-                  res := curl_easy_perform(hCurl);
-                end;
-              end;
-            end
-            else
-            *)
-            break;
-          end;
-        end;
-
-        result:=((res=CURLE_OK) AND (Dest.Size>0));
+          res:=curl_easy_perform(hCurl);
+          result:=((res=CURLE_OK) AND (Dest.Size>0));
+        end else result:=false;
 
         curl_easy_cleanup(hCurl);
       end;

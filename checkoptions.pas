@@ -197,7 +197,7 @@ begin
           FInstaller.Clean:=Options.GetOptionNoParam('','clean',false);
         end;
       end;
-      FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',ProgramDirectory+installerUniversal.CONFIGFILENAME);
+      FInstaller.ConfigFile:=Options.GetOption('','moduleconfig',SafeGetApplicationPath+installerUniversal.CONFIGFILENAME);
 
       FInstaller.CrossCPU_Target:=Options.GetOption('','cputarget','');
       FInstaller.CrossOS_SubArch:=Options.GetOption('','subarch','');
