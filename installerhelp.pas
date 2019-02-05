@@ -284,7 +284,7 @@ const
     ('1.8','/Lazarus%201.8.0/doc-chm-fpc3.0.2-laz1.8.zip'),
     ('1.8.2','/Lazarus%201.8.2/doc-chm-fpc3.0.2-laz1.8.zip'),
     ('1.8.4','/Lazarus%201.8.4/doc-chm-fpc3.0.4-laz1.8.zip'),
-    ('2.0RC1','/Lazarus%202.0RC1/doc-chm-fpc3.0.4-laz2.0.zip')
+    ('2.0.0','/Lazarus%202.0.0/doc-chm-fpc3.0.4-laz2.0.zip')
   );
   HELP_URL_BASE='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation';
   HELP_URL_BASE_ALTERNATIVE='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation';
