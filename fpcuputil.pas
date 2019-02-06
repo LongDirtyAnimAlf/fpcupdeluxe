@@ -288,6 +288,7 @@ function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: strin
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
+function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
@@ -1364,6 +1365,14 @@ begin
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByPowerShell(URL,TargetFile);
   end;
+  //Third resort: use BitsAdmin
+  {
+  if (NOT result) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    result:=DownloadByBitsAdmin(URL,TargetFile);
+  end;
+  }
   {$endif}
 
   //Final resort: use wget by force
@@ -1576,6 +1585,29 @@ begin
   end;
 end;
 
+
+function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
+const
+  URLMAGIC='/download';
+var
+  Output : String;
+  URI    : TURI;
+  aURL,P : String;
+begin
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+  infoln('BitsAdmin downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
+  //result:=(ExecuteCommand('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
+  //result:=(ExecuteCommand('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
+  result:=(ExecuteCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output, False)=0);
+  if result then
+  begin
+    result:=FileExists(TargetFile);
+  end;
+end;
+
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 const
   URLMAGIC='/download';
@@ -1589,6 +1621,7 @@ begin
   URI:=ParseURI(aURL);
   P:=URI.Protocol;
   infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
+  //result:=(ExecuteCommand('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
   result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
   if result then
   begin

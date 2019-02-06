@@ -407,7 +407,7 @@ uses
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
   //,blcksock, ssl_openssl_lib
-  ,fpopenssl,openssl
+  ,openssl, opensslsockets
   {$ENDIF}
   {$ENDIF}
   ;
@@ -594,8 +594,17 @@ begin
           DestroySSLInterface; // disable ssl and release libs
         end;
       end;
-      if (NOT IsSSLloaded) then InitSSLInterface;
+      if (NOT IsSSLloaded) then
+      begin
+        InitSSLInterface;
+      end;
     end;
+
+    if (NOT IsSSLloaded) then
+      infoln(localinfotext+'Could not init SSL interface.',etWarning)
+    else
+      infoln(localinfotext+'Init SSL interface success.',etInfo);
+
 
     FWget:=Which('wget');
     if Not FileExists(FWget) then FWget := IncludeTrailingPathDelimiter(FMakeDir) + 'wget\wget.exe';
