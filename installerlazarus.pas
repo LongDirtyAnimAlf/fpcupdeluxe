@@ -995,7 +995,7 @@ end;
 function TLazarusInstaller.GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
 const
   VERSIONMAGIC='LazarusVersionStr';
-  VERSIONMAGIC2='laz_patch';
+  //VERSIONMAGIC2='laz_patch';
 var
   s,aFileName:string;
   TxtFile:Text;
@@ -1064,6 +1064,7 @@ begin
     end;
   end;
 
+  {
   if result=-1 then
   begin
     aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
@@ -1096,6 +1097,7 @@ begin
       CloseFile(TxtFile);
     end;
   end;
+  }
 
 end;
 
