@@ -1774,6 +1774,30 @@ begin
     end;
   end;
 
+  if (NOT OperationSucceeded) then
+  begin
+    infoln(localinfotext+'Could not download/install openssl library the normal way', etInfo);
+    infoln(localinfotext+'Now going to use BitsAdmin (may be slow)', etInfo);
+
+    for i:=0 to (Length(NewSourceURL)-1) do
+    try
+      aSourceURL:=NewSourceURL[i];
+      SysUtils.DeleteFile(OpenSSLZip);
+      OperationSucceeded:=DownloadByBitsAdmin(aSourceURL,OpenSSLZip);
+      if (NOT OperationSucceeded) then
+        SysUtils.DeleteFile(OpenSSLZip)
+      else
+        break;
+
+    except
+      on E: Exception do
+      begin
+        OperationSucceeded := false;
+        writelnlog(etError, localinfotext + 'Exception ' + E.ClassName + '/' + E.Message + ' downloading OpenSSL library by BitsAdmin', true);
+      end;
+    end;
+  end;
+
   if OperationSucceeded then
   begin
     // Extract

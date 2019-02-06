@@ -1585,7 +1585,6 @@ begin
   end;
 end;
 
-
 function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
 const
   URLMAGIC='/download';
