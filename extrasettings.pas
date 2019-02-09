@@ -50,6 +50,7 @@ type
     btnListCustomOptions: TButton;
     CheckAutoSwitchURL: TCheckBox;
     CheckForceLocalRepoClient: TCheckBox;
+    CheckGetUpdates: TCheckBox;
     CheckSendInfo: TCheckBox;
     CheckIncludeHelp: TCheckBox;
     CheckSplitFPC: TCheckBox;
@@ -156,6 +157,9 @@ type
     function GetForceLocalRepoClient:boolean;
     procedure SetForceLocalRepoClient(value:boolean);
 
+    function GetCheckUpdates:boolean;
+    procedure SetCheckUpdates(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -212,6 +216,7 @@ type
     property SendInfo:boolean read GetSendInfo write SetSendInfo;
     property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
     property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
+    property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -973,6 +978,15 @@ end;
 procedure TForm2.SetForceLocalRepoClient(value:boolean);
 begin
   CheckForceLocalRepoClient.Checked:=value;
+end;
+
+function TForm2.GetCheckUpdates:boolean;
+begin
+  result:=CheckGetUpdates.Checked;
+end;
+procedure TForm2.SetCheckUpdates(value:boolean);
+begin
+  CheckGetUpdates.Checked:=value;
 end;
 
 function TForm2.GetFPCOptions:string;

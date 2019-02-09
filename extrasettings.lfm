@@ -390,6 +390,22 @@ object Form2: TForm2
       ShowHint = True
       TabOrder = 13
     end
+    object CheckGetUpdates: TCheckBox
+      AnchorSideLeft.Control = GroupBox2
+      AnchorSideTop.Control = CheckForceLocalRepoClient
+      AnchorSideTop.Side = asrBottom
+      Left = 4
+      Height = 19
+      Hint = 'Check for updates of fpcupdeluxe.'
+      Top = 354
+      Width = 186
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 6
+      Caption = 'Check for updates (default=no)'
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 14
+    end
   end
   object GroupBox4: TGroupBox
     AnchorSideLeft.Control = GroupBox2

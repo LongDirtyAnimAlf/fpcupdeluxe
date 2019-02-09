@@ -3370,7 +3370,7 @@ begin
     end;
   end;
   {$endif}
-  Application.QueueAsyncCall(@CheckForUpdates,0);
+  if Form2.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
 end;
 
 procedure TForm1.CheckForUpdates(Data: PtrInt);
