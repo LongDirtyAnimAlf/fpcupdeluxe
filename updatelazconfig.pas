@@ -95,7 +95,7 @@ const
   TrunkLazarusNewEnvironmentConfig='2.1.0';
   // We use a hardcoded version for Lazarus below
   VersionNewHelpConfig='1';
-  VersionNewPackageConfig='2';
+  VersionNewPackageConfig='3';
 
 type
 

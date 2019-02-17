@@ -33,6 +33,7 @@ type
     btnSetupPlus: TButton;
     btnClearLog: TButton;
     btnUninstallModule: TButton;
+    btnGetOpenSSL: TButton;
     ButtonInstallCrossCompiler: TButton;
     CheckAutoClear: TCheckBox;
     FPCVersionLabel: TLabel;
@@ -55,8 +56,8 @@ type
     BasicSheet: TTabSheet;
     CrossSheet: TTabSheet;
     ModuleSheet: TTabSheet;
+    ExtraSheet: TTabSheet;
     TrunkBtn: TBitBtn;
-    NPBtn: TBitBtn;
     FixesBtn: TBitBtn;
     StableBtn: TBitBtn;
     OldBtn: TBitBtn;
@@ -70,6 +71,7 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
+    procedure btnGetOpenSSLClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; {%H-}var Key: Word; {%H-}Shift: TShiftState);
     procedure FPCVersionLabelClick(Sender: TObject);
     procedure LazarusOnlyClick(Sender: TObject);
@@ -178,6 +180,7 @@ uses
   IniFiles,
   strutils,
   LCLType, // for MessageBox
+  lclintf, // for OpenURL
   InterfaceBase, // for WidgetSet
   {$ifdef EnableLanguages}
   Translations,
@@ -319,6 +322,7 @@ begin
   sInstallDir:='C:\fpcupdeluxe';
   {$ELSE}
   sInstallDir:='~/fpcupdeluxe';
+  btnGetOpenSSL.Visible:=False;;
   {$ENDIF}
 
   {$ifdef DARWIN}
@@ -809,6 +813,53 @@ begin
   FPCupManager.Destroy;
   InitFPCupManager;
   //DisEnable(Sender,True);
+end;
+
+procedure TForm1.btnGetOpenSSLClick(Sender: TObject);
+var
+  OpenSSLZip,OpenSSLURL:string;
+  Success:boolean;
+begin
+  {$ifdef MSWindows}
+  OpenSSLURL:=OpenSSLSourceURL[Low(OpenSSLSourceURL)];
+  OpenSSLZip:=IncludeTrailingPathDelimiter(GetWindowsDownloadFolder)+GetFileNameFromURL(OpenSSLURL);
+  SysUtils.Deletefile(OpenSSLZip);
+  Success:=OpenURL(OpenSSLURL);
+  if (NOT Success) then
+  begin
+    OpenSSLURL:=OpenSSLSourceURL[High(OpenSSLSourceURL)];
+    OpenSSLZip:=IncludeTrailingPathDelimiter(GetWindowsDownloadFolder)+GetFileNameFromURL(OpenSSLURL);
+    SysUtils.Deletefile(OpenSSLZip);
+    Success:=OpenURL(OpenSSLURL);
+  end;
+  if Success then
+  begin
+    sleep(5000); // give browser some time to finish
+    if FileExists(OpenSSLZip) then
+    begin
+      with TNormalUnzipper.Create do
+      begin
+        try
+          SysUtils.Deletefile(SafeGetApplicationPath+'libeay32.dll');
+          if GetLastOSError<>5 then // no access denied
+          begin
+            SysUtils.Deletefile(SafeGetApplicationPath+'ssleay32.dll');
+            if GetLastOSError<>5 then // no access denied
+            begin
+              if DoUnZip(OpenSSLZip,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then
+              begin
+                AddMessage('Success: got OpenSSL library dll by browser!');
+              end;
+            end;
+          end;
+        finally
+          Free;
+        end;
+      end;
+      SysUtils.Deletefile(OpenSSLZip);
+    end;
+  end;
+  {$endif MSWindows}
 end;
 
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);
@@ -1410,6 +1461,7 @@ begin
       LazarusTarget:='trunk';
     end;
 
+    {
     if Sender=NPBtn then
     begin
       s:='Going to install NewPascal release';
@@ -1419,6 +1471,7 @@ begin
       //LazarusBranch:='release';
       //FPCupManager.IncludeModules:='mORMot';
     end;
+    }
 
     if Sender=FixesBtn then
     begin
@@ -1588,7 +1641,7 @@ begin
 
     PrepareRun;
 
-    FPCupManager.ExportOnly:=(NOT Form2.CheckPackageRepo.Checked);
+    FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
 
     modules:='';
 
@@ -1646,7 +1699,7 @@ begin
       RealRun;
     end;
   finally
-    FPCupManager.ExportOnly:=(NOT Form2.CheckRepo.Checked);
+    FPCupManager.ExportOnly:=(NOT Form2.Repo);
     DisEnable(Sender,True);
   end;
 end;
@@ -2857,7 +2910,7 @@ begin
 
   FPCupManager.LazarusPrimaryConfigPath:=sInstallDir+'config_'+ExtractFileName(FPCupManager.LazarusDirectory);
 
-  FPCupManager.ExportOnly:=(NOT Form2.CheckRepo.Checked);
+  FPCupManager.ExportOnly:=(NOT Form2.Repo);
 
   FPCupManager.FPCPatches:=Form2.FPCPatches;
   FPCupManager.LazarusPatches:=Form2.LazPatches;

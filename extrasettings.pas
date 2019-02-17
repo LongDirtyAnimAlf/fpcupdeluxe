@@ -5,8 +5,8 @@ unit extrasettings;
 interface
 
 uses
-  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls, Dialogs,
-  installerCore;
+  Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
+  Dialogs, CheckLst, installerCore;
 
 Const
   DELUXEKEY='fpcupdeluxeishereforyou';
@@ -48,21 +48,7 @@ type
     btnRemLazPatch: TButton;
     btnSelectCompiler: TButton;
     btnListCustomOptions: TButton;
-    CheckAutoSwitchURL: TCheckBox;
-    CheckForceLocalRepoClient: TCheckBox;
-    CheckGetUpdates: TCheckBox;
-    CheckSendInfo: TCheckBox;
-    CheckIncludeHelp: TCheckBox;
-    CheckSplitFPC: TCheckBox;
-    CheckIncludeLCL: TCheckBox;
-    CheckSplitLazarus: TCheckBox;
-    CheckUseWget: TCheckBox;
-    CheckUpdateOnly: TCheckBox;
-    CheckRepo: TCheckBox;
-    CheckPackageRepo: TCheckBox;
-    CheckUseMakeJobs: TCheckBox;
-    CheckExtraVerbose: TCheckBox;
-    CheckFpcupBootstrappersOnly: TCheckBox;
+    MiscellaneousCheckListBox: TCheckListBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;
     EditCrossBuildOptions: TEdit;
@@ -122,14 +108,28 @@ type
     FCrossUtils:TCrossUtils;
     FInstallPath:string;
 
+    function GetCheckIndex(aCaption:string):integer;
+    function GetCheckState(aCaption:string):boolean;
+    procedure SetCheckState(aCaption:string;aState:boolean);
+    procedure SetCheckEnabled(aCaption:string;aState:boolean);
+
     function  GetPatches(const Lazarus:boolean=false):string;
     procedure SetPatches(value:string;const Lazarus:boolean=false);
 
     function GetRepo:boolean;
+    procedure SetRepo(value:boolean);
+
     function GetPackageRepo:boolean;
+    procedure SetPackageRepo(value:boolean);
+
     function GetUpdateOnly:boolean;
+    procedure SetUpdateOnly(value:boolean);
+
     function GetIncludeLCL:boolean;
+    procedure SetIncludeLCL(value:boolean);
+
     function GetIncludeHelp:boolean;
+    procedure SetIncludeHelp(value:boolean);
 
     function GetSplitFPC:boolean;
     procedure SetSplitFPC(value:boolean);
@@ -198,13 +198,13 @@ type
     function GetCrossARMFPCStr(aCPU, aOS: string): string;
     function GetCompiler(aCPU, aOS: string): string;
 
-    property Repo:boolean read GetRepo;
-    property PackageRepo:boolean read GetPackageRepo;
+    property Repo:boolean read GetRepo write SetRepo;
+    property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
 
-    property UpdateOnly:boolean read GetUpdateOnly;
+    property UpdateOnly:boolean read GetUpdateOnly write SetUpdateOnly;
 
-    property IncludeLCL:boolean read GetIncludeLCL;
-    property IncludeHelp:boolean read GetIncludeHelp;
+    property IncludeLCL:boolean read GetIncludeLCL write SetIncludeLCL;
+    property IncludeHelp:boolean read GetIncludeHelp write SetIncludeHelp;
 
     property SplitFPC:boolean read GetSplitFPC write SetSplitFPC;
     property SplitLazarus:boolean read GetSplitLazarus write SetSplitLazarus;
@@ -233,6 +233,53 @@ type
     property FPCPatches:string read GetFPCPatches write SetFPCPatches;
     property LazPatches:string read GetLazPatches write SetLazPatches;
   end;
+
+
+resourcestring
+  HintCheckRepo = 'Download whole repository, or only latest files';
+  CaptionCheckRepo = 'Get FPC/Laz repositories (default=yes)';
+
+  HintCheckPackageRepo = '';
+  CaptionCheckPackageRepo = 'Get package repositories (default=no)';
+
+  HintCheckIncludeLCL = '';
+  CaptionCheckIncludeLCL = 'Include LCL with cross-compiler (default=no)';
+
+  HintCheckUpdateOnly = '';
+  CaptionCheckUpdateOnly = 'FPC/Laz rebuild only';
+
+  HintCheckIncludeHelp = '';
+  CaptionCheckIncludeHelp = 'Include Help (default=no)';
+
+  HintCheckSplitFPC = '';
+  CaptionCheckSplitFPC = 'Split FPC source and bins (default=yes)';
+
+  HintCheckSplitLazarus = '';
+  CaptionCheckSplitLazarus = 'Split Lazarus source and bins (default=no)';
+
+  HintCheckUseWget = '';
+  CaptionCheckUseWget = 'Use wget/libcurl as downloader (default=no)';
+
+  HintCheckUseMakeJobs = '';
+  CaptionCheckUseMakeJobs = 'Use jobs for GNU make (default=yes)';
+
+  HintCheckExtraVerbose = '';
+  CaptionCheckExtraVerbose = 'Be extra verbose (default=no)';
+
+  HintCheckAutoSwitchURL = '';
+  CaptionCheckAutoSwitchURL = 'Auto-switch repo URL (default=no)';
+
+  HintCheckSendInfo = 'Location and install info will be send to public central fpcupdeluxe server.';
+  CaptionCheckSendInfo = 'Send location and install info (default=no)';
+
+  HintCheckFpcupBootstrappersOnly = '';
+  CaptionCheckFpcupBootstrappersOnly = 'Only use fpcup bootstrappers (default=no)';
+
+  HintCheckForceLocalRepoClient = 'Use the repo-client by fpcupdeluxe.';
+  CaptionCheckForceLocalRepoClient = 'Use local repo-client (default=no)';
+
+  HintCheckGetUpdates = 'Check for updates of fpcupdeluxe.';
+  CaptionCheckGetUpdates = 'Check for updates (default=no)';
 
 var
   Form2: TForm2;
@@ -322,6 +369,26 @@ begin
   for ARMArch := Low(TARMARCH) to High(TARMARCH) do
     RadioGroupARMArch.Items.Add(GetEnumNameSimple(TypeInfo(TARMARCH),Ord(ARMArch)));
 
+  with MiscellaneousCheckListBox.Items do
+  begin
+    Append(CaptionCheckRepo);
+    Append(CaptionCheckPackageRepo);
+    Append(CaptionCheckIncludeLCL);
+    Append(CaptionCheckUpdateOnly);
+    Append(CaptionCheckIncludeHelp);
+    Append(CaptionCheckSplitFPC);
+    Append(CaptionCheckSplitLazarus);
+    Append(CaptionCheckUseWget);
+    Append(CaptionCheckUseMakeJobs);
+    Append(CaptionCheckExtraVerbose);
+    Append(CaptionCheckAutoSwitchURL);
+    Append(CaptionCheckSendInfo);
+    Append(CaptionCheckFpcupBootstrappersOnly);
+    Append(CaptionCheckForceLocalRepoClient);
+    Append(CaptionCheckGetUpdates);
+  end;
+
+
   for OS := Low(TOS) to High(TOS) do
   begin
     for CPU := Low(TCPU) to High(TCPU) do
@@ -340,14 +407,14 @@ begin
 
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
-    CheckRepo.Checked:=ReadBool('General','GetRepo',True);
-    CheckPackageRepo.Checked:=ReadBool('General','GetPackageRepo',False);
-    CheckIncludeHelp.Checked:=ReadBool('General','IncludeHelp',False);
+    Repo:=ReadBool('General','GetRepo',True);
+    PackageRepo:=ReadBool('General','GetPackageRepo',False);
+    IncludeHelp:=ReadBool('General','IncludeHelp',False);
 
-    CheckIncludeLCL.Checked:=ReadBool('Cross','IncludeLCL',False);
+    IncludeLCL:=ReadBool('Cross','IncludeLCL',False);
 
     {$ifdef RemoteLog}
-    CheckSendInfo.Checked:=ReadBool('General','SendInfo',False);
+    SendInfo:=ReadBool('General','SendInfo',False);
     {$endif}
 
     EditHTTPProxyHost.Text:=ReadString('ProxySettings','HTTPProxyURL','');
@@ -379,7 +446,7 @@ begin
   //{$IF (defined(MSWINDOWS)) OR (defined(Darwin)) OR (defined(OpenBSD))}
   {$IF (defined(Darwin)) OR (defined(OpenBSD))}
   // there are default setings for the downloader, so disable user access
-  CheckUseWget.Enabled:=False;
+  UseWget:=False;
   {$endif}
 
   {$ifdef CPUAARCH64}
@@ -392,14 +459,15 @@ begin
   {$endif CPUARM}
 
   {$ifndef RemoteLog}
-  CheckSendInfo.Checked:=False;
-  CheckSendInfo.Enabled:=False;
+  SendInfo:=False;
+  SetCheckEnabled(CaptionCheckSendInfo,False);
   {$endif}
 
   {$ifndef Windows}
-  CheckForceLocalRepoClient.Checked:=False;
-  CheckForceLocalRepoClient.Enabled:=False;
+  ForceLocalRepoClient:=False;
+  SetCheckEnabled(CaptionCheckForceLocalRepoClient,False);
   {$endif}
+
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
@@ -872,121 +940,169 @@ begin
   result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler;
 end;
 
+function TForm2.GetCheckIndex(aCaption:string):integer;
+begin
+  result:=MiscellaneousCheckListBox.Items.IndexOf(aCaption);
+end;
+
+function TForm2.GetCheckState(aCaption:string):boolean;
+var
+  aIndex:integer;
+begin
+  result:=false;
+  aIndex:=GetCheckIndex(aCaption);
+  if aIndex<>-1 then result:=MiscellaneousCheckListBox.Checked[aIndex];
+end;
+
+procedure TForm2.SetCheckState(aCaption:string;aState:boolean);
+var
+  aIndex:integer;
+begin
+  aIndex:=GetCheckIndex(aCaption);
+  MiscellaneousCheckListBox.Checked[aIndex]:=aState;
+end;
+
+procedure TForm2.SetCheckEnabled(aCaption:string;aState:boolean);
+var
+  aIndex:integer;
+begin
+  aIndex:=GetCheckIndex(aCaption);
+  MiscellaneousCheckListBox.ItemEnabled[aIndex]:=aState;
+end;
 
 function TForm2.GetRepo:boolean;
 begin
-  result:=CheckRepo.Checked;
+  result:=GetCheckState(CaptionCheckRepo);
+end;
+procedure TForm2.SetRepo(value:boolean);
+begin
+  SetCheckState(CaptionCheckRepo,value);
 end;
 
 function TForm2.GetPackageRepo:boolean;
 begin
-  result:=CheckPackageRepo.Checked;
+  result:=GetCheckState(CaptionCheckPackageRepo);
 end;
-
-function TForm2.GetUpdateOnly:boolean;
+procedure TForm2.SetPackageRepo(value:boolean);
 begin
-  result:=CheckUpdateOnly.Checked;
+  SetCheckState(CaptionCheckPackageRepo,value);
 end;
 
 function TForm2.GetIncludeLCL:boolean;
 begin
-  result:=CheckIncludeLCL.Checked;
+  result:=GetCheckState(CaptionCheckIncludeLCL);
+end;
+procedure TForm2.SetIncludeLCL(value:boolean);
+begin
+  SetCheckState(CaptionCheckIncludeLCL,value);
+end;
+
+function TForm2.GetUpdateOnly:boolean;
+begin
+  result:=GetCheckState(CaptionCheckUpdateOnly);
+end;
+procedure TForm2.SetUpdateOnly(value:boolean);
+begin
+  SetCheckState(CaptionCheckUpdateOnly,value);
 end;
 
 function TForm2.GetIncludeHelp:boolean;
 begin
-  result:=CheckIncludeHelp.Checked;
+  result:=GetCheckState(CaptionCheckIncludeHelp);
+end;
+procedure TForm2.SetIncludeHelp(value:boolean);
+begin
+  SetCheckState(CaptionCheckIncludeHelp,value);
 end;
 
 function TForm2.GetSplitFPC:boolean;
 begin
-  result:=CheckSplitFPC.Checked;
+  result:=GetCheckState(CaptionCheckSplitFPC);
 end;
 procedure TForm2.SetSplitFPC(value:boolean);
 begin
-  CheckSplitFPC.Checked:=value;
+  SetCheckState(CaptionCheckSplitFPC,value);
 end;
 
 function TForm2.GetSplitLazarus:boolean;
 begin
-  result:=CheckSplitLazarus.Checked;
+  result:=GetCheckState(CaptionCheckSplitLazarus);
 end;
 procedure TForm2.SetSplitLazarus(value:boolean);
 begin
-  CheckSplitLazarus.Checked:=value;
+  SetCheckState(CaptionCheckSplitLazarus,value);
 end;
 
 function TForm2.GetUseWget:boolean;
 begin
-  result:=CheckUseWget.Checked;
+  result:=GetCheckState(CaptionCheckUseWget);
 end;
 procedure TForm2.SetUseWget(value:boolean);
 begin
-  CheckUseWget.Checked:=value;
+  SetCheckState(CaptionCheckUseWget,value);
 end;
 
 function TForm2.GetMakeJobs:boolean;
 begin
-  result:=CheckUseMakeJobs.Checked;
+  result:=GetCheckState(CaptionCheckUseMakeJobs);
 end;
 procedure TForm2.SetMakeJobs(value:boolean);
 begin
-  CheckUseMakeJobs.Checked:=value;
+  SetCheckState(CaptionCheckUseMakeJobs,value);
 end;
-
 
 function TForm2.GetExtraVerbose:boolean;
 begin
-  result:=CheckExtraVerbose.Checked;
+  result:=GetCheckState(CaptionCheckExtraVerbose);
 end;
 procedure TForm2.SetExtraVerbose(value:boolean);
 begin
-  CheckExtraVerbose.Checked:=value;
+  SetCheckState(CaptionCheckExtraVerbose,value);
 end;
 
 function TForm2.GetAutoSwitchURL:boolean;
 begin
-  result:=CheckAutoSwitchURL.Checked;
+  result:=GetCheckState(CaptionCheckAutoSwitchURL);
 end;
 procedure TForm2.SetAutoSwitchURL(value:boolean);
 begin
-  CheckAutoSwitchURL.Checked:=value;
+  SetCheckState(CaptionCheckAutoSwitchURL,value);
 end;
 
 function TForm2.GetSendInfo:boolean;
 begin
-  result:=CheckSendInfo.Checked;
+  result:=GetCheckState(CaptionCheckSendInfo);
 end;
 procedure TForm2.SetSendInfo(value:boolean);
 begin
-  CheckSendInfo.Checked:=value;
+  SetCheckState(CaptionCheckSendInfo,value);
 end;
 
 function TForm2.GetFpcupBootstrappersOnly:boolean;
 begin
-  result:=CheckFpcupBootstrappersOnly.Checked;
+  result:=GetCheckState(CaptionCheckFpcupBootstrappersOnly);
 end;
 procedure TForm2.SetFpcupBootstrappersOnly(value:boolean);
 begin
-  CheckFpcupBootstrappersOnly.Checked:=value;
+  SetCheckState(CaptionCheckFpcupBootstrappersOnly,value);
 end;
 
 function TForm2.GetForceLocalRepoClient:boolean;
 begin
-  result:=CheckForceLocalRepoClient.Checked;
+  result:=GetCheckState(CaptionCheckForceLocalRepoClient);
 end;
 procedure TForm2.SetForceLocalRepoClient(value:boolean);
 begin
-  CheckForceLocalRepoClient.Checked:=value;
+  SetCheckState(CaptionCheckForceLocalRepoClient,value);
 end;
 
 function TForm2.GetCheckUpdates:boolean;
 begin
-  result:=CheckGetUpdates.Checked;
+  result:=GetCheckState(CaptionCheckGetUpdates);
 end;
 procedure TForm2.SetCheckUpdates(value:boolean);
 begin
-  CheckGetUpdates.Checked:=value;
+  SetCheckState(CaptionCheckGetUpdates,value);
 end;
 
 function TForm2.GetFPCOptions:string;

@@ -1,7 +1,7 @@
 object Form2: TForm2
-  Left = 485
+  Left = 228
   Height = 670
-  Top = 30
+  Top = 172
   Width = 756
   Caption = 'Advanced settings'
   ClientHeight = 670
@@ -160,251 +160,19 @@ object Form2: TForm2
     ClientHeight = 410
     ClientWidth = 412
     TabOrder = 3
-    object CheckRepo: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = GroupBox2
+    object MiscellaneousCheckListBox: TCheckListBox
       Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
+      Height = 402
       Top = 4
-      Width = 221
+      Width = 404
+      Align = alClient
       BorderSpacing.Left = 4
       BorderSpacing.Top = 4
-      Caption = 'Get FPC/Laz repositories (default=yes)'
-      Checked = True
-      ParentShowHint = False
-      ShowHint = True
-      State = cbChecked
+      BorderSpacing.Right = 4
+      BorderSpacing.Bottom = 4
+      ExtendedSelect = False
+      ItemHeight = 0
       TabOrder = 0
-    end
-    object CheckPackageRepo: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckRepo
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 29
-      Width = 219
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Get package repositories (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 1
-    end
-    object CheckIncludeLCL: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckPackageRepo
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 54
-      Width = 260
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Include LCL with cross-compiler (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 2
-    end
-    object CheckUpdateOnly: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckIncludeLCL
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 79
-      Width = 129
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'FPC/Laz rebuild only'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 3
-    end
-    object CheckIncludeHelp: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckUpdateOnly
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 104
-      Width = 157
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Include Help (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 4
-    end
-    object CheckSplitFPC: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckIncludeHelp
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 129
-      Width = 226
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Split FPC source and bins (default=yes)'
-      Checked = True
-      ParentShowHint = False
-      ShowHint = True
-      State = cbChecked
-      TabOrder = 5
-    end
-    object CheckSplitLazarus: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckSplitFPC
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 154
-      Width = 241
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Split Lazarus source and bins (default=no)'
-      Enabled = False
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 6
-    end
-    object CheckUseWget: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckSplitLazarus
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 179
-      Width = 256
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Use wget/libcurl as downloader (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 7
-    end
-    object CheckUseMakeJobs: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckUseWget
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 204
-      Width = 215
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Use jobs for GNU make (default=yes)'
-      Checked = True
-      ParentShowHint = False
-      ShowHint = True
-      State = cbChecked
-      TabOrder = 8
-    end
-    object CheckExtraVerbose: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckUseMakeJobs
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 229
-      Width = 175
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Be extra verbose (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 9
-    end
-    object CheckAutoSwitchURL: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckExtraVerbose
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Download whole repository, or only latest files'
-      Top = 254
-      Width = 206
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Auto-switch repo URL (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 10
-    end
-    object CheckSendInfo: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckAutoSwitchURL
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Location and install info will be send to public central fpcupdeluxe server.'
-      Top = 279
-      Width = 243
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Send location and install info (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 11
-    end
-    object CheckFpcupBootstrappersOnly: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckSendInfo
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Location and install info will be send to public central fpcupdeluxe server.'
-      Top = 304
-      Width = 246
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Only use fpcup bootstrappers (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 12
-    end
-    object CheckForceLocalRepoClient: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckFpcupBootstrappersOnly
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Use the repo-client by fpcupdeluxe.'
-      Top = 329
-      Width = 198
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Use local repo-client (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 13
-    end
-    object CheckGetUpdates: TCheckBox
-      AnchorSideLeft.Control = GroupBox2
-      AnchorSideTop.Control = CheckForceLocalRepoClient
-      AnchorSideTop.Side = asrBottom
-      Left = 4
-      Height = 19
-      Hint = 'Check for updates of fpcupdeluxe.'
-      Top = 354
-      Width = 186
-      BorderSpacing.Left = 4
-      BorderSpacing.Top = 6
-      Caption = 'Check for updates (default=no)'
-      ParentShowHint = False
-      ShowHint = True
-      TabOrder = 14
     end
   end
   object GroupBox4: TGroupBox

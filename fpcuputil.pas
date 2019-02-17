@@ -294,7 +294,8 @@ function DownloadByPowerShell(URL, TargetFile: string): boolean;
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 function IsWindows64: boolean;
 // Get path for Windows per user storage of application data. Useful for storing settings
-function GetLocalAppDataPath: string;
+function GetWindowsDownloadFolder: string;
+function GetWindowsAppDataFolder: string;
 {$ENDIF MSWINDOWS}
 //check if there is at least one directory between Dir and root
 function ParentDirectoryIsNotRoot(Dir:string):boolean;
@@ -1628,14 +1629,26 @@ begin
   end;
 end;
 
-function GetLocalAppDataPath: string;
+function GetWindowsFolder(aFolder:TGUID): string;
 var
-  AppDataPath: array[0..MaxPathLen] of char; //Allocate memory
+  w : pwidechar;
 begin
-  AppDataPath := '';
-  SHGetSpecialFolderPath(0, AppDataPath, CSIDL_LOCAL_APPDATA, False);
-  result:=AppDataPath;
+  SHGetKnownFolderPath(aFolder,0,0,w);
+  Result := w;
+  CoTaskMemFree(w);
 end;
+
+function GetWindowsDownloadFolder: string;
+begin
+  result:=GetWindowsFolder(FOLDERID_Downloads);
+end;
+
+function GetWindowsAppDataFolder: string;
+begin
+  result:=GetWindowsFolder(FOLDERID_LocalAppData);
+end;
+
+
 {$ENDIF MSWINDOWS}
 
 procedure infoln(Message: string; const Level: TEventType=etInfo);

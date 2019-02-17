@@ -518,6 +518,15 @@ begin
     PackageFiles.Free;
   end;
 
+  // find an OPM component, if any
+  // all other packages will be ignored
+  if (NOT FileExists(PackageAbsolutePath)) then
+  begin
+    PackageFiles:=FindAllFiles(IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+'onlinepackagemanager'+DirectorySeparator+'packages', PackageName+'.lpk' , true);
+    if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
+    PackageFiles.Free;
+  end;
+
   lpkversion.Name:='unknown';
   if FileExists(PackageAbsolutePath) then
   begin

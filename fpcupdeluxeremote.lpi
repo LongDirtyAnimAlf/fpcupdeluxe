@@ -97,7 +97,6 @@
           <Linking>
             <Debugging>
               <UseHeaptrc Value="True"/>
-              <UseExternalDbgSyms Value="True"/>
             </Debugging>
             <Options>
               <Win32>
@@ -106,7 +105,8 @@
             </Options>
           </Linking>
           <Other>
-            <CustomOptions Value="-dDEBUG"/>
+            <CustomOptions Value="-dDEBUG
+-dRemoteLog"/>
           </Other>
         </CompilerOptions>
       </Item3>

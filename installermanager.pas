@@ -441,7 +441,7 @@ begin
   begin
     {$IFDEF MSWINDOWS}
     // Somewhere in local appdata special folder
-    FLazarusPrimaryConfigPath:=ExcludeTrailingPathDelimiter(GetLocalAppDataPath())+DefaultPCPSubdir;
+    FLazarusPrimaryConfigPath:=IncludeTrailingPathDelimiter(GetWindowsAppDataFolder)+DefaultPCPSubdir;
     {$ELSE}
     // Note: normal GetAppConfigDir gets ~/.config/fpcup/.lazarusdev or something
     // XdgConfigHome normally resolves to something like ~/.config

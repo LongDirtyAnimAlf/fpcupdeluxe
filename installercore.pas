@@ -65,6 +65,23 @@ const
   NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
   NASMFPCURL=BINUTILSURL + '/trunk/install/crossbinmsdos/nasm.exe';
 
+  {$ifdef win64}
+  OpenSSLSourceURL : array [0..3] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2q-x64_86-win64.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win64.zip',
+    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
+    );
+  {$endif}
+  {$ifdef win32}
+  OpenSSLSourceURL : array [0..3] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2q-i386-win32.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win32.zip',
+    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
+    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
+    );
+  {$endif}
+
   SnipMagicBegin='# begin fpcup do not remove '; //look for this/add this in fpc.cfg cross-compile snippet. Note: normally followed by FPC CPU-os code
   SnipMagicEnd='# end fpcup do not remove'; //denotes end of fpc.cfg cross-compile snippet
 
@@ -1719,23 +1736,6 @@ begin
 end;
 
 function TInstaller.DownloadOpenSSL: boolean;
-const
-  {$ifdef win64}
-  NewSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2q-x64_86-win64.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win64.zip',
-    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
-    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
-    );
-  {$endif}
-  {$ifdef win32}
-  NewSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2q-i386-win32.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win32.zip',
-    'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
-    'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
-    );
-  {$endif}
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
@@ -1750,9 +1750,9 @@ begin
 
   OpenSSLZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
-  for i:=0 to (Length(NewSourceURL)-1) do
+  for i:=0 to (Length(OpenSSLSourceURL)-1) do
   try
-    aSourceURL:=NewSourceURL[i];
+    aSourceURL:=OpenSSLSourceURL[i];
     //always get this file with the native downloader !!
     OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
     if (NOT OperationSucceeded) then
@@ -1779,9 +1779,9 @@ begin
     infoln(localinfotext+'Could not download/install openssl library the normal way', etInfo);
     infoln(localinfotext+'Now going to use BitsAdmin (may be slow)', etInfo);
 
-    for i:=0 to (Length(NewSourceURL)-1) do
+    for i:=0 to (Length(OpenSSLSourceURL)-1) do
     try
-      aSourceURL:=NewSourceURL[i];
+      aSourceURL:=OpenSSLSourceURL[i];
       SysUtils.DeleteFile(OpenSSLZip);
       OperationSucceeded:=DownloadByBitsAdmin(aSourceURL,OpenSSLZip);
       if (NOT OperationSucceeded) then
