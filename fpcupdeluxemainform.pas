@@ -739,9 +739,13 @@ begin
 
   FPCupManager.LoadFPCUPConfig;
 
+  FPCTarget:='stable';
+  LazarusTarget:='stable';
+
   FPCupManager.FPCURL:='stable';
   FPCupManager.LazarusURL:='stable';
-  FPCupManager.Verbose:=true;
+
+  FPCupManager.Verbose:=false;
 
   //CheckFPCUPOptions(FPCupManager);
 

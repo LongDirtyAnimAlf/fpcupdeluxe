@@ -246,7 +246,7 @@ resourcestring
   CaptionCheckIncludeLCL = 'Include LCL with cross-compiler (default=no)';
 
   HintCheckUpdateOnly = '';
-  CaptionCheckUpdateOnly = 'FPC/Laz rebuild only';
+  CaptionCheckUpdateOnly = 'FPC/Laz rebuild only (default=no)';
 
   HintCheckIncludeHelp = '';
   CaptionCheckIncludeHelp = 'Include Help (default=no)';
@@ -440,6 +440,10 @@ begin
   finally
     Free;
   end;
+
+  //defaults
+  SplitFPC:=true;
+  MakeJobs:=true;
 
   SetInstallDir;// for backwards compatibility
 
