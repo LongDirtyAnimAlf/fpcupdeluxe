@@ -1538,20 +1538,6 @@ var
 begin
   s:=aVersion;
 
-  {$IFDEF CPUAARCH64}
-  if (s=FPCTRUNKVERSION) then result:=FPCTRUNKVERSION
-  else if s='3.2.0' then result:='3.2.0'
-  else result:='0.0.0';
-  exit;
-  {$ENDIF}
-
-  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-  if (s=FPCTRUNKVERSION) then result:=FPCTRUNKVERSION
-  else if s='3.2.0' then result:='3.2.0'
-  else result:='0.0.0';
-  exit;
-  {$ENDIF}
-
   result:='0.0.0';
 
   if s=FPCTRUNKVERSION then result:=FPCTRUNKBOOTVERSION
@@ -1580,6 +1566,16 @@ begin
   else if s='1.9.2' then result:='1.9.0'
   else if s='1.9.0' then result:='0.0.0';
 
+
+  {$IFDEF CPUAARCH64}
+  // we need at least 3.2.0 for aarch64
+  if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  {$ENDIF}
+
+  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
+  // we need at least 3.2.0 for ppc64le
+  if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  {$ENDIF}
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
@@ -1593,16 +1589,6 @@ var
   FinalVersion,RequiredVersion,RequiredVersion2:integer;
 begin
   result:='0.0.0';
-
-  {$IFDEF CPUAARCH64}
-  result:=FPCTRUNKVERSION;
-  exit;
-  {$ENDIF}
-
-  {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-  result:=FPCTRUNKVERSION;
-  exit;
-  {$ENDIF}
 
   s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
 
@@ -1654,6 +1640,16 @@ begin
             FinalVersion := RequiredVersion2;
         end;
       end;
+
+    {$IFDEF CPUAARCH64}
+    // we need at least 3.2.0 for aarch64
+    if FinalVersion<GetNumericalVersion('3.2.0') then FinalVersion:=GetNumericalVersion('3.2.0');
+    {$ENDIF}
+
+    {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
+    // we need at least 3.2.0 for ppc64le
+    if FinalVersion<GetNumericalVersion('3.2.0') then FinalVersion:=GetNumericalVersion('3.2.0');
+    {$ENDIF}
 
     result:=InttoStr(FinalVersion DIV 10000);
     FinalVersion:=FinalVersion MOD 10000;
@@ -2493,11 +2489,11 @@ begin
     end else infoln(infotext+'Available bootstrapper has correct version !',etInfo);
 
     {$IFDEF CPUAARCH64}
-    // we build with >=3.1.1 (trunk), while aarch64 is not available for FPC =< 3.1.1
+    // we build with >=3.2.0 , while aarch64 is not available for FPC < 3.2.0
     FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF CPUAARCH64}
     {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
-    // we build with >=3.1.1 (trunk), while ppc64le is not available for FPC =< 3.1.1
+    // we build with >=3.2.0 , while ppc64le is not available for FPC < 3.2.0
     FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF}
 

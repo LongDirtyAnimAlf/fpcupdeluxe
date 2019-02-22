@@ -419,12 +419,15 @@ implementation
 
 uses
   FileUtil
-  {$ifndef Haiku}
+  {$IFNDEF HAIKU}
   //,ssl_openssl
   // for runtime init of openssl
   {$IFDEF MSWINDOWS}
   //,blcksock, ssl_openssl_lib
-  ,openssl, opensslsockets
+  ,openssl
+  {$IF FPC_FULLVERSION > 30300}
+  ,opensslsockets
+  {$ENDIF}
   {$ENDIF}
   {$ENDIF}
   ;
