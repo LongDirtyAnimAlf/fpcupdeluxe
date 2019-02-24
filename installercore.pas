@@ -978,21 +978,6 @@ begin
     begin
       OperationSucceeded := CheckExecutable(Make, '-v', '');
       if (NOT OperationSucceeded) then infoln(localinfotext+Make+' not found.',etDebug);
-
-      // expand make path ... not needed
-      //if OperationSucceeded then FMake:=FindDefaultExecutablePath(Make);
-      {
-      try
-        ExecuteCommand(Make + ' -v', Output, true);
-        if Ansipos('GNU Make', Output) = 0 then
-        begin
-          infoln(localinfotext+'Found make executable, but it is not GNU Make.',etError);
-          OperationSucceeded := false;
-        end else OperationSucceeded := true;
-      except
-        // ignore errors, this is only an extra check
-      end;
-      }
     end;
     {$ENDIF}
 
@@ -1008,9 +993,9 @@ var
   i: integer;
   {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
-  Output: string;
+  s1,s2: string;
 begin
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
+  s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
 
   OperationSucceeded := true;
 
@@ -1022,7 +1007,7 @@ begin
     AllThere:=true;
     if DirectoryExists(FMakeDir) = false then
     begin
-      infoln(localinfotext+'Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
+      infoln(s2+'Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
       AllThere:=false;
     end
     else
@@ -1032,7 +1017,7 @@ begin
       begin
         if FUtilFiles[i].Category=ucBinutil then
         begin
-          if not(FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
+          if (NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+FUtilFiles[i].FileName)) then
           begin
             AllThere:=false;
             break;
@@ -1042,8 +1027,8 @@ begin
     end;
     if not(AllThere) then
     begin
-      infoln(localinfotext+'Make path [' + FMakeDir + '] does not have (all) binutils. Going to download needed binutils.',etInfo);
-      //infoln(localinfotext+'Some binutils missing: going to get them.',etInfo);
+      infoln(s2+'Make path [' + FMakeDir + '] does not have (all) binutils. Going to download needed binutils.',etInfo);
+      //infoln(s2+'Some binutils missing: going to get them.',etInfo);
       OperationSucceeded := DownloadBinUtils;
     end;
   end;
@@ -1054,18 +1039,28 @@ begin
 
     {$IFDEF MSWINDOWS}
     // check if we have make ... otherwise get it from standard URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+
-            '/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make),Make);
+    if (NOT FileExists(Make)) then
+    begin
+      s1:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw'+{$ifdef win64}'64'{$else}'32'{$endif}+'/'+ExtractFileName(Make);
+      infoln(s2+'Make binary not found. Getting it from: '+s1+'.',etInfo);
+      GetFile(s1,Make);
+      OperationSucceeded:=FileExists(Make);
+    end;
     {$ENDIF MSWINDOWS}
 
     // Check for proper make executable
+    if OperationSucceeded then
     try
-      ExecuteCommand(Make + ' -v', Output, False);
-      if Ansipos('GNU Make', Output) = 0 then
+      ExecuteCommand(Make + ' -v', s1, False);
+      if AnsiPos('GNU Make', s1) = 0 then
       begin
-        ExecuteCommand(Make + ' -v', Output, True);
-        infoln(localinfotext+'Found make executable, but it is not GNU Make.',etError);
+        ExecuteCommand(Make + ' -v', s1, True);
+        infoln(s2+'Found make binary here: '+Make+'. But it is not GNU Make.',etError);
         OperationSucceeded := false;
+      end
+      else
+      begin
+        infoln(s2+'Found GNU make binary here: '+Make+'.',etInfo);
       end;
     except
       // ignore errors, this is only an extra check

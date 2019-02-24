@@ -49,6 +49,7 @@ type
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineeslanguage: TMenuItem;
+    OPMBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
     radgrpOS: TRadioGroup;
@@ -1518,10 +1519,18 @@ begin
 
     if Sender=mORMotBtn then
     begin
-      s:='Going to install de special version of mORMot for FPC ';
+      s:='Going to install the mORMot ';
       FPCupManager.OnlyModules:='mORMot';
       //FPCupManager.OnlyModules:='mORMot,zeos';
     end;
+
+    if Sender=OPMBtn then
+    begin
+      s:='Going to install the Online Package Manager ';
+      FPCupManager.OnlyModules:='opm';
+      //FPCupManager.OnlyModules:='mORMot,zeos';
+    end;
+
 
     FPCupManager.FPCURL:=FPCTarget;
     FPCupManager.LazarusURL:=LazarusTarget;

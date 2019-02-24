@@ -43,7 +43,7 @@ type
 implementation
 
 uses
-  dateutils,SynSQLite3;
+  dateutils,SynSQLite3,SynTable;
 
 { TSQLUp }
 
