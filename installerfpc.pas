@@ -625,6 +625,10 @@ begin
           s1:='';
           {$ifdef Darwin}
           s1:=GetSDKVersion('macosx');
+          if CompareVersionStrings(s1,'10.8')>=0 then
+          begin
+            s1:='10.8';
+          end;
           {$endif}
           if Length(s1)>0 then
           begin
@@ -1205,6 +1209,10 @@ begin
   {$IFDEF DARWIN}
   //Add minimum required OSX version to prevent "crti not found" errors.
   s2:=GetSDKVersion('macosx');
+  if CompareVersionStrings(s2,'10.8')>=0 then
+  begin
+    s2:='10.8';
+  end;
   if Length(s2)>0 then
   begin
     s1:='-WM'+s2+' '+s1;
@@ -1679,9 +1687,9 @@ begin
   if FileExists(FPCScript) then
   begin
     infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
-    if not(sysutils.DeleteFile(FPCScript)) then
+    if not(SysUtils.DeleteFile(FPCScript)) then
     begin
-      infoln(localinfotext+'Error deleting existing launcher script for FPC:'+FPCScript,eterror);
+      infoln(localinfotext+'Error deleting existing launcher script for FPC:'+FPCScript,etError);
       Exit(false);
     end;
   end;
@@ -2999,7 +3007,11 @@ begin
           ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
           ConfigText.Insert(x,'# Add minimum required OSX version for native compiling'); Inc(x);
           ConfigText.Insert(x,'# Prevents crti not found errors'); Inc(x);
-          ConfigText.Insert(x,'-WM'+s); Inc(x);
+          if CompareVersionStrings(s,'10.8')>=0 then
+            ConfigText.Insert(x,'-WM10.8')
+          else
+            ConfigText.Insert(x,'-WM'+s);
+          Inc(x);
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
             ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory'); Inc(x);
