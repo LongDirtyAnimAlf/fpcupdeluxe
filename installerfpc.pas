@@ -3004,14 +3004,16 @@ begin
         s:=GetSDKVersion('macosx');
         if Length(s)>0 then
         begin
-          ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+          //ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+          ConfigText.Insert(x,'#IFDEF DARWIN'); Inc(x);
           ConfigText.Insert(x,'# Add minimum required OSX version for native compiling'); Inc(x);
-          ConfigText.Insert(x,'# Prevents crti not found errors'); Inc(x);
+          ConfigText.Insert(x,'# Prevents crti not found linking errors'); Inc(x);
           if CompareVersionStrings(s,'10.8')>=0 then
             ConfigText.Insert(x,'-WM10.8')
           else
             ConfigText.Insert(x,'-WM'+s);
           Inc(x);
+          {
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
             ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory'); Inc(x);
@@ -3029,6 +3031,7 @@ begin
             //ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
             //ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
           end;
+          }
           ConfigText.Insert(x,'#ENDIF'); Inc(x);
         end;
         {$ifndef FPCONLY}
