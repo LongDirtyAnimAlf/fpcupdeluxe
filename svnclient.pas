@@ -203,7 +203,7 @@ end;
 procedure TSVNClient.CheckOut(UseForce:boolean=false);
 var
   i:integer;
-  Command: RawByteString;
+  Command: string;
   Output: string = '';
   ProxyCommand: string;
   RetryAttempt: integer;
@@ -371,7 +371,7 @@ const
   MaxUpdateRetries = 9;
 var
   i:integer;
-  Command: RawByteString;
+  Command: string;
   FileList: TStringList;
   Output: string = '';
   ProxyCommand: string;
@@ -720,7 +720,7 @@ end;
 
 procedure TSVNClient.SwitchURL;
 var
-  Command: RawByteString;
+  Command: string;
   Output: string = '';
   ProxyCommand: string;
   RetryAttempt: integer;
@@ -882,7 +882,7 @@ var
   RevExtr: TRegExpr;
   RevCount: integer;
 
-  Command: RawByteString;
+  Command: string;
   ExecuteSpecialDue2EmptyString:boolean;
   TempOutputFile:string;
   TempOutputSL:TStringList;

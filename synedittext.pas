@@ -224,7 +224,11 @@ begin
     // output line !!
     if (outputline) then
     begin
+      {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
       Self.Append(line);
+      {$ELSE}
+      Self.Lines.Append(line);
+      {$ENDIF}
       Self.CaretX:=0;
       Self.CaretY:=Self.Lines.Count;
       // the below is needed:

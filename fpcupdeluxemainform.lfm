@@ -14,7 +14,7 @@ object Form1: TForm1
   OnDestroy = FormDestroy
   OnResize = FormResize
   Position = poDefault
-  LCLVersion = '2.0.1.0'
+  LCLVersion = '1.4.5.0'
   Visible = True
   object btnSetupPlus: TButton
     AnchorSideLeft.Control = PageControl1
@@ -583,11 +583,11 @@ object Form1: TForm1
     OnSpecialLineMarkup = CommandOutputScreenSpecialLineMarkup
     inline SynLeftGutterPartList1: TSynGutterPartList
       object SynGutterMarks1: TSynGutterMarks
-        Width = 0
+        Width = 24
         MouseActions = <>
       end
       object SynGutterLineNumber1: TSynGutterLineNumber
-        Width = 0
+        Width = 15
         MouseActions = <>
         MarkupInfo.Background = clBtnFace
         MarkupInfo.Foreground = clNone
@@ -597,19 +597,18 @@ object Form1: TForm1
         LeadingZeros = False
       end
       object SynGutterChanges1: TSynGutterChanges
-        Width = 0
+        Width = 4
         MouseActions = <>
         ModifiedColor = 59900
         SavedColor = clGreen
       end
       object SynGutterSeparator1: TSynGutterSeparator
-        Width = 0
+        Width = 2
         MouseActions = <>
         MarkupInfo.Background = clWhite
         MarkupInfo.Foreground = clGray
       end
       object SynGutterCodeFolding1: TSynGutterCodeFolding
-        Width = 0
         MouseActions = <>
         MarkupInfo.Background = clNone
         MarkupInfo.Foreground = clGray
@@ -3269,12 +3268,12 @@ object Form1: TForm1
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
     Options = [ofHideReadOnly, ofPathMustExist, ofNoNetworkButton, ofEnableSizing, ofViewDetail]
-    Left = 920
-    Top = 120
+    left = 920
+    top = 120
   end
   object MainMenu1: TMainMenu
-    Left = 928
-    Top = 216
+    left = 928
+    top = 216
     object MenuItem2: TMenuItem
       Caption = 'Languages'
       object MEnglishlanguage: TMenuItem

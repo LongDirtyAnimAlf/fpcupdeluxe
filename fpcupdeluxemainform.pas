@@ -15,7 +15,7 @@ uses
   {$endif}
   ;
 
-{$if (lcl_fullversion >= 2010000)}
+{$IF DEFINED(lcl_fullversion) AND (lcl_fullversion >= 2010000)}
 {$define EnableLanguages}
 {$endif}
 
@@ -299,7 +299,11 @@ begin
   Reset(System.Input);
   Rewrite(System.Output);
 
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
   aTarget:=GetLCLWidgetTypeName;
+  {$ELSE}
+  aTarget:='';
+  {$ENDIF}
 
   {$ifdef RemoteLog}
   aDataClient.UpInfo.UpWidget:=aTarget;
@@ -636,7 +640,7 @@ begin
                 continue;
               end;
               {$endif}
-              CommandOutputScreen.Clear;
+              CommandOutputScreen.ClearAll;
               AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
               AddMessage(upBuildAllCrossCompilersUpdate);
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
@@ -2719,7 +2723,7 @@ end;
 
 procedure TForm1.btnClearLogClick(Sender: TObject);
 begin
-  CommandOutputScreen.Clear;
+  CommandOutputScreen.ClearAll;
   memoSummary.Clear;
 end;
 
@@ -3149,7 +3153,7 @@ var
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
-  CommandOutputScreen.Clear;
+  CommandOutputScreen.ClearAll;
 
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
@@ -3291,7 +3295,11 @@ end;
 
 procedure TForm1.AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
 begin
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
   CommandOutputScreen.Append(aMessage);
+  {$ELSE}
+  CommandOutputScreen.Lines.Append(aMessage);
+  {$ENDIF}
   CommandOutputScreen.CaretX:=0;
   CommandOutputScreen.CaretY:=CommandOutputScreen.Lines.Count;
   if UpdateStatus then StatusMessage.Text:=aMessage;

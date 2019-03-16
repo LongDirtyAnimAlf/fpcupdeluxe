@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CONFIG>
   <ProjectOptions>
-    <Version Value="11"/>
+    <Version Value="9"/>
     <PathDelim Value="\"/>
     <General>
       <SessionStorage Value="InProjectDir"/>
@@ -9,9 +9,6 @@
       <Title Value="fpcupdeluxe"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
-      <XPManifest>
-        <DpiAware Value="Per-monitor"/>
-      </XPManifest>
       <Icon Value="0"/>
       <Resources Count="6">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
@@ -610,10 +607,9 @@
       <Version Value="2"/>
     </PublishOptions>
     <RunParams>
-      <FormatVersion Value="2"/>
-      <Modes Count="1">
-        <Mode0 Name="default"/>
-      </Modes>
+      <local>
+        <FormatVersion Value="1"/>
+      </local>
     </RunParams>
     <RequiredPackages Count="2">
       <Item1>
@@ -645,7 +641,6 @@
       <Unit3>
         <Filename Value="syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="SynEditPopup"/>
       </Unit3>
       <Unit4>
         <Filename Value="aboutfrm.pas"/>
@@ -653,7 +648,6 @@
         <ComponentName Value="AboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
-        <UnitName Value="AboutFrm"/>
       </Unit4>
       <Unit5>
         <Filename Value="unzipprogress.pas"/>
