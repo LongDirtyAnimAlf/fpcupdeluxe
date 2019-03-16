@@ -1907,7 +1907,17 @@ begin
       UpdateWarnings:=TStringList.Create;
       try
         UpdateWarnings.LoadFromFile(VersionSnippet);
-        aIndex:=UpdateWarnings.IndexOf(DARWINHACKMAGIC);
+        aIndex:=UpdateWarnings.IndexOf(#9+DARWINHACKMAGIC);
+        if aIndex=-1 then
+        begin
+          // be very secure and sure about hacking the makefile: check extensively !!
+          aIndex:=(UpdateWarnings.Count-1);
+          while (aIndex>=0) do
+          begin
+            if Pos(DARWINHACKMAGIC,UpdateWarnings.Strings[aIndex])>0 then break;
+            Dec(aIndex);
+          end;
+        end;
         if aIndex=-1 then
         begin
           aIndex:=UpdateWarnings.IndexOf(DARWINCHECKMAGIC);
