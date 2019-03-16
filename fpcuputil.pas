@@ -295,6 +295,7 @@ function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
+function CheckWin32Version(aMajor,aMinor: Integer): Boolean;
 function IsWindows64: boolean;
 // Get path for Windows per user storage of application data. Useful for storing settings
 function GetWindowsDownloadFolder: string;
@@ -495,6 +496,17 @@ begin
     end;
   end
   else result:=false;
+end;
+
+function CheckWin32Version(aMajor,aMinor: Integer): Boolean;
+var
+  Major,Minor,Build : Integer;
+begin
+  if GetWin32Version(Major,Minor,Build) then
+  begin
+    result:=(Major>aMajor) or
+            ((Major=aMajor) and (Minor>=aMinor));
+  end else result:=false;
 end;
 
 function IsWindows64: boolean;

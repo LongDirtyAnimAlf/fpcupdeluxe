@@ -67,16 +67,16 @@ const
 
   {$ifdef win64}
   OpenSSLSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2q-x64_86-win64.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win64.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-x64_86-win64.zip'
     );
   {$endif}
   {$ifdef win32}
   OpenSSLSourceURL : array [0..3] of string = (
-    'https://indy.fulgan.com/SSL/openssl-1.0.2q-i386-win32.zip',
-    'http://wiki.overbyte.eu/arch/openssl-1.0.2q-win32.zip',
+    'https://indy.fulgan.com/SSL/openssl-1.0.2r-i386-win32.zip',
+    'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win32.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
     'https://indy.fulgan.com/SSL/Archive/openssl-1.0.2p-i386-win32.zip'
     );
@@ -769,48 +769,51 @@ begin
       begin
         //Source:
         //https://github.com/git-for-windows
-
-        ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'git');
-        {$ifdef win32}
-        //Output:='git32.7z';
-        Output:='git32.zip';
-        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
-        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
-        aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
-        {$else}
-        //Output:='git64.7z';
-        Output:='git64.zip';
-        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
-        //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
-        aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
-        {$endif}
-        //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
-        infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
-        OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-        if NOT OperationSucceeded then
+        //install GIT only on Windows Vista and higher
+        if CheckWin32Version(6,0) then
         begin
-          // try one more time
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+          ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+          {$ifdef win32}
+          //Output:='git32.7z';
+          Output:='git32.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
+          aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
+          {$else}
+          //Output:='git64.7z';
+          Output:='git64.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
+          aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
+          {$endif}
+          //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
+          infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
           OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-        end;
-        if OperationSucceeded then
-        begin
-          infoln(localinfotext+'GIT client download ready: unpacking (may take time).',etInfo);
-          with TNormalUnzipper.Create do
+          if NOT OperationSucceeded then
           begin
-            try
-              OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\',[]);
-            finally
-              Free;
-            end;
+            // try one more time
+            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+            OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
           end;
           if OperationSucceeded then
           begin
-            SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
-            OperationSucceeded:=FileExists(aLocalClientBinary);
+            infoln(localinfotext+'GIT client download ready: unpacking (may take time).',etInfo);
+            with TNormalUnzipper.Create do
+            begin
+              try
+                OperationSucceeded:=DoUnZip(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'git\',[]);
+              finally
+                Free;
+              end;
+            end;
+            if OperationSucceeded then
+            begin
+              SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
+              OperationSucceeded:=FileExists(aLocalClientBinary);
+            end;
           end;
+          if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
         end;
-        if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
       end;
       if RepoExecutable <> EmptyStr then
       begin
@@ -1098,7 +1101,6 @@ var
   aSourceURL64:string;
   {$endif}
   aTag:string;
-  aMajor,aMinor,aBuild : Integer;
 begin
   SetLength(FUtilFiles,0); //clean out any cruft
 
@@ -1107,9 +1109,8 @@ begin
   // default
   if aVersion='' then aVersion:=DEFAULTFPCVERSION;
 
-  GetWin32Version(aMajor,aMinor,aBuild);
-  // if Win7 or higher: use modern (2.4.0 and higher) binutils
-  if aMajor>5 then
+  // if Win Vista or higher: use modern (2.4.0 and higher) binutils
+  if CheckWin32Version(6,0) then
   begin
     if (GetNumericalVersion(aVersion)<CalculateFullVersion(2,4,0)) then
        aVersion:='2.4.0';
