@@ -2999,10 +2999,20 @@ begin
         then FTotalFileCnt:=FUnZipper.Entries.Count
         else FTotalFileCnt:=FFileList.Count;
 
-      if FFileList.Count=0
-        then FUnZipper.UnZipAllFiles
-        else FUnZipper.UnZipFiles(FFileList);
-
+      try
+        if FFileList.Count=0
+          then FUnZipper.UnZipAllFiles
+          else FUnZipper.UnZipFiles(FFileList);
+      except
+        on E:EFCreateError do
+        begin
+          infoln('TNormalUnzipper: Could not create file.',etError);
+        end
+        else
+        begin
+          infoln('TNormalUnzipper: Unknown exception error.',etError);
+        end;
+      end;
       { Flat option only available in FPC >= 3.1 }
       {$IF FPC_FULLVERSION < 30100}
       if Flat then

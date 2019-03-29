@@ -2284,6 +2284,9 @@ begin
           // Darwin has some universal binaries and libs
           if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='x86';
           if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x86';
+          //Newer bins and libs for Darwin on i386 and x86_64
+          //if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='x86OSX1012';
+          //if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x86OSX1012';
           if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='powerpc';
           if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
         end;
@@ -3150,6 +3153,7 @@ end;
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aTarget,aURL:string;
+  aIndex:integer;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
@@ -3199,6 +3203,12 @@ begin
       if Pos('http://svn.freepascal.org',aURL)>0 then aURL:=StringReplace(aURL,'http://','https://',[rfIgnoreCase]);
       aURL:=ExcludeTrailingPathDelimiter(aURL);
       LazarusTarget:=aURL;
+
+
+      radgrpCPU.ItemIndex:=ReadInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
+      radgrpOS.ItemIndex:=ReadInteger('Cross','OSTarget',radgrpOS.ItemIndex);
+
+      if (listModules.Items.Count>0) then listModules.ItemIndex:=ReadInteger('General','Module',listModules.ItemIndex);
 
       Form2.FPCOptions:=ReadString('General','FPCOptions','');
       Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
@@ -3254,6 +3264,11 @@ begin
 
       if FPCTarget<>'skip' then WriteString('URL','fpcURL',FPCTarget);
       if LazarusTarget<>'skip' then WriteString('URL','lazURL',LazarusTarget);
+
+      if (radgrpCPU.ItemIndex<>-1) then WriteInteger('Cross','CPUTarget',radgrpCPU.ItemIndex);
+      if (radgrpOS.ItemIndex<>-1) then WriteInteger('Cross','OSTarget',radgrpOS.ItemIndex);
+
+      if ((listModules.Items.Count>0) AND (listModules.ItemIndex<>-1)) then WriteInteger('General','Module',listModules.ItemIndex);
 
       WriteString('General','FPCOptions',Form2.FPCOptions);
       WriteString('General','LazarusOptions',Form2.LazarusOptions);

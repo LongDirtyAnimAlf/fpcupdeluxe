@@ -87,7 +87,7 @@ begin
   // also for osxcross
   if not result then
   begin
-    for i:=15 downto 3 do
+    for i:=16 downto 3 do
     begin
       s:='MacOSX10.'+InttoStr(i);
       result:=SimpleSearchLibrary(BasePath,'x86-darwin'+DirectorySeparator+s+'.sdk'+DirectorySeparator+'usr'+DirectorySeparator+'lib',LibName);
@@ -174,7 +174,7 @@ begin
   {$endif}
   BinPrefixTry:=BinPrefixTry+'-apple-darwin';
 
-  for i:=15 downto 10 do
+  for i:=16 downto 10 do
   begin
     if not result then
     begin
