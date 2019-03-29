@@ -62,7 +62,6 @@ type
     FixesBtn: TBitBtn;
     StableBtn: TBitBtn;
     OldBtn: TBitBtn;
-    DinoBtn: TBitBtn;
     mORMotBtn: TBitBtn;
     btnInstallDirSelect: TButton;
     InstallDirEdit: TEdit;
@@ -1503,6 +1502,7 @@ begin
       LazarusTarget:='1.4';
     end;
 
+    {
     if Sender=DinoBtn then
     begin
       s:='Going to install FPC 2.0.2 and Lazarus 0.9.16 ';
@@ -1511,6 +1511,7 @@ begin
       LazarusTarget:='0.9.16';
       FPCupManager.OnlyModules:=_FPC+','+_OLDLAZARUS;
     end;
+    }
 
     if Sender=EmbeddedBtn then
     begin
