@@ -512,6 +512,7 @@ var
   Counter:integer;
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
+  ARMArch:TARMARCH;
   Minimum_OSX,Minimum_iOS:string;
 begin
   result:=inherited;
@@ -854,7 +855,17 @@ begin
             // or default to softfloat for ARM ?
             // if (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMEL';
             // decision: (nearly) always build hardfloat ... not necessary correct however !
-            if (Pos('-dFPC_ARMHF',Options)=0) AND (Pos('-dFPC_ARMEL',Options)=0) then Options:=Options+' -dFPC_ARMHF';
+            s2:=' -dFPC_ARMHF';
+            for ARMArch := Low(TARMARCH) to High(TARMARCH) do
+            begin
+              s1:=ARMArchFPCStr[ARMArch];
+              if (Length(s1)>0) and (Pos(s1,Options)>0) then
+              begin
+                s2:='';
+                break;
+              end;
+            end;
+            if Length(s2)>0 then Options:=Options+s2;
           end;
 
           {$ifdef solaris}

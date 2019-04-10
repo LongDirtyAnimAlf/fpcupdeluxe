@@ -1491,6 +1491,11 @@ var
   {$endif}
   oldlog: TErrorMethod;
   CleanCommand,CleanDirectory:string;
+  {
+  DeleteList: TStringList;
+  CrossCompiling: boolean;
+  CPUOS_Signature:string;
+  }
 begin
   Result := inherited;
 
@@ -1654,6 +1659,25 @@ begin
     end;
   end;
   {$endif MSWINDOWS}
+
+  {
+  // finally ... if something is still still still floating around ... delete it !!
+  CrossCompiling:=(Self is TLazarusCrossInstaller);
+  if CrossCompiling then
+    CPUOS_Signature:=GetFPCTarget(false)
+  else
+    CPUOS_Signature:=GetFPCTarget(true);
+  DeleteList := TStringList.Create;
+  try
+    DeleteList.Add('.ppu');
+    DeleteList.Add('.a');
+    DeleteList.Add('.o');
+    DeleteList.Add('.compiled');
+    DeleteFilesExtensionsSubdirs(FSourceDirectory,DeleteList,CPUOS_Signature);
+  finally
+    DeleteList.Free;
+  end;
+  }
 end;
 
 function TLazarusInstaller.GetModule(ModuleName: string): boolean;

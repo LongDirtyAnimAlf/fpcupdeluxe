@@ -8,7 +8,8 @@ interface
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
   ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
-  SynEditMiscClasses, SynGutterCodeFolding, installerManager{$ifdef usealternateui},alternateui{$endif}
+  SynEditMiscClasses, SynGutterCodeFolding, installerManager
+  {$ifdef usealternateui},alternateui{$endif}
   ,LCLVersion
   {$ifdef RemoteLog}
   ,mormotdatamodelclient
@@ -277,10 +278,14 @@ begin
   aDataClient.UpInfo.UpOS:=GetTargetCPUOS;
   {$endif}
 
+  {$ifndef MSWINDOWS}
+  ExtraSheet.TabVisible:=false;
+  {$endif}
+
   {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)) OR defined(Haiku)}
   // disable some features
   OldBtn.Visible:=False;
-  DinoBtn.Visible:=False;
+  {DinoBtn.Visible:=False;}
   CrossSheet.TabVisible:=false;
   {$endif}
   {$IF defined(CPUAARCH64) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2))}
@@ -3440,8 +3445,8 @@ begin
   if (sConsentWarning) OR (Form2.SendInfo) then
   begin
     AddMessage('Fpcupdeluxe logging info:');
-    AddMessage('https://www.batterybutcher.com/fpcup/getinfohtml',true);
-    AddMessage('https://www.batterybutcher.com/fpcup/getinfohtml?ShowErrors=yes');
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml',true);
+    AddMessage('http://fpcuplogger.batterybutcher.com:8880/root/getinfohtml?ShowErrors=yes');
     if (sConsentWarning) then
     begin
       aModalResult:=(MessageDlg(
