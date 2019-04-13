@@ -917,8 +917,8 @@ begin
             // if we have libs ... chances are +/-100% that we have bins, so set path to include bins !
             // but only in case we did not do it before
             // not sure if this is realy needed
-            if NOT CrossInstaller.BinUtilsPathInPath then
-               SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),true,false);
+            //if NOT CrossInstaller.BinUtilsPathInPath then
+            //   SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),true,false);
           end;
 
           if CrossInstaller.BinUtilsPath<>''then
@@ -983,6 +983,10 @@ begin
                infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
             else
               infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
+
+            infoln(infotext+'Path: '+GetPath,etDebug);
+            infoln(infotext+'AS: '+Which('as'),etDebug);
+
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
 

@@ -2014,6 +2014,17 @@ begin
       s:='Be forwarned: this will only work with trunk.' + sLineBreak +
          'Do you want to continue ?';
     end;
+
+    {$ifdef Linux}
+    if ((FPCupManager.CrossCPU_Target='mips') OR (FPCupManager.CrossCPU_Target='mipsel'))
+    then
+    begin
+      s:='You could get the native cross-utilities first (advised).' + sLineBreak +
+         'E.g.: sudo apt-get install libc6-mips-cross binutils-mips-linux-gnu' + sLineBreak +
+         'Do you want to continue ?';
+    end;
+    {$endif}
+
     if length(s)>0 then
     begin
       if (MessageDlg(s,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
@@ -2042,7 +2053,7 @@ begin
 
       if (FPCupManager.CrossOS_Target='wince') then
       begin
-        //Disable for now : setting ARMV6 gives problems with FPC 3.0.4 and lower
+        //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
         //FPCupManager.CrossOPT:='-CpARMV6 ';
       end
       else

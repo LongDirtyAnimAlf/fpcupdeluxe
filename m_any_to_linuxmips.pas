@@ -64,6 +64,12 @@ begin
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
 
+  {$IFDEF UNIX}
+  // search local default cross-libs paths
+  if not result then
+    result:=SearchLibrary('/usr/mips-linux-gnu/lib',LIBCNAME);
+  {$ENDIF}
+
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
@@ -102,6 +108,19 @@ begin
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
+
+  {$IFDEF UNIX}
+  // Now also allow for empty binutilsprefix in the right directory:
+  if not result then
+  begin
+    BinPrefixTry:='';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    // search local default cross-utils paths
+    result:=SearchBinUtil('/usr/mips-linux-gnu/bin',AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+  {$ENDIF}
+
   if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
   // Now also allow for mips-linux-gnu- binutilsprefix (e.g. codesourcery)
