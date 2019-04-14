@@ -38,12 +38,17 @@ Adapt (add) for other setups
 
 {$mode objfpc}{$H+}
 
+{$DEFINE MULTILIB}
+
 interface
 
 uses
   Classes, SysUtils, m_crossinstaller, fileutil;
 
 implementation
+
+uses
+  processutils,fpcuputil;
 
 type
 
@@ -66,6 +71,9 @@ end;
 function Tany_linux386.GetLibs(Basepath:string): boolean;
 const
   DirName='i386-linux';
+var
+  s:string;
+  i:integer;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -91,16 +99,27 @@ begin
     {$IFDEF MULTILIB}
     FLibsPath:='/usr/lib/i386-linux-gnu'; //debian (multilib) Jessie+ convention
     result:=DirectoryExists(FLibsPath);
+    if (NOT result) then
+    begin
+      FLibsPath:='/lib32';
+      result:=DirectoryExists(FLibsPath);
+    end;
     if result then
     begin
       FLibsFound:=True;
-      //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/lib/i386-linux-gnu'));
       {$ifdef CPUX64}
-      // gcc multilib
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/usr/lib/gcc/x86_64-linux-gnu/5/32'));
-      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter('/usr/lib/gcc/x86_64-linux-gnu/6/32'));
+      s:='/usr/lib32';
+      if DirectoryExists(s) then
+      begin
+        AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
+      end;
+      // gcc 32bit multilib
+      s:=IncludeTrailingPathDelimiter(GetGCCDirectory)+'32';
+      if DirectoryExists(s) then
+      begin
+        AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
+      end;
       // set linker target; multilib //
       // we could test multilib by asking the linker ; ld --target-help, and process the output to see if elf32-i386 is supported
       //AddFPCCFGSnippet('-k-b elf32-i386'));
@@ -131,6 +150,7 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
+  s:string;
 begin
   result:=inherited;
   if result then exit;
@@ -138,6 +158,43 @@ begin
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
   result:=SearchBinUtil(BasePath,AsFile);
+
+  {$IFDEF MULTILIB}
+    {$IFDEF CPUX64}
+    // Now also allow for empty binutilsprefix in the right directory:
+    if (NOT result) then
+    begin
+      ExecuteCommand('objdump -i', s, False);
+      if AnsiPos('elf32-i386', s) <> 0 then
+      begin
+        s:=Which('objdump');
+        s:=ExtractFileDir(s);
+        BinPrefixTry:='';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        // search local default cross-utils paths
+        result:=SearchBinUtil(s,AsFile);
+        if result then FBinUtilsPrefix:=BinPrefixTry;
+      end;
+    end;
+    {$ENDIF}
+    {$IFDEF CPUX32}
+    // Now also allow for empty binutilsprefix in the right directory:
+    if (NOT result) then
+    begin
+      ExecuteCommand('objdump -i', s, False);
+      if AnsiPos('elf64-x86-64', s) <> 0 then
+      begin
+        s:=Which('objdump');
+        s:=ExtractFileDir(s);
+        BinPrefixTry:='';
+        AsFile:=BinPrefixTry+'as'+GetExeExt;
+        // search local default cross-utils paths
+        result:=SearchBinUtil(s,AsFile);
+        if result then FBinUtilsPrefix:=BinPrefixTry;
+      end;
+    end;
+  {$ENDIF}
+  {$ENDIF}
 
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);

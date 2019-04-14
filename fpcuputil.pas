@@ -1967,6 +1967,7 @@ begin
     if (ReturnCode=0) then
     begin
       s1:=' --libdir=';
+      //s1:=' --libexecdir=';
       i:=Ansipos(s1, Output);
       if i > 0 then
       begin
@@ -1988,6 +1989,11 @@ begin
 
       s1:=' --build=';
       i:=Ansipos(s1, Output);
+      if i=0 then
+      begin
+        s1:=' --target=';
+        i:=Ansipos(s1, Output);
+      end;
       if i > 0 then
       begin
         s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
@@ -2025,19 +2031,23 @@ begin
     // ignore errors
   end;
 
-  if ReturnCode<>0 then
+  //In case of errors, do a brute force search of gcc
+  if ((ReturnCode<>0) or (NOT DirectoryExists(result))) then
   begin
-    output:=result+'/'+GetTargetCPUOS+'-gnu/7';
-    if DirectoryExists(output) then result:=output else
+    {$IF (defined(BSD)) and (not defined(Darwin))}
+    result:='/usr/local/lib/gcc/';
+    {$else}
+    result:='/usr/lib/gcc/';
+    {$endif}
+    for i:=9 downto 4 do
     begin
-      output:=result+'/'+GetTargetCPUOS+'-gnu/6';
-      if DirectoryExists(output) then result:=output else
+      output:=IncludeTrailingPathDelimiter(result)+GetTargetCPUOS+'-gnu'+DirectorySeparator+InttoStr(i);
+      if DirectoryExists(output) then
       begin
-        output:=result+'/'+GetTargetCPUOS+'-gnu/5';
-        if DirectoryExists(output) then result:=output else
+        if FileExists(output+DirectorySeparator+'crtbegin.o') then
         begin
-          output:=result+'/'+GetTargetCPUOS+'-gnu/4';
-          if DirectoryExists(output) then result:=output;
+          result:=output;
+          break;
         end;
       end;
     end;
