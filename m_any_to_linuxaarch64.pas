@@ -115,6 +115,16 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
+  // Now also allow for aarch64-linux-gnu- binutilsprefix (e.g. codesourcery)
+  if not result then
+  begin
+    BinPrefixTry:='aarch64-linux-gnu-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   // Also allow for (cross)binutils without prefix
   if not result then
   begin
