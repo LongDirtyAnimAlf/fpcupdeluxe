@@ -95,6 +95,7 @@ const
 var
   AsFile: string;
   BinPrefixTry: string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
@@ -104,6 +105,24 @@ begin
   result:=SearchBinUtil(BasePath,AsFile);
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+
+  if not result then
+  begin
+    // look for versioned binutils
+    BinPrefixTry:='i386-freebsd';
+    for i:=12 downto 7 do
+    begin
+      AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
+      result:=SearchBinUtil(BasePath,AsFile);
+      if not result then
+        result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+      if result then
+      begin
+        FBinUtilsPrefix:=BinPrefixTry+InttoStr(i)+'-';
+        break;
+      end;
+    end;
+  end;
 
   // Also allow for (cross)binutils without prefix
   if not result then
