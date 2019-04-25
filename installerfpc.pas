@@ -2114,16 +2114,18 @@ begin
               end;
               {$ENDIF}
 
-              // look for a previous compiler if not found, and use overrideversioncheck
-              if NOT aCompilerFound then
-              begin
-                FBootstrapCompilerOverrideVersionCheck:=true;
-                s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
-                if aLocalBootstrapVersion<>s
-                   then aLocalBootstrapVersion:=s
-                   else break;
-              end;
             end;
+
+            // look for a previous compiler if not found, and use overrideversioncheck
+            if (NOT aCompilerFound) then
+            begin
+              FBootstrapCompilerOverrideVersionCheck:=true;
+              s:=GetBootstrapCompilerVersionFromVersion(aLocalBootstrapVersion);
+              if aLocalBootstrapVersion<>s
+                 then aLocalBootstrapVersion:=s
+                 else break;
+            end;
+
           end; // while
 
         finally
