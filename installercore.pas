@@ -159,7 +159,7 @@ const
 
 type
   TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
-  TOS  = (windows,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku);
+  TOS  = (windows,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris);
   TARMARCH  = (default,armel,armeb,armhf);
 
   TCPUOS = record
@@ -179,7 +179,7 @@ const
   );
 
   OSStr : array[TOS] of string=(
-    'windows'{,'win32','win64'},'linux', 'android','darwin','freebsd','openbsd','aix','wince','iphonesim','embedded','java', 'msdos','haiku'
+    'windows'{,'win32','win64'},'linux', 'android','darwin','freebsd','openbsd','aix','wince','iphonesim','embedded','java', 'msdos','haiku','solaris'
   );
 
   ARMArchFPCStr : array[TARMARCH] of string=(

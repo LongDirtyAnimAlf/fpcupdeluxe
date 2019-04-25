@@ -259,7 +259,13 @@ const
                            // Works under MAC OS X, but is undocumented,
                            // So FPC doesn't include it
   {$else}
+  {$ifdef Solaris}
+  MSG_NOSIGNAL  = $4000;  // Do not generate SIGPIPE.
+                           // Works under MAC OS X, but is undocumented,
+                           // So FPC doesn't include it
+  {$else}
    MSG_NOSIGNAL  = sockets.MSG_NOSIGNAL; // Do not generate SIGPIPE.
+  {$endif}
   {$endif}
 
 const

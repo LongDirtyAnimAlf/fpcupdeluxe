@@ -46,10 +46,10 @@ begin
   end;
 end;
 {$ELSEIF defined(solaris)}
-//untested
-  begin
-    t = sysconf(_SC_NPROC_ONLN);
-  end;
+//not implemented
+begin
+  Result:=1;
+end;
 {$ELSEIF defined(freebsd) or defined(darwin)}
 var
   mib: array[0..1] of cint;
