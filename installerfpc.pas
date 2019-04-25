@@ -1219,7 +1219,11 @@ begin
 
   {$IFDEF UNIX}
   s1:='-Sg '+s1;
+    {$IFDEF SOLARIS}
+    s1:='-Xn '+s1;
+    {$ENDIF}
   {$ENDIF}
+
 
   {$IFDEF DARWIN}
   //Add minimum required OSX version to prevent "crti not found" errors.
@@ -3015,6 +3019,9 @@ begin
         {$endif}
         s:=s+';'+GetGCCDirectory;
         ConfigText.Insert(x,s); Inc(x);
+        {$IFDEF SOLARIS}
+        ConfigText.Insert(x,'-Xn'); Inc(x);
+        {$ENDIF}
         {$ENDIF UNIX}
 
         {$ifdef Darwin}

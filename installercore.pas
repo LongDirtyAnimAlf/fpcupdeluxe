@@ -481,7 +481,7 @@ begin
     {$IFDEF MSWINDOWS}
     FMake := IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt;
     {$ELSE}
-    {$IF defined(BSD) and not defined(DARWIN)}
+    {$IF (defined(BSD) and not defined(DARWIN)) or (defined(Solaris))}
     FMake := 'gmake'; //GNU make; assume in path
     //FMake := FindDefaultExecutablePath('gmake');
     {$else}

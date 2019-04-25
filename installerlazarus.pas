@@ -1404,7 +1404,9 @@ begin
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('gmake')); //GNU make; assume in path
       {$ENDIF DARWIN}
       {$ENDIF BSD}
-
+      {$IFDEF Solaris}
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', which('gmake')); //GNU make; assume in path
+      {$ENDIF}
       {$ENDIF UNIX}
 
       // Debugger type needs to be specified at least since Lazarus 1.1
