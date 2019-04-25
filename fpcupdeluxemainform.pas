@@ -36,6 +36,7 @@ type
     btnUninstallModule: TButton;
     btnGetOpenSSL: TButton;
     ButtonInstallCrossCompiler: TButton;
+    ButtonRemoveCrossCompiler: TButton;
     CheckAutoClear: TCheckBox;
     FPCVersionLabel: TLabel;
     LazarusVersionLabel: TLabel;
@@ -49,7 +50,7 @@ type
     EmbeddedBtn: TBitBtn;
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
-    MChineeslanguage: TMenuItem;
+    MChineseCNlanguage: TMenuItem;
     OPMBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
@@ -91,7 +92,7 @@ type
     procedure LazarusVersionLabelClick(Sender: TObject);
     procedure listModulesSelectionChange(Sender: TObject; User: boolean);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
-    procedure MChineeslanguageClick(Sender: TObject);
+    procedure MChineseCNlanguageClick(Sender: TObject);
     procedure MEnglishlanguageClick(Sender: TObject);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
@@ -132,22 +133,23 @@ type
     {$endif}
     procedure InitFpcupdeluxe({%H-}Data: PtrInt);
     procedure CheckForUpdates({%H-}Data: PtrInt);
-    function InstallCrossCompiler(Sender: TObject):boolean;
-    function AutoUpdateCrossCompiler(Sender: TObject):boolean;
+    function  InstallCrossCompiler(Sender: TObject):boolean;
+    function  RemoveCrossCompiler(Sender: TObject):boolean;
+    function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
     procedure Edit1Change(Sender: TObject);
     procedure PrepareRun;
-    function RealRun:boolean;
-    function GetFPCUPSettings(IniDirectory:string):boolean;
-    function SetFPCUPSettings(IniDirectory:string):boolean;
+    function  RealRun:boolean;
+    function  GetFPCUPSettings(IniDirectory:string):boolean;
+    function  SetFPCUPSettings(IniDirectory:string):boolean;
     procedure AddMessage(const aMessage:string; const UpdateStatus:boolean=false);
     procedure SetTarget(aControl:TControl;const aTarget:string='');
     procedure InitFPCupManager;
     {$ifndef usealternateui}
-    property FPCTarget:string read FFPCTarget write SetFPCTarget;
-    property LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
+    property  FPCTarget:string read FFPCTarget write SetFPCTarget;
+    property  LazarusTarget:string read FLazarusTarget write SetLazarusTarget;
     {$endif}
 
   public
@@ -499,7 +501,7 @@ begin
   end;
 end;
 
-procedure TForm1.MChineeslanguageClick(Sender: TObject);
+procedure TForm1.MChineseCNlanguageClick(Sender: TObject);
 begin
   {$ifdef EnableLanguages}
   sLanguage:='zh';
@@ -1739,7 +1741,14 @@ end;
 
 procedure TForm1.ButtonInstallCrossCompilerClick(Sender: TObject);
 begin
-  InstallCrossCompiler(Sender);
+  if Sender=ButtonInstallCrossCompiler then
+  begin
+    InstallCrossCompiler(Sender);
+  end;
+  if Sender=ButtonRemoveCrossCompiler then
+  begin
+    RemoveCrossCompiler(Sender);
+  end;
 end;
 
 function TForm1.InstallCrossCompiler(Sender: TObject):boolean;
@@ -2633,6 +2642,93 @@ begin
 
   result:=success;
 end;
+
+function TForm1.RemoveCrossCompiler(Sender: TObject):boolean;
+var
+  success:boolean;
+  i:integer;
+  s:string;
+begin
+  result:=false;
+
+  if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
+  begin
+    ShowMessage('Please select a CPU and OS target first');
+    exit;
+  end;
+
+
+  PrepareRun;
+
+  if radgrpCPU.ItemIndex<>-1 then
+  begin
+    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+    if s='ppc' then s:='powerpc';
+    if s='ppc64' then s:='powerpc64';
+    if s='x8664' then s:='x86_64';
+    FPCupManager.CrossCPU_Target:=s;
+  end;
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    if s='i-sim' then s:='iphonesim';
+    FPCupManager.CrossOS_Target:=s;
+  end;
+
+  if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
+  if (FPCupManager.CrossOS_Target='msdos') then FPCupManager.CrossCPU_Target:='i8086';
+  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
+  if (FPCupManager.CrossCPU_Target='i8086') then FPCupManager.CrossOS_Target:='msdos';
+  if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:='i386';
+
+  if FPCupManager.CrossOS_Target='windows' then
+  begin
+    if FPCupManager.CrossCPU_Target='i386' then FPCupManager.CrossOS_Target:='win32';
+    if FPCupManager.CrossCPU_Target='x86_64' then FPCupManager.CrossOS_Target:='win64';
+  end;
+
+  if (FPCupManager.CrossCPU_Target='') then
+  begin
+    if Sender<>nil then Application.MessageBox(PChar('Please select a CPU target first.'), PChar('CPU error'), MB_ICONERROR);
+    FPCupManager.CrossOS_Target:=''; // cleanup
+    exit;
+  end;
+
+  if (FPCupManager.CrossOS_Target='') then
+  begin
+    if Sender<>nil then Application.MessageBox(PChar('Please select an OS target first.'), PChar('OS error'), MB_ICONERROR);
+    FPCupManager.CrossCPU_Target:=''; // cleanup
+    exit;
+  end;
+
+  if assigned(CrossInstallers) then
+  begin
+    success:=false;
+    for i := 0 to CrossInstallers.Count - 1 do
+    begin
+      success:=(CrossInstallers[i] = GetFPCTargetCPUOS(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,false));
+      if success then break;
+    end;
+    if (NOT success) then
+    begin
+      if Sender<>nil then
+      begin
+        Application.MessageBox(PChar('No valid CPU / OS crosscompiler found.'), PChar('FPCUPDELUXE Limitation'), MB_ICONERROR);
+      end
+      else
+      begin
+        memoSummary.Lines.Append('');
+        memoSummary.Lines.Append('FPCUPDELUXE Limitation: No valid CPU / OS crosscompiler found. Skipping');
+      end;
+      FPCupManager.CrossOS_Target:=''; // cleanup
+      FPCupManager.CrossCPU_Target:=''; // cleanup
+      exit;
+    end;
+  end;
+
+  result:=success;
+end;
+
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
 begin

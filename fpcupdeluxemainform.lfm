@@ -2972,17 +2972,17 @@ object Form1: TForm1
         AnchorSideLeft.Control = radgrpCPU
         AnchorSideTop.Control = radgrpCPU
         AnchorSideTop.Side = asrBottom
-        AnchorSideRight.Control = radgrpOS
+        AnchorSideRight.Control = radgrpCPU
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = AutoCrossUpdate
         Left = 8
         Height = 39
         Hint = 'Install the selected CPU-OS cross-compiler.'
         Top = 355
-        Width = 286
+        Width = 130
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
-        Caption = 'Install cross-compiler'
+        Caption = 'Install compiler'
         OnClick = ButtonInstallCrossCompilerClick
         ParentShowHint = False
         ShowHint = True
@@ -2992,7 +2992,7 @@ object Form1: TForm1
         AnchorSideLeft.Control = ButtonInstallCrossCompiler
         AnchorSideTop.Control = ButtonInstallCrossCompiler
         AnchorSideTop.Side = asrBottom
-        AnchorSideRight.Control = ButtonInstallCrossCompiler
+        AnchorSideRight.Control = radgrpOS
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
@@ -3009,6 +3009,26 @@ object Form1: TForm1
         ParentShowHint = False
         ShowHint = True
         TabOrder = 3
+      end
+      object ButtonRemoveCrossCompiler: TButton
+        AnchorSideLeft.Control = radgrpOS
+        AnchorSideTop.Control = radgrpCPU
+        AnchorSideTop.Side = asrBottom
+        AnchorSideRight.Control = radgrpOS
+        AnchorSideRight.Side = asrBottom
+        AnchorSideBottom.Control = AutoCrossUpdate
+        Left = 164
+        Height = 39
+        Hint = 'Remove the selected CPU-OS cross-compiler.'
+        Top = 355
+        Width = 130
+        Anchors = [akLeft, akRight, akBottom]
+        BorderSpacing.Top = 6
+        Caption = 'Remove compiler'
+        OnClick = ButtonInstallCrossCompilerClick
+        ParentShowHint = False
+        ShowHint = True
+        TabOrder = 4
       end
     end
     object ModuleSheet: TTabSheet
@@ -3130,9 +3150,9 @@ object Form1: TForm1
         Caption = 'English'
         OnClick = MEnglishlanguageClick
       end
-      object MChineeslanguage: TMenuItem
-        Caption = 'Chinees'
-        OnClick = MChineeslanguageClick
+      object MChineseCNlanguage: TMenuItem
+        Caption = 'Chinese (CN)'
+        OnClick = MChineseCNlanguageClick
       end
     end
     object MenuItem1: TMenuItem
