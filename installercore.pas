@@ -2477,8 +2477,10 @@ begin
             j:=Pos('_FPCUPPATCH',PatchFilePath);
 
       {$if defined(Darwin) and defined(LCLQT5)}
+      //disable big hack for now
+      if Pos('DARWINQT5HACK_LAZPATCH',PatchFilePath)>0 then j:=0;
       {$else}
-      if PatchFilePath='DARWINQT5HACK_LAZPATCH' then j:=0;
+      if Pos('DARWINQT5',PatchFilePath)>0 then j:=0;
       {$endif}
 
       // In general, only patch trunk !

@@ -1,0 +1,26 @@
+Index: lcl/interfaces/qt5/qt56.pas
+===================================================================
+--- lcl/interfaces/qt5/qt56.pas	(revision 60897)
++++ lcl/interfaces/qt5/qt56.pas	(working copy)
+@@ -10002,7 +10002,7 @@
+ procedure QTextEdit_zoomIn(handle: QTextEditH; range: Integer = 1); cdecl; external Qt5PasLib name 'QTextEdit_zoomIn';
+ procedure QTextEdit_zoomOut(handle: QTextEditH; range: Integer = 1); cdecl; external Qt5PasLib name 'QTextEdit_zoomOut';
+ procedure QTextEdit_placeholderText(handle: QTextEditH; retval: PWideString); cdecl; external Qt5PasLib name 'QTextEdit_placeholderText';
+-procedure QTextEdit_setPlaceholderText(handle: QTextEditH; AnonParam1: PWideString); cdecl; external Qt5PasLib name 'QTextEdit_setPlaceholderText';
++//procedure QTextEdit_setPlaceholderText(handle: QTextEditH; AnonParam1: PWideString); cdecl; external Qt5PasLib name 'QTextEdit_setPlaceholderText';
+ 
+ type
+   QTextEdit_textChanged_Event = procedure () of object cdecl;
+Index: lcl/interfaces/qt5/qtwidgets.pas
+===================================================================
+--- lcl/interfaces/qt5/qtwidgets.pas	(revision 60897)
++++ lcl/interfaces/qt5/qtwidgets.pas	(working copy)
+@@ -10148,7 +10148,7 @@
+   W: WideString;
+ begin
+   W := UTF8ToUTF16(ATextHint);
+-  QTextEdit_setPlaceholderText(QTextEditH(Widget), @W);
++  //QTextEdit_setPlaceholderText(QTextEditH(Widget), @W);
+ end;
+ 
+ procedure TQtTextEdit.setReadOnly(const AReadOnly: Boolean);
