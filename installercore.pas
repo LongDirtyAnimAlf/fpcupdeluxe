@@ -158,7 +158,7 @@ const
 
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris);
   TARMARCH  = (default,armel,armeb,armhf);
 
@@ -171,11 +171,11 @@ type
 
 const
   CpuStr : array[TCPU] of string=(
-    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086'
+    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086','sparc'
   );
 
   ppcSuffix : array[TCPU] of string=(
-    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086'
+    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc'
   );
 
   OSStr : array[TOS] of string=(

@@ -75,6 +75,7 @@ uses
   m_any_to_aixpowerpc,
   m_any_to_aixpowerpc64,
   m_any_to_solarisx64,
+  m_any_to_solarissparc,
   m_any_to_msdosi8086,
   {$ifdef LINUX}
   //{$ifdef CPUX86}

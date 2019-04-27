@@ -775,7 +775,7 @@ begin
         if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android) AND (OS<>embedded)) then continue;
         if (CPU=avr) AND (OS<>embedded) then continue;
         if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;
-        if (OS=solaris) AND ((CPU<>x86_64)) then continue;
+        if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then continue;
 
         s:=FCrossUtils[CPU,OS].CPU+'-'+FCrossUtils[CPU,OS].OS;
         WriteInteger(s,'Setting',Ord(FCrossUtils[CPU,OS].Setting));

@@ -2918,6 +2918,7 @@ object Form1: TForm1
           'avr'
           'jvm'
           'i8086'
+          'sparc'
         )
         OnClick = radgrpCPUClick
         ParentShowHint = False

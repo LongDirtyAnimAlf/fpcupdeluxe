@@ -189,6 +189,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure SetTarget(aCPU,aOS,aSubArch:string);override;
+    procedure DeleteTarget(aCPU,aOS,aSubArch:string);
     property CrossCompilerName: string read FCrossCompilerName;
   end;
 
@@ -299,25 +300,28 @@ begin
       SnipBegin:=ConfigText.Count;
     end;
 
-    for i:=0 to (SnippetText.Count-1) do
+    if (SnippetText.Count>1) then
     begin
-      ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
-      Inc(SnipBegin);
-    end;
-
-    //{$ifndef Darwin}
-    {$ifdef MSWINDOWS}
-    // remove pipeline assembling for Darwin when cross-compiling !!
-    SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
-    if SnipBegin>-1 then
-    begin
-      if ConfigText.Strings[SnipBegin+1]<>'#IFNDEF FPC_CROSSCOMPILING' then
+      for i:=0 to (SnippetText.Count-1) do
       begin
-        ConfigText.Insert(SnipBegin+1,'#IFNDEF FPC_CROSSCOMPILING');
-        ConfigText.Insert(SnipBegin+3,'#ENDIF');
+        ConfigText.Insert(SnipBegin,SnippetText.Strings[i]);
+        Inc(SnipBegin);
       end;
+
+      //{$ifndef Darwin}
+      {$ifdef MSWINDOWS}
+      // remove pipeline assembling for Darwin when cross-compiling !!
+      SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
+      if SnipBegin>-1 then
+      begin
+        if ConfigText.Strings[SnipBegin+1]<>'#IFNDEF FPC_CROSSCOMPILING' then
+        begin
+          ConfigText.Insert(SnipBegin+1,'#IFNDEF FPC_CROSSCOMPILING');
+          ConfigText.Insert(SnipBegin+3,'#ENDIF');
+        end;
+      end;
+      {$endif}
     end;
-    {$endif}
 
     ConfigText.SaveToFile(FPCCFG);
 
@@ -490,6 +494,21 @@ begin
   inherited;
   if Assigned(CrossInstaller) then FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
 end;
+
+procedure TFPCCrossInstaller.DeleteTarget(aCPU,aOS,aSubArch:string);
+var
+  FPCCfg :string;
+begin
+  FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+  InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target);
+  {
+  if Assigned(CrossInstaller) then
+  begin
+    InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS);
+  end;
+  }
+end;
+
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // Runs make/make install for cross compiler.
