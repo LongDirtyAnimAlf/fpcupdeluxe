@@ -1310,6 +1310,8 @@ begin
     or (ModuleName=_STARTLAZARUS)
     or (ModuleName=_LAZBUILD)
     or (ModuleName=_LCL)
+    or (ModuleName=_COMPONENTS)
+    or (ModuleName=_PACKAGER)
     or (ModuleName=_LCLCROSS)
     or (ModuleName=_IDE)
     or (ModuleName=_BIGIDE)

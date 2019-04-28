@@ -62,15 +62,16 @@ const
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
     _END +
 
-    //standard uninstall
-    _DECLARE+_LAZARUS+_UNINSTALL+_SEP+
-    _UNINSTALLMODULE+_LAZARUS+_SEP +
-    _EXECUTE+_DELETELAZARUSSCRIPT+_SEP +
-    _END +
-
     //standard clean
     _DECLARE+_LAZARUS+_CLEAN+_SEP+
     _CLEANMODULE+_LAZARUS+_SEP +
+    _END +
+
+    //standard uninstall
+    _DECLARE+_LAZARUS+_UNINSTALL+_SEP+
+    //_CLEANMODULE+_LAZARUS+_SEP+
+    _UNINSTALLMODULE+_LAZARUS+_SEP +
+    _EXECUTE+_DELETELAZARUSSCRIPT+_SEP +
     _END +
 
     //selective actions triggered with --only=SequenceName
@@ -89,11 +90,42 @@ const
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
     _END +
 
+    _DECLARE+_LAZARUSREMOVEONLY+_SEP +
+    _CLEANMODULE+_LAZARUS+_SEP +
+    _CONFIGMODULE+_LAZARUS+_SEP +
+    //_UNINSTALLMODULE+_LAZARUS+_SEP +
+    _END +
+
     // Compile only LCL
     _DECLARE+_LCL+_SEP +
-    _CLEANMODULE+_LCL+_SEP+
+    _CLEANMODULE+_LCL+_SEP +
     _BUILDMODULE+_LCL+_SEP +
     _END +
+
+    // Clean (remove only LCL
+    _DECLARE+_LCLREMOVEONLY+_SEP +
+    _CLEANMODULE+_LCL+_SEP +
+    _UNINSTALLMODULE+_LCL+_SEP +
+    _END +
+
+    // Clean (remove only components)
+    _DECLARE+_COMPONENTSREMOVEONLY+_SEP +
+    _CLEANMODULE+_COMPONENTS+_SEP +
+    _UNINSTALLMODULE+_COMPONENTS+_SEP +
+    _END +
+
+    // Clean (remove only packager)
+    _DECLARE+_PACKAGERREMOVEONLY+_SEP +
+    _CLEANMODULE+_PACKAGER+_SEP +
+    _UNINSTALLMODULE+_PACKAGER+_SEP +
+    _END +
+
+    _DECLARE+_LCLALLREMOVEONLY+_SEP +
+    _DO+_LCLREMOVEONLY+_SEP +
+    _DO+_COMPONENTSREMOVEONLY+_SEP +
+    _DO+_PACKAGERREMOVEONLY+_SEP +
+    _END +
+
 
     //standard lazbuild build
     _DECLARE+_LAZBUILD+_SEP +
@@ -124,7 +156,7 @@ const
     {$endif}
     {$endif mswindows}
 
-    // Crosscompile only LCL native widgetset (needs to be run at end
+    // Crosscompile only LCL native widgetset (needs to be run at end)
     _DECLARE+_LCLCROSS+_SEP +
     _RESETLCL+_SEP + //module code itself will select proper widgetset
     _CLEANMODULE+_LCLCROSS+_SEP+
@@ -231,9 +263,10 @@ type
 
   TLazarusCrossInstaller = class(TLazarusInstaller)
   protected
-  public
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName: string): boolean; override;
+  public
+    function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
   end;
@@ -447,6 +480,51 @@ begin
   end    //valid cross compile setup
   else
     infoln(infotext+'Can''t find cross installer for ' + GetFPCTarget(false), etError);
+end;
+
+function TLazarusCrossInstaller.UnInstallModule(ModuleName:string): boolean;
+var
+  aDir:string;
+begin
+  Result:=true;
+
+  FErrorLog.Clear;
+
+  if Assigned(CrossInstaller) then
+  begin
+
+    //CrossInstaller.Reset;
+
+    case ModuleName of
+      _LCL:
+      begin
+        aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lcl'+DirectorySeparator+'units'+DirectorySeparator+GetFPCTarget(false);
+        if DeleteDirectoryEx(aDir)=false then
+        begin
+          WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+        end;
+      end;
+      _PACKAGER:
+      begin
+        aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'packager'+DirectorySeparator+'units'+DirectorySeparator+GetFPCTarget(false);
+        if DeleteDirectoryEx(aDir)=false then
+        begin
+          WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+        end;
+      end;
+      _COMPONENTS:
+      begin
+        aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'lazutils'+DirectorySeparator+'lib'+DirectorySeparator+GetFPCTarget(false);
+        if DeleteDirectoryEx(aDir)=false then
+        begin
+          WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+        end;
+      end;
+      _LCLCROSS:
+      begin
+      end;
+    end;
+  end;
 end;
 
 constructor TLazarusCrossInstaller.Create;
@@ -1571,6 +1649,7 @@ begin
 
   CleanDirectory:='';
   CleanCommand:='';
+
   case ModuleName of
     _IDE:
     begin
@@ -1591,6 +1670,24 @@ begin
       begin
         CleanCommand:='clean';
       end;
+    end;
+    _COMPONENTS:
+    begin
+      CleanDirectory:=DirectorySeparator+'components';
+      if (Self is TLazarusCrossInstaller) AND (FCrossLCL_Platform <> '') then
+      begin
+        Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+      end;
+      CleanCommand:='clean';
+    end;
+    _PACKAGER:
+    begin
+      CleanDirectory:=DirectorySeparator+'packager';
+      if (Self is TLazarusCrossInstaller) AND (FCrossLCL_Platform <> '') then
+      begin
+        Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
+      end;
+      CleanCommand:='clean';
     end;
     _LCLCROSS:
     begin
@@ -1624,12 +1721,15 @@ begin
     Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
   end;
 
-  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory)+CleanDirectory);
+  CleanDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory)+CleanDirectory;
+
+  Processor.Parameters.Add('--directory=' + CleanDirectory);
   Processor.Parameters.Add(CleanCommand);
+
   if (Self is TLazarusCrossInstaller) then
-    infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory+' for OS_TARGET='+CrossOS_Target+' and CPU_TARGET='+CrossCPU_Target,etInfo)
+    infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory+' for OS_TARGET='+CrossOS_Target+' and CPU_TARGET='+CrossCPU_Target,etInfo)
   else
-    infoln(infotext+'Running "make '+CleanCommand+'" twice inside .'+CleanDirectory,etInfo);
+    infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory,etInfo);
 
   try
     writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);

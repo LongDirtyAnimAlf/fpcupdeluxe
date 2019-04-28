@@ -56,6 +56,7 @@ Const
 
 //standard uninstall
     _DECLARE+_FPC+_UNINSTALL+_SEP+
+    //_CLEANMODULE+_FPC+_SEP+
     _UNINSTALLMODULE+_FPC+_SEP+
     _END+
 
@@ -97,6 +98,11 @@ Const
     _DECLARE+_FPCCLEANBUILDONLY+_SEP+
     _CLEANMODULE+_FPC+_SEP+
     _BUILDMODULE+_FPC+_SEP+
+    _END+
+
+    _DECLARE+_FPCREMOVEONLY+_SEP+
+    _CLEANMODULE+_FPC+_SEP+
+    _UNINSTALLMODULE+_FPC+_SEP+
 
     _ENDFINAL;
 
@@ -186,10 +192,10 @@ type
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; override;
   public
+    function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
     procedure SetTarget(aCPU,aOS,aSubArch:string);override;
-    procedure DeleteTarget(aCPU,aOS,aSubArch:string);
     property CrossCompilerName: string read FCrossCompilerName;
   end;
 
@@ -270,20 +276,23 @@ begin
         exit;
       end;
 
-      // found end of OS and CPU snippet ; now check detailed CPU setting
-      for i:=SnipBegin to SnipEnd do
+      if (SnippetText.Count>1) then
       begin
-        // do we have a CPU define ...
-        if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+        // found end of OS and CPU snippet ; now check detailed CPU setting
+        for i:=SnipBegin to SnipEnd do
         begin
-          if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
+          // do we have a CPU define ...
+          if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
           begin
-            // we have exactly the same CPU type: delete snipped from config-file to replace !!!
-            result:=true;
+            if (Pos(ConfigText.Strings[i]+LineEnding,Snippet)>0) then
+            begin
+              // we have exactly the same CPU type: delete snipped from config-file to replace !!!
+              result:=true;
+            end;
+            break;
           end;
-          break;
         end;
-      end;
+      end else result:=true;
     end;
 
     if result then
@@ -494,21 +503,6 @@ begin
   inherited;
   if Assigned(CrossInstaller) then FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
 end;
-
-procedure TFPCCrossInstaller.DeleteTarget(aCPU,aOS,aSubArch:string);
-var
-  FPCCfg :string;
-begin
-  FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
-  InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target);
-  {
-  if Assigned(CrossInstaller) then
-  begin
-    InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS);
-  end;
-  }
-end;
-
 
 function TFPCCrossInstaller.BuildModuleCustom(ModuleName: string): boolean;
 // Runs make/make install for cross compiler.
@@ -1167,6 +1161,80 @@ begin
     result:=false;
   end;
 
+end;
+
+function TFPCCrossInstaller.UnInstallModule(ModuleName: string): boolean;
+var
+  BinsAvailable,LibsAvailable:boolean;
+  aDir,FPCCfg :string;
+begin
+  result:=true; //succeed by default
+
+  FErrorLog.Clear;
+
+  if assigned(CrossInstaller) then
+  begin
+    CrossInstaller.Reset;
+
+    // get/set cross binary utils !!
+    BinsAvailable:=false;
+    CrossInstaller.SearchModeUsed:=smFPCUPOnly; // default;
+    if Length(CrossToolsDirectory)>0 then
+    begin
+      // we have a crosstools setting
+      if (CrossToolsDirectory='FPCUP_AUTO')
+         then CrossInstaller.SearchModeUsed:=smAuto
+         else CrossInstaller.SearchModeUsed:=smManual;
+    end;
+    if CrossInstaller.SearchModeUsed=smManual
+       then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
+       else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
+    if BinsAvailable then
+    begin
+      aDir:=CrossInstaller.BinUtilsPath;
+      if DeleteDirectoryEx(aDir)=false then
+      begin
+        WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+      end;
+    end;
+
+    // get/set cross libraries !!
+    LibsAvailable:=false;
+    CrossInstaller.SearchModeUsed:=smFPCUPOnly;
+    if Length(CrossLibraryDirectory)>0 then
+    begin
+      // we have a crosslibrary setting
+      if (CrossLibraryDirectory='FPCUP_AUTO')
+         then CrossInstaller.SearchModeUsed:=smAuto
+         else CrossInstaller.SearchModeUsed:=smManual;
+    end;
+    if CrossInstaller.SearchModeUsed=smManual
+      then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
+      else LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
+    if LibsAvailable then
+    begin
+      aDir:=CrossInstaller.LibsPath;
+      if DeleteDirectoryEx(aDir)=false then
+      begin
+        WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+      end;
+    end;
+
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+    InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target);
+
+    aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
+    if DeleteDirectoryEx(aDir)=false then
+    begin
+      WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+    end;
+    aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(false);
+    if DeleteDirectoryEx(aDir)=false then
+    begin
+      WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+    end;
+
+  end;
 end;
 
 { TFPCNativeInstaller }

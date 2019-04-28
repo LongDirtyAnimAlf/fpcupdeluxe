@@ -1605,7 +1605,7 @@ begin
     begin
       // still not working 100% for Lazarus ...  todo
       // packages that are installed by the user are not included
-      FPCupManager.OnlyModules:='FPCCleanAndBuildOnly,LazCleanAndBuildOnly';
+      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
       FModuleList:=TStringList.Create;
       try
         GetModuleEnabledList(FModuleList);
@@ -2187,7 +2187,7 @@ begin
     end;
 
     // use the available source to build the cross-compiler ... change nothing about source and url !!
-    FPCupManager.OnlyModules:='FPCCleanOnly,FPCBuildOnly';
+    FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;//'FPCCleanOnly,FPCBuildOnly';
 
     // handle inclusion of LCL when cross-compiling
     IncludeLCL:=Form2.IncludeLCL;
@@ -2657,7 +2657,6 @@ begin
     exit;
   end;
 
-
   PrepareRun;
 
   if radgrpCPU.ItemIndex<>-1 then
@@ -2725,6 +2724,11 @@ begin
       exit;
     end;
   end;
+
+  // use the available source to build the cross-compiler ... change nothing about source and url !!
+  FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
+
+  success:=RealRun;
 
   result:=success;
 end;

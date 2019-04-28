@@ -103,12 +103,21 @@ const
   _RESET                   = 'Reset';
   _ONLY                    = 'Only';
 
-  _CLEANMODULE             = _CLEAN+'Module ';
-  _CHECKMODULE             = _CHECK+'Module ';
-  _GETMODULE               = _GET+'Module ';
-  _CONFIGMODULE            = _CONFIG+'Module ';
-  _BUILDMODULE             = _BUILD+'Module ';
-  _UNINSTALLMODULE         = _UNINSTALL+'Module ';
+  _DO                      = 'Do ';
+  _DECLARE                 = 'Declare ';
+  _EXECUTE                 = 'Exec ';
+  _SETCPU                  = 'SetCPU ';
+  _SETOS                   = 'SetOS ';
+  _REQUIRES                = 'Requires ';
+  _DECLAREHIDDEN           = 'DeclareHidden ';
+  _MODULE                  = 'Module ';
+
+  _CLEANMODULE             = _CLEAN+_MODULE;
+  _CHECKMODULE             = _CHECK+_MODULE;
+  _GETMODULE               = _GET+_MODULE;
+  _CONFIGMODULE            = _CONFIG+_MODULE;
+  _BUILDMODULE             = _BUILD+_MODULE;
+  _UNINSTALLMODULE         = _UNINSTALL+_MODULE;
 
   _CREATEFPCUPSCRIPT       = 'CreateFpcupScript';
   _CREATELAZARUSSCRIPT     = 'CreateLazarusScript';
@@ -118,24 +127,23 @@ const
   _LAZBUILD                = 'Lazbuild';
   _STARTLAZARUS            = 'StartLazarus';
   _LCL                     = 'LCL';
+  _COMPONENTS              = 'Components';
+  _PACKAGER                = 'Packager';
   _IDE                     = 'IDE';
   _BIGIDE                  = 'BigIDE';
   _USERIDE                 = 'UserIDE';
   _OLDLAZARUS              = 'OldLazarus';
   _PAS2JS                  = 'Pas2JS';
 
-  _DO                      = 'Do ';
-  _DECLARE                 = 'Declare ';
-  _EXECUTE                 = 'Exec ';
-  _SETCPU                  = 'SetCPU ';
-  _SETOS                   = 'SetOS ';
-  _REQUIRES                = 'Requires ';
-  _DECLAREHIDDEN           = 'DeclareHidden ';
-
-
   _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
+  _FPCREMOVEONLY           = _FPC+_CLEAN+_UNINSTALL+_ONLY;
   _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
+  _LAZARUSREMOVEONLY       = _LAZARUS+_CLEAN+_UNINSTALL+_ONLY;
+  _LCLALLREMOVEONLY        = _LCL+'ALL'+_CLEAN+_ONLY;
+  _LCLREMOVEONLY           = _LCL+_CLEAN+_ONLY;
+  _COMPONENTSREMOVEONLY    = _COMPONENTS+_CLEAN+_ONLY;
+  _PACKAGERREMOVEONLY      = _PACKAGER+_CLEAN+_ONLY;
 
   _HELP                    = 'Help';
   _HELPFPC                 = _HELP+_FPC;
