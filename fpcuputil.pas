@@ -772,6 +772,7 @@ var
   ResultCode: boolean;
   XdgDesktopContent: TStringList;
   XdgDesktopFile: string;
+  aDirectory:string;
 begin
   // Fail by default:
   OperationSucceeded:=false;
@@ -804,8 +805,21 @@ begin
     if OperationSucceeded=false then
     begin
       infoln('CreateDesktopShortcut: xdg-desktop-icon failed to create shortcut to '+Target,etWarning);
-      //infoln('CreateDesktopShortcut: going to create shortcut manually',etWarning);
-      //FileUtil.CopyFile(XdgDesktopFile,'/usr/share/applications/'+ExtractFileName(XdgDesktopFile));
+      infoln('CreateDesktopShortcut: going to create shortcut manually',etWarning);
+      aDirectory:='/usr/share/applications';
+      if DirectoryExists(aDirectory) then
+      begin
+        FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
+      end
+      else
+      begin
+        // Create shortcut directly on User-Desktop
+        aDirectory:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'Desktop';
+        if DirectoryExists(aDirectory) then
+        begin
+          FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
+        end
+      end;
     end;
     // Temp file is no longer needed....
     try
