@@ -3006,6 +3006,8 @@ begin
 
   FPCupManager.LazarusOPT:=Form2.LazarusOptions;
 
+  FPCupManager.UseSystemFPC:=Form2.SystemFPC;
+
   FPCupManager.UseWget:=Form2.UseWget;
 
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
@@ -3340,6 +3342,8 @@ begin
       Form2.UseWget:=ReadBool('General','UseWget',False);
       Form2.MakeJobs:=ReadBool('General','MakeJobs',True);
 
+      Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
+
       Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
 
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
@@ -3396,6 +3400,8 @@ begin
 
       WriteBool('General','SplitFPC',Form2.SplitFPC);
       WriteBool('General','SplitLazarus',Form2.SplitLazarus);
+
+      WriteBool('General','SystemFPC',Form2.SystemFPC);
 
       WriteBool('General','UseWget',Form2.UseWget);
       WriteBool('General','MakeJobs',Form2.MakeJobs);

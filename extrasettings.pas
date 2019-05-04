@@ -125,6 +125,9 @@ type
     function GetUpdateOnly:boolean;
     procedure SetUpdateOnly(value:boolean);
 
+    function GetSystemFPC:boolean;
+    procedure SetSystemFPC(value:boolean);
+
     function GetIncludeLCL:boolean;
     procedure SetIncludeLCL(value:boolean);
 
@@ -202,6 +205,7 @@ type
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
 
     property UpdateOnly:boolean read GetUpdateOnly write SetUpdateOnly;
+    property SystemFPC:boolean read GetSystemFPC write SetSystemFPC;
 
     property IncludeLCL:boolean read GetIncludeLCL write SetIncludeLCL;
     property IncludeHelp:boolean read GetIncludeHelp write SetIncludeHelp;
@@ -247,6 +251,9 @@ resourcestring
 
   HintCheckUpdateOnly = '';
   CaptionCheckUpdateOnly = 'FPC/Laz rebuild only (default=no)';
+
+  HintCheckSystemFPC = 'Use the system wide install of FPC to build Lazarus.';
+  CaptionCheckSystemFPC = 'Use system FPC for Lazarus (default=no)';
 
   HintCheckIncludeHelp = '';
   CaptionCheckIncludeHelp = 'Include Help (default=no)';
@@ -375,6 +382,7 @@ begin
     Append(CaptionCheckPackageRepo);
     Append(CaptionCheckIncludeLCL);
     Append(CaptionCheckUpdateOnly);
+    Append(CaptionCheckSystemFPC);
     Append(CaptionCheckIncludeHelp);
     Append(CaptionCheckSplitFPC);
     Append(CaptionCheckSplitLazarus);
@@ -1010,6 +1018,16 @@ procedure TForm2.SetUpdateOnly(value:boolean);
 begin
   SetCheckState(CaptionCheckUpdateOnly,value);
 end;
+
+function TForm2.GetSystemFPC:boolean;
+begin
+  result:=GetCheckState(CaptionCheckSystemFPC);
+end;
+procedure TForm2.SetSystemFPC(value:boolean);
+begin
+  SetCheckState(CaptionCheckSystemFPC,value);
+end;
+
 
 function TForm2.GetIncludeHelp:boolean;
 begin
