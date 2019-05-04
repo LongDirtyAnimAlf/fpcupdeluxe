@@ -1859,10 +1859,8 @@ var
   aRepoClient:TRepoClient;
   VersionSnippet:string;
   aIndex:integer;
-  {$ifdef Darwin}
-  {$ifdef LCLQT5}
+  {$ifdef BSD}
   FilePath:string;
-  {$endif}
   {$endif}
 begin
   Result := inherited;
@@ -2009,6 +2007,16 @@ begin
     end;
   end;
   *)
+
+  {$ifdef BSD}
+  FilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide/include/';
+  if (NOT DirectoryExists(FilePath+'dragonfly')) then
+  begin
+    if DirCopy(FilePath+'netbsd',FilePath+'dragonfly')
+      then infoln(infotext+'Adding dragonfly include file for IDE.',etInfo)
+      else infoln(infotext+'Adding dragonfly include file for IDE failure.',etError);
+  end;
+  {$endif}
 
   if result then
   begin
