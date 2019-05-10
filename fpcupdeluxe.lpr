@@ -108,6 +108,7 @@ uses
   {$else}
   m_any_to_linux386,
   m_any_to_linuxx64,
+  m_any_to_netbsdx64,
   m_any_to_freebsdx64,
   m_any_to_freebsd386,
   m_any_to_openbsd386,

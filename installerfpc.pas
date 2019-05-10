@@ -1339,6 +1339,10 @@ begin
   s1:=s1+' -dFPC_SOFT_FPUX80';
   {$endif}
 
+  {$IF defined(BSD) and (not defined(DARWIN))}
+  s1:=s1+' -Fl/usr/pkg/lib';
+  {$ENDIF}
+
   s1:=Trim(s1);
   Processor.Parameters.Add('OPT='+s1);
 
@@ -3102,13 +3106,25 @@ begin
         {$ENDIF CPUARMHF}
         {$ENDIF cpuarm}
         {$IF (defined(BSD)) and (not defined(Darwin))}
-        s:=s+';'+'/usr/local/lib'+';'+'/usr/X11R6/lib';
+        s:=s+';'+'/usr/local/lib'+';'+'/usr/pkg/lib';
+        {$ifndef FPCONLY}
+        s:=s+';'+'/usr/X11R6/lib'+';'+'/usr/X11R7/lib';
+        {$endif}
         {$endif}
         s:=s+';'+GetGCCDirectory;
         ConfigText.Insert(x,s); Inc(x);
         {$IFDEF SOLARIS}
         ConfigText.Insert(x,'-Xn'); Inc(x);
         {$ENDIF}
+
+        {$IF (defined(NetBSD)) and (not defined(Darwin))}
+        {$ifndef FPCONLY}
+        ConfigText.Insert(x,'-k"-rpath=/usr/X11R6/lib"'); Inc(x);
+        ConfigText.Insert(x,'-k"-rpath=/usr/X11R7/lib"'); Inc(x);
+        {$endif}
+        ConfigText.Insert(x,'-k"-rpath=/usr/pkg/lib"'); Inc(x);
+        {$endif}
+
         {$ENDIF UNIX}
 
         {$ifdef Darwin}

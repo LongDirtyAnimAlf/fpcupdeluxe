@@ -2964,6 +2964,7 @@ object Form1: TForm1
           'msdos'
           'haiku'
           'solaris'
+          'netbsd'
         )
         OnClick = radgrpOSClick
         ParentShowHint = False

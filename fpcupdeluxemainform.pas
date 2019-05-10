@@ -3116,8 +3116,8 @@ begin
   AddMessage('Bootstrap dir:         '+FPCupManager.BootstrapCompilerDirectory);
 
   {$IF (defined(BSD)) and (not defined(Darwin))}
-  FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib';
-  FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib';
+  FPCupManager.FPCOpt:=FPCupManager.FPCOpt+' -Fl/usr/local/lib -Fl/usr/pkg/lib';
+  FPCupManager.LazarusOpt:=FPCupManager.LazarusOpt+' -Fl/usr/local/lib -Fl/usr/X11R6/lib -Fl/usr/pkg/lib -Fl/usr/X11R7/lib';
   {$endif}
 
   // default branch and revision overrides

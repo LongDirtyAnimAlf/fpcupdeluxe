@@ -285,7 +285,7 @@ begin
       begin
         infoln('Lazarus options: FreeBSD needs -Fl/usr/X11R6/lib as options; adding it. For details, see '+LineEnding+
           'http://www.stack.nl/~marcov/buildfaq/#toc-Subsection-1.6.4',etInfo);
-        FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib';
+        FInstaller.LazarusOpt:=FInstaller.LazarusOPT+' -Fl/usr/X11R6/lib -Fl/usr/X11R7/lib';
       end;
       {$ENDIF defined(BSD) and not defined(Darwin)}
       FInstaller.LazarusDesiredRevision:=Options.GetOption('','lazrevision','',false);
