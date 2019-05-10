@@ -456,7 +456,7 @@ begin
   SetInstallDir;// for backwards compatibility
 
   //{$IF (defined(MSWINDOWS)) OR (defined(Darwin)) OR (defined(OpenBSD))}
-  {$IF (defined(Darwin)) OR (defined(OpenBSD))}
+  {$IF (defined(BSD)) AND (NOT defined(FreeBSD))}
   // there are default setings for the downloader, so disable user access
   UseWget:=False;
   {$endif}

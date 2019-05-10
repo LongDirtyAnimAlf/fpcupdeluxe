@@ -51,7 +51,16 @@ const
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
-  CHM_URL_LATEST_SVN = FPCSVNURL + '/lazarus/binaries/docs/chm';
+  LAZARUSBINARIES = FPCSVNURL + '/lazarus/binaries';
+
+  CHM_URL_LATEST_SVN = LAZARUSBINARIES + '/docs/chm';
+
+  {$ifdef win64}
+  OPENSSL_URL_LATEST_SVN = LAZARUSBINARIES + '/x86_64-win64/openssl';
+  {$endif}
+  {$ifdef win32}
+  OPENSSL_URL_LATEST_SVN = LAZARUSBINARIES + '/i386-win32/openssl';
+  {$endif}
 
   {$IFDEF DEBUG}
   STANDARDCOMPILERVERBOSITYOPTIONS='-vewh';
@@ -1086,13 +1095,14 @@ end;
 procedure TInstaller.CreateBinutilsList(aVersion:string);
 // Windows-centric
 const
-  SourceURL_gdb = FPCSVNURL+'/lazarus/binaries/i386-win32/gdb/bin/';
+  SourceURL_gdb = LAZARUSBINARIES+'/i386-win32/gdb/bin/';
   //SourceURL_gdb = 'https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Alternative%20GDB/GDB%208.1/gdb.exe/download';
   //SourceURL_gdbserver = 'https://sourceforge.net/projects/lazarus/files/Lazarus%20Windows%2064%20bits/Alternative%20GDB/GDB%208.1/gdbserver.exe/download';
   //SourceURL_gdb = 'https://github.com/newpascal/fpcupdeluxe/releases/download/gdb-7.11.1/GDB-i386-win32.zip';
-  SourceURL64_gdb = FPCSVNURL+'/lazarus/binaries/x86_64-win64/gdb/bin/';
+  SourceURL64_gdb = LAZARUSBINARIES+'/x86_64-win64/gdb/bin/';
   //SourceURL64_gdb = 'https://github.com/newpascal/fpcupdeluxe/releases/download/gdb-7.11.1/GDB-x86_64-win64.zip';
-  SourceURL_Qt = FPCSVNURL+'/lazarus/binaries/i386-win32/qt/';
+  SourceURL_QT = LAZARUSBINARIES+'/i386-win32/qt/';
+  SourceURL_QT5 = LAZARUSBINARIES+'/i386-win32/qt5/';
 
   procedure AddNewUtil(FileName, RootURL, OS: string; Category: TUtilCategory);
   var
@@ -1155,7 +1165,6 @@ begin
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger64);
   AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
 
-
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('as' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1186,7 +1195,9 @@ begin
   AddNewUtil('pwd' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('rm' + GetExeExt,aSourceURL,'',ucBinutil);
   AddNewUtil('strip' + GetExeExt,aSourceURL,'',ucBinutil);
-  AddNewUtil('Qt4Pas5.dll',SourceURL_Qt,'',ucQtFile);
+
+  AddNewUtil('Qt4Pas5.dll',SourceURL_QT,'',ucQtFile);
+  AddNewUtil('Qt5Pas1.dll',SourceURL_QT5,'',ucQtFile);
   {$endif win32}
   {$ifdef win64}
   AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
@@ -1211,8 +1222,6 @@ begin
   AddNewUtil('pwd' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('rm' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('strip' + GetExeExt,aSourceURL64,'',ucBinutil);
-  //No equivalent for Win64...
-  //AddNewUtil('Qt4Pas5.dll',SourceURL64_Qt,'',ucQtFile);
   {$endif win64}
 
   // add wince gdb
@@ -1748,7 +1757,7 @@ function TInstaller.DownloadOpenSSL: boolean;
 var
   OperationSucceeded: boolean;
   ResultCode: longint;
-  OpenSSLZip,Output,aSourceURL: string;
+  OpenSSLFileName,Output,aSourceURL: string;
   i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadOpenSSL): ';
@@ -1757,21 +1766,21 @@ begin
 
   OperationSucceeded := false;
 
-  OpenSSLZip := GetTempFileNameExt('','FPCUPTMP','zip');
+  OpenSSLFileName := GetTempFileNameExt('','FPCUPTMP','zip');
 
   for i:=0 to (Length(OpenSSLSourceURL)-1) do
   try
     aSourceURL:=OpenSSLSourceURL[i];
     //always get this file with the native downloader !!
-    OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
+    OperationSucceeded:=GetFile(aSourceURL,OpenSSLFileName,true,true);
     if (NOT OperationSucceeded) then
     begin
       // try one more time
-      SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded:=GetFile(aSourceURL,OpenSSLZip,true,true);
+      SysUtils.DeleteFile(OpenSSLFileName);
+      OperationSucceeded:=GetFile(aSourceURL,OpenSSLFileName,true,true);
     end;
     if (NOT OperationSucceeded) then
-      SysUtils.DeleteFile(OpenSSLZip)
+      SysUtils.DeleteFile(OpenSSLFileName)
     else
       break;
 
@@ -1791,10 +1800,10 @@ begin
     for i:=0 to (Length(OpenSSLSourceURL)-1) do
     try
       aSourceURL:=OpenSSLSourceURL[i];
-      SysUtils.DeleteFile(OpenSSLZip);
-      OperationSucceeded:=DownloadByBitsAdmin(aSourceURL,OpenSSLZip);
+      SysUtils.DeleteFile(OpenSSLFileName);
+      OperationSucceeded:=DownloadByBitsAdmin(aSourceURL,OpenSSLFileName);
       if (NOT OperationSucceeded) then
-        SysUtils.DeleteFile(OpenSSLZip)
+        SysUtils.DeleteFile(OpenSSLFileName)
       else
         break;
 
@@ -1821,7 +1830,7 @@ begin
           if GetLastOSError<>5 then // no access denied
           begin
             resultcode:=1;
-            if DoUnZip(OpenSSLZip,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
+            if DoUnZip(OpenSSLFileName,SafeGetApplicationPath,['libeay32.dll','ssleay32.dll']) then resultcode:=0;
           end;
         end;
       finally
@@ -1839,8 +1848,24 @@ begin
 
   if OperationSucceeded
      then infoln(localinfotext+'OpenSLL library files download and unpacking from '+aSourceURL+' ok.',etWarning)
-     else infoln(localinfotext+'Could not download/install openssl library', etError);
-  SysUtils.Deletefile(OpenSSLZip); //Get rid of temp zip if success.
+     else infoln(localinfotext+'Could not download/install openssl library archive.', etError);
+  SysUtils.Deletefile(OpenSSLFileName); //Get rid of temp zip if success.
+
+  //Real last resort: get OpenSSL from from Lazarus binaries
+  if (NOT OperationSucceeded) then
+  begin
+    OpenSSLFileName:=SafeGetApplicationPath+'libeay32.dll';
+    OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/libeay32.dll',OpenSSLFileName,true,true);
+    if OperationSucceeded then
+    begin
+      OpenSSLFileName:=SafeGetApplicationPath+'ssleay32.dll';
+      OperationSucceeded:=GetFile(OPENSSL_URL_LATEST_SVN+'/ssleay32.dll',OpenSSLFileName,true,true);
+    end;
+    if OperationSucceeded
+       then infoln(localinfotext+'OpenSLL library files download from '+OPENSSL_URL_LATEST_SVN+'s ok.',etWarning)
+       else infoln(localinfotext+'Could not download/install openssl library from '+OPENSSL_URL_LATEST_SVN+'.', etError);
+  end;
+
   Result := OperationSucceeded;
  end;
 
