@@ -2639,23 +2639,26 @@ end;
 constructor TInstaller.Create;
 begin
   inherited Create;
-  FProcessEx := TProcessEx.Create(nil);
-  Processor.OnErrorM := @LogError;
-  FCPUCount := GetLogicalCpuCount;
 
-  FGitClient := TGitClient.Create;
-  FHGClient := THGClient.Create;
+  FProcessEx:=TProcessEx.Create(nil);
+  FProcessEx.OnErrorM := @LogError;
+
+  FCPUCount  := GetLogicalCpuCount;
+
   FSVNClient := TSVNClient.Create;
+  FGitClient := TGitClient.Create;
+  FHGClient  := THGClient.Create;
 
   // List of binutils that can be downloaded:
   // CreateBinutilsList;
   FNeededExecutablesChecked:=false;
   FCleanModuleSuccess:=false;
+
   // Set up verbose log: will be done in dumpoutput
   // as it depends on verbosity etc
   //FLogVerbose: TLogger.Create;
   FErrorLog := TStringList.Create;
-  Processor.OnErrorM:=@(ProcessError);
+  FProcessEx.OnErrorM:=@(ProcessError);
 
   FCrossCPU_Target:='invalid';
   FCrossOS_Target:='invalid';

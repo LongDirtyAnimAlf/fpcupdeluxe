@@ -363,7 +363,7 @@ end;
 
 constructor TProcessEx.Create(AOwner : TComponent);
 begin
-  inherited;
+  inherited Create(AOwner);
   {$ifdef LCL}
   Self.ShowWindow:=swoHIDE;
   {$endif}

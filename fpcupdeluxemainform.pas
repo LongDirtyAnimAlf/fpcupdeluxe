@@ -333,7 +333,7 @@ begin
   sInstallDir:='C:\fpcupdeluxe';
   {$ELSE}
   sInstallDir:='~/fpcupdeluxe';
-  btnGetOpenSSL.Visible:=False;;
+  btnGetOpenSSL.Visible:=False;
   {$ENDIF}
 
   {$ifdef DARWIN}
