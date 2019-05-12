@@ -1243,6 +1243,16 @@ begin
   s:=Trim(s);
   if Length(s)=0 then exit;
 
+  // special override for me: for easy debugging FPC and Lazarus source with plain writelines in source
+  if ExistWordInString(PChar(s),'donalf:',[soWholeWord,soDown]) then
+  begin
+    begin
+      FG      := clBlack;
+      BG      := clYellow;
+      Special := True;
+    end;
+  end;
+
   if (NOT Special) AND ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
@@ -1431,16 +1441,6 @@ begin
     begin
       FG      := clRed;
       BG      := clBlue;
-      Special := True;
-    end;
-  end;
-
-  // special override for me: for easy debugging FPC and Lazarus source with plain writelines in source
-  if ExistWordInString(PChar(s),'donalf:',[soWholeWord,soDown]) then
-  begin
-    begin
-      FG      := clBlack;
-      BG      := clYellow;
       Special := True;
     end;
   end;
@@ -1759,6 +1759,7 @@ var
   i:integer;
   aList: TStringList;
   BaseBinsURL,BaseLibsURL:string;
+  musl:boolean;
 begin
   result:=false;
 
@@ -1850,10 +1851,13 @@ begin
     if s='x8664' then s:='x86_64';
     FPCupManager.CrossCPU_Target:=s;
   end;
+
   if radgrpOS.ItemIndex<>-1 then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='i-sim' then s:='iphonesim';
+    musl:=(s='linux-musl');
+    if musl then s:='linux';
     FPCupManager.CrossOS_Target:=s;
   end;
 
@@ -2227,6 +2231,8 @@ begin
     s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
     s:=Trim(s);
     if Length(s)>0 then FPCupManager.CrossToolsDirectory:=s;
+
+    FPCupManager.MUSL:=musl;
 
     AddMessage(upBuildCrossCompiler);
 
@@ -2980,6 +2986,7 @@ begin
   FPCupManager.CrossOS_Target:='';
   FPCupManager.CrossOS_SubArch:='';
   FPCupManager.CrossLCL_Platform:='';
+  FPCupManager.MUSL:=false;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;;
   FPCupManager.CrossOPT:='';
@@ -3280,7 +3287,9 @@ begin
 
   AddMessage('Welcome @ FPCUPdeluxe.');
   AddMessage(Self.Caption);
+  {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
+  {$endif}
   AddMessage('');
 
   if result then

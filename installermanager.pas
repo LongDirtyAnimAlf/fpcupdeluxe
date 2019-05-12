@@ -233,6 +233,7 @@ type
     FNativeFPCBootstrapCompiler:boolean;
     FForceLocalRepoClient:boolean;
     FSequencer: TSequencer;
+    FMUSL:boolean;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
     procedure SetLazarusDirectory(AValue: string);
@@ -344,6 +345,7 @@ type
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
+    property MUSL:boolean read FMUSL write FMUSL;
 
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
     function LoadFPCUPConfig:boolean;
@@ -1163,6 +1165,11 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     begin
       Output:='xorg-libraries libX11 libXtst gtkglext iconv xorg-fonts-type1 liberation-fonts-ttf';
     end
+    else
+    if (AnsiContainsText(Output,'alpine')) then
+    begin
+      Output:='gcc musl-dev';
+    end
     else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
 
     if (LCLPlatform='') or (Uppercase(LCLPlatform)='GTK2') then
@@ -1300,7 +1307,10 @@ begin
     FInstaller.InstallDirectory:=FParent.FPCInstallDirectory;
     (FInstaller as TFPCInstaller).BootstrapCompilerDirectory:=FParent.BootstrapCompilerDirectory;
     (FInstaller as TFPCInstaller).SourcePatches:=FParent.FPCPatches;
-    (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=FParent.NativeFPCBootstrapCompiler;
+    if FParent.MUSL then
+      (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=false
+    else
+      (FInstaller as TFPCInstaller).NativeFPCBootstrapCompiler:=FParent.NativeFPCBootstrapCompiler;
     FInstaller.CompilerOptions:=FParent.FPCOPT;
     FInstaller.DesiredRevision:=FParent.FPCDesiredRevision;
     FInstaller.DesiredBranch:=FParent.FPCDesiredBranch;
@@ -1471,6 +1481,7 @@ begin
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
     FInstaller.SwitchURL:=FParent.SwitchURL;
+    //FInstaller.MUSL:=FParent.MUSL;
   end;
 end;
 

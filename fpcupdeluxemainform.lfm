@@ -2954,6 +2954,7 @@ object Form1: TForm1
         Items.Strings = (
           'windows'
           'linux'
+          'linux-musl'
           'android'
           'darwin'
           'freebsd'

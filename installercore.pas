@@ -291,6 +291,8 @@ type
     //FGit: string;
     FProcessEx: TProcessEx;
     FSwitchURL: boolean;
+    FMUSL: boolean;
+    FMUSLLinker: string;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetTools: boolean;
@@ -381,6 +383,8 @@ type
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     // auto switchover SVN URL
     property SwitchURL: boolean write FSwitchURL;
+    // do we have musl instead of libc
+    //property MUSL: boolean write FMUSL;
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
@@ -2668,6 +2672,22 @@ begin
   FMinorVersion := -1;
   FReleaseVersion := -1;
   FPatchVersion := -1;
+
+  {$ifdef Linux}
+  FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
+  infoln('donalf: '+FMUSLLinker,etInfo);
+  FMUSL:=FileExists(FMUSLLinker);
+  if FMUSL then
+  begin
+    infoln('donalf: We have MUSL',etInfo);
+  end
+  else
+  begin
+    infoln('donalf: No MUSL found',etInfo);
+  end;
+  {$else}
+  FMUSL:=false;
+  {$endif}
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;

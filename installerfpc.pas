@@ -566,6 +566,8 @@ begin
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
 
+    CrossInstaller.MUSL:=FMUSL;
+
     // get/set cross binary utils !!
     BinsAvailable:=false;
     CrossInstaller.SearchModeUsed:=smFPCUPOnly; // default;
@@ -884,6 +886,8 @@ begin
           {$ifdef solaris}
           Options:=Options+' -Xn';
           {$endif}
+
+          if FMUSL then Options:=Options+' -Cg';
 
           CrossOptions:='';
 
@@ -1266,7 +1270,8 @@ begin
   FErrorLog.Clear;
   Processor.Parameters.Clear;
   if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-  Processor.Parameters.Add('FPC='+FCompiler);
+  //Processor.Parameters.Add('FPC='+FCompiler);
+  Processor.Parameters.Add('PP='+FCompiler);
   {$IFDEF DEBUG}
   Processor.Parameters.Add('-d');
   {$ENDIF}
@@ -1309,8 +1314,8 @@ begin
     {$IFDEF SOLARIS}
     s1:='-Xn '+s1;
     {$ENDIF}
+  if FMUSL then s1:='-FL'+FMUSLLinker+' '+s1;
   {$ENDIF}
-
 
   {$IFDEF DARWIN}
   //Add minimum required OSX version to prevent "crti not found" errors.
@@ -2073,6 +2078,10 @@ begin
     {$ENDIF CPU32}
   {$ENDIF Darwin}
 
+  {$ifdef Linux}
+  if FMUSL then NativeFPCBootstrapCompiler:=false;
+  {$endif}
+
   if (aBootstrapVersion<>'') then
   begin
 
@@ -2280,7 +2289,11 @@ begin
             {$IF DEFINED(CPUPOWERPC64) AND DEFINED(LINUX) AND DEFINED(FPC_ABI_ELFV2)}
             s:=s+'le';
             {$ENDIF}
-            s:=s+'-'+GetTargetOS;
+            s:=s+'-';
+            {$ifdef LINUX}
+            if FMUSL then s:=s+'musl';
+            {$endif LINUX}
+            s:=s+GetTargetOS;
             {$ifdef FREEBSD}
             j:=GetFreeBSDVersion;
             s:=s+'11'; // version 11 only for now
@@ -3124,7 +3137,9 @@ begin
         {$endif}
         ConfigText.Insert(x,'-k"-rpath=/usr/pkg/lib"'); Inc(x);
         {$endif}
-
+        {$ifdef Linux}
+        if FMUSL then ConfigText.Insert(x,'-FL'+FMUSLLinker); Inc(x);
+        {$endif}
         {$ENDIF UNIX}
 
         {$ifdef Darwin}

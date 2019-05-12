@@ -82,8 +82,6 @@
               <OverflowChecks Value="True"/>
               <StackChecks Value="True"/>
             </Checks>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="netbsd"/>
             <Optimizations>
               <OptimizationLevel Value="0"/>
             </Optimizations>

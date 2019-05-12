@@ -305,6 +305,7 @@ begin
     // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     CrossInstaller.SetSubArch(CrossOS_SubArch);
+    CrossInstaller.MUSL:=FMUSL;
     if not CrossInstaller.GetBinUtils(FFPCInstallDir) then
       infoln(infotext+'Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FFPCInstallDir) then
