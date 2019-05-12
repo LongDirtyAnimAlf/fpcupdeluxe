@@ -2084,9 +2084,6 @@ begin
 
   if (aBootstrapVersion<>'') then
   begin
-
-    infoln(localinfotext+'Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
-
     FBootstrapCompilerOverrideVersionCheck:=false;
 
     aStandardCompilerArchive:=GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
@@ -2113,6 +2110,8 @@ begin
       if NativeFPCBootstrapCompiler then
       begin
         // first, try official FPC binaries
+        infoln(localinfotext+'Looking for a bootstrap compiler from official FPC bootstrap binaries.',etInfo);
+
         aCompilerList:=TStringList.Create;
         try
           while ((NOT aCompilerFound) AND (GetNumericalVersion(aLocalBootstrapVersion)>(FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION))) do
@@ -2272,7 +2271,14 @@ begin
         aCompilerList:=TStringList.Create;
         try
           aCompilerList.Clear;
-          GetGitHubFileList(FPCUPGITREPOBOOTSTRAPPERAPI,aCompilerList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+          try
+            GetGitHubFileList(FPCUPGITREPOBOOTSTRAPPERAPI,aCompilerList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+          except
+            on E : Exception do
+            begin
+              infoln(localinfotext+E.ClassName+' error raised, with message : '+E.Message, etError);
+            end;
+          end;
           for i:=0 to Pred(aCompilerList.Count) do
           begin
             infoln(localinfotext+'Found online bootstrap compiler: '+aCompilerList[i],etDebug);

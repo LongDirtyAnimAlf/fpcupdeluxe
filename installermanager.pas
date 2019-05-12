@@ -1060,7 +1060,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   {$ifdef linux}
   function CheckDevLibs(LCLPlatform: string): boolean;
   const
-    LIBSCNT=4;
+    LIBSCNT=5;
   type
     TLibList=array[1..LIBSCNT] of string;
     LibSource = record
@@ -1069,8 +1069,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     end;
 
   const
-    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libgdk-x11-2.0.so');
-    QTLIBS:TLibList = ('libQt5Pas.so','','','');
+    LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
+    QTLIBS:TLibList = ('libQt5Pas.so','','','','');
   var
     i:integer;
     pll:^TLibList;
@@ -1097,7 +1097,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     result:=true;
 
     // these libs are always needed !!
-    AdvicedLibs:='make gdb binutils unrar unzip patch wget subversion';
+    AdvicedLibs:='make gdb binutils gcc unrar unzip patch wget subversion';
 
     Output:=GetDistro;
     if (AnsiContainsText(Output,'arch') OR AnsiContainsText(Output,'manjaro')) then
@@ -1168,7 +1168,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     else
     if (AnsiContainsText(Output,'alpine')) then
     begin
-      Output:='gcc musl-dev';
+      AdvicedLibs:=AdvicedLibs+' musl-dev openssl-dev';
+      Output:='the libraries to run xorg and xfce4, but also make, binutils, gcc, musl-dev and openssl-dev';
     end
     else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
 

@@ -446,9 +446,9 @@ uses
   {$IFDEF MSWINDOWS}
   //,blcksock, ssl_openssl_lib
   ,openssl
+  {$ENDIF}
   {$IF FPC_FULLVERSION > 30300}
   ,opensslsockets
-  {$ENDIF}
   {$ENDIF}
   {$ENDIF}
   ;
@@ -575,6 +575,7 @@ begin
     {$ENDIF MSWINDOWS}
     {$IFDEF LINUX}
     FBunzip2 := 'bunzip2';
+    if FMUSL then FBunzip2 := 'unzip';
     FTar := 'tar';
     F7zip := '7za';
     FWget := 'wget';
@@ -2522,6 +2523,8 @@ begin
       if Pos('DARWINQT5',PatchFilePath)>0 then j:=0;
       {$endif}
 
+      if ((NOT FMUSL) AND (Pos('MUSLTRUNK',PatchFilePath)>0)) then j:=0;
+
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!
@@ -2675,16 +2678,8 @@ begin
 
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
-  infoln('donalf: '+FMUSLLinker,etInfo);
   FMUSL:=FileExists(FMUSLLinker);
-  if FMUSL then
-  begin
-    infoln('donalf: We have MUSL',etInfo);
-  end
-  else
-  begin
-    infoln('donalf: No MUSL found',etInfo);
-  end;
+  if FMUSL then infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
   {$else}
   FMUSL:=false;
   {$endif}

@@ -1,0 +1,34 @@
+Index: components/debuggerintf/ideminilibc.pas
+===================================================================
+--- components/debuggerintf/ideminilibc.pas	(revision 61210)
++++ components/debuggerintf/ideminilibc.pas	(working copy)
+@@ -68,13 +68,26 @@
+ function __read(Handle: cint; var Buffer; Count: size_t): ssize_t; cdecl;external clib name 'read';
+ function __write(Handle: cint; const Buffer; Count: size_t): ssize_t; cdecl;external clib name 'write';
+ function __close(Handle: cint): cint; cdecl;external clib name 'close';
+-function getpt:cint;cdecl;external clib name 'getpt';
+-function grantpt(__fd:cint):cint;cdecl;external clib name 'grantpt';
+-function unlockpt(__fd:cint):cint;cdecl;external clib name 'unlockpt';
++function getpt:cint;//cdecl;external clib name 'getpt';
++function grantpt(__fd:cint):cint;//cdecl;external clib name 'grantpt';
++function unlockpt(__fd:cint):cint;//cdecl;external clib name 'unlockpt';
+ function ptsname_r(__fd:cint; __buf:Pchar; __buflen:size_t):cint;cdecl;external clib name 'ptsname_r';
+ function fcntl(Handle: cint; Command: cint; Arg: clong): cint; cdecl;external clib name 'fcntl';
+ 
+ implementation
+ 
++function getpt:cint;
++begin
++result:=InvalHandle;
++end;
++function grantpt(__fd:cint):cint;//cdecl;//external clib name 'grantpt';
++begin
++result:=InvalHandle;
++end;
++function unlockpt(__fd:cint):cint;//cdecl;//external clib name 'unlockpt';
++begin
++result:=InvalHandle;
++end;
++
+ end.
+ 

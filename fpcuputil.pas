@@ -807,7 +807,8 @@ begin
       infoln('CreateDesktopShortcut: xdg-desktop-icon failed to create shortcut to '+Target,etWarning);
       infoln('CreateDesktopShortcut: going to create shortcut manually',etWarning);
       aDirectory:='/usr/share/applications';
-      if DirectoryExists(aDirectory) then
+      if false then // skip global
+      //if DirectoryExists(aDirectory) then
       begin
         FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
       end
