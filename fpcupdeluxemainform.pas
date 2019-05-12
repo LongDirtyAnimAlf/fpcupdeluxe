@@ -1759,7 +1759,6 @@ var
   i:integer;
   aList: TStringList;
   BaseBinsURL,BaseLibsURL:string;
-  musl:boolean;
 begin
   result:=false;
 
@@ -1856,8 +1855,11 @@ begin
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
     if s='i-sim' then s:='iphonesim';
-    musl:=(s='linux-musl');
-    if musl then s:='linux';
+    if s='linux-musl' then
+    begin
+      FPCupManager.MUSL:=true;
+      s:='linux';
+    end;
     FPCupManager.CrossOS_Target:=s;
   end;
 
@@ -2232,8 +2234,6 @@ begin
     s:=Trim(s);
     if Length(s)>0 then FPCupManager.CrossToolsDirectory:=s;
 
-    FPCupManager.MUSL:=musl;
-
     AddMessage(upBuildCrossCompiler);
 
     sStatus:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
@@ -2335,6 +2335,8 @@ begin
             if FPCupManager.CrossOS_Target='aix' then BinsFileName:='AIX'+BinsFileName else
               if FPCupManager.CrossOS_Target='msdos' then BinsFileName:='MSDos'+BinsFileName else
                 BinsFileName:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsFileName;
+
+        if FPCupManager.MUSL then BinsFileName:='MUSL'+BinsFileName;
 
         // normally, we have the same names for libs and bins URL
         LibsFileName:=BinsFileName;

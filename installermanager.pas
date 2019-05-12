@@ -1482,7 +1482,7 @@ begin
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     {$ENDIF}
     FInstaller.SwitchURL:=FParent.SwitchURL;
-    //FInstaller.MUSL:=FParent.MUSL;
+    if FParent.MUSL then FInstaller.MUSL:=true;
   end;
 end;
 

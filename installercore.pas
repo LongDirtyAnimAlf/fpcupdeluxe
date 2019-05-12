@@ -384,7 +384,7 @@ type
     // auto switchover SVN URL
     property SwitchURL: boolean write FSwitchURL;
     // do we have musl instead of libc
-    //property MUSL: boolean write FMUSL;
+    property MUSL: boolean write FMUSL;
     property Log: TLogger write FLog;
     // Directory where make (and the other binutils on Windows) is located
     property MakeDirectory: string write FMakeDir;
