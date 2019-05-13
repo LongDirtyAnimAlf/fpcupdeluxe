@@ -818,9 +818,15 @@ begin
     (lowercase(FSequencer.FParent.CrossOS_Target)=GetTargetOS)
   then
   begin
-    infoln('No crosscompiling to own target !',etError);
-    infoln('Native [CPU-OS] version is already installed !!',etError);
-    exit;
+    //if (NOT FSequencer.FParent.MUSL) then
+    {$ifdef Linux}
+    if (NOT (Self.MUSL AND (GetTargetOS='linux'))) then
+    {$endif}
+    begin
+      infoln('No crosscompiling to own target !',etError);
+      infoln('Native [CPU-OS] version is already installed !!',etError);
+      exit;
+    end;
   end;
 
   FResultSet:=[];

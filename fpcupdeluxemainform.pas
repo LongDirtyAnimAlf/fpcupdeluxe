@@ -2342,8 +2342,15 @@ begin
         LibsFileName:=BinsFileName;
 
         // normally, we have the standard names for libs and bins paths
-        LibPath:=DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target;
-        BinPath:=DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-'+FPCupManager.CrossOS_Target;
+        LibPath:=DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
+        BinPath:=DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
+        if FPCupManager.MUSL then
+        begin
+          LibPath:=LibPath+'MUSL';
+          BinPath:=BinPath+'MUSL';
+        end;
+        LibPath:=LibPath+FPCupManager.CrossOS_Target;
+        BinPath:=BinPath+FPCupManager.CrossOS_Target;
 
         if FPCupManager.CrossOS_Target='darwin' then
         begin
