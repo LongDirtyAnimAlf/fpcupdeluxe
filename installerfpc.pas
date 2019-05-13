@@ -3144,7 +3144,10 @@ begin
         ConfigText.Insert(x,'-k"-rpath=/usr/pkg/lib"'); Inc(x);
         {$endif}
         {$ifdef Linux}
-        if FMUSL then ConfigText.Insert(x,'-FL'+FMUSLLinker); Inc(x);
+        if FMUSL then
+        begin
+          ConfigText.Insert(x,'-FL'+FMUSLLinker); Inc(x);
+        end;
         {$endif}
         {$ENDIF UNIX}
 
