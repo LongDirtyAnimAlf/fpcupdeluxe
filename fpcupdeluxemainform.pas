@@ -2346,8 +2346,8 @@ begin
         BinPath:=DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
         if FPCupManager.MUSL then
         begin
-          LibPath:=LibPath+'MUSL';
-          BinPath:=BinPath+'MUSL';
+          LibPath:=LibPath+'musl';
+          BinPath:=BinPath+'musl';
         end;
         LibPath:=LibPath+FPCupManager.CrossOS_Target;
         BinPath:=BinPath+FPCupManager.CrossOS_Target;

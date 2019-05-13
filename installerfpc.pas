@@ -780,6 +780,21 @@ begin
             end;
             st_CompilerInstall:
             begin
+              {$if (defined(Linux)) AND (defined (CPUX86_64))}
+              if FMUSL then
+              begin
+                // copy over the [cross-]compiler
+                s1:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+GetCompilerName(CrossInstaller.TargetCPU);
+                s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler/'+GetCrossCompilerName(CrossInstaller.TargetCPU);
+                if FileExists(s1) then
+                begin
+                  infoln(infotext+'Copy [cross-]compiler ('+ExtractFileName(s1)+') into: '+ExtractFilePath(s2),etInfo);
+                  FileUtil.CopyFile(s1,s2);
+                  fpChmod(s2,&755);
+                end;
+              end;
+              {$endif}
+
               {$ifdef Darwin}
               if Length(Minimum_OSX)>0 then Options:=Options+' '+Minimum_OSX;
               {$endif}
