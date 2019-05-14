@@ -902,7 +902,7 @@ begin
           Options:=Options+' -Xn';
           {$endif}
 
-          if FMUSL then Options:=Options+' -Cg';
+          if FMUSL then Options:=Options+' -Cg -FL'+FMUSLLinker;
 
           CrossOptions:='';
 
