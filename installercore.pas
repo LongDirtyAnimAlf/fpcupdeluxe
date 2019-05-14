@@ -2523,14 +2523,22 @@ begin
       if Pos('DARWINQT5',PatchFilePath)>0 then j:=0;
       {$endif}
 
-      if ((NOT FMUSL) AND (Pos('MUSLTRUNK',PatchFilePath)>0)) then j:=0;
-
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!
       if PatchFPC then if (GetFullVersion<GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
       {$ifndef FPCONLY}
-      if PatchLaz then if (GetFullVersion<GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
+      if PatchLaz then
+      begin
+        if (FMUSL AND (Pos('MUSLTRUNK',PatchFilePath)>0)) then
+        begin
+          if (GetFullVersion<GetNumericalVersion('2.0.0')) then j:=0;
+        end
+        else
+        begin
+          if (GetFullVersion<GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
+        end;
+      end;
       {$endif}
 
       if (j>0) then

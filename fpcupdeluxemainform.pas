@@ -1863,6 +1863,16 @@ begin
     FPCupManager.CrossOS_Target:=s;
   end;
 
+  {$if (defined(Linux)) AND (defined (CPUX86_64))}
+  if FPCupManager.MUSL then
+  begin
+    if Sender<>nil then Application.MessageBox(PChar('On Linux x86_64, you cannot cross towards another Linux x86_64.'), PChar('FPC limitation'), MB_ICONERROR);
+    FPCupManager.CrossOS_Target:=''; // cleanup
+    FPCupManager.CrossCPU_Target:=''; // cleanup
+    exit;
+  end;
+  {$endif}
+
   if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
   if (FPCupManager.CrossOS_Target='msdos') then FPCupManager.CrossCPU_Target:='i8086';
   //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
@@ -2995,6 +3005,7 @@ begin
   FPCupManager.CrossOS_Target:='';
   FPCupManager.CrossOS_SubArch:='';
   FPCupManager.CrossLCL_Platform:='';
+
   FPCupManager.MUSL:=false;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;;

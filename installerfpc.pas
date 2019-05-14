@@ -1016,9 +1016,6 @@ begin
             else
               infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
 
-            infoln(infotext+'Path: '+GetPath,etDebug);
-            infoln(infotext+'AS: '+Which('as'),etDebug);
-
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
 
@@ -2502,15 +2499,14 @@ var
   RequiredBootstrapBootstrapVersion:string;
   FPCCfg: string;
   FPCMkCfg: string; //path+file of fpcmkcfg
-  ConfigText:TStringList;
+  ConfigText,ConfigTextStore:TStringList;
   OperationSucceeded: boolean;
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
   s:string;
   TxtFile:Text;
   BootstrapDirectory :string;
-  x:integer;
-  Output: string = '';
-  ReturnCode: integer;
+  x,y:integer;
+  rc: integer;
   VersionSnippet:string;
 begin
   result:=inherited;
@@ -2666,7 +2662,7 @@ begin
 
       FSVNClient.ModuleName:=ModuleName;
 
-      ReturnCode:=-1;
+      rc:=-1;
       if DirectoryExists(BootstrapDirectory) then
       begin
         // first cleanout the intermediat bootstrapper in case of .... as the rules prescibe
@@ -2684,50 +2680,50 @@ begin
         Processor.Execute;
         infoln(infotext+'Cleaned FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
 
-        ReturnCode := FSVNClient.Execute('info ' + BootstrapDirectory);
-        if (ReturnCode <> 0) then
+        rc := FSVNClient.Execute('info ' + BootstrapDirectory);
+        if (rc <> 0) then
         begin
           FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
-          ReturnCode := FSVNClient.Execute('info ' + BootstrapDirectory);
+          rc := FSVNClient.Execute('info ' + BootstrapDirectory);
         end;
       end;
 
       infoln(infotext+'Checking out/updating ' + ModuleName + ' ' + RequiredBootstrapVersion + ' intermediate compiler sources.',etInfo);
 
       s:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
-      if (ReturnCode = 0)
+      if (rc = 0)
           then ICSVNCommand:='update --non-interactive --trust-server-cert --quiet'
           else ICSVNCommand:='checkout --non-interactive --trust-server-cert --quiet --depth=files ' + s;
 
-      ReturnCode := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
-      if (ReturnCode <> 0) then
+      rc := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
+      if (rc <> 0) then
       begin
         // try once again, after a cleanup
-        ReturnCode := FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
-        if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
+        rc := FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
+        if (rc = 0) then rc := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
       end;
 
       // get compiler source
       s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler';
-      if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
+      if (rc = 0) then rc := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
       // try once again
-      if (ReturnCode <> 0) then
+      if (rc <> 0) then
       begin
         FSVNClient.Execute('cleanup --non-interactive ' + s);
-        ReturnCode := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
+        rc := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
       end;
 
       // get rtl source
       s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl';
-      if (ReturnCode = 0) then ReturnCode := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
+      if (rc = 0) then rc := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
       // try once again
-      if (ReturnCode <> 0) then
+      if (rc <> 0) then
       begin
         FSVNClient.Execute('cleanup --non-interactive ' + s);
-        ReturnCode := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
+        rc := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
       end;
 
-      if (ReturnCode = 0) then
+      if (rc = 0) then
       begin
         infoln(infotext+'We have a FPC bootstrap source (@ '+BootstrapDirectory+') with version: '+RequiredBootstrapVersion,etInfo);
         RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory);
@@ -2754,10 +2750,10 @@ begin
         Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
 
         // clean and build intermediate
-        for ReturnCode:=0 to 1 do
+        for y:=0 to 1 do
         begin
           Processor.Parameters.Clear;
-          if ReturnCode=0
+          if y=0
              then Processor.Parameters.Add('clean')
              else Processor.Parameters.Add('compiler_cycle');
           // not sure if this needed here, but better safe than sorry
@@ -2789,19 +2785,19 @@ begin
 
           if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
           begin
-             if ReturnCode=1 then infoln(infotext+'Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
+             if y=1 then infoln(infotext+'Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
              Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
           end;
-          if ReturnCode=1 then infoln(infotext+'Running make cycle for intermediate bootstrap compiler:',etInfo);
+          if y=1 then infoln(infotext+'Running make cycle for intermediate bootstrap compiler:',etInfo);
           Processor.Execute;
           if Processor.ExitStatus <> 0 then
           begin
             result := False;
-            if ReturnCode=0 then infoln(infotext+'Running clean cycle for intermediate bootstrap compiler failed',etError);
-            if ReturnCode=1 then infoln(infotext+'Running make cycle for intermediate bootstrap compiler failed',etError);
+            if y=0 then infoln(infotext+'Running clean cycle for intermediate bootstrap compiler failed',etError);
+            if y=1 then infoln(infotext+'Running make cycle for intermediate bootstrap compiler failed',etError);
             exit;
           end;
-          if ReturnCode=1 then infoln(infotext+'Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
+          if y=1 then infoln(infotext+'Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
         end;
 
         infoln(infotext+'Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompilerName + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompilerName,etInfo);
@@ -2821,7 +2817,7 @@ begin
       else
       begin
         result := False;
-        infoln(infotext+'Error (SVN) getting sources for intermediate bootstrap compiler. Error: '+InttoStr(ReturnCode),etError);
+        infoln(infotext+'Error (SVN) getting sources for intermediate bootstrap compiler. Error: '+InttoStr(rc),etError);
         exit;
       end;
     end
@@ -3058,9 +3054,10 @@ begin
     if (FileExists(FPCCfg)=true) then
     begin
       ConfigText:=TStringList.Create;
+      ConfigTextStore:=TStringList.Create;
       try
         ConfigText.LoadFromFile(FPCCfg);
-        ReturnCode:=ConfigText.Count;
+        y:=ConfigText.Count;
 
         // cleanup previous fpcup settings
         repeat
@@ -3084,7 +3081,7 @@ begin
           if x<>-1 then
           begin
             // save position
-            ReturnCode:=x;
+            y:=x;
 
             // delete previous settings by fpcup[deluxe] by looking for some magic ... ;-)
             ConfigText.Delete(x);
@@ -3103,33 +3100,40 @@ begin
 
         until x=-1;
 
-        // insert new config on right spot
-        x:=ReturnCode;
+        // ReturnCode now holds the correct spot to insert new config
 
-        // insert empty line before
-        if Length(ConfigText.Strings[x-1])>0 then
-        begin
-          ConfigText.Insert(x,''); Inc(x);
-        end;
+        if y=ConfigText.Count then
+          //add empty line
+          ConfigText.Append('')
+        else
+          begin
+            // store tail of ConfigText
+            for x:=y to (ConfigText.Count-1) do
+              ConfigTextStore.Append(ConfigText.Strings[x]);
+
+            // delete tail of ConfigText
+            for x:=(ConfigText.Count-1) downto y do
+              ConfigText.Delete(x);
+          end;
 
         // add magic
-        ConfigText.Insert(x,SnipMagicBegin+FPCUPMAGIC); Inc(x);
+        ConfigText.Append(SnipMagicBegin+FPCUPMAGIC);
 
         // add settings
-        ConfigText.Insert(x,'# Adding binary tools paths to'); Inc(x);
-        ConfigText.Insert(x,'# plain bin dir and architecture bin dir so'); Inc(x);
-        ConfigText.Insert(x,'# fpc 3.1+ fpcres etc can be found.'); Inc(x);
+        ConfigText.Append('# Adding binary tools paths to');
+        ConfigText.Append('# plain bin dir and architecture bin dir so');
+        ConfigText.Append('# fpc 3.1+ fpcres etc can be found.');
 
         // On *nix FPC 3.1.x, both "architecture bin" and "plain bin" may contain tools like fpcres.
         // Adding this won't hurt on Windows.
         // Adjust for that
         PlainBinPath:=SafeExpandFileName(SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath)+'..'+DirectorySeparator+'..'));
         s:='-FD'+IncludeTrailingPathDelimiter(FBinPath)+';'+IncludeTrailingPathDelimiter(PlainBinPath);
-        ConfigText.Insert(x,s); Inc(x);
+        ConfigText.Append(s);
         {$IFDEF UNIX}
         // Need to add appropriate library search path
         // where it is e.g /usr/lib/arm-linux-gnueabihf...
-        ConfigText.Insert(x,'# library search path'); Inc(x);
+        ConfigText.Append('# library search path'); Inc(x);
         s:='-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu';
         s:=s+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
         {$IFDEF cpuarm}
@@ -3146,23 +3150,20 @@ begin
         {$endif}
         {$endif}
         s:=s+';'+GetGCCDirectory;
-        ConfigText.Insert(x,s); Inc(x);
+        ConfigText.Append(s);
         {$IFDEF SOLARIS}
-        ConfigText.Insert(x,'-Xn'); Inc(x);
+        ConfigText.Append('-Xn');
         {$ENDIF}
 
         {$IF (defined(NetBSD)) and (not defined(Darwin))}
         {$ifndef FPCONLY}
-        ConfigText.Insert(x,'-k"-rpath=/usr/X11R6/lib"'); Inc(x);
-        ConfigText.Insert(x,'-k"-rpath=/usr/X11R7/lib"'); Inc(x);
+        ConfigText.Append('-k"-rpath=/usr/X11R6/lib"');
+        ConfigText.Append('-k"-rpath=/usr/X11R7/lib"');
         {$endif}
-        ConfigText.Insert(x,'-k"-rpath=/usr/pkg/lib"'); Inc(x);
+        ConfigText.Append('-k"-rpath=/usr/pkg/lib"');
         {$endif}
         {$ifdef Linux}
-        if FMUSL then
-        begin
-          ConfigText.Insert(x,'-FL'+FMUSLLinker); Inc(x);
-        end;
+        if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
         {$endif}
         {$ENDIF UNIX}
 
@@ -3170,59 +3171,63 @@ begin
         s:=GetSDKVersion('macosx');
         if Length(s)>0 then
         begin
-          //ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
-          ConfigText.Insert(x,'#IFDEF DARWIN'); Inc(x);
-          ConfigText.Insert(x,'# Add minimum required OSX version for native compiling'); Inc(x);
-          ConfigText.Insert(x,'# Prevents crti not found linking errors'); Inc(x);
+          //ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+          ConfigText.Append('#IFDEF DARWIN');
+          ConfigText.Append('# Add minimum required OSX version for native compiling');
+          ConfigText.Append('# Prevents crti not found linking errors');
           if CompareVersionStrings(s,'10.8')>=0 then
-            ConfigText.Insert(x,'-WM10.8')
+            ConfigText.Append('-WM10.8')
           else
-            ConfigText.Insert(x,'-WM'+s);
-          Inc(x);
+            ConfigText.Append('-WM'+s);
           {
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
-            ConfigText.Insert(x,'# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory'); Inc(x);
-            ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
-            ConfigText.Insert(x,'#ifdef cpui386'); Inc(x);
-            ConfigText.Insert(x,'-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib'); Inc(x);
-            ConfigText.Insert(x,'#endif'); Inc(x);
-            ConfigText.Insert(x,'#ifndef cpui386'); Inc(x);
-            ConfigText.Insert(x,'#ifndef cpupowerpc'); Inc(x);
-            ConfigText.Insert(x,'#ifndef cpupowerpc64'); Inc(x);
-            ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
-            ConfigText.Insert(x,'#endif'); Inc(x);
-            ConfigText.Insert(x,'#endif'); Inc(x);
-            ConfigText.Insert(x,'#endif'); Inc(x);
-            //ConfigText.Insert(x,'-FD/Library/Developer/CommandLineTools/usr/bin'); Inc(x);
-            //ConfigText.Insert(x,'-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk'); Inc(x);
+            ConfigText.Append('# MacOS 10.14 Mojave and newer have libs and tools in new, yet non-standard directory');
+            ConfigText.Append('-FD/Library/Developer/CommandLineTools/usr/bin');
+            ConfigText.Append('#ifdef cpui386');
+            ConfigText.Append('-Fl/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/lib');
+            ConfigText.Append('#endif');
+            ConfigText.Append('#ifndef cpui386');
+            ConfigText.Append('#ifndef cpupowerpc');
+            ConfigText.Append('#ifndef cpupowerpc64');
+            ConfigText.Append('-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk');
+            ConfigText.Append('#endif');
+            ConfigText.Append('#endif');
+            ConfigText.Append('#endif');
+            //ConfigText.Append('-FD/Library/Developer/CommandLineTools/usr/bin');
+            //ConfigText.Append('-XR/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk');
           end;
           }
-          ConfigText.Insert(x,'#ENDIF'); Inc(x);
+          ConfigText.Append('#ENDIF');
         end;
         {$ifndef FPCONLY}
         {$ifdef LCLQT5}
-        ConfigText.Insert(x,'#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
-        ConfigText.Insert(x,'# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)'); Inc(x);
-        ConfigText.Insert(x,'-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-        ConfigText.Insert(x,'-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-        ConfigText.Insert(x,'-k-rpath'); Inc(x);
-        ConfigText.Insert(x,'-k@executable_path/../Frameworks'); Inc(x);
-        ConfigText.Insert(x,'-k-rpath'); Inc(x);
-        ConfigText.Insert(x,'-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks'); Inc(x);
-        ConfigText.Insert(x,'#ENDIF'); Inc(x);
+        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+        ConfigText.Append('# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)');
+        ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k@executable_path/../Frameworks');
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        ConfigText.Append('#ENDIF');
         {$endif FPCONLY}
         {$endif LCLQT5}
         {$endif Darwin}
 
         // add magic
-        ConfigText.Insert(x,SnipMagicEnd); Inc(x);
+        ConfigText.Append(SnipMagicEnd);
         // add empty line
-        ConfigText.Insert(x,'');
+        ConfigText.Append('');
+
+        // add tail of ConfigText
+        for x:=0 to (ConfigTextStore.Count-1) do
+          ConfigText.Append(ConfigTextStore.Strings[x]);
 
         ConfigText.SaveToFile(FPCCfg);
       finally
         ConfigText.Free;
+        ConfigTextStore.Free;
       end;
 
     end;
