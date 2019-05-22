@@ -40,6 +40,9 @@ const
 
   LAZBUILDNAME          = 'lazbuild';
 
+  MAKEFILENAME          = 'Makefile';
+  FPCMAKEFILENAME       = MAKEFILENAME+'.fpc';
+
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
 

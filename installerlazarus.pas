@@ -1293,6 +1293,14 @@ begin
   Result := inherited;
   Result := InitModule;
   if not Result then exit;
+
+  s:=IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME;
+  if (NOT FileExists(s)) then
+  begin
+    infoln(infotext+s+' not found. Severe error. Should not happen. Aborting.',etError);
+    exit(false);
+  end;
+
   CompilerVersion:=GetCompilerVersion(FCompiler);
   VersionSnippet:=GetLazarusVersionFromSource(FSourceDirectory);
   if VersionSnippet='0.0.0' then VersionSnippet:=GetLazarusVersionFromUrl(FURL);
@@ -1313,7 +1321,7 @@ begin
       end
       else
       begin
-        s:='Lazarus builder: ';
+        s:='Lazarus native builder: ';
       end;
       infoln(s+'Detected source version Lazarus: '+VersionSnippet, etInfo);
       infoln(s+'Using FPC compiler with version: '+CompilerVersion, etInfo);
@@ -2036,7 +2044,7 @@ begin
 
   if result then
   begin
-    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile';
+    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
     if FileExists(VersionSnippet) then
     begin
       UpdateWarnings:=TStringList.Create;
@@ -2065,7 +2073,7 @@ begin
             UpdateWarnings.Insert(aIndex,#9+DARWINHACKMAGIC);
             UpdateWarnings.Insert(aIndex,'ifdef LCL_PLATFORM');
             UpdateWarnings.SaveToFile(VersionSnippet);
-            infoln(infotext+ModuleName + 'Makefile lazbuild widgetset hack applied.',etInfo);
+            infoln(infotext+ModuleName + MAKEFILENAME+' lazbuild widgetset hack applied.',etInfo);
           end;
         end;
       finally
@@ -2091,7 +2099,7 @@ begin
   if not Result then exit;
 
   //sanity check
-  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'Makefile') and DirectoryExists(
+  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME) and DirectoryExists(
     IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
   begin

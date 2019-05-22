@@ -945,7 +945,7 @@ begin
     end;
   end;
 
-  if (ExistWordInString(PChar(s),' builder: ',[soDown])) OR (ExistWordInString(PChar(s),' cross-builder: ',[soDown])) then
+  if (ExistWordInString(PChar(s),' native builder: ',[soDown])) OR (ExistWordInString(PChar(s),' cross-builder: ',[soDown])) then
   begin
     memoSummary.Lines.Append(s);
   end;

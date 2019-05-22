@@ -742,14 +742,6 @@ begin
           if CrossInstaller.BinUtilsPath<>'' then
              Processor.Parameters.Add('CROSSBINDIR='+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath));
 
-          // will not happen often but if the compiler version is too low, add override
-          if (CompareVersionStrings(GetCompilerVersion(ChosenCompiler),GetBootstrapCompilerVersionFromSource(FSourceDirectory,True))<0) then
-          begin
-            infoln(infotext+'OVERRIDEVERSIONCHECK needed for building of cross-compiler. Very strange.',etError);
-            infoln(infotext+'The building process will continue, but results may be unexpected.',etError);
-            Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-          end;
-
           Options:=FCompilerOptions;
 
           //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
@@ -1268,7 +1260,7 @@ begin
 
   s1:=GetCompilerVersion(FCompiler);
   if s1<>'0.0.0'
-    then infoln('FPC builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
+    then infoln('FPC native builder: Using FPC bootstrap compiler with version: '+s1, etInfo)
     else infoln(infotext+'FPC bootstrap version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
   //if clean failed (due to missing compiler), try again !
@@ -1643,7 +1635,7 @@ begin
   begin
     infoln('Tried to get FPC version from version.pas, but no version.pas found',etError);
     // fail-over ... not very reliable however
-    s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
+    s:=IncludeTrailingPathDelimiter(aSourcePath) + FPCMAKEFILENAME;
     if FileExists(s) then
     begin
       AssignFile(TxtFile,s);
@@ -1662,7 +1654,7 @@ begin
         end;
       end;
       CloseFile(TxtFile);
-    end else infoln('Tried to get FPC version from Makefile.fpc, but no Makefile.fpc found',etError);
+    end else infoln('Tried to get FPC version from '+FPCMAKEFILENAME+', but no '+FPCMAKEFILENAME+' found',etError);
 
   end;
 end;
@@ -1725,7 +1717,7 @@ var
 begin
   result:='0.0.0';
 
-  s:=IncludeTrailingPathDelimiter(aSourcePath) + 'Makefile.fpc';
+  s:=IncludeTrailingPathDelimiter(aSourcePath) + FPCMAKEFILENAME;
 
   if FileExists(s) then
   begin
@@ -1792,7 +1784,7 @@ begin
     FinalVersion:=FinalVersion MOD 100;
     result:=result+'.'+InttoStr(FinalVersion);
 
-  end else infoln('Tried to get required bootstrap compiler version from Makefile.fpc, but no Makefile.fpc found',etError);
+  end else infoln('Tried to get required bootstrap compiler version from '+FPCMAKEFILENAME+', but no '+FPCMAKEFILENAME+' found',etError);
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
@@ -2516,6 +2508,13 @@ begin
 
   infoln(infotext+'Building module '+ModuleName+'...',etInfo);
 
+  s:=IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME;
+  if (NOT FileExists(s)) then
+  begin
+    infoln(infotext+s+' not found. Severe error. Should not happen. Aborting.',etError);
+    exit(false);
+  end;
+
   VersionSnippet:='0.0.0';
   if (Self is TFPCCrossInstaller) then VersionSnippet:=GetCompilerVersion(GetCompilerInDir(FInstallDirectory));
   if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromSource(FSourceDirectory);
@@ -2529,7 +2528,7 @@ begin
     if (Self is TFPCCrossInstaller) then
       s:='FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Detected source version FPC (compiler): '
     else
-      s:='FPC builder: Detected source version FPC: ';
+      s:='FPC native builder: Detected source version FPC: ';
     infoln(s+VersionSnippet, etInfo);
   end;
 
@@ -2542,15 +2541,6 @@ begin
     RequiredBootstrapVersion:='0.0.0';
 
     RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,True);
-
-    {
-    if RequiredBootstrapVersionLow='0.0.0' then
-    begin
-      infoln(infotext+'Could not determine minimum required bootstrap compiler version from source. Should not happen. Aborting.',etError);
-      exit(false);
-    end;
-    }
-
     RequiredBootstrapVersionHigh:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,False);
 
     // There is no Makefile or no info inside the Makefile to determine bootstrap version
@@ -3443,7 +3433,7 @@ begin
       begin
         if IsExecutable(DeleteList.Strings[FileCounter]) then
         begin
-          if Pos('Makefile',DeleteList.Strings[FileCounter])=0 then
+          if Pos(MAKEFILENAME,DeleteList.Strings[FileCounter])=0 then
           begin
             infoln(infotext+'Deleting [stray] executable: '+DeleteList.Strings[FileCounter],etInfo);
             DeleteFile(DeleteList.Strings[FileCounter]);
@@ -3531,7 +3521,7 @@ begin
   //dirty hack for newest Darwin versions ... to be removed later
   if result then
   begin
-    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+'packages'+DirectorySeparator+'Makefile';
+    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+'packages'+DirectorySeparator+MAKEFILENAME;
     if FileExists(VersionSnippet) then
     begin
       UpdateWarnings:=TStringList.Create;
@@ -3549,7 +3539,7 @@ begin
             UpdateWarnings.Insert(aIndex,'ifdef CROSSCOMPILE');
             UpdateWarnings.Insert(aIndex,'ifeq ($(OS_SOURCE),darwin)');
             UpdateWarnings.SaveToFile(VersionSnippet);
-            infoln(infotext+ModuleName + 'packages Makefile dirty hack for Darwin applied ',etInfo);
+            infoln(infotext+ModuleName + 'packages '+MAKEFILENAME+' dirty hack for Darwin applied ',etInfo);
           end;
         end;
       finally
@@ -3576,7 +3566,7 @@ begin
   if not result then exit;
 
   //sanity check
-  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'Makefile') and
+  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME) and
     DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
     DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then

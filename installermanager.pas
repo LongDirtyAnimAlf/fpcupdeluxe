@@ -752,7 +752,7 @@ begin
   Result.Sorted := True;
   Result.Duplicates := dupIgnore;
 
-  s:=IncludeTrailingPathDelimiter(FPCSourceDirectory)+'rtl'+DirectorySeparator+'embedded'+DirectorySeparator+'Makefile';
+  s:=IncludeTrailingPathDelimiter(FPCSourceDirectory)+'rtl'+DirectorySeparator+'embedded'+DirectorySeparator+MAKEFILENAME;
 
   if FileExists(s) then
   begin
@@ -793,7 +793,7 @@ begin
 
     CloseFile(TxtFile);
 
-  end else infoln('Tried to get subarchs from Makefile, but no Makefile found',etWarning);
+  end else infoln('Tried to get subarchs from '+MAKEFILENAME+', but no '+MAKEFILENAME+' found',etWarning);
 end;
 
 
