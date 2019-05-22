@@ -162,7 +162,6 @@ begin
           if AnsiContainsText(line,'implicit string type conversion') then continue;
           if AnsiContainsText(line,'function result does not seem to be set') then continue;
           if AnsiContainsText(line,'comparison might be always') then continue;
-          //if AnsiContainsText(line,'unreachable code') then continue;
           if AnsiContainsText(line,'converting pointers to signed integers') then continue;
           if AnsiContainsText(line,'does not seem to be initialized') then continue;
           if AnsiContainsText(line,'an inherited method is hidden') then continue;
@@ -184,6 +183,15 @@ begin
           if AnsiContainsText(line,'Circular dependency detected when compiling target') then continue;
           if AnsiContainsText(line,'overriding recipe for target') then continue;
           if AnsiContainsText(line,'ignoring old recipe for target') then continue;
+          if AnsiContainsText(line,'Case statement does not handle all possible cases') then continue;
+
+          if AnsiContainsText(line,'unreachable code') then continue;
+          if AnsiContainsText(line,'Fix implicit pointer conversions') then continue;
+          if AnsiContainsText(line,'are not related') then continue;
+          if AnsiContainsText(line,'Constructor should be public') then continue;
+          if AnsiContainsText(line,'is experimental') then continue;
+          if AnsiContainsText(line,'This code is not thread-safe') then continue;
+
           // when generating help
           if AnsiContainsText(line,'is unknown') then continue;
           {$ifdef MSWINDOWS}

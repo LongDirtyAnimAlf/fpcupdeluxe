@@ -2542,6 +2542,15 @@ begin
     RequiredBootstrapVersion:='0.0.0';
 
     RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,True);
+
+    {
+    if RequiredBootstrapVersionLow='0.0.0' then
+    begin
+      infoln(infotext+'Could not determine minimum required bootstrap compiler version from source. Should not happen. Aborting.',etError);
+      exit(false);
+    end;
+    }
+
     RequiredBootstrapVersionHigh:=GetBootstrapCompilerVersionFromSource(FSourceDirectory,False);
 
     // There is no Makefile or no info inside the Makefile to determine bootstrap version

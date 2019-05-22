@@ -1878,19 +1878,21 @@ function TInstaller.DownloadWget: boolean;
 const
   {$ifdef win64}
   NewSourceURL : array [0..0] of string = (
+    //'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/wget-64.zip',
     //'https://eternallybored.org/misc/wget/1.19.4/64/wget.exe'
     'https://eternallybored.org/misc/wget/1.20/64/wget.exe'
     );
   {$endif}
   {$ifdef win32}
   NewSourceURL : array [0..0] of string = (
+    //'https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases/download/zlib/wget-32.zip',
     //'https://eternallybored.org/misc/wget/1.19.4/32/wget.exe'
     'https://eternallybored.org/misc/wget/1.20/32/wget.exe'
     );
   {$endif}
 var
   OperationSucceeded: boolean;
-  WgetExe: string;
+  WgetFile,WgetExe,WgetZip: string;
   i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadWget): ';
@@ -1901,11 +1903,14 @@ begin
 
   if ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
   begin
-
     WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
+
+    WgetZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
     for i:=0 to (Length(NewSourceURL)-1) do
     try
+      WgetFile:=GetFileNameFromURL(NewSourceURL[i]);
+
       //always get this file with the native downloader !!
       OperationSucceeded:=GetFile(NewSourceURL[i],WgetExe,true,true);
       if (NOT OperationSucceeded) then

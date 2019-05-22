@@ -312,7 +312,14 @@ begin
           Sleep(10);
           if (i<100) then Inc(i);
           // process message queue after 50ms
-          if (i>5) then Application.ProcessMessages;
+          if ((i DIV 5)=0) then
+          begin
+            try
+              Application.ProcessMessages;
+            except
+              Application.HandleException(Application);
+            end;
+          end;
           // set cursor after 1 second of execution time
           if (i=99) then Application.MainForm.Cursor:=crHourGlass;
           {$else}
@@ -325,7 +332,11 @@ begin
       if Application.MainForm.Cursor=crHourGlass then
       begin
         Application.MainForm.Cursor:=crDefault;
-        Application.ProcessMessages;
+        try
+          Application.ProcessMessages;
+        except
+          Application.HandleException(Application);
+        end;
       end;
       {$endif}
 
