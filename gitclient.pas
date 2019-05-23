@@ -201,16 +201,23 @@ begin
     else
     begin
       // initial : very shallow clone = fast !!
-      Command := ' clone --recurse-submodules --depth 1 -b ' + aBranch + ' ' + Repository + ' ' + LocalRepository
+      Command := ' clone --recurse-submodules --depth 1 -b ' + aBranch
     end;
   end
   else
   begin
-    Command := ' clone --recurse-submodules -b ' + aBranch + ' ' +  Repository + ' ' + LocalRepository;
+    Command := ' clone --recurse-submodules -b ' + aBranch;
   end;
+
 
   if Command<>'' then
   begin
+
+    if (Length(FDesiredRevision)>0) AND (Uppercase(trim(FDesiredRevision)) <> 'HEAD') then
+      Command := Command+ ' ' + FDesiredRevision;
+
+    Command := Command + ' ' +  Repository + ' ' + LocalRepository;
+
     FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose)
   end else FReturnCode := 0;
 
@@ -331,10 +338,10 @@ begin
     FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
   end;
 
-  if (FReturnCode = 0) and (FDesiredRevision <> '') and (uppercase(trim(FDesiredRevision)) = 'HEAD') then
+  if (FReturnCode = 0){ and (Length(FDesiredRevision)>0) and (uppercase(trim(FDesiredRevision)) <> 'HEAD')}
+  then
   begin
-    // If user wants a certain revision, move back to it:
-    //todo: check if this desired revision works
+    // always reset hard towards desired revision
     Command := ' reset --hard ' + FDesiredRevision;
     FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
   end;
