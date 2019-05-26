@@ -259,46 +259,71 @@ begin
   end;
   {$ENDIF}
 
-  {$IFNDEF MSWINDOWS}
-  if ExecuteSpecialDue2EmptyString then
+  RetryAttempt := 0;
+
+  while true do
   begin
-    if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
-    //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
-    //FReturnCode := FpExecL(FRepoExecutable,[Command]);
-    //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
-    FReturnCode := fpSystem(FRepoExecutable+' '+Command);
-    sleep(5000);
-    //if FReturnCode=-1 then FReturnCode:=fpgeterrno;
-    if FileExists(TempOutputFile) then
+    {$IFNDEF MSWINDOWS}
+    if ExecuteSpecialDue2EmptyString then
     begin
-      TempOutputSL:=TStringList.Create();
-      try
-        TempOutputSL.LoadFromFile(TempOutputFile);
-        Output:=TempOutputSL.ToString;
-        if Verbose then
-        begin
-          for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
+      if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
+      //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
+      //FReturnCode := FpExecL(FRepoExecutable,[Command]);
+      //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
+      FReturnCode := fpSystem(FRepoExecutable+' '+Command);
+      sleep(5000);
+      //if FReturnCode=-1 then FReturnCode:=fpgeterrno;
+      if FileExists(TempOutputFile) then
+      begin
+        TempOutputSL:=TStringList.Create();
+        try
+          TempOutputSL.LoadFromFile(TempOutputFile);
+          Output:=TempOutputSL.ToString;
+          if Verbose then
+          begin
+            for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
+          end;
+        finally
+          TempOutputSL.Free();
         end;
-      finally
-        TempOutputSL.Free();
+        SysUtils.DeleteFile(TempOutputFile);
       end;
-      SysUtils.DeleteFile(TempOutputFile);
-    end;
-  end
-  else
-  {$ENDIF}
-  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
+    end
+    else
+    {$ENDIF}
+    FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
 
-  FReturnOutput := Output;
+    FReturnOutput := Output;
 
-  // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-  RetryAttempt := 1;
-  if (ReturnCode <> 0) then
-  begin
-    while (ReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
+    if (ReturnCode = 0) then break else
     begin
-      //E155004: Working copy '<directory>' locked.
+      infoln('SVN client error return code: '+InttoStr(ReturnCode),etWarning);
+
+      Inc(RetryAttempt);
+
+      //Give everybody a chance to relax ;)
+      Sleep(1000);
+
       //E175002: Connection failure
+      //E730065: Host unreacheable.
+      //E170013: Unable to connect to a repository at URL
+      //E731001: Host is unknown.
+      //E175012: Connection timed out
+      if ((Pos('E175002', Output)>0) OR (Pos('E730065', Output)>0) OR (Pos('E170013', Output)>0) OR (Pos('E731001', Output)>0) OR (Pos('E175012', Output)>0)) then
+      begin
+        //do a simple retry in case of connection failures
+        if RetryAttempt>CONNECTIONMAXRETRIES then break else
+        begin
+          // remove locks if any
+          ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose);
+          // try again
+          continue;
+        end;
+      end;
+
+      if RetryAttempt>ERRORMAXRETRIES then break;
+
+      //E155004: Working copy '<directory>' locked.
       //run 'svn cleanup' first to remove eventual locks (type 'svn help cleanup' for details)
       if (Pos('E155004', Output) > 0) OR (Pos('E175002', Output) > 0) then
       begin
@@ -318,40 +343,6 @@ begin
         // Now update again:
         Update;
       end;
-      //Give everybody a chance to relax ;)
-      Sleep(500);
-      //attempt again
-      {$IFNDEF MSWINDOWS}
-      if ExecuteSpecialDue2EmptyString then
-      begin
-        if Verbose then infoln('Executing: '+FRepoExecutable+' '+Command);
-        //FReturnCode := ExecuteProcess(FRepoExecutable,Command,[]);
-        //FReturnCode := FpExecL(FRepoExecutable,[Command]);
-        //FReturnCode := FpExecL('/bin/sh',['-c',Command]);
-        FReturnCode := fpSystem(FRepoExecutable+' '+Command);
-        sleep(2500);
-        //if FReturnCode=-1 then FReturnCode:=fpgeterrno;
-        if FileExists(TempOutputFile) then
-        begin
-          TempOutputSL:=TStringList.Create();
-          try
-            TempOutputSL.LoadFromFile(TempOutputFile);
-            Output:=TempOutputSL.ToString;
-            if Verbose then
-            begin
-              for i:=0 to (TempOutputSL.Count-1) do infoln(TempOutputSL[i]);
-            end;
-          finally
-            TempOutputSL.Free();
-          end;
-          SysUtils.DeleteFile(TempOutputFile);
-        end;
-      end
-      else
-      {$ENDIF}
-      FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, Verbose);
-      FReturnOutput := Output;
-      RetryAttempt := RetryAttempt + 1;
     end;
   end;
 
@@ -366,9 +357,6 @@ begin
 end;
 
 procedure TSVNClient.Update;
-const
-  MaxErrorRetries = 3;
-  MaxUpdateRetries = 9;
 var
   i:integer;
   Command: string;
@@ -464,6 +452,11 @@ begin
     FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + command, Output, Verbose);
     FReturnOutput := Output;
 
+    if (ReturnCode <> 0) then
+    begin
+      infoln('SVN client error return code: '+InttoStr(ReturnCode),etError);
+    end;
+
     if (Pos('An obstructing working copy was found', Output) > 0) then
     begin
       // this is a very severe error !
@@ -481,10 +474,10 @@ begin
     ParseFileList(Output, FileList, []);
 
     // Detect when svn up cannot update any more files anymore.
-    while (FileList.Count > 0) and (UpdateRetry < MaxUpdateRetries) do
+    while (FileList.Count > 0) and (UpdateRetry < CONNECTIONMAXRETRIES) do
     begin
       // If command fails, e.g. due to misconfigured firewalls blocking ICMP etc, retry a few times
-      while (ReturnCode <> 0) and (AfterErrorRetry < MaxErrorRetries) do
+      while (ReturnCode <> 0) and (AfterErrorRetry < ERRORMAXRETRIES) do
       begin
         if Pos('E155004', Output) > 0 then
         {
@@ -537,7 +530,7 @@ begin
         AfterErrorRetry := AfterErrorRetry + 1;
 
         // last resort measures
-        if (AfterErrorRetry = MaxErrorRetries) then
+        if (AfterErrorRetry = ERRORMAXRETRIES) then
         begin
           //revert local changes to try to cleanup errors ...
           //ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert -R '+ProxyCommand+' --non-interactive ' + LocalRepository, Verbose); //revert changes
@@ -762,7 +755,7 @@ begin
   RetryAttempt := 1;
   if (ReturnCode <> 0) then
   begin
-    while (ReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
+    while (ReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
     begin
       //ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' cleanup --non-interactive ' + LocalRepository, Verbose); //attempt again
       //relax ... ;-)

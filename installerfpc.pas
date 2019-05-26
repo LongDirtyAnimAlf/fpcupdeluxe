@@ -992,7 +992,10 @@ begin
           end;
           {$endif}
 
-          Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+          while Pos('  ',Options)>0 do
+          begin
+            Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
+          end;
           Options:=Trim(Options);
 
           s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+Options;
@@ -1310,7 +1313,10 @@ begin
   if FBootstrapCompilerOverrideVersionCheck then
     Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
   s1:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
-  s1:=StringReplace(s1,'  ',' ',[rfReplaceAll]);
+  while Pos('  ',s1)>0 do
+  begin
+    s1:=StringReplace(s1,'  ',' ',[rfReplaceAll]);
+  end;
   s1:=Trim(s1);
 
   {$IFDEF UNIX}

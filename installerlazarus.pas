@@ -387,7 +387,7 @@ begin
         end;
         while Pos('  ',Options)>0 do
         begin
-          Options:=StringReplace(Options,'  ',' ',[]);
+          Options:=StringReplace(Options,'  ',' ',[rfReplaceAll]);
         end;
         Options:=Trim(Options);
         if Length(Options)>0 then Processor.Parameters.Add('OPT='+Options);
@@ -621,10 +621,12 @@ begin
       end;
     end;
 
+    // remove double spaces
     while Pos('  ',s)>0 do
     begin
-      s:=StringReplace(s,'  ',' ',[]);
+      s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
     end;
+
     s:=Trim(s);
 
     if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
@@ -750,6 +752,7 @@ begin
   end
   else
   begin
+    // For building useride for Lazarus versions < 1.6.2
     // useride; using lazbuild. Note: in recent Lazarus we use make
     // Check for valid lazbuild.
     // Note: we don't check if we have a valid primary config path, but that will come out

@@ -227,7 +227,7 @@ begin
   begin
     // if we have a proxy, set it now !
     if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
-    while (FReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
+    while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
       FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again
@@ -409,7 +409,7 @@ begin
   begin
     // if we have a proxy, set it now !
     if Length(GetProxyCommand)>0 then ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) +  GetProxyCommand, Output, FVerbose);
-    while (FReturnCode <> 0) and (RetryAttempt < MAXRETRIES) do
+    while (FReturnCode <> 0) and (RetryAttempt < ERRORMAXRETRIES) do
     begin
       Sleep(500); //Give everybody a chance to relax ;)
       FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + Command, Output, FVerbose); //attempt again

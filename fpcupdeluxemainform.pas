@@ -1257,9 +1257,18 @@ begin
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
     begin
-      FG      := clYellow;
-      BG      := clBlack;
-      Special := True;
+      if
+      NOT (ExistWordInString(PChar(s),'Extracted #',[soDown])
+      OR
+      ExistWordInString(PChar(s),'Extracting ',[soDown])
+      OR
+      ExistWordInString(PChar(s),'Download progress ',[soDown]))
+      then
+      begin
+        FG      := clYellow;
+        BG      := clBlack;
+        Special := True;
+      end;
     end;
     if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
     begin

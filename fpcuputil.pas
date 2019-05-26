@@ -3344,7 +3344,7 @@ begin
   //Show progress only every 5 seconds
   if GetUpTickCount>StoredTickCount+5000 then
   begin
-    infoln('Downloading '+aFileName+': '+KB(APos),etInfo);
+    infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
     StoredTickCount:=GetUpTickCount;
   end;
 end;

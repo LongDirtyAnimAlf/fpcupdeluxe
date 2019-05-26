@@ -252,7 +252,7 @@ begin
   s := FLazarusCompilerOptions;
   while Pos('  ',s)>0 do
   begin
-    s:=StringReplace(s,'  ',' ',[]);
+    s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
   end;
   s:=Trim(s);
   if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
