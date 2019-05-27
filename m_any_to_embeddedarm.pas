@@ -160,11 +160,13 @@ begin
 
   if not result then
   begin
+    ShowInfo('Suggestion for cross binutils:');
     {$ifdef mswindows}
-    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32/.');
+    ShowInfo('The crossfpc binutils (arm-embedded) at http://svn.freepascal.org/svn/fpcbuild/binaries/i386-win32');
     {$else}
-    ShowInfo('Suggestion for cross binutils: the crossfpc binutils (arm-embedded) at https://launchpad.net/gcc-arm-embedded.');
+    ShowInfo('Tools from https://launchpad.net/gcc-arm-embedded.');
     {$endif}
+    ShowInfo('Tools from https://github.com/gnu-mcu-eclipse/arm-none-eabi-gcc');
     FAlreadyWarned:=true;
   end
   else

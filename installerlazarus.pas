@@ -591,19 +591,6 @@ begin
     if FCrossLCL_Platform <> '' then
       Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
 
-    //Set config-file
-    s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-    if (ModuleName=_USERIDE) then
-    begin
-      Processor.Parameters.Add('CFGFILE=' + s);
-    end
-    else
-    begin
-      //To be investigated if necessary
-      //At the moment, this gives errors when building lazbuild, so do not enable.
-      //if FileExists(s) then Processor.Parameters.Add('CFGFILE=' + s);
-    end;
-
     //Set options
     s:=STANDARDCOMPILERVERBOSITYOPTIONS+' '+FCompilerOptions;
 
@@ -634,23 +621,40 @@ begin
     case ModuleName of
       _USERIDE:
       begin
-        Processor.Parameters.Add('useride');
-        infoln(infotext+'Running make useride', etInfo);
+        s:=IncludeTrailingPathDelimiter(FPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
+        if FileExists(s) then
+        begin
+          //Set config-file
+          Processor.Parameters.Add('CFGFILE=' + s);
+          Processor.Parameters.Add('useride');
+          infoln(infotext+'Running: make useride', etInfo);
+        end
+        else
+        begin
+          // sometimes, we get an error 217 when buidling lazarus for the first time.
+          // the below tries to prevent this by not using lazbuild on a fresh install.
+          Processor.Parameters.Add('registration');
+          Processor.Parameters.Add('lazutils');
+          Processor.Parameters.Add('lcl');
+          Processor.Parameters.Add('basecomponents');
+          Processor.Parameters.Add('ide');
+          infoln(infotext+'Running: make registration lazutils lcl basecomponents ide', etInfo);
+        end;
       end;
       _IDE:
       begin
         Processor.Parameters.Add('idepkg');
-        infoln(infotext+'Running make idepkg', etInfo);
+        infoln(infotext+'Running: make idepkg', etInfo);
       end;
       _BIGIDE:
       begin
         Processor.Parameters.Add('idebig');
-        infoln(infotext+'Running make idebig', etInfo);
+        infoln(infotext+'Running: make idebig', etInfo);
       end;
       _LAZARUS:
       begin
         Processor.Parameters.Add('all');
-        infoln(infotext+'Running make all', etInfo);
+        infoln(infotext+'Running: make all', etInfo);
       end;
       _STARTLAZARUS:
       begin
@@ -662,7 +666,7 @@ begin
           exit;
         end;
         Processor.Parameters.Add('starter');
-        infoln(infotext+'Running make starter', etInfo);
+        infoln(infotext+'Running: make starter', etInfo);
       end;
       _LAZBUILD:
       begin
@@ -674,7 +678,7 @@ begin
           exit;
         end;
         Processor.Parameters.Add('lazbuild');
-        infoln(infotext+'Running make lazbuild', etInfo);
+        infoln(infotext+'Running: make lazbuild', etInfo);
       end;
       _LCL:
       begin
@@ -686,7 +690,7 @@ begin
         Processor.Parameters.Add('lcl');
         // always build standard LCL for native system ... other widgetsets to be done by LCLCROSS: see below
         //if FCrossLCL_Platform<>'' then Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-        infoln(infotext+'Running make registration lazutils lcl', etInfo);
+        infoln(infotext+'Running: make registration lazutils lcl', etInfo);
       end;
       _LCLCROSS:
       begin
@@ -697,7 +701,7 @@ begin
           Processor.Parameters.Add('-C lcl');
           Processor.Parameters.Add('intf');
           //Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
-          infoln(infotext+'Running make -C lcl intf', etInfo);
+          infoln(infotext+'Running: make -C lcl intf', etInfo);
         end
         else
         begin
