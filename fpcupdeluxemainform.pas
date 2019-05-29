@@ -2255,7 +2255,11 @@ begin
 
     AddMessage(upBuildCrossCompiler);
 
-    sStatus:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+    s:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+FPCupManager.CrossOS_Target;
+    if FPCupManager.MUSL then s:=s+'musl';
+    s:=s+'-'+FPCupManager.CrossCPU_Target;
+    sStatus:=s;
+
     if FPCupManager.FPCOPT<>'' then
     begin
       sStatus:=sStatus+' (OPT: '+FPCupManager.FPCOPT+')';

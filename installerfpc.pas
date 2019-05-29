@@ -894,7 +894,11 @@ begin
           Options:=Options+' -Xn';
           {$endif}
 
-          if FMUSL then Options:=Options+' -Cg -FL'+FMUSLLinker;
+          if FMUSL then
+          begin
+            FMUSLLinker:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'ld-musl-'+GetTargetCPU+'.so.1';
+            Options:=Options+' -Cg -FL'+FMUSLLinker;
+          end;
 
           CrossOptions:='';
 
