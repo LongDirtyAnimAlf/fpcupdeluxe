@@ -3142,9 +3142,8 @@ begin
         {$IFDEF UNIX}
         // Need to add appropriate library search path
         // where it is e.g /usr/lib/arm-linux-gnueabihf...
-        ConfigText.Append('# library search path'); Inc(x);
-        s:='-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu';
-        s:=s+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
+        ConfigText.Append('# library search path');
+        s:='-Fl/usr/lib/$FPCTARGET'+';'+'/usr/lib/$FPCTARGET-gnu'+';'+'/lib/$FPCTARGET'+';'+'/lib/$FPCTARGET-gnu';
         {$IFDEF cpuarm}
         {$IFDEF CPUARMHF}
         s:=s+';'+'/usr/lib/$FPCTARGET-gnueabihf';
@@ -3152,35 +3151,52 @@ begin
         s:=s+';'+'/usr/lib/$FPCTARGET-gnueabi';
         {$ENDIF CPUARMHF}
         {$ENDIF cpuarm}
+        ConfigText.Append(s);
+
+        s:=GetGCCDirectory;
+        if Length(s)>0 then
+        begin
+          ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+          ConfigText.Append('-Fl'+s);
+          ConfigText.Append('#ENDIF');
+        end;
+
         {$IF (defined(BSD)) and (not defined(Darwin))}
-        s:=s+';'+'/usr/local/lib'+';'+'/usr/pkg/lib';
+        s:='-Fl/usr/local/lib'+';'+'/usr/pkg/lib';
         {$ifndef FPCONLY}
         s:=s+';'+'/usr/X11R6/lib'+';'+'/usr/X11R7/lib';
-        {$endif}
-        {$endif}
-        s:=s+';'+GetGCCDirectory;
+        {$endif FPCONLY}
+        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         ConfigText.Append(s);
+        ConfigText.Append('#ENDIF');
+        {$endif}
+
         {$IFDEF SOLARIS}
         ConfigText.Append('-Xn');
         {$ENDIF}
 
         {$IF (defined(NetBSD)) and (not defined(Darwin))}
+        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         {$ifndef FPCONLY}
         ConfigText.Append('-k"-rpath=/usr/X11R6/lib"');
         ConfigText.Append('-k"-rpath=/usr/X11R7/lib"');
         {$endif}
         ConfigText.Append('-k"-rpath=/usr/pkg/lib"');
+        ConfigText.Append('#ENDIF');
         {$endif}
+
         {$ifdef Linux}
         if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
         {$endif}
+
+
         {$ENDIF UNIX}
 
         {$ifdef Darwin}
         s:=GetSDKVersion('macosx');
         if Length(s)>0 then
         begin
-          //ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING'); Inc(x);
+          //ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
           ConfigText.Append('#IFDEF DARWIN');
           ConfigText.Append('# Add minimum required OSX version for native compiling');
           ConfigText.Append('# Prevents crti not found linking errors');

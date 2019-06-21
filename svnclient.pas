@@ -309,7 +309,8 @@ begin
       //E170013: Unable to connect to a repository at URL
       //E731001: Host is unknown.
       //E175012: Connection timed out
-      if ((Pos('E175002', Output)>0) OR (Pos('E730065', Output)>0) OR (Pos('E170013', Output)>0) OR (Pos('E731001', Output)>0) OR (Pos('E175012', Output)>0)) then
+      //E120108: The server unexpectedly closed the connection
+      if ((Pos('E175002', Output)>0) OR (Pos('E730065', Output)>0) OR (Pos('E170013', Output)>0) OR (Pos('E731001', Output)>0) OR (Pos('E175012', Output)>0) OR (Pos('E120108', Output)>0)) then
       begin
         //do a simple retry in case of connection failures
         if RetryAttempt>CONNECTIONMAXRETRIES then break else
@@ -345,14 +346,6 @@ begin
       end;
     end;
   end;
-
-  //FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' update --set-depth exclude ide', Output, Verbose);
-  //DeleteDirectoryEx(IncludeTrailingPathDelimiter(LocalRepository)+'ide');
-
-  //ExecuteCommand('find . ! -path "./.svn/*" \( -name "*.pas" -o -name "*.pp" -o -name "*.lpk" -o -name "*.lpr" -name "*.lpi" \) -type f -exec sed -i "+''''+"s/\r//"+''''+" {} \;', Output, Verbose);
-  //writeln('SED: ' +Output);
-
-  //find . ! -path "./.svn/*" \( -name "*.pas" -o -name "*.pp" -o -name "*.lpk" -o -name "*.lpr" \) -type f -exec sed -i 's/\r//' {} \;
 
 end;
 

@@ -1,0 +1,20 @@
+--- bfd/coff64-rs6000.c.old	Sun Jun 24 20:38:56 2018
++++ bfd/coff64-rs6000.c	Wed Oct 24 12:08:02 2018
+@@ -2128,14 +2128,14 @@
+   /* Changes from 32 :
+      .sv == 8, is only for 32 bit programs
+      .ti == 12 and .tb == 13 are now reserved.  */
+-  static const char *names[19] =
++  static const char *names[23] =
+   {
+     ".pr", ".ro", ".db", ".tc", ".ua", ".rw", ".gl", ".xo",
+     NULL, ".bs", ".ds", ".uc", NULL,  NULL,  NULL,  ".tc0",
+-    ".td", ".sv64", ".sv3264"
++    ".td", ".sv64", ".sv3264", NULL, ".tl", ".ul", ".te"
+   };
+ 
+-  if ((19 >= aux->x_csect.x_smclas)
++  if ((23 >= aux->x_csect.x_smclas)
+       && (NULL != names[aux->x_csect.x_smclas]))
+     {
+ 

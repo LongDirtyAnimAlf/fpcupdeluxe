@@ -157,8 +157,6 @@ begin
     AddFPCCFGSnippet('-k-framework -kFoundation');
     AddFPCCFGSnippet('-k-framework -kCoreFoundation');
     AddFPCCFGSnippet('-XR'+s);
-
-    AddFPCCFGSnippet('-Xr/usr/lib');
   end;
 end;
 

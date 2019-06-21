@@ -87,7 +87,8 @@ begin
     AddFPCCFGSnippet('-k"-rpath=/usr/pkg/lib"');
     //AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
     SearchLibraryInfo(result);
-  end
+  end;
+  {
   else
   begin
     //libs path is optional; it can be empty
@@ -96,6 +97,7 @@ begin
     FLibsFound:=true;
     result:=true;
   end;
+  }
 end;
 
 function TAny_NetBSDx64.GetBinUtils(Basepath:string): boolean;

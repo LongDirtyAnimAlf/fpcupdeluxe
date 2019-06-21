@@ -73,13 +73,21 @@ begin
     begin
       line:='';
       outputline:=true;
-    end else line:=Copy(linestore,1,i-1);
+    end
+    else
+    begin
+      line:=Copy(linestore,1,i-1);
+      line:=TrimRight(line);
+    end;
 
     i:=i+Length(LineEnding);
     Delete(linestore,1,i-1);
 
     // get new line-ending to be used by next loop
     i:=Pos(LineEnding,linestore);
+
+    // skip stray empty lines
+    if (Length(line)=0) AND (NOT outputline) then continue;
 
     {$ifdef Darwin}
     // suppress all setfocus errors on Darwin, always
@@ -209,8 +217,14 @@ begin
         {$ifdef UNIX}
         s:='rm -f ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
+        {$ifdef Darwin}
+        if AnsiContainsText(line,'/'+Trim(s)) OR AnsiStartsText(Trim(s),line) then continue;
+        {$endif}
         s:='rm -rf ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
+        {$ifdef Darwin}
+        if AnsiContainsText(line,'/'+Trim(s)) OR AnsiStartsText(Trim(s),line) then continue;
+        {$endif}
         s:='mkdir ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
         s:='mv ';

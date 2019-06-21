@@ -319,6 +319,7 @@ begin
             except
               Application.HandleException(Application);
             end;
+            if Application.Terminated then Break;
           end;
           // set cursor after 1 second of execution time
           if (i=99) then Application.MainForm.Cursor:=crHourGlass;

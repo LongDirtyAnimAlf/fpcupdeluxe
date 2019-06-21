@@ -108,7 +108,8 @@ begin
     begin
       FLibsFound:=True;
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-      {$ifdef CPUX64}
+      //AddFPCCFGSnippet('-FL'+IncludeTrailingPathDelimiter(FLibsPath)+'ld-linux.so.2');
+      {$ifdef CPU64}
       s:='/usr/lib32';
       if DirectoryExists(s) then
       begin
