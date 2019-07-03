@@ -1360,6 +1360,8 @@ begin
     OR
     (ExistWordInString(PChar(s),'make: ',[soDown]))
     OR
+    (ExistWordInString(PChar(s),'dependency dropped',[soDown]))
+    OR
     ( ExistWordInString(PChar(s),'echo ',[soDown]) AND ExistWordInString(PChar(s),'revision.inc',[soDown]) )
     OR
     ( ExistWordInString(PChar(s),'Start ',[soDown]) AND ExistWordInString(PChar(s),'now ',[soDown]) )

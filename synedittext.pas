@@ -154,10 +154,13 @@ begin
           if AnsiContainsText(line,'(e=1)') then continue;
           if AnsiContainsText(line,'error 87') then continue;
           if AnsiContainsText(line,'(e=87)') then continue;
+          //if AnsiContainsText(line,'dependency dropped') then continue;
         end;
 
         if AnsiContainsText(line,'~~~~~~~~') then continue;
         if AnsiContainsText(line,', coalesced') then continue;
+
+        if AnsiContainsText(line,'TODO: ') then continue;
 
         // When building a java cross-compiler
         if AnsiContainsText(line,'Generated: ') then continue;

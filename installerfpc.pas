@@ -320,6 +320,7 @@ begin
       //{$ifndef Darwin}
       {$ifdef MSWINDOWS}
       // remove pipeline assembling for Darwin when cross-compiling !!
+      // for FPC >= rev 42302 this is not needed anymore: DoPipe:=false; by default on non-unix !!
       SnipBegin:=ConfigText.IndexOf('# use pipes instead of temporary files for assembling');
       if SnipBegin>-1 then
       begin
@@ -2040,14 +2041,6 @@ begin
 end;
 
 function TFPCInstaller.InitModule(aBootstrapVersion:string):boolean;
-const
-  {$IF (defined(OpenBSD)) and (defined(CPU64))}
-  // 2.6.2 and older do not work anymore on newer OpenBSD64 versions
-  FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+6*100+2);
-  {$else}
-  // 2.2.4 and older have no official FPC bootstrapper available online
-  FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+2*100+4);
-  {$endif}
 var
   aCompilerList:TStringList;
   i,j:integer;
@@ -2057,7 +2050,6 @@ var
   k,l,FreeBSDVersion:integer;
   {$ENDIF}
   s,s1:string;
-  ReturnCode:integer;
   aLocalBootstrapVersion,aLocalFPCUPBootstrapVersion:string;
   aIntermediateBootstrapCompiler:string;
   aFPCUPBootstrapURL:string;
@@ -3046,11 +3038,21 @@ begin
           writeln(TxtFile,'# Always strip debuginfo from the executable');
           writeln(TxtFile,'-Xs');
           writeln(TxtFile,'');
+          writeln(TxtFile,'# assembling');
+          writeln(TxtFile,'#IFDEF Darwin');
+          writeln(TxtFile,'# use pipes instead of temporary files for assembling');
+          writeln(TxtFile,'-ap');
+          writeln(TxtFile,'#ENDIF');
+          writeln(TxtFile,'');
           writeln(TxtFile,'# Write always a nice FPC logo ;)');
           writeln(TxtFile,'-l');
           writeln(TxtFile,'');
           writeln(TxtFile,'# Display Info, Warnings and Notes and supress Hints');
           writeln(TxtFile,'-viwnh-');
+
+
+
+
           writeln(TxtFile,'');
         finally
           CloseFile(TxtFile);
@@ -3108,8 +3110,6 @@ begin
           end;
 
         until x=-1;
-
-        // ReturnCode now holds the correct spot to insert new config
 
         if y=ConfigText.Count then
           //add empty line
@@ -3282,7 +3282,6 @@ var
   DeleteList: TStringList;
   CPUOS_Signature:string;
   aCleanupCompiler:string;
-  S : string;
 begin
   result:=inherited;
 
@@ -3484,15 +3483,19 @@ begin
 end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
+{$ifdef Darwin}
 const
   DARWINCHECKMAGIC='FPMAKE_OPT+=$(addprefix -o ,$(FPCOPT))';
   DARWINHACKMAGIC='override FPCOPT:=$(filter-out -WM%,$(FPCOPT))';
+{$endif}
 var
   BeforeRevision: string;
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
   VersionSnippet:string;
+  {$ifdef Darwin}
   aIndex:integer;
+  {$endif}
 begin
   result:=inherited;
   result:=InitModule;

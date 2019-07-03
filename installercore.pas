@@ -73,9 +73,19 @@ const
   STANDARDCOMPILERVERBOSITYOPTIONS='-vw-n-h-l-d-u-t-p-c-';
   {$ENDIF}
 
-  NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win32/nasm-2.13-win32.zip';
-  NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
+  //NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win32/nasm-2.13-win32.zip';
+  //NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.13/win64/nasm-2.13-win64.zip';
+  NASMWIN32URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win32/nasm-2.14-win32.zip';
+  NASMWIN64URL='https://www.nasm.us/pub/nasm/releasebuilds/2.14/win64/nasm-2.14-win64.zip';
   NASMFPCURL=BINUTILSURL + '/trunk/install/crossbinmsdos/nasm.exe';
+
+  {$IF (defined(OpenBSD)) and (defined(CPU64))}
+  // 2.6.2 and older do not work anymore on newer OpenBSD64 versions
+  FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+6*100+2);
+  {$else}
+  // 2.2.4 and older have no official FPC bootstrapper available online
+  FPC_OFFICIAL_MINIMUM_BOOTSTRAPVERSION=(2*10000+2*100+4);
+  {$endif}
 
   {$ifdef win64}
   OpenSSLSourceURL : array [0..3] of string = (
