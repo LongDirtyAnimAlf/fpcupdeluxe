@@ -44,9 +44,7 @@ var
 procedure TSynEditHelper.SetSelTextBuf(aBuf: PChar);
 var
   i:cardinal;
-  {$ifdef UNIX}
   s:string;
-  {$endif}
   subline,line:string;
   outputline:boolean;
 begin
@@ -210,6 +208,7 @@ begin
           {$endif}
         end;
         // suppress "trivial"* build commands
+
         {$ifdef MSWINDOWS}
         if AnsiContainsText(line,'rm.exe ') then continue;
         if AnsiContainsText(line,'mkdir.exe ') then continue;
@@ -217,7 +216,7 @@ begin
         if AnsiContainsText(line,'cmp.exe ') then continue;
         if (AnsiContainsText(line,'cp.exe ')) AND (AnsiContainsText(line,'.compiled')) then continue;
         {$endif}
-        {$ifdef UNIX}
+
         s:='rm -f ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
         {$ifdef Darwin}
@@ -234,7 +233,7 @@ begin
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
         s:='cp ';
         if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND AnsiContainsText(line,'.compiled') ) then continue;
-        {$endif}
+
         if AnsiContainsText(line,'is up to date.') then continue;
         if AnsiContainsText(line,'searching ') then continue;
 

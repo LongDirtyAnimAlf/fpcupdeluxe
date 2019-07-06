@@ -814,14 +814,16 @@ begin
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-32-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-32-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-32-bit.zip';
-          aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-32-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-32-bit.zip';
+          aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-32-bit.zip';
           {$else}
           //Output:='git64.7z';
           Output:='git64.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.17.1.windows.2/MinGit-2.17.1.2-64-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.18.0.windows.1/MinGit-2.18.0-64-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.19.0.windows.1/MinGit-2.19.0-64-bit.zip';
-          aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip';
+          aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-64-bit.zip';
           {$endif}
           //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
           infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
@@ -1705,7 +1707,8 @@ end;
 
 function TInstaller.DownloadSVN: boolean;
 const
-  NewSourceURL : array [0..2] of string = (
+  NewSourceURL : array [0..3] of string = (
+    'https://www.visualsvn.com/files/Apache-Subversion-1.11.1.zip',
     'https://www.visualsvn.com/files/Apache-Subversion-1.10.3.zip',
     'https://www.visualsvn.com/files/Apache-Subversion-1.10.2.zip',
     'https://sourceforge.net/projects/win32svn/files/1.8.17/apache24/svn-win32-1.8.17-ap24.zip/download'
