@@ -1963,10 +1963,14 @@ end;
 
 {$IFDEF UNIX}
 function GetGCCDirectory:string;
+const
+  LINKFILE='crtbegin.o';
 var
-  output,s1,s2:string;
-  i,j:integer;
-  ReturnCode: integer;
+  LinkFiles     : TStringList;
+  Output,s1,s2  : string;
+  i,j           : integer;
+  ReturnCode    : integer;
+  FoundLinkFile : boolean;
 begin
 
   {$IF (defined(BSD)) and (not defined(Darwin))}
@@ -1974,71 +1978,124 @@ begin
   {$else}
   result:='/usr/lib/gcc/';
   {$endif}
-  output:='';
+
+  FoundLinkFile:=false;
 
   try
-    ReturnCode:=ExecuteCommand('gcc -v', Output, false);
+    Output:='';
+    ReturnCode:=ExecuteCommand('gcc -print-prog-name=cc1', Output, false);
 
     if (ReturnCode=0) then
     begin
-      s1:=' --libdir=';
-      //s1:=' --libexecdir=';
-      i:=Ansipos(s1, Output);
-      if i > 0 then
+      s1:=Trim(Output);
+      if FileExists(s1) then
       begin
-        s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-        // find space as delimiter
-        i:=Ansipos(' ', s2);
-        // find lf as delimiter
-        j:=Ansipos(#10, s2);
-        if (j>0) AND (j<i) then i:=j;
-        // find cr as delimiter
-        j:=Ansipos(#13, s2);
-        if (j>0) AND (j<i) then i:=j;
-        if i > 0 then delete(s2,i,MaxInt);
-        result:=IncludeTrailingPathDelimiter(s2);
+        s2:=ExtractFileDir(s1);
+        if FileExists(s2+DirectorySeparator+LINKFILE) then
+        begin
+          result:=s2;
+          FoundLinkFile:=true;
+        end;
       end;
+    end;
 
-      i:=Ansipos('gcc', result);
-      if i=0 then result:=result+'gcc'+DirectorySeparator;
+    if (NOT FoundLinkFile) then
+    begin
 
-      s1:=' --build=';
-      i:=Ansipos(s1, Output);
-      if i=0 then
+      Output:='';
+      ReturnCode:=ExecuteCommand('gcc -v', Output, false);
+
+      if (ReturnCode=0) then
       begin
-        s1:=' --target=';
+
+        s1:='COLLECT_LTO_WRAPPER=';
         i:=Ansipos(s1, Output);
-      end;
-      if i > 0 then
-      begin
-        s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-        // find space as delimiter
-        i:=Ansipos(' ', s2);
-        // find lf as delimiter
-        j:=Ansipos(#10, s2);
-        if (j>0) AND (j<i) then i:=j;
-        // find cr as delimiter
-        j:=Ansipos(#13, s2);
-        if (j>0) AND (j<i) then i:=j;
-        if i > 0 then delete(s2,i,MaxInt);
-        result:=result+s2+DirectorySeparator;
-      end;
+        if (i>0) then
+        begin
+          s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+          // find space as delimiter
+          i:=Ansipos(' ', s2);
+          // find lf as delimiter
+          j:=Ansipos(#10, s2);
+          if (j>0) AND (j<i) then i:=j;
+          // find cr as delimiter
+          j:=Ansipos(#13, s2);
+          if (j>0) AND (j<i) then i:=j;
+          if (i>0) then delete(s2,i,MaxInt);
+          s2:=ExtractFileDir(s2);
+          if FileExists(s2+DirectorySeparator+LINKFILE) then
+          begin
+            result:=s2;
+            FoundLinkFile:=true;
+          end;
+        end;
 
-      s1:='gcc version ';
-      i:=Ansipos(s1, Output);
-      if i > 0 then
-      begin
-        s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
-        // find space as delimiter
-        i:=Ansipos(' ', s2);
-        // find lf as delimiter
-        j:=Ansipos(#10, s2);
-        if (j>0) AND (j<i) then i:=j;
-        // find cr as delimiter
-        j:=Ansipos(#13, s2);
-        if (j>0) AND (j<i) then i:=j;
-        if i > 0 then delete(s2,i,MaxInt);
-        result:=result+s2;
+        if (NOT FoundLinkFile) then
+        begin
+          s1:=' --libdir=';
+          //s1:=' --libexecdir=';
+          i:=Ansipos(s1, Output);
+          if (i>0) then
+          begin
+            s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+            // find space as delimiter
+            i:=Ansipos(' ', s2);
+            // find lf as delimiter
+            j:=Ansipos(#10, s2);
+            if (j>0) AND (j<i) then i:=j;
+            // find cr as delimiter
+            j:=Ansipos(#13, s2);
+            if (j>0) AND (j<i) then i:=j;
+            if (i>0) then delete(s2,i,MaxInt);
+            result:=IncludeTrailingPathDelimiter(s2);
+          end;
+
+          i:=Ansipos('gcc', result);
+          if i=0 then result:=result+'gcc'+DirectorySeparator;
+
+          s1:=' --build=';
+          i:=Ansipos(s1, Output);
+          if i=0 then
+          begin
+            s1:=' --target=';
+            i:=Ansipos(s1, Output);
+          end;
+          if (i>0) then
+          begin
+            s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+            // find space as delimiter
+            i:=Ansipos(' ', s2);
+            // find lf as delimiter
+            j:=Ansipos(#10, s2);
+            if (j>0) AND (j<i) then i:=j;
+            // find cr as delimiter
+            j:=Ansipos(#13, s2);
+            if (j>0) AND (j<i) then i:=j;
+            if (i>0) then delete(s2,i,MaxInt);
+            result:=result+s2+DirectorySeparator;
+          end;
+
+          s1:='gcc version ';
+          i:=Ansipos(s1, Output);
+          if (i>0) then
+          begin
+            s2:=RightStr(Output,Length(Output)-(i+Length(s1)-1));
+            // find space as delimiter
+            i:=Ansipos(' ', s2);
+            // find lf as delimiter
+            j:=Ansipos(#10, s2);
+            if (j>0) AND (j<i) then i:=j;
+            // find cr as delimiter
+            j:=Ansipos(#13, s2);
+            if (j>0) AND (j<i) then i:=j;
+            if (i>0) then delete(s2,i,MaxInt);
+            result:=result+s2;
+            if FileExists(result+DirectorySeparator+LINKFILE) then
+            begin
+              FoundLinkFile:=true;
+            end;
+          end;
+        end;
       end;
     end;
 
@@ -2046,26 +2103,31 @@ begin
     // ignore errors
   end;
 
-  //In case of errors, do a brute force search of gcc
-  if ((ReturnCode<>0) or (NOT DirectoryExists(result))) then
+  //In case of errors or failures, do a brute force search of gcc link file
+  if ((ReturnCode<>0) or (NOT FoundLinkFile)) then
   begin
     {$IF (defined(BSD)) and (not defined(Darwin))}
-    result:='/usr/local/lib/gcc/';
+    result:='/usr/local/lib/gcc';
     {$else}
-    result:='/usr/lib/gcc/';
+    result:='/usr/lib/gcc';
     {$endif}
-    for i:=9 downto 4 do
-    begin
-      output:=IncludeTrailingPathDelimiter(result)+GetTargetCPUOS+'-gnu'+DirectorySeparator+InttoStr(i);
-      if DirectoryExists(output) then
+
+    LinkFiles := TStringList.Create;
+    try
+      FindAllFiles(LinkFiles, result, '*.o', true);
+      for i:=0 to (LinkFiles.Count-1) do
       begin
-        if FileExists(output+DirectorySeparator+'crtbegin.o') then
+        if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
         begin
-          result:=output;
+          result:=ExtractFileDir(LinkFiles[i]);
+          FoundLinkFile:=true;
           break;
         end;
       end;
+    finally
+      LinkFiles.Free;
     end;
+
   end;
 
 end;
