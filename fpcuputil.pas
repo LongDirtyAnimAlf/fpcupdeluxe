@@ -2104,7 +2104,7 @@ begin
   end;
 
   //In case of errors or failures, do a brute force search of gcc link file
-  if ((ReturnCode<>0) or (NOT FoundLinkFile)) then
+  if (NOT FoundLinkFile) then
   begin
     {$IF (defined(BSD)) and (not defined(Darwin))}
     result:='/usr/local/lib/gcc';
@@ -2128,6 +2128,11 @@ begin
       LinkFiles.Free;
     end;
 
+  end;
+
+  if (NOT FoundLinkFile) then
+  begin
+    infoln('GetGCCDirectory: Could not find ' + LINKFILE + ' on system. Expect linking warnings/errors.',etWarning);
   end;
 
 end;
