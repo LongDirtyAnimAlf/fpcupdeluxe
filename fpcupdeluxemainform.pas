@@ -1370,6 +1370,8 @@ begin
     OR
     (ExistWordInString(PChar(s),'this could take some time',[soDown]))
     OR
+    (ExistWordInString(PChar(s),'Skipped package',[soWholeWord,soDown]))
+    OR
     (
       (ExistWordInString(PChar(s),'writing',[soDown]))
       AND
