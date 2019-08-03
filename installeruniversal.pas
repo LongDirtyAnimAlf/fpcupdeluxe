@@ -941,7 +941,7 @@ begin
     InstallDir:=IncludeTrailingPathDelimiter(SafeExpandFileName(GetValueFromKey('InstallDir',sl)));
     InstallDir:=FixPath(InstallDir);
     if InstallDir<>'' then
-      ForceDirectories(InstallDir);
+      ForceDirectoriesSafe(InstallDir);
     Installer:=TWinInstaller.Create(InstallDir,FCompiler,FVerbose);
     try
       //todo: make installer module-level; split out config from build part; would also require fixed svn dirs etc
@@ -1508,7 +1508,7 @@ begin
     FSourceDirectory:=InstallDir;
 
     if InstallDir<>'' then
-      ForceDirectories(InstallDir);
+      ForceDirectoriesSafe(InstallDir);
 
     // Common keywords for all repo methods
     FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);

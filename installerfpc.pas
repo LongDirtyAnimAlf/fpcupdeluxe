@@ -369,6 +369,7 @@ begin
   }
   OldPath:=IncludeTrailingPathDelimiter(aBaseDir);
   DeleteFilesNameSubdirs(OldPath,'.stackdump');
+  DeleteFilesNameSubdirs(OldPath,'.core');
 
   // patch residues
   //DeleteFilesNameSubdirs(OldPath,'.rej');
@@ -1155,7 +1156,7 @@ begin
                   if FileExists(s1) then
                   begin
                     s2:=IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+DirectorySeparator+'arm-embedded'+DirectorySeparator;
-                    ForceDirectories(s2);
+                    ForceDirectoriesSafe(s2);
                     FileUtil.CopyFile(s1,s2+'gdb'+GetExeExt);
                   end;
                 end;
@@ -1872,7 +1873,7 @@ begin
 
   if OperationSucceeded then
   begin
-    OperationSucceeded:=ForceDirectories(FBootstrapCompilerDirectory);
+    OperationSucceeded:=ForceDirectoriesSafe(FBootstrapCompilerDirectory);
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 

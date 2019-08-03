@@ -118,7 +118,7 @@ begin
   begin
     // look for versioned binutils
     BinPrefixTry:='x86_64-freebsd';
-    for i:=12 downto 7 do
+    for i:=13 downto 7 do
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;
       result:=SearchBinUtil(BasePath,AsFile);

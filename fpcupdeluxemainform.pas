@@ -2517,7 +2517,7 @@ begin
               {$ifndef MSWINDOWS}
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath+DirectorySeparator;
               {$endif}
-              if (NOT DirectoryExists(TargetPath)) then ForceDirectories(TargetPath);
+              ForceDirectoriesSafe(TargetPath);
 
               AddMessage('Going to extract archive into '+TargetPath);
 
@@ -2615,7 +2615,7 @@ begin
               AddMessage('Successfully downloaded the libraries.');
               TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath+DirectorySeparator;
-              //if (NOT DirectoryExists(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath)) then ForceDirectories(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath);
+              //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath);
 
               AddMessage('Going to extract them into '+TargetPath);
 
@@ -3224,7 +3224,7 @@ begin
   AddMessage('');
 
   //create install directory
-  if (NOT DirectoryExists(FPCupManager.BaseDirectory)) then ForceDirectories(FPCupManager.BaseDirectory);
+  ForceDirectoriesSafe(FPCupManager.BaseDirectory);
   //save install settings in install directory
   SetFPCUPSettings(IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory));
 

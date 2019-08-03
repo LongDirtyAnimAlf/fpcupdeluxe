@@ -354,7 +354,7 @@ begin
       HelpUrl:=HELPSOURCEURL[High(HELPSOURCEURL),1];
     end;
 
-    ForceDirectories(ExcludeTrailingPathDelimiter(FTargetDirectory));
+    ForceDirectoriesSafe(ExcludeTrailingPathDelimiter(FTargetDirectory));
     DocsZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
     OperationSucceeded:=true;
@@ -839,7 +839,7 @@ begin
   result:=inherited ConfigModule(ModuleName);
   if result then
   begin
-    result:=ForceDirectories(FLazarusPrimaryConfigPath);
+    result:=ForceDirectoriesSafe(FLazarusPrimaryConfigPath);
   end
   else
   begin

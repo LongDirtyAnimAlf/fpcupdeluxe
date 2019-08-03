@@ -343,6 +343,7 @@ function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 function IsExecutable(Executable: string):boolean;
+function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function GetJava: string;
 function CheckJava: boolean;
@@ -584,13 +585,20 @@ begin
  end;
  {$endif}
  if FileIsSymlink(StartPath) then
-    StartPath:=GetPhysicalFilename(StartPath,pfeException);
+ begin
+   try
+     StartPath:=GetPhysicalFilename(StartPath,pfeException);
+   except
+   end;
+ end;
  result:=StartPath;
 end;
 
 function SafeGetApplicationPath: String;
+var
+  StartPath: String;
 begin
-  result:=ExtractFilePath(SafeGetApplicationName);
+  StartPath:=ExtractFileDir(SafeGetApplicationName);
 
   (*
  //StartPath:=IncludeTrailingPathDelimiter(ProgramDirectory);
@@ -614,9 +622,14 @@ begin
  result:=ExtractFilePath(StartPath);
  *)
 
- if DirectoryExists(result) then
-    result:=GetPhysicalFilename(result,pfeException);
- result:=IncludeTrailingPathDelimiter(result);
+ if DirectoryExists(StartPath) then
+ begin
+   try
+     StartPath:=GetPhysicalFilename(StartPath,pfeException);
+   except
+   end;
+ end;
+ result:=IncludeTrailingPathDelimiter(StartPath);
 end;
 
 function SaveFileFromResource(filename,resourcename:string):boolean;
@@ -870,7 +883,7 @@ begin
   {$ENDIF MSWINDOWS}
   {$IFDEF UNIX}
   //create dir if it doesn't exist
-  ForceDirectories(ExtractFilePath(IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName));
+  ForceDirectoriesSafe(ExtractFilePath(IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+ShortcutName));
   ScriptText:=TStringList.Create;
   try
     // No quotes here, either, we're not in a shell, apparently...
@@ -2324,6 +2337,11 @@ begin
   end;
 end;
 
+function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
+begin
+  result:=true;
+  if (NOT DirectoryExists(Dir)) then result:=ForceDirectories(Dir);
+end;
 
 {$IFDEF UNIX}
 //Adapted from sysutils; Unix/Linux only

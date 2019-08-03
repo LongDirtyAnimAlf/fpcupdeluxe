@@ -611,7 +611,7 @@ begin
     {$ENDIF BSD}
 
     {$IFDEF MSWINDOWS}
-    ForceDirectories(FMakeDir);
+    ForceDirectoriesSafe(FMakeDir);
 
     (*
     // check if we have make ... otherwise get it from standard URL
@@ -683,7 +683,7 @@ begin
     if Not FileExists(F7zip) then F7zip := IncludeTrailingPathDelimiter(FMakeDir) + '\7Zip\7za.exe';
     if Not FileExists(F7zip) then
     begin
-      ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
+      ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
@@ -739,8 +739,8 @@ begin
     FUnrar := IncludeTrailingPathDelimiter(FMakeDir) + 'unrar\bin\unrar.exe';
     if Not FileExists(FUnrar) then
     begin
-      ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
-      //ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
+      ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar');
+      //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
       OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
@@ -807,7 +807,7 @@ begin
         //install GIT only on Windows Vista and higher
         if CheckWin32Version(6,0) then
         begin
-          ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'git');
+          ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'git');
           {$ifdef win32}
           //Output:='git32.7z';
           Output:='git32.zip';
@@ -888,7 +888,7 @@ begin
         Output:='hg64.zip';
         {$endif}
         aURL:=FPCUPGITREPO+'/releases/download/HG-4.7/'+Output;
-        ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
+        ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'hg');
         infoln(localinfotext+'HG (mercurial) client not found. Downloading it (may take time) from '+aURL,etInfo);
         OperationSucceeded:=GetFile(aURL,IncludeTrailingPathDelimiter(FMakeDir)+'hg\'+Output);
         if NOT OperationSucceeded then
@@ -1465,7 +1465,7 @@ begin
     if not(DirectoryExists(FSVNClient.LocalRepository)) then
     begin
       writelnlog(localinfotext+'Creating directory '+FSourceDirectory+' for SVN checkout.');
-      ForceDirectories(FSourceDirectory);
+      ForceDirectoriesSafe(FSourceDirectory);
     end;
   end;
 
@@ -1611,7 +1611,7 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
-  ForceDirectories(FMakeDir);
+  ForceDirectoriesSafe(FMakeDir);
   Result := true;
   for Counter := low(FUtilFiles) to high(FUtilFiles) do
   begin
@@ -1623,7 +1623,7 @@ begin
       begin
         if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
         if (FUtilFiles[Counter].Category=ucDebugger64) then InstallPath:=InstallPath+'gdb\x86_64-win64\';
-        ForceDirectories(InstallPath);
+        ForceDirectoriesSafe(InstallPath);
       end;
 
       InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
@@ -1657,7 +1657,7 @@ var
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
-  ForceDirectories(FMakeDir);
+  ForceDirectoriesSafe(FMakeDir);
   Result := true;
   OperationSucceeded := false;
   SourceURL:=FPCUPGITREPO+'/releases/download/wincrossbins_v1.0/Win64Bins.zip';
@@ -1724,7 +1724,7 @@ begin
 
   SVNZip := GetTempFileNameExt('','FPCUPTMP','zip');
 
-  ForceDirectories(FSVNDirectory);
+  ForceDirectoriesSafe(FSVNDirectory);
 
   for i:=0 to (Length(NewSourceURL)-1) do
   try
@@ -1917,7 +1917,7 @@ begin
 
   OperationSucceeded := false;
 
-  if ForceDirectories(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
+  if ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'wget') then
   begin
     WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
 
@@ -2564,7 +2564,7 @@ begin
 
       if (j>0) then
       begin
-        if (NOT DirectoryExists(PatchDirectory)) then ForceDirectories(PatchDirectory);
+        ForceDirectoriesSafe(PatchDirectory);
         SaveFileFromResource(PatchDirectory+DirectorySeparator+PatchFilePath+'.patch',resourcefiles[i]);
       end;
     end;

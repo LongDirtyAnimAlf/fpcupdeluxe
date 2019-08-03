@@ -49,7 +49,7 @@ These did not work (marked broken) in PC BSD 9 release
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
 type
@@ -96,11 +96,6 @@ end;
 {$endif}
 
 function TFreeBSD_Linux64.GetBinUtils(Basepath:string): boolean;
-const
-  BinutilsDownloadURL='http://ftp.gnu.org/gnu/binutils/binutils-2.23.1.tar.gz';
-  {or bz2:
-  http://ftp.gnu.org/gnu/binutils/binutils-2.23.1.tar.bz2
-  }
 begin
   result:=inherited;
   if result then exit;
@@ -115,7 +110,7 @@ begin
   if not FileExists(FBinUtilsPath+'/as') then
   begin
     // Check for and get Linux binutils.
-    if not(ForceDirectories(FBinUtilsPath)) then
+    if not(ForceDirectoriesSafe(FBinUtilsPath)) then
     begin
       ShowInfo('Could not create binutils directory '+FBinUtilsPath,etError);
       FAlreadyWarned:=true;

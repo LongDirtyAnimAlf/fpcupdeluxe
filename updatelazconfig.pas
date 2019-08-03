@@ -412,7 +412,7 @@ begin
   If bChanged then
   begin
     // Make sure path exists:
-    ForceDirectories(ExtractFilePath(FFilename));
+    ForceDirectoriesSafe(ExtractFilePath(FFilename));
     Save;
   end;
   Doc.Free;

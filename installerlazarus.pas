@@ -1356,7 +1356,7 @@ begin
 
   if DirectoryExists(FPrimaryConfigPath) = false then
   begin
-    if ForceDirectories(FPrimaryConfigPath) then
+    if ForceDirectoriesSafe(FPrimaryConfigPath) then
       infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
   end;
 
@@ -1525,7 +1525,7 @@ begin
 
       // add default projects path
       DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
-      ForceDirectories(DebuggerPath);
+      ForceDirectoriesSafe(DebuggerPath);
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
 
       // Set file history towards default project directory

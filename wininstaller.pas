@@ -177,7 +177,7 @@ begin
   //checkout fpc build sources svn checkout
   //This repository includes the full FPC sources as well...
   if FVerbose then WritelnLog(ClassName+': Getting FPC build repository',true);
-  ForceDirectories(FFPCBuildDir);
+  ForceDirectoriesSafe(FFPCBuildDir);
   FSVNClient.LocalRepository:=FFPCBuildDir;
   // Using the fixes version of FPC hardcoded; probably we officially need latest stable FPC...
   //todo: perhaps link this to the actual version of FPC used in the regular install?
@@ -186,7 +186,7 @@ begin
 
   //checkout laz binaries
   if FVerbose then WritelnLog(ClassName+': Getting Lazarus binaries repository',true);
-  ForceDirectories(FLazarusBinaryDir);
+  ForceDirectoriesSafe(FLazarusBinaryDir);
   FSVNClient.LocalRepository:=FLazarusBinaryDir;
   // Will have at least i386, x64 and arm-wince subfolders
   FSVNClient.Repository:='http://svn.freepascal.org/svn/lazarus/binaries/';
