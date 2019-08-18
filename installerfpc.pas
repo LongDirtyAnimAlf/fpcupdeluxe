@@ -113,7 +113,6 @@ type
   private
     FBinPath: string; // path where generated compiler lives
     FTargetCompilerName: string;
-    FIntermediateCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
     FBootstrapCompilerURL: string;
@@ -161,7 +160,6 @@ type
     property NativeFPCBootstrapCompiler: boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
 
     property TargetCompilerName: string read FTargetCompilerName;
-    property IntermediateCompilerName: string read FIntermediateCompilerName;
 
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
@@ -613,9 +611,7 @@ begin
       else //ctBootstrap
       begin
         infoln(infotext+'Using the original bootstrapper to compile and build the cross-compiler',etInfo);
-        if FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName)
-           then ChosenCompiler:=ExtractFilePath(FCompiler)+IntermediateCompilerName
-           else ChosenCompiler:=FCompiler;
+        ChosenCompiler:=FCompiler;
       end;
 
       s1:=GetCompilerVersion(ChosenCompiler);
@@ -2052,7 +2048,6 @@ var
   {$ENDIF}
   s,s1:string;
   aLocalBootstrapVersion,aLocalFPCUPBootstrapVersion:string;
-  aIntermediateBootstrapCompiler:string;
   aFPCUPBootstrapURL:string;
   aDownLoader: TBasicDownLoader;
 begin
@@ -2074,10 +2069,6 @@ begin
   // set standard bootstrap compilername
   FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetTargetCPUOS+'-'+GetCompilerName(GetTargetCPU);
   if NOT FileExists(FBootstrapCompiler) then FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
-
-  // if we have previously build an intermediate compiler, use that !
-  aIntermediateBootstrapCompiler:=ExtractFilePath(FBootstrapCompiler)+'intermediate_'+GetCompilerName(GetTargetCPU);
-  if FileExists(aIntermediateBootstrapCompiler) then FBootstrapCompiler:=aIntermediateBootstrapCompiler;
 
   {$IFDEF Darwin}
     {$IFDEF CPU32}
@@ -2486,12 +2477,9 @@ function TFPCInstaller.BuildModule(ModuleName: string): boolean;
 const
   FPCUPMAGIC=': base settings';
 var
-  bIntermediateNeeded:boolean;
-  ICSVNCommand:string;
   RequiredBootstrapVersion:string;
   RequiredBootstrapVersionLow:string;
   RequiredBootstrapVersionHigh:string;
-  RequiredBootstrapBootstrapVersion:string;
   FPCCfg: string;
   FPCMkCfg: string; //path+file of fpcmkcfg
   ConfigText,ConfigTextStore:TStringList;
@@ -2499,9 +2487,7 @@ var
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
   s:string;
   TxtFile:Text;
-  BootstrapDirectory :string;
   x,y:integer;
-  rc: integer;
   VersionSnippet:string;
 begin
   result:=inherited;
@@ -2534,8 +2520,6 @@ begin
       s:='FPC native builder: Detected source version FPC: ';
     infoln(s+VersionSnippet, etInfo);
   end;
-
-  bIntermediateNeeded:=false;
 
   // if cross-compiling, skip a lot of code
   // trust the previous work done by this code for the native installer!
@@ -2616,30 +2600,6 @@ begin
         end;
     end;
 
-    // if we still do not have the correct bootstrapper, build an intermediate one with the right version to compile the FPC source
-    // but only if required version >= 2.0.0 (no easy source available online for earlier versions)
-    if (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(FCompiler)<>RequiredBootstrapVersionHigh) AND (GetNumericalVersion(RequiredBootstrapVersion)>=CalculateFullVersion(2,0,0)) then
-    begin
-      // we need an intermediate compiler !!
-      if NOT FileExists(ExtractFilePath(FCompiler)+IntermediateCompilerName) then
-      begin
-        bIntermediateNeeded:=true;
-      end
-      else
-      begin
-        if (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)<>RequiredBootstrapVersionLow) AND (GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)<>RequiredBootstrapVersionHigh) then
-        begin
-          bIntermediateNeeded:=true;
-        end
-        else
-        begin
-          infoln(infotext+'Using available FPC '+GetCompilerVersion(ExtractFilePath(FCompiler)+IntermediateCompilerName)+' intermediate compiler.',etInfo);
-          FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompilerName;
-          FBootstrapCompilerOverrideVersionCheck:=False;
-        end;
-      end;
-    end else infoln(infotext+'Available bootstrapper has correct version !',etInfo);
-
     {$IFDEF CPUAARCH64}
     // we build with >=3.2.0 , while aarch64 is not available for FPC < 3.2.0
     FBootstrapCompilerOverrideVersionCheck:=true;
@@ -2649,189 +2609,12 @@ begin
     FBootstrapCompilerOverrideVersionCheck:=true;
     {$ENDIF}
 
-    if (bIntermediateNeeded) then
-    begin
-      // always build the lowest version allowed
-      RequiredBootstrapVersion:=RequiredBootstrapVersionLow;
-      infoln(infotext+'We need to build an FPC ' + RequiredBootstrapVersion + ' intermediate compiler.',etInfo);
-
-      // get the correct binutils (Windows only)
-      CreateBinutilsList(RequiredBootstrapVersion);
-      result:=CheckAndGetNeededBinUtils;
-      //if not result then exit;
-
-      BootstrapDirectory := IncludeTrailingPathDelimiter(FBaseDirectory)+'fpc'+StringReplace(RequiredBootstrapVersion,'.','',[rfReplaceAll,rfIgnoreCase])+'bootstrap';
-
-      FSVNClient.ModuleName:=ModuleName;
-
-      rc:=-1;
-      if DirectoryExists(BootstrapDirectory) then
-      begin
-        // first cleanout the intermediat bootstrapper in case of .... as the rules prescibe
-        Processor.Executable := Make;
-        Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
-        Processor.Parameters.Clear;
-        Processor.Parameters.Add('clean');
-        if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-        Processor.Parameters.Add('FPC='+FCompiler);
-        Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
-
-        Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
-        Processor.Parameters.Add('CPU_TARGET='+GetTargetCPU);
-
-        Processor.Execute;
-        infoln(infotext+'Cleaned FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
-
-        rc := FSVNClient.Execute('info ' + BootstrapDirectory);
-        if (rc <> 0) then
-        begin
-          FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
-          rc := FSVNClient.Execute('info ' + BootstrapDirectory);
-        end;
-      end;
-
-      infoln(infotext+'Checking out/updating ' + ModuleName + ' ' + RequiredBootstrapVersion + ' intermediate compiler sources.',etInfo);
-
-      s:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(RequiredBootstrapVersion,'.','_',[rfReplaceAll,rfIgnoreCase]);
-      if (rc = 0)
-          then ICSVNCommand:='update --non-interactive --trust-server-cert --quiet'
-          else ICSVNCommand:='checkout --non-interactive --trust-server-cert --quiet --depth=files ' + s;
-
-      rc := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
-      if (rc <> 0) then
-      begin
-        // try once again, after a cleanup
-        rc := FSVNClient.Execute('cleanup --non-interactive ' + BootstrapDirectory);
-        if (rc = 0) then rc := FSVNClient.Execute(ICSVNCommand + ' ' + BootstrapDirectory);
-      end;
-
-      // get compiler source
-      s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler';
-      if (rc = 0) then rc := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
-      // try once again
-      if (rc <> 0) then
-      begin
-        FSVNClient.Execute('cleanup --non-interactive ' + s);
-        rc := FSVNClient.Execute('update compiler --non-interactive --trust-server-cert --quiet ' + s);
-      end;
-
-      // get rtl source
-      s:=IncludeTrailingPathDelimiter(BootstrapDirectory)+'rtl';
-      if (rc = 0) then rc := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
-      // try once again
-      if (rc <> 0) then
-      begin
-        FSVNClient.Execute('cleanup --non-interactive ' + s);
-        rc := FSVNClient.Execute('update rtl --non-interactive --trust-server-cert --quiet ' + s);
-      end;
-
-      if (rc = 0) then
-      begin
-        infoln(infotext+'We have a FPC bootstrap source (@ '+BootstrapDirectory+') with version: '+RequiredBootstrapVersion,etInfo);
-        RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory);
-        if RequiredBootstrapBootstrapVersion='0.0.0' then
-        begin
-          RequiredBootstrapBootstrapVersion:=GetBootstrapCompilerVersionFromVersion(GetFPCVersionFromSource(BootstrapDirectory));
-          infoln(infotext+'To compile this bootstrap FPC, we should use a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
-        end else infoln(infotext+'To compile this bootstrap FPC, we need (required) a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
-
-        // check if we have a lower acceptable requirement for the bootstrapbootstrapper
-        if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
-        begin
-          // get lower requirement for the bootstrapper
-          s:=GetBootstrapCompilerVersionFromSource(BootstrapDirectory,True);
-          // if so, set bootstrapper to lower one !!
-          if (GetCompilerVersion(FCompiler)=s) then
-          begin
-            RequiredBootstrapBootstrapVersion:=s;
-            infoln(infotext+'To compile this bootstrap FPC, we can also (and will) use (required) a compiler with version : '+RequiredBootstrapBootstrapVersion,etInfo);
-          end;
-        end;
-
-        Processor.Executable := Make;
-        Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(BootstrapDirectory);
-
-        // clean and build intermediate
-        for y:=0 to 1 do
-        begin
-          Processor.Parameters.Clear;
-          if y=0
-             then Processor.Parameters.Add('clean')
-             else Processor.Parameters.Add('compiler_cycle');
-          // not sure if this needed here, but better safe than sorry
-          if (GetNumericalVersion(RequiredBootstrapBootstrapVersion)<CalculateFullVersion(2,4,4)) then
-          begin
-            Processor.Parameters.Add('DATA2INC=echo');
-          end;
-          if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
-          Processor.Parameters.Add('FPC='+FCompiler);
-          Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(BootstrapDirectory));
-
-          // Legacy settings from fpcup ... not sure if correct [Don]: disabled for now
-          // Copy over user-specified instruction sets e.g. for trunk compiler...
-          // in CROSSOPT though, as the stable compiler likely will not understand them
-          // if FCompilerOptions<>'' then Processor.Parameters.Add('CROSSOPT='+FCompilerOptions);
-
-          s:=STANDARDCOMPILERVERBOSITYOPTIONS;
-          {$ifdef CPUARMHF}
-          s:=s+' -dFPC_ARMHF';
-          {$endif}
-          {$ifdef DEBUG}
-          //s:=s+' -g -gl -dEXTDEBUG';
-          //s:=s+' -dEXTDEBUG';
-          {$endif}
-          Processor.Parameters.Add('OPT='+s);
-
-          Processor.Parameters.Add('OS_TARGET='+GetTargetOS);
-          Processor.Parameters.Add('CPU_TARGET='+GetTargetCPU);
-
-          if (GetCompilerVersion(FCompiler)<>RequiredBootstrapBootstrapVersion) then
-          begin
-             if y=1 then infoln(infotext+'Apply OVERRIDEVERSIONCHECK=1, because we have a (wrong) bootstrap bootstrapper with version '+GetCompilerVersion(FCompiler),etInfo);
-             Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-          end;
-          if y=1 then infoln(infotext+'Running make cycle for intermediate bootstrap compiler:',etInfo);
-          Processor.Execute;
-          if Processor.ExitStatus <> 0 then
-          begin
-            result := False;
-            if y=0 then infoln(infotext+'Running clean cycle for intermediate bootstrap compiler failed',etError);
-            if y=1 then infoln(infotext+'Running make cycle for intermediate bootstrap compiler failed',etError);
-            exit;
-          end;
-          if y=1 then infoln(infotext+'Successfully build FPC ' + RequiredBootstrapVersion + ' intermediate bootstrap compiler.',etInfo);
-        end;
-
-        infoln(infotext+'Going to copy bootstrapper ' + IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompilerName + ' towards bootstrapper ' + ExtractFilePath(FCompiler)+IntermediateCompilerName,etInfo);
-        FileUtil.CopyFile(IncludeTrailingPathDelimiter(BootstrapDirectory)+'compiler/'+TargetCompilerName,
-          ExtractFilePath(FCompiler)+IntermediateCompilerName);
-
-        //Make executable
-        {$ifdef unix}
-        OperationSucceeded:=(fpChmod(ExtractFilePath(FCompiler)+IntermediateCompilerName, &755)=0); //rwxr-xr-x
-        if OperationSucceeded=false then infoln('Intermediate bootstrap compiler: chmod failed for '+ExtractFilePath(FCompiler)+IntermediateCompilerName,etError);
-        {$endif}
-
-        // Now we can change the compiler from the stable one to the one in our FPC repo:
-        FCompiler:=ExtractFilePath(FCompiler)+IntermediateCompilerName;
-        FBootstrapCompilerOverrideVersionCheck:=False;
-      end
-      else
-      begin
-        result := False;
-        infoln(infotext+'Error (SVN) getting sources for intermediate bootstrap compiler. Error: '+InttoStr(rc),etError);
-        exit;
-      end;
-    end
-    else
-    begin
-      // get the correct binutils (Windows only)
-      //CreateBinutilsList(GetBootstrapCompilerVersionFromSource(FSourceDirectory));
-      //CreateBinutilsList(GetFPCVersionFromSource(FSourceDirectory));
-      CreateBinutilsList(RequiredBootstrapVersion);
-      result:=CheckAndGetNeededBinUtils;
-      //if not result then exit;
-    end;
+    // get the correct binutils (Windows only)
+    //CreateBinutilsList(GetBootstrapCompilerVersionFromSource(FSourceDirectory));
+    //CreateBinutilsList(GetFPCVersionFromSource(FSourceDirectory));
+    CreateBinutilsList(RequiredBootstrapVersion);
+    result:=CheckAndGetNeededBinUtils;
+    //if not result then exit;
 
     {$ifdef win64}
     // Deals dynamically with either ppc386.exe or native ppcx64.exe
@@ -3625,7 +3408,6 @@ begin
   FMakeDir :='';
 
   FTargetCompilerName:=GetCompilerName(GetTargetCPU);
-  FIntermediateCompilerName:='intermediate_'+FTargetCompilerName;
 
   InitDone:=false;
 end;

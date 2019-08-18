@@ -338,8 +338,13 @@ begin
 
   {$ifdef DARWIN}
   // we could have started from with an .app , so goto the basedir ... not sure if realy needed, but to be sure.
-  SetCurrentDir(ExcludeTrailingPathDelimiter(SafeGetApplicationPath));
+  AddMessage('Setting base directory to: '+ExcludeTrailingPathDelimiter(SafeGetApplicationPath));
+  if (NOT SetCurrentDir(ExcludeTrailingPathDelimiter(SafeGetApplicationPath))) then
+    AddMessage('Setting base directory failure !!')
+  else
+    AddMessage('Current base directory : '+GetCurrentDir);
   {$endif}
+
   // get last used install directory, proxy and visual settings
   with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
@@ -2114,6 +2119,7 @@ begin
         //   http://repo.or.cz/openal-soft/android.git or
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
+            //then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' '
             then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
             else
             begin
