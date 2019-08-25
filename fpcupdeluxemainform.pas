@@ -1454,7 +1454,7 @@ begin
     end;
   end;
 
-  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR  (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) then
+  if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord,soDown])) then
   begin
     // skip git fatal messages ... they are not that fatal ... but not sure yet !
     // if (Pos('fatal: not a git repository',lowercase(s))=0) then
@@ -2119,7 +2119,6 @@ begin
         //   http://repo.or.cz/openal-soft/android.git or
         //   https://github.com/michaliskambi/tremolo-android .
         if (FPCupManager.CrossOS_Target='android')
-            //then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' '
             then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
             else
             begin
@@ -3325,6 +3324,7 @@ function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aTarget,aURL:string;
   aIndex:integer;
+  MemAvaiable,SwapAvaiable:Word;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
@@ -3335,6 +3335,25 @@ begin
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
   {$endif}
+
+  {$IFDEF LINUX}
+  MemAvaiable:=GetTotalPhysicalMemory;
+  AddMessage('Available memory: '+InttoStr(MemAvaiable)+' MB');
+  if (MemAvaiable<1500) then
+  begin
+    SwapAvaiable:=GetSwapFileSize;
+    AddMessage('Available swap: '+InttoStr(SwapAvaiable)+' MB');
+    if (SwapAvaiable<900) then
+    begin
+      AddMessage('');
+      AddMessage('Memory warning: Please add swap space !!');
+      AddMessage('Memory warning: To build Lazarus, you will need (at least) 1GB of swap space.');
+    end;
+
+  end;
+
+  {$ENDIF LINUX}
+
   AddMessage('');
 
   if result then

@@ -333,6 +333,12 @@ function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 function GetGCCDirectory:string;
+{$IFDEF LINUX}
+function GetTotalPhysicalMemory: Word;
+function GetFreePhysicalMemory: Word;
+function GetSwapFileSize: Word;
+function GetFreeSwapFileSize: Word;
+{$ENDIF LINUX}
 {$ENDIF UNIX}
 {$ifdef Darwin}
 function GetSDKVersion(aSDK: string):string;
@@ -395,6 +401,9 @@ uses
     //Mostly for shortcut code
     ,windows, shlobj {for special folders}, ActiveX, ComObj, WinDirs
   {$ENDIF MSWINDOWS}
+  {$IFDEF LINUX}
+  ,linux
+  {$ENDIF}
   {$IFDEF UNIX}
   ,unix,baseunix
   {$ENDIF}
@@ -2149,6 +2158,52 @@ begin
   end;
 
 end;
+
+{$IFDEF LINUX}
+function GetTotalPhysicalMemory: Word;
+var
+  SystemInf: TSysInfo;
+  mu:        cardinal;
+begin
+  FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+  SysInfo(@SystemInf);
+  mu := SystemInf.mem_unit;
+  result := (QWord(SystemInf.totalram*mu) shr 20);
+end;
+
+function GetFreePhysicalMemory: Word;
+var
+  SystemInf: TSysInfo;
+  mu:        cardinal;
+begin
+  FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+  SysInfo(@SystemInf);
+  mu := SystemInf.mem_unit;
+  result := (QWord(SystemInf.freeram*mu) shr 20);
+end;
+
+function GetSwapFileSize: Word;
+var
+  SystemInf: TSysInfo;
+  mu:        cardinal;
+begin
+  FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+  SysInfo(@SystemInf);
+  mu := SystemInf.mem_unit;
+  result := (QWord(SystemInf.totalswap*mu) shr 20);
+end;
+
+function GetFreeSwapFileSize: Word;
+var
+  SystemInf: TSysInfo;
+  mu:        cardinal;
+begin
+  FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+  SysInfo(@SystemInf);
+  mu := SystemInf.mem_unit;
+  result := (QWord(SystemInf.freeswap*mu) shr 20);
+end;
+{$ENDIF LINUX}
 {$ENDIF UNIX}
 
 {$ifdef Darwin}
