@@ -1,0 +1,16 @@
+--- rtl/solaris/Makefile	Sat Sep 21 07:51:39 2019
++++ rtl/solaris/Makefile	Thu Oct 31 10:15:56 2019
+@@ -3001,9 +3001,11 @@
+ macpas$(PPUEXT) : $(INC)/macpas.pp objpas$(PPUEXT) math$(PPUEXT)
+ 	$(COMPILER) $(INC)/macpas.pp $(REDIR)
+ ifneq ($(findstring $(ARCH),x86_64 i386),)
+-cpu$(PPUEXT) : $(PROCINC)/cpu.pp $(SYSTEMUNIT)$(PPUEXT) sysutils$(PPUEXT)
++cpu$(PPUEXT) : $(PROCINC)/cpu.pp $(SYSTEMUNIT)$(PPUEXT) sysutils$(PPUEXT) objpas$(PPUEXT)
++	$(COMPILER) $(PROCINC)/cpu.pp
+ else
+-cpu$(PPUEXT) : $(PROCINC)/cpu.pp $(SYSTEMUNIT)$(PPUEXT)
++cpu$(PPUEXT) : $(PROCINC)/cpu.pp $(SYSTEMUNIT)$(PPUEXT) objpas$(PPUEXT)
++	$(COMPILER) $(PROCINC)/cpu.pp
+ endif
+ mmx$(PPUEXT) : $(PROCINC)/mmx.pp cpu$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
+ 	$(COMPILER) $(PROCINC)/mmx.pp

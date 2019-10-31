@@ -1,0 +1,78 @@
+Index: Makefile
+===================================================================
+--- Makefile	(revision 62146)
++++ Makefile	(working copy)
+@@ -3276,7 +3276,11 @@
+ idepkg:
+ 	$(MAKE) -C ide idepkg
+ useride: 
++ifdef LCL_PLATFORM
++	./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)
++else
+ 	./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide=
++endif
+ starter:
+ 	$(MAKE) -C ide starter
+ lazbuild: registration lazutils codetools
+Index: lcl/interfaces/qt5/qt56.pas
+===================================================================
+--- lcl/interfaces/qt5/qt56.pas	(revision 62146)
++++ lcl/interfaces/qt5/qt56.pas	(working copy)
+@@ -10023,7 +10023,7 @@
+ procedure QTextEdit_zoomIn(handle: QTextEditH; range: Integer = 1); cdecl; external Qt5PasLib name 'QTextEdit_zoomIn';
+ procedure QTextEdit_zoomOut(handle: QTextEditH; range: Integer = 1); cdecl; external Qt5PasLib name 'QTextEdit_zoomOut';
+ procedure QTextEdit_placeholderText(handle: QTextEditH; retval: PWideString); cdecl; external Qt5PasLib name 'QTextEdit_placeholderText';
+-procedure QTextEdit_setPlaceholderText(handle: QTextEditH; AnonParam1: PWideString); cdecl; external Qt5PasLib name 'QTextEdit_setPlaceholderText';
++//procedure QTextEdit_setPlaceholderText(handle: QTextEditH; AnonParam1: PWideString); cdecl; external Qt5PasLib name 'QTextEdit_setPlaceholderText';
+ 
+ type
+   QTextEdit_textChanged_Event = procedure () of object cdecl;
+@@ -12513,7 +12513,7 @@
+     QStyleCE_ColumnViewGrip,
+     QStyleCE_ItemViewItem,
+     QStyleCE_ShapedFrame,
+-    QStyleCE_CustomBase = $f0000000 );
++    QStyleCE_CustomBase = $f000000 );
+ 
+   QStyleComplexControl = (  //QStyle::ComplexControl (2)
+     QStyleCC_SpinBox,
+@@ -12525,7 +12525,7 @@
+     QStyleCC_Dial,
+     QStyleCC_GroupBox,
+     QStyleCC_MdiControls,
+-    QStyleCC_CustomBase = $f0000000 );
++    QStyleCC_CustomBase = $f000000 );
+ 
+ type
+   QStyleSubControl = cardinal; // QStyle::SubControl
+@@ -12601,7 +12601,7 @@
+     QStyleCT_GroupBox,
+     QStyleCT_MdiControls,
+     QStyleCT_ItemViewItem,
+-    QStyleCT_CustomBase = $f0000000 );
++    QStyleCT_CustomBase = $f000000 );
+ 
+   QStyleStandardPixmap = (  //QStyle::StandardPixmap (2)
+     QStyleSP_TitleBarMenuButton,
+@@ -12674,7 +12674,7 @@
+     QStyleSP_MediaSeekBackward,
+     QStyleSP_MediaVolume,
+     QStyleSP_MediaVolumeMuted,
+-    QStyleSP_CustomBase = $f0000000 );
++    QStyleSP_CustomBase = $f000000 );
+ 
+ type
+   QStylePrimitiveElement = cardinal; //  QStyle::PrimitiveElement (4)
+Index: lcl/interfaces/qt5/qtwidgets.pas
+===================================================================
+--- lcl/interfaces/qt5/qtwidgets.pas	(revision 62146)
++++ lcl/interfaces/qt5/qtwidgets.pas	(working copy)
+@@ -10153,7 +10153,7 @@
+   W: WideString;
+ begin
+   W := UTF8ToUTF16(ATextHint);
+-  QTextEdit_setPlaceholderText(QTextEditH(Widget), @W);
++  //QTextEdit_setPlaceholderText(QTextEditH(Widget), @W);
+ end;
+ 
+ procedure TQtTextEdit.setReadOnly(const AReadOnly: Boolean);
