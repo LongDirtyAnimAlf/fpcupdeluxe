@@ -1536,7 +1536,7 @@ begin
       FPCTarget:='2.0.2';
       //LazarusTarget:='0.9.4';
       LazarusTarget:='0.9.16';
-      FPCupManager.OnlyModules:=_FPC+','+_OLDLAZARUS;
+      FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
     end;
     }
 
@@ -3206,14 +3206,14 @@ begin
     s:=FPCupManager.OnlyModules;
     if (Length(s)>0) then
     begin
-      if Pos('oldlazarus',s)=0 then s:=StringReplace(s,'lazarus','oldlazarus',[]);
+      if Pos(_LAZARUSSIMPLE,s)=0 then s:=StringReplace(s,_LAZARUS,_LAZARUSSIMPLE,[]);
       s:=StringReplace(s,'FPCCrossWin32-64','',[]);
       s:=StringReplace(s,'LazarusCrossWin32-64','',[]);
       FPCupManager.OnlyModules:=s;
     end
     else
     begin
-      FPCupManager.OnlyModules:='fpc,oldlazarus';
+      FPCupManager.OnlyModules:=_FPC+','+_LAZARUSSIMPLE;
     end;
     AddMessage('Detected a very old version of Lazarus !');
     AddMessage('Switching towards old lazarus sequence !!');
