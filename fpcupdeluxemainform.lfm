@@ -710,7 +710,7 @@ object Form1: TForm1
       Height = 42
       Hint = 'Will install/update trunk version of both FPC and Lazarus.'
       Top = 8
-      Width = 93
+      Width = 92
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 2
@@ -857,11 +857,11 @@ object Form1: TForm1
       AnchorSideLeft.Control = TrunkBtn
       AnchorSideLeft.Side = asrBottom
       AnchorSideTop.Control = Panel1
-      Left = 111
+      Left = 110
       Height = 42
       Hint = 'Will install/update current fixes versions of both FPC and Lazarus'
       Top = 8
-      Width = 95
+      Width = 96
       AutoSize = True
       BorderSpacing.Left = 4
       BorderSpacing.Top = 2

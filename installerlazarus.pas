@@ -53,12 +53,12 @@ const
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
     _END +
 
-    _DECLARE+'oldlazarus'+_SEP +
+    _DECLARE+_LAZARUSSIMPLE+_SEP +
     _CLEANMODULE+_LAZARUS+_SEP +
     _CHECKMODULE+_LAZARUS+_SEP +
     _GETMODULE+_LAZARUS+_SEP +
-    _BUILDMODULE+_LAZARUS+_SEP +
     _CONFIGMODULE+_LAZARUS+_SEP +
+    _BUILDMODULE+_LAZARUS+_SEP +
     _EXECUTE+_CREATELAZARUSSCRIPT+_SEP +
     _END +
 
@@ -890,7 +890,7 @@ begin
     end;
   end;
 
-  if (ModuleName=_USERIDE) then
+  if (ModuleName=_USERIDE) OR (ModuleName=_LAZARUS) then
   begin
     if OperationSucceeded then
     begin
@@ -1320,7 +1320,7 @@ begin
     FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
 
     // only report once
-    if (ModuleName=_LAZBUILD) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
+    if (ModuleName=_LAZBUILD) OR (ModuleName=_LAZARUS) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
     begin
       if (Self is TLazarusCrossInstaller) then
       begin

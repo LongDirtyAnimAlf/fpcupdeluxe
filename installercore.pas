@@ -32,7 +32,7 @@ uses
 
 const
   DEFAULTFPCVERSION     = '3.0.4';
-  DEFAULTLAZARUSVERSION = '2.0.0';
+  DEFAULTLAZARUSVERSION = '2.0.6';
 
   FPCTRUNKVERSION       = '3.3.1';
   FPCTRUNKBOOTVERSION   = '3.0.4';
@@ -88,7 +88,8 @@ const
   {$endif}
 
   {$ifdef win64}
-  OpenSSLSourceURL : array [0..3] of string = (
+  OpenSSLSourceURL : array [0..4] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2t-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win64.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win64.zip',
@@ -96,7 +97,8 @@ const
     );
   {$endif}
   {$ifdef win32}
-  OpenSSLSourceURL : array [0..3] of string = (
+  OpenSSLSourceURL : array [0..4] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2t-i386-win32.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2r-i386-win32.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win32.zip',
     'http://www.magsys.co.uk/download/software/openssl-1.0.2o-win32.zip',
@@ -113,8 +115,10 @@ const
 
   _FPC                     = 'FPC';
   _LAZARUS                 = 'Lazarus';
+  _LAZARUSSIMPLE           = 'LazarusSimple';
 
   _DEFAULT                 = 'Default';
+  _DEFAULTSIMPLE           = 'DefaultSimple';
 
   _CLEAN                   = 'Clean';
   _CHECK                   = 'Check';

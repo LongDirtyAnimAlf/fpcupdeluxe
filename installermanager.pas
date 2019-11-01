@@ -90,13 +90,13 @@ Const
     {$endif mswindows}
 
     //default simple sequence: some packages give errors and memory is limited, so keep it simple
-    _DECLARE+_DEFAULT+'Simple'+_SEP+
+    _DECLARE+_DEFAULTSIMPLE+_SEP+
     {$ifndef FPCONLY}
     _EXECUTE+_CHECKDEVLIBS+_SEP+
     {$endif}
     _DO+_FPC+_SEP+
     {$ifndef FPCONLY}
-    _DO+'oldlazarus'+_SEP+
+    _DO+_LAZARUSSIMPLE+_SEP+
     {$endif}
     _END+
 
@@ -884,21 +884,9 @@ begin
       //not yet
       //if pos(_CROSSWIN,SkipModules)=0 then aSequence:='Defaultwin64';
       {$endif}
-      {$ifdef CPUAARCH64}
-      aSequence:='DefaultSimple';
-      {$endif}
-      {$ifdef cpuarm}
-      aSequence:='DefaultSimple';
-      {$endif}
-      {$ifdef cpuarmhf}
-      aSequence:='DefaultSimple';
-      {$endif}
-      {$ifdef HAIKU}
-      aSequence:='DefaultSimple';
-      {$endif}
-      {$ifdef CPUPOWERPC64}
-      aSequence:='DefaultSimple';
-      {$endif}
+      {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(OPENBSD)}
+      aSequence:=_DEFAULTSIMPLE;
+      {$ENDIF}
 
       infoln('InstallerManager: going to run sequencer for sequence: '+aSequence,etDebug);
       result:=FSequencer.Run(aSequence);

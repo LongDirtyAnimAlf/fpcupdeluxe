@@ -2846,12 +2846,16 @@ begin
     end
     else
     begin
-      {$ifdef win32}
-      //Only auto-install win32 -> win64 crossutils
-      FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
-      {$else}
-      FPCupManager.OnlyModules:=_LAZARUS;
-      {$endif}
+      {$IFDEF win32}
+        //Only auto-install win32 -> win64 crossutils
+        FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
+      {$ELSE}
+        {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(OPENBSD)}
+          FPCupManager.OnlyModules:=_LAZARUSSIMPLE;
+        {$ELSE}
+          FPCupManager.OnlyModules:=_LAZARUS;
+        {$ENDIF}
+      {$ENDIF}
     end;
 
     if (NOT Form2.IncludeHelp) then
