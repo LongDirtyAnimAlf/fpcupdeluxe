@@ -924,6 +924,8 @@ begin
         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MessagesView/CustomPosition/Width', '600');
         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MessagesView/CustomPosition/Height', '100');
         LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/MessagesView/Visible/Value', 'True');
+        {$else}
+        LazarusConfig.SetVariable(EnvironmentConfig, 'Desktops/Desktop1/ObjectInspectorDlg/Visible/Value', 'True');
         {$endif}
 
         j:=LazarusConfig.GetVariable(EnvironmentConfig, 'Desktops/Desktop1/IDECoolBarOptions/Count',0);
