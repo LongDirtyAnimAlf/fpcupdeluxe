@@ -3147,6 +3147,17 @@ object Form1: TForm1
   object MainMenu1: TMainMenu
     Left = 928
     Top = 216
+    object MenuItem3: TMenuItem
+      Caption = 'Issues'
+      object MIssuesGitHub: TMenuItem
+        Caption = 'GitHub issues'
+        OnClick = MIssuesGitHubClick
+      end
+      object MIssuesForum: TMenuItem
+        Caption = 'Lazarus forum'
+        OnClick = MIssuesForumClick
+      end
+    end
     object MenuItem2: TMenuItem
       Caption = 'Languages'
       object MEnglishlanguage: TMenuItem

@@ -51,6 +51,9 @@ type
     MenuItem2: TMenuItem;
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
+    MenuItem3: TMenuItem;
+    MIssuesGitHub: TMenuItem;
+    MIssuesForum: TMenuItem;
     OPMBtn: TBitBtn;
     PageControl1: TPageControl;
     radgrpCPU: TRadioGroup;
@@ -94,6 +97,8 @@ type
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure MChineseCNlanguageClick(Sender: TObject);
     procedure MEnglishlanguageClick(Sender: TObject);
+    procedure MIssuesForumClick(Sender: TObject);
+    procedure MIssuesGitHubClick(Sender: TObject);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
     procedure CommandOutputScreenChange(Sender: TObject);
@@ -520,6 +525,16 @@ begin
   sLanguage:='en';
   TransLate(sLanguage);
   {$endif}
+end;
+
+procedure TForm1.MIssuesForumClick(Sender: TObject);
+begin
+  OpenURL('https://forum.lazarus.freepascal.org/index.php/topic,34645.0.html');
+end;
+
+procedure TForm1.MIssuesGitHubClick(Sender: TObject);
+begin
+  OpenURL('https://github.com/LongDirtyAnimAlf/fpcupdeluxe/issues');
 end;
 
 procedure TForm1.RealURLChange(Sender: TObject);
