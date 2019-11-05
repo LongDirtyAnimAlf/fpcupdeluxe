@@ -261,6 +261,7 @@ begin
   s:=Trim(s);
   if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
 
+  Processor.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
   Processor.Parameters.Add('useride');
 
   try

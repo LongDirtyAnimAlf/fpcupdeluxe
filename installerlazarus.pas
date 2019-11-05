@@ -573,10 +573,6 @@ begin
     Processor.Executable := Make;
     Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     Processor.Parameters.Clear;
-    if (FNoJobs) then
-      Processor.Parameters.Add('--jobs=1')
-    else
-      Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
     Processor.Parameters.Add('FPC=' + FCompiler);
     Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -631,6 +627,7 @@ begin
         if FileExists(s) then
         begin
           //Set config-file
+          Processor.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
           Processor.Parameters.Add('CFGFILE=' + s);
           Processor.Parameters.Add('useride');
           infoln(infotext+'Running: make useride', etInfo);
@@ -1880,18 +1877,34 @@ const
   ConstName = 'RevisionStr';
   RevisionIncFileName = 'revision.inc';
 
-  DARWINCHECKMAGIC='useride: ';
-  DARWINHACKMAGIC='./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)';
+  LAZBUILDHACKMAGIC=
+    'useride: '+LineEnding+
+    'ifdef LAZBUILDJOBS'+LineEnding+
+    'ifdef LCL_PLATFORM'+LineEnding+
+    #9+'./lazbuild$(SRCEXEEXT) --max-process-count=$(LAZBUILDJOBS) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)'+LineEnding+
+    'else'+LineEnding+
+    #9+'./lazbuild$(SRCEXEEXT) --max-process-count=$(LAZBUILDJOBS) --lazarusdir=. --build-ide='+LineEnding+
+    'endif'+LineEnding+
+    'else'+LineEnding+
+    'ifdef LCL_PLATFORM'+LineEnding+
+    #9+'./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)'+LineEnding+
+    'else'+LineEnding+
+    #9+'./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide='+LineEnding+
+    'endif'+LineEnding+
+    'endif';
 
 var
   AfterRevision: string;
   BeforeRevision: string;
   UpdateWarnings: TStringList;
+  HackMagic:TStringList;
   RevisionIncText: Text;
   ConstStart: string;
   aRepoClient:TRepoClient;
   VersionSnippet:string;
-  aIndex:integer;
+  MakeFilePath:string;
+  aIndex,aHackIndex:integer;
+  s1,s2:string;
   {$ifdef BSD}
   FilePath:string;
   {$endif}
@@ -2066,43 +2079,53 @@ begin
     PatchModule(ModuleName);
   end;
 
+  //if false then
   if result then
   begin
-    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
-    if FileExists(VersionSnippet) then
+    MakeFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
+    if FileExists(MakeFilePath) then
     begin
       UpdateWarnings:=TStringList.Create;
       try
-        UpdateWarnings.LoadFromFile(VersionSnippet);
-        aIndex:=UpdateWarnings.IndexOf(#9+DARWINHACKMAGIC);
-        if aIndex=-1 then
+        UpdateWarnings.LoadFromFile(MakeFilePath);
+        aIndex:=(UpdateWarnings.Count-1);
+        while (aIndex>=0) do
         begin
-          // be very secure and sure about hacking the makefile: check extensively !!
-          aIndex:=(UpdateWarnings.Count-1);
-          while (aIndex>=0) do
+          s1:=ExtractWord(1,UpdateWarnings.Strings[aIndex],[' ']);
+          s1:=TrimRight(s1);
+          if s1='useride:' then
           begin
-            if Pos(DARWINHACKMAGIC,UpdateWarnings.Strings[aIndex])>0 then break;
-            Dec(aIndex);
+            while (aIndex<UpdateWarnings.Count) do
+            begin
+              UpdateWarnings.Delete(aIndex);
+              s1:=ExtractWord(1,UpdateWarnings.Strings[aIndex],[' ']);
+              s1:=TrimRight(s1);
+              if s1[Length(s1)]=':' then break;
+            end;
+            break;
           end;
+          Dec(aIndex);
         end;
-        if aIndex=-1 then
-        begin
-          aIndex:=UpdateWarnings.IndexOf(DARWINCHECKMAGIC);
-          if aIndex=-1 then aIndex:=UpdateWarnings.IndexOf(Trim(DARWINCHECKMAGIC));
-          if aIndex<>-1 then
+
+        aHackIndex:=aIndex;
+
+        HackMagic:=TStringList.Create;
+        try
+          HackMagic.Text:=LAZBUILDHACKMAGIC;
+          for aIndex:=(HackMagic.Count-1) downto 0 do
           begin
-            Inc(aIndex);
-            UpdateWarnings.Insert(aIndex+1,'endif');
-            UpdateWarnings.Insert(aIndex,'else');
-            UpdateWarnings.Insert(aIndex,#9+DARWINHACKMAGIC);
-            UpdateWarnings.Insert(aIndex,'ifdef LCL_PLATFORM');
-            UpdateWarnings.SaveToFile(VersionSnippet);
-            infoln(infotext+ModuleName + MAKEFILENAME+' lazbuild widgetset hack applied.',etInfo);
+            UpdateWarnings.Insert(aHackIndex,HackMagic.Strings[aIndex]);
           end;
+        finally
+          HackMagic.Free;
         end;
+
+        UpdateWarnings.SaveToFile(MakeFilePath);
+
       finally
         UpdateWarnings.Free;
       end;
+
     end;
   end;
 

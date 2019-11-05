@@ -3466,10 +3466,10 @@ begin
 
       Form2.UseWget:=ReadBool('General','UseWget',False);
       Form2.MakeJobs:=ReadBool('General','MakeJobs',True);
+      Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
+      Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
 
       Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
-
-      Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
 
       Form2.FPCPatches:=ReadString('Patches','FPCPatches','');
       Form2.LazPatches:=ReadString('Patches','LazarusPatches','');
@@ -3531,6 +3531,8 @@ begin
       WriteBool('General','UseWget',Form2.UseWget);
       WriteBool('General','MakeJobs',Form2.MakeJobs);
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
+
+      WriteBool('General','UpdateOnly',Form2.UpdateOnly);
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);
       WriteString('Patches','LazarusPatches',Form2.LazPatches);
