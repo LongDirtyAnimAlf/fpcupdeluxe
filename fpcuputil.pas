@@ -340,6 +340,7 @@ function GetSwapFileSize: Word;
 function GetFreeSwapFileSize: Word;
 {$ENDIF LINUX}
 {$ENDIF UNIX}
+function GetLogicalCpuCount: integer;
 {$ifdef Darwin}
 function GetSDKVersion(aSDK: string):string;
 {$endif}
@@ -413,6 +414,7 @@ uses
   // for libc downloader
   ,fpcuplibcurl
   {$ENDIF ENABLEWGET}
+  ,NumCPULib  in './numcpulib/NumCPULib.pas'
   ,processutils
   ;
 
@@ -2165,10 +2167,14 @@ var
   SystemInf: TSysInfo;
   mu:        cardinal;
 begin
-  FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
-  SysInfo(@SystemInf);
-  mu := SystemInf.mem_unit;
-  result := (QWord(SystemInf.totalram*mu) shr 20);
+  result:=0;
+  try
+    FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+    SysInfo(@SystemInf);
+    mu := SystemInf.mem_unit;
+    result := (QWord(SystemInf.totalram*mu) shr 20);
+  except
+  end;
 end;
 
 function GetFreePhysicalMemory: Word;
@@ -2187,10 +2193,14 @@ var
   SystemInf: TSysInfo;
   mu:        cardinal;
 begin
-  FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
-  SysInfo(@SystemInf);
-  mu := SystemInf.mem_unit;
-  result := (QWord(SystemInf.totalswap*mu) shr 20);
+  result:=0;
+  try
+    FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+    SysInfo(@SystemInf);
+    mu := SystemInf.mem_unit;
+    result := (QWord(SystemInf.totalswap*mu) shr 20);
+  except
+  end;
 end;
 
 function GetFreeSwapFileSize: Word;
@@ -2205,6 +2215,29 @@ begin
 end;
 {$ENDIF LINUX}
 {$ENDIF UNIX}
+
+function GetLogicalCpuCount: integer;
+begin
+  { Uses NumCPULib Library }
+  { Copyright (c) 2019 Ugochukwu Mmaduekwe }
+  { Github Repository https://github.com/Xor-el }
+  result:=TNumCPULib.GetLogicalCPUCount();
+
+  {$IFDEF LINUX}
+  if GetTotalPhysicalMemory=0 then exit;
+  if GetSwapFileSize=0 then exit;
+  // limit the amount of spawn processes in case of limited memory
+  if (GetTotalPhysicalMemory<2500) OR (GetSwapFileSize<1500) then
+  begin
+    result:=(result DIV 2);
+  end;
+  // limit the amount to 1 process in case of very limited memory
+  if (GetTotalPhysicalMemory<1500) OR (GetSwapFileSize<500) then
+  begin
+    result:=1;
+  end;
+  {$ENDIF LINUX}
+end;
 
 {$ifdef Darwin}
 function GetSDKVersion(aSDK: string):string;

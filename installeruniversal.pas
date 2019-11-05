@@ -228,7 +228,11 @@ begin
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
   Processor.Parameters.Clear;
-  //if ((FCPUCount>1) AND (NOT FNoJobs)) then Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+
+  if (FNoJobs) then
+    Processor.Parameters.Add('--jobs=1')
+  else
+    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   Processor.Parameters.Add('FPC=' + FCompiler);
   Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -620,6 +624,10 @@ begin
   {$ELSE}
   Processor.Parameters.Add('--quiet');
   {$ENDIF}
+  if (FNoJobs) then
+    Processor.Parameters.Add('--max-process-count=1')
+  else
+    Processor.Parameters.Add('--max-process-count='+InttoStr(GetLogicalCpuCount));
   Processor.Parameters.Add('--pcp=' + DoubleQuoteIfNeeded(FLazarusPrimaryConfigPath));
   Processor.Parameters.Add('--cpu=' + GetTargetCPU);
   Processor.Parameters.Add('--os=' + GetTargetOS);

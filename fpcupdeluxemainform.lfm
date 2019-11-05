@@ -3150,12 +3150,23 @@ object Form1: TForm1
     object MenuItem3: TMenuItem
       Caption = 'Issues'
       object MIssuesGitHub: TMenuItem
-        Caption = 'GitHub issues'
+        Caption = 'Up GitHub issues'
         OnClick = MIssuesGitHubClick
       end
       object MIssuesForum: TMenuItem
-        Caption = 'Lazarus forum'
+        Caption = 'Up Lazarus forum'
         OnClick = MIssuesForumClick
+      end
+      object MenuItem4: TMenuItem
+        Caption = '-'
+      end
+      object MFPCBugs: TMenuItem
+        Caption = 'FPC bugs'
+        OnClick = MFPCBugsClick
+      end
+      object MLazarusBugs: TMenuItem
+        Caption = 'Lazarus bugs'
+        OnClick = MLazarusBugsClick
       end
     end
     object MenuItem2: TMenuItem

@@ -28,7 +28,7 @@ interface
 uses
   Classes, SysUtils,
   repoclient, GitClient, HGClient, SvnClient,
-  processutils, m_crossinstaller, fpcuputil, cpucount;
+  processutils, m_crossinstaller, fpcuputil;
 
 const
   DEFAULTFPCVERSION     = '3.0.4';

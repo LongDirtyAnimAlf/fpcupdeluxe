@@ -52,6 +52,9 @@ type
     MEnglishlanguage: TMenuItem;
     MChineseCNlanguage: TMenuItem;
     MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    MFPCBugs: TMenuItem;
+    MLazarusBugs: TMenuItem;
     MIssuesGitHub: TMenuItem;
     MIssuesForum: TMenuItem;
     OPMBtn: TBitBtn;
@@ -97,8 +100,10 @@ type
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
     procedure MChineseCNlanguageClick(Sender: TObject);
     procedure MEnglishlanguageClick(Sender: TObject);
+    procedure MFPCBugsClick(Sender: TObject);
     procedure MIssuesForumClick(Sender: TObject);
     procedure MIssuesGitHubClick(Sender: TObject);
+    procedure MLazarusBugsClick(Sender: TObject);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
     procedure CommandOutputScreenChange(Sender: TObject);
@@ -527,6 +532,11 @@ begin
   {$endif}
 end;
 
+procedure TForm1.MFPCBugsClick(Sender: TObject);
+begin
+  OpenURL('https://bugs.freepascal.org/my_view_page.php');
+end;
+
 procedure TForm1.MIssuesForumClick(Sender: TObject);
 begin
   OpenURL('https://forum.lazarus.freepascal.org/index.php/topic,34645.0.html');
@@ -535,6 +545,11 @@ end;
 procedure TForm1.MIssuesGitHubClick(Sender: TObject);
 begin
   OpenURL('https://github.com/LongDirtyAnimAlf/fpcupdeluxe/issues');
+end;
+
+procedure TForm1.MLazarusBugsClick(Sender: TObject);
+begin
+  OpenURL('https://bugs.freepascal.org/view_all_bug_page.php?project_id=1');
 end;
 
 procedure TForm1.RealURLChange(Sender: TObject);
@@ -1898,13 +1913,30 @@ begin
     FPCupManager.CrossOS_Target:=s;
   end;
 
-  {$if (defined(Linux)) AND (defined (CPUX86_64))}
+  {$ifdef Linux}
   if FPCupManager.MUSL then
   begin
-    if Sender<>nil then Application.MessageBox(PChar('On Linux x86_64, you cannot cross towards another Linux x86_64.'), PChar('FPC limitation'), MB_ICONERROR);
-    FPCupManager.CrossOS_Target:=''; // cleanup
-    FPCupManager.CrossCPU_Target:=''; // cleanup
-    exit;
+
+    {$ifdef CPUX86_64}
+    if FPCupManager.CrossCPU_Target='x86_64' then
+    begin
+      if Sender<>nil then Application.MessageBox(PChar('On Linux x86_64, you cannot cross towards another Linux x86_64.'), PChar('FPC limitation'), MB_ICONERROR);
+      FPCupManager.CrossOS_Target:=''; // cleanup
+      FPCupManager.CrossCPU_Target:=''; // cleanup
+      exit;
+    end;
+    {$endif}
+
+    {$ifdef CPUX86}
+    if FPCupManager.CrossCPU_Target='i386' then
+    begin
+      if Sender<>nil then Application.MessageBox(PChar('On Linux i386, you cannot cross towards another Linux i386.'), PChar('FPC limitation'), MB_ICONERROR);
+      FPCupManager.CrossOS_Target:=''; // cleanup
+      FPCupManager.CrossCPU_Target:=''; // cleanup
+      exit;
+    end;
+    {$endif}
+
   end;
   {$endif}
 
@@ -3355,6 +3387,8 @@ begin
   AddMessage('Running on '+GetDistro);
   {$endif}
 
+  AddMessage('CPU cores used: '+InttoStr(GetLogicalCpuCount));
+
   {$IFDEF LINUX}
   MemAvaiable:=GetTotalPhysicalMemory;
   AddMessage('Available memory: '+InttoStr(MemAvaiable)+' MB');
@@ -3368,7 +3402,6 @@ begin
       AddMessage('Memory warning: Please add swap space !!');
       AddMessage('Memory warning: To build Lazarus, you will need (at least) 1GB of swap space.');
     end;
-
   end;
 
   {$ENDIF LINUX}
