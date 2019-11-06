@@ -723,10 +723,13 @@ begin
           Processor.Executable := Make;
           Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
           Processor.Parameters.Clear;
+          {
+          //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           if (FNoJobs) then
             Processor.Parameters.Add('--jobs=1')
           else
             Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+          }
           Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);

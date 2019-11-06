@@ -228,11 +228,12 @@ begin
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
   Processor.Parameters.Clear;
-
+  {
+  //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
   if (FNoJobs) then
     Processor.Parameters.Add('--jobs=1')
   else
-    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
   Processor.Parameters.Add('FPC=' + FCompiler);
   Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -514,6 +515,15 @@ begin
    // Just use absolute path
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
 
+  // find a package component, if any
+  // all other packages will be ignored
+  if (NOT FileExists(PackageAbsolutePath)) then
+  begin
+    PackageFiles:=FindAllFiles(WorkingDir, PackageName+'.lpk' , true);
+    if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
+    PackageFiles.Free;
+  end;
+
   // find a Lazarus component, if any
   // all other packages will be ignored
   if (NOT FileExists(PackageAbsolutePath)) then
@@ -573,6 +583,8 @@ begin
            (ReqPackage<>'LazDebuggerGdbmi') AND
            (ReqPackage<>'CodeTools') then
         begin
+
+
           InstallPackage(ReqPackage, WorkingDir, RegisterOnly, true);
         end;
       end;
@@ -759,6 +771,7 @@ const
   // The command that will be processed:
   Directive='AddPackage';
   LOCATIONMAGIC='Workingdir';
+  INSTALLMAGIC='Installdir';
   NAMEMAGIC='Name';
 var
   i:integer;
@@ -771,6 +784,7 @@ var
   RegisterOnly:boolean;
 begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+  if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);;
   BaseWorkingdir:=FixPath(BaseWorkingdir);
   Workingdir:=BaseWorkingdir;
   ModuleName:=GetValueFromKey(NAMEMAGIC,sl);
@@ -1021,6 +1035,11 @@ begin
       {$ELSE}
       s:='--quiet';
       {$ENDIF}
+
+      if (FNoJobs) then
+        s:=s+' --max-process-count=1'
+      else
+        s:=s+' --max-process-count='+InttoStr(GetLogicalCpuCount);
       if FLCL_Platform<>'' then s:=s+' --ws=' + FLCL_Platform;
       exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+' '+s,[rfIgnoreCase]);
     end;
@@ -1396,9 +1415,7 @@ begin
             i:=cnt;
             while i>0 do
             begin
-              if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')
-                =ModuleName then
-                  break;
+              if LazarusConfig.GetVariable(xmlfile,'EnvironmentOptions/ExternalTools/Tool'+IntToStr(i)+'/Title/Value')=ModuleName then break;
               i:=i-1;
             end;
             if i<1 then //not found

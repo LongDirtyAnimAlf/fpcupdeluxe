@@ -341,10 +341,12 @@ begin
         Processor.Executable := Make;
         Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
+        {
+        //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
         if (FNoJobs) then
           Processor.Parameters.Add('--jobs=1')
         else
-          Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+          Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
         Processor.Parameters.Add('FPC=' + FCompiler);
         Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
         Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -573,6 +575,12 @@ begin
     Processor.Executable := Make;
     Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     Processor.Parameters.Clear;
+    {
+    //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
+    if (FNoJobs) then
+      Processor.Parameters.Add('--jobs=1')
+    else
+      Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
     Processor.Parameters.Add('FPC=' + FCompiler);
     Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
@@ -1663,10 +1671,12 @@ begin
   Processor.Executable := Make;
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
+  {
+  //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
   if (FNoJobs) then
     Processor.Parameters.Add('--jobs=1')
   else
-    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
+    Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
   Processor.Parameters.Add('FPC=' + FCompiler);
   Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
