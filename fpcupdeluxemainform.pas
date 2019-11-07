@@ -3375,7 +3375,7 @@ function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aTarget,aURL:string;
   aIndex:integer;
-  MemAvaiable,SwapAvaiable:Word;
+  MemAvailable,SwapAvailable:DWord;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
@@ -3389,22 +3389,22 @@ begin
 
   AddMessage('CPU cores used: '+InttoStr(GetLogicalCpuCount));
 
-  {$IFDEF LINUX}
-  MemAvaiable:=GetTotalPhysicalMemory;
-  AddMessage('Available memory: '+InttoStr(MemAvaiable)+' MB');
-  if (MemAvaiable<1500) then
-  begin
-    SwapAvaiable:=GetSwapFileSize;
-    AddMessage('Available swap: '+InttoStr(SwapAvaiable)+' MB');
-    if (SwapAvaiable<900) then
-    begin
-      AddMessage('');
-      AddMessage('Memory warning: Please add swap space !!');
-      AddMessage('Memory warning: To build Lazarus, you will need (at least) 1GB of swap space.');
-    end;
-  end;
+  MemAvailable:=GetTotalPhysicalMemory;
+  AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
 
-  {$ENDIF LINUX}
+  SwapAvailable:=GetSwapFileSize;
+  AddMessage('Available swap: '+InttoStr(SwapAvailable)+' MB');
+
+  MemAvailable:=MemAvailable+SwapAvailable;
+
+  if (MemAvailable<1500) then
+  begin
+    AddMessage('Please be warned: memory is very limited for building Lazarus');
+    {$IFDEF LINUX}
+    AddMessage('Memory advice: Please add (more) swap space !!');
+    AddMessage('Memory advice: To build Lazarus, you will need (at least) 1GB of (swap-)RAM space.');
+    {$ENDIF LINUX}
+  end;
 
   AddMessage('');
 

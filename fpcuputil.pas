@@ -330,14 +330,14 @@ function SaveInisFromResource(filename,resourcename:string):boolean;
 // Searches for SearchFor in the stringlist and returns the index if found; -1 if not
 // Search optionally starts from position SearchFor
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
+function GetTotalPhysicalMemory: DWord;
+function GetSwapFileSize: DWord;
 {$IFDEF UNIX}
 function XdgConfigHome: String;
 function GetGCCDirectory:string;
 {$IFDEF LINUX}
-function GetTotalPhysicalMemory: Word;
-function GetFreePhysicalMemory: Word;
-function GetSwapFileSize: Word;
-function GetFreeSwapFileSize: Word;
+function GetFreePhysicalMemory: DWord;
+function GetFreeSwapFileSize: DWord;
 {$ENDIF LINUX}
 {$ENDIF UNIX}
 function GetLogicalCpuCount: integer;
@@ -1985,6 +1985,16 @@ begin
     result:=-1;
 end;
 
+function GetTotalPhysicalMemory: DWord;
+begin
+  result:=TNumCPULib.GetTotalPhysicalMemory();
+end;
+
+function GetSwapFileSize: DWord;
+begin
+  result:=TNumCPULib.GetTotalSwapMemory();
+end;
+
 {$IFDEF UNIX}
 function GetGCCDirectory:string;
 const
@@ -2162,22 +2172,7 @@ begin
 end;
 
 {$IFDEF LINUX}
-function GetTotalPhysicalMemory: Word;
-var
-  SystemInf: TSysInfo;
-  mu:        cardinal;
-begin
-  result:=0;
-  try
-    FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
-    SysInfo(@SystemInf);
-    mu := SystemInf.mem_unit;
-    result := (QWord(SystemInf.totalram*mu) shr 20);
-  except
-  end;
-end;
-
-function GetFreePhysicalMemory: Word;
+function GetFreePhysicalMemory: DWord;
 var
   SystemInf: TSysInfo;
   mu:        cardinal;
@@ -2188,22 +2183,8 @@ begin
   result := (QWord(SystemInf.freeram*mu) shr 20);
 end;
 
-function GetSwapFileSize: Word;
-var
-  SystemInf: TSysInfo;
-  mu:        cardinal;
-begin
-  result:=0;
-  try
-    FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
-    SysInfo(@SystemInf);
-    mu := SystemInf.mem_unit;
-    result := (QWord(SystemInf.totalswap*mu) shr 20);
-  except
-  end;
-end;
 
-function GetFreeSwapFileSize: Word;
+function GetFreeSwapFileSize: DWord;
 var
   SystemInf: TSysInfo;
   mu:        cardinal;
@@ -2217,26 +2198,28 @@ end;
 {$ENDIF UNIX}
 
 function GetLogicalCpuCount: integer;
+var
+  TotalMBMemory:DWord;
 begin
   { Uses NumCPULib Library }
   { Copyright (c) 2019 Ugochukwu Mmaduekwe }
   { Github Repository https://github.com/Xor-el }
   result:=TNumCPULib.GetLogicalCPUCount();
 
-  {$IFDEF LINUX}
   if GetTotalPhysicalMemory=0 then exit;
-  if GetSwapFileSize=0 then exit;
+  TotalMBMemory:=GetTotalPhysicalMemory+GetSwapFileSize;
+  if TotalMBMemory=0 then exit;
+
   // limit the amount of spawn processes in case of limited memory
-  if (GetTotalPhysicalMemory<2500) OR (GetSwapFileSize<1500) then
+  if (TotalMBMemory<2500) then
   begin
     result:=(result DIV 2);
   end;
   // limit the amount to 1 process in case of very limited memory
-  if (GetTotalPhysicalMemory<1500) OR (GetSwapFileSize<500) then
+  if (TotalMBMemory<1500) then
   begin
     result:=1;
   end;
-  {$ENDIF LINUX}
 end;
 
 {$ifdef Darwin}

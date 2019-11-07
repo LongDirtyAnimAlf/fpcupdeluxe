@@ -186,6 +186,9 @@ uses
 {$IFDEF NUMCPULIB_HAS_SYSCONF}
 {$IFDEF FPC}
   unixtype,
+{$IFDEF LINUX}
+  Linux,
+{$ENDIF}   // ENDIF LINUX
 {$ELSE}
   Posix.Unistd,
 {$ENDIF}   // ENDIF FPC
@@ -356,6 +359,19 @@ type
           (Group: TGroupRelationship);
     end;
 
+    MEMORYSTATUSEX = record
+       dwLength : DWORD;
+       dwMemoryLoad : DWORD;
+       ullTotalPhys : uint64;
+       ullAvailPhys : uint64;
+       ullTotalPageFile : uint64;
+       ullAvailPageFile : uint64;
+       ullTotalVirtual : uint64;
+       ullAvailVirtual : uint64;
+       ullAvailExtendedVirtual : uint64;
+    end;
+    TMemoryStatusEx = MEMORYSTATUSEX;
+
 {$ENDIF}
 
     // ================================================================//
@@ -368,6 +384,9 @@ type
       : TLogicalProcessorRelationship; Buffer:
 {$IFNDEF HAS_GET_LOGICAL_PROCESSOR_INFORMATION_INBUILT}TNumCPULib.{$ENDIF}PSystemLogicalProcessorInformationEx; var ReturnLength: DWORD): BOOL; stdcall;
 
+    TGetGlobalMemoryStatus = procedure(var Buffer:MemoryStatus); stdcall;
+    TGetGlobalMemoryStatusEx = function(var Buffer:TMemoryStatusEx): BOOL; stdcall;
+
   class var
 
     FIsGetLogicalProcessorInformationAvailable,
@@ -375,6 +394,10 @@ type
     FGetLogicalProcessorInformation: TGetLogicalProcessorInformation;
     FGetLogicalProcessorInformationEx: TGetLogicalProcessorInformationEx;
 
+    FIsGetGlobalMemoryStatusAvailable,
+      FIsGetGlobalMemoryStatusAvailableEx: Boolean;
+    FGetGlobalMemoryStatus: TGetGlobalMemoryStatus;
+    FGetGlobalMemoryStatusEx: TGetGlobalMemoryStatusEx;
 
     // ================================================================//
 
@@ -399,13 +422,20 @@ type
   class function GetProcessorInfo(): TProcessorInformation; static;
   class function GetProcessorInfoEx(): TProcessorInformationEx; static;
 
+  class function IsGetGlobalMemoryStatusAvailable(): Boolean; static;
+  class function IsGetGlobalMemoryStatusAvailableEx(): Boolean; static;
+  class function GetPhysicalMemoryEx(): UInt32;
+  class function GetPhysicalMemory(): UInt32;
+
   class function GetLogicalCPUCountWindows(): UInt32; static;
   class function GetPhysicalCPUCountWindows(): UInt32; static;
+  class function GetTotalPhysicalMemoryWindows(): UInt32; static;
 {$ENDIF}
   // ================================================================//
 {$IFDEF NUMCPULIB_APPLE}
   class function GetLogicalCPUCountApple(): UInt32; static;
   class function GetPhysicalCPUCountApple(): UInt32; static;
+  class function GetTotalPhysicalMemoryApple(): UInt32; static;
 {$ENDIF}
   // ================================================================//
 {$IFDEF NUMCPULIB_WILL_PARSE_DATA}
@@ -440,6 +470,8 @@ type
     var AOutputParameters: TStringList); static;
   class function GetLogicalCPUCountLinux(): UInt32; static;
   class function GetPhysicalCPUCountLinux(): UInt32; static;
+  class function GetTotalPhysicalMemoryLinux(): UInt32; static;
+  class function GetTotalSwapMemoryLinux(): UInt32; static;
 {$ENDIF}
   // ================================================================//
 {$IFDEF NUMCPULIB_SOLARIS}
@@ -469,6 +501,9 @@ type
     /// This function will get the number of physical cores.
     /// </summary>
     class function GetPhysicalCPUCount(): UInt32; static;
+
+    class function GetTotalPhysicalMemory(): UInt32; static;
+    class function GetTotalSwapMemory(): UInt32; static;
   end;
 
 {$IFDEF NUMCPULIB_HAS_SYSCONF}
@@ -489,6 +524,11 @@ begin
     IsGetLogicalProcessorInformationAvailable();
   FIsGetLogicalProcessorInformationAvailableEx :=
     IsGetLogicalProcessorInformationExAvailable();
+
+  FIsGetGlobalMemoryStatusAvailable :=
+    IsGetGlobalMemoryStatusAvailable();
+  FIsGetGlobalMemoryStatusAvailableEx :=
+    IsGetGlobalMemoryStatusAvailableEx();
 {$ENDIF}
 end;
 
@@ -781,6 +821,42 @@ begin
   end;
 end;
 
+class function TNumCPULib.GetPhysicalMemoryEx(): UInt32;
+var
+  M: TMemoryStatusEx;
+begin
+  Result := 0;
+  FillChar(M, SizeOf(TMemoryStatusEx), 0);
+  M.dwLength := SizeOf(TMemoryStatusEx);
+  if FGetGlobalMemoryStatusEx(M) then
+    Result := (M.ullTotalPhys shr 20);
+end;
+
+class function TNumCPULib.GetPhysicalMemory(): UInt32;
+var
+  M: TMemoryStatus;
+begin
+  FillChar(M, SizeOf(TMemoryStatus), 0);
+  M.dwLength := SizeOf(TMemoryStatus);
+  FGetGlobalMemoryStatus(M);
+  Result := (M.dwTotalPhys shr 20);
+end;
+
+class function TNumCPULib.GetTotalPhysicalMemoryWindows(): UInt32;
+begin
+  Result := 0;
+  if IsGetGlobalMemoryStatusAvailableEx then
+  begin
+    Result := GetPhysicalMemoryEx();
+    Exit;
+  end;
+  if IsGetGlobalMemoryStatusAvailable then
+  begin
+    Result := GetPhysicalMemory();
+    Exit;
+  end;
+end;
+
 class function TNumCPULib.GetProcedureAddress(ModuleHandle: THandle;
   const AProcedureName: String; var AFunctionFound: Boolean): Pointer;
 begin
@@ -819,6 +895,35 @@ begin
   end;
 end;
 
+class function TNumCPULib.IsGetGlobalMemoryStatusAvailable(): Boolean;
+var
+  ModuleHandle: THandle;
+begin
+  Result := False;
+  ModuleHandle := SafeLoadLibrary(KERNEL32, SEM_FAILCRITICALERRORS);
+  if ModuleHandle <> 0 then
+  begin
+    Result := True;
+    FGetGlobalMemoryStatus := GetProcedureAddress(ModuleHandle,
+      'GlobalMemoryStatus', Result);
+  end;
+end;
+
+class function TNumCPULib.IsGetGlobalMemoryStatusAvailableEx: Boolean;
+var
+  ModuleHandle: THandle;
+begin
+  Result := False;
+  ModuleHandle := SafeLoadLibrary(KERNEL32, SEM_FAILCRITICALERRORS);
+  if ModuleHandle <> 0 then
+  begin
+    Result := True;
+    FGetGlobalMemoryStatusEx := GetProcedureAddress(ModuleHandle,
+      'GlobalMemoryStatusEx', Result);
+  end;
+end;
+
+
 {$ENDIF}
 // ================================================================//
 {$IFDEF NUMCPULIB_APPLE}
@@ -855,6 +960,11 @@ end;
 class function TNumCPULib.GetPhysicalCPUCountApple(): UInt32;
 begin
   Result := GetCPUCountUsingSysCtlByName('hw.physicalcpu');
+end;
+
+class function TNumCPULib.GetTotalPhysicalMemoryApple(): UInt32;
+begin
+  Result := GetCPUCountUsingSysCtlByName('hw.memsize');
 end;
 {$ENDIF}
 // ================================================================//
@@ -1091,6 +1201,38 @@ begin
     LProcCpuInfos.Free;
   end;
 end;
+
+class function TNumCPULib.GetTotalPhysicalMemoryLinux(): UInt32; static;
+var
+  SystemInf: TSysInfo;
+  mu:        cardinal;
+begin
+  result:=0;
+  try
+    FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+    SysInfo(@SystemInf);
+    mu := SystemInf.mem_unit;
+    result := (QWord(SystemInf.totalram*mu) shr 20);
+  except
+  end;
+end;
+
+class function TNumCPULib.GetTotalSwapMemoryLinux(): UInt32; static;
+var
+  SystemInf: TSysInfo;
+  mu:        cardinal;
+begin
+  result:=0;
+  try
+    FillChar({%H-}SystemInf,SizeOf(SystemInf),0);
+    SysInfo(@SystemInf);
+    mu := SystemInf.mem_unit;
+    result := (QWord(SystemInf.totalswap*mu) shr 20);
+  except
+  end;
+end;
+
+
 {$ENDIF}
 // ================================================================//
 {$IFDEF NUMCPULIB_SOLARIS}
@@ -1258,5 +1400,40 @@ begin
   Result := 1;
 {$IFEND}
 end;
+
+class function TNumCPULib.GetTotalPhysicalMemory(): UInt32;
+begin
+{$IF DEFINED(NUMCPULIB_MSWINDOWS)}
+  Result := GetTotalPhysicalMemoryWindows();
+{$ELSEIF DEFINED(NUMCPULIB_APPLE)}
+  Result := GetTotalPhysicalMemoryApple();
+{$ELSEIF DEFINED(NUMCPULIB_LINUX)}
+  Result := GetTotalPhysicalMemoryLinux();
+{$ELSEIF DEFINED(NUMCPULIB_SOLARIS)}
+  //Result := GetTotalPhysicalMemorySolaris();
+  Result := 0;
+{$ELSE}
+  // fallback for other Unsupported Oses
+  Result := 0;
+{$IFEND}
+end;
+
+class function TNumCPULib.GetTotalSwapMemory(): UInt32;
+begin
+{$IF DEFINED(NUMCPULIB_MSWINDOWS)}
+  Result := 0;
+{$ELSEIF DEFINED(NUMCPULIB_APPLE)}
+  Result := 0;
+{$ELSEIF DEFINED(NUMCPULIB_LINUX)}
+  Result := GetTotalSwapMemoryLinux();
+{$ELSEIF DEFINED(NUMCPULIB_SOLARIS)}
+  //Result := GetTotalPhysicalSwapSolaris();
+  Result := 0;
+{$ELSE}
+  // fallback for other Unsupported Oses
+  Result := 0;
+{$IFEND}
+end;
+
 
 end.

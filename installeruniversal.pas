@@ -1628,7 +1628,14 @@ begin
     begin
       infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
       aName:=GetFileNameFromURL(RemoteURL);
-      if Length(aName)>0 then aName:=SysUtils.ExtractFileExt(aName);
+      if Length(aName)>0 then
+      begin
+        aName:=SysUtils.ExtractFileExt(aName);
+        if Length(aName)>0 then
+        begin
+          if aName[1]='.' then Delete(aName,1,1);
+        end;
+      end;
       //If no extension, assume zip
       if Length(aName)=0 then aName:='zip';
       aFile := GetTempFileNameExt('','FPCUPTMP',aName);
