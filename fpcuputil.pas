@@ -265,6 +265,7 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 // Delete shortcut on desktop
 procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
+function FindFileInDir(Filename, Path: String): String;
 // Copy a directory recursive
 function DirCopy(SourcePath, DestPath: String): Boolean;
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
@@ -1157,6 +1158,30 @@ begin
   SysUtils.DeleteFile(LinkName);
 end;
 {$ENDIF MSWINDOWS}
+
+function FindFileInDir(Filename, Path: String): String;
+var
+  DirList: TStringList;
+  ADirectory: String;
+  AFile: string;
+begin
+  Result := '';
+  DirList := FindAllDirectories(Path);
+  try
+    DirList.Insert(0,ExcludeTrailingPathDelimiter(Path));
+    for ADirectory in DirList do
+    begin
+      AFile:=IncludeTrailingPathDelimiter(ADirectory)+Filename;
+      if FileExists(AFile) then
+      begin
+        Result := AFile;
+        Break;
+      end;
+    end;
+  finally
+    DirList.Free;
+  end;
+end;
 
 function DirCopy(SourcePath, DestPath: String): Boolean;
 begin
@@ -2211,12 +2236,12 @@ begin
   if TotalMBMemory=0 then exit;
 
   // limit the amount of spawn processes in case of limited memory
-  if (TotalMBMemory<2500) then
+  if (TotalMBMemory<3000) then
   begin
     result:=(result DIV 2);
   end;
   // limit the amount to 1 process in case of very limited memory
-  if (TotalMBMemory<1500) then
+  if (TotalMBMemory<2000) then
   begin
     result:=1;
   end;

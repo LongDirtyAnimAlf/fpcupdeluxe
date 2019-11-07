@@ -219,14 +219,10 @@ begin
 
         s:='rm -f ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
-        {$ifdef Darwin}
-        if AnsiContainsText(line,'/'+Trim(s)) OR AnsiStartsText(Trim(s),line) then continue;
-        {$endif}
+        if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then continue;
         s:='rm -rf ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
-        {$ifdef Darwin}
-        if AnsiContainsText(line,'/'+Trim(s)) OR AnsiStartsText(Trim(s),line) then continue;
-        {$endif}
+        if AnsiContainsText(line,'/'+TrimRight(s)) OR AnsiStartsText(TrimRight(s),line) then continue;
         s:='mkdir ';
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
         s:='mv ';

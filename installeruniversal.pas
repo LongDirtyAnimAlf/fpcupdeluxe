@@ -109,7 +109,7 @@ type
     // Scans for and removes all packages specfied in a (module's) stringlist with commands:
     function RemovePackages(sl:TStringList): boolean;
     // Uninstall a single package:
-    function UnInstallPackage(PackagePath: string): boolean;
+    function UnInstallPackage(PackagePath, WorkingDir: string): boolean;
     {$endif}
     // Filters (a module's) sl stringlist and runs all <Directive> commands:
     function RunCommands(Directive:string;sl:TStringList):boolean;
@@ -517,7 +517,7 @@ begin
 
   // find a package component, if any
   // all other packages will be ignored
-  if (NOT FileExists(PackageAbsolutePath)) then
+  if ( (NOT FileExists(PackageAbsolutePath)) AND (Length(WorkingDir)>0) AND DirectoryExists(WorkingDir) ) then
   begin
     PackageFiles:=FindAllFiles(WorkingDir, PackageName+'.lpk' , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
@@ -583,8 +583,6 @@ begin
            (ReqPackage<>'LazDebuggerGdbmi') AND
            (ReqPackage<>'CodeTools') then
         begin
-
-
           InstallPackage(ReqPackage, WorkingDir, RegisterOnly, true);
         end;
       end;
@@ -706,7 +704,8 @@ function TUniversalInstaller.RemovePackages(sl: TStringList): boolean;
 const
   // The command that will be processed:
   Directive='AddPackage';
-  Location='Workingdir';
+  LOCATIONMAGIC='Workingdir';
+  INSTALLMAGIC='Installdir';
 var
   Failure: boolean;
   i:integer;
@@ -719,8 +718,10 @@ begin
   Failure:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
 
-  BaseWorkingdir:=GetValueFromKey(Location,sl);
+  BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
+  if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);
   BaseWorkingdir:=FixPath(BaseWorkingdir);
+
   Workingdir:=BaseWorkingdir;
 
   for RegisterOnly:=false to true do
@@ -737,7 +738,7 @@ begin
       if i>=0 then
       begin
         RealDirective:=RealDirective+IntToStr(i);
-        Workingdir:=GetValueFromKey(Location+IntToStr(i),sl);
+        Workingdir:=GetValueFromKey(LOCATIONMAGIC+IntToStr(i),sl);
         Workingdir:=FixPath(Workingdir);
       end else
       begin
@@ -749,17 +750,17 @@ begin
 
       // Skip over missing numbers:
       if PackagePath='' then continue;
+
+      if Workingdir='' then Workingdir:=BaseWorkingdir;
+
       if NOT FileExists(PackagePath) then
       begin
         infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etInfo);
-        UnInstallPackage(PackagePath);
+        UnInstallPackage(PackagePath, WorkingDir);
         continue;
       end;
-      if Workingdir='' then Workingdir:=BaseWorkingdir;
       // Try to uninstall everything, even if some of these fail.
-      // Note: UninstallPackage used to have a WorkingDir parameter but
-      // I'm wondering how to implement that as we have PackagePath already.
-      if UnInstallPackage(PackagePath)=false then Failure:=true;
+      if UnInstallPackage(PackagePath, WorkingDir)=false then Failure:=true;
     end;
     result:=Failure;
   end;
@@ -816,13 +817,15 @@ begin
       PackagePath:=GetValueFromKey(RealDirective,sl);
       PackagePath:=FixPath(PackagePath);
 
+      if Workingdir='' then Workingdir:=BaseWorkingdir;
+
       // Skip over missing data:
       if (PackagePath='') then continue;
       if NOT FileExists(PackagePath) then
       begin
         infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etInfo);
         {$ifndef FPCONLY}
-        UnInstallPackage(PackagePath);
+        UnInstallPackage(PackagePath,Workingdir);
         {$endif}
         continue;
       end;
@@ -1088,7 +1091,7 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function TUniversalInstaller.UnInstallPackage(PackagePath: string): boolean;
+function TUniversalInstaller.UnInstallPackage(PackagePath, WorkingDir: string): boolean;
 const
   PACKAGE_KEYSTART='UserPkgLinks/';
   MISC_KEYSTART='MiscellaneousOptions/BuildLazarusOptions/StaticAutoInstallPackages/';
@@ -1100,6 +1103,8 @@ var
   xmlfile: string;
   lpkdoc:TConfig;
   lpkversion:TAPkgVersion;
+  ReqCount:integer;
+  ReqPackage,Path:string;
 begin
   result:=false;
 
@@ -1117,6 +1122,34 @@ begin
   else
     PackageAbsolutePath:=SafeExpandFileName(PackagePath);
   if FVerbose then WritelnLog(localinfotext+'Going to uninstall package',true);
+
+  if (ExtractFileName(PackagePath)<>PackagePath) then
+  begin
+    if FileExists(PackageAbsolutePath) then
+    begin
+      lpkdoc:=TConfig.Create(PackageAbsolutePath);
+      try
+        // get package requirements
+        Path:='Package/RequiredPkgs/';
+        ReqCount:=lpkdoc.GetValue(Path+'Count',0);
+        for i:=1 to ReqCount do
+        begin
+          Path:='Package/RequiredPkgs/';
+          ReqPackage:=lpkdoc.GetValue(Path+'Item'+InttoStr(i)+'/PackageName/Value','unknown');
+          // try to auto-resolve dependencies
+          // not very elegant, but working
+          if (ReqPackage<>'unknown') then
+          begin
+            ReqPackage:=ChangeFileExt(ExtractFileName(ReqPackage), '.lpk');
+            ReqPackage:=FindFileInDir(ReqPackage,WorkingDir);
+            if FileExists(ReqPackage) then UnInstallPackage(ReqPackage, WorkingDir);
+          end;
+        end;
+      finally
+        lpkdoc.Free;
+      end;
+    end;
+  end;
 
   LazarusConfig:=TUpdateLazConfig.Create(FLazarusPrimaryConfigPath);
   try
