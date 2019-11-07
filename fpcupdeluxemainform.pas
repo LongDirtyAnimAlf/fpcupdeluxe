@@ -3393,7 +3393,10 @@ begin
   AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
 
   SwapAvailable:=GetSwapFileSize;
+
+  {$IFDEF LINUX}
   AddMessage('Available swap: '+InttoStr(SwapAvailable)+' MB');
+  {$ENDIF}
 
   MemAvailable:=MemAvailable+SwapAvailable;
 

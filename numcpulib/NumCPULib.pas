@@ -252,8 +252,8 @@ type
     // ================================================================//
 {$IFDEF NUMCPULIB_HAS_SYSCTL}
 {$IFDEF NUMCPULIB_APPLE}
-    class function GetCPUCountUsingSysCtlByName(const AName: String)
-      : UInt32; static;
+    class function GetValueUsingSysCtlByName(const AName: String)
+      : UInt64; static;
 {$ENDIF}
     class function GetLogicalCPUCountUsingSysCtl(): UInt32; static;
 {$ENDIF}
@@ -601,8 +601,8 @@ end;
 {$IFDEF NUMCPULIB_HAS_SYSCTL}
 {$IFDEF NUMCPULIB_APPLE}
 
-class function TNumCPULib.GetCPUCountUsingSysCtlByName
-  (const AName: String): UInt32;
+class function TNumCPULib.GetValueUsingSysCtlByName
+  (const AName: String): UInt64;
 var
   LLen: size_t;
 begin
@@ -949,7 +949,7 @@ begin
   // final fallback if all above fails
   if LTempRes < 1 then
   begin
-    Result := GetCPUCountUsingSysCtlByName('hw.logicalcpu');
+    Result := UInt32(GetValueUsingSysCtlByName('hw.logicalcpu'));
   end
   else
   begin
@@ -959,12 +959,12 @@ end;
 
 class function TNumCPULib.GetPhysicalCPUCountApple(): UInt32;
 begin
-  Result := GetCPUCountUsingSysCtlByName('hw.physicalcpu');
+  Result := UInt32(GetValueUsingSysCtlByName('hw.physicalcpu'));
 end;
 
 class function TNumCPULib.GetTotalPhysicalMemoryApple(): UInt32;
 begin
-  Result := GetCPUCountUsingSysCtlByName('hw.memsize');
+  Result := (GetValueUsingSysCtlByName('hw.memsize') shr 20);
 end;
 {$ENDIF}
 // ================================================================//
