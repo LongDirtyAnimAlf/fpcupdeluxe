@@ -226,6 +226,9 @@ begin
   FLazarusNeedsRebuild:=false;
 
   Processor.Executable := Make;
+  {$IFDEF MSWINDOWS}
+  if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+  {$ENDIF}
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
   Processor.Parameters.Clear;
   {

@@ -339,6 +339,9 @@ begin
       begin
         // Use make for cross compiling
         Processor.Executable := Make;
+        {$IFDEF MSWINDOWS}
+        if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+        {$ENDIF}
         Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
         Processor.Parameters.Clear;
         {
@@ -573,6 +576,9 @@ begin
     // distclean was already run; otherwise specify make clean all
     FErrorLog.Clear;
     Processor.Executable := Make;
+    {$IFDEF MSWINDOWS}
+    if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+    {$ENDIF}
     Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
     Processor.Parameters.Clear;
     {
@@ -1669,6 +1675,9 @@ begin
   Processor.OnErrorM := nil;  //don't want to log errors in distclean
 
   Processor.Executable := Make;
+  {$IFDEF MSWINDOWS}
+  if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+  {$ENDIF}
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
   Processor.Parameters.Clear;
   {

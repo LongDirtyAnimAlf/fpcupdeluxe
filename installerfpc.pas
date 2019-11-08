@@ -721,6 +721,9 @@ begin
           end;
 
           Processor.Executable := Make;
+          {$IFDEF MSWINDOWS}
+          if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+          {$ENDIF}
           Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
           Processor.Parameters.Clear;
           {
@@ -1281,6 +1284,9 @@ begin
   end;
 
   Processor.Executable := Make;
+  {$IFDEF MSWINDOWS}
+  if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+  {$ENDIF}
   FErrorLog.Clear;
   Processor.Parameters.Clear;
   if (FNoJobs) then
@@ -1397,6 +1403,7 @@ begin
   end;
 
   Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
+
   Processor.Parameters.Add('all');
   Processor.Parameters.Add('install');
   infoln(infotext+'Running make all install for '+ModuleName,etInfo);
@@ -2630,6 +2637,9 @@ begin
     begin
       infoln('We have ppc386. We need ppcx64. So make it !',etInfo);
       Processor.Executable := Make;
+      {$IFDEF MSWINDOWS}
+      if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+      {$ENDIF}
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
       Processor.Parameters.Add('compiler_cycle');
@@ -3129,6 +3139,9 @@ begin
     Processor.OnErrorM:=nil;  //don't want to log errors in distclean
     try
       Processor.Executable := Make;
+      {$IFDEF MSWINDOWS}
+      if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
+      {$ENDIF}
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
       Processor.Parameters.Clear;
       if (FNoJobs) then

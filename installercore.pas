@@ -248,6 +248,7 @@ type
     FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
+    function GetShell: string;
     function GetMake: string;
     procedure SetHTTPProxyHost(AValue: string);
     procedure SetHTTPProxyPassword(AValue: string);
@@ -280,6 +281,7 @@ type
     FHTTPProxyUser: string;
     FLog: TLogger;
     FLogVerbose: TLogger; // Log file separate from main fpcup.log, for verbose logging
+    FShell: string;
     FMake: string;
     FMakeDir: string; //Binutils/make/patch directory
     FPatchCmd: string;
@@ -310,6 +312,7 @@ type
     FSwitchURL: boolean;
     FMUSL: boolean;
     FMUSLLinker: string;
+    property Shell: string read GetShell;
     property Make: string read GetMake;
     // Check for existence of required executables; if not there, get them if possible
     function CheckAndGetTools: boolean;
@@ -530,6 +533,27 @@ begin
     {$ENDIF MSWINDOWS}
   Result := FMake;
 end;
+
+function TInstaller.GetShell: string;
+var
+  output:string;
+begin
+  {$IFDEF MSWINDOWS}
+  if FShell = '' then
+  begin
+    ExecuteCommand('cmd.exe /C echo %COMSPEC%', output, False);
+    FShell := Trim(output);
+    if FShell = '' then
+    begin
+      //for older Windows versions
+      ExecuteCommand('ECHO %COMSPEC%', output, False);
+      FShell := Trim(output);
+    end;
+  end;
+  {$ENDIF MSWINDOWS}
+  Result := FShell;
+end;
+
 
 procedure TInstaller.SetHTTPProxyHost(AValue: string);
 begin
@@ -2691,6 +2715,8 @@ begin
   FSVNClient := TSVNClient.Create;
   FGitClient := TGitClient.Create;
   FHGClient  := THGClient.Create;
+
+  FShell := '';
 
   // List of binutils that can be downloaded:
   // CreateBinutilsList;
