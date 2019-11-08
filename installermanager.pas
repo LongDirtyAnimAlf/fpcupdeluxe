@@ -1678,16 +1678,6 @@ var
   idx:integer;
   SeqAttr:^TSequenceAttributes;
   localinfotext:string;
-
-  Procedure CleanUpInstaller;
-  begin
-    if assigned(FInstaller) then
-      begin
-      FInstaller.Free;
-      FInstaller:=nil;
-      end;
-  end;
-
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' ('+SequenceName+'): ';
   try
@@ -1749,7 +1739,6 @@ begin
           SMexec        : result:=DoExec(FStateMachine[InstructionPointer].param);
           SMend         : begin
                             SeqAttr^.Executed:=ESSucceeded;
-                            CleanUpInstaller;
                             exit; //success
                           end;
           SMcleanmodule : result:=DoCleanModule(FStateMachine[InstructionPointer].param);
@@ -1773,14 +1762,12 @@ begin
             '; line: '+IntTostr(InstructionPointer - EntryPoint+1)+
             ', param: '+FStateMachine[InstructionPointer].param);
           {$ENDIF DEBUG}
-          CleanUpInstaller;
           exit; //failure, bail out
         end;
         InstructionPointer:=InstructionPointer+1;
         if InstructionPointer>=length(FStateMachine) then  //somebody forgot end
         begin
           SeqAttr^.Executed:=ESSucceeded;
-          CleanUpInstaller;
           exit; //success
         end;
       end;
@@ -1792,6 +1779,11 @@ begin
     end;
   finally
     infoln(localinfotext+'Run ready.',etDebug);
+    if Assigned(FInstaller) then
+    begin
+      FInstaller.Free;
+      FInstaller:=nil;
+    end;
   end;
 end;
 

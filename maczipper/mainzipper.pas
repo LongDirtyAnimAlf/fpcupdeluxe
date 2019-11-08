@@ -78,11 +78,11 @@ begin
             begin
               aFile3:=ExtractRelativepath(aFile1+'.app',aZipList.Strings[aIndex2]);
               aZipFileEntry:=zipper.Entries.AddFileEntry(aZipList.Strings[aIndex2],aFile3);
-              aZipFileEntry.OS:=OS_UNIX;
+              aZipFileEntry.OS:=OS_OSX;
               if aZipList.Strings[aIndex2]=aFile2 then
-                 aZipFileEntry.Attributes:=((UNIX_RUSR or UNIX_WUSR or UNIX_XUSR or UNIX_RGRP or UNIX_XGRP or UNIX_ROTH or UNIX_XOTH) shl 16)
+                 aZipFileEntry.Attributes:=((UNIX_RUSR or UNIX_WUSR or UNIX_XUSR or UNIX_RGRP or UNIX_XGRP or UNIX_ROTH or UNIX_XOTH){ shl 16})
               else
-                aZipFileEntry.Attributes:=((UNIX_RUSR or UNIX_WUSR or UNIX_RGRP or UNIX_ROTH) shl 16);
+                aZipFileEntry.Attributes:=((UNIX_RUSR or UNIX_WUSR or UNIX_RGRP or UNIX_ROTH) {shl 16});
             end;
             zipper.ZipAllFiles;
           finally
@@ -92,7 +92,7 @@ begin
       finally
         aZipList.Free;
       end;
-      DeleteFile(aFile1);
+      //DeleteFile(aFile1);
     end;
   end;
 end;

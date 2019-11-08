@@ -2171,28 +2171,32 @@ begin
     result:='/usr/lib/gcc';
     {$endif}
 
-    LinkFiles := TStringList.Create;
-    try
-      FindAllFiles(LinkFiles, result, '*.o', true);
-      for i:=0 to (LinkFiles.Count-1) do
-      begin
-        if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
+    if DirectoryExists(result) then
+    begin
+      LinkFiles := TStringList.Create;
+      try
+        FindAllFiles(LinkFiles, result, '*.o', true);
+        for i:=0 to (LinkFiles.Count-1) do
         begin
-          result:=ExtractFileDir(LinkFiles[i]);
-          FoundLinkFile:=true;
-          break;
+          if Pos(DirectorySeparator+LINKFILE,LinkFiles[i])>0 then
+          begin
+            result:=ExtractFileDir(LinkFiles[i]);
+            FoundLinkFile:=true;
+            break;
+          end;
         end;
+      finally
+        LinkFiles.Free;
       end;
-    finally
-      LinkFiles.Free;
     end;
-
   end;
 
+  {$IFNDEF DARWIN}
   if (NOT FoundLinkFile) then
   begin
     infoln('GetGCCDirectory: Could not find ' + LINKFILE + ' on system. Expect linking warnings/errors.',etWarning);
   end;
+  {$ENDIF}
 
 end;
 
