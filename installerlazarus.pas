@@ -162,6 +162,10 @@ const
     _CLEANMODULE+_LCLCROSS+_SEP+
     _BUILDMODULE+_LCLCROSS+_SEP +
 
+    _DECLARE+_MAKEFILECHECK+_LAZARUS+_SEP+
+    _BUILDMODULE+_MAKEFILECHECK+_LAZARUS+_SEP+
+    _END+
+
     _ENDFINAL;
 
   DEFAULTLPI =
@@ -339,11 +343,11 @@ begin
       begin
         // Use make for cross compiling
         Processor.Executable := Make;
+        Processor.Parameters.Clear;
         {$IFDEF MSWINDOWS}
         if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
         {$ENDIF}
         Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
-        Processor.Parameters.Clear;
         {
         //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
         if (FNoJobs) then
@@ -576,11 +580,11 @@ begin
     // distclean was already run; otherwise specify make clean all
     FErrorLog.Clear;
     Processor.Executable := Make;
+    Processor.Parameters.Clear;
     {$IFDEF MSWINDOWS}
     if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
     {$ENDIF}
     Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
-    Processor.Parameters.Clear;
     {
     //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
     if (FNoJobs) then
@@ -728,6 +732,11 @@ begin
           Result := true;
           exit;
         end;
+      end;
+      _MAKEFILECHECK+_LAZARUS:
+      begin
+        Processor.Parameters.Add('fpc_baseinfo');
+        infoln(infotext+'Running: make fpc_baseinfo', etInfo);
       end
       else //raise error;
       begin
@@ -914,6 +923,8 @@ begin
       end;
     end;
   end;
+
+  if (ModuleName=_MAKEFILECHECK+_LAZARUS) then exit;
 
   if (ModuleName=_USERIDE) OR (ModuleName=_LAZARUS) then
   begin
@@ -1675,11 +1686,11 @@ begin
   Processor.OnErrorM := nil;  //don't want to log errors in distclean
 
   Processor.Executable := Make;
+  Processor.Parameters.Clear;
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(FSourceDirectory);
-  Processor.Parameters.Clear;
   {
   //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
   if (FNoJobs) then

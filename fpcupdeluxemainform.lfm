@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 241
+  Left = 249
   Height = 631
-  Top = 98
+  Top = 190
   Width = 1004
   Anchors = []
   Caption = 'Form1'
@@ -3136,6 +3136,24 @@ object Form1: TForm1
         Caption = 'Get OpenSSL by Browser'
         OnClick = btnGetOpenSSLClick
         TabOrder = 0
+      end
+      object ChkMakefileFPC: TButton
+        Left = 6
+        Height = 51
+        Top = 46
+        Width = 234
+        Caption = 'Check Makefile FPC'
+        OnClick = ChkMakefileFPCClick
+        TabOrder = 1
+      end
+      object ChkMakefileLaz: TButton
+        Left = 6
+        Height = 51
+        Top = 104
+        Width = 234
+        Caption = 'Check Makefile Lazarus'
+        OnClick = ChkMakefileFPCClick
+        TabOrder = 2
       end
     end
   end

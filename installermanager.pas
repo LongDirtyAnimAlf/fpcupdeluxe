@@ -1270,7 +1270,7 @@ begin
   //check if this is a known module:
 
   // FPC:
-  if (ModuleName=_FPC) then
+  if (ModuleName=_FPC) OR (ModuleName=_MAKEFILECHECK+_FPC) then
   begin
     if assigned(FInstaller) then
     begin
@@ -1325,6 +1325,7 @@ begin
     or (ModuleName=_IDE)
     or (ModuleName=_BIGIDE)
     or (ModuleName=_USERIDE)
+    or (ModuleName=_MAKEFILECHECK+_LAZARUS)
   then
   begin
     if assigned(FInstaller) then

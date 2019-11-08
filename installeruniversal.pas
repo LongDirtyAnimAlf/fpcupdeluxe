@@ -226,11 +226,11 @@ begin
   FLazarusNeedsRebuild:=false;
 
   Processor.Executable := Make;
+  Processor.Parameters.Clear;
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
   Processor.CurrentDirectory := ExcludeTrailingPathDelimiter(LazarusInstallDir);
-  Processor.Parameters.Clear;
   {
   //Still not clear if jobs can be enabled for Lazarus make builds ... :-|
   if (FNoJobs) then

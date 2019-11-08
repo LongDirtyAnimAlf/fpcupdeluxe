@@ -35,9 +35,11 @@ type
     btnClearLog: TButton;
     btnUninstallModule: TButton;
     btnGetOpenSSL: TButton;
+    ChkMakefileFPC: TButton;
     ButtonInstallCrossCompiler: TButton;
     ButtonRemoveCrossCompiler: TButton;
     CheckAutoClear: TCheckBox;
+    ChkMakefileLaz: TButton;
     FPCVersionLabel: TLabel;
     LazarusVersionLabel: TLabel;
     ListBoxFPCTarget: TListBox;
@@ -80,6 +82,7 @@ type
     CommandOutputScreen: TSynEdit;
     procedure BitBtnHaltClick(Sender: TObject);
     procedure btnGetOpenSSLClick(Sender: TObject);
+    procedure ChkMakefileFPCClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; {%H-}var Key: Word; {%H-}Shift: TShiftState);
     procedure FPCVersionLabelClick(Sender: TObject);
     procedure LazarusOnlyClick(Sender: TObject);
@@ -910,6 +913,24 @@ begin
     end;
   end;
   {$endif MSWindows}
+end;
+
+procedure TForm1.ChkMakefileFPCClick(Sender: TObject);
+begin
+  DisEnable(Sender,False);
+
+  try
+    PrepareRun;
+
+    if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECK+_LAZARUS;
+    if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECK+_FPC;
+
+    sStatus:='Going to check Makefile.';
+
+    RealRun;
+  finally
+    DisEnable(Sender,True);
+  end;
 end;
 
 procedure TForm1.TargetSelectionChange(Sender: TObject; User: boolean);

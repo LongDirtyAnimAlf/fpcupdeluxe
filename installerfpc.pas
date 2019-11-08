@@ -104,6 +104,10 @@ Const
     _CLEANMODULE+_FPC+_SEP+
     _UNINSTALLMODULE+_FPC+_SEP+
 
+    _DECLARE+_MAKEFILECHECK+_FPC+_SEP+
+    _BUILDMODULE+_MAKEFILECHECK+_FPC+_SEP+
+    _END+
+
     _ENDFINAL;
 
 type
@@ -721,11 +725,11 @@ begin
           end;
 
           Processor.Executable := Make;
+          Processor.Parameters.Clear;
           {$IFDEF MSWINDOWS}
           if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
           {$ENDIF}
           Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-          Processor.Parameters.Clear;
           {
           //Still not clear if jobs can be enabled for crosscompiler builds ... :-|
           if (FNoJobs) then
@@ -1279,16 +1283,19 @@ begin
   //if clean failed (due to missing compiler), try again !
   if (NOT FCleanModuleSuccess) then
   begin
-    infoln(infotext+'Running CleanModule once more before building FPC from sources, due to previous CleanModule failure.',etInfo);
-    CleanModule(ModuleName);
+    if ((ModuleName=_FPC) OR (ModuleName=_PAS2JS)) then
+    begin
+      infoln(infotext+'Running CleanModule once more before building FPC from sources, due to previous CleanModule failure.',etInfo);
+      CleanModule(ModuleName);
+    end;
   end;
 
   Processor.Executable := Make;
+  Processor.Parameters.Clear;
   {$IFDEF MSWINDOWS}
   if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
   {$ENDIF}
   FErrorLog.Clear;
-  Processor.Parameters.Clear;
   if (FNoJobs) then
     Processor.Parameters.Add('--jobs=1')
   else
@@ -1379,7 +1386,7 @@ begin
 
   Processor.CurrentDirectory:='';
   case ModuleName of
-    _FPC:
+    _FPC,_MAKEFILECHECK+_FPC:
     begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     end;
@@ -1404,9 +1411,17 @@ begin
 
   Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
 
-  Processor.Parameters.Add('all');
-  Processor.Parameters.Add('install');
-  infoln(infotext+'Running make all install for '+ModuleName,etInfo);
+  if ModuleName=_MAKEFILECHECK+_FPC then
+  begin
+    Processor.Parameters.Add('fpc_baseinfo');
+    infoln(infotext+'Running make fpc_baseinfo for '+ModuleName,etInfo);
+  end
+  else
+  begin
+    Processor.Parameters.Add('all');
+    Processor.Parameters.Add('install');
+    infoln(infotext+'Running make all install for '+ModuleName,etInfo);
+  end;
 
   try
     Processor.Execute;
@@ -2637,11 +2652,11 @@ begin
     begin
       infoln('We have ppc386. We need ppcx64. So make it !',etInfo);
       Processor.Executable := Make;
+      Processor.Parameters.Clear;
       {$IFDEF MSWINDOWS}
       if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
       {$ENDIF}
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      Processor.Parameters.Clear;
       Processor.Parameters.Add('compiler_cycle');
       if (FNoJobs) then
         Processor.Parameters.Add('--jobs=1')
@@ -3139,11 +3154,11 @@ begin
     Processor.OnErrorM:=nil;  //don't want to log errors in distclean
     try
       Processor.Executable := Make;
+      Processor.Parameters.Clear;
       {$IFDEF MSWINDOWS}
       if Length(Shell)>0 then Processor.Parameters.Add('SHELL='+Shell);
       {$ENDIF}
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
-      Processor.Parameters.Clear;
       if (FNoJobs) then
         Processor.Parameters.Add('--jobs=1')
       else

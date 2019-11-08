@@ -117,6 +117,8 @@ const
   _LAZARUS                 = 'Lazarus';
   _LAZARUSSIMPLE           = 'LazarusSimple';
 
+  _MAKEFILECHECK           = 'MakefileCheck';
+
   _DEFAULT                 = 'Default';
   _DEFAULTSIMPLE           = 'DefaultSimple';
 
