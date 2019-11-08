@@ -1,13 +1,13 @@
-program zipper;
+program MacZipper;
 
 {$mode objfpc}{$H+}
 
 uses
-  {$IFDEF UNIX}
+  {$IFDEF UNIX}{$IFDEF UseCThreads}
   cthreads,
-  {$ENDIF}
+  {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, main
+  Forms, MainZipper
   { you can add units after this };
 
 {$R *.res}

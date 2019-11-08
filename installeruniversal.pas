@@ -1620,6 +1620,18 @@ begin
         begin
           WritelnLog(UpdateWarnings.Text);
         end;
+        // hack for pascalscada (if needed)
+        if ModuleName='pascalscada' then
+        begin
+          aFile:=IncludeTrailingPathDelimiter(InstallDir)+'pascalscada.lrs';
+          if (NOT FileExists(aFile)) then
+          begin
+            try
+              result:=Download(FUseWget,'https://sourceforge.net/p/pascalscada/code/HEAD/tree/trunk/pascalscada.lrs?format=raw', aFile);
+            except
+            end;
+          end;
+        end;
       finally
         UpdateWarnings.Free;
       end;
