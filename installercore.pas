@@ -312,6 +312,7 @@ type
     //FGit: string;
     FProcessEx: TProcessEx;
     FSwitchURL: boolean;
+    FSolarisOI: boolean;
     FMUSL: boolean;
     FMUSLLinker: string;
     property Shell: string read GetShell;
@@ -405,6 +406,8 @@ type
     property KeepLocalChanges: boolean write FKeepLocalChanges;
     // auto switchover SVN URL
     property SwitchURL: boolean write FSwitchURL;
+    // do we have OpenIndiana instead of plain Solaris
+    property SolarisOI: boolean write FSolarisOI;
     // do we have musl instead of libc
     property MUSL: boolean write FMUSL;
     property Log: TLogger write FLog;
@@ -1072,6 +1075,14 @@ begin
   s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
 
   OperationSucceeded := true;
+
+  {$ifdef Solaris}
+  if (NOT FileExists('/bin/gstrip')) AND (FileExists('/bin/strip')) then
+  begin
+    FileUtil.CopyFile('/bin/strip',ExcludeTrailingPathDelimiter(FMakeDir)+'/bin/gstrip');
+  end;
+  {$endif}
+
 
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
@@ -2739,6 +2750,8 @@ begin
   FMinorVersion := -1;
   FReleaseVersion := -1;
   FPatchVersion := -1;
+
+  FSolarisOI:=false;
 
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';

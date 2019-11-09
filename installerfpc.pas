@@ -32,7 +32,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {.$define crosssimple}
 {$ifdef MSWindows}
-{.$define buildnative}
+{$define buildnative}
 {$endif}
 
 interface
@@ -570,6 +570,7 @@ begin
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
 
+    CrossInstaller.SolarisOI:=FSolarisOI;
     CrossInstaller.MUSL:=FMUSL;
 
     // get/set cross binary utils !!
@@ -901,7 +902,10 @@ begin
           end;
 
           {$ifdef solaris}
+          {$IF defined(CPUX64) OR defined(CPUX86)}
+          //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
           Options:=Options+' -Xn';
+          {$endif}
           {$endif}
 
           if FMUSL then
@@ -1345,7 +1349,10 @@ begin
   {$IFDEF UNIX}
   s1:='-Sg '+s1;
     {$IFDEF SOLARIS}
+    {$IF defined(CPUX64) OR defined(CPUX86)}
+    //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
     s1:='-Xn '+s1;
+    {$endif}
     {$ENDIF}
   if FMUSL then s1:='-FL'+FMUSLLinker+' '+s1;
   {$ENDIF}
@@ -2327,6 +2334,9 @@ begin
             {$ifdef LINUX}
             if FMUSL then s:=s+'musl';
             {$endif LINUX}
+            {$ifdef Solaris}
+            //if FSolarisOI then s:=s+'OI';
+            {$endif Solaris}
             s:=s+GetTargetOS;
             {$ifdef FREEBSD}
             j:=GetFreeBSDVersion;
@@ -2994,9 +3004,12 @@ begin
         ConfigText.Append('#ENDIF');
         {$endif}
 
-        {$IFDEF SOLARIS}
+        {$ifdef solaris}
+        {$IF defined(CPUX64) OR defined(CPUX86)}
+        //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
         ConfigText.Append('-Xn');
-        {$ENDIF}
+        {$endif}
+        {$endif}
 
         {$IF (defined(NetBSD)) and (not defined(Darwin))}
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');

@@ -91,6 +91,7 @@ type
     FTargetOS: string; //operating system for the target environment. Follows FPC names
     FSubArch: string; //optional subarch for embedded targets
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
+    FSolarisOI:boolean;
     FMUSL:boolean;
     // Sets FBinutilspath if file LookFor found in Directory. Returns true if found.
     function SearchLibrary(Directory, LookFor: string): boolean;
@@ -149,6 +150,7 @@ type
     // Target Operating System (in FPC notation). Used to select cross compiler
     property TargetOS:string read FTargetOS;
     property SubArch:string read FSubArch;
+    property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
     constructor Create;
     destructor Destroy; override;

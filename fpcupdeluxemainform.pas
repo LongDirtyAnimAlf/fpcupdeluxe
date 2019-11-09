@@ -294,7 +294,7 @@ begin
   {$endif}
 
   {$ifndef MSWINDOWS}
-  ExtraSheet.TabVisible:=false;
+  btnGetOpenSSL.Visible:=false;
   {$endif}
 
   {$IF defined(CPUAARCH64) OR defined(CPUARM) OR (DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)) OR defined(Haiku)}
@@ -1931,6 +1931,13 @@ begin
       FPCupManager.MUSL:=true;
       s:='linux';
     end;
+
+    if s='solaris-oi' then
+    begin
+      FPCupManager.SolarisOI:=true;
+      s:='solaris';
+    end;
+
     FPCupManager.CrossOS_Target:=s;
   end;
 
@@ -2335,7 +2342,8 @@ begin
     AddMessage(upBuildCrossCompiler);
 
     s:='Fpcupdeluxe: FPC cross-builder: Building compiler for '+FPCupManager.CrossOS_Target;
-    if FPCupManager.MUSL then s:=s+'musl';
+    if FPCupManager.MUSL then s:=s+'-musl';
+    if FPCupManager.SolarisOI then s:=s+'-openindiana';
     s:=s+'-'+FPCupManager.CrossCPU_Target;
     sStatus:=s;
 
@@ -2439,6 +2447,7 @@ begin
                 BinsFileName:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsFileName;
 
         if FPCupManager.MUSL then BinsFileName:='MUSL'+BinsFileName;
+        if FPCupManager.SolarisOI then BinsFileName:=BinsFileName+'OI';
 
         // normally, we have the same names for libs and bins URL
         LibsFileName:=BinsFileName;
@@ -2453,6 +2462,11 @@ begin
         end;
         LibPath:=LibPath+FPCupManager.CrossOS_Target;
         BinPath:=BinPath+FPCupManager.CrossOS_Target;
+        if FPCupManager.SolarisOI then
+        begin
+          LibPath:=LibPath+'-oi';
+          BinPath:=BinPath+'-oi';
+        end;
 
         if FPCupManager.CrossOS_Target='darwin' then
         begin
@@ -2917,6 +2931,7 @@ begin
       {$IFDEF win32}
         //Only auto-install win32 -> win64 crossutils
         FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
+        FPCupManager.OnlyModules:=_LAZARUSSIMPLE;
       {$ELSE}
         {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(OPENBSD)}
           FPCupManager.OnlyModules:=_LAZARUSSIMPLE;
@@ -3102,6 +3117,7 @@ begin
   FPCupManager.CrossOS_SubArch:='';
   FPCupManager.CrossLCL_Platform:='';
 
+  FPCupManager.SolarisOI:=false;
   FPCupManager.MUSL:=false;
 
   FPCupManager.FPCOPT:=Form2.FPCOptions;;
@@ -3149,11 +3165,8 @@ begin
 
   sInstallDir:=sInstallDir+DirectorySeparator;
 
-  {$IFDEF MSWINDOWS}
   FPCupManager.MakeDirectory:=sInstallDir+'fpcbootstrap';
-  {$ELSE}
-  FPCupManager.MakeDirectory:='';
-  {$ENDIF MSWINDOWS}
+
   FPCupManager.BootstrapCompilerDirectory:=sInstallDir+'fpcbootstrap';
 
   FPCupManager.FPCInstallDirectory:=sInstallDir+'fpc';
@@ -3396,7 +3409,7 @@ function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aTarget,aURL:string;
   aIndex:integer;
-  MemAvailable,SwapAvailable:DWord;
+  Cores,MemAvailable,SwapAvailable:DWord;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);
 
@@ -3408,10 +3421,11 @@ begin
   AddMessage('Running on '+GetDistro);
   {$endif}
 
-  AddMessage('CPU cores used: '+InttoStr(GetLogicalCpuCount));
+  Cores:=GetLogicalCpuCount;
+  if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));
 
   MemAvailable:=GetTotalPhysicalMemory;
-  AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
+  if (MemAvailable<>0) then AddMessage('Available physical memory: '+InttoStr(MemAvailable)+' MB');
 
   SwapAvailable:=GetSwapFileSize;
 
@@ -3421,7 +3435,7 @@ begin
 
   MemAvailable:=MemAvailable+SwapAvailable;
 
-  if (MemAvailable<1500) then
+  if (MemAvailable<>0) AND (MemAvailable<1500) then
   begin
     AddMessage('Please be warned: memory is very limited for building Lazarus');
     {$IFDEF LINUX}

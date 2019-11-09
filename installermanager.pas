@@ -233,6 +233,7 @@ type
     FNativeFPCBootstrapCompiler:boolean;
     FForceLocalRepoClient:boolean;
     FSequencer: TSequencer;
+    FSolarisOI:boolean;
     FMUSL:boolean;
     {$ifndef FPCONLY}
     function GetLazarusPrimaryConfigPath: string;
@@ -345,6 +346,7 @@ type
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
     property ForceLocalRepoClient:boolean read FForceLocalRepoClient write FForceLocalRepoClient;
+    property SolarisOI:boolean read FSolarisOI write FSolarisOI;
     property MUSL:boolean read FMUSL write FMUSL;
 
     // Fill in ModulePublishedList and ModuleEnabledList and load other config elements
@@ -1473,10 +1475,9 @@ begin
     FInstaller.ExportOnly:=FParent.ExportOnly;
     FInstaller.NoJobs:=FParent.NoJobs;
     FInstaller.Log:=FParent.FLog;
-    {$IFDEF MSWINDOWS}
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
-    {$ENDIF}
     FInstaller.SwitchURL:=FParent.SwitchURL;
+    if FParent.SolarisOI then FInstaller.SolarisOI:=true;
     if FParent.MUSL then FInstaller.MUSL:=true;
   end;
 end;

@@ -2965,6 +2965,7 @@ object Form1: TForm1
           'msdos'
           'haiku'
           'solaris'
+          'solaris-oi'
           'netbsd'
         )
         OnClick = radgrpOSClick
@@ -3125,32 +3126,45 @@ object Form1: TForm1
       ClientWidth = 302
       object btnGetOpenSSL: TButton
         AnchorSideLeft.Control = ExtraSheet
-        AnchorSideTop.Control = ExtraSheet
-        Left = 6
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = ChkMakefileLaz
+        AnchorSideTop.Side = asrBottom
+        Left = 74
         Height = 25
-        Top = 8
+        Top = 98
         Width = 155
         AutoSize = True
         BorderSpacing.Left = 6
-        BorderSpacing.Top = 8
+        BorderSpacing.Top = 16
         Caption = 'Get OpenSSL by Browser'
         OnClick = btnGetOpenSSLClick
         TabOrder = 0
       end
       object ChkMakefileFPC: TButton
-        Left = 6
-        Height = 51
-        Top = 46
-        Width = 234
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = ExtraSheet
+        Left = 86
+        Height = 25
+        Top = 16
+        Width = 131
+        AutoSize = True
+        BorderSpacing.Top = 16
         Caption = 'Check Makefile FPC'
         OnClick = ChkMakefileFPCClick
         TabOrder = 1
       end
       object ChkMakefileLaz: TButton
-        Left = 6
-        Height = 51
-        Top = 104
-        Width = 234
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = ChkMakefileFPC
+        AnchorSideTop.Side = asrBottom
+        Left = 77
+        Height = 25
+        Top = 57
+        Width = 149
+        AutoSize = True
+        BorderSpacing.Top = 16
         Caption = 'Check Makefile Lazarus'
         OnClick = ChkMakefileFPCClick
         TabOrder = 2

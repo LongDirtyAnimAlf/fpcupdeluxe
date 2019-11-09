@@ -309,6 +309,7 @@ begin
     // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     CrossInstaller.SetSubArch(CrossOS_SubArch);
+    CrossInstaller.SolarisOI:=FSolarisOI;
     CrossInstaller.MUSL:=FMUSL;
     if not CrossInstaller.GetBinUtils(FFPCInstallDir) then
       infoln(infotext+'Failed to get crossbinutils', etError)
@@ -675,6 +676,7 @@ begin
       _LAZARUS:
       begin
         Processor.Parameters.Add('all');
+        //Processor.Parameters.Add('install');
         infoln(infotext+'Running: make all', etInfo);
       end;
       _STARTLAZARUS:
