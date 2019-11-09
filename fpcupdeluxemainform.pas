@@ -2440,14 +2440,17 @@ begin
           if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
         end;
 
-        if FPCupManager.CrossOS_Target='freebsd' then BinsFileName:='FreeBSD'+BinsFileName else
-          if FPCupManager.CrossOS_Target='openbsd' then BinsFileName:='OpenBSD'+BinsFileName else
-            if FPCupManager.CrossOS_Target='aix' then BinsFileName:='AIX'+BinsFileName else
-              if FPCupManager.CrossOS_Target='msdos' then BinsFileName:='MSDos'+BinsFileName else
-                BinsFileName:=UppercaseFirstChar(FPCupManager.CrossOS_Target)+BinsFileName;
+
+        if FPCupManager.CrossOS_Target='freebsd' then s:='FreeBSD' else
+          if FPCupManager.CrossOS_Target='openbsd' then s:='OpenBSD' else
+            if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
+              if FPCupManager.CrossOS_Target='msdos' then s:='MSDos' else
+                s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
+
+        if FPCupManager.SolarisOI then s:=s+'OI';
+        BinsFileName:=s+BinsFileName;
 
         if FPCupManager.MUSL then BinsFileName:='MUSL'+BinsFileName;
-        if FPCupManager.SolarisOI then BinsFileName:=BinsFileName+'OI';
 
         // normally, we have the same names for libs and bins URL
         LibsFileName:=BinsFileName;

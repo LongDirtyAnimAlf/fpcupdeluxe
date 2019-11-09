@@ -2235,9 +2235,13 @@ begin
   { Github Repository https://github.com/Xor-el }
   result:=TNumCPULib.GetLogicalCPUCount();
 
-  if GetTotalPhysicalMemory=0 then exit;
   TotalMBMemory:=GetTotalPhysicalMemory+GetSwapFileSize;
-  if TotalMBMemory=0 then exit;
+  if TotalMBMemory=0 then
+  begin
+    // no info : be safe
+    result:=1;
+    exit;
+  end;
 
   // limit the amount of spawn processes in case of limited memory
   if (TotalMBMemory<3000) then
