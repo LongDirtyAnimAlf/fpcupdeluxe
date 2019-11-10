@@ -544,17 +544,26 @@ var
   output:string;
 begin
   {$IFDEF MSWINDOWS}
+  {$IFDEF CPUX86}
   if FShell = '' then
   begin
-    ExecuteCommand('cmd.exe /C echo %COMSPEC%', output, False);
-    FShell := Trim(output);
-    if FShell = '' then
+    // disable for now .... not working 100%
+    {
+    // do we have a stray sh.exe in the path ...
+    if (Length(Which('sh.exe'))>0) then
     begin
-      //for older Windows versions
-      ExecuteCommand('ECHO %COMSPEC%', output, False);
+      ExecuteCommand('cmd.exe /C echo %COMSPEC%', output, False);
       FShell := Trim(output);
+      if FShell = '' then
+      begin
+        //for older Windows versions
+        ExecuteCommand('ECHO %COMSPEC%', output, False);
+        FShell := Trim(output);
+      end;
     end;
+    }
   end;
+  {$ENDIF CPU32}
   {$ENDIF MSWINDOWS}
   Result := FShell;
 end;
@@ -1254,6 +1263,7 @@ begin
   AddNewUtil('Qt4Pas5.dll',SourceURL_QT,'',ucQtFile);
   AddNewUtil('Qt5Pas1.dll',SourceURL_QT5,'',ucQtFile);
   {$endif win32}
+
   {$ifdef win64}
   AddNewUtil('ar' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('as' + GetExeExt,aSourceURL64,'',ucBinutil);

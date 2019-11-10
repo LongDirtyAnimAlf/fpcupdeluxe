@@ -2079,7 +2079,7 @@ var
   aCompilerList:TStringList;
   i,j:integer;
   aCompilerArchive,aStandardCompilerArchive:string;
-  aCompilerFound,aFPCUPCompilerFound:boolean;
+  aCompilerFound,aFPCUPCompilerFound, aLookForBetterAlternative:boolean;
   {$IFDEF FREEBSD}
   k,l,FreeBSDVersion:integer;
   {$ENDIF}
@@ -2282,8 +2282,17 @@ begin
 
       end;
 
+      aLookForBetterAlternative:=false;
+      {$ifdef Darwin}
+      {$ifdef CPUX64}
+      // Catalina does not like the multi-arch bootstrappers from FPC itself.
+      // Try to get a better one from fpcupdeluxe bootstrapper repository itself.
+      if (aCompilerFound) then aLookForBetterAlternative:=true;
+      {$endif}
+      {$endif}
+
       // second, try the FPCUP binaries from release, perhaps it is a better version
-      if (NOT aCompilerFound) OR (FBootstrapCompilerOverrideVersionCheck) then
+      if (NOT aCompilerFound) OR (FBootstrapCompilerOverrideVersionCheck) OR (aLookForBetterAlternative) then
       begin
 
         if (NOT FBootstrapCompilerOverrideVersionCheck) then
@@ -2335,6 +2344,7 @@ begin
             if FMUSL then s:=s+'musl';
             {$endif LINUX}
             {$ifdef Solaris}
+            //perhaps needed for special Solaris OpenIndiana bootstrapper
             //if FSolarisOI then s:=s+'OI';
             {$endif Solaris}
             s:=s+GetTargetOS;
@@ -2388,10 +2398,15 @@ begin
           end
           else
           begin
-            if GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) then
+            if (
+              ( GetNumericalVersion(aLocalFPCUPBootstrapVersion)>GetNumericalVersion(aLocalBootstrapVersion) )
+              OR
+              ( (GetNumericalVersion(aLocalFPCUPBootstrapVersion)=GetNumericalVersion(aLocalBootstrapVersion)) AND aLookForBetterAlternative )
+              ) then
             begin
               aCompilerFound:=true;
               infoln(localinfotext+'Got a better [version] bootstrap compiler from FPCUP(deluxe) bootstrap binaries.',etInfo);
+              if aLookForBetterAlternative then infoln(localinfotext+'This is important for OSX Cataline, that dislikes FPC multi-arch binaries.',etInfo);
               aLocalBootstrapVersion:=aLocalFPCUPBootstrapVersion;
               FBootstrapCompilerURL:=aFPCUPBootstrapURL;
               // set standard bootstrap compilername
