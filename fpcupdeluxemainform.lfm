@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 249
-  Height = 631
-  Top = 190
+  Left = 279
+  Height = 685
+  Top = 121
   Width = 1004
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 611
+  ClientHeight = 665
   ClientWidth = 1004
   Constraints.MinHeight = 620
   Menu = MainMenu1
@@ -25,7 +25,7 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 512
+    Top = 566
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -91,7 +91,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 336
-    Height = 357
+    Height = 411
     Top = 62
     Width = 656
     BorderSpacing.Top = 6
@@ -689,7 +689,7 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 551
+    Top = 605
     Width = 986
     Align = alBottom
     AutoSize = True
@@ -1951,7 +1951,7 @@ object Form1: TForm1
     Left = 336
     Height = 120
     Hint = 'Will show error'
-    Top = 427
+    Top = 481
     Width = 656
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
@@ -1968,7 +1968,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 469
+    Height = 523
     Top = 35
     Width = 310
     ActivePage = BasicSheet
@@ -1980,7 +1980,7 @@ object Form1: TForm1
     TabOrder = 11
     object BasicSheet: TTabSheet
       Caption = 'Basic'
-      ClientHeight = 441
+      ClientHeight = 495
       ClientWidth = 302
       object FPCVersionLabel: TLabel
         AnchorSideLeft.Control = ListBoxFPCTarget
@@ -2008,7 +2008,7 @@ object Form1: TForm1
         AnchorSideTop.Control = BasicSheet
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 229
+        Height = 283
         Top = 42
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2047,7 +2047,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 231
+        Height = 285
         Top = 40
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2069,7 +2069,7 @@ object Form1: TForm1
         Left = 8
         Height = 70
         Hint = 'Only install/update selected FPC version.'
-        Top = 287
+        Top = 341
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -2223,7 +2223,7 @@ object Form1: TForm1
         Left = 163
         Height = 70
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 287
+        Top = 341
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -2378,7 +2378,7 @@ object Form1: TForm1
         Left = 8
         Height = 68
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 365
+        Top = 419
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Left = 8
@@ -2880,14 +2880,14 @@ object Form1: TForm1
     end
     object CrossSheet: TTabSheet
       Caption = 'Cross'
-      ClientHeight = 441
+      ClientHeight = 495
       ClientWidth = 302
       object radgrpCPU: TRadioGroup
         AnchorSideLeft.Control = CrossSheet
         AnchorSideTop.Control = CrossSheet
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 8
-        Height = 339
+        Height = 393
         Top = 8
         Width = 130
         Anchors = [akTop, akLeft, akBottom]
@@ -2903,7 +2903,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 319
+        ClientHeight = 373
         ClientWidth = 126
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -2932,7 +2932,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = ButtonInstallCrossCompiler
         Left = 164
-        Height = 339
+        Height = 393
         Top = 8
         Width = 130
         Anchors = [akTop, akRight, akBottom]
@@ -2948,7 +2948,7 @@ object Form1: TForm1
         ChildSizing.ShrinkVertical = crsScaleChilds
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
-        ClientHeight = 319
+        ClientHeight = 373
         ClientWidth = 126
         Constraints.MaxWidth = 150
         Items.Strings = (
@@ -2982,7 +2982,7 @@ object Form1: TForm1
         Left = 8
         Height = 39
         Hint = 'Install the selected CPU-OS cross-compiler.'
-        Top = 355
+        Top = 409
         Width = 130
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
@@ -3003,7 +3003,7 @@ object Form1: TForm1
         Left = 8
         Height = 37
         Hint = 'Auto-update all installed cross-compilers.'
-        Top = 398
+        Top = 452
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 4
@@ -3024,7 +3024,7 @@ object Form1: TForm1
         Left = 164
         Height = 39
         Hint = 'Remove the selected CPU-OS cross-compiler.'
-        Top = 355
+        Top = 409
         Width = 130
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6

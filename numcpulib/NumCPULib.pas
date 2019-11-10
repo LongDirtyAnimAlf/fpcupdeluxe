@@ -447,6 +447,8 @@ type
     : TNumCPULibStringArray; static;
 
   class function ParseLastString(const AInputString: String): String; static;
+  class function ParseInt32(const AInputString: String;
+    ADefault: Int32): Int32;
   class function ParseLastInt32(const AInputString: String; ADefault: Int32)
     : Int32; static;
 
@@ -1027,12 +1029,12 @@ begin
   end;
 end;
 
-class function TNumCPULib.ParseLastInt32(const AInputString: String;
+class function TNumCPULib.ParseInt32(const AInputString: String;
   ADefault: Int32): Int32;
 var
   LLocalString: String;
 begin
-  LLocalString := ParseLastString(AInputString);
+  LLocalString := AInputString;
   if BeginsWith(LowerCase(LLocalString), '0x', False) then
   begin
     Result := StrToIntDef(StringReplace(LLocalString, '0x', '$',
@@ -1042,6 +1044,16 @@ begin
   begin
     Result := StrToIntDef(LLocalString, ADefault);
   end;
+end;
+
+
+class function TNumCPULib.ParseLastInt32(const AInputString: String;
+  ADefault: Int32): Int32;
+var
+  LLocalString: String;
+begin
+  LLocalString := ParseLastString(AInputString);
+  result:=ParseInt32(LLocalString,ADefault);
 end;
 
 class function TNumCPULib.BeginsWith(const AInputString, ASubString: String;
@@ -1352,9 +1364,9 @@ end;
 class function TNumCPULib.GetTotalPhysicalMemorySolaris(): UInt32; static;
 var
   LInputParameters, LOuputParameters: TStringList;
-  LLineOutputInfo: String;
+  LLineOutputInfo,aLastWord: String;
   MemoryPages:QWord;
-  LIdx: Int32;
+  LIdx,LWordCount: Int32;
 begin
   Result := 0;
 
@@ -1374,10 +1386,11 @@ begin
     for LIdx := 0 to System.Pred(LOuputParameters.Count) do
     begin
       LLineOutputInfo := LOuputParameters[LIdx];
-      writeln(LLineOutputInfo);
-      if BeginsWith(LLineOutputInfo, 'unix:0:system_pages:physmem', False) then
+      if AnsiStartsText('unix:0:system_pages:physmem',LLineOutputInfo) then
       begin
-        MemoryPages := QWord(ParseLastInt32(LLineOutputInfo, 0));
+        LWordCount:=WordCount(LLineOutputInfo,[' ',#9]);
+        aLastWord:=ExtractWord(LWordCount,LLineOutputInfo,[' ',#9]);
+        MemoryPages := QWord(ParseInt32(aLastWord, 0));
         MemoryPages := MemoryPages*4096;//4096 = pagesize
         MemoryPages := MemoryPages DIV (1024*1024);
         result:=UInt32(MemoryPages);
