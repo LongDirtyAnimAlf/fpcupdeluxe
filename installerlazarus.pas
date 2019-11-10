@@ -161,10 +161,10 @@ const
     _RESETLCL+_SEP + //module code itself will select proper widgetset
     _CLEANMODULE+_LCLCROSS+_SEP+
     _BUILDMODULE+_LCLCROSS+_SEP +
+    _END+
 
     _DECLARE+_MAKEFILECHECK+_LAZARUS+_SEP+
     _BUILDMODULE+_MAKEFILECHECK+_LAZARUS+_SEP+
-    _END+
 
     _ENDFINAL;
 

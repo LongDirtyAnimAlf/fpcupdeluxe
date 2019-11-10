@@ -1076,14 +1076,6 @@ begin
 
   OperationSucceeded := true;
 
-  {$ifdef Solaris}
-  if (NOT FileExists('/bin/gstrip')) AND (FileExists('/bin/strip')) then
-  begin
-    FileUtil.CopyFile('/bin/strip',ExcludeTrailingPathDelimiter(FMakeDir)+'/bin/gstrip');
-  end;
-  {$endif}
-
-
   {$IFDEF MSWINDOWS}
   if OperationSucceeded then
   begin

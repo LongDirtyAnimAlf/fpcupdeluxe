@@ -3123,7 +3123,7 @@ begin
   FPCupManager.SolarisOI:=false;
   FPCupManager.MUSL:=false;
 
-  FPCupManager.FPCOPT:=Form2.FPCOptions;;
+  FPCupManager.FPCOPT:=Form2.FPCOptions;
   FPCupManager.CrossOPT:='';
 
   FPCupManager.CrossLibraryDirectory:='';
@@ -3495,7 +3495,7 @@ begin
 
       if (listModules.Items.Count>0) then listModules.ItemIndex:=ReadInteger('General','Module',listModules.ItemIndex);
 
-      Form2.FPCOptions:=ReadString('General','FPCOptions','');
+      Form2.FPCOptions:=ReadString('General','FPCOptions',Form2.FPCOptions);
       Form2.LazarusOptions:=ReadString('General','LazarusOptions','');
       Form2.FPCRevision:=ReadString('General','FPCRevision','');
       Form2.LazarusRevision:=ReadString('General','LazarusRevision','');
@@ -3529,6 +3529,14 @@ begin
 
     {$ifdef usealternateui}
     alternateui_update_interface_buttons;
+    {$endif}
+  end
+  else
+  begin
+    {$ifdef Solaris}
+    // current trunk does not build with the standard -O2, so use -O1 for all
+    Form2.FPCOptions:='-g -gl -O1';
+    FPCupManager.FPCOPT:=Form2.FPCOptions;
     {$endif}
   end;
 end;

@@ -479,6 +479,7 @@ type
     AInputParameters: TStringList; var AOutputParameters: TStringList);
   class function GetLogicalCPUCountSolaris(): UInt32; static;
   class function GetPhysicalCPUCountSolaris(): UInt32; static;
+  class function GetTotalPhysicalMemorySolaris(): UInt32; static;
 {$ENDIF}
   // ================================================================//
 {$IFDEF NUMCPULIB_GENERIC_BSD}
@@ -1347,6 +1348,50 @@ begin
     LOuputParameters.Free;
   end;
 end;
+
+class function TNumCPULib.GetTotalPhysicalMemorySolaris(): UInt32; static;
+var
+  LInputParameters, LOuputParameters: TStringList;
+  LLineOutputInfo: String;
+  MemoryPages:QWord;
+  LIdx: Int32;
+begin
+  Result := 0;
+
+  LInputParameters := TStringList.Create();
+  LOuputParameters := TStringList.Create();
+  try
+    LInputParameters.Add('-n');
+    LInputParameters.Add('system_pages');
+    LInputParameters.Add('-p');
+    LInputParameters.Add('-s');
+    LInputParameters.Add('physmem');
+
+
+    ExecuteAndParseProcessOutput('/usr/bin/kstat', LInputParameters,
+      LOuputParameters);
+
+    for LIdx := 0 to System.Pred(LOuputParameters.Count) do
+    begin
+      LLineOutputInfo := LOuputParameters[LIdx];
+      writeln(LLineOutputInfo);
+      if BeginsWith(LLineOutputInfo, 'unix:0:system_pages:physmem', False) then
+      begin
+        MemoryPages := QWord(ParseLastInt32(LLineOutputInfo, 0));
+        MemoryPages := MemoryPages*4096;//4096 = pagesize
+        MemoryPages := MemoryPages DIV (1024*1024);
+        result:=UInt32(MemoryPages);
+        break;
+      end
+    end;
+
+  finally
+    LInputParameters.Free;
+    LOuputParameters.Free;
+  end;
+end;
+
+
 {$ENDIF}
 // ================================================================//
 {$IFDEF NUMCPULIB_GENERIC_BSD}
@@ -1410,8 +1455,7 @@ begin
 {$ELSEIF DEFINED(NUMCPULIB_LINUX)}
   Result := GetTotalPhysicalMemoryLinux();
 {$ELSEIF DEFINED(NUMCPULIB_SOLARIS)}
-  //Result := GetTotalPhysicalMemorySolaris();
-  Result := 0;
+  Result := GetTotalPhysicalMemorySolaris();
 {$ELSE}
   // fallback for other Unsupported Oses
   Result := 0;

@@ -103,10 +103,10 @@ Const
     _DECLARE+_FPCREMOVEONLY+_SEP+
     _CLEANMODULE+_FPC+_SEP+
     _UNINSTALLMODULE+_FPC+_SEP+
+    _END+
 
     _DECLARE+_MAKEFILECHECK+_FPC+_SEP+
     _BUILDMODULE+_MAKEFILECHECK+_FPC+_SEP+
-    _END+
 
     _ENDFINAL;
 
@@ -2654,6 +2654,26 @@ begin
     //CreateBinutilsList(GetFPCVersionFromSource(FSourceDirectory));
     CreateBinutilsList(RequiredBootstrapVersion);
     result:=CheckAndGetNeededBinUtils;
+
+    {$ifdef Solaris}
+    //sometimes, gstrip does not exist on Solaris ... just copy it to a place where it can be found ... tricky
+    if (NOT FileExists('/usr/bin/gstrip')) AND (FileExists('/usr/bin/strip')) then
+    begin
+      if DirectoryExists(FBinPath) then
+      begin
+        s:=IncludeTrailingPathDelimiter(FBinPath)+'gstrip';
+        if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
+      end
+      else
+      begin
+        ForceDirectoriesSafe(FInstallDirectory);
+        s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'gstrip';
+        if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
+      end;
+    end;
+    {$endif}
+
+
     //if not result then exit;
 
     {$ifdef win64}

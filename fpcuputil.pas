@@ -2191,7 +2191,7 @@ begin
     end;
   end;
 
-  {$IFNDEF DARWIN}
+  {$IF (not defined(Solaris)) and (not defined(Darwin))}
   if (NOT FoundLinkFile) then
   begin
     infoln('GetGCCDirectory: Could not find ' + LINKFILE + ' on system. Expect linking warnings/errors.',etWarning);
