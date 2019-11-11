@@ -2934,7 +2934,6 @@ begin
       {$IFDEF win32}
         //Only auto-install win32 -> win64 crossutils
         FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
-        FPCupManager.OnlyModules:=_LAZARUSSIMPLE;
       {$ELSE}
         {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(OPENBSD)}
           FPCupManager.OnlyModules:=_LAZARUSSIMPLE;
