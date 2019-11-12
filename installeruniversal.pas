@@ -547,6 +547,18 @@ begin
     PackageFiles.Free;
   end;
 
+  // find a fpcupdeluxe ccr component, if any
+  // all other packages will be ignored
+  {
+  Path:=IncludeTrailingPathDelimiter(FBaseDirectory)+'ccr';
+  if ( (NOT FileExists(PackageAbsolutePath)) AND DirectoryExists(Path) ) then
+  begin
+    PackageFiles:=FindAllFiles(Path, PackageName+'.lpk' , true);
+    if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
+    PackageFiles.Free;
+  end;
+  }
+
   lpkversion.Name:='unknown';
   if FileExists(PackageAbsolutePath) then
   begin
