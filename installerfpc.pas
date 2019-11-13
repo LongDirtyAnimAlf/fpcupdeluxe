@@ -1744,6 +1744,17 @@ begin
   if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
   {$ENDIF}
 
+  {$IFDEF HAIKU}
+  {$IFDEF CPUX64}
+  // we need at least 3.2.0 for Haiku x86_64
+  if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  {$ENDIF}
+  {$IFDEF CPUX32}
+  // we need at least 3.0.0 for Haiku x32
+  if GetNumericalVersion(result)<GetNumericalVersion('3.0.0') then result:='3.0.0';
+  {$ENDIF}
+  {$ENDIF}
+
   {$IF DEFINED(CPUPOWERPC64) AND DEFINED(FPC_ABI_ELFV2)}
   // we need at least 3.2.0 for ppc64le
   if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';

@@ -2753,8 +2753,6 @@ begin
   FReleaseVersion := -1;
   FPatchVersion := -1;
 
-  FSolarisOI:=false;
-
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
   FMUSL:=FileExists(FMUSLLinker);
@@ -2762,6 +2760,15 @@ begin
   {$else}
   FMUSL:=false;
   {$endif}
+
+  {$ifdef Solaris}
+  FSolarisOI:=false;
+  if FSolarisOI then infoln('Fpcupdeluxe: We have an OpenIndiana Solaris version !',etInfo);
+  {$else}
+  FSolarisOI:=false;
+  {$endif}
+
+
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;

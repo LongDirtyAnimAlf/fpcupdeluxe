@@ -2560,11 +2560,19 @@ begin
                       if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins_v1.0';
                     end
                     else
-                      if GetTargetOS='darwin' then
+                      if GetTargetOS='solaris' then
                       begin
-                        if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins_v1.0';
-                        if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins_v1.0';
-                      end;
+                        {if FPCupManager.SolarisOI then}
+                        begin
+                          if GetTargetCPU='x86_64' then BaseBinsURL:='solarisoix64crossbins_v1.0';
+                        end;
+                      end
+                      else
+                        if GetTargetOS='darwin' then
+                        begin
+                          if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins_v1.0';
+                          if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins_v1.0';
+                        end;
 
             // no cross-bins available
             if (Length(BaseBinsURL)=0) then

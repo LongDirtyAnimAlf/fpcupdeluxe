@@ -25,7 +25,7 @@
     <i18n>
       <EnableI18N LFM="False"/>
     </i18n>
-    <BuildModes Count="20">
+    <BuildModes Count="21">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
@@ -627,10 +627,49 @@
           </Linking>
         </CompilerOptions>
       </Item20>
+      <Item21 Name="haikuix64QT5">
+        <MacroValues Count="1">
+          <Macro3 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="haiku"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+            </Debugging>
+            <Options>
+              <Win32>
+                <GraphicApplication Value="True"/>
+              </Win32>
+            </Options>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath ./&quot;
+-k&quot;-rpath /boot/system/develop/lib/x86&quot;
+-k&quot;-rpath ~/config/non-packaged/lib&quot;"/>
+          </Other>
+        </CompilerOptions>
+      </Item21>
       <SharedMatrixOptions Count="3">
         <Item1 ID="178210829291" Modes="darwin64cocoa,darwin32cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
         <Item2 ID="784204643275" Modes="DefaultQT,darwin64QT" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item3 ID="477497289322" Modes="haikui386QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item3 ID="477497289322" Modes="haikui386QT5,haikuix64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>

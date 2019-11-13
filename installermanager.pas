@@ -1477,8 +1477,8 @@ begin
     FInstaller.Log:=FParent.FLog;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     FInstaller.SwitchURL:=FParent.SwitchURL;
-    if FParent.SolarisOI then FInstaller.SolarisOI:=true;
-    if FParent.MUSL then FInstaller.MUSL:=true;
+    if FParent.SolarisOI then FInstaller.SolarisOI:=true else {if FInstaller.SolarisOI then FParent.SolarisOI:=true};
+    if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
   end;
 end;
 
