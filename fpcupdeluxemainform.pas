@@ -2894,7 +2894,11 @@ begin
 
     if Form2.UpdateOnly then
     begin
+      {$ifdef win32}
+      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
+      {$else}
       FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
+      {$endif}
     end
     else
     begin
