@@ -180,7 +180,7 @@ uses
   StrUtils, typinfo,inifiles, FileUtil, fpcuputil, process;
 
 Const
-  MAXSYSMODULES=200;
+  MAXSYSMODULES=250;
   MAXUSERMODULES=20;
   // Allow enough instructions per module:
   MAXINSTRUCTIONS=255;
@@ -2093,14 +2093,15 @@ var
     end;
   end;
 
-  function CreateModuleSequence(aModuleName:string):string;
+  function CreateModuleSequence(aModuleName:string;IsHidden:boolean=false):string;
   var
-    ModuleName,RequiredModules:string;
+    ModuleName,Declaration,RequiredModules:string;
   begin
     result:='';
     ModuleName:=ini.ReadString(aModuleName,INIKEYWORD_NAME,'');
     if ModuleName<>'' then
-      begin
+    begin
+      if IsHidden then Declaration:=_DECLAREHIDDEN else Declaration:=_DECLARE;
       RequiredModules:=ini.ReadString(aModuleName,Trim(_REQUIRES),'');
       if RequiredModules<>'' then
       begin
@@ -2109,20 +2110,20 @@ var
       end;
 
       result:=
-          _DECLARE+ ModuleName + _SEP +
+          Declaration+ ModuleName + _SEP +
           RequiredModules +
           _CLEANMODULE + ModuleName +_SEP +
           _GETMODULE + ModuleName +_SEP +
           _BUILDMODULE + ModuleName +_SEP +
           _CONFIGMODULE + ModuleName +_SEP +
           _END +
-          _DECLARE + ModuleName + _CLEAN + _SEP +
+          Declaration + ModuleName + _CLEAN + _SEP +
           _CLEANMODULE + ModuleName +_SEP +
           _END +
-          _DECLARE + ModuleName + _UNINSTALL + _SEP +
+          Declaration + ModuleName + _UNINSTALL + _SEP +
           _UNINSTALLMODULE + ModuleName +_SEP +
           _END;
-      end;
+    end;
   end;
 
 begin
@@ -2147,6 +2148,10 @@ begin
     for i:=0 to maxmodules do
       if LoadModule('UserModule'+IntToStr(i))then
         result:=result+CreateModuleSequence('UserModule'+IntToStr(i));
+    for i:=0 to maxmodules do
+      if LoadModule('HiddenModule'+IntToStr(i))then
+        result:=result+CreateModuleSequence('HiddenModule'+IntToStr(i),true);
+
     // the overrides in the [general] section
     for i:=0 to UniModuleList.Count-1 do
       begin
