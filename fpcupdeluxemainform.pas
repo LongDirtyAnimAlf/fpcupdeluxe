@@ -345,7 +345,7 @@ begin
   {$IFDEF MSWINDOWS}
   sInstallDir:='C:\fpcupdeluxe';
   {$ELSE}
-  sInstallDir:='~/fpcupdeluxe';
+  sInstallDir:=ExpandFileName('~/fpcupdeluxe');
   btnGetOpenSSL.Visible:=False;
   {$ENDIF}
 
@@ -3319,6 +3319,8 @@ begin
     AddMessage('Switching towards old lazarus sequence !!');
   end;
 
+  AddMessage('FPCupdeluxe basedir:   '+FPCupManager.BaseDirectory);
+
   AddMessage('FPC URL:               '+FPCupManager.FPCURL);
   AddMessage('FPC options:           '+FPCupManager.FPCOPT);
   AddMessage('FPC source directory:  '+FPCupManager.FPCSourceDirectory);
@@ -3558,17 +3560,21 @@ begin
 end;
 
 function TForm1.SetFPCUPSettings(IniDirectory:string):boolean;
+var
+  aDir:string;
 begin
   result:=false;
 
   if NOT Assigned(FPCupManager) then exit;
   if NOT Assigned(Form2) then exit;
 
-  result:=DirectoryExists(ExtractFileDir(IniDirectory+installerUniversal.DELUXEFILENAME));
-  if not result then exit;
+  aDir:=ExtractFileDir(IncludeTrailingPathDelimiter(IniDirectory)+installerUniversal.DELUXEFILENAME);
+  result:=DirectoryExistsSafe(aDir);
+
+  if (NOT result) then exit;
 
   try
-    with TIniFile.Create(IniDirectory+installerUniversal.DELUXEFILENAME) do
+    with TIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
     try
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));

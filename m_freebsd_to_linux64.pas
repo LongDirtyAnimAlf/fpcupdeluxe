@@ -77,7 +77,7 @@ begin
   if result then exit;
 
   FLibsPath:='/compat/linux/lib';
-  result:=DirectoryExists(FLibsPath);
+  result:=DirectoryExistsSafe(FLibsPath);
   if result then
   begin
     FLibsFound:=true;

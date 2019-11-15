@@ -34,7 +34,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller, fileutil;
+  Classes, SysUtils, m_crossinstaller, fileutil, fpcuputil;
 
 implementation
 
@@ -136,7 +136,7 @@ begin
   begin
     {$IFDEF UNIX}
     FLibsPath:='/usr/lib/arm-darwin-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
+    result:=DirectoryExistsSafe(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}

@@ -1407,7 +1407,7 @@ begin
     end;
   end;
 
-  if (Length(Processor.CurrentDirectory)=0) OR (NOT DirectoryExists(Processor.CurrentDirectory)) then
+  if (Length(Processor.CurrentDirectory)=0) OR (NOT DirectoryExistsSafe(Processor.CurrentDirectory)) then
   begin
     Processor.Parameters.Add('--help'); // this should render make harmless
     WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
@@ -1747,7 +1747,8 @@ begin
   {$IFDEF HAIKU}
   {$IFDEF CPUX64}
   // we need at least 3.2.0 for Haiku x86_64
-  if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  //if GetNumericalVersion(result)<GetNumericalVersion('3.2.0') then result:='3.2.0';
+  if GetNumericalVersion(result)<GetNumericalVersion(FPCTRUNKVERSION) then result:=FPCTRUNKVERSION;
   {$ENDIF}
   {$IFDEF CPUX32}
   // we need at least 3.0.0 for Haiku x32
@@ -2685,7 +2686,7 @@ begin
     //sometimes, gstrip does not exist on Solaris ... just copy it to a place where it can be found ... tricky
     if (NOT FileExists('/usr/bin/gstrip')) AND (FileExists('/usr/bin/strip')) then
     begin
-      if DirectoryExists(FBinPath) then
+      if DirectoryExistsSafe(FBinPath) then
       begin
         s:=IncludeTrailingPathDelimiter(FBinPath)+'gstrip';
         if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
@@ -3167,7 +3168,7 @@ var
 begin
   result:=inherited;
 
-  if not DirectoryExists(FSourceDirectory) then
+  if not DirectoryExistsSafe(FSourceDirectory) then
   begin
     infoln(infotext+'No FPC source [yet] ... nothing to be done',etInfo);
     exit(true);
@@ -3484,8 +3485,8 @@ begin
 
   //sanity check
   if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME) and
-    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
-    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
+    DirectoryExistsSafe(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
+    DirectoryExistsSafe(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
     begin
     if DeleteDirectoryEx(FSourceDirectory)=false then

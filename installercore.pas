@@ -1063,7 +1063,7 @@ begin
     if OperationSucceeded then
     begin
       OperationSucceeded := CheckExecutable(Make, '-v', '');
-      if (NOT OperationSucceeded) then infoln(localinfotext+Make+' not found.',etDebug);
+      if (NOT OperationSucceeded) then infoln(localinfotext+Make+' not found.',etError);
     end;
     {$ENDIF}
 
@@ -1091,7 +1091,7 @@ begin
     // Download if needed, including unzip - needed for SVN download
     // Check for binutils directory
     AllThere:=true;
-    if DirectoryExists(FMakeDir) = false then
+    if DirectoryExistsSafe(FMakeDir) = false then
     begin
       infoln(s2+'Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
       AllThere:=false;
@@ -1507,7 +1507,7 @@ begin
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
     writelnlog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
-    if not(DirectoryExists(FSVNClient.LocalRepository)) then
+    if not(DirectoryExistsSafe(FSVNClient.LocalRepository)) then
     begin
       writelnlog(localinfotext+'Creating directory '+FSourceDirectory+' for SVN checkout.');
       ForceDirectoriesSafe(FSourceDirectory);
@@ -2485,7 +2485,7 @@ begin
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
 
-  if NOT DirectoryExists(FSourceDirectory) then exit;
+  if NOT DirectoryExistsSafe(FSourceDirectory) then exit;
   if FExportOnly then exit;
 
   if FSwitchURL then
@@ -2568,7 +2568,7 @@ begin
 
   // always remove the previous patches when updating the source !!!
   // to be decided if this is (always) correct: for now, we delete the whole directory
-  if (DirectoryExists(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
+  if (DirectoryExistsSafe(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
 
   LocalSourcePatches:=FSourcePatches;
 
@@ -2588,6 +2588,16 @@ begin
       if Pos('DARWINQT5HACK_LAZPATCH',PatchFilePath)>0 then j:=0;
       {$else}
       if Pos('DARWINQT5',PatchFilePath)>0 then j:=0;
+      {$endif}
+
+      {$ifndef MSWindows}
+      //only patch the Haiku build process on Windows
+      if Pos('HAIKU_FPCPATCH',PatchFilePath)>0 then j:=0;
+      {$endif}
+
+      {$ifndef Haiku}
+      //only patch the Haiku FPU exception mask on Haiku
+      if Pos('HAIKUFPU_FPCPATCH',PatchFilePath)>0 then j:=0;
       {$endif}
 
       // In general, only patch trunk !
@@ -2616,7 +2626,7 @@ begin
     end;
   end;
 
-  if (DirectoryExists(PatchDirectory)) then
+  if (DirectoryExistsSafe(PatchDirectory)) then
   begin
     PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
     try

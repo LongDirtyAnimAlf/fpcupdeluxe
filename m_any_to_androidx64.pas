@@ -97,7 +97,7 @@ begin
         begin
           FLibsPath := IncludeTrailingPathDelimiter(PresetLibPath)+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
-          result:=DirectoryExists(FLibsPath);
+          result:=DirectoryExistsSafe(FLibsPath);
           if not result
              then ShowInfo('Searched but not found: libspath '+FLibsPath,etDebug)
              else break;
@@ -125,7 +125,7 @@ begin
           // check libs in userdir\
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
-          result:=DirectoryExists(FLibsPath);
+          result:=DirectoryExistsSafe(FLibsPath);
           if not result then
           begin
             ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
@@ -133,7 +133,7 @@ begin
           // check libs in userdir\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
-          result:=DirectoryExists(FLibsPath);
+          result:=DirectoryExistsSafe(FLibsPath);
           if not result then
           begin
             ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
@@ -141,7 +141,7 @@ begin
           // check libs in userdir\AppData\Local\Andoid
           FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\'+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
                        PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
-          result:=DirectoryExists(FLibsPath);
+          result:=DirectoryExistsSafe(FLibsPath);
           if not result then
           begin
             ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
@@ -169,7 +169,7 @@ begin
             begin
               FLibsPath:='C:\Users\Public\Documents\Embarcadero\Studio\'+InttoStr(delphiversion)+
               '.0\PlatformSDKs\'+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+'\platforms\'+PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+'\'+NDKARCHDIRNAME+'\usr\lib';
-              result:=DirectoryExists(FLibsPath);
+              result:=DirectoryExistsSafe(FLibsPath);
               if not result
                  then ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
                  else break;

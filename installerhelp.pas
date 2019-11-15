@@ -504,7 +504,7 @@ function THelpFPCInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=inherited CleanModule(ModuleName);
   // Check for valid directory
-  if not DirectoryExists(FTargetDirectory) then
+  if not DirectoryExistsSafe(FTargetDirectory) then
   begin
     infoln(infotext+'Directory '+FTargetDirectory+' does not exist. Exiting CleanModule.',etInfo);
     exit;
@@ -799,7 +799,7 @@ function THelpLazarusInstaller.CleanModule(ModuleName: string): boolean;
 begin
   result:=inherited CleanModule(ModuleName);
   // Check for valid directory
-  if not DirectoryExists(FTargetDirectory) then
+  if not DirectoryExistsSafe(FTargetDirectory) then
   begin
     infoln('HelpLazarusInstaller CleanModule: directory '+FTargetDirectory+' does not exist. Exiting CleanModule.',etInfo);
     exit;

@@ -15,7 +15,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="8">
+      <Resources Count="9">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -24,6 +24,7 @@
         <Resource_5 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
         <Resource_6 FileName="patchlazarus\darwinqt5hacksimple.patch" Type="RCDATA" ResourceName="DARWINQT5HACKSIMPLE_LAZPATCH"/>
         <Resource_7 FileName="patchfpc\haiku.patch" Type="RCDATA" ResourceName="HAIKU_FPCPATCH"/>
+        <Resource_8 FileName="patchfpc\haikufpu.patch" Type="RCDATA" ResourceName="HAIKUFPU_FPCPATCH"/>
       </Resources>
     </General>
     <i18n>

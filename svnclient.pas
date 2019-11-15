@@ -120,7 +120,7 @@ begin
     // Look in path
     // Windows: will also look for <SVNName>.exe
     if not FileExists(FRepoExecutable)
-       then FRepoExecutable := FindDefaultExecutablePath(RepoExecutableName)
+       then FRepoExecutable := Which(RepoExecutableName)
        else break;
 
     {$IFDEF MSWINDOWS}
@@ -171,15 +171,8 @@ begin
     if rv<>0 then
     begin
       FRepoExecutable := '';
+      infoln('SVN client found, but error code during check: '+InttoStr(rv),etError);
     end;
-    {
-    rv:=ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' --version', Output, Verbose);
-    // a good SVN has version info. If not : error !!
-    if Ansipos('version', Output) = 0 then
-    begin
-      FRepoExecutable := '';
-    end;
-    }
   end
   else
   begin

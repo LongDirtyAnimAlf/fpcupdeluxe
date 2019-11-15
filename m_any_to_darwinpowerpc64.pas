@@ -123,7 +123,7 @@ begin
   begin
     {$IFDEF UNIX}
     FLibsPath:='/usr/lib/powerpc64-darwin-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
+    result:=DirectoryExistsSafe(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}

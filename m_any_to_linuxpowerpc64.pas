@@ -84,14 +84,14 @@ begin
     {$IFDEF UNIX}
     {$IFDEF MULTILIB}
     FLibsPath:='/usr/lib/powerpc64-linux-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
+    result:=DirectoryExistsSafe(FLibsPath);
     if not result then
     begin
       if (StringListStartsWith(FCrossOpts,'-Cb-')<>-1) then
       begin
         // we have little endian !!
         FLibsPath:='/usr/lib/powerpc64le-linux-gnu'; //debian Jessie+ convention
-        result:=DirectoryExists(FLibsPath);
+        result:=DirectoryExistsSafe(FLibsPath);
       end;
     end;
     {$ENDIF}

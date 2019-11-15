@@ -522,7 +522,7 @@ begin
 
   // find a package component, if any
   // all other packages will be ignored
-  if ( (NOT FileExists(PackageAbsolutePath)) AND (Length(WorkingDir)>0) AND DirectoryExists(WorkingDir) ) then
+  if ( (NOT FileExists(PackageAbsolutePath)) AND (Length(WorkingDir)>0) AND DirectoryExistsSafe(WorkingDir) ) then
   begin
     PackageFiles:=FindAllFiles(WorkingDir, PackageName+'.lpk' , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
@@ -551,7 +551,7 @@ begin
   // all other packages will be ignored
   {
   Path:=IncludeTrailingPathDelimiter(FBaseDirectory)+'ccr';
-  if ( (NOT FileExists(PackageAbsolutePath)) AND DirectoryExists(Path) ) then
+  if ( (NOT FileExists(PackageAbsolutePath)) AND DirectoryExistsSafe(Path) ) then
   begin
     PackageFiles:=FindAllFiles(Path, PackageName+'.lpk' , true);
     if PackageFiles.Count>0 then PackageAbsolutePath:=PackageFiles.Strings[0];
@@ -1323,7 +1323,7 @@ begin
   if not result then exit;
 
   (*
-  if (Length(FSourceDirectory)>0) AND (DirectoryExists(FSourceDirectory)) then
+  if (Length(FSourceDirectory)>0) AND (DirectoryExistsSafe(FSourceDirectory)) then
   begin
     DeleteList := TStringList.Create;
     try
@@ -1632,7 +1632,7 @@ begin
         FSVNClient.UserName:=GetValueFromKey('UserName',PackageSettings);
         FSVNClient.Password:=GetValueFromKey('Password',PackageSettings);
         result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
+        SourceOK:=(result) AND (DirectoryExistsSafe(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
         if UpdateWarnings.Count>0 then
         begin
           WritelnLog(UpdateWarnings.Text);
@@ -1799,7 +1799,7 @@ begin
               aFile:=FilesList[i];
               aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
               aFile:=SafeExpandFileName(aFile);
-              if NOT DirectoryExists(ExtractFileDir(aFile)) then CreateDir(ExtractFileDir(aFile));
+              if NOT DirectoryExistsSafe(ExtractFileDir(aFile)) then ForceDirectoriesSafe(ExtractFileDir(aFile));
               SysUtils.RenameFile(FilesList[i],aFile);
             end;
             DeleteDirectory(aName,False);

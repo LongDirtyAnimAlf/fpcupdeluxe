@@ -23,7 +23,7 @@ Another solution would be to get the relevant binutils/libs from a working Linux
 interface
 
 uses
-  Classes, SysUtils, m_crossinstaller;
+  Classes, SysUtils, m_crossinstaller, fpcuputil;
 
 implementation
 type
@@ -48,7 +48,7 @@ begin
   if result then exit;
 
   FLibsPath:='/compat/linux/lib';
-  result:=DirectoryExists(FLibsPath);
+  result:=DirectoryExistsSafe(FLibsPath);
   if result then
   begin
     FLibsFound:=true;

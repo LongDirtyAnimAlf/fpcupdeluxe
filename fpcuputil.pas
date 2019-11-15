@@ -351,6 +351,7 @@ function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 function IsExecutable(Executable: string):boolean;
+function DirectoryExistsSafe(Const Dir: RawByteString): Boolean;
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function GetJava: string;
@@ -634,7 +635,7 @@ begin
  result:=ExtractFilePath(StartPath);
  *)
 
- if DirectoryExists(StartPath) then
+ if DirectoryExistsSafe(StartPath) then
  begin
    try
      StartPath:=GetPhysicalFilename(StartPath,pfeException);
@@ -833,7 +834,7 @@ begin
       infoln('CreateDesktopShortcut: going to create shortcut manually',etWarning);
       aDirectory:='/usr/share/applications';
       if false then // skip global
-      //if DirectoryExists(aDirectory) then
+      //if DirectoryExistsSafe(aDirectory) then
       begin
         FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
       end
@@ -841,7 +842,7 @@ begin
       begin
         // Create shortcut directly on User-Desktop
         aDirectory:=IncludeTrailingPathDelimiter(SafeExpandFileName('~'))+'Desktop';
-        if DirectoryExists(aDirectory) then
+        if DirectoryExistsSafe(aDirectory) then
         begin
           FileUtil.CopyFile(XdgDesktopFile,aDirectory+'/'+ExtractFileName(XdgDesktopFile));
         end
@@ -1858,7 +1859,7 @@ begin
   repeat
     Result:=Format('%s%.5d',[Start,i]);
     Inc(i);
-  until not DirectoryExists(Result);
+  until not DirectoryExistsSafe(Result);
 end;
 
 
@@ -2171,7 +2172,7 @@ begin
     result:='/usr/lib/gcc';
     {$endif}
 
-    if DirectoryExists(result) then
+    if DirectoryExistsSafe(result) then
     begin
       LinkFiles := TStringList.Create;
       try
@@ -2388,7 +2389,20 @@ var
   Output: string;
 begin
   result:=FindDefaultExecutablePath(Executable);
+
+  {$IFNDEF FREEBSD}
   if (NOT FileIsExecutable(result)) then result:='';
+  {$ENDIF}
+
+  {$IFDEF UNIX}
+  if (NOT FileExists(result)) then
+  begin
+    ExecuteCommand('which '+Executable,Output,false);
+    Output:=Trim(Output);
+    if ((Output<>'') and FileExists(Output)) then result:=Output;
+  end;
+  {$ENDIF}
+
 
   (*
   {$IFDEF UNIX}
@@ -2441,10 +2455,29 @@ begin
   end;
 end;
 
+function DirectoryExistsSafe(Const Dir: RawByteString): Boolean;
+begin
+  {$ifdef FreeBSD}
+  result:=(ExecuteCommand('test -d '+Dir,false)=0)
+  {$else}
+  result:=DirectoryExists(Dir);
+  {$endif}
+end;
+
+
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
 begin
   result:=true;
-  if (NOT DirectoryExists(Dir)) then result:=ForceDirectories(Dir);
+  {$ifdef FreeBSD}
+  ExecuteCommand('mkdir -p '+Dir,false);
+  {$else}
+  if (NOT DirectoryExistsSafe(Dir)) then
+  begin
+    infoln('Non existing directory: '+Dir+'. Going to create it.', etInfo);
+    result:=ForceDirectories(Dir);
+    if (NOT result) then infoln('Could not create directory: '+Dir, etWarning);
+  end;
+  {$endif}
 end;
 
 {$IFDEF UNIX}
@@ -2655,7 +2688,7 @@ var
   {$ENDIF}
   i: Integer;
 begin
-  Result:=(NOT DirectoryExists(Directory));
+  Result:=(NOT DirectoryExistsSafe(Directory));
   if Result=true then exit;
   SysUtils.FindFirst(IncludeTrailingPathDelimiter(Directory) + '*', faAnyFile, FileInfo);
   for i := 1 to 2 do

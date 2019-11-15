@@ -74,7 +74,7 @@ begin
   begin
     {$IFDEF UNIX}
     FLibsPath:='/usr/lib/x86_64-freebsd-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
+    result:=DirectoryExistsSafe(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}
