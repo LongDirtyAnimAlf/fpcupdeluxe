@@ -904,7 +904,6 @@ begin
           {$ifdef freebsd}
           if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
                Options:=Options+' -dFPC_USE_LIBC';
-          end;
           {$endif}
 
           {$ifdef solaris}
@@ -930,7 +929,10 @@ begin
           if (CrossInstaller.TargetOS='freebsd') then
           begin
             //if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
-               CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
+            begin
+              //Processor.Parameters.Add('COMPILER_OPTIONS=-dFPC_USE_LIBC');
+              CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
+            end;
           end;
 
           if CrossInstaller.BinUtilsPrefix<>'' then
