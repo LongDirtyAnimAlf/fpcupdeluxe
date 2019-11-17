@@ -116,6 +116,7 @@ begin
   begin
     // look for versioned binutils
     BinPrefixTry:=FBinUtilsPrefix;
+    SetLength(BinPrefixTry,Length(BinPrefixTry)-1);
     for i:=MAXFREEBSDVERSION downto MINFREEBSDVERSION do
     begin
       AsFile:=BinPrefixTry+InttoStr(i)+'-'+'as'+GetExeExt;

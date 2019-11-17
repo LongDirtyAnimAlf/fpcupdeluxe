@@ -901,14 +901,6 @@ begin
             if Length(s2)>0 then Options:=Options+s2;
           end;
 
-          //Still not sure if this is needed
-          //To be checked
-          if (CrossInstaller.TargetOS='freebsd') then
-          begin
-            if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
-               Options:=Options+' -dFPC_USE_LIBC';
-          end;
-
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
           //Still not sure if this is needed
@@ -925,6 +917,14 @@ begin
           end;
 
           CrossOptions:='';
+
+          //Still not sure if this is needed
+          //To be checked
+          if (CrossInstaller.TargetOS='freebsd') then
+          begin
+            //if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
+               CrossOptions:=CrossOptions+' -dFPC_USE_LIBC';
+          end;
 
           if CrossInstaller.BinUtilsPrefix<>'' then
           begin
