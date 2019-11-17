@@ -901,12 +901,19 @@ begin
             if Length(s2)>0 then Options:=Options+s2;
           end;
 
+          {$ifdef freebsd}
+          if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
+               Options:=Options+' -dFPC_USE_LIBC';
+          end;
+          {$endif}
+
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
           //Still not sure if this is needed
           //To be checked
           //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
-          Options:=Options+' -Xn';
+          if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
+            Options:=Options+' -Xn';
           {$endif}
           {$endif}
 
