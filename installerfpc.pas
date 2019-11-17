@@ -901,8 +901,18 @@ begin
             if Length(s2)>0 then Options:=Options+s2;
           end;
 
+          //Still not sure if this is needed
+          //To be checked
+          if (CrossInstaller.TargetOS='freebsd') then
+          begin
+            if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
+               Options:=Options+' -dFPC_USE_LIBC';
+          end;
+
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
+          //Still not sure if this is needed
+          //To be checked
           //Intel only. See: https://wiki.lazarus.freepascal.org/Lazarus_on_Solaris#A_note_on_gld_.28Intel_architecture_only.29
           Options:=Options+' -Xn';
           {$endif}
@@ -1384,9 +1394,14 @@ begin
   s1:=s1+' -dFPC_SOFT_FPUX80';
   {$endif}
 
-  {$IF defined(BSD) and (not defined(DARWIN))}
-  s1:=s1+' -Fl/usr/pkg/lib';
-  {$ENDIF}
+  {$ifdef BSD}
+    {$ifndef DARWIN}
+      s1:=s1+' -Fl/usr/pkg/lib';
+    {$endif}
+    {$ifdef FreeBSD}
+      s1:=s1+' -dFPC_USE_LIBC';
+    {$endif}
+  {$endif}
 
   s1:=Trim(s1);
   Processor.Parameters.Add('OPT='+s1);
@@ -1407,7 +1422,7 @@ begin
     end;
   end;
 
-  if (Length(Processor.CurrentDirectory)=0) OR (NOT DirectoryExistsSafe(Processor.CurrentDirectory)) then
+  if (Length(Processor.CurrentDirectory)=0) OR (NOT DirectoryExists(Processor.CurrentDirectory)) then
   begin
     Processor.Parameters.Add('--help'); // this should render make harmless
     WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
@@ -2686,7 +2701,7 @@ begin
     //sometimes, gstrip does not exist on Solaris ... just copy it to a place where it can be found ... tricky
     if (NOT FileExists('/usr/bin/gstrip')) AND (FileExists('/usr/bin/strip')) then
     begin
-      if DirectoryExistsSafe(FBinPath) then
+      if DirectoryExists(FBinPath) then
       begin
         s:=IncludeTrailingPathDelimiter(FBinPath)+'gstrip';
         if (NOT FileExists(s)) then FileUtil.CopyFile('/usr/bin/strip',s);
@@ -3033,7 +3048,7 @@ begin
         {$ENDIF cpuarm}
         ConfigText.Append(s);
 
-        s:=GetGCCDirectory;
+        s:=GetStartupObjects;
         if Length(s)>0 then
         begin
           ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
@@ -3058,6 +3073,12 @@ begin
         {$endif}
         {$endif}
 
+        {$ifdef freebsd}
+        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+        ConfigText.Append('-dFPC_USE_LIBC');
+        ConfigText.Append('#ENDIF');
+        {$endif}
+
         {$IF (defined(NetBSD)) and (not defined(Darwin))}
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         {$ifndef FPCONLY}
@@ -3071,7 +3092,6 @@ begin
         {$ifdef Linux}
         if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
         {$endif}
-
 
         {$ENDIF UNIX}
 
@@ -3168,7 +3188,7 @@ var
 begin
   result:=inherited;
 
-  if not DirectoryExistsSafe(FSourceDirectory) then
+  if not DirectoryExists(FSourceDirectory) then
   begin
     infoln(infotext+'No FPC source [yet] ... nothing to be done',etInfo);
     exit(true);
@@ -3485,8 +3505,8 @@ begin
 
   //sanity check
   if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME) and
-    DirectoryExistsSafe(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
-    DirectoryExistsSafe(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
+    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler') and
+    DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'rtl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
     begin
     if DeleteDirectoryEx(FSourceDirectory)=false then

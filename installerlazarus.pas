@@ -1391,7 +1391,7 @@ begin
   Result := inherited;
   Result := true;
 
-  if not DirectoryExistsSafe(FInstallDirectory) then
+  if not DirectoryExists(FInstallDirectory) then
   begin
     infoln(infotext+'No Lazarus install directory.',etError);
     exit;
@@ -1400,7 +1400,7 @@ begin
   //Set GDB as standard debugger
   DebuggerType:='TGDBMIDebugger';
 
-  if DirectoryExistsSafe(FPrimaryConfigPath) = false then
+  if DirectoryExists(FPrimaryConfigPath) = false then
   begin
     if ForceDirectoriesSafe(FPrimaryConfigPath) then
       infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
@@ -1641,7 +1641,7 @@ var
 begin
   Result := inherited;
 
-  if not DirectoryExistsSafe(FSourceDirectory) then
+  if not DirectoryExists(FSourceDirectory) then
   begin
     infoln(infotext+'No Lazarus source [yet] ... nothing to be done',etInfo);
     exit(true);
@@ -2094,7 +2094,7 @@ begin
 
   {$ifdef BSD}
   FilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide/include/';
-  if (NOT DirectoryExistsSafe(FilePath+'dragonfly')) then
+  if (NOT DirectoryExists(FilePath+'dragonfly')) then
   begin
     if DirCopy(FilePath+'netbsd',FilePath+'dragonfly')
       then infoln(infotext+'Adding dragonfly include file for IDE.',etInfo)
@@ -2184,8 +2184,8 @@ begin
   if not Result then exit;
 
   //sanity check
-  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME) and DirectoryExistsSafe(
-    IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExistsSafe(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
+  if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME) and DirectoryExists(
+    IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
   begin
     Result := DeleteDirectoryEx(FSourceDirectory);

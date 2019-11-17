@@ -281,7 +281,7 @@ begin
       begin
         // Avoid unpredictable behaviour as well as
         // OSX bug 26706 (fixed in FPC trunk)
-        if not(DirectoryExistsSafe(CurrentDirectory)) then
+        if not(DirectoryExists(CurrentDirectory)) then
         begin
           FExitStatus:=PROC_INTERNALEXCEPTION;
           FExceptionInfoStrings.Add('Invalid directory: '+CurrentDirectory);

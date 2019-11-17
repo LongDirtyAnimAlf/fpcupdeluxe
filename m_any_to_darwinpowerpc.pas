@@ -116,7 +116,7 @@ begin
   begin
     {$IFDEF UNIX}
     FLibsPath:='/usr/lib/powerpc-darwin-gnu'; //debian Jessie+ convention
-    result:=DirectoryExistsSafe(FLibsPath);
+    result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}

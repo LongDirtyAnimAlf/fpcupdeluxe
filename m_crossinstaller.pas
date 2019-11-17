@@ -255,7 +255,7 @@ begin
      then FLibsPath:=sd
      else FBinUtilsPath:=sd;
   if Length(LookFor)=0
-     then result:=DirectoryExistsSafe(sd)
+     then result:=DirectoryExists(sd)
      else result:=FileExists(IncludeTrailingPathDelimiter(sd)+LookFor);
 
   // Report results to user. SearchBinUtil will probably only be called until

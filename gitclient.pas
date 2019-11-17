@@ -193,7 +193,7 @@ begin
     FReturnCode := ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+TargetFile,FVerbose);
     SysUtils.DeleteFile(TargetFile);
     }
-    if DirectoryExistsSafe(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
+    if DirectoryExists(IncludeTrailingPathDelimiter(LocalRepository)+'.git') then
     begin
       ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' fetch --all',LocalRepository, FVerbose);
       ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + ' reset --hard origin/'+aBranch,LocalRepository, FVerbose);
@@ -427,7 +427,7 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
-  if NOT DirectoryExistsSafe(FLocalRepository) then exit;
+  if NOT DirectoryExists(FLocalRepository) then exit;
 
   FileList.Clear;
   // --porcelain indicate stable output;
@@ -453,7 +453,7 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
-  if NOT DirectoryExistsSafe(FLocalRepository) then exit;
+  if NOT DirectoryExists(FLocalRepository) then exit;
 
   // This will output nothing to stdout and
   // fatal: Not a git repository (or any of the parent directories): .git
@@ -531,7 +531,7 @@ begin
   FReturnCode := 0;
   if ExportOnly then exit;
   if NOT ValidClient then exit;
-  if NOT DirectoryExistsSafe(FLocalRepository) then exit;
+  if NOT DirectoryExists(FLocalRepository) then exit;
 
   // Only update if we have invalid revision info, in order to minimize git info calls
   if FLocalRevision = FRET_UNKNOWN_REVISION then

@@ -118,7 +118,7 @@ begin
   begin
     {$IFDEF UNIX}
     FLibsPath:='/usr/lib/x86_64-darwin-gnu'; //debian Jessie+ convention
-    result:=DirectoryExistsSafe(FLibsPath);
+    result:=DirectoryExists(FLibsPath);
     if not result then
     ShowInfo('Searched but not found libspath '+FLibsPath);
     {$ENDIF}

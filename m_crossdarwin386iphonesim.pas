@@ -76,14 +76,14 @@ begin
   FLibsFound:=true;
 
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='~/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='~/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
 
-  if DirectoryExistsSafe(IOS_BASE) then
+  if DirectoryExists(IOS_BASE) then
   begin
     FLibsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/lib/';
     //FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
@@ -108,14 +108,14 @@ begin
   FBinsFound:=true;
 
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='~/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='~/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk';
 
-  if DirectoryExistsSafe(IOS_BASE) then
+  if DirectoryExists(IOS_BASE) then
   begin
     FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
     AddFPCCFGSnippet('-FD'+FBinUtilsPath); {search this directory for compiler utilities}

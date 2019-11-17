@@ -99,11 +99,11 @@ begin
     {$IFDEF UNIX}
     {$IFDEF MULTILIB}
     FLibsPath:='/usr/lib/i386-linux-gnu'; //debian (multilib) Jessie+ convention
-    result:=DirectoryExistsSafe(FLibsPath);
+    result:=DirectoryExists(FLibsPath);
     if (NOT result) then
     begin
       FLibsPath:='/lib32';
-      result:=DirectoryExistsSafe(FLibsPath);
+      result:=DirectoryExists(FLibsPath);
     end;
     if result then
     begin
@@ -112,13 +112,13 @@ begin
       //AddFPCCFGSnippet('-FL'+IncludeTrailingPathDelimiter(FLibsPath)+'ld-linux.so.2');
       {$ifdef CPU64}
       s:='/usr/lib32';
-      if DirectoryExistsSafe(s) then
+      if DirectoryExists(s) then
       begin
         AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
       end;
       // gcc 32bit multilib
-      s:=IncludeTrailingPathDelimiter(GetGCCDirectory)+'32';
-      if DirectoryExistsSafe(s) then
+      s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';
+      if DirectoryExists(s) then
       begin
         AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
       end;

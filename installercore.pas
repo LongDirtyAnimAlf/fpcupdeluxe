@@ -1091,7 +1091,7 @@ begin
     // Download if needed, including unzip - needed for SVN download
     // Check for binutils directory
     AllThere:=true;
-    if DirectoryExistsSafe(FMakeDir) = false then
+    if DirectoryExists(FMakeDir) = false then
     begin
       infoln(s2+'Make path ' + FMakeDir + ' does not exist. Going to download binutils.',etInfo);
       AllThere:=false;
@@ -1507,7 +1507,7 @@ begin
   begin
     // We could insist on the repo existing, but then we wouldn't be able to checkout!!
     writelnlog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
-    if not(DirectoryExistsSafe(FSVNClient.LocalRepository)) then
+    if not(DirectoryExists(FSVNClient.LocalRepository)) then
     begin
       writelnlog(localinfotext+'Creating directory '+FSourceDirectory+' for SVN checkout.');
       ForceDirectoriesSafe(FSourceDirectory);
@@ -2485,7 +2485,7 @@ begin
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (CheckModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
 
-  if NOT DirectoryExistsSafe(FSourceDirectory) then exit;
+  if NOT DirectoryExists(FSourceDirectory) then exit;
   if FExportOnly then exit;
 
   if FSwitchURL then
@@ -2568,7 +2568,7 @@ begin
 
   // always remove the previous patches when updating the source !!!
   // to be decided if this is (always) correct: for now, we delete the whole directory
-  if (DirectoryExistsSafe(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
+  if (DirectoryExists(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
 
   LocalSourcePatches:=FSourcePatches;
 
@@ -2626,7 +2626,7 @@ begin
     end;
   end;
 
-  if (DirectoryExistsSafe(PatchDirectory)) then
+  if (DirectoryExists(PatchDirectory)) then
   begin
     PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
     try

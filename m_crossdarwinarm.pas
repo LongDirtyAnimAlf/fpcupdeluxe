@@ -43,7 +43,7 @@ begin
   if result then exit;
 
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
 
   if not result then
@@ -71,7 +71,7 @@ begin
   end;
 
 (*
-  if DirectoryExistsSafe(IOS_BASE) then
+  if DirectoryExists(IOS_BASE) then
   begin
     FLibsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/lib/';
     //FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
@@ -97,10 +97,10 @@ begin
   FBinsFound:=true;
   (*
   IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
-  if NOT DirectoryExistsSafe(IOS_BASE) then
+  if NOT DirectoryExists(IOS_BASE) then
      IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
 
-  if DirectoryExistsSafe(IOS_BASE) then
+  if DirectoryExists(IOS_BASE) then
   begin
     //SearchBinUtilsInfo(result);
     //FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';

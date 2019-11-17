@@ -2261,6 +2261,14 @@ begin
       end;
     end;
 
+    //freebsd predefined settings
+    if (FPCupManager.CrossOS_Target='freebsd') then
+    begin
+      //This is already done in the FPC installer itself.
+      //To be checked if that is the right choice.
+      //FPCupManager.CrossOPT:='-dFPC_USE_LIBC ';
+    end;
+
     // recheck / override / set custom FPC options by special user input through setup+
     s:=Form2.FPCOptions;
     s:=Trim(s);
@@ -3569,7 +3577,7 @@ begin
   if NOT Assigned(Form2) then exit;
 
   aDir:=ExtractFileDir(IncludeTrailingPathDelimiter(IniDirectory)+installerUniversal.DELUXEFILENAME);
-  result:=DirectoryExistsSafe(aDir);
+  result:=DirectoryExists(aDir);
 
   if (NOT result) then exit;
 
