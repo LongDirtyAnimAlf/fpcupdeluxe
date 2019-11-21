@@ -2133,11 +2133,13 @@ begin
           s1:=TrimRight(s1);
           if s1='useride:' then
           begin
+            //remove everything of the useride macro definition
             while (aIndex<UpdateWarnings.Count) do
             begin
               UpdateWarnings.Delete(aIndex);
               s1:=ExtractWord(1,UpdateWarnings.Strings[aIndex],[' ']);
               s1:=TrimRight(s1);
+              //this will stop at the next macro definition [starter:]
               if s1[Length(s1)]=':' then break;
             end;
             break;
@@ -2147,6 +2149,7 @@ begin
 
         aHackIndex:=aIndex;
 
+        //replace the useride macro with the new one
         HackMagic:=TStringList.Create;
         try
           HackMagic.Text:=LAZBUILDHACKMAGIC;

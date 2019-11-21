@@ -2024,6 +2024,15 @@ end;
 function GetStartupObjects:string;
 const
   LINKFILE='crtbegin.o';
+  SEARCHDIRS : array [0..5] of string = (
+    '/usr/local/lib/',
+    '/usr/lib/',
+    '/usr/local/lib/gcc/',
+    '/usr/lib/gcc/',
+    '/lib/gcc/',
+    '/lib/'
+    );
+
 var
   LinkFiles     : TStringList;
   Output,s1,s2  : string;
@@ -2032,24 +2041,22 @@ var
   FoundLinkFile : boolean;
 begin
   FoundLinkFile:=false;
+  result:='';
 
   try
     //start with a very simple filesearch.
 
-    {$IF (defined(BSD)) and (not defined(Darwin))}
-    result:='/usr/local/lib/';
-    {$else}
-    result:='/usr/lib/';
-    {$endif}
-    if FileExists(result+LINKFILE) then FoundLinkFile:=true;
-    if FoundLinkFile then exit;
+    for i:=Low(SEARCHDIRS) to High(SEARCHDIRS) do
+    begin
+      s1:=SEARCHDIRS[i];
+      if FileExists(s1+LINKFILE) then FoundLinkFile:=true;
+      if FoundLinkFile then
+      begin
+        result:=s1;
+        break;
+      end;
+    end;
 
-    {$IF (defined(BSD)) and (not defined(Darwin))}
-    result:='/usr/local/lib/gcc/';
-    {$else}
-    result:='/usr/lib/gcc/';
-    {$endif}
-    if FileExists(result+LINKFILE) then FoundLinkFile:=true;
     if FoundLinkFile then exit;
 
     try
