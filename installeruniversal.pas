@@ -247,7 +247,7 @@ begin
   Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
   Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
   s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-  {if FileExists(s) then}
+  if FileExists(s) then
     Processor.Parameters.Add('CFGFILE=' + s);
 
   {$ifdef Windows}

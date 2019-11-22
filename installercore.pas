@@ -118,6 +118,8 @@ const
   _LAZARUSSIMPLE           = 'LazarusSimple';
 
   _MAKEFILECHECK           = 'MakefileCheck';
+  _MAKEFILECHECKFPC        = _MAKEFILECHECK+_FPC;
+  _MAKEFILECHECKLAZARUS    = _MAKEFILECHECK+_LAZARUS;
 
   _DEFAULT                 = 'Default';
   _DEFAULTSIMPLE           = 'DefaultSimple';

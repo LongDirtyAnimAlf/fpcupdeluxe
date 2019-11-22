@@ -922,8 +922,8 @@ begin
   try
     PrepareRun;
 
-    if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECK+_LAZARUS;
-    if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECK+_FPC;
+    if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
+    if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
 
     sStatus:='Going to check Makefile.';
 

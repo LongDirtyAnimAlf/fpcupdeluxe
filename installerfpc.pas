@@ -105,8 +105,8 @@ Const
     _UNINSTALLMODULE+_FPC+_SEP+
     _END+
 
-    _DECLARE+_MAKEFILECHECK+_FPC+_SEP+
-    _BUILDMODULE+_MAKEFILECHECK+_FPC+_SEP+
+    _DECLARE+_MAKEFILECHECKFPC+_SEP+
+    _BUILDMODULE+_MAKEFILECHECKFPC+_SEP+
 
     _ENDFINAL;
 
@@ -1044,9 +1044,9 @@ begin
 
           try
             if CrossOptions='' then
-               infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
+               infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
             else
-              infoln(infotext+'Running make [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
+              infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
 
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
@@ -1054,7 +1054,7 @@ begin
             if ((NOT result) AND (MakeCycle=st_Packages)) then
             begin
               //Sometimes rerun gives good results (on AIX 32bit especially).
-              infoln(infotext+'Running make stage again ... could work !',etInfo);
+              infoln(infotext+'Running '+Processor.Executable+' stage again ... could work !',etInfo);
               Processor.Execute;
               result:=(Processor.ExitStatus=0);
             end;
@@ -1062,7 +1062,7 @@ begin
           except
             on E: Exception do
             begin
-              WritelnLog(infotext+'Running cross compiler fpc make generated an exception!'+LineEnding+'Details: '+E.Message,true);
+              WritelnLog(infotext+'Running cross compiler fpc '+Processor.Executable+' generated an exception!'+LineEnding+'Details: '+E.Message,true);
               WritelnLog(infotext+'We are going to try again !',true);
               exit(false);
               //result:=false;
@@ -1092,9 +1092,9 @@ begin
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';
           if result then
-            infoln(infotext+'Running cross compiler fpc make for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
+            infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code. Optional module; continuing regardless.', etInfo)
           else
-          infoln(infotext+'Running cross compiler fpc make for '+GetFPCTarget(false)+' failed with an error code.',etError);
+          infoln(infotext+'Running cross compiler fpc '+Processor.Executable+' for '+GetFPCTarget(false)+' failed with an error code.',etError);
           // No use in going on, but
           // do make sure installation continues if this happened with optional crosscompiler:
           exit(result);
@@ -1417,7 +1417,7 @@ begin
 
   Processor.CurrentDirectory:='';
   case ModuleName of
-    _FPC,_MAKEFILECHECK+_FPC:
+    _FPC,_MAKEFILECHECKFPC:
     begin
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
     end;
@@ -1442,16 +1442,16 @@ begin
 
   Processor.Parameters.Add('--directory='+Processor.CurrentDirectory);
 
-  if ModuleName=_MAKEFILECHECK+_FPC then
+  if ModuleName=_MAKEFILECHECKFPC then
   begin
     Processor.Parameters.Add('fpc_baseinfo');
-    infoln(infotext+'Running make fpc_baseinfo for '+ModuleName,etInfo);
+    infoln(infotext+'Running '+Processor.Executable+' fpc_baseinfo for '+ModuleName,etInfo);
   end
   else
   begin
     Processor.Parameters.Add('all');
     Processor.Parameters.Add('install');
-    infoln(infotext+'Running make all install for '+ModuleName,etInfo);
+    infoln(infotext+'Running '+Processor.Executable+' all install for '+ModuleName,etInfo);
   end;
 
   try
@@ -1459,13 +1459,13 @@ begin
     if Processor.ExitStatus <> 0 then
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Error running make for '+ModuleName+' failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
+      WritelnLog(etError, infotext+'Error running '+Processor.Executable+' for '+ModuleName+' failed with exit code '+IntToStr(Processor.ExitStatus)+LineEnding+'. Details: '+FErrorLog.Text,true);
     end;
   except
     on E: Exception do
     begin
       OperationSucceeded := False;
-      WritelnLog(etError, infotext+'Running fpc make for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
+      WritelnLog(etError, infotext+'Running fpc '+Processor.Executable+' for '+ModuleName+' failed with an exception!'+LineEnding+'. Details: '+E.Message,true);
     end;
   end;
 
@@ -2753,7 +2753,7 @@ begin
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      infoln(infotext+'Running make cycle for Windows FPC64:',etInfo);
+      infoln(infotext+'Running '+Processor.Executable+' cycle for Windows FPC64:',etInfo);
       Processor.Execute;
       if Processor.ExitStatus <> 0 then
       begin
@@ -2789,7 +2789,7 @@ begin
       // Override makefile checks that checks for stable compiler in FPC trunk
       if FBootstrapCompilerOverrideVersionCheck then
         Processor.Parameters.Add('OVERRIDEVERSIONCHECK=1');
-      infoln(infotext+'Running make cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
+      infoln(infotext+'Running '+Processor.Executable+' cycle for FPC '+TargetCompilerName+' bootstrap compiler only',etInfo);
       Processor.Execute;
       if Processor.ExitStatus <> 0 then
       begin
@@ -3280,11 +3280,11 @@ begin
 
       if (NOT CrossCompiling) then
       begin
-        infoln(infotext+'Running make distclean twice',etInfo);
+        infoln(infotext+'Running '+Processor.Executable+' distclean twice',etInfo);
       end
       else
       begin
-        infoln(infotext+'Running make distclean twice (OS_TARGET='+CrossOS_Target+'/CPU_TARGET='+CrossCPU_Target+')',etInfo);
+        infoln(infotext+'Running '+Processor.Executable+' distclean twice (OS_TARGET='+CrossOS_Target+'/CPU_TARGET='+CrossCPU_Target+')',etInfo);
       end;
       try
         writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
@@ -3301,7 +3301,7 @@ begin
         on E: Exception do
         begin
           result:=false;
-          WritelnLog(etError, infotext+'Running make distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+          WritelnLog(etError, infotext+'Running '+Processor.Executable+' distclean failed with an exception!'+LineEnding+'Details: '+E.Message,true);
         end;
       end;
     finally
@@ -3312,7 +3312,7 @@ begin
   else
   begin
     result:=false;
-    infoln(infotext+'Running make distclean failed: could not find cleanup compiler. Will try again later',etInfo);
+    infoln(infotext+'Running '+Processor.Executable+' distclean failed: could not find cleanup compiler. Will try again later',etInfo);
   end;
 
   if (NOT CrossCompiling) then

@@ -163,8 +163,8 @@ const
     _BUILDMODULE+_LCLCROSS+_SEP +
     _END+
 
-    _DECLARE+_MAKEFILECHECK+_LAZARUS+_SEP+
-    _BUILDMODULE+_MAKEFILECHECK+_LAZARUS+_SEP+
+    _DECLARE+_MAKEFILECHECKLAZARUS+_SEP+
+    _BUILDMODULE+_MAKEFILECHECKLAZARUS+_SEP+
 
     _ENDFINAL;
 
@@ -735,7 +735,7 @@ begin
           exit;
         end;
       end;
-      _MAKEFILECHECK+_LAZARUS:
+      _MAKEFILECHECKLAZARUS:
       begin
         Processor.Parameters.Add('fpc_baseinfo');
         infoln(infotext+'Running: make fpc_baseinfo', etInfo);
@@ -926,7 +926,7 @@ begin
     end;
   end;
 
-  if (ModuleName=_MAKEFILECHECK+_LAZARUS) then exit;
+  if (ModuleName=_MAKEFILECHECKLAZARUS) then exit;
 
   if (ModuleName=_USERIDE) OR (ModuleName=_LAZARUS) then
   begin

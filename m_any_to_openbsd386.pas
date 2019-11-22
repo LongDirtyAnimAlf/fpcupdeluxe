@@ -85,7 +85,7 @@ begin
     FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
       '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
       '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-      '-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
+      //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
       '-k--allow-shlib-undefined'+LineEnding+
       '-k--allow-multiple-definition'+LineEnding+
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
