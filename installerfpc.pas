@@ -2384,15 +2384,48 @@ begin
             //if FSolarisOI then s:=s+'OI';
             {$endif Solaris}
             s:=s+GetTargetOS;
-            {$ifdef FREEBSD}
-            j:=GetFreeBSDVersion;
-            s:=s+'11'; // version 11 only for now
-            {$endif FREEBSD}
 
             for i:=0 to Pred(aCompilerList.Count) do
             begin
               aFPCUPBootstrapURL:='fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+'-'+GetCompilerName(GetTargetCPU);
               aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
+
+              {$ifdef OPENBSD}
+              if (NOT aFPCUPCompilerFound) then
+              begin
+                // if looking for 3.0.4, also look for 3.0.5, as these have been made available by FPC itself, and are sources on fpcupdeluxe on GitHub.
+                if aLocalFPCUPBootstrapVersion='3.0.4' then
+                begin
+                  aFPCUPBootstrapURL:='fpcup-'+StringReplace('3.0.5','.','_',[rfReplaceAll])+'-'+s+'-'+GetCompilerName(GetTargetCPU);
+                  aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
+                  // as 3.0.5 is not on the offical support list, use the override
+                  if aFPCUPCompilerFound then FBootstrapCompilerOverrideVersionCheck:=true;
+                end;
+              end;
+              {$endif}
+
+              {$ifdef FREEBSD}
+              if (NOT aFPCUPCompilerFound) then
+              begin
+                j:=GetFreeBSDVersion;
+                if j=0 then j:=11; // default to FreeBSD11 when GetFreeBSDVersion does not give a result
+
+                aFPCUPBootstrapURL:='fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+InttoStr(j)+'-'+GetCompilerName(GetTargetCPU);
+                aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
+
+                if (NOT aFPCUPCompilerFound) then
+                begin
+                  //try other versions if available
+                  for j:=13 downto 9 do
+                  begin
+                    aFPCUPBootstrapURL:='fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+InttoStr(j)+'-'+GetCompilerName(GetTargetCPU);
+                    aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
+                    if aFPCUPCompilerFound then break;
+                  end;
+                end;
+              end;
+              {$endif}
+
               if aFPCUPCompilerFound then
               begin
                 // also ok, but for now, use code below ... we can search on filename or url through github api.

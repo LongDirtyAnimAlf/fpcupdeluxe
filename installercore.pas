@@ -2568,9 +2568,30 @@ begin
      {$endif}
         PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpcup';
 
-  // always remove the previous patches when updating the source !!!
-  // to be decided if this is (always) correct: for now, we delete the whole directory
-  if (DirectoryExists(PatchDirectory)) then DeleteDirectoryEx(PatchDirectory);
+  // always remove the previous fpcupdeluxe patches when updating the source !!!
+  if (DirectoryExists(PatchDirectory)) then
+  begin
+    //DeleteDirectoryEx(PatchDirectory);
+    PatchList := FindAllFiles(PatchDirectory, '*.patch;*.diff', false);
+    try
+      if (PatchList.Count>0) then
+      begin
+        for i:=0 to (PatchList.Count-1) do
+        begin
+          PatchFilePath:=PatchList.Strings[i];
+          j:=-1;
+          if PatchFPC then j:=Pos('_FPCPATCH',PatchFilePath) else
+             {$ifndef FPCONLY}
+             if PatchLaz then j:=Pos('_LAZPATCH',PatchFilePath) else
+             {$endif}
+                j:=Pos('_FPCUPPATCH',PatchFilePath);
+          if (j<>-1) then DeleteFile(PatchFilePath);
+        end;
+      end;
+    finally
+      PatchList.Free;
+    end;
+  end;
 
   LocalSourcePatches:=FSourcePatches;
 
@@ -2605,7 +2626,17 @@ begin
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!
-      if PatchFPC then if (GetFullVersion<GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
+      if PatchFPC then
+      begin
+        if (Pos('FREEBSDFIXES',PatchFilePath)>0) then
+        begin
+          if (GetFullVersion>=GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
+        end
+        else
+        begin
+          if (GetFullVersion<GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
+        end;
+      end;
       {$ifndef FPCONLY}
       if PatchLaz then
       begin
