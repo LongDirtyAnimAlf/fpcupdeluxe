@@ -2394,6 +2394,8 @@ begin
               if (NOT aFPCUPCompilerFound) then
               begin
                 // if looking for 3.0.4, also look for 3.0.5, as these have been made available by FPC itself, and are sources on fpcupdeluxe on GitHub.
+                // after testing 3.0.5, it seems that these versions do not work for 100%, so disable for now.
+                {
                 if aLocalFPCUPBootstrapVersion='3.0.4' then
                 begin
                   aFPCUPBootstrapURL:='fpcup-'+StringReplace('3.0.5','.','_',[rfReplaceAll])+'-'+s+'-'+GetCompilerName(GetTargetCPU);
@@ -2401,6 +2403,7 @@ begin
                   // as 3.0.5 is not on the offical support list, use the override
                   if aFPCUPCompilerFound then FBootstrapCompilerOverrideVersionCheck:=true;
                 end;
+                }
               end;
               {$endif}
 

@@ -3448,7 +3448,10 @@ begin
   AddMessage(Self.Caption);
   {$ifndef NetBSD}
   AddMessage('Running on '+GetDistro);
-  {$endif}
+  {$ifdef FreeBSD}
+  AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
+  {$endif FreeBSD}
+  {$endif NetBSD}
 
   Cores:=GetLogicalCpuCount;
   if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));

@@ -196,6 +196,9 @@ const
     '  writeln(''Hello world from fpcupdeluxe !'');'+LineEnding+
     'end.';
 
+  LAZARUSCFG = 'lazarus.cfg'; //file to store primary config argument in
+
+
 type
 
   { TLazarusInstaller }
@@ -1378,8 +1381,6 @@ begin
 end;
 
 function TLazarusInstaller.ConfigModule(ModuleName: string): boolean;
-const
-  LazarusCFG = 'lazarus.cfg'; //file to store primary config argument in
 var
   DebuggerPath,DebuggerType: string;
   VersionSnippet: string;
@@ -1406,26 +1407,26 @@ begin
       infoln(infotext+'Created Lazarus primary config directory: ' + FPrimaryConfigPath, etInfo);
   end;
 
+  // Lazarus 1.2RC1+ and higher support specifying the primary-config-path that should be used
+  // inside the lazarus directory itself.
+  PCPSnippet := TStringList.Create;
+  try
+    // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
+    PCPSnippet.Add('--primary-config-path=' + Trim(ExcludeTrailingPathDelimiter(FPrimaryConfigPath)));
+    aFileName:=IncludeTrailingPathDelimiter(FInstallDirectory) + LAZARUSCFG;
+    if (NOT FileExists(aFileName)) then PCPSnippet.SaveToFile(aFileName);
+  finally
+    PCPSnippet.Free;
+  end;
+
   // Set up a minimal config so we can use LazBuild
   LazarusConfig := TUpdateLazConfig.Create(FPrimaryConfigPath, FMajorVersion, FMinorVersion, FReleaseVersion, FPatchVersion);
   try
     try
-      // Lazarus 1.2RC1+ and trunk support specifying the primary-config-path that should be used
-      // inside the lazarus directory itself.
-      PCPSnippet := TStringList.Create;
-      try
-        // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
-        PCPSnippet.Add('--primary-config-path=' + trim(ExcludeTrailingPathDelimiter(FPrimaryConfigPath)));
-        if not (FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + LazarusCFG)) then
-          PCPSnippet.SaveToFile(IncludeTrailingPathDelimiter(FInstallDirectory) + LazarusCFG);
-      finally
-        PCPSnippet.Free;
-      end;
       // Force English language
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/Language/ID', 'en');
       // Set Lazarus directory
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FInstallDirectory);
-
 
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
@@ -1623,9 +1624,6 @@ begin
 end;
 
 function TLazarusInstaller.CleanModule(ModuleName: string): boolean;
-  // Make distclean is unreliable; at least for FPC.
-  // Running it twice apparently can fix a lot of problems; see FPC ML message
-  // by Jonas Maebe, 1 November 2012
 var
   {$ifdef MSWINDOWS}
   CrossWin: boolean;
@@ -1633,9 +1631,9 @@ var
   {$endif}
   oldlog: TErrorMethod;
   CleanCommand,CleanDirectory:string;
+  CrossCompiling: boolean;
   {
   DeleteList: TStringList;
-  CrossCompiling: boolean;
   CPUOS_Signature:string;
   }
 begin
@@ -1651,10 +1649,18 @@ begin
 
   if not Result then exit;
 
+  CrossCompiling:=(Self is TLazarusCrossInstaller);
+  //CrossCompiling:=Assigned(CrossInstaller);
+
   // If cleaning primary config:
-  if (FCrossLCL_Platform = '') and (CrossCPU_Target = '') then
-    infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
-      FInstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
+  if ((NOT CrossCompiling) and (ModuleName=_LAZARUS)) then
+  begin
+    //infoln(infotext+'If your primary config path has changed, you may want to remove ' + IncludeTrailingPathDelimiter(
+    //  FInstallDirectory) + 'lazarus.cfg which points to the primary config path.', etInfo);
+    infoln(infotext+'Deleting Lazarus primary config file ('+LAZARUSCFG+').', etInfo);
+    DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZARUSCFG);
+  end;
+
 
   {$ifdef MSWINDOWS}
   // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL
@@ -1663,7 +1669,7 @@ begin
   LHelpTemp:='';
   CrossWin:=false;
 
-  if Assigned(CrossInstaller) then
+  if CrossCompiling then
   begin
     {$ifdef win32}
     if (CrossInstaller.TargetCPU = 'x86_64') and ((CrossInstaller.TargetOS = 'win64') or (CrossInstaller.TargetOS = 'win32')) then
@@ -1674,17 +1680,16 @@ begin
     if (CrossInstaller.TargetCPU = 'i386') and (CrossInstaller.TargetOS = 'win32') then
       CrossWin := true;
     {$endif win64}
-  end;
-
-  if CrossWin then
-  begin
-    LHelpTemp:=GetTempFileName('','');
-    try
-      CopyFile(
-        IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
-        LHelpTemp,[cffOverWriteFile]);
-    except
-      infoln(infotext+'Non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
+    if CrossWin then
+    begin
+      LHelpTemp:=GetTempFileName('','');
+      try
+        CopyFile(
+          IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,
+          LHelpTemp,[cffOverWriteFile]);
+      except
+        infoln(infotext+'Non-fatal error copying lhelp to temp file '+LHelpTemp,etInfo);
+      end;
     end;
   end;
   {$endif MSWINDOWS}
