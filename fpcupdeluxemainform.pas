@@ -451,9 +451,13 @@ begin
   {$ifdef RemoteLog}
   FreeAndNil(aDataClient);
   {$endif}
+
   (* using CloseFile will ensure that all pending output is flushed *)
-  CloseFile(System.Output);
-  System.Output := oldoutput;
+  //if (TTextRec(oldoutput).Handle=UnusedHandle) then
+  begin
+    CloseFile(System.Output);
+    System.Output := oldoutput;
+  end;
 end;
 
 procedure TForm1.FormResize(Sender: TObject);
@@ -3084,7 +3088,9 @@ begin
 
     SetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 
-    FPCupManager.Free;
+    FPCupManager.Destroy;
+    FPCupManager:=nil;
+
   end;
 
   CloseAction:=caFree;

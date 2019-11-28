@@ -930,18 +930,11 @@ end;
 destructor TFPCupManager.Destroy;
 var i:integer;
 begin
-  for i:=0 to FModuleList.Count-1 do
-    Freemem(FModuleList.Objects[i]);
+  for i:=0 to FModuleList.Count-1 do Freemem(FModuleList.Objects[i]);
   FModuleList.Free;
   FModulePublishedList.Free;
   FModuleEnabledList.Free;
   FSequencer.free;
-  try
-    WritelnLog(DateTimeToStr(now)+': fpcup finished.',true);
-    WritelnLog('------------------------------------------------',false);
-  finally
-    //ignore logging errors
-  end;
   FLog.Free;
   inherited Destroy;
 end;

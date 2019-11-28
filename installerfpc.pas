@@ -1313,6 +1313,14 @@ begin
     end;
   end;
 
+  //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
+  //Copy them now, just to be sure
+  s1:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
+  ForceDirectoriesSafe(s1);
+  s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
+  if (NOT FileExists(s1+DirectorySeparator+'yylex.cod')) then FileUtil.CopyFile(s2+DirectorySeparator+'yylex.cod',s1+DirectorySeparator+'yylex.cod');
+  if (NOT FileExists(s1+DirectorySeparator+'yyparse.cod')) then FileUtil.CopyFile(s2+DirectorySeparator+'yyparse.cod',s1+DirectorySeparator+'yyparse.cod');
+
   Processor.Executable := Make;
   Processor.Parameters.Clear;
   {$IFDEF MSWINDOWS}
