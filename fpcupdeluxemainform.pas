@@ -859,17 +859,10 @@ begin
              begin
                exit;
              end;
-
   if Assigned(FPCupManager.Sequencer) then
   begin
     FPCupManager.Sequencer.Kill;
   end;
-  // brute force ... nothing better at the moment
-  // but still does not work when downloading from SVN
-  // the process that gets created when downloading if not reachable from here through the fpcupmanager
-  FPCupManager.Destroy;
-  InitFPCupManager;
-  //DisEnable(Sender,True);
 end;
 
 procedure TForm1.btnGetOpenSSLClick(Sender: TObject);

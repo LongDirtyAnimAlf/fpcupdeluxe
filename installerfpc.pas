@@ -740,8 +740,8 @@ begin
           }
           Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-          Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
-          Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+          Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+          Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
           Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           {$IFDEF MSWINDOWS}
           Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
@@ -1288,6 +1288,9 @@ end;
 { TFPCNativeInstaller }
 
 function TFPCNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
+const
+  YYLEX='yylex.cod';
+  YYPARSE='yyparse.cod';
 var
   OperationSucceeded:boolean;
   {$IFDEF MSWINDOWS}
@@ -1315,11 +1318,12 @@ begin
 
   //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
   //Copy them now, just to be sure
-  s1:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
-  ForceDirectoriesSafe(s1);
+  ForceDirectoriesSafe(FBinPath);
   s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
-  if (NOT FileExists(s1+DirectorySeparator+'yylex.cod')) then FileUtil.CopyFile(s2+DirectorySeparator+'yylex.cod',s1+DirectorySeparator+'yylex.cod');
-  if (NOT FileExists(s1+DirectorySeparator+'yyparse.cod')) then FileUtil.CopyFile(s2+DirectorySeparator+'yyparse.cod',s1+DirectorySeparator+'yyparse.cod');
+  s1:=IncludeTrailingPathDelimiter(FBinPath)+YYLEX;
+  if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYLEX,s1);
+  s1:=IncludeTrailingPathDelimiter(FBinPath)+YYPARSE;
+  if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
 
   Processor.Executable := Make;
   Processor.Parameters.Clear;
@@ -1336,8 +1340,8 @@ begin
   {$IFDEF DEBUG}
   Processor.Parameters.Add('-d');
   {$ENDIF}
-  Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
-  Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+  Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+  Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
   Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
 
   //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
@@ -2138,6 +2142,8 @@ begin
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
 
+  FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
+
   result:=CheckAndGetTools;
 
   if FVerbose then Processor.OnOutputM:=@DumpOutput;
@@ -2555,7 +2561,6 @@ begin
   {$IFDEF MSWINDOWS}
   WritelnLog(localinfotext+'Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
-  FBinPath:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true);
 
   {$IFDEF MSWINDOWS}
   s:='';
@@ -3298,10 +3303,13 @@ begin
         Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
       Processor.Parameters.Add('FPC='+aCleanupCompiler);
       Processor.Parameters.Add('--directory='+ExcludeTrailingPathDelimiter(FSourceDirectory));
-      Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
-      Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+      Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
+      Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
       Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
       Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+      {$IFDEF UNIX}
+      Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
+      {$ENDIF}
       {$IFDEF MSWINDOWS}
       Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
       Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ

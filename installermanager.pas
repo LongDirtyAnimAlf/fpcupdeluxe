@@ -1748,7 +1748,7 @@ begin
           SMSetOS       : DoSetOS(FStateMachine[InstructionPointer].param);
           SMSetCPU      : DoSetCPU(FStateMachine[InstructionPointer].param);
         end;
-        if not result then
+        if (NOT result) OR (SeqAttr^.Executed=ESFailed) then
         begin
           SeqAttr^.Executed:=ESFailed;
           {$IFDEF DEBUG}
@@ -1783,11 +1783,18 @@ begin
 end;
 
 function TSequencer.Kill: boolean;
+  var
+    idx:integer;
 begin
   result:=false;
+
+  //Set all to failed to halt the statemachine
+  for idx:=0 to FParent.FModuleList.Count -1 do
+    PSequenceAttributes(FParent.FModuleList.Objects[idx])^.Executed:=ESFailed;
+
   if Assigned(Installer) then
   begin
-    result:=Installer.Processor.Terminate(0);
+    result:=Installer.Processor.Terminate(-1);
     {$IF FPC_FULLVERSION < 30300}
     Installer.Processor.WaitOnExit;
     {$ELSE}
