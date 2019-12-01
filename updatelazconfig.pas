@@ -163,6 +163,8 @@ public
   procedure SetVariable(ConfigFile, Variable: string; Value: integer);
   { Sets boolean variable to a certain value}
   procedure SetVariable(ConfigFile, Variable: string; Value: boolean);
+  { Is config file is created for us.}
+  function IfNewFile(ConfigFile:string):boolean;
   { Sets variable to a certain value, only if a config file is created for us.}
   procedure SetVariableIfNewFile(ConfigFile, Variable, Value: string);
   { Create object; specify
@@ -623,6 +625,15 @@ begin
   // Don't free this one, as it will remove it from the list
   Config:=GetConfig(ConfigFile);
   Config.SetValue(Variable, Value);
+end;
+
+function TUpdateLazConfig.IfNewFile(ConfigFile:string):boolean;
+var
+  Config: TConfig;
+begin
+  // Don't free this one, as it will remove it from the list
+  Config:=GetConfig(ConfigFile);
+  result:=Config.New;
 end;
 
 procedure TUpdateLazConfig.SetVariableIfNewFile(ConfigFile, Variable,

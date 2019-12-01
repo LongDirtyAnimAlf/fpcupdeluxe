@@ -593,13 +593,13 @@ begin
   aOS := GetTargetOS;
   aCPU := GetTargetCPU;
   BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+aCPU + '-' + aOS;
-  FPCCfg := IncludeTrailingPathDelimiter(BinPath) + 'fpc.cfg';
+  FPCCfg := IncludeTrailingPathDelimiter(BinPath) + FPCCONFIGFILENAME;
 
   result:=false;
 
   if NOT FileExists(FPCCfg) then
   begin
-    if (Sender<>nil) then AddMessage('FPC configfile [fpc.cfg] not found in ' + BinPath);
+    if (Sender<>nil) then AddMessage('FPC configfile ['+FPCCONFIGFILENAME+'] not found in ' + BinPath);
     exit;
   end;
 
@@ -3189,7 +3189,7 @@ begin
 
   FPCupManager.ShortCutNameLazarus:='Lazarus_'+ExtractFileName(sInstallDir);
 
-  sInstallDir:=sInstallDir+DirectorySeparator;
+  sInstallDir:=IncludeTrailingPathDelimiter(sInstallDir);
 
   FPCupManager.MakeDirectory:=sInstallDir+'fpcbootstrap';
 

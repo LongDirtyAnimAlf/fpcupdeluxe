@@ -973,7 +973,6 @@ begin
   begin
     if OperationSucceeded then
     begin
-
       {
 
       s:=IncludeTrailingPathDelimiter(FFPCSourceDir)+'utils'+DirectorySeparator+'fpcmkcfg'+DirectorySeparator+FPCPKGFILENAME;
@@ -1669,10 +1668,25 @@ begin
       DebuggerPath := IncludeTrailingPathDelimiter(FBaseDirectory) + 'projects';
       ForceDirectoriesSafe(DebuggerPath);
       LazarusConfig.SetVariableIfNewFile(EnvironmentConfig, 'EnvironmentOptions/TestBuildDirectory/Value', IncludeTrailingPathDelimiter(DebuggerPath));
+      {$IFDEF UNIX}
+      {$IFDEF LCLQT5}
+      if (NOT LibWhich(QT5LIBNAME)) then
+      begin
+        s:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+QT5LIBNAME;
+        if FileExists(s) then
+        begin
+          // Strange: running needs a .so.1 file .... but linking needs a .so file ...
+          s2:=IncludeTrailingPathDelimiter(DebuggerPath)+QT5LIBNAME;
+          if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
+          Delete(s2,Length(s2)-1,2);
+          if (NOT FileExists(s2)) then FileUtil.CopyFile(s,s2);
+        end;
+      end;
+      {$ENDIF LCLQT5}
+      {$ENDIF UNIX}
 
       // Set file history towards default project directory
       LazarusConfig.SetVariableIfNewFile(History, 'InputHistory/FileDialog/InitialDir', IncludeTrailingPathDelimiter(DebuggerPath));
-
 
       {$IFDEF DARWIN}
       {$IFDEF CPUX86_64}
@@ -1706,58 +1720,62 @@ begin
       {$ENDIF CPUX86_64}
       {$ENDIF DARWIN}
 
-      //Setup fppkg things
-
-      s:=IncludeTrailingPathDelimiter(FFPCSourceDir)+'utils'+DirectorySeparator+'fpcmkcfg'+DirectorySeparator+FPCPKGFILENAME;
-      s2:=IncludeTrailingPathDelimiter(SafeGetApplicationConfigPath)+'fpcup_'+ExtractFileName(ExcludeTrailingPathDelimiter(FBaseDirectory));
-
-      if (NOT FileExists(IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME)) then
+      //Setup basic fppkg things
+      if LazarusConfig.IfNewFile(EnvironmentConfig) then
       begin
-        if ForceDirectoriesSafe(s2) then
-          FileUtil.CopyFile(s,IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME);
+
+        s:=IncludeTrailingPathDelimiter(FFPCSourceDir)+'utils'+DirectorySeparator+'fpcmkcfg'+DirectorySeparator+FPCPKGFILENAME;
+        //s2:=IncludeTrailingPathDelimiter(SafeGetApplicationConfigPath)+'fpcup_'+ExtractFileName(ExcludeTrailingPathDelimiter(FBaseDirectory));
+        s2:=IncludeTrailingPathDelimiter(FBaseDirectory)+'fpcpkgconfig';
+
+        if (NOT FileExists(IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME)) then
+        begin
+          if ForceDirectoriesSafe(s2) then
+            FileUtil.CopyFile(s,IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME);
+        end;
+
+        s:=s2;
+
+        s2:=IncludeTrailingPathDelimiter(s)+'default';
+        with TIniFile.Create(s2) do
+        try
+          WriteString('Defaults','ConfigVersion','5');
+          WriteString('Defaults','Compiler',FCompiler);
+          WriteString('Defaults','OS',GetTargetOS);
+          WriteString('Defaults','CPU',GetTargetCPU);
+        finally
+          Free;
+        end;
+
+        s2:=IncludeTrailingPathDelimiter(s)+FPCPKGFILENAME;
+        with TIniFile.Create(s2) do
+        try
+          WriteString('Defaults','ConfigVersion','5');
+
+          WriteString('Defaults','LocalRepository',IncludeTrailingPathDelimiter(FBaseDirectory)+'packages.fppkg'+DirectorySeparator);
+          //WriteString('Defaults','CompilerConfigDir','{LocalRepository}config/');
+
+          WriteString('Defaults','CompilerConfig','default');
+          WriteString('Defaults','CompilerConfigDir',IncludeTrailingPathDelimiter(s));
+
+          //WriteString('Defaults','CompilerConfig','default');
+          //WriteString('Defaults','CompilerConfigDir',s);
+
+          WriteString('IncludeFiles','FileMask','{LocalRepository}config/conf.d/*.conf');
+
+          // The FPC repository
+          WriteString('Repository','Path',IncludeTrailingPathDelimiter(FFPCInstallDir)+'lib'+DirectorySeparator+'fpc'+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
+          WriteString('Repository','Prefix',ExcludeTrailingPathDelimiter(FFPCInstallDir));
+
+          // The user repository
+          //WriteString('Repository','Path','{LocalRepository}lib'+DirectorySeparator+'fpc'+DirectorySeparator+s);
+          //WriteString('Repository','Prefix','{LocalRepository}');
+        finally
+          Free;
+        end;
+
+        if FileExists(s2) then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FppkgConfigFile/Value', s2);
       end;
-
-      s:=s2;
-
-      s2:=IncludeTrailingPathDelimiter(s)+'default';
-      with TIniFile.Create(s2) do
-      try
-        WriteString('Defaults','ConfigVersion','5');
-        WriteString('Defaults','Compiler',FCompiler);
-        WriteString('Defaults','OS',GetTargetOS);
-        WriteString('Defaults','CPU',GetTargetCPU);
-      finally
-        Free;
-      end;
-
-      s2:=IncludeTrailingPathDelimiter(s)+FPCPKGFILENAME;
-      with TIniFile.Create(s2) do
-      try
-        WriteString('Defaults','ConfigVersion','5');
-
-        WriteString('Defaults','LocalRepository',IncludeTrailingPathDelimiter(FBaseDirectory)+'packages.fppkg'+DirectorySeparator);
-        //WriteString('Defaults','CompilerConfigDir','{LocalRepository}config/');
-
-        WriteString('Defaults','CompilerConfig','default');
-        WriteString('Defaults','CompilerConfigDir',IncludeTrailingPathDelimiter(s));
-
-        //WriteString('Defaults','CompilerConfig','default');
-        //WriteString('Defaults','CompilerConfigDir',s);
-
-        WriteString('IncludeFiles','FileMask','{LocalRepository}config/conf.d/*.conf');
-
-        // The FPC repository
-        WriteString('Repository','Path',IncludeTrailingPathDelimiter(FFPCInstallDir)+'lib'+DirectorySeparator+'fpc'+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
-        WriteString('Repository','Prefix',ExcludeTrailingPathDelimiter(FFPCInstallDir));
-
-        // The user repository
-        //WriteString('Repository','Path','{LocalRepository}lib'+DirectorySeparator+'fpc'+DirectorySeparator+s);
-        //WriteString('Repository','Prefix','{LocalRepository}');
-      finally
-        Free;
-      end;
-
-      if FileExists(s2) then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FppkgConfigFile/Value', s2);
 
 
     except

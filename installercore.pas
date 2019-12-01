@@ -47,6 +47,8 @@ const
 
   FPCPKGFILENAME        = 'fppkg.cfg';
 
+  FPCCONFIGFILENAME     = 'fpc.cfg';
+
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
 

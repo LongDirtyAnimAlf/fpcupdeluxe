@@ -221,7 +221,7 @@ function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
 // Adds snippet to fpc.cfg file or replaces if if first line of snippet is present
 // Returns success (snippet inserted or added) or failure
 const
-  INFOTEXT='FPCCrossInstaller (InsertFPCCFGSnippet: fpc.cfg): ';
+  INFOTEXT='FPCCrossInstaller (InsertFPCCFGSnippet: '+FPCCONFIGFILENAME+'): ';
 var
   ConfigText: TStringList;
   i:integer;
@@ -268,13 +268,13 @@ begin
         if SnipEndLastResort<>MaxInt then
         begin
           SnipEnd:=SnipEndLastResort;
-          infoln(INFOTEXT+'Existing snippet was not closed correct. Please check your fpc.cfg.',etWarning);
+          infoln(INFOTEXT+'Existing snippet was not closed correct. Please check your '+FPCCONFIGFILENAME+'.',etWarning);
         end;
       end;
       if SnipEnd=MaxInt then
       begin
         //apparently snippet was not closed at all: severe error
-        infoln(INFOTEXT+'Existing snippet was not closed at all. Please check your fpc.cfg for '+SnipMagicEnd+'.',etError);
+        infoln(INFOTEXT+'Existing snippet was not closed at all. Please check your '+FPCCONFIGFILENAME+' for '+SnipMagicEnd+'.',etError);
         exit;
       end;
 
@@ -686,7 +686,7 @@ begin
           if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
           begin
 
-            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
             Options:=UpperCase(CrossCPU_Target);
 
             //Distinguish between 32 and 64 bit powerpc
@@ -698,14 +698,14 @@ begin
             //Remove dedicated settings of config snippet
             if MakeCycle=Low(TSTEPS) then
             begin
-              infoln(infotext+'Removing fpc.cfg config snippet.',etInfo);
+              infoln(infotext+'Removing '+FPCCONFIGFILENAME+' config snippet.',etInfo);
               s1:='# dummy (blank) config just to remove dedicated settings during build of cross-compiler'+LineEnding;
             end;
 
             //Add config snippet
             if (MakeCycle=High(TSTEPS)) then
             begin
-              infoln(infotext+'Adding fpc.cfg config snippet.',etInfo);
+              infoln(infotext+'Adding '+FPCCONFIGFILENAME+' config snippet.',etInfo);
               if CrossInstaller.FPCCFGSnippet<>''
                  then s1:=CrossInstaller.FPCCFGSnippet+LineEnding
                  else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
@@ -1268,7 +1268,7 @@ begin
       end;
     end;
 
-    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
     InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target);
 
     aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
@@ -1912,7 +1912,7 @@ begin
   writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
   writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
   writeln(TxtFile,FPCCompiler,' -n @',
-    IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),'fpc.cfg '+
+    IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
     '"$@"');
   CloseFile(TxtFile);
   Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
@@ -2891,7 +2891,7 @@ begin
   if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
   begin
 
-    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + 'fpc.cfg';
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
 
     // Find out where fpcmkcfg lives - only if necessary.
     if (OperationSucceeded) AND (FileExists(FPCCfg)=false) then
@@ -2930,7 +2930,7 @@ begin
 
       Processor.Parameters.Add('-o');
       Processor.Parameters.Add('' + FPCCfg + '');
-      infoln(infotext+'Creating fpc.cfg: '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
+      infoln(infotext+'Creating '+FPCCONFIGFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
       try
         Processor.Execute;
       except
@@ -3186,20 +3186,29 @@ begin
           }
           ConfigText.Append('#ENDIF');
         end;
+        {$endif Darwin}
+
+
         {$ifndef FPCONLY}
         {$ifdef LCLQT5}
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         ConfigText.Append('# Adding some standard paths for QT5 locations ... bit dirty, but works ... ;-)');
+        {$ifdef Darwin}
         ConfigText.Append('-Fl'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
         ConfigText.Append('-k-F'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
         ConfigText.Append('-k-rpath');
         ConfigText.Append('-k@executable_path/../Frameworks');
         ConfigText.Append('-k-rpath');
         ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
+        {$else Darwin}
+        {$ifdef Unix}
+        ConfigText.Append('-k"-rpath=./"');
+        ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
+        {$endif}
+        {$endif Darwin}
         ConfigText.Append('#ENDIF');
         {$endif FPCONLY}
         {$endif LCLQT5}
-        {$endif Darwin}
 
         // add magic
         ConfigText.Append(SnipMagicEnd);
@@ -3371,7 +3380,7 @@ begin
   begin
     // The original behavior: delete fpc.cfg
     // New: keep it, while we will loose all crosscompilers [settings] when updating FPC !!
-    // Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.cfg');
+    // Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+FPCCONFIGFILENAME);
     {$IFDEF UNIX}
     // Delete any fpc.sh shell scripts
     Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
