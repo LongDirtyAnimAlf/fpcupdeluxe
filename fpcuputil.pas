@@ -686,7 +686,7 @@ begin
     end;
   finally
     Freemem(pathBuffer);
-  end
+  end;
   {$ELSE}
   {$IFDEF WINDOWS}
   if Global then
