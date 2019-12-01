@@ -1131,7 +1131,17 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       LS[11].lib:='libpangocairo-1.0.so';
       }
       //apt-get install subversion make binutils gdb gcc libgtk2.0-dev
-
+      {
+       libatk1.0
+       libc6
+       libcairo2
+       libgdk-pixbuf2.0
+       libglib2.0
+       libgtk2.0
+       libpango-1.0
+       libpangocairo-1.0
+       libx11
+      }
       Output:='libx11-dev libgtk2.0-dev libcairo2-dev libpango1.0-dev libxtst-dev libgdk-pixbuf2.0-dev libatk1.0-dev libghc-x11-dev';
       AdvicedLibs:=AdvicedLibs+
                    'make binutils build-essential gdb gcc subversion unrar devscripts libc6-dev freeglut3-dev libgl1-mesa libgl1-mesa-dev '+

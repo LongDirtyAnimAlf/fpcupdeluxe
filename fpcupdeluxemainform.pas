@@ -3010,13 +3010,13 @@ end;
 procedure TForm1.Edit1Change(Sender: TObject);
 begin
   sInstallDir:=InstallDirEdit.Text;
-  GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
+  if DirectoryExists(sInstallDir) then GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
 procedure TForm1.Edit1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
 begin
   sInstallDir:=InstallDirEdit.Text;
-  GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
+  if DirectoryExists(sInstallDir) then GetFPCUPSettings(IncludeTrailingPathDelimiter(sInstallDir));
 end;
 
 procedure TForm1.FPCVersionLabelClick(Sender: TObject);

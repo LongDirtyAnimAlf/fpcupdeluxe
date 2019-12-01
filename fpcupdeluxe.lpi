@@ -11,25 +11,35 @@
       <Title Value="fpcupdeluxe"/>
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
+      <XPManifest>
+        <DpiAware Value="True/PM"/>
+      </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="7">
+      <Resources Count="10">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="patchlazarus\darwinqt5hack.patch" Type="RCDATA" ResourceName="DARWINQT5HACK_LAZPATCH"/>
         <Resource_4 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
         <Resource_5 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
-        <Resource_6 FileName="patchlazarus\musltrunk.patch" Type="RCDATA" ResourceName="MUSLTRUNK_LAZPATCH"/>
+        <Resource_6 FileName="patchlazarus\darwinqt5hacksimple.patch" Type="RCDATA" ResourceName="DARWINQT5HACKSIMPLE_LAZPATCH"/>
+        <Resource_7 FileName="patchfpc\haiku.patch" Type="RCDATA" ResourceName="HAIKU_FPCPATCH"/>
+        <Resource_8 FileName="patchfpc\haikufpu.patch" Type="RCDATA" ResourceName="HAIKUFPU_FPCPATCH"/>
+        <Resource_9 FileName="patchfpc\freebsdfixes.patch" Type="RCDATA" ResourceName="FREEBSDFIXES_FPCPATCH"/>
       </Resources>
     </General>
     <i18n>
-      <EnableI18N LFM="False"/>
+      <EnableI18N Value="True" LFM="False"/>
+      <OutDir Value="languages"/>
+      <ExcludedIdentifiers Count="1">
+        <Item1 Value="tform1.caption"/>
+      </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="21">
+    <BuildModes Count="26">
       <Item1 Name="Default" Default="True"/>
       <Item2 Name="DefaultQT">
         <MacroValues Count="1">
-          <Macro2 Name="LCLWidgetType" Value="qt5"/>
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -67,8 +77,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <Parsing>
@@ -102,7 +112,7 @@
           </Other>
         </CompilerOptions>
       </Item3>
-      <Item4 Name="openbsdi386">
+      <Item4 Name="win32">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -110,64 +120,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="openbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item4>
-      <Item5 Name="openbsdx64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="openbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item5>
-      <Item6 Name="win32">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -189,8 +143,8 @@
             </Options>
           </Linking>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="win64">
+      </Item4>
+      <Item5 Name="win64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -198,8 +152,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -222,8 +176,8 @@
             </Options>
           </Linking>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="linuxi386">
+      </Item5>
+      <Item6 Name="linuxi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -231,8 +185,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -250,8 +204,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item8>
-      <Item9 Name="linux64">
+      </Item6>
+      <Item7 Name="linux64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -259,8 +213,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -278,8 +232,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item9>
-      <Item10 Name="linuxaarch64">
+      </Item7>
+      <Item8 Name="linuxaarch64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -287,8 +241,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -305,8 +259,8 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item10>
-      <Item11 Name="linuxarm">
+      </Item8>
+      <Item9 Name="linuxarm">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -314,8 +268,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -333,22 +287,23 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item11>
-      <Item12 Name="freebsdi386">
+      </Item9>
+      <Item10 Name="linuxarmv6">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)v6hf-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)v6hf-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <TargetCPU Value="i386"/>
-            <TargetOS Value="freebsd"/>
+            <TargetProcessor Value="ARMV6"/>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="linux"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -360,9 +315,80 @@
               <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
+          <Other>
+            <CustomOptions Value="-CpARMV6"/>
+          </Other>
+        </CompilerOptions>
+      </Item10>
+      <Item11 Name="linuxi386QT5">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;
+-XrC:\fpctrunk2\cross\lib\i386-linux"/>
+          </Other>
+        </CompilerOptions>
+      </Item11>
+      <Item12 Name="linuxx64QT5">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+          </Other>
         </CompilerOptions>
       </Item12>
-      <Item13 Name="freebsdx64">
+      <Item13 Name="linuxppc64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -370,13 +396,13 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="freebsd"/>
+            <TargetCPU Value="powerpc64"/>
+            <TargetOS Value="linux"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -390,7 +416,7 @@
           </Linking>
         </CompilerOptions>
       </Item13>
-      <Item14 Name="darwin32">
+      <Item14 Name="freebsdi386">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -398,13 +424,13 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
             <TargetCPU Value="i386"/>
-            <TargetOS Value="darwin"/>
+            <TargetOS Value="freebsd"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -418,19 +444,75 @@
           </Linking>
         </CompilerOptions>
       </Item14>
-      <Item15 Name="darwin32cocoa">
+      <Item15 Name="freebsdx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="freebsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item15>
+      <Item16 Name="netbsdx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="netbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item16>
+      <Item17 Name="darwin32carbon">
         <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+          <Macro3 Name="LCLWidgetType" Value="carbon"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-carbon"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -448,10 +530,10 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item15>
-      <Item16 Name="darwin64cocoa">
+      </Item17>
+      <Item18 Name="darwin32cocoa">
         <MacroValues Count="1">
-          <Macro1 Name="LCLWidgetType" Value="cocoa"/>
+          <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -460,12 +542,12 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
+            <TargetCPU Value="i386"/>
             <TargetOS Value="darwin"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
@@ -479,10 +561,40 @@
             </Debugging>
           </Linking>
         </CompilerOptions>
-      </Item16>
-      <Item17 Name="darwin64QT">
+      </Item18>
+      <Item19 Name="darwin64cocoa">
         <MacroValues Count="1">
-          <Macro2 Name="LCLWidgetType" Value="qt5"/>
+          <Macro2 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item19>
+      <Item20 Name="darwin64QT5">
+        <MacroValues Count="1">
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -491,8 +603,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -532,10 +644,10 @@
 -kAGL"/>
           </Other>
         </CompilerOptions>
-      </Item17>
-      <Item18 Name="haikui386QT5">
+      </Item20>
+      <Item21 Name="haikui386QT5">
         <MacroValues Count="1">
-          <Macro3 Name="LCLWidgetType" Value="qt5"/>
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -544,8 +656,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -571,65 +683,10 @@
 -k&quot;-rpath ~/config/non-packaged/lib&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item18>
-      <Item19 Name="linuxppc64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="powerpc64"/>
-            <TargetOS Value="linux"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <UseLineInfoUnit Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item19>
-      <Item20 Name="netbsdx64">
-        <CompilerOptions>
-          <Version Value="11"/>
-          <PathDelim Value="\"/>
-          <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
-          </Target>
-          <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
-          </SearchPaths>
-          <CodeGeneration>
-            <TargetCPU Value="x86_64"/>
-            <TargetOS Value="netbsd"/>
-            <Optimizations>
-              <OptimizationLevel Value="2"/>
-            </Optimizations>
-          </CodeGeneration>
-          <Linking>
-            <Debugging>
-              <GenerateDebugInfo Value="False"/>
-              <StripSymbols Value="True"/>
-            </Debugging>
-          </Linking>
-        </CompilerOptions>
-      </Item20>
-      <Item21 Name="haikuix64QT5">
+      </Item21>
+      <Item22 Name="haikux64QT5">
         <MacroValues Count="1">
-          <Macro3 Name="LCLWidgetType" Value="qt5"/>
+          <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
         <CompilerOptions>
           <Version Value="11"/>
@@ -638,8 +695,8 @@
             <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-qt5"/>
           </Target>
           <SearchPaths>
-            <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
@@ -652,6 +709,7 @@
           <Linking>
             <Debugging>
               <GenerateDebugInfo Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
             <Options>
               <Win32>
@@ -665,11 +723,126 @@
 -k&quot;-rpath ~/config/non-packaged/lib&quot;"/>
           </Other>
         </CompilerOptions>
-      </Item21>
+      </Item22>
+      <Item23 Name="darwinppc64cocoa">
+        <MacroValues Count="1">
+          <Macro2 Name="LCLWidgetType" Value="cocoa"/>
+        </MacroValues>
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-cocoa"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="powerpc64"/>
+            <TargetOS Value="darwin"/>
+            <Optimizations>
+              <OptimizationLevel Value="0"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <UseExternalDbgSyms Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item23>
+      <Item24 Name="solarisx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="solaris"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item24>
+      <Item25 Name="openbsdi386">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="openbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item25>
+      <Item26 Name="openbsdx64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="openbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+        </CompilerOptions>
+      </Item26>
       <SharedMatrixOptions Count="3">
-        <Item1 ID="178210829291" Modes="darwin64cocoa,darwin32cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
-        <Item2 ID="784204643275" Modes="DefaultQT,darwin64QT" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
-        <Item3 ID="477497289322" Modes="haikui386QT5,haikuix64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item1 ID="784204643275" Modes="DefaultQT,darwin64QT5,haikui386QT5,linuxx64QT5,linuxi386QT5,haikux64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
+        <Item2 ID="322994045052" Modes="darwinppc64cocoa,darwin32cocoa,darwin64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
+        <Item3 ID="015223611220" Modes="darwin32carbon" Type="IDEMacro" MacroName="LCLWidgetType" Value="carbon"/>
       </SharedMatrixOptions>
     </BuildModes>
     <PublishOptions>
@@ -711,6 +884,7 @@
       <Unit3>
         <Filename Value="syneditpopup.pas"/>
         <IsPartOfProject Value="True"/>
+        <UnitName Value="SynEditPopup"/>
       </Unit3>
       <Unit4>
         <Filename Value="aboutfrm.pas"/>
@@ -718,6 +892,7 @@
         <ComponentName Value="AboutForm"/>
         <HasResources Value="True"/>
         <ResourceBaseClass Value="Form"/>
+        <UnitName Value="AboutFrm"/>
       </Unit4>
       <Unit5>
         <Filename Value="unzipprogress.pas"/>
@@ -734,8 +909,11 @@
         <ResourceBaseClass Value="Form"/>
       </Unit6>
       <Unit7>
-        <Filename Value="mormotdatamodelserver.pas"/>
+        <Filename Value="modulesettings.pas"/>
         <IsPartOfProject Value="True"/>
+        <ComponentName Value="Form3"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
       </Unit7>
     </Units>
   </ProjectOptions>
@@ -746,8 +924,8 @@
       <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
     </Target>
     <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir);mORMot"/>
-      <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;mORMot\CrossPlatform;mORMot;mORMot\SQLite3"/>
+      <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+      <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot;logger\mORMot\SQLite3;logger\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
     <CodeGeneration>
@@ -758,6 +936,7 @@
     <Linking>
       <Debugging>
         <GenerateDebugInfo Value="False"/>
+        <UseLineInfoUnit Value="False"/>
       </Debugging>
       <Options>
         <Win32>
@@ -767,7 +946,7 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="7">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -780,6 +959,15 @@
       <Item4>
         <Name Value="EProcess"/>
       </Item4>
+      <Item5>
+        <Name Value="EInOutError"/>
+      </Item5>
+      <Item6>
+        <Name Value="ESocketError"/>
+      </Item6>
+      <Item7>
+        <Name Value="ESSLSocketError"/>
+      </Item7>
     </Exceptions>
   </Debugging>
 </CONFIG>

@@ -324,6 +324,8 @@ function SafeExpandFileName (Const FileName : String): String;
 function SafeGetApplicationName: String;
 // Get application path
 function SafeGetApplicationPath: String;
+// Get config path
+function SafeGetApplicationConfigPath(Global:boolean=false): String;
 function SaveFileFromResource(filename,resourcename:string):boolean;
 // Copies specified resource (e.g. fpcup.ini, settings.ini)
 // to application directory
@@ -348,6 +350,8 @@ function GetSDKVersion(aSDK: string):string;
 function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
+//Find a library, if any
+function LibWhich(aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
 function Which(Executable: string): string;
 function IsExecutable(Executable: string):boolean;
@@ -383,6 +387,11 @@ implementation
 uses
   {$ifdef LCL}
   Forms,Controls,
+  {$endif}
+  {$ifdef Darwin}
+  MacTypes,
+  Folders,
+  Files,
   {$endif}
   IniFiles,
   DOM,DOM_HTML,SAX_HTML,
@@ -644,6 +653,62 @@ begin
  result:=IncludeTrailingPathDelimiter(StartPath);
 end;
 
+function SafeGetApplicationConfigPath(Global:boolean=false): String;
+{$IFDEF DARWIN}
+const
+  kMaxPath = 1024;
+var
+  theError: OSErr;
+  theRef: FSRef;
+  pathBuffer: PChar;
+{$ENDIF}
+begin
+  result:='';
+  {$IFDEF DARWIN}
+  theRef := Default(FSRef); // init
+  try
+    pathBuffer := Allocmem(kMaxPath);
+  except on exception
+    do exit;
+  end;
+  try
+    Fillchar(pathBuffer^, kMaxPath, #0);
+    Fillchar(theRef, Sizeof(theRef), #0);
+    if Global then // kLocalDomain
+      theError := FSFindFolder(kLocalDomain, kPreferencesFolderType, kDontCreateFolder, theRef)
+    else // kUserDomain
+      theError := FSFindFolder(kUserDomain , kPreferencesFolderType, kDontCreateFolder, theRef);
+    if (pathBuffer <> nil) and (theError = noErr) then
+    begin
+      theError := FSRefMakePath(theRef, pathBuffer, kMaxPath);
+      if theError = noErr then
+        result := UTF8ToAnsi(StrPas(pathBuffer));
+    end;
+  finally
+    Freemem(pathBuffer);
+  end
+  {$ELSE}
+  {$IFDEF WINDOWS}
+  if Global then
+    result:=GetWindowsSpecialDir(CSIDL_COMMON_APPDATA)
+  else
+    result:=GetWindowsSpecialDir(CSIDL_LOCAL_APPDATA);
+  {$ELSE}
+  if Global then
+    result:=SysConfigDir
+  else
+  begin
+    result:=GetEnvironmentVariable('HOME');
+    if (result='') then
+      result:=SafeExpandFileName('~/.config')
+    else
+      result:=IncludeTrailingPathDelimiter(result) + '.config';
+  end;
+  {$ENDIF}
+  {$ENDIF}
+  result:=IncludeTrailingPathDelimiter(result);
+end;
+
 function SaveFileFromResource(filename,resourcename:string):boolean;
 var
   fs:Tfilestream;
@@ -809,7 +874,12 @@ begin
     XdgDesktopContent.Add('Encoding=UTF-8');
     XdgDesktopContent.Add('Type=Application');
     XdgDesktopContent.Add('Icon='+ExtractFilePath(Target)+'images/icons/lazarus.ico');
+    {$ifndef LCLQT5}
+    XdgDesktopContent.Add('Path='+ExtractFilePath(Target));
+    XdgDesktopContent.Add('Exec=./'+ExtractFileName(Target)+' '+TargetArguments+' %f');
+    {$else}
     XdgDesktopContent.Add('Exec='+Target+' '+TargetArguments+' %f');
+    {$endif}
     XdgDesktopContent.Add('Name='+ShortcutName);
     XdgDesktopContent.Add('GenericName=Lazarus IDE with Free Pascal Compiler');
     XdgDesktopContent.Add('Category=Application;IDE;Development;GUIDesigner;');
@@ -2402,6 +2472,14 @@ begin
       result := '' else
       result := GetEnumName(aTypeInfo,aEnum);
   end;
+end;
+
+function LibWhich(aLibrary: string): boolean;
+var
+  Output: string;
+begin
+  ExecuteCommand('sh -c "ldconfig -p | grep '+aLibrary+'"', Output, false);
+  result:=(Pos(aLibrary,Output)>0);
 end;
 
 function Which(Executable: string): string;

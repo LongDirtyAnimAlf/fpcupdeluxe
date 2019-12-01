@@ -43,6 +43,10 @@ const
   MAKEFILENAME          = 'Makefile';
   FPCMAKEFILENAME       = MAKEFILENAME+'.fpc';
 
+  QT5LIBNAME            = 'libQt5Pas.so.1';
+
+  FPCPKGFILENAME        = 'fppkg.cfg';
+
   FPCSVNURL = 'https://svn.freepascal.org/svn';
   FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
 

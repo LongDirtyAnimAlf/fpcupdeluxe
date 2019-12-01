@@ -260,11 +260,30 @@ begin
 
   //Set options
   s := FLazarusCompilerOptions;
+
+  {$ifdef Unix}
+    {$ifndef Darwin}
+      {$ifdef LCLQT}
+      {$endif}
+      {$ifdef LCLQT5}
+        // Did we copy the QT5 libs ??
+        // If so, add some linker help.
+        if (FileExists(IncludeTrailingPathDelimiter(LazarusInstallDir)+QT5LIBNAME)) then
+        begin
+          s:=s+' -k"-rpath=./"';
+          s:=s+' -k"-rpath=\\$$$$$\\ORIGIN"';
+          s:=s+' -Fl'+ExcludeTrailingPathDelimiter(LazarusInstallDir);
+        end;
+      {$endif}
+    {$endif}
+  {$endif}
+
   while Pos('  ',s)>0 do
   begin
     s:=StringReplace(s,'  ',' ',[rfReplaceAll]);
   end;
   s:=Trim(s);
+
   if Length(s)>0 then Processor.Parameters.Add('OPT='+s);
 
   Processor.Parameters.Add('LAZBUILDJOBS='+IntToStr(FCPUCount));
