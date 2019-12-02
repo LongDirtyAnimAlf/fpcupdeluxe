@@ -2690,80 +2690,87 @@ begin
 
           if MissingCrossLibs then
           begin
-            BaseLibsURL:=FPCUPGITREPO+'/releases/download/crosslibs_v1.1';
-
-            AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
-            DownloadURL:=BaseLibsURL+'/'+'CrossLibs'+LibsFileName;
-
-            // default to zip
-            DownloadURL:=DownloadURL+'.zip';
-
-            TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
-            SysUtils.DeleteFile(TargetFile);
-            success:=false;
-            AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
-            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            ZipFile:=success;
-
-            {$ifndef Darwin}
-            // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
-            if (NOT success) then
+            for i:=High(FPCUPLIBSURL) downto Low(FPCUPLIBSURL) do
             begin
-              DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
-              SysUtils.DeleteFile(TargetFile);
+              BaseLibsURL:=FPCUPLIBSURL[i];
+
+              AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
+              DownloadURL:=BaseLibsURL+'/'+'CrossLibs'+LibsFileName;
+
+              // default to zip
+              DownloadURL:=DownloadURL+'.zip';
+
               TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
               SysUtils.DeleteFile(TargetFile);
+              success:=false;
               AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
               success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            end;
-            {$endif}
+              ZipFile:=success;
 
-            if success then
-            begin
-              AddMessage('Successfully downloaded the libraries.');
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-              //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath+DirectorySeparator;
-              //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath);
-
-              AddMessage('Going to extract them into '+TargetPath);
-
-              if ZipFile then
+              {$ifndef Darwin}
+              // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
+              if (NOT success) then
               begin
-                with TNormalUnzipper.Create do
+                DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
+                SysUtils.DeleteFile(TargetFile);
+                TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
+                SysUtils.DeleteFile(TargetFile);
+                AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              end;
+              {$endif}
+
+              if success then
+              begin
+                AddMessage('Successfully downloaded the libraries.');
+                TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+                //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath+DirectorySeparator;
+                //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath);
+
+                AddMessage('Going to extract them into '+TargetPath);
+
+                if ZipFile then
                 begin
-                  try
-                    success:=DoUnZip(TargetFile,TargetPath,[]);
-                  finally
-                    Free;
+                  with TNormalUnzipper.Create do
+                  begin
+                    try
+                      success:=DoUnZip(TargetFile,TargetPath,[]);
+                    finally
+                      Free;
+                    end;
                   end;
-                end;
-              end
-              else
-              begin
-                {$ifdef MSWINDOWS}
-                if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
-                if (NOT success) then
-                {$endif}
+                end
+                else
                 begin
                   {$ifdef MSWINDOWS}
-                  UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                  {$else}
-                  UnZipper := 'unrar';
+                  if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
+                  success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
+                  if (NOT success) then
                   {$endif}
-                  success:=CheckExecutable(UnZipper, '-v', '');
-                  if success then
                   begin
-                    if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
-                    success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
-                  end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
+                    {$ifdef MSWINDOWS}
+                    UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                    {$else}
+                    UnZipper := 'unrar';
+                    {$endif}
+                    success:=CheckExecutable(UnZipper, '-v', '');
+                    if success then
+                    begin
+                      if (not verbose) then AddMessage('Please wait: going to unpack library files archive.');
+                      success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                    end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
+                  end;
                 end;
               end;
+              SysUtils.DeleteFile(TargetFile);
+              // as libraries are not needed for embedded, always end with success even if the above has failed
+              if FPCupManager.CrossOS_Target='embedded' then success:=true;
+              if success then
+              begin
+                MissingCrossLibs:=False;
+                break;
+              end;
             end;
-            SysUtils.DeleteFile(TargetFile);
-            // as libraries are not needed for embedded, always end with success even if the above has failed
-            if FPCupManager.CrossOS_Target='embedded' then success:=true;
-            if success then MissingCrossLibs:=False;
           end;
 
           if success then

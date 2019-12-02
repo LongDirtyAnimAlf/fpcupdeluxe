@@ -59,6 +59,12 @@ const
   NEWPASCALGITREPO='https://github.com/LongDirtyAnimAlf';
   FPCUPGITREPO=NEWPASCALGITREPO+'/fpcupdeluxe';
 
+  FPCUPLIBSURL : array [0..2] of string = (
+    FPCUPGITREPO+'/releases/download/crosslibs_v1.0',
+    FPCUPGITREPO+'/releases/download/crosslibs_v1.1',
+    FPCUPGITREPO+'/releases/download/crosslibs_v1.2'
+    );
+
   BOOTSTRAPPERVERSION='bootstrappers_v1.0';
   FPCUPGITREPOBOOTSTRAPPER=FPCUPGITREPO+'/releases/download/'+BOOTSTRAPPERVERSION;
   FPCUPGITREPOAPI='https://api.github.com/repos/LongDirtyAnimAlf/fpcupdeluxe/releases';
