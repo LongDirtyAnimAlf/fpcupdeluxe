@@ -362,6 +362,7 @@ begin
         Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
         Processor.Parameters.Add('USESVN2REVISIONINC=0');
         Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
+        Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
         //Make sure our FPC units can be found by Lazarus
@@ -622,6 +623,7 @@ begin
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
     //Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
     Processor.Parameters.Add('--directory=.');
+    Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     //Make sure our FPC units can be found by Lazarus
     Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
@@ -1831,6 +1833,7 @@ begin
     Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));}
   Processor.Parameters.Add('FPC=' + FCompiler);
   Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
+  Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
   {$ifdef Windows}
   Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
