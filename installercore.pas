@@ -267,9 +267,11 @@ type
     function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
+    function GetCrossCompilerPresent:boolean;
     function GetFullVersion:dword;
     function GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
   protected
+    FBinPath: string; //path where compiler lives
     FCleanModuleSuccess: boolean;
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
@@ -438,7 +440,7 @@ type
     property UseWget: boolean write FUseWget;
     // get cross-installer
     property CrossInstaller:TCrossInstaller read GetCrossInstaller;
-    // set cross-target
+    property CrossCompilerPresent: boolean read GetCrossCompilerPresent;
     property NumericalVersion:dword read GetFullVersion;
     function GetCompilerName(Cpu_Target:string):string;
     function GetCrossCompilerName(Cpu_Target:string):string;
@@ -509,6 +511,116 @@ begin
         Result := TCrossInstaller(CrossInstallers.Objects[idx]);
         break;
       end;
+end;
+
+function TInstaller.GetCrossCompilerPresent:boolean;
+var
+  FPCCfg,aDir,s   : string;
+  ConfigText      : TStringList;
+  SnipBegin,i     : integer;
+  aCPU,aOS,aArch  : string;
+begin
+  result:=false;
+
+  if (NOT DirectoryExists(FInstallDirectory)) then exit;
+  if CheckDirectory(FInstallDirectory) then exit;
+
+  if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
+
+  //if (Self is TFPCCrossInstaller) then
+  begin
+    // check for existing cross-dirs
+    if (NOT result) then
+    begin
+      aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
+      result:=DirectoryExists(aDir);
+    end;
+    if (NOT result) then
+    begin
+      aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(false);
+      {$ifdef UNIX}
+      if FileIsSymlink(aDir) then
+      begin
+        try
+          aDir:=GetPhysicalFilename(aDir,pfeException);
+        except
+        end;
+      end;
+      {$endif}
+      result:=DirectoryExists(aDir);
+    end;
+
+    if result then exit;
+
+    // Check FPC config-file
+
+    aCPU:='';
+    aOS:='';
+    aArch:='';
+
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
+
+    if (NOT FileExists(FPCCfg)) then exit;
+
+    ConfigText:=TStringList.Create;
+    try
+      ConfigText.LoadFromFile(FPCCFG);
+      SnipBegin:=0;
+      while (SnipBegin<ConfigText.Count) do
+      begin
+        if Pos(SnipMagicBegin,ConfigText.Strings[SnipBegin])>0 then
+        begin
+          s:=ConfigText.Strings[SnipBegin];
+          Delete(s,1,Length(SnipMagicBegin));
+          i:=Pos('-',s);
+          if i>0 then
+          begin
+            aCPU:=Copy(s,1,i-1);
+            aOS:=Trim(Copy(s,i+1,MaxInt));
+            // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
+            if (UpperCase(aCPU)='ARM') AND (UpperCase(aOS)='LINUX') then
+            begin
+              for i:=SnipBegin to SnipBegin+5 do
+              begin
+                if Pos('#IFDEF CPU',ConfigText.Strings[i])>0 then
+                begin
+                  s:=ConfigText.Strings[i];
+                  Delete(s,1,Length('#IFDEF CPU'));
+                  aArch:=s;
+                  break;
+                end;
+              end;
+            end;
+          end;
+        end;
+        Inc(SnipBegin);
+      end;
+
+      result:=((CrossCPU_Target=aCPU) AND (CrossOS_Target=aOS));
+
+    finally
+      ConfigText.Free;
+    end;
+  end;
+
+  //if (Self is TLazarusCrossInstaller) then
+  begin
+    if (NOT result) then
+    begin
+      aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lcl'+DirectorySeparator+'units'+DirectorySeparator+GetFPCTarget(false);
+      {$ifdef UNIX}
+      if FileIsSymlink(aDir) then
+      begin
+        try
+          aDir:=GetPhysicalFilename(aDir,pfeException);
+        except
+        end;
+      end;
+      {$endif}
+      result:=DirectoryExists(aDir);
+    end;
+  end;
+
 end;
 
 procedure TInstaller.SetURL(value:string);

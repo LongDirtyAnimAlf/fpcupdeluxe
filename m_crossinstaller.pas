@@ -76,6 +76,11 @@ const
   LINKERNAMEBASE='ld-linux.so.2';
   LINKERNAMECPUX64='ld-linux-x86-64.so.2';
 
+  CROSSPATH      = 'cross';
+  CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';
+  CROSSLIBPATH   = CROSSPATH+DirectorySeparator+'lib';
+
+
 type
   CompilerType=(ctBootstrap,ctInstalled);
   SearchMode=(smFPCUPOnly,smAuto,smManual);
@@ -301,7 +306,7 @@ begin
 
   if not result then
   begin
-    sd:=IncludeTrailingPathDelimiter(BasePath)+'cross'+DirectorySeparator;
+    sd:=IncludeTrailingPathDelimiter(BasePath)+CROSSPATH+DirectorySeparator;
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';
@@ -312,7 +317,7 @@ begin
 
   if not result then
   begin
-    sd:=SafeGetApplicationPath+'cross'+DirectorySeparator;
+    sd:=SafeGetApplicationPath+CROSSPATH+DirectorySeparator;
     if LibsOrBins
        then sd:=sd+'lib'
        else sd:=sd+'bin';

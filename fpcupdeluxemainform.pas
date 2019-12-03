@@ -151,7 +151,7 @@ type
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
     procedure Edit1Change(Sender: TObject);
-    function  PrepareRun:boolean;
+    procedure PrepareRun;
     function  RealRun:boolean;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
@@ -915,7 +915,7 @@ begin
   DisEnable(Sender,False);
 
   try
-    if NOT PrepareRun then exit;
+    PrepareRun;
 
     if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
     if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
@@ -1538,7 +1538,7 @@ begin
 
   DisEnable(Sender,False);
   try
-    if NOT PrepareRun then exit;
+    PrepareRun;
 
     if Sender=TrunkBtn then
     begin
@@ -1667,7 +1667,7 @@ begin
 
   DisEnable(Sender,False);
   try
-    if NOT PrepareRun then exit;
+    PrepareRun;
 
     AddMessage('Going to install/update FPC and Lazarus with given options.');
     sStatus:='Going to install/update FPC and Lazarus.';
@@ -1735,7 +1735,7 @@ begin
       exit;
     end;
 
-    if NOT PrepareRun then exit;
+    PrepareRun;
 
     FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
 
@@ -1899,7 +1899,7 @@ begin
     exit;
   end;
 
-  if NOT PrepareRun then exit;
+  PrepareRun;
 
   if radgrpCPU.ItemIndex<>-1 then
   begin
@@ -2482,15 +2482,51 @@ begin
         // normally, we have the same names for libs and bins URL
         LibsFileName:=BinsFileName;
 
-        LibPath:=GetFPCUPCrossLibsDirectory(FPCupManager.BaseDirectory,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.MUSL,FPCupManager.SolarisOI);
-        BinPath:=GetFPCUPCrossBinsDirectory(FPCupManager.BaseDirectory,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.MUSL,FPCupManager.SolarisOI);
+        // normally, we have the standard names for libs and bins paths
+        LibPath:=CROSSPATH+DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
+        BinPath:=CROSSPATH+DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
+        if FPCupManager.MUSL then
+        begin
+          LibPath:=LibPath+'musl';
+          BinPath:=BinPath+'musl';
+        end;
+        LibPath:=LibPath+FPCupManager.CrossOS_Target;
+        BinPath:=BinPath+FPCupManager.CrossOS_Target;
+        if FPCupManager.SolarisOI then
+        begin
+          LibPath:=LibPath+'-oi';
+          BinPath:=BinPath+'-oi';
+        end;
 
         if FPCupManager.CrossOS_Target='darwin' then
         begin
+          // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
+          if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') then
+          begin
+            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
+          end;
+          if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+          begin
+            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+          end;
+
           // Darwin is special: combined libs for arm and aarch64 with osxcross
           if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
           begin
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
             LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
+          end;
+        end;
+
+        if FPCupManager.CrossOS_Target='aix' then
+        begin
+          // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
+          if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+          begin
+            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
           end;
         end;
 
@@ -2517,9 +2553,9 @@ begin
 
         // bit tricky ... if bins and libs are already there exit this retry ... ;-)
         if (
-           (DirectoryIsEmpty(BinPath))
+           (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+BinPath))
            OR
-           (DirectoryIsEmpty(LibPath))
+           (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath))
            )
         then
         begin
@@ -2602,9 +2638,9 @@ begin
             if success then
             begin
               AddMessage('Successfully downloaded binary-tools archive.');
-              TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
               {$ifndef MSWINDOWS}
-              TargetPath:=IncludeTrailingPathDelimiter(BinPath);
+              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
               {$endif}
               ForceDirectoriesSafe(TargetPath);
 
@@ -2666,7 +2702,7 @@ begin
           end;
 
           // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
-          if (DirectoryIsEmpty(LibPath)) AND (FPCupManager.CrossOS_Target='embedded')
+          if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) AND (FPCupManager.CrossOS_Target='embedded')
             then MissingCrossLibs:=true;
 
           if MissingCrossLibs then
@@ -2705,6 +2741,8 @@ begin
               begin
                 AddMessage('Successfully downloaded the libraries.');
                 TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+                //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
+                //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
 
                 AddMessage('Going to extract them into '+TargetPath);
 
@@ -2790,7 +2828,7 @@ begin
   end;
   DisEnable(Sender,False);
   try
-    if NOT PrepareRun then exit;
+    PrepareRun;
 
     if Form2.UpdateOnly then
     begin
@@ -2840,7 +2878,7 @@ begin
   DisEnable(Sender,False);
 
   try
-    if NOT PrepareRun then exit;
+    PrepareRun;
 
     if Form2.UpdateOnly then
     begin
@@ -3006,10 +3044,8 @@ begin
   end;
 end;
 
-function TForm1.PrepareRun:boolean;
+procedure TForm1.PrepareRun;
 begin
-  result:=true;
-
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;
 
@@ -3079,14 +3115,6 @@ begin
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
-
-  if CheckDirectory(FPCupManager.BaseDirectory) then
-  begin
-    AddMessage('Install directory not allowed.');
-    AddMessage('');
-    result:=false;
-    exit;
-  end;
 
   // do not create shortcut for fpcupeluxe itself: we have already fpcupdeluxe by itself !!
   //FPCupManager.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update';

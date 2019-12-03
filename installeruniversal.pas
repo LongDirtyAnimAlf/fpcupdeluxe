@@ -67,7 +67,6 @@ type
 
   TUniversalInstaller = class(TInstaller)
   private
-    FBinPath:string; //Path where compiler is
     // FPC base directories
     FFPCSourceDir:string;
     FFPCInstallDir:string;

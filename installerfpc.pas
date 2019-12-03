@@ -115,7 +115,6 @@ type
 
   TFPCInstaller = class(TInstaller)
   private
-    FBinPath: string; // path where generated compiler lives
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
     FBootstrapCompilerDirectory: string;
@@ -570,9 +569,6 @@ begin
     //pass on user-requested cross compile options
     CrossInstaller.SetCrossOpt(CrossOPT);
     CrossInstaller.SetSubArch(CrossOS_SubArch);
-
-    CrossInstaller.SolarisOI:=FSolarisOI;
-    CrossInstaller.MUSL:=FMUSL;
 
     // get/set cross binary utils !!
     BinsAvailable:=false;
@@ -1222,7 +1218,14 @@ begin
 
   FErrorLog.Clear;
 
-  if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) then
+  if (NOT DirectoryExists(FInstallDirectory)) then exit;
+  if CheckDirectory(FInstallDirectory) then exit;
+
+  if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
+
+  //if (NOT CrossCompilerPresent) then exit;
+
+  if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) AND (NOT CheckDirectory(FBaseDirectory)) then
   begin
     CrossInstaller.Reset;
 
@@ -1233,11 +1236,12 @@ begin
       if DirectoryExists(aDir) then
       begin
         // Only allow cross directories inside our own install te be deleted
-        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos('cross'+DirectorySeparator+'bin',aDir)>0) then
+        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSBINPATH,aDir)>0) then
         begin
+          infoln(infotext+'Deleting '+ModuleName+' bin tools directory '+aDir);
           if DeleteDirectoryEx(aDir)=false then
           begin
-            WritelnLog(infotext+'Error deleting '+ModuleName+' bins directory '+aDir);
+            WritelnLog(infotext+'Error deleting '+ModuleName+' bin tools directory '+aDir);
           end;
         end;
       end;
@@ -1250,8 +1254,9 @@ begin
       if DirectoryExists(aDir) then
       begin
         // Only allow cross directories inside our own install te be deleted
-        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos('cross'+DirectorySeparator+'lib',aDir)>0) then
+        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSLIBPATH,aDir)>0) then
         begin
+          infoln(infotext+'Deleting '+ModuleName+' libs directory '+aDir);
           if DeleteDirectoryEx(aDir)=false then
           begin
             WritelnLog(infotext+'Error deleting '+ModuleName+' libs directory '+aDir);
@@ -1264,9 +1269,17 @@ begin
     InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target);
 
     aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
-    if DeleteDirectoryEx(aDir)=false then
+    if DirectoryExists(aDir) then
     begin
-      WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+      // Only allow binary directories inside our own install te be deleted
+      if (Pos(FBaseDirectory,aDir)=1) then
+      begin
+        infoln(infotext+'Deleting '+ModuleName+' binary directory '+aDir);
+        if DeleteDirectoryEx(aDir)=false then
+        begin
+          WritelnLog(infotext+'Error deleting '+ModuleName+' binary directory '+aDir);
+        end;
+      end;
     end;
 
     aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(false);
@@ -1279,16 +1292,23 @@ begin
       end;
     end;
     {$endif}
-    if DeleteDirectoryEx(aDir)=false then
+    if DirectoryExists(aDir) then
     begin
-      WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+      // Only allow unit directories inside our own install te be deleted
+      if (Pos(FBaseDirectory,aDir)=1) then
+      begin
+        infoln(infotext+'Deleting '+ModuleName+' unit directory '+aDir);
+        if DeleteDirectoryEx(aDir)=false then
+        begin
+          WritelnLog(infotext+'Error deleting '+ModuleName+' unit directory '+aDir);
+        end;
+      end;
     end;
 
   end;
 end;
 
 { TFPCNativeInstaller }
-
 function TFPCNativeInstaller.BuildModuleCustom(ModuleName: string): boolean;
 const
   YYLEX='yylex.cod';
@@ -2565,53 +2585,62 @@ begin
   WritelnLog(localinfotext+'Make/binutils path:     '+FMakeDir,false);
   {$ENDIF MSWINDOWS}
 
-  {$IFDEF MSWINDOWS}
-  s:='';
-  if Length(FSVNDirectory)>0
-     then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
-  // Try to ignore existing make.exe, fpc.exe by setting our own path:
-  // add install/fpc/utils to solve data2inc not found by fpcmkcfg
-  // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
-  SetPath(
-    FBinPath+PathSeparator+ {compiler for current architecture}
-    FMakeDir+PathSeparator+
-    FBootstrapCompilerDirectory+PathSeparator+
-    ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
-    IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
-    IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-    ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+
-    s,
-    false,false);
-  {$ENDIF MSWINDOWS}
-  {$IFDEF UNIX}
-  // add install/fpc/utils to solve data2inc not found by fpcmkcfg
-  // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
-  s:='';
-  {$ifdef Darwin}
-  s1:=GetSDKVersion('macosx');
-  if CompareVersionStrings(s1,'10.14')>=0 then
+  if result then
   begin
-    s:=PathSeparator+'/Library/Developer/CommandLineTools/usr/bin';
+    if assigned(CrossInstaller) then
+    begin
+      CrossInstaller.SolarisOI:=FSolarisOI;
+      CrossInstaller.MUSL:=FMUSL;
+    end;
+
+    {$IFDEF MSWINDOWS}
+    s:='';
+    if Length(FSVNDirectory)>0
+       then s:=PathSeparator+ExcludeTrailingPathDelimiter(FSVNDirectory);
+    // Try to ignore existing make.exe, fpc.exe by setting our own path:
+    // add install/fpc/utils to solve data2inc not found by fpcmkcfg
+    // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
+    SetPath(
+      FBinPath+PathSeparator+ {compiler for current architecture}
+      FMakeDir+PathSeparator+
+      FBootstrapCompilerDirectory+PathSeparator+
+      ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
+      IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
+      ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
+      IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+
+      s,
+      false,false);
+    {$ENDIF MSWINDOWS}
+    {$IFDEF UNIX}
+    // add install/fpc/utils to solve data2inc not found by fpcmkcfg
+    // also add src/fpc/utils to solve data2inc not found by fpcmkcfg
+    s:='';
+    {$ifdef Darwin}
+    s1:=GetSDKVersion('macosx');
+    if CompareVersionStrings(s1,'10.14')>=0 then
+    begin
+      s:=PathSeparator+'/Library/Developer/CommandLineTools/usr/bin';
+    end;
+    {$endif}
+    SetPath(
+      FBinPath+PathSeparator+
+      FBootstrapCompilerDirectory+PathSeparator+
+      ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
+      IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
+      ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
+      IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
+      IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
+      // pwd is located in /bin ... the makefile needs it !!
+      // tools are located in /usr/bin ... the makefile needs it !!
+      '/bin'+PathSeparator+
+      '/usr/bin'+
+      s,
+      true,false);
+    {$ENDIF UNIX}
   end;
-  {$endif}
-  SetPath(
-    FBinPath+PathSeparator+
-    FBootstrapCompilerDirectory+PathSeparator+
-    ExcludeTrailingPathDelimiter(FInstallDirectory)+PathSeparator+
-    IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+PathSeparator+ {e.g. fpdoc, fpcres}
-    IncludeTrailingPathDelimiter(FInstallDirectory)+'utils'+PathSeparator+
-    ExcludeTrailingPathDelimiter(FSourceDirectory)+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathSeparator+
-    IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+PathSeparator+
-    // pwd is located in /bin ... the makefile needs it !!
-    // tools are located in /usr/bin ... the makefile needs it !!
-    '/bin'+PathSeparator+
-    '/usr/bin'+
-    s,
-    true,false);
-  {$ENDIF UNIX}
   InitDone:=result;
 end;
 

@@ -204,7 +204,6 @@ type
 
   TLazarusInstaller = class(TInstaller)
   private
-    FBinPath: string; //path where compiler lives
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
     FRevision: string;
@@ -510,16 +509,22 @@ begin
 
   FErrorLog.Clear;
 
-  if Assigned(CrossInstaller) then
-  begin
+  if (NOT DirectoryExists(FInstallDirectory)) then exit;
+  if CheckDirectory(FInstallDirectory) then exit;
 
-    //CrossInstaller.Reset;
+  if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
+
+  //if (NOT CrossCompilerPresent) then exit;
+
+  if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) AND (NOT CheckDirectory(FBaseDirectory)) then
+  begin
+    CrossInstaller.Reset;
 
     case ModuleName of
       _LCL:
       begin
         aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lcl'+DirectorySeparator+'units'+DirectorySeparator+GetFPCTarget(false);
-        if DeleteDirectoryEx(aDir)=false then
+        if DirectoryExists(aDir) then if DeleteDirectoryEx(aDir)=false then
         begin
           WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
         end;
@@ -527,7 +532,7 @@ begin
       _PACKAGER:
       begin
         aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'packager'+DirectorySeparator+'units'+DirectorySeparator+GetFPCTarget(false);
-        if DeleteDirectoryEx(aDir)=false then
+        if DirectoryExists(aDir) then if DeleteDirectoryEx(aDir)=false then
         begin
           WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
         end;
@@ -535,7 +540,7 @@ begin
       _COMPONENTS:
       begin
         aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'lazutils'+DirectorySeparator+'lib'+DirectorySeparator+GetFPCTarget(false);
-        if DeleteDirectoryEx(aDir)=false then
+        if DirectoryExists(aDir) then if DeleteDirectoryEx(aDir)=false then
         begin
           WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
         end;
@@ -1351,8 +1356,14 @@ begin
   WritelnLog(localinfotext+'Lazarus URL:            ' + FURL, false);
   WritelnLog(localinfotext+'Lazarus options:        ' + FCompilerOptions, false);
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
-  if Result then
+  if result then
   begin
+    if Assigned(CrossInstaller) then
+    begin
+      CrossInstaller.SolarisOI:=FSolarisOI;
+      CrossInstaller.MUSL:=FMUSL;
+    end;
+
     // Look for make etc in the current compiler directory:
     FBinPath := ExcludeTrailingPathDelimiter(ExtractFilePath(FCompiler));
     PlainBinPath := SafeExpandFileName(IncludeTrailingPathDelimiter(FBinPath) + '..'+DirectorySeparator+'..');

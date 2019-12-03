@@ -368,8 +368,6 @@ function GetTargetCPU:string;
 function GetTargetOS:string;
 function GetTargetCPUOS:string;
 function GetFPCTargetCPUOS(const aCPU,aOS:string;const Native:boolean=true): string;
-function GetFPCUPCrossLibsDirectory(const FBaseDirectory,CrossCPU_Target,CrossOS_Target:string;const FMUSL,FSolarisOI:boolean):string;
-function GetFPCUPCrossBinsDirectory(const FBaseDirectory,CrossCPU_Target,CrossOS_Target:string;const FMUSL,FSolarisOI:boolean):string;
 function GetDistro:string;
 function GetFreeBSDVersion:byte;
 function checkGithubRelease(const aURL:string):string;
@@ -1266,8 +1264,8 @@ var
   s,aDirectory:string;
 
 begin
-  aDirectory:=LowerCase(DirectoryName);
   result:=true;
+  aDirectory:=LowerCase(DirectoryName);
   if aDirectory='' then exit;
   if aDirectory=DirectorySeparator then exit;
   {$ifndef Windows}
@@ -1283,6 +1281,7 @@ begin
   if Length(aDirectory)<=3 then exit;
   if Pos('\windows',aDirectory)>0 then exit;
   {$endif}
+  if (NOT ParentDirectoryIsNotRoot(aDirectory)) then exit;
   result:=false;
 end;
 
@@ -2995,92 +2994,6 @@ begin
       os := aOS;
   end;
   Result := processorname + '-' + os;
-end;
-
-function GetFPCUPCrossLibsDirectory(const FBaseDirectory,CrossCPU_Target,CrossOS_Target:string;const FMUSL,FSolarisOI:boolean):string;
-var
-  LibPath:string;
-begin
-  // normally, we have the standard names for libs and bins paths
-  LibPath:=FBaseDirectory+DirectorySeparator+'cross'+DirectorySeparator+'lib'+DirectorySeparator+CrossCPU_Target+'-';
-  if FMUSL then
-  begin
-    LibPath:=LibPath+'musl';
-  end;
-  LibPath:=LibPath+CrossOS_Target;
-  if FSolarisOI then
-  begin
-    LibPath:=LibPath+'-oi';
-  end;
-
-  if CrossOS_Target='darwin' then
-  begin
-    // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-    if (CrossCPU_Target='i386') OR (CrossCPU_Target='x86_64') then
-    begin
-      LibPath:=StringReplace(LibPath,CrossCPU_Target,'x86',[rfIgnoreCase]);
-    end;
-    if (CrossCPU_Target='powerpc') OR (CrossCPU_Target='powerpc64') then
-    begin
-      LibPath:=StringReplace(LibPath,CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-    end;
-
-    // Darwin is special: combined libs for arm and aarch64 with osxcross
-    if (CrossCPU_Target='arm') OR (CrossCPU_Target='aarch64') then
-    begin
-      LibPath:=StringReplace(LibPath,CrossCPU_Target,'arm',[rfIgnoreCase]);
-    end;
-  end;
-
-  if CrossOS_Target='aix' then
-  begin
-    // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-    if (CrossCPU_Target='powerpc') OR (CrossCPU_Target='powerpc64') then
-    begin
-      LibPath:=StringReplace(LibPath,CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-    end;
-  end;
-  result:=LibPath;
-end;
-
-function GetFPCUPCrossBinsDirectory(const FBaseDirectory,CrossCPU_Target,CrossOS_Target:string;const FMUSL,FSolarisOI:boolean):string;
-var
-  BinPath:string;
-begin
-  // normally, we have the standard names for libs and bins paths
-  BinPath:=FBaseDirectory+DirectorySeparator+'cross'+DirectorySeparator+'bin'+DirectorySeparator+CrossCPU_Target+'-';
-  if FMUSL then
-  begin
-    BinPath:=BinPath+'musl';
-  end;
-  BinPath:=BinPath+CrossOS_Target;
-  if FSolarisOI then
-  begin
-    BinPath:=BinPath+'-oi';
-  end;
-
-  if CrossOS_Target='darwin' then
-  begin
-    // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-    if (CrossCPU_Target='i386') OR (CrossCPU_Target='x86_64') then
-    begin
-      BinPath:=StringReplace(BinPath,CrossCPU_Target,'x86',[rfIgnoreCase]);
-    end;
-    if (CrossCPU_Target='powerpc') OR (CrossCPU_Target='powerpc64') then
-    begin
-      BinPath:=StringReplace(BinPath,CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-    end;
-  end;
-
-  if CrossOS_Target='aix' then
-  begin
-    // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-    if (CrossCPU_Target='powerpc') OR (CrossCPU_Target='powerpc64') then
-    begin
-      BinPath:=StringReplace(BinPath,CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-    end;
-  end;
-  result:=BinPath;
 end;
 
 function checkGithubRelease(const aURL:string):string;

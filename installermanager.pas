@@ -1297,6 +1297,8 @@ begin
       FInstaller:=TFPCCrossInstaller.Create;
       FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
       FInstaller.CrossOPT:=FParent.CrossOPT;
+      FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
+      FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
     end
     else
       FInstaller:=TFPCNativeInstaller.Create;
@@ -1480,25 +1482,6 @@ begin
     FInstaller.SwitchURL:=FParent.SwitchURL;
     if FParent.SolarisOI then FInstaller.SolarisOI:=true else {if FInstaller.SolarisOI then FParent.SolarisOI:=true};
     if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
-
-    if CrossCompiling then
-    begin
-
-      if Length(FParent.CrossLibraryDirectory)>0 then
-        FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
-      {
-      else
-        // to check if this is correct
-        FInstaller.CrossLibraryDirectory:=GetFPCUPCrossLibsDirectory(FParent.BaseDirectory,FInstaller.CrossCPU_Target,FInstaller.CrossOS_Target,FParent.MUSL,FParent.SolarisOI);
-      }
-      if Length(FParent.CrossToolsDirectory)>0 then
-        FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
-      {
-      else
-        // to check if this is correct
-        FInstaller.CrossToolsDirectory:=GetFPCUPCrossBinsDirectory(FParent.BaseDirectory,FInstaller.CrossCPU_Target,FInstaller.CrossOS_Target,FParent.MUSL,FParent.SolarisOI);
-      }
-    end;
   end;
 end;
 

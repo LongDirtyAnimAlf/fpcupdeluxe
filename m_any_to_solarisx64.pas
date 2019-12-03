@@ -118,7 +118,6 @@ begin
     aDirName:=NormalDirName;
   end;
 
-
   // Start with any names user may have given
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
