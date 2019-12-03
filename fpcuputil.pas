@@ -268,6 +268,7 @@ procedure DeleteDesktopShortcut(ShortcutName: string);
 function FindFileInDir(Filename, Path: String): String;
 // Copy a directory recursive
 function DirCopy(SourcePath, DestPath: String): Boolean;
+function CheckDirectory(DirectoryName: string):boolean;
 // Delete directory and children, even read-only. Equivalent to rm -rf <directory>:
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Recursively delete files with specified name(s), only if path contains specfied directory name somewhere (or no directory name specified):
@@ -1260,6 +1261,31 @@ begin
   result:=FileUtil.CopyDirTree(SourcePath, DestPath,[cffOverwriteFile,cffCreateDestDirectory]);
 end;
 
+function CheckDirectory(DirectoryName: string):boolean;
+var
+  s,aDirectory:string;
+
+begin
+  aDirectory:=LowerCase(DirectoryName);
+  result:=true;
+  if aDirectory='' then exit;
+  if aDirectory=DirectorySeparator then exit;
+  {$ifndef Windows}
+  s:=LowerCase(IncludeTrailingPathDelimiter(GetEnvironmentVariable('HOME')));
+  if s=aDirectory then exit;
+  s:=IncludeTrailingPathDelimiter(s);
+  if s=aDirectory then exit;
+  if (Pos(DirectorySeparator+'lib',aDirectory)=1) then exit;
+  if (Pos(DirectorySeparator+'lib32',aDirectory)=1) then exit;
+  if (Pos(DirectorySeparator+'lib64',aDirectory)=1) then exit;
+  if (Pos(DirectorySeparator+'sbin',aDirectory)=1) then exit;
+  {$else}
+  if Length(aDirectory)<=3 then exit;
+  if Pos('\windows',aDirectory)>0 then exit;
+  {$endif}
+  result:=false;
+end;
+
 function DeleteDirectoryEx(DirectoryName: string): boolean;
 // Lazarus fileutil.DeleteDirectory on steroids, works like
 // deltree <directory>, rmdir /s /q <directory> or rm -rf <directory>
@@ -1276,6 +1302,9 @@ var
   CurFilename: String;
 begin
   Result:=false;
+
+  if CheckDirectory(DirectoryName) then exit;
+
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
   if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
   begin
@@ -1334,6 +1363,9 @@ var
   CurFilename: String;
 begin
   Result:=false;
+
+  if CheckDirectory(DirectoryName) then exit;
+
   AllFiles:=(Names.Count=0);
   CurSrcDir:=CleanAndExpandDirectory(DirectoryName);
   if SysUtils.FindFirst(CurSrcDir+GetAllFilesMask,faAnyFile{$ifdef unix} or faSymLink {$endif unix},FileInfo)=0 then
@@ -1403,6 +1435,9 @@ var
   i: integer;
 begin
   Result:=false;
+
+  if CheckDirectory(DirectoryName) then exit;
+
   // Make sure we can compare extensions using ExtractFileExt
   for i:=0 to Extensions.Count-1 do
   begin
@@ -1472,6 +1507,9 @@ var
   i: integer;
 begin
   Result:=false;
+
+  if CheckDirectory(DirectoryName) then exit;
+
   AllFiles:=(Length(OnlyIfNameHas)=0);
 
   // for now, exit when no filename data is given ... use DeleteDirectoryEx

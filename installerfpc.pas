@@ -1216,32 +1216,47 @@ end;
 function TFPCCrossInstaller.UnInstallModule(ModuleName: string): boolean;
 var
   aDir,FPCCfg :string;
+  DirectoryAvailable:boolean;
 begin
   result:=true; //succeed by default
 
   FErrorLog.Clear;
 
-  if assigned(CrossInstaller) then
+  if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) then
   begin
     CrossInstaller.Reset;
 
-    // get cross binary utils, but only those that are installed by fpcup !!
-    aDir:=GetFPCUPCrossBinsDirectory(FBaseDirectory,CrossCPU_Target,CrossOS_Target,FMUSL,FSolarisOI);
-    if DirectoryExists(aDir) then
+    DirectoryAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
+    if DirectoryAvailable then
     begin
-      if DeleteDirectoryEx(aDir)=false then
+      aDir:=CrossInstaller.BinUtilsPath;
+      if DirectoryExists(aDir) then
       begin
-        WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+        // Only allow cross directories inside our own install te be deleted
+        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos('cross'+DirectorySeparator+'bin',aDir)>0) then
+        begin
+          if DeleteDirectoryEx(aDir)=false then
+          begin
+            WritelnLog(infotext+'Error deleting '+ModuleName+' bins directory '+aDir);
+          end;
+        end;
       end;
     end;
 
-    // get cross libraries, but only those that are installed by fpcup !!
-    aDir:=GetFPCUPCrossLibsDirectory(FBaseDirectory,CrossCPU_Target,CrossOS_Target,FMUSL,FSolarisOI);
-    if DirectoryExists(aDir) then
+    DirectoryAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
+    if DirectoryAvailable then
     begin
-      if DeleteDirectoryEx(aDir)=false then
+      aDir:=CrossInstaller.LibsPath;
+      if DirectoryExists(aDir) then
       begin
-        WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
+        // Only allow cross directories inside our own install te be deleted
+        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos('cross'+DirectorySeparator+'lib',aDir)>0) then
+        begin
+          if DeleteDirectoryEx(aDir)=false then
+          begin
+            WritelnLog(infotext+'Error deleting '+ModuleName+' libs directory '+aDir);
+          end;
+        end;
       end;
     end;
 

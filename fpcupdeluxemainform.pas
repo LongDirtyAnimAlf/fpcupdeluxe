@@ -151,7 +151,7 @@ type
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
     procedure Edit1Change(Sender: TObject);
-    procedure PrepareRun;
+    function  PrepareRun:boolean;
     function  RealRun:boolean;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
     function  SetFPCUPSettings(IniDirectory:string):boolean;
@@ -915,7 +915,7 @@ begin
   DisEnable(Sender,False);
 
   try
-    PrepareRun;
+    if NOT PrepareRun then exit;
 
     if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
     if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
@@ -1538,7 +1538,7 @@ begin
 
   DisEnable(Sender,False);
   try
-    PrepareRun;
+    if NOT PrepareRun then exit;
 
     if Sender=TrunkBtn then
     begin
@@ -1667,7 +1667,7 @@ begin
 
   DisEnable(Sender,False);
   try
-    PrepareRun;
+    if NOT PrepareRun then exit;
 
     AddMessage('Going to install/update FPC and Lazarus with given options.');
     sStatus:='Going to install/update FPC and Lazarus.';
@@ -1735,7 +1735,7 @@ begin
       exit;
     end;
 
-    PrepareRun;
+    if NOT PrepareRun then exit;
 
     FPCupManager.ExportOnly:=(NOT Form2.PackageRepo);
 
@@ -1899,7 +1899,7 @@ begin
     exit;
   end;
 
-  PrepareRun;
+  if NOT PrepareRun then exit;
 
   if radgrpCPU.ItemIndex<>-1 then
   begin
@@ -2790,7 +2790,7 @@ begin
   end;
   DisEnable(Sender,False);
   try
-    PrepareRun;
+    if NOT PrepareRun then exit;
 
     if Form2.UpdateOnly then
     begin
@@ -2840,7 +2840,7 @@ begin
   DisEnable(Sender,False);
 
   try
-    PrepareRun;
+    if NOT PrepareRun then exit;
 
     if Form2.UpdateOnly then
     begin
@@ -3006,8 +3006,10 @@ begin
   end;
 end;
 
-procedure TForm1.PrepareRun;
+function TForm1.PrepareRun:boolean;
 begin
+  result:=true;
+
   FPCVersionLabel.Font.Color:=clDefault;
   LazarusVersionLabel.Font.Color:=clDefault;
 
@@ -3077,6 +3079,14 @@ begin
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;
+
+  if CheckDirectory(FPCupManager.BaseDirectory) then
+  begin
+    AddMessage('Install directory not allowed.');
+    AddMessage('');
+    result:=false;
+    exit;
+  end;
 
   // do not create shortcut for fpcupeluxe itself: we have already fpcupdeluxe by itself !!
   //FPCupManager.ShortCutNameFpcup:='fpcup_'+ExtractFileName(sInstallDir)+'_update';
