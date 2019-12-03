@@ -211,6 +211,7 @@ uses
   FileUtil
   {$IFDEF UNIX}
     ,baseunix
+    ,LazFileUtils
   {$ENDIF UNIX}
   {$IFDEF BSD}
     ,math
@@ -919,7 +920,7 @@ begin
 
           if FMUSL then
           begin
-            FMUSLLinker:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'ld-musl-'+GetTargetCPU+'.so.1';
+            FMUSLLinker:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'ld-musl-'+CrossInstaller.TargetCPU+'.so.1';
             Options:=Options+' -Cg -FL'+FMUSLLinker;
           end;
 
@@ -1214,7 +1215,6 @@ end;
 
 function TFPCCrossInstaller.UnInstallModule(ModuleName: string): boolean;
 var
-  BinsAvailable,LibsAvailable:boolean;
   aDir,FPCCfg :string;
 begin
   result:=true; //succeed by default
@@ -1225,44 +1225,20 @@ begin
   begin
     CrossInstaller.Reset;
 
-    // get/set cross binary utils !!
-    BinsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=smFPCUPOnly; // default;
-    if Length(CrossToolsDirectory)>0 then
+    // get cross binary utils, but only those that are installed by fpcup !!
+    aDir:=GetFPCUPCrossBinsDirectory(FBaseDirectory,CrossCPU_Target,CrossOS_Target,FMUSL,FSolarisOI);
+    if DirectoryExists(aDir) then
     begin
-      // we have a crosstools setting
-      if (CrossToolsDirectory='FPCUP_AUTO')
-         then CrossInstaller.SearchModeUsed:=smAuto
-         else CrossInstaller.SearchModeUsed:=smManual;
-    end;
-    if CrossInstaller.SearchModeUsed=smManual
-       then BinsAvailable:=CrossInstaller.GetBinUtils(CrossToolsDirectory)
-       else BinsAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
-    if BinsAvailable then
-    begin
-      aDir:=CrossInstaller.BinUtilsPath;
       if DeleteDirectoryEx(aDir)=false then
       begin
         WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
       end;
     end;
 
-    // get/set cross libraries !!
-    LibsAvailable:=false;
-    CrossInstaller.SearchModeUsed:=smFPCUPOnly;
-    if Length(CrossLibraryDirectory)>0 then
+    // get cross libraries, but only those that are installed by fpcup !!
+    aDir:=GetFPCUPCrossLibsDirectory(FBaseDirectory,CrossCPU_Target,CrossOS_Target,FMUSL,FSolarisOI);
+    if DirectoryExists(aDir) then
     begin
-      // we have a crosslibrary setting
-      if (CrossLibraryDirectory='FPCUP_AUTO')
-         then CrossInstaller.SearchModeUsed:=smAuto
-         else CrossInstaller.SearchModeUsed:=smManual;
-    end;
-    if CrossInstaller.SearchModeUsed=smManual
-      then LibsAvailable:=CrossInstaller.GetLibs(CrossLibraryDirectory)
-      else LibsAvailable:=CrossInstaller.GetLibs(FBaseDirectory);
-    if LibsAvailable then
-    begin
-      aDir:=CrossInstaller.LibsPath;
       if DeleteDirectoryEx(aDir)=false then
       begin
         WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
@@ -1277,7 +1253,17 @@ begin
     begin
       WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);
     end;
+
     aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(false);
+    {$ifdef UNIX}
+    if FileIsSymlink(aDir) then
+    begin
+      try
+        aDir:=GetPhysicalFilename(aDir,pfeException);
+      except
+      end;
+    end;
+    {$endif}
     if DeleteDirectoryEx(aDir)=false then
     begin
       WritelnLog(infotext+'Error deleting '+ModuleName+' directory '+aDir);

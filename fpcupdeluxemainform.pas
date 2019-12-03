@@ -89,10 +89,10 @@ type
     procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
     procedure btnInstallDirSelectClick(Sender: TObject);
-    procedure ButtonInstallCrossCompilerClick(Sender: TObject);
     procedure FPCOnlyClick(Sender: TObject);
     procedure btnSetupPlusClick(Sender: TObject);
     procedure btnClearLogClick(Sender: TObject);
+    function  ButtonProcessCrossCompiler(Sender: TObject):boolean;
     procedure ButtonAutoUpdateCrossCompiler(Sender: TObject);
     procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
     procedure FormCreate(Sender: TObject);
@@ -146,8 +146,6 @@ type
     {$endif}
     procedure InitFpcupdeluxe({%H-}Data: PtrInt);
     procedure CheckForUpdates({%H-}Data: PtrInt);
-    function  InstallCrossCompiler(Sender: TObject):boolean;
-    function  RemoveCrossCompiler(Sender: TObject):boolean;
     function  AutoUpdateCrossCompiler(Sender: TObject):boolean;
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
@@ -693,7 +691,7 @@ begin
               AddMessage(upBuildAllCrossCompilersUpdate);
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
               radgrpOS.ItemIndex:=radgrpOS.Items.IndexOf(aRadiogroup_OS);
-              success:=InstallCrossCompiler(nil);
+              success:=ButtonProcessCrossCompiler(nil);
               if success
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
                 else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
@@ -1812,19 +1810,7 @@ begin
   end;
 end;
 
-procedure TForm1.ButtonInstallCrossCompilerClick(Sender: TObject);
-begin
-  if Sender=ButtonInstallCrossCompiler then
-  begin
-    InstallCrossCompiler(Sender);
-  end;
-  if Sender=ButtonRemoveCrossCompiler then
-  begin
-    RemoveCrossCompiler(Sender);
-  end;
-end;
-
-function TForm1.InstallCrossCompiler(Sender: TObject):boolean;
+function TForm1.ButtonProcessCrossCompiler(Sender: TObject):boolean;
 var
   BinsFileName,LibsFileName,DownloadURL,TargetFile,TargetPath,BinPath,LibPath,UnZipper,s:string;
   success,verbose:boolean;
@@ -2026,6 +2012,18 @@ begin
       FPCupManager.CrossOS_Target:=''; // cleanup
       FPCupManager.CrossCPU_Target:=''; // cleanup
       exit;
+    end;
+  end;
+
+  if Sender=ButtonRemoveCrossCompiler then
+  begin
+    FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
+    try
+      result:=RealRun;
+      DisEnable(Sender,False);
+      exit;
+    finally
+      DisEnable(Sender,true);
     end;
   end;
 
@@ -2344,10 +2342,30 @@ begin
 
     s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
     s:=Trim(s);
-    if Length(s)>0 then FPCupManager.CrossLibraryDirectory:=s;
+    if Length(s)>0 then
+    begin
+      if DirectoryExists(s) then
+        FPCupManager.CrossLibraryDirectory:=s
+      else
+      begin
+        AddMessage('Cross libraries not found at supplied location.');
+        AddMessage('Libs location: '+s);
+        AddMessage('Expect failures.');
+      end;
+    end;
     s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
     s:=Trim(s);
-    if Length(s)>0 then FPCupManager.CrossToolsDirectory:=s;
+    if Length(s)>0 then
+    begin
+      if DirectoryExists(s) then
+        FPCupManager.CrossToolsDirectory:=s
+      else
+      begin
+        AddMessage('Cross tools not found at supplied location.');
+        AddMessage('Tools location: '+s);
+        AddMessage('Expect failures.');
+      end;
+    end;
 
     AddMessage(upBuildCrossCompiler);
 
@@ -2450,7 +2468,6 @@ begin
           if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
         end;
 
-
         if FPCupManager.CrossOS_Target='freebsd' then s:='FreeBSD' else
           if FPCupManager.CrossOS_Target='openbsd' then s:='OpenBSD' else
             if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
@@ -2465,51 +2482,15 @@ begin
         // normally, we have the same names for libs and bins URL
         LibsFileName:=BinsFileName;
 
-        // normally, we have the standard names for libs and bins paths
-        LibPath:=DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
-        BinPath:=DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
-        if FPCupManager.MUSL then
-        begin
-          LibPath:=LibPath+'musl';
-          BinPath:=BinPath+'musl';
-        end;
-        LibPath:=LibPath+FPCupManager.CrossOS_Target;
-        BinPath:=BinPath+FPCupManager.CrossOS_Target;
-        if FPCupManager.SolarisOI then
-        begin
-          LibPath:=LibPath+'-oi';
-          BinPath:=BinPath+'-oi';
-        end;
+        LibPath:=GetFPCUPCrossLibsDirectory(FPCupManager.BaseDirectory,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.MUSL,FPCupManager.SolarisOI);
+        BinPath:=GetFPCUPCrossBinsDirectory(FPCupManager.BaseDirectory,FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,FPCupManager.MUSL,FPCupManager.SolarisOI);
 
         if FPCupManager.CrossOS_Target='darwin' then
         begin
-          // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-          if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') then
-          begin
-            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
-            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
-          end;
-          if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
-          begin
-            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-          end;
-
           // Darwin is special: combined libs for arm and aarch64 with osxcross
           if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
           begin
-            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
             LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
-          end;
-        end;
-
-        if FPCupManager.CrossOS_Target='aix' then
-        begin
-          // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-          if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
-          begin
-            BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-            LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
           end;
         end;
 
@@ -2536,9 +2517,9 @@ begin
 
         // bit tricky ... if bins and libs are already there exit this retry ... ;-)
         if (
-           (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath))
+           (DirectoryIsEmpty(BinPath))
            OR
-           (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath))
+           (DirectoryIsEmpty(LibPath))
            )
         then
         begin
@@ -2621,9 +2602,9 @@ begin
             if success then
             begin
               AddMessage('Successfully downloaded binary-tools archive.');
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+              TargetPath:=IncludeTrailingPathDelimiter(FPCupManager.BaseDirectory);
               {$ifndef MSWINDOWS}
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+BinPath+DirectorySeparator;
+              TargetPath:=IncludeTrailingPathDelimiter(BinPath);
               {$endif}
               ForceDirectoriesSafe(TargetPath);
 
@@ -2685,7 +2666,7 @@ begin
           end;
 
           // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
-          if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath)) AND (FPCupManager.CrossOS_Target='embedded')
+          if (DirectoryIsEmpty(LibPath)) AND (FPCupManager.CrossOS_Target='embedded')
             then MissingCrossLibs:=true;
 
           if MissingCrossLibs then
@@ -2724,8 +2705,6 @@ begin
               begin
                 AddMessage('Successfully downloaded the libraries.');
                 TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-                //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath+DirectorySeparator;
-                //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+'cross'+LibPath);
 
                 AddMessage('Going to extract them into '+TargetPath);
 
@@ -2801,97 +2780,6 @@ begin
 
   result:=success;
 end;
-
-function TForm1.RemoveCrossCompiler(Sender: TObject):boolean;
-var
-  success:boolean;
-  i:integer;
-  s:string;
-begin
-  result:=false;
-
-  if (radgrpCPU.ItemIndex=-1) and (radgrpOS.ItemIndex=-1) then
-  begin
-    ShowMessage('Please select a CPU and OS target first');
-    exit;
-  end;
-
-  PrepareRun;
-
-  if radgrpCPU.ItemIndex<>-1 then
-  begin
-    s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s='ppc' then s:='powerpc';
-    if s='ppc64' then s:='powerpc64';
-    if s='x8664' then s:='x86_64';
-    FPCupManager.CrossCPU_Target:=s;
-  end;
-  if radgrpOS.ItemIndex<>-1 then
-  begin
-    s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='i-sim' then s:='iphonesim';
-    FPCupManager.CrossOS_Target:=s;
-  end;
-
-  if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
-  if (FPCupManager.CrossOS_Target='msdos') then FPCupManager.CrossCPU_Target:='i8086';
-  //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
-  if (FPCupManager.CrossCPU_Target='i8086') then FPCupManager.CrossOS_Target:='msdos';
-  if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:='i386';
-
-  if FPCupManager.CrossOS_Target='windows' then
-  begin
-    if FPCupManager.CrossCPU_Target='i386' then FPCupManager.CrossOS_Target:='win32';
-    if FPCupManager.CrossCPU_Target='x86_64' then FPCupManager.CrossOS_Target:='win64';
-  end;
-
-  if (FPCupManager.CrossCPU_Target='') then
-  begin
-    if Sender<>nil then Application.MessageBox(PChar('Please select a CPU target first.'), PChar('CPU error'), MB_ICONERROR);
-    FPCupManager.CrossOS_Target:=''; // cleanup
-    exit;
-  end;
-
-  if (FPCupManager.CrossOS_Target='') then
-  begin
-    if Sender<>nil then Application.MessageBox(PChar('Please select an OS target first.'), PChar('OS error'), MB_ICONERROR);
-    FPCupManager.CrossCPU_Target:=''; // cleanup
-    exit;
-  end;
-
-  if assigned(CrossInstallers) then
-  begin
-    success:=false;
-    for i := 0 to CrossInstallers.Count - 1 do
-    begin
-      success:=(CrossInstallers[i] = GetFPCTargetCPUOS(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target,false));
-      if success then break;
-    end;
-    if (NOT success) then
-    begin
-      if Sender<>nil then
-      begin
-        Application.MessageBox(PChar('No valid CPU / OS crosscompiler found.'), PChar('FPCUPDELUXE Limitation'), MB_ICONERROR);
-      end
-      else
-      begin
-        memoSummary.Lines.Append('');
-        memoSummary.Lines.Append('FPCUPDELUXE Limitation: No valid CPU / OS crosscompiler found. Skipping');
-      end;
-      FPCupManager.CrossOS_Target:=''; // cleanup
-      FPCupManager.CrossCPU_Target:=''; // cleanup
-      exit;
-    end;
-  end;
-
-  // use the available source to build the cross-compiler ... change nothing about source and url !!
-  FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
-
-  success:=RealRun;
-
-  result:=success;
-end;
-
 
 procedure TForm1.FPCOnlyClick(Sender: TObject);
 begin

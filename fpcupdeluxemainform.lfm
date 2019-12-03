@@ -2987,7 +2987,7 @@ object Form1: TForm1
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
         Caption = 'Install compiler'
-        OnClick = ButtonInstallCrossCompilerClick
+        OnClick = ButtonProcessCrossCompiler
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
@@ -3029,7 +3029,7 @@ object Form1: TForm1
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
         Caption = 'Remove compiler'
-        OnClick = ButtonInstallCrossCompilerClick
+        OnClick = ButtonProcessCrossCompiler
         ParentShowHint = False
         ShowHint = True
         TabOrder = 4

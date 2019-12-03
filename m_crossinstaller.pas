@@ -73,7 +73,8 @@ const
   FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
   LIBCNAME='libc.so';
-  MUSLLIBCNAME='libc.musl-x86_64.so.1';
+  LINKERNAMEBASE='ld-linux.so.2';
+  LINKERNAMECPUX64='ld-linux-x86-64.so.2';
 
 type
   CompilerType=(ctBootstrap,ctInstalled);

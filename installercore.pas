@@ -173,9 +173,9 @@ const
 
   _UNIVERSALDEFAULT        = 'Universal'+_DEFAULT;
   _FPCCLEANBUILDONLY       = _FPC+_CLEAN+_BUILD+_ONLY;
-  _FPCREMOVEONLY           = _FPC+_CLEAN+_UNINSTALL+_ONLY;
+  _FPCREMOVEONLY           = _FPC+_UNINSTALL+_ONLY;
   _LAZARUSCLEANBUILDONLY   = _LAZARUS+_CLEAN+_BUILD+_ONLY;
-  _LAZARUSREMOVEONLY       = _LAZARUS+_CLEAN+_UNINSTALL+_ONLY;
+  _LAZARUSREMOVEONLY       = _LAZARUS+_UNINSTALL+_ONLY;
   _LCLALLREMOVEONLY        = _LCL+'ALL'+_CLEAN+_ONLY;
   _LCLREMOVEONLY           = _LCL+_CLEAN+_ONLY;
   _COMPONENTSREMOVEONLY    = _COMPONENTS+_CLEAN+_ONLY;
@@ -2876,8 +2876,6 @@ begin
      then result:=GetDefaultCompilerFilename(Cpu_Target,true)
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
-
-
 
 destructor TInstaller.Destroy;
 begin

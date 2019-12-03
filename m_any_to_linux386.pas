@@ -74,9 +74,12 @@ const
 var
   s:string;
   i:integer;
+  LinkerAdded:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
+
+  LinkerAdded:=false;
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
@@ -92,47 +95,68 @@ begin
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
     //AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     AddFPCCFGSnippet('-Xr/usr/lib');
+    s:=IncludeTrailingPathDelimiter(FLibsPath);
+    if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
+    begin
+      AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
+      LinkerAdded:=True;
+    end;
   end;
 
   if not result then
   begin
-    {$IFDEF UNIX}
+    {$IFDEF LINUX}
     {$IFDEF MULTILIB}
     FLibsPath:='/usr/lib/i386-linux-gnu'; //debian (multilib) Jessie+ convention
     result:=DirectoryExists(FLibsPath);
-    if (NOT result) then
-    begin
-      FLibsPath:='/lib32';
-      result:=DirectoryExists(FLibsPath);
-    end;
     if result then
     begin
       FLibsFound:=True;
       AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-      //AddFPCCFGSnippet('-FL'+IncludeTrailingPathDelimiter(FLibsPath)+'ld-linux.so.2');
       {$ifdef CPU64}
-      s:='/usr/lib32';
+
+      s:='/lib32';
       if DirectoryExists(s) then
       begin
-        AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
+        s:=s+DirectorySeparator;
+        AddFPCCFGSnippet('-Fl'+s);
+        if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
+        begin
+          AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
+          LinkerAdded:=True;
+        end;
       end;
+
+      s:='/usr/lib32';
+      if DirectoryExists(s) then
+      s:=s+DirectorySeparator;
+      AddFPCCFGSnippet('-Fl'+s);
+      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
+      begin
+        AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
+        LinkerAdded:=True;
+      end;
+
+      s:='/lib/i386-linux-gnu';
+      if DirectoryExists(s) then
+      s:=s+DirectorySeparator;
+      AddFPCCFGSnippet('-Fl'+s);
+      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
+      begin
+        AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
+        LinkerAdded:=True;
+      end;
+
       // gcc 32bit multilib
       s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';
       if DirectoryExists(s) then
       begin
         AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
       end;
-      // set linker target; multilib //
-      // we could test multilib by asking the linker ; ld --target-help, and process the output to see if elf32-i386 is supported
-      //AddFPCCFGSnippet('-k-b elf32-i386'));
       {$endif}
-      //AddFPCCFGSnippet('-FL/lib/ld-linux.so.2');
-      {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-      //AddFPCCFGSnippet('-Xr'+ExcludeTrailingPathDelimiter(FLibsPath));
-      //AddFPCCFGSnippet('-Xr/usr/lib);
     end else ShowInfo('Searched but not found (multilib) libspath '+FLibsPath);
-    {$ENDIF}
-    {$ENDIF}
+    {$ENDIF MULTILIB}
+    {$ENDIF LINUX}
   end;
 
   SearchLibraryInfo(result);

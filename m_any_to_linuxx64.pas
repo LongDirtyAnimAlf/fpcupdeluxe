@@ -31,12 +31,17 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
+{.$DEFINE MULTILIB}
+
 interface
 
 uses
   Classes, SysUtils, m_crossinstaller, fileutil;
 
 implementation
+
+uses
+  fpcuputil;
 
 type
 
@@ -61,15 +66,18 @@ const
   NormalDirName='x86_64-linux';
   MUSLDirName='x86_64-musllinux';
 var
-  aDirName,aLibcName:string;
+  aDirName,aLibcName,s:string;
+  LinkerAdded:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
 
+  LinkerAdded:=false;
+
   if FMUSL then
   begin
     aDirName:=MUSLDirName;
-    aLibcName:=MUSLLIBCNAME;
+    aLibcName:='libc.musl-'+FTargetCPU+'.so.1';
   end
   else
   begin
@@ -84,29 +92,81 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,aDirName,aLibcName);
 
-  if not result then
-  begin
-    {$IFDEF UNIX}
-    {$IFDEF MULTILIB}
-    FLibsPath:='/usr/lib/x86_64-linux-gnu'; //debian Jessie+ convention
-    result:=DirectoryExists(FLibsPath);
-    if not result then
-    ShowInfo('Searched but not found libspath '+FLibsPath);
-    {$ENDIF}
-    {$ENDIF}
-  end;
-
-  SearchLibraryInfo(result);
-
   if result then
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     AddFPCCFGSnippet('-Xr/usr/lib');
-    if FMUSL then AddFPCCFGSnippet('-FL/lib/ld-musl-x86_64.so.1');
+    s:=IncludeTrailingPathDelimiter(FLibsPath);
+    if FMUSL then
+      s:=s+'ld-musl-'+FTargetCPU+'.so.1'
+    else
+      s:=s+LINKERNAMECPUX64;
+    if FileExists(s) then
+    begin
+      AddFPCCFGSnippet('-FL'+s);
+      LinkerAdded:=true;
+    end;
   end;
+
+  if not result then
+  begin
+    {$IFDEF LINUX}
+    {$IFDEF MULTILIB}
+    FLibsPath:='/usr/lib/x86_64-linux-gnu'; //debian (multilib) Jessie+ convention
+    result:=DirectoryExists(FLibsPath);
+    if result then
+    begin
+      FLibsFound:=True;
+      AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+      {$ifdef CPU32}
+
+      s:='/lib64';
+      if DirectoryExists(s) then
+      begin
+        s:=s+DirectorySeparator;
+        AddFPCCFGSnippet('-Fl'+s);
+        if (NOT LinkerAdded) AND FileExists(s+LINKERNAMECPUX64) then
+        begin
+          AddFPCCFGSnippet('-FL'+s+LINKERNAMECPUX64);
+          LinkerAdded:=True;
+        end;
+      end;
+
+      s:='/usr/lib64';
+      if DirectoryExists(s) then
+      s:=s+DirectorySeparator;
+      AddFPCCFGSnippet('-Fl'+s);
+      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMECPUX64) then
+      begin
+        AddFPCCFGSnippet('-FL'+s+LINKERNAMECPUX64);
+        LinkerAdded:=True;
+      end;
+
+      s:='/lib/x86_64-linux-gnu';
+      if DirectoryExists(s) then
+      s:=s+DirectorySeparator;
+      AddFPCCFGSnippet('-Fl'+s);
+      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMECPUX64) then
+      begin
+        AddFPCCFGSnippet('-FL'+s+LINKERNAMECPUX64);
+        LinkerAdded:=True;
+      end;
+
+      // gcc 64bit multilib
+      s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'64';
+      if DirectoryExists(s) then
+      begin
+        AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(s));
+      end;
+      {$endif}
+    end else ShowInfo('Searched but not found (multilib) libspath '+FLibsPath);
+    {$ENDIF MULTILIB}
+    {$ENDIF LINUX}
+  end;
+
+  SearchLibraryInfo(result);
 end;
 
 {$ifndef FPCONLY}
