@@ -122,7 +122,7 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-    procedure DoUnZip(const ASrcFile, ADstDir: String; Files:array of string);
+    function DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
   published
     property OnZipProgress: TOnZipProgress read FOnZipProgress write FOnZipProgress;
     property OnZipFile: TOnZipFile read FOnZipFile write FOnZipFile;
@@ -1113,7 +1113,10 @@ end;
 
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
 begin
-  result:=(Major *  100 + Minor) * 100 + Release;
+  if (Major>=0) AND (Minor>=0) AND (Release>=0)then
+    result:=((Major *  100 + Minor) * 100 + Release)
+  else
+    result:=0;
 end;
 
 function GetNumericalVersion(VersionSnippet: string): word;
@@ -3172,32 +3175,38 @@ begin
     {$ifdef MSWINDOWS}
     // on windows, .files (hidden files) cannot be created !!??
     // still to check on non-windows
-    if FFileList.Count=0 then
-    begin
-      for x:=0 to FUnZipper.Entries.Count-1 do
+    if NOT Assigned(FFileList) then FFileList:=TStringList.Create;
+    try
+      if FFileList.Count=0 then
       begin
-        { UTF8 features are only available in FPC >= 3.1 }
-        {$IF FPC_FULLVERSION > 30100}
-        if FUnZipper.UseUTF8
-          then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-          else
-        {$endif}
-          s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+        for x:=0 to FUnZipper.Entries.Count-1 do
+        begin
+          { UTF8 features are only available in FPC >= 3.1 }
+          {$IF FPC_FULLVERSION > 30100}
+          if FUnZipper.UseUTF8
+            then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+            else
+          {$endif}
+            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
 
-        if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
-        if (Length(s)>0) AND (s[1]='.') then continue;
-        FFileList.Append(s);
+          if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+          if (Length(s)>0) AND (s[1]='.') then continue;
+          FFileList.Append(s);
+        end;
       end;
-    end;
-    {$endif}
+      {$endif}
 
-    if FFileList.Count=0
-      then FTotalFileCount:=FUnZipper.Entries.Count
-      else FTotalFileCount:=FFileList.Count;
+      if FFileList.Count=0
+        then FTotalFileCount:=FUnZipper.Entries.Count
+        else FTotalFileCount:=FFileList.Count;
 
-    if FFileList.Count=0
-      then FUnZipper.UnZipAllFiles
-      else FUnZipper.UnZipFiles(FFileList);
+      if FFileList.Count=0
+        then FUnZipper.UnZipAllFiles
+        else FUnZipper.UnZipFiles(FFileList);
+
+      finally
+        FFileList.Free;
+      end;
   except
     on E: Exception do
     begin
@@ -3219,8 +3228,16 @@ end;
 
 destructor TThreadedUnzipper.Destroy;
 begin
-  FFileList.Free;
-  FUnZipper.Free;
+  if Assigned(FFileList) then
+  begin
+    FFileList.Destroy;
+    FFileList:=nil;
+  end;
+  if Assigned(FUnZipper) then
+  begin
+    FUnZipper.Destroy;
+    FUnZipper:=nil;
+  end;
   inherited Destroy;
 end;
 
@@ -3261,10 +3278,11 @@ begin
 end;
 
 
-procedure TThreadedUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string);
+function TThreadedUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;
 var
   i:word;
 begin
+  result:=true;
   if FStarted then exit;
   infoln('TThreadedUnzipper: Going to extract files from ' + ASrcFile + ' into ' + ADstDir,etInfo);
   FUnZipper.Clear;
@@ -3273,10 +3291,12 @@ begin
   FUnZipper.OutputPath := ADstDir;
   FUnZipper.OnProgress := @DoOnProgress;
   FUnZipper.OnStartFile:= @DoOnFile;
-  FFileList.Clear;
   if Length(Files)>0 then
+  begin
+    FFileList := TStringList.Create;
     for i := 0 to high(Files) do
       FFileList.Append(Files[i]);
+  end;
   FPercent:=0;
   FFileCount:=0;
   FTotalFileCount:=0;

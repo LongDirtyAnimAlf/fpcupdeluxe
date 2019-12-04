@@ -1804,7 +1804,7 @@ begin
   if result then
   begin
     //Delete existing files from source directory
-    DeleteDirectory(FSourceDirectory,True);
+    //DeleteDirectory(FSourceDirectory,True);
 
     with TNormalUnzipper.Create do
     begin

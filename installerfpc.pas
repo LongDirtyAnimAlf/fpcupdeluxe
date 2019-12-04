@@ -3526,36 +3526,37 @@ begin
   begin
     infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
     result:=DownloadFromFTP(ModuleName);
-    exit(result);
-  end;
-
-  infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
-
-  UpdateWarnings:=TStringList.Create;
-  try
-    aRepoClient.Verbose:=FVerbose;
-    aRepoClient.ExportOnly:=FExportOnly;
-    aRepoClient.ModuleName:=ModuleName;
-    if aRepoClient=FGitClient
-       then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
-       else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
-    if UpdateWarnings.Count>0 then
-    begin
-      WritelnLog(UpdateWarnings.Text);
-    end;
-  finally
-    UpdateWarnings.Free;
-  end;
-
-  if NOT aRepoClient.ExportOnly then
+  end
+  else
   begin
-    infoln(infotext+ModuleName + ' was at: '+BeforeRevision,etInfo);
-    if FRepositoryUpdated then infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo) else
-      infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
-  end;
+    infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
-  if (NOT Result) then
-    infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
+    UpdateWarnings:=TStringList.Create;
+    try
+      aRepoClient.Verbose:=FVerbose;
+      aRepoClient.ExportOnly:=FExportOnly;
+      aRepoClient.ModuleName:=ModuleName;
+      if aRepoClient=FGitClient
+         then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
+         else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
+      if UpdateWarnings.Count>0 then
+      begin
+        WritelnLog(UpdateWarnings.Text);
+      end;
+    finally
+      UpdateWarnings.Free;
+    end;
+
+    if NOT aRepoClient.ExportOnly then
+    begin
+      infoln(infotext+ModuleName + ' was at: '+BeforeRevision,etInfo);
+      if FRepositoryUpdated then infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo) else
+        infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
+    end;
+
+    if (NOT Result) then
+      infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
+  end;
 
   if result then
   begin

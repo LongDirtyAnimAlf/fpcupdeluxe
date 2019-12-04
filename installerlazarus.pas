@@ -2104,61 +2104,62 @@ begin
   begin
     infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
     result:=DownloadFromFTP(ModuleName);
-    exit(result);
-  end;
-
-  infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
-
-  UpdateWarnings := TStringList.Create;
-  try
-    aRepoClient.Verbose:=FVerbose;
-    aRepoClient.ExportOnly:=FExportOnly;
-    aRepoClient.ModuleName:=ModuleName;
-    if aRepoClient=FGitClient
-       then result:=DownloadFromGit(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings)
-       else result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
-  finally
-    UpdateWarnings.Free;
-  end;
-
-  if NOT aRepoClient.ExportOnly then
-  begin
-    infoln(infotext+'Lazarus was at: ' + BeforeRevision, etInfo);
-
-    if FRepositoryUpdated then
-    begin
-      Revision := AfterRevision;
-      infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
-    end
-    else
-    begin
-      Revision := BeforeRevision;
-      infoln(infotext+'No updates for Lazarus found.', etInfo);
-    end;
   end
   else
   begin
-    Revision := AfterRevision;
-    infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
-  end;
+    infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
-  if (Result) then
-  begin
-    // update revision.inc;
-    infoln(infotext+'Updating Lazarus version info.', etInfo);
-    AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+RevisionIncFileName);
+    UpdateWarnings := TStringList.Create;
     try
-      Rewrite(RevisionIncText);
-      writeln(RevisionIncText, RevisionIncComment);
-      ConstStart := Format('const %s = ''', [ConstName]);
-      writeln(RevisionIncText, ConstStart, aRepoClient.LocalRevision, ''';');
+      aRepoClient.Verbose:=FVerbose;
+      aRepoClient.ExportOnly:=FExportOnly;
+      aRepoClient.ModuleName:=ModuleName;
+      if aRepoClient=FGitClient
+         then result:=DownloadFromGit(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings)
+         else result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
     finally
-      CloseFile(RevisionIncText);
+      UpdateWarnings.Free;
     end;
-  end;
 
-  if (NOT Result) then
-    infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
+    if NOT aRepoClient.ExportOnly then
+    begin
+      infoln(infotext+'Lazarus was at: ' + BeforeRevision, etInfo);
+
+      if FRepositoryUpdated then
+      begin
+        Revision := AfterRevision;
+        infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
+      end
+      else
+      begin
+        Revision := BeforeRevision;
+        infoln(infotext+'No updates for Lazarus found.', etInfo);
+      end;
+    end
+    else
+    begin
+      Revision := AfterRevision;
+      infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
+    end;
+
+    if (Result) then
+    begin
+      // update revision.inc;
+      infoln(infotext+'Updating Lazarus version info.', etInfo);
+      AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+RevisionIncFileName);
+      try
+        Rewrite(RevisionIncText);
+        writeln(RevisionIncText, RevisionIncComment);
+        ConstStart := Format('const %s = ''', [ConstName]);
+        writeln(RevisionIncText, ConstStart, aRepoClient.LocalRevision, ''';');
+      finally
+        CloseFile(RevisionIncText);
+      end;
+    end;
+
+    if (NOT Result) then
+      infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
+  end;
 
   {$ifdef Darwin}
   {$ifdef LCLQT5}
