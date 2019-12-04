@@ -86,8 +86,8 @@ begin
     FLibsFound:=True;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib64'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     AddFPCCFGSnippet('-Xr/usr/lib');
-    //AddFPCCFGSnippet('-FL/usr/lib/ld-linux.so.2'); {buildfaq 3.3.1: the name of the dynamic linker on the target};
   end;
 end;
 

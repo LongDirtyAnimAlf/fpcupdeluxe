@@ -64,13 +64,9 @@ end;
 function Tany_linuxarm.GetLibs(Basepath:string): boolean;
 const
   DirName='arm-linux';
-//var
-//  requirehardfloat:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
-
-  //requirehardfloat:=(StringListStartsWith(FCrossOpts,'-CaEABIHF')>-1);
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
@@ -95,23 +91,9 @@ begin
 
     AddFPCCFGSnippet('-Xd');
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib32'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     AddFPCCFGSnippet('-Xr/usr/lib');
-
-    {
-    Actually leaving this out seems to work ok on the target system.
-    if StringListStartsWith(FCrossOpts,'-FL')=-1 then
-    begin
-      infoln(FCrossModuleName+ ': you did not specify any -FL option in your crossopts. You MAY want to specify e.g. -FL/usr/lib/ld-linux.so.3',etInfo);
-      Let's not get too zealous and leave choices up to the user. Perhaps the default is good, too.
-      FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-        '-FL/usr/lib/ld-linux.so.3' //buildfaq 3.3.1: the name of the dynamic linker on the target
-      maybe for older situation:
-        '-FL/usr/lib/ld-linux.so.2'
-    end;
-    }
-
-    { Note: bug 21554 and checked on raspberry pi wheezy: uses armhf /lib/arm-linux-gnueabihf/ld-linux.so.3}
   end
   else
   begin

@@ -49,8 +49,13 @@ const
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
-  FPCSVNURL = 'https://svn.freepascal.org/svn';
-  FPCFTPURL = 'ftp://ftp.freepascal.org/pub/fpc';
+  FPCSVNURL             = 'https://svn.freepascal.org/svn';
+  FTPURL                = 'ftp://ftp.freepascal.org/pub';
+  FPCFTPURL             = FTPURL+'/fpc';
+  LAZARUSFTPURL         = FTPURL+'/lazarus';
+
+  FPCFTPSNAPSHOTURL     = FPCFTPURL+'/snapshot';
+  LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'/snapshot';
 
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
 
@@ -155,6 +160,7 @@ const
   _BUILDMODULE             = _BUILD+_MODULE;
   _UNINSTALLMODULE         = _UNINSTALL+_MODULE;
 
+  _CREATESCRIPT            = 'CreateScript';
   _CREATEFPCUPSCRIPT       = 'CreateFpcupScript';
   _CREATELAZARUSSCRIPT     = 'CreateLazarusScript';
   _DELETELAZARUSSCRIPT     = 'DeleteLazarusScript';
@@ -475,6 +481,9 @@ implementation
 
 uses
   FileUtil
+  {$IFDEF UNIX}
+  ,LazFileUtils
+  {$ENDIF UNIX}
   {$IFNDEF HAIKU}
   //,ssl_openssl
   // for runtime init of openssl
@@ -2560,10 +2569,17 @@ end;
 
 function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
+
+  //FPCFTPSNAPSHOTURL
+  result:=nil;
   // not so elegant check to see what kind of client we need ...
-  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) )
-     then result:=FGitClient
-     else result:=FSVNClient;
+  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then
+    result:=FGitClient
+  else
+    begin
+      if (Pos('https://svn.',LowerCase(FURL))=1) then
+        result:=FSVNClient;
+     end;
 end;
 
 function TInstaller.BuildModule(ModuleName: string): boolean;

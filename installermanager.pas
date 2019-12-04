@@ -138,6 +138,13 @@ Const
     {$ifndef FPCONLY}
     _CHECKMODULE+_LAZARUS+_SEP+
     {$endif}
+    _END+
+
+    _DECLARE+_CREATESCRIPT+_SEP+
+    _EXECUTE+_CREATEFPCUPSCRIPT+_SEP+
+    {$ifndef FPCONLY}
+    _EXECUTE+_CREATELAZARUSSCRIPT+_SEP+
+    {$endif}
 
     _ENDFINAL;
 
@@ -1292,14 +1299,9 @@ begin
       else
         FInstaller.free; // get rid of old FInstaller
     end;
+
     if CrossCompiling then
-    begin
-      FInstaller:=TFPCCrossInstaller.Create;
-      FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
-      FInstaller.CrossOPT:=FParent.CrossOPT;
-      FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
-      FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
-    end
+      FInstaller:=TFPCCrossInstaller.Create
     else
       FInstaller:=TFPCNativeInstaller.Create;
 
@@ -1343,14 +1345,12 @@ begin
       else
         FInstaller.free; // get rid of old FInstaller
       end;
+
     if CrossCompiling then
-    begin
-      FInstaller:=TLazarusCrossInstaller.Create;
-      FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
-      FInstaller.CrossOPT:=FParent.CrossOPT;
-    end
+      FInstaller:=TLazarusCrossInstaller.Create
     else
       FInstaller:=TLazarusNativeInstaller.Create;
+
     // source- and install-dir are the same for Lazarus ... could be changed
     FInstaller.SourceDirectory:=FParent.LazarusDirectory;
     FInstaller.InstallDirectory:=FParent.LazarusDirectory;
@@ -1375,6 +1375,7 @@ begin
   else if ModuleName=_HELPFPC
   then
   begin
+    CrossCompiling:=false;
     if assigned(FInstaller) then
     begin
       if (FInstaller is THelpFPCInstaller) then
@@ -1391,6 +1392,7 @@ begin
   else if ModuleName=_HELPLAZARUS
   then
   begin
+    CrossCompiling:=false;
     if assigned(FInstaller) then
     begin
       if (FInstaller is THelpLazarusInstaller) then
@@ -1411,6 +1413,7 @@ begin
   {$endif}
   else       // this is a universal module
   begin
+      CrossCompiling:=false;
       if assigned(FInstaller) then
       begin
         if (FInstaller is TUniversalInstaller) and
@@ -1482,6 +1485,15 @@ begin
     FInstaller.SwitchURL:=FParent.SwitchURL;
     if FParent.SolarisOI then FInstaller.SolarisOI:=true else {if FInstaller.SolarisOI then FParent.SolarisOI:=true};
     if FParent.MUSL then FInstaller.MUSL:=true {else if FInstaller.MUSL then FParent.MUSL:=true};
+
+    if CrossCompiling then
+    begin
+      FInstaller.SetTarget(FParent.CrossCPU_Target,FParent.CrossOS_Target,FParent.CrossOS_SubArch);
+      FInstaller.CrossOPT:=FParent.CrossOPT;
+      FInstaller.CrossLibraryDirectory:=FParent.CrossLibraryDirectory;
+      FInstaller.CrossToolsDirectory:=FParent.CrossToolsDirectory;
+    end
+
   end;
 end;
 

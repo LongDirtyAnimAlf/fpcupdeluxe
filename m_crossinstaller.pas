@@ -73,8 +73,14 @@ const
   FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
   LIBCNAME='libc.so';
+
+  {
   LINKERNAMEBASE='ld-linux.so.2';
+  LINKERNAMEARM='ld-linux-arm.so.2';
+  LINKERNAMEARMHF='ld-linux-armhf.so.2';
   LINKERNAMECPUX64='ld-linux-x86-64.so.2';
+  LINKERNAMECPUAARCH64='ld-linux-aarch64.so.2';
+  }
 
   CROSSPATH      = 'cross';
   CROSSBINPATH   = CROSSPATH+DirectorySeparator+'bin';

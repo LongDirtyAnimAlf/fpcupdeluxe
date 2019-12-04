@@ -74,12 +74,9 @@ const
 var
   s:string;
   i:integer;
-  LinkerAdded:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
-
-  LinkerAdded:=false;
 
   // begin simple: check presence of library file in basedir
   result:=SearchLibrary(Basepath,LIBCNAME);
@@ -93,14 +90,9 @@ begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib32'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     AddFPCCFGSnippet('-Xr/usr/lib');
-    s:=IncludeTrailingPathDelimiter(FLibsPath);
-    if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
-    begin
-      AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
-      LinkerAdded:=True;
-    end;
   end;
 
   if not result then
@@ -120,32 +112,17 @@ begin
       begin
         s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
-        if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
-        begin
-          AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
-          LinkerAdded:=True;
-        end;
       end;
 
       s:='/usr/lib32';
       if DirectoryExists(s) then
       s:=s+DirectorySeparator;
       AddFPCCFGSnippet('-Fl'+s);
-      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
-      begin
-        AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
-        LinkerAdded:=True;
-      end;
 
       s:='/lib/i386-linux-gnu';
       if DirectoryExists(s) then
       s:=s+DirectorySeparator;
       AddFPCCFGSnippet('-Fl'+s);
-      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMEBASE) then
-      begin
-        AddFPCCFGSnippet('-FL'+s+LINKERNAMEBASE);
-        LinkerAdded:=True;
-      end;
 
       // gcc 32bit multilib
       s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'32';

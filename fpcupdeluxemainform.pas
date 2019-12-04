@@ -39,6 +39,7 @@ type
     ButtonInstallCrossCompiler: TButton;
     ButtonRemoveCrossCompiler: TButton;
     CheckAutoClear: TCheckBox;
+    CreateStartup: TButton;
     ChkMakefileLaz: TButton;
     FPCVersionLabel: TLabel;
     LazarusVersionLabel: TLabel;
@@ -919,6 +920,8 @@ begin
 
     if Sender=ChkMakefileLaz then FPCupManager.OnlyModules:=_MAKEFILECHECKLAZARUS;
     if Sender=ChkMakefileFPC then FPCupManager.OnlyModules:=_MAKEFILECHECKFPC;
+
+    if Sender=CreateStartup then FPCupManager.OnlyModules:=_CREATESCRIPT;
 
     sStatus:='Going to check Makefile.';
 

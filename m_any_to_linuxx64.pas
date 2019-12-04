@@ -67,12 +67,9 @@ const
   MUSLDirName='x86_64-musllinux';
 var
   aDirName,aLibcName,s:string;
-  LinkerAdded:boolean;
 begin
   result:=FLibsFound;
   if result then exit;
-
-  LinkerAdded:=false;
 
   if FMUSL then
   begin
@@ -97,17 +94,8 @@ begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib64'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     AddFPCCFGSnippet('-Xr/usr/lib');
-    s:=IncludeTrailingPathDelimiter(FLibsPath);
-    if FMUSL then
-      s:=s+'ld-musl-'+FTargetCPU+'.so.1'
-    else
-      s:=s+LINKERNAMECPUX64;
-    if FileExists(s) then
-    begin
-      AddFPCCFGSnippet('-FL'+s);
-      LinkerAdded:=true;
-    end;
   end;
 
   if not result then
@@ -127,32 +115,17 @@ begin
       begin
         s:=s+DirectorySeparator;
         AddFPCCFGSnippet('-Fl'+s);
-        if (NOT LinkerAdded) AND FileExists(s+LINKERNAMECPUX64) then
-        begin
-          AddFPCCFGSnippet('-FL'+s+LINKERNAMECPUX64);
-          LinkerAdded:=True;
-        end;
       end;
 
       s:='/usr/lib64';
       if DirectoryExists(s) then
       s:=s+DirectorySeparator;
       AddFPCCFGSnippet('-Fl'+s);
-      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMECPUX64) then
-      begin
-        AddFPCCFGSnippet('-FL'+s+LINKERNAMECPUX64);
-        LinkerAdded:=True;
-      end;
 
       s:='/lib/x86_64-linux-gnu';
       if DirectoryExists(s) then
       s:=s+DirectorySeparator;
       AddFPCCFGSnippet('-Fl'+s);
-      if (NOT LinkerAdded) AND FileExists(s+LINKERNAMECPUX64) then
-      begin
-        AddFPCCFGSnippet('-FL'+s+LINKERNAMECPUX64);
-        LinkerAdded:=True;
-      end;
 
       // gcc 64bit multilib
       s:=IncludeTrailingPathDelimiter(GetStartupObjects)+'64';

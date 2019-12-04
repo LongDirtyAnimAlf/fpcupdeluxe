@@ -550,7 +550,6 @@ begin
 
   if assigned(CrossInstaller) then
   begin
-
     CrossInstaller.Reset;
 
     {$ifdef win32}
@@ -914,11 +913,13 @@ begin
           {$endif}
           {$endif}
 
+          {$ifdef linux}
           if FMUSL then
           begin
-            FMUSLLinker:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'ld-musl-'+CrossInstaller.TargetCPU+'.so.1';
-            Options:=Options+' -Cg -FL'+FMUSLLinker;
+            //FMUSLLinker:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'ld-musl-'+CrossInstaller.TargetCPU+'.so.1';
+            //Options:=Options+' -Cg -FL'+FMUSLLinker;
           end;
+          {$endif}
 
           CrossOptions:='';
 
@@ -2587,6 +2588,7 @@ begin
 
   if result then
   begin
+
     if assigned(CrossInstaller) then
     begin
       CrossInstaller.SolarisOI:=FSolarisOI;
@@ -3515,6 +3517,12 @@ begin
   if not result then exit;
 
   aRepoClient:=GetSuitableRepoClient;
+
+  if aRepoClient=nil then
+  begin
+    infoln(infotext+'No suitable repo client for checkout/update of ' + ModuleName + ' sources.',etError);
+    exit(false);
+  end;
 
   infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 

@@ -306,13 +306,13 @@ begin
 
   if Assigned(CrossInstaller) then
   begin
+    CrossInstaller.Reset;
+
     // Actually not using crossopts - they're only for building an FPC compiler; the
     // relevant options should have been written as a snippet to fpc.cfg and picked
     // up from there.
     CrossInstaller.SetCrossOpt(CrossOPT); //pass on user-requested cross compile options
     CrossInstaller.SetSubArch(CrossOS_SubArch);
-    CrossInstaller.SolarisOI:=FSolarisOI;
-    CrossInstaller.MUSL:=FMUSL;
     if not CrossInstaller.GetBinUtils(FFPCInstallDir) then
       infoln(infotext+'Failed to get crossbinutils', etError)
     else if not CrossInstaller.GetLibs(FFPCInstallDir) then
@@ -505,12 +505,18 @@ function TLazarusCrossInstaller.UnInstallModule(ModuleName:string): boolean;
 var
   aDir:string;
 begin
-  Result:=true;
+  result:=true; //succeed by default
+
+  if not DirectoryExists(FInstallDirectory) then
+  begin
+    infoln(infotext+'No Lazarus install [yet] ... nothing to be done',etInfo);
+  end;
+  if CheckDirectory(FInstallDirectory) then exit;
+
+  Result := InitModule;
+  if not Result then exit;
 
   FErrorLog.Clear;
-
-  if (NOT DirectoryExists(FInstallDirectory)) then exit;
-  if CheckDirectory(FInstallDirectory) then exit;
 
   if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
 
@@ -1356,7 +1362,9 @@ begin
   WritelnLog(localinfotext+'Lazarus URL:            ' + FURL, false);
   WritelnLog(localinfotext+'Lazarus options:        ' + FCompilerOptions, false);
   result:=(CheckAndGetTools) AND (CheckAndGetNeededBinUtils);
+
   if result then
+
   begin
     if Assigned(CrossInstaller) then
     begin
@@ -1387,6 +1395,7 @@ begin
     PlainBinPath, true, false);
     {$ENDIF UNIX}
   end;
+
   InitDone := Result;
 end;
 
@@ -1782,7 +1791,6 @@ begin
   if not Result then exit;
 
   CrossCompiling:=(Self is TLazarusCrossInstaller);
-  //CrossCompiling:=Assigned(CrossInstaller);
 
   // If cleaning primary config:
   if ((NOT CrossCompiling) and (ModuleName=_LAZARUS)) then
@@ -1853,6 +1861,17 @@ begin
   Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
   Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
 
+  if (Self is TLazarusCrossInstaller) then
+  begin
+    Processor.Parameters.Add('OS_TARGET=' + CrossOS_Target);
+    Processor.Parameters.Add('CPU_TARGET=' + CrossCPU_Target);
+  end
+  else
+  begin
+    Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
+    Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
+  end;
+
   CleanDirectory:='';
   CleanCommand:='';
 
@@ -1914,17 +1933,6 @@ begin
     begin
       WritelnLog(etError, infotext+'Invalid module name [' + ModuleName + '] specified! Please fix the code.', true);
     end;
-  end;
-
-  if (Self is TLazarusCrossInstaller) then
-  begin
-    Processor.Parameters.Add('OS_TARGET=' + CrossOS_Target);
-    Processor.Parameters.Add('CPU_TARGET=' + CrossCPU_Target);
-  end
-  else
-  begin
-    Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
-    Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
   end;
 
   CleanDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory)+CleanDirectory;
@@ -2091,6 +2099,12 @@ begin
   if not Result then exit;
 
   aRepoClient:=GetSuitableRepoClient;
+
+  if aRepoClient=nil then
+  begin
+    infoln(infotext+'No suitable repo client for checkout/update of ' + ModuleName + ' sources.',etError);
+    exit(false);
+  end;
 
   infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
@@ -2320,11 +2334,19 @@ end;
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
   Result := inherited;
-  Result := InitModule;
 
+  if not DirectoryExists(FSourceDirectory) then
+  begin
+    infoln(infotext+'No Lazarus sources [yet] ... nothing to be done',etInfo);
+  end;
+  if CheckDirectory(FSourceDirectory) then exit;
+
+  Result := InitModule;
   if not Result then exit;
 
-  //sanity check
+  FErrorLog.Clear;
+
+  // Sanity check so we don't try to delete random directories
   if FileExists(IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME) and DirectoryExists(
     IncludeTrailingPathDelimiter(FSourceDirectory) + 'ide') and DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory) + 'lcl') and
     ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FSourceDirectory)) then
@@ -2339,20 +2361,24 @@ begin
     Result := false;
   end;
 
-  // Sanity check so we don't try to delete random directories
-  // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
-  if Result and FileExists(IncludeTrailingPathDelimiter(FPrimaryConfigPath) + EnvironmentConfig) and
-    ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FPrimaryConfigPath)) then
+  if result then
   begin
-    Result := DeleteDirectoryEx(FPrimaryConfigPath) = false;
-    if not (Result) then
-      WritelnLog(infotext+'Error deleting Lazarus PrimaryConfigPath directory ' + FPrimaryConfigPath);
-  end
-  else
-  begin
-    WritelnLog(infotext+'Error: invalid Lazarus FPrimaryConfigPath: ' + FPrimaryConfigPath);
-    Result := false;
+    // Sanity check so we don't try to delete random directories
+    // Assume Lazarus has been configured/run once so enviroronmentoptions.xml exists.
+    if FileExists(IncludeTrailingPathDelimiter(FPrimaryConfigPath) + EnvironmentConfig) and
+      ParentDirectoryIsNotRoot(IncludeTrailingPathDelimiter(FPrimaryConfigPath)) then
+    begin
+      Result := DeleteDirectoryEx(FPrimaryConfigPath) = false;
+      if not (Result) then
+        WritelnLog(infotext+'Error deleting Lazarus PrimaryConfigPath directory ' + FPrimaryConfigPath);
+    end
+    else
+    begin
+      WritelnLog(infotext+'Error: invalid Lazarus FPrimaryConfigPath: ' + FPrimaryConfigPath);
+      Result := false;
+    end;
   end;
+
 end;
 
 function TLazarusInstaller.LCLCrossActionNeeded:boolean;
