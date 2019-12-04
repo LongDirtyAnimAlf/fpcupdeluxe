@@ -2597,7 +2597,7 @@ begin
   result:=true;
   if (NOT DirectoryExists(Dir)) then
   begin
-    infoln('Non existing directory: '+Dir+'. Going to create it.', etInfo);
+    //infoln('Non existing directory: '+Dir+'. Going to create it.', etInfo);
     result:=ForceDirectories(Dir);
     if (NOT result) then infoln('Could not create directory: '+Dir, etWarning);
   end;

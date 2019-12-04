@@ -1822,7 +1822,7 @@ begin
     FilesList:=FindAllDirectories(FSourceDirectory,False);
     if FilesList.Count=1 then aName:=FilesList[0];
     FreeAndNil(FilesList);
-    if ExtractFileName(aName)='fpc' then
+    if LowerCase(ExtractFileName(aName))=LowerCase(ModuleName) then
     begin
       infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
       FilesList:=FindAllFiles(aName, '', True);
