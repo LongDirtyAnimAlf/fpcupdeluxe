@@ -50,12 +50,12 @@ const
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
   FPCSVNURL             = 'https://svn.freepascal.org/svn';
-  FTPURL                = 'ftp://ftp.freepascal.org/pub';
-  FPCFTPURL             = FTPURL+'/fpc';
-  LAZARUSFTPURL         = FTPURL+'/lazarus';
+  FTPURL                = 'ftp://ftp.freepascal.org/pub/';
+  FPCFTPURL             = FTPURL+'fpc/';
+  LAZARUSFTPURL         = FTPURL+'lazarus/';
 
-  FPCFTPSNAPSHOTURL     = FPCFTPURL+'/snapshot';
-  LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'/snapshot';
+  FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
+  LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
   BINUTILSURL = FPCSVNURL + '/fpcbuild';
 
@@ -351,6 +351,9 @@ type
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
+    function DownloadFromFTP(ModuleName: string): boolean;
+    // Clone/update using Git; use FSourceDirectory as local repository
+    // Any generated warnings will be added to UpdateWarnings
     {$IFDEF MSWINDOWS}
     // Download make.exe, patch.exe etc into the make directory (only implemented for Windows):
     function DownloadBinUtils: boolean;
@@ -1419,7 +1422,7 @@ begin
   {$endif win64}
 
   // add wince gdb
-  AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'/contrib/cross/','',ucDebuggerWince);
+  AddNewUtil('gdb-6.4-win32-arm-wince.zip',FPCFTPURL+'contrib/cross/','',ucDebuggerWince);
 
   {$endif MSWINDOWS}
 end;
@@ -1773,6 +1776,71 @@ begin
       end;
     end;
   end;
+end;
+
+function TInstaller.DownloadFromFTP(ModuleName: string): boolean;
+var
+  i:integer;
+  FilesList:TStringList;
+  FPCArchive,aName,aFile:string;
+begin
+  result:=false;
+
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadFromFTP: '+ModuleName+'): ';
+
+  if (NOT DirectoryIsEmpty(ExcludeTrailingPathDelimiter(FSourceDirectory))) then
+  begin
+    infoln(localinfotext+ModuleName+' sources are already there.',etWarning);
+    infoln(localinfotext+ModuleName+' build-process will continue with existing sources.',etWarning);
+    exit(true);
+  end;
+
+  infoln(localinfotext+'Getting '+ModuleName+' sources.',etInfo);
+
+  FPCArchive := GetTempFileNameExt('','FPCUPTMP','zip');
+  result:=GetFile(FURL,FPCArchive,true);
+  if (result AND (NOT FileExists(FPCArchive))) then result:=false;
+
+  if result then
+  begin
+    //Delete existing files from source directory
+    DeleteDirectory(FSourceDirectory,True);
+
+    with TNormalUnzipper.Create do
+    begin
+      try
+        result:=DoUnZip(FPCArchive,FSourceDirectory,[]);
+      finally
+        Free;
+      end;
+    end;
+  end;
+
+  if result then
+  begin
+    aName:='';
+    FilesList:=FindAllDirectories(FSourceDirectory,False);
+    if FilesList.Count=1 then aName:=FilesList[0];
+    FreeAndNil(FilesList);
+    if ExtractFileName(aName)='fpc' then
+    begin
+      infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
+      FilesList:=FindAllFiles(aName, '', True);
+      for i:=0 to (FilesList.Count-1) do
+      begin
+        aFile:=FilesList[i];
+        aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
+        aFile:=SafeExpandFileName(aFile);
+        if NOT DirectoryExists(ExtractFileDir(aFile)) then ForceDirectoriesSafe(ExtractFileDir(aFile));
+        SysUtils.RenameFile(FilesList[i],aFile);
+      end;
+      DeleteDirectory(aName,False);
+      FreeAndNil(FilesList);
+    end;
+  end;
+
+  SysUtils.Deletefile(FPCArchive); //Get rid of temp file.
+
 end;
 
 {$IFDEF MSWINDOWS}
@@ -2569,8 +2637,6 @@ end;
 
 function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
-
-  //FPCFTPSNAPSHOTURL
   result:=nil;
   // not so elegant check to see what kind of client we need ...
   if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then

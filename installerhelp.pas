@@ -291,7 +291,7 @@ const
   );
   HELP_URL_BASE='https://sourceforge.net/projects/lazarus/files/Lazarus%20Documentation';
   HELP_URL_BASE_ALTERNATIVE='http://mirrors.iwi.me/lazarus/releases/Lazarus%20Documentation';
-  HELP_URL_FTP=LAZARUSFTPURL+'/releases/Lazarus%20Documentation';
+  HELP_URL_FTP=LAZARUSFTPURL+'releases/Lazarus%20Documentation';
 
 var
   DocsZip: string;

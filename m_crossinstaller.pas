@@ -242,6 +242,10 @@ begin
   begin
     if LookFor=LIBCNAME then result:=SearchUtil(Directory, LIBCNAME+'.6', true);
   end;
+  if NOT result then
+  begin
+    if LookFor=LIBCNAME then result:=SearchUtil(Directory, LIBCNAME+'.7', true);
+  end;
 end;
 
 function TCrossInstaller.SimpleSearchLibrary(BasePath,DirName: string; const LookFor:string): boolean;
@@ -250,6 +254,10 @@ begin
   if NOT result then
   begin
     if LookFor=LIBCNAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCNAME+'.6');
+  end;
+  if NOT result then
+  begin
+    if LookFor=LIBCNAME then result:=FPCUPToolsSearch(BasePath,DirName,true,LIBCNAME+'.7');
   end;
 end;
 

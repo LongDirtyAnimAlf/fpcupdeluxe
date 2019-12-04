@@ -75,6 +75,8 @@ begin
   if not result then
     result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
 
+  SearchLibraryInfo(result);
+
   if result then
   begin
     FLibsFound:=true;
@@ -85,15 +87,14 @@ begin
     AddFPCCFGSnippet('-k"-rpath=/usr/X11R7/lib"');
     AddFPCCFGSnippet('-k"-rpath=/usr/pkg/lib"');
     //AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-    SearchLibraryInfo(result);
   end;
   {
   else
   begin
     //libs path is optional; it can be empty
     ShowInfo('Libspath ignored; it is optional for this cross compiler.');
-    FLibsPath:='';
     FLibsFound:=true;
+    FLibsPath:='';
     result:=true;
   end;
   }

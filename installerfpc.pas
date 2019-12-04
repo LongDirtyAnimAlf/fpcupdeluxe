@@ -1384,8 +1384,12 @@ begin
   Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
   Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
 
-  Processor.Parameters.Add('REVSTR='+ActualRevision);
-  Processor.Parameters.Add('REVINC=force');
+  s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'revision.inc';
+  if FileExists(s2) then
+  begin
+    Processor.Parameters.Add('REVSTR='+ActualRevision);
+    Processor.Parameters.Add('REVINC=force');
+  end;
 
   if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
   begin
@@ -2252,7 +2256,7 @@ begin
             if aLocalBootstrapVersion='3.0.2' then aCompilerArchive:='ppc386-i386-win32.zip';
             {$endif}
 
-            s:=FPCFTPURL+'/dist/'+aLocalBootstrapVersion+'/bootstrap/';
+            s:=FPCFTPURL+'dist/'+aLocalBootstrapVersion+'/bootstrap/';
 
             infoln(localinfotext+'Looking for (online) bootstrapper '+aCompilerArchive + ' in ' + s,etDebug);
 
@@ -2350,7 +2354,7 @@ begin
           if FBootstrapCompilerURL='' then
           begin
             infoln(localinfotext+'Got a V'+aLocalBootstrapVersion+' bootstrap compiler from official FPC bootstrap sources.',etInfo);
-            FBootstrapCompilerURL := FPCFTPURL+'/dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
+            FBootstrapCompilerURL := FPCFTPURL+'dist/'+aLocalBootstrapVersion+'/bootstrap/'+aCompilerArchive;
           end;
         end;
 
@@ -3520,24 +3524,25 @@ begin
 
   if aRepoClient=nil then
   begin
-    infoln(infotext+'No suitable repo client for checkout/update of ' + ModuleName + ' sources.',etError);
-    exit(false);
+    infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
+    result:=DownloadFromFTP(ModuleName);
+    exit(result);
   end;
 
   infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
   UpdateWarnings:=TStringList.Create;
   try
-   aRepoClient.Verbose:=FVerbose;
-   aRepoClient.ExportOnly:=FExportOnly;
-   aRepoClient.ModuleName:=ModuleName;
-   if aRepoClient=FGitClient
-      then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
-      else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
-   if UpdateWarnings.Count>0 then
-   begin
-     WritelnLog(UpdateWarnings.Text);
-   end;
+    aRepoClient.Verbose:=FVerbose;
+    aRepoClient.ExportOnly:=FExportOnly;
+    aRepoClient.ModuleName:=ModuleName;
+    if aRepoClient=FGitClient
+       then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
+       else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
+    if UpdateWarnings.Count>0 then
+    begin
+      WritelnLog(UpdateWarnings.Text);
+    end;
   finally
     UpdateWarnings.Free;
   end;

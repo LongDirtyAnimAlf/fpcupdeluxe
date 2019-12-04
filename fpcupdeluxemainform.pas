@@ -1004,7 +1004,6 @@ begin
     memoSummary.Lines.Append(s);
   end;
 
-
   // warn about time consuming module operations
   if ExistWordInString(PChar(s),'UniversalInstaller (GetModule:',[soWholeWord,soDown]) then
   begin
@@ -1021,12 +1020,14 @@ begin
   begin
     // warn about time consuming FPC and Lazarus operations
     if (
+      (ExistWordInString(PChar(s),'downloadfromftp',[soWholeWord,soDown]))
+      OR
       (ExistWordInString(PChar(s),'checkout',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--quiet',[soWholeWord,soDown]))
       OR
       (ExistWordInString(PChar(s),'clone',[soWholeWord,soDown])) AND (ExistWordInString(PChar(s),'--recurse-submodules',[soWholeWord,soDown]))
     ) then
     begin
-      memoSummary.Lines.Append(BeginSnippet + ' Performing a SVN/GIT/HG checkout ... please wait, could take some time.');
+      memoSummary.Lines.Append(BeginSnippet + ' Performing a SVN/GIT/HG/FTP checkout ... please wait, could take some time.');
     end;
   end;
 

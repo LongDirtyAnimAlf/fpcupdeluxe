@@ -2102,8 +2102,9 @@ begin
 
   if aRepoClient=nil then
   begin
-    infoln(infotext+'No suitable repo client for checkout/update of ' + ModuleName + ' sources.',etError);
-    exit(false);
+    infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
+    result:=DownloadFromFTP(ModuleName);
+    exit(result);
   end;
 
   infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
