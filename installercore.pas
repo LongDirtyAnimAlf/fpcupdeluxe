@@ -49,15 +49,20 @@ const
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
-  FPCSVNURL             = 'https://svn.freepascal.org/svn';
-  FTPURL                = 'ftp://ftp.freepascal.org/pub/';
-  FPCFTPURL             = FTPURL+'fpc/';
-  LAZARUSFTPURL         = FTPURL+'lazarus/';
+  SVNBASEHTTP           = 'https://svn.';
+  SVNBASESVN            = 'svn://svn.';
+  FTPBASEHTTP           = 'https://ftp.';
+  FTPBASEFTP            = 'ftp://ftp.';
+
+  FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org/svn';
+  FTPBASEURL            = FTPBASEFTP+'freepascal.org/pub/';
+  FPCFTPURL             = FTPBASEURL+'fpc/';
+  LAZARUSFTPURL         = FTPBASEURL+'lazarus/';
 
   FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
-  BINUTILSURL = FPCSVNURL + '/fpcbuild';
+  BINUTILSURL = FPCBASESVNURL + '/fpcbuild';
 
   {$IFDEF MSWINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
@@ -65,7 +70,7 @@ const
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
-  LAZARUSBINARIES = FPCSVNURL + '/lazarus/binaries';
+  LAZARUSBINARIES = FPCBASESVNURL + '/lazarus/binaries';
 
   CHM_URL_LATEST_SVN = LAZARUSBINARIES + '/docs/chm';
 
@@ -255,6 +260,9 @@ type
 
   { TInstaller }
 
+  //TBaseFPCInstaller = class;
+  //TBaseLazarusInstaller = class;
+
   TInstaller = class(TObject)
   private
     FKeepLocalChanges: boolean;
@@ -276,6 +284,10 @@ type
     function GetCrossCompilerPresent:boolean;
     function GetFullVersion:dword;
     function GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
+    function GetInstallerClass(aClassToFind:TClass):boolean;
+    function IsFPCInstaller:boolean;
+    function IsLazarusInstaller:boolean;
+    function IsUniversalInstaller:boolean;
   protected
     FBinPath: string; //path where compiler lives
     FCleanModuleSuccess: boolean;
@@ -379,6 +391,7 @@ type
     // Get currently set path
     function GetPath: string;
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
+    function GetSanityCheck:boolean;
   public
     InfoText: string;
     LocalInfoText: string;
@@ -451,6 +464,7 @@ type
     property CrossInstaller:TCrossInstaller read GetCrossInstaller;
     property CrossCompilerPresent: boolean read GetCrossCompilerPresent;
     property NumericalVersion:dword read GetFullVersion;
+    property SanityCheck:boolean read GetSanityCheck;
     function GetCompilerName(Cpu_Target:string):string;
     function GetCrossCompilerName(Cpu_Target:string):string;
     procedure SetTarget(aCPU,aOS,aSubArch:string);virtual;
@@ -479,6 +493,12 @@ type
     constructor Create;
     destructor Destroy; override;
   end;
+
+  TBaseUniversalInstaller = class(TInstaller);
+  TBaseFPCInstaller = class(TInstaller);
+  TBaseLazarusInstaller = class(TInstaller);
+  TBaseHelpInstaller = class(TInstaller);
+  TBaseWinInstaller = class(TInstaller);
 
 implementation
 
@@ -2661,6 +2681,12 @@ begin
   FCleanModuleSuccess:=false;
   infotext:=Copy(Self.ClassName,2,MaxInt)+' (CleanModule: '+ModuleName+'): ';
   infoln(infotext+'Entering ...',etDebug);
+
+  if not DirectoryExists(FSourceDirectory) then
+  begin
+    infoln(infotext+'No '+ModuleName+' source [yet] ... nothing to be done',etInfo);
+    exit(true);
+  end;
 end;
 
 function TInstaller.ConfigModule(ModuleName: string): boolean;
@@ -2695,12 +2721,25 @@ begin
   else
     aEvent:=etError;
 
-  // not so elegant check to see what kind of client we need ...
   aRepoClient:=nil;
-  if (Pos(FPCSVNURL,LowerCase(FURL))>0) then aRepoClient:=FSVNClient;
+
+  // not so elegant check to see what kind of client we need ...
+  if aRepoClient=nil then if (Pos(SVNBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=FSVNClient;
+  if aRepoClient=nil then if (Pos(SVNBASESVN,LowerCase(FURL))>0) then aRepoClient:=FSVNClient;
+  //if aRepoClient=nil then if (Pos(FTPBASEFTP,LowerCase(FURL))>0) then aRepoClient:=FFTPClient;
+  //if aRepoClient=nil then if (Pos(FTPBASEHTTP,LowerCase(FURL))>0) then aRepoClient:=FFTPClient;
   if aRepoClient=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then aRepoClient:=FGitClient;
   if aRepoClient=nil then if ( (Pos('hg.code.sf.net',LowerCase(FURL))>0) ) then aRepoClient:=FHGClient;
-  if aRepoClient=nil then aRepoClient:=FSVNClient;
+  if aRepoClient=nil then if ( (Pos('bitbucket.org',LowerCase(FURL))>0) ) then aRepoClient:=FHGClient;
+
+  //if aRepoClient=nil then aRepoClient:=FSVNClient;
+
+  // No repo client ... exit normal
+  if aRepoClient=nil then
+  begin
+    infoln(infotext+'Could not determine what repoclient to use for ' + ModuleName + ' sources !',etWarning);
+    exit;
+  end;
 
   infoln(infotext+'checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
 
@@ -3011,7 +3050,7 @@ begin
   FSolarisOI:=false;
   {$endif}
 
-
+  GetSanityCheck;
 end;
 
 function TInstaller.GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
@@ -3034,6 +3073,54 @@ end;
 function TInstaller.GetFullVersion:dword;
 begin
   result:=CalculateFullVersion(Self.FMajorVersion,Self.FMinorVersion,Self.FReleaseVersion);
+end;
+
+function TInstaller.GetSanityCheck:boolean;
+begin
+  if IsFPCInstaller then
+  begin
+
+  end;
+  if IsLazarusInstaller then
+  begin
+
+  end;
+  if IsUniversalInstaller then
+  begin
+
+  end;
+end;
+
+function TInstaller.GetInstallerClass(aClassToFind:TClass):boolean;
+var
+  aClass:TClass;
+begin
+  result:=false;
+  aClass:=Self.ClassType;
+  while aClass<>nil do
+  begin
+    if aClass=aClassToFind then
+    begin
+      result:=True;
+      break;
+    end;
+    aClass:=aClass.ClassParent;
+  end;
+end;
+
+function TInstaller.IsFPCInstaller:boolean;
+begin
+  result:=GetInstallerClass(TBaseFPCInstaller);
+end;
+
+function TInstaller.IsLazarusInstaller:boolean;
+begin
+  result:=GetInstallerClass(TBaseLazarusInstaller);
+end;
+
+function TInstaller.IsUniversalInstaller:boolean;
+begin
+  result:=GetInstallerClass(TBaseUniversalInstaller);
 end;
 
 function TInstaller.GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;

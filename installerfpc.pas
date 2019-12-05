@@ -113,7 +113,7 @@ Const
 type
   { TFPCInstaller }
 
-  TFPCInstaller = class(TInstaller)
+  TFPCInstaller = class(TBaseFPCInstaller)
   private
     FTargetCompilerName: string;
     FBootstrapCompiler: string;
@@ -3293,11 +3293,8 @@ var
 begin
   result:=inherited;
 
-  if not DirectoryExists(FSourceDirectory) then
-  begin
-    infoln(infotext+'No FPC source [yet] ... nothing to be done',etInfo);
-    exit(true);
-  end;
+  // if no sources, then exit;
+  if result then exit;
 
   result:=InitModule;
 

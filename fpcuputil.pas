@@ -159,17 +159,20 @@ type
     destructor Destroy; override;
   end;
 
-  TBasicDownLoader = Class(TComponent)
+  TBasicDownLoader = Class(TObject)
   private
-    FVerbose:boolean;
+    FHTTPProxyPort: integer;
     FMaxRetries:byte;
+    FVerbose:boolean;
     FUsername: string;
     FPassword: string;
     FHTTPProxyHost: string;
-    FHTTPProxyPort: integer;
     FHTTPProxyUser: string;
     FHTTPProxyPassword: string;
+    StoredTickCount:QWord;
+    aFilename:string;
     procedure parseFTPHTMLListing(F:TStream;filelist:TStringList);
+    procedure DoOnWriteStream(Sender: TObject; APos: Int64);
   protected
     procedure SetVerbose(aValue:boolean);virtual;
     property MaxRetries : Byte Read FMaxRetries Write FMaxRetries;
@@ -182,7 +185,6 @@ type
     property Verbose: boolean write SetVerbose;
   public
     constructor Create;virtual;
-    constructor Create(AOwner: TComponent);override;
     destructor Destroy;override;
     procedure setCredentials(user,pass:string);virtual;
     procedure setProxy(host:string;port:integer;user,pass:string);virtual;
@@ -200,10 +202,7 @@ type
     {$else}
     aFPHTTPClient:TFPHTTPClient;
     {$endif}
-    StoredTickCount:QWord;
-    aFilename:string;
     procedure DoProgress(Sender: TObject; Const ContentLength, CurrentPos : Int64);
-    procedure DoOnWriteStream(Sender: TObject; APos: Int64);
     procedure DoHeaders(Sender : TObject);
     procedure DoPassword(Sender: TObject; var {%H-}RepeatRequest: Boolean);
     procedure ShowRedirect({%H-}ASender : TObject; Const ASrc : String; Var ADest : String);
@@ -3175,38 +3174,33 @@ begin
     {$ifdef MSWINDOWS}
     // on windows, .files (hidden files) cannot be created !!??
     // still to check on non-windows
-    if NOT Assigned(FFileList) then FFileList:=TStringList.Create;
-    try
-      if FFileList.Count=0 then
+    if FFileList.Count=0 then
+    begin
+      for x:=0 to FUnZipper.Entries.Count-1 do
       begin
-        for x:=0 to FUnZipper.Entries.Count-1 do
-        begin
-          { UTF8 features are only available in FPC >= 3.1 }
-          {$IF FPC_FULLVERSION > 30100}
-          if FUnZipper.UseUTF8
-            then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-            else
-          {$endif}
-            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+        { UTF8 features are only available in FPC >= 3.1 }
+        {$IF FPC_FULLVERSION > 30100}
+        if FUnZipper.UseUTF8
+          then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+          else
+        {$endif}
+          s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
 
-          if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
-          if (Length(s)>0) AND (s[1]='.') then continue;
-          FFileList.Append(s);
-        end;
+        if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+        if (Length(s)>0) AND (s[1]='.') then continue;
+        FFileList.Append(s);
       end;
-      {$endif}
+    end;
+    {$endif}
 
-      if FFileList.Count=0
-        then FTotalFileCount:=FUnZipper.Entries.Count
-        else FTotalFileCount:=FFileList.Count;
+    if FFileList.Count=0
+      then FTotalFileCount:=FUnZipper.Entries.Count
+      else FTotalFileCount:=FFileList.Count;
 
-      if FFileList.Count=0
-        then FUnZipper.UnZipAllFiles
-        else FUnZipper.UnZipFiles(FFileList);
+    if FFileList.Count=0
+      then FUnZipper.UnZipAllFiles
+      else FUnZipper.UnZipFiles(FFileList);
 
-      finally
-        FFileList.Free;
-      end;
   except
     on E: Exception do
     begin
@@ -3512,12 +3506,7 @@ end;
 
 constructor TBasicDownLoader.Create;
 begin
-  Inherited Create(nil);
-end;
-
-constructor TBasicDownLoader.Create(AOwner: TComponent);
-begin
-  inherited;
+  Inherited Create;
   FMaxRetries:=MAXCONNECTIONRETRIES;
   FVerbose:=False;
   FUsername:='';
@@ -3530,7 +3519,7 @@ end;
 
 destructor TBasicDownLoader.Destroy;
 begin
-  inherited;
+  inherited Destroy;
 end;
 
 procedure TBasicDownLoader.SetVerbose(aValue:boolean);
@@ -3588,6 +3577,67 @@ begin
     end;
   finally
     aDoc.Free;
+  end;
+end;
+
+procedure TBasicDownLoader.DoOnWriteStream(Sender: TObject; APos: Int64);
+//From the mORMot !!
+function KB(bytes: Int64): string;
+const
+  _B: array[0..5] of string[3] = ('KB','MB','GB','TB','PB','EB');
+var
+  hi,rem,b: cardinal;
+begin
+  if bytes<1 shl 10-(1 shl 10) div 10 then begin
+    result:=Format('%d Byte',[integer(bytes)]);
+    exit;
+  end;
+  if bytes<1 shl 20-(1 shl 20) div 10 then begin
+    b := 0;
+    rem := bytes;
+    hi := bytes shr 10;
+  end else
+  if bytes<1 shl 30-(1 shl 30) div 10 then begin
+    b := 1;
+    rem := bytes shr 10;
+    hi := bytes shr 20;
+  end else
+  if bytes<Int64(1) shl 40-(Int64(1) shl 40) div 10 then begin
+    b := 2;
+    rem := bytes shr 20;
+    hi := bytes shr 30;
+  end else
+  if bytes<Int64(1) shl 50-(Int64(1) shl 50) div 10 then begin
+    b := 3;
+    rem := bytes shr 30;
+    hi := bytes shr 40;
+  end else
+  if bytes<Int64(1) shl 60-(Int64(1) shl 60) div 10 then begin
+    b := 4;
+    rem := bytes shr 40;
+    hi := bytes shr 50;
+  end else begin
+    b := 5;
+    rem := bytes shr 50;
+    hi := bytes shr 60;
+  end;
+  rem := rem and 1023;
+  if rem<>0 then
+    rem := rem div 102;
+  if rem=10 then begin
+    rem := 0;
+    inc(hi); // round up as expected by an human being
+  end;
+  if rem<>0 then
+    result:=Format('%d.%d %s',[hi,rem,_B[b]]) else
+    result:=Format('%d %s',[hi,_B[b]]);
+end;
+begin
+  //Show progress only every 5 seconds
+  //if GetUpTickCount>StoredTickCount+5000 then
+  begin
+    infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
+    StoredTickCount:=GetUpTickCount;
   end;
 end;
 
@@ -3651,67 +3701,6 @@ begin
     writeln('Reading data (no length available) : ',CurrentPos,' Bytes.')
   else
     writeln('Reading data : ',CurrentPos,' Bytes of ',ContentLength);
-end;
-
-procedure TUseNativeDownLoader.DoOnWriteStream(Sender: TObject; APos: Int64);
-//From the mORMot !!
-function KB(bytes: Int64): string;
-const
-  _B: array[0..5] of string[3] = ('KB','MB','GB','TB','PB','EB');
-var
-  hi,rem,b: cardinal;
-begin
-  if bytes<1 shl 10-(1 shl 10) div 10 then begin
-    result:=Format('%d Byte',[integer(bytes)]);
-    exit;
-  end;
-  if bytes<1 shl 20-(1 shl 20) div 10 then begin
-    b := 0;
-    rem := bytes;
-    hi := bytes shr 10;
-  end else
-  if bytes<1 shl 30-(1 shl 30) div 10 then begin
-    b := 1;
-    rem := bytes shr 10;
-    hi := bytes shr 20;
-  end else
-  if bytes<Int64(1) shl 40-(Int64(1) shl 40) div 10 then begin
-    b := 2;
-    rem := bytes shr 20;
-    hi := bytes shr 30;
-  end else
-  if bytes<Int64(1) shl 50-(Int64(1) shl 50) div 10 then begin
-    b := 3;
-    rem := bytes shr 30;
-    hi := bytes shr 40;
-  end else
-  if bytes<Int64(1) shl 60-(Int64(1) shl 60) div 10 then begin
-    b := 4;
-    rem := bytes shr 40;
-    hi := bytes shr 50;
-  end else begin
-    b := 5;
-    rem := bytes shr 50;
-    hi := bytes shr 60;
-  end;
-  rem := rem and 1023;
-  if rem<>0 then
-    rem := rem div 102;
-  if rem=10 then begin
-    rem := 0;
-    inc(hi); // round up as expected by an human being
-  end;
-  if rem<>0 then
-    result:=Format('%d.%d %s',[hi,rem,_B[b]]) else
-    result:=Format('%d %s',[hi,_B[b]]);
-end;
-begin
-  //Show progress only every 5 seconds
-  if GetUpTickCount>StoredTickCount+5000 then
-  begin
-    infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
-    StoredTickCount:=GetUpTickCount;
-  end;
 end;
 
 procedure TUseNativeDownLoader.DoPassword(Sender: TObject; var RepeatRequest: Boolean);
@@ -3874,48 +3863,67 @@ function TUseNativeDownLoader.FTPDownload(Const URL : String; filename:string):b
 var
   URI : TURI;
   aPort:integer;
+  //aStream:TDownloadStream;
 begin
-  // we will use synapse TFTPSend ... FPHTTPClient does not support FTP (yet)
   aFileName:=ExtractFileName(filename);
+
   result:=false;
   URI:=ParseURI(URL);
   aPort:=URI.Port;
   if aPort=0 then aPort:=21;
   Result := False;
-  with TFTPSend.Create do
+
+  //aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
+  //aStream.FOnWriteStream:=@DoOnWriteStream;
+  //StoredTickCount:=GetUpTickCount;
+
   try
-    TargetHost := URI.Host;
-    TargetPort := InttoStr(aPort);
-    if FUsername <> '' then
-    begin
-      Username := FUsername;
-      Password := FPassword;
-    end
-    else
-    begin
-      if Pos('ftp.freepascal.org',URL)>0 then
+
+    with TFTPSend.Create do
+    try
+      TargetHost := URI.Host;
+      TargetPort := InttoStr(aPort);
+      if FUsername <> '' then
       begin
-        Username := 'anonymous';
-        Password := 'fpc@example.com';
+        Username := FUsername;
+        Password := FPassword;
+      end
+      else
+      begin
+        if Pos('ftp.freepascal.org',URL)>0 then
+        begin
+          Username := 'anonymous';
+          Password := 'fpc@example.com';
+        end;
       end;
+      if Length(HTTPProxyHost)>0 then
+      begin
+        Sock.HTTPTunnelIP:=HTTPProxyHost;
+        Sock.HTTPTunnelPort:=InttoStr(HTTPProxyPort);
+        Sock.HTTPTunnelUser:=HTTPProxyUser;
+        Sock.HTTPTunnelPass:=HTTPProxyPassword;
+      end;
+      if Login then
+      begin
+        //Timeout:=100;
+        //aStream.Position:=0;
+        //aStream.Size:=0;
+        DirectFileName := filename;
+        DirectFile:=True;
+        //Result := RetrieveStream(aStream, false);
+        Result := RetrieveFile(URI.Path+URI.Document, False);
+        Logout;
+      end;
+    finally
+      Free;
     end;
-    if Length(HTTPProxyHost)>0 then
-    begin
-      Sock.HTTPTunnelIP:=HTTPProxyHost;
-      Sock.HTTPTunnelPort:=InttoStr(HTTPProxyPort);
-      Sock.HTTPTunnelUser:=HTTPProxyUser;
-      Sock.HTTPTunnelPass:=HTTPProxyPassword;
-    end;
-    if Login then
-    begin
-      DirectFileName := filename;
-      DirectFile:=True;
-      Result := RetrieveFile(URI.Path+URI.Document, False);
-      Logout;
-    end;
+
   finally
-    Free;
+    //aStream.Free;
   end;
+
+  if NOT result then SysUtils.DeleteFile(filename); // delete stray file in case of error
+
 end;
 
 function TUseNativeDownLoader.HTTPDownload(Const URL : String; filename:string):boolean;
@@ -3925,6 +3933,7 @@ var
   aStream:TDownloadStream;
 begin
   aFileName:=ExtractFileName(filename);
+
   result:=false;
   tries:=0;
   SysUtils.DeleteFile(filename); // overwrite targetfile
@@ -4085,7 +4094,7 @@ begin
   result:=false;
   if (NOT FWGETOk) then exit;
 
-  With TProcess.Create(Self) do
+  With TProcess.Create(nil) do
   try
     CommandLine:=WGETBinary+' -q --no-check-certificate --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
     Options:=[poUsePipes,poNoConsole];
@@ -4404,20 +4413,27 @@ end;
 
 function TUseWGetDownloader.getFile(const URL,filename:string):boolean;
 var
-  F : TFileStream;
+  aStream:TDownloadStream;
 begin
+  aFileName:=ExtractFileName(filename);
+
   result:=false;
   try
-    F:=TFileStream.Create(filename,fmCreate);
+    aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
+    aStream.FOnWriteStream:=@DoOnWriteStream;
+    StoredTickCount:=GetUpTickCount;
     try
-      result:=Download(URL,F);
+      aStream.Position:=0;
+      aStream.Size:=0;
+      result:=Download(URL,aStream);
     finally
-      F.Free;
+      aStream.Free;
     end;
   except
     result:=False;
-    SysUtils.DeleteFile(filename);
   end;
+
+  if (NOT result) then SysUtils.DeleteFile(filename);
 end;
 
 
@@ -4440,6 +4456,7 @@ end;
 function TDownloadStream.Read(var Buffer; Count: LongInt): LongInt;
 begin
   Result := FStream.Read(Buffer, Count);
+  //DoProgress;
 end;
 
 function TDownloadStream.Write(const Buffer; Count: LongInt): LongInt;
@@ -4451,6 +4468,7 @@ end;
 function TDownloadStream.Seek(Offset: LongInt; Origin: Word): LongInt;
 begin
   Result := FStream.Seek(Offset, Origin);
+  //DoProgress;
 end;
 
 procedure TDownloadStream.DoProgress;

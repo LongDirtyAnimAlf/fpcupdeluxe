@@ -65,7 +65,7 @@ type
 
   { TUniversalInstaller }
 
-  TUniversalInstaller = class(TInstaller)
+  TUniversalInstaller = class(TBaseUniversalInstaller)
   private
     // FPC base directories
     FFPCSourceDir:string;
@@ -2051,9 +2051,9 @@ begin
         if (result='') then
         begin
           infoln('InstallerUniversal (GetAlias): no source alias found: using fpcup default',etInfo);
-          if aDictionary='fpcURL' then result:=FPCSVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='fpcURL' then result:=FPCBASESVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
-          if aDictionary='lazURL' then result:=FPCSVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='lazURL' then result:=FPCBASESVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
 

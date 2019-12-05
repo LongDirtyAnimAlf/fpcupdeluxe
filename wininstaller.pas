@@ -68,7 +68,7 @@ type
 
   { TWinInstaller }
 
-  TWinInstaller = class(TInstaller)
+  TWinInstaller = class(TBaseWinInstaller)
   private
     FFPCBuildDir: string; //Location of fpcbuild sources
     FFPCDir: string; //Location of FPC sources

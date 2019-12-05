@@ -108,7 +108,7 @@ type
 
 { THelpInstaller }
 
-THelpInstaller = class(TInstaller)
+THelpInstaller = class(TBaseHelpInstaller)
 private
   InitDone:boolean;
   // Directory where help files are placed

@@ -202,7 +202,7 @@ type
 
   { TLazarusInstaller }
 
-  TLazarusInstaller = class(TInstaller)
+  TLazarusInstaller = class(TBaseLazarusInstaller)
   private
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
@@ -1780,11 +1780,8 @@ var
 begin
   Result := inherited;
 
-  if not DirectoryExists(FSourceDirectory) then
-  begin
-    infoln(infotext+'No Lazarus source [yet] ... nothing to be done',etInfo);
-    exit(true);
-  end;
+  // if no sources, then exit;
+  if result then exit;
 
   Result := InitModule;
 
