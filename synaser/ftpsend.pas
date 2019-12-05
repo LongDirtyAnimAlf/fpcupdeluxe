@@ -289,6 +289,7 @@ type
      supports resume dowloads, download is resumed. (received is only rest
      of file)}
     function RetrieveFile(const FileName: string; Restore: Boolean): Boolean; virtual;
+    function RetrieveStream(const aStream: TStream; Restore: Boolean): Boolean;
 
     {:Send data to FileName on FTP server. If Restore is @true and server
      supports resume upload, upload is resumed. (send only rest of file)
@@ -1042,6 +1043,67 @@ begin
       RetrStream.Free;
   end;
 end;
+
+function TFTPSend.RetrieveStream(const aStream: TStream; Restore: Boolean): Boolean;
+const
+  BufferSize = 1024 * 1024;
+var
+  Buffer: Pointer;
+  Count: longint;
+  SourceSize, DestSize: DWord;
+begin
+  Result := False;
+  if aStream=nil then
+    Exit;
+  if not DataSocket then
+    Exit;
+
+  Restore := Restore and FCanResume;
+
+  if FBinaryMode then
+    FTPCommand('TYPE I')
+  else
+    FTPCommand('TYPE A');
+  if Restore then
+  begin
+    aStream.Position := aStream.Size;
+    if (FTPCommand('REST ' + IntToStr(aStream.Size)) div 100) <> 3 then
+      Exit;
+  end
+  else
+    if aStream is TMemoryStream then
+      TMemoryStream(aStream).Clear;
+
+  if (FTPCommand('RETR ' + DirectFileName) div 100) <> 1 then
+      Exit;
+
+  GetMem(Buffer, BufferSize);
+  try
+    if not AcceptDataSocket then
+      Exit;
+    repeat
+      Count := TBlockSocket(FDSock).RecvBufferEx(Buffer, BufferSize,TimeOut);
+      //Count := TBlockSocket(FDSock).RecvBuffer(Buffer, BufferSize);
+      if Count > 0 then
+         if aStream.Write(Buffer, Count) = Count then
+         begin
+           DestSize := DestSize + Count;
+         end;
+    until (Count < 1);
+    //Result := DestSize = SourceSize;
+    Result := True;
+  finally
+    FDSock.CloseSocket;
+    FreeMem(Buffer);
+  end;
+
+  //Result := DataRead(aStream);
+
+  if not FDirectFile then
+    aStream.Position := 0;
+end;
+
+
 
 function TFTPSend.InternalStor(const Command: string; RestoreAt: int64): Boolean;
 var

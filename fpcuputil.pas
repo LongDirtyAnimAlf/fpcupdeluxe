@@ -3634,7 +3634,7 @@ begin
 end;
 begin
   //Show progress only every 5 seconds
-  //if GetUpTickCount>StoredTickCount+5000 then
+  if GetUpTickCount>StoredTickCount+5000 then
   begin
     infoln('Download progress '+aFileName+': '+KB(APos),etInfo);
     StoredTickCount:=GetUpTickCount;
@@ -3863,7 +3863,7 @@ function TUseNativeDownLoader.FTPDownload(Const URL : String; filename:string):b
 var
   URI : TURI;
   aPort:integer;
-  //aStream:TDownloadStream;
+  aStream:TDownloadStream;
 begin
   aFileName:=ExtractFileName(filename);
 
@@ -3873,9 +3873,9 @@ begin
   if aPort=0 then aPort:=21;
   Result := False;
 
-  //aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
-  //aStream.FOnWriteStream:=@DoOnWriteStream;
-  //StoredTickCount:=GetUpTickCount;
+  aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
+  aStream.FOnWriteStream:=@DoOnWriteStream;
+  StoredTickCount:=GetUpTickCount;
 
   try
 
@@ -3905,13 +3905,15 @@ begin
       end;
       if Login then
       begin
-        //Timeout:=100;
-        //aStream.Position:=0;
-        //aStream.Size:=0;
-        DirectFileName := filename;
-        DirectFile:=True;
-        //Result := RetrieveStream(aStream, false);
-        Result := RetrieveFile(URI.Path+URI.Document, False);
+        aStream.Position:=0;
+        aStream.Size:=0;
+        //DirectFileName := filename;
+        //DirectFile:=True;
+        //Result := RetrieveFile(URI.Path+URI.Document, False);
+
+        DirectFileName := URI.Path+URI.Document;
+        Result := RetrieveStream(aStream, false);
+
         Logout;
       end;
     finally
@@ -3919,7 +3921,7 @@ begin
     end;
 
   finally
-    //aStream.Free;
+    aStream.Free;
   end;
 
   if NOT result then SysUtils.DeleteFile(filename); // delete stray file in case of error

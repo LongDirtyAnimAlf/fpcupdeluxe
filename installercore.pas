@@ -2734,11 +2734,20 @@ begin
 
   //if aRepoClient=nil then aRepoClient:=FSVNClient;
 
-  // No repo client ... exit normal
+  // No repo client ...
   if aRepoClient=nil then
   begin
     infoln(infotext+'Could not determine what repoclient to use for ' + ModuleName + ' sources !',etWarning);
-    exit;
+    if (IsFPCInstaller OR IsLazarusInstaller) then
+    begin
+      exit;
+    end
+    else
+    begin
+      // Make a best quess
+      infoln(infotext+'Using SVNClient for ' + ModuleName + ' sources !',etWarning);
+      aRepoClient:=FSVNClient;
+    end;
   end;
 
   infoln(infotext+'checking ' + ModuleName + ' sources with '+aRepoClient.ClassName,etInfo);
