@@ -2217,7 +2217,7 @@ begin
                       try
                         LinkFiles.StrictDelimiter:=true;
                         LinkFiles.Delimiter:=':';
-                        LinkFiles.Text:=s1;
+                        LinkFiles.DelimitedText:=s1;
                         if LinkFiles.Count>0 then
                         begin
                           for j:=0 to (LinkFiles.Count-1) do
