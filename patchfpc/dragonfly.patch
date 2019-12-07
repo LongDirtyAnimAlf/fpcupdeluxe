@@ -1,4 +1,16 @@
-Index: rtl/dragonfly/Makefile
+Index: compiler/systems/t_bsd.pas
+===================================================================
+--- compiler/systems/t_bsd.pas	(revision 43661)
++++ compiler/systems/t_bsd.pas	(working copy)
+@@ -168,7 +168,7 @@
+ var
+   LdProgram: string='ld';
+ begin
+-  if target_info.system in systems_openbsd then
++  if target_info.system in (systems_openbsd+[system_x86_64_dragonfly]) then
+     LdProgram:='ld.bfd';
+   LibrarySuffix:=' ';
+   LdSupportsNoResponseFile := (target_info.system in ([system_m68k_netbsd]+systems_darwin));Index: rtl/dragonfly/Makefile
 ===================================================================
 --- rtl/dragonfly/Makefile	(revision 43639)
 +++ rtl/dragonfly/Makefile	(working copy)

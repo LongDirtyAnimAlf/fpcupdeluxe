@@ -15,7 +15,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="10">
+      <Resources Count="11">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -26,6 +26,7 @@
         <Resource_7 FileName="patchfpc\haiku.patch" Type="RCDATA" ResourceName="HAIKU_FPCPATCH"/>
         <Resource_8 FileName="patchfpc\haikufpu.patch" Type="RCDATA" ResourceName="HAIKUFPU_FPCPATCH"/>
         <Resource_9 FileName="patchfpc\freebsdfixes.patch" Type="RCDATA" ResourceName="FREEBSDFIXES_FPCPATCH"/>
+        <Resource_10 FileName="patchfpc\dragonfly.patch" Type="RCDATA" ResourceName="DRAGONFLY_FPCPATCH"/>
       </Resources>
     </General>
     <i18n>
