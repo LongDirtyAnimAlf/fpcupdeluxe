@@ -3257,6 +3257,13 @@ begin
         for x:=0 to (ConfigTextStore.Count-1) do
           ConfigText.Append(ConfigTextStore.Strings[x]);
 
+        x:=ConfigText.IndexOf('# searchpath for fppkg user-specific packages');
+        if x>-1 then
+        begin
+          ConfigText.Strings[x+1]:='-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESLOCATION+DirectorySeparator+'units'+DirectorySeparator+'$FPCTARGET/*';
+        end;
+
+
         ConfigText.SaveToFile(FPCCfg);
       finally
         ConfigText.Free;

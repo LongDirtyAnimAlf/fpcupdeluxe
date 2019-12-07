@@ -62,7 +62,9 @@ const
   FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
-  BINUTILSURL = FPCBASESVNURL + '/fpcbuild';
+  BINUTILSURL           = FPCBASESVNURL + '/fpcbuild';
+
+  PACKAGESLOCATION      = 'packages.fppkg';
 
   {$IFDEF MSWINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
@@ -2854,6 +2856,10 @@ begin
          {$endif}
             j:=Pos('_FPCUPPATCH',PatchFilePath);
 
+      if j=0 then continue;
+
+      infoln(infotext+'Got '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etInfo);
+
       {$if defined(Darwin) and defined(LCLQT5)}
       //disable big hack for now
       if Pos('DARWINQT5HACK_LAZPATCH',PatchFilePath)>0 then j:=0;
@@ -2903,6 +2909,10 @@ begin
       begin
         ForceDirectoriesSafe(PatchDirectory);
         SaveFileFromResource(PatchDirectory+DirectorySeparator+PatchFilePath+'.patch',resourcefiles[i]);
+      end
+      else
+      begin
+        infoln(infotext+ExtractFileName(PatchFilePath)+ 'for '+ModuleName+' wil not be applied !',etInfo);
       end;
     end;
   end;

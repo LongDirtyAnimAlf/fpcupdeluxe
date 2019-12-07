@@ -1722,7 +1722,7 @@ begin
         try
           WriteString('Defaults','ConfigVersion','5');
 
-          WriteString('Defaults','LocalRepository',IncludeTrailingPathDelimiter(FBaseDirectory)+'packages.fppkg'+DirectorySeparator);
+          WriteString('Defaults','LocalRepository',IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESLOCATION+DirectorySeparator);
           //WriteString('Defaults','CompilerConfigDir','{LocalRepository}config/');
 
           WriteString('Defaults','CompilerConfig','default');
