@@ -91,8 +91,8 @@ begin
   end
   else
   begin
-    FLibsFound:=True;
-    result:=true;
+    //FLibsFound:=True;
+    //result:=true;
   end;
 end;
 

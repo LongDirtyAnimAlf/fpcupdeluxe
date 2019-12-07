@@ -80,3 +80,4 @@ deluxebin/
 !deluxebin/languages/*.po
 lib/
 lib*/
+!fpcuptools/*

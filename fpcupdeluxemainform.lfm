@@ -1,11 +1,11 @@
 object Form1: TForm1
-  Left = 279
-  Height = 685
-  Top = 121
+  Left = 248
+  Height = 740
+  Top = 28
   Width = 1004
   Anchors = []
   Caption = 'Form1'
-  ClientHeight = 665
+  ClientHeight = 720
   ClientWidth = 1004
   Constraints.MinHeight = 620
   Menu = MainMenu1
@@ -25,7 +25,7 @@ object Form1: TForm1
     Left = 12
     Height = 31
     Hint = 'Open the extended settings form.'
-    Top = 566
+    Top = 621
     Width = 310
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Top = 8
@@ -91,7 +91,7 @@ object Form1: TForm1
     AnchorSideRight.Side = asrBottom
     AnchorSideBottom.Control = memoSummary
     Left = 336
-    Height = 411
+    Height = 466
     Top = 62
     Width = 656
     BorderSpacing.Top = 6
@@ -689,7 +689,7 @@ object Form1: TForm1
     AnchorSideBottom.Side = asrBottom
     Left = 6
     Height = 56
-    Top = 605
+    Top = 660
     Width = 986
     Align = alBottom
     AutoSize = True
@@ -1951,7 +1951,7 @@ object Form1: TForm1
     Left = 336
     Height = 120
     Hint = 'Will show error'
-    Top = 481
+    Top = 536
     Width = 656
     Anchors = [akLeft, akRight, akBottom]
     BorderSpacing.Right = 12
@@ -1968,7 +1968,7 @@ object Form1: TForm1
     AnchorSideTop.Side = asrBottom
     AnchorSideBottom.Control = btnSetupPlus
     Left = 12
-    Height = 523
+    Height = 578
     Top = 35
     Width = 310
     ActivePage = BasicSheet
@@ -1980,7 +1980,7 @@ object Form1: TForm1
     TabOrder = 11
     object BasicSheet: TTabSheet
       Caption = 'Basic'
-      ClientHeight = 495
+      ClientHeight = 550
       ClientWidth = 302
       object FPCVersionLabel: TLabel
         AnchorSideLeft.Control = ListBoxFPCTarget
@@ -2008,7 +2008,7 @@ object Form1: TForm1
         AnchorSideTop.Control = BasicSheet
         AnchorSideBottom.Control = BitBtnFPCOnly
         Left = 8
-        Height = 283
+        Height = 338
         Top = 42
         Width = 131
         Anchors = [akTop, akLeft, akBottom]
@@ -2047,7 +2047,7 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = BitBtnLazarusOnly
         Left = 163
-        Height = 285
+        Height = 340
         Top = 40
         Width = 131
         Anchors = [akTop, akRight, akBottom]
@@ -2069,7 +2069,7 @@ object Form1: TForm1
         Left = 8
         Height = 70
         Hint = 'Only install/update selected FPC version.'
-        Top = 341
+        Top = 396
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -2223,7 +2223,7 @@ object Form1: TForm1
         Left = 163
         Height = 70
         Hint = 'Only install/update selected Lazarus version.'
-        Top = 341
+        Top = 396
         Width = 131
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 16
@@ -2378,7 +2378,7 @@ object Form1: TForm1
         Left = 8
         Height = 68
         Hint = 'Will install/update the selected version of both FPC and Lazarus.'
-        Top = 419
+        Top = 474
         Width = 286
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Left = 8

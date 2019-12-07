@@ -37,9 +37,9 @@ object Form1: TForm1
     TabOrder = 2
   end
   object BaseLibsMemo: TMemo
-    Left = 272
+    Left = 280
     Height = 456
-    Top = 20
+    Top = 24
     Width = 248
     Lines.Strings = (
       'crtbegin'
@@ -53,6 +53,7 @@ object Form1: TForm1
       'libatk-'
       'libblkid'
       'libbsd'
+      'libbz2'
       'libc'
       'libc-'
       'libcairo'
@@ -73,6 +74,7 @@ object Form1: TForm1
       'libfontconfig'
       'libfreetype'
       'libfribidi'
+      'libgbm'
       'libgcc_s'
       'libgdk_pixbuf_xlib-'
       'libgdk_pixbuf-'
@@ -92,9 +94,11 @@ object Form1: TForm1
       'libgtk-'
       'libgtk-x11-'
       'libharfbuzz'
+      'libiconv'
       'libicudata'
       'libicui18n'
       'libicuuc'
+      'libintl'
       'libjpeg'
       'liblayer_utils'
       'liblzma'
@@ -151,6 +155,8 @@ object Form1: TForm1
       'libVkLayer_threading'
       'libVkLayer_unique_objects'
       'libvulkan'
+      'libwayland-client'
+      'libwayland-server'
       'libX11'
       'libX11-xcb'
       'libXau'
