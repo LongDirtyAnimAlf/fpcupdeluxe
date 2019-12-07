@@ -1903,6 +1903,29 @@ begin
     exit;
   end;
 
+  success:=true;
+  if radgrpOS.ItemIndex<>-1 then
+  begin
+    s:=radgrpOS.Items[radgrpOS.ItemIndex];
+    if s='dragonfly' then
+    begin
+      if radgrpCPU.ItemIndex<>-1 then
+      begin
+        s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
+        if (s<>'x86_64') then
+        begin
+          success:=false;
+        end;
+      end else success:=false;
+    end;
+  end;
+
+  if (NOT success) then
+  begin
+    ShowMessage('No valid CPU target for dragonfly.');
+    exit;
+  end;
+
   PrepareRun;
 
   if radgrpCPU.ItemIndex<>-1 then
@@ -1965,6 +1988,7 @@ begin
   //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
   if (FPCupManager.CrossCPU_Target='i8086') then FPCupManager.CrossOS_Target:='msdos';
   if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:='i386';
+  if (FPCupManager.CrossOS_Target='dragonfly') then FPCupManager.CrossCPU_Target:='x86_64';
 
   if FPCupManager.CrossOS_Target='windows' then
   begin
@@ -2473,10 +2497,11 @@ begin
         end;
 
         if FPCupManager.CrossOS_Target='freebsd' then s:='FreeBSD' else
-          if FPCupManager.CrossOS_Target='openbsd' then s:='OpenBSD' else
-            if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
-              if FPCupManager.CrossOS_Target='msdos' then s:='MSDos' else
-                s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
+          if FPCupManager.CrossOS_Target='dragonfly' then s:='DragonFlyBSD' else
+            if FPCupManager.CrossOS_Target='openbsd' then s:='OpenBSD' else
+              if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
+                if FPCupManager.CrossOS_Target='msdos' then s:='MSDos' else
+                  s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
 
         if FPCupManager.SolarisOI then s:=s+'OI';
         BinsFileName:=s+BinsFileName;

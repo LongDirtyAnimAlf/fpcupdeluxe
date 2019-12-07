@@ -2954,19 +2954,20 @@ object Form1: TForm1
         Items.Strings = (
           'windows'
           'linux'
-          'linux-musl'
           'android'
           'darwin'
           'freebsd'
-          'aix'
+          'netbsd'
           'wince'
           'embedded'
           'java'
-          'msdos'
           'haiku'
+          'aix'
           'solaris'
           'solaris-oi'
-          'netbsd'
+          'dragonfly'
+          'msdos'
+          'linux-musl'
         )
         OnClick = radgrpOSClick
         ParentShowHint = False

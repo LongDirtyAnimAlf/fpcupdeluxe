@@ -34,7 +34,7 @@ uses
 { TForm1 }
 
 const
-  BaseDir='.\..\..\deluxebin';
+  BaseDir='.\..\..\..\deluxebin';
   //BaseDir='.\..\deluxebin';
   BaseName='fpcupdeluxe-';
   FileList:array[0..4] of string = (BaseName+'i386-darwin-carbon',BaseName+'i386-darwin-cocoa',BaseName+'powerpc64-darwin-cocoa',BaseName+'x86_64-darwin-cocoa',BaseName+'x86_64-darwin-qt5');
@@ -92,7 +92,7 @@ begin
       finally
         aZipList.Free;
       end;
-      //DeleteFile(aFile1);
+      DeleteFile(aFile1);
     end;
   end;
 end;
