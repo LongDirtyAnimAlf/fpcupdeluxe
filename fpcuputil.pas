@@ -2150,6 +2150,7 @@ var
   i,j           : integer;
   ReturnCode    : integer;
   FoundLinkFile : boolean;
+  OutputLines   : TStringList;
 begin
   FoundLinkFile:=false;
   result:='';
@@ -2184,6 +2185,64 @@ begin
           begin
             result:=s2;
             FoundLinkFile:=true;
+          end;
+        end;
+      end;
+
+      if (NOT FoundLinkFile) then
+      begin
+        Output:='';
+        ReturnCode:=ExecuteCommand('gcc -print-search-dirs', Output, false);
+        if (ReturnCode=0) then
+        begin
+          Output:=TrimRight(Output);
+          if Length(Output)>0 then
+          begin
+            OutputLines:=TStringList.Create;
+            try
+              OutputLines.Text:=Output;
+              if OutputLines.Count>0 then
+              begin
+                for i:=0 to (OutputLines.Count-1) do
+                begin
+                  s1:=OutputLines.Strings[i];
+                  j:=Pos('libraries:',s1);
+                  if j=1 then
+                  begin
+                    j:=Pos(DirectorySeparator,s1);
+                    if j>0 then
+                    begin
+                      Delete(s1,1,j-1);
+                      LinkFiles := TStringList.Create;
+                      try
+                        LinkFiles.StrictDelimiter:=true;
+                        LinkFiles.Delimiter:=':';
+                        LinkFiles.Text:=s1;
+                        if LinkFiles.Count>0 then
+                        begin
+                          for j:=0 to (LinkFiles.Count-1) do
+                          begin
+                            s2:=ExcludeTrailingPathDelimiter(LinkFiles.Strings[j]);
+                            //s2:=ExtractFileDir(LinkFiles.Strings[j]);
+                            if FileExists(s2+DirectorySeparator+LINKFILE) then
+                            begin
+                              result:=s2;
+                              FoundLinkFile:=true;
+                              break;
+                            end;
+                          end;
+                        end;
+                      finally
+                        LinkFiles.Free;
+                      end;
+                    end;
+                    break;
+                  end;
+                end;
+              end;
+            finally
+              OutputLines.Free;
+            end;
           end;
         end;
       end;

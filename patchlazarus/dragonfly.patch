@@ -1,0 +1,118 @@
+Index: components/codetools/definetemplates.pas
+===================================================================
+--- components/codetools/definetemplates.pas	(revision 62333)
++++ components/codetools/definetemplates.pas	(working copy)
+@@ -109,11 +109,11 @@
+   VirtualTempDir='TEMPORARYDIRECTORY';
+   
+   // FPC operating systems and processor types
+-  FPCOperatingSystemNames: array[1..35] of shortstring =(
++  FPCOperatingSystemNames: array[1..36] of shortstring =(
+      'linux',
+      'win32','win64','wince',
+      'darwin','macos',
+-     'freebsd','netbsd','openbsd',
++     'dragonfly','freebsd','netbsd','openbsd',
+      'aix',
+      'amiga',
+      'android',
+@@ -141,7 +141,7 @@
+      'wdosx',
+      'wii'
+     );
+-  FPCOperatingSystemCaptions: array[1..35] of shortstring =(
++  FPCOperatingSystemCaptions: array[1..36] of shortstring =(
+      'AIX',
+      'Amiga',
+      'Android',
+@@ -149,6 +149,7 @@
+      'Atari',
+      'BeOS',
+      'Darwin',
++     'DragonFly',
+      'Embedded',
+      'emx',
+      'FreeBSD',
+@@ -213,7 +214,7 @@
+     'ECMAScript6'
+     );
+ 
+-  Lazarus_CPU_OS_Widget_Combinations: array[1..91] of shortstring = (
++  Lazarus_CPU_OS_Widget_Combinations: array[1..97] of shortstring = (
+     'i386-linux-gtk',
+     'i386-linux-gtk2',
+     'i386-linux-qt',
+@@ -288,6 +289,12 @@
+     'arm-linux-nogui',
+     'arm-darwin-carbon',
+     'arm-darwin-nogui',
++    'x86_64-dragonfly-gtk',
++    'x86_64-dragonfly-gtk2',
++    'x86_64-dragonfly-qt',
++    'x86_64-dragonfly-qt5',
++    'x86_64-dragonfly-fpgui',
++    'x86_64-dragonfly-nogui',
+     'x86_64-freebsd-gtk',
+     'x86_64-freebsd-gtk2',
+     'x86_64-freebsd-qt',
+@@ -3612,6 +3619,7 @@
+ begin
+   Result:='';
+   if (CompareText(TargetOS,'linux')=0)
++  or (CompareText(TargetOS,'dragonfly')=0)
+   or (CompareText(TargetOS,'freebsd')=0)
+   or (CompareText(TargetOS,'netbsd')=0)
+   or (CompareText(TargetOS,'openbsd')=0)
+@@ -3633,6 +3641,7 @@
+ begin
+   Result:='';
+   if (CompareText(TargetOS,'freebsd')=0)
++  or (CompareText(TargetOS,'dragonfly')=0)
+   or (CompareText(TargetOS,'netbsd')=0)
+   or (CompareText(TargetOS,'openbsd')=0)
+   or (CompareText(TargetOS,'darwin')=0)
+Index: ide/buildlazdialog.pas
+===================================================================
+--- ide/buildlazdialog.pas	(revision 62333)
++++ ide/buildlazdialog.pas	(working copy)
+@@ -1062,6 +1062,7 @@
+     with Items do begin
+       Add(''); //('+rsiwpDefault+')');
+       Add('Darwin');
++      Add('DragonFly');
+       Add('FreeBSD');
+       Add('Linux');
+       Add('NetBSD');
+Index: ide/compileroptions.pp
+===================================================================
+--- ide/compileroptions.pp	(revision 62333)
++++ ide/compileroptions.pp	(working copy)
+@@ -713,7 +713,7 @@
+ begin
+   Result:= (TargetCPU='x86_64')
+     and ((TargetOS='linux') or (TargetOS='freebsd') or (TargetOS='netbsd')
+-      or (TargetOS='openbsd') or (TargetOS='solaris'));
++      or (TargetOS='openbsd') or (TargetOS='dragonfly') or (TargetOS='solaris'));
+ end;
+ 
+ procedure GatherInheritedOptions(AddOptionsList: TFPList;
+Index: ide/lazconf.pp
+===================================================================
+--- ide/lazconf.pp	(revision 62333)
++++ ide/lazconf.pp	(working copy)
+@@ -353,6 +353,7 @@
+     Result:='.dylib'
+   else if (CompareText(TargetOS, 'linux') = 0)
+   or (CompareText(TargetOS, 'android') = 0)
++  or (CompareText(TargetOS, 'dragonfly') = 0)
+   or (CompareText(TargetOS, 'freebsd') = 0)
+   or (CompareText(TargetOS, 'openbsd') = 0)
+   or (CompareText(TargetOS, 'netbsd') = 0)
+@@ -394,6 +395,7 @@
+     Result:=ExtractFilePath(Result)+StdPrefix+ExtractFileName(Result);
+   // lowercase
+   if (CompareText(TargetOS,'linux')=0)
++  or (CompareText(TargetOS,'dragonfly')=0)
+   or (CompareText(TargetOS,'freebsd')=0)
+   or (CompareText(TargetOS,'netbsd')=0)
+   or (CompareText(TargetOS,'openbsd')=0)

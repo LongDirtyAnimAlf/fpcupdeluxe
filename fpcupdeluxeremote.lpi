@@ -15,7 +15,7 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="11">
+      <Resources Count="12">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
@@ -27,6 +27,7 @@
         <Resource_8 FileName="patchfpc\haikufpu.patch" Type="RCDATA" ResourceName="HAIKUFPU_FPCPATCH"/>
         <Resource_9 FileName="patchfpc\freebsdfixes.patch" Type="RCDATA" ResourceName="FREEBSDFIXES_FPCPATCH"/>
         <Resource_10 FileName="patchfpc\dragonfly.patch" Type="RCDATA" ResourceName="DRAGONFLY_FPCPATCH"/>
+        <Resource_11 FileName="patchlazarus\dragonfly.patch" Type="RCDATA" ResourceName="DRAGONFLY_LAZPATCH"/>
       </Resources>
     </General>
     <i18n>
@@ -914,6 +915,8 @@
             <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
           <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="dragonfly"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -926,9 +929,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-dRemoteLog
--Tdragonfly
--Px86_64"/>
+            <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
       </Item27>
