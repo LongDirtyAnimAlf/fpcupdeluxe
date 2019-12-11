@@ -69,6 +69,9 @@ type
     function GetRepoExecutableName: string; override;
     function FindRepoExecutable: string; override;
   public
+    property UserName: string read FUserName write FUserName;
+    property Password: string read FPassword write FPassword;
+
     procedure CheckOutOrUpdate; override;
     function Commit(Message: string): boolean; override;
     function Execute(Command: string): integer; override;
@@ -77,14 +80,13 @@ type
     function LocalRepositoryExists: boolean; override;
     //Revision number of local repository - the repository wide revision number regardless of what branch we are in
     property LocalRevisionWholeRepo: string read GetLocalRevisionWholeRepo;
-    property UserName: string read FUserName write FUserName;
-    property Password: string read FPassword write FPassword;
-    // Run SVN log command for repository and put results into Log
-    procedure Log(var Log: TStringList); override;
     procedure ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string); override;
-    procedure DeleteDirectories(const CommandOutput: string);
     procedure SwitchURL; override;
     procedure Revert; override;
+    function CheckURL: boolean;
+    // Run SVN log command for repository and put results into Log
+    procedure Log(var Log: TStringList); override;
+
     constructor Create;
     destructor Destroy; override;
   end;
@@ -445,15 +447,10 @@ begin
 
     if (Pos('An obstructing working copy was found', Output) > 0) then
     begin
-      // this is a very severe error !
-      // can only be solved by brute force !!
-      // we are going to delete the .svn directory and any obstructing directories
-      DeleteDirectoryEx(IncludeTrailingPathDelimiter(LocalRepository)+'.svn');
-      DeleteDirectories(Output);
-      // perform forced checkout
-      CheckOut(True);
-      Output:='';
-      // hope all is well now
+      infoln('SVN reported than an obstructing working copy was found.',etError);
+      infoln('Please try to resolve.',etError);
+      //FReturnCode := -1;
+      exit;
     end;
 
     FileList.Clear;
@@ -611,6 +608,17 @@ begin
   FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' revert '+GetProxyCommand+' --recursive ' + LocalRepository, FReturnOutput, Verbose);
 end;
 
+function TSVNClient.CheckURL: boolean;
+var
+  Output:string;
+begin
+  FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, false);
+  //FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls '+ Repository, Output, Verbose);
+  //FReturnCode := ExecuteCommand(DoubleQuoteIfNeeded(FRepoExecutable) + ' ls --depth empty '+ Repository, Output, Verbose);
+  result:=(FReturnCode=0);
+  //result:=(Output=GetFileNameFromURL(Repository));
+end;
+
 procedure TSVNClient.ParseFileList(const CommandOutput: string; var FileList: TStringList; const FilterCodes: array of string);
  // Parses file lists from svn update and svn status outputs
  // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
@@ -657,39 +665,6 @@ begin
         FileName := (Trim(Copy(AllFilesRaw[Counter], SpaceAfterStatus, Length(AllFilesRaw[Counter]))));
         if FileName <> '' then
           FileList.Add(FileName);
-      end;
-    end;
-  finally
-    AllFilesRaw.Free;
-  end;
-end;
-
-procedure TSVNClient.DeleteDirectories(const CommandOutput: string);
- // Parses directory lists from svn update and svn status outputsto find skipped directories.
- // If FilterCodes specified, only returns the files that match one of the characters in the code (e.g 'CGM');
- // Case-sensitive filter.
-var
-  AllFilesRaw: TStringList;
-  Counter,index: integer;
-  DirName: string;
-begin
-  AllFilesRaw := TStringList.Create;
-  try
-    AllFilesRaw.Text := CommandOutput;
-    for Counter := 0 to AllFilesRaw.Count - 1 do
-    begin
-      DirName:=AllFilesRaw[Counter];
-      index:=Pos('Skipped ',DirName);
-      if index>0 then
-      begin
-        Delete(DirName,1,Length('Skipped '));
-        index:=Pos('--',DirName);
-        if index>0 then
-        begin
-          Delete(DirName,index,MaxInt);
-          RemovePadChars(DirName,[' ','''','"','`']);
-          DeleteDirectoryEx(DirName);
-        end;
       end;
     end;
   finally

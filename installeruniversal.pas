@@ -1571,7 +1571,7 @@ function TUniversalInstaller.GetModule(ModuleName: string): boolean;
 var
   idx,i,j:integer;
   PackageSettings:TStringList;
-  RemoteURL,InstallDir:string;
+  RemoteURL:string;
   BeforeRevision: string='';
   AfterRevision: string='';
   UpdateWarnings: TStringList;
@@ -1593,289 +1593,289 @@ begin
     PackageSettings:=TStringList(UniModuleList.Objects[idx]);
 
     WritelnLog(infotext+'Getting module '+ModuleName,True);
-    InstallDir:=GetValueFromKey('InstallDir',PackageSettings);
-    InstallDir:=FixPath(InstallDir);
-    InstallDir:=ExcludeTrailingPathDelimiter(InstallDir);
-    FSourceDirectory:=InstallDir;
+    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    FSourceDirectory:=FixPath(FSourceDirectory);
+    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
 
-    if InstallDir<>'' then
-      ForceDirectoriesSafe(InstallDir);
-
-    // Common keywords for all repo methods
-    FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
-    FDesiredBranch:=GetValueFromKey('Branch',PackageSettings);
-
-    // Handle Git URLs
-    RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
-    if (RemoteURL<>'') AND (NOT SourceOK) then
+    if FSourceDirectory<>'' then
     begin
-      infoln(infotext+'Going to download/update from GIT repository '+RemoteURL,etInfo);
-      infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
-      UpdateWarnings:=TStringList.Create;
-      try
-        FUrl:=RemoteURL;
-        FGitClient.ModuleName:=ModuleName;
-        FGitClient.Verbose:=FVerbose;
-        FGitClient.ExportOnly:=FExportOnly;
-        result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        SourceOK:=result;
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
-        end;
-      finally
-        UpdateWarnings.Free;
-      end;
-      if SourceOK
-         then infoln(infotext+'Download/update from GIT repository ok.',etInfo)
-         else infoln(infotext+'Getting GIT repo failed. Trying another source, if available.',etWarning)
-    end;
+      ForceDirectoriesSafe(FSourceDirectory);
 
+      // Common keywords for all repo methods
+      FDesiredRevision:=GetValueFromKey('Revision',PackageSettings);
+      FDesiredBranch:=GetValueFromKey('Branch',PackageSettings);
 
-    // Handle SVN urls
-    RemoteURL:=GetValueFromKey('SVNURL',PackageSettings);
-    if (RemoteURL<>'') AND (NOT SourceOK) then
-    begin
-      infoln(infotext+'Going to download/update from SVN repository '+RemoteURL,etInfo);
-      infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
-      UpdateWarnings:=TStringList.Create;
-      try
-        FURL:=RemoteURL;
-        FSVNClient.ModuleName:=ModuleName;
-        FSVNClient.Verbose:=FVerbose;
-        FSVNClient.ExportOnly:=FExportOnly;
-        FSVNClient.UserName:=GetValueFromKey('UserName',PackageSettings);
-        FSVNClient.Password:=GetValueFromKey('Password',PackageSettings);
-        result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
-        end;
-        // hack for pascalscada (if needed)
-        if ModuleName='pascalscada' then
-        begin
-          aFile:=IncludeTrailingPathDelimiter(InstallDir)+'pascalscada.lrs';
-          if (NOT FileExists(aFile)) then
+      // Handle Git URLs
+      RemoteURL:=GetValueFromKey('GITURL',PackageSettings);
+      if (RemoteURL<>'') AND (NOT SourceOK) then
+      begin
+        infoln(infotext+'Going to download/update from GIT repository '+RemoteURL,etInfo);
+        infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
+        UpdateWarnings:=TStringList.Create;
+        try
+          FURL:=RemoteURL;
+          FGitClient.ModuleName:=ModuleName;
+          FGitClient.Verbose:=FVerbose;
+          FGitClient.ExportOnly:=FExportOnly;
+          result:=DownloadFromGit(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          SourceOK:=result;
+          if UpdateWarnings.Count>0 then
           begin
-            try
-              result:=Download(FUseWget,'https://sourceforge.net/p/pascalscada/code/HEAD/tree/trunk/pascalscada.lrs?format=raw', aFile);
-            except
+            WritelnLog(UpdateWarnings.Text);
+          end;
+        finally
+          UpdateWarnings.Free;
+        end;
+        if SourceOK
+           then infoln(infotext+'Download/update from GIT repository ok.',etInfo)
+           else infoln(infotext+'Getting GIT repo failed. Trying another source, if available.',etWarning)
+      end;
+
+      // Handle SVN urls
+      RemoteURL:=GetValueFromKey('SVNURL',PackageSettings);
+      if (RemoteURL<>'') AND (NOT SourceOK) then
+      begin
+        infoln(infotext+'Going to download/update from SVN repository '+RemoteURL,etInfo);
+        infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
+        UpdateWarnings:=TStringList.Create;
+        try
+          FURL:=RemoteURL;
+          FSVNClient.UserName   := GetValueFromKey('UserName',PackageSettings);
+          FSVNClient.Password   := GetValueFromKey('Password',PackageSettings);
+          result:=DownloadFromSVN(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          SourceOK:=(result) AND (DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory+'.svn')) OR FExportOnly);
+          if UpdateWarnings.Count>0 then
+          begin
+            WritelnLog(UpdateWarnings.Text);
+          end;
+          // hack for pascalscada (if needed)
+          if ModuleName='pascalscada' then
+          begin
+            aFile:=IncludeTrailingPathDelimiter(FSourceDirectory)+'pascalscada.lrs';
+            if (NOT FileExists(aFile)) then
+            begin
+              try
+                result:=Download(FUseWget,'https://sourceforge.net/p/pascalscada/code/HEAD/tree/trunk/pascalscada.lrs?format=raw', aFile);
+              except
+              end;
             end;
           end;
+        finally
+          UpdateWarnings.Free;
         end;
-      finally
-        UpdateWarnings.Free;
+        if SourceOK
+           then infoln(infotext+'Download/update from SVN repository ok.',etInfo)
+           else infoln(infotext+'Getting SVN repo failed. Trying another source, if available.',etWarning)
       end;
-      if SourceOK
-         then infoln(infotext+'Download/update from SVN repository ok.',etInfo)
-         else infoln(infotext+'Getting SVN repo failed. Trying another source, if available.',etWarning)
-    end;
 
-    // Handle HG URLs
-    RemoteURL:=GetValueFromKey('HGURL',PackageSettings);
-    if (RemoteURL<>'') AND (NOT SourceOK) then
-    begin
-      infoln(infotext+'Going to download/update from HG repository '+RemoteURL,etInfo);
-      infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
-      UpdateWarnings:=TStringList.Create;
-      try
-        FUrl:=RemoteURL;
-        FHGClient.ModuleName:=ModuleName;
-        FHGClient.Verbose:=FVerbose;
-        FHGClient.ExportOnly:=FExportOnly;
-        result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
-        SourceOK:=result;
-        if result=false then
-          WritelnLog(infotext+'HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
-        if UpdateWarnings.Count>0 then
-        begin
-          WritelnLog(UpdateWarnings.Text);
-        end;
-      finally
-        UpdateWarnings.Free;
-      end;
-      if SourceOK
-         then infoln(infotext+'Download/update from HG repository ok.',etInfo)
-         else infoln(infotext+'Getting HG repo failed. Trying another source, if available.',etWarning)
-    end;
-
-    RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
-    if (RemoteURL<>'') AND (NOT SourceOK) then
-    begin
-      infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
-      aName:=GetFileNameFromURL(RemoteURL);
-      if Length(aName)>0 then
+      // Handle HG URLs
+      RemoteURL:=GetValueFromKey('HGURL',PackageSettings);
+      if (RemoteURL<>'') AND (NOT SourceOK) then
       begin
-        aName:=SysUtils.ExtractFileExt(aName);
+        infoln(infotext+'Going to download/update from HG repository '+RemoteURL,etInfo);
+        infoln(infotext+'Please wait: this can take some time (if repo is big or has a large history).',etInfo);
+        UpdateWarnings:=TStringList.Create;
+        try
+          FUrl:=RemoteURL;
+          FHGClient.ModuleName:=ModuleName;
+          FHGClient.Verbose:=FVerbose;
+          FHGClient.ExportOnly:=FExportOnly;
+          result:=DownloadFromHG(ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+          SourceOK:=result;
+          if result=false then
+            WritelnLog(infotext+'HG error downloading from '+RemoteURL+'. Continuing regardless.',true);
+          if UpdateWarnings.Count>0 then
+          begin
+            WritelnLog(UpdateWarnings.Text);
+          end;
+        finally
+          UpdateWarnings.Free;
+        end;
+        if SourceOK
+           then infoln(infotext+'Download/update from HG repository ok.',etInfo)
+           else infoln(infotext+'Getting HG repo failed. Trying another source, if available.',etWarning)
+      end;
+
+      RemoteURL:=GetValueFromKey('ArchiveURL',PackageSettings);
+      if (RemoteURL<>'') AND (NOT SourceOK) then
+      begin
+        infoln(infotext+'Going to download from archive '+RemoteURL,etInfo);
+        aName:=GetFileNameFromURL(RemoteURL);
         if Length(aName)>0 then
         begin
-          if aName[1]='.' then Delete(aName,1,1);
+          aName:=SysUtils.ExtractFileExt(aName);
+          if Length(aName)>0 then
+          begin
+            if aName[1]='.' then Delete(aName,1,1);
+          end;
         end;
-      end;
-      //If no extension, assume zip
-      if Length(aName)=0 then aName:='zip';
-      aFile := GetTempFileNameExt('','FPCUPTMP',aName);
-      WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
-      try
-        result:=Download(FUseWget, RemoteURL, aFile);
-      except
-        on E: Exception do
+        //If no extension, assume zip
+        if Length(aName)=0 then aName:='zip';
+        aFile := GetTempFileNameExt('','FPCUPTMP',aName);
+        WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
+        try
+          result:=Download(FUseWget, RemoteURL, aFile);
+        except
+          on E: Exception do
+          begin
+           result:=false;
+          end;
+        end;
+
+        if result=false then
+           WritelnLog(etError,infotext+'Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+
+        if result then
         begin
-         result:=false;
-        end;
-      end;
+          WritelnLog(infotext+'Download ok',True);
 
-      if result=false then
-         WritelnLog(etError,infotext+'Error downloading from '+RemoteURL+'. Continuing regardless.',True);
+          //Delete existing files from install directory
+          DeleteDirectory(FSourceDirectory,True);
 
-      if result then
-      begin
-        WritelnLog(infotext+'Download ok',True);
-
-        //Delete existing files from install directory
-        DeleteDirectory(InstallDir,True);
-
-        // Extract, overwrite
-        case UpperCase(sysutils.ExtractFileExt(aFile)) of
-           '.ZIP','.TMP':
-              begin
-                //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(InstallDir)+' '+aFile,FVerbose);
-                with TNormalUnzipper.Create do
+          // Extract, overwrite
+          case UpperCase(sysutils.ExtractFileExt(aFile)) of
+             '.ZIP','.TMP':
                 begin
-                  try
-                    ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(InstallDir),[]));
-                  finally
-                    Free;
+                  //ResultCode:=ExecuteCommand(FUnzip+' -o -d '+IncludeTrailingPathDelimiter(FSourceDirectory)+' '+aFile,FVerbose);
+                  with TNormalUnzipper.Create do
+                  begin
+                    try
+                      ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+                    finally
+                      Free;
+                    end;
                   end;
                 end;
-              end;
-           '.7Z':
-              begin
-                ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
-                {$ifdef MSWINDOWS}
-                // try winrar
-                if ResultCode <> 0 then
+             '.7Z':
                 begin
-                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
+                  ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                  {$ifdef MSWINDOWS}
+                  // try winrar
+                  if ResultCode <> 0 then
+                  begin
+                    ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                  end;
+                  {$endif}
+                  if ResultCode <> 0 then
+                  begin
+                    ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                  end;
+                  if ResultCode <> 0 then
+                  begin
+                    ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+                  end;
                 end;
-                {$endif}
-                if ResultCode <> 0 then
+             '.rar':
                 begin
-                  ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
+                  ResultCode:=ExecuteCommand(FUnrar+' x "'+aFile+'" "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                  {$ifdef MSWINDOWS}
+                  // try winrar
+                  if ResultCode <> 0 then
+                  begin
+                    ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+                  end;
+                  {$endif}
                 end;
-                if ResultCode <> 0 then
-                begin
-                  ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
-                end;
-              end;
-           '.rar':
-              begin
-                ResultCode:=ExecuteCommand(FUnrar+' x "'+aFile+'" "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
-                {$ifdef MSWINDOWS}
-                // try winrar
-                if ResultCode <> 0 then
-                begin
-                  ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
-                end;
-                {$endif}
-              end;
 
-           else {.tar and all others}
-              ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
+             else {.tar and all others}
+                ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(FSourceDirectory),FVerbose);
+             end;
+          if ResultCode <> 0 then
+          begin
+            result := False;
+            infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etWarning);
+          end;
+        end;
+        SysUtils.Deletefile(aFile); //Get rid of temp file.
+        SourceOK:=result;
+        if SourceOK then
+        begin
+          infoln(infotext+'Download from archive ok.',etInfo);
+
+          // Check specials : sometimes, an extra path is added when unpacking, installing
+          // Move files up ... tricky, but necessary unfortunately ...
+          if ((Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) OR (Pos('sourceforge.net',RemoteURL)>0)) then
+          begin
+            //There should be a single directory !
+            aName:='';
+            FilesList:=FindAllDirectories(FSourceDirectory,False);
+            if FilesList.Count=1 then aName:=FilesList[0];
+            FreeAndNil(FilesList);
+            if Length(aName)>0 then
+            begin
+              infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
+              FilesList:=FindAllFiles(aName, '', True);
+              for i:=0 to (FilesList.Count-1) do
+              begin
+                aFile:=FilesList[i];
+                aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
+                aFile:=SafeExpandFileName(aFile);
+                if NOT DirectoryExists(ExtractFileDir(aFile)) then ForceDirectoriesSafe(ExtractFileDir(aFile));
+                SysUtils.RenameFile(FilesList[i],aFile);
+              end;
+              DeleteDirectory(aName,False);
+              FreeAndNil(FilesList);
+            end;
+          end;
+        end else infoln(infotext+'Getting archive failed. Trying another source, if available.',etInfo)
+      end;
+
+      RemoteURL:=GetValueFromKey('ArchivePATH',PackageSettings);
+      if (RemoteURL<>'') AND (NOT SourceOK) then
+      begin
+        infoln(infotext+'Going to download from archive path '+RemoteURL,etInfo);
+        aFile := RemoteURL;
+        case UpperCase(sysutils.ExtractFileExt(aFile)) of
+           '.ZIP':
+           begin
+             with TNormalUnzipper.Create do
+             begin
+               try
+                 ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(FSourceDirectory),[]));
+               finally
+                 Free;
+               end;
+             end;
            end;
+           '.7Z':
+           begin
+             ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+             {$ifdef MSWINDOWS}
+             // try winrar
+             if ResultCode <> 0 then
+             begin
+               ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(FSourceDirectory)+'"',FVerbose);
+             end;
+             {$endif}
+             if ResultCode <> 0 then
+             begin
+               ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+             end;
+             if ResultCode <> 0 then
+             begin
+               ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(FSourceDirectory)+'" '+aFile,FVerbose);
+             end;
+           end;
+           else {.tar and all others}
+              ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(FSourceDirectory),FVerbose);
+        end;
+
         if ResultCode <> 0 then
         begin
           result := False;
-          infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etWarning);
+          infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
         end;
+
+        if result then infoln(infotext+'Download from archive path ok.',etInfo);
+
+        // todo patch package if correct patch is available in patch directory
+
       end;
-      SysUtils.Deletefile(aFile); //Get rid of temp file.
-      SourceOK:=result;
-      if SourceOK then
-      begin
-        infoln(infotext+'Download from archive ok.',etInfo);
-
-        // Check specials : sometimes, an extra path is added when unpacking, installing
-        // Move files up ... tricky, but necessary unfortunately ...
-        if ((Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) OR (Pos('sourceforge.net',RemoteURL)>0)) then
-        begin
-          //There should be a single directory !
-          aName:='';
-          FilesList:=FindAllDirectories(InstallDir,False);
-          if FilesList.Count=1 then aName:=FilesList[0];
-          FreeAndNil(FilesList);
-          if Length(aName)>0 then
-          begin
-            infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
-            FilesList:=FindAllFiles(aName, '', True);
-            for i:=0 to (FilesList.Count-1) do
-            begin
-              aFile:=FilesList[i];
-              aFile:=StringReplace(aFile,aName,aName+DirectorySeparator+'..',[]);
-              aFile:=SafeExpandFileName(aFile);
-              if NOT DirectoryExists(ExtractFileDir(aFile)) then ForceDirectoriesSafe(ExtractFileDir(aFile));
-              SysUtils.RenameFile(FilesList[i],aFile);
-            end;
-            DeleteDirectory(aName,False);
-            FreeAndNil(FilesList);
-          end;
-        end;
-      end else infoln(infotext+'Getting archive failed. Trying another source, if available.',etInfo)
-    end;
-
-    RemoteURL:=GetValueFromKey('ArchivePATH',PackageSettings);
-    if (RemoteURL<>'') AND (NOT SourceOK) then
+    end
+    else
     begin
-      infoln(infotext+'Going to download from archive path '+RemoteURL,etInfo);
-      aFile := RemoteURL;
-      case UpperCase(sysutils.ExtractFileExt(aFile)) of
-         '.ZIP':
-         begin
-           with TNormalUnzipper.Create do
-           begin
-             try
-               ResultCode:=Ord(NOT DoUnZip(aFile,IncludeTrailingPathDelimiter(InstallDir),[]));
-             finally
-               Free;
-             end;
-           end;
-         end;
-         '.7Z':
-         begin
-           ResultCode:=ExecuteCommand(F7zip+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
-           {$ifdef MSWINDOWS}
-           // try winrar
-           if ResultCode <> 0 then
-           begin
-             ResultCode:=ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+aFile+' "'+IncludeTrailingPathDelimiter(InstallDir)+'"',FVerbose);
-           end;
-           {$endif}
-           if ResultCode <> 0 then
-           begin
-             ResultCode:=ExecuteCommand('7z'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
-           end;
-           if ResultCode <> 0 then
-           begin
-             ResultCode:=ExecuteCommand('7za'+GetExeExt+' x -o"'+IncludeTrailingPathDelimiter(InstallDir)+'" '+aFile,FVerbose);
-           end;
-         end;
-         else {.tar and all others}
-            ResultCode:=ExecuteCommand(FTar+' -xf '+aFile +' -C '+ExcludeTrailingPathDelimiter(InstallDir),FVerbose);
-      end;
-
-      if ResultCode <> 0 then
-      begin
-        result := False;
-        infoln(infotext+'Unpack of '+aFile+' failed with resultcode: '+IntToStr(ResultCode),etwarning);
-      end;
-
-      if result then infoln(infotext+'Download from archive path ok.',etInfo);
-
-      // todo patch package if correct patch is available in patch directory
-
+      infoln(infotext+'No source directory defined. Skipping fetching of external sources.',etInfo);
     end;
-
   end
   else
     result:=false;

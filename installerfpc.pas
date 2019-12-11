@@ -3537,9 +3537,6 @@ begin
 
     UpdateWarnings:=TStringList.Create;
     try
-      aRepoClient.Verbose:=FVerbose;
-      aRepoClient.ExportOnly:=FExportOnly;
-      aRepoClient.ModuleName:=ModuleName;
       if aRepoClient=FGitClient
          then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
          else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);

@@ -113,6 +113,7 @@ uses
   m_any_to_freebsdx64,
   m_any_to_freebsd386,
   m_any_to_openbsd386,
+  m_any_to_openbsdx64,
   {$endif}
   {$ifdef MSWINDOWS}
   m_win32_to_linuxmips, m_win32_to_go32v2i386, m_win32_to_wincearm,

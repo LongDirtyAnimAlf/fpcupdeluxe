@@ -160,9 +160,6 @@ begin
   // todo: split up, move to config, perhaps make dirs properties etc
   if FVerbose then
     Processor.OnOutputM:=@DumpOutput;
-  FSVNClient.ModuleName:=ModuleName;
-  FSVNClient.Verbose:=FVerbose;
-  FSVNClient.ExportOnly:=FExportOnly;
   infoln('TWinInstaller: creating Lazarus installer. This may take a while...',etInfo);
 
   // Basedirectory = install directory from fpcup.ini/universal module.

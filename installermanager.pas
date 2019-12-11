@@ -1065,6 +1065,33 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     end;
 
   const
+    DEBIAN_INSTALL_COMMAND='sudo apt-get install';
+    DEBIAN_LIBS : array [0..15] of string = (
+    'unrar',
+    'unzip',
+    'wget',
+    'make',
+    'gcc',
+    'build-essential',
+    'binutils',
+    'gdb',
+    'devscripts',
+    'patch',
+    'subversion',
+    'git',
+    'libxtst-dev',
+    'libx11-dev',
+    'libgtk2.0-dev',
+    'libcairo2-dev'
+
+    );
+    DEBIAN_LIBS_QT5 : array [0..3] of string = (
+    'qt5-qmake',
+    'qtbase5-dev',
+    'qtbase5-dev-tools',
+    'libqt5x11extras5-dev'
+    );
+
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
     QTLIBS:TLibList = ('libQt5Pas.so','','','','');
   var

@@ -364,6 +364,7 @@ type
     // Checkout/update using SVN; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
     function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+    function SimpleExportFromSVN(ModuleName: string; aFileURL,aLocalPath:string): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadFromFTP(ModuleName: string): boolean;
     // Clone/update using Git; use FSourceDirectory as local repository
@@ -871,8 +872,22 @@ begin
     TUseWGetDownloader.WGETBinary:=FWget;
 
     // Get patch binary from default binutils URL
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
-    GetFile(BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+    aURL:=BINUTILSURL+'/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll])+'/install/binw32/';
+
+    OperationSucceeded:=false;
+    if FSVNClient.ValidClient then
+      OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe',ExcludeTrailingPathDelimiter(FMakeDir));
+    if (NOT OperationSucceeded) then
+      OperationSucceeded:=GetFile(aURL+'patch.exe',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe');
+
+    OperationSucceeded:=false;
+    if FSVNClient.ValidClient then
+      OperationSucceeded:=SimpleExportFromSVN('CheckAndGetTools',aURL+'patch.exe.manifest',ExcludeTrailingPathDelimiter(FMakeDir));
+    if (NOT OperationSucceeded) then
+      OperationSucceeded:=GetFile(aURL+'patch.exe.manifest',IncludeTrailingPathDelimiter(FMakeDir) + 'patch.exe.manifest');
+
+    // do not fail
+    OperationSucceeded:=True;
 
     F7zip:=Which('7z');
     if Not FileExists(F7zip) then Which('7za');
@@ -1506,7 +1521,9 @@ begin
   BeforeRevisionShort:='unknown';
   AfterRevision := 'failure';
   aClient.LocalRepository := FSourceDirectory;
-  aClient.Repository := FURL;
+  aClient.Repository      := FURL;
+  aClient.ExportOnly      := FExportOnly;
+  aClient.Verbose         := FVerbose;
 
   BeforeRevision := 'revision '+aClient.LocalRevision;
   BeforeRevisionShort:=aClient.LocalRevision;
@@ -1642,12 +1659,15 @@ begin
     exit;
   end;
 
-  BeforeRevision := 'failure';
-  BeforeRevisionShort:='unknown';
-  AfterRevision := 'failure';
-  FSVNClient.ModuleName:=ModuleName;
-  FSVNClient.LocalRepository := FSourceDirectory;
-  FSVNClient.Repository := FURL;
+  BeforeRevision               := 'failure';
+  BeforeRevisionShort          := 'unknown';
+  AfterRevision                := 'failure';
+  FSVNClient.ModuleName        := ModuleName;
+  FSVNClient.LocalRepository   := FSourceDirectory;
+  FSVNClient.Repository        := FURL;
+  FSVNClient.ExportOnly        := FExportOnly;
+  FSVNClient.Verbose           := FVerbose;
+
   RepoExists:=FSVNClient.LocalRepositoryExists;
   if RepoExists then
   begin
@@ -1663,8 +1683,8 @@ begin
     writelnlog('Directory ' + FSourceDirectory + ' is not an SVN repository (or a repository with the wrong remote URL).');
     if not(DirectoryExists(FSVNClient.LocalRepository)) then
     begin
-      writelnlog(localinfotext+'Creating directory '+FSourceDirectory+' for SVN checkout.');
-      ForceDirectoriesSafe(FSourceDirectory);
+      writelnlog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout.');
+      ForceDirectoriesSafe(FSVNClient.LocalRepository);
     end;
   end;
 
@@ -1800,6 +1820,41 @@ begin
   end;
 end;
 
+function TInstaller.SimpleExportFromSVN(ModuleName: string; aFileURL,aLocalPath:string): boolean;
+begin
+  result:=false;
+
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (SimpleExportFromSVN: '+ModuleName+'): ';
+
+  // check if we do have a client !!
+  if NOT FSVNClient.ValidClient then
+  begin
+    infoln(localinfotext+FSVNClient.RepoExecutableName+' is needed, but cannot be found on the system !!',etWarning);
+    exit;
+  end;
+
+  FSVNClient.ModuleName       := ModuleName;
+  FSVNClient.LocalRepository  := aLocalPath;
+  FSVNClient.Repository       := aFileURL;
+  FSVNClient.ExportOnly       := true;
+
+  if not(DirectoryExists(FSVNClient.LocalRepository)) then
+  begin
+    writelnlog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout/export.');
+    ForceDirectoriesSafe(FSVNClient.LocalRepository);
+  end;
+
+  if FSVNClient.CheckURL then
+  begin
+    FSVNClient.CheckOutOrUpdate;
+    result:=(FSVNClient.ReturnCode=0);
+  end
+  else
+  begin
+    result:=true;
+  end;
+end;
+
 function TInstaller.DownloadFromFTP(ModuleName: string): boolean;
 var
   i:integer;
@@ -1872,17 +1927,18 @@ var
   Errors: integer = 0;
   DownloadSuccess:boolean;
   InstallPath:string;
+  RemotePath:string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
   //Parent directory of files. Needs trailing backslash.
   ForceDirectoriesSafe(FMakeDir);
   Result := true;
+
   for Counter := low(FUtilFiles) to high(FUtilFiles) do
   begin
     if (FUtilFiles[Counter].Category=ucBinutil) or (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
     begin
       InstallPath:=IncludeTrailingPathDelimiter(FMakeDir);
-
       if (FUtilFiles[Counter].Category=ucDebugger32) or (FUtilFiles[Counter].Category=ucDebugger64) then
       begin
         if (FUtilFiles[Counter].Category=ucDebugger32) then InstallPath:=InstallPath+'gdb\i386-win32\';
@@ -1890,11 +1946,17 @@ begin
         ForceDirectoriesSafe(InstallPath);
       end;
 
-      InstallPath:=InstallPath+FUtilFiles[Counter].FileName;
+      if (FileExists(InstallPath+FUtilFiles[Counter].FileName)) then continue;
 
-      if (FileExists(InstallPath)) then continue;
+      RemotePath:=FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName;
 
-      DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath);
+      DownloadSuccess:=false;
+
+      // These FPC binutils are always served by SVN, so use SVN client and related.
+      if FSVNClient.ValidClient then
+        DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,InstallPath);
+      if (NOT DownloadSuccess) then
+        DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
 
       if NOT DownloadSuccess then
       begin
