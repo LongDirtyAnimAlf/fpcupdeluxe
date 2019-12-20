@@ -1020,11 +1020,14 @@ begin
 
           {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
           // soft 80 bit float if available
-          if ( (CrossInstaller.TargetCPU='i386') OR (CrossInstaller.TargetCPU='i8086')  OR (CrossInstaller.TargetCPU='x86_64') ) then
+          if FSoftFloat then
           begin
-            infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-            infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
-            Options:=Options+' -dFPC_SOFT_FPUX80';
+            if ( (CrossInstaller.TargetCPU='i386') OR (CrossInstaller.TargetCPU='i8086')  OR (CrossInstaller.TargetCPU='x86_64') ) then
+            begin
+              infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+              infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
+              Options:=Options+' -dFPC_SOFT_FPUX80';
+            end;
           end;
           {$endif}
 
@@ -1438,9 +1441,12 @@ begin
   //s1:=s1+' -dREVINC';
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
-  // soft 80 bit float if available
-  infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
-  s1:=s1+' -dFPC_SOFT_FPUX80';
+  if FSoftFloat then
+  begin
+    // soft 80 bit float if available
+    infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
+    s1:=s1+' -dFPC_SOFT_FPUX80';
+  end;
   {$endif}
 
   {$ifdef BSD}

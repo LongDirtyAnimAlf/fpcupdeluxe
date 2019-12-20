@@ -163,6 +163,9 @@ type
     function GetCheckUpdates:boolean;
     procedure SetCheckUpdates(value:boolean);
 
+    function GetUseSoftFloat:boolean;
+    procedure SetUseSoftFloat(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -221,6 +224,7 @@ type
     property FpcupBootstrappersOnly:boolean read GetFpcupBootstrappersOnly write SetFpcupBootstrappersOnly;
     property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
     property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
+    property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -287,6 +291,9 @@ resourcestring
 
   HintCheckGetUpdates = 'Check for updates of fpcupdeluxe.';
   CaptionCheckGetUpdates = 'Check for updates (default=no)';
+
+  HintUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
+  CaptionUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
 
 var
   Form2: TForm2;
@@ -394,6 +401,7 @@ begin
     Append(CaptionCheckFpcupBootstrappersOnly);
     Append(CaptionCheckForceLocalRepoClient);
     Append(CaptionCheckGetUpdates);
+    Append(CaptionUseSoftFloat80bit);
   end;
 
 
@@ -479,7 +487,6 @@ begin
   ForceLocalRepoClient:=False;
   SetCheckEnabled(CaptionCheckForceLocalRepoClient,False);
   {$endif}
-
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
@@ -1126,6 +1133,15 @@ end;
 procedure TForm2.SetCheckUpdates(value:boolean);
 begin
   SetCheckState(CaptionCheckGetUpdates,value);
+end;
+
+function TForm2.GetUseSoftFloat:boolean;
+begin
+  result:=GetCheckState(CaptionUseSoftFloat80bit);
+end;
+procedure TForm2.SetUseSoftFloat(value:boolean);
+begin
+  SetCheckState(CaptionUseSoftFloat80bit,value);
 end;
 
 function TForm2.GetFPCOptions:string;

@@ -235,6 +235,7 @@ type
     FUseWget: boolean;
     FExportOnly:boolean;
     FNoJobs:boolean;
+    FSoftFloat:boolean;
     FUseGitClient:boolean;
     FSwitchURL:boolean;
     FNativeFPCBootstrapCompiler:boolean;
@@ -349,6 +350,7 @@ type
     property UseWget:boolean read FUseWget write FUseWget;
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
+    property SoftFloat:boolean read FSoftFloat write FSoftFloat;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
@@ -1507,6 +1509,7 @@ begin
     {$ENDIF}
     FInstaller.ExportOnly:=FParent.ExportOnly;
     FInstaller.NoJobs:=FParent.NoJobs;
+    FInstaller.SoftFloat:=FParent.SoftFloat;
     FInstaller.Log:=FParent.FLog;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     FInstaller.SwitchURL:=FParent.SwitchURL;

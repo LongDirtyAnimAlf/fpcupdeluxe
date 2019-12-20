@@ -1696,7 +1696,7 @@ begin
 
         s:=IncludeTrailingPathDelimiter(FFPCSourceDir)+'utils'+DirectorySeparator+'fpcmkcfg'+DirectorySeparator+FPCPKGFILENAME;
         //s2:=IncludeTrailingPathDelimiter(SafeGetApplicationConfigPath)+'fpcup_'+ExtractFileName(ExcludeTrailingPathDelimiter(FBaseDirectory));
-        s2:=IncludeTrailingPathDelimiter(FBaseDirectory)+'fpcpkgconfig';
+        s2:=IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
 
         if (NOT FileExists(IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME)) then
         begin

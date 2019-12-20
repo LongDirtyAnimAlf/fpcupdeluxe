@@ -1352,12 +1352,13 @@ begin
     Special := True;
   end;
 
-  if (NOT Special) AND ExistWordInString(PChar(s),'Please wait:',[soWholeWord,soDown]) then
+  if (NOT Special) AND ((ExistWordInString(PChar(s),'HEAD is now at ',[soDown])) OR (ExistWordInString(PChar(s),'Last Changed ',[soDown]))) then
   begin
-    FG      := clBlue;
+    FG      := clGreen;
     BG      := clWhite;
     Special := True;
   end;
+
 
   if (NOT Special) AND ExistWordInString(PChar(s),'failed:',[soWholeWord,soDown]) then
   begin
@@ -1408,8 +1409,6 @@ begin
   if (NOT Special)
   AND
   (
-    (ExistWordInString(PChar(s),'HEAD is now at ',[soDown])) // for GIT info
-    OR
     (ExistWordInString(PChar(s),'lines compiled,',[soDown]))
     OR
     (ExistWordInString(PChar(s),'issued',[soWholeWord,soDown]))
@@ -3097,6 +3096,8 @@ begin
   FPCupManager.NoJobs:=(NOT Form2.MakeJobs);
   {$endif}
 
+  FPCupManager.SoftFloat:=Form2.UseSoftFloat;
+
   FPCupManager.OnlyModules:='';
   FPCupManager.IncludeModules:='';
   FPCupManager.SkipModules:='';
@@ -3499,6 +3500,7 @@ begin
       Form2.MakeJobs:=ReadBool('General','MakeJobs',True);
       Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
       Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
+      Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',True);
 
       Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
 
@@ -3574,8 +3576,8 @@ begin
       WriteBool('General','UseWget',Form2.UseWget);
       WriteBool('General','MakeJobs',Form2.MakeJobs);
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
-
       WriteBool('General','UpdateOnly',Form2.UpdateOnly);
+      WriteBool('General','UseSoftFloat',Form2.UseSoftFloat);
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);
       WriteString('Patches','LazarusPatches',Form2.LazPatches);

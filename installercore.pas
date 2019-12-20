@@ -65,6 +65,8 @@ const
   BINUTILSURL           = FPCBASESVNURL + '/fpcbuild';
 
   PACKAGESLOCATION      = 'packages.fppkg';
+  PACKAGESCONFIGDIR     = 'fpcpkgconfig';
+  //PACKAGESCONFIGDIR     = PACKAGESLOCATION+DirectorySeparator+'fpcpkgconfig';
 
   {$IFDEF MSWINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
@@ -332,6 +334,7 @@ type
     FUtilFiles: array of TUtilsList; //Keeps track of binutils etc download locations, filenames...
     FExportOnly: boolean;
     FNoJobs: boolean;
+    FSoftFloat: boolean;
     FVerbose: boolean;
     FUseWget: boolean;
     FTar: string;
@@ -459,6 +462,7 @@ type
     // do not download the repo itself, but only get the files (of master)
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;
+    property SoftFloat: boolean write FSoftFloat;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
     // use wget as downloader ??
@@ -2859,13 +2863,14 @@ var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
   LocalPatchCmd:string;
-  Output: string = '';
+  s: string = '';
   ReturnCode,i,j: integer;
   LocalSourcePatches:string;
   PatchFPC:boolean;
   {$ifndef FPCONLY}
   PatchLaz:boolean;
   {$endif}
+  PatchVersion:dword;
 begin
   result:=false;
 
@@ -2891,13 +2896,26 @@ begin
         for i:=0 to (PatchList.Count-1) do
         begin
           PatchFilePath:=PatchList.Strings[i];
-          j:=-1;
-          if PatchFPC then j:=Pos('_FPCPATCH',PatchFilePath) else
-             {$ifndef FPCONLY}
-             if PatchLaz then j:=Pos('_LAZPATCH',PatchFilePath) else
-             {$endif}
-                j:=Pos('_FPCUPPATCH',PatchFilePath);
-          if (j<>-1) then DeleteFile(PatchFilePath);
+          j:=0;
+          if PatchFPC then
+          begin
+            if (j=0) then j:=Pos('_FPCPATCH',PatchFilePath);
+            if (j=0) then j:=Pos('fpcpatch_',PatchFilePath);
+          end
+          else
+          {$ifndef FPCONLY}
+          if PatchLaz then
+          begin
+            if (j=0) then j:=Pos('_LAZPATCH',PatchFilePath);
+            if (j=0) then j:=Pos('lazpatch_',PatchFilePath);
+          end
+          else
+          {$endif}
+          begin
+            if (j=0) then j:=Pos('_FPCUPPATCH',PatchFilePath);
+            if (j=0) then j:=Pos('fpcuppatch_',PatchFilePath);
+          end;
+          if (j<>0) then DeleteFile(PatchFilePath);
         end;
       end;
     finally
@@ -2907,76 +2925,87 @@ begin
 
   LocalSourcePatches:=FSourcePatches;
 
-  if resourcefiles.Count>0 then
-  begin
-    for i:=0 to resourcefiles.Count-1 do
+  PatchList:=TStringList.Create;
+  try
+    PatchList.Clear;
+    try
+      GetGitHubFileList(FPCUPGITREPOSOURCEPATCHESAPI,PatchList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    except
+      on E : Exception do
+      begin
+        infoln(localinfotext+E.ClassName+' error raised, with message : '+E.Message, etError);
+      end;
+    end;
+
+    for i:=0 to Pred(PatchList.Count) do
     begin
-      PatchFilePath:=resourcefiles[i];
-      if PatchFPC then j:=Pos('_FPCPATCH',PatchFilePath) else
+      infoln(localinfotext+'Found online patch: '+PatchList[i],etDebug);
+
+      PatchFilePath:=PatchList[i];
+
+      if PatchFPC then j:=Pos('fpcpatch',PatchFilePath) else
          {$ifndef FPCONLY}
-         if PatchLaz then j:=Pos('_LAZPATCH',PatchFilePath) else
+         if PatchLaz then j:=Pos('lazpatch',PatchFilePath) else
          {$endif}
-            j:=Pos('_FPCUPPATCH',PatchFilePath);
+            j:=Pos('fpcuppatch',PatchFilePath);
 
       if j=0 then continue;
 
       infoln(infotext+'Got '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etInfo);
 
+      s:=GetFileNameFromURL(PatchFilePath);
+
+      s:=ExtractFileNameOnly(s);
+      s:=GetVersionFromUrl(s);
+      PatchVersion:=GetNumericalVersion(s);
+
+      if PatchVersion=0 then
+      begin
+        //only patch trunk in case no version is given
+        if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
+        if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+      end;
+
+      infoln(localinfotext+'Found online patch: '+PatchList[i] +' with version '+InttoStr(PatchVersion),etInfo);
+
       {$if defined(Darwin) and defined(LCLQT5)}
       //disable big hack for now
-      if Pos('DARWINQT5HACK_LAZPATCH',PatchFilePath)>0 then j:=0;
+      if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then j:=0;
       {$else}
-      if Pos('DARWINQT5',PatchFilePath)>0 then j:=0;
+      if Pos('darwin_qt5',PatchFilePath)>0 then j:=0;
       {$endif}
 
       {$ifndef MSWindows}
       //only patch the Haiku build process on Windows
-      if Pos('HAIKU_FPCPATCH',PatchFilePath)>0 then j:=0;
+      if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then j:=0;
       {$endif}
 
       {$ifndef Haiku}
-      //only patch the Haiku FPU exception mask on Haiku
-      if Pos('HAIKUFPU_FPCPATCH',PatchFilePath)>0 then j:=0;
+      //only patch the Haiku FPU exception mask on Haiku itself
+      if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
       {$endif}
 
       // In general, only patch trunk !
       // This can be changed to take care of versions ... but not for now !
       // Should be removed in future fpcup versions !!
-      if PatchFPC then
+      if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
       begin
-        if (Pos('FREEBSDFIXES',PatchFilePath)>0) then
-        begin
-          if (GetFullVersion>=GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
-        end
-        else
-        begin
-          if (GetFullVersion<GetNumericalVersion(FPCTRUNKVERSION)) then j:=0;
-        end;
+        if GetFullVersion<>PatchVersion then j:=0;
       end;
-      {$ifndef FPCONLY}
-      if PatchLaz then
-      begin
-        if (FMUSL AND (Pos('MUSLTRUNK',PatchFilePath)>0)) then
-        begin
-          if (GetFullVersion<GetNumericalVersion('2.0.0')) then j:=0;
-        end
-        else
-        begin
-          if (GetFullVersion<GetNumericalVersion(LAZARUSTRUNKVERSION)) then j:=0;
-        end;
-      end;
-      {$endif}
 
       if (j>0) then
       begin
         ForceDirectoriesSafe(PatchDirectory);
-        SaveFileFromResource(PatchDirectory+DirectorySeparator+PatchFilePath+'.patch',resourcefiles[i]);
+        s:=GetFileNameFromURL(PatchFilePath);
+        GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
       end
       else
       begin
         infoln(infotext+ExtractFileName(PatchFilePath)+ 'for '+ModuleName+' wil not be applied !',etInfo);
       end;
     end;
+  finally
+    PatchList.Free;
   end;
 
   if (DirectoryExists(PatchDirectory)) then
@@ -3038,9 +3067,9 @@ begin
             // revert to original file in case of file not found
             if (NOT FileExists(PatchFileCorrectedPath)) then PatchFileCorrectedPath:=PatchFilePath;
             {$IFDEF MSWINDOWS}
-            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, Output, True);
+            ReturnCode:=ExecuteCommandInDir(IncludeTrailingPathDelimiter(FMakeDir) + LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory,s, True);
             {$ELSE}
-            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, Output, True);
+            ReturnCode:=ExecuteCommandInDir(LocalPatchCmd + PatchFileCorrectedPath, FSourceDirectory, s, True);
             {$ENDIF}
             // remove the temporary file
             if (PatchFileCorrectedPath<>PatchFilePath) then DeleteFile(PatchFileCorrectedPath);
@@ -3052,7 +3081,7 @@ begin
             else
             begin
               writelnlog(etError, infotext+ModuleName+' patching with ' + PatchList[i] + ' failed.', true);
-              writelnlog(etError, infotext+ModuleName+' patch output: ' + Output, true);
+              writelnlog(etError, infotext+ModuleName+' patch output: ' + s, true);
             end;
           end;
         end

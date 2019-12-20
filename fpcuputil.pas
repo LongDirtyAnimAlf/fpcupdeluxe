@@ -378,10 +378,6 @@ Function CharInSet(Ch:AnsiChar;Const CSet : TSysCharSet) : Boolean; inline;
 {$ENDIF}
 
 
-
-var
-  resourcefiles:TStringList;
-
 implementation
 
 uses
@@ -455,6 +451,7 @@ type
   end;
 
 
+(*
 function GetStringFromBuffer(const field:PChar):string;
 begin
   if ( field <> nil ) then
@@ -499,6 +496,7 @@ procedure DoEnumResources;
 begin
   EnumResourceTypes(HINSTANCE,@ResTypeProc,0);
 end;
+*)
 
 {$ifdef mswindows}
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
@@ -1157,17 +1155,19 @@ begin
     while (i > 0) and (not CharInSet(VersionSnippet[i],['\','/'])) do Dec(i);
     VersionSnippet := Copy(VersionSnippet, i + 1, MaxInt);
 
-    // find first occurence of _ and delete everything before it
-    // if url contains a version, this version always starts with first _
-    i := Pos('_',VersionSnippet);
-    if i>0 then
-    begin
-      Delete(VersionSnippet,1,i);
-      // ignore release candidate numbering
-      i := Pos('_RC',VersionSnippet);
-      if i>0 then Delete(VersionSnippet,i,200);
-      VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
-    end;
+    // find first occurence of _# and delete everything before it
+    // if url contains a version, this version always starts with first _#
+
+    i:=0;
+    repeat
+      Inc(i);
+    until (i>=(Length(VersionSnippet)-1)) OR ((VersionSnippet[i]='_') AND (CharInSet(VersionSnippet[i+1],['0'..'9'])));
+
+    Delete(VersionSnippet,1,i);
+    // ignore release candidate numbering
+    i := Pos('_RC',VersionSnippet);
+    if i>0 then Delete(VersionSnippet,i,MaxInt);
+    VersionSnippet:=StringReplace(VersionSnippet,'_',',',[rfReplaceAll]);
 
     if Length(VersionSnippet)>0 then
     begin
@@ -4537,14 +4537,6 @@ begin
   if Assigned(FOnWriteStream) then
     FOnWriteStream(Self, Self.Position);
 end;
-
-
-initialization
-  resourcefiles:=TStringList.Create;
-  DoEnumResources;
-
-finalization
-  resourcefiles.Free;
 
 end.
 

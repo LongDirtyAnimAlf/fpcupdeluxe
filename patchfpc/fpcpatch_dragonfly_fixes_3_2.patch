@@ -351,3 +351,16 @@ Index: rtl/dragonfly/Makefile.fpc
 +
 +initc$(PPUEXT) : $(UNIXINC)/initc.pp ctypes$(PPUEXT) $(SYSTEMUNIT)$(PPUEXT)
 +        $(COMPILER) $<
+Index: utils/fppkg/fpmake.pp
+===================================================================
+--- utils/fppkg/fpmake.pp	(revision 43661)
++++ utils/fppkg/fpmake.pp	(working copy)
+@@ -8,7 +8,7 @@
+ procedure add_fppkg_util(const ADirectory: string);
+ 
+ const
+-  lnetOSes = [linux,beos,haiku,freebsd,netbsd,openbsd,darwin,iphonesim,solaris,win32,win64,wince,aix];
++  lnetOSes = [linux,beos,haiku,freebsd,netbsd,openbsd,darwin,iphonesim,solaris,win32,win64,wince,aix,dragonfly];
+   WindowsOSes = [win32,win64,wince];
+ Var
+   P : TPackage;
