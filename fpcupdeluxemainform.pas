@@ -656,6 +656,40 @@ begin
             end;
           end;
 
+          // try to distinguish between different Solaris versons
+          if (aOS='solaris') then
+          begin
+            i:=SnipBegin;
+            while true do
+            begin
+              s:=ConfigText.Strings[i];
+              if (Pos('-FD',s)>0) AND (Pos('-solaris-oi',s)>0) then
+              begin
+                aOS:='solaris-oi';
+                break;
+              end;
+              Inc(i);
+              if (i>=ConfigText.Count) OR (s=SnipMagicEnd) then break;
+            end;
+          end;
+
+          // try to distinguish between different Linux versons
+          if (aOS='linux') then
+          begin
+            i:=SnipBegin;
+            while true do
+            begin
+              s:=ConfigText.Strings[i];
+              if (Pos('-FD',s)>0) AND (Pos('-musllinux',s)>0) then
+              begin
+                aOS:='linux-musl';
+                break;
+              end;
+              Inc(i);
+              if (i>=ConfigText.Count) OR (s=SnipMagicEnd) then break;
+            end;
+          end;
+
           aRadiogroup_CPU:=aCPU;
           aRadiogroup_OS:=aOS;
           if aRadiogroup_CPU='powerpc' then aRadiogroup_CPU:='ppc';
@@ -670,7 +704,7 @@ begin
           end;
 
           //this chek is redundant, but ok for a final check ... ;-)
-          if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
+          //if (ConfigText.IndexOf(SnipMagicBegin+aCPU+'-'+aOS)<>-1) then
           begin
             // list all available compilers
             if (Sender=nil) then AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
