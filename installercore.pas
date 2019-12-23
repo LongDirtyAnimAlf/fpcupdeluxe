@@ -2954,19 +2954,20 @@ begin
       infoln(infotext+'Got '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etInfo);
 
       s:=GetFileNameFromURL(PatchFilePath);
-
       s:=ExtractFileNameOnly(s);
       s:=GetVersionFromUrl(s);
       PatchVersion:=GetNumericalVersion(s);
 
-      if PatchVersion=0 then
+      if (s='trunk') or (PatchVersion=0) then
       begin
         //only patch trunk in case no version is given
         if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
+        {$ifndef FPCONLY}
         if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+        {$endif}
       end;
 
-      infoln(localinfotext+'Found online patch: '+PatchList[i] +' with version '+InttoStr(PatchVersion),etInfo);
+      infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etInfo);
 
       {$if defined(Darwin) and defined(LCLQT5)}
       //disable big hack for now
@@ -3001,7 +3002,7 @@ begin
       end
       else
       begin
-        infoln(infotext+ExtractFileName(PatchFilePath)+ 'for '+ModuleName+' wil not be applied !',etInfo);
+        infoln(infotext+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil not be applied !',etInfo);
       end;
     end;
   finally
