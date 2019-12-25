@@ -1127,6 +1127,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
   begin
     result:=true;
 
+    pll:=nil;
+
     // these libs are always needed !!
     AdvicedLibs:='make gdb binutils gcc unrar unzip patch wget subversion';
 
@@ -1220,15 +1222,20 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       pll:=@QTLIBS
     else if Uppercase(LCLPlatform)='QT5' then
       pll:=@QT5LIBS;
-    for i:=1 to LIBSCNT do
+
+    if Assigned(pll) then
     begin
-      if not TestLib(pll^[i]) then
+      for i:=1 to LIBSCNT do
       begin
-        if result=true then FParent.WritelnLog(etError,'Missing library:', true);
-        FParent.WritelnLog(etError, pll^[i], true);
-        result:=false;
+        if not TestLib(pll^[i]) then
+        begin
+          if result=true then FParent.WritelnLog(etError,'Missing library:', true);
+          FParent.WritelnLog(etError, pll^[i], true);
+          result:=false;
+        end;
       end;
     end;
+
     if (NOT result) AND (Length(Output)>0) then
     begin
       FParent.WritelnLog(etWarning,'You need to install at least '+Output+' to build Lazarus !!', true);
