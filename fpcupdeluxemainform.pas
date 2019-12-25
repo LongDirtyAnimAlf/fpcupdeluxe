@@ -2857,37 +2857,47 @@ begin
   try
     PrepareRun;
 
+    s:='';
+
     if Form2.UpdateOnly then
     begin
 
       if Sender=BitBtnFPCOnly then
       begin
         {$ifdef win32}
-        FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
+        s:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
         {$else}
-        FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
+        s:=_FPCCLEANBUILDONLY;
         {$endif}
       end;
 
       if Sender=BitBtnLazarusOnly then
       begin
-        FPCupManager.OnlyModules:=_LAZARUSCLEANBUILDONLY;
+        s:=_LAZARUSCLEANBUILDONLY;
       end;
 
       if Sender=BitBtnFPCandLazarus then
       begin
         // still not working 100% for Lazarus ...  todo
         // packages that are installed by the user are not included
-        FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
+        s:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
         FModuleList:=TStringList.Create;
         try
           GetModuleEnabledList(FModuleList);
           // also include enabled modules (packages) when rebuilding Lazarus
-          if FModuleList.Count>0 then FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+FModuleList.CommaText;
+          if FModuleList.Count>0 then s:=s+','+FModuleList.CommaText;
         finally
           FModuleList.Free;
         end;
       end;
+
+      if Length(s)>0 then
+        FPCupManager.OnlyModules:=s
+      else
+        begin
+          ShowMessage('No sequence defined. Should never happen. Please file bugger.');
+          exit;
+        end;
     end
     else
     begin
@@ -2896,9 +2906,9 @@ begin
       begin
         {$ifdef win32}
         //Only auto-install win32 -> win64 crossutils
-        FPCupManager.OnlyModules:=_FPC+','+_FPC+_CROSSWIN;
+        s:=_FPC+','+_FPC+_CROSSWIN;
         {$else}
-        FPCupManager.OnlyModules:=_FPC;
+        s:=_FPC;
         {$endif}
       end;
 
@@ -2906,12 +2916,12 @@ begin
       begin
       {$IFDEF win32}
         //Only auto-install win32 -> win64 crossutils
-        FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
+        s:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
       {$ELSE}
         {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(OPENBSD)}
-          FPCupManager.OnlyModules:=_LAZARUSSIMPLE;
+          s:=_LAZARUSSIMPLE;
         {$ELSE}
-          FPCupManager.OnlyModules:=_LAZARUS;
+          s:=_LAZARUS;
         {$ENDIF}
       {$ENDIF}
       end;
@@ -2920,6 +2930,9 @@ begin
       begin
         //use standard install/default sequence
       end;
+
+      if Length(s)>0 then FPCupManager.OnlyModules:=s;
+
     end;
 
     if NOT Form2.IncludeHelp then
@@ -2951,11 +2964,11 @@ begin
     end;
 
     if Sender=BitBtnFPCOnly then
-      sStatus:='Going to install/update FPC only.';
+      sStatus:='Going to install/update FPC only';
     if Sender=BitBtnLazarusOnly then
-      sStatus:='Going to install/update Lazarus only.';
+      sStatus:='Going to install/update Lazarus only';
     if Sender=BitBtnFPCandLazarus then
-      sStatus:='Going to install/update FPC and Lazarus.';
+      sStatus:='Going to install/update FPC and Lazarus';
 
     AddMessage(sStatus+' with given options.');
 

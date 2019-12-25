@@ -1217,7 +1217,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     if (LCLPlatform='') or (Uppercase(LCLPlatform)='GTK2') then
       pll:=@LCLLIBS
     else if Uppercase(LCLPlatform)='QT' then
-      pll:=@QTLIBS;
+      pll:=@QTLIBS
     else if Uppercase(LCLPlatform)='QT5' then
       pll:=@QT5LIBS;
     for i:=1 to LIBSCNT do
