@@ -912,7 +912,8 @@ begin
     end;
     //FResultSet:=FSequencer.FInstaller;
   finally
-    if assigned(FSequencer.FSkipList) then FreeAndNil(FSequencer.FSkipList);
+    if assigned(FSequencer.FSkipList) then FSequencer.FSkipList.Free;
+    FSequencer.FSkipList:=nil;
     FSequencer.DeleteOnly;
   end;
 end;
@@ -1094,8 +1095,13 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     'libqt5x11extras5-dev'
     );
 
+    //qt5-default
+    //qttools5-dev-tools
+    //qttools5-dev
+
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
-    QTLIBS:TLibList = ('libQt5Pas.so','','','','');
+    QTLIBS:TLibList = ('libQt4Pas.so','','','','');
+    QT5LIBS:TLibList = ('libQt5Pas.so','','','','');
   var
     i:integer;
     pll:^TLibList;
@@ -1104,7 +1110,7 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     AllOutput:TStringList;
     LS:array of LibSource;
 
-    function TestLib(LibName:string):boolean;
+    function TestLib(const LibName:string):boolean;
     var
       Lib : TLibHandle;
     begin
@@ -1212,6 +1218,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
       pll:=@LCLLIBS
     else if Uppercase(LCLPlatform)='QT' then
       pll:=@QTLIBS;
+    else if Uppercase(LCLPlatform)='QT5' then
+      pll:=@QT5LIBS;
     for i:=1 to LIBSCNT do
     begin
       if not TestLib(pll^[i]) then

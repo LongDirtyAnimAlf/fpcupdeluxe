@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 322
+  Left = 428
   Height = 740
-  Top = 53
+  Top = 52
   Width = 1004
   Anchors = []
   Caption = 'Form1'
@@ -2208,7 +2208,7 @@ object Form1: TForm1
           83FEA99484FEA89383FEB09B8BFDC6B8AEEE0000000000000000
         }
         Layout = blGlyphTop
-        OnClick = FPCOnlyClick
+        OnClick = InstallClick
         ParentShowHint = False
         ShowHint = True
         TabOrder = 2
@@ -2362,7 +2362,7 @@ object Form1: TForm1
           0000000000000000000000000000000000000000000000000000
         }
         Layout = blGlyphTop
-        OnClick = LazarusOnlyClick
+        OnClick = InstallClick
         ParentShowHint = False
         ShowHint = True
         TabOrder = 3
@@ -2872,7 +2872,7 @@ object Form1: TForm1
           0000000000000000000000000000000000000000000000000000
         }
         Layout = blGlyphTop
-        OnClick = BitBtnFPCandLazarusClick
+        OnClick = InstallClick
         ParentShowHint = False
         ShowHint = True
         TabOrder = 4

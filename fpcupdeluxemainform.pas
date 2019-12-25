@@ -81,16 +81,15 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
+    procedure InstallClick(Sender: TObject);
     procedure BitBtnHaltClick(Sender: TObject);
     procedure btnGetOpenSSLClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
     procedure ChkMakefileFPCClick(Sender: TObject);
     procedure Edit1KeyUp(Sender: TObject; {%H-}var Key: Word; {%H-}Shift: TShiftState);
     procedure FPCVersionLabelClick(Sender: TObject);
-    procedure LazarusOnlyClick(Sender: TObject);
-    procedure BitBtnFPCandLazarusClick(Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
     procedure btnInstallDirSelectClick(Sender: TObject);
-    procedure FPCOnlyClick(Sender: TObject);
     procedure btnSetupPlusClick(Sender: TObject);
     procedure btnClearLogClick(Sender: TObject);
     function  ButtonProcessCrossCompiler(Sender: TObject):boolean;
@@ -945,6 +944,11 @@ begin
   {$endif MSWindows}
 end;
 
+procedure TForm1.Button1Click(Sender: TObject);
+begin
+
+end;
+
 procedure TForm1.ChkMakefileFPCClick(Sender: TObject);
 begin
   DisEnable(Sender,False);
@@ -1249,6 +1253,13 @@ begin
     end;
   end;
 
+  //Lazbuild error
+  if (ExistWordInString(PChar(s),'Unable to open the package',[soDown])) then
+  begin
+    memoSummary.Lines.Append(s);
+    memoSummary.Lines.Append('Package source is missing. Please check your Lazarus config files.');
+  end;
+
   // linker error
   if (ExistWordInString(PChar(s),'/usr/bin/ld: cannot find',[soDown])) then
   begin
@@ -1542,6 +1553,14 @@ begin
     end;
   end;
 
+  // lazbuild error
+  if (NOT Special) AND (ExistWordInString(PChar(s),'Unable to open the package',[soDown]) OR ExistWordInString(PChar(s),'Unable to load package',[soDown])) then
+  begin
+    FG      := clRed;
+    BG      := clPurple;
+    Special := True;
+  end;
+
   if (ExistWordInString(PChar(s),'error:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'fatal:',[soWholeWord,soDown])) OR (ExistWordInString(PChar(s),'Memory warning:',[soWholeWord,soDown])) then
   begin
     // skip git fatal messages ... they are not that fatal ... but not sure yet !
@@ -1669,73 +1688,6 @@ begin
     AddMessage(s+'.');
 
     sStatus:=s;
-
-    {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
-    {$endif}
-
-    RealRun;
-
-  finally
-    DisEnable(Sender,True);
-  end;
-end;
-
-procedure TForm1.BitBtnFPCandLazarusClick(Sender: TObject);
-var
-  FModuleList: TStringList;
-begin
-
-  if (Length(FPCTarget)=0) or (Length(LazarusTarget)=0) then
-  begin
-    ShowMessage('Please select a FPC and Lazarus version first');
-    exit;
-  end;
-
-  {$ifdef CPUAARCH64}
-  if (MessageDlg('Be forwarned: this will only work with FPC 3.2 or trunk (or NewPascal).' + sLineBreak +
-                 'An aarch64 fpcupdeluxe bootstrapper wil be used.' + sLineBreak +
-                 'Do you want to continue ?'
-                 ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
-                 begin
-                   exit;
-                 end;
-  {$endif CPUAARCH64}
-
-  DisEnable(Sender,False);
-  try
-    PrepareRun;
-
-    AddMessage('Going to install/update FPC and Lazarus with given options.');
-    sStatus:='Going to install/update FPC and Lazarus.';
-
-    if Form2.UpdateOnly then
-    begin
-      // still not working 100% for Lazarus ...  todo
-      // packages that are installed by the user are not included
-      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
-      FModuleList:=TStringList.Create;
-      try
-        GetModuleEnabledList(FModuleList);
-        // also include enabled modules (packages) when rebuilding Lazarus
-        if FModuleList.Count>0 then FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+FModuleList.CommaText;
-      finally
-        FModuleList.Free;
-      end;
-    end
-    else
-    begin
-      if (NOT Form2.IncludeHelp) then
-      begin
-        if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-        FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPFPC+','+_HELPLAZARUS
-      end
-      else
-      begin
-        if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
-        FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
-      end;
-    end;
 
     {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
@@ -2881,73 +2833,77 @@ begin
   result:=success;
 end;
 
-procedure TForm1.FPCOnlyClick(Sender: TObject);
+procedure TForm1.InstallClick(Sender: TObject);
+var
+  s:string;
+  FModuleList: TStringList;
 begin
-  if (Length(FPCTarget)=0) then
+
+  s:='';
+  if Sender=BitBtnFPCOnly then
+    if (Length(FPCTarget)=0) then s:='Please select a FPC target first';
+  if Sender=BitBtnLazarusOnly then
+    if (Length(LazarusTarget)=0) then s:='Please select a Lazarus target first';
+  if Sender=BitBtnFPCandLazarus then
+    if (Length(FPCTarget)=0) or (Length(LazarusTarget)=0) then s:='Please select a FPC and Lazarus target first';
+
+  if Length(s)>0 then
   begin
-    ShowMessage('Please select a FPC target first');
+    ShowMessage(s);
     exit;
   end;
+
   DisEnable(Sender,False);
   try
     PrepareRun;
 
     if Form2.UpdateOnly then
     begin
-      {$ifdef win32}
-      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
-      {$else}
-      FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
-      {$endif}
+
+      if Sender=BitBtnFPCOnly then
+      begin
+        {$ifdef win32}
+        FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_FPC+_CROSSWIN;
+        {$else}
+        FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY;
+        {$endif}
+      end;
+
+      if Sender=BitBtnLazarusOnly then
+      begin
+        FPCupManager.OnlyModules:=_LAZARUSCLEANBUILDONLY;
+      end;
+
+      if Sender=BitBtnFPCandLazarus then
+      begin
+        // still not working 100% for Lazarus ...  todo
+        // packages that are installed by the user are not included
+        FPCupManager.OnlyModules:=_FPCCLEANBUILDONLY+','+_LAZARUSCLEANBUILDONLY;
+        FModuleList:=TStringList.Create;
+        try
+          GetModuleEnabledList(FModuleList);
+          // also include enabled modules (packages) when rebuilding Lazarus
+          if FModuleList.Count>0 then FPCupManager.OnlyModules:=FPCupManager.OnlyModules+','+FModuleList.CommaText;
+        finally
+          FModuleList.Free;
+        end;
+      end;
     end
     else
     begin
-      {$ifdef win32}
-      //Only auto-install win32 -> win64 crossutils
-      FPCupManager.OnlyModules:=_FPC+','+_FPC+_CROSSWIN;
-      {$else}
-      FPCupManager.OnlyModules:=_FPC;
-      {$endif}
-    end;
 
-    if NOT Form2.IncludeHelp then
-    begin
-      if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPFPC;
-    end;
+      if Sender=BitBtnFPCOnly then
+      begin
+        {$ifdef win32}
+        //Only auto-install win32 -> win64 crossutils
+        FPCupManager.OnlyModules:=_FPC+','+_FPC+_CROSSWIN;
+        {$else}
+        FPCupManager.OnlyModules:=_FPC;
+        {$endif}
+      end;
 
-    sStatus:='Going to install/update FPC only.';
-
-    {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufInstallFPC;
-    {$endif}
-
-    RealRun;
-
-  finally
-    DisEnable(Sender,True);
-  end;
-end;
-
-procedure TForm1.LazarusOnlyClick(Sender: TObject);
-begin
-  if (Length(LazarusTarget)=0) then
-  begin
-    ShowMessage('Please select a Lazarus target first');
-    exit;
-  end;
-
-  DisEnable(Sender,False);
-
-  try
-    PrepareRun;
-
-    if Form2.UpdateOnly then
-    begin
-      FPCupManager.OnlyModules:=_LAZARUSCLEANBUILDONLY;
-    end
-    else
-    begin
+      if Sender=BitBtnLazarusOnly then
+      begin
       {$IFDEF win32}
         //Only auto-install win32 -> win64 crossutils
         FPCupManager.OnlyModules:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
@@ -2958,26 +2914,59 @@ begin
           FPCupManager.OnlyModules:=_LAZARUS;
         {$ENDIF}
       {$ENDIF}
+      end;
+
+      if Sender=BitBtnFPCandLazarus then
+      begin
+        //use standard install/default sequence
+      end;
     end;
 
-    if (NOT Form2.IncludeHelp) then
+    if NOT Form2.IncludeHelp then
     begin
-      if Length(FPCupManager.SkipModules)>0 then FPCupManager.SkipModules:=FPCupManager.SkipModules+',';
-      FPCupManager.SkipModules:=FPCupManager.SkipModules+_HELPLAZARUS;
+      if ((Sender=BitBtnFPCOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.SkipModules:=FPCupManager.SkipModules+','+_HELPFPC;
+      if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then FPCupManager.SkipModules:=FPCupManager.SkipModules+','+_HELPLAZARUS;
     end
     else
     begin
-      if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
-      FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
+      if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then
+      begin
+        FPCupManager.IncludeModules:=FPCupManager.IncludeModules+','+'lhelp';
+      end;
     end;
 
-    sStatus:='Going to install/update Lazarus only.';
+    //Delete stray comma
+    s:=FPCupManager.IncludeModules;
+    if Pos(',',s)=1 then
+    begin
+      Delete(s,1,1);
+      FPCupManager.IncludeModules:=s;
+    end;
+    //Delete stray comma
+    s:=FPCupManager.SkipModules;
+    if Pos(',',s)=1 then
+    begin
+      Delete(s,1,1);
+      FPCupManager.SkipModules:=s;
+    end;
+
+    if Sender=BitBtnFPCOnly then
+      sStatus:='Going to install/update FPC only.';
+    if Sender=BitBtnLazarusOnly then
+      sStatus:='Going to install/update Lazarus only.';
+    if Sender=BitBtnFPCandLazarus then
+      sStatus:='Going to install/update FPC and Lazarus.';
+
+    AddMessage(sStatus+' with given options.');
 
     {$ifdef RemoteLog}
-    aDataClient.UpInfo.UpFunction:=ufInstallLAZ;
+    if Sender=BitBtnFPCOnly then aDataClient.UpInfo.UpFunction:=ufInstallFPC;
+    if Sender=BitBtnLazarusOnly then aDataClient.UpInfo.UpFunction:=ufInstallLAZ;
+    if Sender=BitBtnFPCandLazarus then aDataClient.UpInfo.UpFunction:=ufInstallFPCLAZ;
     {$endif}
 
     RealRun;
+
   finally
     DisEnable(Sender,True);
   end;
