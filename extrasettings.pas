@@ -166,6 +166,9 @@ type
     function GetUseSoftFloat:boolean;
     procedure SetUseSoftFloat(value:boolean);
 
+    function GetAllowOnlinePatching:boolean;
+    procedure SetAllowOnlinePatching(value:boolean);
+
     function GetHTTPProxyHost:string;
     function GetHTTPProxyPort:integer;
     function GetHTTPProxyUser:string;
@@ -225,6 +228,7 @@ type
     property ForceLocalRepoClient:boolean read GetForceLocalRepoClient write SetForceLocalRepoClient;
     property GetUpdates:boolean read GetCheckUpdates write SetCheckUpdates;
     property UseSoftFloat:boolean read GetUseSoftFloat write SetUseSoftFloat;
+    property OnlinePatching:boolean read GetAllowOnlinePatching write SetAllowOnlinePatching;
 
     property HTTPProxyHost:string read GetHTTPProxyHost;
     property HTTPProxyPort:integer read GetHTTPProxyPort;
@@ -294,6 +298,10 @@ resourcestring
 
   HintUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
   CaptionUseSoftFloat80bit = 'Enable software emulation of 80 bit floats.';
+
+  HintCheckEnableOnlinePatching = 'Fpcupdeluxe can patch the sources automagically by using online patches.';
+  CaptionCheckEnableOnlinePatching = 'Allow patching of sources by online patches.';
+
 
 var
   Form2: TForm2;
@@ -402,6 +410,7 @@ begin
     Append(CaptionCheckForceLocalRepoClient);
     Append(CaptionCheckGetUpdates);
     Append(CaptionUseSoftFloat80bit);
+    Append(CaptionCheckEnableOnlinePatching);
   end;
 
 
@@ -487,6 +496,9 @@ begin
   ForceLocalRepoClient:=False;
   SetCheckEnabled(CaptionCheckForceLocalRepoClient,False);
   {$endif}
+
+  UseSoftFloat:=true;
+  OnlinePatching:=true;
 end;
 
 procedure TForm2.SetInstallDir(const aInstallDir:string='');
@@ -1143,6 +1155,16 @@ procedure TForm2.SetUseSoftFloat(value:boolean);
 begin
   SetCheckState(CaptionUseSoftFloat80bit,value);
 end;
+
+function TForm2.GetAllowOnlinePatching:boolean;
+begin
+  result:=GetCheckState(CaptionCheckEnableOnlinePatching);
+end;
+procedure TForm2.SetAllowOnlinePatching(value:boolean);
+begin
+  SetCheckState(CaptionCheckEnableOnlinePatching,value);
+end;
+
 
 function TForm2.GetFPCOptions:string;
 begin

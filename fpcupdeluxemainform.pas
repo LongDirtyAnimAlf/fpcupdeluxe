@@ -3133,6 +3133,7 @@ begin
   {$endif}
 
   FPCupManager.SoftFloat:=Form2.UseSoftFloat;
+  FPCupManager.OnlinePatching:=Form2.OnlinePatching;
 
   FPCupManager.OnlyModules:='';
   FPCupManager.IncludeModules:='';
@@ -3537,6 +3538,7 @@ begin
       Form2.ExtraVerbose:=ReadBool('General','ExtraVerbose',False);
       Form2.UpdateOnly:=ReadBool('General','UpdateOnly',False);
       Form2.UseSoftFloat:=ReadBool('General','UseSoftFloat',True);
+      Form2.OnlinePatching:=ReadBool('General','OnlinePatching',True);
 
       Form2.SystemFPC:=ReadBool('General','SystemFPC',False);
 
@@ -3614,6 +3616,7 @@ begin
       WriteBool('General','ExtraVerbose',Form2.ExtraVerbose);
       WriteBool('General','UpdateOnly',Form2.UpdateOnly);
       WriteBool('General','UseSoftFloat',Form2.UseSoftFloat);
+      WriteBool('General','OnlinePatching',Form2.OnlinePatching);
 
       WriteString('Patches','FPCPatches',Form2.FPCPatches);
       WriteString('Patches','LazarusPatches',Form2.LazPatches);

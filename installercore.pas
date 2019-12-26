@@ -335,6 +335,7 @@ type
     FExportOnly: boolean;
     FNoJobs: boolean;
     FSoftFloat: boolean;
+    FOnlinePatching: boolean;
     FVerbose: boolean;
     FUseWget: boolean;
     FTar: string;
@@ -463,6 +464,7 @@ type
     property ExportOnly: boolean write FExportOnly;
     property NoJobs: boolean write FNoJobs;
     property SoftFloat: boolean write FSoftFloat;
+    property OnlinePatching: boolean write FOnlinePatching;
     // display and log in temp log file all sub process output
     property Verbose: boolean write FVerbose;
     // use wget as downloader ??
@@ -2866,7 +2868,7 @@ var
   s: string = '';
   ReturnCode,i,j: integer;
   LocalSourcePatches:string;
-  PatchFPC:boolean;
+  PatchFPC,PatchUniversal:boolean;
   {$ifndef FPCONLY}
   PatchLaz:boolean;
   {$endif}
@@ -2879,11 +2881,16 @@ begin
   PatchLaz:=(ModuleName=_LAZARUS);
   {$endif}
 
-  if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc' else
-     {$ifndef FPCONLY}
-     if PatchLaz then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchlazarus' else
-     {$endif}
-        PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpcup';
+  PatchUniversal:=(NOT PatchFPC);
+  {$ifndef FPCONLY}
+  PatchUniversal:=(PatchUniversal AND (NOT PatchLaz));
+  {$endif};
+
+  if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc';
+  {$ifndef FPCONLY}
+  if PatchLaz then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchlazarus';
+  {$endif}
+  if PatchUniversal then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpcup';
 
   // always remove the previous fpcupdeluxe patches when updating the source !!!
   if (DirectoryExists(PatchDirectory)) then
@@ -2911,6 +2918,7 @@ begin
           end
           else
           {$endif}
+          if PatchUniversal then
           begin
             if (j=0) then j:=Pos('_FPCUPPATCH',PatchFilePath);
             if (j=0) then j:=Pos('fpcuppatch_',PatchFilePath);
@@ -2943,15 +2951,15 @@ begin
 
       PatchFilePath:=PatchList[i];
 
-      if PatchFPC then j:=Pos('fpcpatch',PatchFilePath) else
-         {$ifndef FPCONLY}
-         if PatchLaz then j:=Pos('lazpatch',PatchFilePath) else
-         {$endif}
-            j:=Pos('fpcuppatch',PatchFilePath);
+      if PatchFPC then j:=Pos('fpcpatch',PatchFilePath);
+      {$ifndef FPCONLY}
+      if PatchLaz then j:=Pos('lazpatch',PatchFilePath);
+      {$endif}
+      if PatchUniversal then j:=Pos('fpcuppatch',PatchFilePath);
 
       if j=0 then continue;
 
-      infoln(infotext+'Got '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etInfo);
+      infoln(infotext+'Using '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etDebug);
 
       s:=GetFileNameFromURL(PatchFilePath);
       s:=ExtractFileNameOnly(s);
@@ -2967,7 +2975,7 @@ begin
         {$endif}
       end;
 
-      infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etInfo);
+      infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
 
       {$if defined(Darwin) and defined(LCLQT5)}
       //disable big hack for now
@@ -2996,13 +3004,14 @@ begin
 
       if (j>0) then
       begin
+        infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil be applied !',etInfo);
         ForceDirectoriesSafe(PatchDirectory);
         s:=GetFileNameFromURL(PatchFilePath);
         GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
       end
       else
       begin
-        infoln(infotext+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil not be applied !',etInfo);
+        infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil not be applied !',etDebug);
       end;
     end;
   finally

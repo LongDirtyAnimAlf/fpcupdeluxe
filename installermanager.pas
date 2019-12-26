@@ -236,6 +236,7 @@ type
     FExportOnly:boolean;
     FNoJobs:boolean;
     FSoftFloat:boolean;
+    FOnlinePatching:boolean;
     FUseGitClient:boolean;
     FSwitchURL:boolean;
     FNativeFPCBootstrapCompiler:boolean;
@@ -351,6 +352,7 @@ type
     property ExportOnly:boolean read FExportOnly write FExportOnly;
     property NoJobs:boolean read FNoJobs write FNoJobs;
     property SoftFloat:boolean read FSoftFloat write FSoftFloat;
+    property OnlinePatching:boolean read FOnlinePatching write FOnlinePatching;
     property UseGitClient:boolean read FUseGitClient write FUseGitClient;
     property SwitchURL:boolean read FSwitchURL write FSwitchURL;
     property NativeFPCBootstrapCompiler:boolean read FNativeFPCBootstrapCompiler write FNativeFPCBootstrapCompiler;
@@ -927,6 +929,13 @@ begin
   UseGitClient:=false;
   FNativeFPCBootstrapCompiler:=true;
   ForceLocalRepoClient:=false;
+
+  FSoftFloat:=true;
+  FOnlinePatching:=false;
+  FSwitchURL:=false;
+  FSolarisOI:=false;
+  FMUSL:=false;
+
   FPatchCmd:='patch';
 
   FModuleList:=TStringList.Create;
@@ -1525,6 +1534,7 @@ begin
     FInstaller.ExportOnly:=FParent.ExportOnly;
     FInstaller.NoJobs:=FParent.NoJobs;
     FInstaller.SoftFloat:=FParent.SoftFloat;
+    FInstaller.OnlinePatching:=FParent.OnlinePatching;
     FInstaller.Log:=FParent.FLog;
     FInstaller.MakeDirectory:=FParent.MakeDirectory;
     FInstaller.SwitchURL:=FParent.SwitchURL;

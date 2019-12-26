@@ -2261,8 +2261,12 @@ begin
       FReleaseVersion:=0;
       GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
       FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
+    end
+    else
+    begin
+      infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
-    PatchModule(ModuleName);
+    if FOnlinePatching then PatchModule(ModuleName);
   end;
 
   //if false then

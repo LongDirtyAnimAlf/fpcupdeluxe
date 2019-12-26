@@ -1879,6 +1879,8 @@ begin
   end
   else
     result:=false;
+
+  //if (result and FOnlinePatching) then PatchModule(ModuleName);
 end;
 
 function TUniversalInstaller.GetModuleRequirements(ModuleName: string;
