@@ -713,8 +713,9 @@ begin
     // do we have a stray sh.exe in the path ...
     if (Length(Which('sh.exe'))>0) then
     begin
-      ExecuteCommand('cmd.exe /C echo %COMSPEC%', output, False);
-      FShell := Trim(output);
+      FShell := GetEnvironmentVariable('COMSPEC');
+      //ExecuteCommand('cmd.exe /C echo %COMSPEC%', output, False);
+      //FShell := Trim(output);
       if FShell = '' then
       begin
         //for older Windows versions

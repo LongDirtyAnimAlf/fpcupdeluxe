@@ -572,20 +572,83 @@ begin
 end;
 
 function TSVNClient.GetDiffAll: string;
+var
+  aFile:string;
+  aResult:TStringList;
+  aProcess:TProcessEx;
 begin
-  Result := ''; //fail by default
+  result := '';
+  FReturnCode := 0;
+
   if ExportOnly then
   begin
-    FReturnCode := 0;
     exit;
   end;
-  // Using proxy more for completeness here
-  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff '+' .', LocalRepository, Result, Verbose);
-  // with external diff program
-  //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff --diff-cmd diff --extensions "--binary -wbua"'+' .', LocalRepository, Result, Verbose);
-  // ignoring whitespaces
-  FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' .', LocalRepository, Result, Verbose);
-  FReturnOutput := Result;
+
+  infoln('Getting diff between current sources and online sources of ' + LocalRepository,etInfo);
+
+  aProcess:=nil;
+
+  {$ifdef  MSWINDOWS}
+  aProcess := TProcessEx.Create(nil);
+  aProcess.Executable := GetEnvironmentVariable('COMSPEC');
+  if NOT FileExists(aProcess.Executable) then aProcess.Executable := 'c:\windows\system32\cmd.exe';
+  aProcess.Parameters.Add('/c');
+  {$endif  MSWINDOWS}
+
+  {$ifdef LINUX}
+  aProcess := TProcessEx.Create(nil);
+  aProcess.Executable := '/bin/sh';
+  aprocess.Parameters.Add('-c');
+  {$endif LINUX}
+
+  if Assigned(aProcess) then
+  begin
+    if NOT FileExists(aProcess.Executable) then
+    begin
+      aProcess.Free;
+      aProcess:=nil;
+    end;
+  end;
+
+  if Assigned(aProcess) then
+  begin
+    aFile := GetTempFileNameExt('','FPCUPTMP','diff');
+    aProcess.CurrentDirectory:=LocalRepository;
+    aProcess.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
+    aProcess.Options := aProcess.Options + [poNoConsole, poWaitOnExit{, poUsePipes}];
+    infoln('Executing: '+aProcess.ResultingCommand+' (working dir: '+ aProcess.CurrentDirectory +')',etInfo);
+    try
+      aProcess.Execute;
+      FReturnCode:=aProcess.ExitCode;
+      if (FReturnCode=0) AND (FileExists(aFile)) then
+      begin
+        aResult:=TStringList.Create;
+        try
+          aResult.LoadFromFile(aFile);
+          result:=aResult.Text;
+        finally
+          aResult.Free;
+        end;
+      end;
+    finally
+      aProcess.Free;
+      aProcess:=nil;
+      DeleteFile(aFile);
+    end;
+  end;
+
+  if result='' then
+  begin
+    // Using proxy more for completeness here
+    //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff '+' .', LocalRepository, Result, Verbose);
+    // with external diff program
+    //FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff --diff-cmd diff --extensions "--binary -wbua"'+' .', LocalRepository, Result, Verbose);
+    // ignoring whitespaces
+    FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' .', LocalRepository, result, Verbose);
+  end;
+
+  FReturnOutput := result;
 end;
 
 procedure TSVNClient.Log(var Log: TStringList);
