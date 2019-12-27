@@ -730,6 +730,7 @@ begin
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
                 else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
               memoSummary.Lines.Append('');
+              if (NOT success) then break;
             end;
           end;
         end;
@@ -1682,7 +1683,7 @@ begin
     else
     begin
       if Length(FPCupManager.IncludeModules)>0 then FPCupManager.IncludeModules:=FPCupManager.IncludeModules+',';
-      FPCupManager.IncludeModules:=FPCupManager.IncludeModules+'lhelp';
+      FPCupManager.IncludeModules:=FPCupManager.IncludeModules+_LHELP;
     end;
 
     AddMessage(s+'.');
@@ -2944,7 +2945,7 @@ begin
     begin
       if ((Sender=BitBtnLazarusOnly) OR (Sender=BitBtnFPCandLazarus)) then
       begin
-        FPCupManager.IncludeModules:=FPCupManager.IncludeModules+','+'lhelp';
+        FPCupManager.IncludeModules:=FPCupManager.IncludeModules+','+_LHELP;
       end;
     end;
 

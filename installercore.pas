@@ -199,6 +199,7 @@ const
   _HELP                    = 'Help';
   _HELPFPC                 = _HELP+_FPC;
   _HELPLAZARUS             = _HELP+_LAZARUS;
+  _LHELP                   = 'lhelp';
 
   {$ifdef mswindows}
   {$ifdef win32}

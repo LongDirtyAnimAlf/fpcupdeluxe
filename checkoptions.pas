@@ -306,7 +306,7 @@ begin
       else
       begin
         if Length(FInstaller.IncludeModules)>0 then FInstaller.IncludeModules:=FInstaller.IncludeModules+',';
-        FInstaller.IncludeModules:=FInstaller.IncludeModules+'lhelp';
+        FInstaller.IncludeModules:=FInstaller.IncludeModules+_LHELP;
       end;
 
       FInstaller.FPCPatches:=Options.GetOption('','fpcpatch','',false);
