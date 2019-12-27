@@ -2366,6 +2366,23 @@ begin
 
       end;
 
+      // go ahead with online compiler found !!
+      // get compiler version (if any)
+      {
+      s:=GetCompilerVersion(FCompiler);
+      if (s='0.0.0') AND (aCompilerFound) AND (FBootstrapCompilerURL<>'') then
+      begin
+        if s<>aLocalBootstrapVersion then
+        begin
+          result:=DownloadBootstrapCompiler;
+          if result then
+          begin
+            FCompiler:=FBootstrapCompiler;
+          end;
+        end;
+      end;
+      }
+
       aLookForBetterAlternative:=false;
       {$ifdef Darwin}
       {$ifdef CPUX64}
@@ -3247,6 +3264,7 @@ begin
         {$else Darwin}
         {$ifdef Unix}
         ConfigText.Append('-k"-rpath=./"');
+        ConfigText.Append('-k"-rpath=/usr/local/lib"');
         ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
         {$endif}
         {$endif Darwin}

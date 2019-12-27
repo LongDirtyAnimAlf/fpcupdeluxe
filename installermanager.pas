@@ -1109,8 +1109,8 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     //qttools5-dev
 
     LCLLIBS:TLibList = ('libX11.so','libgdk_pixbuf-2.0.so','libpango-1.0.so','libcairo.so','libgdk-x11-2.0.so');
-    QTLIBS:TLibList = ('libQt4Pas.so','','','','');
-    QT5LIBS:TLibList = ('libQt5Pas.so','','','','');
+    QTLIBS:TLibList = ('libQt4Pas.so.1','','','','');
+    QT5LIBS:TLibList = ('libQt5Pas.so.1','','','','');
   var
     i:integer;
     pll:^TLibList;

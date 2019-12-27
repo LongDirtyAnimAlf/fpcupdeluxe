@@ -15,19 +15,12 @@
         <DpiAware Value="True/PM"/>
       </XPManifest>
       <Icon Value="0"/>
-      <Resources Count="12">
+      <Resources Count="5">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
-        <Resource_3 FileName="patchlazarus\darwinqt5hack.patch" Type="RCDATA" ResourceName="DARWINQT5HACK_LAZPATCH"/>
-        <Resource_4 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
-        <Resource_5 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
-        <Resource_6 FileName="patchlazarus\darwinqt5hacksimple.patch" Type="RCDATA" ResourceName="DARWINQT5HACKSIMPLE_LAZPATCH"/>
-        <Resource_7 FileName="patchfpc\haiku.patch" Type="RCDATA" ResourceName="HAIKU_FPCPATCH"/>
-        <Resource_8 FileName="patchfpc\haikufpu.patch" Type="RCDATA" ResourceName="HAIKUFPU_FPCPATCH"/>
-        <Resource_9 FileName="patchfpc\freebsdfixes.patch" Type="RCDATA" ResourceName="FREEBSDFIXES_FPCPATCH"/>
-        <Resource_10 FileName="patchfpc\dragonfly.patch" Type="RCDATA" ResourceName="DRAGONFLY_FPCPATCH"/>
-        <Resource_11 FileName="patchlazarus\dragonfly.patch" Type="RCDATA" ResourceName="DRAGONFLY_LAZPATCH"/>
+        <Resource_3 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
+        <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
       </Resources>
     </General>
     <i18n>
@@ -352,7 +345,7 @@
           </Linking>
           <Other>
             <CustomOptions Value="-k&quot;-rpath=./&quot;
--XrC:\fpctrunk2\cross\lib\i386-linux"/>
+-k&quot;-rpath=/usr/local/lib&quot;"/>
           </Other>
         </CompilerOptions>
       </Item11>
@@ -386,7 +379,8 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;
+-k&quot;-rpath=/usr/local/lib&quot;"/>
           </Other>
         </CompilerOptions>
       </Item12>

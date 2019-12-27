@@ -369,7 +369,7 @@
           <Other>
             <CustomOptions Value="-dRemoteLog
 -k&quot;-rpath=./&quot;
--XrC:\fpctrunk2\cross\lib\i386-linux"/>
+-k&quot;-rpath=/usr/local/lib&quot;"/>
           </Other>
         </CompilerOptions>
       </Item11>
@@ -404,7 +404,8 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog
--k&quot;-rpath=./&quot;"/>
+-k&quot;-rpath=./&quot;
+-k&quot;-rpath=/usr/local/lib&quot;"/>
           </Other>
         </CompilerOptions>
       </Item12>
