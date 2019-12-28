@@ -344,8 +344,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;
--k&quot;-rpath=/usr/local/lib&quot;"/>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item11>
@@ -379,8 +378,7 @@
             </Debugging>
           </Linking>
           <Other>
-            <CustomOptions Value="-k&quot;-rpath=./&quot;
--k&quot;-rpath=/usr/local/lib&quot;"/>
+            <CustomOptions Value="-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item12>

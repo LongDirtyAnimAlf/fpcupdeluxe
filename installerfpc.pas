@@ -3264,7 +3264,7 @@ begin
         {$else Darwin}
         {$ifdef Unix}
         ConfigText.Append('-k"-rpath=./"');
-        ConfigText.Append('-k"-rpath=/usr/local/lib"');
+        //ConfigText.Append('-k"-rpath=/usr/local/lib"');
         ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
         {$endif}
         {$endif Darwin}

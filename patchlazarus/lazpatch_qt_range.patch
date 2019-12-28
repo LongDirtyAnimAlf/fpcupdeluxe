@@ -1,0 +1,156 @@
+Index: lcl/interfaces/qt/qt45.pas
+===================================================================
+--- lcl/interfaces/qt/qt45.pas	(revision 62400)
++++ lcl/interfaces/qt/qt45.pas	(working copy)
+@@ -10648,7 +10648,8 @@
+ 
+ type
+   QStyleControlElement = (  //QStyle::ControlElement (2)
+-    QStyleCE_PushButton,
++    QStyleCE_CustomBase = LongInt($f0000000),
++    QStyleCE_PushButton = 0,
+     QStyleCE_PushButtonBevel,
+     QStyleCE_PushButtonLabel,
+     QStyleCE_CheckBox,
+@@ -10695,11 +10696,12 @@
+     QStyleCE_HeaderEmptyArea,
+     QStyleCE_ColumnViewGrip,
+     QStyleCE_ItemViewItem,
+-    QStyleCE_ShapedFrame,
+-    QStyleCE_CustomBase = $f0000000 );
++    QStyleCE_ShapedFrame
++    );
+ 
+   QStyleComplexControl = (  //QStyle::ComplexControl (2)
+-    QStyleCC_SpinBox,
++    QStyleCC_CustomBase = LongInt($f0000000),
++    QStyleCC_SpinBox = 0,
+     QStyleCC_ComboBox,
+     QStyleCC_ScrollBar,
+     QStyleCC_Slider,
+@@ -10708,8 +10710,8 @@
+     QStyleCC_Q3ListView,
+     QStyleCC_Dial,
+     QStyleCC_GroupBox,
+-    QStyleCC_MdiControls,
+-    QStyleCC_CustomBase = $f0000000 );
++    QStyleCC_MdiControls
++    );
+ 
+ type
+   QStyleSubControl = cardinal; // QStyle::SubControl
+@@ -10764,7 +10766,8 @@
+ 
+ type
+   QStyleContentsType = (  //QStyle::ContentsType (2)
+-    QStyleCT_PushButton,
++    QStyleCT_CustomBase = LongInt($f0000000),
++    QStyleCT_PushButton = 0,
+     QStyleCT_CheckBox,
+     QStyleCT_RadioButton,
+     QStyleCT_ToolButton,
+@@ -10788,11 +10791,12 @@
+     QStyleCT_HeaderSection,
+     QStyleCT_GroupBox,
+     QStyleCT_MdiControls,
+-    QStyleCT_ItemViewItem,
+-    QStyleCT_CustomBase = $f0000000 );
++    QStyleCT_ItemViewItem
++    );
+ 
+   QStyleStandardPixmap = (  //QStyle::StandardPixmap (2)
+-    QStyleSP_TitleBarMenuButton,
++    QStyleSP_CustomBase = LongInt($f0000000),
++    QStyleSP_TitleBarMenuButton = 0,
+     QStyleSP_TitleBarMinButton,
+     QStyleSP_TitleBarMaxButton,
+     QStyleSP_TitleBarCloseButton,
+@@ -10860,8 +10864,8 @@
+     QStyleSP_MediaSeekForward,
+     QStyleSP_MediaSeekBackward,
+     QStyleSP_MediaVolume,
+-    QStyleSP_MediaVolumeMuted,
+-    QStyleSP_CustomBase = $f0000000 );
++    QStyleSP_MediaVolumeMuted
++    );
+ 
+ type
+   QStylePrimitiveElement = cardinal; //  QStyle::PrimitiveElement (4)
+Index: lcl/interfaces/qt5/qt56.pas
+===================================================================
+--- lcl/interfaces/qt5/qt56.pas	(revision 62400)
++++ lcl/interfaces/qt5/qt56.pas	(working copy)
+@@ -12467,7 +12467,8 @@
+ 
+ type
+   QStyleControlElement = (  //QStyle::ControlElement (2)
+-    QStyleCE_PushButton,
++    QStyleCE_CustomBase = LongInt($f0000000),
++    QStyleCE_PushButton = 0,
+     QStyleCE_PushButtonBevel,
+     QStyleCE_PushButtonLabel,
+     QStyleCE_CheckBox,
+@@ -12513,11 +12514,12 @@
+     QStyleCE_HeaderEmptyArea,
+     QStyleCE_ColumnViewGrip,
+     QStyleCE_ItemViewItem,
+-    QStyleCE_ShapedFrame,
+-    QStyleCE_CustomBase = $f0000000 );
++    QStyleCE_ShapedFrame
++    );
+ 
+   QStyleComplexControl = (  //QStyle::ComplexControl (2)
+-    QStyleCC_SpinBox,
++    QStyleCC_CustomBase = LongInt($f0000000),
++    QStyleCC_SpinBox = 0,
+     QStyleCC_ComboBox,
+     QStyleCC_ScrollBar,
+     QStyleCC_Slider,
+@@ -12525,8 +12527,8 @@
+     QStyleCC_TitleBar,
+     QStyleCC_Dial,
+     QStyleCC_GroupBox,
+-    QStyleCC_MdiControls,
+-    QStyleCC_CustomBase = $f0000000 );
++    QStyleCC_MdiControls
++    );
+ 
+ type
+   QStyleSubControl = cardinal; // QStyle::SubControl
+@@ -12579,7 +12581,8 @@
+ 
+ type
+   QStyleContentsType = (  //QStyle::ContentsType (2)
+-    QStyleCT_PushButton,
++    QStyleCT_CustomBase = LongInt($f0000000),
++    QStyleCT_PushButton = 0,
+     QStyleCT_CheckBox,
+     QStyleCT_RadioButton,
+     QStyleCT_ToolButton,
+@@ -12601,11 +12604,12 @@
+     QStyleCT_HeaderSection,
+     QStyleCT_GroupBox,
+     QStyleCT_MdiControls,
+-    QStyleCT_ItemViewItem,
+-    QStyleCT_CustomBase = $f0000000 );
++    QStyleCT_ItemViewItem
++    );
+ 
+   QStyleStandardPixmap = (  //QStyle::StandardPixmap (2)
+-    QStyleSP_TitleBarMenuButton,
++    QStyleSP_CustomBase = LongInt($f0000000),
++    QStyleSP_TitleBarMenuButton = 0,
+     QStyleSP_TitleBarMinButton,
+     QStyleSP_TitleBarMaxButton,
+     QStyleSP_TitleBarCloseButton,
+@@ -12674,8 +12678,8 @@
+     QStyleSP_MediaSeekForward,
+     QStyleSP_MediaSeekBackward,
+     QStyleSP_MediaVolume,
+-    QStyleSP_MediaVolumeMuted,
+-    QStyleSP_CustomBase = $f0000000 );
++    QStyleSP_MediaVolumeMuted
++    );
+ 
+ type
+   QStylePrimitiveElement = cardinal; //  QStyle::PrimitiveElement (4)

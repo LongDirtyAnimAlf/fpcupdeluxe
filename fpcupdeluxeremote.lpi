@@ -368,8 +368,7 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog
--k&quot;-rpath=./&quot;
--k&quot;-rpath=/usr/local/lib&quot;"/>
+-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item11>
@@ -404,8 +403,7 @@
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog
--k&quot;-rpath=./&quot;
--k&quot;-rpath=/usr/local/lib&quot;"/>
+-k&quot;-rpath=./&quot;"/>
           </Other>
         </CompilerOptions>
       </Item12>
