@@ -1846,21 +1846,25 @@ begin
   FSVNClient.Repository       := aFileURL;
   FSVNClient.ExportOnly       := true;
 
-  if not(DirectoryExists(FSVNClient.LocalRepository)) then
+  if (Length(FSVNClient.LocalRepository)>0) then
   begin
-    writelnlog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout/export.');
-    ForceDirectoriesSafe(FSVNClient.LocalRepository);
-  end;
-
-  if FSVNClient.CheckURL then
-  begin
-    FSVNClient.CheckOutOrUpdate;
-    result:=(FSVNClient.ReturnCode=0);
+    if not(DirectoryExists(FSVNClient.LocalRepository)) then
+    begin
+      writelnlog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout/export.');
+      ForceDirectoriesSafe(FSVNClient.LocalRepository);
+    end;
+    if FSVNClient.CheckURL then
+    begin
+      FSVNClient.CheckOutOrUpdate;
+      result:=(FSVNClient.ReturnCode=0);
+    end;
   end
   else
   begin
-    result:=true;
+    //only report validity of remote URL
+    result:=FSVNClient.CheckURL;
   end;
+
 end;
 
 function TInstaller.DownloadFromFTP(ModuleName: string): boolean;
@@ -1933,7 +1937,7 @@ function TInstaller.DownloadBinUtils: boolean;
 var
   Counter: integer;
   Errors: integer = 0;
-  DownloadSuccess:boolean;
+  DownloadSuccess,Essential:boolean;
   InstallPath:string;
   RemotePath:string;
 begin
@@ -1956,20 +1960,40 @@ begin
 
       if (FileExists(InstallPath+FUtilFiles[Counter].FileName)) then continue;
 
+      //some files are not essential, so do not report as failure
+      Essential:=true;
+      if ((FUtilFiles[Counter].FileName='libiconv-2.dll') AND (FUtilFiles[Counter].Category=ucDebugger64)) then Essential:=false;
+
       RemotePath:=FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName;
 
       DownloadSuccess:=false;
 
       // These FPC binutils are always served by SVN, so use SVN client and related.
       if FSVNClient.ValidClient then
-        DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,InstallPath);
+      begin
+        //first check remote URL
+        DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,'');
+        if DownloadSuccess then
+          DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,InstallPath)
+        else
+          //skip file in case remote URL is wrong
+          DownloadSuccess:=True;
+      end;
+
+      DownloadSuccess:=DownloadSuccess AND (FileExists(InstallPath+FUtilFiles[Counter].FileName) OR  (NOT Essential));
+
       if (NOT DownloadSuccess) then
+      begin
+        if Essential then infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etWarning);
         DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
+      end;
+
+      if (NOT Essential) then continue;
 
       if NOT DownloadSuccess then
       begin
-        infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' to ' + ExtractFileDir(InstallPath) + '. Retrying.',etError);
-        Errors := Errors + 1;
+        infoln(localinfotext+'Error downloading binutil: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + '.',etError);
+        Inc(Errors);
       end else infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' into ' + ExtractFileDir(InstallPath) + ' success.',etInfo);
 
     end;
