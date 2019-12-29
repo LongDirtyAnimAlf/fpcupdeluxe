@@ -1853,11 +1853,8 @@ begin
       writelnlog(localinfotext+'Creating directory '+FSVNClient.LocalRepository+' for SVN checkout/export.');
       ForceDirectoriesSafe(FSVNClient.LocalRepository);
     end;
-    if FSVNClient.CheckURL then
-    begin
-      FSVNClient.CheckOutOrUpdate;
-      result:=(FSVNClient.ReturnCode=0);
-    end;
+    FSVNClient.CheckOutOrUpdate;
+    result:=(FSVNClient.ReturnCode=0);
   end
   else
   begin
@@ -1911,7 +1908,8 @@ begin
     FilesList:=FindAllDirectories(FSourceDirectory,False);
     if FilesList.Count=1 then aName:=FilesList[0];
     FreeAndNil(FilesList);
-    if LowerCase(ExtractFileName(aName))=LowerCase(ModuleName) then
+    if Pos(LowerCase(ModuleName),LowerCase(ExtractFileName(aName)))>0 then
+    //if LowerCase(ExtractFileName(aName))=LowerCase(ModuleName) then
     begin
       infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
       FilesList:=FindAllFiles(aName, '', True);

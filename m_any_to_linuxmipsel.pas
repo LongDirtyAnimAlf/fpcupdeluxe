@@ -172,6 +172,16 @@ begin
 
   if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
+  // Now also allow for mipsel-linux-gnu
+  if not result then
+  begin
+    BinPrefixTry:='mipsel-linux-gnu-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
   // Now also allow for mips-linux-gnu- binutilsprefix (e.g. codesourcery)
   if not result then
   begin
