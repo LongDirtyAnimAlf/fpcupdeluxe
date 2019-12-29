@@ -1404,7 +1404,7 @@ begin
   // add win32/64 gdb from lazarus
   AddNewUtil('gdb' + GetExeExt,SourceURL_gdb,'',ucDebugger32);
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucDebugger64);
-  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
+  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucDebugger64);
 
   {$ifdef win32}
   AddNewUtil('ar' + GetExeExt,aSourceURL,'',ucBinutil);
@@ -1450,7 +1450,7 @@ begin
   AddNewUtil('gdate' + GetExeExt,aSourceURL64,'',ucBinutil);
   // just add default 64 bit debugger for all usercases as a binutil !
   AddNewUtil('gdb' + GetExeExt,SourceURL64_gdb,'',ucBinutil);
-  AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucBinutil);
+  //AddNewUtil('libiconv-2.dll',SourceURL64_gdb,'',ucBinutil);
   AddNewUtil('gecho' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall' + GetExeExt,aSourceURL64,'',ucBinutil);
   AddNewUtil('ginstall.exe.manifest',aSourceURL64,'',ucBinutil);
@@ -1937,7 +1937,7 @@ function TInstaller.DownloadBinUtils: boolean;
 var
   Counter: integer;
   Errors: integer = 0;
-  DownloadSuccess,Essential:boolean;
+  DownloadSuccess:boolean;
   InstallPath:string;
   RemotePath:string;
 begin
@@ -1960,10 +1960,6 @@ begin
 
       if (FileExists(InstallPath+FUtilFiles[Counter].FileName)) then continue;
 
-      //some files are not essential, so do not report as failure
-      Essential:=true;
-      if ((FUtilFiles[Counter].FileName='libiconv-2.dll') AND (FUtilFiles[Counter].Category=ucDebugger64)) then Essential:=false;
-
       RemotePath:=FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName;
 
       DownloadSuccess:=false;
@@ -1974,21 +1970,17 @@ begin
         //first check remote URL
         DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,'');
         if DownloadSuccess then
-          DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,InstallPath)
-        else
-          //skip file in case remote URL is wrong
-          DownloadSuccess:=True;
+        begin
+          DownloadSuccess:=SimpleExportFromSVN('DownloadBinUtils',RemotePath,InstallPath);
+          DownloadSuccess:=DownloadSuccess AND FileExists(InstallPath+FUtilFiles[Counter].FileName);
+        end;
       end;
-
-      DownloadSuccess:=DownloadSuccess AND (FileExists(InstallPath+FUtilFiles[Counter].FileName) OR  (NOT Essential));
 
       if (NOT DownloadSuccess) then
       begin
-        if Essential then infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etWarning);
+        infoln(localinfotext+'Downloading: ' + FUtilFiles[Counter].FileName + ' with SVN failed. Now trying normal download.',etWarning);
         DownloadSuccess:=GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,InstallPath+FUtilFiles[Counter].FileName);
       end;
-
-      if (NOT Essential) then continue;
 
       if NOT DownloadSuccess then
       begin
