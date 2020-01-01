@@ -235,6 +235,8 @@ begin
 
         //Remove some Lazarus info
         if AnsiContainsText(line,'Info: (lazarus)') then continue;
+        if AnsiStartsText('  File=',line) then continue;
+        if AnsiStartsText('  State file=',line) then continue;
 
         // found modified files
         outputline:=true;

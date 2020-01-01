@@ -497,7 +497,8 @@ type
     // Perform some checks on the sources
     function CheckModule(ModuleName: string): boolean; virtual;
     // Patch sources
-    function PatchModule(ModuleName: string): boolean; virtual;
+    function PatchModule(ModuleName: string): boolean;
+    function CreateRevision(ModuleName,aRevision:string): boolean;
     // Uninstall module
     function UnInstallModule(ModuleName: string): boolean; virtual;
     constructor Create;
@@ -3127,6 +3128,45 @@ begin
     infoln(infotext+'No ' + ModuleName + ' patches defined.',etInfo);
   end;
 end;
+
+function TInstaller.CreateRevision(ModuleName,aRevision:string): boolean;
+const
+  // needs to be exactly the same as used by Lazarus !!!
+  //RevisionIncComment = '// Created by FPCLAZUP';
+  RevisionIncComment = '// Created by Svn2RevisionInc';
+  ConstName = 'RevisionStr';
+  RevisionIncFileName = 'revision.inc';
+var
+  RevisionIncText: Text;
+  RevFileName,ConstStart: string;
+begin
+  result:=false;
+  // update revision.inc;
+
+  if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+RevisionIncFileName;
+  if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+RevisionIncFileName;
+
+  infoln(infotext+'Updating '+ModuleName+' revision info.', etInfo);
+  AssignFile(RevisionIncText, RevFileName);
+  try
+    Rewrite(RevisionIncText);
+    if ModuleName=_LAZARUS then
+    begin
+      writeln(RevisionIncText, RevisionIncComment);
+      ConstStart := Format('const %s = ''', [ConstName]);
+      writeln(RevisionIncText, ConstStart, aRevision, ''';');
+    end;
+    if ModuleName=_FPC then
+    begin
+      writeln(RevisionIncText, '''',aRevision,'''');
+    end;
+    result:=true;
+  finally
+    CloseFile(RevisionIncText);
+  end;
+end;
+
+
 
 
 function TInstaller.UnInstallModule(ModuleName: string): boolean;

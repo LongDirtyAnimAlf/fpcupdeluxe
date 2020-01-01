@@ -213,7 +213,6 @@ type
     function GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
     function GetLazarusReleaseCandidateFromUrl(aURL:string):integer;
     function LCLCrossActionNeeded:boolean;
-    function CreateRevision(aRevision:string): boolean;
   protected
     FFPCInstallDir: string;
     FFPCSourceDir: string;
@@ -2094,7 +2093,7 @@ begin
   begin
     infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
     result:=DownloadFromFTP(ModuleName);
-    if result then CreateRevision('unknown');
+    if result then CreateRevision(ModuleName,'unknown');
   end
   else
   begin
@@ -2130,7 +2129,7 @@ begin
       infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
     end;
 
-    if Result then CreateRevision(aRepoClient.LocalRevision);
+    if Result then CreateRevision(ModuleName,aRepoClient.LocalRevision);
 
     if (NOT Result) then
       infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
@@ -2311,33 +2310,6 @@ begin
   if not result then exit;
   result:=inherited;
 end;
-
-function TLazarusInstaller.CreateRevision(aRevision:string): boolean;
-const
-  // needs to be exactly the same as used by Lazarus !!!
-  //RevisionIncComment = '// Created by FPCLAZUP';
-  RevisionIncComment = '// Created by Svn2RevisionInc';
-  ConstName = 'RevisionStr';
-  RevisionIncFileName = 'revision.inc';
-var
-  RevisionIncText: Text;
-  ConstStart: string;
-begin
-  result:=false;
-  // update revision.inc;
-  infoln(infotext+'Updating Lazarus version info.', etInfo);
-  AssignFile(RevisionIncText, IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+RevisionIncFileName);
-  try
-    Rewrite(RevisionIncText);
-    writeln(RevisionIncText, RevisionIncComment);
-    ConstStart := Format('const %s = ''', [ConstName]);
-    writeln(RevisionIncText, ConstStart, aRevision, ''';');
-    result:=true;
-  finally
-    CloseFile(RevisionIncText);
-  end;
-end;
-
 
 function TLazarusInstaller.UnInstallModule(ModuleName: string): boolean;
 begin

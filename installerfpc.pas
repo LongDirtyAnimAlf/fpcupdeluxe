@@ -3554,6 +3554,7 @@ begin
   begin
     infoln(infotext+'Using FTP for download of ' + ModuleName + ' sources.',etWarning);
     result:=DownloadFromFTP(ModuleName);
+    if result then CreateRevision(ModuleName,'unknown');
   end
   else
   begin
@@ -3582,6 +3583,8 @@ begin
     if (NOT Result) then
       infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
+
+  if result then CreateRevision(ModuleName,aRepoClient.LocalRevision);
 
   if result then
   begin
