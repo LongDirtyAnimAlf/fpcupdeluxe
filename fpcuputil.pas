@@ -280,6 +280,7 @@ function DeleteFilesNameSubdirs(const DirectoryName: string; const OnlyIfNameHas
 function GetFileNameFromURL(URL:string):string;
 function StripUrl(URL:string): string;
 function GetCompilerVersion(CompilerPath: string): string;
+function GetCompilerRevision(CompilerPath: string): integer;
 function GetLazbuildVersion(LazbuildPath: string): string;
 procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
@@ -1025,6 +1026,33 @@ begin
   end;
 end;
 
+function GetCompilerRevision(CompilerPath: string): integer;
+var
+  Output: string;
+  i:integer;
+begin
+  Result:=0;
+  if ((CompilerPath='') OR (NOT FileExists(CompilerPath))) then exit;
+  try
+    Output:='';
+    if (ExecuteCommand(CompilerPath+ ' -iW', Output, false)=0) then
+    begin
+      Output:=TrimRight(Output);
+      if Length(Output)>0 then
+      begin
+        i:=Pos('-r',Output);
+        if (i>0) then
+        begin
+          Delete(Output,1,i+1);
+          TryStrToInt(Output,Result);
+        end;
+      end;
+    end;
+  except
+  end;
+end;
+
+
 function GetLazbuildVersion(LazbuildPath: string): string;
 var
   Output: string;
@@ -1034,7 +1062,6 @@ begin
   if ((LazbuildPath='') OR (NOT FileExists(LazbuildPath))) then exit;
   try
     Output:='';
-    // -iW does not work on older compilers : use -iV
     if (ExecuteCommand(LazbuildPath+ ' --version', Output, false)=0) then
     begin
       Output:=TrimRight(Output);

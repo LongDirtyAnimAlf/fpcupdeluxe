@@ -1513,7 +1513,7 @@ var
   DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
   DiffFileSL:TStringList;
-  Output: string = '';
+  Output:string;
 begin
   Result := false;
 
@@ -1537,6 +1537,15 @@ begin
   BeforeRevision := 'revision '+aClient.LocalRevision;
   BeforeRevisionShort:=aClient.LocalRevision;
 
+  if ((ModuleName=_FPC) OR (ModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
+  begin
+    Output:=(aClient as TGitClient).GetSVNRevision;
+    if (Length(Output)>0) then
+    begin
+      BeforeRevision := 'revision '+Output;
+    end;
+  end;
+
   if BeforeRevisionShort<>FRET_UNKNOWN_REVISION then
   begin
     aClient.LocalModifications(UpdateWarnings); //Get list of modified files
@@ -1555,6 +1564,12 @@ begin
 
   aClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
   aClient.DesiredBranch := FDesiredBranch; //We want to update to this specific branch
+  Output:=localinfotext+'Running '+UpperCase(aClient.RepoExecutableName)+' checkout or update';
+  if Length(aClient.DesiredRevision)>0 then
+    Output:=Output+' of revision '+aClient.DesiredRevision;
+  Output:=Output+'.';
+  infoln(Output,etInfo);
+
 
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   aClient.CheckOutOrUpdate;
@@ -1581,7 +1596,17 @@ begin
       if FExportOnly then
         AfterRevision := FDesiredRevision
       else
+      begin
         AfterRevision := aClient.LocalRevision;
+        if ((ModuleName=_FPC) OR (ModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
+        begin
+          Output:=(aClient as TGitClient).GetSVNRevision;
+          if (Length(Output)>0) then
+          begin
+            AfterRevision:=Output;
+          end;
+        end;
+      end;
 
       if (aClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> aClient.LocalRevision) then
         FRepositoryUpdated := true
@@ -1590,6 +1615,8 @@ begin
 
       if FReApplyLocalChanges and (DiffFile<>'') then
       begin
+         Output:='';
+
          UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
 
          // check for default values
@@ -1727,7 +1754,12 @@ begin
   end;
 
   FSVNClient.DesiredRevision := FDesiredRevision; //We want to update to this specific revision
-  infoln(localinfotext+'Running SVN checkout or update.',etInfo);
+
+  Output:=localinfotext+'Running '+UpperCase(FSVNClient.RepoExecutableName)+' checkout or update';
+  if Length(FSVNClient.DesiredRevision)>0 then
+    Output:=Output+' of revision '+FSVNClient.DesiredRevision;
+  Output:=Output+'.';
+  infoln(Output,etInfo);
 
   // CheckoutOrUpdate sets result code. We'd like to detect e.g. mixed repositories.
   FSVNClient.CheckOutOrUpdate;
@@ -1777,6 +1809,8 @@ begin
 
       if Result and FReApplyLocalChanges and (DiffFile<>'') then
       begin
+        Output:='';
+
         UpdateWarnings.Add(ModuleName + ': reapplying local changes.');
 
         if ((FPatchCmd='patch') OR (FPatchCmd='gpatch'))
@@ -2745,14 +2779,13 @@ end;
 function TInstaller.GetSuitableRepoClient:TRepoClient;
 begin
   result:=nil;
-  // not so elegant check to see what kind of client we need ...
-  if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then
-    result:=FGitClient
-  else
-    begin
-      if (Pos('https://svn.',LowerCase(FURL))=1) then
-        result:=FSVNClient;
-     end;
+
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.svn') then result:=FSVNClient;
+  if result=nil then if (Pos('https://svn.',LowerCase(FURL))=1) then result:=FSVNClient;
+  if result=nil then if (Pos('http://svn.',LowerCase(FURL))=1) then result:=FSVNClient;
+
+  if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=FGitClient;
+  if result=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=FGitClient;
 end;
 
 function TInstaller.BuildModule(ModuleName: string): boolean;

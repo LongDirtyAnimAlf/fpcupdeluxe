@@ -3584,7 +3584,7 @@ begin
       infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
 
-  if result then CreateRevision(ModuleName,aRepoClient.LocalRevision);
+  if result then CreateRevision(ModuleName,ActualRevision);
 
   if result then
   begin

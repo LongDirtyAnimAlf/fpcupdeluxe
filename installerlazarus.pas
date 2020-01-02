@@ -2069,7 +2069,6 @@ const
     'endif';
 
 var
-  AfterRevision: string;
   BeforeRevision: string;
   UpdateWarnings: TStringList;
   HackMagic:TStringList;
@@ -2099,41 +2098,31 @@ begin
   begin
     infoln(infotext+'Start checkout/update of ' + ModuleName + ' sources.',etInfo);
 
-    UpdateWarnings := TStringList.Create;
+    UpdateWarnings:=TStringList.Create;
     try
       if aRepoClient=FGitClient
-         then result:=DownloadFromGit(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings)
-         else result:=DownloadFromSVN(ModuleName,BeforeRevision, AfterRevision, UpdateWarnings);
+         then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
+         else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
+      if UpdateWarnings.Count>0 then
+      begin
+        WritelnLog(UpdateWarnings.Text);
+      end;
     finally
       UpdateWarnings.Free;
     end;
 
     if NOT aRepoClient.ExportOnly then
     begin
-      infoln(infotext+'Lazarus was at: ' + BeforeRevision, etInfo);
-
-      if FRepositoryUpdated then
-      begin
-        Revision := AfterRevision;
-        infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
-      end
-      else
-      begin
-        Revision := BeforeRevision;
-        infoln(infotext+'No updates for Lazarus found.', etInfo);
-      end;
-    end
-    else
-    begin
-      Revision := AfterRevision;
-      infoln(infotext+'Lazarus is now at: ' + AfterRevision, etInfo);
+      infoln(infotext+ModuleName + ' was at: '+BeforeRevision,etInfo);
+      if FRepositoryUpdated then infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo) else
+        infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
     end;
-
-    if Result then CreateRevision(ModuleName,aRepoClient.LocalRevision);
 
     if (NOT Result) then
       infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
+
+  if result then CreateRevision(ModuleName,ActualRevision);
 
   {$ifdef Darwin}
   {$ifdef LCLQT5}
