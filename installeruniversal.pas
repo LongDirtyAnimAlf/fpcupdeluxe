@@ -1587,8 +1587,6 @@ begin
   result:=InitModule;
   if not result then exit;
   SourceOK:=false;
-
-
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
   begin
@@ -1882,7 +1880,7 @@ begin
   else
     result:=false;
 
-  //if (result and FOnlinePatching) then PatchModule(ModuleName);
+  if (result and FOnlinePatching) then PatchModule(ModuleName);
 end;
 
 function TUniversalInstaller.GetModuleRequirements(ModuleName: string;

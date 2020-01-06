@@ -3009,51 +3009,61 @@ begin
       {$ifndef FPCONLY}
       if PatchLaz then j:=Pos('lazpatch',PatchFilePath);
       {$endif}
-      if PatchUniversal then j:=Pos('fpcuppatch',PatchFilePath);
+      if PatchUniversal then
+      begin
+        j:=Pos('fpcuppatch',PatchFilePath);
+        if j<>0 then
+        begin
+          j:=Pos(LowerCase(ModuleName),LowerCase(PatchFilePath));
+        end;
+      end;
 
       if j=0 then continue;
 
       infoln(infotext+'Using '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etDebug);
 
-      s:=GetFileNameFromURL(PatchFilePath);
-      s:=ExtractFileNameOnly(s);
-      s:=GetVersionFromUrl(s);
-      PatchVersion:=GetNumericalVersion(s);
-
-      if (s='trunk') or (PatchVersion=0) then
+      if NOT PatchUniversal then
       begin
-        //only patch trunk in case no version is given
-        if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
-        {$ifndef FPCONLY}
-        if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+        s:=GetFileNameFromURL(PatchFilePath);
+        s:=ExtractFileNameOnly(s);
+        s:=GetVersionFromUrl(s);
+        PatchVersion:=GetNumericalVersion(s);
+
+        if (s='trunk') or (PatchVersion=0) then
+        begin
+          //only patch trunk in case no version is given
+          if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
+          {$ifndef FPCONLY}
+          if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+          {$endif}
+        end;
+
+        infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
+
+        {$if defined(Darwin) and defined(LCLQT5)}
+        //disable big hack for now
+        if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then j:=0;
+        {$else}
+        if Pos('darwin_qt5',PatchFilePath)>0 then j:=0;
         {$endif}
-      end;
 
-      infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
+        {$ifndef MSWindows}
+        //only patch the Haiku build process on Windows
+        if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then j:=0;
+        {$endif}
 
-      {$if defined(Darwin) and defined(LCLQT5)}
-      //disable big hack for now
-      if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then j:=0;
-      {$else}
-      if Pos('darwin_qt5',PatchFilePath)>0 then j:=0;
-      {$endif}
+        {$ifndef Haiku}
+        //only patch the Haiku FPU exception mask on Haiku itself
+        if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
+        {$endif}
 
-      {$ifndef MSWindows}
-      //only patch the Haiku build process on Windows
-      if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then j:=0;
-      {$endif}
-
-      {$ifndef Haiku}
-      //only patch the Haiku FPU exception mask on Haiku itself
-      if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
-      {$endif}
-
-      // In general, only patch trunk !
-      // This can be changed to take care of versions ... but not for now !
-      // Should be removed in future fpcup versions !!
-      if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
-      begin
-        if GetFullVersion<>PatchVersion then j:=0;
+        // In general, only patch trunk !
+        // This can be changed to take care of versions ... but not for now !
+        // Should be removed in future fpcup versions !!
+        if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
+        begin
+          if GetFullVersion<>PatchVersion then j:=0;
+        end;
       end;
 
       if (j>0) then
