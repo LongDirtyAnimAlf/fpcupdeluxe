@@ -1,0 +1,54 @@
+--- Source/3rd Party/Expat/Expat.pas	Mon Jan 06 07:31:20 2020
++++ Source/3rd Party/Expat/Expat.pas	Mon Jan 06 07:27:25 2020
+@@ -1057,7 +1057,7 @@
+   S : PAnsiChar;
+   Ok: Integer;
+ begin
+-{$IFDEF XML_UNICODE {..}
++{$IFDEF XML_UNICODE}
+ {$ELSE }
+   S := Pointer(Parser.ProtocolEncodingName);
+ {$ENDIF}
+@@ -2476,8 +2476,7 @@
+ 
+     Parser.EventEndPtr := Next;
+ 
+-    case Tok of
+-      TXmlTok(-Integer(xtProlog_S)):
++    if Ord(Tok)=-Integer(xtProlog_S) then
+         begin
+           if @Parser.DefaultHandler <> nil then
+           begin
+@@ -2495,8 +2494,10 @@
+           Result := xeNone;
+ 
+           Exit;
+-        end;
+-
++      end
++    else
++      begin
++        case Tok of
+       xtNone:
+         begin
+           NextPtr^ := S;
+@@ -2569,6 +2570,8 @@
+         Exit;
+       end;
+     end;
++      end;
++
+ 
+     Parser.EventPtr := Next;
+ 
+--- Source/AggFontWin32TrueType.pas	Mon Jan 06 07:31:20 2020
++++ Source/AggFontWin32TrueType.pas	Mon Jan 06 07:02:08 2020
+@@ -78,7 +78,7 @@
+     FNumFonts, FMaxFonts: Cardinal;
+     FFontNames: array of TAggBytes;
+     FCurrentFont: HFONT;
+-    FTextMetric: TTextMetricA;
++    FTextMetric: PTEXTMETRICA;
+     FTextMetricValid: boolean;
+ 
+     FChangeStamp: Integer;

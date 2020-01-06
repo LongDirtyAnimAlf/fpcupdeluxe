@@ -1587,6 +1587,8 @@ begin
   result:=InitModule;
   if not result then exit;
   SourceOK:=false;
+
+
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
   begin
@@ -2134,9 +2136,17 @@ var
           _BUILDMODULE + ModuleName +_SEP +
           _CONFIGMODULE + ModuleName +_SEP +
           _END +
+
           Declaration + ModuleName + _CLEAN + _SEP +
           _CLEANMODULE + ModuleName +_SEP +
           _END +
+
+          Declaration + ModuleName + _BUILD + _ONLY + _SEP +
+          _CLEANMODULE + ModuleName +_SEP +
+          _BUILDMODULE + ModuleName +_SEP +
+          _CONFIGMODULE + ModuleName +_SEP +
+          _END+
+
           Declaration + ModuleName + _UNINSTALL + _SEP +
           _UNINSTALLMODULE + ModuleName +_SEP +
           _END;

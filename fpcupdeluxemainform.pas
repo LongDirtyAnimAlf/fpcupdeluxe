@@ -851,7 +851,7 @@ begin
           SortedModules.Delete(i);
           continue;
         end;
-        if (AnsiEndsText(_CLEAN,s)) OR (AnsiEndsText(_UNINSTALL,s)) then
+        if (AnsiEndsText(_CLEAN,s)) OR (AnsiEndsText(_UNINSTALL,s)) OR (AnsiEndsText(_BUILD+_ONLY,s)) then
         begin
           SortedModules.Delete(i);
           continue;
@@ -1741,7 +1741,7 @@ begin
         if Sender=btnUninstallModule then modules:=modules+_UNINSTALL;
         modules:=modules+',';
         {$ifdef RemoteLog}
-        aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items[i]);
+        aDataClient.AddExtraData('module'+InttoStr(i),listModules.Items[i]);
         {$endif}
       end;
     end;
@@ -1751,7 +1751,10 @@ begin
     if (listModules.ItemIndex<>-1) then
     begin
       modules:=listModules.Items.Strings[listModules.ItemIndex];
-      if Sender=btnUninstallModule then modules:=modules+_UNINSTALL;
+      if Sender=btnUninstallModule then modules:=modules+_UNINSTALL else
+      begin
+        if Form2.UpdateOnly then modules:=modules+_BUILD+_ONLY;
+      end;
       {$ifdef RemoteLog}
       aDataClient.AddExtraData('module'+InttoStr(1),listModules.Items.Strings[listModules.ItemIndex]);
       {$endif}
