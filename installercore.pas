@@ -18,7 +18,7 @@ unit installerCore;
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with fpc(laz)up(deluxe).  If not, see <http://www.gnu.org/licenses/>
+    along with fpc(laz)up(deluxe).  If not, see <https://www.gnu.org/licenses/>
 }
 
 {$mode objfpc}{$H+}
@@ -108,7 +108,8 @@ const
   {$endif}
 
   {$ifdef win64}
-  OpenSSLSourceURL : array [0..4] of string = (
+  OpenSSLSourceURL : array [0..5] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2u-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2t-x64_86-win64.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2r-x64_86-win64.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win64.zip',
@@ -117,7 +118,8 @@ const
     );
   {$endif}
   {$ifdef win32}
-  OpenSSLSourceURL : array [0..4] of string = (
+  OpenSSLSourceURL : array [0..5] of string = (
+    'https://indy.fulgan.com/SSL/openssl-1.0.2u-i386-win32.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2t-i386-win32.zip',
     'https://indy.fulgan.com/SSL/openssl-1.0.2r-i386-win32.zip',
     'http://wiki.overbyte.eu/arch/openssl-1.0.2r-win32.zip',
@@ -906,7 +908,7 @@ begin
       ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
-      OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if OperationSucceeded then
       begin
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
@@ -921,7 +923,7 @@ begin
       begin
         // try one more time
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+        OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
         if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output)<50000) then
         begin
@@ -963,7 +965,7 @@ begin
       //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
-      OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+      OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
       // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
       if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
       begin
@@ -974,7 +976,7 @@ begin
       begin
         // try one more time
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-        OperationSucceeded:=GetFile('http://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
         if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
         begin
@@ -1037,6 +1039,7 @@ begin
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-32-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-32-bit.zip';
           aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-32-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-32-bit.zip';
           {$else}
           //Output:='git64.7z';
           Output:='git64.zip';
@@ -1046,6 +1049,7 @@ begin
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.21.0.windows.1/MinGit-2.21.0-64-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-64-bit.zip';
           aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-64-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-64-bit.zip';
           {$endif}
           //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
           infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
@@ -1424,7 +1428,7 @@ begin
   AddNewUtil('gmkdir' + GetExeExt,aSourceURL,'',ucBinutil);
   //AddNewUtil('GoRC' + GetExeExt,aSourceURL,'',ucBinutil);
   {
-  http://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
+  https://svn.freepascal.org/svn/lazarus/binaries/i386-win32/gdb/bin/
   only has libexpat-1, so no need for these:
   AddNewUtil('libgcc_s_dw2-1.dll',aSourceURL,'',ucBinutil);
   AddNewUtil('libiconv-2.dll',aSourceURL,'',ucBinutil);

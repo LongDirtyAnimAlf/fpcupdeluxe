@@ -1178,7 +1178,7 @@ begin
         begin
           memoSummary.Lines.Append('FPC revision 30351 introduced some changed into the compiler causing this error.');
           memoSummary.Lines.Append('Has something todo about how floating points are handled. And that has changed.');
-          memoSummary.Lines.Append('See: http://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
+          memoSummary.Lines.Append('See: https://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=30351');
         end;
 
         if (InternalError='2013051401') then
@@ -1208,8 +1208,8 @@ begin
           memoSummary.Lines.Append('So update your FPC trunk to a revision >= 37621 !!');
           //memoSummary.Lines.Append('See: https://svn.freepascal.org/cgi-bin/viewvc.cgi?view=revision&revision=37621');
           //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=32502');
-          //memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=29892');
-          //memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=9262');
+          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=29892');
+          //memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=9262');
         end;
       end;
     end
@@ -2116,11 +2116,11 @@ begin
     //if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
     begin
       if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes, stable).' + sLineBreak +
-                 'See: http://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
+                 'See: https://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
                  'Do you want to continue ?'
                  ,mtConfirmation,[mbYes, mbNo],0)<>mrYes) then
                  begin
-                   memoSummary.Lines.Append('See: http://bugs.freepascal.org/view.php?id=30908');
+                   memoSummary.Lines.Append('See: https://bugs.freepascal.org/view.php?id=30908');
                    exit;
                  end;
     end;

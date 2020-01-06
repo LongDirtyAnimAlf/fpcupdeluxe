@@ -229,7 +229,7 @@ begin
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
     // at least one ; to be present in the path. If you only have one entry, you
     // can add PathSeparator without problems.
-    // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
+    // https://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
     SetPath(BinPath+PathSeparator+
       PlainBinPath+PathSeparator+
       FMakeDir+PathSeparator+

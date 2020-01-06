@@ -345,6 +345,8 @@ begin
   if (FReturnCode = 0){ and (Length(FDesiredRevision)>0) and (uppercase(trim(FDesiredRevision)) <> 'HEAD')}
   then
   begin
+    //SSL Certificate problem
+    //git config --system http.sslCAPath /absolute/path/to/git/certificates
     // always reset hard towards desired revision
     Command := ' reset --hard ' + FDesiredRevision;
     FReturnCode := ExecuteCommandInDir(DoubleQuoteIfNeeded(FRepoExecutable) + command, FLocalRepository, Verbose);
@@ -510,6 +512,7 @@ begin
   if FHTTPProxyHost<>'' then
   begin
     s:=FHTTPProxyHost;
+    if Pos('http',s)<>1 then s:='https://'+s;
     if FHTTPProxyPort<>0 then s:=s+':'+IntToStr(FHTTPProxyPort);
     if FHTTPProxyUser<>'' then
     begin
@@ -517,7 +520,7 @@ begin
       if FHTTPProxyPassword<>'' then s:=':'+FHTTPProxyPassword+s;
       s:=FHTTPProxyUser+s;
     end;
-    result:=' config --local --add http.proxy http://'+s;
+    result:=' config --local --add http.proxy '+s;
   end
   else
   begin

@@ -542,7 +542,7 @@ begin
   rem gives bin\i386-win32\ppcrossx64.exe
 
   Note: make install CROSSINSTALL=1 apparently installs, but does NOT install utilities (ld etc?) for that
-  platform; see posting Jonas Maebe http://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
+  platform; see posting Jonas Maebe https://lists.freepascal.org/lists/fpc-pascal/2011-August/030084.html
   make all install CROSSCOMPILE=1??? find out?
   }
 
@@ -943,7 +943,7 @@ begin
 
           if CrossInstaller.LibsPath<>''then
           begin
-             // http://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
+             // https://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
              if (CrossInstaller.TargetOS='aix') then
              begin
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
@@ -3178,6 +3178,8 @@ begin
         {$IF (defined(BSD)) and (not defined(Darwin))}
         s:='-Fl/usr/local/lib'+';'+'/usr/pkg/lib';
         {$ifndef FPCONLY}
+        //VersionSnippet:=GetEnvironmentVariable('X11BASE');
+        //if Length(VersionSnippet)>0 then s:=s+';'+VersionSnippet
         s:=s+';'+'/usr/X11R6/lib'+';'+'/usr/X11R7/lib';
         {$endif FPCONLY}
         ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');

@@ -339,8 +339,8 @@ begin
       end;
 
       // Since April 2012, LCL requires lazutils which requires registration
-      // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
-      //http://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
+      // https://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+      //https://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
 
       if Length(LazBuildApp)=0 then
       begin
@@ -760,8 +760,8 @@ begin
       _LCL:
       begin
         // April 2012: lcl now requires lazutils and registration
-        // http://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
-        // http://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
+        // https://wiki.lazarus.freepascal.org/Getting_Lazarus#Make_targets
+        // https://lists.lazarus-ide.org/pipermail/lazarus/2012-April/138168.html
         Processor.Parameters.Add('registration');
         Processor.Parameters.Add('lazutils');
         Processor.Parameters.Add('lcl');
@@ -1380,7 +1380,7 @@ begin
     // Note: apparently on Windows, the FPC, perhaps Lazarus make scripts expect
     // at least one ; to be present in the path. If you only have one entry, you
     // can add PathSeparator without problems.
-    // http://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
+    // https://www.mail-archive.com/fpc-devel@lists.freepascal.org/msg27351.html
     SetPath(FBinPath + PathSeparator + PlainBinPath + PathSeparator + FMakeDir + PathSeparator +
       ExcludeTrailingPathDelimiter(FSVNDirectory) + PathSeparator + ExcludeTrailingPathDelimiter(FInstallDirectory), false, false);
     {$ENDIF MSWINDOWS}

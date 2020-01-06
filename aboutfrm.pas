@@ -12,7 +12,7 @@
  *   General Public License for more details.                              *
  *                                                                         *
  *   A copy of the GNU General Public License is available on the World    *
- *   Wide Web at <http://www.gnu.org/copyleft/gpl.html>. You can also      *
+ *   Wide Web at <https://www.gnu.org/copyleft/gpl.html>. You can also      *
  *   obtain it by writing to the Free Software Foundation,                 *
  *   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.        *
  *                                                                         *
@@ -157,13 +157,13 @@ begin
   Height:= 380;
 
   OfficialLabel.Caption := 'Source';
-  OfficialURLLabel.Caption := 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup/';
+  OfficialURLLabel.Caption := 'https://github.com/LongDirtyAnimAlf/Reiniero-fpcup';
   DocumentationLabel.Caption := 'Wiki';
-  DocumentationURLLabel.Caption := 'http://wiki.lazarus.freepascal.org/fpcup';
+  DocumentationURLLabel.Caption := 'https://wiki.lazarus.freepascal.org/fpcup';
   ForumLabel.Caption := 'Forum';
-  ForumURLLabel.Caption := 'http://forum.lazarus.freepascal.org/index.php/topic,34645.0.html';
+  ForumURLLabel.Caption := 'https://forum.lazarus.freepascal.org/index.php/topic,34645.0.html';
   ReinierLabel.Caption := 'Reinier';
-  ReinierURLLabel.Caption := 'http://forum.lazarus.freepascal.org/index.php/topic,26726.0.html';
+  ReinierURLLabel.Caption := 'https://forum.lazarus.freepascal.org/index.php/topic,26726.0.html';
 
   CloseButton.Caption:='Close';
 end;
@@ -264,7 +264,7 @@ begin
       else
       begin
         //check for url
-        if Pos('http://', s) = 1 then
+        if Pos('https://', s) = 1 then
         begin
           if i = FActiveLine then
           begin
@@ -290,7 +290,7 @@ end;
 function TScrollingText.ActiveLineIsURL: boolean;
 begin
   if (FActiveLine > 0) and (FActiveLine < FLines.Count) then
-    Result := Pos('http://', FLines[FActiveLine]) = 1
+    Result := Pos('https://', FLines[FActiveLine]) = 1
   else
     Result := False;
 end;
