@@ -347,6 +347,10 @@ begin
   btnGetOpenSSL.Visible:=False;
   {$ENDIF}
 
+  //Prevent overwriting an existing install when starting with a new fpcupdeluxe install
+  If DirectoryExists(sInstallDir) then
+    sInstallDir:=IncludeTrailingPathDelimiter(SafeGetApplicationPath)+'fpcupdeluxe';
+
   {$ifdef DARWIN}
   // we could have started from with an .app , so goto the basedir ... not sure if realy needed, but to be sure.
   AddMessage('Setting base directory to: '+ExcludeTrailingPathDelimiter(SafeGetApplicationPath));
