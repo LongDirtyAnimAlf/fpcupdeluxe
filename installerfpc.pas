@@ -707,6 +707,7 @@ begin
                  else s1:='# dummy (blank) config for auto-detect cross-compilers'+LineEnding;
             end;
 
+            //Edit dedicated settings of config snippet
             InsertFPCCFGSnippet(FPCCfg,
               SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
               '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
@@ -768,7 +769,7 @@ begin
               Processor.Parameters.Add('crossinstall');
             end;
           end;
-          {$else}
+          {$else crosssimple}
           case MakeCycle of
             st_Compiler:
             begin
@@ -855,7 +856,17 @@ begin
           end;
 
           Processor.Parameters.Add('CROSSINSTALL=1');
-          {$endif}
+
+          if (CrossInstaller.TargetCPU='jvm') then
+          begin
+            if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
+            begin
+              infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPU+'.',etInfo);
+              continue;
+            end;
+          end;
+
+          {$endif crosssimple}
 
           Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
           Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
