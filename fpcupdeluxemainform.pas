@@ -2714,6 +2714,17 @@ begin
 
               if success then
               begin
+                aList:=TStringList.Create;
+                try
+                  aList.Add('These binary utilities were happely provided to you by fpcupdeluxe.');
+                  aList.Add('You can find them at:');
+                  aList.Add(DownloadURL);
+                  s:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
+                  SysUtils.DeleteFile(s);
+                  aList.SaveToFile(s);
+                finally
+                  aList.Free;
+                end;
                 {$IFDEF UNIX}
                 aList:=FindAllFiles(TargetPath);
                 try
@@ -2817,6 +2828,17 @@ begin
               if FPCupManager.CrossOS_Target='embedded' then success:=true;
               if success then
               begin
+                aList:=TStringList.Create;
+                try
+                  aList.Add('These libraries were happely provided to you by fpcupdeluxe.');
+                  aList.Add('You can find them at:');
+                  aList.Add(DownloadURL);
+                  s:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
+                  SysUtils.DeleteFile(s);
+                  aList.SaveToFile(s);
+                finally
+                  aList.Free;
+                end;
                 MissingCrossLibs:=False;
                 break;
               end;

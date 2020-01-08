@@ -1,0 +1,16 @@
+Index: compiler/systems/t_linux.pas
+===================================================================
+--- compiler/systems/t_linux.pas	(revision 43880)
++++ compiler/systems/t_linux.pas	(working copy)
+@@ -482,7 +482,10 @@
+       if (isdll) then
+        begin
+          Add('INPUT(');
+-         Add(info.DynamicLinker);
++         if FileExists(info.DynamicLinker,false) then
++           Add(info.DynamicLinker)
++         else
++           Add(ExtractFileName(info.DynamicLinker));
+          Add(')');
+        end;
+       linksToSharedLibFiles := not SharedLibFiles.Empty;

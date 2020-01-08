@@ -75,6 +75,8 @@ const
 
   FPCUPPRIVATEGITREPO='https://www.consulab.nl/git/Alfred/FPCbootstrappers/raw/master';
 
+  FPCUP_ACKNOWLEDGE='acknowledgement_fpcup.txt';
+
   LIBCNAME='libc.so';
 
   {

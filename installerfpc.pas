@@ -1250,13 +1250,16 @@ begin
       aDir:=CrossInstaller.BinUtilsPath;
       if DirectoryExists(aDir) then
       begin
-        // Only allow cross directories inside our own install te be deleted
-        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSBINPATH,aDir)>0) then
+        if FileExists(IncludeTrailingPathDelimiter(aDir)+FPCUP_ACKNOWLEDGE) then
         begin
-          infoln(infotext+'Deleting '+ModuleName+' bin tools directory '+aDir);
-          if DeleteDirectoryEx(aDir)=false then
+          // Only allow cross directories inside our own install te be deleted
+          if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSBINPATH,aDir)>0) then
           begin
-            WritelnLog(infotext+'Error deleting '+ModuleName+' bin tools directory '+aDir);
+            infoln(infotext+'Deleting '+ModuleName+' bin tools directory '+aDir);
+            if DeleteDirectoryEx(aDir)=false then
+            begin
+              WritelnLog(infotext+'Error deleting '+ModuleName+' bin tools directory '+aDir);
+            end;
           end;
         end;
       end;
@@ -1268,13 +1271,16 @@ begin
       aDir:=CrossInstaller.LibsPath;
       if DirectoryExists(aDir) then
       begin
-        // Only allow cross directories inside our own install te be deleted
-        if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSLIBPATH,aDir)>0) then
+        if FileExists(IncludeTrailingPathDelimiter(aDir)+FPCUP_ACKNOWLEDGE) then
         begin
-          infoln(infotext+'Deleting '+ModuleName+' libs directory '+aDir);
-          if DeleteDirectoryEx(aDir)=false then
+          // Only allow cross directories inside our own install te be deleted
+          if (Pos(FBaseDirectory,aDir)=1) AND  (Pos(CROSSLIBPATH,aDir)>0) then
           begin
-            WritelnLog(infotext+'Error deleting '+ModuleName+' libs directory '+aDir);
+            infoln(infotext+'Deleting '+ModuleName+' libs directory '+aDir);
+            if DeleteDirectoryEx(aDir)=false then
+            begin
+              WritelnLog(infotext+'Error deleting '+ModuleName+' libs directory '+aDir);
+            end;
           end;
         end;
       end;
