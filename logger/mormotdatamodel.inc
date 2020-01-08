@@ -7,8 +7,10 @@ type
         ufInstallLAZ,
         ufInstallFPCLAZ,
         ufInstallCross,
+        ufUninstallCross,
         ufInstallModule,
-        ufUninstallModule
+        ufUninstallModule,
+        ufCheckMakefile
       );
 
   // keep it very simple: all in one record !!

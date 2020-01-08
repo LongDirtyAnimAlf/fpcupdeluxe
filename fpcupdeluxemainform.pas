@@ -7,8 +7,9 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, Types, Buttons, Menus, ComCtrls, SynEdit, SynEditPopup,
-  SynEditMiscClasses, SynGutterCodeFolding, installerManager
+  ExtCtrls, Types, Buttons, Menus, ComCtrls,
+  SynEdit, SynEditPopup, SynEditMiscClasses,
+  installerManager
   {$ifdef usealternateui},alternateui{$endif}
   ,LCLVersion
   {$ifdef RemoteLog}
@@ -967,6 +968,10 @@ begin
     if Sender=CreateStartup then FPCupManager.OnlyModules:=_CREATESCRIPT;
 
     sStatus:='Going to check Makefile.';
+
+    {$ifdef RemoteLog}
+    aDataClient.UpInfo.UpFunction:=ufCheckMakefile;
+    {$endif}
 
     RealRun;
   finally
@@ -2036,10 +2041,17 @@ begin
     end;
   end;
 
+  {$ifdef RemoteLog}
+  aDataClient.UpInfo.CrossCPUOS:=FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
+  {$endif}
+
   if Sender=ButtonRemoveCrossCompiler then
   begin
     FPCupManager.OnlyModules:=_LCLALLREMOVEONLY+','+_FPCREMOVEONLY;
     try
+      {$ifdef RemoteLog}
+      aDataClient.UpInfo.UpFunction:=ufUninstallCross;
+      {$endif}
       result:=RealRun;
       DisEnable(Sender,False);
       exit;
@@ -2424,7 +2436,6 @@ begin
 
     {$ifdef RemoteLog}
     aDataClient.UpInfo.UpFunction:=ufInstallCross;
-    aDataClient.UpInfo.CrossCPUOS:=FPCupManager.CrossOS_Target+'-'+FPCupManager.CrossCPU_Target;
     if length(FPCupManager.CrossLCL_Platform)>0 then aDataClient.AddExtraData('CrossLCL',FPCupManager.CrossLCL_Platform);
     if length(FPCupManager.OnlyModules)>0 then aDataClient.AddExtraData('Only',FPCupManager.OnlyModules);
     if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
