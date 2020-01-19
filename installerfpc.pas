@@ -231,6 +231,9 @@ begin
   result:=false;
 
   ConfigText:=TStringList.Create;
+  {$IF FPC_FULLVERSION > 30100}
+  //ConfigText.DefaultEncoding:=TEncoding.ASCII;
+  {$ENDIF}
   SnippetText:=TStringList.Create;
   try
     SnippetText.Text:=Snippet;
@@ -736,9 +739,9 @@ begin
             Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
           }
           Processor.Parameters.Add('--directory='+ ExcludeTrailingPathDelimiter(FSourceDirectory));
-          Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FBinPath)+'fpcmake'+GetExeExt);
           Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
+          Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           {$IFDEF MSWINDOWS}
@@ -913,6 +916,15 @@ begin
           if (MakeCycle in [st_Compiler,st_CompilerInstall]) then
                Options:=Options+' -dFPC_USE_LIBC';
           {$endif}
+
+          {
+          s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
+          if FileExists(s2) then
+          begin
+            Processor.Parameters.Add('REVSTR='+ActualRevision);
+            Options:=Options+' -dREVINC';
+          end;
+          }
 
           {$ifdef solaris}
           {$IF defined(CPUX64) OR defined(CPUX86)}
@@ -1339,7 +1351,8 @@ var
   {$IFDEF MSWINDOWS}
   FileCounter:integer;
   {$ENDIF}
-  s1,s2:string;
+  s1,s2,s3:string;
+  FPCDirStore:string;
 begin
   result:=inherited;
   OperationSucceeded:=true;
@@ -1359,14 +1372,35 @@ begin
     end;
   end;
 
-  //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
-  //Copy them now, just to be sure
-  ForceDirectoriesSafe(FBinPath);
-  s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
-  s1:=IncludeTrailingPathDelimiter(FBinPath)+YYLEX;
-  if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYLEX,s1);
-  s1:=IncludeTrailingPathDelimiter(FBinPath)+YYPARSE;
-  if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
+  if (ModuleName=_FPC) then
+  //if (false) then
+  begin
+    //Sometimes, during build, we get an error about missing yylex.cod and yyparse.cod.
+    //Copy them now, just to be sure
+
+    ForceDirectoriesSafe(FBinPath);
+    s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
+    s1:=IncludeTrailingPathDelimiter(FBinPath)+YYLEX;
+    if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYLEX,s1);
+    s1:=IncludeTrailingPathDelimiter(FBinPath)+YYPARSE;
+    if (NOT FileExists(s1)) then FileUtil.CopyFile(s2+DirectorySeparator+YYPARSE,s1);
+
+    {$IFDEF UNIX}
+    s1:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+GetFPCVersion;
+    ForceDirectoriesSafe(s1);
+    s1:=s1+'/lexyacc';
+    DeleteFile(s1);
+    s2:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/lexyacc';
+    ForceDirectoriesSafe(s2);
+    fpSymlink(pchar(s2),pchar(s1));
+
+    s1:=IncludeTrailingPathDelimiter(FSourceDirectory)+'utils'+DirectorySeparator+'tply';
+    s3:=s2+DirectorySeparator+YYLEX;
+    if (NOT FileExists(s3)) then FileUtil.CopyFile(s1+DirectorySeparator+YYLEX,s3);
+    s3:=s2+DirectorySeparator+YYPARSE;
+    if (NOT FileExists(s3)) then FileUtil.CopyFile(s1+DirectorySeparator+YYPARSE,s3);
+    {$ENDIF UNIX}
+  end;
 
   Processor.Executable := Make;
   Processor.Parameters.Clear;
@@ -1387,6 +1421,10 @@ begin
   Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FBinPath)+'ppumove'+GetExeExt);
   Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
 
+  //Makefile could pickup FPCDIR setting, so try to set it for fpcupdeluxe
+  //FPCDirStore:=Processor.Environment.GetVar('FPCDIR');
+  //Processor.Environment.SetVar('FPCDIR',IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc');
+
   //Prevents the Makefile to search for the (native) ppc compiler which is used to do the latest build
   //Todo: to be investigated
   //Processor.Parameters.Add('FPCFPMAKE='+ChosenCompiler);
@@ -1403,13 +1441,6 @@ begin
   Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
   Processor.Parameters.Add('OS_TARGET=' + GetTargetOS);
   Processor.Parameters.Add('CPU_TARGET=' + GetTargetCPU);
-
-  s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'revision.inc';
-  if FileExists(s2) then
-  begin
-    Processor.Parameters.Add('REVSTR='+ActualRevision);
-    Processor.Parameters.Add('REVINC=force');
-  end;
 
   if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,4)) then
   begin
@@ -1455,7 +1486,12 @@ begin
   end;
   {$ENDIF}
 
-  //s1:=s1+' -dREVINC';
+  s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
+  if FileExists(s2) then
+  begin
+    Processor.Parameters.Add('REVSTR='+ActualRevision);
+    s1:=s1+' -dREVINC';
+  end;
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
   if FSoftFloat then
@@ -1519,6 +1555,8 @@ begin
 
   try
     Processor.Execute;
+    //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
+    //Processor.Environment.SetVar('FPCDIR',FPCDirStore);
     if Processor.ExitStatus <> 0 then
     begin
       OperationSucceeded := False;
@@ -1593,7 +1631,7 @@ end;
 
 constructor TFPCNativeInstaller.Create;
 begin
-  inherited create;
+  inherited Create;
 end;
 
 destructor TFPCNativeInstaller.Destroy;
@@ -2157,11 +2195,16 @@ function TFPCInstaller.GetFPCVersion: string;
 var
   testcompiler:string;
 begin
-  testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc1';
+  result:='0.0.0';
+
+  testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc1'+GetExeExt;
+
   if not FileExists(testcompiler) then
-  begin //darwin
-    testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc';
-  end;
+    testcompiler:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+'ppc'+GetExeExt;
+
+  if not FileExists(testcompiler) then
+    testcompiler:=GetCompiler;
+
   if FileExists(testcompiler) then
   begin
     result:=GetCompilerVersion(testcompiler);
@@ -2956,14 +2999,14 @@ begin
       fpChmod(IncludeTrailingPathDelimiter(FBinPath)+TargetCompilerName,&755);
     end;
 
-    // create link 'units' below FSourceDirectory to
+    // create link 'units' below FInstallDirectory to
     // <somewhere>/lib/fpc/$fpcversion/units
-    DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'units');
+    s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units';
+    DeleteFile(s);
     fpSymlink(pchar(IncludeTrailingPathDelimiter(FInstallDirectory)+'lib/fpc/'+GetFPCVersion+'/units'),
-      pchar(IncludeTrailingPathDelimiter(FInstallDirectory)+'units'));
+      pchar(s));
   end;
   {$ENDIF UNIX}
-
 
   // only touch fpc.cfg when NOT crosscompiling !
   if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
@@ -3080,10 +3123,6 @@ begin
           writeln(TxtFile,'');
           writeln(TxtFile,'# Display Info, Warnings and Notes and supress Hints');
           writeln(TxtFile,'-viwnh-');
-
-
-
-
           writeln(TxtFile,'');
         finally
           CloseFile(TxtFile);
@@ -3096,7 +3135,13 @@ begin
     if (FileExists(FPCCfg)=true) then
     begin
       ConfigText:=TStringList.Create;
+      {$IF FPC_FULLVERSION > 30100}
+      //ConfigText.DefaultEncoding:=TEncoding.ASCII;
+      {$ENDIF}
       ConfigTextStore:=TStringList.Create;
+      {$IF FPC_FULLVERSION > 30100}
+      //ConfigTextStore.DefaultEncoding:=TEncoding.ASCII;
+      {$ENDIF}
       try
         ConfigText.LoadFromFile(FPCCfg);
         y:=ConfigText.Count;
@@ -3184,13 +3229,17 @@ begin
         {$ENDIF cpuarm}
         ConfigText.Append(s);
 
+        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+
         s:=GetStartupObjects;
         if Length(s)>0 then
         begin
-          ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
           ConfigText.Append('-Fl'+s);
-          ConfigText.Append('#ENDIF');
         end;
+
+        {$ifdef Linux}
+        if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
+        {$endif}
 
         {$IF (defined(BSD)) and (not defined(Darwin))}
         s:='-Fl/usr/local/lib'+';'+'/usr/pkg/lib';
@@ -3199,10 +3248,22 @@ begin
         //if Length(VersionSnippet)>0 then s:=s+';'+VersionSnippet
         s:=s+';'+'/usr/X11R6/lib'+';'+'/usr/X11R7/lib';
         {$endif FPCONLY}
-        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
         ConfigText.Append(s);
-        ConfigText.Append('#ENDIF');
         {$endif}
+
+        {$ifdef freebsd}
+        ConfigText.Append('-dFPC_USE_LIBC');
+        {$endif}
+
+        {$IF (defined(NetBSD)) and (not defined(Darwin))}
+        {$ifndef FPCONLY}
+        ConfigText.Append('-k"-rpath=/usr/X11R6/lib"');
+        ConfigText.Append('-k"-rpath=/usr/X11R7/lib"');
+        {$endif}
+        ConfigText.Append('-k"-rpath=/usr/pkg/lib"');
+        {$endif}
+
+        ConfigText.Append('#ENDIF');
 
         {$ifdef solaris}
         {$IF defined(CPUX64) OR defined(CPUX86)}
@@ -3211,25 +3272,6 @@ begin
         {$endif}
         {$endif}
 
-        {$ifdef freebsd}
-        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-        ConfigText.Append('-dFPC_USE_LIBC');
-        ConfigText.Append('#ENDIF');
-        {$endif}
-
-        {$IF (defined(NetBSD)) and (not defined(Darwin))}
-        ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-        {$ifndef FPCONLY}
-        ConfigText.Append('-k"-rpath=/usr/X11R6/lib"');
-        ConfigText.Append('-k"-rpath=/usr/X11R7/lib"');
-        {$endif}
-        ConfigText.Append('-k"-rpath=/usr/pkg/lib"');
-        ConfigText.Append('#ENDIF');
-        {$endif}
-
-        {$ifdef Linux}
-        if FMUSL then ConfigText.Append('-FL'+FMUSLLinker);
-        {$endif}
 
         {$ENDIF UNIX}
 
@@ -3237,10 +3279,10 @@ begin
         s:=GetSDKVersion('macosx');
         if Length(s)>0 then
         begin
-          //ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
-          ConfigText.Append('#IFDEF DARWIN');
           ConfigText.Append('# Add minimum required OSX version for native compiling');
           ConfigText.Append('# Prevents crti not found linking errors');
+          //ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
+          ConfigText.Append('#IFDEF DARWIN');
           if CompareVersionStrings(s,'10.8')>=0 then
             ConfigText.Append('-WM10.8')
           else
@@ -3548,19 +3590,11 @@ begin
 end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
-{$ifdef Darwin}
-const
-  DARWINCHECKMAGIC='FPMAKE_OPT+=$(addprefix -o ,$(FPCOPT))';
-  DARWINHACKMAGIC='override FPCOPT:=$(filter-out -WM%,$(FPCOPT))';
-{$endif}
 var
   BeforeRevision: string;
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
   VersionSnippet:string;
-  {$ifdef Darwin}
-  aIndex:integer;
-  {$endif}
 begin
   result:=inherited;
   result:=InitModule;
@@ -3622,38 +3656,6 @@ begin
     end;
     if FOnlinePatching then PatchModule(ModuleName);
   end;
-
-  {$ifdef Darwin}
-  //dirty hack for newest Darwin versions ... to be removed later
-  if result then
-  begin
-    VersionSnippet:=IncludeTrailingPathDelimiter(FSourceDirectory)+'packages'+DirectorySeparator+MAKEFILENAME;
-    if FileExists(VersionSnippet) then
-    begin
-      UpdateWarnings:=TStringList.Create;
-      try
-        UpdateWarnings.LoadFromFile(VersionSnippet);
-        aIndex:=UpdateWarnings.IndexOf(DARWINHACKMAGIC);
-        if aIndex=-1 then
-        begin
-          aIndex:=UpdateWarnings.IndexOf(DARWINCHECKMAGIC);
-          if aIndex<>-1 then
-          begin
-            UpdateWarnings.Insert(aIndex,'endif');
-            UpdateWarnings.Insert(aIndex,'endif');
-            UpdateWarnings.Insert(aIndex,DARWINHACKMAGIC);
-            UpdateWarnings.Insert(aIndex,'ifdef CROSSCOMPILE');
-            UpdateWarnings.Insert(aIndex,'ifeq ($(OS_SOURCE),darwin)');
-            UpdateWarnings.SaveToFile(VersionSnippet);
-            infoln(infotext+ModuleName + 'packages '+MAKEFILENAME+' dirty hack for Darwin applied ',etInfo);
-          end;
-        end;
-      finally
-        UpdateWarnings.Free;
-      end;
-    end;
-  end;
-  {$endif}
 
 end;
 

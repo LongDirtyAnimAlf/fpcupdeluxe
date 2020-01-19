@@ -1372,19 +1372,16 @@ begin
   begin
     if ExistWordInString(PChar(s),Seriousness[etInfo],[soWholeWord,soDown]) then
     begin
-      if
-      NOT (ExistWordInString(PChar(s),'Extracted #',[soDown])
-      OR
-      ExistWordInString(PChar(s),'Extracting ',[soDown])
-      OR
-      ExistWordInString(PChar(s),'Download progress ',[soDown]))
-      then
+      FG      := clYellow;
+      BG      := clBlack;
+      Special := True;
+      if ExistWordInString(PChar(s),'Extracted #',[soDown]) then
       begin
-        FG      := clYellow;
+        FG      := clSilver;
         BG      := clBlack;
-        Special := True;
       end;
     end;
+
     if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
     begin
       FG      := clFuchsia;
@@ -2716,7 +2713,7 @@ begin
               begin
                 aList:=TStringList.Create;
                 try
-                  aList.Add('These binary utilities were happely provided to you by fpcupdeluxe.');
+                  aList.Add('These binary utilities were happily provided to you by fpcupdeluxe.');
                   aList.Add('You can find them at:');
                   aList.Add(DownloadURL);
                   s:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;
@@ -2830,7 +2827,7 @@ begin
               begin
                 aList:=TStringList.Create;
                 try
-                  aList.Add('These libraries were happely provided to you by fpcupdeluxe.');
+                  aList.Add('These libraries were happily provided to you by fpcupdeluxe.');
                   aList.Add('You can find them at:');
                   aList.Add(DownloadURL);
                   s:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator+FPCUP_ACKNOWLEDGE;

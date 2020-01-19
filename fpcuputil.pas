@@ -2515,7 +2515,7 @@ begin
       end;
     end;
   end;
-  result:=s;
+  result:=Trim(s);
 end;
 {$endif}
 
@@ -3410,7 +3410,7 @@ begin
     if (FFileCnt MOD 5)=0 then infoln('Extracted #'+InttoStr(FFileCnt)+' files out of #'+InttoStr(FTotalFileCnt),etInfo);
   end
   else
-    infoln('Extracting '+FCurrentFile+'. #'+InttoStr(FFileCnt)+' out of #'+InttoStr(FTotalFileCnt),etInfo);
+    infoln('Extracted '+FCurrentFile+'. #'+InttoStr(FFileCnt)+' out of #'+InttoStr(FTotalFileCnt),etInfo);
 end;
 
 function TNormalUnzipper.DoUnZip(const ASrcFile, ADstDir: String; Files:array of string):boolean;

@@ -1,7 +1,7 @@
 object Form1: TForm1
-  Left = 185
+  Left = 409
   Height = 740
-  Top = 52
+  Top = 57
   Width = 1004
   Anchors = []
   Caption = 'Form1'
@@ -2963,7 +2963,6 @@ object Form1: TForm1
           'java'
           'haiku'
           'aix'
-          'openbsd'
           'solaris'
           'solaris-oi'
           'dragonfly'
@@ -3124,7 +3123,7 @@ object Form1: TForm1
     end
     object ExtraSheet: TTabSheet
       Caption = 'ExtraSheet'
-      ClientHeight = 495
+      ClientHeight = 550
       ClientWidth = 302
       object btnGetOpenSSL: TButton
         AnchorSideLeft.Control = ExtraSheet

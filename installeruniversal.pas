@@ -245,12 +245,13 @@ begin
   //Make sure Lazarus does not pick up these tools from other installs
   Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
   Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
+
   Processor.Parameters.Add('CFGFILE=' + IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename);
 
-  {$ifdef Windows}
+  {$IFDEF MSWINDOWS}
   Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo');     //fix for examples in Win svn, see build FAQ
-  {$endif}
+  {$ENDIF MSWINDOWS}
 
   if FLCL_Platform <> '' then Processor.Parameters.Add('LCL_PLATFORM=' + FLCL_Platform);
 

@@ -1,0 +1,16 @@
+Index: packages/Makefile
+===================================================================
+--- packages/Makefile	(revision 43888)
++++ packages/Makefile	(working copy)
+@@ -1703,6 +1703,11 @@
+ override FPCOPT:=$(filter-out -FU%,$(FPCOPT))
+ override FPCOPT:=$(filter-out -FE%,$(FPCOPT))
+ override FPCOPT:=$(filter-out $(addprefix -Fu,$(COMPILER_UNITDIR)),$(FPCOPT))# Compose general fpmake-parameters
++ifdef CROSSCOMPILE
++ifeq ($(OS_SOURCE),darwin)
++override FPCOPT:=$(filter-out -WM%,$(FPCOPT))
++endif
++endif
+ ifdef FPMAKEOPT
+ FPMAKE_OPT+=$(FPMAKEOPT)
+ endif

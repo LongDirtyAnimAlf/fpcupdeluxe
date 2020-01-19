@@ -68,6 +68,8 @@ const
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
   //PACKAGESCONFIGDIR     = PACKAGESLOCATION+DirectorySeparator+'fpcpkgconfig';
 
+  REVINCFILENAME        = 'revision.inc';
+
   {$IFDEF MSWINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
   PREBUILTBINUTILSURL = BINUTILSURL + '/binaries/i386-win32';
@@ -3057,6 +3059,12 @@ begin
         if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
         {$endif}
 
+        {$ifndef Darwin}
+        //only patch the packages Makefile on Darwin itself
+        if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then j:=0;
+        {$endif}
+
+
         // In general, only patch trunk !
         // This can be changed to take care of versions ... but not for now !
         // Should be removed in future fpcup versions !!
@@ -3100,6 +3108,7 @@ begin
 
   if Length(LocalSourcePatches)>0 then
   begin
+    infoln(infotext+'Going to patch ' + ModuleName + ' sources !!',etWarning);
     PatchList:=TStringList.Create;
     try
       PatchList.CommaText := LocalSourcePatches;
@@ -3182,7 +3191,6 @@ const
   //RevisionIncComment = '// Created by FPCLAZUP';
   RevisionIncComment = '// Created by Svn2RevisionInc';
   ConstName = 'RevisionStr';
-  RevisionIncFileName = 'revision.inc';
 var
   RevisionIncText: Text;
   RevFileName,ConstStart: string;
@@ -3190,31 +3198,34 @@ begin
   result:=false;
   // update revision.inc;
 
-  if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+RevisionIncFileName;
-  if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+RevisionIncFileName;
+  RevFileName:='';
 
-  infoln(infotext+'Updating '+ModuleName+' revision info.', etInfo);
-  AssignFile(RevisionIncText, RevFileName);
-  try
-    Rewrite(RevisionIncText);
-    if ModuleName=_LAZARUS then
-    begin
-      writeln(RevisionIncText, RevisionIncComment);
-      ConstStart := Format('const %s = ''', [ConstName]);
-      writeln(RevisionIncText, ConstStart, aRevision, ''';');
+  if ModuleName=_LAZARUS then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'ide'+PathDelim+REVINCFILENAME;
+  if ModuleName=_FPC then RevFileName:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+PathDelim+REVINCFILENAME;
+
+  if Length(RevFileName)>0 then
+  begin
+    infoln(infotext+'Updating '+ModuleName+' revision info. Current revision='+aRevision+'.', etInfo);
+    AssignFile(RevisionIncText, RevFileName);
+    try
+      Rewrite(RevisionIncText);
+      if ModuleName=_LAZARUS then
+      begin
+        writeln(RevisionIncText, RevisionIncComment);
+        ConstStart := Format('const %s = ''', [ConstName]);
+        writeln(RevisionIncText, ConstStart, aRevision, ''';');
+      end;
+      if ModuleName=_FPC then
+      begin
+        writeln(RevisionIncText, '''',aRevision,'''');
+      end;
+      result:=true;
+    finally
+      CloseFile(RevisionIncText);
     end;
-    if ModuleName=_FPC then
-    begin
-      writeln(RevisionIncText, '''',aRevision,'''');
-    end;
-    result:=true;
-  finally
-    CloseFile(RevisionIncText);
   end;
+
 end;
-
-
-
 
 function TInstaller.UnInstallModule(ModuleName: string): boolean;
 begin
@@ -3258,19 +3269,11 @@ begin
   FReleaseVersion := -1;
   FPatchVersion := -1;
 
+  FMUSL:=false;
+  FSolarisOI:=false;
+
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
-  FMUSL:=FileExists(FMUSLLinker);
-  if FMUSL then infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
-  {$else}
-  FMUSL:=false;
-  {$endif}
-
-  {$ifdef Solaris}
-  FSolarisOI:=false;
-  if FSolarisOI then infoln('Fpcupdeluxe: We have an OpenIndiana Solaris version !',etInfo);
-  {$else}
-  FSolarisOI:=false;
   {$endif}
 
   GetSanityCheck;

@@ -363,7 +363,6 @@ begin
         Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
         Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
         Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-
         //Make sure our FPC units can be found by Lazarus
         Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FFPCSourceDir));
         //Make sure Lazarus does not pick up these tools from other installs
@@ -903,6 +902,7 @@ begin
         try
           WritelnLog(infotext+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
           Processor.Execute;
+          //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
           Processor.Environment.SetVar('FPCDIR',FPCDirStore);
           if Processor.ExitStatus <> 0 then
           begin
@@ -960,6 +960,7 @@ begin
           try
             writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);
             Processor.Execute;
+            //Restore FPCDIR environment variable ... could be trivial, but batter safe than sorry
             Processor.Environment.SetVar('FPCDIR',FPCDirStore);
             if Processor.ExitStatus <> 0 then
             begin
@@ -1474,6 +1475,9 @@ begin
   // Lazarus 1.2RC1+ and higher support specifying the primary-config-path that should be used
   // inside the lazarus directory itself.
   PCPSnippet := TStringList.Create;
+  {$IF FPC_FULLVERSION > 30100}
+  //PCPSnippet.DefaultEncoding:=TEncoding.ASCII;
+  {$ENDIF}
   try
     // Martin Friebe mailing list January 2014: no quotes allowed, no trailing blanks
     PCPSnippet.Add('--primary-config-path=' + Trim(ExcludeTrailingPathDelimiter(FPrimaryConfigPath)));
@@ -1668,6 +1672,9 @@ begin
       SysUtils.DeleteFile(aFileName);
       SysUtils.DeleteFile(ChangeFileExt(aFileName,'.lpr'));
       PCPSnippet:=TStringList.Create;
+      {$IF FPC_FULLVERSION > 30100}
+      //PCPSnippet.DefaultEncoding:=TEncoding.ASCII;
+      {$ENDIF}
       try
         PCPSnippet.Clear;
         PCPSnippet.Text:=DEFAULTLPI;
@@ -2238,8 +2245,8 @@ begin
     if FOnlinePatching then PatchModule(ModuleName);
   end;
 
-  //if false then
-  if result then
+  if false then
+  //if result then
   begin
     MakeFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
     if FileExists(MakeFilePath) then

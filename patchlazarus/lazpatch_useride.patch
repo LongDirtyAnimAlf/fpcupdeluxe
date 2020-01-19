@@ -1,0 +1,24 @@
+Index: Makefile
+===================================================================
+--- Makefile	(revision 62450)
++++ Makefile	(working copy)
+@@ -3276,7 +3276,19 @@
+ idepkg:
+ 	$(MAKE) -C ide idepkg
+ useride: 
++ifdef LAZBUILDJOBS
++ifdef LCL_PLATFORM
++	./lazbuild$(SRCEXEEXT) --max-process-count=$(LAZBUILDJOBS) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)
++else
++	./lazbuild$(SRCEXEEXT) --max-process-count=$(LAZBUILDJOBS) --lazarusdir=. --build-ide=
++endif
++else
++ifdef LCL_PLATFORM
++	./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)
++else
+ 	./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide=
++endif
++endif
+ starter:
+ 	$(MAKE) -C ide starter
+ lazbuild: registration lazutils codetools
