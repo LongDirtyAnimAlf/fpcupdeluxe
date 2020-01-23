@@ -452,7 +452,7 @@ begin
   end;
 
   {$ifdef RemoteLog}
-  FreeAndNil(aDataClient);
+  if Assigned(aDataClient) then aDataClient.Destroy;
   {$endif}
 
   (* using CloseFile will ensure that all pending output is flushed *)
@@ -3489,6 +3489,10 @@ begin
   AddMessage('Detected mayor FreeBSD version '+InttoStr(GetFreeBSDVersion));
   {$endif FreeBSD}
   {$endif NetBSD}
+
+  {$IFDEF LINUX}
+  if IsLinuxMUSL then AddMessage('Seems we are running on a MUSL Linux.');
+  {$ENDIF LINUX}
 
   Cores:=GetLogicalCpuCount;
   if Cores<>0 then AddMessage('CPU cores used: '+InttoStr(Cores));

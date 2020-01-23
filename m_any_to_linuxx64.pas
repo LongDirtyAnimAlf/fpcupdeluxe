@@ -66,7 +66,7 @@ const
   NormalDirName='x86_64-linux';
   MUSLDirName='x86_64-musllinux';
 var
-  aDirName,aLibcName,s:string;
+  aDirName,aLibName,s:string;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -74,20 +74,20 @@ begin
   if FMUSL then
   begin
     aDirName:=MUSLDirName;
-    aLibcName:='libc.musl-'+FTargetCPU+'.so.1';
+    aLibName:='libc.musl-'+FTargetCPU+'.so.1';
   end
   else
   begin
     aDirName:=NormalDirName;
-    aLibcName:=LIBCNAME;
+    aLibName:=LIBCNAME;
   end;
 
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,aLibcName);
+  result:=SearchLibrary(Basepath,aLibName);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,aDirName,aLibcName);
+    result:=SimpleSearchLibrary(BasePath,aDirName,aLibName);
 
   if result then
   begin
@@ -98,6 +98,12 @@ begin
     //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib64'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
     //Remember: -Xr adds a  rlink path to the linker
     AddFPCCFGSnippet('-Xr/usr/lib');
+
+    if FMUSL then
+    begin
+      aLibName:='ld-musl-'+FTargetCPU+'.so.1';
+      AddFPCCFGSnippet('-FL/lib/'+aLibName);
+    end;
   end;
 
   if not result then

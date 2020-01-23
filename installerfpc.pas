@@ -939,8 +939,7 @@ begin
           {$ifdef linux}
           if FMUSL then
           begin
-            //FMUSLLinker:=IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'ld-musl-'+CrossInstaller.TargetCPU+'.so.1';
-            //Options:=Options+' -Cg -FL'+FMUSLLinker;
+            //if FileExists(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+FMUSLLinker) then Options:=Options+' -FL'+FMUSLLinker;
           end;
           {$endif}
 

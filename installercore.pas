@@ -3064,6 +3064,14 @@ begin
         if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then j:=0;
         {$endif}
 
+        if Pos('lazpatch_musllibc.patch',PatchFilePath)>0 then
+        begin
+          {$ifdef Linux}
+          if (NOT FMUSL) then j:=0;
+          {$else}
+          j:=0;
+          {$endif}
+        end;
 
         // In general, only patch trunk !
         // This can be changed to take care of versions ... but not for now !
@@ -3274,6 +3282,8 @@ begin
 
   {$ifdef Linux}
   FMUSLLinker:='/lib/ld-musl-'+GetTargetCPU+'.so.1';
+  FMUSL:=(FileExists(FMUSLLinker) AND IsLinuxMUSL);
+  if FMUSL then infoln('Fpcupdeluxe: We have a MUSL Linux version !',etInfo);
   {$endif}
 
   GetSanityCheck;

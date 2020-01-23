@@ -70,29 +70,47 @@ end;
 
 function Tany_linux386.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-linux';
+  NormalDirName='i386-linux';
+  MUSLDirName='i386-musllinux';
 var
-  s:string;
-  i:integer;
+  aDirName,aLibName,s:string;
 begin
   result:=FLibsFound;
   if result then exit;
 
+  if FMUSL then
+  begin
+    aDirName:=MUSLDirName;
+    aLibName:='libc.musl-'+FTargetCPU+'.so.1';
+  end
+  else
+  begin
+    aDirName:=NormalDirName;
+    aLibName:=LIBCNAME;
+  end;
+
   // begin simple: check presence of library file in basedir
-  result:=SearchLibrary(Basepath,LIBCNAME);
+  result:=SearchLibrary(Basepath,aLibName);
 
   // first search local paths based on libbraries provided for or adviced by fpc itself
   if not result then
-    result:=SimpleSearchLibrary(BasePath,DirName,LIBCNAME);
+    result:=SimpleSearchLibrary(BasePath,aDirName,aLibName);
 
   if result then
   begin
     FLibsFound:=True;
     AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
     AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
-    //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib32'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    //Remember: -XR sets the sysroot path used for linking
+    //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath)+'lib64'); {buildfaq 1.6.4/3.3.1: the directory to look for the target libraries ... just te be safe ...}
+    //Remember: -Xr adds a  rlink path to the linker
     AddFPCCFGSnippet('-Xr/usr/lib');
+
+    if FMUSL then
+    begin
+      aLibName:='ld-musl-'+FTargetCPU+'.so.1';
+      AddFPCCFGSnippet('-FL/lib/'+aLibName);
+    end;
   end;
 
   if not result then
@@ -149,14 +167,21 @@ end;
 
 function Tany_linux386.GetBinUtils(Basepath:string): boolean;
 const
-  DirName='i386-linux';
+  NormalDirName='i386-linux';
+  MUSLDirName='i386-musllinux';
 var
   AsFile: string;
   BinPrefixTry: string;
+  aDirName: string;
   s:string;
 begin
   result:=inherited;
   if result then exit;
+
+  if FMUSL then
+    aDirName:=MUSLDirName
+  else
+    aDirName:=NormalDirName;
 
   AsFile:=FBinUtilsPrefix+'as'+GetExeExt;
 
@@ -200,7 +225,7 @@ begin
   {$ENDIF}
 
   if not result then
-    result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
 
   // Also allow for (cross)binutils without prefix
   if not result then
@@ -208,7 +233,7 @@ begin
     BinPrefixTry:='';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 

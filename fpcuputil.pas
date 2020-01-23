@@ -342,6 +342,7 @@ function GetStartupObjects:string;
 {$IFDEF LINUX}
 function GetFreePhysicalMemory: DWord;
 function GetFreeSwapFileSize: DWord;
+function IsLinuxMUSL:boolean;
 {$ENDIF LINUX}
 {$ENDIF UNIX}
 function GetLogicalCpuCount: integer;
@@ -2440,6 +2441,24 @@ begin
   SysInfo(@SystemInf);
   mu := SystemInf.mem_unit;
   result := (QWord(SystemInf.freeswap*mu) shr 20);
+end;
+
+function IsLinuxMUSL:boolean;
+var
+  Output:string;
+begin
+  result:=false;
+  Output:='';
+  ExecuteCommand('getconf GNU_LIBC_VERSION', Output, False);
+  begin
+    //exit;
+    if AnsiContainsText(Output,'glibc') then exit;
+  end;
+  Output:='';
+  ExecuteCommand('ldd --version', Output, False);
+  begin
+    if AnsiContainsText(Output,'musl') then result:=true;
+  end;
 end;
 {$ENDIF LINUX}
 {$ENDIF UNIX}
