@@ -52,8 +52,16 @@ begin
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
   result:=true;
   FBinsFound:=true;
+
   aOption:=GetSDKVersion('macosx');
-  if Length(aOption)>0 then AddFPCCFGSnippet('-WM'+aOption);
+  if Length(aOption)>0 then
+  begin
+    if CompareVersionStrings(aOption,'10.8')>=0 then
+    begin
+      aOption:='10.8';
+    end;
+    AddFPCCFGSnippet('-WM'+aOption);
+  end;
 end;
 
 constructor TDarwin64.Create;
