@@ -404,8 +404,7 @@ uses
   fpwebclient,
   fphttpwebclient,
   {$ENDIF}
-  fpjson, jsonparser,
-  uriparser
+  fpjson, jsonparser ,uriparser
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
     ,windows, shlobj {for special folders}, ActiveX, ComObj, WinDirs

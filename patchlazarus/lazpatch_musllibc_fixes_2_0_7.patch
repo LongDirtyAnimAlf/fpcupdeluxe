@@ -1,0 +1,33 @@
+Index: components/debuggerintf/ideminilibc.pas
+===================================================================
+--- components/debuggerintf/ideminilibc.pas	(revision 61209)
++++ components/debuggerintf/ideminilibc.pas	(working copy)
+@@ -32,6 +32,7 @@
+   VMIN = 6;
+   VTIME = 5;
+   TCSANOW = 0;
++  O_RDWR    = &00002;
+   F_DUPFD   = 0;
+   F_GETFD   = 1;
+   F_SETFD   = 2;
+@@ -68,7 +69,8 @@
+ function __read(Handle: cint; var Buffer; Count: size_t): ssize_t; cdecl;external clib name 'read';
+ function __write(Handle: cint; const Buffer; Count: size_t): ssize_t; cdecl;external clib name 'write';
+ function __close(Handle: cint): cint; cdecl;external clib name 'close';
+-function getpt:cint;cdecl;external clib name 'getpt';
++function getpt:cint;
++function posix_openpt(__flags:cint):cint;cdecl;external clib name 'posix_openpt';
+ function grantpt(__fd:cint):cint;cdecl;external clib name 'grantpt';
+ function unlockpt(__fd:cint):cint;cdecl;external clib name 'unlockpt';
+ function ptsname_r(__fd:cint; __buf:Pchar; __buflen:size_t):cint;cdecl;external clib name 'ptsname_r';
+@@ -76,5 +78,10 @@
+ 
+ implementation
+ 
++function getpt:cint;
++begin
++  result:=posix_openpt(O_RDWR);
++end;
++
+ end.
+ 

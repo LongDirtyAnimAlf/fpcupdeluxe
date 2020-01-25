@@ -229,6 +229,8 @@ begin
         if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
         s:='cp ';
         if ( (AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line)) AND AnsiContainsText(line,'.compiled') ) then continue;
+        s:='grep: ';
+        if AnsiContainsText(line,'/'+s) OR AnsiStartsText(s,line) then continue;
 
         if AnsiContainsText(line,'is up to date.') then continue;
         if AnsiContainsText(line,'searching ') then continue;

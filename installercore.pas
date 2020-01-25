@@ -3007,6 +3007,7 @@ begin
 
       PatchFilePath:=PatchList[i];
 
+      j:=0;
       if PatchFPC then j:=Pos('fpcpatch',PatchFilePath);
       {$ifndef FPCONLY}
       if PatchLaz then j:=Pos('lazpatch',PatchFilePath);
@@ -3016,7 +3017,7 @@ begin
         j:=Pos('fpcuppatch',PatchFilePath);
         if j<>0 then
         begin
-          j:=Pos(LowerCase(ModuleName),LowerCase(PatchFilePath));
+          j:=Pos(LowerCase(ModuleName),LowerCase(GetFileNameFromURL(PatchFilePath)));
         end;
       end;
 
@@ -3064,7 +3065,9 @@ begin
         if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then j:=0;
         {$endif}
 
-        if Pos('lazpatch_musllibc.patch',PatchFilePath)>0 then
+        {$ifndef FPCONLY}
+        //only patch lazarus for musl on musl itself
+        if Pos('lazpatch_musllibc',PatchFilePath)>0 then
         begin
           {$ifdef Linux}
           if (NOT FMUSL) then j:=0;
@@ -3072,6 +3075,7 @@ begin
           j:=0;
           {$endif}
         end;
+        {$endif}
 
         // In general, only patch trunk !
         // This can be changed to take care of versions ... but not for now !
