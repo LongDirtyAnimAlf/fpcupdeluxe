@@ -266,9 +266,12 @@ end;
 
 function EditWrite(var F: TTextRec): Integer;
 begin
+  InOutRes:=0;
   try
     with F do
     begin
+      if BufPos=0 then exit;
+      InOutRes:=101;
       BufPtr^[BufPos] := #0;
       with TSynEdit(PSynEditData(@F.UserData)^.SynEdit) do
       begin
@@ -280,6 +283,7 @@ begin
         end;
       end;
     end;
+    InOutRes:=0;
   finally
     F.BufPos := 0;
     EditWrite := 0;
