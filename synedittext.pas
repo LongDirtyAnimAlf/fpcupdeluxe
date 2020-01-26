@@ -240,7 +240,9 @@ begin
         if AnsiStartsText('  File=',line) then continue;
         if AnsiStartsText('  State file=',line) then continue;
 
+        //Remove some not so very interesting info
         if AnsiContainsText('Writing Resource String Table',line) then continue;
+        if AnsiContainsText('Nothing to be done',line) then continue;
 
         // found modified files
         outputline:=true;

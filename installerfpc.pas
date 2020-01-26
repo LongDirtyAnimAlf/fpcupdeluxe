@@ -1401,6 +1401,11 @@ begin
     {$ENDIF UNIX}
   end;
 
+  if (ModuleName=_FPC) then
+  begin
+    infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+  end;
+
   Processor.Executable := Make;
   Processor.Parameters.Clear;
   {$IFDEF MSWINDOWS}
@@ -3590,7 +3595,6 @@ end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
-  BeforeRevision: string;
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
   VersionSnippet:string;
@@ -3615,8 +3619,8 @@ begin
     UpdateWarnings:=TStringList.Create;
     try
       if aRepoClient=FGitClient
-         then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
-         else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
+         then result:=DownloadFromGit(ModuleName,FPreviousRevision, FActualRevision, UpdateWarnings)
+         else result:=DownloadFromSVN(ModuleName,FPreviousRevision, FActualRevision, UpdateWarnings);
       if UpdateWarnings.Count>0 then
       begin
         WritelnLog(UpdateWarnings.Text);
@@ -3627,9 +3631,16 @@ begin
 
     if NOT aRepoClient.ExportOnly then
     begin
-      infoln(infotext+ModuleName + ' was at: '+BeforeRevision,etInfo);
-      if FRepositoryUpdated then infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo) else
+      if FRepositoryUpdated then
+      begin
+        infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
+        infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
+      end
+      else
+      begin
+        infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
         infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
+      end;
     end;
 
     if (NOT Result) then

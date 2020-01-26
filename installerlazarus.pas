@@ -206,7 +206,6 @@ type
   private
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
-    FRevision: string;
     InitDone: boolean;
     function GetLazarusVersionFromSource(aSourceDirectory:string):string;
     function GetLazarusVersionFromUrl(aURL:string):string;
@@ -231,8 +230,6 @@ type
     property FPCSourceDir: string write FFPCSourceDir;
     // Lazarus primary config path
     property PrimaryConfigPath: string write FPrimaryConfigPath;
-    // Local revision of source
-    property Revision: string read FRevision write FRevision;
     // Build module
     function BuildModule(ModuleName: string): boolean; override;
     // Create configuration in PrimaryConfigPath
@@ -609,6 +606,10 @@ begin
     {$endif}
   {$endif}
 
+  if (ModuleName=_LAZARUS) then
+  begin
+    infoln(infotext+'Now building '+ModuleName+' revision '+ActualRevision,etInfo);
+  end;
 
   //Note: available in more recent Lazarus : use "make lazbuild useride" to build ide with installed packages
   if ((ModuleName<>_USERIDE) OR (NumericalVersion>=CalculateFullVersion(1,6,2))) then
@@ -880,7 +881,7 @@ begin
       // Support keeping userdefined installed packages when building.
       // Compile with selected compiler options
       // Assume new Laz version on failure getting revision
-      if StrToIntDef(Revision, 38971) >= 38971 then
+      if StrToIntDef(ActualRevision, 38971) >= 38971 then
       begin
         Processor.Parameters.Add('--build-ide=-dKeepInstalledPackages ' + FCompilerOptions);
       end
@@ -2057,33 +2058,10 @@ begin
 end;
 {$endif}
 {$endif}
-
-const
-  LAZBUILDHACKMAGIC=
-    'useride: '+LineEnding+
-    'ifdef LAZBUILDJOBS'+LineEnding+
-    'ifdef LCL_PLATFORM'+LineEnding+
-    #9+'./lazbuild$(SRCEXEEXT) --max-process-count=$(LAZBUILDJOBS) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)'+LineEnding+
-    'else'+LineEnding+
-    #9+'./lazbuild$(SRCEXEEXT) --max-process-count=$(LAZBUILDJOBS) --lazarusdir=. --build-ide='+LineEnding+
-    'endif'+LineEnding+
-    'else'+LineEnding+
-    'ifdef LCL_PLATFORM'+LineEnding+
-    #9+'./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)'+LineEnding+
-    'else'+LineEnding+
-    #9+'./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide='+LineEnding+
-    'endif'+LineEnding+
-    'endif';
-
 var
-  BeforeRevision: string;
   UpdateWarnings: TStringList;
-  HackMagic:TStringList;
   aRepoClient:TRepoClient;
   VersionSnippet:string;
-  MakeFilePath:string;
-  aIndex,aHackIndex:integer;
-  s1,s2:string;
   {$ifdef BSD}
   FilePath:string;
   {$endif}
@@ -2108,8 +2086,8 @@ begin
     UpdateWarnings:=TStringList.Create;
     try
       if aRepoClient=FGitClient
-         then result:=DownloadFromGit(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings)
-         else result:=DownloadFromSVN(ModuleName,BeforeRevision, FActualRevision, UpdateWarnings);
+         then result:=DownloadFromGit(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings)
+         else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
       if UpdateWarnings.Count>0 then
       begin
         WritelnLog(UpdateWarnings.Text);
@@ -2120,9 +2098,16 @@ begin
 
     if NOT aRepoClient.ExportOnly then
     begin
-      infoln(infotext+ModuleName + ' was at: '+BeforeRevision,etInfo);
-      if FRepositoryUpdated then infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo) else
+      if FRepositoryUpdated then
+      begin
+        infoln(infotext+ModuleName + ' was at revision: '+PreviousRevision,etInfo);
+        infoln(infotext+ModuleName + ' is now at revision: '+ActualRevision,etInfo);
+      end
+      else
+      begin
+        infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
         infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
+      end;
     end;
 
     if (NOT Result) then
@@ -2243,59 +2228,6 @@ begin
       infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
     if FOnlinePatching then PatchModule(ModuleName);
-  end;
-
-  if false then
-  //if result then
-  begin
-    MakeFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
-    if FileExists(MakeFilePath) then
-    begin
-      UpdateWarnings:=TStringList.Create;
-      try
-        UpdateWarnings.LoadFromFile(MakeFilePath);
-        aIndex:=(UpdateWarnings.Count-1);
-        while (aIndex>=0) do
-        begin
-          s1:=ExtractWord(1,UpdateWarnings.Strings[aIndex],[' ']);
-          s1:=TrimRight(s1);
-          if s1='useride:' then
-          begin
-            //remove everything of the useride macro definition
-            while (aIndex<UpdateWarnings.Count) do
-            begin
-              UpdateWarnings.Delete(aIndex);
-              s1:=ExtractWord(1,UpdateWarnings.Strings[aIndex],[' ']);
-              s1:=TrimRight(s1);
-              //this will stop at the next macro definition [starter:]
-              if s1[Length(s1)]=':' then break;
-            end;
-            break;
-          end;
-          Dec(aIndex);
-        end;
-
-        aHackIndex:=aIndex;
-
-        //replace the useride macro with the new one
-        HackMagic:=TStringList.Create;
-        try
-          HackMagic.Text:=LAZBUILDHACKMAGIC;
-          for aIndex:=(HackMagic.Count-1) downto 0 do
-          begin
-            UpdateWarnings.Insert(aHackIndex,HackMagic.Strings[aIndex]);
-          end;
-        finally
-          HackMagic.Free;
-        end;
-
-        UpdateWarnings.SaveToFile(MakeFilePath);
-
-      finally
-        UpdateWarnings.Free;
-      end;
-
-    end;
   end;
 
 end;

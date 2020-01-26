@@ -1118,6 +1118,7 @@ begin
     memoSummary.Lines.Append('We have a fatal FPC runtime error 217: Unhandled exception occurred.');
     memoSummary.Lines.Append('See: https://www.freepascal.org/docs-html/user/userap4.html');
     memoSummary.Lines.Append('Can be caused by anything unknown. No clues about cause whatsoever.');
+    memoSummary.Lines.Append('Re-running fpcupdeluxe does work in most cases however !. So, just do a restart.');
     s:=
     'We have a fatal FPC runtime error 217: Unhandled exception occurred.' + sLineBreak +
     'This sometime happens, due to causes unknown (to me) yet.' + sLineBreak +
@@ -1309,6 +1310,11 @@ begin
 
   if ExistWordInString(PChar(s),BeginSnippet,[soWholeWord,soDown]) then
   begin
+    if ExistWordInString(PChar(s),'revision:',[soWholeWord,soDown]) then
+    begin
+      // repeat fpcupdeluxe warning
+      memoSummary.Lines.Append(s);
+    end;
     if ExistWordInString(PChar(s),Seriousness[etWarning],[soWholeWord,soDown]) then
     begin
       // repeat fpcupdeluxe warning

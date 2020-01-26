@@ -287,7 +287,7 @@ type
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
     procedure SetHTTPProxyUser(AValue: string);
-    function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
+    function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
     function GetCrossCompilerPresent:boolean;
@@ -309,6 +309,7 @@ type
     FCrossOPT: string; //options passed (only) when cross-compiling
     FCrossToolsDirectory: string;
     FCrossLibraryDirectory: string;
+    FPreviousRevision: string;
     FDesiredRevision: string;
     FActualRevision: string;
     FDesiredBranch: string;
@@ -366,13 +367,13 @@ type
     procedure CreateStoreRepositoryDiff(DiffFileName: string; UpdateWarnings: TStringList; RepoClass: TObject);
     // Clone/update using HG; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
-    function DownloadFromHG(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+    function DownloadFromHG(ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Clone/update using Git; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
-    function DownloadFromGit(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+    function DownloadFromGit(ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Checkout/update using SVN; use FSourceDirectory as local repository
     // Any generated warnings will be added to UpdateWarnings
-    function DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+    function DownloadFromSVN(ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     function SimpleExportFromSVN(ModuleName: string; aFileURL,aLocalPath:string): boolean;
     // Download SVN client and set FSVNClient.SVNExecutable if succesful.
     function DownloadFromFTP(ModuleName: string): boolean;
@@ -435,6 +436,7 @@ type
     property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision
+    property PreviousRevision: string read FPreviousRevision;
     property DesiredRevision: string write FDesiredRevision;
     property ActualRevision: string read FActualRevision;
     property DesiredBranch: string write FDesiredBranch;
@@ -1511,10 +1513,9 @@ begin
   UpdateWarnings.Add('Diff with last revision stored in ' + DiffFileName);
 end;
 
-function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; var BeforeRevision,
-  AfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
+function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; var aBeforeRevision,
+  aAfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
 var
-  BeforeRevisionShort: string; //Basically the branch revision number
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
   LocalPatchCmd : string;
@@ -1532,27 +1533,25 @@ begin
     exit;
   end;
 
-  BeforeRevision := 'failure';
-  BeforeRevisionShort:='unknown';
-  AfterRevision := 'failure';
+  aBeforeRevision := 'failure';
+  aAfterRevision := 'failure';
   aClient.LocalRepository := FSourceDirectory;
   aClient.Repository      := FURL;
   aClient.ExportOnly      := FExportOnly;
   aClient.Verbose         := FVerbose;
 
-  BeforeRevision := 'revision '+aClient.LocalRevision;
-  BeforeRevisionShort:=aClient.LocalRevision;
+  aBeforeRevision:=aClient.LocalRevision;
 
   if ((ModuleName=_FPC) OR (ModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
   begin
     Output:=(aClient as TGitClient).GetSVNRevision;
     if (Length(Output)>0) then
     begin
-      BeforeRevision := 'revision '+Output;
+      aBeforeRevision := Output;
     end;
   end;
 
-  if BeforeRevisionShort<>FRET_UNKNOWN_REVISION then
+  if aBeforeRevision<>FRET_UNKNOWN_REVISION then
   begin
     aClient.LocalModifications(UpdateWarnings); //Get list of modified files
     if UpdateWarnings.Count > 0 then
@@ -1560,7 +1559,7 @@ begin
       UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,aClient);
         UpdateWarnings.Add(ModuleName + ': reverting to original before updating.');
         aClient.Revert; //Remove local changes
@@ -1600,21 +1599,21 @@ begin
       Result := true;
 
       if FExportOnly then
-        AfterRevision := FDesiredRevision
+        aAfterRevision := FDesiredRevision
       else
       begin
-        AfterRevision := aClient.LocalRevision;
+        aAfterRevision := aClient.LocalRevision;
         if ((ModuleName=_FPC) OR (ModuleName=_LAZARUS)) AND (aClient is TGitClient)  then
         begin
           Output:=(aClient as TGitClient).GetSVNRevision;
           if (Length(Output)>0) then
           begin
-            AfterRevision:=Output;
+            aAfterRevision:=Output;
           end;
         end;
       end;
 
-      if (aClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> aClient.LocalRevision) then
+      if (aClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (aBeforeRevision <> aClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
@@ -1666,21 +1665,20 @@ begin
   end;
 end;
 
-function TInstaller.DownloadFromHG(ModuleName: string; var BeforeRevision,
-  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+function TInstaller.DownloadFromHG(ModuleName: string; var aBeforeRevision,
+  aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
-  result:=DownloadFromBase(FHGClient,ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+  result:=DownloadFromBase(FHGClient,ModuleName,aBeforeRevision,aAfterRevision,UpdateWarnings);
 end;
 
-function TInstaller.DownloadFromGit(ModuleName: string; var BeforeRevision,
-  AfterRevision: string; UpdateWarnings: TStringList): boolean;
+function TInstaller.DownloadFromGit(ModuleName: string; var aBeforeRevision,
+  aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 begin
-  result:=DownloadFromBase(FGitClient,ModuleName,BeforeRevision,AfterRevision,UpdateWarnings);
+  result:=DownloadFromBase(FGitClient,ModuleName,aBeforeRevision,aAfterRevision,UpdateWarnings);
 end;
 
-function TInstaller.DownloadFromSVN(ModuleName: string; var BeforeRevision, AfterRevision: string; UpdateWarnings: TStringList): boolean;
+function TInstaller.DownloadFromSVN(ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 var
-  BeforeRevisionShort: string; //Basically the branch revision number
   CheckoutOrUpdateReturnCode: integer;
   DiffFile: String;
   RepoExists: boolean;
@@ -1701,9 +1699,8 @@ begin
     exit;
   end;
 
-  BeforeRevision               := 'failure';
-  BeforeRevisionShort          := 'unknown';
-  AfterRevision                := 'failure';
+  aBeforeRevision              := 'failure';
+  aAfterRevision               := 'failure';
   FSVNClient.ModuleName        := ModuleName;
   FSVNClient.LocalRepository   := FSourceDirectory;
   FSVNClient.Repository        := FURL;
@@ -1714,10 +1711,9 @@ begin
   if RepoExists then
   begin
     if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-      BeforeRevision := 'revision '+FSVNClient.LocalRevisionWholeRepo
+      aBeforeRevision := FSVNClient.LocalRevisionWholeRepo
     else
-      BeforeRevision := 'branch revision '+FSVNClient.LocalRevision+' (repository revision '+FSVNClient.LocalRevisionWholeRepo+')';
-    BeforeRevisionShort:=FSVNClient.LocalRevision;
+      aBeforeRevision := FSVNClient.LocalRevision;
   end
   else
   begin
@@ -1747,7 +1743,7 @@ begin
       UpdateWarnings.Insert(0, ModuleName + ': WARNING: found modified files.');
       if FKeepLocalChanges=false then
       begin
-        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + BeforeRevisionShort + '.diff';
+        DiffFile:=IncludeTrailingPathDelimiter(FSourceDirectory) + 'REV' + aBeforeRevision + '.diff';
         CreateStoreRepositoryDiff(DiffFile, UpdateWarnings,FSVNClient);
         UpdateWarnings.Add(ModuleName + ': reverting before updating.');
         FSVNClient.Revert; //Remove local changes
@@ -1788,18 +1784,18 @@ begin
 
       if FExportOnly then
       begin
-        AfterRevision := FDesiredRevision;
-        if Trim(AfterRevision)='' then AfterRevision := FSVNClient.LocalRevisionWholeRepo;
+        aAfterRevision := FDesiredRevision;
+        if Trim(aAfterRevision)='' then aAfterRevision := FSVNClient.LocalRevisionWholeRepo;
       end
       else
       begin
         if FSVNClient.LocalRevision=FSVNClient.LocalRevisionWholeRepo then
-          AfterRevision := FSVNClient.LocalRevisionWholeRepo
+          aAfterRevision := FSVNClient.LocalRevisionWholeRepo
         else
-          AfterRevision := FSVNClient.LocalRevision;
+          aAfterRevision := FSVNClient.LocalRevision;
       end;
 
-      if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (BeforeRevisionShort <> FSVNClient.LocalRevision) then
+      if (FSVNClient.LocalRevision<>FRET_UNKNOWN_REVISION) and (aBeforeRevision <> FSVNClient.LocalRevision) then
         FRepositoryUpdated := true
       else
         FRepositoryUpdated := false;
@@ -3217,7 +3213,7 @@ begin
 
   if Length(RevFileName)>0 then
   begin
-    infoln(infotext+'Updating '+ModuleName+' revision info. Current revision='+aRevision+'.', etInfo);
+    //infoln(infotext+'Updating '+ModuleName+' '+RevFileName+'. Setting current revision:'+aRevision+'.', etInfo);
     AssignFile(RevisionIncText, RevFileName);
     try
       Rewrite(RevisionIncText);
