@@ -246,7 +246,11 @@ begin
   Processor.Parameters.Add('FPCMAKE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'fpcmake'+GetExeExt);
   Processor.Parameters.Add('PPUMOVE=' + IncludeTrailingPathDelimiter(FPCInstallDir)+'bin'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'ppumove'+GetExeExt);
 
-  Processor.Parameters.Add('CFGFILE=' + IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename);
+  s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
+  if FileExists(s) then
+  begin
+    Processor.Parameters.Add('CFGFILE=' + s);
+  end;
 
   {$IFDEF MSWINDOWS}
   Processor.Parameters.Add('UPXPROG=echo');      //Don't use UPX

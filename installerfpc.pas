@@ -607,6 +607,7 @@ begin
     if result then
     begin
       result:=false;
+
       if CrossInstaller.CompilerUsed=ctInstalled then
       begin
         infoln(infotext+'Using FPC itself to compile and build the cross-compiler',etInfo);
@@ -681,11 +682,11 @@ begin
           // Modify fpc.cfg
           // always add this, to be able to detect which cross-compilers are installed
           // helpfull for later bulk-update of all cross-compilers
+          FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
 
           if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
           begin
 
-            FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
             Options:=UpperCase(CrossCPU_Target);
 
             //Distinguish between 32 and 64 bit powerpc
@@ -744,7 +745,15 @@ begin
           Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
           Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
           Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
           {$IFDEF MSWINDOWS}
+          if ChosenCompiler=GetCompilerInDir(FInstallDirectory) then
+          begin
+            if FileExists(FPCCfg) then
+            begin
+              //Processor.Parameters.Add('CFGFILE=' + FPCCfg);
+            end;
+          end;
           Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
           Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
           {$ELSE}
@@ -1418,6 +1427,7 @@ begin
     Processor.Parameters.Add('--jobs='+IntToStr(FCPUCount));
   //Processor.Parameters.Add('FPC='+FCompiler);
   Processor.Parameters.Add('PP='+FCompiler);
+
   {$IFDEF DEBUG}
   Processor.Parameters.Add('-d');
   {$ENDIF}
@@ -1438,6 +1448,16 @@ begin
   {$IFDEF UNIX}
   Processor.Parameters.Add('INSTALL_BINDIR='+FBinPath);
   {$ELSE}
+
+  if (ModuleName<>_FPC) then
+  begin
+    s1:=IncludeTrailingPathDelimiter(FBinPath)+FPCCONFIGFILENAME;
+    if FileExists(s1) then
+    begin
+      //Processor.Parameters.Add('CFGFILE=' + s1);
+    end;
+  end;
+
   Processor.Parameters.Add('UPXPROG=echo'); //Don't use UPX
   Processor.Parameters.Add('COPYTREE=echo'); //fix for examples in Win svn, see build FAQ
   {$ENDIF}
@@ -2770,7 +2790,8 @@ begin
   end;
 
   VersionSnippet:='0.0.0';
-  if (Self is TFPCCrossInstaller) then VersionSnippet:=GetCompilerVersion(GetCompilerInDir(FInstallDirectory));
+  s:=GetCompilerInDir(FInstallDirectory);
+  if FileExists(s) then VersionSnippet:=GetCompilerVersion(s);
   if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromSource(FSourceDirectory);
   if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromUrl(FURL);
   if VersionSnippet<>'0.0.0' then
@@ -3015,11 +3036,8 @@ begin
   // only touch fpc.cfg when NOT crosscompiling !
   if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
   begin
-
-    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
-
-    // Find out where fpcmkcfg lives - only if necessary.
-    if (OperationSucceeded) AND (FileExists(FPCCfg)=false) then
+    // Find out where fpcmkcfg lives
+    if (OperationSucceeded) then
     begin
       fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg'+GetExeExt;
       if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
@@ -3044,99 +3062,152 @@ begin
       end;
     end;
 
-    // Create fpc.cfg if needed
-    if (OperationSucceeded) AND (FileExists(FPCCfg)=False) then
+    FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
+
+    if (OperationSucceeded) then
     begin
       Processor.Executable := fpcmkcfg;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
-      Processor.Parameters.Clear;
-      Processor.Parameters.Add('-d');
-      Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
-      Processor.Parameters.Add('-o');
-      Processor.Parameters.Add('' + FPCCfg + '');
-      infoln(infotext+'Creating '+FPCCONFIGFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
-      try
-        Processor.Execute;
-      except
-        on E: Exception do
-          begin
-          WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
-            'Details: '+E.Message,true);
-          OperationSucceeded := False;
-          end;
-      end;
-
-      if Processor.ExitStatus <> 0 then
+      s := IncludeTrailingPathDelimiter(FBinPath) + FPCONFIGFILENAME;
+      if (NOT FileExists(s)) then
       begin
-        OperationSucceeded := False;
-        WritelnLog(etError, infotext+'Running fpcmkcfg failed with exit code '+IntToStr(Processor.ExitStatus),true);
-      end;
+        //create fp.cfg
+        Processor.Parameters.Clear;
+        Processor.Parameters.Add('-1');
+        Processor.Parameters.Add('-d');
+        Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
 
-      // if, for one reason or another, there is no cfg file, create a minimal one by ourselves
-      if FileExists(FPCCfg) = False then
-      begin
-        AssignFile(TxtFile,FPCCfg);
-        Rewrite(TxtFile);
+        Processor.Parameters.Add('-o');
+        Processor.Parameters.Add('' + s + '');
+        infoln(infotext+'Creating '+FPCONFIGFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
         try
-          writeln(TxtFile,'# Minimal FPC config file generated by fpcup(deluxe).');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# For a release compile with optimizes and strip debuginfo');
-          writeln(TxtFile,'#IFDEF RELEASE');
-          writeln(TxtFile,'  -O2');
-          writeln(TxtFile,'  -Xs');
-          writeln(TxtFile,'  #WRITE Compiling Release Version');
-          writeln(TxtFile,'#ENDIF');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# For a debug version compile with debuginfo and all codegeneration checks on');
-          writeln(TxtFile,'#IFDEF DEBUG');
-          writeln(TxtFile,'  -glh');
-          writeln(TxtFile,'  -Crtoi');
-          writeln(TxtFile,'  #WRITE Compiling Debug Version');
-          writeln(TxtFile,'#ENDIF');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# Allow goto, inline, C-operators, C-vars');
-          writeln(TxtFile,'-Sgic');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# searchpath for units and other system dependent things');
-          writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/');
-          writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/*');
-          writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/rtl');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# searchpath for tools');
-          writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin/$FPCTARGET');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# binutils prefix for cross compiling');
-          writeln(TxtFile,'#IFDEF FPC_CROSSCOMPILING');
-          writeln(TxtFile,'#IFDEF NEEDCROSSBINUTILS');
-          writeln(TxtFile,'  -XP$FPCTARGET-');
-          writeln(TxtFile,'#ENDIF');
-          writeln(TxtFile,'#ENDIF');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# Always strip debuginfo from the executable');
-          writeln(TxtFile,'-Xs');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# assembling');
-          writeln(TxtFile,'#IFDEF Darwin');
-          writeln(TxtFile,'# use pipes instead of temporary files for assembling');
-          writeln(TxtFile,'-ap');
-          writeln(TxtFile,'#ENDIF');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# Write always a nice FPC logo ;)');
-          writeln(TxtFile,'-l');
-          writeln(TxtFile,'');
-          writeln(TxtFile,'# Display Info, Warnings and Notes and supress Hints');
-          writeln(TxtFile,'-viwnh-');
-          writeln(TxtFile,'');
-        finally
-          CloseFile(TxtFile);
+          Processor.Execute;
+        except
+          on E: Exception do
+            begin
+              WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
+                'Details: '+E.Message,true);
+            end;
+        end;
+      end;
+
+      s := IncludeTrailingPathDelimiter(FBinPath) + FPINIFILENAME;
+      if (NOT FileExists(s)) then
+      begin
+        //create fp.ini
+        Processor.Parameters.Clear;
+        Processor.Parameters.Add('-2');
+        Processor.Parameters.Add('-d');
+        Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+        Processor.Parameters.Add('-o');
+        Processor.Parameters.Add('' + s + '');
+        infoln(infotext+'Creating '+FPINIFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
+        try
+          Processor.Execute;
+        except
+          on E: Exception do
+            begin
+              WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
+                'Details: '+E.Message,true);
+            end;
+        end;
+      end;
+
+      if (NOT FileExists(FPCCfg)) then
+      begin
+        //create fpc.cfg
+        Processor.Parameters.Clear;
+        Processor.Parameters.Add('-0');
+        Processor.Parameters.Add('-d');
+        Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+        Processor.Parameters.Add('-o');
+        Processor.Parameters.Add('' + FPCCfg + '');
+        infoln(infotext+'Creating '+FPCCONFIGFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
+        try
+          Processor.Execute;
+        except
+          on E: Exception do
+            begin
+            WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
+              'Details: '+E.Message,true);
+            end;
+        end;
+
+        if Processor.ExitStatus <> 0 then
+        begin
+          WritelnLog(etError, infotext+'Running fpcmkcfg failed with exit code '+IntToStr(Processor.ExitStatus),true);
         end;
       end;
     end;
 
+    // if, for one reason or another, there is no cfg file, create a minimal one by ourselves
+    if (NOT FileExists(FPCCfg)) then
+    begin
+      AssignFile(TxtFile,FPCCfg);
+      Rewrite(TxtFile);
+      try
+        writeln(TxtFile,'# Minimal FPC config file generated by fpcup(deluxe).');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# For a release compile with optimizes and strip debuginfo');
+        writeln(TxtFile,'#IFDEF RELEASE');
+        writeln(TxtFile,'  -O2');
+        writeln(TxtFile,'  -Xs');
+        writeln(TxtFile,'  #WRITE Compiling Release Version');
+        writeln(TxtFile,'#ENDIF');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# For a debug version compile with debuginfo and all codegeneration checks on');
+        writeln(TxtFile,'#IFDEF DEBUG');
+        writeln(TxtFile,'  -glh');
+        writeln(TxtFile,'  -Crtoi');
+        writeln(TxtFile,'  #WRITE Compiling Debug Version');
+        writeln(TxtFile,'#ENDIF');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# Allow goto, inline, C-operators, C-vars');
+        writeln(TxtFile,'-Sgic');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# searchpath for units and other system dependent things');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/*');
+        writeln(TxtFile,'-Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units/$FPCTARGET/rtl');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# searchpath for tools');
+        writeln(TxtFile,'-FD'+IncludeTrailingPathDelimiter(FInstallDirectory)+'bin/$FPCTARGET');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# binutils prefix for cross compiling');
+        writeln(TxtFile,'#IFDEF FPC_CROSSCOMPILING');
+        writeln(TxtFile,'#IFDEF NEEDCROSSBINUTILS');
+        writeln(TxtFile,'  -XP$FPCTARGET-');
+        writeln(TxtFile,'#ENDIF');
+        writeln(TxtFile,'#ENDIF');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# Always strip debuginfo from the executable');
+        writeln(TxtFile,'-Xs');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# assembling');
+        writeln(TxtFile,'#IFDEF Darwin');
+        writeln(TxtFile,'# use pipes instead of temporary files for assembling');
+        writeln(TxtFile,'-ap');
+        writeln(TxtFile,'#ENDIF');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# Write always a nice FPC logo ;)');
+        writeln(TxtFile,'-l');
+        writeln(TxtFile,'');
+        writeln(TxtFile,'# Display Info, Warnings and Notes and supress Hints');
+        writeln(TxtFile,'-viwnh-');
+        writeln(TxtFile,'');
+      finally
+        CloseFile(TxtFile);
+      end;
+    end;
+
+    OperationSucceeded:=FileExists(FPCCfg);
+
     // at this point, a default fpc.cfg should exist
     // modify it to suit fpcup[deluxe]
-    if (FileExists(FPCCfg)=true) then
+    if OperationSucceeded then
     begin
       ConfigText:=TStringList.Create;
       {$IF FPC_FULLVERSION > 30100}

@@ -46,7 +46,8 @@ const
   QT5LIBNAME            = 'libQt5Pas.so.1';
 
   FPCPKGFILENAME        = 'fppkg.cfg';
-
+  FPCONFIGFILENAME      = 'fp.cfg';
+  FPINIFILENAME         = 'fp.ini';
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
   SVNBASEHTTP           = 'https://svn.';
