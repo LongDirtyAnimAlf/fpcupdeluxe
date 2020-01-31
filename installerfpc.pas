@@ -2022,11 +2022,11 @@ begin
     begin
       //Compile and install FPC proxy
       FPCScriptSource:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+FPCPROXY+'.lpr';
-      //if FileExists(FPCScriptSource) then SysUtils.DeleteFile(FPCScriptSource);
+      if FileExists(FPCScriptSource) then SysUtils.DeleteFile(FPCScriptSource);
       if NOT FileExists(FPCScriptSource) then SaveInisFromResource(FPCScriptSource,FPCPROXY);
       if FileExists(FPCScriptSource) then
       begin
-        ExecuteCommandInDir(FPCCompiler+' '+FPCScriptSource, ExtractFilePath(FPCCompiler), FVerbose);
+        ExecuteCommandInDir(FPCCompiler+' -O2 -Os -Xs -XX '+FPCScriptSource, ExtractFileDir(FPCCompiler), FVerbose);
         FPCScriptSource := ChangeFileExt(FPCScriptSource, GetExeExt);
         if FileExists(FPCScriptSource) then
         begin
@@ -2040,6 +2040,7 @@ begin
       end;
     end
     else
+    if ExtractFileExt(FPCScript)='.bat' then
     begin
       //Install FPC batch proxy
       AssignFile(TxtFile,FPCScript);
@@ -2050,7 +2051,7 @@ begin
       finally
         CloseFile(TxtFile);
       end;
-    end;
+    end else exit(true);
     {$ELSE}
     exit(true);
     {$ENDIF USEWINDOWSPROXY}
@@ -2079,7 +2080,7 @@ begin
     end
     else
     begin
-      infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
+      infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,{$IFDEF WINDOWS}etWarning{$ELSE}etError{$ENDIF});
     end;
   end;
 

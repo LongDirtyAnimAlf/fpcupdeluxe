@@ -1,6 +1,10 @@
 program gcc;
+
+{$mode objfpc}{$H+}
+
 uses
-  Classes, SysUtils, Process;
+  Classes, SysUtils, process;
+
 var
   i: integer;
   AProcess: TProcess;

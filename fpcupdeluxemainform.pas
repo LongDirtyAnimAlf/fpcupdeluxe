@@ -3089,7 +3089,7 @@ begin
   if Assigned(FPCupManager) then
   begin
     Application.MainForm.Cursor:=crHourGlass;
-    with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
+    with TMemIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
     try
       WriteString('General','InstallDirectory',sInstallDir);
       {$ifdef RemoteLog}
@@ -3121,6 +3121,7 @@ begin
       end;
 
     finally
+      UpdateFile;
       Free;
     end;
 
@@ -3638,7 +3639,7 @@ begin
   if (NOT result) then exit;
 
   try
-    with TIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
+    with TMemIniFile.Create(aDir+DirectorySeparator+installerUniversal.DELUXEFILENAME) do
     try
       // mmm, is this correct ?  See extrasettings !!
       WriteBool('General','GetRepo',(NOT FPCupManager.ExportOnly));
@@ -3680,6 +3681,7 @@ begin
       WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 
     finally
+      UpdateFile;
       Free;
     end;
 

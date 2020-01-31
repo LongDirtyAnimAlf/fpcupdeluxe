@@ -2772,6 +2772,8 @@ begin
     begin
       result := ChangeFileExt(aCompiler, '');
       result := result + PROXYEXTENSION;
+      // to be absolutely safe we do not overwrite the compiler somewhere else.
+      if result=aCompiler then result:='';
     end;
 end;
 

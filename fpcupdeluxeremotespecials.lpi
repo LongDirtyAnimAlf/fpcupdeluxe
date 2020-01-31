@@ -15,12 +15,13 @@
         <DpiAware Value="True/PM_V2"/>
         <ExecutionLevel Value="requireAdministrator"/>
       </XPManifest>
-      <Resources Count="5">
+      <Resources Count="6">
         <Resource_0 FileName="fpcup.ini" Type="RCDATA" ResourceName="FPCUP_INI"/>
         <Resource_1 FileName="settings.ini" Type="RCDATA" ResourceName="SETTINGS_INI"/>
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
         <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
+        <Resource_5 FileName="fpcproxy.lpr" Type="RCDATA" ResourceName="FPCPROXY"/>
       </Resources>
     </General>
     <i18n>

@@ -1,0 +1,13 @@
+Index: packages/cocoaint/fpmake.pp
+===================================================================
+--- packages/cocoaint/fpmake.pp	(revision 44047)
++++ packages/cocoaint/fpmake.pp	(working copy)
+@@ -40,7 +40,7 @@
+     T:=P.Targets.AddUnit('CoreAudio.pas');
+     T:=P.Targets.AddUnit('CoreAudioKit.pas');
+     T:=P.Targets.AddUnit('CoreBluetooth.pas');
+-    T:=P.Targets.AddUnit('CoreGraphics.pas');
++    //T:=P.Targets.AddUnit('CoreGraphics.pas');
+     T:=P.Targets.AddUnit('CoreLocation.pas');
+     T:=P.Targets.AddUnit('CoreMedia.pas');
+     T:=P.Targets.AddUnit('CoreMediaIO.pas');

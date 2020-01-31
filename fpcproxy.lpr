@@ -1,6 +1,9 @@
 program fpcproxy;
+
+{$mode objfpc}{$H+}
+
 uses
-  SysUtils;
+  SysUtils;//,process;
 
 procedure error(const s : string);
 begin
@@ -22,6 +25,7 @@ begin
   {$ELSE}
   fpcbin:=aPath+'fpc';
   {$ENDIF}
+  
   {
   AProcess:=TProcess.Create(nil);
   AProcess.Options := [poWaitOnExit];
@@ -34,16 +38,19 @@ begin
   AProcess.Execute;
   AProcess.Free;
   }
+
   setlength(ppccommandline,paramcount+2);
   ppccommandline[0]:='-n';
   ppccommandline[1]:='@'+aPath+'fpc.cfg';
   for i:=1 to ParamCount() do ppccommandline[i+1]:=ParamStr(i);
+    
   try
     errorvalue:=ExecuteProcess(fpcbin,ppccommandline);
   except
     on e : exception do
       error(fpcbin+' can''t be executed, error message: '+e.message);
   end;
+  
   if (errorvalue<>0) and
      (paramcount<>0) then
     error(fpcbin+' returned an error exitcode');
