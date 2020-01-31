@@ -30,10 +30,11 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
 {$mode objfpc}{$H+}
 
-{.$define crosssimple}
-{$ifdef MSWindows}
-{.$define buildnative}
-{$endif}
+{.$DEFINE crosssimple}
+{$IFDEF WINDOWS}
+{.$DEFINE buildnative}
+{.$DEFINE USEWINDOWSPROXY}
+{$ENDIF WINDOWS}
 
 interface
 
@@ -134,7 +135,7 @@ type
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
     function GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
     // Creates fpc proxy script that masks general fpc.cfg
-    function CreateFPCScript:boolean;
+    function CreateFPCScript(ReplaceExistingProxy:boolean=true):boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
     function DownloadBootstrapCompiler: boolean;
     // Another way to get the compiler version string
@@ -623,7 +624,7 @@ begin
 
       if s1<>'0.0.0'
         then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using compiler with version: '+s1, etInfo)
-        else infoln(infotext+'FPC compiler version error: '+s1+' ! Should never happen: expect many errors !!', etError);
+        else infoln(infotext+'FPC compiler ('+ChosenCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
       // Add binutils path to path if necessary
       OldPath:=GetPath;
@@ -1158,9 +1159,7 @@ begin
           // delete cross-compiler in source-directory
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+CrossCompilerName);
 
-          {$IFDEF UNIX}
-          result:=CreateFPCScript;
-          {$ENDIF UNIX}
+          result:=CreateFPCScript(false);
           FCompiler:=GetCompiler;
 
           {$ifdef MSWINDOWS}
@@ -1596,17 +1595,6 @@ begin
 
   if ModuleName=_FPC then
   begin
-    {$IFDEF UNIX}
-    if OperationSucceeded then
-    begin
-      if FVerbose then
-        infoln(infotext+'Creating fpc script:',etInfo)
-      else
-        infoln(infotext+'Creating fpc script:',etDebug);
-      OperationSucceeded:=CreateFPCScript;
-    end;
-    {$ENDIF UNIX}
-
     // Let everyone know of our shiny new compiler:
     if OperationSucceeded then
     begin
@@ -1993,57 +1981,119 @@ begin
   end else infoln('Tried to get required bootstrap compiler version from '+FPCMAKEFILENAME+', but no '+FPCMAKEFILENAME+' found',etError);
 end;
 
-function TFPCInstaller.CreateFPCScript: boolean;
-  {$IFDEF UNIX}
+function TFPCInstaller.CreateFPCScript(ReplaceExistingProxy:boolean): boolean;
+{$IFDEF WINDOWS}
+const
+  FPCPROXY='fpcproxy';
+{$ENDIF}
 var
   FPCScript:string;
-  TxtFile:Text;
   FPCCompiler:String;
-  {$ENDIF UNIX}
+  TxtFile:Text;
+  {$IFDEF WINDOWS}
+  FPCScriptSource:string;
+  {$ENDIF}
 begin
-  result:=true;
-  {$IFDEF UNIX}
-  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateFPCScript): ';
-  FPCCompiler:=IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt;
-
-  // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+  // If needed, create a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
   // If this fails, Lazarus compilation will fail...
-  FPCScript := IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)) + 'fpc.sh';
-  if FileExists(FPCScript) then
+  result:=true;
+
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateFPCProxy): ';
+
+  FPCCompiler := IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt;
+  //if (NOT FileExists(FPCCompiler)) then exit(false)
+  FPCScript   := GetFPCCompilerProxy(FPCCompiler);
+
+  if FileExists(FPCScript) AND (ReplaceExistingProxy) then
   begin
-    infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
+    infoln(localinfotext+'FPC launcher proxy already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
     if not(SysUtils.DeleteFile(FPCScript)) then
     begin
-      infoln(localinfotext+'Error deleting existing launcher script for FPC:'+FPCScript,etError);
-      Exit(false);
+      infoln(localinfotext+'Error deleting existing launcher proxy for FPC:'+FPCScript,etError);
+      exit(false);
     end;
   end;
-  AssignFile(TxtFile,FPCScript);
-  Rewrite(TxtFile);
-  writeln(TxtFile,'#!/bin/sh');
-  writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
-  writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
-  writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-  writeln(TxtFile,FPCCompiler,' -n @',
-    IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
-    '"$@"');
-  CloseFile(TxtFile);
-  Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+
+  if (NOT FileExists(FPCScript)) then
+  begin
+    {$IFDEF WINDOWS}
+    {$IFDEF USEWINDOWSPROXY}
+    if ExtractFileExt(FPCScript)='.exe' then
+    begin
+      //Compile and install FPC proxy
+      FPCScriptSource:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+FPCPROXY+'.lpr';
+      //if FileExists(FPCScriptSource) then SysUtils.DeleteFile(FPCScriptSource);
+      if NOT FileExists(FPCScriptSource) then SaveInisFromResource(FPCScriptSource,FPCPROXY);
+      if FileExists(FPCScriptSource) then
+      begin
+        ExecuteCommandInDir(FPCCompiler+' '+FPCScriptSource, ExtractFilePath(FPCCompiler), FVerbose);
+        FPCScriptSource := ChangeFileExt(FPCScriptSource, GetExeExt);
+        if FileExists(FPCScriptSource) then
+        begin
+          FileUtil.CopyFile(FPCScriptSource,FPCScript);
+          SysUtils.DeleteFile(FPCScriptSource);
+          FPCScriptSource := ChangeFileExt(FPCScriptSource, '.o');
+          SysUtils.DeleteFile(FPCScriptSource);
+          FPCScriptSource := ChangeFileExt(FPCScriptSource, '.lpr');
+          SysUtils.DeleteFile(FPCScriptSource);
+        end;
+      end;
+    end
+    else
+    begin
+      //Install FPC batch proxy
+      AssignFile(TxtFile,FPCScript);
+      try
+        Rewrite(TxtFile);
+        writeln(TxtFile,FPCCompiler,' -n @',
+          IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+'%*');
+      finally
+        CloseFile(TxtFile);
+      end;
+    end;
+    {$ELSE}
+    exit(true);
+    {$ENDIF USEWINDOWSPROXY}
+    {$ELSE}
+    AssignFile(TxtFile,FPCScript);
+    try
+      Rewrite(TxtFile);
+      writeln(TxtFile,'#!/bin/sh');
+      writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+      writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+      writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+      writeln(TxtFile,FPCCompiler,' -n @',
+        IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
+        '"$@"');
+    finally
+      CloseFile(TxtFile);
+    end;
+    if FileExists(FPCScript) then FPChmod(FPCScript,&755);
+    {$ENDIF}
+
+    Result:=FileExists(FPCScript);
+
+    if Result then
+    begin
+      infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
+    end
+    else
+    begin
+      infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
+    end;
+  end;
+
   if Result then
   begin
     // To prevent unneccessary rebuilds of FCL, LCL and others:
     // Set fileage the same as the FPC binary itself
-    Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
+    if FileExists(FPCScript) then Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
   end;
-  if Result then
-  begin
-    infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
-  end
-  else
-  begin
-    infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
-  end;
-  {$ENDIF UNIX}
+
+  {$IFDEF WINDOWS}
+  // Do not fail on Windows
+  Result:=True;
+  {$ENDIF}
 end;
 
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;
@@ -3436,6 +3486,30 @@ begin
     // if OperationSucceeded then BuildModuleCustom('PAS2JS');
   end;
 
+  if OperationSucceeded then
+  begin
+    if (NOT (Self is TFPCCrossInstaller)) then
+    begin
+      if FVerbose then
+        infoln(infotext+'Creating fpc script:',etInfo)
+      else
+        infoln(infotext+'Creating fpc script:',etDebug);
+      OperationSucceeded:=CreateFPCScript;
+    end else OperationSucceeded:=CreateFPCScript(false);
+  end;
+
+  // Let everyone know of our shiny new compiler (or proxy:
+  if OperationSucceeded then
+  begin
+    FCompiler:=GetCompiler;
+    // Verify it exists
+    if not(FileExists(FCompiler)) then
+    begin
+      WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
+      OperationSucceeded:=false;
+    end;
+  end;
+
   RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
 
   if OperationSucceeded then
@@ -3581,13 +3655,8 @@ begin
 
   if (NOT CrossCompiling) then
   begin
-    // The original behavior: delete fpc.cfg
-    // New: keep it, while we will loose all crosscompilers [settings] when updating FPC !!
-    // Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+FPCCONFIGFILENAME);
-    {$IFDEF UNIX}
-    // Delete any fpc.sh shell scripts
-    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
-    {$ENDIF UNIX}
+    // Delete any proxy scripts
+    SysUtils.DeleteFile(GetFPCCompilerProxy(FCompiler));
   end;
 
   {$IFDEF UNIX}

@@ -71,10 +71,14 @@ const
 
   REVINCFILENAME        = 'revision.inc';
 
-  {$IFDEF MSWINDOWS}
+  {$IFDEF WINDOWS}
   //FPC prebuilt binaries of the GNU Binutils
-  PREBUILTBINUTILSURL = BINUTILSURL + '/binaries/i386-win32';
+  PREBUILTBINUTILSURL      = BINUTILSURL + '/binaries/i386-win32';
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
+  PROXYEXTENSION           = 'proxy.exe';
+  //PROXYEXTENSION           = '.bat';
+  {$ELSE}
+  PROXYEXTENSION           = '.sh';
   {$ENDIF}
 
   LAZARUSBINARIES = FPCBASESVNURL + '/lazarus/binaries';
@@ -495,6 +499,7 @@ type
     function CleanModule(ModuleName: string): boolean; virtual;
     // Config module
     function ConfigModule(ModuleName: string): boolean; virtual;
+    function GetFPCCompilerProxy(aCompiler:string): string;
     // Constructs compiler path from directory and architecture
     // Corrects for use of our fpc.sh launcher on *nix
     // Does not verify compiler actually exists.
@@ -2759,17 +2764,27 @@ begin
   end;
 end;
 
+function TInstaller.GetFPCCompilerProxy(aCompiler:string): string;
+begin
+  if Length(aCompiler)=0 then
+    result:=''
+  else
+    begin
+      result := ChangeFileExt(aCompiler, '');
+      result := result + PROXYEXTENSION;
+    end;
+end;
 
 function TInstaller.GetCompilerInDir(Dir: string): string;
+var
+  aCompiler,aProxy:string;
 begin
-  Result := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
-  {$IFDEF UNIX}
-  if FileExists(Result + '.sh') then
-  begin
-    //Use our proxy if it is installed
-    Result := Result + '.sh';
-  end;
-  {$ENDIF UNIX}
+  aCompiler := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
+  aProxy:=GetFPCCompilerProxy(aCompiler);
+  if FileExists(aProxy) then
+    result:=aProxy
+  else
+    result:=aCompiler;
 end;
 
 procedure TInstaller.SetTarget(aCPU,aOS,aSubArch:string);
@@ -2807,7 +2822,7 @@ begin
 
   if not DirectoryExists(FSourceDirectory) then
   begin
-    infoln(infotext+'No '+ModuleName+' source [yet] ... nothing to be done',etInfo);
+    infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
     exit(true);
   end;
 end;

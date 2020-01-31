@@ -1527,10 +1527,9 @@ begin
          else LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/MakeFilename/Value', IncludeTrailingPathDelimiter(FMakeDir) + 'make' + GetExeExt);
       {$ENDIF MSWINDOWS}
 
-      {$IFDEF UNIX}
-      // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', FCompiler);
 
+      {$IFDEF UNIX}
       {$IF (defined(FREEBSD)) or (defined(Darwin))}
       // Check for newer user-installed debugger (e.g. from ports tree
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
@@ -1544,6 +1543,7 @@ begin
         begin
           //Check for newest lldb debugger ... does work !!
           DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
+          if NOT FileExists(DebuggerPath) then DebuggerPath:='/usr/bin/lldb';
           if FileExists(DebuggerPath) then
             DebuggerType:='TLldbDebugger'
           else

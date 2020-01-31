@@ -1,0 +1,13 @@
+Index: components/codetools/definetemplates.pas
+===================================================================
+--- components/codetools/definetemplates.pas	(revision 62599)
++++ components/codetools/definetemplates.pas	(working copy)
+@@ -3874,7 +3883,7 @@
+ 
+   // check fpc<something>
+   // Note: fpc.exe is just a wrapper, it can call pas2js
+-  if CompareFilenames(ShortFilename,'fpc')=0 then
++  if IsFPCExecutable(AFilename,ErrorMsg,Run) then
+     exit(true);
+ 
+   ErrorMsg:='fpc executable should start with fpc or ppc';

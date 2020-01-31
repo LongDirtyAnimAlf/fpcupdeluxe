@@ -443,6 +443,9 @@ procedure TForm1.FormDestroy(Sender: TObject);
 var
   i:integer;
 begin
+  //if Assigned(Form3) then Form3.Destroy;
+  //if Assigned(Form2) then Form2.Destroy;
+
   for i:=(listModules.Count-1) downto 0 do
   begin
     if Assigned(listModules.Items.Objects[i]) then
@@ -3082,6 +3085,7 @@ end;
 
 procedure TForm1.FormClose(Sender: TObject; var CloseAction: TCloseAction);
 begin
+  Self.OnResize:=nil;
   if Assigned(FPCupManager) then
   begin
     Application.MainForm.Cursor:=crHourGlass;

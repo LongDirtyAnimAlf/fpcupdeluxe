@@ -1,0 +1,13 @@
+Index: Makefile
+===================================================================
+--- Makefile	(revision 44068)
++++ Makefile	(working copy)
+@@ -21,7 +21,7 @@
+ SEARCHPATH:=$(subst ;, ,$(PATH))
+ endif
+ endif
+-SEARCHPATH+=$(patsubst %/,%,$(subst \,/,$(dir $(MAKE))))
++SEARCHPATH:=$(patsubst %/,%,$(subst \,/,$(dir $(MAKE)))) $(SEARCHPATH)
+ PWD:=$(strip $(wildcard $(addsuffix /pwd.exe,$(SEARCHPATH))))
+ ifeq ($(PWD),)
+ PWD:=$(strip $(wildcard $(addsuffix /pwd,$(SEARCHPATH))))

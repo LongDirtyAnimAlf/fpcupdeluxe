@@ -1334,38 +1334,21 @@ begin
 end;
 
 function TUniversalInstaller.CleanModule(ModuleName: string): boolean;
-//var
-//  DeleteList:TStringList;
-//  FileCounter:integer;
+var
+  idx:integer;
+  PackageSettings:TStringList;
 begin
+  idx:=UniModuleList.IndexOf(ModuleName);
+  if idx>=0 then
+  begin
+    PackageSettings:=TStringList(UniModuleList.Objects[idx]);
+    FSourceDirectory:=GetValueFromKey('InstallDir',PackageSettings);
+    FSourceDirectory:=FixPath(FSourceDirectory);
+    FSourceDirectory:=ExcludeTrailingPathDelimiter(FSourceDirectory);
+  end;
   result:=inherited;
   result:=InitModule;
   if not result then exit;
-
-  (*
-  if (Length(FSourceDirectory)>0) AND (DirectoryExists(FSourceDirectory)) then
-  begin
-    DeleteList := TStringList.Create;
-    try
-      FindAllFiles(DeleteList,FSourceDirectory, '*.ppu; *.compiled; *.o', True);
-      if DeleteList.Count > 0 then
-      begin
-        for FileCounter := 0 to (DeleteList.Count-1) do
-        begin
-          if Pos(GetTargetCPUOS,DeleteList.Strings[FileCounter])>0 then
-          begin
-            DeleteFile(DeleteList.Strings[FileCounter]);
-            infoln(infotext+'Deleting '+DeleteList.Strings[FileCounter],etDebug);
-          end;
-        end;
-      end;
-    finally
-      DeleteList.Free;
-    end;
-  end;
-  *)
-
-  result:=true;
 end;
 
 // Processes a single module (i.e. section in fpcup.ini)

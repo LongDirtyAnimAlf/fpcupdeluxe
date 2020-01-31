@@ -747,7 +747,7 @@ var
   //Cipher: TDCP_rc4;
   Cipher: TDCP_DES;
 begin
-  with TIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
+  with TMemIniFile.Create(SafeGetApplicationPath+installerUniversal.DELUXEFILENAME) do
   try
     WriteBool('General','GetRepo',Repo);
     WriteBool('General','GetPackageRepo',PackageRepo);
@@ -780,10 +780,11 @@ begin
     WriteString('ProxySettings','HTTPProxyPass',s);
 
   finally
+    UpdateFile;
     Free;
   end;
 
-  with TIniFile.Create(FInstallPath+installerUniversal.DELUXEFILENAME) do
+  with TMemIniFile.Create(FInstallPath+installerUniversal.DELUXEFILENAME) do
   try
     for OS := Low(TOS) to High(TOS) do
     begin
@@ -821,18 +822,26 @@ begin
       end;
     end;
   finally
+    UpdateFile;
     Free;
   end;
 
-  for i := 0 to ListBoxFPCPatch.Items.Count - 1 do
+  if (ListBoxFPCPatch.Items.Count>0) then
   begin
-     TString(ListBoxFPCPatch.Items.Objects[i]).Free;
-     ListBoxFPCPatch.Items.Objects[i] := nil;
+    for i := 0 to ListBoxFPCPatch.Items.Count - 1 do
+    begin
+       TString(ListBoxFPCPatch.Items.Objects[i]).Free;
+       ListBoxFPCPatch.Items.Objects[i] := nil;
+    end;
   end;
-  for i := 0 to ListBoxLazPatch.Items.Count - 1 do
+
+  if (ListBoxLazPatch.Items.Count>0) then
   begin
-     TString(ListBoxLazPatch.Items.Objects[i]).Free;
-     ListBoxLazPatch.Items.Objects[i] := nil;
+    for i := 0 to ListBoxLazPatch.Items.Count - 1 do
+    begin
+       TString(ListBoxLazPatch.Items.Objects[i]).Free;
+       ListBoxLazPatch.Items.Objects[i] := nil;
+    end;
   end;
 end;
 
