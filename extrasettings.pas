@@ -802,6 +802,8 @@ begin
         if (CPU=mips) AND (OS<>linux) then continue;
         if (CPU=mipsel) AND ((OS<>linux) AND (OS<>android) AND (OS<>embedded)) then continue;
         if (CPU=avr) AND (OS<>embedded) then continue;
+        if (CPU=sparc64) AND (OS<>linux) then continue;
+        if ((CPU=riscv32) OR (CPU=riscv64)) AND ((OS<>linux) AND (OS<>embedded)) then continue;
         if (OS=haiku) AND ((CPU<>i386) AND (CPU<>x86_64) {AND (CPU<>arm)}) then continue;
         if (OS=solaris) AND ((CPU<>x86_64) AND (CPU<>sparc)) then continue;
 

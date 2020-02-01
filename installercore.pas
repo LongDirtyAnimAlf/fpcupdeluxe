@@ -227,7 +227,7 @@ const
 
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc);
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64);
   TOS  = (windows,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd);
   TARMARCH  = (default,armel,armeb,armhf);
 
@@ -240,11 +240,11 @@ type
 
 const
   CpuStr : array[TCPU] of string=(
-    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086','sparc'
+    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086','sparc','sparc64','riscv32','riscv64'
   );
 
   ppcSuffix : array[TCPU] of string=(
-    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc'
+    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64'
   );
 
   OSStr : array[TOS] of string=(
@@ -292,7 +292,7 @@ type
     procedure SetHTTPProxyPassword(AValue: string);
     procedure SetHTTPProxyPort(AValue: integer);
     procedure SetHTTPProxyUser(AValue: string);
-    function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
+    function DownloadFromBase(aClient:TRepoClient; ModuleName: string; var aBeforeRevision, aAfterRevision: string; UpdateWarnings: TStringList): boolean;
     // Get fpcup registred cross-compiler, if any, if not, return nil
     function GetCrossInstaller: TCrossInstaller;
     function GetCrossCompilerPresent:boolean;
@@ -1520,7 +1520,7 @@ begin
 end;
 
 function TInstaller.DownloadFromBase(aClient:TRepoClient; ModuleName: string; var aBeforeRevision,
-  aAfterRevision: string; UpdateWarnings: TStringList; const aUserName:string=''; const aPassword:string=''): boolean;
+  aAfterRevision: string; UpdateWarnings: TStringList): boolean;
 var
   ReturnCode: integer;
   DiffFile,DiffFileCorrectedPath: String;
@@ -3003,117 +3003,120 @@ begin
 
   LocalSourcePatches:=FSourcePatches;
 
-  PatchList:=TStringList.Create;
-  try
-    PatchList.Clear;
+  if FOnlinePatching then
+  begin
+    PatchList:=TStringList.Create;
     try
-      GetGitHubFileList(FPCUPGITREPOSOURCEPATCHESAPI,PatchList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-    except
-      on E : Exception do
-      begin
-        infoln(localinfotext+E.ClassName+' error raised, with message : '+E.Message, etError);
-      end;
-    end;
-
-    for i:=0 to Pred(PatchList.Count) do
-    begin
-      infoln(localinfotext+'Found online patch: '+PatchList[i],etDebug);
-
-      PatchFilePath:=PatchList[i];
-
-      j:=0;
-      if PatchFPC then j:=Pos('fpcpatch',PatchFilePath);
-      {$ifndef FPCONLY}
-      if PatchLaz then j:=Pos('lazpatch',PatchFilePath);
-      {$endif}
-      if PatchUniversal then
-      begin
-        j:=Pos('fpcuppatch',PatchFilePath);
-        if j<>0 then
+      PatchList.Clear;
+      try
+        GetGitHubFileList(FPCUPGITREPOSOURCEPATCHESAPI,PatchList,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      except
+        on E : Exception do
         begin
-          j:=Pos(LowerCase(ModuleName),LowerCase(GetFileNameFromURL(PatchFilePath)));
+          infoln(localinfotext+E.ClassName+' error raised, with message : '+E.Message, etError);
         end;
       end;
 
-      if j=0 then continue;
-
-      infoln(infotext+'Using '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etDebug);
-
-      if NOT PatchUniversal then
+      for i:=0 to Pred(PatchList.Count) do
       begin
-        s:=GetFileNameFromURL(PatchFilePath);
-        s:=ExtractFileNameOnly(s);
-        s:=GetVersionFromUrl(s);
-        PatchVersion:=GetNumericalVersion(s);
+        infoln(localinfotext+'Found online patch: '+PatchList[i],etDebug);
 
-        if (s='trunk') or (PatchVersion=0) then
-        begin
-          //only patch trunk in case no version is given
-          if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
-          {$ifndef FPCONLY}
-          if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
-          {$endif}
-        end;
+        PatchFilePath:=PatchList[i];
 
-        infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
-
-        {$if defined(Darwin) and defined(LCLQT5)}
-        //disable big hack for now
-        if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then j:=0;
-        {$else}
-        if Pos('darwin_qt5',PatchFilePath)>0 then j:=0;
-        {$endif}
-
-        {$ifndef MSWindows}
-        //only patch the Haiku build process on Windows
-        if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then j:=0;
-        {$endif}
-
-        {$ifndef Haiku}
-        //only patch the Haiku FPU exception mask on Haiku itself
-        if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
-        {$endif}
-
-        {$ifndef Darwin}
-        //only patch the packages Makefile on Darwin itself
-        if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then j:=0;
-        {$endif}
-
+        j:=0;
+        if PatchFPC then j:=Pos('fpcpatch',PatchFilePath);
         {$ifndef FPCONLY}
-        //only patch lazarus for musl on musl itself
-        if Pos('lazpatch_musllibc',PatchFilePath)>0 then
-        begin
-          {$ifdef Linux}
-          if (NOT FMUSL) then j:=0;
-          {$else}
-          j:=0;
-          {$endif}
-        end;
+        if PatchLaz then j:=Pos('lazpatch',PatchFilePath);
         {$endif}
-
-        // In general, only patch trunk !
-        // This can be changed to take care of versions ... but not for now !
-        // Should be removed in future fpcup versions !!
-        if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
+        if PatchUniversal then
         begin
-          if GetFullVersion<>PatchVersion then j:=0;
+          j:=Pos('fpcuppatch',PatchFilePath);
+          if j<>0 then
+          begin
+            j:=Pos(LowerCase(ModuleName),LowerCase(GetFileNameFromURL(PatchFilePath)));
+          end;
+        end;
+
+        if j=0 then continue;
+
+        infoln(infotext+'Using '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etDebug);
+
+        if NOT PatchUniversal then
+        begin
+          s:=GetFileNameFromURL(PatchFilePath);
+          s:=ExtractFileNameOnly(s);
+          s:=GetVersionFromUrl(s);
+          PatchVersion:=GetNumericalVersion(s);
+
+          if (s='trunk') or (PatchVersion=0) then
+          begin
+            //only patch trunk in case no version is given
+            if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
+            {$ifndef FPCONLY}
+            if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+            {$endif}
+          end;
+
+          infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
+
+          {$if defined(Darwin) and defined(LCLQT5)}
+          //disable big hack for now
+          if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then j:=0;
+          {$else}
+          if Pos('darwin_qt5',PatchFilePath)>0 then j:=0;
+          {$endif}
+
+          {$ifndef MSWindows}
+          //only patch the Haiku build process on Windows
+          if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then j:=0;
+          {$endif}
+
+          {$ifndef Haiku}
+          //only patch the Haiku FPU exception mask on Haiku itself
+          if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
+          {$endif}
+
+          {$ifndef Darwin}
+          //only patch the packages Makefile on Darwin itself
+          if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then j:=0;
+          {$endif}
+
+          {$ifndef FPCONLY}
+          //only patch lazarus for musl on musl itself
+          if Pos('lazpatch_musllibc',PatchFilePath)>0 then
+          begin
+            {$ifdef Linux}
+            if (NOT FMUSL) then j:=0;
+            {$else}
+            j:=0;
+            {$endif}
+          end;
+          {$endif}
+
+          // In general, only patch trunk !
+          // This can be changed to take care of versions ... but not for now !
+          // Should be removed in future fpcup versions !!
+          if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
+          begin
+            if GetFullVersion<>PatchVersion then j:=0;
+          end;
+        end;
+
+        if (j>0) then
+        begin
+          infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil be applied !',etInfo);
+          ForceDirectoriesSafe(PatchDirectory);
+          s:=GetFileNameFromURL(PatchFilePath);
+          GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
+        end
+        else
+        begin
+          infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil not be applied !',etDebug);
         end;
       end;
-
-      if (j>0) then
-      begin
-        infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil be applied !',etInfo);
-        ForceDirectoriesSafe(PatchDirectory);
-        s:=GetFileNameFromURL(PatchFilePath);
-        GetFile(PatchFilePath,PatchDirectory+DirectorySeparator+s,true);
-      end
-      else
-      begin
-        infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil not be applied !',etDebug);
-      end;
+    finally
+      PatchList.Free;
     end;
-  finally
-    PatchList.Free;
   end;
 
   if (DirectoryExists(PatchDirectory)) then

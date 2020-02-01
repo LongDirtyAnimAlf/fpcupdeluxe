@@ -2227,7 +2227,7 @@ begin
     begin
       infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
-    if FOnlinePatching then PatchModule(ModuleName);
+    PatchModule(ModuleName);
   end;
 
 end;
