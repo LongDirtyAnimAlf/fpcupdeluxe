@@ -2026,7 +2026,7 @@ begin
       if NOT FileExists(FPCScriptSource) then SaveInisFromResource(FPCScriptSource,FPCPROXY);
       if FileExists(FPCScriptSource) then
       begin
-        ExecuteCommandInDir(FPCCompiler+' -O2 -Os -Xs -XX '+FPCScriptSource, ExtractFileDir(FPCCompiler), FVerbose);
+        ExecuteCommandInDir(FPCCompiler+' -n -O2 -Os -Xs -XX -Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'*'+' '+FPCScriptSource, ExtractFileDir(FPCCompiler), FVerbose);
         FPCScriptSource := ChangeFileExt(FPCScriptSource, GetExeExt);
         if FileExists(FPCScriptSource) then
         begin
@@ -2821,10 +2821,57 @@ var
   ConfigText,ConfigTextStore:TStringList;
   OperationSucceeded: boolean;
   PlainBinPath: string; //directory above the architecture-dependent FBinDir
-  s:string;
+  s,s2:string;
   TxtFile:Text;
   x,y:integer;
   VersionSnippet:string;
+
+  function CheckFPCMkCfgOption(aOption:string):boolean;
+  var
+    aIndex:integer;
+  begin
+    aIndex:=-1;
+    Processor.Parameters.Clear;
+    Processor.Parameters.Add('-h');
+    try
+      Processor.Execute;
+      //if Processor.ExitStatus = 0 then
+      begin
+        if Processor.OutputStrings.Count>0 then
+        begin
+          aIndex:=StringListStartsWith(Processor.OutputStrings,Trim(aOption));
+        end;
+      end;
+    except
+      on E: Exception do
+      begin
+        WritelnLog(etError, infotext+'Running [CheckFPCMkCfgOption] failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+      end;
+    end;
+    result:=(aIndex<>-1);
+  end;
+
+
+  function RunFPCMkCfgOption(aFile:string):boolean;
+  begin
+    result:=false;
+    Processor.Parameters.Add('-d');
+    Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+    Processor.Parameters.Add('-o');
+    Processor.Parameters.Add('' + aFile + '');
+    infoln(infotext+'Creating '+ExtractFileName(aFile)+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]));
+    try
+      Processor.Execute;
+      result:=(Processor.ExitStatus=0);
+    except
+      on E: Exception do
+      begin
+        WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+'Details: '+E.Message,true);
+        result:=false;
+      end;
+    end;
+  end;
+
 begin
   result:=inherited;
   result:=InitModule;
@@ -3084,32 +3131,59 @@ begin
   end;
   {$ENDIF UNIX}
 
-  // only touch fpc.cfg when NOT crosscompiling !
+  // Create FPC proxy for better isolation of FPC itself (prevent other than own fpc.cfg from use)
+  if OperationSucceeded then
+  begin
+    if (NOT (Self is TFPCCrossInstaller)) then
+    begin
+      if FVerbose then
+        infoln(infotext+'Creating fpc script:',etInfo)
+      else
+        infoln(infotext+'Creating fpc script:',etDebug);
+      OperationSucceeded:=CreateFPCScript;
+    end else OperationSucceeded:=CreateFPCScript(false);
+  end;
+
+  // Let everyone know of our shiny new compiler (or proxy):
+  if OperationSucceeded then
+  begin
+    FCompiler:=GetCompiler;
+    // Verify it exists
+    if not(FileExists(FCompiler)) then
+    begin
+      WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
+      OperationSucceeded:=false;
+    end;
+  end;
+
+  // only create fpc.cfg and other configs with fpcmkcfg when NOT crosscompiling !
   if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
   begin
     // Find out where fpcmkcfg lives
     if (OperationSucceeded) then
     begin
-      fpcmkcfg:=IncludeTrailingPathDelimiter(FBinPath) + 'fpcmkcfg'+GetExeExt;
-      if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
+      s:=ExcludeTrailingPathDelimiter(FBinPath);
+      FPCMkCfg:=IncludeTrailingPathDelimiter(s)+FPCMAKECONFIG+GetExeExt;
+      OperationSucceeded:=CheckExecutable(FPCMkCfg,'-h',FPCMAKECONFIG);
+      if (NOT OperationSucceeded) then
       begin
-        // Newer 3.1 trunk versions put fpcmkcfg in bin itself ??!!
-        // todo check !!
-        // base or install directory
-        infoln(infotext+'Did not find '+fpcmkcfg+'. Now looking in '+
-          IncludeTrailingPathDelimiter(FInstallDirectory)+'bin.',etDebug);
-        fpcmkcfg:=IncludeTrailingPathDelimiter(FInstallDirectory)+
-          'bin'+DirectorySeparator+'fpcmkcfg'+GetExeExt;
-        if not(CheckExecutable(fpcmkcfg,'-h','fpcmkcfg')) then
+        infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+s,etDebug);
+        s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin';
+        FPCMkCfg:=IncludeTrailingPathDelimiter(s)+FPCMAKECONFIG+GetExeExt;
+        OperationSucceeded:=CheckExecutable(FPCMkCfg,'-h',FPCMAKECONFIG);
+        if (NOT OperationSucceeded) then
         begin
-          infoln(infotext+'Could not find fpcmkcfg in '+fpcmkcfg+'. Aborting.',etError);
-          fpcmkcfg:='';
-          OperationSucceeded:=false;
-        end
-        else
-        begin
-          infoln(infotext+'Found valid fpcmkcfg executable: '+fpcmkcfg,etInfo);
+          infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+s,etDebug);
         end;
+      end;
+      if OperationSucceeded then
+      begin
+        infoln(infotext+'Found valid '+FPCMAKECONFIG+GetExeExt+' executable in '+s,etInfo);
+      end
+      else
+      begin
+        infoln(infotext+'Could not find '+FPCMAKECONFIG+GetExeExt+' executable. Aborting.',etError);
+        FPCMkCfg:='';
       end;
     end;
 
@@ -3117,80 +3191,131 @@ begin
 
     if (OperationSucceeded) then
     begin
-      Processor.Executable := fpcmkcfg;
+      Processor.Executable:=FPCMkCfg;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
 
       s := IncludeTrailingPathDelimiter(FBinPath) + FPCONFIGFILENAME;
       if (NOT FileExists(s)) then
       begin
         //create fp.cfg
-        Processor.Parameters.Clear;
-        Processor.Parameters.Add('-1');
-        Processor.Parameters.Add('-d');
-        Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+        //if CheckFPCMkCfgOption('-1') then
+        begin
+          Processor.Parameters.Clear;
+          Processor.Parameters.Add('-1');
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('fpctargetos='+GetTargetOS);
 
-        Processor.Parameters.Add('-o');
-        Processor.Parameters.Add('' + s + '');
-        infoln(infotext+'Creating '+FPCONFIGFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
-        try
-          Processor.Execute;
-        except
-          on E: Exception do
-            begin
-              WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
-                'Details: '+E.Message,true);
-            end;
+          {$IFDEF UNIX}
+          //s2:=GetStartupObjects;
+          //if Length(s2)>0 then
+          //begin
+          //  Processor.Parameters.Add('-d');
+          //  Processor.Parameters.Add('GCCLIBPATH= -Fl'+s2);
+          //end;
+          {$ENDIF UNIX}
+
+          RunFPCMkCfgOption(s);
         end;
+      end
+      else
+      begin
+        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
       end;
 
       s := IncludeTrailingPathDelimiter(FBinPath) + FPINIFILENAME;
       if (NOT FileExists(s)) then
       begin
         //create fp.ini
-        Processor.Parameters.Clear;
-        Processor.Parameters.Add('-2');
-        Processor.Parameters.Add('-d');
-        Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+        //if CheckFPCMkCfgOption('-2') then
+        begin
+          Processor.Parameters.Clear;
+          Processor.Parameters.Add('-2');
 
-        Processor.Parameters.Add('-o');
-        Processor.Parameters.Add('' + s + '');
-        infoln(infotext+'Creating '+FPINIFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
-        try
-          Processor.Execute;
-        except
-          on E: Exception do
-            begin
-              WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
-                'Details: '+E.Message,true);
-            end;
+          RunFPCMkCfgOption(s);
         end;
+      end
+      else
+      begin
+        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
       end;
 
-      if (NOT FileExists(FPCCfg)) then
+      s2 := IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
+
+      s  := IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME;
+      if (NOT FileExists(s)) then
+      begin
+        ForceDirectoriesSafe(s2);
+        //Create package configuration fppkg.cfg
+        //if CheckFPCMkCfgOption('-3') then
+        begin
+          Processor.Parameters.Clear;
+          Processor.Parameters.Add('-3');
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('LocalRepository='+IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESLOCATION+DirectorySeparator);
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
+
+          Processor.Parameters.Add('-d');
+          {$ifdef MSWINDOWS}
+          Processor.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
+          {$ELSE}
+          Processor.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory)+'lib'+DirectorySeparator+'fpc'+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
+          {$ENDIF}
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('UserPathSuffix=users');
+
+          RunFPCMkCfgOption(s);
+        end;
+      end
+      else
+      begin
+        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+      end;
+
+
+      s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
+      if (NOT FileExists(s)) then
+      begin
+        ForceDirectoriesSafe(s2);
+        //Create default compiler template
+        //if CheckFPCMkCfgOption('-4') then
+        begin
+          Processor.Parameters.Clear;
+          Processor.Parameters.Add('-4');
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('fpcbin='+FCompiler);
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('fpctargetos='+GetTargetOS);
+
+          Processor.Parameters.Add('-d');
+          Processor.Parameters.Add('fpctargetcpu='+GetTargetCPU);
+
+          RunFPCMkCfgOption(s);
+        end;
+      end
+      else
+      begin
+        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+      end;
+
+      s := FPCCfg;
+      if (NOT FileExists(s)) then
       begin
         //create fpc.cfg
         Processor.Parameters.Clear;
-        Processor.Parameters.Add('-0');
-        Processor.Parameters.Add('-d');
-        Processor.Parameters.Add('basepath='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-
-        Processor.Parameters.Add('-o');
-        Processor.Parameters.Add('' + FPCCfg + '');
-        infoln(infotext+'Creating '+FPCCONFIGFILENAME+': '+Processor.Executable+' '+StringReplace(Processor.Parameters.CommaText,',',' ',[rfReplaceAll]),etInfo);
-        try
-          Processor.Execute;
-        except
-          on E: Exception do
-            begin
-            WritelnLog(etError, infotext+'Running fpcmkcfg failed with an exception!'+LineEnding+
-              'Details: '+E.Message,true);
-            end;
-        end;
-
-        if Processor.ExitStatus <> 0 then
-        begin
-          WritelnLog(etError, infotext+'Running fpcmkcfg failed with exit code '+IntToStr(Processor.ExitStatus),true);
-        end;
+        RunFPCMkCfgOption(s);
+      end
+      else
+      begin
+        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
       end;
     end;
 
@@ -3487,30 +3612,6 @@ begin
     // if OperationSucceeded then BuildModuleCustom('PAS2JS');
   end;
 
-  if OperationSucceeded then
-  begin
-    if (NOT (Self is TFPCCrossInstaller)) then
-    begin
-      if FVerbose then
-        infoln(infotext+'Creating fpc script:',etInfo)
-      else
-        infoln(infotext+'Creating fpc script:',etDebug);
-      OperationSucceeded:=CreateFPCScript;
-    end else OperationSucceeded:=CreateFPCScript(false);
-  end;
-
-  // Let everyone know of our shiny new compiler (or proxy:
-  if OperationSucceeded then
-  begin
-    FCompiler:=GetCompiler;
-    // Verify it exists
-    if not(FileExists(FCompiler)) then
-    begin
-      WritelnLog(etError, infotext+'Could not find compiler '+FCompiler+' that should have been created.',true);
-      OperationSucceeded:=false;
-    end;
-  end;
-
   RemoveStaleBuildDirectories(FSourceDirectory,GetTargetCPU,GetTargetOS);
 
   if OperationSucceeded then
@@ -3658,6 +3759,10 @@ begin
   begin
     // Delete any proxy scripts
     SysUtils.DeleteFile(GetFPCCompilerProxy(FCompiler));
+
+    infoln(infotext+'Deleting some FPC package config files.', etInfo);
+    //DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
+    DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
   end;
 
   {$IFDEF UNIX}

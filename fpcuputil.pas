@@ -2680,9 +2680,11 @@ end;
 function IsExecutable(Executable: string):boolean;
 var
   aPath:string;
+  {$ifndef MSWindows}
+  Info : Stat;
+  {$endif}
 begin
   result:=false;
-  //aPath:=FindDefaultExecutablePath(Executable);
   aPath:=Executable;
   if NOT FileExists(aPath) then exit;
   {$ifdef Windows}
@@ -2690,10 +2692,13 @@ begin
   {$endif}
   if ExtractFileExt(aPath)=GetExeExt then
   begin
-    {$ifdef Windows}
+    {$ifdef MSWindows}
     result:=true;
     {$else}
-    result:=(fpAccess(aPath,X_OK)=0);
+    //result:=(fpAccess(aPath,X_OK)=0);
+    result:=(FpStat(aPath,info{%H-})<>-1) and FPS_ISREG(info.st_mode) and
+            (BaseUnix.FpAccess(aPath,BaseUnix.X_OK)=0);
+
     {$endif}
   end;
 end;
@@ -2744,7 +2749,7 @@ begin
     {$ENDIF}
     if ResultCode >= 0 then //Not all non-0 result codes are errors. There's no way to tell, really
     begin
-      if (ExpectOutput <> '') and (Ansipos(ExpectOutput, Output) = 0) then
+      if (ExpectOutput <> '') and (AnsiPos(ExpectOutput, Output) = 0) then
       begin
         // This is not a warning/error message as sometimes we can use multiple different versions of executables
         if Level<>etCustom then infoln(Executable + ' is not a valid ' + ExeName + ' application. ' +

@@ -43,9 +43,12 @@ const
   MAKEFILENAME          = 'Makefile';
   FPCMAKEFILENAME       = MAKEFILENAME+'.fpc';
 
+  FPCMAKECONFIG         = 'fpcmkcfg';
+
   QT5LIBNAME            = 'libQt5Pas.so.1';
 
   FPCPKGFILENAME        = 'fppkg.cfg';
+  FPCPKGCOMPILERTEMPLATE= 'default'; // fppkg default compiler template
   FPCONFIGFILENAME      = 'fp.cfg';
   FPINIFILENAME         = 'fp.ini';
   FPCCONFIGFILENAME     = 'fpc.cfg';
@@ -2682,8 +2685,10 @@ end;
 
 function TInstaller.GetPath: string;
 begin
-  result:=Processor.Environment.GetVar(PATHVARNAME);
-  //result:=GetEnvironmentVariable(PATHVARNAME);
+  if Assigned(Processor) then
+    result:=Processor.Environment.GetVar(PATHVARNAME)
+  else
+    result:=GetEnvironmentVariable(PATHVARNAME);
 end;
 
 procedure TInstaller.LogError(Sender: TProcessEx; IsException: boolean);

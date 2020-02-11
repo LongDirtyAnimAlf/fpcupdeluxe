@@ -1699,66 +1699,12 @@ begin
       {$ENDIF DARWIN}
 
       //Setup basic fppkg things
-      if LazarusConfig.IfNewFile(EnvironmentConfig) then
+      s2 := IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
+      s  := IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME;
+      if (LazarusConfig.IfNewFile(EnvironmentConfig)) then
       begin
-
-        s:=IncludeTrailingPathDelimiter(FFPCSourceDir)+'utils'+DirectorySeparator+'fpcmkcfg'+DirectorySeparator+FPCPKGFILENAME;
-        //s2:=IncludeTrailingPathDelimiter(SafeGetApplicationConfigPath)+'fpcup_'+ExtractFileName(ExcludeTrailingPathDelimiter(FBaseDirectory));
-        s2:=IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
-
-        if (NOT FileExists(IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME)) then
-        begin
-          if ForceDirectoriesSafe(s2) then
-            FileUtil.CopyFile(s,IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME);
-        end;
-
-        s:=s2;
-
-        s2:=IncludeTrailingPathDelimiter(s)+'default';
-        with TIniFile.Create(s2) do
-        try
-          WriteString('Defaults','ConfigVersion','5');
-          WriteString('Defaults','Compiler',FCompiler);
-          WriteString('Defaults','OS',GetTargetOS);
-          WriteString('Defaults','CPU',GetTargetCPU);
-        finally
-          Free;
-        end;
-
-        s2:=IncludeTrailingPathDelimiter(s)+FPCPKGFILENAME;
-        with TIniFile.Create(s2) do
-        try
-          WriteString('Defaults','ConfigVersion','5');
-
-          WriteString('Defaults','LocalRepository',IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESLOCATION+DirectorySeparator);
-          //WriteString('Defaults','CompilerConfigDir','{LocalRepository}config/');
-
-          WriteString('Defaults','CompilerConfig','default');
-          WriteString('Defaults','CompilerConfigDir',IncludeTrailingPathDelimiter(s));
-
-          //WriteString('Defaults','CompilerConfig','default');
-          //WriteString('Defaults','CompilerConfigDir',s);
-
-          WriteString('IncludeFiles','FileMask','{LocalRepository}config/conf.d/*.conf');
-
-          // The FPC repository
-          {$ifdef MSWINDOWS}
-          WriteString('Repository','Path',IncludeTrailingPathDelimiter(FFPCInstallDir));
-          {$ELSE}
-          WriteString('Repository','Path',IncludeTrailingPathDelimiter(FFPCInstallDir)+'lib'+DirectorySeparator+'fpc'+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
-          {$ENDIF}
-          WriteString('Repository','Prefix',ExcludeTrailingPathDelimiter(FFPCInstallDir));
-
-          // The user repository
-          //WriteString('Repository','Path','{LocalRepository}lib'+DirectorySeparator+'fpc'+DirectorySeparator+s);
-          //WriteString('Repository','Prefix','{LocalRepository}');
-        finally
-          Free;
-        end;
-
-        if FileExists(s2) then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FppkgConfigFile/Value', s2);
+        if FileExists(s) then LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/FppkgConfigFile/Value', s);
       end;
-
 
     except
       on E: Exception do
@@ -1805,7 +1751,6 @@ begin
     infoln(infotext+'Deleting Lazarus primary config file ('+LAZARUSCFG+').', etInfo);
     DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory) + LAZARUSCFG);
   end;
-
 
   {$ifdef MSWINDOWS}
   // If doing crosswin32-64 or crosswin64-32, make distclean will not only clean the LCL

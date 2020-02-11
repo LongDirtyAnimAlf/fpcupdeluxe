@@ -1120,10 +1120,13 @@ begin
   begin
     memoSummary.Lines.Append('We have a fatal FPC runtime error 217: Unhandled exception occurred.');
     memoSummary.Lines.Append('See: https://www.freepascal.org/docs-html/user/userap4.html');
-    memoSummary.Lines.Append('Can be caused by anything unknown. No clues about cause whatsoever.');
+    memoSummary.Lines.Append('Most common cause: a stray fpc process still running.');
+    memoSummary.Lines.Append('Please check the task manager for FPC or PPC processes that are still active.');
     memoSummary.Lines.Append('Re-running fpcupdeluxe does work in most cases however !. So, just do a restart.');
     s:=
     'We have a fatal FPC runtime error 217: Unhandled exception occurred.' + sLineBreak +
+    'Most common cause: a stray fpc process still running.' + sLineBreak +
+    'Please check the task manager for FPC or PPC processes that are still active.' + sLineBreak +
     'This sometime happens, due to causes unknown (to me) yet.' + sLineBreak +
     'Just quiting fpcupdeluxe and running it again will result in success.';
     Application.MessageBox(PChar(s), PChar('FPC runtime error 217'), MB_ICONSTOP);

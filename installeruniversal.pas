@@ -479,10 +479,10 @@ begin
   result:=true;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (InitModule): ';
   infoln(localinfotext+'Entering ...',etDebug);
-  if InitDone then
-    exit;
-  if FVerbose then
-    Processor.OnOutputM:=@DumpOutput;
+  if InitDone then exit;
+
+  if FVerbose then Processor.OnOutputM:=@DumpOutput;
+
   // While getting svn etc may help a bit, if Lazarus isn't installed correctly,
   // it probably won't help for normal use cases.
   // However, in theory, we could run only external modules and
