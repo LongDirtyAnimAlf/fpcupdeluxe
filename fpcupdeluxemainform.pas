@@ -1387,7 +1387,7 @@ begin
       FG      := clYellow;
       BG      := clBlack;
       Special := True;
-      if ExistWordInString(PChar(s),'Extracted #',[soDown]) then
+      if ExistWordInString(PChar(s),'Extracted ',[soDown]) then
       begin
         FG      := clSilver;
         BG      := clBlack;
@@ -1827,6 +1827,7 @@ var
   success,verbose:boolean;
   IncludeLCL,ZipFile:boolean;
   i:integer;
+  MajorVersion,MinorVersion:integer;
   aList: TStringList;
   BaseBinsURL,BaseLibsURL:string;
 begin
@@ -2607,119 +2608,129 @@ begin
 
           if MissingCrossBins then
           begin
-            BaseBinsURL:='';
+            MajorVersion:=1;
 
-            if GetTargetOS='win32' then BaseBinsURL:='wincrossbins_v1.0'
-            else
-               if GetTargetOS='win64' then BaseBinsURL:='wincrossbins_v1.0'
-               else
-                  if GetTargetOS='linux' then
-                  begin
-                    if GetTargetCPU='i386' then BaseBinsURL:='linuxi386crossbins_v1.0';
-                    if GetTargetCPU='x86_64' then BaseBinsURL:='linuxx64crossbins_v1.0';
-                  end
-                  else
-                    if GetTargetOS='freebsd' then
+            for MinorVersion:=2 downto 0 do
+            begin
+              BaseBinsURL:='';
+
+              if GetTargetOS='win32' then BaseBinsURL:='wincrossbins'
+              else
+                 if GetTargetOS='win64' then BaseBinsURL:='wincrossbins'
+                 else
+                    if GetTargetOS='linux' then
                     begin
-                      if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins_v1.0';
+                      if GetTargetCPU='i386' then BaseBinsURL:='linuxi386crossbins';
+                      if GetTargetCPU='x86_64' then BaseBinsURL:='linuxx64crossbins';
                     end
                     else
-                      if GetTargetOS='solaris' then
+                      if GetTargetOS='freebsd' then
                       begin
-                        {if FPCupManager.SolarisOI then}
-                        begin
-                          if GetTargetCPU='x86_64' then BaseBinsURL:='solarisoix64crossbins_v1.0';
-                        end;
+                        if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins';
                       end
                       else
-                        if GetTargetOS='darwin' then
+                        if GetTargetOS='solaris' then
                         begin
-                          if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins_v1.0';
-                          if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins_v1.0';
-                        end;
+                          {if FPCupManager.SolarisOI then}
+                          begin
+                            if GetTargetCPU='x86_64' then BaseBinsURL:='solarisoix64crossbins';
+                          end;
+                        end
+                        else
+                          if GetTargetOS='darwin' then
+                          begin
+                            if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins';
+                            if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins';
+                          end;
 
-            // no cross-bins available
-            if (Length(BaseBinsURL)=0) then
-            begin
-              ShowMessage('No tools available online. You could do a feature request ... ;-)');
-              exit;
-            end;
+              // no cross-bins available
+              if (Length(BaseBinsURL)=0) then
+              begin
+                ShowMessage('No tools available online. You could do a feature request ... ;-)');
+                exit;
+              end;
 
-            success:=false;
-            AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
+              //Add version
+              BaseBinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
-            BaseBinsURL:=FPCUPGITREPO+'/releases/download/'+BaseBinsURL;
+              success:=false;
+              AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
 
-            {$ifdef MSWINDOWS}
-            DownloadURL:=BaseBinsURL+'/'+'WinCrossBins'+BinsFileName;
-            {$else}
-            DownloadURL:=BaseBinsURL+'/'+'CrossBins'+BinsFileName;
-            {$endif MSWINDOWS}
+              BaseBinsURL:=FPCUPGITREPO+'/releases/download/'+BaseBinsURL;
 
-            //default to zip
-            DownloadURL:=DownloadURL+'.zip';
-            TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
-            SysUtils.DeleteFile(TargetFile);
-            AddMessage('Please wait: Going to download the zip binary-tools from '+DownloadURL);
-            success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            ZipFile:=success;
+              {$ifdef MSWINDOWS}
+              DownloadURL:=BaseBinsURL+'/'+'WinCrossBins'+BinsFileName;
+              {$else}
+              DownloadURL:=BaseBinsURL+'/'+'CrossBins'+BinsFileName;
+              {$endif MSWINDOWS}
 
-            {$ifndef Darwin}
-            // try rar .... very dirty and certainly not elegant ... ;-)
-            if (NOT success) then
-            begin
-              DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
-              SysUtils.DeleteFile(TargetFile);
+              //default to zip
+              DownloadURL:=DownloadURL+'.zip';
               TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
               SysUtils.DeleteFile(TargetFile);
-              AddMessage('Please wait: Going to download the rar binary-tools from '+DownloadURL);
+              AddMessage('Please wait: Going to download the zip binary-tools from '+DownloadURL);
               success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-            end;
-            {$endif}
+              ZipFile:=success;
 
-            if success then
-            begin
-              AddMessage('Successfully downloaded binary-tools archive.');
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
-              {$ifndef MSWINDOWS}
-              TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
+              {$ifndef Darwin}
+              // try rar .... very dirty and certainly not elegant ... ;-)
+              if (NOT success) then
+              begin
+                DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
+                SysUtils.DeleteFile(TargetFile);
+                TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
+                SysUtils.DeleteFile(TargetFile);
+                AddMessage('Please wait: Going to download the rar binary-tools from '+DownloadURL);
+                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+              end;
               {$endif}
-              ForceDirectoriesSafe(TargetPath);
 
-              AddMessage('Going to extract archive into '+TargetPath);
-
-              if ZipFile then
+              if success then
               begin
-                with TNormalUnzipper.Create do
-                begin
-                  try
-                    success:=DoUnZip(TargetFile,TargetPath,[]);
-                  finally
-                    Free;
-                  end;
-                end;
-              end
-              else
-              begin
-                {$ifdef MSWINDOWS}
-                if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
-                if (NOT success) then
+                AddMessage('Successfully downloaded binary-tools archive.');
+                TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
+                {$ifndef MSWINDOWS}
+                TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
                 {$endif}
+                ForceDirectoriesSafe(TargetPath);
+
+                AddMessage('Going to extract archive into '+TargetPath);
+
+                if ZipFile then
+                begin
+                  with TNormalUnzipper.Create do
+                  begin
+                    try
+                      success:=DoUnZip(TargetFile,TargetPath,[]);
+                    finally
+                      Free;
+                    end;
+                  end;
+                end
+                else
                 begin
                   {$ifdef MSWINDOWS}
-                  UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
-                  {$else}
-                  UnZipper := 'unrar';
+                  if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
+                  success:=(ExecuteCommand('"C:\Program Files (x86)\WinRAR\WinRAR.exe" x '+TargetFile+' "'+TargetPath+'"',verbose)=0);
+                  if (NOT success) then
                   {$endif}
-                  success:=CheckExecutable(UnZipper, '-v', '');
-                  if success then
                   begin
-                    if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
-                    success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
-                  end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
+                    {$ifdef MSWINDOWS}
+                    UnZipper := IncludeTrailingPathDelimiter(FPCupManager.MakeDirectory) + 'unrar\bin\unrar.exe';
+                    {$else}
+                    UnZipper := 'unrar';
+                    {$endif}
+                    success:=CheckExecutable(UnZipper, '-v', '');
+                    if success then
+                    begin
+                      if (not verbose) then AddMessage('Please wait: going to unpack binary tools archive.');
+                      success:=(ExecuteCommand(UnZipper + ' x "' + TargetFile + '" "' + TargetPath + '"',verbose)=0);
+                    end else AddMessage('Error: '+UnZipper+' not found on system. Cannot unpack cross-tools !');
+                  end;
                 end;
               end;
+
+              SysUtils.DeleteFile(TargetFile);
 
               if success then
               begin
@@ -2748,10 +2759,10 @@ begin
                   aList.Free;
                 end;
                 {$ENDIF}
+                MissingCrossBins:=False;
+                break;
               end;
             end;
-            SysUtils.DeleteFile(TargetFile);
-            if success then MissingCrossBins:=False;
           end;
 
           // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
@@ -2833,8 +2844,7 @@ begin
                 end;
               end;
               SysUtils.DeleteFile(TargetFile);
-              // as libraries are not needed for embedded, always end with success even if the above has failed
-              if FPCupManager.CrossOS_Target='embedded' then success:=true;
+
               if success then
               begin
                 aList:=TStringList.Create;
@@ -2851,6 +2861,12 @@ begin
                 MissingCrossLibs:=False;
                 break;
               end;
+            end;
+            // as libraries are not always needed for embedded, end with success even if the above has failed
+            if FPCupManager.CrossOS_Target='embedded' then
+            begin
+              success:=true;
+              MissingCrossLibs:=False;
             end;
           end;
 

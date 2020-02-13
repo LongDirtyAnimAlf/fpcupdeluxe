@@ -165,6 +165,27 @@ begin
     if result then FBinUtilsPrefix:=BinPrefixTry;
   end;
 
+  // Now also allow for mips-sde-elf binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:='mips-sde-elf-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
+  // Now also allow for mipsel-sde-elf binutilsprefix
+  if not result then
+  begin
+    BinPrefixTry:='mipsel-sde-elf-';
+    AsFile:=BinPrefixTry+'as'+GetExeExt;
+    result:=SearchBinUtil(BasePath,AsFile);
+    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
+    if result then FBinUtilsPrefix:=BinPrefixTry;
+  end;
+
+
   // Now also allow for empty binutilsprefix:
   if not result then
   begin
@@ -191,6 +212,7 @@ begin
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+    AddFPCCFGSnippet('-a5'); // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
 
     i:=StringListStartsWith(FCrossOpts,'-Cp');
     if i=-1 then
