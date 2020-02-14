@@ -83,41 +83,41 @@ type
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
     procedure InstallClick(Sender: TObject);
-    procedure BitBtnHaltClick(Sender: TObject);
-    procedure btnGetOpenSSLClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
+    procedure BitBtnHaltClick({%H-}Sender: TObject);
+    procedure btnGetOpenSSLClick({%H-}Sender: TObject);
+    procedure Button1Click({%H-}Sender: TObject);
     procedure ChkMakefileFPCClick(Sender: TObject);
-    procedure Edit1KeyUp(Sender: TObject; {%H-}var Key: Word; {%H-}Shift: TShiftState);
-    procedure FPCVersionLabelClick(Sender: TObject);
+    procedure Edit1KeyUp({%H-}Sender: TObject; var {%H-}Key: Word; {%H-}Shift: TShiftState);
+    procedure FPCVersionLabelClick({%H-}Sender: TObject);
     procedure btnInstallModuleClick(Sender: TObject);
-    procedure btnInstallDirSelectClick(Sender: TObject);
-    procedure btnSetupPlusClick(Sender: TObject);
-    procedure btnClearLogClick(Sender: TObject);
+    procedure btnInstallDirSelectClick({%H-}Sender: TObject);
+    procedure btnSetupPlusClick({%H-}Sender: TObject);
+    procedure btnClearLogClick({%H-}Sender: TObject);
     function  ButtonProcessCrossCompiler(Sender: TObject):boolean;
     procedure ButtonAutoUpdateCrossCompiler(Sender: TObject);
-    procedure FormClose(Sender: TObject; var CloseAction: TCloseAction);
-    procedure FormCreate(Sender: TObject);
-    procedure FormDestroy(Sender: TObject);
-    procedure FormResize(Sender: TObject);
-    procedure LazarusVersionLabelClick(Sender: TObject);
+    procedure FormClose({%H-}Sender: TObject; var CloseAction: TCloseAction);
+    procedure FormCreate({%H-}Sender: TObject);
+    procedure FormDestroy({%H-}Sender: TObject);
+    procedure FormResize({%H-}Sender: TObject);
+    procedure LazarusVersionLabelClick({%H-}Sender: TObject);
     procedure listModulesSelectionChange(Sender: TObject; User: boolean);
     procedure listModulesShowHint(Sender: TObject; HintInfo: PHintInfo);
-    procedure MChineseCNlanguageClick(Sender: TObject);
-    procedure MEnglishlanguageClick(Sender: TObject);
-    procedure MFPCBugsClick(Sender: TObject);
-    procedure MIssuesForumClick(Sender: TObject);
-    procedure MIssuesGitHubClick(Sender: TObject);
-    procedure MLazarusBugsClick(Sender: TObject);
+    procedure MChineseCNlanguageClick({%H-}Sender: TObject);
+    procedure MEnglishlanguageClick({%H-}Sender: TObject);
+    procedure MFPCBugsClick({%H-}Sender: TObject);
+    procedure MIssuesForumClick({%H-}Sender: TObject);
+    procedure MIssuesGitHubClick({%H-}Sender: TObject);
+    procedure MLazarusBugsClick({%H-}Sender: TObject);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
-    procedure CommandOutputScreenChange(Sender: TObject);
-    procedure CommandOutputScreenSpecialLineMarkup(Sender: TObject; Line: integer;
+    procedure CommandOutputScreenChange({%H-}Sender: TObject);
+    procedure CommandOutputScreenSpecialLineMarkup({%H-}Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
-    procedure MenuItem1Click(Sender: TObject);
-    procedure radgrpCPUClick(Sender: TObject);
-    procedure radgrpOSClick(Sender: TObject);
-    procedure CommandOutputScreenMouseWheel(Sender: TObject; Shift: TShiftState;
+    procedure MenuItem1Click({%H-}Sender: TObject);
+    procedure radgrpCPUClick({%H-}Sender: TObject);
+    procedure radgrpOSClick({%H-}Sender: TObject);
+    procedure CommandOutputScreenMouseWheel({%H-}Sender: TObject; Shift: TShiftState;
       WheelDelta: Integer; {%H-}MousePos: TPoint; var {%H-}Handled: Boolean);
     procedure QuickBtnClick(Sender: TObject);
 
@@ -151,7 +151,7 @@ type
     procedure SetFPCTarget(aFPCTarget:string);
     procedure SetLazarusTarget(aLazarusTarget:string);
     procedure DisEnable({%H-}Sender: TObject;value:boolean);
-    procedure Edit1Change(Sender: TObject);
+    procedure Edit1Change({%H-}Sender: TObject);
     procedure PrepareRun;
     function  RealRun:boolean;
     function  GetFPCUPSettings(IniDirectory:string):boolean;
@@ -182,8 +182,6 @@ resourcestring
   upBuildAllCrossCompilersFound = 'Found crosscompiler for ';
   upBuildAllCrossCompilersUpdate = 'Going to update cross-compiler.';
 
-
-
 var
   Form1: TForm1;
 
@@ -192,18 +190,18 @@ implementation
 {$R *.lfm}
 
 uses
-  IniFiles,
-  strutils,
+  InterfaceBase, // for WidgetSet
   LCLType, // for MessageBox
   lclintf, // for OpenURL
-  InterfaceBase, // for WidgetSet
+  IniFiles,
+  StrUtils,
   {$ifdef EnableLanguages}
   Translations,
   LCLTranslator,
   LazUTF8,
   {$endif}
   {$ifdef UNIX}
-  baseunix,
+  BaseUnix,
   {$endif UNIX}
   AboutFrm,
   extrasettings,
@@ -588,7 +586,8 @@ var
   FPCCfg:string;
   BinPath:string;
   ConfigText: TStringList;
-  aCPU, aOS, aArch: string;
+  aCPU, aOS: string;
+  //aArch: string;
   // tricky: to be changed; todo
   aRadiogroup_CPU,aRadiogroup_OS: string;
   CheckAutoClearStore:boolean;
@@ -645,6 +644,7 @@ begin
           aCPU:=Copy(s,1,i-1);
           aOS:=Trim(Copy(s,i+1,MaxInt));
 
+          {
           aArch:='';
           // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
           if (UpperCase(aCPU)='ARM') AND (UpperCase(aOS)='LINUX') then
@@ -662,6 +662,7 @@ begin
               end;
             end;
           end;
+          }
 
           // try to distinguish between different Solaris versons
           if (aOS='solaris') then
@@ -907,9 +908,11 @@ begin
 end;
 
 procedure TForm1.btnGetOpenSSLClick(Sender: TObject);
+{$ifdef MSWindows}
 var
   OpenSSLZip,OpenSSLURL:string;
   Success:boolean;
+  {$endif MSWindows}
 begin
   {$ifdef MSWindows}
   OpenSSLURL:=OpenSSLSourceURL[Low(OpenSSLSourceURL)];
@@ -3504,7 +3507,6 @@ end;
 function TForm1.GetFPCUPSettings(IniDirectory:string):boolean;
 var
   aTarget,aURL:string;
-  aIndex:integer;
   Cores,MemAvailable,SwapAvailable:DWord;
 begin
   result:=FileExists(IniDirectory+installerUniversal.DELUXEFILENAME);

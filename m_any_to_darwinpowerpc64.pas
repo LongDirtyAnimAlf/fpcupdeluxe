@@ -245,6 +245,7 @@ var
 initialization
   any_darwinpowerpc64:=Tany_darwinpowerpc64.Create;
   RegisterExtension(any_darwinpowerpc64.TargetCPU+'-'+any_darwinpowerpc64.TargetOS,any_darwinpowerpc64);
+
 finalization
   any_darwinpowerpc64.Destroy;
 {$endif mswindows}

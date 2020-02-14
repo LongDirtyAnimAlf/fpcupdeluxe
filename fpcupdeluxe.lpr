@@ -50,10 +50,11 @@ uses
   //cmem,  // the c memory manager is on some systems much faster for multi-threading
   {$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, Classes, sysutils,
-  fpcupdeluxemainform, extrasettings, modulesettings,
-  unzipprogress, infounit,
-  fpcuputil, commandline, installerUniversal, installerManager,
+  Forms, Classes, SysUtils,
+  fpcupdeluxemainform,
+  //extrasettings,
+  //installerManager, installerUniversal,
+  //modulesettings, unzipprogress, infounit, fpcuputil,
   m_crossinstaller,
   m_any_to_androidarm,
   m_any_to_androidmipsel,
@@ -95,8 +96,10 @@ uses
   {$else}
   m_any_to_darwin386,
   m_any_to_darwinx64,
+  {$ifdef MSWINDOWS}
   m_any_to_darwinpowerpc,
   m_any_to_darwinpowerpc64,
+  {$endif MSWINDOWS}
   m_any_to_darwinarm,
   m_any_to_darwinaarch64,
   {$endif}
