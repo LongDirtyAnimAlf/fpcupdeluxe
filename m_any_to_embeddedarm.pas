@@ -172,6 +172,7 @@ begin
   begin
     FBinsFound:=true;
 
+    {
     if length(FSubArch)>0 then
     begin
       ShowInfo('Cross-bins: We have a subarch: '+FSubArch);
@@ -184,10 +185,21 @@ begin
       end else aOption:=Trim(FCrossOpts[i]);
       AddFPCCFGSnippet(aOption);
     end else ShowInfo('Cross-bins: No subarch defined. Expect fatal errors.',etError);
+    }
 
     // Configuration snippet for FPC
     AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath));
     AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names};
+
+    i:=StringListStartsWith(FCrossOpts,'-Cp');
+    if i=-1 then
+    begin
+      if length(FSubArch)=0 then FSubArch:='armv6m';
+      aOption:='-Cp'+FSubArch;
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
 
     (*
     if length(FSubArch)=0 then

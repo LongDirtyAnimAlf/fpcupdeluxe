@@ -1782,7 +1782,7 @@ begin
 
           // Check specials : sometimes, an extra path is added when unpacking, installing
           // Move files up ... tricky, but necessary unfortunately ...
-          if ((Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) OR (Pos('sourceforge.net',RemoteURL)>0)) then
+          //if ((Pos('github.com',RemoteURL)>0) AND (Pos('/archive/',RemoteURL)>0) OR (Pos('sourceforge.net',RemoteURL)>0)) then
           begin
             //There should be a single directory !
             aName:='';

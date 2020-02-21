@@ -1,8 +1,8 @@
 Index: compiler/systems/t_linux.pas
 ===================================================================
---- compiler/systems/t_linux.pas	(revision 43706)
+--- compiler/systems/t_linux.pas	(revision 44222)
 +++ compiler/systems/t_linux.pas	(working copy)
-@@ -569,7 +569,10 @@
+@@ -579,7 +579,10 @@
        if (isdll) then
         begin
           Add('INPUT(');

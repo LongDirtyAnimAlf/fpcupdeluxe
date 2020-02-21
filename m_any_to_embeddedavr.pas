@@ -227,13 +227,13 @@ begin
     i:=StringListStartsWith(FCrossOpts,'-Cp');
     if i=-1 then
     begin
-      aOption:='-Cpavr5';
+      if length(FSubArch)=0 then FSubArch:='avr5';
+      aOption:='-Cp'+FSubArch;
       FCrossOpts.Add(aOption+' ');
-      //When compiling for avr-embedded, a sub-architecture (e.g. SUBARCH=avr25 or SUBARCH=avr35) must be defined)
-      FSubArch:='avr5';
-      ShowInfo('Did not find any -Cp architecture parameter; using -Cpavr5 and SUBARCH=avr5.');
+      ShowInfo('Did not find any -Cp architecture parameter; using -Cp'+FSubArch+' and SUBARCH='+FSubArch+'.');
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
+
   end;
 end;
 

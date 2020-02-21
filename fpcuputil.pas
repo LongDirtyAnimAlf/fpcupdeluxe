@@ -429,8 +429,11 @@ uses
 const
   USERAGENT = 'curl/7.50.1 (i686-pc-linux-gnu) libcurl/7.50.1 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
   //USERAGENT = 'Mozilla/5.0 (compatible; fpweb)';
-  //USERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)';
   CURLUSERAGENT='curl/7.51.0';
+  {$IFDEF MSWINDOWS}
+  WININETUSERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; WinInet)';
+  {$ENDIF MSWINDOWS}
+
 
 {$i revision.inc}
 
@@ -453,7 +456,6 @@ type
   end;
 
 
-(*
 function GetStringFromBuffer(const field:PChar):string;
 begin
   if ( field <> nil ) then
@@ -464,6 +466,8 @@ begin
     SetLength(result,strlen(field));
   end else result:='';
 end;
+
+(*
 
 function ResNameProc({%H-}ModuleHandle : TFPResourceHMODULE; {%H-}ResourceType, ResourceName : PChar; {%H-}lParam : PtrInt) : LongBool; stdcall;
 var
@@ -1617,20 +1621,20 @@ begin
   end;
 
   {$ifdef Windows}
-  //Second resort: use Windows INet
-  if (NOT result) then
-  begin
-    SysUtils.Deletefile(TargetFile);
-    result:=DownloadByWinINet(URL,TargetFile);
-    if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
-  end;
-
-  //Third resort: use Windows PowerShell
+  //Second resort: use Windows PowerShell
   if (NOT result) then
   begin
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByPowerShell(URL,TargetFile);
     if (NOT result) then infoln('Windows PowerShell downloader failure.',etDebug);
+  end;
+
+  //Third resort: use Windows INet
+  if (NOT result) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    result:=DownloadByWinINet(URL,TargetFile);
+    if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
   end;
 
   //Fourth resort: use BitsAdmin
@@ -1882,6 +1886,27 @@ begin
   end;
 end;
 
+function WinInetErrorMsg(Err: DWORD): string;
+var
+  ErrMsg: array of Char;
+  ErrLen: DWORD;
+begin
+  if Err = ERROR_INTERNET_EXTENDED_ERROR then
+  begin
+    ErrLen := 0;
+    InternetGetLastResponseInfo(@Err, nil, ErrLen);
+    if GetLastError() = ERROR_INSUFFICIENT_BUFFER then
+    begin
+      SetLength(ErrMsg, ErrLen);
+      InternetGetLastResponseInfo(@Err, PChar(ErrMsg), ErrLen);
+      SetString(Result, PChar(ErrMsg), ErrLen);
+    end else begin
+      Result := 'Unknown WinInet error';
+    end;
+  end else
+    Result := SysErrorMessage(Err);
+end;
+
 function DownloadByWinINet(URL, TargetFile: string): boolean;
 const
   URLMAGIC='/download';
@@ -1891,9 +1916,10 @@ var
   NetHandle: HINTERNET;
   UrlHandle: HINTERNET;
   Buffer: array[0..1023] of Byte;
-  BytesRead: DWord;
+  Error,BytesRead: DWord;
+  dummy: DWORD;
   aStream:TDownloadStream;
-  LOk:boolean;
+  s:string;
 begin
   result:=false;
 
@@ -1910,28 +1936,52 @@ begin
 
   infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
-  NetHandle := InternetOpen('Mozilla/5.0(compatible; WinInet)', INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
+  NetHandle := InternetOpen(WININETUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
 
   // NetHandle valid?
   if Assigned(NetHandle) then
   try
-    UrlHandle := InternetOpenUrl(NetHandle, PChar(URL), nil, 0, INTERNET_FLAG_RELOAD, 0);
+    UrlHandle := InternetOpenUrl(NetHandle, PChar(URL), nil, 0, INTERNET_FLAG_NO_UI or INTERNET_FLAG_RELOAD, 0);
+
+    {
+    Error:=GetLastError;
+    if Error>0 then
+    begin
+      WinInetErrorMsg(Error);
+    end;
+    }
 
     // UrlHandle valid?
     if Assigned(UrlHandle) then
     try
-      aStream := TDownloadStream.Create(TFileStream.Create(TargetFile, fmCreate));
-      //aStream.FOnWriteStream:=@DoOnWriteStream;
-      //StoredTickCount:=GetUpTickCount;
-      try
-        repeat
-          FillChar(Buffer, SizeOf(Buffer), #0);
-          LOk := InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), @BytesRead);
-          if LOk then aStream.Write(Buffer,BytesRead);
-        until BytesRead = 0;
-        result:=(aStream.Size>0);
-      finally
-        aStream.Free;
+      DeleteUrlCacheEntry(PChar(URL));
+
+      FillChar({%H-}Buffer, SizeOf(Buffer), #0);
+      dummy := 0;
+      BytesRead := SizeOf(Buffer);
+      if HttpQueryInfo(UrlHandle,HTTP_QUERY_STATUS_CODE,@Buffer[0],BytesRead,dummy) then
+      begin
+        s:=GetStringFromBuffer(PChar(@Buffer));
+        if s='200' then
+        begin
+          //All ok : get file.
+          FillChar({%H-}Buffer, SizeOf(Buffer), #0);
+          aStream := TDownloadStream.Create(TFileStream.Create(TargetFile, fmCreate));
+          //aStream.FOnWriteStream:=@DoOnWriteStream;
+          //StoredTickCount:=GetUpTickCount;
+          try
+            while InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), {%H-}BytesRead) do
+            begin
+              if (BytesRead = 0) then Break;
+              aStream.Write(Buffer, BytesRead);
+            end;
+            //Buffer[0] := 0;
+            //aStream.Write(Buffer, 1);
+            result:=(aStream.Size>1);
+          finally
+            aStream.Free;
+          end;
+        end;
       end;
     finally
       InternetCloseHandle(UrlHandle);
