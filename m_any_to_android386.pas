@@ -95,8 +95,7 @@ begin
         PresetLibPath:=LeftStr(FBinUtilsPath,ndkversion);
         for platform:=High(PLATFORMVERSIONSNUMBERS) downto Low(PLATFORMVERSIONSNUMBERS) do
         begin
-          FLibsPath := IncludeTrailingPathDelimiter(PresetLibPath)+'platforms'+DirectorySeparator+
-                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          FLibsPath := ConcatPaths([PresetLibPath,'platforms',PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform]),NDKARCHDIRNAME,'usr','lib']);
           result:=DirectoryExists(FLibsPath);
           if not result
              then ShowInfo('Searched but not found: libspath '+FLibsPath,etDebug)
@@ -123,24 +122,22 @@ begin
         for platform:=High(PLATFORMVERSIONSNUMBERS) downto Low(PLATFORMVERSIONSNUMBERS) do
         begin
           // check libs in userdir\
-          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
-                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+
+          FLibsPath := ConcatPaths([GetUserDir,NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'platforms',PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform]),NDKARCHDIRNAME,'usr','lib']);
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
             ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\Andoid
-          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
-                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          FLibsPath := ConcatPaths([GetUserDir,UppercaseFirstChar(OS),NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'platforms',PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform]),NDKARCHDIRNAME,'usr','lib']);
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin
             ShowInfo('Searched but not found libspath '+FLibsPath,etDebug)
           end else break;
           // check libs in userdir\AppData\Local\Andoid
-          FLibsPath := IncludeTrailingPathDelimiter(GetUserDir)+'AppData\Local\'+UppercaseFirstChar(OS)+DirectorySeparator+NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion]+DirectorySeparator+'platforms'+DirectorySeparator+
-                       PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform])+DirectorySeparator+NDKARCHDIRNAME+DirectorySeparator+'usr'+DirectorySeparator+'lib';
+          FLibsPath := ConcatPaths([GetUserDir,'AppData','Local',UppercaseFirstChar(OS),NDKVERSIONBASENAME+NDKVERSIONNAMES[ndkversion],'platforms',PLATFORMVERSIONBASENAME + InttoStr(PLATFORMVERSIONSNUMBERS[platform]),NDKARCHDIRNAME,'usr','lib']);
           result:=DirectoryExists(FLibsPath);
           if not result then
           begin

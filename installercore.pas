@@ -38,6 +38,8 @@ const
   FPCTRUNKBOOTVERSION   = '3.0.4';
   LAZARUSTRUNKVERSION   = '2.1.0';
 
+  DEFAULTFREEBSDVERSION = '11';
+
   LAZBUILDNAME          = 'lazbuild';
 
   MAKEFILENAME          = 'Makefile';
@@ -47,10 +49,15 @@ const
 
   QT5LIBNAME            = 'libQt5Pas.so.1';
 
-  FPCPKGFILENAME        = 'fppkg.cfg';
-  FPCPKGCOMPILERTEMPLATE= 'default'; // fppkg default compiler template
+  FPCPKGFILENAME        = 'fppkg';
+  FPCPKGCONFIGFILENAME  = 'fppkg.cfg';
+
+  FPFILENAME            = 'fp';
   FPCONFIGFILENAME      = 'fp.cfg';
   FPINIFILENAME         = 'fp.ini';
+
+  FPCPKGCOMPILERTEMPLATE= 'default'; // fppkg default compiler template
+
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
   SVNBASEHTTP           = 'https://svn.';
@@ -590,12 +597,12 @@ begin
     // check for existing cross-dirs
     if (NOT result) then
     begin
-      aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
+      aDir:=ConcatPaths([FInstallDirectory,'bin',GetFPCTarget(false)]);
       result:=DirectoryExists(aDir);
     end;
     if (NOT result) then
     begin
-      aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(false);
+      aDir:=ConcatPaths([FInstallDirectory,'units',GetFPCTarget(false)]);
       {$ifdef UNIX}
       if FileIsSymlink(aDir) then
       begin
@@ -665,7 +672,7 @@ begin
   begin
     if (NOT result) then
     begin
-      aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'lcl'+DirectorySeparator+'units'+DirectorySeparator+GetFPCTarget(false);
+      aDir:=ConcatPaths([FInstallDirectory,'lcl','units',GetFPCTarget(false)]);
       {$ifdef UNIX}
       if FileIsSymlink(aDir) then
       begin
@@ -921,7 +928,8 @@ begin
       ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
-      OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+      aURL:='https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/';
+      OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if OperationSucceeded then
       begin
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
@@ -934,21 +942,17 @@ begin
       //OperationSucceeded:=GetFile('https://freefr.dl.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if NOT OperationSucceeded then
       begin
-        // try one more time
+        // try another URL
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
-        if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output)<50000) then
-        begin
-          SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-          OperationSucceeded:=false;
-        end;
+        aURL:='https://osdn.net/frs/redir.php?m=acc&f=sevenzip%2F64455%2F';
+        OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       end;
       if NOT OperationSucceeded then
       begin
         // try one more time on different URL
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
-        OperationSucceeded:=GetFile('http://7-zip.org/a/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
+        aURL:='http://7-zip.org/a/';
+        OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       end;
 
       if OperationSucceeded then
@@ -978,7 +982,8 @@ begin
       //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
-      OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+      aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
+      OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
       // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
       if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
       begin
@@ -989,7 +994,8 @@ begin
       begin
         // try one more time
         SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
-        OperationSucceeded:=GetFile('https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/'+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
+        aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
+        OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
         // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself
         if (FileSize(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output)<50000) then
         begin
@@ -1053,6 +1059,7 @@ begin
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-32-bit.zip';
           aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-32-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-32-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-32-bit.zip';
           {$else}
           //Output:='git64.7z';
           Output:='git64.zip';
@@ -1063,6 +1070,7 @@ begin
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.22.0.windows.1/MinGit-2.22.0-64-bit.zip';
           aURL:='https://github.com/git-for-windows/git/releases/download/v2.23.0.windows.1/MinGit-2.23.0-64-bit.zip';
           //aURL:='https://github.com/git-for-windows/git/releases/download/v2.24.1.windows.2/MinGit-2.24.1.2-64-bit.zip';
+          //aURL:='https://github.com/git-for-windows/git/releases/download/v2.25.1.windows.1/MinGit-2.25.1-64-bit.zip';
           {$endif}
           //aURL:=FPCUPGITREPO+'/releases/download/Git-2.13.2/'+Output;
           infoln(localinfotext+'GIT not found. Downloading it (may take time) from '+aURL,etInfo);
@@ -1088,6 +1096,9 @@ begin
             begin
               SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'git\'+Output);
               OperationSucceeded:=FileExists(aLocalClientBinary);
+              //Copy certificate ... might be necessary
+              //aURL:=IncludeTrailingPathDelimiter(FMakeDir)+'git\mingw32\';
+              //if (NOT FileExists(aURL+'bin\curl-ca-bundle.crt')) then FileUtil.CopyFile(aURL+'ssl\certs\ca-bundle.crt',aURL+'bin\curl-ca-bundle.crt');
             end;
           end;
           if OperationSucceeded then RepoExecutable:=aLocalClientBinary else RepoExecutable:=RepoExecutableName+'.exe';
@@ -2523,7 +2534,7 @@ const
     );
 var
   OperationSucceeded: boolean;
-  TargetDir,TargetBin,SourceBin,SourceZip,ZipDir: string;
+  TargetBin,SourceBin,SourceZip,ZipDir: string;
   i:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (Download '+TARGETNAME+'): ';
@@ -2531,8 +2542,8 @@ begin
   OperationSucceeded := false;
 
   // for now, just put jasmin.jar in FPC bin-directory ... easy and simple and working
-  TargetDir:=IncludeTrailingPathDelimiter(FInstallDirectory) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator;
-  TargetBin:=TargetDir+TARGETNAME;
+
+  TargetBin:=ConcatPaths([FInstallDirectory,'bin',GetFPCTarget(true)])+PathDelim+TARGETNAME;
 
   if (NOT FileExists(TargetBin)) then
   begin
@@ -2786,7 +2797,7 @@ function TInstaller.GetCompilerInDir(Dir: string): string;
 var
   aCompiler,aProxy:string;
 begin
-  aCompiler := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
+  aCompiler:=ConcatPaths([Dir,'bin',GetFPCTarget(true)])+PathDelim+'fpc'+GetExeExt;
   aProxy:=GetFPCCompilerProxy(aCompiler);
   if FileExists(aProxy) then
     result:=aProxy

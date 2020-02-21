@@ -1204,7 +1204,7 @@ begin
           // move arm-embedded debugger, if any
           if (CrossCPU_Target='arm') AND (CrossOS_Target='embedded') then
           begin
-            if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb'+DirectorySeparator+'arm-embedded'+DirectorySeparator+'gdb'+GetExeExt) then
+            if NOT FileExists(ConcatPaths([FMakeDir,'gdb','arm-embedded'])+PathDelim+'gdb'+GetExeExt) then
             begin
               //Get cross-binaries directory
               i:=Pos('-FD',CrossInstaller.FPCCFGSnippet);
@@ -2032,7 +2032,7 @@ begin
       if NOT FileExists(FPCScriptSource) then SaveInisFromResource(FPCScriptSource,FPCPROXY);
       if FileExists(FPCScriptSource) then
       begin
-        ExecuteCommandInDir(FPCCompiler+' -n -O2 -Os -Xs -XX -Fu'+IncludeTrailingPathDelimiter(FInstallDirectory)+'units'+DirectorySeparator+GetFPCTarget(true)+DirectorySeparator+'*'+' '+FPCScriptSource, ExtractFileDir(FPCCompiler), FVerbose);
+        ExecuteCommandInDir(FPCCompiler+' -n -O2 -Os -Xs -XX -Fu'+ConcatPaths([FInstallDirectory,'units',GetFPCTarget(true)])+PathDelim+'*'+' '+FPCScriptSource, ExtractFileDir(FPCCompiler), FVerbose);
         FPCScriptSource := ChangeFileExt(FPCScriptSource, GetExeExt);
         if FileExists(FPCScriptSource) then
         begin
@@ -2617,7 +2617,7 @@ begin
               if (NOT aFPCUPCompilerFound) then
               begin
                 j:=GetFreeBSDVersion;
-                if j=0 then j:=11; // default to FreeBSD11 when GetFreeBSDVersion does not give a result
+                if j=0 then j:=DEFAULTFREEBSDVERSION; // default to FreeBSD11 when GetFreeBSDVersion does not give a result
 
                 aFPCUPBootstrapURL:='fpcup-'+StringReplace(aLocalFPCUPBootstrapVersion,'.','_',[rfReplaceAll])+'-'+s+InttoStr(j)+'-'+GetCompilerName(GetTargetCPU);
                 aFPCUPCompilerFound:=(Pos(aFPCUPBootstrapURL,aCompilerList[i])>0);
@@ -3168,23 +3168,21 @@ begin
     // Find out where fpcmkcfg lives
     if (OperationSucceeded) then
     begin
-      s:=ExcludeTrailingPathDelimiter(FBinPath);
-      FPCMkCfg:=IncludeTrailingPathDelimiter(s)+FPCMAKECONFIG+GetExeExt;
+      FPCMkCfg:=ConcatPaths([FBinPath,FPCMAKECONFIG+GetExeExt]);
       OperationSucceeded:=CheckExecutable(FPCMkCfg,'-h',FPCMAKECONFIG);
       if (NOT OperationSucceeded) then
       begin
-        infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+s,etDebug);
-        s:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin';
-        FPCMkCfg:=IncludeTrailingPathDelimiter(s)+FPCMAKECONFIG+GetExeExt;
+        infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+ExtractFileDir(FPCMkCfg),etDebug);
+        FPCMkCfg:=ConcatPaths([FInstallDirectory,'bin',FPCMAKECONFIG+GetExeExt]);
         OperationSucceeded:=CheckExecutable(FPCMkCfg,'-h',FPCMAKECONFIG);
         if (NOT OperationSucceeded) then
         begin
-          infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+s,etDebug);
+          infoln(infotext+'Did not find '+FPCMAKECONFIG+GetExeExt+' in '+ExtractFileDir(FPCMkCfg),etDebug);
         end;
       end;
       if OperationSucceeded then
       begin
-        infoln(infotext+'Found valid '+FPCMAKECONFIG+GetExeExt+' executable in '+s,etInfo);
+        infoln(infotext+'Found valid '+FPCMAKECONFIG+GetExeExt+' executable in '+ExtractFileDir(FPCMkCfg),etInfo);
       end
       else
       begin
@@ -3200,117 +3198,129 @@ begin
       Processor.Executable:=FPCMkCfg;
       Processor.CurrentDirectory:=ExcludeTrailingPathDelimiter(FInstallDirectory);
 
-      s := IncludeTrailingPathDelimiter(FBinPath) + FPCONFIGFILENAME;
-      if (NOT FileExists(s)) then
+      s2:= ExtractFilePath(FPCMkCfg)+FPFILENAME+GetExeExt;
+      if FileExists(s2) then
       begin
-        //create fp.cfg
-        //if CheckFPCMkCfgOption('-1') then
+        s := IncludeTrailingPathDelimiter(FBinPath) + FPCONFIGFILENAME;
+        if (NOT FileExists(s)) then
         begin
-          Processor.Parameters.Clear;
-          Processor.Parameters.Add('-1');
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('fpctargetos='+GetTargetOS);
+          //create fp.cfg
+          //if CheckFPCMkCfgOption('-1') then
+          begin
+            Processor.Parameters.Clear;
+            Processor.Parameters.Add('-1');
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('fpctargetos='+GetTargetOS);
 
-          {$IFDEF UNIX}
-          //s2:=GetStartupObjects;
-          //if Length(s2)>0 then
-          //begin
-          //  Processor.Parameters.Add('-d');
-          //  Processor.Parameters.Add('GCCLIBPATH= -Fl'+s2);
-          //end;
-          {$ENDIF UNIX}
+            {$IFDEF UNIX}
+            //s2:=GetStartupObjects;
+            //if Length(s2)>0 then
+            //begin
+            //  Processor.Parameters.Add('-d');
+            //  Processor.Parameters.Add('GCCLIBPATH= -Fl'+s2);
+            //end;
+            {$ENDIF UNIX}
 
-          RunFPCMkCfgOption(s);
+            RunFPCMkCfgOption(s);
+          end;
+        end
+        else
+        begin
+          infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
         end;
-      end
-      else
-      begin
-        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+
+        s := IncludeTrailingPathDelimiter(FBinPath) + FPINIFILENAME;
+        if (NOT FileExists(s)) then
+        begin
+          //create fp.ini
+          //if CheckFPCMkCfgOption('-2') then
+          begin
+            Processor.Parameters.Clear;
+            Processor.Parameters.Add('-2');
+
+            RunFPCMkCfgOption(s);
+          end;
+        end
+        else
+        begin
+          infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
       end;
 
-      s := IncludeTrailingPathDelimiter(FBinPath) + FPINIFILENAME;
-      if (NOT FileExists(s)) then
+      s2:= ExtractFilePath(FPCMkCfg)+FPCPKGFILENAME+GetExeExt;
+      if FileExists(s2) then
       begin
-        //create fp.ini
-        //if CheckFPCMkCfgOption('-2') then
-        begin
-          Processor.Parameters.Clear;
-          Processor.Parameters.Add('-2');
 
-          RunFPCMkCfgOption(s);
+        s2 := IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
+
+        s  := IncludeTrailingPathDelimiter(s2)+FPCPKGCONFIGFILENAME;
+        if (NOT FileExists(s)) then
+        begin
+          ForceDirectoriesSafe(s2);
+          //Create package configuration fppkg.cfg
+          //if CheckFPCMkCfgOption('-3') then
+          begin
+            Processor.Parameters.Clear;
+            Processor.Parameters.Add('-3');
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('LocalRepository='+ConcatPaths([FBaseDirectory,PACKAGESLOCATION])+PathDelim);
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
+
+            Processor.Parameters.Add('-d');
+            {$ifdef MSWINDOWS}
+            Processor.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
+            {$ELSE}
+            Processor.Parameters.Add('GlobalPath='+ConcatPaths([FInstallDirectory,'lib','fpc','{CompilerVersion}'])+PathDelim);
+            {$ENDIF}
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('UserPathSuffix=users');
+
+            RunFPCMkCfgOption(s);
+          end;
+        end
+        else
+        begin
+          infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
         end;
-      end
-      else
-      begin
-        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+
+        s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
+        if (NOT FileExists(s)) then
+        begin
+          ForceDirectoriesSafe(s2);
+          //Create default compiler template
+          //if CheckFPCMkCfgOption('-4') then
+          begin
+            Processor.Parameters.Clear;
+            Processor.Parameters.Add('-4');
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('fpcbin='+FCompiler);
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('fpctargetos='+GetTargetOS);
+
+            Processor.Parameters.Add('-d');
+            Processor.Parameters.Add('fpctargetcpu='+GetTargetCPU);
+
+            RunFPCMkCfgOption(s);
+          end;
+        end
+        else
+        begin
+          infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
+        end;
       end;
 
-      s2 := IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
-
-      s  := IncludeTrailingPathDelimiter(s2)+FPCPKGFILENAME;
-      if (NOT FileExists(s)) then
-      begin
-        ForceDirectoriesSafe(s2);
-        //Create package configuration fppkg.cfg
-        //if CheckFPCMkCfgOption('-3') then
-        begin
-          Processor.Parameters.Clear;
-          Processor.Parameters.Add('-3');
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('LocalRepository='+IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESLOCATION+DirectorySeparator);
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('CompilerConfigDir='+IncludeTrailingPathDelimiter(s2));
-
-          Processor.Parameters.Add('-d');
-          {$ifdef MSWINDOWS}
-          Processor.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory));
-          {$ELSE}
-          Processor.Parameters.Add('GlobalPath='+IncludeTrailingPathDelimiter(FInstallDirectory)+'lib'+DirectorySeparator+'fpc'+DirectorySeparator+'{CompilerVersion}'+DirectorySeparator);
-          {$ENDIF}
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('GlobalPrefix='+ExcludeTrailingPathDelimiter(FInstallDirectory));
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('UserPathSuffix=users');
-
-          RunFPCMkCfgOption(s);
-        end;
-      end
-      else
-      begin
-        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-      end;
-
-
-      s := IncludeTrailingPathDelimiter(s2)+FPCPKGCOMPILERTEMPLATE;
-      if (NOT FileExists(s)) then
-      begin
-        ForceDirectoriesSafe(s2);
-        //Create default compiler template
-        //if CheckFPCMkCfgOption('-4') then
-        begin
-          Processor.Parameters.Clear;
-          Processor.Parameters.Add('-4');
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('fpcbin='+FCompiler);
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('fpctargetos='+GetTargetOS);
-
-          Processor.Parameters.Add('-d');
-          Processor.Parameters.Add('fpctargetcpu='+GetTargetCPU);
-
-          RunFPCMkCfgOption(s);
-        end;
-      end
-      else
-      begin
-        infoln(infotext+'Found existing '+ExtractFileName(s)+' in '+ExtractFileDir(s)+'. Not touching it !');
-      end;
 
       s := FPCCfg;
       if (NOT FileExists(s)) then
@@ -3602,9 +3612,8 @@ begin
         x:=ConfigText.IndexOf('# searchpath for fppkg user-specific packages');
         if x>-1 then
         begin
-          ConfigText.Strings[x+1]:='-Fu'+IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESLOCATION+DirectorySeparator+'units'+DirectorySeparator+'$FPCTARGET/*';
+          ConfigText.Strings[x+1]:='-Fu'+ConcatPaths([FBaseDirectory,PACKAGESLOCATION,'units','$FPCTARGET'])+'/*';
         end;
-
 
         ConfigText.SaveToFile(FPCCfg);
       finally

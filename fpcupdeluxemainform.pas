@@ -597,7 +597,8 @@ var
 begin
   aOS := GetTargetOS;
   aCPU := GetTargetCPU;
-  BinPath:=IncludeTrailingPathDelimiter(sInstallDir)+'fpc'+DirectorySeparator+'bin'+DirectorySeparator+aCPU + '-' + aOS;
+
+  BinPath:=ConcatPaths([sInstallDir,'fpc','bin',aCPU+'-'+aOS]);
   FPCCfg := IncludeTrailingPathDelimiter(BinPath) + FPCCONFIGFILENAME;
 
   result:=false;
@@ -2529,8 +2530,8 @@ begin
         LibsFileName:=BinsFileName;
 
         // normally, we have the standard names for libs and bins paths
-        LibPath:=CROSSPATH+DirectorySeparator+'lib'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
-        BinPath:=CROSSPATH+DirectorySeparator+'bin'+DirectorySeparator+FPCupManager.CrossCPU_Target+'-';
+        LibPath:=ConcatPaths([CROSSPATH,'lib',FPCupManager.CrossCPU_Target])+'-';
+        BinPath:=ConcatPaths([CROSSPATH,'bin',FPCupManager.CrossCPU_Target])+'-';
         if FPCupManager.MUSL then
         begin
           LibPath:=LibPath+'musl';
@@ -3141,9 +3142,8 @@ begin
       begin
         WriteBool('General','Maximized',True);
       end;
-
-    finally
       UpdateFile;
+    finally
       Free;
     end;
 
@@ -3701,8 +3701,8 @@ begin
 
       WriteBool('General','ForceLocalRepoClient',Form2.ForceLocalRepoClient);
 
-    finally
       UpdateFile;
+    finally
       Free;
     end;
 

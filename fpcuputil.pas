@@ -293,6 +293,7 @@ function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: strin
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
+function DownloadByWinINet(URL, TargetFile: string): boolean;
 function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
 function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
@@ -407,7 +408,7 @@ uses
   fpjson, jsonparser ,uriparser
   {$IFDEF MSWINDOWS}
     //Mostly for shortcut code
-    ,windows, shlobj {for special folders}, ActiveX, ComObj, WinDirs
+    ,windows, shlobj {for special folders}, ActiveX, ComObj, WinDirs, WinINet
   {$ENDIF MSWINDOWS}
   {$IFDEF LINUX}
   ,linux
@@ -1601,28 +1602,44 @@ var
 begin
   result:=false;
 
-  if UseWget
-     then aDownLoader:=TWGetDownLoader.Create
-     else aDownLoader:=TNativeDownLoader.Create;
-  try
-    result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-  finally
-    aDownLoader.Destroy;
+  if (NOT result) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    if UseWget
+       then aDownLoader:=TWGetDownLoader.Create
+       else aDownLoader:=TNativeDownLoader.Create;
+    try
+      result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    finally
+      aDownLoader.Destroy;
+    end;
+    if (NOT result) then infoln('FPCUP downloader failure.',etDebug);
   end;
 
   {$ifdef Windows}
-  //Second resort: use Windows PowerShell
+  //Second resort: use Windows INet
+  if (NOT result) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    result:=DownloadByWinINet(URL,TargetFile);
+    if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
+  end;
+
+  //Third resort: use Windows PowerShell
   if (NOT result) then
   begin
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByPowerShell(URL,TargetFile);
+    if (NOT result) then infoln('Windows PowerShell downloader failure.',etDebug);
   end;
-  //Third resort: use BitsAdmin
+
+  //Fourth resort: use BitsAdmin
   {
   if (NOT result) then
   begin
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByBitsAdmin(URL,TargetFile);
+    if (NOT result) then infoln('Windows BitsAdmin downloader failure.',etDebug);
   end;
   }
   {$endif}
@@ -1637,6 +1654,7 @@ begin
     finally
       aDownLoader.Destroy;
     end;
+    if (NOT result) then infoln('FPCUP wget downloader failure.',etDebug);
   end;
 
   if (NOT result) then SysUtils.Deletefile(TargetFile);
@@ -1858,6 +1876,70 @@ begin
   //result:=(ExecuteCommand('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
   //result:=(ExecuteCommand('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
   result:=(ExecuteCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output, False)=0);
+  if result then
+  begin
+    result:=FileExists(TargetFile);
+  end;
+end;
+
+function DownloadByWinINet(URL, TargetFile: string): boolean;
+const
+  URLMAGIC='/download';
+var
+  URI    : TURI;
+  aURL,P : String;
+  NetHandle: HINTERNET;
+  UrlHandle: HINTERNET;
+  Buffer: array[0..1023] of Byte;
+  BytesRead: DWord;
+  aStream:TDownloadStream;
+  LOk:boolean;
+begin
+  result:=false;
+
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+
+  //do not use WinINet for FTP
+  if CompareText(P,'ftp')=0 then exit;
+
+  //do not use WinINet for sourceforge
+  if CompareText(URI.Host,'downloads.sourceforge.net')=0 then exit;
+
+  infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
+
+  NetHandle := InternetOpen('Mozilla/5.0(compatible; WinInet)', INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
+
+  // NetHandle valid?
+  if Assigned(NetHandle) then
+  try
+    UrlHandle := InternetOpenUrl(NetHandle, PChar(URL), nil, 0, INTERNET_FLAG_RELOAD, 0);
+
+    // UrlHandle valid?
+    if Assigned(UrlHandle) then
+    try
+      aStream := TDownloadStream.Create(TFileStream.Create(TargetFile, fmCreate));
+      //aStream.FOnWriteStream:=@DoOnWriteStream;
+      //StoredTickCount:=GetUpTickCount;
+      try
+        repeat
+          FillChar(Buffer, SizeOf(Buffer), #0);
+          LOk := InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), @BytesRead);
+          if LOk then aStream.Write(Buffer,BytesRead);
+        until BytesRead = 0;
+        result:=(aStream.Size>0);
+      finally
+        aStream.Free;
+      end;
+    finally
+      InternetCloseHandle(UrlHandle);
+    end
+  finally
+    InternetCloseHandle(NetHandle);
+  end;
+
   if result then
   begin
     result:=FileExists(TargetFile);

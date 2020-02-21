@@ -779,8 +779,8 @@ begin
     end;
     WriteString('ProxySettings','HTTPProxyPass',s);
 
-  finally
     UpdateFile;
+  finally
     Free;
   end;
 
@@ -823,8 +823,8 @@ begin
         WriteString(s,'Compiler',FCrossUtils[CPU,OS].Compiler);
       end;
     end;
-  finally
     UpdateFile;
+  finally
     Free;
   end;
 
