@@ -928,6 +928,7 @@ begin
       ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip');
       // this version of 7Zip is the last version that does not need installation ... so we can silently get it !!
       Output:='7za920.zip';
+      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       aURL:='https://downloads.sourceforge.net/project/sevenzip/7-Zip/9.20/';
       OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'7Zip\'+Output);
       if OperationSucceeded then
@@ -982,6 +983,7 @@ begin
       //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\bin');
       // this version of unrar does not need installation ... so we can silently get it !!
       Output:='unrar-3.4.3-bin.zip';
+      SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
       aURL:='https://downloads.sourceforge.net/project/gnuwin32/unrar/3.4.3/';
       OperationSucceeded:=GetFile(aURL+Output,IncludeTrailingPathDelimiter(FMakeDir)+'unrar\'+Output);
       // sometimes, souceforge has a redirect error, returning a successfull download, but without the datafile itself

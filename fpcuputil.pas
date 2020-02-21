@@ -1931,8 +1931,14 @@ begin
   //do not use WinINet for FTP
   if CompareText(P,'ftp')=0 then exit;
 
-  //do not use WinINet for sourceforge
-  if CompareText(URI.Host,'downloads.sourceforge.net')=0 then exit;
+  //do not use WinINet for sourceforge : redirect is not working !
+  //if CompareText(URI.Host,'downloads.sourceforge.net')=0 then exit;
+  // a bit tricky: we know where sourceforge redirects, so go there ... ;-)
+  if CompareText(URI.Host,'downloads.sourceforge.net')=0 then
+  begin
+    URI.Host:='netix.dl.sourceforge.net';
+    aURL:=P+'://'+URI.Host+URI.Path+URI.Document
+  end else aURL:=URL;
 
   infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
@@ -1941,7 +1947,7 @@ begin
   // NetHandle valid?
   if Assigned(NetHandle) then
   try
-    UrlHandle := InternetOpenUrl(NetHandle, PChar(URL), nil, 0, INTERNET_FLAG_NO_UI or INTERNET_FLAG_RELOAD, 0);
+    UrlHandle := InternetOpenUrl(NetHandle, PChar(aURL), nil, 0, INTERNET_FLAG_NO_UI or INTERNET_FLAG_RELOAD, 0);
 
     {
     Error:=GetLastError;
@@ -1954,7 +1960,7 @@ begin
     // UrlHandle valid?
     if Assigned(UrlHandle) then
     try
-      DeleteUrlCacheEntry(PChar(URL));
+      DeleteUrlCacheEntry(PChar(aURL));
 
       FillChar({%H-}Buffer, SizeOf(Buffer), #0);
       dummy := 0;
@@ -1965,16 +1971,33 @@ begin
         if s='200' then
         begin
           //All ok : get file.
+          SetLastError(0);
           FillChar({%H-}Buffer, SizeOf(Buffer), #0);
           aStream := TDownloadStream.Create(TFileStream.Create(TargetFile, fmCreate));
           //aStream.FOnWriteStream:=@DoOnWriteStream;
           //StoredTickCount:=GetUpTickCount;
           try
+            while true do
+            begin
+              if InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer)-1, {%H-}BytesRead) then
+              begin
+                if (BytesRead = 0) then Break;
+                aStream.Write(Buffer, BytesRead);
+              end
+              else
+              if InternetQueryDataAvailable(UrlHandle, {%H-}BytesRead, 0, 0) then
+              begin
+                if (BytesRead = 0) then Break;
+              end
+              else break;
+            end;
+            {
             while InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), {%H-}BytesRead) do
             begin
               if (BytesRead = 0) then Break;
               aStream.Write(Buffer, BytesRead);
             end;
+            }
             //Buffer[0] := 0;
             //aStream.Write(Buffer, 1);
             result:=(aStream.Size>1);
@@ -3580,119 +3603,130 @@ begin
   try
     FFileList := TStringList.Create;
     try
-      FUnZipper.Clear;
-      FUnZipper.OnPercent:=10;
-      { Flat option only available in FPC >= 3.1 }
-      {$IF FPC_FULLVERSION > 30100}
-      FUnZipper.Flat:=Flat;
-      {$ENDIF}
-      FUnZipper.FileName := ASrcFile;
-      FUnZipper.OutputPath := ADstDir;
-      FUnZipper.OnStartFile:= @DoOnFile;
-      FFileList.Clear;
-      if Length(Files)>0 then
-        for i := 0 to high(Files) do
-          FFileList.Append(Files[i]);
-      FFileCnt:=0;
-      FTotalFileCnt:=0;
-
-      FUnZipper.Examine;
-
-      {$ifdef MSWINDOWS}
-      // on windows, .files (hidden files) cannot be created !!??
-      // still to check on non-windows
-      if FFileList.Count=0 then
-      begin
-        for x:=0 to FUnZipper.Entries.Count-1 do
-        begin
-          { UTF8 features are only available in FPC >= 3.1 }
-          {$IF FPC_FULLVERSION > 30100}
-          if FUnZipper.UseUTF8
-            then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-            else
-          {$endif}
-            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
-
-          if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
-          if (Length(s)>0) AND (s[1]='.') then continue;
-          FFileList.Append(s);
-        end;
-      end;
-      {$endif}
-
-      if FFileList.Count=0
-        then FTotalFileCnt:=FUnZipper.Entries.Count
-        else FTotalFileCnt:=FFileList.Count;
-
       try
-        if FFileList.Count=0
-          then FUnZipper.UnZipAllFiles
-          else FUnZipper.UnZipFiles(FFileList);
-      except
-        on E:EFCreateError do
+        FUnZipper.Clear;
+        FUnZipper.OnPercent:=10;
+        { Flat option only available in FPC >= 3.1 }
+        {$IF FPC_FULLVERSION > 30100}
+        FUnZipper.Flat:=Flat;
+        {$ENDIF}
+        FUnZipper.FileName := ASrcFile;
+        FUnZipper.OutputPath := ADstDir;
+        FUnZipper.OnStartFile:= @DoOnFile;
+        FFileList.Clear;
+        if Length(Files)>0 then
+          for i := 0 to high(Files) do
+            FFileList.Append(Files[i]);
+        FFileCnt:=0;
+        FTotalFileCnt:=0;
+
+        FUnZipper.Examine;
+
+        {$ifdef MSWINDOWS}
+        // on windows, .files (hidden files) cannot be created !!??
+        // still to check on non-windows
+        if FFileList.Count=0 then
         begin
-          infoln('TNormalUnzipper: Could not create file.',etError);
+          for x:=0 to FUnZipper.Entries.Count-1 do
+          begin
+            { UTF8 features are only available in FPC >= 3.1 }
+            {$IF FPC_FULLVERSION > 30100}
+            if FUnZipper.UseUTF8
+              then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+              else
+            {$endif}
+              s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+
+            if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+            if (Length(s)>0) AND (s[1]='.') then continue;
+            FFileList.Append(s);
+          end;
+        end;
+        {$endif}
+
+        if FFileList.Count=0
+          then FTotalFileCnt:=FUnZipper.Entries.Count
+          else FTotalFileCnt:=FFileList.Count;
+
+        try
+          if FFileList.Count=0
+            then FUnZipper.UnZipAllFiles
+            else FUnZipper.UnZipFiles(FFileList);
+        except
+          on E:EFCreateError do
+          begin
+            infoln('TNormalUnzipper: Could not create file.',etError);
+          end
+          else
+          begin
+            infoln('TNormalUnzipper: Unknown exception error.',etError);
+          end;
+        end;
+        { Flat option only available in FPC >= 3.1 }
+        {$IF FPC_FULLVERSION < 30100}
+        if Flat then
+        begin
+          if FFileList.Count=0 then
+          begin
+            for x:=0 to FUnZipper.Entries.Count-1 do
+            begin
+
+              if FUnZipper.Entries.Entries[x].IsDirectory then continue;
+              if FUnZipper.Entries.Entries[x].IsLink then continue;
+
+              { UTF8 features are only available in FPC >= 3.1 }
+              {$IF FPC_FULLVERSION > 30100}
+              if FUnZipper.UseUTF8
+                 then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+                 else
+              {$endif}
+              s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+
+              if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
+              if (Length(s)>0) AND (s[1]='.') then continue;
+
+              FFileList.Append(s);
+            end;
+          end;
+
+          for x:=0 to FFileList.Count-1 do
+          begin
+            s:=FFileList.Strings[x];
+            if DirectorySeparator<>'/' then s:=StringReplace(s, '/', DirectorySeparator, [rfReplaceAll]);
+            MoveFile(IncludeTrailingPathDelimiter(ADstDir)+s, IncludeTrailingPathDelimiter(ADstDir)+ExtractFileName(s));
+          end;
+
+          for x:=0 to FUnZipper.Entries.Count-1 do
+          begin
+            if FUnZipper.Entries.Entries[x].IsDirectory then
+            begin
+              { UTF8 features are only available in FPC >= 3.1 }
+              {$IF FPC_FULLVERSION > 30100}
+              if FUnZipper.UseUTF8
+                 then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
+                 else
+              {$endif}
+              s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
+              if DirectorySeparator<>'/' then s:=StringReplace(s, '/', DirectorySeparator, [rfReplaceAll]);
+              if (s='.') or (s=DirectorySeparator+'.') or (Pos('..',s)>0) then continue;
+              DeleteDirectoryEx(IncludeTrailingPathDelimiter(ADstDir)+s);
+            end;
+          end;
+        end;
+        {$ENDIF}
+
+        result:=true;
+
+      except
+        on E:EZipError do
+        begin
+          infoln('TNormalUnzipper: Could not unzip file.',etError);
         end
         else
         begin
           infoln('TNormalUnzipper: Unknown exception error.',etError);
         end;
       end;
-      { Flat option only available in FPC >= 3.1 }
-      {$IF FPC_FULLVERSION < 30100}
-      if Flat then
-      begin
-        if FFileList.Count=0 then
-        begin
-          for x:=0 to FUnZipper.Entries.Count-1 do
-          begin
-
-            if FUnZipper.Entries.Entries[x].IsDirectory then continue;
-            if FUnZipper.Entries.Entries[x].IsLink then continue;
-
-            { UTF8 features are only available in FPC >= 3.1 }
-            {$IF FPC_FULLVERSION > 30100}
-            if FUnZipper.UseUTF8
-               then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-               else
-            {$endif}
-            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
-
-            if (Pos('/.',s)>0) OR (Pos('\.',s)>0) then continue;
-            if (Length(s)>0) AND (s[1]='.') then continue;
-
-            FFileList.Append(s);
-          end;
-        end;
-
-        for x:=0 to FFileList.Count-1 do
-        begin
-          s:=FFileList.Strings[x];
-          if DirectorySeparator<>'/' then s:=StringReplace(s, '/', DirectorySeparator, [rfReplaceAll]);
-          MoveFile(IncludeTrailingPathDelimiter(ADstDir)+s, IncludeTrailingPathDelimiter(ADstDir)+ExtractFileName(s));
-        end;
-
-        for x:=0 to FUnZipper.Entries.Count-1 do
-        begin
-          if FUnZipper.Entries.Entries[x].IsDirectory then
-          begin
-            { UTF8 features are only available in FPC >= 3.1 }
-            {$IF FPC_FULLVERSION > 30100}
-            if FUnZipper.UseUTF8
-               then s:=FUnZipper.Entries.Entries[x].UTF8ArchiveFileName
-               else
-            {$endif}
-            s:=FUnZipper.Entries.Entries[x].ArchiveFileName;
-            if DirectorySeparator<>'/' then s:=StringReplace(s, '/', DirectorySeparator, [rfReplaceAll]);
-            if (s='.') or (s=DirectorySeparator+'.') or (Pos('..',s)>0) then continue;
-            DeleteDirectoryEx(IncludeTrailingPathDelimiter(ADstDir)+s);
-          end;
-        end;
-      end;
-      {$ENDIF}
-
-      result:=true;
-
     finally
       FFileList.Free;
     end;
