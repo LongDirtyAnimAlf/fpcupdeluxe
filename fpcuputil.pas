@@ -361,6 +361,7 @@ function IsExecutable(Executable: string):boolean;
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
 function GetJava: string;
+function GetJavac: string;
 function CheckJava: boolean;
 function ExtractFileNameOnly(const AFilename: string): string;
 function DoubleQuoteIfNeeded(s: string): string;
@@ -692,7 +693,7 @@ begin
     Freemem(pathBuffer);
   end;
   {$ELSE}
-  {$IFDEF WINDOWS}
+  {$IFDEF MSWINDOWS}
   if Global then
     result:=GetWindowsSpecialDir(CSIDL_COMMON_APPDATA)
   else
@@ -2947,7 +2948,7 @@ begin
     result:=CheckExecutable(Executable, Parameters, ExpectOutput, etInfo);
 end;
 
-function GetJava: string;
+function GetJavaBase(aJava:string): string;
 var
   s:string;
   JavaFiles: TStringList;
@@ -2959,7 +2960,7 @@ begin
   if s<>'' then
   begin
     s:=IncludeTrailingPathDelimiter(s);
-    JavaFiles := FindAllFiles(s, 'java.exe', true);
+    JavaFiles := FindAllFiles(s, aJava+GetExeExt, true);
     try
       if JavaFiles.Count>0 then
       begin
@@ -2984,7 +2985,7 @@ begin
   end;
   {$endif win32}
   s:=IncludeTrailingPathDelimiter(s)+'Java'+DirectorySeparator;
-  JavaFiles := FindAllFiles(s, 'java.exe', true);
+  JavaFiles := FindAllFiles(s, aJava+GetExeExt, true);
   try
     if JavaFiles.Count>0 then
     begin
@@ -3001,7 +3002,7 @@ begin
   //On Win32, try to find the 32bit version of java in the standard 32bit program directory
   s:=GetWindowsSpecialDir(CSIDL_PROGRAM_FILES);
   s:=IncludeTrailingPathDelimiter(s)+'Java'+DirectorySeparator;
-  JavaFiles := FindAllFiles(s, 'java.exe', true);
+  JavaFiles := FindAllFiles(s, aJava+GetExeExt, true);
   try
     if JavaFiles.Count>0 then
     begin
@@ -3013,11 +3014,61 @@ begin
   end;
   {$endif win32}
 
-  if result='' then result:=Which('java.exe');
+  if result='' then result:=Which(aJava+GetExeExt);
 
   {$else Windows}
-  result:=Which('java');
+  result:=Which(aJava+GetExeExt);
+  if result<>'' then
+  begin
+    while FileIsSymlink(result) do
+    begin
+      try
+        result:=GetPhysicalFilename(result,pfeException);
+      except
+      end;
+    end;
+  end;
+
+  if result<>'' then exit;
+
+  {$ifdef Linux}
+  JavaFiles := FindAllFiles('/usr/lib/jvm', aJava+GetExeExt, true);
+  try
+    if JavaFiles.Count>0 then
+    begin
+      result:=JavaFiles[0];
+    end;
+  finally
+    JavaFiles.Free;
+  end;
+  if result<>'' then exit;
+  {$endif}
+
+  {$IF (defined(BSD)) and (not defined(Darwin))}
+  JavaFiles := FindAllFiles('/usr/local', aJava+GetExeExt, true);
+  try
+    if JavaFiles.Count>0 then
+    begin
+      result:=JavaFiles[0];
+    end;
+  finally
+    JavaFiles.Free;
+  end;
+  if result<>'' then exit;
+  {$endif}
+
   {$endif Windows}
+end;
+
+function GetJava: string;
+begin
+  result:=GetJavaBase('java');
+end;
+
+function GetJavac: string;
+begin
+  result:=GetJavaBase('javac');
+  //if length(result)=0 then result:=GetJavaBase('jexec');
 end;
 
 function CheckJava: boolean;

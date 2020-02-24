@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 {.$DEFINE crosssimple}
 {$IFDEF WINDOWS}
 {.$DEFINE buildnative}
-{.$DEFINE USEWINDOWSPROXY}
+{$DEFINE USEWINDOWSPROXY}
 {$ENDIF WINDOWS}
 
 interface
@@ -3251,7 +3251,11 @@ begin
       if FileExists(s2) then
       begin
 
-        s2 := IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR;
+        s2:=ConcatPaths([FBaseDirectory,PACKAGESLOCATION]);
+        ForceDirectoriesSafe(s2);
+
+        s2 := ConcatPaths([FBaseDirectory,PACKAGESCONFIGDIR]);
+        ForceDirectoriesSafe(s2);
 
         s  := IncludeTrailingPathDelimiter(s2)+FPCPKGCONFIGFILENAME;
         if (NOT FileExists(s)) then

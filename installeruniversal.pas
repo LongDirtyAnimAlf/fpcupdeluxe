@@ -718,11 +718,7 @@ begin
   if (result) AND (lpkversion.Name<>'unknown') then
   begin
     if FVerbose then WritelnLog(localinfotext+'Checking lpl file for '+PackageName,true);
-    Path := IncludeTrailingPathDelimiter(LazarusInstallDir)+
-            'packager'+DirectorySeparator+
-            'globallinks'+DirectorySeparator+
-            LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
-
+    Path := ConcatPaths([LazarusInstallDir,'packager','globallinks'])+DirectorySeparator+LowerCase(lpkversion.Name)+'-'+lpkversion.AsString+'.lpl';
     if NOT FileExists(Path) then
     begin
       AssignFile(TxtFile,Path);
@@ -856,8 +852,36 @@ begin
 
       if Workingdir='' then Workingdir:=BaseWorkingdir;
 
-      // Skip over missing data:
+      if (LowerCase(ModuleName)='lamw-gradle') then
+      begin
+        //perform some auto magic install stuff
+        s:=IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+'LAMW.ini';
+        with TIniFile.Create(s) do
+        try
+          s:=ExcludeTrailingPathDelimiter(WorkingDir);
+          s:=ReadString('NewProject','PathToGradle',s);
+          WriteString('NewProject','PathToGradle',s);
+        finally
+          Free;
+        end;
+      end;
+      if (LowerCase(ModuleName)='lamw-ant') then
+      begin
+        //perform some auto magic install stuff
+        s:=IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+'LAMW.ini';
+        with TIniFile.Create(s) do
+        try
+          s:=ConcatPaths([WorkingDir,'bin']);
+          s:=ReadString('NewProject','PathToAntBin',s);
+          WriteString('NewProject','PathToAntBin',s);
+        finally
+          Free;
+        end;
+      end;
+
+      // Skip over missing data or if no AddPackage is defined
       if (PackagePath='') then continue;
+
       if NOT FileExists(PackagePath) then
       begin
         infoln(localinfotext+'Package '+ExtractFileName(PackagePath)+' not found ... skipping.',etInfo);
@@ -957,6 +981,53 @@ begin
         if FVerbose then WritelnLog(localinfotext+'Error while installing package '+PackagePath+'.',false);
         break;
       end;
+
+      if result then
+      begin
+        if (LowerCase(ModuleName)='lamw') AND (Pos('amw_ide_tools',LowerCase(PackagePath))>0) then
+        begin
+          //perform some auto magic install stuff
+          s:=IncludeTrailingPathDelimiter(FLazarusPrimaryConfigPath)+'LAMW.ini';
+          with TIniFile.Create(s) do
+          try
+            s:='PathToSmartDesigner';
+            RealDirective:=ReadString('NewProject',s,ConcatPaths([WorkingDir,'android_wizard','smartdesigner']));
+            WriteString('NewProject',s,RealDirective);
+
+            s:='PathToJavaTemplates';
+            RealDirective:=ReadString('NewProject',s,ConcatPaths([WorkingDir,'android_wizard','smartdesigner','java']));
+            WriteString('NewProject',s,RealDirective);
+
+            s:='PathToJavaJDK';
+            RealDirective:=ReadString('NewProject',s,SafeExpandFileName(ExtractFilePath(GetJavac)+'..'));
+            if Length(RealDirective)>0 then WriteString('NewProject',s,RealDirective);
+
+            s:='PathToWorkspace';
+            RealDirective:=ReadString('NewProject',s,ConcatPaths([FBaseDirectory,'projects','LAMWProjects']));
+            ForceDirectoriesSafe(RealDirective);
+            WriteString('NewProject',s,RealDirective);
+
+            s:='InstructionSet';
+            RealDirective:=ReadString('NewProject',s,'2');
+            WriteString('NewProject',s,RealDirective);
+
+            s:='PathToAndroidSDK';
+            RealDirective:='';
+            {$ifdef Linux}
+            RealDirective:=ReadString('NewProject',s,'/usr/lib/android-sdk');
+            {$endif}
+            {$ifdef MSWindows}
+            RealDirective:=ReadString('NewProject',s,ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']));
+            {$endif}
+            if DirectoryExists(RealDirective) then WriteString('NewProject',s,RealDirective);
+
+          finally
+            Free;
+          end;
+        end;
+      end;
+
+
       {$endif}
     end;
   end;
