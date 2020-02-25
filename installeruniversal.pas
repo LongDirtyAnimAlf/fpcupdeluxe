@@ -183,6 +183,7 @@ Const
   MAXUSERMODULES=20;
   // Allow enough instructions per module:
   MAXINSTRUCTIONS=255;
+  MAXEMPTYINSTRUCTIONS=5;
   MAXRECURSIONS=10;
 
 var
@@ -747,6 +748,7 @@ var
   Workingdir:string;
   BaseWorkingdir:string;
   RegisterOnly:boolean;
+  ReadyCounter:integer;
 begin
   Failure:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
@@ -754,6 +756,8 @@ begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);
   BaseWorkingdir:=FixPath(BaseWorkingdir);
+
+  ReadyCounter:=0;
 
   Workingdir:=BaseWorkingdir;
 
@@ -782,7 +786,15 @@ begin
       PackagePath:=FixPath(PackagePath);
 
       // Skip over missing numbers:
-      if PackagePath='' then continue;
+      //Limit iterration;
+      if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
+
+      // Skip over missing data or if no AddPackage is defined
+      if (PackagePath='') then
+      begin
+        Inc(ReadyCounter);
+        continue;
+      end else ReadyCounter:=0;
 
       if Workingdir='' then Workingdir:=BaseWorkingdir;
 
@@ -816,12 +828,16 @@ var
   BaseWorkingdir:string;
   RealDirective:string;
   RegisterOnly:boolean;
+  ReadyCounter:integer;
+
 begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);;
   BaseWorkingdir:=FixPath(BaseWorkingdir);
   Workingdir:=BaseWorkingdir;
   ModuleName:=GetValueFromKey(NAMEMAGIC,sl);
+
+  ReadyCounter:=0;
 
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
 
@@ -879,8 +895,15 @@ begin
         end;
       end;
 
+      //Limit iterration;
+      if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
+
       // Skip over missing data or if no AddPackage is defined
-      if (PackagePath='') then continue;
+      if (PackagePath='') then
+      begin
+        Inc(ReadyCounter);
+        continue;
+      end else ReadyCounter:=0;
 
       if NOT FileExists(PackagePath) then
       begin
@@ -1044,6 +1067,7 @@ var
   Installer: TWinInstaller;
   Workingdir:string;
   BaseWorkingdir:string;
+  ReadyCounter:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateInstallers): ';
 
@@ -1051,13 +1075,25 @@ begin
   BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
   BaseWorkingdir:=FixPath(BaseWorkingdir);
 
+  ReadyCounter:=0;
+
   for i:=0 to MAXINSTRUCTIONS do
     begin
     if i=0
        then exec:=GetValueFromKey(Directive,sl)
        else exec:=GetValueFromKey(Directive+IntToStr(i),sl);
     // Skip over missing numbers:
-    if exec='' then continue;
+
+    //Limit iterration;
+    if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
+
+    // Skip over missing data or if no exec is defined
+    if (exec='') then
+    begin
+      Inc(ReadyCounter);
+      continue;
+    end else ReadyCounter:=0;
+
     Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
     Workingdir:=FixPath(Workingdir);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
@@ -1106,19 +1142,31 @@ var
   s:string;
   BaseWorkingdir:string;
   Workingdir:string;
+  ReadyCounter:integer;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RunCommands: '+Directive+'): ';
 
   result:=true; //not finding any instructions at all should not be a problem.
   BaseWorkingdir:=GetValueFromKey('Workingdir',sl);
   BaseWorkingdir:=FixPath(BaseWorkingdir);
+
+  ReadyCounter:=0;
+
   for i:=0 to MAXINSTRUCTIONS do
   begin
     if i=0
        then exec:=GetValueFromKey(Directive,sl)
        else exec:=GetValueFromKey(Directive+IntToStr(i),sl);
-    // Skip over missing numbers:
-    if exec='' then continue;
+
+    //Limit iterration;
+    if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
+
+    // Skip over missing data or if no exec is defined
+    if (exec='') then
+    begin
+      Inc(ReadyCounter);
+      continue;
+    end else ReadyCounter:=0;
 
     exec:=FixPath(exec);
 
@@ -1155,6 +1203,7 @@ begin
       exec:=StringReplace(exec,LAZBUILDNAME,LAZBUILDNAME+' '+s,[rfIgnoreCase]);
     end;
     {$endif}
+
     Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
     Workingdir:=FixPath(Workingdir);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
@@ -1183,10 +1232,9 @@ begin
       end
       else
       begin
-        WritelnLog(etError, localinfotext+'Running '+exec+' returned with an error.',true);
-        WritelnLog(etError, localinfotext+'Error-code: '+InttoStr(j),true);
-        WritelnLog(etError, localinfotext+'Error message (if any): '+s,true);
-        break;
+        WritelnLog(etWarning, localinfotext+'Running '+exec+' returned with an error.',true);
+        WritelnLog(etWarning, localinfotext+'Error-code: '+InttoStr(j),true);
+        if Length(s)>0 then WritelnLog(etWarning, localinfotext+'Error message: '+s,true);
       end;
     except
       on E: Exception do
@@ -1436,12 +1484,15 @@ var
   i,j,k:integer;
   exec,key,counter,oldcounter,filename:string;
   count:integer;
+  ReadyCounter:integer;
 begin
   result:=true;
   //filename:=xmlfile;
   //if rightstr(filename,4)<>'.xml' then
   filename:=xmlfile+'.xml';
   oldcounter:='';
+  ReadyCounter:=0;
+
   for i:=0 to MAXINSTRUCTIONS do
   begin
     // Read command, e.g. AddToHelpOptions1
@@ -1449,8 +1500,17 @@ begin
     if i=0
        then exec:=GetValueFromKey('AddTo'+xmlfile,sl)
        else exec:=GetValueFromKey('AddTo'+xmlfile+IntToStr(i),sl);
-    // Skip over missing numbers:
-    if exec='' then continue;
+
+    //Limit iterration;
+    if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
+
+    // Skip over missing data or if no exec is defined
+    if (exec='') then
+    begin
+      Inc(ReadyCounter);
+      continue;
+    end else ReadyCounter:=0;
+
     //split off key and value
     j:=1;
     while j<=length(exec) do
@@ -1787,6 +1847,11 @@ begin
         if result then
         begin
           WritelnLog(infotext+'Download ok',True);
+
+          if ModuleName='lamw-gradle' then
+          begin
+            UnInstallModule(ModuleName);
+          end;
 
           //Delete existing files from install directory
           DeleteDirectory(FSourceDirectory,True);
