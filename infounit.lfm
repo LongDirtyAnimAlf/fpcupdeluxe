@@ -1,19 +1,57 @@
 object InfoForm: TInfoForm
-  Left = 285
+  Left = 371
   Height = 372
-  Top = 163
+  Top = 161
   Width = 419
   Caption = 'InfoForm'
   ClientHeight = 372
   ClientWidth = 419
-  LCLVersion = '1.9.0.0'
+  LCLVersion = '2.1.0.0'
   object Memo1: TMemo
-    Left = 0
-    Height = 372
-    Top = 0
-    Width = 419
-    Align = alClient
+    AnchorSideLeft.Control = Owner
+    AnchorSideTop.Control = Label1
+    AnchorSideTop.Side = asrBottom
+    AnchorSideRight.Control = Owner
+    AnchorSideRight.Side = asrBottom
+    AnchorSideBottom.Control = ButtonPanel1
+    Left = 4
+    Height = 285
+    Top = 35
+    Width = 411
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    BorderSpacing.Left = 4
+    BorderSpacing.Top = 12
+    BorderSpacing.Right = 4
+    BorderSpacing.Bottom = 12
     ScrollBars = ssAutoBoth
     TabOrder = 0
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 34
+    Top = 332
+    Width = 407
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 1
+    ShowButtons = [pbClose]
+  end
+  object Label1: TLabel
+    AnchorSideLeft.Control = Owner
+    AnchorSideLeft.Side = asrCenter
+    AnchorSideTop.Control = Owner
+    Left = 100
+    Height = 15
+    Top = 8
+    Width = 218
+    BorderSpacing.Top = 8
+    Caption = 'Listing of all custom CPU and OS settings'
+    ParentColor = False
   end
 end

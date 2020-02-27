@@ -5,13 +5,16 @@ unit infounit;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  ButtonPanel;
 
 type
 
   { TInfoForm }
 
   TInfoForm = class(TForm)
+    ButtonPanel1: TButtonPanel;
+    Label1: TLabel;
     Memo1: TMemo;
   private
 

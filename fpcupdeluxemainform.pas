@@ -594,7 +594,7 @@ var
   CheckAutoClearStore:boolean;
   success:boolean;
   SnipBegin,i:integer;
-  s:string;
+  s,aResultMessage:string;
 begin
   aOS := GetTargetOS;
   aCPU := GetTargetCPU;
@@ -629,6 +629,8 @@ begin
   end;
 
   success:=true;
+
+  aResultMessage:='No cross-compilers found. Nothing to do !';
 
   ConfigText:=TStringList.Create;
   try
@@ -751,6 +753,7 @@ begin
               end;
               {$endif}
               CommandOutputScreen.ClearAll;
+              aResultMessage:='Finished building of cross-compilers.';
               AddMessage(upBuildAllCrossCompilersFound+aCPU + '-' + aOS);
               AddMessage(upBuildAllCrossCompilersUpdate);
               radgrpCPU.ItemIndex:=radgrpCPU.Items.IndexOf(aRadiogroup_CPU);
@@ -760,7 +763,11 @@ begin
                 then memoSummary.Lines.Append('Cross-compiler update ok.')
                 else memoSummary.Lines.Append('Failure during update of cross-compiler !!');
               memoSummary.Lines.Append('');
-              if (NOT success) then break;
+              if (NOT success) then
+              begin
+                aResultMessage:='Building of cross-compilers ended with some error(s).';
+                break;
+              end;
             end;
           end;
         end;
@@ -842,6 +849,11 @@ begin
 
   result:=success;
 
+  if (Sender<>nil) then
+  begin
+    AddMessage('');
+    AddMessage(aResultMessage,True);
+  end;
 end;
 
 procedure TForm1.InitFPCupManager;

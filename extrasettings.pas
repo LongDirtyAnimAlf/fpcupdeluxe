@@ -48,6 +48,8 @@ type
     btnRemLazPatch: TButton;
     btnSelectCompiler: TButton;
     btnListCustomOptions: TButton;
+    LabelCPU: TLabel;
+    LabelOS: TLabel;
     MiscellaneousCheckListBox: TCheckListBox;
     ComboBoxOS: TComboBox;
     ComboBoxCPU: TComboBox;

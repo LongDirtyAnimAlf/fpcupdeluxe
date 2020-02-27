@@ -200,27 +200,29 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 96
       Height = 23
-      Top = 8
+      Top = 27
       Width = 104
       BorderSpacing.Left = 8
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
+      Style = csDropDownList
       TabOrder = 1
-      Text = 'OS'
     end
     object ComboBoxCPU: TComboBox
       AnchorSideLeft.Control = GroupBox4
-      AnchorSideTop.Control = GroupBox4
+      AnchorSideTop.Control = LabelCPU
+      AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 8
+      Top = 27
       Width = 84
       BorderSpacing.Left = 4
       BorderSpacing.Top = 8
       ItemHeight = 15
       OnChange = ComboBoxCPUOSChange
+      ParentShowHint = False
+      Style = csDropDownList
       TabOrder = 0
-      Text = 'CPU'
     end
     object RadioGroup3: TRadioGroup
       AnchorSideLeft.Control = GroupBox4
@@ -230,7 +232,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 58
-      Top = 38
+      Top = 57
       Width = 302
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
@@ -266,7 +268,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 100
+      Top = 119
       Width = 210
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -287,7 +289,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 129
+      Top = 148
       Width = 210
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -308,7 +310,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 226
       Height = 25
-      Top = 100
+      Top = 119
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -328,7 +330,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 226
       Height = 25
-      Top = 129
+      Top = 148
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -348,7 +350,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 183
+      Top = 202
       Width = 294
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -365,7 +367,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 164
+      Top = 183
       Width = 219
       BorderSpacing.Left = 4
       BorderSpacing.Top = 12
@@ -378,12 +380,12 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 216
       Height = 25
-      Top = 8
+      Top = 27
       Width = 90
       Anchors = [akTop, akLeft, akRight]
       AutoSize = True
       BorderSpacing.Right = 6
-      Caption = 'List'
+      Caption = 'List All'
       OnClick = btnListCustomOptionsClick
       TabOrder = 2
     end
@@ -393,7 +395,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 212
+      Top = 231
       Width = 213
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -408,7 +410,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 23
-      Top = 231
+      Top = 250
       Width = 294
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -427,7 +429,7 @@ object Form2: TForm2
       Left = 4
       Height = 23
       Hint = 'Double click to clear'
-      Top = 279
+      Top = 298
       Width = 210
       Anchors = [akTop, akLeft, akRight]
       BorderSpacing.Left = 4
@@ -448,7 +450,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 226
       Height = 25
-      Top = 279
+      Top = 298
       Width = 80
       Anchors = [akTop, akRight]
       AutoSize = True
@@ -466,7 +468,7 @@ object Form2: TForm2
       AnchorSideTop.Side = asrBottom
       Left = 4
       Height = 15
-      Top = 260
+      Top = 279
       Width = 97
       BorderSpacing.Left = 4
       BorderSpacing.Top = 6
@@ -481,7 +483,7 @@ object Form2: TForm2
       AnchorSideRight.Side = asrBottom
       Left = 4
       Height = 59
-      Top = 310
+      Top = 329
       Width = 294
       Anchors = [akTop, akLeft, akRight]
       AutoFill = True
@@ -500,6 +502,28 @@ object Form2: TForm2
       Enabled = False
       OnSelectionChanged = RadioGroupARMArchSelectionChanged
       TabOrder = 12
+    end
+    object LabelCPU: TLabel
+      AnchorSideLeft.Control = GroupBox4
+      AnchorSideTop.Control = GroupBox4
+      Left = 4
+      Height = 15
+      Top = 4
+      Width = 57
+      BorderSpacing.Left = 4
+      BorderSpacing.Top = 4
+      Caption = 'Select CPU'
+      ParentColor = False
+    end
+    object LabelOS: TLabel
+      AnchorSideLeft.Control = ComboBoxOS
+      AnchorSideTop.Control = LabelCPU
+      Left = 96
+      Height = 15
+      Top = 4
+      Width = 49
+      Caption = 'Select OS'
+      ParentColor = False
     end
   end
   object GroupBoxFPCLazBranchRevision: TGroupBox
