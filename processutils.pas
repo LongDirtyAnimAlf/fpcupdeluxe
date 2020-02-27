@@ -532,51 +532,7 @@ var
   OldPath: string;
   PE:TProcessEx;
   s:string;
-
-  Function GetNextWord : TProcessString;
-
-  Const
-    WhiteSpace = [' ',#9,#10,#13];
-    Literals = ['"',''''];
-
-  Var
-    Wstart,wend : Integer;
-    InLiteral : Boolean;
-    LastLiteral : TProcessChar;
-
-  begin
-    WStart:=1;
-    While (WStart<=Length(Commandline)) and charinset(Commandline[WStart],WhiteSpace) do
-      Inc(WStart);
-    WEnd:=WStart;
-    InLiteral:=False;
-    LastLiteral:=#0;
-    While (Wend<=Length(Commandline)) and (Not charinset(Commandline[Wend],WhiteSpace) or InLiteral) do
-      begin
-      if charinset(Commandline[Wend],Literals) then
-        If InLiteral then
-          InLiteral:=Not (Commandline[Wend]=LastLiteral)
-        else
-          begin
-          InLiteral:=True;
-          LastLiteral:=Commandline[Wend];
-          end;
-       inc(wend);
-       end;
-
-     Result:=Copy(Commandline,WStart,WEnd-WStart);
-
-     if  (Length(Result) > 0)
-     and (Result[1] = Result[Length(Result)]) // if 1st char = last char and..
-     and (Result[1] in Literals) then // it's one of the literals, then
-       Result:=Copy(Result, 2, Length(Result) - 2); //delete the 2 (but not others in it)
-
-     While (WEnd<=Length(Commandline)) and (Commandline[Wend] in WhiteSpace) do
-       inc(Wend);
-     Delete(Commandline,1,WEnd-1);
-
-  end;
-
+  i:integer;
 begin
   PE:=TProcessEx.Create(nil);
   try
@@ -592,16 +548,16 @@ begin
       else
         PE.Environment.SetVar(PATHVARNAME, PrependPath);
     end;
-    s:=GetNextWord;
-    PE.Executable:=s;
-    s:=GetNextWord;
-    while s<>'' do
-      begin
-      if s<>'emptystring'
-         then PE.Parameters.Add(s)
-         else PE.Parameters.Add('""');
-      s:=GetNextWord;
-      end;
+
+    CommandToList(Commandline,PE.Parameters);
+    If PE.Parameters.Count>0 then
+    begin
+      PE.Executable:=PE.Parameters[0];
+      PE.Parameters.Delete(0);
+      i:=PE.Parameters.IndexOf('emptystring');
+      if (i<>-1) then PE.Parameters.Strings[i]:='""';
+    end;
+
     PE.ShowWindow := swoHIDE;
     if Verbose then
       PE.OnOutput:=@DumpConsole;

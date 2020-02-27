@@ -2947,6 +2947,25 @@ begin
 
     OperationSucceeded:=false;
 
+    if NOT FileExists(FCompiler) then
+    begin
+      // can we use a FPC bootstrapper that is already on the system (somewhere in the path) ?
+      if NativeFPCBootstrapCompiler then
+      begin
+        s:=GetCompilerName(GetTargetCPU);
+        s:=Which(s);
+        if NOT FileExists(s) then
+        begin
+          s:='fpc'+GetExeExt;
+          s:=Which(s);
+        end;
+        if FileExists(s) then
+        begin
+          FCompiler:=s;
+        end;
+      end;
+    end;
+
     // do we already have a suitable compiler somewhere ?
     if FileExists(FCompiler) then
     begin

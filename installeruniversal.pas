@@ -821,7 +821,7 @@ const
   NAMEMAGIC='Name';
 var
   i:integer;
-  s:string;
+  s,s2:string;
   PackagePath:string;
   ModuleName:string;
   Workingdir:string;
@@ -875,8 +875,8 @@ begin
         with TIniFile.Create(s) do
         try
           s:=ExcludeTrailingPathDelimiter(WorkingDir);
-          s:=ReadString('NewProject','PathToGradle',s);
-          WriteString('NewProject','PathToGradle',s);
+          s2:=ReadString('NewProject','PathToGradle','');
+          if (s<>s2) then WriteString('NewProject','PathToGradle',s);
         finally
           Free;
         end;
@@ -888,8 +888,8 @@ begin
         with TIniFile.Create(s) do
         try
           s:=ConcatPaths([WorkingDir,'bin']);
-          s:=ReadString('NewProject','PathToAntBin',s);
-          WriteString('NewProject','PathToAntBin',s);
+          s2:=ReadString('NewProject','PathToAntBin','');
+          if (s<>s2) then WriteString('NewProject','PathToAntBin',s);
         finally
           Free;
         end;
@@ -1014,42 +1014,41 @@ begin
           with TIniFile.Create(s) do
           try
             s:='PathToSmartDesigner';
-            RealDirective:=ReadString('NewProject',s,ConcatPaths([WorkingDir,'android_wizard','smartdesigner']));
-            WriteString('NewProject',s,RealDirective);
+            s2:=ReadString('NewProject',s,ConcatPaths([WorkingDir,'android_wizard','smartdesigner']));
+            WriteString('NewProject',s,s2);
 
             s:='PathToJavaTemplates';
-            RealDirective:=ReadString('NewProject',s,ConcatPaths([WorkingDir,'android_wizard','smartdesigner','java']));
-            WriteString('NewProject',s,RealDirective);
+            s2:=ReadString('NewProject',s,ConcatPaths([WorkingDir,'android_wizard','smartdesigner','java']));
+            WriteString('NewProject',s,s2);
 
             s:='PathToJavaJDK';
-            RealDirective:=ReadString('NewProject',s,SafeExpandFileName(ExtractFilePath(GetJavac)+'..'));
-            if Length(RealDirective)>0 then WriteString('NewProject',s,RealDirective);
+            s2:=ReadString('NewProject',s,SafeExpandFileName(ExtractFilePath(GetJavac)+'..'));
+            if Length(s2)>0 then WriteString('NewProject',s,s2);
 
             s:='PathToWorkspace';
-            RealDirective:=ReadString('NewProject',s,ConcatPaths([FBaseDirectory,'projects','LAMWProjects']));
-            ForceDirectoriesSafe(RealDirective);
-            WriteString('NewProject',s,RealDirective);
+            s2:=ReadString('NewProject',s,ConcatPaths([FBaseDirectory,'projects','LAMWProjects']));
+            ForceDirectoriesSafe(s2);
+            WriteString('NewProject',s,s2);
 
             s:='InstructionSet';
-            RealDirective:=ReadString('NewProject',s,'2');
-            WriteString('NewProject',s,RealDirective);
+            s2:=ReadString('NewProject',s,'2');
+            WriteString('NewProject',s,s2);
 
             s:='PathToAndroidSDK';
-            RealDirective:='';
+            s2:='';
             {$ifdef Linux}
-            RealDirective:=ReadString('NewProject',s,'/usr/lib/android-sdk');
+            s2:=ReadString('NewProject',s,'/usr/lib/android-sdk');
             {$endif}
             {$ifdef MSWindows}
-            RealDirective:=ReadString('NewProject',s,ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']));
+            s2:=ReadString('NewProject',s,ConcatPaths([SafeGetApplicationConfigPath,'Android','Sdk']));
             {$endif}
-            if DirectoryExists(RealDirective) then WriteString('NewProject',s,RealDirective);
+            if DirectoryExists(s2) then WriteString('NewProject',s,s2);
 
           finally
             Free;
           end;
         end;
       end;
-
 
       {$endif}
     end;
@@ -1207,13 +1206,24 @@ begin
     Workingdir:=GetValueFromKey('Workingdir'+IntToStr(i),sl);
     Workingdir:=FixPath(Workingdir);
     if Workingdir='' then Workingdir:=BaseWorkingdir;
-    if FVerbose then WritelnLog(localinfotext+'Running ExecuteCommand[InDir] for '+exec,true);
+
     try
+      s:='';
       result:=false;
-      if Length(WorkingDir)>0 then
-        j:=ExecuteCommandInDir(exec,Workingdir,s,FPath,FVerbose)
-      else
-        j:=ExecuteCommand(exec,s,FVerbose);
+      j:=-1;
+
+      Processor.Parameters.Clear;
+      CommandToList(exec,Processor.Parameters);
+      If Processor.Parameters.Count>0 then
+      begin
+        Processor.Executable:=Processor.Parameters[0];
+        Processor.Parameters.Delete(0);
+      end;
+      Processor.CurrentDirectory:=Workingdir;
+      Processor.Execute;
+      s:=Processor.OutputString;
+      j:=Processor.ExitStatus;
+
       if j=0 then
       begin
         result:=true;
@@ -1239,8 +1249,7 @@ begin
     except
       on E: Exception do
       begin
-        WritelnLog(etError, localinfotext+'Exception trying to execute '+exec+LineEnding+
-          'Details: '+E.Message,true);
+        WritelnLog(etError, localinfotext+'Exception trying to execute '+exec+LineEnding+'Details: '+E.Message,true);
       end;
     end;
   end;
