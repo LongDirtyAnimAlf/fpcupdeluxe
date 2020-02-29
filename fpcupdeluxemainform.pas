@@ -2705,9 +2705,10 @@ begin
                 DownloadURL:=DownloadURL+'.zip';
                 TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
                 SysUtils.DeleteFile(TargetFile);
-                AddMessage('Please wait: Going to download the zip binary-tools from '+DownloadURL);
+                AddMessage('Trying '+DownloadURL);
                 success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                 ZipFile:=success;
+
 
                 {$ifndef Darwin}
                 // try rar .... very dirty and certainly not elegant ... ;-)
@@ -2717,7 +2718,7 @@ begin
                   SysUtils.DeleteFile(TargetFile);
                   TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
                   SysUtils.DeleteFile(TargetFile);
-                  AddMessage('Please wait: Going to download the rar binary-tools from '+DownloadURL);
+                  AddMessage('Trying '+DownloadURL);
                   success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                 end;
                 {$endif}
@@ -2821,7 +2822,7 @@ begin
                 TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
                 SysUtils.DeleteFile(TargetFile);
                 success:=false;
-                AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+                AddMessage('Trying '+DownloadURL);
                 success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                 ZipFile:=success;
 
@@ -2833,7 +2834,7 @@ begin
                   SysUtils.DeleteFile(TargetFile);
                   TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
                   SysUtils.DeleteFile(TargetFile);
-                  AddMessage('Please wait: Going to download the libraries from '+DownloadURL);
+                  AddMessage('Trying '+DownloadURL);
                   success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                 end;
                 {$endif}
