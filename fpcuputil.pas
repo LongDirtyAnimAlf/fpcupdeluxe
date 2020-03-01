@@ -2203,8 +2203,12 @@ var
 begin
   { Fix separator }
   result:=s;
+  {$IFDEF MSWINDOWS}
+  for i:=2 to length(s) do
+  {$ELSE}
   for i:=1 to length(s) do
-   if s[i] in ['/','\'] then
+  {$ENDIF}
+   if (s[i] in ['/','\']){$IFDEF MSWINDOWS} AND (s[i-1]<>' '){$ENDIF} then
     result[i]:=DirectorySeparator;
 end;
 

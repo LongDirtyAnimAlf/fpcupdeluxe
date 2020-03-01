@@ -437,6 +437,19 @@ begin
           macro:='rm -Rf';
           {$ENDIF}
         end
+        else if macro='TERMINAL' then
+        begin
+          doublequote:=false;
+          {$ifdef  MSWINDOWS}
+          macro:=GetEnvironmentVariable('COMSPEC');
+          if NOT FileExists(macro) then macro:='c:\windows\system32\cmd.exe';
+          if NOT FileExists(macro) then macro:='' else macro:=macro+' /c';
+          {$endif  MSWINDOWS}
+          {$ifdef UNIX}
+          macro := '/bin/sh';
+          if NOT FileExists(macro) then macro:='' else macro:=macro+' -c';
+          {$endif UNIX}
+        end
         else if macro='REMOVEINSTALLDIRECTORY' then
         begin
           doublequote:=false;
@@ -467,7 +480,7 @@ begin
     len:=1;
     {$ENDIF}
     for i:=len to length(s) do
-      if ((s[i]='/') or (s[i]='\')){$IFDEF MSWINDOWS} AND (s[i-1]<>' '){$ENDIF} then
+      if (s[i] in ['/','\']){$IFDEF MSWINDOWS} AND (s[i-1]<>' '){$ENDIF} then
         s[i]:=DirectorySeparator;
   end;
   result:=s;
@@ -1219,6 +1232,7 @@ begin
         Processor.Executable:=Processor.Parameters[0];
         Processor.Parameters.Delete(0);
       end;
+
       Processor.CurrentDirectory:=Workingdir;
       Processor.Execute;
       s:=Processor.OutputString;
@@ -1859,11 +1873,13 @@ begin
 
           if ModuleName='lamw-gradle' then
           begin
+            aName:=infotext;
             UnInstallModule(ModuleName);
+            infotext:=aName;
           end;
 
           //Delete existing files from install directory
-          DeleteDirectory(FSourceDirectory,True);
+          if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
 
           // Extract, overwrite
           case UpperCase(sysutils.ExtractFileExt(aFile)) of
@@ -1934,7 +1950,7 @@ begin
             FilesList:=FindAllDirectories(FSourceDirectory,False);
             if FilesList.Count=1 then aName:=FilesList[0];
             FreeAndNil(FilesList);
-            if Length(aName)>0 then
+            if (Length(aName)>0) AND (DirectoryExists(aName)) then
             begin
               infoln(infotext+'Moving files due to extra path. Please wait.',etInfo);
               FilesList:=FindAllFiles(aName, '', True);
@@ -1946,7 +1962,7 @@ begin
                 if NOT DirectoryExists(ExtractFileDir(aFile)) then ForceDirectoriesSafe(ExtractFileDir(aFile));
                 SysUtils.RenameFile(FilesList[i],aFile);
               end;
-              DeleteDirectory(aName,False);
+              if (NOT CheckDirectory(aName)) then DeleteDirectory(aName,False);
               FreeAndNil(FilesList);
             end;
           end;
@@ -2035,8 +2051,16 @@ var
 {$endif}
 begin
   result:=inherited;
+
+  if not DirectoryExists(FSourceDirectory) then
+  begin
+    infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
+    exit(true);
+  end;
+
   result:=InitModule;
   if not result then exit;
+
   {$ifndef FPCONLY}
   idx:=UniModuleList.IndexOf(ModuleName);
   if idx>=0 then
