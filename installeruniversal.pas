@@ -1873,12 +1873,19 @@ begin
 
           if ModuleName='lamw-gradle' then
           begin
+            //store info
             aName:=infotext;
+            //try to stop gradle deamons
             UnInstallModule(ModuleName);
+            //wait a bit after stopping daemons
+            sleep(2000);
+            //restore info
             infotext:=aName;
           end;
 
           //Delete existing files from install directory
+          if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
+          //Sometimes, we need to do this twice ... :-(
           if DirectoryExists(FSourceDirectory) then DeleteDirectoryEx(FSourceDirectory);
 
           // Extract, overwrite
