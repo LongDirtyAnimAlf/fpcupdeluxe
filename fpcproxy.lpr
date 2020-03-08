@@ -13,7 +13,6 @@ end;
 
 var
   i: integer;
-  //AProcess: TProcess;
   aPath:string;
   ppccommandline : array of ansistring;
   errorvalue     : Longint;
@@ -26,19 +25,6 @@ begin
   fpcbin:=aPath+'fpc';
   {$ENDIF}
   
-  {
-  AProcess:=TProcess.Create(nil);
-  AProcess.Options := [poWaitOnExit];
-  APRocess.Executable:=fpcbin;
-
-  APRocess.Parameters.Append('-n');
-  APRocess.Parameters.Append('@'+aPath+'fpc.cfg');
-
-  for i:=1 to ParamCount() do APRocess.Parameters.Append(ParamStr(i));
-  AProcess.Execute;
-  AProcess.Free;
-  }
-
   setlength(ppccommandline,paramcount+2);
   ppccommandline[0]:='-n';
   ppccommandline[1]:='@'+aPath+'fpc.cfg';

@@ -23,6 +23,8 @@ unit installerCore;
 
 {$mode objfpc}{$H+}
 
+{$define USEFPCPROXY}
+
 interface
 
 uses
@@ -38,7 +40,7 @@ const
   FPCTRUNKBOOTVERSION   = '3.0.4';
   LAZARUSTRUNKVERSION   = '2.1.0';
 
-  DEFAULTFREEBSDVERSION = '11';
+  DEFAULTFREEBSDVERSION = 11;
 
   LAZBUILDNAME          = 'lazbuild';
 
@@ -59,6 +61,12 @@ const
   FPCPKGCOMPILERTEMPLATE= 'default'; // fppkg default compiler template
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
+
+  {$ifdef USEFPCPROXY}
+  FPCPROXYNAME          = 'proxy';
+  {$else}
+  FPCPROXYNAME          = '';
+  {$endif USEFPCPROXY}
 
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
@@ -85,10 +93,6 @@ const
   //FPC prebuilt binaries of the GNU Binutils
   PREBUILTBINUTILSURL      = BINUTILSURL + '/binaries/i386-win32';
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
-  PROXYEXTENSION           = 'proxy.exe';
-  //PROXYEXTENSION           = '.bat';
-  {$ELSE}
-  PROXYEXTENSION           = '.sh';
   {$ENDIF}
 
   LAZARUSBINARIES = FPCBASESVNURL + '/lazarus/binaries';
@@ -1287,7 +1291,7 @@ var
   i: integer;
   {$ENDIF MSWINDOWS}
   OperationSucceeded: boolean;
-  s1,s2: string;
+  s1,s2,s3: string;
 begin
   s2:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBinUtils): ';
 
@@ -1359,6 +1363,33 @@ begin
     except
       // ignore errors, this is only an extra check
     end;
+
+    {$IFDEF UNIX}
+    // Check for proper ld executable
+    if OperationSucceeded then
+    try
+      s3:=Which('ld');
+      ExecuteCommand(s3+ ' -v', s1, False);
+      if AnsiPos('GNU ld', s1) = 0 then
+      begin
+        ExecuteCommand(s3 + ' -v', s1, True);
+        infoln(s2+'Found ld binary here: '+s3+'. But it is not GNU ld. Expect errors',etWarning);
+        s3:=Which('ld.bfd');
+        ExecuteCommand(s3+ ' -v', s1, False);
+        if AnsiPos('GNU ld', s1) = 1 then
+        begin
+          infoln(s2+'Found GNU ld.bfd binary here: '+s3+'. Could be used through symlinking.',etWarning);
+        end;
+        OperationSucceeded := true;
+      end
+      else
+      begin
+        infoln(s2+'Found GNU ld binary here: '+s1+'.',etInfo);
+      end;
+    except
+      // ignore errors, this is only an extra check
+    end;
+    {$ENDIF UNIX}
   end;
 
   Result := OperationSucceeded;
@@ -2789,7 +2820,7 @@ begin
   else
     begin
       result := ChangeFileExt(aCompiler, '');
-      result := result + PROXYEXTENSION;
+      result := result + FPCPROXYNAME+GetExeExt;
       // to be absolutely safe we do not overwrite the compiler somewhere else.
       if result=aCompiler then result:='';
     end;

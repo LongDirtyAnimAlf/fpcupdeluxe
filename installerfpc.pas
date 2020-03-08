@@ -33,7 +33,7 @@ Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 {.$DEFINE crosssimple}
 {$IFDEF WINDOWS}
 {.$DEFINE buildnative}
-{.$DEFINE USEWINDOWSPROXY}
+{$DEFINE USEWINDOWSPROXY}
 {$ENDIF WINDOWS}
 
 interface
@@ -1988,17 +1988,13 @@ begin
 end;
 
 function TFPCInstaller.CreateFPCScript(ReplaceExistingProxy:boolean): boolean;
-{$IFDEF WINDOWS}
 const
-  FPCPROXY='fpcproxy';
-{$ENDIF}
+  FPCPROXY='fpc'+FPCPROXYNAME;
 var
   FPCScript:string;
   FPCCompiler:String;
   TxtFile:Text;
-  {$IFDEF WINDOWS}
   FPCScriptSource:string;
-  {$ENDIF}
 begin
   // If needed, create a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
   // If this fails, Lazarus compilation will fail...
@@ -2022,9 +2018,7 @@ begin
 
   if (NOT FileExists(FPCScript)) then
   begin
-    {$IFDEF WINDOWS}
-    {$IFDEF USEWINDOWSPROXY}
-    if ExtractFileExt(FPCScript)='.exe' then
+    if Length(FPCPROXYNAME)>0 then
     begin
       //Compile and install FPC proxy
       FPCScriptSource:=IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+FPCPROXY+'.lpr';
@@ -2044,50 +2038,17 @@ begin
           SysUtils.DeleteFile(FPCScriptSource);
         end;
       end;
-    end
-    else
-    if ExtractFileExt(FPCScript)='.bat' then
-    begin
-      //Install FPC batch proxy
-      AssignFile(TxtFile,FPCScript);
-      try
-        Rewrite(TxtFile);
-        writeln(TxtFile,FPCCompiler,' -n @',
-          IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+'%*');
-      finally
-        CloseFile(TxtFile);
-      end;
-    end else exit(true);
-    {$ELSE}
-    exit(true);
-    {$ENDIF USEWINDOWSPROXY}
-    {$ELSE}
-    AssignFile(TxtFile,FPCScript);
-    try
-      Rewrite(TxtFile);
-      writeln(TxtFile,'#!/bin/sh');
-      writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
-      writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
-      writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
-      writeln(TxtFile,FPCCompiler,' -n @',
-        IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
-        '"$@"');
-    finally
-      CloseFile(TxtFile);
-    end;
-    if FileExists(FPCScript) then FPChmod(FPCScript,&755);
-    {$ENDIF}
+      {$IFDEF UNIX}
+      if FileExists(FPCScript) then FPChmod(FPCScript,&755);
+      {$ENDIF}
+      Result:=FileExists(FPCScript);
 
-    Result:=FileExists(FPCScript);
+      if Result then
+        infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo)
+      else
+        infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
 
-    if Result then
-    begin
-      infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
-    end
-    else
-    begin
-      infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,{$IFDEF WINDOWS}etWarning{$ELSE}etError{$ENDIF});
-    end;
+    end else result:=True;
   end;
 
   if Result then
@@ -2096,11 +2057,6 @@ begin
     // Set fileage the same as the FPC binary itself
     if FileExists(FPCScript) then Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
   end;
-
-  {$IFDEF WINDOWS}
-  // Do not fail on Windows
-  Result:=True;
-  {$ENDIF}
 end;
 
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;

@@ -269,6 +269,8 @@ var
 begin
   MessageTrigger:=false;
 
+  DisEnable(nil,False);
+
   {$ifdef EnableLanguages}
   sLanguage:='en';
   {$endif}
@@ -3903,6 +3905,7 @@ begin
     end;
   end;
   {$endif}
+  DisEnable(nil,True);
   if Form2.GetUpdates then Application.QueueAsyncCall(@CheckForUpdates,0);
 end;
 
