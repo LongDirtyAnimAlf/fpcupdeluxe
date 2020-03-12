@@ -21,7 +21,7 @@
         <Resource_2 FileName="chimp.png" Type="RCDATA" ResourceName="SPLASH_LOGO"/>
         <Resource_3 FileName="languages\fpcupdeluxe.en.po" Type="RCDATA" ResourceName="FPCUPDELUXE.EN"/>
         <Resource_4 FileName="languages\fpcupdeluxe.zh.po" Type="RCDATA" ResourceName="FPCUPDELUXE.ZH"/>
-        <Resource_5 FileName="fpcproxy.lpr" Type="RCDATA" ResourceName="FPCPROXY"/>
+        <Resource_5 FileName="patchfpc\fpcproxy.patch" Type="RCDATA" ResourceName="FPCNEWPROXY"/>
       </Resources>
     </General>
     <i18n>

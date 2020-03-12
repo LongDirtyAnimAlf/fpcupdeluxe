@@ -62,12 +62,6 @@ const
 
   FPCCONFIGFILENAME     = 'fpc.cfg';
 
-  {$ifdef USEFPCPROXY}
-  FPCPROXYNAME          = 'proxy';
-  {$else}
-  FPCPROXYNAME          = '';
-  {$endif USEFPCPROXY}
-
   SVNBASEHTTP           = 'https://svn.';
   SVNBASESVN            = 'svn://svn.';
   FTPBASEHTTP           = 'https://ftp.';
@@ -513,7 +507,6 @@ type
     function CleanModule(ModuleName: string): boolean; virtual;
     // Config module
     function ConfigModule(ModuleName: string): boolean; virtual;
-    function GetFPCCompilerProxy(aCompiler:string): string;
     // Constructs compiler path from directory and architecture
     // Corrects for use of our fpc.sh launcher on *nix
     // Does not verify compiler actually exists.
@@ -1364,7 +1357,7 @@ begin
       // ignore errors, this is only an extra check
     end;
 
-    {$IFDEF UNIX}
+    {$IF (defined(UNIX)) and (not defined(Darwin))}
     // Check for proper ld executable
     if OperationSucceeded then
     try
@@ -2813,29 +2806,9 @@ begin
   end;
 end;
 
-function TInstaller.GetFPCCompilerProxy(aCompiler:string): string;
-begin
-  if Length(aCompiler)=0 then
-    result:=''
-  else
-    begin
-      result := ChangeFileExt(aCompiler, '');
-      result := result + FPCPROXYNAME+GetExeExt;
-      // to be absolutely safe we do not overwrite the compiler somewhere else.
-      if result=aCompiler then result:='';
-    end;
-end;
-
 function TInstaller.GetCompilerInDir(Dir: string): string;
-var
-  aCompiler,aProxy:string;
 begin
-  aCompiler:=ConcatPaths([Dir,'bin',GetFPCTarget(true)])+PathDelim+'fpc'+GetExeExt;
-  aProxy:=GetFPCCompilerProxy(aCompiler);
-  if FileExists(aProxy) then
-    result:=aProxy
-  else
-    result:=aCompiler;
+  result:=ConcatPaths([Dir,'bin',GetFPCTarget(true)])+PathDelim+'fpc'+GetExeExt;
 end;
 
 procedure TInstaller.SetTarget(aCPU,aOS,aSubArch:string);
@@ -2980,6 +2953,7 @@ end;
 function TInstaller.PatchModule(ModuleName: string): boolean;
 const
   STRIPMAGIC='fpcupstrip';
+  FPCPROXYPATCH='fpcproxy.patch';
 var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
@@ -3166,6 +3140,13 @@ begin
     finally
       PatchList.Free;
     end;
+  end;
+
+  if PatchFPC then
+  begin
+    PatchFilePath:=IncludeTrailingPathDelimiter(PatchDirectory)+FPCPROXYPATCH;
+    if FileExists(PatchFilePath) then SysUtils.DeleteFile(PatchFilePath);
+    if NOT FileExists(PatchFilePath) then SaveInisFromResource(PatchFilePath,'FPCNEWPROXY');
   end;
 
   if (DirectoryExists(PatchDirectory)) then
