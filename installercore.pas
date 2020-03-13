@@ -2953,7 +2953,7 @@ end;
 function TInstaller.PatchModule(ModuleName: string): boolean;
 const
   STRIPMAGIC='fpcupstrip';
-  FPCPROXYPATCH='fpcproxy.patch';
+  //FPCPROXYPATCH='fpcpatch_fpcproxy.patch';
 var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
@@ -2961,7 +2961,7 @@ var
   s: string = '';
   ReturnCode,i,j: integer;
   LocalSourcePatches:string;
-  PatchFPC,PatchUniversal:boolean;
+  PatchFPC,PatchUniversal,PatchAccepted:boolean;
   {$ifndef FPCONLY}
   PatchLaz:boolean;
   {$endif}
@@ -2996,27 +2996,27 @@ begin
         for i:=0 to (PatchList.Count-1) do
         begin
           PatchFilePath:=PatchList.Strings[i];
-          j:=0;
+          PatchAccepted:=false;
           if PatchFPC then
           begin
-            if (j=0) then j:=Pos('_FPCPATCH',PatchFilePath);
-            if (j=0) then j:=Pos('fpcpatch_',PatchFilePath);
+            PatchAccepted:=((Pos('_FPCPATCH',PatchFilePath)>0) OR PatchAccepted);
+            PatchAccepted:=((Pos('fpcpatch_',PatchFilePath)>0) OR PatchAccepted);
           end
           else
           {$ifndef FPCONLY}
           if PatchLaz then
           begin
-            if (j=0) then j:=Pos('_LAZPATCH',PatchFilePath);
-            if (j=0) then j:=Pos('lazpatch_',PatchFilePath);
+            PatchAccepted:=((Pos('_LAZPATCH',PatchFilePath)>0) OR PatchAccepted);
+            PatchAccepted:=((Pos('lazpatch_',PatchFilePath)>0) OR PatchAccepted);
           end
           else
           {$endif}
           if PatchUniversal then
           begin
-            if (j=0) then j:=Pos('_FPCUPPATCH',PatchFilePath);
-            if (j=0) then j:=Pos('fpcuppatch_',PatchFilePath);
+            PatchAccepted:=((Pos('_FPCUPPATCH',PatchFilePath)>0) OR PatchAccepted);
+            PatchAccepted:=((Pos('fpcuppatch_',PatchFilePath)>0) OR PatchAccepted);
           end;
-          if (j<>0) then DeleteFile(PatchFilePath);
+          if (PatchAccepted) then DeleteFile(PatchFilePath);
         end;
       end;
     finally
@@ -3046,21 +3046,21 @@ begin
 
         PatchFilePath:=PatchList[i];
 
-        j:=0;
-        if PatchFPC then j:=Pos('fpcpatch',PatchFilePath);
+        PatchAccepted:=false;
+        if PatchFPC then PatchAccepted:=(Pos('fpcpatch',PatchFilePath)>0);
         {$ifndef FPCONLY}
-        if PatchLaz then j:=Pos('lazpatch',PatchFilePath);
+        if PatchLaz then PatchAccepted:=(Pos('lazpatch',PatchFilePath)>0);
         {$endif}
         if PatchUniversal then
         begin
-          j:=Pos('fpcuppatch',PatchFilePath);
-          if j<>0 then
+          PatchAccepted:=(Pos('fpcuppatch',PatchFilePath)>0);
+          if PatchAccepted then
           begin
-            j:=Pos(LowerCase(ModuleName),LowerCase(GetFileNameFromURL(PatchFilePath)));
+            PatchAccepted:=(Pos(LowerCase(ModuleName),LowerCase(GetFileNameFromURL(PatchFilePath)))>0);
           end;
         end;
 
-        if j=0 then continue;
+        if (NOT PatchAccepted) then continue;
 
         infoln(infotext+'Using '+ExtractFileName(PatchFilePath)+ 'for '+ModuleName,etDebug);
 
@@ -3084,24 +3084,24 @@ begin
 
           {$if defined(Darwin) and defined(LCLQT5)}
           //disable big hack for now
-          if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then j:=0;
+          if Pos('lazpatch_darwin_qt5hack',PatchFilePath)>0 then PatchAccepted:=False;
           {$else}
-          if Pos('darwin_qt5',PatchFilePath)>0 then j:=0;
+          if Pos('darwin_qt5',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
           {$ifndef MSWindows}
           //only patch the Haiku build process on Windows
-          if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then j:=0;
+          if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
           {$ifndef Haiku}
           //only patch the Haiku FPU exception mask on Haiku itself
-          if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then j:=0;
+          if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
           {$ifndef Darwin}
           //only patch the packages Makefile on Darwin itself
-          if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then j:=0;
+          if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
           {$ifndef FPCONLY}
@@ -3109,9 +3109,9 @@ begin
           if Pos('lazpatch_musllibc',PatchFilePath)>0 then
           begin
             {$ifdef Linux}
-            if (NOT FMUSL) then j:=0;
+            if (NOT FMUSL) then PatchAccepted:=False;
             {$else}
-            j:=0;
+            PatchAccepted:=False;
             {$endif}
           end;
           {$endif}
@@ -3121,11 +3121,11 @@ begin
           // Should be removed in future fpcup versions !!
           if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
           begin
-            if GetFullVersion<>PatchVersion then j:=0;
+            if GetFullVersion<>PatchVersion then PatchAccepted:=False;
           end;
         end;
 
-        if (j>0) then
+        if (PatchAccepted) then
         begin
           infoln(infotext+'Online '+ExtractFileName(PatchFilePath)+ ' for '+ModuleName+' wil be applied !',etInfo);
           ForceDirectoriesSafe(PatchDirectory);
@@ -3142,11 +3142,73 @@ begin
     end;
   end;
 
-  if PatchFPC then
+  // we will hack into fpc itself for better isolation
+  if FOnlinePatching then
   begin
-    PatchFilePath:=IncludeTrailingPathDelimiter(PatchDirectory)+FPCPROXYPATCH;
-    if FileExists(PatchFilePath) then SysUtils.DeleteFile(PatchFilePath);
-    if NOT FileExists(PatchFilePath) then SaveInisFromResource(PatchFilePath,'FPCNEWPROXY');
+    if PatchFPC then
+    begin
+      PatchList:=TStringList.Create;
+      try
+        PatchList.Clear;
+        PatchFilePath:=ConcatPaths([FSourceDirectory,'compiler','utils'])+DirectorySeparator+'fpc.pp';
+        PatchList.LoadFromFile(PatchFilePath);
+
+        // are we able to patch
+        PatchAccepted:=False;
+        for i:=0 to (PatchList.Count-1) do
+        begin
+          s:=PatchList.Strings[i];
+          if (Pos('fpcupdeluxe',s)>0) then break; // we were here already ... ;-)
+          if (Pos('call ppcXXX',s)>0) then PatchAccepted:=True;
+          if PatchAccepted then
+          begin
+            // store correct position
+            j:=i;
+            break;
+          end;
+        end;
+
+        if PatchAccepted then
+        begin
+          // do we have an array as ppccommandline
+          PatchAccepted:=False;
+          for i:=0 to (PatchList.Count-1) do
+          begin
+            s:=PatchList.Strings[i];
+            if (Pos('SetLength(ppccommandline',s)>0) then PatchAccepted:=True;
+            if PatchAccepted then break;
+          end;
+
+          if PatchAccepted then
+          begin
+            s:='ppccommandline[ppccommandlinelen+1]:=''@''+splitpath(paramstr(0))+''fpc.cfg'';';
+            PatchList.Insert(j-1,'     '+s);
+            s:='ppccommandline[ppccommandlinelen]:=''-n'';';
+            PatchList.Insert(j-1,'     '+s);
+            s:='SetLength(ppccommandline,ppccommandlinelen+2);';
+            PatchList.Insert(j-1,'     '+s);
+            s:='// Patched by fpcupdeluxe for better isolation';
+            PatchList.Insert(j-1,'     '+s);
+          end
+          else
+          begin
+            s:='''-n @''+splitpath(paramstr(0))+''fpc.cfg''';
+            PatchList.Insert(j-1,'     '+'ppccommandline:=ppccommandline+'+s+'+'' '';');
+            s:='// Patched by fpcupdeluxe for better isolation';
+            PatchList.Insert(j-1,'     '+s);
+          end;
+          PatchList.SaveToFile(PatchFilePath);
+        end;
+
+      finally
+        PatchList.Free;
+      end;
+      {
+      PatchFilePath:=IncludeTrailingPathDelimiter(PatchDirectory)+FPCPROXYPATCH;
+      if FileExists(PatchFilePath) then SysUtils.DeleteFile(PatchFilePath);
+      if NOT FileExists(PatchFilePath) then SaveInisFromResource(PatchFilePath,'FPCPROXY');
+      }
+    end;
   end;
 
   if (DirectoryExists(PatchDirectory)) then
