@@ -1927,6 +1927,7 @@ begin
   FSVNClient.Repository       := aFileURL;
   FSVNClient.ExportOnly       := true;
   FSVNClient.DesiredRevision  := '';
+  FSVNClient.DesiredBranch    := '';
 
   if (Length(FSVNClient.LocalRepository)>0) then
   begin
