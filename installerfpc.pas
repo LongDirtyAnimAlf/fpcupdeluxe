@@ -133,6 +133,8 @@ type
     function GetFPCVersionFromSource(aSourcePath: string): string;
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
     function GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
+    // Creates fpc proxy script that masks general fpc.cfg
+    function CreateFPCScript:boolean;
     // Downloads bootstrap compiler for relevant platform, reports result.
     function DownloadBootstrapCompiler: boolean;
     // Another way to get the compiler version string
@@ -1162,6 +1164,9 @@ begin
           // delete cross-compiler in source-directory
           SysUtils.DeleteFile(IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+CrossCompilerName);
 
+          {$IFDEF UNIX}
+          result:=CreateFPCScript;
+          {$ENDIF UNIX}
           FCompiler:=GetCompiler;
 
           {$ifdef MSWINDOWS}
@@ -1597,6 +1602,17 @@ begin
 
   if ModuleName=_FPC then
   begin
+    {$IFDEF UNIX}
+    if OperationSucceeded then
+    begin
+      if FVerbose then
+        infoln(infotext+'Creating fpc script:',etInfo)
+      else
+        infoln(infotext+'Creating fpc script:',etDebug);
+      OperationSucceeded:=CreateFPCScript;
+    end;
+    {$ENDIF UNIX}
+
     // Let everyone know of our shiny new compiler:
     if OperationSucceeded then
     begin
@@ -1981,6 +1997,59 @@ begin
     result:=result+'.'+InttoStr(FinalVersion);
 
   end else infoln('Tried to get required bootstrap compiler version from '+FPCMAKEFILENAME+', but no '+FPCMAKEFILENAME+' found',etError);
+end;
+
+function TFPCInstaller.CreateFPCScript: boolean;
+{$IFDEF UNIX}
+var
+  FPCScript:string;
+  TxtFile:Text;
+  FPCCompiler:String;
+{$ENDIF UNIX}
+begin
+  result:=true;
+  {$IFDEF UNIX}
+  localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (CreateFPCScript): ';
+  FPCCompiler := IncludeTrailingPathDelimiter(FBinPath)+'fpc'+GetExeExt;
+
+  // If needed, create fpc.sh, a launcher to fpc that ignores any existing system-wide fpc.cfgs (e.g. /etc/fpc.cfg)
+  // If this fails, Lazarus compilation will fail...
+  FPCScript := IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)) + 'fpc.sh';
+  if FileExists(FPCScript) then
+  begin
+    infoln(localinfotext+'fpc.sh launcher script already exists ('+FPCScript+'); trying to overwrite it.',etInfo);
+    if not(SysUtils.DeleteFile(FPCScript)) then
+    begin
+      infoln(localinfotext+'Error deleting existing launcher script for FPC:'+FPCScript,etError);
+      Exit(false);
+    end;
+  end;
+    AssignFile(TxtFile,FPCScript);
+      Rewrite(TxtFile);
+      writeln(TxtFile,'#!/bin/sh');
+      writeln(TxtFile,'# This script starts the fpc compiler installed by fpcup');
+      writeln(TxtFile,'# and ignores any system-wide fpc.cfg files');
+      writeln(TxtFile,'# Note: maintained by fpcup; do not edit directly, your edits will be lost.');
+      writeln(TxtFile,FPCCompiler,' -n @',
+        IncludeTrailingPathDelimiter(ExtractFilePath(FPCCompiler)),FPCCONFIGFILENAME+' '+
+        '"$@"');
+      CloseFile(TxtFile);
+  Result:=(FPChmod(FPCScript,&755)=0); //Make executable; fails if file doesn't exist=>Operationsucceeded update
+  if Result then
+  begin
+    // To prevent unneccessary rebuilds of FCL, LCL and others:
+    // Set fileage the same as the FPC binary itself
+    Result:=(FileSetDate(FPCScript,FileAge(FPCCompiler))=0);
+    end;
+    if Result then
+    begin
+      infoln(localinfotext+'Created launcher script for FPC:'+FPCScript,etInfo);
+    end
+    else
+    begin
+    infoln(localinfotext+'Error creating launcher script for FPC:'+FPCScript,etError);
+    end;
+  {$ENDIF UNIX}
 end;
 
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;
@@ -3665,6 +3734,10 @@ begin
     infoln(infotext+'Deleting some FPC package config files.', etInfo);
     //DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGFILENAME);
     DeleteFile(IncludeTrailingPathDelimiter(FBaseDirectory)+PACKAGESCONFIGDIR+DirectorySeparator+FPCPKGCOMPILERTEMPLATE);
+    {$IFDEF UNIX}
+    // Delete any fpc.sh shell scripts
+    Sysutils.DeleteFile(IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+CPUOS_Signature+DirectorySeparator+'fpc.sh');
+    {$ENDIF UNIX}
   end;
 
   {$IFDEF UNIX}

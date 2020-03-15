@@ -1,0 +1,14 @@
+Index: packages/rtl-extra/src/unix/sockets.pp
+===================================================================
+--- packages/rtl-extra/src/unix/sockets.pp	(revision 44292)
++++ packages/rtl-extra/src/unix/sockets.pp	(working copy)
+@@ -20,7 +20,8 @@
+ {$i osdefs.inc}       { Compile time defines }
+ 
+ {$if 
+-     defined(FreeBSD) or 
++     defined(OpenBSD) or
++     defined(FreeBSD) or
+      defined(Darwin) or 
+      defined(Haiku)
+ }

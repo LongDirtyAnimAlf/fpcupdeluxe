@@ -23,8 +23,6 @@ unit installerCore;
 
 {$mode objfpc}{$H+}
 
-{$define USEFPCPROXY}
-
 interface
 
 uses
@@ -1928,6 +1926,7 @@ begin
   FSVNClient.LocalRepository  := aLocalPath;
   FSVNClient.Repository       := aFileURL;
   FSVNClient.ExportOnly       := true;
+  FSVNClient.DesiredRevision  := '';
 
   if (Length(FSVNClient.LocalRepository)>0) then
   begin
@@ -2806,9 +2805,17 @@ begin
   end;
 end;
 
+
 function TInstaller.GetCompilerInDir(Dir: string): string;
 begin
-  result:=ConcatPaths([Dir,'bin',GetFPCTarget(true)])+PathDelim+'fpc'+GetExeExt;
+  Result := IncludeTrailingPathDelimiter(Dir) + 'bin' + DirectorySeparator + GetFPCTarget(true) + DirectorySeparator + 'fpc' + GetExeExt;
+  {$IFDEF UNIX}
+  if FileExists(Result + '.sh') then
+    begin
+    //Use our proxy if it is installed
+    Result := Result + '.sh';
+    end;
+  {$ENDIF UNIX}
 end;
 
 procedure TInstaller.SetTarget(aCPU,aOS,aSubArch:string);
@@ -2953,7 +2960,6 @@ end;
 function TInstaller.PatchModule(ModuleName: string): boolean;
 const
   STRIPMAGIC='fpcupstrip';
-  //FPCPROXYPATCH='fpcpatch_fpcproxy.patch';
 var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
@@ -3099,6 +3105,11 @@ begin
           if Pos('fpcpatch_haikufpu.patch',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
+          {$ifndef OpenBSD}
+          //only patch the openbsd mask on Haiku itself
+          if Pos('fpcpatch_openbsd',PatchFilePath)>0 then PatchAccepted:=False;
+          {$endif}
+
           {$ifndef Darwin}
           //only patch the packages Makefile on Darwin itself
           if Pos('fpcpatch_darwin_makepackages_',PatchFilePath)>0 then PatchAccepted:=False;
@@ -3143,6 +3154,7 @@ begin
   end;
 
   // we will hack into fpc itself for better isolation
+  (*
   if FOnlinePatching then
   begin
     if PatchFPC then
@@ -3210,6 +3222,7 @@ begin
       }
     end;
   end;
+  *)
 
   if (DirectoryExists(PatchDirectory)) then
   begin

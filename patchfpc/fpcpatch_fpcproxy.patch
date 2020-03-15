@@ -1,0 +1,13 @@
+--- compiler/utils/fpc.pp
++++ compiler/utils/fpc.pp
+@@ -292,7 +292,9 @@ program fpc;
+                 end;
+             end;
+        end;
+-     SetLength(ppccommandline,ppccommandlinelen);
++     SetLength(ppccommandline,ppccommandlinelen+2);
++     ppccommandline[ppccommandlinelen]:='-n';
++     ppccommandline[ppccommandlinelen+1]:='@'+aPath+'fpc.cfg';     
+ 
+      if versionstr<>'' then
+        ppcbin:=ppcbin+'-'+versionstr;

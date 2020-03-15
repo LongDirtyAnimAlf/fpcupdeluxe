@@ -2525,8 +2525,6 @@ begin
          // if we have a positive define list, then default to false until a positive setting is encountered
          AddModule:=NegativeList;
 
-
-
          {$ifdef CPU32}
          if (Pos('cpu32',cpu)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-cpu32',cpu)=0),NegativeList);
          {$endif}

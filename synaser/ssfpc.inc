@@ -64,6 +64,9 @@ For IPv6 support you must have new API!
 {$ifdef FreeBSD}
 {$DEFINE SOCK_HAS_SINLEN}               // BSD definition of scoketaddr
 {$endif}
+{$ifdef OpenBSD}
+{$DEFINE SOCK_HAS_SINLEN}               // BSD definition of scoketaddr
+{$endif}
 {$ifdef darwin}
 {$DEFINE SOCK_HAS_SINLEN}               // BSD definition of scoketaddr
 {$endif}
