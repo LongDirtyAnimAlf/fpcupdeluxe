@@ -1497,11 +1497,14 @@ begin
       // Set Lazarus directory
       LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/LazarusDirectory/Value', FInstallDirectory);
 
+      // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
+      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', FCompiler);
+
       {$IFDEF MSWINDOWS}
       // FInstalledCompiler could be something like c:\bla\ppc386.exe, e.g.
       // the platform specific compiler. In order to be able to cross compile
       // we'd rather use fpc
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', ExtractFilePath(FCompiler) + 'fpc' + GetExeExt);
+      //LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', ExtractFilePath(FCompiler) + 'fpc' + GetExeExt);
 
       // do we supply GDB in the installdir from mingw for win32 and/or win64
       if FileExists(IncludeTrailingPathDelimiter(FInstallDirectory) + '..\mingw\' + GetFPCTarget(true) + '\bin\gdb.exe') then
@@ -1528,9 +1531,6 @@ begin
       {$ENDIF MSWINDOWS}
 
       {$IFDEF UNIX}
-      // On Unix, FInstalledCompiler should be set to our fpc.sh proxy if installed
-      LazarusConfig.SetVariable(EnvironmentConfig, 'EnvironmentOptions/CompilerFilename/Value', FCompiler);
-
       {$IF (defined(FREEBSD)) or (defined(Darwin))}
       // Check for newer user-installed debugger (e.g. from ports tree
       // The system gdb is ancient (gdb 6.1.1 in FreeBSD 9) and does not work well with Laz
