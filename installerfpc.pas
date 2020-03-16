@@ -3105,8 +3105,8 @@ begin
   end;
   {$ENDIF UNIX}
 
-  // Let everyone know of our shiny new compiler (or proxy):
-  if OperationSucceeded then
+  // Let everyone know of our shiny new compiler (or proxy) when NOT crosscompiling !
+  if (OperationSucceeded) AND (NOT (Self is TFPCCrossInstaller)) then
   begin
     FCompiler:=GetCompiler;
     // Verify it exists

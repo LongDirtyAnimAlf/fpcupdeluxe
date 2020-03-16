@@ -248,7 +248,7 @@ begin
   Processor.Parameters.Add('PPUMOVE=' + ConcatPaths([FFPCInstallDir,'bin',GetFPCTarget(true)])+PathDelim+'ppumove'+GetExeExt);
 
   s:=IncludeTrailingPathDelimiter(LazarusPrimaryConfigPath)+DefaultIDEMakeOptionFilename;
-  if FileExists(s) then
+  //if FileExists(s) then
   begin
     Processor.Parameters.Add('CFGFILE=' + s);
   end;
@@ -2505,7 +2505,6 @@ begin
          {$ifdef FreeBSD}
          if (Pos('freebsd',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-freebsd',os)=0),NegativeList);
          {$endif}
-
       end;
 
       cpu:=GetValueSimple('CPU_OK',sl);

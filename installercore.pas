@@ -3134,6 +3134,14 @@ begin
           if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
           begin
             if GetFullVersion<>PatchVersion then PatchAccepted:=False;
+            if PatchVersion=GetNumericalVersion(LAZARUSTRUNKVERSION) then
+            begin
+              // only patch trunk when HEAD is requested
+              if (FDesiredRevision <> '') AND (Uppercase(trim(FDesiredRevision)) <> 'HEAD') then
+              begin
+                PatchAccepted:=False;
+              end;
+            end;
           end;
         end;
 
