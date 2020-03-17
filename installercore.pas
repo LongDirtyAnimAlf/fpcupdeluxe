@@ -2972,7 +2972,7 @@ var
   {$ifndef FPCONLY}
   PatchLaz:boolean;
   {$endif}
-  PatchVersion:dword;
+  PatchVersion,TrunkVersion:dword;
 begin
   result:=false;
 
@@ -2985,6 +2985,11 @@ begin
   {$ifndef FPCONLY}
   PatchUniversal:=(PatchUniversal AND (NOT PatchLaz));
   {$endif};
+
+  if PatchFPC then TrunkVersion:=GetNumericalVersion(FPCTRUNKVERSION);
+  {$ifndef FPCONLY}
+  if PatchLaz then TrunkVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
+  {$endif}
 
   if PatchFPC then PatchDirectory:=IncludeTrailingPathDelimiter(FBaseDirectory)+'patchfpc';
   {$ifndef FPCONLY}
@@ -3081,10 +3086,7 @@ begin
           if (s='trunk') or (PatchVersion=0) then
           begin
             //only patch trunk in case no version is given
-            if PatchFPC then PatchVersion:=GetNumericalVersion(FPCTRUNKVERSION);
-            {$ifndef FPCONLY}
-            if PatchLaz then PatchVersion:=GetNumericalVersion(LAZARUSTRUNKVERSION);
-            {$endif}
+            PatchVersion:=TrunkVersion;
           end;
 
           infoln(localinfotext+'Found online patch: '+PatchFilePath+' with version '+InttoStr(PatchVersion),etDebug);
@@ -3134,7 +3136,7 @@ begin
           if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
           begin
             if GetFullVersion<>PatchVersion then PatchAccepted:=False;
-            if PatchVersion=GetNumericalVersion(LAZARUSTRUNKVERSION) then
+            if (PatchVersion=TrunkVersion) then
             begin
               // only patch trunk when HEAD is requested
               if (FDesiredRevision <> '') AND (Uppercase(trim(FDesiredRevision)) <> 'HEAD') then

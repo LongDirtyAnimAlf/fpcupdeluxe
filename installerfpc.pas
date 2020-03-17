@@ -1828,6 +1828,7 @@ begin
       result:=version_nr;
       if found_release_nr then result:=result+'.'+release_nr;
       if found_build_nr then result:=result+'.'+build_nr;
+      //result:=Format('%d%.02d%.02d',[StrToInt(version_nr),StrToInt(release_nr),StrToInt(build_nr)]))
     end;
 
   end
