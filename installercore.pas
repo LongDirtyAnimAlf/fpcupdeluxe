@@ -3109,7 +3109,7 @@ begin
           {$endif}
 
           {$ifndef OpenBSD}
-          //only patch the openbsd mask on Haiku itself
+          //only patch the openbsd mask on OpenBSD itself
           if Pos('fpcpatch_openbsd',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 

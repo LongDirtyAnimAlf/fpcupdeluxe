@@ -1691,6 +1691,10 @@ begin
   Http:=TNSHTTPSendAndReceive.Create;
   try
     Http.Address := aURL;
+    if (Pos('api.github.com',aURL)>0) AND (Pos('fpcupdeluxe',aURL)>0) then
+      Http.AddHeader('User-Agent','fpcupdeluxe')
+    else
+      Http.AddHeader('User-Agent',USERAGENT);
     Http.AddHeader('Content-Type', 'application/json');
     if Length(HTTPProxyHost)>0 then
     begin
@@ -1750,7 +1754,10 @@ begin
   begin
     Http:=TFPHTTPClient.Create(Nil);
     try
-      Http.AddHeader('User-Agent',USERAGENT);
+      if (Pos('api.github.com',aURL)>0) AND (Pos('fpcupdeluxe',aURL)>0) then
+        Http.AddHeader('User-Agent','fpcupdeluxe')
+      else
+        Http.AddHeader('User-Agent',USERAGENT);
       Http.AddHeader('Content-Type', 'application/json');
       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
       Http.IOTimeout:=5000;

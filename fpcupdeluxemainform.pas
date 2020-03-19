@@ -2633,6 +2633,13 @@ begin
             {$endif}
           end;
 
+          LibsFileName:='CrossLibs'+LibsFileName;
+          {$ifdef MSWINDOWS}
+          BinsFileName:='WinCrossBins'+BinsFileName;
+          {$else}
+          BinsFileName:='CrossBins'+BinsFileName;
+          {$endif MSWINDOWS}
+
           // bit tricky ... if bins and libs are already there exit this retry ... ;-)
           if (
              (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+BinPath))
@@ -2647,6 +2654,9 @@ begin
 
             if MissingCrossBins then
             begin
+              AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
+              AddMessage('Looking for: '+BinsFileName,True);
+
               MajorVersion:=1;
 
               for MinorVersion:=2 downto 0 do
@@ -2693,41 +2703,50 @@ begin
                 BaseBinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
                 success:=false;
-                AddMessage('Going to download the right cross-bins. Can (will) take some time !',True);
 
-                BaseBinsURL:=FPCUPGITREPO+'/releases/download/'+BaseBinsURL;
+                TargetFile:=BinsFileName;
 
-                {$ifdef MSWINDOWS}
-                DownloadURL:=BaseBinsURL+'/'+'WinCrossBins'+BinsFileName;
-                {$else}
-                DownloadURL:=BaseBinsURL+'/'+'CrossBins'+BinsFileName;
-                {$endif MSWINDOWS}
+                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BaseBinsURL;
 
-                //default to zip
-                DownloadURL:=DownloadURL+'.zip';
-                TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
-                SysUtils.DeleteFile(TargetFile);
-                AddMessage('Trying '+DownloadURL);
-                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                ZipFile:=success;
-
-
-                {$ifndef Darwin}
-                // try rar .... very dirty and certainly not elegant ... ;-)
-                if (NOT success) then
-                begin
-                  DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
-                  SysUtils.DeleteFile(TargetFile);
-                  TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
-                  SysUtils.DeleteFile(TargetFile);
-                  AddMessage('Trying '+DownloadURL);
-                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                success:=false;
+                aList:=TStringList.Create;
+                try
+                  aList.Clear;
+                  try
+                    GetGitHubFileList(DownloadURL,aList,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  except
+                    on E : Exception do
+                    begin
+                      //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
+                    end;
+                  end;
+                  for i:=0 to Pred(aList.Count) do
+                  begin
+                    if Pos(TargetFile,aList[i])>0 then
+                    begin
+                      TargetFile := GetFileNameFromURL(aList[i]);
+                      success:=true;
+                      break;
+                    end;
+                  end;
+                finally
+                  aList.Free;
                 end;
-                {$endif}
 
                 if success then
                 begin
-                  AddMessage('Successfully downloaded binary-tools archive.');
+                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+BaseBinsURL+'/'+TargetFile;
+                  AddMessage('Found correct online binutils at: '+DownloadURL);
+                  AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
+                  TargetFile := SysUtils.GetTempDir+TargetFile;
+                  SysUtils.DeleteFile(TargetFile);
+                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  if success then AddMessage('Download successfull !');
+                end;
+
+                if success then
+                begin
+                  ZipFile:=(ExtractFileExt(TargetFile)='.zip');
                   TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
                   {$ifndef MSWINDOWS}
                   TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+BinPath+DirectorySeparator;
@@ -2811,44 +2830,61 @@ begin
 
             if MissingCrossLibs then
             begin
-              for i:=High(FPCUPLIBSURL) downto Low(FPCUPLIBSURL) do
+              AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
+              AddMessage('Looking for: '+LibsFileName,True);
+              MajorVersion:=1;
+              for MinorVersion:=2 downto 0 do
               begin
-                BaseLibsURL:=FPCUPLIBSURL[i];
+                BaseLibsURL:='crosslibs_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
-                AddMessage('Going to download the right cross-libs. Can (will) take some time !',True);
-                DownloadURL:=BaseLibsURL+'/'+'CrossLibs'+LibsFileName;
+                TargetFile:=LibsFileName;
 
-                // default to zip
-                DownloadURL:=DownloadURL+'.zip';
+                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BaseLibsURL;
 
-                TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
-                SysUtils.DeleteFile(TargetFile);
                 success:=false;
-                AddMessage('Trying '+DownloadURL);
-                success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
-                ZipFile:=success;
-
-                {$ifndef Darwin}
-                // if rar then try zip ... if zip then try rar .... very dirty and certainly not elegant ... ;-)
-                if (NOT success) then
-                begin
-                  DownloadURL:=ChangeFileExt(DownloadURL,'.rar');
-                  SysUtils.DeleteFile(TargetFile);
-                  TargetFile := SysUtils.GetTempDir+GetFileNameFromURL(DownloadURL);
-                  SysUtils.DeleteFile(TargetFile);
-                  AddMessage('Trying '+DownloadURL);
-                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                aList:=TStringList.Create;
+                try
+                  aList.Clear;
+                  try
+                    GetGitHubFileList(DownloadURL,aList,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  except
+                    on E : Exception do
+                    begin
+                      //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
+                    end;
+                  end;
+                  for i:=0 to Pred(aList.Count) do
+                  begin
+                    if Pos(TargetFile,aList[i])>0 then
+                    begin
+                      TargetFile := GetFileNameFromURL(aList[i]);
+                      success:=true;
+                      break;
+                    end;
+                  end;
+                finally
+                  aList.Free;
                 end;
-                {$endif}
 
                 if success then
                 begin
-                  AddMessage('Successfully downloaded the libraries.');
+                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+BaseLibsURL+'/'+TargetFile;
+                  AddMessage('Found correct online libraries at: '+DownloadURL);
+                  AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
+                  TargetFile := SysUtils.GetTempDir+TargetFile;
+                  SysUtils.DeleteFile(TargetFile);
+                  success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
+                  if success then AddMessage('Download successfull !');
+                end;
+
+                if success then
+                begin
+                  ZipFile:=(ExtractFileExt(TargetFile)='.zip');
                   TargetPath:=IncludeTrailingPathDelimiter(sInstallDir);
                   //TargetPath:=IncludeTrailingPathDelimiter(sInstallDir)+LibPath+DirectorySeparator;
                   //ForceDirectoriesSafe(IncludeTrailingPathDelimiter(sInstallDir)+LibPath);
 
-                  AddMessage('Going to extract them into '+TargetPath);
+                  AddMessage('Going to extract archive into '+TargetPath);
 
                   if ZipFile then
                   begin
