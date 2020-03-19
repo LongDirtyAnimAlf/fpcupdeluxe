@@ -2961,6 +2961,8 @@ end;
 function TInstaller.PatchModule(ModuleName: string): boolean;
 const
   STRIPMAGIC='fpcupstrip';
+  DARWINCHECKMAGIC='useride: ';
+  DARWINHACKMAGIC='./lazbuild$(SRCEXEEXT) --lazarusdir=. --build-ide= --ws=$(LCL_PLATFORM)';
 var
   PatchList:TStringList;
   PatchFilePath,PatchFileCorrectedPath,PatchDirectory:string;
@@ -3128,6 +3130,12 @@ begin
             PatchAccepted:=False;
             {$endif}
           end;
+
+          //skip makefile patch lazarus ... we do it ourselves again.
+          if Pos('lazpatch_useride',PatchFilePath)>0 then
+          begin
+            PatchAccepted:=False;
+          end;
           {$endif}
 
           // In general, only patch trunk !
@@ -3165,6 +3173,7 @@ begin
   end;
 
   // we will hack into fpc itself for better isolation
+  // needs more testing
   (*
   if FOnlinePatching then
   begin
@@ -3234,6 +3243,52 @@ begin
     end;
   end;
   *)
+
+
+  // we will hack into Lazarus makefile for better handling of useride
+  {$ifndef FPCONLY}
+  if FOnlinePatching then
+  begin
+    if PatchLaz then
+    begin
+      PatchList:=TStringList.Create;
+      try
+        PatchList.Clear;
+
+        PatchFilePath:=IncludeTrailingPathDelimiter(FSourceDirectory)+MAKEFILENAME;
+
+        PatchList.LoadFromFile(PatchFilePath);
+
+        // are we able to patch
+        PatchAccepted:=True;
+        for i:=0 to (PatchList.Count-1) do
+        begin
+          s:=PatchList.Strings[i];
+          if (Pos(DARWINHACKMAGIC,s)>0) then
+          begin
+            PatchAccepted:=False;
+            break; // we were here already ... ;-)
+          end;
+          if (Pos(DARWINCHECKMAGIC,s)>0) then j:=i; //store position
+        end;
+
+        if PatchAccepted then
+        begin
+          Inc(j);
+          PatchList.Insert(j+1,'endif');
+          PatchList.Insert(j,'else');
+          PatchList.Insert(j,#9+DARWINHACKMAGIC);
+          PatchList.Insert(j,'ifdef LCL_PLATFORM');
+          PatchList.SaveToFile(PatchFilePath);
+        end;
+
+      finally
+        PatchList.Free;
+      end;
+    end;
+  end;
+  {$endif FPCONLY}
+
 
   if (DirectoryExists(PatchDirectory)) then
   begin

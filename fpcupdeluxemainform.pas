@@ -2720,15 +2720,29 @@ begin
                       //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
                     end;
                   end;
+                  //Prefer a zip-file
                   for i:=0 to Pred(aList.Count) do
                   begin
-                    if Pos(TargetFile,aList[i])>0 then
+                    if Pos(TargetFile+'.zip',aList[i])>0 then
                     begin
-                      TargetFile := GetFileNameFromURL(aList[i]);
+                      TargetFile := TargetFile+'.zip';
                       success:=true;
                       break;
                     end;
                   end;
+                  if NOT success then
+                  begin
+                    for i:=0 to Pred(aList.Count) do
+                    begin
+                      if Pos(TargetFile,aList[i])>0 then
+                      begin
+                        TargetFile := GetFileNameFromURL(aList[i]);
+                        success:=true;
+                        break;
+                      end;
+                    end;
+                  end;
+
                 finally
                   aList.Free;
                 end;
@@ -2853,13 +2867,27 @@ begin
                       //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
                     end;
                   end;
+
+                  //Prefer a zip-file
                   for i:=0 to Pred(aList.Count) do
                   begin
-                    if Pos(TargetFile,aList[i])>0 then
+                    if Pos(TargetFile+'.zip',aList[i])>0 then
                     begin
-                      TargetFile := GetFileNameFromURL(aList[i]);
+                      TargetFile := TargetFile+'.zip';
                       success:=true;
                       break;
+                    end;
+                  end;
+                  if NOT success then
+                  begin
+                    for i:=0 to Pred(aList.Count) do
+                    begin
+                      if Pos(TargetFile,aList[i])>0 then
+                      begin
+                        TargetFile := GetFileNameFromURL(aList[i]);
+                        success:=true;
+                        break;
+                      end;
                     end;
                   end;
                 finally
