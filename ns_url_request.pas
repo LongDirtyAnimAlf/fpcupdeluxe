@@ -57,6 +57,8 @@ type
     FMethod : string;
     FRequestHeaders: TStringList;
     FResponseHeaders: TStringList;    // to be done
+    FUserAgent : string;
+    FContentType : string;
     FUserName : string;               // to be done
     FPassword : string;               // to be done
     FProxy : TProxyData;              // to be done
@@ -67,9 +69,13 @@ type
     function GetProxy: TProxyData;
     procedure SetProxy(AValue: TProxyData);
     function CheckResponseCode(ACode: Integer; const AllowedResponseCodes: array of Integer): Boolean;
+    procedure SetUserAgent(const AValue: string);
+    procedure SetContentType(const AValue: string);
   protected
     property RequestHeaders : TStringList Read FRequestHeaders Write SetRequestHeaders;
     property ResponseHeaders : TStringList Read FResponseHeaders;
+    property UserAgent: String Write SetUserAgent;
+    property ContentType: String Write SetContentType;
     property UserName : String Read FUserName Write FUserName;
     property Password : String Read FPassword Write FPassword;
     property Proxy : TProxyData Read GetProxy Write SetProxy;
@@ -95,6 +101,8 @@ type
   published
     property RequestHeaders;
     property ResponseHeaders;
+    property UserAgent;
+    property ContentType;
     property UserName;
     property Password;
     property Proxy;
@@ -108,10 +116,11 @@ constructor TCustomNSHTTPSendAndReceive.Create;
 begin
   inherited Create;
   FTimeOut := 30;
+  FUserAgent:='';
   FRequestHeaders := TStringList.Create;
-  FRequestHeaders.Add('User-Agent=Mozilla/5.0 (compatible; fpweb)');
   FResponseHeaders := TStringList.Create;
   FResponseStatusCode := 0;
+  UserAgent:='Mozilla/5.0 (compatible; fpweb)';
 end;
 
 destructor TCustomNSHTTPSendAndReceive.Destroy;
@@ -126,6 +135,24 @@ procedure TCustomNSHTTPSendAndReceive.SetRequestHeaders(const AValue: TStringLis
 begin
   if FRequestHeaders=AValue then exit;
   FRequestHeaders.Assign(AValue);
+end;
+
+procedure TCustomNSHTTPSendAndReceive.SetContentType(const AValue: string);
+begin
+  if AValue<>FContentType then
+  begin
+    FContentType:=AValue;
+    AddHeader('Content-Type',FContentType);
+  end
+end;
+
+procedure TCustomNSHTTPSendAndReceive.SetUserAgent(const AValue: string);
+begin
+  if AValue<>FUserAgent then
+  begin
+    FUserAgent:=AValue;
+    AddHeader('User-Agent',FUserAgent);
+  end
 end;
 
 function TCustomNSHTTPSendAndReceive.GetProxy: TProxyData;

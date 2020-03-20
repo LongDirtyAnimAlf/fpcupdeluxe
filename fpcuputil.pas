@@ -164,6 +164,8 @@ type
     FHTTPProxyPort: integer;
     FMaxRetries:byte;
     FVerbose:boolean;
+    FUserAgent: string;
+    FContentType: string;
     FUsername: string;
     FPassword: string;
     FHTTPProxyHost: string;
@@ -173,16 +175,20 @@ type
     aFilename:string;
     procedure parseFTPHTMLListing(F:TStream;filelist:TStringList);
     procedure DoOnWriteStream(Sender: TObject; APos: Int64);
+    procedure SetUserAgent(AValue:string);virtual;abstract;
+    procedure SetContentType(AValue:string);virtual;abstract;
   protected
     procedure SetVerbose(aValue:boolean);virtual;
-    property MaxRetries : Byte Read FMaxRetries Write FMaxRetries;
-    property Username: string read FUsername;
-    property Password: string read FPassword;
-    property HTTPProxyHost: string read FHTTPProxyHost;
-    property HTTPProxyPort: integer read FHTTPProxyPort;
-    property HTTPProxyUser: string read FHTTPProxyUser;
-    property HTTPProxyPassword: string read FHTTPProxyPassword;
-    property Verbose: boolean write SetVerbose;
+    property  MaxRetries : Byte Read FMaxRetries Write FMaxRetries;
+    property  UserAgent: string write SetUserAgent;
+    property  ContentType: string write SetContentType;
+    property  Username: string read FUsername;
+    property  Password: string read FPassword;
+    property  HTTPProxyHost: string read FHTTPProxyHost;
+    property  HTTPProxyPort: integer read FHTTPProxyPort;
+    property  HTTPProxyUser: string read FHTTPProxyUser;
+    property  HTTPProxyPassword: string read FHTTPProxyPassword;
+    property  Verbose: boolean write SetVerbose;
   public
     constructor Create;virtual;
     destructor Destroy;override;
@@ -210,6 +216,8 @@ type
     function FTPDownload(Const URL : String; filename:string):boolean;
     function HTTPDownload(Const URL : String; filename:string):boolean;
   protected
+    procedure SetContentType(AValue:string);override;
+    procedure SetUserAgent(AValue:string);override;
     procedure SetVerbose(aValue:boolean);override;
   public
     constructor Create;override;
@@ -227,13 +235,17 @@ type
     FCURLOk:boolean;
     FWGETOk:boolean;
     //WGETBinary:string;
-    function WGetDownload(Const URL : String; Dest : TStream):boolean;
-    function LibCurlDownload(Const URL : String; Dest : TStream):boolean;
-    function WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
-    function LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
-    function Download(const URL: String; Dest: TStream):boolean;
-    function FTPDownload(Const URL : String; Dest : TStream):boolean;
-    function HTTPDownload(Const URL : String; Dest : TStream):boolean;
+    procedure AddHeader(const aHeader,aValue:String);
+    function  WGetDownload(Const URL : String; Dest : TStream):boolean;
+    function  LibCurlDownload(Const URL : String; Dest : TStream):boolean;
+    function  WGetFTPFileList(const URL:string; filelist:TStringList):boolean;
+    function  LibCurlFTPFileList(const URL:string; filelist:TStringList):boolean;
+    function  Download(const URL: String; Dest: TStream):boolean;
+    function  FTPDownload(Const URL : String; Dest : TStream):boolean;
+    function  HTTPDownload(Const URL : String; Dest : TStream):boolean;
+  protected
+    procedure SetContentType(AValue:string);override;
+    procedure SetUserAgent(AValue:string);override;
   public
     class var
         WGETBinary:string;
@@ -428,9 +440,10 @@ uses
   ;
 
 const
-  USERAGENT = 'curl/7.50.1 (i686-pc-linux-gnu) libcurl/7.50.1 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
+  NORMALUSERAGENT = 'curl/7.50.1 (i686-pc-linux-gnu) libcurl/7.50.1 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
   //USERAGENT = 'Mozilla/5.0 (compatible; fpweb)';
   CURLUSERAGENT='curl/7.51.0';
+  FPCUPUSERAGENT = 'fpcupdeluxe';
   {$IFDEF MSWINDOWS}
   WININETUSERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; WinInet)';
   {$ENDIF MSWINDOWS}
@@ -1614,6 +1627,13 @@ begin
        then aDownLoader:=TWGetDownLoader.Create
        else aDownLoader:=TNativeDownLoader.Create;
     try
+      if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+      begin
+        aDownLoader.UserAgent:=FPCUPUSERAGENT;
+        aDownLoader.ContentType:='application/json';
+      end
+      else
+        aDownLoader.UserAgent:=NORMALUSERAGENT;
       result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
@@ -1692,10 +1712,12 @@ begin
   try
     Http.Address := aURL;
     if (Pos('api.github.com',aURL)>0) AND (Pos('fpcupdeluxe',aURL)>0) then
-      Http.AddHeader('User-Agent','fpcupdeluxe')
+    begin
+      Http.UserAgent:=FPCUPUSERAGENT;
+      Http.ContentType:='application/json';
+    end
     else
-      Http.AddHeader('User-Agent',USERAGENT);
-    Http.AddHeader('Content-Type', 'application/json');
+      Http.UserAgent:=NORMALUSERAGENT;
     if Length(HTTPProxyHost)>0 then
     begin
       with Http do
@@ -1755,9 +1777,9 @@ begin
     Http:=TFPHTTPClient.Create(Nil);
     try
       if (Pos('api.github.com',aURL)>0) AND (Pos('fpcupdeluxe',aURL)>0) then
-        Http.AddHeader('User-Agent','fpcupdeluxe')
+        Http.AddHeader('User-Agent',FPCUPUSERAGENT)
       else
-        Http.AddHeader('User-Agent',USERAGENT);
+        Http.AddHeader('User-Agent',NORMALUSERAGENT);
       Http.AddHeader('Content-Type', 'application/json');
       {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
       Http.IOTimeout:=5000;
@@ -3846,6 +3868,8 @@ begin
   Inherited Create;
   FMaxRetries:=MAXCONNECTIONRETRIES;
   FVerbose:=False;
+  FContentType:='';
+  FUserAgent:='';
   FUsername:='';
   FPassword:='';
   FHTTPProxyHost:='';
@@ -4001,7 +4025,7 @@ begin
     //ConnectTimeout:=10000;
     //RequestHeaders.Add('Connection: Close');
     // User-Agent needed for sourceforge and GitHub
-    AddHeader('User-Agent',USERAGENT);
+    UserAgent:=NORMALUSERAGENT;
     OnPassword:=@DoPassword;
     if FVerbose then
     begin
@@ -4096,6 +4120,24 @@ procedure TUseNativeDownLoader.ShowRedirect(ASender: TObject; const ASrc: String
   var ADest: String);
 begin
   writeln('Following redirect from ',ASrc,'  ==> ',ADest);
+end;
+
+procedure TUseNativeDownLoader.SetContentType(AValue:string);
+begin
+  if AValue<>FContentType then
+  begin
+    FContentType:=AValue;
+    aFPHTTPClient.AddHeader('Content-Type',FContentType);
+  end;
+end;
+
+procedure TUseNativeDownLoader.SetUserAgent(AValue:string);
+begin
+  if AValue<>FUserAgent then
+  begin
+    FUserAgent:=AValue;
+    aFPHTTPClient.AddHeader('User-Agent',FUserAgent);
+  end;
 end;
 
 procedure TUseNativeDownLoader.SetVerbose(aValue:boolean);
@@ -4417,6 +4459,8 @@ begin
   begin
     //infoln('Could not initialize either libcurl or wget: expect severe failures !',etError);
   end;
+
+  UserAgent:=CURLUSERAGENT;
 end;
 
 constructor TUseWGetDownloader.Create(aWGETBinary:string);
@@ -4424,6 +4468,19 @@ begin
   WGETBinary:=aWGETBinary;
   inherited Create;
 end;
+
+procedure TUseWGetDownloader.AddHeader(const aHeader,aValue:String);
+begin
+  {
+  P := pointer(hdr);
+  while P<>nil do begin
+    GetNextLine(P,s);
+    if s<>'' then // nil would reset the whole list
+      fIn.Headers := curl.slist_append(fIn.Headers,pointer(s));
+  end;
+  }
+end;
+
 
 function TUseWGetDownloader.WGetDownload(Const URL : String; Dest : TStream):boolean;
 var
@@ -4435,7 +4492,7 @@ begin
 
   With TProcess.Create(nil) do
   try
-    CommandLine:=WGETBinary+' -q --no-check-certificate --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
+    CommandLine:=WGETBinary+' -q --no-check-certificate --user-agent="'+FUserAgent+'" --tries='+InttoStr(MaxRetries)+' --output-document=- '+URL;
     Options:=[poUsePipes,poNoConsole];
     Execute;
     while Running do
@@ -4465,6 +4522,7 @@ var
   aBuffer:PChar;
   location:string;
   response:sizeint;
+  curl_headers: pointer;
 begin
   result:=false;
 
@@ -4505,7 +4563,12 @@ begin
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(URL));
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(Dest));
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(CURLUSERAGENT));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(FUserAgent));
+        if (Length(FContentType)>0) then
+        begin
+          if res=CURLE_OK then curl_headers := curl_slist_append(nil,PChar(FContentType));
+          if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTPHEADER,curl_headers);
+        end;
 
         //check the URL
         if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
@@ -4516,6 +4579,13 @@ begin
         end else result:=false;
 
         curl_easy_cleanup(hCurl);
+
+        if curl_headers<>nil then
+        begin
+          curl_slist_free_all(curl_headers);
+          curl_headers:=nil;
+        end;
+
       end;
     except
       // swallow libcurl exceptions
@@ -4543,6 +4613,22 @@ begin
   begin
     result:=WGetDownload(URL,Dest);
     if (result) then infoln('Wget HTTP file download success !', etDebug);
+  end;
+end;
+
+procedure TUseWGetDownloader.SetContentType(AValue:string);
+begin
+  if AValue<>FContentType then
+  begin
+    FContentType:=AValue;
+  end;
+end;
+
+procedure TUseWGetDownloader.SetUserAgent(AValue:string);
+begin
+  if AValue<>FUserAgent then
+  begin
+    FUserAgent:=AValue;
   end;
 end;
 
@@ -4599,6 +4685,7 @@ var
   aTFTPList:TFTPList;
   F:TMemoryStream;
   i:integer;
+  curl_headers: pointer;
   UserPass :string;
 begin
   result:=false;
@@ -4637,7 +4724,14 @@ begin
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
-            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,CURLUSERAGENT);
+            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(FUserAgent));
+
+            if (Length(FContentType)>0) then
+            begin
+              if res=CURLE_OK then curl_headers := curl_slist_append(nil,PChar(FContentType));
+              if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTPHEADER,curl_headers);
+            end;
+
             {$ifdef MSWINDOWS}
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER, 0);
             {$endif}
@@ -4647,6 +4741,12 @@ begin
             result:=(res=CURLE_OK);
 
             curl_easy_cleanup(hCurl);
+
+            if curl_headers<>nil then
+            begin
+              curl_slist_free_all(curl_headers);
+              curl_headers:=nil;
+            end;
 
             // libcurl correct exit ?
             if result then
@@ -4720,7 +4820,7 @@ begin
   end;
 
   Output:='';
-  result:=(ExecuteCommand(WGETBinary+' --no-check-certificate --user-agent="'+USERAGENT+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
+  result:=(ExecuteCommand(WGETBinary+' --no-check-certificate --user-agent="'+FUserAgent+'" --tries='+InttoStr(MaxRetries)+' --spider '+URL,Output,false)=0);
   if result then
   begin
     result:=(Pos('Remote file exists',Output)>0);
