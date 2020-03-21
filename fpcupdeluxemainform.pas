@@ -1867,7 +1867,8 @@ var
   i:integer;
   MajorVersion,MinorVersion:integer;
   aList: TStringList;
-  BaseBinsURL,BaseLibsURL:string;
+  BaseBinsURL:string;
+  BinsURL,LibsURL:string;
 begin
   result:=false;
 
@@ -2490,7 +2491,11 @@ begin
       if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
       {$endif}
 
-      success:=RealRun;
+      //success:=RealRun;
+      Success:=False;
+      MissingCrossBins:=True;
+      MissingCrossLibs:=True;
+
 
       if {(Sender<>nil) AND} (NOT success) then
       begin
@@ -2552,9 +2557,10 @@ begin
           if FPCupManager.CrossOS_Target='freebsd' then s:='FreeBSD' else
             if FPCupManager.CrossOS_Target='dragonfly' then s:='DragonFlyBSD' else
               if FPCupManager.CrossOS_Target='openbsd' then s:='OpenBSD' else
-                if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
-                  if FPCupManager.CrossOS_Target='msdos' then s:='MSDos' else
-                    s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
+                if FPCupManager.CrossOS_Target='netbsd' then s:='NetBSD' else
+                  if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
+                    if FPCupManager.CrossOS_Target='msdos' then s:='MSDos' else
+                      s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
 
           if FPCupManager.SolarisOI then s:=s+'OI';
           BinsFileName:=s+BinsFileName;
@@ -2655,60 +2661,61 @@ begin
             if MissingCrossBins then
             begin
               AddMessage('Going to look for the right cross-bins. Can (will) take some time !',True);
-              AddMessage('Looking for: '+BinsFileName,True);
 
-              MajorVersion:=1;
+              BaseBinsURL:='';
 
-              for MinorVersion:=2 downto 0 do
-              begin
-                BaseBinsURL:='';
-
-                if GetTargetOS='win32' then BaseBinsURL:='wincrossbins'
-                else
-                   if GetTargetOS='win64' then BaseBinsURL:='wincrossbins'
-                   else
-                      if GetTargetOS='linux' then
+              if GetTargetOS='win32' then BaseBinsURL:='wincrossbins'
+              else
+                 if GetTargetOS='win64' then BaseBinsURL:='wincrossbins'
+                 else
+                    if GetTargetOS='linux' then
+                    begin
+                      if GetTargetCPU='i386' then BaseBinsURL:='linuxi386crossbins';
+                      if GetTargetCPU='x86_64' then BaseBinsURL:='linuxx64crossbins';
+                    end
+                    else
+                      if GetTargetOS='freebsd' then
                       begin
-                        if GetTargetCPU='i386' then BaseBinsURL:='linuxi386crossbins';
-                        if GetTargetCPU='x86_64' then BaseBinsURL:='linuxx64crossbins';
+                        if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins';
                       end
                       else
-                        if GetTargetOS='freebsd' then
+                        if GetTargetOS='solaris' then
                         begin
-                          if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins';
+                          {if FPCupManager.SolarisOI then}
+                          begin
+                            if GetTargetCPU='x86_64' then BaseBinsURL:='solarisoix64crossbins';
+                          end;
                         end
                         else
-                          if GetTargetOS='solaris' then
+                          if GetTargetOS='darwin' then
                           begin
-                            {if FPCupManager.SolarisOI then}
-                            begin
-                              if GetTargetCPU='x86_64' then BaseBinsURL:='solarisoix64crossbins';
-                            end;
-                          end
-                          else
-                            if GetTargetOS='darwin' then
-                            begin
-                              if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins';
-                              if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins';
-                            end;
+                            if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins';
+                            if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins';
+                          end;
 
-                // no cross-bins available
-                if (Length(BaseBinsURL)=0) then
-                begin
-                  ShowMessage('No tools available online. You could do a feature request ... ;-)');
-                  exit;
-                end;
+
+              // no cross-bins available
+              if (Length(BaseBinsURL)=0) then
+              begin
+                ShowMessage('No tools available online. You could do a feature request ... ;-)');
+                exit;
+              end;
+
+              AddMessage('Looking for: '+BinsFileName, True);
+
+              MajorVersion:=1;
+              for MinorVersion:=2 downto 0 do
+              begin
 
                 //Add version
-                BaseBinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
+                BinsURL:=BaseBinsURL+'_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
                 success:=false;
 
                 TargetFile:=BinsFileName;
 
-                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BaseBinsURL;
+                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BinsURL;
 
-                success:=false;
                 aList:=TStringList.Create;
                 try
                   aList.Clear;
@@ -2717,13 +2724,14 @@ begin
                   except
                     on E : Exception do
                     begin
-                      //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
+                      AddMessage('Could not get binutils file list from '+DownloadURL+'.');
+                      //continue;
                     end;
                   end;
                   //Prefer a zip-file
                   for i:=0 to Pred(aList.Count) do
                   begin
-                    if Pos(TargetFile+'.zip',aList[i])>0 then
+                    if AnsiContainsText(aList[i],TargetFile+'.zip') then
                     begin
                       TargetFile := TargetFile+'.zip';
                       success:=true;
@@ -2734,7 +2742,7 @@ begin
                   begin
                     for i:=0 to Pred(aList.Count) do
                     begin
-                      if Pos(TargetFile,aList[i])>0 then
+                      if AnsiContainsText(aList[i],TargetFile) then
                       begin
                         TargetFile := GetFileNameFromURL(aList[i]);
                         success:=true;
@@ -2749,7 +2757,7 @@ begin
 
                 if success then
                 begin
-                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+BaseBinsURL+'/'+TargetFile;
+                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+BinsURL+'/'+TargetFile;
                   AddMessage('Found correct online binutils at: '+DownloadURL);
                   AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
                   TargetFile := SysUtils.GetTempDir+TargetFile;
@@ -2845,15 +2853,17 @@ begin
             if MissingCrossLibs then
             begin
               AddMessage('Going to look for the right cross-libraries. Can (will) take some time !',True);
+
               AddMessage('Looking for: '+LibsFileName,True);
+
               MajorVersion:=1;
               for MinorVersion:=2 downto 0 do
               begin
-                BaseLibsURL:='crosslibs_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
+                LibsURL:='crosslibs_v'+InttoStr(MajorVersion)+'.'+InttoStr(MinorVersion);
 
                 TargetFile:=LibsFileName;
 
-                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BaseLibsURL;
+                DownloadURL:=FPCUPGITREPOAPI+'/tags/'+LibsURL;
 
                 success:=false;
                 aList:=TStringList.Create;
@@ -2864,7 +2874,8 @@ begin
                   except
                     on E : Exception do
                     begin
-                      //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
+                      AddMessage('Could not get libraries file list from '+DownloadURL+'.');
+                      //continue;
                     end;
                   end;
 
@@ -2896,7 +2907,7 @@ begin
 
                 if success then
                 begin
-                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+BaseLibsURL+'/'+TargetFile;
+                  DownloadURL:=FPCUPGITREPO+'/releases/download/'+LibsURL+'/'+TargetFile;
                   AddMessage('Found correct online libraries at: '+DownloadURL);
                   AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
                   TargetFile := SysUtils.GetTempDir+TargetFile;

@@ -1620,8 +1620,11 @@ var
 begin
   result:=false;
 
+  writeln('Entering download.');
+
   if (NOT result) then
   begin
+    writeln('Native.');
     SysUtils.Deletefile(TargetFile);
     if UseWget
        then aDownLoader:=TWGetDownLoader.Create
@@ -1635,6 +1638,11 @@ begin
       else
         aDownLoader.UserAgent:=NORMALUSERAGENT;
       result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      if result then
+      begin
+        writeln(TargetFile);
+        writeln('dfgdfg');
+      end;
     finally
       aDownLoader.Destroy;
     end;
@@ -1645,6 +1653,7 @@ begin
   //Second resort: use Windows PowerShell
   if (NOT result) then
   begin
+    writeln('PowerShell.');
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByPowerShell(URL,TargetFile);
     if (NOT result) then infoln('Windows PowerShell downloader failure.',etDebug);
@@ -1653,6 +1662,7 @@ begin
   //Third resort: use Windows INet
   if (NOT result) then
   begin
+    writeln('Wininet.');
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByWinINet(URL,TargetFile);
     if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
@@ -1672,6 +1682,7 @@ begin
   //Final resort: use wget by force
   if (NOT result) AND (NOT UseWget) then
   begin
+    writeln('Wget last reort.');
     SysUtils.Deletefile(TargetFile);
     aDownLoader:=TWGetDownLoader.Create;
     try
@@ -1681,6 +1692,8 @@ begin
     end;
     if (NOT result) then infoln('FPCUP wget downloader failure.',etDebug);
   end;
+
+  writeln('Leaving download.');
 
   if (NOT result) then SysUtils.Deletefile(TargetFile);
 end;
@@ -1798,6 +1811,8 @@ begin
         end;
       end;
       Content:=Http.Get(aURL);
+      writeln('TFPHTTPClient @',aURL,' ; ',Http.ResponseStatusText);
+
     finally
       Http.Free;
     end;
@@ -1972,7 +1987,10 @@ begin
 
   infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
-  NetHandle := InternetOpen(WININETUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
+  if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+    NetHandle := InternetOpen(FPCUPUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0)
+  else
+    NetHandle := InternetOpen(WININETUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
 
   // NetHandle valid?
   if Assigned(NetHandle) then
@@ -4534,9 +4552,10 @@ begin
     curl_global_init(CURL_GLOBAL_ALL);
 
     try
-      hCurl:= curl_easy_init();
-      if Assigned(hCurl) then
-      begin
+      try
+       hCurl:= curl_easy_init();
+       if Assigned(hCurl) then
+       begin
 
         res:=CURLE_OK;
 
@@ -4560,32 +4579,42 @@ begin
         {$else}
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
         {$endif}
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,PChar(URL));
+        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
         if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(Dest));
-        if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(FUserAgent));
+        if (Length(FUserAgent)>0) then if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,pointer(FUserAgent));
+
+        curl_headers := nil;
+        {
         if (Length(FContentType)>0) then
         begin
           if res=CURLE_OK then curl_headers := curl_slist_append(nil,PChar(FContentType));
           if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTPHEADER,curl_headers);
         end;
+        }
 
         //check the URL
         if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
+        if res=CURLE_OK then writeln('CURL @',URL,' ; ',response);
         if ( (res=CURLE_OK) AND (response<>0) AND (response<>404) ) then
         begin
           res:=curl_easy_perform(hCurl);
           result:=((res=CURLE_OK) AND (Dest.Size>0));
         end else result:=false;
 
-        curl_easy_cleanup(hCurl);
-
-        if curl_headers<>nil then
-        begin
-          curl_slist_free_all(curl_headers);
-          curl_headers:=nil;
+        try
+          if Assigned(curl_headers) then
+          begin
+            curl_slist_free_all(curl_headers);
+            curl_headers:=nil;
+          end;
+        except
         end;
 
+       end;
+
+      finally
+        if Assigned(hCurl) then curl_easy_cleanup(hCurl);
       end;
     except
       // swallow libcurl exceptions
@@ -4685,7 +4714,6 @@ var
   aTFTPList:TFTPList;
   F:TMemoryStream;
   i:integer;
-  curl_headers: pointer;
   UserPass :string;
 begin
   result:=false;
@@ -4701,6 +4729,7 @@ begin
       //curl_global_init(CURL_GLOBAL_ALL);
 
       try
+       try
         hCurl:= curl_easy_init();
         if Assigned(hCurl) then
         begin
@@ -4724,13 +4753,6 @@ begin
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_URL,pointer(URL));
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEFUNCTION,@DoWrite);
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_WRITEDATA,Pointer(F));
-            if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_USERAGENT,PChar(FUserAgent));
-
-            if (Length(FContentType)>0) then
-            begin
-              if res=CURLE_OK then curl_headers := curl_slist_append(nil,PChar(FContentType));
-              if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_HTTPHEADER,curl_headers);
-            end;
 
             {$ifdef MSWINDOWS}
             if res=CURLE_OK then res:=curl_easy_setopt(hCurl,CURLOPT_SSL_VERIFYPEER, 0);
@@ -4739,14 +4761,6 @@ begin
             if res=CURLE_OK then res:=curl_easy_perform(hCurl);
 
             result:=(res=CURLE_OK);
-
-            curl_easy_cleanup(hCurl);
-
-            if curl_headers<>nil then
-            begin
-              curl_slist_free_all(curl_headers);
-              curl_headers:=nil;
-            end;
 
             // libcurl correct exit ?
             if result then
@@ -4789,6 +4803,10 @@ begin
           end;
 
         end;
+       finally
+        if Assigned(hCurl) then curl_easy_cleanup(hCurl);
+       end;
+
       except
         // swallow libcurl exceptions
       end;
