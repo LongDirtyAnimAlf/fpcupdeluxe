@@ -2491,11 +2491,7 @@ begin
       if length(FPCupManager.SkipModules)>0 then aDataClient.AddExtraData('Skip',FPCupManager.SkipModules);
       {$endif}
 
-      //success:=RealRun;
-      Success:=False;
-      MissingCrossBins:=True;
-      MissingCrossLibs:=True;
-
+      success:=RealRun;
 
       if {(Sender<>nil) AND} (NOT success) then
       begin
@@ -2716,6 +2712,8 @@ begin
 
                 DownloadURL:=FPCUPGITREPOAPI+'/tags/'+BinsURL;
 
+                AddMessage('Looking for bins in: '+DownloadURL, True);
+
                 aList:=TStringList.Create;
                 try
                   aList.Clear;
@@ -2724,7 +2722,7 @@ begin
                   except
                     on E : Exception do
                     begin
-                      AddMessage('Could not get binutils file list from '+DownloadURL+'.');
+                      //AddMessage('Could not get binutils file list from '+DownloadURL+'.');
                       //continue;
                     end;
                   end;
@@ -2865,6 +2863,8 @@ begin
 
                 DownloadURL:=FPCUPGITREPOAPI+'/tags/'+LibsURL;
 
+                AddMessage('Looking for libs in: '+DownloadURL, True);
+
                 success:=false;
                 aList:=TStringList.Create;
                 try
@@ -2874,7 +2874,7 @@ begin
                   except
                     on E : Exception do
                     begin
-                      AddMessage('Could not get libraries file list from '+DownloadURL+'.');
+                      //AddMessage('Could not get libraries file list from '+DownloadURL+'.');
                       //continue;
                     end;
                   end;

@@ -1620,11 +1620,8 @@ var
 begin
   result:=false;
 
-  writeln('Entering download.');
-
   if (NOT result) then
   begin
-    writeln('Native.');
     SysUtils.Deletefile(TargetFile);
     if UseWget
        then aDownLoader:=TWGetDownLoader.Create
@@ -1638,11 +1635,6 @@ begin
       else
         aDownLoader.UserAgent:=NORMALUSERAGENT;
       result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-      if result then
-      begin
-        writeln(TargetFile);
-        writeln('dfgdfg');
-      end;
     finally
       aDownLoader.Destroy;
     end;
@@ -1653,7 +1645,6 @@ begin
   //Second resort: use Windows PowerShell
   if (NOT result) then
   begin
-    writeln('PowerShell.');
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByPowerShell(URL,TargetFile);
     if (NOT result) then infoln('Windows PowerShell downloader failure.',etDebug);
@@ -1662,7 +1653,6 @@ begin
   //Third resort: use Windows INet
   if (NOT result) then
   begin
-    writeln('Wininet.');
     SysUtils.Deletefile(TargetFile);
     result:=DownloadByWinINet(URL,TargetFile);
     if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
@@ -1682,7 +1672,6 @@ begin
   //Final resort: use wget by force
   if (NOT result) AND (NOT UseWget) then
   begin
-    writeln('Wget last reort.');
     SysUtils.Deletefile(TargetFile);
     aDownLoader:=TWGetDownLoader.Create;
     try
@@ -1692,8 +1681,6 @@ begin
     end;
     if (NOT result) then infoln('FPCUP wget downloader failure.',etDebug);
   end;
-
-  writeln('Leaving download.');
 
   if (NOT result) then SysUtils.Deletefile(TargetFile);
 end;
@@ -1811,8 +1798,6 @@ begin
         end;
       end;
       Content:=Http.Get(aURL);
-      writeln('TFPHTTPClient @',aURL,' ; ',Http.ResponseStatusText);
-
     finally
       Http.Free;
     end;
@@ -2081,7 +2066,14 @@ begin
   P:=URI.Protocol;
   infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   //result:=(ExecuteCommand('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
-  result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+  //result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+
+  if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+    P:=FPCUPUSERAGENT
+  else
+    P:=NORMALUSERAGENT;
+  result:=(ExecuteCommand('powershell -command "$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+
   if result then
   begin
     result:=FileExists(TargetFile);
@@ -4556,7 +4548,6 @@ begin
        hCurl:= curl_easy_init();
        if Assigned(hCurl) then
        begin
-
         res:=CURLE_OK;
 
         UserPass:='';
@@ -4595,7 +4586,6 @@ begin
 
         //check the URL
         if res=CURLE_OK then res:=curl_easy_getinfo(hCurl,CURLINFO_RESPONSE_CODE, @response);
-        if res=CURLE_OK then writeln('CURL @',URL,' ; ',response);
         if ( (res=CURLE_OK) AND (response<>0) AND (response<>404) ) then
         begin
           res:=curl_easy_perform(hCurl);
@@ -4610,7 +4600,6 @@ begin
           end;
         except
         end;
-
        end;
 
       finally
