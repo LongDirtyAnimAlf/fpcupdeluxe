@@ -30,7 +30,7 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="7">
+    <BuildModes Count="8">
       <Item1 Name="linux64" Default="True"/>
       <Item2 Name="freebsdx64">
         <CompilerOptions>
@@ -249,6 +249,38 @@
           </Other>
         </CompilerOptions>
       </Item7>
+      <Item8 Name="default">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-musl"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-musl"/>
+          </SearchPaths>
+          <Conditionals Value="if TargetOS=&apos;darwin&apos; then
+   CustomOptions := &apos; -Cg-&apos;;
+if TargetOS=&apos;openbsd&apos; then
+   CustomOptions := &apos; -Cg-&apos;;"/>
+          <CodeGeneration>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item8>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Modes="darwin64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwin32cocoa,darwin64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>

@@ -922,6 +922,10 @@
       <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot;logger\mORMot\SQLite3;logger\mORMot\CrossPlatform"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
     </SearchPaths>
+    <Conditionals Value="if TargetOS=&apos;darwin&apos; then
+   CustomOptions := &apos; -Cg-&apos;;
+if TargetOS=&apos;openbsd&apos; then
+   CustomOptions := &apos; -Cg-&apos;;"/>
     <CodeGeneration>
       <Optimizations>
         <OptimizationLevel Value="2"/>
