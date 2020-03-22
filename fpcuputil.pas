@@ -75,7 +75,7 @@ uses
   eventlog;
 
 Const
-  MAXCONNECTIONRETRIES=5;
+  MAXCONNECTIONRETRIES=2;
   {$ifdef LCL}
   BeginSnippet='fpcupdeluxe:'; //helps identify messages as coming from fpcupdeluxe instead of make etc
   {$else}
@@ -468,6 +468,15 @@ type
   published
     property OnWriteStream: TOnWriteStream read FOnWriteStream write FOnWriteStream;
   end;
+
+  //PTGitHubStore = ^TGitHubStore;
+  TGitHubStore = record
+    URL:string;
+    FileList:TStringList;
+  end;
+
+var
+  GitHubFileListCache:array of TGitHubStore;
 
 
 function GetStringFromBuffer(const field:PChar):string;
@@ -1700,9 +1709,40 @@ var
   JsonObject : TJSONObject;
   JsonArray: TJSONArray;
   i:integer;
+  aStore:TGitHubStore;
 begin
   result:=false;
   Content:='';
+
+  if (aURL='') then exit;
+
+  if Length(GitHubFileListCache)>0 then
+  begin
+    for aStore in GitHubFileListCache do
+    begin
+      if (aStore.URL=aURL) then
+      begin
+        infoln('GetGitHubFileList :We have a cache for GitHub URL: '+aURL,etDebug);
+        if (aStore.FileList.Count>0) then
+        begin
+          for Content in aStore.FileList do fileurllist.Add(Content);
+        end;
+        result:=true;
+        exit;
+      end;
+    end;
+  end;
+
+  infoln('GetGitHubFileList :No cache for GitHub URL: '+aURL,etDebug);
+  infoln('GetGitHubFileList :Creating cache for GitHub URL: '+aURL,etDebug);
+
+  SetLength(GitHubFileListCache,Length(GitHubFileListCache)+1);
+  with GitHubFileListCache[High(GitHubFileListCache)] do
+  begin
+    URL:=aURL;
+    FileList:=TStringList.Create;
+  end;
+  infoln('GetGitHubFileList :Created cache for GitHub URL: '+aURL,etDebug);
 
   {$ifdef Darwin}
   // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
@@ -1815,10 +1855,12 @@ begin
       Dec(i);
       JsonObject := JsonArray.Objects[i];
       fileurllist.Add(JsonObject.Get('browser_download_url'));
+      with GitHubFileListCache[High(GitHubFileListCache)] do FileList.Add(fileurllist[(fileurllist.Count-1)]);
     end;
   finally
     Json.Free;
   end;
+
 end;
 
 // returns file size in bytes or 0 if not found.
@@ -4346,9 +4388,17 @@ begin
           //result:=(response>=100) and (response<300);
           if (NOT result) then
           begin
+            // Do no retry on errors that we cannot recover from
+            if (response>=400) then break;
             Inc(tries);
             if FVerbose then
               infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.',etDebug);
+          end
+          else
+          begin
+            //For GitHub
+            //See: https://developer.github.com/v3/#rate-limiting
+            //GetHeader('X-RateLimit-Remaining');
           end;
         except
           tries:=(MaxRetries+1);
@@ -4383,24 +4433,14 @@ begin
   with aFPHTTPClient do
   begin
     AddHeader(HTTPHEADER,HTTPHEADERVALUE);
-    repeat
-      try
-        HTTPMethod('HEAD', URL, Nil, []);
-        response:=ResponseStatusCode;
-        // 404 Not Found
-        // The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
-        result:=(response<>404);
-        if (NOT result) then
-        begin
-          Inc(tries);
-          if FVerbose then
-            infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' check of ' + URL + '.',etInfo);
-        end;
-      except
-        tries:=(MaxRetries+1);
-      end;
-    until (result or (tries>MaxRetries));
-
+    try
+      HTTPMethod('HEAD', URL, Nil, []);
+      response:=ResponseStatusCode;
+      // 404 Not Found
+      // The requested resource could not be found but may be available in the future. Subsequent requests by the client are permissible.
+      result:=(response<>404);
+    except
+    end;
     // remove additional header
     if GetHeader(HTTPHEADER)=HTTPHEADERVALUE then
     begin
@@ -4922,6 +4962,24 @@ begin
   if Assigned(FOnWriteStream) then
     FOnWriteStream(Self, Self.Position);
 end;
+
+
+procedure FinaGitHubStore;
+var
+  aStore:TGitHubStore;
+begin
+  if Length(GitHubFileListCache)>0 then
+  begin
+    for aStore in GitHubFileListCache do
+    begin
+      if Assigned(aStore.FileList) then aStore.FileList.Free
+    end;
+  end;
+  Finalize(GitHubFileListCache);
+end;
+
+finalization
+  FinaGitHubStore;
 
 end.
 
