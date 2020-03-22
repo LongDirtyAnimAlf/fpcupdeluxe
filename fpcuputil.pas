@@ -1048,7 +1048,13 @@ begin
     //-iVSPTPSOTO
     begin
       Output:=TrimRight(Output);
-      if Length(Output)>0 then Result:=Output;
+      if Length(Output)>0 then
+      begin
+        Result:=Output;
+        // 3.0.5 is the same as 3.0.5, but with some fixes.
+        // Tricky ... to be reviewed
+        if Result='3.0.5' then Result:='3.0.4';
+      end;
     end;
   except
   end;
@@ -2208,6 +2214,7 @@ begin
     Extension:='tmp'
   else
     Extension:=Ext;
+  if Extension[1]='.' then Delete(Extension,1,1);
   i:=0;
   repeat
     Result:=Format('%s%.5d.'+Extension,[Start,i]);

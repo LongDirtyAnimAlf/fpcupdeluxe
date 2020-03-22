@@ -71,6 +71,7 @@ const
   LAZARUSFTPURL         = FTPBASEURL+'lazarus/';
 
   FPCFTPSNAPSHOTURL     = FPCFTPURL+'snapshot/';
+
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
   BINUTILSURL           = FPCBASESVNURL + '/fpcbuild';
