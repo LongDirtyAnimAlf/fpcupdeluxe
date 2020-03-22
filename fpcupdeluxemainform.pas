@@ -3100,7 +3100,7 @@ begin
         //Only auto-install win32 -> win64 crossutils
         s:=_LAZARUS+','+_LAZARUS+_CROSSWIN;
       {$ELSE}
-        {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64) or defined(OPENBSD)}
+        {$IF defined(CPUAARCH64) or defined(CPUARM) or defined(CPUARMHF) or defined(HAIKU) or defined(CPUPOWERPC64)}
           s:=_LAZARUSSIMPLE;
         {$ELSE}
           s:=_LAZARUS;
