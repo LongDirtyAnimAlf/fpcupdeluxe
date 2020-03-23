@@ -2054,14 +2054,11 @@ begin
 end;
 
 function TFPCInstaller.DownloadBootstrapCompiler: boolean;
-// Should be done after we have unzip executable (on Windows: in FMakePath)
 var
   BootstrapFileArchiveDir: string;
-  BootstrapFilePath,BootstrapFileExt: string;
-  CompilerName:string; // File name of compiler in bootstrap archive
-  ExtractedCompilerName: string;
+  BootstrapFilePath: string;
+  CompilerName:string;
   OperationSucceeded: boolean;
-  ArchiveTypeExt:string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (DownloadBootstrapCompiler): ';
 
@@ -2079,94 +2076,94 @@ begin
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
-  //BootstrapFileArchiveDir:=GetTempDirName('','FPCUPTMP');
-  BootstrapFileArchiveDir:='C:\Users\Alfred\AppData\Local\Temp\FPCUPTMP00000';
+  BootstrapFileArchiveDir:=GetTempDirName('','FPCUPTMP');
   ForceDirectoriesSafe(BootstrapFileArchiveDir);
   BootstrapFileArchiveDir:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir);
   BootstrapFilePath:=BootstrapFileArchiveDir+GetFileNameFromURL(FBootstrapCompilerURL);
-  BootstrapFileExt:=ExtractFileExt(BootstrapFilePath);
+  CompilerName:=ExtractFileName(FBootstrapCompiler);
 
+  // Delete old compiler in archive directory (if any)
+  SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
 
-  {
   if OperationSucceeded then
   begin
-    OperationSucceeded:=GetFile(FBootstrapCompilerURL,BootstrapFilePath,true);
-    if FileExists(BootstrapFilePath)=false then OperationSucceeded:=false;
+    if (NOT FileExists(BootstrapFilePath)) then OperationSucceeded:=GetFile(FBootstrapCompilerURL,BootstrapFilePath,true);
+    if OperationSucceeded then OperationSucceeded:=FileExists(BootstrapFilePath);
   end;
-  }
+
   if OperationSucceeded then
   begin
-    CompilerName:=ExtractFileName(FBootstrapCompiler);
+    //Download was successfull
+    //Process result
 
-    if BootstrapFileExt<>GetExeExt then
-    begin
-      // assume we have an archive if the file extension differs from a normal executable extension
+    case ExtractFileExt(BootstrapFilePath) of
 
-      if BootstrapFileExt='.zip' then
-      begin
-        with TNormalUnzipper.Create do
+        '.zip':
         begin
-          try
-            SysUtils.DeleteFile(BootstrapFilePath);
-            OperationSucceeded:=DoUnZip(BootstrapFilePath,ExcludeTrailingPathDelimiter(BootstrapFileArchiveDir),[]);
-          finally
-            Free;
+          with TNormalUnzipper.Create do
+          begin
+            try
+              OperationSucceeded:=DoUnZip(BootstrapFilePath,ExcludeTrailingPathDelimiter(BootstrapFileArchiveDir),[]);
+            finally
+              Free;
+            end;
           end;
         end;
-      end;
 
-      if BootstrapFileExt='.gz' then
-      begin
         {$ifdef MSWINDOWS}
-        //& cmd.exe '/C 7z x "somename.tar.gz" -so | 7z e -aoa -si -ttar -o"somename"'
-        OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath,FVerbose)=0);
-        if OperationSucceeded then
+        '.gz','.bz2':
         begin
-          BootstrapFilePath:=StringReplace(BootstrapFilePath,BootstrapFileExt,'',[]);
-          OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+ExtractFileName(FBootstrapCompiler)+' -r',FVerbose)=0);
+          //& cmd.exe '/C 7z x "somename.tar.gz" -so | 7z e -aoa -si -ttar -o"somename"'
+          OperationSucceeded:=(ExecuteCommand(F7zip+' x -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath,FVerbose)=0);
+          if OperationSucceeded then
+          begin
+            //We now have a .tar file, so remove extension
+            BootstrapFilePath:=StringReplace(BootstrapFilePath,'.gz','',[]);
+            BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
+            OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+' -r',FVerbose)=0);
+          end;
         end;
-        {$else}
+        {$endif MSWINDOWS}
 
-        //tar -zxvf BootstrapFilePath ExtractFileName(FBootstrapCompiler)
-
-        {$endif}
-      end;
-
-
-      {$IFDEF UNIX}
-      {$IFDEF DARWIN}
-      if ExecuteCommand(FTar+' -xf ' + BootstrapArchive + ' -C ' + ArchiveDir ,FVerbose) <> 0 then
-      begin
-        infoln(localinfotext+'Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',etError);
-        OperationSucceeded := False;
-      end
-      {$ELSE}
-      // Extract bz2, overwriting without prompting
-      if ExecuteCommand(FBunzip2+' -d -f -q '+BootstrapFilePath,FVerbose) <> 0 then
-      begin
-        infoln(localinfotext+'Received non-zero exit code extracting bootstrap compiler. This will abort further processing.',etError);
-        OperationSucceeded := False;
-      end;
-      {$ENDIF DARWIN}
-      {$ENDIF UNIX}
-
+        {$ifdef UNIX}
+        '.bz2':
+        begin
+          {$ifdef BSD}
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O ' + CompilerName+'*',FVerbose)=0);
+          {$else}
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName+'*',FVerbose)=0);
+          {$endif}
+        end;
+        '.gz':
+        begin
+          {$ifdef BSD}
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O ' + CompilerName+'*',FVerbose)=0);
+          {$else}
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName+'*',FVerbose)=0);
+          {$endif}
+        end;
+        {$endif UNIX}
 
     end;
 
-    // Get the bootstrapper somewhere inside the temporary directory
-    BootstrapFilePath:=FindFileInDir(ExtractFileName(FBootstrapCompiler),ExcludeTrailingPathDelimiter(BootstrapFileArchiveDir));
-    if FileExists(BootstrapFilePath) AND (ExtractFileExt(BootstrapFilePath)=GetExeExt) then
+    BootstrapFilePath:=BootstrapFileArchiveDir+CompilerName;
+    if (NOT FileExists(BootstrapFilePath)) then
     begin
-      infoln(localinfotext+'Going to copy '+BootstrapFilePath+' to '+FBootstrapCompiler,etInfo);
-      SysUtils.DeleteFile(FBootstrapCompiler); //ignore errors
-      // We might be moving files across partitions so we cannot use renamefile
-      OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
-      //Sysutils.DeleteFile(ArchiveDir + CompilerName);
+      // Get the bootstrapper somewhere inside the temporary directory
+      BootstrapFilePath:=FindFileInDir(ExtractFileName(FBootstrapCompiler),ExcludeTrailingPathDelimiter(BootstrapFileArchiveDir));
     end;
 
-    SysUtils.DeleteFile(BootstrapFilePath);
-    DeleteDirectoryEx(BootstrapFileArchiveDir);
-
+    if OperationSucceeded then
+    begin
+      if FileExists(BootstrapFilePath) AND (ExtractFileExt(BootstrapFilePath)=GetExeExt) then
+      begin
+        infoln(localinfotext+'Success. Going to copy '+BootstrapFilePath+' to '+FBootstrapCompiler,etInfo);
+        SysUtils.DeleteFile(FBootstrapCompiler); //ignore errors
+        // We might be moving files across partitions so we cannot use renamefile
+        OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, FBootstrapCompiler);
+        //Sysutils.DeleteFile(ArchiveDir + CompilerName);
+      end else OperationSucceeded:=False;
+    end;
   end;
 
   {$IFNDEF MSWINDOWS}
@@ -2181,11 +2178,13 @@ begin
   if OperationSucceeded = True then
   begin
     SysUtils.DeleteFile(BootstrapFilePath);
+    DeleteDirectoryEx(BootstrapFileArchiveDir);
   end
   else
   begin
     infoln(localinfotext+'Getting/extracting bootstrap compiler failed. File: '+BootstrapFilePath, etError);
   end;
+
   Result := OperationSucceeded;
 end;
 
@@ -2286,7 +2285,6 @@ begin
        else aDownLoader:=TNativeDownLoader.Create;
 
     try
-      (*
       if NativeFPCBootstrapCompiler then
       begin
         // first, try official FPC binaries
@@ -2426,23 +2424,6 @@ begin
         end;
 
       end;
-
-      // go ahead with online compiler found !!
-      // get compiler version (if any)
-      {
-      s:=GetCompilerVersion(FCompiler);
-      if (s='0.0.0') AND (aCompilerFound) AND (FBootstrapCompilerURL<>'') then
-      begin
-        if s<>aLocalBootstrapVersion then
-        begin
-          result:=DownloadBootstrapCompiler;
-          if result then
-          begin
-            FCompiler:=FBootstrapCompiler;
-          end;
-        end;
-      end;
-      }
 
       aLookForBetterAlternative:=false;
       {$ifdef Darwin}
@@ -2613,38 +2594,6 @@ begin
           end;
         end;
       end;
-      *)
-      // Panic last resort ... ;-)
-      // Try to get a FPC snapshot binary
-      if (NOT aCompilerFound) AND (FBootstrapCompilerURL='') then
-      begin
-        aCompilerList:=TStringList.Create;
-        try
-          aCompilerList.Clear;
-          GetVersionFromString(aBootstrapVersion,i,j,k);
-          s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetTargetCPUOS+'/';
-          result:=aDownLoader.getFTPFileList(s,aCompilerList);
-          if result then
-          begin
-            for i:=0 to Pred(aCompilerList.Count) do
-            begin
-              if (Pos(GetTargetCPUOS+'-fpc-',aCompilerList[i])=1) then
-              begin
-                // we got a snapshot
-                infoln(localinfotext+'Found a official FPC snapshot achive.',etDebug);
-                aLocalBootstrapVersion:=aBootstrapVersion;
-                FBootstrapCompilerURL:=s+aCompilerList[i];
-                aCompilerFound:=True;
-                // set standard bootstrap compilername
-                FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
-                break;
-              end;
-            end;
-          end;
-        finally
-          aCompilerList.Free;
-        end;
-      end;
 
       // go ahead with compiler found !!
       // get compiler version (if any)
@@ -2656,8 +2605,44 @@ begin
       begin
         if (s='0.0.0') then
         begin
-          infoln(localinfotext+'No bootstrapper local and online. Fatal. Stopping.',etError);
-          exit(false);
+          // Panic last resort ... ;-)
+          // Try to get bootstrapper from a FPC snapshot binary
+          if NativeFPCBootstrapCompiler then
+          begin
+            aCompilerList:=TStringList.Create;
+            try
+              aCompilerList.Clear;
+              GetVersionFromString(aBootstrapVersion,i,j,k);
+              s:=FPCFTPSNAPSHOTURL+'/v'+InttoStr(i)+InttoStr(j)+'/'+GetTargetCPUOS+'/';
+              result:=aDownLoader.getFTPFileList(s,aCompilerList);
+              if result then
+              begin
+                for i:=0 to Pred(aCompilerList.Count) do
+                begin
+                  if (Pos(GetTargetCPUOS+'-fpc-',aCompilerList[i])=1) then
+                  begin
+                    // we got a snapshot
+                    infoln(localinfotext+'Found a official FPC snapshot achive.',etDebug);
+                    aLocalBootstrapVersion:=aBootstrapVersion;
+                    FBootstrapCompilerURL:=s+aCompilerList[i];
+                    aCompilerFound:=True;
+                    // set standard bootstrap compilername
+                    FBootstrapCompiler := IncludeTrailingPathDelimiter(FBootstrapCompilerDirectory)+GetCompilerName(GetTargetCPU);
+                    // as we do not know exactly what we get, set override
+                    FBootstrapCompilerOverrideVersionCheck:=true;
+                    break;
+                  end;
+                end;
+              end;
+            finally
+              aCompilerList.Free;
+            end;
+          end;
+          if NOT aCompilerFound then
+          begin
+            infoln(localinfotext+'No bootstrapper local and online. Fatal. Stopping.',etError);
+            exit(false);
+          end;
         end
         else
         begin
