@@ -2120,7 +2120,7 @@ begin
             //We now have a .tar file, so remove extension
             BootstrapFilePath:=StringReplace(BootstrapFilePath,'.gz','',[]);
             BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
-            OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+' -r',FVerbose)=0);
+            OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+GetExeExt+' -r',FVerbose)=0);
           end;
         end;
         {$endif MSWINDOWS}
@@ -2129,17 +2129,17 @@ begin
         '.bz2':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O ' + CompilerName+'*',FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O *' + CompilerName + GetExeExt,FVerbose)=0);
           {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName+'*',FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName + GetExeExt,FVerbose)=0);
           {$endif}
         end;
         '.gz':
         begin
           {$ifdef BSD}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O ' + CompilerName+'*',FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O *' + CompilerName + GetExeExt,FVerbose)=0);
           {$else}
-          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName+'*',FVerbose)=0);
+          OperationSucceeded:=(ExecuteCommand(FTar+' -xzf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName + GetExeExt,FVerbose)=0);
           {$endif}
         end;
         {$endif UNIX}

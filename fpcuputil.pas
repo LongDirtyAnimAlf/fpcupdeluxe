@@ -1051,9 +1051,6 @@ begin
       if Length(Output)>0 then
       begin
         Result:=Output;
-        // 3.0.5 is the same as 3.0.5, but with some fixes.
-        // Tricky ... to be reviewed
-        if Result='3.0.5' then Result:='3.0.4';
       end;
     end;
   except
