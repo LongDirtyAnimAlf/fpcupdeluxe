@@ -2144,6 +2144,16 @@ begin
         end;
         {$endif UNIX}
 
+        else
+        begin
+          if ExtractFileExt(BootstrapFilePath)=GetExeExt then
+          begin
+            // Normal exe ... rename towards correct name
+            // OperationSucceeded:=MoveFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+            OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+          end;
+        end;
+
     end;
 
     BootstrapFilePath:=BootstrapFileArchiveDir+CompilerName;
