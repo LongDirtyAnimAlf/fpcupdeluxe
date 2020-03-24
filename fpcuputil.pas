@@ -297,7 +297,7 @@ function StripUrl(URL:string): string;
 function GetCompilerVersion(CompilerPath: string): string;
 function GetCompilerRevision(CompilerPath: string): integer;
 function GetLazbuildVersion(LazbuildPath: string): string;
-procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
+procedure GetVersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
 function GetNumericalVersion(VersionSnippet: string): word;
 function GetVersionFromUrl(URL:string): string;
@@ -437,14 +437,16 @@ uses
   ;
 
 const
-  NORMALUSERAGENT = 'curl/7.50.1 (i686-pc-linux-gnu) libcurl/7.50.1 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
-  //USERAGENT = 'Mozilla/5.0 (compatible; fpweb)';
-  CURLUSERAGENT='curl/7.51.0';
+  //NORMALUSERAGENT = 'curl/7.50.1 (i686-pc-linux-gnu) libcurl/7.50.1 OpenSSL/1.0.1t zlib/1.2.8 libidn/1.29 libssh2/1.4.3 librtmp/2.3';
+  NORMALUSERAGENT = 'Mozilla/5.0 (compatible; fpweb)';
   FPCUPUSERAGENT = 'fpcupdeluxe';
+  {$IFDEF ENABLEWGET}
+  CURLUSERAGENT='curl/7.50.1';
+  //CURLUSERAGENT='curl/7.51.0';
+  {$ENDIF}
   {$IFDEF MSWINDOWS}
   WININETUSERAGENT = 'Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0; WinInet)';
   {$ENDIF MSWINDOWS}
-
 
 {$i revision.inc}
 
@@ -1174,7 +1176,7 @@ begin
   end;
 end;
 
-procedure GetVersionFromString(const VersionSnippet:string;var Major,Minor,Build: Integer);
+procedure GetVersionFromString(const VersionSnippet:string;out Major,Minor,Build: Integer);
 var
   i,j:integer;
   found:boolean;
@@ -1912,9 +1914,7 @@ begin
       begin
         aDownLoader.UserAgent:=FPCUPUSERAGENT;
         aDownLoader.ContentType:='application/json';
-      end
-      else
-        aDownLoader.UserAgent:=NORMALUSERAGENT;
+      end;
       result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
@@ -1946,11 +1946,14 @@ begin
   begin
     aDownLoader:=TWGetDownLoader.Create;
     try
-      result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      if (NOT (aDownLoader is TUseNativeDownLoader)) then
+      begin
+        result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+        if (NOT result) then infoln('FPCUP force wget downloader failure.',etDebug);
+      end;
     finally
       aDownLoader.Destroy;
     end;
-    if (NOT result) then infoln('FPCUP wget downloader failure.',etDebug);
   end;
 
 end;
@@ -1973,14 +1976,12 @@ begin
       begin
         aDownLoader.UserAgent:=FPCUPUSERAGENT;
         aDownLoader.ContentType:='application/json';
-      end
-      else
-        aDownLoader.UserAgent:=NORMALUSERAGENT;
+      end;
       result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
     end;
-    if (NOT result) then infoln('FPCUP downloader failure.',etDebug);
+    if (NOT result) then infoln('FPCUP native downloader failure.',etWarning);
   end;
 
   {$ifdef Windows}
@@ -2029,11 +2030,7 @@ end;
 
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 var
-  {$ifdef Darwin}
-  Http:TNSHTTPSendAndReceive;
-  {$else}
   Http: TFPHTTPClient;
-  {$endif}
   Ms: TMemoryStream;
   JSONFileList:TStringList;
   Content : string;
@@ -2044,6 +2041,7 @@ var
   aStore:TGitHubStore;
 begin
   result:=false;
+
   Content:='';
 
   if (aURL='') then exit;
@@ -2076,52 +2074,8 @@ begin
   end;
   infoln('GetGitHubFileList :Created cache for GitHub URL: '+aURL,etDebug);
 
-  {$ifdef Darwin}
-  // GitHub needs TLS 1.2 .... native FPC client does not support this (through OpenSSL)
-  // So, use client by Phil, a Lazarus forum member
-  // See: https://macpgmr.github.io/
-  Http:=TNSHTTPSendAndReceive.Create;
-  try
-    Http.Address := aURL;
-    if (Pos('api.github.com',aURL)>0) AND (Pos('fpcupdeluxe',aURL)>0) then
-    begin
-      Http.UserAgent:=FPCUPUSERAGENT;
-      Http.ContentType:='application/json';
-    end
-    else
-      Http.UserAgent:=NORMALUSERAGENT;
-    if Length(HTTPProxyHost)>0 then
-    begin
-      with Http do
-      begin
-        Proxy.Host:=HTTPProxyHost;
-        Proxy.Port:=HTTPProxyPort;
-        Proxy.UserName:=HTTPProxyUser;
-        Proxy.Password:=HTTPProxyPassword;
-      end;
-    end;
-    Ms := TMemoryStream.Create;
-    try
-      if Http.SendAndReceive(nil, Ms) then
-      begin
-        SetLength(Content, Ms.Size);
-        if Ms.Size > 0 then
-        begin
-          Ms.Read(Content[1], Ms.Size);
-          result:=true;
-        end;
-      end;
-    finally
-      Ms.Free;
-    end;
-  finally
-    Http.Free;
-  end;
-  {$else}
-
   if (NOT result) then
   begin
-
     Ms := TMemoryStream.Create;
     try
       result:=Download(
@@ -2132,6 +2086,20 @@ begin
             HTTPProxyPort,
             HTTPProxyUser,
             HTTPProxyPassword);
+
+      if (NOT result) then
+      begin
+        //retry
+        Ms.Clear;
+        result:=Download(
+              true,
+              aURL,
+              Ms,
+              HTTPProxyUser,
+              HTTPProxyPort,
+              HTTPProxyUser,
+              HTTPProxyPassword);
+      end;
       if result then
       begin
         JSONFileList:=TStringList.Create;
@@ -2147,38 +2115,6 @@ begin
       Ms.Free;
     end;
   end;
-
-  if (NOT result) then
-  begin
-    Http:=TFPHTTPClient.Create(Nil);
-    try
-      if (Pos('api.github.com',aURL)>0) AND (Pos('fpcupdeluxe',aURL)>0) then
-        Http.AddHeader('User-Agent',FPCUPUSERAGENT)
-      else
-        Http.AddHeader('User-Agent',NORMALUSERAGENT);
-      Http.AddHeader('Content-Type', 'application/json');
-      {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-      Http.IOTimeout:=5000;
-      Http.AllowRedirect:=true;
-      {$ENDIF}
-      if Length(HTTPProxyHost)>0 then
-      begin
-        with Http do
-        begin
-          {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
-          Proxy.Host:=HTTPProxyHost;
-          Proxy.Port:=HTTPProxyPort;
-          Proxy.UserName:=HTTPProxyUser;
-          Proxy.Password:=HTTPProxyPassword;
-          {$endif}
-        end;
-      end;
-      Content:=Http.Get(aURL);
-    finally
-      Http.Free;
-    end;
-  end;
-  {$endif}
 
   if (Length(Content)=0) OR (NOT result) then exit;
   Json:=GetJSON(Content);
@@ -4182,6 +4118,7 @@ begin
   with aFPHTTPClient do
   begin
     TimeOut:=10000;
+    UserAgent:=NORMALUSERAGENT;
   end;
   {$else}
   aFPHTTPClient:=TFPHTTPClient.Create(Nil);
@@ -4412,17 +4349,21 @@ var
   aDownloadStream:TDownloadStream;
 begin
   result:=false;
+
+  if DataStream=nil then exit;
+
   URI:=ParseURI(URL);
   aPort:=URI.Port;
   if aPort=0 then aPort:=21;
-  Result := False;
 
   aDownloadStream := TDownloadStream.Create(DataStream);
-  aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
-  StoredTickCount:=GetUpTickCount;
+  if (DataStream is TFileStream) then
+  begin
+    aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
+    StoredTickCount:=GetUpTickCount;
+  end;
 
   try
-
     with TFTPSend.Create do
     try
       TargetHost := URI.Host;
@@ -4473,23 +4414,28 @@ function TUseNativeDownLoader.HTTPDownload(Const URL : String; DataStream: TStre
 var
   tries:byte;
   response: Integer;
-  aStream:TDownloadStream;
+  aDownloadStream:TDownloadStream;
 begin
   result:=false;
   tries:=0;
 
-  aStream := TDownloadStream.Create(DataStream);
-  aStream.FOnWriteStream:=@DoOnWriteStream;
-  StoredTickCount:=GetUpTickCount;
+  if DataStream=nil then exit;
+
+  aDownloadStream := TDownloadStream.Create(DataStream);
+  if (DataStream is TFileStream) then
+  begin
+    aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
+    StoredTickCount:=GetUpTickCount;
+  end;
 
   try
     with aFPHTTPClient do
     begin
       repeat
         try
-          aStream.Position:=0;
-          aStream.Size:=0;
-          Get(URL,aStream);
+          aDownloadStream.Position:=0;
+          aDownloadStream.Size:=0;
+          Get(URL,aDownloadStream);
           response:=ResponseStatusCode;
           result:=(response=200);
           //result:=(response>=100) and (response<300);
@@ -4511,7 +4457,7 @@ begin
       until (result or (tries>MaxRetries));
     end;
   finally
-    aStream.Free;
+    aDownloadStream.Free;
   end;
 end;
 
@@ -5038,6 +4984,12 @@ begin
 
   try
     aDownloadStream:=TDownloadStream.Create(DataStream);
+    if (DataStream is TFileStream) then
+    begin
+      aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
+      StoredTickCount:=GetUpTickCount;
+    end;
+
     aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
     StoredTickCount:=GetUpTickCount;
     try

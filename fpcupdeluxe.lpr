@@ -86,8 +86,12 @@ uses
   //{$endif}
   {$endif}
   {$ifdef Darwin}
+  {$ifndef CPUX86_64}
   m_crossdarwin64,
+  {$endif}
+  {$ifndef CPUX86}
   m_crossdarwin32,
+  {$endif}
   m_crossdarwinpowerpc,
   m_crossdarwinarm,
   m_crossdarwinaarch64,

@@ -533,7 +533,9 @@ var
   LibsAvailable,BinsAvailable:boolean;
   MakeCycle:TSTEPS;
   ARMArch:TARMARCH;
+  {$ifdef Darwin}
   Minimum_OSX,Minimum_iOS:string;
+  {$endif}
 begin
   result:=inherited;
   // Make crosscompiler using new compiler
@@ -631,6 +633,7 @@ begin
         if CrossInstaller.BinUtilsPathInPath then
            SetPath(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath),false,true);
 
+        {$ifdef Darwin}
         //Get minimum Mac OS X deployment version: 10.4, 10.5.1, ... (Darwin)
         //Get minimum iOS deployment version: 8.0, 8.0.2, ... (iphonesim)
         //Add minimum required OSX/iOS version to prevent "crti not found" errors.
@@ -675,6 +678,7 @@ begin
             Minimum_iOS:='-WP'+s1;
           end;
         end else Minimum_iOS:=CrossInstaller.CrossOpt[i];
+        {$endif}
 
         for MakeCycle:=Low(TSTEPS) to High(TSTEPS) do
         begin
@@ -1365,8 +1369,12 @@ var
   {$IFDEF MSWINDOWS}
   FileCounter:integer;
   {$ENDIF}
-  s1,s2,s3:string;
-  FPCDirStore:string;
+  s1,s2:string;
+  {$IFDEF UNIX}
+  s3:string;
+  {$ENDIF}
+
+  //FPCDirStore:string;
 begin
   result:=inherited;
   OperationSucceeded:=true;
@@ -2076,17 +2084,21 @@ begin
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
-  BootstrapFileArchiveDir:=GetTempDirName;
-  ForceDirectoriesSafe(BootstrapFileArchiveDir);
-  BootstrapFileArchiveDir:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir);
-  BootstrapFilePath:=BootstrapFileArchiveDir+GetFileNameFromURL(FBootstrapCompilerURL);
-  CompilerName:=ExtractFileName(FBootstrapCompiler);
-
-  // Delete old compiler in archive directory (if any)
-  SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
+  if OperationSucceeded then
+  begin
+    BootstrapFileArchiveDir:=GetTempDirName;
+    OperationSucceeded:=ForceDirectoriesSafe(BootstrapFileArchiveDir);
+    if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+BootstrapFileArchiveDir,etError);
+  end;
 
   if OperationSucceeded then
   begin
+    BootstrapFileArchiveDir:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir);
+    BootstrapFilePath:=BootstrapFileArchiveDir+GetFileNameFromURL(FBootstrapCompilerURL);
+    CompilerName:=ExtractFileName(FBootstrapCompiler);
+
+    // Delete old compiler in archive directory (if any)
+    SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
     if (NOT FileExists(BootstrapFilePath)) then OperationSucceeded:=GetFile(FBootstrapCompilerURL,BootstrapFilePath,true);
     if OperationSucceeded then OperationSucceeded:=FileExists(BootstrapFilePath);
   end;

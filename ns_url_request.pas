@@ -202,7 +202,7 @@ begin
   j:=IndexOfHeader(AHeader);
   if (J<>-1) then
     FRequestHeaders.Delete(j);
-  FRequestHeaders.Add(AHeader+': '+Avalue);
+  FRequestHeaders.AddPair(AHeader,AValue);
 end;
 
 function TCustomNSHTTPSendAndReceive.IndexOfHeader(const AHeader: String): Integer;
@@ -213,7 +213,7 @@ begin
   H:=LowerCase(AHeader);
   LH:=Length(AHeader);
   Result:=FRequestHeaders.Count-1;
-  While (Result>=0) and ((LowerCase(Copy(FRequestHeaders[Result],1,LH)))<>H) do
+  while (Result>=0) and (LowerCase(FRequestHeaders.Names[Result])<>H) do
     Dec(Result);
 end;
 
@@ -225,14 +225,7 @@ begin
   if (I=-1) then
     Result:=''
   else
-    begin
-      Result:=FRequestHeaders[i];
-      I:=Pos(':',Result);
-      if (I=0) then
-        I:=Length(Result);
-      System.Delete(Result,1,I);
-      Result:=TrimLeft(Result);
-    end;
+    Result:=FRequestHeaders.ValueFromIndex[I];
 end;
 
 procedure TCustomNSHTTPSendAndReceive.HTTPMethod(const AMethod, AURL: String;
