@@ -1938,7 +1938,7 @@ var
 begin
   result:='0.0.0';
 
-  s:=IncludeTrailingPathDelimiter(aSourcePath) + FPCMAKEFILENAME;
+  s:=IncludeTrailingPathDelimiter(aSourcePath) + MAKEFILENAME;
 
   if FileExists(s) then
   begin
@@ -2005,7 +2005,7 @@ begin
     FinalVersion:=FinalVersion MOD 100;
     result:=result+'.'+InttoStr(FinalVersion);
 
-  end else infoln('Tried to get required bootstrap compiler version from '+FPCMAKEFILENAME+', but no '+FPCMAKEFILENAME+' found',etError);
+  end else infoln('Tried to get required bootstrap compiler version from '+MAKEFILENAME+', but no '+MAKEFILENAME+' found',etError);
 end;
 
 function TFPCInstaller.CreateFPCScript: boolean;
