@@ -1773,7 +1773,7 @@ begin
     {$endif win64}
     if CrossWin then
     begin
-      LHelpTemp:=GetTempFileName('','');
+      LHelpTemp:=GetTempFileNameExt('','');
       try
         CopyFile(
           IncludeTrailingPathDelimiter(FInstallDirectory)+'components'+DirectorySeparator+'chmhelp'+DirectorySeparator+'lhelp'+DirectorySeparator+'lhelp'+GetExeExt,

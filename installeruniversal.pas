@@ -1853,7 +1853,7 @@ begin
         end;
         //If no extension, assume zip
         if Length(aName)=0 then aName:='zip';
-        aFile := GetTempFileNameExt('','FPCUPTMP',aName);
+        aFile := GetTempFileNameExt('FPCUPTMP',aName);
         WritelnLog(infotext+'Going to download '+RemoteURL+' into '+aFile,false);
         try
           result:=Download(FUseWget, RemoteURL, aFile);

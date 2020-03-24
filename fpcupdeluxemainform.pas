@@ -2758,7 +2758,7 @@ begin
                   DownloadURL:=FPCUPGITREPO+'/releases/download/'+BinsURL+'/'+TargetFile;
                   AddMessage('Found correct online binutils at: '+DownloadURL);
                   AddMessage('Going to download the cross-bins. Can (will) take some time !',True);
-                  TargetFile := SysUtils.GetTempDir+TargetFile;
+                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
                   success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                   if success then AddMessage('Download successfull !');
@@ -2910,7 +2910,7 @@ begin
                   DownloadURL:=FPCUPGITREPO+'/releases/download/'+LibsURL+'/'+TargetFile;
                   AddMessage('Found correct online libraries at: '+DownloadURL);
                   AddMessage('Going to download the cross-libraries. Can (will) take some time !',True);
-                  TargetFile := SysUtils.GetTempDir+TargetFile;
+                  TargetFile := IncludeTrailingPathDelimiter(FPCupManager.TempDirectory)+TargetFile;
                   SysUtils.DeleteFile(TargetFile);
                   success:=DownLoad(FPCupManager.UseWget,DownloadURL,TargetFile,FPCupManager.HTTPProxyHost,FPCupManager.HTTPProxyPort,FPCupManager.HTTPProxyUser,FPCupManager.HTTPProxyPassword);
                   if success then AddMessage('Download successfull !');
@@ -3435,10 +3435,6 @@ begin
   StatusMessage.Text:=sStatus;
 
   if CheckAutoClear.Checked then memoSummary.Lines.Clear;
-
-  AddMessage(Self.Caption);
-  AddMessage('');
-
 end;
 
 function TForm1.RealRun:boolean;

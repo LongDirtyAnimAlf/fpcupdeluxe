@@ -30,6 +30,8 @@ uses
   repoclient, GitClient, HGClient, SvnClient,
   processutils, m_crossinstaller, fpcuputil;
 
+{$i revision.inc}
+
 const
   DEFAULTFPCVERSION     = '3.0.4';
   DEFAULTLAZARUSVERSION = '2.0.6';
@@ -315,6 +317,7 @@ type
     FBaseDirectory: string; //Base directory for fpc(laz)up(deluxe) install itself
     FSourceDirectory: string; //Top source directory for a product (FPC, Lazarus)
     FInstallDirectory: string; //Top install directory for a product (FPC, Lazarus)
+    FTempDirectory: string; //For storing temp files and logs
     FCompiler: string; // Compiler executable
     FCompilerOptions: string; //options passed when compiling (FPC or Lazarus currently)
     FCPUCount: integer; //logical cpu count (i.e. hyperthreading=2cpus)
@@ -433,6 +436,8 @@ type
     property BaseDirectory: string write FBaseDirectory;
     // Source directory for installation (fpcdir, lazdir,... option)
     property InstallDirectory: string write FInstallDirectory;
+    //Base directory for fpc(laz)up(deluxe) itself
+    property TempDirectory: string write FTempDirectory;
     // Compiler to use for building. Specify empty string when using bootstrap compiler.
     property Compiler: string {read GetCompiler} write FCompiler;
     // Compiler options passed on to make as OPT= or FPCOPT=
@@ -500,6 +505,8 @@ type
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
     function GetSuitableRepoClient:TRepoClient;
+    function GetTempFileNameExt(Prefix,Ext : String) : String;
+    function GetTempDirName(Prefix: String='fpcup') : String;
     // Build module
     function BuildModule(ModuleName: string): boolean; virtual;
     // Clean up environment
@@ -1686,7 +1693,7 @@ begin
              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed '+''''+'s/$'+''''+'"/`echo \\\r`/" '+DiffFile+' > '+DiffFile, FSourceDirectory, FVerbose);
              //CheckoutOrUpdateReturnCode:=ExecuteCommandInDir('sed -i '+''''+'s/$/\r/'+''''+' '+DiffFile, FSourceDirectory, FVerbose);
 
-             DiffFileCorrectedPath:=SysUtils.GetTempDir+ExtractFileName(DiffFile);
+             DiffFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(DiffFile);
              if FileCorrectLineEndings(DiffFile,DiffFileCorrectedPath) then
              begin
                if FileExists(DiffFileCorrectedPath) then
@@ -1967,7 +1974,7 @@ begin
 
   infoln(localinfotext+'Getting '+ModuleName+' sources.',etInfo);
 
-  FPCArchive := GetTempFileNameExt('','FPCUPTMP','zip');
+  FPCArchive := GetTempFileNameExt('FPCUPTMP','zip');
   result:=GetFile(FURL,FPCArchive,true);
   if (result AND (NOT FileExists(FPCArchive))) then result:=false;
 
@@ -2155,7 +2162,7 @@ begin
 
   OperationSucceeded := false;
 
-  SVNZip := GetTempFileNameExt('','FPCUPTMP','zip');
+  SVNZip := GetTempFileNameExt('FPCUPTMP','zip');
 
   ForceDirectoriesSafe(FSVNDirectory);
 
@@ -2220,7 +2227,7 @@ begin
 
   OperationSucceeded := false;
 
-  OpenSSLFileName := GetTempFileNameExt('','FPCUPTMP','zip');
+  OpenSSLFileName := GetTempFileNameExt('FPCUPTMP','zip');
 
   for i:=0 to (Length(OpenSSLSourceURL)-1) do
   try
@@ -2354,7 +2361,7 @@ begin
   begin
     WgetExe := IncludeTrailingPathDelimiter(FMakeDir)+'wget'+DirectorySeparator+'wget.exe';
 
-    WgetZip := GetTempFileNameExt('','FPCUPTMP','zip');
+    WgetZip := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(NewSourceURL)-1) do
     try
@@ -2409,7 +2416,7 @@ begin
   if NOT FileExists(FreetypeBin) then
   begin
 
-    FreetypZip := GetTempFileNameExt('','FPCUPTMP','zip');
+    FreetypZip := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(NewSourceURL)-1) do
     try
@@ -2438,7 +2445,7 @@ begin
 
   if OperationSucceeded then
   begin
-    FreetypZipDir:=IncludeTrailingPathDelimiter(SysUtils.GetTempDir)+'Freetype';
+    FreetypZipDir:=IncludeTrailingPathDelimiter(GetTempDirName)+'Freetype';
     // Extract
     with TNormalUnzipper.Create do
     begin
@@ -2489,7 +2496,7 @@ begin
   if NOT FileExists(TargetBin) then
   begin
 
-    SourceZip := GetTempFileNameExt('','FPCUPTMP','zip');
+    SourceZip := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(SOURCEURL)-1) do
     try
@@ -2518,7 +2525,7 @@ begin
 
   if OperationSucceeded then
   begin
-    ZipDir:=GetTempDirName('','FPCUPTMP');
+    ZipDir:=GetTempDirName;
     // Extract
     with TNormalUnzipper.Create do
     begin
@@ -2576,7 +2583,7 @@ begin
   begin
     infoln(localinfotext+'No '+TARGETNAME+' found. Going to download it.');
 
-    SourceZip := GetTempFileNameExt('','FPCUPTMP','zip');
+    SourceZip := GetTempFileNameExt('FPCUPTMP','zip');
 
     for i:=0 to (Length(SOURCEURL)-1) do
     try
@@ -2605,7 +2612,7 @@ begin
 
   if OperationSucceeded then
   begin
-    ZipDir:=GetTempDirName('','FPCUPTMP');
+    ZipDir:=GetTempDirName;
     // Extract
     with TNormalUnzipper.Create do
     begin
@@ -2642,8 +2649,9 @@ begin
     if (NOT Assigned(FLogVerbose)) then
     begin
       FLogVerbose:=TLogger.Create;
-      FLogVerbose.LogFile:=GetTempFileNameExt('','FPCUPLOG','log');
-      WritelnLog(localinfotext+'Verbose output saved to ' + FLogVerbose.LogFile, false);
+      FLogVerbose.LogFile:=GetTempFileNameExt('FPCUPLOG','log');
+      WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
+      WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
     end;
     FLogVerbose.WriteLog(Output,false);
   end;
@@ -2734,7 +2742,7 @@ var
   TempFileName: string;
 begin
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+': ';
-  TempFileName := GetTempFileNameExt('','FPCUPDUMP','dump');
+  TempFileName := GetTempFileNameExt('FPCUPDUMP','dump');
   if IsException then
   begin
     WritelnLog(etError, localinfotext+'Exception raised running ' + Sender.ResultingCommand, true);
@@ -2837,6 +2845,43 @@ begin
 
   if result=nil then if DirectoryExists(IncludeTrailingPathDelimiter(FSourceDirectory)+'.git') then result:=FGitClient;
   if result=nil then if ( {(Pos('GITHUB',UpperCase(FURL))>0) OR} (Pos('.GIT',UpperCase(FURL))>0) ) then result:=FGitClient;
+end;
+
+function TInstaller.GetTempFileNameExt(Prefix,Ext : String) : String;
+Var
+  I : Integer;
+  Start,Extension : String;
+begin
+  Start:=FTempDirectory;
+  Start:=Start+DirectorySeparator;
+  if (Prefix='') then
+    Start:=Start+'fpcup'
+  else
+    Start:=Start+Prefix;
+  if (Ext='') then
+    Extension:='tmp'
+  else
+    Extension:=Ext;
+  if Extension[1]='.' then Delete(Extension,1,1);
+  i:=0;
+  repeat
+    Result:=Format('%s%.5d.'+Extension,[Start,i]);
+    Inc(i);
+  until not FileExists(Result);
+end;
+
+function TInstaller.GetTempDirName(Prefix: String) : String;
+Var
+  I : Integer;
+  Start : String;
+begin
+  Start:=FTempDirectory;
+  Start:=Start+DirectorySeparator+Prefix;
+  i:=0;
+  repeat
+    Result:=Format('%s%.5d',[Start,i]);
+    Inc(i);
+  until not DirectoryExists(Result);
 end;
 
 function TInstaller.BuildModule(ModuleName: string): boolean;
@@ -3345,7 +3390,7 @@ begin
              else LocalPatchCmd:=Trim(FPatchCmd) + ' ';
 
           // always correct for line-endings while patch is very sensitive for that
-          PatchFileCorrectedPath:=SysUtils.GetTempDir+ExtractFileName(PatchFilePath);
+          PatchFileCorrectedPath:=IncludeTrailingPathDelimiter(GetTempDirName)+ExtractFileName(PatchFilePath);
           if FileCorrectLineEndings(PatchFilePath,PatchFileCorrectedPath) then
           begin
             // revert to original file in case of file not found

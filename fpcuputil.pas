@@ -322,10 +322,6 @@ function ParentDirectoryIsNotRoot(Dir:string):boolean;
 procedure infoln(Message: string; const Level: TEventType=etInfo);
 // Moves file if it exists, overwriting destination file
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
-//Get a temp file
-Function GetTempFileNameExt(Const Dir,Prefix,Ext : String) : String;
-//Get a temp directory
-Function GetTempDirName(Const Dir,Prefix : String) : String;
 // Correct line-endings
 function FileCorrectLineEndings(const SrcFilename, DestFilename: string): boolean;
 // Correct directory separators
@@ -368,7 +364,7 @@ function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
 //Find a library, if any
 function LibWhich(aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
-function Which(Executable: string): string;
+function Which(const Executable: string): string;
 function IsExecutable(Executable: string):boolean;
 function ForceDirectoriesSafe(Const Dir: RawByteString): Boolean;
 function CheckExecutable(Executable, Parameters, ExpectOutput: string): boolean;
@@ -735,6 +731,64 @@ begin
   {$ENDIF}
   result:=IncludeTrailingPathDelimiter(result);
 end;
+
+
+function SafeGetApplicationTempPath(Global:boolean=false): String;
+{$IFDEF DARWIN}
+const
+  kMaxPath = 1024;
+var
+  theError: OSErr;
+  theRef: FSRef;
+  pathBuffer: PChar;
+{$ENDIF}
+begin
+  result:='';
+  {$IFDEF DARWIN}
+  theRef := Default(FSRef); // init
+  try
+    pathBuffer := Allocmem(kMaxPath);
+  except on exception
+    do exit;
+  end;
+  try
+    Fillchar(pathBuffer^, kMaxPath, #0);
+    Fillchar(theRef, Sizeof(theRef), #0);
+    if Global then // kLocalDomain
+      theError := FSFindFolder(kLocalDomain, kTemporaryFolderType, kDontCreateFolder, theRef)
+    else // kUserDomain
+      theError := FSFindFolder(kUserDomain , kTemporaryFolderType, kDontCreateFolder, theRef);
+    if (pathBuffer <> nil) and (theError = noErr) then
+    begin
+      theError := FSRefMakePath(theRef, pathBuffer, kMaxPath);
+      if theError = noErr then
+        result := UTF8ToAnsi(StrPas(pathBuffer));
+    end;
+  finally
+    Freemem(pathBuffer);
+  end;
+  {$ELSE}
+  {$IFDEF MSWINDOWS}
+  if Global then
+    result:=GetWindowsSpecialDir(CSIDL_COMMON_APPDATA)
+  else
+    result:=GetWindowsSpecialDir(CSIDL_LOCAL_APPDATA);
+  {$ELSE}
+  if Global then
+    result:=SysConfigDir
+  else
+  begin
+    result:=GetEnvironmentVariable('HOME');
+    if (result='') then
+      result:=SafeExpandFileName('~/.cache')
+    else
+      result:=IncludeTrailingPathDelimiter(result) + '.cache';
+  end;
+  {$ENDIF}
+  {$ENDIF}
+  result:=IncludeTrailingPathDelimiter(result);
+end;
+
 
 function SaveFileFromResource(filename,resourcename:string):boolean;
 var
@@ -1792,7 +1846,7 @@ begin
 
   if (NOT result) then
   begin
-    JSONFile := GetTempFileNameExt('','FPCUPTMP','tmp');
+    JSONFile := SysUtils.GetTempFileName(GetTempDir(false),'FPCUPTMP');
 
     result:=Download(
           False,
@@ -2177,8 +2231,7 @@ begin
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
       writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-      //sleep(200); //hopefully allow output to be written without interfering with other output
-      sleep(1);
+      sleep(0);
     end
   else
     begin
@@ -2187,59 +2240,11 @@ begin
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
     writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-    //sleep(200); //hopefully allow output to be written without interfering with other output
-    sleep(1);
+    sleep(0);
     {$ENDIF}
     end;
 {$ENDIF NOCONSOLE}
 end;
-
-Function GetTempFileNameExt(Const Dir,Prefix,Ext : String) : String;
-Var
-  I : Integer;
-  Start,Extension : String;
-begin
-  if (Dir='') then
-    Start:=GetTempDir
-  else
-    Start:=IncludeTrailingPathDelimiter(Dir);
-  if (Prefix='') then
-    Start:=Start+'TMP'
-  else
-    Start:=Start+Prefix;
-  if (Ext='') then
-    Extension:='tmp'
-  else
-    Extension:=Ext;
-  if Extension[1]='.' then Delete(Extension,1,1);
-  i:=0;
-  repeat
-    Result:=Format('%s%.5d.'+Extension,[Start,i]);
-    Inc(i);
-  until not FileExists(Result);
-end;
-
-
-Function GetTempDirName(Const Dir,Prefix : String) : String;
-Var
-  I : Integer;
-  Start,Extension : String;
-begin
-  if (Dir='') then
-    Start:=GetTempDir
-  else
-    Start:=IncludeTrailingPathDelimiter(Dir);
-  if (Prefix='') then
-    Start:=Start+'TMP'
-  else
-    Start:=Start+Prefix;
-  i:=0;
-  repeat
-    Result:=Format('%s%.5d',[Start,i]);
-    Inc(i);
-  until not DirectoryExists(Result);
-end;
-
 
 function MoveFile(const SrcFilename, DestFilename: string): boolean;
 // We might (in theory) be moving files across partitions so we cannot use renamefile
@@ -2360,7 +2365,6 @@ begin
   else
     result:=s;
 end;
-
 
 
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
@@ -2872,10 +2876,19 @@ begin
   result:=(Pos(aLibrary,Output)>0);
 end;
 
-function Which(Executable: string): string;
+function Which(const Executable: string): string;
 var
   Output: string;
 begin
+  (*
+  {$IFDEF Windows}
+  if ExtractFileExt(Executable)='' then
+     result:=ExeSearch(Executable+'.exe',SysUtils.GetEnvironmentVariable('PATH'))
+  else
+  {$ENDIF}
+  result:=ExeSearch(Executable,SysUtils.GetEnvironmentVariable('PATH'));
+  *)
+
   result:=FindDefaultExecutablePath(Executable);
 
   {$IFNDEF FREEBSD}
@@ -3421,9 +3434,7 @@ begin
   result:='';
   if (Length(aURL)>0) then
   begin
-
-    JSONFile := GetTempFileNameExt('','FPCUPTMP','tmp');
-
+    JSONFile := SysUtils.GetTempFileName(GetTempDir(false),'FPCUPTMP');
     Success:=Download(
              False,
              aURL,

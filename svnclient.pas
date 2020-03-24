@@ -248,7 +248,7 @@ begin
   if Pos('emptystring',Command)>0 then
   begin
     Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
-    TempOutputFile := GetTempFileNameExt('','FPCUPTMP','svn');
+    TempOutputFile:=ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'svn');
     Command:=Command+' &> '+TempOutputFile;
     ExecuteSpecialDue2EmptyString:=True;
   end;
@@ -395,7 +395,7 @@ begin
   if Pos('emptystring',Command)>0 then
   begin
     Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
-    TempOutputFile := GetTempFileNameExt('','FPCUPTMP','svn');
+    TempOutputFile:=ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'svn');
     Command:=Command + ' &> '+TempOutputFile;
     ExecuteSpecialDue2EmptyString:=True;
   end;
@@ -613,7 +613,7 @@ begin
 
   if Assigned(aProcess) then
   begin
-    aFile := GetTempFileNameExt('','FPCUPTMP','diff');
+    aFile := ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'diff');
     aProcess.CurrentDirectory:=LocalRepository;
     aProcess.Parameters.Add(DoubleQuoteIfNeeded(FRepoExecutable) + GetProxyCommand + ' diff -x --ignore-space-change'+' . > ' + aFile);
     aProcess.Options := aProcess.Options + [poNoConsole, poWaitOnExit{, poUsePipes}];
@@ -931,7 +931,7 @@ begin
               if Pos('emptystring',Command)>0 then
               begin
                 Command:=StringReplace(Command,'emptystring','""',[rfReplaceAll,rfIgnoreCase]);
-                TempOutputFile := GetTempFileNameExt('','FPCUPTMP','svn');
+                TempOutputFile:=ChangeFileExt(GetTempFileName(GetTempDir(false),'FPCUPTMP'),'svn');
                 Command:=Command+' &> '+TempOutputFile;
                 ExecuteSpecialDue2EmptyString:=True;
               end;

@@ -1181,7 +1181,7 @@ begin
               begin
                 if NOT FileExists(IncludeTrailingPathDelimiter(FMakeDir)+'gdb\arm-wince\gdb.exe') then
                 begin
-                  s1:=GetTempFileNameExt('','FPCUPTMP','zip');
+                  s1:=GetTempFileNameExt('FPCUPTMP','zip');
                   if GetFile(FUtilFiles[Counter].RootURL + FUtilFiles[Counter].FileName,s1) then
                   begin
                     with TNormalUnzipper.Create do
@@ -2076,7 +2076,7 @@ begin
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
-  BootstrapFileArchiveDir:=GetTempDirName('','FPCUPTMP');
+  BootstrapFileArchiveDir:=GetTempDirName;
   ForceDirectoriesSafe(BootstrapFileArchiveDir);
   BootstrapFileArchiveDir:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir);
   BootstrapFilePath:=BootstrapFileArchiveDir+GetFileNameFromURL(FBootstrapCompilerURL);
@@ -2148,12 +2148,12 @@ begin
         begin
           if ExtractFileExt(BootstrapFilePath)=GetExeExt then
           begin
-            // Normal exe ... rename towards correct name
-            // OperationSucceeded:=MoveFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
-            OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+            // Normal exe ... rename towards correct name if needed
+            if (ExtractFileName(BootstrapFilePath)<>CompilerName) then
+              OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+              // OperationSucceeded:=MoveFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
           end;
         end;
-
     end;
 
     BootstrapFilePath:=BootstrapFileArchiveDir+CompilerName;
@@ -2901,14 +2901,13 @@ begin
       begin
         s:=GetCompilerName(GetTargetCPU);
         s:=Which(s);
+        //Copy the compiler to out bootstrap directory
+        if FileExists(s) then FileUtil.CopyFile(s,FCompiler);
         if NOT FileExists(s) then
         begin
           s:='fpc'+GetExeExt;
           s:=Which(s);
-        end;
-        if FileExists(s) then
-        begin
-          FCompiler:=s;
+          if FileExists(s) then FCompiler:=s;
         end;
       end;
     end;

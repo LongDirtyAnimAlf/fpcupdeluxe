@@ -360,7 +360,7 @@ begin
     end;
 
     ForceDirectoriesSafe(ExcludeTrailingPathDelimiter(FTargetDirectory));
-    DocsZip := GetTempFileNameExt('','FPCUPTMP','zip');
+    DocsZip := GetTempFileNameExt('FPCUPTMP','zip');
 
     OperationSucceeded:=true;
 

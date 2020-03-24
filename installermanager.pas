@@ -48,11 +48,6 @@ uses
   {$endif UNIX}
   ;
 
-// Get revision from our source code repository:
-// If you have a file not found error for revision.inc, please make sure you compile hgversion.pas before compiling this project.
-{$i revision.inc}
-//Contains RevisionStr and versiondate constants
-
 // These sequences determine standard installation/uninstallation order/content:
 // Note that a single os/cpu/sequence combination will only be executed once (the state machine checks for this)
 Const
@@ -259,6 +254,7 @@ type
     procedure SetCrossLibraryDirectory(AValue: string);
     procedure SetLogFileName(AValue: string);
     procedure SetMakeDirectory(AValue: string);
+    function  GetTempDirectory:string;
   protected
     FShortcutCreated:boolean;
     FLog:TLogger;
@@ -286,6 +282,7 @@ type
     property BaseDirectory: string read FBaseDirectory write SetBaseDirectory;
     // Directory where bootstrap compiler is installed/downloaded
     property BootstrapCompilerDirectory: string read FBootstrapCompilerDirectory write SetBootstrapCompilerDirectory;
+    property TempDirectory: string read GetTempDirectory;
     // Compiler override
     property CompilerOverride: string read FCompilerOverride write FCompilerOverride;
     property Clean: boolean read FClean write FClean;
@@ -557,6 +554,15 @@ end;
 procedure TFPCupManager.SetMakeDirectory(AValue: string);
 begin
   FMakeDirectory:=SafeExpandFileName(AValue);
+end;
+
+function TFPCupManager.GetTempDirectory:string;
+begin
+  if DirectoryExists(FBaseDirectory) then
+  begin
+    result:=ConcatPaths([FBaseDirectory,'tmp']);
+    ForceDirectoriesSafe(result);
+  end;
 end;
 
 procedure TFPCupManager.WritelnLog(msg: string; ToConsole: boolean);
@@ -846,6 +852,7 @@ begin
 
   try
     WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',true);
+    WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,true);
   except
     // Writing to log failed, probably duplicate run. Inform user and get out.
     {$IFNDEF NOCONSOLE}
@@ -857,8 +864,9 @@ begin
     halt(2);
   end;
 
-  infoln('InstallerManager: current sequence: '+LineEnding+
-    FSequencer.Text,etDebug);
+  exit;
+
+  infoln('InstallerManager: current sequence: '+LineEnding+FSequencer.Text,etDebug);
 
   // Some diagnostic info
   {$IFDEF MSWINDOWS}
@@ -1499,6 +1507,7 @@ begin
   if assigned(FInstaller) then
   begin
     FInstaller.BaseDirectory:=FParent.BaseDirectory;
+    FInstaller.TempDirectory:=FParent.TempDirectory;
     FInstaller.SVNClient.RepoExecutable := FParent.SVNExecutable;
     {$IFDEF MSWINDOWS}
     FInstaller.SVNClient.ForceLocal:=FParent.ForceLocalRepoClient;

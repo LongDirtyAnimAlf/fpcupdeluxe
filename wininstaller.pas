@@ -190,7 +190,7 @@ begin
   FSVNClient.CheckOutOrUpdate;
 
   // Lazbuilddir may not exist (or should be empty) - so if it is there, remove it
-  FInstallerBuildDir:=IncludeTrailingPathDelimiter(GetTempDir(false))+'lazinstaller';
+  FInstallerBuildDir:=IncludeTrailingPathDelimiter(GetTempDirName)+'lazinstaller';
   if DirectoryExists(FInstallerBuildDir) then
   begin
     infoln('Deleting temporary Lazarus installer build directory '+FInstallerBuildDir+' before running installer creator.',etInfo);
