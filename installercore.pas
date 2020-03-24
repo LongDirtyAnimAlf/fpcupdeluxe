@@ -2870,7 +2870,6 @@ begin
     Result:=Format('%s%.5d.'+Extension,[Start,i]);
     Inc(i);
   until not FileExists(Result);
-  ForceDirectoriesSafe(Result);
 end;
 
 function TInstaller.GetTempDirName(Prefix: String) : String;
