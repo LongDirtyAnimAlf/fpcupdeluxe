@@ -3873,7 +3873,7 @@ begin
       end;
       UpdateWarnings:=TStringList.Create;
       try
-        s:=SafeExpandFileName(SafeGetApplicationPath+'fpcrevisions.log');
+        s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
         if FileExists(s) then UpdateWarnings.LoadFromFile(s);
         UpdateWarnings.Add('FPC update at: '+DateTimeToStr(now));
         UpdateWarnings.Add('FPC previous revision: '+PreviousRevision);

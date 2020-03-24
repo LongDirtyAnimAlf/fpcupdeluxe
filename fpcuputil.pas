@@ -1683,6 +1683,16 @@ begin
   result:=false;
   aFile:=TDownloadStream.Create(TargetFile,fmCreate);
   try
+    if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+    begin
+      aDownLoader.UserAgent:=FPCUPUSERAGENT;
+      aDownLoader.ContentType:='application/json';
+    end
+    else
+    begin
+      aDownLoader.UserAgent:=NORMALUSERAGENT;
+      aDownLoader.ContentType:='';
+    end;
     result:=DownloadBase(aDownLoader,URL,aFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   finally
     aFile.Free;
@@ -1935,11 +1945,8 @@ begin
   begin
     aDownLoader:=TWGetDownLoader.Create;
     try
-      if (NOT (aDownLoader is TUseNativeDownLoader)) then
-      begin
-        result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-        if (NOT result) then infoln('FPCUP force wget downloader failure.',etDebug);
-      end;
+      result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+      if (NOT result) then infoln('FPCUP force wget downloader failure.',etDebug);
     finally
       aDownLoader.Destroy;
     end;
@@ -1961,16 +1968,11 @@ begin
        then aDownLoader:=TWGetDownLoader.Create
        else aDownLoader:=TNativeDownLoader.Create;
     try
-      if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
-      begin
-        aDownLoader.UserAgent:=FPCUPUSERAGENT;
-        aDownLoader.ContentType:='application/json';
-      end;
       result:=DownloadBase(aDownLoader,URL,TargetFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
     finally
       aDownLoader.Destroy;
     end;
-    if (NOT result) then infoln('FPCUP native downloader failure.',etWarning);
+    if (NOT result) then infoln('FPCUP native downloader failure.',etDebug);
   end;
 
   {$ifdef Windows}
@@ -4216,22 +4218,41 @@ begin
 end;
 
 procedure TUseNativeDownLoader.SetContentType(AValue:string);
+const
+  HEADERMAGIC='Content-Type';
+var
+  i:integer;
 begin
   if AValue<>FContentType then
   begin
     FContentType:=AValue;
-    aFPHTTPClient.AddHeader('Content-Type',FContentType);
+    if FContentType='' then
+    begin
+      i:=aFPHTTPClient.IndexOfHeader(HEADERMAGIC);
+      if i<>-1 then aFPHTTPClient.RequestHeaders.Delete(i);
+    end
+    else aFPHTTPClient.AddHeader(HEADERMAGIC,FContentType);
   end;
 end;
 
 procedure TUseNativeDownLoader.SetUserAgent(AValue:string);
+const
+  HEADERMAGIC='User-Agent';
+var
+  i:integer;
 begin
   if AValue<>FUserAgent then
   begin
     FUserAgent:=AValue;
-    aFPHTTPClient.AddHeader('User-Agent',FUserAgent);
+    if FUserAgent='' then
+    begin
+      i:=aFPHTTPClient.IndexOfHeader(HEADERMAGIC);
+      if i<>-1 then aFPHTTPClient.RequestHeaders.Delete(i);
+    end
+    else aFPHTTPClient.AddHeader(HEADERMAGIC,FUserAgent);
   end;
 end;
+
 
 procedure TUseNativeDownLoader.SetVerbose(aValue:boolean);
 begin
@@ -4917,6 +4938,12 @@ begin
   P:=URI.Protocol;
   infoln('Wget downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
 
+  if (DataStream is TDownloadStream) then
+  begin
+    (DataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
+    StoredTickCount:=GetUpTickCount;
+  end;
+
   If CompareText(P,'ftp')=0 then
     result:=FTPDownload(URL,DataStream)
   else if CompareText(P,'http')=0 then
@@ -4948,12 +4975,6 @@ begin
   result:=false;
 
   if DataStream=nil then exit;
-
-  if (DataStream is TDownloadStream) then
-  begin
-    (DataStream as TDownloadStream).FOnWriteStream:=@DoOnWriteStream;
-    StoredTickCount:=GetUpTickCount;
-  end;
 
   try
     DataStream.Position:=0;

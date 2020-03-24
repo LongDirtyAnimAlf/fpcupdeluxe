@@ -138,20 +138,24 @@ begin
 end;
 
 procedure TCustomNSHTTPSendAndReceive.SetContentType(const AValue: string);
+const
+  HEADERMAGIC='Content-Type';
 begin
   if AValue<>FContentType then
   begin
     FContentType:=AValue;
-    AddHeader('Content-Type',FContentType);
+    AddHeader(HEADERMAGIC,FContentType);
   end
 end;
 
 procedure TCustomNSHTTPSendAndReceive.SetUserAgent(const AValue: string);
+const
+  HEADERMAGIC='User-Agent';
 begin
   if AValue<>FUserAgent then
   begin
     FUserAgent:=AValue;
-    AddHeader('User-Agent',FUserAgent);
+    AddHeader(HEADERMAGIC,FUserAgent);
   end
 end;
 
@@ -202,7 +206,7 @@ begin
   j:=IndexOfHeader(AHeader);
   if (J<>-1) then
     FRequestHeaders.Delete(j);
-  FRequestHeaders.AddPair(AHeader,AValue);
+  if Length(AValue)>0 then FRequestHeaders.AddPair(AHeader,AValue);
 end;
 
 function TCustomNSHTTPSendAndReceive.IndexOfHeader(const AHeader: String): Integer;

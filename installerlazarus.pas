@@ -2058,7 +2058,7 @@ begin
 
     UpdateWarnings:=TStringList.Create;
     try
-      s:=SafeExpandFileName(SafeGetApplicationPath+'lazrevisions.log');
+      s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
       if FileExists(s) then UpdateWarnings.LoadFromFile(s);
       UpdateWarnings.Add('Lazarus update at: '+DateTimeToStr(now));
       UpdateWarnings.Add('Lazarus previous revision: '+PreviousRevision);
