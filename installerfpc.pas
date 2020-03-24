@@ -3815,12 +3815,12 @@ function TFPCInstaller.GetModule(ModuleName: string): boolean;
 var
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
-  VersionSnippet:string;
+  s:string;
 begin
   result:=inherited;
   result:=InitModule;
 
-  if not result then exit;
+  if (not result) then exit;
 
   aRepoClient:=GetSuitableRepoClient;
 
@@ -3859,32 +3859,42 @@ begin
         infoln(infotext+ModuleName + ' is at revision: '+ActualRevision,etInfo);
         infoln(infotext+'No updates for ' + ModuleName + ' found.',etInfo);
       end;
+      UpdateWarnings:=TStringList.Create;
+      try
+        s:=SafeExpandFileName(SafeGetApplicationPath+'fpcrevisions.log');
+        if FileExists(s) then UpdateWarnings.LoadFromFile(s);
+        UpdateWarnings.Add('FPC update at: '+DateTimeToStr(now));
+        UpdateWarnings.Add('FPC previous revision: '+PreviousRevision);
+        UpdateWarnings.Add('FPC new revision: '+ActualRevision);
+        UpdateWarnings.Add('');
+        UpdateWarnings.SaveToFile(s);
+      finally
+        UpdateWarnings.Free;
+      end;
     end;
 
     if (NOT Result) then
       infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
 
-  if result then CreateRevision(ModuleName,ActualRevision);
-
   if result then
   begin
-    VersionSnippet:=GetFPCVersionFromSource(FSourceDirectory);
-    if VersionSnippet='0.0.0' then GetFPCVersionFromURL(FURL);
-    if VersionSnippet<>'0.0.0' then
+    CreateRevision(ModuleName,ActualRevision);
+    s:=GetFPCVersionFromSource(FSourceDirectory);
+    if s='0.0.0' then s:=GetFPCVersionFromURL(FURL);
+    if s<>'0.0.0' then
     begin
       FMajorVersion:=0;
       FMinorVersion:=0;
       FReleaseVersion:=0;
-      GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+      GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
+      PatchModule(ModuleName);
     end
     else
     begin
       infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
-    PatchModule(ModuleName);
   end;
-
 end;
 
 function TFPCInstaller.CheckModule(ModuleName: string): boolean;

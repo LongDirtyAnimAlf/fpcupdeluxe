@@ -2324,7 +2324,9 @@ begin
     begin
       if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
       writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-      sleep(0);
+      {$IFDEF MSWINDOWS}
+      Sleep(1);
+      {$ENDIF}
     end
   else
     begin
@@ -2333,7 +2335,9 @@ begin
     Project Options/Other/Custom Options using -dDEBUG}
     if AnsiPos(LineEnding, Message)>0 then writeln(''); //Write an empty line before multiline messagse
     writeln(BeginSnippet+' '+Seriousness[Level]+' '+ Message); //we misuse this for info output
-    sleep(0);
+    {$IFDEF MSWINDOWS}
+    Sleep(1);
+    {$ENDIF}
     {$ENDIF}
     end;
 {$ENDIF NOCONSOLE}

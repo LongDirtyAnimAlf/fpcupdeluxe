@@ -2007,7 +2007,7 @@ end;
 var
   UpdateWarnings: TStringList;
   aRepoClient:TRepoClient;
-  VersionSnippet:string;
+  s:string;
   {$ifdef BSD}
   FilePath:string;
   {$endif}
@@ -2056,11 +2056,22 @@ begin
       end;
     end;
 
+    UpdateWarnings:=TStringList.Create;
+    try
+      s:=SafeExpandFileName(SafeGetApplicationPath+'lazrevisions.log');
+      if FileExists(s) then UpdateWarnings.LoadFromFile(s);
+      UpdateWarnings.Add('Lazarus update at: '+DateTimeToStr(now));
+      UpdateWarnings.Add('Lazarus previous revision: '+PreviousRevision);
+      UpdateWarnings.Add('Lazarus new revision: '+ActualRevision);
+      UpdateWarnings.Add('');
+      UpdateWarnings.SaveToFile(s);
+    finally
+      UpdateWarnings.Free;
+    end;
+
     if (NOT Result) then
       infoln(infotext+'Checkout/update of ' + ModuleName + ' sources failure.',etError);
   end;
-
-  if result then CreateRevision(ModuleName,ActualRevision);
 
   {$ifdef Darwin}
   {$ifdef LCLQT5}
@@ -2159,21 +2170,22 @@ begin
 
   if result then
   begin
-    VersionSnippet:=GetLazarusVersionFromSource(FSourceDirectory);
-    if VersionSnippet='0.0.0' then GetLazarusVersionFromURL(FURL);
-    if VersionSnippet<>'0.0.0' then
+    CreateRevision(ModuleName,ActualRevision);
+    s:=GetLazarusVersionFromSource(FSourceDirectory);
+    if s='0.0.0' then s:=GetLazarusVersionFromURL(FURL);
+    if s<>'0.0.0' then
     begin
       FMajorVersion:=0;
       FMinorVersion:=0;
       FReleaseVersion:=0;
-      GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+      GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
       FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
+      PatchModule(ModuleName);
     end
     else
     begin
       infoln(infotext+'Could not get version of ' + ModuleName + ' sources. Expect severe errors.',etError);
     end;
-    PatchModule(ModuleName);
   end;
 
 end;
