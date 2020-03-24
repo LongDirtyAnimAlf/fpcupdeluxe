@@ -456,9 +456,8 @@ type
   TDownloadStream = class(TFileStream)
   private
     FOnWriteStream: TOnWriteStream;
-  protected
-    function Write(const Buffer; Count: LongInt): LongInt; overload;
   public
+    function Write(const Buffer; Count: LongInt): LongInt; override;
     procedure DoProgress;
   published
     property OnWriteStream: TOnWriteStream read FOnWriteStream write FOnWriteStream;
