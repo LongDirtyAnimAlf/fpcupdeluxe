@@ -2651,9 +2651,9 @@ begin
     if (NOT Assigned(FLogVerbose)) then
     begin
       FLogVerbose:=TLogger.Create;
-      FLogVerbose.LogFile:=GetTempFileNameExt(BeginSnippet+'_','log');
-      WritelnLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
-      WritelnLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
+      FLogVerbose.LogFile:=GetTempFileNameExt(Copy(BeginSnippet,1,Length(BeginSnippet)-1),'log');
+      FLogVerbose.WriteLog(DateTimeToStr(now)+': '+BeginSnippet+' V'+RevisionStr+' ('+VersionDate+') started.',false);
+      FLogVerbose.WriteLog('FPCUPdeluxe V'+DELUXEVERSION+' for '+GetTargetCPUOS+' running on '+GetDistro,false);
     end;
     FLogVerbose.WriteLog(Output,false);
   end;
