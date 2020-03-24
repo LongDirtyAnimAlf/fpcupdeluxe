@@ -2084,12 +2084,7 @@ begin
     if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+FBootstrapCompilerDirectory,etError);
   end;
 
-  if OperationSucceeded then
-  begin
-    BootstrapFileArchiveDir:=GetTempDirName;
-    OperationSucceeded:=ForceDirectoriesSafe(BootstrapFileArchiveDir);
-    if OperationSucceeded=false then infoln(localinfotext+'Could not create directory '+BootstrapFileArchiveDir,etError);
-  end;
+  BootstrapFileArchiveDir:=GetTempDirName;
 
   if OperationSucceeded then
   begin

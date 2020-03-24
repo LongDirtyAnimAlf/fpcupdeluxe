@@ -2870,6 +2870,7 @@ begin
     Result:=Format('%s%.5d.'+Extension,[Start,i]);
     Inc(i);
   until not FileExists(Result);
+  ForceDirectoriesSafe(Result);
 end;
 
 function TInstaller.GetTempDirName(Prefix: String) : String;
@@ -2884,6 +2885,7 @@ begin
     Result:=Format('%s%.5d',[Start,i]);
     Inc(i);
   until not DirectoryExists(Result);
+  ForceDirectoriesSafe(Result);
 end;
 
 function TInstaller.BuildModule(ModuleName: string): boolean;
@@ -3415,6 +3417,7 @@ begin
               writelnlog(etError, infotext+ModuleName+' patch output: ' + s, true);
             end;
           end;
+          DeleteDirectoryEx(ExtractFileDir(PatchFileCorrectedPath));
         end
         else
         begin

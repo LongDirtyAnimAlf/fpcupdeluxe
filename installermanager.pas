@@ -1518,7 +1518,7 @@ begin
     FInstaller.HTTPProxyPassword:=FParent.HTTPProxyPassword;
     FInstaller.KeepLocalChanges:=FParent.KeepLocalChanges;
     FInstaller.ReApplyLocalChanges:=FParent.ReApplyLocalChanges;
-    FInstaller.PatchCmd:=FParent.PatchCmd;
+    if Length(FParent.PatchCmd)>0 then FInstaller.PatchCmd:=FParent.PatchCmd;
     FInstaller.Verbose:=FParent.Verbose;
 
     aCompiler:='';
