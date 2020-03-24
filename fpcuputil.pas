@@ -1679,7 +1679,7 @@ begin
   result:=aDownLoader.getStream(URL,DataStream);
   if (NOT result) then
   begin
-    infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
+    infoln('Error while trying to stream download '+URL,etDebug);
   end;
 end;
 
@@ -1690,14 +1690,14 @@ begin
   result:=false;
   aFile:=TFileStream.Create(TargetFile,fmCreate);
   try
-    DownloadBase(aDownLoader,URL,aFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    result:=DownloadBase(aDownLoader,URL,aFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   finally
     aFile.Free;
   end;
   if (NOT result) then
   begin
-    infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
-    SysUtils.DeleteFile(TargetFile); // delete stale targetfile
+    infoln('Error while trying to file download '+URL,etDebug);
+    if FileExists(TargetFile) then SysUtils.DeleteFile(TargetFile); // delete stale targetfile
   end;
 end;
 
