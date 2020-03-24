@@ -195,6 +195,7 @@ type
     procedure setCredentials(user,pass:string);virtual;
     procedure setProxy(host:string;port:integer;user,pass:string);virtual;
     function getFile(const URL,filename:string):boolean;virtual;abstract;
+    function getStream(const URL:string; DataStream:TStream):boolean;virtual;abstract;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;virtual;abstract;
     function checkURL(const URL:string):boolean;virtual;abstract;
   end;
@@ -212,9 +213,9 @@ type
     procedure DoHeaders(Sender : TObject);
     procedure DoPassword(Sender: TObject; var {%H-}RepeatRequest: Boolean);
     procedure ShowRedirect({%H-}ASender : TObject; Const ASrc : String; Var ADest : String);
-    function Download(const URL: String; filename:string):boolean;
-    function FTPDownload(Const URL : String; filename:string):boolean;
-    function HTTPDownload(Const URL : String; filename:string):boolean;
+    function Download(const URL: String; DataStream:TStream):boolean;
+    function FTPDownload(Const URL: String; DataStream:TStream):boolean;
+    function HTTPDownload(Const URL : String; DataStream:TStream):boolean;
   protected
     procedure SetContentType(AValue:string);override;
     procedure SetUserAgent(AValue:string);override;
@@ -224,6 +225,7 @@ type
     destructor Destroy; override;
     procedure setProxy(host:string;port:integer;user,pass:string);override;
     function getFile(const URL,filename:string):boolean;override;
+    function getStream(const URL:string; DataStream:TStream):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
@@ -252,6 +254,7 @@ type
     constructor Create;override;
     constructor Create(aWGETBinary:string);
     function getFile(const URL,filename:string):boolean;override;
+    function getStream(const URL:string; DataStream:TStream):boolean;override;
     function getFTPFileList(const URL:string; filelist:TStringList):boolean;override;
     function checkURL(const URL:string):boolean;override;
   end;
@@ -301,13 +304,11 @@ function GetVersionFromUrl(URL:string): string;
 function GetReleaseCandidateFromUrl(aURL:string): integer;
 // Download from HTTP (includes Sourceforge redirection support) or FTP
 // HTTP download can work with http proxy
-function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
+function Download(UseWget:boolean; URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
-function DownloadByWinINet(URL, TargetFile: string): boolean;
-function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
-function DownloadByPowerShell(URL, TargetFile: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
 function CheckWin32Version(aMajor,aMinor: Integer): Boolean;
@@ -454,6 +455,10 @@ type
   private
     FOnWriteStream: TOnWriteStream;
     FStream: TStream;
+  protected
+    function GetSize: Int64; override;
+    procedure SetPosition(const Pos: Int64); override;
+    procedure SetSize64(const NewSize: Int64); override;
   public
     constructor Create(AStream: TStream);
     destructor Destroy; override;
@@ -1667,16 +1672,287 @@ begin
   Result:=true;
 end;
 
-function DownloadBase(aDownLoader:TBasicDownloader;URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+function DownloadBase(aDownLoader:TBasicDownloader;URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
 begin
   result:=false;
   if Length(HTTPProxyHost)>0 then aDownLoader.setProxy(HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
-  result:=aDownLoader.getFile(URL,TargetFile);
+  result:=aDownLoader.getStream(URL,DataStream);
+  if (NOT result) then
+  begin
+    infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
+  end;
+end;
+
+function DownloadBase(aDownLoader:TBasicDownloader;URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+var
+  aFile:TFileStream;
+begin
+  result:=false;
+  aFile:=TFileStream.Create(TargetFile,fmCreate);
+  try
+    DownloadBase(aDownLoader,URL,aFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+  finally
+    aFile.Free;
+  end;
   if (NOT result) then
   begin
     infoln('Error while trying to download '+URL+'. Trying again.',etDebug);
     SysUtils.DeleteFile(TargetFile); // delete stale targetfile
   end;
+end;
+
+
+{$ifdef MSWindows}
+function DownloadByWinINet(URL: string; DataStream: TSTream): boolean;
+const
+  URLMAGIC='/download';
+var
+  URI    : TURI;
+  aURL,P : String;
+  NetHandle: HINTERNET;
+  UrlHandle: HINTERNET;
+  Buffer: array[0..1023] of Byte;
+  Error,BytesRead: DWord;
+  dummy: DWORD;
+  s:string;
+begin
+  result:=false;
+
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+
+  //do not use WinINet for FTP
+  if CompareText(P,'ftp')=0 then exit;
+
+  //do not use WinINet for sourceforge : redirect is not working !
+  //if CompareText(URI.Host,'downloads.sourceforge.net')=0 then exit;
+  // a bit tricky: we know where sourceforge redirects, so go there ... ;-)
+  if CompareText(URI.Host,'downloads.sourceforge.net')=0 then
+  begin
+    URI.Host:='netix.dl.sourceforge.net';
+    aURL:=P+'://'+URI.Host+URI.Path+URI.Document
+  end else aURL:=URL;
+
+  infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
+
+  if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+    NetHandle := InternetOpen(FPCUPUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0)
+  else
+    NetHandle := InternetOpen(WININETUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
+
+  // NetHandle valid?
+  if Assigned(NetHandle) then
+  try
+    UrlHandle := InternetOpenUrl(NetHandle, PChar(aURL), nil, 0, INTERNET_FLAG_NO_UI or INTERNET_FLAG_RELOAD, 0);
+
+    {
+    Error:=GetLastError;
+    if Error>0 then
+    begin
+      WinInetErrorMsg(Error);
+    end;
+    }
+
+    // UrlHandle valid?
+    if Assigned(UrlHandle) then
+    try
+      DeleteUrlCacheEntry(PChar(aURL));
+
+      FillChar({%H-}Buffer, SizeOf(Buffer), #0);
+      dummy := 0;
+      BytesRead := SizeOf(Buffer);
+      if HttpQueryInfo(UrlHandle,HTTP_QUERY_STATUS_CODE,@Buffer[0],BytesRead,dummy) then
+      begin
+        s:=GetStringFromBuffer(PChar(@Buffer));
+        if s='200' then
+        begin
+          //All ok : get file.
+          SetLastError(0);
+          FillChar({%H-}Buffer, SizeOf(Buffer), #0);
+          while true do
+          begin
+            if InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer)-1, {%H-}BytesRead) then
+            begin
+              if (BytesRead = 0) then Break;
+              DataStream.Write(Buffer, BytesRead);
+            end
+            else
+            if InternetQueryDataAvailable(UrlHandle, {%H-}BytesRead, 0, 0) then
+            begin
+              if (BytesRead = 0) then Break;
+            end
+            else break;
+          end;
+          {
+          while InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), {%H-}BytesRead) do
+          begin
+            if (BytesRead = 0) then Break;
+            DataStream.Write(Buffer, BytesRead);
+          end;
+          }
+          //Buffer[0] := 0;
+          //DataStream.Write(Buffer, 1);
+          result:=(DataStream.Size>1);
+        end;
+      end;
+    finally
+      InternetCloseHandle(UrlHandle);
+    end
+  finally
+    InternetCloseHandle(NetHandle);
+  end;
+end;
+
+function WinInetErrorMsg(Err: DWORD): string;
+var
+  ErrMsg: array of Char;
+  ErrLen: DWORD;
+begin
+  if Err = ERROR_INTERNET_EXTENDED_ERROR then
+  begin
+    ErrLen := 0;
+    InternetGetLastResponseInfo(@Err, nil, ErrLen);
+    if GetLastError() = ERROR_INSUFFICIENT_BUFFER then
+    begin
+      SetLength(ErrMsg, ErrLen);
+      InternetGetLastResponseInfo(@Err, PChar(ErrMsg), ErrLen);
+      SetString(Result, PChar(ErrMsg), ErrLen);
+    end else begin
+      Result := 'Unknown WinInet error';
+    end;
+  end else
+    Result := SysErrorMessage(Err);
+end;
+
+function DownloadByWinINet(URL, TargetFile: string): boolean;
+var
+  aStream:TDownloadStream;
+begin
+  result:=false;
+  aStream := TDownloadStream.Create(TFileStream.Create(TargetFile, fmCreate));
+  //aStream.FOnWriteStream:=@DoOnWriteStream;
+  //StoredTickCount:=GetUpTickCount;
+  try
+    result:=DownloadByWinINet(URL,aStream);
+  finally
+    aStream.Free;
+  end;
+  if result then
+  begin
+    result:=FileExists(TargetFile);
+  end;
+end;
+
+function DownloadByPowerShell(URL, TargetFile: string): boolean;
+const
+  URLMAGIC='/download';
+var
+  Output : String;
+  URI    : TURI;
+  aURL,P : String;
+begin
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+  infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
+  //result:=(ExecuteCommand('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+  //result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+
+  if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+    P:=FPCUPUSERAGENT
+  else
+    P:=NORMALUSERAGENT;
+  result:=(ExecuteCommand('powershell -command "$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
+
+  if result then
+  begin
+    result:=FileExists(TargetFile);
+  end;
+end;
+
+function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
+const
+  URLMAGIC='/download';
+var
+  Output : String;
+  URI    : TURI;
+  aURL,P : String;
+begin
+  aURL:=URL;
+  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
+  URI:=ParseURI(aURL);
+  P:=URI.Protocol;
+  infoln('BitsAdmin downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
+  //result:=(ExecuteCommand('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
+  //result:=(ExecuteCommand('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
+  result:=(ExecuteCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output, False)=0);
+  if result then
+  begin
+    result:=FileExists(TargetFile);
+  end;
+end;
+{$endif MSWindows}
+
+function Download(UseWget:boolean; URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;
+var
+  aDownLoader:TBasicDownLoader;
+begin
+  result:=false;
+
+  if (NOT result) then
+  begin
+    if UseWget
+       then aDownLoader:=TWGetDownLoader.Create
+       else aDownLoader:=TNativeDownLoader.Create;
+    try
+      if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
+      begin
+        aDownLoader.UserAgent:=FPCUPUSERAGENT;
+        aDownLoader.ContentType:='application/json';
+      end
+      else
+        aDownLoader.UserAgent:=NORMALUSERAGENT;
+      result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    finally
+      aDownLoader.Destroy;
+    end;
+    if (NOT result) then infoln('FPCUP downloader failure.',etDebug);
+  end;
+
+  {$ifdef Windows}
+  //Third resort: use Windows INet
+  if (NOT result) then
+  begin
+    result:=DownloadByWinINet(URL,DataStream);
+    if (NOT result) then infoln('Windows WinINet downloader failure.',etDebug);
+  end;
+
+  //Fourth resort: use BitsAdmin
+  {
+  if (NOT result) then
+  begin
+    SysUtils.Deletefile(TargetFile);
+    result:=DownloadByBitsAdmin(URL,TargetFile);
+    if (NOT result) then infoln('Windows BitsAdmin downloader failure.',etDebug);
+  end;
+  }
+  {$endif}
+
+  //Final resort: use wget by force
+  if (NOT result) AND (NOT UseWget) then
+  begin
+    aDownLoader:=TWGetDownLoader.Create;
+    try
+      result:=DownloadBase(aDownLoader,URL,DataStream,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
+    finally
+      aDownLoader.Destroy;
+    end;
+    if (NOT result) then infoln('FPCUP wget downloader failure.',etDebug);
+  end;
+
 end;
 
 
@@ -1755,11 +2031,10 @@ function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: s
 var
   {$ifdef Darwin}
   Http:TNSHTTPSendAndReceive;
-  Ms: TMemoryStream;
   {$else}
   Http: TFPHTTPClient;
   {$endif}
-  JSONFile:string;
+  Ms: TMemoryStream;
   JSONFileList:TStringList;
   Content : string;
   Json : TJSONData;
@@ -1846,27 +2121,31 @@ begin
 
   if (NOT result) then
   begin
-    JSONFile := SysUtils.GetTempFileName(GetTempDir(false),'FPCUPTMP');
 
-    result:=Download(
-          False,
-          aURL,
-          JSONFile,
-          HTTPProxyUser,
-          HTTPProxyPort,
-          HTTPProxyUser,
-          HTTPProxyPassword);
-    if result then
-    begin
-      JSONFileList:=TStringList.Create;
-      try
-        JSONFileList.LoadFromFile(JSONFile);
-        Content:=JSONFileList.Text;
-      finally
-        JSONFileList.Free;
+    Ms := TMemoryStream.Create;
+    try
+      result:=Download(
+            False,
+            aURL,
+            Ms,
+            HTTPProxyUser,
+            HTTPProxyPort,
+            HTTPProxyUser,
+            HTTPProxyPassword);
+      if result then
+      begin
+        JSONFileList:=TStringList.Create;
+        try
+          Ms.Position:=0;
+          JSONFileList.LoadFromStream(Ms);
+          Content:=JSONFileList.Text;
+        finally
+          JSONFileList.Free;
+        end;
       end;
+    finally
+      Ms.Free;
     end;
-    SysUtils.Deletefile(JSONFile); //Get rid of temp file.
   end;
 
   if (NOT result) then
@@ -1990,192 +2269,6 @@ begin
     {$endif}
   except
     result:=true;
-  end;
-end;
-
-function DownloadByBitsAdmin(URL, TargetFile: string): boolean;
-const
-  URLMAGIC='/download';
-var
-  Output : String;
-  URI    : TURI;
-  aURL,P : String;
-begin
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
-  URI:=ParseURI(aURL);
-  P:=URI.Protocol;
-  infoln('BitsAdmin downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
-  //result:=(ExecuteCommand('bitsadmin.exe /SetMinRetryDelay "JobName" 1', Output, False)=0);
-  //result:=(ExecuteCommand('bitsadmin.exe /SetNoProgressTimeout "JobName" 1', Output, False)=0);
-  result:=(ExecuteCommand('bitsadmin.exe /transfer "JobName" '+URL+' '+TargetFile, Output, False)=0);
-  if result then
-  begin
-    result:=FileExists(TargetFile);
-  end;
-end;
-
-function WinInetErrorMsg(Err: DWORD): string;
-var
-  ErrMsg: array of Char;
-  ErrLen: DWORD;
-begin
-  if Err = ERROR_INTERNET_EXTENDED_ERROR then
-  begin
-    ErrLen := 0;
-    InternetGetLastResponseInfo(@Err, nil, ErrLen);
-    if GetLastError() = ERROR_INSUFFICIENT_BUFFER then
-    begin
-      SetLength(ErrMsg, ErrLen);
-      InternetGetLastResponseInfo(@Err, PChar(ErrMsg), ErrLen);
-      SetString(Result, PChar(ErrMsg), ErrLen);
-    end else begin
-      Result := 'Unknown WinInet error';
-    end;
-  end else
-    Result := SysErrorMessage(Err);
-end;
-
-function DownloadByWinINet(URL, TargetFile: string): boolean;
-const
-  URLMAGIC='/download';
-var
-  URI    : TURI;
-  aURL,P : String;
-  NetHandle: HINTERNET;
-  UrlHandle: HINTERNET;
-  Buffer: array[0..1023] of Byte;
-  Error,BytesRead: DWord;
-  dummy: DWORD;
-  aStream:TDownloadStream;
-  s:string;
-begin
-  result:=false;
-
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
-  URI:=ParseURI(aURL);
-  P:=URI.Protocol;
-
-  //do not use WinINet for FTP
-  if CompareText(P,'ftp')=0 then exit;
-
-  //do not use WinINet for sourceforge : redirect is not working !
-  //if CompareText(URI.Host,'downloads.sourceforge.net')=0 then exit;
-  // a bit tricky: we know where sourceforge redirects, so go there ... ;-)
-  if CompareText(URI.Host,'downloads.sourceforge.net')=0 then
-  begin
-    URI.Host:='netix.dl.sourceforge.net';
-    aURL:=P+'://'+URI.Host+URI.Path+URI.Document
-  end else aURL:=URL;
-
-  infoln('WinINet downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
-
-  if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
-    NetHandle := InternetOpen(FPCUPUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0)
-  else
-    NetHandle := InternetOpen(WININETUSERAGENT, INTERNET_OPEN_TYPE_PRECONFIG, nil, nil, 0);
-
-  // NetHandle valid?
-  if Assigned(NetHandle) then
-  try
-    UrlHandle := InternetOpenUrl(NetHandle, PChar(aURL), nil, 0, INTERNET_FLAG_NO_UI or INTERNET_FLAG_RELOAD, 0);
-
-    {
-    Error:=GetLastError;
-    if Error>0 then
-    begin
-      WinInetErrorMsg(Error);
-    end;
-    }
-
-    // UrlHandle valid?
-    if Assigned(UrlHandle) then
-    try
-      DeleteUrlCacheEntry(PChar(aURL));
-
-      FillChar({%H-}Buffer, SizeOf(Buffer), #0);
-      dummy := 0;
-      BytesRead := SizeOf(Buffer);
-      if HttpQueryInfo(UrlHandle,HTTP_QUERY_STATUS_CODE,@Buffer[0],BytesRead,dummy) then
-      begin
-        s:=GetStringFromBuffer(PChar(@Buffer));
-        if s='200' then
-        begin
-          //All ok : get file.
-          SetLastError(0);
-          FillChar({%H-}Buffer, SizeOf(Buffer), #0);
-          aStream := TDownloadStream.Create(TFileStream.Create(TargetFile, fmCreate));
-          //aStream.FOnWriteStream:=@DoOnWriteStream;
-          //StoredTickCount:=GetUpTickCount;
-          try
-            while true do
-            begin
-              if InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer)-1, {%H-}BytesRead) then
-              begin
-                if (BytesRead = 0) then Break;
-                aStream.Write(Buffer, BytesRead);
-              end
-              else
-              if InternetQueryDataAvailable(UrlHandle, {%H-}BytesRead, 0, 0) then
-              begin
-                if (BytesRead = 0) then Break;
-              end
-              else break;
-            end;
-            {
-            while InternetReadFile(UrlHandle, @Buffer, SizeOf(Buffer), {%H-}BytesRead) do
-            begin
-              if (BytesRead = 0) then Break;
-              aStream.Write(Buffer, BytesRead);
-            end;
-            }
-            //Buffer[0] := 0;
-            //aStream.Write(Buffer, 1);
-            result:=(aStream.Size>1);
-          finally
-            aStream.Free;
-          end;
-        end;
-      end;
-    finally
-      InternetCloseHandle(UrlHandle);
-    end
-  finally
-    InternetCloseHandle(NetHandle);
-  end;
-
-  if result then
-  begin
-    result:=FileExists(TargetFile);
-  end;
-end;
-
-function DownloadByPowerShell(URL, TargetFile: string): boolean;
-const
-  URLMAGIC='/download';
-var
-  Output : String;
-  URI    : TURI;
-  aURL,P : String;
-begin
-  aURL:=URL;
-  if AnsiEndsStr(URLMAGIC,URL) then SetLength(aURL,Length(URL)-Length(URLMAGIC));
-  URI:=ParseURI(aURL);
-  P:=URI.Protocol;
-  infoln('PowerShell downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
-  //result:=(ExecuteCommand('powershell -command "[Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12; (new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
-  //result:=(ExecuteCommand('powershell -command "(new-object System.Net.WebClient).DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
-
-  if (Pos('api.github.com',URL)>0) AND (Pos('fpcupdeluxe',URL)>0) then
-    P:=FPCUPUSERAGENT
-  else
-    P:=NORMALUSERAGENT;
-  result:=(ExecuteCommand('powershell -command "$cli = New-Object System.Net.WebClient;$cli.Headers[''User-Agent''] = '''+P+''';$cli.DownloadFile('''+URL+''','''+TargetFile+''')"', Output, False)=0);
-
-  if result then
-  begin
-    result:=FileExists(TargetFile);
   end;
 end;
 
@@ -3423,7 +3516,7 @@ var
   Releases     : TJSONArray;
   NewVersion   : boolean;
   i            : integer;
-  JSONFile     : string;
+  Ms           : TMemoryStream;
   JSONFileList : TStringList;
   Content      : string;
   Success:boolean;
@@ -3434,21 +3527,26 @@ begin
   result:='';
   if (Length(aURL)>0) then
   begin
-    JSONFile := SysUtils.GetTempFileName(GetTempDir(false),'FPCUPTMP');
-    Success:=Download(
-             False,
-             aURL,
-             JSONFile);
+    Ms := TMemoryStream.Create;
+    try
+      Success:=Download(False,aURL,Ms);
+      if Success then
+      begin
+        JSONFileList:=TStringList.Create;
+        try
+          Ms.Position:=0;
+          JSONFileList.LoadFromStream(Ms);
+          Content:=JSONFileList.Text;
+        finally
+          JSONFileList.Free;
+        end;
+      end;
+    finally
+      Ms.Free;
+    end;
+
     if Success then
     begin
-      JSONFileList:=TStringList.Create;
-      try
-        JSONFileList.LoadFromFile(JSONFile);
-        Content:=JSONFileList.Text;
-      finally
-        JSONFileList.Free;
-      end;
-
       if (Length(Content)>0) then
       begin
         Json:=GetJSON(Content);
@@ -3510,8 +3608,6 @@ begin
         end;
       end;
     end;
-    SysUtils.Deletefile(JSONFile); //Get rid of temp file.
-
   end;
 end;
 
@@ -4305,22 +4401,20 @@ begin
   end;
 end;
 
-function TUseNativeDownLoader.FTPDownload(Const URL : String; filename:string):boolean;
+function TUseNativeDownLoader.FTPDownload(Const URL: String; DataStream:TStream):boolean;
 var
   URI : TURI;
   aPort:integer;
-  aStream:TDownloadStream;
+  aDownloadStream:TDownloadStream;
 begin
-  aFileName:=ExtractFileName(filename);
-
   result:=false;
   URI:=ParseURI(URL);
   aPort:=URI.Port;
   if aPort=0 then aPort:=21;
   Result := False;
 
-  aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
-  aStream.FOnWriteStream:=@DoOnWriteStream;
+  aDownloadStream := TDownloadStream.Create(DataStream);
+  aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
   StoredTickCount:=GetUpTickCount;
 
   try
@@ -4351,14 +4445,14 @@ begin
       end;
       if Login then
       begin
-        aStream.Position:=0;
-        aStream.Size:=0;
+        aDownloadStream.Position:=0;
+        aDownloadStream.Size:=0;
         //DirectFileName := filename;
         //DirectFile:=True;
         //Result := RetrieveFile(URI.Path+URI.Document, False);
 
         DirectFileName := URI.Path+URI.Document;
-        Result := RetrieveStream(aStream, false);
+        Result := RetrieveStream(aDownloadStream, false);
 
         Logout;
       end;
@@ -4367,26 +4461,20 @@ begin
     end;
 
   finally
-    aStream.Free;
+    aDownloadStream.Free;
   end;
-
-  if NOT result then SysUtils.DeleteFile(filename); // delete stray file in case of error
-
 end;
 
-function TUseNativeDownLoader.HTTPDownload(Const URL : String; filename:string):boolean;
+function TUseNativeDownLoader.HTTPDownload(Const URL : String; DataStream: TStream):boolean;
 var
   tries:byte;
   response: Integer;
   aStream:TDownloadStream;
 begin
-  aFileName:=ExtractFileName(filename);
-
   result:=false;
   tries:=0;
-  SysUtils.DeleteFile(filename); // overwrite targetfile
 
-  aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
+  aStream := TDownloadStream.Create(DataStream);
   aStream.FOnWriteStream:=@DoOnWriteStream;
   StoredTickCount:=GetUpTickCount;
 
@@ -4406,8 +4494,6 @@ begin
             // Do no retry on errors that we cannot recover from
             if (response>=400) then break;
             Inc(tries);
-            if FVerbose then
-              infoln('TFPHTTPClient retry #' +InttoStr(tries)+ ' of download from '+URL+' into '+filename+'.',etDebug);
           end
           else
           begin
@@ -4423,16 +4509,25 @@ begin
   finally
     aStream.Free;
   end;
-  if NOT result then SysUtils.DeleteFile(filename); // delete stray file in case of error
 end;
 
 function TUseNativeDownLoader.getFile(const URL,filename:string):boolean;
+var
+  aFile:TFileStream;
 begin
+  result:=false;
+  aFile:=TFileStream.Create(filename,fmCreate);
   try
-    result:=Download(URL,filename);
-  except
-    SysUtils.DeleteFile(filename);
+    result:=Download(URL,aFile);
+  finally
+    aFile.Free;
   end;
+  if NOT result then SysUtils.DeleteFile(filename);
+end;
+
+function TUseNativeDownLoader.getStream(const URL:string; DataStream:TStream):boolean;
+begin
+  result:=Download(URL,DataStream);
 end;
 
 function TUseNativeDownLoader.checkURL(const URL:string):boolean;
@@ -4440,11 +4535,9 @@ const
   HTTPHEADER='Connection';
   HTTPHEADERVALUE='Close';
 var
-  tries:byte;
   response: Integer;
 begin
   result:=false;
-  tries:=0;
   with aFPHTTPClient do
   begin
     AddHeader(HTTPHEADER,HTTPHEADERVALUE);
@@ -4465,7 +4558,7 @@ begin
   end;
 end;
 
-function TUseNativeDownLoader.Download(const URL: String; filename:string):boolean;
+function TUseNativeDownLoader.Download(const URL: String; DataStream:TStream):boolean;
 const
   URLMAGIC='/download';
 Var
@@ -4479,17 +4572,15 @@ begin
   P:=URI.Protocol;
   infoln('Native downloader: Getting ' + URI.Document + ' from '+P+'://'+URI.Host+URI.Path,etDebug);
   If CompareText(P,'ftp')=0 then
-    result:=FTPDownload(URL,filename)
+    result:=FTPDownload(URL,DataStream)
   else if CompareText(P,'http')=0 then
-    result:=HTTPDownload(URL,filename)
+    result:=HTTPDownload(URL,DataStream)
   else if CompareText(P,'https')=0 then
-    result:=HTTPDownload(URL,filename);
+    result:=HTTPDownload(URL,DataStream);
 end;
 {$endif}
 
-
 {$IFDEF ENABLEWGET}
-
 // proxy still to do !!
 
 constructor TUseWGetDownloader.Create;
@@ -4914,19 +5005,15 @@ end;
 
 function TUseWGetDownloader.getFile(const URL,filename:string):boolean;
 var
-  aStream:TDownloadStream;
+  aStream:TFileStream;
 begin
   aFileName:=ExtractFileName(filename);
 
   result:=false;
   try
-    aStream := TDownloadStream.Create(TFileStream.Create(filename, fmCreate));
-    aStream.FOnWriteStream:=@DoOnWriteStream;
-    StoredTickCount:=GetUpTickCount;
+    aStream := TFileStream.Create(filename, fmCreate);
     try
-      aStream.Position:=0;
-      aStream.Size:=0;
-      result:=Download(URL,aStream);
+      result:=getStream(URL,aStream);
     finally
       aStream.Free;
     end;
@@ -4935,6 +5022,30 @@ begin
   end;
 
   if (NOT result) then SysUtils.DeleteFile(filename);
+end;
+
+function TUseWGetDownloader.getStream(const URL:string;DataStream:TStream):boolean;
+var
+  aDownloadStream:TDownloadStream;
+begin
+  result:=false;
+
+  if DataStream=nil then exit;
+
+  try
+    aDownloadStream:=TDownloadStream.Create(DataStream);
+    aDownloadStream.FOnWriteStream:=@DoOnWriteStream;
+    StoredTickCount:=GetUpTickCount;
+    try
+      aDownloadStream.Position:=0;
+      aDownloadStream.Size:=0;
+      result:=Download(URL,aDownloadStream);
+    finally
+      aDownloadStream.Free;
+    end;
+  except
+    result:=False;
+  end;
 end;
 
 
@@ -4950,7 +5061,6 @@ end;
 
 destructor TDownloadStream.Destroy;
 begin
-  FStream.Free;
   inherited Destroy;
 end;
 
@@ -4970,6 +5080,25 @@ function TDownloadStream.Seek(Offset: LongInt; Origin: Word): LongInt;
 begin
   Result := FStream.Seek(Offset, Origin);
   //DoProgress;
+end;
+
+function TDownloadStream.GetSize: Int64;
+var
+  p : int64;
+begin
+  p:=FStream.Seek(0,soCurrent);
+  Result:=FStream.Seek(0,soEnd);
+  FStream.Seek(p,soBeginning);
+end;
+
+procedure TDownloadStream.SetPosition(const Pos: Int64);
+begin
+  FStream.Seek(pos,soBeginning);
+end;
+
+procedure TDownloadStream.SetSize64(const NewSize: Int64);
+begin
+  FStream.Size:=NewSize;
 end;
 
 procedure TDownloadStream.DoProgress;

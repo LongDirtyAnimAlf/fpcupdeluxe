@@ -2253,6 +2253,7 @@ begin
     end;
   end;
 
+  {
   if (NOT OperationSucceeded) then
   begin
     infoln(localinfotext+'Could not download/install openssl library the normal way', etInfo);
@@ -2276,6 +2277,7 @@ begin
       end;
     end;
   end;
+  }
 
   if OperationSucceeded then
   begin

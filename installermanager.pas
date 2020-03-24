@@ -864,8 +864,6 @@ begin
     halt(2);
   end;
 
-  exit;
-
   infoln('InstallerManager: current sequence: '+LineEnding+FSequencer.Text,etDebug);
 
   // Some diagnostic info
