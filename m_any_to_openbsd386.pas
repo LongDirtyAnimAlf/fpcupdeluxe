@@ -89,12 +89,7 @@ begin
       '-k--allow-shlib-undefined'+LineEnding+
       '-k--allow-multiple-definition'+LineEnding+
       '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-  end
-  else
-  begin
-    ShowInfo('For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.');
   end;
-  result:=true; //this step is optional at least for simple hello world programs
 end;
 
 {$ifndef FPCONLY}

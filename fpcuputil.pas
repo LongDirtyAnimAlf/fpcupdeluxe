@@ -4425,8 +4425,6 @@ begin
           DataStream.Position:=0;
           DataStream.Size:=0;
           Get(URL,DataStream);
-          writeln(DataStream.Position);
-          writeln(DataStream.Size);
           response:=ResponseStatusCode;
           result:=(response=200);
           //result:=(response>=100) and (response<300);
