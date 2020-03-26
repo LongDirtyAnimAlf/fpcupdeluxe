@@ -2958,6 +2958,7 @@ object Form1: TForm1
           'darwin'
           'freebsd'
           'netbsd'
+          'openbsd'
           'wince'
           'embedded'
           'java'

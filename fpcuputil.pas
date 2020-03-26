@@ -1695,7 +1695,7 @@ begin
     end;
     result:=DownloadBase(aDownLoader,URL,aFile,HTTPProxyHost,HTTPProxyPort,HTTPProxyUser,HTTPProxyPassword);
   finally
-    aFile.Free;
+    aFile.Destroy;
   end;
   if (NOT result) then
   begin
@@ -4356,6 +4356,7 @@ function TUseNativeDownLoader.FTPDownload(Const URL: String; DataStream:TStream)
 var
   URI : TURI;
   aPort:integer;
+  aFTPClient:TFTPSend;
 begin
   result:=false;
 
@@ -4365,8 +4366,13 @@ begin
   aPort:=URI.Port;
   if aPort=0 then aPort:=21;
 
-  with TFTPSend.Create do
+  aFTPClient:=TFTPSend.Create;
+
   try
+    with aFTPClient do
+    begin
+      DirectFile := False;
+      DirectFileName := URI.Path+URI.Document;
       TargetHost := URI.Host;
       TargetPort := InttoStr(aPort);
       if FUsername <> '' then
@@ -4389,21 +4395,16 @@ begin
         Sock.HTTPTunnelUser:=HTTPProxyUser;
         Sock.HTTPTunnelPass:=HTTPProxyPassword;
       end;
-      if Login then
-      begin
-        DataStream.Position:=0;
-        DataStream.Size:=0;
-        //DirectFileName := filename;
-        //DirectFile:=True;
-        //Result := RetrieveFile(URI.Path+URI.Document, False);
-
-        DirectFileName := URI.Path+URI.Document;
-        Result := RetrieveStream(DataStream, false);
-
-        Logout;
-      end;
+    end;
+    DataStream.Position:=0;
+    DataStream.Size:=0;
+    if aFTPClient.Login then
+    begin
+      Result := aFTPClient.RetrieveStream(DataStream, true);
+      aFTPClient.Logout;
+    end;
   finally
-    Free;
+    aFTPClient.Destroy;
   end;
 end;
 
@@ -4424,6 +4425,8 @@ begin
           DataStream.Position:=0;
           DataStream.Size:=0;
           Get(URL,DataStream);
+          writeln(DataStream.Position);
+          writeln(DataStream.Size);
           response:=ResponseStatusCode;
           result:=(response=200);
           //result:=(response>=100) and (response<300);
@@ -4455,7 +4458,7 @@ begin
   try
     result:=Download(URL,aFile);
   finally
-    aFile.Free;
+    aFile.Destroy;
   end;
   if (NOT result) then SysUtils.DeleteFile(filename);
 end;
@@ -4962,7 +4965,7 @@ begin
     try
       result:=getStream(URL,aFile);
     finally
-      aFile.Free;
+      aFile.Destroy;
     end;
   except
     result:=False;
@@ -4995,7 +4998,7 @@ end;
 
 function TDownloadStream.Write(const Buffer; Count: LongInt): LongInt;
 begin
-  Result := inherited Write(Buffer, Count);
+  Result:= inherited Write(Buffer, Count);
   DoProgress;
 end;
 

@@ -969,7 +969,7 @@ begin
             end;
           end;
 
-          if (CrossInstaller.TargetCPU='mipsel') AND (CrossInstaller.TargetOS='embedded') then
+          if ((CrossInstaller.TargetCPU='mipsel') AND (CrossInstaller.TargetOS='embedded')) then
           begin
             // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
             CrossOptions:=CrossOptions+' -a5';

@@ -63,7 +63,7 @@ end;
 function TAny_OpenBSDx64.GetLibs(Basepath:string): boolean;
 const
   DirName=ARCH+'-'+OS;
-  LibName='libc.so.88.0';
+  LibName='libc.so.95.0';
 begin
 
   result:=FLibsFound;
@@ -82,20 +82,13 @@ begin
     FLibsFound:=true;
     //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
     //todo: implement -Xr for other platforms if this setup works
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-      '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-      '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-      //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
-      '-k--allow-shlib-undefined'+LineEnding+
-      '-k--allow-multiple-definition'+LineEnding+
-      '-Xr/usr/lib'; {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
-  end
-  else
-  begin
-    FLibsFound:=true;
-    ShowInfo('For simple programs that do not call (C) libraries, this is not necessary. However, you MAY want to copy your /usr/lib from your AIX machine to your cross lib directory.');
+    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+      //AddFPCCFGSnippet('-XR'+IncludeTrailingPathDelimiter(FLibsPath));
+    AddFPCCFGSnippet('-k--allow-shlib-undefined');
+    AddFPCCFGSnippet('-k--allow-multiple-definition');
+    AddFPCCFGSnippet('-Xr/usr/lib'); {buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries}
   end;
-  result:=true; //this step is optional at least for simple hello world programs
 end;
 
 {$ifndef FPCONLY}
@@ -146,18 +139,12 @@ begin
 
   SearchBinUtilsInfo(result);
 
-  if not result then
-  begin
-    ShowInfo('Suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.');
-    FAlreadyWarned:=true;
-  end
-  else
+  if result then
   begin
     FBinsFound:=true;
     // Configuration snippet for FPC
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)+LineEnding+ {search this directory for compiler utilities}
-    '-XP'+FBinUtilsPrefix; {Prepend the binutils names}
+    AddFPCCFGSnippet('-FD'+IncludeTrailingPathDelimiter(FBinUtilsPath)); {search this directory for compiler utilities}
+    AddFPCCFGSnippet('-XP'+FBinUtilsPrefix); {Prepend the binutils names}
   end;
 end;
 
