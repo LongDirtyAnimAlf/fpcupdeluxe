@@ -280,6 +280,7 @@ procedure CreateHomeStartLink(Target, TargetArguments, ShortcutName: string);
 procedure DeleteDesktopShortcut(ShortcutName: string);
 {$ENDIF MSWINDOWS}
 function FindFileInDir(Filename, Path: String): String;
+function FindFileInDirWildCard(Filename, Path: String): String;
 // Copy a directory recursive
 function DirCopy(SourcePath, DestPath: String): Boolean;
 function CheckDirectory(DirectoryName: string):boolean;
@@ -1363,6 +1364,30 @@ begin
     end;
   finally
     DirList.Free;
+  end;
+end;
+
+function FindFileInDirWildCard(Filename, Path: String): String;
+var
+  FilesFound: TStringList;
+  AFile: string;
+begin
+  Result := '';
+  FilesFound := FindAllFiles(Path, Filename, true);
+  try
+    if FilesFound.Count>0 then
+    begin
+      for AFile in FilesFound do
+      begin
+        if (NOT FileIsSymlink(AFile)) then
+        begin
+          result:=AFile;
+          break;
+        end;
+      end;
+    end;
+  finally
+    FilesFound.Free;
   end;
 end;
 

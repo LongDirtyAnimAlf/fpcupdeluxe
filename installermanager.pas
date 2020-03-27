@@ -1233,12 +1233,11 @@ function TSequencer.DoExec(FunctionName: string): boolean;
     end
     else Output:='the libraries to get libX11.so and libgdk_pixbuf-2.0.so and libpango-1.0.so and libgdk-x11-2.0.so, but also make and binutils';
 
-    if (LCLPlatform='') or (Uppercase(LCLPlatform)='GTK2') then
-      pll:=@LCLLIBS
-    else if Uppercase(LCLPlatform)='QT' then
+    if Uppercase(LCLPlatform)='QT' then
       pll:=@QTLIBS
     else if Uppercase(LCLPlatform)='QT5' then
-      pll:=@QT5LIBS;
+      pll:=@QT5LIBS
+    else pll:=@LCLLIBS;
 
     if Assigned(pll) then
     begin
@@ -1280,7 +1279,10 @@ begin
   else if FunctionName=_DELETELAZARUSSCRIPT then
     result:=DeleteLazarusScript
   else if FunctionName=_CHECKDEVLIBS then
+  begin
+    FParent.WritelnLog(etInfo,'Checking dev-libs for: '+FParent.CrossLCL_Platform, true);
     result:=CheckDevLibs(FParent.CrossLCL_Platform)
+  end
   {$endif}
   else
   begin

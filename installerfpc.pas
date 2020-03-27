@@ -2072,6 +2072,8 @@ begin
 
   OperationSucceeded:=true;
 
+  CompilerName:=ExtractFileName(FBootstrapCompiler);
+
   if FBootstrapCompilerURL='' then
   begin
     infoln(localinfotext+'No URL supplied. Fatal error. Should not happen !', etError);
@@ -2090,7 +2092,6 @@ begin
   begin
     BootstrapFileArchiveDir:=IncludeTrailingPathDelimiter(BootstrapFileArchiveDir);
     BootstrapFilePath:=BootstrapFileArchiveDir+GetFileNameFromURL(FBootstrapCompilerURL);
-    CompilerName:=ExtractFileName(FBootstrapCompiler);
 
     // Delete old compiler in archive directory (if any)
     SysUtils.DeleteFile(BootstrapFileArchiveDir+CompilerName);
@@ -2111,6 +2112,7 @@ begin
           begin
             try
               OperationSucceeded:=DoUnZip(BootstrapFilePath,ExcludeTrailingPathDelimiter(BootstrapFileArchiveDir),[]);
+              if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.zip','',[]);
             finally
               Free;
             end;
@@ -2127,7 +2129,11 @@ begin
             //We now have a .tar file, so remove extension
             BootstrapFilePath:=StringReplace(BootstrapFilePath,'.gz','',[]);
             BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
-            OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+GetExeExt+' -r',FVerbose)=0);
+            if ExtractFileExt(BootstrapFilePath)='.tar' then
+            begin
+              OperationSucceeded:=(ExecuteCommand(F7zip+' e -aoa -ttar -o"'+BootstrapFileArchiveDir+'" '+BootstrapFilePath+' '+CompilerName+GetExeExt+' -r',FVerbose)=0);
+              if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.tar','',[]);
+            end;
           end;
         end;
         {$endif MSWINDOWS}
@@ -2139,6 +2145,11 @@ begin
           OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' -O *' + CompilerName + GetExeExt,FVerbose)=0);
           {$else}
           OperationSucceeded:=(ExecuteCommand(FTar+' -xjf ' + BootstrapFilePath + ' -C ' + BootstrapFileArchiveDir + ' --wildcards --no-anchored ' + CompilerName + GetExeExt,FVerbose)=0);
+          if (NOT OperationSucceeded) then
+          begin
+            OperationSucceeded:=(ExecuteCommand(FBunzip2+' -dfkq '+BootstrapFilePath,FVerbose)=0);
+            if OperationSucceeded then BootstrapFilePath:=StringReplace(BootstrapFilePath,'.bz2','',[]);
+          end;
           {$endif}
         end;
         '.gz':
@@ -2150,17 +2161,19 @@ begin
           {$endif}
         end;
         {$endif UNIX}
+    end;
 
-        else
-        begin
-          if ExtractFileExt(BootstrapFilePath)=GetExeExt then
-          begin
-            // Normal exe ... rename towards correct name if needed
-            if (ExtractFileName(BootstrapFilePath)<>CompilerName) then
-              OperationSucceeded:=FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
-              // OperationSucceeded:=MoveFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
-          end;
-        end;
+    // Find a bootstrapper somewhere inside the download directory
+    if (NOT FileExists(BootstrapFilePath)) then
+      BootstrapFilePath:=FindFileInDirWildCard('*'+CompilerName,ExcludeTrailingPathDelimiter(BootstrapFileArchiveDir));
+
+    if ExtractFileExt(BootstrapFilePath)=GetExeExt then
+    begin
+      if (ExtractFileName(BootstrapFilePath)<>CompilerName) then
+      begin
+        // Give the bootstrapper its correct name
+        if FileExists(BootstrapFilePath) then FileUtil.CopyFile(BootstrapFilePath, BootstrapFileArchiveDir+CompilerName);
+      end;
     end;
 
     BootstrapFilePath:=BootstrapFileArchiveDir+CompilerName;
@@ -2239,7 +2252,10 @@ var
   {$IFDEF FREEBSD}
   l,FreeBSDVersion:integer;
   {$ENDIF}
-  s,s1:string;
+  s:string;
+  {$ifdef Darwin}
+  s1:string;
+  {$endif}
   aLocalBootstrapVersion,aLocalFPCUPBootstrapVersion:string;
   aFPCUPBootstrapURL:string;
   aDownLoader: TBasicDownLoader;

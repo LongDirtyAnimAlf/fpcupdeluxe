@@ -30,9 +30,40 @@
         <Item1 Value="tform1.caption"/>
       </ExcludedIdentifiers>
     </i18n>
-    <BuildModes Count="8">
-      <Item1 Name="linux64" Default="True"/>
-      <Item2 Name="freebsdx64">
+    <BuildModes Count="10">
+      <Item1 Name="default" Default="True"/>
+      <Item2 Name="linux64">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-musl"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-musl"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item2>
+      <Item3 Name="freebsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -62,8 +93,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item2>
-      <Item3 Name="solarisx64">
+      </Item3>
+      <Item4 Name="solarisx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
@@ -93,8 +124,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item3>
-      <Item4 Name="darwin32carbon">
+      </Item4>
+      <Item5 Name="darwin32carbon">
         <MacroValues Count="1">
           <Macro3 Name="LCLWidgetType" Value="carbon"/>
         </MacroValues>
@@ -127,8 +158,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item4>
-      <Item5 Name="darwin32cocoa">
+      </Item5>
+      <Item6 Name="darwin32cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -161,8 +192,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item5>
-      <Item6 Name="darwin64cocoa">
+      </Item6>
+      <Item7 Name="darwin64cocoa">
         <MacroValues Count="1">
           <Macro2 Name="LCLWidgetType" Value="cocoa"/>
         </MacroValues>
@@ -194,8 +225,8 @@
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item6>
-      <Item7 Name="darwin64QT5">
+      </Item7>
+      <Item8 Name="darwin64QT5">
         <MacroValues Count="1">
           <Macro1 Name="LCLWidgetType" Value="qt5"/>
         </MacroValues>
@@ -248,24 +279,22 @@
 -kAGL"/>
           </Other>
         </CompilerOptions>
-      </Item7>
-      <Item8 Name="default">
+      </Item8>
+      <Item9 Name="openbsdx64">
         <CompilerOptions>
           <Version Value="11"/>
           <PathDelim Value="\"/>
           <Target>
-            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)-musl"/>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
           </Target>
           <SearchPaths>
             <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
             <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
-            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-musl"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
           </SearchPaths>
-          <Conditionals Value="if TargetOS=&apos;darwin&apos; then
-   CustomOptions := &apos; -Cg-&apos;;
-if TargetOS=&apos;openbsd&apos; then
-   CustomOptions := &apos; -Cg-&apos;;"/>
           <CodeGeneration>
+            <TargetCPU Value="x86_64"/>
+            <TargetOS Value="openbsd"/>
             <Optimizations>
               <OptimizationLevel Value="2"/>
             </Optimizations>
@@ -274,13 +303,45 @@ if TargetOS=&apos;openbsd&apos; then
             <Debugging>
               <GenerateDebugInfo Value="False"/>
               <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
             </Debugging>
           </Linking>
           <Other>
             <CustomOptions Value="-dRemoteLog"/>
           </Other>
         </CompilerOptions>
-      </Item8>
+      </Item9>
+      <Item10 Name="openbsd32">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="deluxebin\$NameOnly($(ProjFile))-$(TargetCPU)-$(TargetOS)"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir);logger\mORMot"/>
+            <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
+            <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <TargetCPU Value="i386"/>
+            <TargetOS Value="openbsd"/>
+            <Optimizations>
+              <OptimizationLevel Value="2"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <UseLineInfoUnit Value="False"/>
+              <StripSymbols Value="True"/>
+            </Debugging>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-dRemoteLog"/>
+          </Other>
+        </CompilerOptions>
+      </Item10>
       <SharedMatrixOptions Count="3">
         <Item1 ID="784204643275" Modes="darwin64QT5" Type="IDEMacro" MacroName="LCLWidgetType" Value="qt5"/>
         <Item2 ID="322994045052" Modes="darwin32cocoa,darwin64cocoa" Type="IDEMacro" MacroName="LCLWidgetType" Value="cocoa"/>
@@ -370,9 +431,11 @@ if TargetOS=&apos;openbsd&apos; then
       <OtherUnitFiles Value="synaser;dcpcrypt;dcpcrypt\Ciphers;dcpcrypt\Hashes;logger;logger\mORMot\CrossPlatform;logger\mORMot;logger\mORMot\SQLite3"/>
       <UnitOutputDirectory Value="libfpclazupdeluxe\$(TargetCPU)-$(TargetOS)-musl"/>
     </SearchPaths>
+    <Conditionals Value="if TargetOS=&apos;darwin&apos; then
+   CustomOptions := &apos; -Cg-&apos;;
+if TargetOS=&apos;openbsd&apos; then
+   CustomOptions := &apos; -Cg-&apos;;"/>
     <CodeGeneration>
-      <TargetCPU Value="x86_64"/>
-      <TargetOS Value="linux"/>
       <Optimizations>
         <OptimizationLevel Value="2"/>
       </Optimizations>
@@ -381,7 +444,6 @@ if TargetOS=&apos;openbsd&apos; then
       <Debugging>
         <GenerateDebugInfo Value="False"/>
         <UseLineInfoUnit Value="False"/>
-        <StripSymbols Value="True"/>
       </Debugging>
     </Linking>
     <Other>
