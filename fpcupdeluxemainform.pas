@@ -373,17 +373,21 @@ begin
     {$endif}
     CheckAutoClear.Checked:=ReadBool('General','AutoClear',True);
     CommandOutputScreen.Font.Size := ReadInteger('General','CommandFontSize',CommandOutputScreen.Font.Size);
-    if ReadBool('General','Maximized',False) then
+
+    if ValueExists('General','Maximized') then
     begin
-      Self.WindowState:=wsMaximized;
-    end
-    else
-    begin
-      Self.WindowState:=wsNormal;
-      Self.Top := ReadInteger('General','Top',Self.Top);
-      Self.Left := ReadInteger('General','Left',Self.Left);
-      Self.Width := ReadInteger('General','Width',Self.Width);
-      Self.Height := ReadInteger('General','Height',Self.Height);
+      if ReadBool('General','Maximized',False) then
+      begin
+        Self.WindowState:=wsMaximized;
+      end
+      else
+      begin
+        Self.WindowState:=wsNormal;
+        Self.Top := ReadInteger('General','Top',Self.Top);
+        Self.Left := ReadInteger('General','Left',Self.Left);
+        Self.Width := ReadInteger('General','Width',Self.Width);
+        Self.Height := ReadInteger('General','Height',Self.Height);
+      end;
     end;
   finally
     Free;
