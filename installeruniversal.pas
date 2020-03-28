@@ -2481,10 +2481,10 @@ begin
            if (Pos('windows',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-windows',os)=0),NegativeList) else
            begin
              {$ifdef win32}
-             if (Pos('win32',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-win32',os)=0),NegativeList);
+             if (Pos(GetOS(TOS.win32),os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-win32',os)=0),NegativeList);
              {$endif}
              {$ifdef win64}
-             if (Pos('win64',os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-win64',os)=0),NegativeList);
+             if (Pos(GetOS(TOS.win64),os)>0) then AddModule:=AND_OR_Values(AddModule,(Pos('-win64',os)=0),NegativeList);
              {$endif}
            end;
          end;
@@ -2580,11 +2580,15 @@ end;
 
 function GetCPU(aCPU:TCPU):string;
 begin
+  if Ord(aCPU) < 0 then
+    raise Exception.Create('Invalid CPU for GetCPU.');
   result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
 end;
 
 function GetOS(aOS:TOS):string;
 begin
+  if Ord(aOS) < 0 then
+    raise Exception.Create('Invalid OS for GetOS.');
   result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
 end;
 
@@ -2611,8 +2615,8 @@ begin
   aLocalOS:=aOS;
   if length(aLocalOS)>0 then
   begin
-    if aLocalOS='win32' then aLocalOS:='windows';
-    if aLocalOS='win64' then aLocalOS:='windows';
+    //if aLocalOS='win32' then aLocalOS:='windows';
+    //if aLocalOS='win64' then aLocalOS:='windows';
     if aLocalOS='i-sim' then aLocalOS:='iphonesim';
     if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
     if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
@@ -2623,7 +2627,6 @@ begin
       raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
     result.OS:=xOS;
   end;
-
 end;
 
 function GetARMArch(aARMArch:string):TARMARCH;

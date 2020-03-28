@@ -193,11 +193,13 @@ type
     function GetLazPatches:string;
     procedure SetLazPatches(value:string);
 
+    {
     function GetCPUFromComboBox:TCPU;
     function GetOSFromComboBox:TOS;
 
     property CPUFromComboBox:TCPU read GetCPUFromComboBox;
     property OSFromComboBox:TOS read GetOSFromComboBox;
+    }
   public
     procedure SetInstallDir(const aInstallDir:string='');
 
@@ -889,6 +891,7 @@ begin
   end;
 end;
 
+{
 function TForm2.GetCPUFromComboBox:TCPU;
 begin
   if (ComboBoxCPU.ItemIndex<>-1) then
@@ -904,6 +907,7 @@ begin
     result:=GetCPUOSCombo('',ComboBoxOS.Items[ComboBoxOS.ItemIndex]).OS;
   end;
 end;
+}
 
 function TForm2.GetLibraryDirectory(aCPU,aOS:string):string;
 var

@@ -2041,6 +2041,7 @@ begin
   if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:=GetCPU(TCPU.i386);
   if (FPCupManager.CrossOS_Target=GetOS(TOS.dragonfly)) then FPCupManager.CrossCPU_Target:=GetCPU(TCPU.x86_64);
 
+  //rename windows target os to the correct FPC target os
   if FPCupManager.CrossOS_Target='windows' then
   begin
     if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then FPCupManager.CrossOS_Target:=GetOS(TOS.win32);

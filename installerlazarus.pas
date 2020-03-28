@@ -1829,7 +1829,8 @@ begin
   case ModuleName of
     _IDE:
     begin
-      CleanCommand:='cleanide';
+      //CleanCommand:='cleanide';
+      CleanCommand:='distclean';
       CleanDirectory:=DirectorySeparator+'ide';
     end;
     _BIGIDE: CleanCommand:='cleanbigide';
