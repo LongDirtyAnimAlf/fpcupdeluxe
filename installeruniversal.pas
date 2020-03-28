@@ -2585,12 +2585,12 @@ end;
 
 function GetCPU(aCPU:TCPU):string;
 begin
-  GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
+  result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
 end;
 
 function GetOS(aOS:TOS):string;
 begin
-  GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
+  result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
 end;
 
 
