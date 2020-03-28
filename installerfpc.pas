@@ -559,7 +559,7 @@ begin
     CrossInstaller.Reset;
 
     {$ifdef win32}
-    if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
+    if (CrossInstaller.TargetCPU=GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS=GetOS(TOS.win64)) or (CrossInstaller.TargetOS=GetOS(TOS.win32))) then
     begin
       if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,2)) then
       begin
@@ -569,7 +569,7 @@ begin
     end;
     {$endif win32}
 
-    if CrossInstaller.TargetCPU='jvm' then DownloadJasmin;
+    if CrossInstaller.TargetCPU=GetCPU(TCPU.jvm) then DownloadJasmin;
 
     //pass on user-requested cross compile options
     CrossInstaller.SetCrossOpt(CrossOPT);
@@ -665,7 +665,7 @@ begin
         begin
           s1:='';
           {$ifdef Darwin}
-          if (CrossInstaller.TargetCPU='aarch64') OR (CrossInstaller.TargetCPU='arm') then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.aarch64)) OR (CrossInstaller.TargetCPU=GetCPU(TCPU.arm)) then
           begin
             s1:=GetSDKVersion('iphoneos');
           end
@@ -695,7 +695,7 @@ begin
             Options:=UpperCase(CrossCPU_Target);
 
             //Distinguish between 32 and 64 bit powerpc
-            if (UpperCase(CrossCPU_Target)='POWERPC') then
+            if (CrossCPU_Target=GetCPU(TCPU.powerpc)) then
             begin
               Options:='POWERPC32';
             end;
@@ -874,7 +874,7 @@ begin
 
           Processor.Parameters.Add('CROSSINSTALL=1');
 
-          if (CrossInstaller.TargetCPU='jvm') then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.jvm)) then
           begin
             if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
             begin
@@ -896,8 +896,8 @@ begin
 
           // Error checking for some known problems with cross compilers
           //todo: this really should go to the cross compiler unit itself but would require a rewrite
-          if (CrossInstaller.TargetCPU='i8086') and
-            (CrossInstaller.TargetOS='msdos') then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.i8086)) and
+            (CrossInstaller.TargetOS=GetOS(TOS.msdos)) then
           begin
             if (pos('-g',Options)>0) then
             begin
@@ -906,7 +906,7 @@ begin
             end;
           end;
 
-          if (CrossInstaller.TargetCPU='arm') then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.arm)) then
           begin
             // what to do ...
             // always build hardfloat for ARM ?
@@ -961,7 +961,7 @@ begin
 
           //Still not sure if this is needed
           //To be checked
-          if (CrossInstaller.TargetOS='freebsd') then
+          if (CrossInstaller.TargetOS=GetOS(TOS.freebsd)) then
           begin
             //if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
             begin
@@ -970,7 +970,7 @@ begin
             end;
           end;
 
-          if ((CrossInstaller.TargetCPU='mipsel') AND (CrossInstaller.TargetOS='embedded')) then
+          if ((CrossInstaller.TargetCPU=GetCPU(TCPU.mipsel)) AND (CrossInstaller.TargetOS=GetOS(TOS.embedded))) then
           begin
             // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
             CrossOptions:=CrossOptions+' -a5';
@@ -986,7 +986,7 @@ begin
           if CrossInstaller.LibsPath<>''then
           begin
              // https://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
-             if (CrossInstaller.TargetOS='aix') then
+             if (CrossInstaller.TargetOS=GetOS(TOS.aix)) then
              begin
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
              end;
@@ -995,7 +995,7 @@ begin
              CrossOptions:=CrossOptions+' -Xd';
              CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
 
-             if (CrossInstaller.TargetOS='darwin') then
+             if (CrossInstaller.TargetOS=GetOS(TOS.darwin)) then
              begin
                // add extra libs located in ...\system for Mac SDK
                // does not do harm on other systems if they are not there
@@ -1004,7 +1004,7 @@ begin
              {$endif}
 
              {$ifdef Darwin}
-             if (CrossInstaller.TargetOS='darwin') OR (CrossInstaller.TargetOS='iphonesim') then
+             if (CrossInstaller.TargetOS=GetOS(TOS.darwin)) OR (CrossInstaller.TargetOS=GetOS(TOS.iphonesim)) then
              begin
                s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
@@ -1126,12 +1126,12 @@ begin
           // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
           {$ifdef win32}
           // if this is crosswin32-64, ignore error as it is optional
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS=GetOS(TOS.win64)) or (CrossInstaller.TargetOS=GetOS(TOS.win32))) then
             result:=true;
           {$endif win32}
           {$ifdef win64}
           // if this is crosswin64-32, ignore error as it is optional
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.i386)) and (CrossInstaller.TargetOS='win32') then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.i386)) and (CrossInstaller.TargetOS=GetOS(TOS.win32)) then
             result:=true;
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';
@@ -1178,7 +1178,7 @@ begin
           CreateBinutilsList(GetCompilerVersion(ChosenCompiler));
 
           // get wince debugger
-          if (CrossCPU_Target='arm') AND (CrossOS_Target='wince') then
+          if (CrossCPU_Target=GetCPU(TCPU.arm)) AND (CrossOS_Target=GetOS(TOS.wince)) then
           begin
             for Counter := low(FUtilFiles) to high(FUtilFiles) do
             begin
@@ -1208,7 +1208,7 @@ begin
           {$endif}
 
           // move arm-embedded debugger, if any
-          if (CrossCPU_Target='arm') AND (CrossOS_Target='embedded') then
+          if (CrossCPU_Target=GetCPU(TCPU.arm)) AND (CrossOS_Target=GetOS(TOS.embedded)) then
           begin
             if NOT FileExists(ConcatPaths([FMakeDir,'gdb','arm-embedded'])+PathDelim+'gdb'+GetExeExt) then
             begin

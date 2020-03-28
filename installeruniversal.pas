@@ -2560,8 +2560,6 @@ begin
   end;
 end;
 
-
-
 function GetModuleEnabledList(var ModuleList: TStringList): boolean;
 var i:integer;
 begin
@@ -2572,9 +2570,6 @@ begin
 end;
 
 function SetConfigFile(aConfigFile: string):boolean;
-var
-  ConfigFile: Text;
-  CurrentConfigFileName:string;
 begin
   result:=true;
   CurrentConfigFile:=aConfigFile;

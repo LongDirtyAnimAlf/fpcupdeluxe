@@ -248,16 +248,8 @@ type
   //TTargetSet=array[tcpu,tos] of boolean;
 
 const
-  CpuStr : array[TCPU] of string=(
-    'i386','x86_64','arm','aarch64','powerpc','powerpc64', 'mips', 'mipsel','avr','jvm','i8086','sparc','sparc64','riscv32','riscv64'
-  );
-
   ppcSuffix : array[TCPU] of string=(
     '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64'
-  );
-
-  OSStr : array[TOS] of string=(
-    'win32','win64','linux', 'android','darwin','freebsd','openbsd','aix','wince','iphonesim','embedded','java', 'msdos','haiku','solaris','dragonfly','netbsd'
   );
 
   ARMArchFPCStr : array[TARMARCH] of string=(
@@ -3611,7 +3603,7 @@ begin
   begin
     for aCPU:=Low(TCPU) to High(TCPU) do
     begin
-      if TargetCPU=CpuStr[aCPU] then
+      if TargetCPU=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU)) then
       begin
         if Cross then
           s:='ppcross'+ppcSuffix[aCPU]
