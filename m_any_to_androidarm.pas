@@ -196,19 +196,9 @@ begin
   if result then
   begin
     FLibsFound:=true;
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    '-Xd'+LineEnding+ {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
-    '-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+ {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
-    //'-XR'+IncludeTrailingPathDelimiter(FLibsPath)+LineEnding+
-    '-FLlibdl.so'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
-    //'-FLlibandroid.so'; {buildfaq 3.3.1: the name of the dynamic linker on the target}
-
-    {
-    //todo: check if -XR is needed for fpc root dir Prepend <x> to all linker search paths
-    '-XR'+IncludeTrailingPathDelimiter(FLibsPath);
-    }
-    //todo: possibly adapt for android:
-    //'-Xr/usr/lib'+LineEnding+ //buildfaq 3.3.1: makes the linker create the binary so that it searches in the specified directory on the target system for libraries
+    AddFPCCFGSnippet('-Xd'); {buildfaq 3.4.1 do not pass parent /lib etc dir to linker}
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)); {buildfaq 1.6.4/3.3.1: the directory to look for the target  libraries}
+    AddFPCCFGSnippet('-FLlibdl.so'); {buildfaq 3.3.1: the name of the dynamic linker on the target}
   end
   else
   begin
@@ -407,9 +397,20 @@ begin
     begin
       aOption:='-Cp'+DEFAULTARMCPU;
       FCrossOpts.Add(aOption+' ');
-      ShowInfo('Did not find any -Cp architecture parameter; using '+aOption+'.');
+      ShowInfo('Did not find any [-Cp] architecture parameter; using '+aOption+'.');
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
+
+    {
+    i:=StringListStartsWith(FCrossOpts,'-Cf');
+    if i=-1 then
+    begin
+      aOption:='-CfVFPV3_D16';
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find any [-Cf] FPU instruction set setting; using '+aOption+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+    }
 
   end
   else

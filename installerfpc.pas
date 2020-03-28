@@ -215,6 +215,7 @@ uses
   {$IFDEF BSD}
     ,math
   {$ENDIF}
+  ,installerUniversal
   ;
 
 function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;
@@ -1125,12 +1126,12 @@ begin
           // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
           {$ifdef win32}
           // if this is crosswin32-64, ignore error as it is optional
-          if (CrossInstaller.TargetCPU='x86_64') and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS='win64') or (CrossInstaller.TargetOS='win32')) then
             result:=true;
           {$endif win32}
           {$ifdef win64}
           // if this is crosswin64-32, ignore error as it is optional
-          if (CrossInstaller.TargetCPU='i386') and (CrossInstaller.TargetOS='win32') then
+          if (CrossInstaller.TargetCPU=GetCPU(TCPU.i386)) and (CrossInstaller.TargetOS='win32') then
             result:=true;
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';

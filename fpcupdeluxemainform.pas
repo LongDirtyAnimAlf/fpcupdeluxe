@@ -309,7 +309,7 @@ begin
   {$endif}
 
   {$ifdef Darwin}
-  radgrpOS.Items.Strings[radgrpOS.Items.IndexOf('wince')]:='i-sim';
+  radgrpOS.Items.Strings[radgrpOS.Items.IndexOf(GetOS(TOS.wince))]:='i-sim';
   {$endif Darwin}
 
   oldoutput := System.Output;
@@ -658,7 +658,7 @@ begin
           {
           aArch:='';
           // try to distinguish between different ARM CPU versons ... very experimental and [therefor] only for Linux
-          if (UpperCase(aCPU)='ARM') AND (UpperCase(aOS)='LINUX') then
+          if (UpperCase(aCPU)=GetCPU(TCPU.arm)) AND (UpperCase(aOS)=GetOS(TOS.linux)) then
           begin
             for i:=SnipBegin to SnipBegin+5 do
             begin
@@ -676,7 +676,7 @@ begin
           }
 
           // try to distinguish between different Solaris versons
-          if (aOS='solaris') then
+          if (aOS=GetOS(TOS.solaris)) then
           begin
             i:=SnipBegin;
             while true do
@@ -693,7 +693,7 @@ begin
           end;
 
           // try to distinguish between different Linux versons
-          if (aOS='linux') then
+          if (aOS=GetOS(TOS.linux)) then
           begin
             i:=SnipBegin;
             while true do
@@ -711,7 +711,7 @@ begin
 
           // try to get subarch
           aSubArch:='';
-          if (aOS='embedded') then
+          if (aOS=GetOS(TOS.embedded)) then
           begin
             i:=SnipBegin;
             while true do
@@ -729,14 +729,14 @@ begin
 
           aRadiogroup_CPU:=aCPU;
           aRadiogroup_OS:=aOS;
-          if aRadiogroup_CPU='powerpc' then aRadiogroup_CPU:='ppc';
-          if aRadiogroup_CPU='powerpc64' then aRadiogroup_CPU:='ppc64';
+          if aRadiogroup_CPU=GetCPU(TCPU.powerpc) then aRadiogroup_CPU:='ppc';
+          if aRadiogroup_CPU=GetCPU(TCPU.powerpc64) then aRadiogroup_CPU:='ppc64';
           if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
 
-          if (aOS='windows') or (aOS='win32') or (aOS='win64') then
+          if (aOS='windows') or (aOS=GetOS(TOS.win32)) or (aOS=GetOS(TOS.win64)) then
           begin
-            if aCPU='i386' then aOS:='win32';
-            if aCPU='x86_64' then aOS:='win64';
+            if aCPU=GetCPU(TCPU.i386) then aOS:=GetOS(TOS.win32);
+            if aCPU=GetCPU(TCPU.x86_64) then aOS:=GetOS(TOS.win64);
             aRadiogroup_OS:='windows';
           end;
 
@@ -752,7 +752,7 @@ begin
               // On win32, we always build a win64 cross-compiler.
               // So, if the win32 install is updated, this cross-compiler is also updated already auto-magically.
               // We can skip it here, in that case.
-              if aOS='win64' then
+              if aOS=GetOS(TOS.win64) then
               begin
                 Inc(SnipBegin);
                 continue;
@@ -799,14 +799,14 @@ begin
         // tricky; see above; improvement todo
         aRadiogroup_CPU:=aCPU;
         aRadiogroup_OS:=aOS;
-        if aRadiogroup_CPU='powerpc' then aRadiogroup_CPU:='ppc';
-        if aRadiogroup_CPU='powerpc64' then aRadiogroup_CPU:='ppc64';
+        if aRadiogroup_CPU=GetCPU(TCPU.powerpc) then aRadiogroup_CPU:='ppc';
+        if aRadiogroup_CPU=GetCPU(TCPU.powerpc64) then aRadiogroup_CPU:='ppc64';
         if aRadiogroup_OS='iphonesim' then aRadiogroup_OS:='i-sim';
 
-        if (aOS='windows') or (aOS='win32') or (aOS='win64') then
+        if (aOS='windows') or (aOS=GetOS(TOS.win32)) or (aOS=GetOS(TOS.win64)) then
         begin
-          if aCPU='i386' then aOS:='win32';
-          if aCPU='x86_64' then aOS:='win64';
+          if aCPU=GetCPU(TCPU.i386) then aOS:=GetOS(TOS.win32);
+          if aCPU=GetCPU(TCPU.x86_64) then aOS:=GetOS(TOS.win64);
           aRadiogroup_OS:='windows';
         end;
 
@@ -814,7 +814,7 @@ begin
         // On win32, we always build a win64 cross-compiler.
         // So, if the win32 install is updated, this cross-compiler is also updated already auto-magically.
         // We can skip it here, in that case.
-        if aOS='win64' then continue;
+        if aOS=GetOS(TOS.win64) then continue;
         {$endif}
 
         // take into account that there are more ARM CPU settings !!
@@ -1052,7 +1052,7 @@ procedure TForm1.radgrpOSClick(Sender: TObject);
 begin
   if (radgrpOS.ItemIndex<>-1) then
   begin
-    if (radgrpOS.Items[radgrpOS.ItemIndex]='java') OR (radgrpOS.Items[radgrpOS.ItemIndex]='msdos') then
+    if (radgrpOS.Items[radgrpOS.ItemIndex]=GetOS(TOS.java)) OR (radgrpOS.Items[radgrpOS.ItemIndex]=GetOS(TOS.msdos)) then
     begin
       radgrpCPU.ItemIndex:=-1;
       radgrpCPU.Enabled:=false;
@@ -1711,8 +1711,8 @@ begin
     if Sender=EmbeddedBtn then
     begin
       s:='Going to install FPC and Lazarus for SAM embedded ';
-      FPCTarget:='embedded';
-      LazarusTarget:='embedded';
+      FPCTarget:=GetOS(TOS.embedded);
+      LazarusTarget:=GetOS(TOS.embedded);
       //FPCupManager.IncludeModules:='mbf,pxl';
       FPCupManager.IncludeModules:='mbf';
     end;
@@ -1889,12 +1889,12 @@ begin
   if radgrpOS.ItemIndex<>-1 then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='embedded' then
+    if s=GetOS(TOS.embedded) then
     begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'avr') and (s<>'arm') and (s<>'mipsel') then
+        if (s<>GetCPU(TCPU.avr)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) then
         begin
           success:=false;
         end;
@@ -1912,12 +1912,12 @@ begin
   if radgrpOS.ItemIndex<>-1 then
   begin
     s:=radgrpOS.Items[radgrpOS.ItemIndex];
-    if s='android' then
+    if s=GetOS(TOS.android) then
     begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'i386') and (s<>'arm') and (s<>'mipsel') and (s<>'jvm') and (s<>'aarch64') and (s<>'x8664') and (s<>'x86_64') then
+        if (s<>GetCPU(TCPU.i386)) and (s<>GetCPU(TCPU.arm)) and (s<>GetCPU(TCPU.mipsel)) and (s<>GetCPU(TCPU.jvm)) and (s<>GetCPU(TCPU.aarch64)) and (s<>'x8664') and (s<>GetCPU(TCPU.x86_64)) then
         begin
           success:=false;
         end;
@@ -1940,7 +1940,7 @@ begin
       if radgrpOS.ItemIndex<>-1 then
       begin
         s:=radgrpOS.Items[radgrpOS.ItemIndex];
-        if (s<>'android') and (s<>'java') then
+        if (s<>GetOS(TOS.android)) and (s<>GetOS(TOS.java)) then
         begin
           success:=false;
         end;
@@ -1963,7 +1963,7 @@ begin
       if radgrpCPU.ItemIndex<>-1 then
       begin
         s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-        if (s<>'x86_64') then
+        if (s<>GetCPU(TCPU.x86_64)) then
         begin
           success:=false;
         end;
@@ -1982,9 +1982,9 @@ begin
   if radgrpCPU.ItemIndex<>-1 then
   begin
     s:=radgrpCPU.Items[radgrpCPU.ItemIndex];
-    if s='ppc' then s:='powerpc';
-    if s='ppc64' then s:='powerpc64';
-    if s='x8664' then s:='x86_64';
+    if s='ppc' then s:=GetCPU(TCPU.powerpc);
+    if s='ppc64' then s:=GetCPU(TCPU.powerpc64);
+    if s='x8664' then s:=GetCPU(TCPU.x86_64);
     FPCupManager.CrossCPU_Target:=s;
   end;
 
@@ -1995,13 +1995,13 @@ begin
     if s='linux-musl' then
     begin
       FPCupManager.MUSL:=true;
-      s:='linux';
+      s:=GetOS(TOS.linux);
     end;
 
     if s='solaris-oi' then
     begin
       FPCupManager.SolarisOI:=true;
-      s:='solaris';
+      s:=GetOS(TOS.solaris);
     end;
 
     FPCupManager.CrossOS_Target:=s;
@@ -2012,7 +2012,7 @@ begin
   begin
 
     {$ifdef CPUX86_64}
-    if FPCupManager.CrossCPU_Target='x86_64' then
+    if FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64) then
     begin
       if Sender<>nil then Application.MessageBox(PChar('On Linux x86_64, you cannot cross towards another Linux x86_64.'), PChar('FPC limitation'), MB_ICONERROR);
       FPCupManager.CrossOS_Target:=''; // cleanup
@@ -2022,7 +2022,7 @@ begin
     {$endif}
 
     {$ifdef CPUX86}
-    if FPCupManager.CrossCPU_Target='i386' then
+    if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then
     begin
       if Sender<>nil then Application.MessageBox(PChar('On Linux i386, you cannot cross towards another Linux i386.'), PChar('FPC limitation'), MB_ICONERROR);
       FPCupManager.CrossOS_Target:=''; // cleanup
@@ -2034,17 +2034,17 @@ begin
   end;
   {$endif}
 
-  if (FPCupManager.CrossOS_Target='java') then FPCupManager.CrossCPU_Target:='jvm';
-  if (FPCupManager.CrossOS_Target='msdos') then FPCupManager.CrossCPU_Target:='i8086';
+  if (FPCupManager.CrossOS_Target=GetOS(TOS.java)) then FPCupManager.CrossCPU_Target:=GetCPU(TCPU.jvm);
+  if (FPCupManager.CrossOS_Target=GetOS(TOS.msdos)) then FPCupManager.CrossCPU_Target:=GetCPU(TCPU.i8086);
   //For i8086 embedded and win16 are also ok, but not [yet] implemented by fpcupdeluxe
-  if (FPCupManager.CrossCPU_Target='i8086') then FPCupManager.CrossOS_Target:='msdos';
-  if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:='i386';
-  if (FPCupManager.CrossOS_Target='dragonfly') then FPCupManager.CrossCPU_Target:='x86_64';
+  if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.i8086)) then FPCupManager.CrossOS_Target:=GetOS(TOS.msdos);
+  if (FPCupManager.CrossOS_Target='go32v2') then FPCupManager.CrossCPU_Target:=GetCPU(TCPU.i386);
+  if (FPCupManager.CrossOS_Target=GetOS(TOS.dragonfly)) then FPCupManager.CrossCPU_Target:=GetCPU(TCPU.x86_64);
 
   if FPCupManager.CrossOS_Target='windows' then
   begin
-    if FPCupManager.CrossCPU_Target='i386' then FPCupManager.CrossOS_Target:='win32';
-    if FPCupManager.CrossCPU_Target='x86_64' then FPCupManager.CrossOS_Target:='win64';
+    if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then FPCupManager.CrossOS_Target:=GetOS(TOS.win32);
+    if FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64) then FPCupManager.CrossOS_Target:=GetOS(TOS.win64);
   end;
 
   if (FPCupManager.CrossCPU_Target='') then
@@ -2117,7 +2117,7 @@ begin
     if Sender<>nil then
     begin
       {$ifdef Linux}
-      if (FPCupManager.CrossOS_Target='darwin') then
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.darwin)) then
       begin
         success:=CheckExecutable('clang', '-v', '');
         if (NOT success) then
@@ -2132,7 +2132,7 @@ begin
           exit;
         end;
       end;
-      if (FPCupManager.CrossOS_Target='wince') then
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.wince)) then
       begin
         (*
         success:=CheckExecutable('gcc', '-v', '');
@@ -2166,7 +2166,7 @@ begin
       end;
       {$endif}
 
-      if (FPCupManager.CrossOS_Target='java') then
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.java)) then
       begin
         success:=CheckJava;
         if (NOT success) then
@@ -2186,7 +2186,7 @@ begin
 
       {$ifndef BSD}
       if (Pos('bsd',FPCupManager.CrossOS_Target)>0) then
-      //if (FPCupManager.CrossOS_Target='freebsd') OR (FPCupManager.CrossOS_Target='netbsd') OR (FPCupManager.CrossOS_Target='openbsd') then
+      //if (FPCupManager.CrossOS_Target=GetOS(TOS.freebsd)) OR (FPCupManager.CrossOS_Target=GetOS(TOS.netbsd)) OR (FPCupManager.CrossOS_Target=GetOS(TOS.openbsd)) then
       begin
         if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes, stable).' + sLineBreak +
                    'See: https://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
@@ -2200,22 +2200,22 @@ begin
       {$endif}
 
       s:='';
-      if (FPCupManager.CrossOS_Target='aix')
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.aix))
       then
       begin
         s:='Be forwarned: this will only work with FPC 3.0 and later.' + sLineBreak +
            'Do you want to continue ?';
       end;
-      if (FPCupManager.CrossCPU_Target='aarch64')
-      {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target='darwin'){$endif}
-      OR (FPCupManager.CrossOS_Target='msdos')
-      OR (FPCupManager.CrossOS_Target='haiku')
+      if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.aarch64))
+      {$ifdef MSWINDOWS}OR (FPCupManager.CrossOS_Target=GetOS(TOS.darwin)){$endif}
+      OR (FPCupManager.CrossOS_Target=GetOS(TOS.msdos))
+      OR (FPCupManager.CrossOS_Target=GetOS(TOS.haiku))
       then
       begin
         s:='Be forwarned: this will only work with FPC 3.2 / embedded / trunk.' + sLineBreak +
            'Do you want to continue ?';
       end;
-      if ((FPCupManager.CrossCPU_Target='aarch64') {OR (FPCupManager.CrossCPU_Target='i386')} OR (FPCupManager.CrossCPU_Target='x86_64')) AND (FPCupManager.CrossOS_Target='android')
+      if ((FPCupManager.CrossCPU_Target=GetCPU(TCPU.aarch64)) {OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386))} OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64))) AND (FPCupManager.CrossOS_Target=GetOS(TOS.android))
       then
       begin
         s:='Be forwarned: this will only work with trunk.' + sLineBreak +
@@ -2246,7 +2246,7 @@ begin
     try
 
       //arm predefined settings
-      if (FPCupManager.CrossCPU_Target='arm') AND (FPCupManager.CrossOS_Target<>'embedded') then
+      if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm)) AND (FPCupManager.CrossOS_Target<>GetOS(TOS.embedded)) then
       begin
         // default: armhf
         // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets
@@ -2258,17 +2258,40 @@ begin
         else
           FPCupManager.FPCOPT:=s+' ';
 
-        if (FPCupManager.CrossOS_Target='wince') then
+        if (FPCupManager.CrossOS_Target=GetOS(TOS.wince)) then
         begin
           //Disable for now : setting ARMV6 or higher gives problems with FPC 3.0.4 and lower
           //FPCupManager.CrossOPT:='-CpARMV6 ';
         end
         else
-        if (FPCupManager.CrossOS_Target='darwin') then
+        if (FPCupManager.CrossOS_Target=GetOS(TOS.darwin)) then
         begin
           FPCupManager.CrossOPT:='-CpARMV7 -CfVFPV3 ';
         end
         else
+        begin
+          if (FPCupManager.CrossOS_Target<>GetOS(TOS.android)) then
+          begin
+            if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
+              FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
+            else
+              FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH ';
+          end;
+        end;
+      end;
+
+      //android predefined settings
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.android)) then
+      begin
+        if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386)) then
+        begin
+          FPCupManager.CrossOPT:='-CfSSSE3 ';
+        end;
+        if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64)) then
+        begin
+          FPCupManager.CrossOPT:='-CfSSE42 ';
+        end;
+        if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm)) then
         begin
           // Use hard floats, using armeabi-v7a Android ABI.
           // Note: do not use -CaEABIHF on Android, to not use
@@ -2280,20 +2303,12 @@ begin
           //   armeabi-v7a-hard ABI (but only using armeabi-v7a) like
           //   http://repo.or.cz/openal-soft/android.git or
           //   https://github.com/michaliskambi/tremolo-android .
-          if (FPCupManager.CrossOS_Target='android')
-              then FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 '
-              else
-              begin
-                if Pos('-dFPC_ARMHF',FPCupManager.FPCOPT)>0 then
-                  FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH -CaEABIHF '
-                else
-                  FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3 -OoFASTMATH ';
-              end;
+          FPCupManager.CrossOPT:='-Cp'+DEFAULTARMCPU+' -CfVFPV3_D16 ';
         end;
       end;
 
       //embedded predefined settings
-      if (FPCupManager.CrossOS_Target='embedded') then
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.embedded)) then
       begin
         if (FPCupManager.CrossCPU_Target='avr') then
         begin
@@ -2303,7 +2318,7 @@ begin
           FPCupManager.CrossOPT:='-Cpavr5 ';
           FPCupManager.CrossOS_SubArch:='avr5';
         end;
-        if (FPCupManager.CrossCPU_Target='arm') then
+        if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm)) then
         begin
           s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
           if Length(s)=0 then
@@ -2334,9 +2349,9 @@ begin
       end;
 
       //ppc64 predefined settings
-      if (FPCupManager.CrossCPU_Target='powerpc64') then
+      if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64)) then
       begin
-        if ((FPCupManager.CrossOS_Target='linux')) then
+        if ((FPCupManager.CrossOS_Target=GetOS(TOS.linux))) then
         begin
           // for now, little endian only on Linux (IBM CPU's) !!
           FPCupManager.CrossOPT:='-Cb- -Caelfv2 ';
@@ -2344,7 +2359,7 @@ begin
       end;
 
       //freebsd predefined settings
-      if (FPCupManager.CrossOS_Target='freebsd') then
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.freebsd)) then
       begin
         //This is already done in the FPC installer itself.
         //To be checked if that is the right choice.
@@ -2365,7 +2380,7 @@ begin
       if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
 
       // override / set custom FPC cross-subarch by special user input through setup+
-      if (FPCupManager.CrossOS_Target='embedded') then
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.embedded)) then
       begin
         s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         s:=Trim(s);
@@ -2397,25 +2412,25 @@ begin
 
       // handle inclusion of LCL when cross-compiling
       IncludeLCL:=Form2.IncludeLCL;
-      if (FPCupManager.CrossOS_Target='java') then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target='android') then IncludeLCL:=false;
-      if (FPCupManager.CrossOS_Target='embedded') then IncludeLCL:=false;
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.java)) then IncludeLCL:=false;
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.android)) then IncludeLCL:=false;
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.embedded)) then IncludeLCL:=false;
       // AFAIK, on Darwin, LCL Carbon and Cocoa are only for MACOSX
-      if (FPCupManager.CrossOS_Target='darwin') AND ((FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64')) then IncludeLCL:=false;
+      if (FPCupManager.CrossOS_Target=GetOS(TOS.darwin)) AND ((FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm)) OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.aarch64))) then IncludeLCL:=false;
       if IncludeLCL then
       begin
         FPCupManager.OnlyModules:=FPCupManager.OnlyModules+',LCL';
-        if ((FPCupManager.CrossOS_Target='win32') OR (FPCupManager.CrossOS_Target='win64')) then
-           FPCupManager.CrossLCL_Platform:='win32' else
-        if (FPCupManager.CrossOS_Target='wince') then
-           FPCupManager.CrossLCL_Platform:='wince' else
-        if (FPCupManager.CrossOS_Target='darwin') then
+        if ((FPCupManager.CrossOS_Target=GetOS(TOS.win32)) OR (FPCupManager.CrossOS_Target=GetOS(TOS.win64))) then
+           FPCupManager.CrossLCL_Platform:=GetOS(TOS.win32) else
+        if (FPCupManager.CrossOS_Target=GetOS(TOS.wince)) then
+           FPCupManager.CrossLCL_Platform:=GetOS(TOS.wince) else
+        if (FPCupManager.CrossOS_Target=GetOS(TOS.darwin)) then
            FPCupManager.CrossLCL_Platform:='carbon' else
         if ((FPCupManager.CrossOS_Target='amiga') OR (FPCupManager.CrossOS_Target='aros') OR (FPCupManager.CrossOS_Target='morphos')) then
            FPCupManager.CrossLCL_Platform:='mui' else
         FPCupManager.CrossLCL_Platform:='gtk2';
         // if Darwin cpu64, only cocoa (but also qt5) will work.
-        if ((FPCupManager.CrossOS_Target='darwin') AND ((FPCupManager.CrossCPU_Target='x86_64') OR (FPCupManager.CrossCPU_Target='powerpc64')))
+        if ((FPCupManager.CrossOS_Target=GetOS(TOS.darwin)) AND ((FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64)) OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64))))
         {$ifdef LCLQT5}
         then FPCupManager.CrossLCL_Platform:='qt5';
         {$else}
@@ -2523,43 +2538,43 @@ begin
 
           AddMessage('Looking for fpcupdeluxe cross-tools on GitHub (if any).');
 
-          if FPCupManager.CrossCPU_Target='arm' then BinsFileName:='ARM';
-          if FPCupManager.CrossCPU_Target='aarch64' then BinsFileName:='Aarch64';
-          if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x64';
-          if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='i386';
-          if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='PowerPC';
-          if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='PowerPC64';
-          if FPCupManager.CrossCPU_Target='mips' then BinsFileName:='Mips';
-          if FPCupManager.CrossCPU_Target='mipsel' then BinsFileName:='Mipsel';
-          if FPCupManager.CrossCPU_Target='sparc' then BinsFileName:='Sparc';
-          if FPCupManager.CrossCPU_Target='avr' then BinsFileName:='AVR';
-          if FPCupManager.CrossCPU_Target='i8086' then BinsFileName:='i8086';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm) then BinsFileName:='ARM';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.aarch64) then BinsFileName:='Aarch64';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64) then BinsFileName:='x64';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then BinsFileName:='i386';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc) then BinsFileName:='PowerPC';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64) then BinsFileName:='PowerPC64';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.mips) then BinsFileName:='Mips';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.mipsel) then BinsFileName:='Mipsel';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.sparc) then BinsFileName:='Sparc';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.avr) then BinsFileName:='AVR';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i8086) then BinsFileName:='i8086';
 
-          if FPCupManager.CrossOS_Target='darwin' then
+          if FPCupManager.CrossOS_Target=GetOS(TOS.darwin) then
           begin
             // Darwin has some universal binaries and libs
-            if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='x86';
-            if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x86';
+            if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then BinsFileName:='x86';
+            if FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64) then BinsFileName:='x86';
             //Newer bins and libs for Darwin on i386 and x86_64
-            //if FPCupManager.CrossCPU_Target='i386' then BinsFileName:='x86OSX1012';
-            //if FPCupManager.CrossCPU_Target='x86_64' then BinsFileName:='x86OSX1012';
-            if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='powerpc';
-            if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
+            //if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386) then BinsFileName:='x86OSX1012';
+            //if FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64) then BinsFileName:='x86OSX1012';
+            if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc) then BinsFileName:='powerpc';
+            if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64) then BinsFileName:='powerpc';
           end;
 
-          if FPCupManager.CrossOS_Target='aix' then
+          if FPCupManager.CrossOS_Target=GetOS(TOS.aix) then
           begin
             // AIX has some universal binaries
-            if FPCupManager.CrossCPU_Target='powerpc' then BinsFileName:='powerpc';
-            if FPCupManager.CrossCPU_Target='powerpc64' then BinsFileName:='powerpc';
+            if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc) then BinsFileName:='powerpc';
+            if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64) then BinsFileName:='powerpc';
           end;
 
-          if FPCupManager.CrossOS_Target='freebsd' then s:='FreeBSD' else
-            if FPCupManager.CrossOS_Target='dragonfly' then s:='DragonFlyBSD' else
-              if FPCupManager.CrossOS_Target='openbsd' then s:='OpenBSD' else
-                if FPCupManager.CrossOS_Target='netbsd' then s:='NetBSD' else
-                  if FPCupManager.CrossOS_Target='aix' then s:='AIX' else
-                    if FPCupManager.CrossOS_Target='msdos' then s:='MSDos' else
+          if FPCupManager.CrossOS_Target=GetOS(TOS.freebsd) then s:='FreeBSD' else
+            if FPCupManager.CrossOS_Target=GetOS(TOS.dragonfly) then s:='DragonFlyBSD' else
+              if FPCupManager.CrossOS_Target=GetOS(TOS.openbsd) then s:='OpenBSD' else
+                if FPCupManager.CrossOS_Target=GetOS(TOS.netbsd) then s:='NetBSD' else
+                  if FPCupManager.CrossOS_Target=GetOS(TOS.aix) then s:='AIX' else
+                    if FPCupManager.CrossOS_Target=GetOS(TOS.msdos) then s:='MSDos' else
                       s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
 
           if FPCupManager.SolarisOI then s:=s+'OI';
@@ -2586,49 +2601,49 @@ begin
             BinPath:=BinPath+'-oi';
           end;
 
-          if FPCupManager.CrossOS_Target='darwin' then
+          if FPCupManager.CrossOS_Target=GetOS(TOS.darwin) then
           begin
             // Darwin is special: combined binaries and libs for i386 and x86_64 with osxcross
-            if (FPCupManager.CrossCPU_Target='i386') OR (FPCupManager.CrossCPU_Target='x86_64') then
+            if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.i386)) OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.x86_64)) then
             begin
               BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
               LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'x86',[rfIgnoreCase]);
             end;
-            if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+            if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc)) OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64)) then
             begin
-              BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,GetCPU(TCPU.powerpc),[rfIgnoreCase]);
+              LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,GetCPU(TCPU.powerpc),[rfIgnoreCase]);
             end;
 
             // Darwin is special: combined libs for arm and aarch64 with osxcross
-            if (FPCupManager.CrossCPU_Target='arm') OR (FPCupManager.CrossCPU_Target='aarch64') then
+            if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm)) OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.aarch64)) then
             begin
-              LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'arm',[rfIgnoreCase]);
+              LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,GetCPU(TCPU.arm),[rfIgnoreCase]);
               LibsFileName:=StringReplace(LibsFileName,'Aarch64','ARM',[rfIgnoreCase]);
             end;
           end;
 
-          if FPCupManager.CrossOS_Target='aix' then
+          if FPCupManager.CrossOS_Target=GetOS(TOS.aix) then
           begin
             // AIX is special: combined binaries and libs for ppc and ppc64 with osxcross
-            if (FPCupManager.CrossCPU_Target='powerpc') OR (FPCupManager.CrossCPU_Target='powerpc64') then
+            if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc)) OR (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64)) then
             begin
-              BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
-              LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,'powerpc',[rfIgnoreCase]);
+              BinPath:=StringReplace(BinPath,FPCupManager.CrossCPU_Target,GetCPU(TCPU.powerpc),[rfIgnoreCase]);
+              LibPath:=StringReplace(LibPath,FPCupManager.CrossCPU_Target,GetCPU(TCPU.powerpc),[rfIgnoreCase]);
             end;
           end;
 
-          if FPCupManager.CrossOS_Target='linux' then
+          if FPCupManager.CrossOS_Target=GetOS(TOS.linux) then
           begin
             // PowerPC64 is special: only little endian libs for now
-            if (FPCupManager.CrossCPU_Target='powerpc64') then
+            if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64)) then
             begin
               LibsFileName:=StringReplace(LibsFileName,'PowerPC64','PowerPC64LE',[rfIgnoreCase]);
             end;
 
             // ARM is special: can be hard or softfloat (Windows only binutils yet)
             {$ifdef MSWINDOWS}
-            if (FPCupManager.CrossCPU_Target='arm') then
+            if (FPCupManager.CrossCPU_Target=GetCPU(TCPU.arm)) then
             begin
               if (Pos('SOFT',UpperCase(FPCupManager.CrossOPT))>0) OR (Pos('FPC_ARMEL',UpperCase(FPCupManager.FPCOPT))>0) then
               begin
@@ -2656,7 +2671,7 @@ begin
           begin
 
             // many files to unpack for Darwin : do not show progress of unpacking files when unpacking for Darwin.
-            verbose:=(FPCupManager.CrossOS_Target<>'darwin');
+            verbose:=(FPCupManager.CrossOS_Target<>GetOS(TOS.darwin));
 
             if MissingCrossBins then
             begin
@@ -2664,33 +2679,33 @@ begin
 
               BaseBinsURL:='';
 
-              if GetTargetOS='win32' then BaseBinsURL:='wincrossbins'
+              if GetTargetOS=GetOS(TOS.win32) then BaseBinsURL:='wincrossbins'
               else
-                 if GetTargetOS='win64' then BaseBinsURL:='wincrossbins'
+                 if GetTargetOS=GetOS(TOS.win64) then BaseBinsURL:='wincrossbins'
                  else
-                    if GetTargetOS='linux' then
+                    if GetTargetOS=GetOS(TOS.linux) then
                     begin
-                      if GetTargetCPU='i386' then BaseBinsURL:='linuxi386crossbins';
-                      if GetTargetCPU='x86_64' then BaseBinsURL:='linuxx64crossbins';
+                      if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='linuxi386crossbins';
+                      if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='linuxx64crossbins';
                     end
                     else
-                      if GetTargetOS='freebsd' then
+                      if GetTargetOS=GetOS(TOS.freebsd) then
                       begin
-                        if GetTargetCPU='x86_64' then BaseBinsURL:='freebsdx64crossbins';
+                        if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='freebsdx64crossbins';
                       end
                       else
-                        if GetTargetOS='solaris' then
+                        if GetTargetOS=GetOS(TOS.solaris) then
                         begin
                           {if FPCupManager.SolarisOI then}
                           begin
-                            if GetTargetCPU='x86_64' then BaseBinsURL:='solarisoix64crossbins';
+                            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='solarisoix64crossbins';
                           end;
                         end
                         else
-                          if GetTargetOS='darwin' then
+                          if GetTargetOS=GetOS(TOS.darwin) then
                           begin
-                            if GetTargetCPU='i386' then BaseBinsURL:='darwini386crossbins';
-                            if GetTargetCPU='x86_64' then BaseBinsURL:='darwinx64crossbins';
+                            if GetTargetCPU=GetCPU(TCPU.i386) then BaseBinsURL:='darwini386crossbins';
+                            if GetTargetCPU=GetCPU(TCPU.x86_64) then BaseBinsURL:='darwinx64crossbins';
                           end;
 
 
@@ -2849,7 +2864,7 @@ begin
             end;
 
             // force the download of embedded libs if not there ... if this fails, don't worry, building will go on
-            if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) AND (FPCupManager.CrossOS_Target='embedded')
+            if (DirectoryIsEmpty(IncludeTrailingPathDelimiter(sInstallDir)+LibPath)) AND (FPCupManager.CrossOS_Target=GetOS(TOS.embedded))
               then MissingCrossLibs:=true;
 
             if MissingCrossLibs then
@@ -2982,7 +2997,7 @@ begin
                 end;
               end;
               // as libraries are not always needed for embedded, end with success even if the above has failed
-              if FPCupManager.CrossOS_Target='embedded' then
+              if FPCupManager.CrossOS_Target=GetOS(TOS.embedded) then
               begin
                 success:=true;
                 MissingCrossLibs:=False;

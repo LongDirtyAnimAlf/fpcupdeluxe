@@ -156,6 +156,8 @@ type
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
   function SetConfigFile(aConfigFile: string):boolean;
+  function GetCPU(aCPU:TCPU):string;
+  function GetOS(aOS:TOS):string;
   function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
   function GetARMArch(aARMArch:string):TARMARCH;
   function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
@@ -2580,6 +2582,17 @@ begin
   if (CurrentConfigFile=SafeGetApplicationPath+CONFIGFILENAME) then
      result:=SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
 end;
+
+function GetCPU(aCPU:TCPU):string;
+begin
+  GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
+end;
+
+function GetOS(aOS:TOS):string;
+begin
+  GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
+end;
+
 
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 var
