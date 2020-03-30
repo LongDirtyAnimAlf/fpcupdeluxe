@@ -17,7 +17,7 @@ implementation
 
 type
 
-{ TFreeBSD_win386 }
+{ TFreeBSD64_FreeBSD386 }
 
 TFreeBSD64_FreeBSD386 = class(TCrossInstaller)
 private
@@ -32,8 +32,6 @@ end;
 { TFreeBSD64_FreeBSD386 }
 
 function TFreeBSD64_FreeBSD386.GetLibs(Basepath:string): boolean;
-const
-  DirName='i386-freebsd';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -66,8 +64,6 @@ begin
 end;
 
 function TFreeBSD64_FreeBSD386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='i386-freebsd';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -109,11 +105,13 @@ constructor TFreeBSD64_FreeBSD386.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TFreeBSD64';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.freebsd);
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.freebsd);
   FBinUtilsPrefix:='';
+  //FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FLibsPath:='';
   ShowInfo;
 end;
@@ -128,13 +126,13 @@ var
 
 //todo: FreeBSD64_FreeBSD386: enable when working. For this, we'll probably need to pass -32 to ld etc. Perhaps do this with batch scripts
 {$IFDEF FREEBSD}
-{$IFDEF CPUAMD64}
+{$IFDEF CPUX64}
 initialization
   FreeBSD64_FreeBSD386:=TFreeBSD64_FreeBSD386.Create;
   RegisterExtension(FreeBSD64_FreeBSD386.TargetCPU+'-'+FreeBSD64_FreeBSD386.TargetOS,FreeBSD64_FreeBSD386);
 finalization
   FreeBSD64_FreeBSD386.Destroy;
-{$ENDIF CPUAMD64}
+{$ENDIF CPUX64}
 {$ENDIF FREEBSD}
 end.
 
