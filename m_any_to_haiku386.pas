@@ -65,7 +65,6 @@ end;
 
 function Tany_haiku386.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-haiku';
   LibName='libroot.so';
 begin
   result:=FLibsFound;
@@ -100,8 +99,6 @@ end;
 {$endif}
 
 function Tany_haiku386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='i386-haiku';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -149,12 +146,13 @@ end;
 constructor Tany_haiku386.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='i386-haiku-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='haiku';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.haiku);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

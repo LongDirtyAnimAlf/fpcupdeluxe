@@ -58,8 +58,6 @@ end;
 { Tany_freebsd386 }
 
 function Tany_freebsd386.GetLibs(Basepath:string): boolean;
-const
-  DirName='i386-freebsd';
 begin
 
   result:=FLibsFound;
@@ -95,8 +93,6 @@ begin
 end;
 
 function Tany_freebsd386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='i386-freebsd';
 var
   AsFile: string;
   AsDirectory: string;
@@ -169,12 +165,13 @@ end;
 constructor Tany_freebsd386.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='i386-freebsd-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='freebsd';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.freebsd);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

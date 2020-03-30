@@ -72,7 +72,6 @@ end;
 
 function TAny_Embeddedmipsel.GetLibs(Basepath:string): boolean;
 const
-  DirName='mipsel-embedded';
   LibName='';
 begin
   // mipsel-embedded does not need libs by default, but user can add them.
@@ -109,8 +108,6 @@ end;
 {$endif}
 
 function TAny_Embeddedmipsel.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='mipsel-embedded';
 var
   AsFile,aOption: string;
   BinPrefixTry: string;
@@ -231,12 +228,13 @@ end;
 constructor TAny_Embeddedmipsel.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='mipsel-embedded-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
-  FTargetCPU:='mipsel';
-  FTargetOS:='embedded';
+  FTargetCPU:=GetCPU(TCPU.mipsel);
+  FTargetOS:=GetOS(TOS.embedded);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

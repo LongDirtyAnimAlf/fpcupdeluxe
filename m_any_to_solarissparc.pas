@@ -41,10 +41,6 @@ uses
 
 implementation
 
-const
-  ARCH='sparc';
-  OS='solaris';
-
 type
 
 { TAny_SolarisSparc }
@@ -61,8 +57,6 @@ end;
 { TAny_SolarisSparc }
 
 function TAny_SolarisSparc.GetLibs(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -95,8 +89,6 @@ begin
 end;
 
 function TAny_SolarisSparc.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -114,7 +106,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:=ARCH+'-'+OS+'-';
+    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -150,13 +142,13 @@ end;
 constructor TAny_SolarisSparc.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.sparc);
+  FTargetOS:=GetOS(TOS.solaris);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

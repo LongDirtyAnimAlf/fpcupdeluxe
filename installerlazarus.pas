@@ -126,7 +126,6 @@ const
     _DO+_PACKAGERREMOVEONLY+_SEP +
     _END +
 
-
     //standard lazbuild build
     _DECLARE+_LAZBUILD+_SEP +
     _BUILDMODULE+_LAZBUILD+_SEP +
@@ -278,8 +277,8 @@ type
 implementation
 
 uses
-  IniFiles,
-  fpcuputil, fileutil,
+  fpcuputil,
+  FileUtil,
   repoclient,
   updatelazconfig
   {$ifdef Darwin}
@@ -473,12 +472,12 @@ begin
         // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
         {$ifdef win32}
         // if this is crosswin32-64, ignore error as it is optional
-        if (CrossInstaller.TargetCPU = 'x86_64') and ((CrossInstaller.TargetOS = 'win64') or (CrossInstaller.TargetOS = 'win32')) then
+        if (CrossInstaller.TargetCPU = GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS = GetOS(TOS.win64)) or (CrossInstaller.TargetOS = GetOS(TOS.win32))) then
           Result := true;
         {$endif win32}
         {$ifdef win64}
         // if this is crosswin64-32, ignore error as it is optional
-        if (CrossInstaller.TargetCPU = 'i386') and (CrossInstaller.TargetOS = 'win32') then
+        if (CrossInstaller.TargetCPU = GetCPU(TCPU.i386)) and (CrossInstaller.TargetOS = GetOS(TOS.win32)) then
           Result := true;
         {$endif win64}
         if Result then
@@ -633,7 +632,8 @@ begin
     Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
     Processor.Parameters.Add('USESVN2REVISIONINC=0');
     //Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FSourceDirectory));
-    Processor.Parameters.Add('--directory=.');
+    //Processor.Parameters.Add('--directory=.');
+    Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Parameters.Add('PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     Processor.Parameters.Add('INSTALL_PREFIX='+ExcludeTrailingPathDelimiter(FInstallDirectory));
     //Make sure our FPC units can be found by Lazarus
@@ -1829,8 +1829,8 @@ begin
   case ModuleName of
     _IDE:
     begin
-      //CleanCommand:='cleanide';
-      CleanCommand:='distclean';
+      CleanCommand:='cleanide';
+      //CleanCommand:='distclean';
       CleanDirectory:=DirectorySeparator+'ide';
     end;
     _BIGIDE: CleanCommand:='cleanbigide';

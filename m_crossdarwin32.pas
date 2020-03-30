@@ -68,8 +68,8 @@ constructor TDarwin32.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin64';
-  FTargetCPU:='i386';
-  FTargetOS:='darwin';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.darwin);
   FAlreadyWarned:=false;
   FFPCCFGSnippet:='';
   ShowInfo;

@@ -56,14 +56,12 @@ public
   function GetLibsLCL(LCL_Platform:string; Basepath:string):boolean;override;
   {$endif}
   function GetBinUtils(Basepath:string):boolean;override;
-  procedure Reset;override;
+  constructor Create;
 end;
 
 { Tany_linuxarm }
 
 function Tany_linuxarm.GetLibs(Basepath:string): boolean;
-const
-  DirName='arm-linux';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -108,8 +106,6 @@ end;
 {$endif}
 
 function Tany_linuxarm.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='arm-linux';
 var
   AsFile,aOption: string;
   BinPrefixTry:string;
@@ -317,12 +313,17 @@ begin
   end;
 end;
 
-procedure Tany_linuxarm.Reset;
+constructor Tany_linuxarm.Create;
 begin
-  inherited Reset;
-  FBinUtilsPrefix:='arm-linux-';
-  FTargetCPU:='arm';
-  FTargetOS:='linux';
+  inherited Create;
+  FBinUtilsPath:='';
+  FFPCCFGSnippet:='';
+  FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.arm);
+  FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FAlreadyWarned:=false;
   ShowInfo;
 end;
 

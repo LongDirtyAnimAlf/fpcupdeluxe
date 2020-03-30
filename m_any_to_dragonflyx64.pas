@@ -57,8 +57,6 @@ end;
 { Tany_dragonflyx64 }
 
 function Tany_dragonflyx64.GetLibs(Basepath:string): boolean;
-const
-  DirName='x86_64-dragonfly';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -105,8 +103,6 @@ end;
 {$endif}
 
 function Tany_dragonflyx64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='x86_64-dragonfly';
 var
   AsFile: string;
 begin
@@ -134,12 +130,13 @@ end;
 constructor Tany_dragonflyx64.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='x86_64-unknown-dragonfly-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='x86_64';
-  FTargetOS:='dragonfly';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.dragonfly);
+  FBinUtilsPrefix:=TargetCPU+'-unknown-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

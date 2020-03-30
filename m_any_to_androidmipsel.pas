@@ -71,8 +71,6 @@ end;
 { TAny_AndroidMIPSEL }
 
 function TAny_AndroidMIPSEL.GetLibs(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
   // we presume, libc.so has to be present in a cross-library for arm
   // we presume, libandroid.so has to be present in a cross-library for arm
   //LibName='libandroid.so';
@@ -217,8 +215,6 @@ begin
 end;
 
 function TAny_AndroidMIPSEL.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   PresetBinPath:string;
@@ -399,13 +395,13 @@ end;
 constructor TAny_AndroidMIPSEL.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:=ARCH+'-linux-'+OS+'-';//standard eg in Android NDK 9 and 10
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.mipsel);
+  FTargetOS:=GetOS(TOS.android);
+  FBinUtilsPrefix:=TargetCPU+'-linux-'+TargetOS+'-';//standard eg in Android NDK 9
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

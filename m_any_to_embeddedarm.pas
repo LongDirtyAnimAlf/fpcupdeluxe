@@ -37,10 +37,6 @@ uses
 
 implementation
 
-const
-  ARCH='arm';
-  OS='embedded';
-
 type
 
 { TAny_Embeddedarm }
@@ -61,7 +57,6 @@ end;
 
 function TAny_Embeddedarm.GetLibs(Basepath:string): boolean;
 const
-  DirName=ARCH+'-'+OS;
   LibName='libgcc.a';  // is this correct ??
 begin
   // Arm-embedded does not need libs by default, but user can add them.
@@ -106,8 +101,6 @@ end;
 {$endif}
 
 function TAny_Embeddedarm.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile,aOption: string;
   BinPrefixTry: string;
@@ -233,12 +226,13 @@ end;
 constructor TAny_Embeddedarm.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.arm);
+  FTargetOS:=GetOS(TOS.embedded);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

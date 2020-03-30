@@ -156,9 +156,6 @@ type
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
   function SetConfigFile(aConfigFile: string):boolean;
-  function GetCPU(aCPU:TCPU):string;
-  function GetOS(aOS:TOS):string;
-  function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
   function GetARMArch(aARMArch:string):TARMARCH;
   function GetARMArchFPCDefine(aARMArch:TARMARCH):string;
 
@@ -242,7 +239,8 @@ begin
   Processor.Parameters.Add('FPC=' + FCompiler);
   Processor.Parameters.Add('PP=' + ExtractFilePath(FCompiler)+GetCompilerName(GetTargetCPU));
   Processor.Parameters.Add('USESVN2REVISIONINC=0');
-  Processor.Parameters.Add('--directory=.');
+  //Processor.Parameters.Add('--directory=.');
+  Processor.Parameters.Add('--directory=' + ExcludeTrailingPathDelimiter(LazarusInstallDir));
   //Make sure our FPC units can be found by Lazarus
   Processor.Parameters.Add('FPCDIR=' + ExcludeTrailingPathDelimiter(FPCSourceDir));
   //Make sure Lazarus does not pick up these tools from other installs
@@ -2578,56 +2576,6 @@ begin
      result:=SaveInisFromResource(SafeGetApplicationPath+CONFIGFILENAME,'fpcup_ini');
 end;
 
-function GetCPU(aCPU:TCPU):string;
-begin
-  if Ord(aCPU) < 0 then
-    raise Exception.Create('Invalid CPU for GetCPU.');
-  result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
-end;
-
-function GetOS(aOS:TOS):string;
-begin
-  if Ord(aOS) < 0 then
-    raise Exception.Create('Invalid OS for GetOS.');
-  result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
-end;
-
-
-function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
-var
-  xCPU:TCPU;
-  xOS:TOS;
-  aLocalCPU,aLocalOS:string;
-begin
-  aLocalCPU:=aCPU;
-
-  if length(aLocalCPU)>0 then
-  begin
-    if aLocalCPU='ppc' then aLocalCPU:='powerpc';
-    if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
-
-    xCPU:=TCPU(GetEnumValue(TypeInfo(TCPU),aLocalCPU));
-    if Ord(xCPU) < 0 then
-      raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
-    result.CPU:=xCPU;
-  end;
-
-  aLocalOS:=aOS;
-  if length(aLocalOS)>0 then
-  begin
-    //if aLocalOS='win32' then aLocalOS:='windows';
-    //if aLocalOS='win64' then aLocalOS:='windows';
-    if aLocalOS='i-sim' then aLocalOS:='iphonesim';
-    if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
-    if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
-    if aLocalOS='iphonesimulator' then aLocalOS:='iphonesim';
-
-    xOS:=TOS(GetEnumValue(TypeInfo(TOS),aLocalOS));
-    if Ord(xOS) < 0 then
-      raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
-    result.OS:=xOS;
-  end;
-end;
 
 function GetARMArch(aARMArch:string):TARMARCH;
 begin

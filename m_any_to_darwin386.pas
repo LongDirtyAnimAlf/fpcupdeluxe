@@ -55,7 +55,6 @@ end;
 
 function Tany_darwin386.GetLibs(Basepath:string): boolean;
 const
-  DirName='i386-darwin';
   LibName='libc.dylib';
 var
   s:string;
@@ -145,8 +144,6 @@ begin
 end;
 
 function Tany_darwin386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='i386-darwin';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -206,13 +203,14 @@ end;
 constructor Tany_darwin386.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='i386-darwin-';
   FBinUtilsPath:='';
   FBinutilsPathInPath:=true;
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='darwin';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.darwin);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

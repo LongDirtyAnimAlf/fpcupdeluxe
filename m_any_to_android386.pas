@@ -67,8 +67,6 @@ end;
 { TAny_Android386 }
 
 function TAny_Android386.GetLibs(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
   // we presume, libc.so has to be present in a cross-library for arm
   // we presume, libandroid.so has to be present in a cross-library for arm
   //LibName='libandroid.so';
@@ -207,8 +205,6 @@ begin
 end;
 
 function TAny_Android386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   PresetBinPath:string;
@@ -389,12 +385,12 @@ end;
 constructor TAny_Android386.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:='i686-linux-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.android);
+  FBinUtilsPrefix:='i686-linux-'+TargetOS+'-';//standard eg in Android NDK 9
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;

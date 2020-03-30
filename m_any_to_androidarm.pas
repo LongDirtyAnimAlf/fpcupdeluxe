@@ -56,11 +56,10 @@ implementation
 
 const
   ARCH='arm';
-  ARCHSHORT='arm';
   OS='android';
   NDKVERSIONBASENAME=OS+'-ndk-r';
   NDKTOOLCHAINVERSIONS:array[0..3] of string = (ARCH+'-linux-'+OS+'eabi-4.4.7',ARCH+'-linux-'+OS+'eabi-4.6',ARCH+'-linux-'+OS+'eabi-4.8',ARCH+'-linux-'+OS+'eabi-4.9');
-  NDKARCHDIRNAME='arch-'+ARCHSHORT;
+  NDKARCHDIRNAME='arch-'+ARCH;
   PLATFORMVERSIONBASENAME=OS+'-';
 
 
@@ -80,8 +79,6 @@ end;
 { TAny_ARMAndroid }
 
 function TAny_ARMAndroid.GetLibs(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
   // we presume, libc.so has to be present in a cross-library for arm
   // we presume, libandroid.so has to be present in a cross-library for arm
   //LibName='libandroid.so';
@@ -210,8 +207,6 @@ begin
 end;
 
 function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile,aOption: string;
   PresetBinPath:string;
@@ -422,12 +417,13 @@ end;
 constructor TAny_ARMAndroid.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  FBinUtilsPrefix:=ARCH+'-linux-'+OS+'eabi-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.arm);
+  FTargetOS:=GetOS(TOS.android);
+  FBinUtilsPrefix:=TargetCPU+'-linux-'+TargetOS+'eabi-';//standard eg in Android NDK 9
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

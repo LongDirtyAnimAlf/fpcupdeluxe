@@ -57,8 +57,6 @@ end;
 { Tany_linuxaarch64 }
 
 function Tany_linuxaarch64.GetLibs(Basepath:string): boolean;
-const
-  DirName='aarch64-linux';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -99,8 +97,6 @@ end;
 {$endif}
 
 function Tany_linuxaarch64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='aarch64-linux';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -148,12 +144,13 @@ end;
 constructor Tany_linuxaarch64.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='aarch64-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='aarch64';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.aarch64);
+  FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

@@ -38,10 +38,6 @@ uses
 
 implementation
 
-const
-  ARCH='x86_64';
-  OS='openbsd';
-
 type
 
 { TAny_OpenBSDx64 }
@@ -151,9 +147,9 @@ end;
 constructor TAny_OpenBSDx64.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.openbsd);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';

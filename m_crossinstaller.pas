@@ -87,6 +87,14 @@ const
 
 
 type
+  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64);
+  TOS  = (win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd);
+
+  TCPUOS = record
+    CPU:TCPU;
+    OS:TOS;
+  end;
+
   CompilerType=(ctBootstrap,ctInstalled);
   SearchMode=(smFPCUPOnly,smAuto,smManual);
 
@@ -98,6 +106,7 @@ type
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
     FBinUtilsPrefix: string; //can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it
+    FBinUtilsDirectoryID: string; //where to find the binutils themselves
     FCompilerUsed: CompilerType;
     FSearchMode: SearchMode;
     FCrossModuleNamePrefix: string; //used for identifying module to user in messages
@@ -163,6 +172,7 @@ type
     // Prefix used before executable names for binutils (e.g. before as.exe). May be empty.
     property BinUtilsPrefix:string read FBinUtilsPrefix;
     // Target processor (in FPC notation). Used to select cross compiler
+    property DirName:string read FBinUtilsDirectoryID;
     property TargetCPU:string read FTargetCPU;
     // Target Operating System (in FPC notation). Used to select cross compiler
     property TargetOS:string read FTargetOS;
@@ -173,6 +183,10 @@ type
     destructor Destroy; override;
   end;
 
+function GetCPU(aCPU:TCPU):string;
+function GetOS(aOS:TOS):string;
+function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+
 Procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
 
 Var
@@ -182,6 +196,57 @@ implementation
 
 uses
   StrUtils;
+
+function GetCPU(aCPU:TCPU):string;
+begin
+  if Ord(aCPU) < 0 then
+    raise Exception.Create('Invalid CPU for GetCPU.');
+  result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
+end;
+
+function GetOS(aOS:TOS):string;
+begin
+  if Ord(aOS) < 0 then
+    raise Exception.Create('Invalid OS for GetOS.');
+  result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
+end;
+
+function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+var
+  xCPU:TCPU;
+  xOS:TOS;
+  aLocalCPU,aLocalOS:string;
+begin
+  aLocalCPU:=aCPU;
+
+  if length(aLocalCPU)>0 then
+  begin
+    if aLocalCPU='ppc' then aLocalCPU:='powerpc';
+    if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
+
+    xCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),aLocalCPU));
+    if Ord(xCPU) < 0 then
+      raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
+    result.CPU:=xCPU;
+  end;
+
+  aLocalOS:=aOS;
+  if length(aLocalOS)>0 then
+  begin
+    //if aLocalOS='win32' then aLocalOS:='windows';
+    //if aLocalOS='win64' then aLocalOS:='windows';
+    if aLocalOS='i-sim' then aLocalOS:='iphonesim';
+    if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
+    if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
+    if aLocalOS='iphonesimulator' then aLocalOS:='iphonesim';
+
+    xOS:=TOS(GetEnumValueSimple(TypeInfo(TOS),aLocalOS));
+    if Ord(xOS) < 0 then
+      raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
+    result.OS:=xOS;
+  end;
+end;
+
 
 { TCrossInstaller }
 procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
@@ -456,6 +521,8 @@ begin
 
   FCrossModuleNamePrefix:='TAny';
 
+  FBinUtilsDirectoryID:='none';
+
   Reset;
 end;
 
@@ -466,7 +533,7 @@ begin
 end;
 
 finalization
-if assigned(CrossInstallers) then
-  CrossInstallers.Destroy;
+  if assigned(CrossInstallers) then
+    CrossInstallers.Destroy;
 end.
 

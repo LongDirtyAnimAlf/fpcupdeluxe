@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, Forms, Controls, Graphics, StdCtrls, Buttons, ExtCtrls,
-  Dialogs, CheckLst, installerCore;
+  Dialogs, CheckLst, m_crossinstaller, installerCore;
 
 Const
   DELUXEKEY='fpcupdeluxeishereforyou';

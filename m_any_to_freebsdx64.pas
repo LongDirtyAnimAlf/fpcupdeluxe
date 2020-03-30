@@ -190,12 +190,12 @@ end;
 constructor Tany_freebsdx64.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='x86_64-freebsd-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='x86_64';
-  FTargetOS:='freebsd';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.freebsd);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

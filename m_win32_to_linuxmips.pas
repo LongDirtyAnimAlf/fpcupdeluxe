@@ -148,7 +148,7 @@ begin
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='mips'; //mips: fpc 2.7+ only; FPC 2.6 does not support mips
-  FTargetOS:='linux';
+  FTargetOS:=GetOS(TOS.linux);
   FAlreadyWarned:=false;
   ShowInfo;
 end;

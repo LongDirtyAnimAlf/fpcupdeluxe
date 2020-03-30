@@ -363,6 +363,7 @@ function GetSDKVersion(aSDK: string):string;
 function CompareVersionStrings(s1,s2: string): longint;
 function ExistWordInString(aString:pchar; aSearchString:string; aSearchOptions: TStringSearchOptions): Boolean;
 function GetEnumNameSimple(aTypeInfo:PTypeInfo;const aEnum:integer):string;
+function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
 //Find a library, if any
 function LibWhich(aLibrary: string): boolean;
 // Emulates/runs which to find executable in path. If not found, returns empty string
@@ -2916,6 +2917,16 @@ begin
       result := GetEnumName(aTypeInfo,aEnum);
   end;
 end;
+
+function GetEnumValueSimple(aTypeInfo:PTypeInfo;const aEnum:string):integer;
+begin
+  begin
+    if (aTypeInfo=nil) or (aTypeInfo^.Kind<>tkEnumeration) then
+      result := -1 else
+      result:=GetEnumValue(aTypeInfo,aEnum);
+  end;
+end;
+
 
 function LibWhich(aLibrary: string): boolean;
 var

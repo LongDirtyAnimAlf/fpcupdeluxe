@@ -57,8 +57,6 @@ end;
 { Tany_linuxpowerpc64 }
 
 function Tany_linuxpowerpc64.GetLibs(Basepath:string): boolean;
-const
-  DirName='powerpc64-linux';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -133,8 +131,6 @@ end;
 {$endif}
 
 function Tany_linuxpowerpc64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='powerpc64-linux';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -228,12 +224,13 @@ end;
 constructor Tany_linuxpowerpc64.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='powerpc64-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='powerpc64';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.powerpc64);
+  FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

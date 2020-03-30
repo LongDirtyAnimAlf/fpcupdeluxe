@@ -74,7 +74,7 @@ begin
   if FMUSL then
   begin
     aDirName:=MUSLDirName;
-    aLibName:='libc.musl-'+FTargetCPU+'.so.1';
+    aLibName:='libc.musl-'+TargetCPU+'.so.1';
   end
   else
   begin
@@ -101,7 +101,7 @@ begin
 
     if FMUSL then
     begin
-      aLibName:='ld-musl-'+FTargetCPU+'.so.1';
+      aLibName:='ld-musl-'+TargetCPU+'.so.1';
       AddFPCCFGSnippet('-FL/lib/'+aLibName);
     end;
   end;
@@ -209,8 +209,8 @@ begin
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='x86_64';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.linux);
   FAlreadyWarned:=false;
   ShowInfo;
 end;

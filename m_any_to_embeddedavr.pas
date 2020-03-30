@@ -73,7 +73,6 @@ end;
 
 function TAny_Embeddedavr.GetLibs(Basepath:string): boolean;
 const
-  DirName='avr-embedded';
   LibName='libc.a';
   {$ifdef unix}
   UnixAVRLibDirs :array[0..3] of string = ('/usr/local/lib/avr/lib','/usr/lib/avr/lib','/usr/lib/avr','/lib/avr');
@@ -146,8 +145,6 @@ end;
 {$endif}
 
 function TAny_Embeddedavr.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='avr-embedded';
 var
   AsFile,aOption: string;
   BinPrefixTry: string;
@@ -240,12 +237,13 @@ end;
 constructor TAny_Embeddedavr.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='avr-embedded-'; //crossfpc nomenclature; module will also search for android crossbinutils
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
-  FTargetCPU:='avr';
-  FTargetOS:='embedded';
+  FTargetCPU:=GetCPU(TCPU.avr);
+  FTargetOS:=GetOS(TOS.embedded);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

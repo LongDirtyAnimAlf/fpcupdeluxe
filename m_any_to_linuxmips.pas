@@ -55,8 +55,6 @@ end;
 { Twin32_linuxmipsel }
 
 function Tany_linuxmips.GetLibs(Basepath:string): boolean;
-const
-  DirName='mips-linux';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -96,8 +94,6 @@ end;
 {$endif}
 
 function Tany_linuxmips.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='mips-linux';
 var
   AsFile: string;
   BinPrefixTry:string;
@@ -189,13 +185,13 @@ end;
 constructor Tany_linuxmips.Create;
 begin
   inherited Create;
-  // binutilsprefix can be modified later in GetBinUtils
-  FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='mips';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.mips);
+  FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

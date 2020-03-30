@@ -55,7 +55,6 @@ end;
 
 function Tany_darwinx64.GetLibs(Basepath:string): boolean;
 const
-  DirName='x86_64-darwin';
   LibName='libc.dylib';
 var
   s:string;
@@ -144,8 +143,6 @@ begin
 end;
 
 function Tany_darwinx64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='x86_64-darwin';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -205,13 +202,14 @@ end;
 constructor Tany_darwinx64.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='x86_64-darwin-';
   FBinUtilsPath:='';
   FBinutilsPathInPath:=true;
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='x86_64';
-  FTargetOS:='darwin';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.darwin);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

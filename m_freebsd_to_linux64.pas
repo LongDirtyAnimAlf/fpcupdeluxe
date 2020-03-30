@@ -146,8 +146,8 @@ begin
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='x86_64';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.linux);
   FAlreadyWarned:=false;
   ShowInfo;
 end;

@@ -109,8 +109,8 @@ constructor TFreeBSD64_FreeBSD386.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TFreeBSD64';
-  FTargetCPU:='i386';
-  FTargetOS:='freebsd';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.freebsd);
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FBinUtilsPrefix:='';

@@ -81,7 +81,7 @@ begin
   if FMUSL then
   begin
     aDirName:=MUSLDirName;
-    aLibName:='libc.musl-'+FTargetCPU+'.so.1';
+    aLibName:='libc.musl-'+TargetCPU+'.so.1';
   end
   else
   begin
@@ -108,7 +108,7 @@ begin
 
     if FMUSL then
     begin
-      aLibName:='ld-musl-'+FTargetCPU+'.so.1';
+      aLibName:='ld-musl-'+TargetCPU+'.so.1';
       AddFPCCFGSnippet('-FL/lib/'+aLibName);
     end;
   end;
@@ -251,12 +251,12 @@ end;
 constructor Tany_linux386.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='i386-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
   FAlreadyWarned:=false;
   ShowInfo;
 end;

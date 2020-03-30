@@ -118,7 +118,7 @@ begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:='arm';
-  FTargetOS:='darwin';
+  FTargetOS:=GetOS(TOS.darwin);
   FAlreadyWarned:=false;
   FFPCCFGSnippet:='';
   ShowInfo;

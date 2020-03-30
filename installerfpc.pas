@@ -215,7 +215,6 @@ uses
   {$IFDEF BSD}
     ,math
   {$ENDIF}
-  ,installerUniversal
   ;
 
 function InsertFPCCFGSnippet(FPCCFG,Snippet: string): boolean;

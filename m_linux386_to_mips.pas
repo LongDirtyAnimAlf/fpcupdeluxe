@@ -162,7 +162,7 @@ begin
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='mips';
-  FTargetOS:='linux';
+  FTargetOS:=GetOS(TOS.linux);
   FAlreadyWarned:=false;
   ShowInfo;
 end;

@@ -75,7 +75,7 @@ constructor TWin64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TWin32';
-  FTargetCPU:='x86_64';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
   FTargetOS:='win64';
   FFPCCFGSnippet:=''; //no need to change fpc.cfg
   ShowInfo;

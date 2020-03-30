@@ -51,10 +51,6 @@ uses
 
 implementation
 
-const
-  ARCH='powerpc';
-  OS='aix';
-
 type
 
 { TAny_AIXPowerPC }
@@ -75,7 +71,6 @@ end;
 
 function TAny_AIXPowerPC.GetLibs(Basepath:string): boolean;
 const
-  DirName=ARCH+'-'+OS;
   StaticLibName='libc.a';
 begin
 
@@ -124,8 +119,6 @@ end;
 {$endif}
 
 function TAny_AIXPowerPC.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -143,7 +136,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:=ARCH+'-'+OS+'-';
+    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -179,12 +172,13 @@ end;
 constructor TAny_AIXPowerPC.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.powerpc);
+  FTargetOS:=GetOS(TOS.aix);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

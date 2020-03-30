@@ -165,7 +165,7 @@ begin
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:='mipsel';
-  FTargetOS:='linux';
+  FTargetOS:=GetOS(TOS.linux);
   FAlreadyWarned:=false;
   ShowInfo;
 end;

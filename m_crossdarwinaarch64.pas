@@ -102,7 +102,7 @@ begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
   FTargetCPU:='aarch64';
-  FTargetOS:='darwin';
+  FTargetOS:=GetOS(TOS.darwin);
   FAlreadyWarned:=false;
   FFPCCFGSnippet:='';
   ShowInfo;

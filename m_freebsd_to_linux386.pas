@@ -97,8 +97,8 @@ begin
   FBinUtilsPrefix:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='i386';
-  FTargetOS:='linux';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.linux);
   ShowInfo;
 end;
 

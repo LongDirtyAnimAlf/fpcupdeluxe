@@ -60,7 +60,7 @@ begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin32';
   FTargetCPU:='powerpc';
-  FTargetOS:='darwin';
+  FTargetOS:=GetOS(TOS.darwin);
   FAlreadyWarned:=false;
   FFPCCFGSnippet:='';
   ShowInfo;
