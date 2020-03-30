@@ -75,8 +75,6 @@ end;
 { TWin32_wincearm }
 
 function TWin32_wincearm.GetLibs(Basepath:string): boolean;
-const
-  DirName='arm-wince';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -113,8 +111,6 @@ end;
 {$endif}
 
 function TWin32_wincearm.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='arm-wince';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -160,12 +156,13 @@ constructor TWin32_wincearm.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='WinAll';
-  FBinUtilsPrefix:='arm-wince-'; //search algorithm may modify this
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
-  FTargetCPU:='arm';
-  FTargetOS:='wince';
+  FTargetCPU:=GetCPU(TCPU.arm);
+  FTargetOS:=GetOS(TOS.wince);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

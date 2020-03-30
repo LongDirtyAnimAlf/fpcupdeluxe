@@ -58,7 +58,6 @@ end;
 
 function TAny_OpenBSDx64.GetLibs(Basepath:string): boolean;
 const
-  DirName=ARCH+'-'+OS;
   LibName='libc.so.95.0';
 begin
 
@@ -97,8 +96,6 @@ end;
 {$endif}
 
 function TAny_OpenBSDx64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -116,7 +113,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:=ARCH+'-'+OS+'-';
+    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -147,12 +144,13 @@ end;
 constructor TAny_OpenBSDx64.Create;
 begin
   inherited Create;
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.openbsd);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.openbsd);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

@@ -61,8 +61,6 @@ end;
 { Tany_freebsdx64 }
 
 function Tany_freebsdx64.GetLibs(Basepath:string): boolean;
-const
-  DirName='x86_64-freebsd';
 var
   aVersion:integer;
 begin
@@ -116,8 +114,6 @@ end;
 {$endif}
 
 function Tany_freebsdx64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='x86_64-freebsd';
 var
   AsFile: string;
   AsDirectory: string;
@@ -196,6 +192,7 @@ begin
   FTargetCPU:=GetCPU(TCPU.x86_64);
   FTargetOS:=GetOS(TOS.freebsd);
   FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

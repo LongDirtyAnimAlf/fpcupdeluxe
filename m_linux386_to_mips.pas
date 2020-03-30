@@ -94,8 +94,6 @@ end;
 { TLinux386_mips }
 
 function TLinux386_mips.GetLibs(Basepath:string): boolean;
-const
-  DirName='mips-linux';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -128,8 +126,6 @@ end;
 {$endif}
 
 function TLinux386_mips.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='mips-linux';
 var
   AsFile: string;
 begin
@@ -157,12 +153,13 @@ constructor TLinux386_mips.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TLinux386';
-  FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='mips';
+  FTargetCPU:=GetCPU(TCPU.mips);
   FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

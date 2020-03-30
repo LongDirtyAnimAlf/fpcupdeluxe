@@ -79,8 +79,6 @@ end;
 { Twin32_linuxmips }
 
 function Twin32_linuxmips.GetLibs(Basepath:string): boolean;
-const
-  DirName='mips-linux';
 begin
   result:=FLibsFound;
   if result then exit;
@@ -113,8 +111,6 @@ end;
 {$endif}
 
 function Twin32_linuxmips.GetBinUtils(Basepath:string): boolean;
-const
-  DirName='mips-linux';
 var
   AsFile: string;
 begin
@@ -143,12 +139,13 @@ constructor Twin32_linuxmips.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TWinAll';
-  FBinUtilsPrefix:='mips-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:='mips'; //mips: fpc 2.7+ only; FPC 2.6 does not support mips
+  FTargetCPU:=GetCPU(TCPU.mips);
   FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

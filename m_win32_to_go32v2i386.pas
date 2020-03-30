@@ -61,10 +61,6 @@ uses
 
 implementation
 
-const
-  ARCH='i386';
-  OS='go32v2';
-
 type
 
 { TWin32_go32v2i386 }
@@ -85,7 +81,6 @@ end;
 
 function TWin32_go32v2i386.GetLibs(Basepath:string): boolean;
 const
-  DirName=ARCH+'-'+OS;
   LibName='';
 begin
   result:=FLibsFound;
@@ -120,8 +115,6 @@ end;
 {$endif}
 
 function TWin32_go32v2i386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
 begin  
@@ -169,13 +162,14 @@ end;
 constructor TWin32_go32v2i386.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
   FCrossModuleNamePrefix:='TWinAll';
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';//standard eg in Android NDK 9
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:='go32v2';
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

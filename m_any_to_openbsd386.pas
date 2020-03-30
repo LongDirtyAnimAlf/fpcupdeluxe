@@ -38,10 +38,6 @@ uses
 
 implementation
 
-const
-  ARCH='i386';
-  OS='openbsd';
-
 type
 
 { TAny_OpenBSD386 }
@@ -62,7 +58,6 @@ end;
 
 function TAny_OpenBSD386.GetLibs(Basepath:string): boolean;
 const
-  DirName=ARCH+'-'+OS;
   LibName='libc.so.88.0';
 begin
 
@@ -102,8 +97,6 @@ end;
 {$endif}
 
 function TAny_OpenBSD386.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -121,7 +114,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:=ARCH+'-'+OS+'-';
+    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -158,12 +151,13 @@ end;
 constructor TAny_OpenBSD386.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:=''; //will be filled in later
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.i386);
+  FTargetOS:=GetOS(TOS.openbsd);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

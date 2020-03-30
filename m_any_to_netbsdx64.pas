@@ -42,10 +42,6 @@ uses
 
 implementation
 
-const
-  ARCH='x86_64';
-  OS='netbsd';
-
 type
 
 { TAny_NetBSDx64 }
@@ -62,8 +58,6 @@ end;
 { TAny_NetBSDx64 }
 
 function TAny_NetBSDx64.GetLibs(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -101,8 +95,6 @@ begin
 end;
 
 function TAny_NetBSDx64.GetBinUtils(Basepath:string): boolean;
-const
-  DirName=ARCH+'-'+OS;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -120,7 +112,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:=ARCH+'-'+OS+'-';
+    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
@@ -156,13 +148,13 @@ end;
 constructor TAny_NetBSDx64.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.netbsd);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
