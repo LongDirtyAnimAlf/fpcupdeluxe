@@ -28,9 +28,12 @@ type
   TForm1 = class(TForm)
     AutoCrossUpdate: TButton;
     BitBtnFPCandLazarus: TBitBtn;
+    BitBtnFPCandLazarusTag: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
+    BitBtnFPCOnlyTag: TBitBtn;
     BitBtnHalt: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
+    BitBtnLazarusOnlyTag: TBitBtn;
     btnInstallModule: TButton;
     btnSetupPlus: TButton;
     btnClearLog: TButton;
@@ -43,9 +46,13 @@ type
     CreateStartup: TButton;
     ChkMakefileLaz: TButton;
     FPCVersionLabel: TLabel;
+    FPCTagLabel: TLabel;
     LazarusVersionLabel: TLabel;
+    LazarusTagLabel: TLabel;
     ListBoxFPCTarget: TListBox;
+    ListBoxFPCTargetTag: TListBox;
     ListBoxLazarusTarget: TListBox;
+    ListBoxLazarusTargetTag: TListBox;
     listModules: TListBox;
     MainMenu1: TMainMenu;
     Memo1: TMemo;
@@ -70,6 +77,7 @@ type
     CrossSheet: TTabSheet;
     ModuleSheet: TTabSheet;
     ExtraSheet: TTabSheet;
+    TagSheet: TTabSheet;
     TrunkBtn: TBitBtn;
     FixesBtn: TBitBtn;
     StableBtn: TBitBtn;
@@ -113,6 +121,7 @@ type
     procedure CommandOutputScreenChange({%H-}Sender: TObject);
     procedure CommandOutputScreenSpecialLineMarkup({%H-}Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
+    procedure TagSheetShow(Sender: TObject);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click({%H-}Sender: TObject);
     procedure radgrpCPUClick({%H-}Sender: TObject);
@@ -1646,6 +1655,25 @@ begin
   {$endif}
 
 
+end;
+
+procedure TForm1.TagSheetShow(Sender: TObject);
+var
+  aFileList:TStringList;
+begin
+  aFileList:=TStringList.Create;
+  try
+    aFileList.Clear;
+    GetSVNFileList('https://svn.freepascal.org/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
+    ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
+    aFileList.Clear;
+    GetSVNFileList('https://svn.freepascal.org/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
+    ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
+  finally
+    aFileList.Free;
+  end;
+  //Do it only once !!
+  TTabSheet(Sender).OnShow:=nil;
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);

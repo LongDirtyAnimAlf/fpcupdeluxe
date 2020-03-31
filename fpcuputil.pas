@@ -308,6 +308,7 @@ function GetReleaseCandidateFromUrl(aURL:string): integer;
 function Download(UseWget:boolean; URL, TargetFile: string; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function Download(UseWget:boolean; URL: string; DataStream:TStream; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''): boolean;overload;
 function GetGitHubFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
+function GetSVNFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
 {$IFDEF MSWINDOWS}
 function CheckFileSignature(aFilePath: string): boolean;
 // Get Windows major and minor version number (e.g. 5.0=Windows 2000)
@@ -522,6 +523,58 @@ begin
   EnumResourceTypes(HINSTANCE,@ResTypeProc,0);
 end;
 *)
+
+procedure FTPHTMLListingParser(F:TStream;filelist:TStringList);
+var
+  ADoc: THTMLDocument;
+  HTMFiles : TDOMNodeList;
+  FilenameValid:boolean;
+  i,j:integer;
+  s:string;
+  FPCSVNList,LAZARUSSVNList:boolean;
+begin
+  FPCSVNList:=False;
+  LAZARUSSVNList:=False;
+  F.Position:=0;
+  try
+    ReadHTMLFile(ADoc,F);
+    // a bit rough, but it works
+    HTMFiles:=ADoc.GetElementsByTagName('title');
+    if HTMFiles.Count>0 then
+    begin
+      s:=HTMFiles[0].TextContent;
+      FPCSVNList:=(Pos('[fpc]',s)=1);
+      LAZARUSSVNList:=(Pos('[lazarus]',s)=1);
+    end;
+    HTMFiles:=ADoc.GetElementsByTagName('a');
+    for i:=0 to Pred(HTMFiles.Count) do
+    begin
+      s:=TDOMElement(HTMFiles[i]).GetAttribute('name');
+      if Length(s)>0 then
+      begin
+        // validate filename (also rough)
+        FilenameValid:=True;
+        for j:=1 to Length(s) do
+        begin
+          FilenameValid := (NOT CharInSet(s[j], [';', '=', '+', '<', '>', '|','"', '[', ']', '\', '/', '''']));
+          if (NOT FilenameValid) then break;
+        end;
+        if FilenameValid then
+        begin
+          FilenameValid:=False;
+          FilenameValid:=FilenameValid OR ((LowerCase(ExtractFileExt(s))='.zip') OR (LowerCase(ExtractFileExt(s))='.bz2'));
+          FilenameValid:=FilenameValid OR ((Pos('lazarus_',s)=1) AND (LAZARUSSVNList));
+          FilenameValid:=FilenameValid OR ((Pos('release_',s)=1) AND (FPCSVNList));
+          // finally, add filename if all is ok !!
+          if FilenameValid then filelist.Add(s);
+        end;
+      end;
+    end;
+  finally
+    aDoc.Free;
+  end;
+end;
+
 
 {$ifdef mswindows}
 function GetWin32Version(out Major,Minor,Build : Integer): Boolean;
@@ -2150,6 +2203,48 @@ begin
     Json.Free;
   end;
 
+end;
+
+function GetSVNFileList(aURL:string;fileurllist:TStringList; HTTPProxyHost: string=''; HTTPProxyPort: integer=0; HTTPProxyUser: string=''; HTTPProxyPassword: string=''):boolean;
+var
+  Ms: TMemoryStream;
+begin
+  result:=false;
+  if (aURL='') then exit;
+  if (NOT result) then
+  begin
+    Ms := TMemoryStream.Create;
+    try
+      result:=Download(
+            False,
+            aURL,
+            Ms,
+            HTTPProxyUser,
+            HTTPProxyPort,
+            HTTPProxyUser,
+            HTTPProxyPassword);
+
+      if (NOT result) then
+      begin
+        //retry
+        Ms.Clear;
+        result:=Download(
+              true,
+              aURL,
+              Ms,
+              HTTPProxyUser,
+              HTTPProxyPort,
+              HTTPProxyUser,
+              HTTPProxyPassword);
+      end;
+      if result then
+      begin
+        FTPHTMLListingParser(Ms,fileurllist);
+      end;
+    finally
+      Ms.Free;
+    end;
+  end;
 end;
 
 // returns file size in bytes or 0 if not found.
@@ -4033,42 +4128,8 @@ begin
 end;
 
 procedure TBasicDownLoader.parseFTPHTMLListing(F:TStream;filelist:TStringList);
-var
-  ADoc: THTMLDocument;
-  HTMFiles : TDOMNodeList;
-  HTMFile : TDOMNode;
-  FilenameValid:boolean;
-  i,j:integer;
-  s:string;
 begin
-  F.Position:=0;
-  try
-    ReadHTMLFile(ADoc,F);
-    // a bit rough, but it works
-    HTMFiles:=ADoc.GetElementsByTagName('a');
-    for i:=0 to HTMFiles.Count-1 do
-    begin
-      HtmFile:=HTMFiles.Item[i];
-      s:=HtmFile.TextContent;
-      if Length(s)>0 then
-      begin
-        // validate filename (also rough)
-        FilenameValid:=True;
-        for j:=1 to Length(s) do
-        begin
-          FilenameValid := (NOT CharInSet(s[j], [';', '=', '+', '<', '>', '|','"', '[', ']', '\', '/', '''']));
-          if (NOT FilenameValid) then break;
-        end;
-        if FilenameValid then FilenameValid:=(Pos('..',s)=0);
-        // restrict ourselves to zip and bz2 ... we only use this to retrieve lists of bootstrapper archives !
-        if FilenameValid then FilenameValid:=((LowerCase(ExtractFileExt(s))='.zip') OR (LowerCase(ExtractFileExt(s))='.bz2'));
-        // finally, add filename if all is ok !!
-        if FilenameValid then filelist.Add(s);
-      end;
-    end;
-  finally
-    aDoc.Free;
-  end;
+  FTPHTMLListingParser(F,filelist);
 end;
 
 procedure TBasicDownLoader.DoOnWriteStream(Sender: TObject; APos: Int64);
