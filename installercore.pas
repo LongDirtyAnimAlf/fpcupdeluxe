@@ -67,7 +67,7 @@ const
   FTPBASEHTTP           = 'https://ftp.';
   FTPBASEFTP            = 'ftp://ftp.';
 
-  FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org/svn';
+  FPCBASESVNURL         = SVNBASEHTTP+'freepascal.org';
   FTPBASEURL            = FTPBASEFTP+'freepascal.org/pub/';
   FPCFTPURL             = FTPBASEURL+'fpc/';
   LAZARUSFTPURL         = FTPBASEURL+'lazarus/';
@@ -76,7 +76,7 @@ const
 
   LAZARUSFTPSNAPSHOTURL = LAZARUSFTPURL+'snapshot/';
 
-  BINUTILSURL           = FPCBASESVNURL + '/fpcbuild';
+  BINUTILSURL           = FPCBASESVNURL + '/svn/fpcbuild';
 
   PACKAGESLOCATION      = 'packages.fppkg';
   PACKAGESCONFIGDIR     = 'fpcpkgconfig';
@@ -90,7 +90,7 @@ const
   PREBUILTBINUTILSURLWINCE = BINUTILSURL + '/tags/release_3_0_4/install/crossbinwce';
   {$ENDIF}
 
-  LAZARUSBINARIES = FPCBASESVNURL + '/lazarus/binaries';
+  LAZARUSBINARIES = FPCBASESVNURL + '/svn/lazarus/binaries';
 
   CHM_URL_LATEST_SVN = LAZARUSBINARIES + '/docs/chm';
 

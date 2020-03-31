@@ -28,7 +28,6 @@ type
   TForm1 = class(TForm)
     AutoCrossUpdate: TButton;
     BitBtnFPCandLazarus: TBitBtn;
-    BitBtnFPCandLazarusTag: TBitBtn;
     BitBtnFPCOnly: TBitBtn;
     BitBtnFPCOnlyTag: TBitBtn;
     BitBtnHalt: TBitBtn;
@@ -90,6 +89,7 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
+    procedure OnlyTagClick(Sender: TObject);
     procedure InstallClick(Sender: TObject);
     procedure BitBtnHaltClick({%H-}Sender: TObject);
     procedure btnGetOpenSSLClick({%H-}Sender: TObject);
@@ -116,12 +116,12 @@ type
     procedure MIssuesForumClick({%H-}Sender: TObject);
     procedure MIssuesGitHubClick({%H-}Sender: TObject);
     procedure MLazarusBugsClick({%H-}Sender: TObject);
+    procedure PageControl1Change(Sender: TObject);
     procedure RealURLChange(Sender: TObject);
     procedure RealURLDblClick(Sender: TObject);
     procedure CommandOutputScreenChange({%H-}Sender: TObject);
     procedure CommandOutputScreenSpecialLineMarkup({%H-}Sender: TObject; Line: integer;
       var Special: boolean; Markup: TSynSelectedColor);
-    procedure TagSheetShow(Sender: TObject);
     procedure TargetSelectionChange(Sender: TObject; User: boolean);
     procedure MenuItem1Click({%H-}Sender: TObject);
     procedure radgrpCPUClick({%H-}Sender: TObject);
@@ -576,6 +576,28 @@ end;
 procedure TForm1.MLazarusBugsClick(Sender: TObject);
 begin
   OpenURL('https://bugs.freepascal.org/view_all_bug_page.php?project_id=1');
+end;
+
+procedure TForm1.PageControl1Change(Sender: TObject);
+var
+  aFileList:TStringList;
+begin
+  if TPageControl(Sender).ActivePage=TagSheet then
+  begin
+    aFileList:=TStringList.Create;
+    try
+      aFileList.Clear;
+      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
+      ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
+      aFileList.Clear;
+      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
+      ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
+    finally
+      aFileList.Free;
+    end;
+    //Do it only once !!
+    TPageControl(Sender).OnChange:=nil;
+  end;
 end;
 
 procedure TForm1.RealURLChange(Sender: TObject);
@@ -1657,24 +1679,37 @@ begin
 
 end;
 
-procedure TForm1.TagSheetShow(Sender: TObject);
+procedure TForm1.OnlyTagClick(Sender: TObject);
 var
-  aFileList:TStringList;
+  s:string;
+  aNewURL:string;
 begin
-  aFileList:=TStringList.Create;
-  try
-    aFileList.Clear;
-    GetSVNFileList('https://svn.freepascal.org/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
-    ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
-    aFileList.Clear;
-    GetSVNFileList('https://svn.freepascal.org/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
-    ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
-  finally
-    aFileList.Free;
+  s:='';
+  if Sender=BitBtnFPCOnlyTag then
+  begin
+    aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
+    if SetAlias('fpcURL',ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
+    begin
+      s:=installerUniversal.GetAlias('fpcURL','list');
+      //s:=aNewURL+','+s;
+      ListBoxFPCTarget.Items.CommaText:=s;
+    end;
+
   end;
-  //Do it only once !!
-  TTabSheet(Sender).OnShow:=nil;
+
+  if Sender=BitBtnLazarusOnlyTag then
+  begin
+    aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
+    if SetAlias('lazURL',ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
+    begin
+      s:=installerUniversal.GetAlias('lazURL','list');
+      //s:=aNewURL+','+s;
+      ListBoxLazarusTarget.Items.CommaText:=s;
+    end;
+  end;
+
 end;
+
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var

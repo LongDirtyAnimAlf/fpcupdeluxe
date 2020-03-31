@@ -153,6 +153,7 @@ type
   //The keyword 'list' is reserved and returns the list of keywords as commatext
   function GetAlias(aDictionary,aKeyword: string): string;
   function GetKeyword(aDictionary,aAlias: string): string;
+  function SetAlias(aDictionary,aKeyWord,aValue: string):boolean;
   // check if enabled modules are allowed !
   function CheckIncludeModule(ModuleName: string):boolean;
   function SetConfigFile(aConfigFile: string):boolean;
@@ -2208,9 +2209,9 @@ begin
         if (result='') then
         begin
           infoln('InstallerUniversal (GetAlias): no source alias found: using fpcup default',etInfo);
-          if aDictionary='fpcURL' then result:=FPCBASESVNURL+'/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='fpcURL' then result:=FPCBASESVNURL+'/svn/fpc/tags/release_'+StringReplace(DEFAULTFPCVERSION,'.','_',[rfReplaceAll]);
           {$ifndef FPCONLY}
-          if aDictionary='lazURL' then result:=FPCBASESVNURL+'/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
+          if aDictionary='lazURL' then result:=FPCBASESVNURL+'/svn/lazarus/tags/lazarus_'+StringReplace(DEFAULTLAZARUSVERSION,'.','_',[rfReplaceAll]);
           {$endif}
         end;
 
@@ -2224,6 +2225,31 @@ begin
   finally
     ini.Free;
     sl.free;
+  end;
+end;
+
+function SetAlias(aDictionary,aKeyWord,aValue: string):boolean;
+var
+  ini:TMemIniFile;
+  s:string;
+begin
+  result:=false;
+  ini:=TMemIniFile.Create(CurrentConfigFile);
+  {$IF DEFINED(FPC_FULLVERSION) AND (FPC_FULLVERSION > 30000)}
+  ini.Options:=ini.Options-[ifoCaseSensitive];
+  {$ELSE}
+  ini.CaseSensitive:=false;
+  {$ENDIF}
+  try
+    s:=ini.ReadString('ALIAS'+aDictionary,aKeyWord,'');
+    if (length(s)=0) then
+    begin
+      ini.WriteString('ALIAS'+aDictionary,aKeyWord,aValue);
+      ini.UpdateFile;
+      result:=true;
+    end;
+  finally
+    ini.Free;
   end;
 end;
 
