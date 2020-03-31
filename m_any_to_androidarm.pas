@@ -65,8 +65,8 @@ const
 
 type
 
-{ TAny_ARMAndroid }
-TAny_ARMAndroid = class(TCrossInstaller)
+{ TAny_AndroidARM }
+TAny_AndroidARM = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -76,9 +76,9 @@ public
   destructor Destroy; override;
 end;
 
-{ TAny_ARMAndroid }
+{ TAny_AndroidARM }
 
-function TAny_ARMAndroid.GetLibs(Basepath:string): boolean;
+function TAny_AndroidARM.GetLibs(Basepath:string): boolean;
   // we presume, libc.so has to be present in a cross-library for arm
   // we presume, libandroid.so has to be present in a cross-library for arm
   //LibName='libandroid.so';
@@ -206,7 +206,7 @@ begin
   end;
 end;
 
-function TAny_ARMAndroid.GetBinUtils(Basepath:string): boolean;
+function TAny_AndroidARM.GetBinUtils(Basepath:string): boolean;
 var
   AsFile,aOption: string;
   PresetBinPath:string;
@@ -414,7 +414,7 @@ begin
   end;
 end;
 
-constructor TAny_ARMAndroid.Create;
+constructor TAny_AndroidARM.Create;
 begin
   inherited Create;
   FBinUtilsPath:='';
@@ -428,18 +428,19 @@ begin
   ShowInfo;
 end;
 
-destructor TAny_ARMAndroid.Destroy;
+destructor TAny_AndroidARM.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  Any_ARMAndroid:TAny_ARMAndroid;
+  Any_AndroidARM:TAny_AndroidARM;
 
 initialization
-  Any_ARMAndroid:=TAny_ARMAndroid.Create;
-  RegisterExtension(Any_ARMAndroid.TargetCPU+'-'+Any_ARMAndroid.TargetOS,Any_ARMAndroid);
+  Any_AndroidARM:=TAny_AndroidARM.Create;
+  RegisterExtension(Any_AndroidARM.TargetCPU+'-'+Any_AndroidARM.TargetOS,Any_AndroidARM);
+
 finalization
-  Any_ARMAndroid.Destroy;
+  Any_AndroidARM.Destroy;
 end.
 

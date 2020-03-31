@@ -117,7 +117,7 @@ constructor TDarwinarm.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
-  FTargetCPU:='arm';
+  FTargetCPU:=GetCPU(TCPU.arm);
   FTargetOS:=GetOS(TOS.darwin);
   FAlreadyWarned:=false;
   FFPCCFGSnippet:='';

@@ -41,10 +41,6 @@ uses
 
 implementation
 
-const
-  ARCH='x86_64';
-  OS='solaris';
-
 type
 
 { TAny_Solarisx64 }
@@ -61,9 +57,6 @@ end;
 { TAny_Solarisx64 }
 
 function TAny_Solarisx64.GetLibs(Basepath:string): boolean;
-const
-  NormalDirName=ARCH+'-'+OS;
-  OIDirName=ARCH+'-'+OS+'-oi';
 var
   aDirName:string;
 begin
@@ -72,11 +65,11 @@ begin
 
   if FSolarisOI then
   begin
-    aDirName:=OIDirName;
+    aDirName:=DirName+'-oi';
   end
   else
   begin
-    aDirName:=NormalDirName;
+    aDirName:=DirName;
   end;
 
   // begin simple: check presence of library file in basedir
@@ -98,9 +91,6 @@ begin
 end;
 
 function TAny_Solarisx64.GetBinUtils(Basepath:string): boolean;
-const
-  NormalDirName=ARCH+'-'+OS;
-  OIDirName=ARCH+'-'+OS+'-oi';
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -111,11 +101,11 @@ begin
 
   if FSolarisOI then
   begin
-    aDirName:=OIDirName;
+    aDirName:=DirName+'-oi';
   end
   else
   begin
-    aDirName:=NormalDirName;
+    aDirName:=DirName;
   end;
 
   // Start with any names user may have given
@@ -128,7 +118,7 @@ begin
   // Also allow for crossfpc naming
   if not result then
   begin
-    BinPrefixTry:=ARCH+'-'+OS+'-';
+    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
     AsFile:=BinPrefixTry+'as'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
@@ -164,12 +154,12 @@ end;
 constructor TAny_Solarisx64.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
-  // This prefix is HARDCODED into the compiler so should match (or be empty, actually)
-  FBinUtilsPrefix:=ARCH+'-'+OS+'-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
+  FTargetCPU:=GetCPU(TCPU.x86_64);
+  FTargetOS:=GetOS(TOS.solaris);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';//standard eg in Android NDK 9
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;

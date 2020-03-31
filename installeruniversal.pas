@@ -761,7 +761,6 @@ var
   Workingdir:string;
   BaseWorkingdir:string;
   RegisterOnly:boolean;
-  ReadyCounter:integer;
 begin
   Failure:=false;
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (RemovePackages): ';
@@ -769,8 +768,6 @@ begin
   BaseWorkingdir:=GetValueFromKey(LOCATIONMAGIC,sl);
   if BaseWorkingdir='' then BaseWorkingdir:=GetValueFromKey(INSTALLMAGIC,sl);
   BaseWorkingdir:=FixPath(BaseWorkingdir);
-
-  ReadyCounter:=0;
 
   Workingdir:=BaseWorkingdir;
 
@@ -798,16 +795,8 @@ begin
       PackagePath:=GetValueFromKey(RealDirective,sl);
       PackagePath:=FixPath(PackagePath);
 
-      // Skip over missing numbers:
-      //Limit iterration;
-      if ReadyCounter>MAXEMPTYINSTRUCTIONS then break;
-
       // Skip over missing data or if no AddPackage is defined
-      if (PackagePath='') then
-      begin
-        Inc(ReadyCounter);
-        continue;
-      end else ReadyCounter:=0;
+      if (PackagePath='') then continue;
 
       if Workingdir='' then Workingdir:=BaseWorkingdir;
 
@@ -850,12 +839,12 @@ begin
   Workingdir:=BaseWorkingdir;
   ModuleName:=GetValueFromKey(NAMEMAGIC,sl);
 
-  ReadyCounter:=0;
-
   localinfotext:=Copy(Self.ClassName,2,MaxInt)+' (AddPackages of '+ModuleName+'): ';
 
   for RegisterOnly:=false to true do
   begin
+    //Reset ready counter
+    ReadyCounter:=0;
 
     // trick: run from -1 to allow the above basic statements to be processed first
     for i:=-1 to MAXINSTRUCTIONS do
@@ -1607,10 +1596,10 @@ begin
       try
         try
           // For security reasons, the files below are the only files we allow adding to/modifying:
-          AddToLazXML('environmentoptions'); //general options
-          AddToLazXML('helpoptions');
-          AddToLazXML('miscellaneousoptions'); //e.g. list of packages to be installed on recompile
-          AddToLazXML('packagefiles'); //e.g. list of available packages
+          AddToLazXML(ExtractFileName(EnvironmentConfig)); //general options
+          AddToLazXML(ExtractFileName(HelpConfig));
+          AddToLazXML(ExtractFileName(MiscellaneousConfig)); //e.g. list of packages to be installed on recompile
+          AddToLazXML(ExtractFileName(PackageConfig)); //e.g. list of available packages
           // Process special directives
           Directive:=GetValueFromKey('RegisterExternalTool',sl);
           if Directive<>'' then
@@ -2059,11 +2048,13 @@ var
 begin
   result:=inherited;
 
+  {
   if not DirectoryExists(FSourceDirectory) then
   begin
     infoln(infotext+'No '+ModuleName+' source directory ('+FSourceDirectory+') found [yet] ... nothing to be done',etInfo);
     exit(true);
   end;
+  }
 
   result:=InitModule;
   if not result then exit;

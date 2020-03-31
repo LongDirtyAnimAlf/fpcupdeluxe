@@ -79,6 +79,7 @@ uses
   m_any_to_solarisx64,
   m_any_to_solarissparc,
   m_any_to_msdosi8086,
+  m_any_to_go32v2i386,
   {$ifdef LINUX}
   //{$ifdef CPUX86}
   m_linux386_to_mips,
@@ -123,7 +124,7 @@ uses
   m_any_to_openbsdx64,
   {$endif}
   {$ifdef MSWINDOWS}
-  m_win32_to_linuxmips, m_win32_to_go32v2i386, m_win32_to_wincearm,
+  m_win32_to_linuxmips, m_win32_to_wincearm,
   {$ifdef win64}
   m_crosswin32,
   {$endif win64}

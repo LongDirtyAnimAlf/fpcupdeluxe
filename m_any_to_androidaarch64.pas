@@ -410,6 +410,7 @@ var
 initialization
   Any_AndroidAarch64:=TAny_AndroidAarch64.Create;
   RegisterExtension(Any_AndroidAarch64.TargetCPU+'-'+Any_AndroidAarch64.TargetOS,Any_AndroidAarch64);
+
 finalization
   Any_AndroidAarch64.Destroy;
 end.

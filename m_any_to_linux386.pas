@@ -257,6 +257,7 @@ begin
   FTargetCPU:=GetCPU(TCPU.i386);
   FTargetOS:=GetOS(TOS.linux);
   FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

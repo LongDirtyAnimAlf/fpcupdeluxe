@@ -35,9 +35,6 @@ interface
 
 uses
   Classes, SysUtils,
-  {$IFDEF UNIX}
-  baseunix,
-  {$ENDIF}
   m_crossinstaller,fileutil,fpcuputil;
 
 implementation

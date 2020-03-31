@@ -205,12 +205,13 @@ end;
 constructor Tany_linux64.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='x86_64-linux-';
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
   FTargetCPU:=GetCPU(TCPU.x86_64);
   FTargetOS:=GetOS(TOS.linux);
+  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';//standard eg in Android NDK 9
+  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

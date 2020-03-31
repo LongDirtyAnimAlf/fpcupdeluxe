@@ -101,7 +101,7 @@ constructor TDarwinaarch64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
-  FTargetCPU:='aarch64';
+  FTargetCPU:=GetCPU(TCPU.aarch64);
   FTargetOS:=GetOS(TOS.darwin);
   FAlreadyWarned:=false;
   FFPCCFGSnippet:='';

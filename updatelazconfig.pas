@@ -72,6 +72,7 @@ uses
 
 const
   // Some fixed configuration files.
+  StaticsConfig='staticpackages.inc';
   // General options:
   EnvironmentConfig='environmentoptions.xml';
   // Help optons:
