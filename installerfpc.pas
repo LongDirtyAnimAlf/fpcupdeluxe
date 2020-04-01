@@ -3860,8 +3860,8 @@ begin
     UpdateWarnings:=TStringList.Create;
     try
       if aRepoClient=FGitClient
-         then result:=DownloadFromGit(ModuleName,FPreviousRevision, FActualRevision, UpdateWarnings)
-         else result:=DownloadFromSVN(ModuleName,FPreviousRevision, FActualRevision, UpdateWarnings);
+         then result:=DownloadFromGit(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings)
+         else result:=DownloadFromSVN(ModuleName, FPreviousRevision, FActualRevision, UpdateWarnings);
       if UpdateWarnings.Count>0 then
       begin
         WritelnLog(UpdateWarnings.Text);
@@ -3885,8 +3885,17 @@ begin
       UpdateWarnings:=TStringList.Create;
       try
         s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
-        if FileExists(s) then UpdateWarnings.LoadFromFile(s);
+        if FileExists(s) then
+          UpdateWarnings.LoadFromFile(s)
+        else
+        begin
+          UpdateWarnings.Add('New install.');
+          UpdateWarnings.Add('Date: '+DateTimeToStr(now));
+          UpdateWarnings.Add('Location: '+FBaseDirectory);
+          UpdateWarnings.Add('');
+        end;
         UpdateWarnings.Add('FPC update at: '+DateTimeToStr(now));
+        UpdateWarnings.Add('FPC URL: '+aRepoClient.Repository);
         UpdateWarnings.Add('FPC previous revision: '+PreviousRevision);
         UpdateWarnings.Add('FPC new revision: '+ActualRevision);
         UpdateWarnings.Add('');

@@ -2060,8 +2060,17 @@ begin
     UpdateWarnings:=TStringList.Create;
     try
       s:=SafeExpandFileName(SafeGetApplicationPath+'fpcuprevisions.log');
-      if FileExists(s) then UpdateWarnings.LoadFromFile(s);
+      if FileExists(s) then
+        UpdateWarnings.LoadFromFile(s)
+      else
+      begin
+        UpdateWarnings.Add('New install.');
+        UpdateWarnings.Add('Date: '+DateTimeToStr(now));
+        UpdateWarnings.Add('Location: '+FBaseDirectory);
+        UpdateWarnings.Add('');
+      end;
       UpdateWarnings.Add('Lazarus update at: '+DateTimeToStr(now));
+      UpdateWarnings.Add('Lazarus URL: '+aRepoClient.Repository);
       UpdateWarnings.Add('Lazarus previous revision: '+PreviousRevision);
       UpdateWarnings.Add('Lazarus new revision: '+ActualRevision);
       UpdateWarnings.Add('');

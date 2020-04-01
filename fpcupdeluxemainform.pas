@@ -55,6 +55,7 @@ type
     listModules: TListBox;
     MainMenu1: TMainMenu;
     Memo1: TMemo;
+    MemoAddTag: TMemo;
     memoSummary: TMemo;
     MenuItem1: TMenuItem;
     EmbeddedBtn: TBitBtn;
@@ -89,6 +90,8 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
+    procedure TagSelectionChange(Sender: TObject; User: boolean
+      );
     procedure OnlyTagClick(Sender: TObject);
     procedure InstallClick(Sender: TObject);
     procedure BitBtnHaltClick({%H-}Sender: TObject);
@@ -576,28 +579,6 @@ end;
 procedure TForm1.MLazarusBugsClick(Sender: TObject);
 begin
   OpenURL('https://bugs.freepascal.org/view_all_bug_page.php?project_id=1');
-end;
-
-procedure TForm1.PageControl1Change(Sender: TObject);
-var
-  aFileList:TStringList;
-begin
-  if TPageControl(Sender).ActivePage=TagSheet then
-  begin
-    aFileList:=TStringList.Create;
-    try
-      aFileList.Clear;
-      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
-      ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
-      aFileList.Clear;
-      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
-      ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
-    finally
-      aFileList.Free;
-    end;
-    //Do it only once !!
-    TPageControl(Sender).OnChange:=nil;
-  end;
 end;
 
 procedure TForm1.RealURLChange(Sender: TObject);
@@ -1675,41 +1656,69 @@ begin
      then alternateui_AddMessage(s,false,FG)
      else alternateui_AddMessage(s,false,clLime);
   {$endif}
+end;
 
-
+procedure TForm1.PageControl1Change(Sender: TObject);
+var
+  aFileList:TStringList;
+begin
+  if TPageControl(Sender).ActivePage=TagSheet then
+  begin
+    Application.ProcessMessages;
+    aFileList:=TStringList.Create;
+    ListBoxFPCTargetTag.Items.BeginUpdate;
+    ListBoxLazarusTargetTag.Items.BeginUpdate;
+    try
+      aFileList.Clear;
+      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=fpc',aFileList);
+      ListBoxFPCTargetTag.Items.Text:=aFileList.Text;
+      aFileList.Clear;
+      GetSVNFileList(FPCBASESVNURL+'/cgi-bin/viewvc.cgi/tags/?root=lazarus',aFileList);
+      ListBoxLazarusTargetTag.Items.Text:=aFileList.Text;
+    finally
+      aFileList.Free;
+      ListBoxLazarusTargetTag.Items.EndUpdate;
+      ListBoxFPCTargetTag.Items.EndUpdate;
+    end;
+    //Do this only once !!
+    TPageControl(Sender).OnChange:=nil;
+  end;
 end;
 
 procedure TForm1.OnlyTagClick(Sender: TObject);
 var
-  s:string;
   aNewURL:string;
 begin
-  s:='';
   if Sender=BitBtnFPCOnlyTag then
   begin
     aNewURL:=FPCBASESVNURL+'/svn/fpc/tags/'+ListBoxFPCTargetTag.GetSelectedText;
     if SetAlias('fpcURL',ListBoxFPCTargetTag.GetSelectedText,aNewURL) then
     begin
-      s:=installerUniversal.GetAlias('fpcURL','list');
-      //s:=aNewURL+','+s;
-      ListBoxFPCTarget.Items.CommaText:=s;
+      ListBoxFPCTarget.Items.CommaText:=installerUniversal.GetAlias('fpcURL','list');
+      MemoAddTag.Lines.Clear;
+      MemoAddTag.Lines.Add('The tag with name ['+ListBoxFPCTargetTag.GetSelectedText+'] and URL ['+aNewURL+'] was added to the bottom of the FPC list.');
+      //ListBoxFPCTarget.ItemIndex:=ListBoxFPCTarget.Count-1;
     end;
-
   end;
-
   if Sender=BitBtnLazarusOnlyTag then
   begin
     aNewURL:=FPCBASESVNURL+'/svn/lazarus/tags/'+ListBoxLazarusTargetTag.GetSelectedText;
     if SetAlias('lazURL',ListBoxLazarusTargetTag.GetSelectedText,aNewURL) then
     begin
-      s:=installerUniversal.GetAlias('lazURL','list');
-      //s:=aNewURL+','+s;
-      ListBoxLazarusTarget.Items.CommaText:=s;
+      ListBoxLazarusTarget.Items.CommaText:=installerUniversal.GetAlias('lazURL','list');
+      MemoAddTag.Lines.Clear;
+      MemoAddTag.Lines.Add('The tag with name ['+ListBoxLazarusTargetTag.GetSelectedText+'] and URL ['+aNewURL+'] was added to the bottom of the Lazarus list.');
+      //ListBoxLazarusTarget.ItemIndex:=ListBoxLazarusTarget.Count-1;
     end;
   end;
-
 end;
 
+procedure TForm1.TagSelectionChange(Sender: TObject;
+  User: boolean);
+begin
+  MemoAddTag.Lines.Clear;
+  MemoAddTag.Lines.Add(TListBox(Sender).GetSelectedText);
+end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);
 var
