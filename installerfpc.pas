@@ -2874,6 +2874,8 @@ begin
     FMinorVersion:=0;
     FReleaseVersion:=0;
     GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
+    FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
+
     if (Self is TFPCCrossInstaller) then
       s:='FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Detected source version FPC (compiler): '
     else
@@ -3920,6 +3922,7 @@ begin
       FMinorVersion:=0;
       FReleaseVersion:=0;
       GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
+      FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
       PatchModule(ModuleName);
     end
     else

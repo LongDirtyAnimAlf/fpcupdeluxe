@@ -1426,6 +1426,7 @@ begin
     FReleaseVersion:=0;
     GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
     FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
+    if FPatchVersion=-1 then FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
 
     // only report once
     if (ModuleName=_LAZBUILD) OR (ModuleName=_LAZARUS) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
@@ -2190,6 +2191,7 @@ begin
       FReleaseVersion:=0;
       GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
       FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
+      if FPatchVersion=-1 then FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
       PatchModule(ModuleName);
     end
     else

@@ -3074,7 +3074,13 @@ begin
 
   LocalSourcePatches:=FSourcePatches;
 
-  if FOnlinePatching then
+  // only patch if we want to and if we do not have a release candidate
+  if (FOnlinePatching AND (FPatchVersion<>-1) AND (NOT PatchUniversal)) then
+  begin
+    infoln(localinfotext+'No online patching: we have a release candidate !');
+  end;
+
+  if (FOnlinePatching AND ((FPatchVersion=-1) OR PatchUniversal)) then
   begin
     PatchList:=TStringList.Create;
     try
@@ -3278,10 +3284,10 @@ begin
   end;
   *)
 
-
   // we will hack into Lazarus makefile for better handling of useride
   {$ifndef FPCONLY}
-  if FOnlinePatching then
+  // only patch if we want to and if we do not have a release candidate
+  // if (FOnlinePatching AND (FPatchVersion=-1)) then
   begin
     if PatchLaz then
     begin
@@ -3294,6 +3300,7 @@ begin
         PatchList.LoadFromFile(PatchFilePath);
 
         // are we able to patch
+        j:=-1;
         PatchAccepted:=True;
         for i:=0 to (PatchList.Count-1) do
         begin
@@ -3306,7 +3313,7 @@ begin
           if (Pos(DARWINCHECKMAGIC,s)>0) then j:=i; //store position
         end;
 
-        if PatchAccepted then
+        if (PatchAccepted AND (j<>-1)) then
         begin
           Inc(j);
           PatchList.Insert(j+1,'endif');
