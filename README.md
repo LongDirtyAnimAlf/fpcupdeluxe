@@ -5,6 +5,11 @@ Updated : https://github.com/LongDirtyAnimAlf/Reiniero-fpcup
 New (this) : https://github.com/newpascal/fpcupdeluxe  
 Wiki : http://wiki.freepascal.org/fpcupdeluxe  
 
+[![GitHub contributors](https://img.shields.io/github/contributors/LongDirtyAnimAlf/fpcupdeluxe)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/graphs/contributors)
+[![GitHub All Releases](https://img.shields.io/github/downloads/LongDirtyAnimAlf/fpcupdeluxe/total)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/releases)
+[![GitHub commits since tagged version](https://img.shields.io/github/commits-since/LongDirtyAnimAlf/fpcupdeluxe/1.6.8k)](https://github.com/LongDirtyAnimAlf/fpcupdeluxe/commits/master)
+[![License](https://img.shields.io/badge/license-zlib%2Flibpng-blue.svg)](LICENSE)
+
 Acknowledgement
 ===========
 As of August 28, 2015, this new repo contains all previous commits by Reinier.
