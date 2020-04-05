@@ -33,6 +33,7 @@ type
     BitBtnHalt: TBitBtn;
     BitBtnLazarusOnly: TBitBtn;
     BitBtnLazarusOnlyTag: TBitBtn;
+    btnUpdateLazarusMakefiles: TButton;
     btnInstallModule: TButton;
     btnSetupPlus: TButton;
     btnClearLog: TButton;
@@ -90,6 +91,7 @@ type
     RealLazURL: TEdit;
     SelectDirectoryDialog1: TSelectDirectoryDialog;
     CommandOutputScreen: TSynEdit;
+    procedure btnUpdateLazarusMakefilesClick(Sender: TObject);
     procedure TagSelectionChange(Sender: TObject; User: boolean
       );
     procedure OnlyTagClick(Sender: TObject);
@@ -1718,6 +1720,57 @@ procedure TForm1.TagSelectionChange(Sender: TObject;
 begin
   MemoAddTag.Lines.Clear;
   MemoAddTag.Lines.Add(TListBox(Sender).GetSelectedText);
+end;
+
+procedure TForm1.btnUpdateLazarusMakefilesClick(Sender: TObject);
+var
+  UpdatemakefilesBaseName:string;
+  aProcess:TProcessEx;
+  OldPath:string;
+begin
+  DisEnable(Sender,False);
+  try
+    PrepareRun;
+
+    aProcess:=TProcessEx.Create(nil);
+    try
+      UpdatemakefilesBaseName:=ConcatPaths([FPCupManager.LazarusDirectory,'tools'])+PathDelim+'updatemakefiles';
+
+      if (NOT FileExists(UpdatemakefilesBaseName+GetExeExt)) then
+      begin
+        aProcess.Parameters.Clear;
+        aProcess.Executable:=IncludeTrailingPathDelimiter(FPCupManager.LazarusDirectory)+'lazbuild'+GetExeExt;
+        aProcess.Parameters.Add(UpdatemakefilesBaseName+'.lpr');
+        //aProcess.Parameters.Add('FPCDIR=' + FPCupManager.FPCInstallDirectory);
+        AddMessage('Execute: '+aProcess.Executable+'. Params: '+aProcess.Parameters.CommaText);
+        aProcess.Execute;
+      end;
+
+      UpdatemakefilesBaseName:=UpdatemakefilesBaseName+GetExeExt;
+
+      if FileExists(UpdatemakefilesBaseName) then
+      begin
+        aProcess.Parameters.Clear;
+        OldPath:=aProcess.Environment.GetVar(PATHVARNAME);
+        if OldPath<>'' then
+          aProcess.Environment.SetVar(PATHVARNAME, ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',GetTargetCPUOS])+PathSeparator+OldPath)
+        else
+          aProcess.Environment.SetVar(PATHVARNAME, ConcatPaths([FPCupManager.FPCInstallDirectory,'bin',GetTargetCPUOS]));
+        aProcess.Executable:=UpdatemakefilesBaseName;
+        aProcess.Parameters.Add('FPCDIR='+FPCupManager.FPCInstallDirectory);
+        AddMessage('Execute: '+aProcess.Executable+'. Params: '+aProcess.Parameters.CommaText);
+        aProcess.Execute;
+        aProcess.Environment.SetVar(PATHVARNAME, OldPath);
+      end;
+    finally
+      aProcess.Free;
+    end;
+
+
+
+  finally
+    DisEnable(Sender,True);
+  end;
 end;
 
 procedure TForm1.QuickBtnClick(Sender: TObject);

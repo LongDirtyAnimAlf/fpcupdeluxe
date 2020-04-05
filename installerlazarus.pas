@@ -2019,6 +2019,8 @@ begin
 
   if not Result then exit;
 
+  FPreviousRevision:='unknown';
+
   aRepoClient:=GetSuitableRepoClient;
 
   if aRepoClient=nil then

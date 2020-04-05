@@ -988,7 +988,7 @@ begin
 end;
 {$ENDIF MSWINDOWS}
 
-{$IFDEF UNIX}
+{$IF DEFINED(UNIX) AND NOT DEFINED(HAIKU)}
 {$IFNDEF DARWIN}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 var
@@ -1086,7 +1086,12 @@ begin
     'EOF');
 end;
 {$ENDIF DARWIN}
-{$ENDIF UNIX}
+{$ELSE}
+procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
+begin
+  infoln('Not creating desktop shortcut: don''t know how to do this.');
+end;
+{$ENDIF}
 
 procedure CreateHomeStartLink(Target, TargetArguments,
   ShortcutName: string);

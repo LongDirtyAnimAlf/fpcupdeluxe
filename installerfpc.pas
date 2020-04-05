@@ -3529,12 +3529,13 @@ begin
         begin
           ConfigText.Append('# Add minimum required OSX version for native compiling');
           ConfigText.Append('# Prevents crti not found linking errors');
-          //ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
           ConfigText.Append('#IFDEF DARWIN');
+          ConfigText.Append('#IFNDEF FPC_CROSSCOMPILING');
           if CompareVersionStrings(s,'10.8')>=0 then
             ConfigText.Append('-WM10.8')
           else
             ConfigText.Append('-WM'+s);
+          ConfigText.Append('#ENDIF');
           {
           if CompareVersionStrings(s,'10.14')>=0 then
           begin
@@ -3572,9 +3573,13 @@ begin
         ConfigText.Append('-k'+IncludeTrailingPathDelimiter(FBaseDirectory)+'Frameworks');
         {$else Darwin}
         {$ifdef Unix}
-        ConfigText.Append('-k"-rpath=./"');
+        //ConfigText.Append('-k"-rpath=./"');
+        ConfigText.Append('-k-rpath');
+        ConfigText.Append('-k./');
         //ConfigText.Append('-k"-rpath=/usr/local/lib"');
-        ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
+        //ConfigText.Append('-k"-rpath=\\$$$$$\\ORIGIN"');
+        //ConfigText.Append('-k-rpath');
+        //ConfigText.Append('-k\\$$$$$\\ORIGIN');
         {$endif}
         {$endif Darwin}
         ConfigText.Append('#ENDIF');
@@ -3846,6 +3851,8 @@ begin
   result:=InitModule;
 
   if (not result) then exit;
+
+  FPreviousRevision:='unknown';
 
   aRepoClient:=GetSuitableRepoClient;
 

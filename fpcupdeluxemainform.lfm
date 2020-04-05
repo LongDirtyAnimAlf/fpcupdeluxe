@@ -3602,6 +3602,22 @@ object Form1: TForm1
         OnClick = ChkMakefileFPCClick
         TabOrder = 3
       end
+      object btnUpdateLazarusMakefiles: TButton
+        AnchorSideLeft.Control = ExtraSheet
+        AnchorSideLeft.Side = asrCenter
+        AnchorSideTop.Control = btnGetOpenSSL
+        AnchorSideTop.Side = asrBottom
+        Left = 72
+        Height = 25
+        Top = 180
+        Width = 159
+        AutoSize = True
+        BorderSpacing.Left = 6
+        BorderSpacing.Top = 16
+        Caption = 'Update Lazarus Makefiles'
+        OnClick = btnUpdateLazarusMakefilesClick
+        TabOrder = 4
+      end
     end
   end
   object SelectDirectoryDialog1: TSelectDirectoryDialog
