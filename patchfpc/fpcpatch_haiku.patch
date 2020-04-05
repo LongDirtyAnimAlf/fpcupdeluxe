@@ -18,8 +18,8 @@ Index: compiler/systems/t_haiku.pas
 +{$ifdef i386}      platform_select='-m elf_i386_haiku';{$endif}
 +{$ifdef x86_64}    platform_select='-m elf_x86_64_haiku';{$endif}
  begin
-+  //if on Windows, the bat-file containing the link files may grow too long: use a linker script to circumvent
-+  LdScriptResponseFile:=(source_info.system in systems_windows);
++  //if on Windows or Haiku itself, the bat/sh-file containing the link files may grow too long: use a linker script to circumvent
++  LdScriptResponseFile:=(source_info.system in ([system_i386_haiku,system_x86_64_haiku]+systems_windows));
 +
    with Info do
     begin

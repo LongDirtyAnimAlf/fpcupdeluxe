@@ -1086,7 +1086,8 @@ begin
     'EOF');
 end;
 {$ENDIF DARWIN}
-{$ELSE}
+{$ENDIF}
+{$IFDEF HAIKU}
 procedure CreateDesktopShortCut(Target, TargetArguments, ShortcutName: string);
 begin
   infoln('Not creating desktop shortcut: don''t know how to do this.');

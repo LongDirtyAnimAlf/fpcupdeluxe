@@ -1728,6 +1728,7 @@ var
   aProcess:TProcessEx;
   OldPath:string;
 begin
+  exit;
   DisEnable(Sender,False);
   try
     PrepareRun;

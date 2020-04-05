@@ -73,6 +73,8 @@ uses
 const
   // Some fixed configuration files.
   StaticsConfig='staticpackages.inc';
+  // Editor options:
+  EditorConfig='editoroptions.xml';
   // General options:
   EnvironmentConfig='environmentoptions.xml';
   // Help optons:

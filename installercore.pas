@@ -3140,8 +3140,8 @@ begin
           if Pos('darwin_qt5',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 
-          {$ifndef MSWindows}
-          //only patch the Haiku build process on Windows
+          {$if not defined(MSWindows) and not defined(Haiku)}
+          //only patch the Haiku build process on Windows and Haiku itself
           if Pos('fpcpatch_haiku.patch',PatchFilePath)>0 then PatchAccepted:=False;
           {$endif}
 

@@ -1597,6 +1597,7 @@ begin
       try
         try
           // For security reasons, the files below are the only files we allow adding to/modifying:
+          AddToLazXML(ExtractFileName(EditorConfig)); //editor options
           AddToLazXML(ExtractFileName(EnvironmentConfig)); //general options
           AddToLazXML(ExtractFileName(HelpConfig));
           AddToLazXML(ExtractFileName(MiscellaneousConfig)); //e.g. list of packages to be installed on recompile

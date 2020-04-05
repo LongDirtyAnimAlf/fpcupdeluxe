@@ -3617,6 +3617,7 @@ object Form1: TForm1
         Caption = 'Update Lazarus Makefiles'
         OnClick = btnUpdateLazarusMakefilesClick
         TabOrder = 4
+        Visible = False
       end
     end
   end
