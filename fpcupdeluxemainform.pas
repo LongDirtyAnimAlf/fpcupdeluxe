@@ -2696,13 +2696,14 @@ begin
             if FPCupManager.CrossCPU_Target=GetCPU(TCPU.powerpc64) then BinsFileName:='powerpc';
           end;
 
-          if FPCupManager.CrossOS_Target=GetOS(TOS.freebsd) then s:='FreeBSD' else
-            if FPCupManager.CrossOS_Target=GetOS(TOS.dragonfly) then s:='DragonFlyBSD' else
-              if FPCupManager.CrossOS_Target=GetOS(TOS.openbsd) then s:='OpenBSD' else
-                if FPCupManager.CrossOS_Target=GetOS(TOS.netbsd) then s:='NetBSD' else
-                  if FPCupManager.CrossOS_Target=GetOS(TOS.aix) then s:='AIX' else
-                    if FPCupManager.CrossOS_Target=GetOS(TOS.msdos) then s:='MSDos' else
-                      s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
+          if FPCupManager.CrossOS_Target=GetOS(TOS.morphos) then s:='MorphOS' else
+            if FPCupManager.CrossOS_Target=GetOS(TOS.freebsd) then s:='FreeBSD' else
+              if FPCupManager.CrossOS_Target=GetOS(TOS.dragonfly) then s:='DragonFlyBSD' else
+                if FPCupManager.CrossOS_Target=GetOS(TOS.openbsd) then s:='OpenBSD' else
+                  if FPCupManager.CrossOS_Target=GetOS(TOS.netbsd) then s:='NetBSD' else
+                    if FPCupManager.CrossOS_Target=GetOS(TOS.aix) then s:='AIX' else
+                      if FPCupManager.CrossOS_Target=GetOS(TOS.msdos) then s:='MSDos' else
+                        s:=UppercaseFirstChar(FPCupManager.CrossOS_Target);
 
           if FPCupManager.SolarisOI then s:=s+'OI';
           BinsFileName:=s+BinsFileName;
