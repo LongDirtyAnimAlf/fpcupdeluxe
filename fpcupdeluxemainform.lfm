@@ -2920,6 +2920,7 @@ object Form1: TForm1
           'jvm'
           'i8086'
           'sparc'
+          'm68k'
         )
         OnClick = radgrpCPUClick
         ParentShowHint = False
@@ -2974,6 +2975,7 @@ object Form1: TForm1
           'linux-musl'
           'morphos'
           'aros'
+          'amiga'
         )
         OnClick = radgrpOSClick
         ParentShowHint = False

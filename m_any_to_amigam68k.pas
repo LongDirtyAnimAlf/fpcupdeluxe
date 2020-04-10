@@ -1,4 +1,4 @@
-unit m_any_to_morphospowerpc;
+unit m_any_to_amigam68k;
 
 { Cross compiles from any (or any other OS with relevant binutils/libs) to Linux 64 bit
 Copyright (C) 2014 Reinier Olislagers
@@ -40,8 +40,8 @@ implementation
 
 type
 
-{ Tany_MorphosPowerPC }
-Tany_MorphosPowerPC = class(TCrossInstaller)
+{ Tany_Amigam68k }
+Tany_Amigam68k = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -54,9 +54,9 @@ public
   destructor Destroy; override;
 end;
 
-{ Tany_MorphosPowerPC }
+{ Tany_Amigam68k }
 
-function Tany_MorphosPowerPC.GetLibs(Basepath:string): boolean;
+function Tany_Amigam68k.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -87,14 +87,14 @@ begin
 end;
 
 {$ifndef FPCONLY}
-function Tany_MorphosPowerPC.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
+function Tany_Amigam68k.GetLibsLCL(LCL_Platform: string; Basepath: string): boolean;
 begin
   // todo: get gtk at least
   result:=inherited;
 end;
 {$endif}
 
-function Tany_MorphosPowerPC.GetBinUtils(Basepath:string): boolean;
+function Tany_Amigam68k.GetBinUtils(Basepath:string): boolean;
 var
   AsFile: string;
   BinPrefixTry: string;
@@ -129,34 +129,34 @@ begin
   end;
 end;
 
-constructor Tany_MorphosPowerPC.Create;
+constructor Tany_Amigam68k.Create;
 begin
   inherited Create;
   FBinUtilsPath:='';
   FFPCCFGSnippet:='';
   FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.powerpc);
-  FTargetOS:=GetOS(TOS.morphos);
+  FTargetCPU:=GetCPU(TCPU.m68k);
+  FTargetOS:=GetOS(TOS.amiga);
   FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
   FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
 
-destructor Tany_MorphosPowerPC.Destroy;
+destructor Tany_Amigam68k.Destroy;
 begin
   inherited Destroy;
 end;
 
 var
-  any_MorphosPowerPC:Tany_MorphosPowerPC;
+  any_Amigam68k:Tany_Amigam68k;
 
 initialization
-  any_MorphosPowerPC:=Tany_MorphosPowerPC.Create;
-  RegisterExtension(any_MorphosPowerPC.TargetCPU+'-'+any_MorphosPowerPC.TargetOS,any_MorphosPowerPC);
+  any_Amigam68k:=Tany_Amigam68k.Create;
+  RegisterExtension(any_Amigam68k.TargetCPU+'-'+any_Amigam68k.TargetOS,any_Amigam68k);
 
 finalization
-  any_MorphosPowerPC.Destroy;
+  any_Amigam68k.Destroy;
 
 end.
 

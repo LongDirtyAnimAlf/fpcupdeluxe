@@ -795,6 +795,8 @@ begin
       for CPU := Low(TCPU) to High(TCPU) do
       begin
         // skip non-combi's to reduce size of ini-file
+        if ((OS=amiga) AND (CPU<>m68k)) then continue;
+        if ((OS=morphos) AND (CPU<>powerpc)) then continue;
         if ((OS=java) AND (CPU<>jvm)) OR ((CPU=jvm) AND (OS<>java) AND (OS<>android)) then continue;
         if (OS=android) AND ((CPU<>arm) AND (CPU<>aarch64) AND (CPU<>jvm) AND (CPU<>mipsel)) then continue;
         if (OS=iphonesim) AND ((CPU<>i386) AND (CPU<>x86_64)) then continue;

@@ -242,7 +242,7 @@ type
 
 const
   ppcSuffix : array[TCPU] of string=(
-    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64'
+    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k'
   );
 
   ARMArchFPCStr : array[TARMARCH] of string=(

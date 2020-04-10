@@ -2103,6 +2103,14 @@ begin
     exit;
   end;
 
+
+
+  // OS=amiga) AND (CPU<>m68k))
+  // OS=morphos) AND (CPU<>powerpc))
+
+
+
+
   PrepareRun;
 
   if radgrpCPU.ItemIndex<>-1 then
@@ -2676,6 +2684,7 @@ begin
           if FPCupManager.CrossCPU_Target=GetCPU(TCPU.sparc) then BinsFileName:='Sparc';
           if FPCupManager.CrossCPU_Target=GetCPU(TCPU.avr) then BinsFileName:='AVR';
           if FPCupManager.CrossCPU_Target=GetCPU(TCPU.i8086) then BinsFileName:='i8086';
+          if FPCupManager.CrossCPU_Target=GetCPU(TCPU.m68k) then BinsFileName:='m68k';
 
           if FPCupManager.CrossOS_Target=GetOS(TOS.darwin) then
           begin

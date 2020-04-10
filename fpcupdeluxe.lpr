@@ -70,6 +70,7 @@ uses
   m_any_to_aros386,
   m_any_to_arosx64,
   m_any_to_arosarm,
+  m_any_to_amigam68k,
   m_any_to_morphospowerpc,
   m_any_to_haiku386,
   m_any_to_haikux64,
