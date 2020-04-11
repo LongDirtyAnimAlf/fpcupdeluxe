@@ -37,10 +37,6 @@ uses
 
 implementation
 
-const
-  ARCH='i386';
-  OS='win32';
-
 type
 
 { TWin32 }
@@ -79,12 +75,12 @@ end;
 constructor TWin32.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
   FCrossModuleNamePrefix:='TWin64';
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.win32;
+  Reset;
   FBinUtilsPath:='';
   FBinUtilsPrefix:='';
-  FFPCCFGSnippet:='';
   FLibsPath:='';
   ShowInfo;
 end;
@@ -100,7 +96,8 @@ var
 
 initialization
   Win32:=TWin32.Create;
-  RegisterExtension(Win32.TargetCPU+'-'+Win32.TargetOS,Win32);
+  RegisterExtension(Win32.RegisterName,Win32);
+
 finalization
   Win32.Destroy;
 {$ENDIF}

@@ -87,8 +87,8 @@ const
 
 
 type
-  TCPU = (i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k);
-  TOS  = (win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga);
+  TCPU = (cpuNone,i386,x86_64,arm,aarch64,powerpc,powerpc64,mips,mipsel,avr,jvm,i8086,sparc,sparc64,riscv32,riscv64,m68k);
+  TOS  = (osNone,win32,win64,linux,android,darwin,freebsd,openbsd,aix,wince,iphonesim,embedded,java,msdos,haiku,solaris,dragonfly,netbsd,morphos,aros,amiga,go32v2);
 
   TCPUOS = record
     CPU:TCPU;
@@ -102,6 +102,8 @@ type
   TCrossInstaller = class(TObject)
   private
     function GetCrossModuleName:string;
+    function GetTargetCPUName:string;
+    function GetTargetOSName:string;
   protected
     FBinUtilsPath: string; //the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.
     FBinutilsPathInPath: boolean;
@@ -113,8 +115,9 @@ type
     FCrossOpts: TStringList; //Options to be added to CROSSOPT by the calling code. XP= (binutils prefix) is already done, no need to add it
     FFPCCFGSnippet: string; //snippet to be added to fpc.cfg in order to find binutils/libraries etc
     FLibsPath: string; //path for target environment libraries
-    FTargetCPU: string; //cpu for the target environment. Follows FPC names
-    FTargetOS: string; //operating system for the target environment. Follows FPC names
+    FTargetCPU: TCPU; //cpu for the target environment. Follows FPC names
+    FTargetOS: TOS; //operating system for the target environment. Follows FPC names
+    FRegisterName: string;
     FSubArch: string; //optional subarch for embedded targets
     FLibsFound,FBinsFound,FCrossOptsAdded:boolean;
     FSolarisOI:boolean;
@@ -171,11 +174,12 @@ type
     property BinUtilsPathInPath: boolean read FBinutilsPathInPath;
     // Prefix used before executable names for binutils (e.g. before as.exe). May be empty.
     property BinUtilsPrefix:string read FBinUtilsPrefix;
-    // Target processor (in FPC notation). Used to select cross compiler
     property DirName:string read FBinUtilsDirectoryID;
-    property TargetCPU:string read FTargetCPU;
-    // Target Operating System (in FPC notation). Used to select cross compiler
-    property TargetOS:string read FTargetOS;
+    property TargetCPU:TCPU read FTargetCPU;
+    property TargetOS:TOS read FTargetOS;
+    property TargetCPUName: string read GetTargetCPUName;
+    property TargetOSName: string read GetTargetOSName;
+    property RegisterName:string read FRegisterName;
     property SubArch:string read FSubArch;
     property SolarisOI: boolean write FSolarisOI;
     property MUSL: boolean write FMUSL;
@@ -184,10 +188,12 @@ type
   end;
 
 function GetCPU(aCPU:TCPU):string;
+function GetTCPU(aCPU:string):TCPU;
 function GetOS(aOS:TOS):string;
+function GetTOS(aOS:string):TOS;
 function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
 
-Procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
+Procedure RegisterExtension(Platform:string;aCrossInstaller:TCrossInstaller);
 
 Var
   CrossInstallers:TStringList=nil;
@@ -204,6 +210,32 @@ begin
   result:=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU));
 end;
 
+function GetTCPU(aCPU:string):TCPU;
+var
+  xCPU:TCPU;
+  aLocalCPU:string;
+begin
+  result:=TCPU.cpuNone;
+
+  aLocalCPU:=aCPU;
+
+  if length(aLocalCPU)>0 then
+  begin
+    if aLocalCPU='ppc' then xCPU:=TCPU.powerpc
+    else
+    if aLocalCPU='ppc64' then xCPU:=TCPU.powerpc64
+    else
+    if aLocalCPU='x8664' then xCPU:=TCPU.x86_64
+    else
+    begin
+      xCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),aLocalCPU));
+      if Ord(xCPU) < 0 then
+        raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
+    end;
+    result:=xCPU;
+  end;
+end;
+
 function GetOS(aOS:TOS):string;
 begin
   if Ord(aOS) < 0 then
@@ -211,55 +243,63 @@ begin
   result:=GetEnumNameSimple(TypeInfo(TOS),Ord(aOS));
 end;
 
-function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+function GetTOS(aOS:string):TOS;
 var
-  xCPU:TCPU;
   xOS:TOS;
-  aLocalCPU,aLocalOS:string;
+  aLocalOS:string;
 begin
-  aLocalCPU:=aCPU;
-
-  if length(aLocalCPU)>0 then
-  begin
-    if aLocalCPU='ppc' then aLocalCPU:='powerpc';
-    if aLocalCPU='ppc64' then aLocalCPU:='powerpc64';
-
-    xCPU:=TCPU(GetEnumValueSimple(TypeInfo(TCPU),aLocalCPU));
-    if Ord(xCPU) < 0 then
-      raise Exception.CreateFmt('Invalid CPU name "%s" for GetCPUOSCombo.', [aLocalCPU]);
-    result.CPU:=xCPU;
-  end;
-
+  result:=TOS.osNone;
   aLocalOS:=aOS;
   if length(aLocalOS)>0 then
   begin
     //if aLocalOS='win32' then aLocalOS:='windows';
     //if aLocalOS='win64' then aLocalOS:='windows';
-    if aLocalOS='i-sim' then aLocalOS:='iphonesim';
-    if aLocalOS='i-simulator' then aLocalOS:='iphonesim';
-    if aLocalOS='iphone-simulator' then aLocalOS:='iphonesim';
-    if aLocalOS='iphonesimulator' then aLocalOS:='iphonesim';
-
-    xOS:=TOS(GetEnumValueSimple(TypeInfo(TOS),aLocalOS));
-    if Ord(xOS) < 0 then
-      raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
-    result.OS:=xOS;
+    if aLocalOS='i-sim' then xOS:=TOS.iphonesim
+    else
+    if aLocalOS='i-simulator' then xOS:=TOS.iphonesim
+    else
+    if aLocalOS='iphone-simulator' then xOS:=TOS.iphonesim
+    else
+    if aLocalOS='iphonesimulator' then xOS:=TOS.iphonesim
+    else
+    begin
+      xOS:=TOS(GetEnumValueSimple(TypeInfo(TOS),aLocalOS));
+      if Ord(xOS) < 0 then
+        raise Exception.CreateFmt('Invalid OS name "%s" for GetCPUOSCombo.', [aLocalOS]);
+    end;
+    result:=xOS;
   end;
 end;
 
+function GetCPUOSCombo(aCPU,aOS:string):TCPUOS;
+begin
+  result.CPU:=GetTCPU(aCPU);
+  result.OS:=GetTOS(aOS);
+end;
 
 { TCrossInstaller }
-procedure RegisterExtension(Platform:string;Extension:TCrossInstaller);
+procedure RegisterExtension(Platform:string;aCrossInstaller:TCrossInstaller);
 begin
   if not assigned(CrossInstallers) then
     CrossInstallers:=TStringList.Create;
-  CrossInstallers.AddObject(Platform,TObject(Extension));
+  CrossInstallers.AddObject(Platform,TObject(aCrossInstaller));
 end;
 
 function TCrossInstaller.GetCrossModuleName:string;
 begin
-  result:=FCrossModuleNamePrefix+'_'+TargetOS+'-'+TargetCPU;
+  result:=FCrossModuleNamePrefix+'_'+GetTargetOSName+'-'+GetTargetCPUName;
 end;
+
+function TCrossInstaller.GetTargetCPUName:string;
+begin
+  GetCPU(TargetCPU);
+end;
+
+function TCrossInstaller.GetTargetOSName:string;
+begin
+  GetOS(TargetOS);
+end;
+
 
 procedure TCrossInstaller.AddFPCCFGSnippet(aSnip: string);
 var
@@ -499,6 +539,15 @@ begin
   FCrossOptsAdded:=false;
   FCrossOpts.Clear;
   FSubArch:='';
+
+  FRegisterName:=GetCPU(TargetCPU)+'-'+GetOS(TargetOS);
+  FBinUtilsDirectoryID:=FRegisterName;
+
+  if TargetOS=TOS.android then
+    FBinUtilsPrefix:=GetCPU(TargetCPU)+'-linux-'+GetOS(TargetOS)+'-' //standard eg in Android NDK 9
+  else
+    FBinUtilsPrefix:=GetCPU(TargetCPU)+'-'+GetOS(TargetOS)+'-';
+
   FBinutilsPathInPath:=false; //don't add binutils directory to path when cross compiling
 
   FBinUtilsPath:='Error: cross compiler extension must set FBinUtilsPath: the cross compile binutils (as, ld etc). Could be the same as regular path if a binutils prefix is used.';
@@ -509,8 +558,8 @@ constructor TCrossInstaller.Create;
 begin
   FCrossOpts:=TStringList.Create;
 
-  FTargetCPU:='Error: cross compiler extension must set FTargetCPU: cpu for the target environment. Follows FPC names.';
-  FTargetOS:='Error: cross compiler extension must set FTargetOS: operating system for the target environment. Follows FPC names';
+  FTargetCPU:=TCPU.cpuNone;
+  FTargetOS:=TOS.osNone;
 
   FBinUtilsPrefix:='Error: cross compiler extension must set FBinUtilsPrefix: can be empty, if a prefix is used to separate binutils for different archs in the same directory, use it';
 
@@ -522,8 +571,6 @@ begin
   FCrossModuleNamePrefix:='TAny';
 
   FBinUtilsDirectoryID:='none';
-
-  Reset;
 end;
 
 destructor TCrossInstaller.Destroy;

@@ -395,13 +395,9 @@ end;
 constructor TAny_AndroidMIPSEL.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.mipsel);
-  FTargetOS:=GetOS(TOS.android);
-  FBinUtilsPrefix:=TargetCPU+'-linux-'+TargetOS+'-';//standard eg in Android NDK 9
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.mipsel;
+  FTargetOS:=TOS.android;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -416,7 +412,7 @@ var
 
 initialization
   Any_AndroidMIPSEL:=TAny_AndroidMIPSEL.Create;
-  RegisterExtension(Any_AndroidMIPSEL.TargetCPU+'-'+Any_AndroidMIPSEL.TargetOS,Any_AndroidMIPSEL);
+  RegisterExtension(Any_AndroidMIPSEL.RegisterName,Any_AndroidMIPSEL);
 finalization
   Any_AndroidMIPSEL.Destroy;
 end.

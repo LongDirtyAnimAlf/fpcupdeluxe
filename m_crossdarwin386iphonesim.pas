@@ -129,10 +129,11 @@ constructor TDarwin386iphonesim.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin32';
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.iphonesim;
+  Reset;
+  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 
@@ -147,7 +148,8 @@ var
 
 initialization
   Darwin386iphonesim:=TDarwin386iphonesim.Create;
-  RegisterExtension(Darwin386iphonesim.TargetCPU+'-'+Darwin386iphonesim.TargetOS,Darwin386iphonesim);
+  RegisterExtension(Darwin386iphonesim.RegisterName,Darwin386iphonesim);
+
 finalization
   Darwin386iphonesim.Destroy;
 {$ENDIF}

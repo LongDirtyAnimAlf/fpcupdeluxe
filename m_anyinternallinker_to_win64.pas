@@ -14,10 +14,6 @@ uses
 
 implementation
 
-const
-  ARCH='x86_64';
-  OS='win64';
-
 type
 
 { Tanyinternallinker_win64 }
@@ -56,11 +52,10 @@ end;
 constructor Tanyinternallinker_win64.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
   FCrossModuleNamePrefix:='TAnyinternallinker';
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.win64;
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:=''; //no need to change fpc.cfg
   ShowInfo;
 end;
 
@@ -69,13 +64,13 @@ begin
   inherited Destroy;
 end;
 
-
 var
   Anyinternallinker_win64:Tanyinternallinker_win64;
 
 initialization
   Anyinternallinker_win64:=Tanyinternallinker_win64.Create;
-  RegisterExtension(Anyinternallinker_win64.TargetCPU+'-'+Anyinternallinker_win64.TargetOS,Anyinternallinker_win64);
+  RegisterExtension(Anyinternallinker_win64.RegisterName,Anyinternallinker_win64);
+
 finalization
   Anyinternallinker_win64.Destroy;
 end.

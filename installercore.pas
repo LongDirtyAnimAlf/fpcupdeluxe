@@ -242,7 +242,7 @@ type
 
 const
   ppcSuffix : array[TCPU] of string=(
-    '386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k'
+    'none','386','x64','arm','a64','ppc','ppc64', 'mips', 'mipsel','avr','jvm','8086','sparc','sparc64','rv32','rv64','68k'
   );
 
   ARMArchFPCStr : array[TARMARCH] of string=(
@@ -275,8 +275,8 @@ type
   private
     FKeepLocalChanges: boolean;
     FReApplyLocalChanges: boolean;
-    FCrossCPU_Target: string; //When cross-compiling: CPU, e.g. x86_64
-    FCrossOS_Target: string; //When cross-compiling: OS, e.g. win64
+    FCrossCPU_Target: TCPU; //When cross-compiling: CPU, e.g. x86_64
+    FCrossOS_Target: TOS; //When cross-compiling: OS, e.g. win64
     FCrossOS_SubArch: string; //When cross-compiling for embedded: CPU, e.g. for Teensy SUBARCH=ARMV7EM
     procedure SetURL(value:string);
     procedure SetSourceDirectory(value:string);
@@ -291,7 +291,7 @@ type
     function GetCrossInstaller: TCrossInstaller;
     function GetCrossCompilerPresent:boolean;
     function GetFullVersion:dword;
-    function GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
+    function GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
     function GetInstallerClass(aClassToFind:TClass):boolean;
     function IsFPCInstaller:boolean;
     function IsLazarusInstaller:boolean;
@@ -428,13 +428,13 @@ type
     // Compiler options passed on to make as OPT= or FPCOPT=
     property CompilerOptions: string write FCompilerOptions;
     // CPU for the target (together with CrossOS_Target the cross compile equivalent to GetFPCTarget)
-    property CrossCPU_Target: string read FCrossCPU_Target;
-    // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
-    property CrossOPT: string read FCrossOPT write FCrossOPT;
+    //property CrossCPU_Target: TCPU read FCrossCPU_Target;
     // OS for target (together with CrossCPU_Target the cross compile equivalent to GetFPCTarget)
-    property CrossOS_Target: string read FCrossOS_Target;
+    //property CrossOS_Target: TOS read FCrossOS_Target;
     // SubArch for target embedded
     property CrossOS_SubArch: string read FCrossOS_SubArch;
+    // Options for cross compiling. User can specify his own, but cross compilers can set defaults, too
+    property CrossOPT: string read FCrossOPT write FCrossOPT;
     property CrossToolsDirectory:string read FCrossToolsDirectory write FCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write FCrossLibraryDirectory;
     // SVN revision override. Default is HEAD/latest revision
@@ -483,9 +483,10 @@ type
     property CrossCompilerPresent: boolean read GetCrossCompilerPresent;
     property NumericalVersion:dword read GetFullVersion;
     property SanityCheck:boolean read GetSanityCheck;
-    function GetCompilerName(Cpu_Target:string):string;
-    function GetCrossCompilerName(Cpu_Target:string):string;
-    procedure SetTarget(aCPU,aOS,aSubArch:string);virtual;
+    function GetCompilerName(Cpu_Target:TCPU):string;overload;
+    function GetCompilerName(Cpu_Target:string):string;overload;
+    function GetCrossCompilerName(Cpu_Target:TCPU):string;
+    procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);virtual;
     // append line ending and write to log and, if specified, to console
     procedure WritelnLog(msg: string; ToConsole: boolean = true);overload;
     procedure WritelnLog(EventType: TEventType; msg: string; ToConsole: boolean = true);overload;
@@ -578,7 +579,7 @@ begin
   if (NOT DirectoryExists(FInstallDirectory)) then exit;
   if CheckDirectory(FInstallDirectory) then exit;
 
-  if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
+  if ((FCrossCPU_Target=TCPU.cpuNone) OR (FCrossOS_Target=TOS.osNone)) then exit;
 
   //if (Self is TFPCCrossInstaller) then
   begin
@@ -649,7 +650,7 @@ begin
         Inc(SnipBegin);
       end;
 
-      result:=((CrossCPU_Target=aCPU) AND (CrossOS_Target=aOS));
+      result:=((GetCPU(FCrossCPU_Target)=aCPU) AND (GetOS(FCrossOS_Target)=aOS));
 
     finally
       ConfigText.Free;
@@ -2713,7 +2714,7 @@ end;
 
 function TInstaller.GetFPCTarget(Native: boolean): string;
 begin
-  result:=GetFPCTargetCPUOS(FCrossCPU_Target,FCrossOS_Target,Native);
+  result:=GetFPCTargetCPUOS(GetCPU(FCrossCPU_Target),GetOS(FCrossOS_Target),Native);
 end;
 
 function TInstaller.GetPath: string;
@@ -2815,7 +2816,7 @@ begin
   {$ENDIF UNIX}
 end;
 
-procedure TInstaller.SetTarget(aCPU,aOS,aSubArch:string);
+procedure TInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);
 begin
   FCrossCPU_Target:=aCPU;
   FCrossOS_Target:=aOS;
@@ -3525,8 +3526,8 @@ begin
   FErrorLog := TStringList.Create;
   FProcessEx.OnErrorM:=@(ProcessError);
 
-  FCrossCPU_Target:='invalid';
-  FCrossOS_Target:='invalid';
+  FCrossCPU_Target:=TCPU.cpuNone;
+  FCrossOS_Target:=TOS.osNone;
   FCrossOS_SubArch:='';
 
   FMajorVersion := -1;
@@ -3616,37 +3617,46 @@ begin
   result:=GetInstallerClass(TBaseUniversalInstaller);
 end;
 
-function TInstaller.GetDefaultCompilerFilename(const TargetCPU: string; Cross: boolean): string;
+function TInstaller.GetDefaultCompilerFilename(const TargetCPU: TCPU; Cross: boolean): string;
 var
-  aCPU:TCPU;
   s:string;
 begin
   s:='fpc';
-  if TargetCPU<>'' then
+  if TargetCPU<>TCPU.cpuNone then
   begin
-    for aCPU:=Low(TCPU) to High(TCPU) do
-    begin
-      if TargetCPU=GetEnumNameSimple(TypeInfo(TCPU),Ord(aCPU)) then
-      begin
-        if Cross then
-          s:='ppcross'+ppcSuffix[aCPU]
-        else
-          s:='ppc'+ppcSuffix[aCPU];
-        break;
-      end;
-    end;
+    if Cross then
+      s:='ppcross'+ppcSuffix[TargetCPU]
+    else
+      s:='ppc'+ppcSuffix[TargetCPU];
   end;
   Result:=s+GetExeExt;
 end;
 
-function TInstaller.GetCompilerName(Cpu_Target:string):string;
+function TInstaller.GetCompilerName(Cpu_Target:TCPU):string;
 begin
   result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;
 
-function TInstaller.GetCrossCompilerName(Cpu_Target:string):string;
+function TInstaller.GetCompilerName(Cpu_Target:string):string;
+var
+  aCPU:TCPU;
 begin
-  if Cpu_Target<>'jvm'
+  result:='fpc'+GetExeExt;
+  if Cpu_Target<>'' then
+  begin
+    for aCPU:=Low(TCPU) to High(TCPU) do
+    begin
+      if (Cpu_Target=GetCPU(aCPU)) then
+      begin
+        result:=GetDefaultCompilerFilename(aCPU,false);
+      end;
+    end;
+  end;
+end;
+
+function TInstaller.GetCrossCompilerName(Cpu_Target:TCPU):string;
+begin
+  if Cpu_Target<>TCPU.jvm
      then result:=GetDefaultCompilerFilename(Cpu_Target,true)
      else result:=GetDefaultCompilerFilename(Cpu_Target,false);
 end;

@@ -388,13 +388,9 @@ end;
 constructor TAny_Androidx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.android);
-  FBinUtilsPrefix:=TargetCPU+'-linux-'+TargetOS+'-';//standard eg in Android NDK 9
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
-  FLibsPath:='';
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.android;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -409,7 +405,7 @@ var
 
 initialization
   Any_Androidx64:=TAny_Androidx64.Create;
-  RegisterExtension(Any_Androidx64.TargetCPU+'-'+Any_Androidx64.TargetOS,Any_Androidx64);
+  RegisterExtension(Any_Androidx64.RegisterName,Any_Androidx64);
 finalization
   Any_Androidx64.Destroy;
 end.

@@ -226,13 +226,9 @@ end;
 constructor TAny_Embeddedarm.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.arm);
-  FTargetOS:=GetOS(TOS.embedded);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.arm;
+  FTargetOS:=TOS.embedded;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -247,7 +243,8 @@ var
 
 initialization
   Any_Embeddedarm:=TAny_Embeddedarm.Create;
-  RegisterExtension(Any_Embeddedarm.TargetCPU+'-'+Any_Embeddedarm.TargetOS,Any_Embeddedarm);
+  RegisterExtension(Any_Embeddedarm.RegisterName,Any_Embeddedarm);
+
 finalization
   Any_Embeddedarm.Destroy;
 end.

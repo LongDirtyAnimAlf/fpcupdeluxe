@@ -114,11 +114,11 @@ end;
 constructor Tany_javajvm.Create;
 begin
   inherited Create;
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
+  FTargetCPU:=TCPU.jvm;
+  FTargetOS:=TOS.java;
+  Reset;
   FBinUtilsPrefix:='';
   FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
   FLibsPath:='';
   FAlreadyWarned:=false;
   ShowInfo;
@@ -134,7 +134,7 @@ var
 
 initialization
   any_javajvm:=Tany_javajvm.Create;
-  RegisterExtension(any_javajvm.TargetCPU+'-'+any_javajvm.TargetOS,any_javajvm);
+  RegisterExtension(any_javajvm.RegisterName,any_javajvm);
 finalization
   any_javajvm.Destroy;
 

@@ -132,13 +132,9 @@ end;
 constructor Tany_MorphosPowerPC.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.powerpc);
-  FTargetOS:=GetOS(TOS.morphos);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.powerpc;
+  FTargetOS:=TOS.morphos;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -153,7 +149,7 @@ var
 
 initialization
   any_MorphosPowerPC:=Tany_MorphosPowerPC.Create;
-  RegisterExtension(any_MorphosPowerPC.TargetCPU+'-'+any_MorphosPowerPC.TargetOS,any_MorphosPowerPC);
+  RegisterExtension(any_MorphosPowerPC.RegisterName,any_MorphosPowerPC);
 
 finalization
   any_MorphosPowerPC.Destroy;

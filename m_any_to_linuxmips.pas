@@ -185,13 +185,9 @@ end;
 constructor Tany_linuxmips.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.mips);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.mips;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -206,7 +202,8 @@ var
 
 initialization
   Any_linuxmips:=Tany_linuxmips.Create;
-  RegisterExtension(Any_linuxmips.TargetCPU+'-'+Any_linuxmips.TargetOS,Any_linuxmips);
+  RegisterExtension(Any_linuxmips.RegisterName,Any_linuxmips);
+
 finalization
   Any_linuxmips.Destroy;
 end.

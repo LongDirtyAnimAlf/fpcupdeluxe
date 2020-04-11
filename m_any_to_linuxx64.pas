@@ -63,7 +63,6 @@ end;
 
 function Tany_linux64.GetLibs(Basepath:string): boolean;
 const
-  NormalDirName='x86_64-linux';
   MUSLDirName='x86_64-musllinux';
 var
   aDirName,aLibName,s:string;
@@ -74,11 +73,11 @@ begin
   if FMUSL then
   begin
     aDirName:=MUSLDirName;
-    aLibName:='libc.musl-'+TargetCPU+'.so.1';
+    aLibName:='libc.musl-'+GetCPU(TargetCPU)+'.so.1';
   end
   else
   begin
-    aDirName:=NormalDirName;
+    aDirName:=DirName;
     aLibName:=LIBCNAME;
   end;
 
@@ -101,7 +100,7 @@ begin
 
     if FMUSL then
     begin
-      aLibName:='ld-musl-'+TargetCPU+'.so.1';
+      aLibName:='ld-musl-'+GetCPU(TargetCPU)+'.so.1';
       AddFPCCFGSnippet('-FL/lib/'+aLibName);
     end;
   end;
@@ -205,13 +204,9 @@ end;
 constructor Tany_linux64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';//standard eg in Android NDK 9
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -226,7 +221,7 @@ var
 
 initialization
   any_linux64:=Tany_linux64.Create;
-  RegisterExtension(any_linux64.TargetCPU+'-'+any_linux64.TargetOS,any_linux64);
+  RegisterExtension(any_linux64.RegisterName,any_linux64);
 
 finalization
   any_linux64.Destroy;

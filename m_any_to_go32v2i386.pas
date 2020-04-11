@@ -130,7 +130,7 @@ begin
 
   if not result then
   begin
-    FBinUtilsPrefix:=TargetCPU+'-go32-';
+    FBinUtilsPrefix:=GetCPU(TargetCPU)+'-go32-';
     AsFile:=FBinUtilsPrefix+'as.exe';
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -173,13 +173,9 @@ end;
 constructor TAny_go32v2i386.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:='go32v2';
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.go32v2;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -195,7 +191,7 @@ var
 
 initialization
   Any_go32v2i386:=TAny_go32v2i386.Create;
-  RegisterExtension(Any_go32v2i386.TargetCPU+'-'+Any_go32v2i386.TargetOS,Any_go32v2i386);
+  RegisterExtension(Any_go32v2i386.RegisterName,Any_go32v2i386);
 
 finalization
   Any_go32v2i386.Destroy;

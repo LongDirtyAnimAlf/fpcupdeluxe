@@ -243,13 +243,9 @@ end;
 constructor Tany_linuxmipsel.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.mipsel);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.mipsel;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -264,7 +260,8 @@ var
 
 initialization
   Any_linuxmipsel:=Tany_linuxmipsel.Create;
-  RegisterExtension(Any_linuxmipsel.TargetCPU+'-'+Any_linuxmipsel.TargetOS,Any_linuxmipsel);
+  RegisterExtension(Any_linuxmipsel.RegisterName,Any_linuxmipsel);
+
 finalization
   Any_linuxmipsel.Destroy;
 end.

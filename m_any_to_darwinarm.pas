@@ -205,14 +205,9 @@ end;
 constructor Tany_darwinarm.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  //FBinutilsPathInPath:=true;
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.arm);
-  FTargetOS:=GetOS(TOS.darwin);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.arm;
+  FTargetOS:=TOS.darwin;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -227,7 +222,8 @@ var
 
 initialization
   any_darwinarm:=Tany_darwinarm.Create;
-  RegisterExtension(any_darwinarm.TargetCPU+'-'+any_darwinarm.TargetOS,any_darwinarm);
+  RegisterExtension(any_darwinarm.RegisterName,any_darwinarm);
+
 finalization
   any_darwinarm.Destroy;
 

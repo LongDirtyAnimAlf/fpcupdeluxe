@@ -130,13 +130,10 @@ end;
 constructor Tany_dragonflyx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.dragonfly);
-  FBinUtilsPrefix:=TargetCPU+'-unknown-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.dragonfly;
+  Reset;
+  FBinUtilsPrefix:=GetCPU(TargetCPU)+'-unknown-'+GetOS(TargetOS)+'-';
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -151,7 +148,8 @@ var
 
 initialization
   any_dragonflyx64:=Tany_dragonflyx64.Create;
-  RegisterExtension(any_dragonflyx64.TargetCPU+'-'+any_dragonflyx64.TargetOS,any_dragonflyx64);
+  RegisterExtension(any_dragonflyx64.RegisterName,any_dragonflyx64);
+
 finalization
   any_dragonflyx64.Destroy;
 

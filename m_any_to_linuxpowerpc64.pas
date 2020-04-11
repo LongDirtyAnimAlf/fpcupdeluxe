@@ -224,13 +224,9 @@ end;
 constructor Tany_linuxpowerpc64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.powerpc64);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.powerpc64;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -245,7 +241,8 @@ var
 
 initialization
   any_linuxpowerpc64:=Tany_linuxpowerpc64.Create;
-  RegisterExtension(any_linuxpowerpc64.TargetCPU+'-'+any_linuxpowerpc64.TargetOS,any_linuxpowerpc64);
+  RegisterExtension(any_linuxpowerpc64.RegisterName,any_linuxpowerpc64);
+
 finalization
   any_linuxpowerpc64.Destroy;
 

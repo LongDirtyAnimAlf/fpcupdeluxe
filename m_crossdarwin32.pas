@@ -68,10 +68,13 @@ constructor TDarwin32.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin64';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.darwin);
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.darwin;
+  Reset;
+  FBinUtilsPrefix:='';
+  FBinUtilsPath:='';
+  FLibsPath:='';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 
@@ -88,7 +91,8 @@ var
 
 initialization
   Darwin32:=TDarwin32.Create;
-  RegisterExtension(Darwin32.TargetCPU+'-'+Darwin32.TargetOS,Darwin32);
+  RegisterExtension(Darwin32.RegisterName,Darwin32);
+
 finalization
   Darwin32.Destroy;
 {$ENDIF}

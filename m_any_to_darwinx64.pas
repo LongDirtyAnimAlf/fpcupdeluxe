@@ -202,14 +202,10 @@ end;
 constructor Tany_darwinx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.darwin;
+  Reset;
   FBinutilsPathInPath:=true;
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.darwin);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -224,7 +220,8 @@ var
 
 initialization
   any_darwinx64:=Tany_darwinx64.Create;
-  RegisterExtension(any_darwinx64.TargetCPU+'-'+any_darwinx64.TargetOS,any_darwinx64);
+  RegisterExtension(any_darwinx64.RegisterName,any_darwinx64);
+
 finalization
   any_darwinx64.Destroy;
 

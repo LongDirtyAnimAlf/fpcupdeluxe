@@ -228,13 +228,9 @@ end;
 constructor TAny_Embeddedmipsel.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.mipsel);
-  FTargetOS:=GetOS(TOS.embedded);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.mipsel;
+  FTargetOS:=TOS.embedded;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -249,7 +245,8 @@ var
 
 initialization
   Any_Embeddedmipsel:=TAny_Embeddedmipsel.Create;
-  RegisterExtension(Any_Embeddedmipsel.TargetCPU+'-'+Any_Embeddedmipsel.TargetOS,Any_Embeddedmipsel);
+  RegisterExtension(Any_Embeddedmipsel.RegisterName,Any_Embeddedmipsel);
+
 finalization
   Any_Embeddedmipsel.Destroy;
 end.

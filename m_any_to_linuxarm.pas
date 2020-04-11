@@ -316,13 +316,9 @@ end;
 constructor Tany_linuxarm.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.arm);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.arm;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -332,7 +328,8 @@ var
 
 initialization
   any_linuxarm:=Tany_linuxarm.Create;
-  RegisterExtension(any_linuxarm.TargetCPU+'-'+any_linuxarm.TargetOS,any_linuxarm);
+  RegisterExtension(any_linuxarm.RegisterName,any_linuxarm);
+
 finalization
   any_linuxarm.Destroy;
 end.

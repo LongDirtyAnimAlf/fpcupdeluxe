@@ -144,13 +144,9 @@ end;
 constructor Tany_linuxaarch64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.aarch64);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.aarch64;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -165,7 +161,8 @@ var
 
 initialization
   any_linuxaarch64:=Tany_linuxaarch64.Create;
-  RegisterExtension(any_linuxaarch64.TargetCPU+'-'+any_linuxaarch64.TargetOS,any_linuxaarch64);
+  RegisterExtension(any_linuxaarch64.RegisterName,any_linuxaarch64);
+
 finalization
   any_linuxaarch64.Destroy;
 

@@ -96,12 +96,12 @@ end;
 constructor Tany_androidjvm.Create;
 begin
   inherited Create;
-  FBinUtilsPrefix:='';
+  FTargetCPU:=TCPU.jvm;
+  FTargetOS:=TOS.android;
+  Reset;
   FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
+  FBinUtilsPrefix:='';
   FLibsPath:='';
-  FTargetCPU:='jvm';
-  FTargetOS:='android';
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -116,7 +116,8 @@ var
 
 initialization
   any_androidjvm:=Tany_androidjvm.Create;
-  RegisterExtension(any_androidjvm.TargetCPU+'-'+any_androidjvm.TargetOS,any_androidjvm);
+  RegisterExtension(any_androidjvm.RegisterName,any_androidjvm);
+
 finalization
   any_androidjvm.Destroy;
 

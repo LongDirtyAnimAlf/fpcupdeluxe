@@ -153,13 +153,9 @@ constructor TLinux386_mips.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TLinux386';
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.mips);
-  FTargetOS:=GetOS(TOS.linux);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.mips;
+  FTargetOS:=TOS.linux;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -176,7 +172,8 @@ var
 // Even though it's officially for x86, x64 may work
 initialization
   Linux386_mips:=TLinux386_mips.Create;
-  RegisterExtension(Linux386_mips.TargetCPU+'-'+Linux386_mips.TargetOS,Linux386_mips);
+  RegisterExtension(Linux386_mips.RegisterName,Linux386_mips);
+
 finalization
   Linux386_mips.Destroy;
 {$ENDIF}

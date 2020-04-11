@@ -133,16 +133,6 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for crossfpc naming
-  if not result then
-  begin
-    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
   // Also allow for crossbinutils without prefix
   if not result then
   begin
@@ -155,7 +145,7 @@ begin
 
   SearchBinUtilsInfo(result);
 
-  if not result then
+  if (not result) then
   begin
     ShowInfo('Suggestion for cross binutils: please check http://wiki.lazarus.freepascal.org/FPC_AIX_Port.',etInfo);
     FAlreadyWarned:=true;
@@ -172,13 +162,9 @@ end;
 constructor TAny_AIXPowerPC.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.powerpc);
-  FTargetOS:=GetOS(TOS.aix);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.powerpc;
+  FTargetOS:=TOS.aix;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -193,7 +179,7 @@ var
 
 initialization
   Any_AIXPowerPC:=TAny_AIXPowerPC.Create;
-  RegisterExtension(Any_AIXPowerPC.TargetCPU+'-'+Any_AIXPowerPC.TargetOS,Any_AIXPowerPC);
+  RegisterExtension(Any_AIXPowerPC.RegisterName,Any_AIXPowerPC);
 finalization
   Any_AIXPowerPC.Destroy;
 end.

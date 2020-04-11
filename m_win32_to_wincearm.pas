@@ -156,13 +156,9 @@ constructor TWin32_wincearm.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='WinAll';
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.arm);
-  FTargetOS:=GetOS(TOS.wince);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.arm;
+  FTargetOS:=TOS.wince;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -179,7 +175,8 @@ var
 
 initialization
   Win32_wincearm:=TWin32_wincearm.Create;
-  RegisterExtension(Win32_wincearm.TargetCPU+'-'+Win32_wincearm.TargetOS,Win32_wincearm);
+  RegisterExtension(Win32_wincearm.RegisterName,Win32_wincearm);
+
 finalization
   Win32_wincearm.Destroy;
 {$ENDIF}

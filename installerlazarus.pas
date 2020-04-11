@@ -379,8 +379,8 @@ begin
 
         Processor.Parameters.Add('OS_SOURCE=' + GetTargetOS);
         Processor.Parameters.Add('CPU_SOURCE=' + GetTargetCPU);
-        Processor.Parameters.Add('CPU_TARGET=' + CrossCPU_Target);
-        Processor.Parameters.Add('OS_TARGET=' + CrossOS_Target);
+        Processor.Parameters.Add('CPU_TARGET=' + CrossInstaller.TargetCPUName);
+        Processor.Parameters.Add('OS_TARGET=' + CrossInstaller.TargetOSName);
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('LCL_PLATFORM=' + FCrossLCL_Platform);
@@ -427,12 +427,12 @@ begin
 
         // Apparently, the .compiled file, that are used to check for a rebuild, do not contain a cpu setting if cpu and cross-cpu do not differ !!
         // So, use this test to prevent a rebuild !!!
-        if (GetTargetCPU<>CrossCPU_Target) then
-          Processor.Parameters.Add('--cpu=' + CrossCPU_Target);
+        if (GetTargetCPU<>CrossInstaller.TargetCPUName) then
+          Processor.Parameters.Add('--cpu=' + CrossInstaller.TargetCPUName);
 
         // See above: the same for OS !
-        if (GetTargetOS<>CrossOS_Target) then
-          Processor.Parameters.Add('--os=' + CrossOS_Target);
+        if (GetTargetOS<>CrossInstaller.TargetOSName) then
+          Processor.Parameters.Add('--os=' + CrossInstaller.TargetOSName);
 
         if FCrossLCL_Platform <> '' then
           Processor.Parameters.Add('--ws=' + FCrossLCL_Platform);
@@ -472,12 +472,12 @@ begin
         // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
         {$ifdef win32}
         // if this is crosswin32-64, ignore error as it is optional
-        if (CrossInstaller.TargetCPU = GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS = GetOS(TOS.win64)) or (CrossInstaller.TargetOS = GetOS(TOS.win32))) then
+        if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
           Result := true;
         {$endif win32}
         {$ifdef win64}
         // if this is crosswin64-32, ignore error as it is optional
-        if (CrossInstaller.TargetCPU = GetCPU(TCPU.i386)) and (CrossInstaller.TargetOS = GetOS(TOS.win32)) then
+        if (CrossInstaller.TargetCPU=TCPU.i386) and (CrossInstaller.TargetOS=TOS.win32) then
           Result := true;
         {$endif win64}
         if Result then
@@ -513,12 +513,12 @@ begin
 
   FErrorLog.Clear;
 
-  if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
-
   //if (NOT CrossCompilerPresent) then exit;
 
   if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) AND (NOT CheckDirectory(FBaseDirectory)) then
   begin
+    if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
+
     CrossInstaller.Reset;
 
     case ModuleName of
@@ -1440,7 +1440,7 @@ begin
     begin
       if (Self is TLazarusCrossInstaller) then
       begin
-        s:='Lazarus '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: ';
+        s:='Lazarus '+TLazarusCrossInstaller(Self).CrossInstaller.RegisterName+' cross-builder: ';
       end
       else
       begin
@@ -1771,12 +1771,12 @@ begin
   if CrossCompiling then
   begin
     {$ifdef win32}
-    if (CrossInstaller.TargetCPU = 'x86_64') and ((CrossInstaller.TargetOS = 'win64') or (CrossInstaller.TargetOS = 'win32')) then
+    if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
       CrossWin := true;
     {$endif win32}
     {$ifdef win64}
     // if this is crosswin64-32, ignore error as it is optional
-    if (CrossInstaller.TargetCPU = 'i386') and (CrossInstaller.TargetOS = 'win32') then
+    if (CrossInstaller.TargetCPU=TCPU.i386) and (CrossInstaller.TargetOS=TOS.win32) then
       CrossWin := true;
     {$endif win64}
     if CrossWin then
@@ -1822,8 +1822,8 @@ begin
 
   if (Self is TLazarusCrossInstaller) then
   begin
-    Processor.Parameters.Add('OS_TARGET=' + CrossOS_Target);
-    Processor.Parameters.Add('CPU_TARGET=' + CrossCPU_Target);
+    Processor.Parameters.Add('OS_TARGET=' + TLazarusCrossInstaller(Self).CrossInstaller.TargetOSName);
+    Processor.Parameters.Add('CPU_TARGET=' + TLazarusCrossInstaller(Self).CrossInstaller.TargetCPUName);
   end
   else
   begin
@@ -1901,7 +1901,7 @@ begin
   Processor.Parameters.Add(CleanCommand);
 
   if (Self is TLazarusCrossInstaller) then
-    infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory+' for OS_TARGET='+CrossOS_Target+' and CPU_TARGET='+CrossCPU_Target,etInfo)
+    infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory+' for target '+TLazarusCrossInstaller(Self).CrossInstaller.RegisterName,etInfo)
   else
     infoln(infotext+'Running "make '+CleanCommand+'" twice inside '+CleanDirectory,etInfo);
 

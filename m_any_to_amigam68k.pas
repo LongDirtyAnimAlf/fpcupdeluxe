@@ -132,13 +132,9 @@ end;
 constructor Tany_Amigam68k.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.m68k);
-  FTargetOS:=GetOS(TOS.amiga);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.m68k;
+  FTargetOS:=TOS.amiga;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -153,7 +149,7 @@ var
 
 initialization
   any_Amigam68k:=Tany_Amigam68k.Create;
-  RegisterExtension(any_Amigam68k.TargetCPU+'-'+any_Amigam68k.TargetOS,any_Amigam68k);
+  RegisterExtension(any_Amigam68k.RegisterName,any_Amigam68k);
 
 finalization
   any_Amigam68k.Destroy;

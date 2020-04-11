@@ -111,16 +111,6 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for crossfpc naming
-  if not result then
-  begin
-    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
   // Also allow for crossbinutils without prefix
   if not result then
   begin
@@ -151,13 +141,9 @@ end;
 constructor TAny_OpenBSD386.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.openbsd);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.openbsd;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -172,7 +158,8 @@ var
 
 initialization
   Any_OpenBSD386:=TAny_OpenBSD386.Create;
-  RegisterExtension(Any_OpenBSD386.TargetCPU+'-'+Any_OpenBSD386.TargetOS,Any_OpenBSD386);
+  RegisterExtension(Any_OpenBSD386.RegisterName,Any_OpenBSD386);
+
 finalization
   Any_OpenBSD386.Destroy;
 end.

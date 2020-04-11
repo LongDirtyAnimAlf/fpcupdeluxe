@@ -196,7 +196,7 @@ type
     function UnInstallModule(ModuleName:string): boolean; override;
     constructor Create;
     destructor Destroy; override;
-    procedure SetTarget(aCPU,aOS,aSubArch:string);override;
+    procedure SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);override;
     property CrossCompilerName: string read FCrossCompilerName;
   end;
 
@@ -505,7 +505,7 @@ begin
   inherited Destroy;
 end;
 
-procedure TFPCCrossInstaller.SetTarget(aCPU,aOS,aSubArch:string);
+procedure TFPCCrossInstaller.SetTarget(aCPU:TCPU;aOS:TOS;aSubArch:string);
 begin
   inherited;
   if Assigned(CrossInstaller) then FCrossCompilerName:=GetCrossCompilerName(CrossInstaller.TargetCPU);
@@ -558,7 +558,7 @@ begin
     CrossInstaller.Reset;
 
     {$ifdef win32}
-    if (CrossInstaller.TargetCPU=GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS=GetOS(TOS.win64)) or (CrossInstaller.TargetOS=GetOS(TOS.win32))) then
+    if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
     begin
       if (GetNumericalVersion(GetFPCVersion)<CalculateFullVersion(2,4,2)) then
       begin
@@ -568,7 +568,7 @@ begin
     end;
     {$endif win32}
 
-    if CrossInstaller.TargetCPU=GetCPU(TCPU.jvm) then DownloadJasmin;
+    if CrossInstaller.TargetCPU=TCPU.jvm then DownloadJasmin;
 
     //pass on user-requested cross compile options
     CrossInstaller.SetCrossOpt(CrossOPT);
@@ -624,7 +624,7 @@ begin
       s1:=GetCompilerVersion(ChosenCompiler);
 
       if s1<>'0.0.0'
-        then infoln('FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Using compiler with version: '+s1, etInfo)
+        then infoln('FPC '+CrossInstaller.TargetCPUName+'-'+CrossInstaller.TargetOSName+' cross-builder: Using compiler with version: '+s1, etInfo)
         else infoln(infotext+'FPC compiler ('+ChosenCompiler+') version error: '+s1+' ! Should never happen: expect many errors !!', etError);
 
       // Add binutils path to path if necessary
@@ -691,10 +691,10 @@ begin
           if (MakeCycle=Low(TSTEPS)) OR (MakeCycle=High(TSTEPS)) then
           begin
 
-            Options:=UpperCase(CrossCPU_Target);
+            Options:=UpperCase(CrossInstaller.TargetCPUName);
 
             //Distinguish between 32 and 64 bit powerpc
-            if (CrossCPU_Target=GetCPU(TCPU.powerpc)) then
+            if (CrossInstaller.TargetCPU=TCPU.powerpc) then
             begin
               Options:='POWERPC32';
             end;
@@ -717,10 +717,10 @@ begin
 
             //Edit dedicated settings of config snippet
             InsertFPCCFGSnippet(FPCCfg,
-              SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target+LineEnding+
+              SnipMagicBegin+CrossInstaller.RegisterName+LineEnding+
               '# cross compile settings dependent on both target OS and target CPU'+LineEnding+
               '#IFDEF FPC_CROSSCOMPILING'+LineEnding+
-              '#IFDEF '+uppercase(CrossOS_Target)+LineEnding+
+              '#IFDEF '+uppercase(GetOS(CrossInstaller.TargetOS))+LineEnding+
               '#IFDEF CPU'+Options+LineEnding+
               '# Inserted by fpcup '+DateTimeToStr(Now)+LineEnding+
               s1+
@@ -873,11 +873,11 @@ begin
 
           Processor.Parameters.Add('CROSSINSTALL=1');
 
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.jvm)) then
+          if (CrossInstaller.TargetCPU=TCPU.jvm) then
           begin
             if (MakeCycle in [st_Packages,st_PackagesInstall,st_NativeCompiler]) then
             begin
-              infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPU+'.',etInfo);
+              infoln(infotext+'Skipping build step '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+' for '+CrossInstaller.TargetCPUName+'.',etInfo);
               continue;
             end;
           end;
@@ -886,8 +886,8 @@ begin
 
           Processor.Parameters.Add('CPU_SOURCE='+GetTargetCPU);
           Processor.Parameters.Add('OS_SOURCE='+GetTargetOS);
-          Processor.Parameters.Add('OS_TARGET='+CrossOS_Target); //cross compile for different OS...
-          Processor.Parameters.Add('CPU_TARGET='+CrossCPU_Target); // and processor.
+          Processor.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName); //cross compile for different OS...
+          Processor.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName); // and processor.
           if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
 
           //Processor.Parameters.Add('OSTYPE='+CrossInstaller.TargetOS);
@@ -895,8 +895,8 @@ begin
 
           // Error checking for some known problems with cross compilers
           //todo: this really should go to the cross compiler unit itself but would require a rewrite
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.i8086)) and
-            (CrossInstaller.TargetOS=GetOS(TOS.msdos)) then
+          if (CrossInstaller.TargetCPU=TCPU.i8086) and
+            (CrossInstaller.TargetOS=TOS.msdos) then
           begin
             if (pos('-g',Options)>0) then
             begin
@@ -905,7 +905,7 @@ begin
             end;
           end;
 
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.arm)) then
+          if (CrossInstaller.TargetCPU=TCPU.arm) then
           begin
             // what to do ...
             // always build hardfloat for ARM ?
@@ -958,9 +958,15 @@ begin
 
           CrossOptions:='';
 
+          for i:=0 to CrossInstaller.CrossOpt.Count-1 do
+          begin
+            CrossOptions:=CrossOptions+Trim(CrossInstaller.CrossOpt[i])+' ';
+          end;
+          CrossOptions:=TrimRight(CrossOptions);
+
           //Still not sure if this is needed
           //To be checked
-          if (CrossInstaller.TargetOS=GetOS(TOS.freebsd)) then
+          if (CrossInstaller.TargetOS=TOS.freebsd) then
           begin
             //if NOT (MakeCycle in [st_Compiler,st_CompilerInstall]) then
             begin
@@ -969,7 +975,7 @@ begin
             end;
           end;
 
-          if ((CrossInstaller.TargetCPU=GetCPU(TCPU.mipsel)) AND (CrossInstaller.TargetOS=GetOS(TOS.embedded))) then
+          if ((CrossInstaller.TargetCPU=TCPU.mipsel) AND (CrossInstaller.TargetOS=TOS.embedded)) then
           begin
             // prevents the addition of .module nomips16 pseudo-op : not all assemblers can handle this
             CrossOptions:=CrossOptions+' -a5';
@@ -985,7 +991,7 @@ begin
           if CrossInstaller.LibsPath<>''then
           begin
              // https://wiki.freepascal.org/FPC_AIX_Port#Cross-compiling
-             if (CrossInstaller.TargetOS=GetOS(TOS.aix)) then
+             if (CrossInstaller.TargetOS=TOS.aix) then
              begin
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
              end;
@@ -994,7 +1000,7 @@ begin
              CrossOptions:=CrossOptions+' -Xd';
              CrossOptions:=CrossOptions+' -Fl'+ExcludeTrailingPathDelimiter(CrossInstaller.LibsPath);
 
-             if (CrossInstaller.TargetOS=GetOS(TOS.darwin)) then
+             if (CrossInstaller.TargetOS=TOS.darwin) then
              begin
                // add extra libs located in ...\system for Mac SDK
                // does not do harm on other systems if they are not there
@@ -1007,7 +1013,6 @@ begin
              begin
                s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
-               //CrossOptions:=CrossOptions+' -ao"-isysroot '+ExcludeTrailingPathDelimiter(s1)+'"';
              end
              else
              begin
@@ -1029,6 +1034,13 @@ begin
              //if (CrossInstaller.TargetOS='iphonesim') then
              begin
                CrossOptions:=CrossOptions+' -FD'+ExcludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath);
+               {
+               s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.BinUtilsPath)+'..'+DirectorySeparator+'..');
+               if (MakeCycle in [st_RTL]) then
+               begin
+                 CrossOptions:=CrossOptions+' -ao-isysroot '+ExcludeTrailingPathDelimiter(s1);
+               end;
+               }
              end;
              {$else}
              //just for testing/debugging
@@ -1036,14 +1048,10 @@ begin
              {$endif}
           end;
 
+
           {$ifdef Darwin}
           Options:=Options+' -ap';
           {$endif}
-
-          for i:=0 to CrossInstaller.CrossOpt.Count-1 do
-          begin
-            CrossOptions:=trimright(CrossOptions+' '+CrossInstaller.CrossOpt[i]);
-          end;
 
           CrossOptions:=Trim(CrossOptions);
 
@@ -1064,7 +1072,7 @@ begin
           // soft 80 bit float if available
           if FSoftFloat then
           begin
-            if ( (CrossInstaller.TargetCPU='i386') OR (CrossInstaller.TargetCPU='i8086')  OR (CrossInstaller.TargetCPU='x86_64') ) then
+            if ( (CrossInstaller.TargetCPU=TCPU.i386) OR (CrossInstaller.TargetCPU=TCPU.i8086)  OR (CrossInstaller.TargetCPU=TCPU.x86_64) ) then
             begin
               infoln(infotext+'Adding -dFPC_SOFT_FPUX80 compiler option to enable 80bit (soft)float support (trunk only).',etInfo);
               infoln(infotext+'This is needed due to the fact that FPC itself is also build with this option enabled.',etInfo);
@@ -1088,9 +1096,9 @@ begin
 
           try
             if CrossOptions='' then
-               infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+')',etInfo)
+               infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+')',etInfo)
             else
-              infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.TargetCPU+'-'+CrossInstaller.TargetOS+') with CROSSOPT: '+CrossOptions,etInfo);
+              infoln(infotext+'Running '+Processor.Executable+' [step # '+GetEnumNameSimple(TypeInfo(TSTEPS),Ord(MakeCycle))+'] (FPC crosscompiler: '+CrossInstaller.RegisterName+') with CROSSOPT: '+CrossOptions,etInfo);
 
             Processor.Execute;
             result:=(Processor.ExitStatus=0);
@@ -1126,12 +1134,12 @@ begin
           // These modules need to be optional because FPC 2.6.2 gives an error crosscompiling regarding fpdoc.css or something.
           {$ifdef win32}
           // if this is crosswin32-64, ignore error as it is optional
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.x86_64)) and ((CrossInstaller.TargetOS=GetOS(TOS.win64)) or (CrossInstaller.TargetOS=GetOS(TOS.win32))) then
+          if (CrossInstaller.TargetCPU=TCPU.x86_64) and ((CrossInstaller.TargetOS=TOS.win64) or (CrossInstaller.TargetOS=TOS.win32)) then
             result:=true;
           {$endif win32}
           {$ifdef win64}
           // if this is crosswin64-32, ignore error as it is optional
-          if (CrossInstaller.TargetCPU=GetCPU(TCPU.i386)) and (CrossInstaller.TargetOS=GetOS(TOS.win32)) then
+          if (CrossInstaller.TargetCPU=TCPU.i386) and (CrossInstaller.TargetOS=TOS.win32) then
             result:=true;
           {$endif win64}
           FCompiler:='////\\\Error trying to compile FPC\|!';
@@ -1178,7 +1186,7 @@ begin
           CreateBinutilsList(GetCompilerVersion(ChosenCompiler));
 
           // get wince debugger
-          if (CrossCPU_Target=GetCPU(TCPU.arm)) AND (CrossOS_Target=GetOS(TOS.wince)) then
+          if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.wince) then
           begin
             for Counter := low(FUtilFiles) to high(FUtilFiles) do
             begin
@@ -1208,7 +1216,7 @@ begin
           {$endif}
 
           // move arm-embedded debugger, if any
-          if (CrossCPU_Target=GetCPU(TCPU.arm)) AND (CrossOS_Target=GetOS(TOS.embedded)) then
+          if (CrossInstaller.TargetCPU=TCPU.arm) AND (CrossInstaller.TargetOS=TOS.embedded) then
           begin
             if NOT FileExists(ConcatPaths([FMakeDir,'gdb','arm-embedded'])+PathDelim+'gdb'+GetExeExt) then
             begin
@@ -1244,7 +1252,7 @@ begin
       end;
     end;
 
-    RemoveStaleBuildDirectories(FSourceDirectory,CrossCPU_Target,CrossOS_Target);
+    RemoveStaleBuildDirectories(FSourceDirectory,CrossInstaller.TargetCPUName,CrossInstaller.TargetOSName);
 
   end
   else
@@ -1267,12 +1275,11 @@ begin
   if (NOT DirectoryExists(FInstallDirectory)) then exit;
   if CheckDirectory(FInstallDirectory) then exit;
 
-  if ((CrossCPU_Target='') OR (CrossOS_Target='')) then exit;
-
-  //if (NOT CrossCompilerPresent) then exit;
 
   if assigned(CrossInstaller) AND (Length(FBaseDirectory)>0) AND (NOT CheckDirectory(FBaseDirectory)) then
   begin
+    if ((CrossInstaller.TargetCPU=TCPU.cpuNone) OR (CrossInstaller.TargetOS=TOS.osNone)) then exit;
+
     CrossInstaller.Reset;
 
     DirectoryAvailable:=CrossInstaller.GetBinUtils(FBaseDirectory);
@@ -1318,7 +1325,7 @@ begin
     end;
 
     FPCCfg := IncludeTrailingPathDelimiter(FBinPath) + FPCCONFIGFILENAME;
-    InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossCPU_target+'-'+CrossOS_Target);
+    InsertFPCCFGSnippet(FPCCfg,SnipMagicBegin+CrossInstaller.RegisterName);
 
     aDir:=IncludeTrailingPathDelimiter(FInstallDirectory)+'bin'+DirectorySeparator+GetFPCTarget(false);
     if DirectoryExists(aDir) then
@@ -2877,7 +2884,7 @@ begin
     FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
 
     if (Self is TFPCCrossInstaller) then
-      s:='FPC '+CrossCPU_Target+'-'+CrossOS_Target+' cross-builder: Detected source version FPC (compiler): '
+      s:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (compiler): '
     else
       s:='FPC native builder: Detected source version FPC: ';
     infoln(s+VersionSnippet, etInfo);
@@ -3707,8 +3714,8 @@ begin
       {$ENDIF}
       if Self is TFPCCrossInstaller then
       begin  // clean out the correct compiler
-        Processor.Parameters.Add('OS_TARGET='+CrossOS_Target);
-        Processor.Parameters.Add('CPU_TARGET='+CrossCPU_Target);
+        Processor.Parameters.Add('OS_TARGET='+CrossInstaller.TargetOSName);
+        Processor.Parameters.Add('CPU_TARGET='+CrossInstaller.TargetCPUName);
         //if Length(CrossInstaller.SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossInstaller.SubArch);
         if Length(CrossOS_SubArch)>0 then Processor.Parameters.Add('SUBARCH='+CrossOS_SubArch);
       end
@@ -3725,7 +3732,7 @@ begin
       end
       else
       begin
-        infoln(infotext+'Running '+Processor.Executable+' distclean twice (OS_TARGET='+CrossOS_Target+'/CPU_TARGET='+CrossCPU_Target+')',etInfo);
+        infoln(infotext+'Running '+Processor.Executable+' distclean twice for target '+CrossInstaller.RegisterName,etInfo);
       end;
       try
         writelnlog(infotext+'Execute: '+Processor.Executable+'. Params: '+Processor.Parameters.CommaText, true);

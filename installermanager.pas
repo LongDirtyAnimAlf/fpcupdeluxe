@@ -38,7 +38,10 @@ this will disable writeln calls
 interface
 
 uses
-  Classes, SysUtils,installerCore,installerFpc,
+  Classes, SysUtils,
+  m_crossinstaller,
+  installerCore,
+  installerFpc,
   {$ifndef FPCONLY}
   installerLazarus,
   {$endif}
@@ -144,26 +147,6 @@ Const
     _ENDFINAL;
 
 type
-  TCpu=(cpuNone,
-      i386,m68k,powerpc,sparc,x86_64,arm,powerpc64,avr,armeb,
-      mips,mipsel,jvm,i8086,aarch64
-    );
-  TOS=(osNone,
-      linux,go32v2,win32,os2,freebsd,beos,netbsd,
-      amiga,atari, solaris, qnx, netware, openbsd,wdosx,
-      palmos,macos,darwin,emx,watcom,morphos,netwlibc,
-      win64,wince,gba,nds,embedded,symbian,haiku,iphonesim,
-      aix,java,android,nativent,msdos,wii,aros,dragonfly,
-      win16
-    );
-
-  //TCPUBase = (i386,x86_64,arm,aarch64,powerpc,powerpc64,jvm,sparc,aix,mips,avr,m68k);
-  TCPUBaseSet = set of TCPU;
-  //TOSBase  = (windows,linux,android,darwin,freebsd,netbsd,ios,iphonesim,wince,java,embedded,dos,aros,haiku,go32,os2,solaris,amiga,atari);
-  TOSBaseSet = set of TOS;
-
-type
-
   TSequencer=class; //forward
 
   TResultCodes=(rMissingCrossLibs,rMissingCrossBins);
@@ -186,12 +169,12 @@ type
     FBootstrapCompilerDirectory: string;
     FClean: boolean;
     FConfigFile: string;
-    FCrossCPU_Target: string;
+    FCrossCPU_Target: TCPU;
     {$ifndef FPCONLY}
     FCrossLCL_Platform: string; //really LCL widgetset
     {$endif}
     FCrossOPT: string;
-    FCrossOS_Target: string;
+    FCrossOS_Target: TOS;
     FCrossOS_SubArch: string;
     FFPCDesiredRevision: string;
     FFPCDesiredBranch: string;
@@ -287,14 +270,14 @@ type
     property CompilerOverride: string read FCompilerOverride write FCompilerOverride;
     property Clean: boolean read FClean write FClean;
     property ConfigFile: string read FConfigFile write FConfigFile;
-    property CrossCPU_Target:string read FCrossCPU_Target write FCrossCPU_Target;
+    property CrossCPU_Target:TCPU read FCrossCPU_Target write FCrossCPU_Target;
     // Widgetset for which the user wants to compile the LCL (not the IDE).
     // Empty if default LCL widgetset used for current platform
     {$ifndef FPCONLY}
     property CrossLCL_Platform:string read FCrossLCL_Platform write FCrossLCL_Platform;
     {$endif}
     property CrossOPT:string read FCrossOPT write FCrossOPT;
-    property CrossOS_Target:string read FCrossOS_Target write FCrossOS_Target;
+    property CrossOS_Target:TOS read FCrossOS_Target write FCrossOS_Target;
     property CrossOS_SubArch:string read FCrossOS_SubArch write FCrossOS_SubArch;
     property CrossToolsDirectory:string read FCrossToolsDirectory write SetCrossToolsDirectory;
     property CrossLibraryDirectory:string read FCrossLibraryDirectory write SetCrossLibraryDirectory;
@@ -404,8 +387,8 @@ type
       function DoConfigModule(ModuleName:string):boolean;
       function DoExec(FunctionName:string):boolean;
       function DoGetModule(ModuleName:string):boolean;
-      function DoSetCPU(CPU:string):boolean;
-      function DoSetOS(OS:string):boolean;
+      function DoSetCPU(aCPU:string):boolean;
+      function DoSetOS(aOS:string):boolean;
       // Resets memory of executed steps so LCL widgetset can be rebuild
       // e.g. using different platform
       {$ifndef FPCONLY}
@@ -655,7 +638,7 @@ begin
           sl.Delimiter:=',';
           sl.StrictDelimiter:=true;
           sl.DelimitedText:=sourceline;
-          cpuindex:=sl.IndexOf(CrossCPU_Target);
+          cpuindex:=sl.IndexOf(GetCPU(CrossCPU_Target));
         finally
           sl.Free;
         end;
@@ -696,7 +679,7 @@ begin
           sl.Delimiter:=',';
           sl.StrictDelimiter:=true;
           sl.DelimitedText:=sourceline;
-          osindex:=sl.IndexOf(CrossOS_Target);
+          osindex:=sl.IndexOf(GetOS(CrossOS_Target));
         finally
           sl.Free;
         end;
@@ -1297,22 +1280,22 @@ begin
   result:= GetInstaller(ModuleName) and FInstaller.GetModule(ModuleName);
 end;
 
-function TSequencer.DoSetCPU(CPU: string): boolean;
+function TSequencer.DoSetCPU(aCPU: string): boolean;
 begin
-  infoln('TSequencer: DoSetCPU for CPU '+CPU+' called.',etDebug);
-  if LowerCase(CPU)=GetTargetCPU
-     then FParent.CrossCPU_Target:=''
-     else FParent.CrossCPU_Target:=CPU;
+  infoln('TSequencer: DoSetCPU for CPU '+aCPU+' called.',etDebug);
+  if aCPU=GetTargetCPU
+     then FParent.CrossCPU_Target:=TCPU.cpuNone
+     else FParent.CrossCPU_Target:=GetTCPU(aCPU);
   ResetAllExecuted;
   result:=true;
 end;
 
-function TSequencer.DoSetOS(OS: string): boolean;
+function TSequencer.DoSetOS(aOS: string): boolean;
 begin
-  infoln('TSequencer: DoSetOS for OS '+OS+' called.',etDebug);
-  if LowerCase(OS)=GetTargetOS
-     then FParent.CrossOS_Target:=''
-     else FParent.CrossOS_Target:=OS;
+  infoln('TSequencer: DoSetOS for OS '+aOS+' called.',etDebug);
+  if aOS=GetTargetOS
+     then FParent.CrossOS_Target:=TOS.osNone
+     else FParent.CrossOS_Target:=GetTOS(aOS);
   ResetAllExecuted;
   result:=true;
 end;
@@ -1340,7 +1323,7 @@ var
   aCompiler:string;
 begin
   result:=true;
-  CrossCompiling:=(FParent.CrossCPU_Target<>'') or (FParent.CrossOS_Target<>'');
+  CrossCompiling:=(FParent.CrossCPU_Target<>TCPU.cpuNone) or (FParent.CrossOS_Target<>TOS.osNone);
 
   //check if this is a known module:
 
@@ -1353,8 +1336,8 @@ begin
       if (not CrossCompiling and (FInstaller is TFPCNativeInstaller)) or
         ( CrossCompiling and
         (FInstaller is TFPCCrossInstaller) and
-        (FInstaller.CrossOS_Target=FParent.CrossOS_Target) and
-        (FInstaller.CrossCPU_Target=FParent.CrossCPU_Target)
+        (TFPCCrossInstaller(FInstaller).CrossInstaller.TargetOS=FParent.CrossOS_Target) and
+        (TFPCCrossInstaller(FInstaller).CrossInstaller.TargetCPU=FParent.CrossCPU_Target)
         ) then
       begin
         exit; //all fine, continue with current FInstaller

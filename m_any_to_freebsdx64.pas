@@ -186,13 +186,9 @@ end;
 constructor Tany_freebsdx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.freebsd);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.freebsd;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -207,7 +203,8 @@ var
 
 initialization
   any_freebsdx64:=Tany_freebsdx64.Create;
-  RegisterExtension(any_freebsdx64.TargetCPU+'-'+any_freebsdx64.TargetOS,any_freebsdx64);
+  RegisterExtension(any_freebsdx64.RegisterName,any_freebsdx64);
+
 finalization
   any_freebsdx64.Destroy;
 

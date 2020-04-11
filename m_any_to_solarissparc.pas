@@ -103,16 +103,6 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for crossfpc naming
-  if not result then
-  begin
-    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
   // Also allow for crossbinutils without prefix
   if not result then
   begin
@@ -142,13 +132,9 @@ end;
 constructor TAny_SolarisSparc.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.sparc);
-  FTargetOS:=GetOS(TOS.solaris);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.sparc;
+  FTargetOS:=TOS.solaris;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -163,7 +149,8 @@ var
 
 initialization
   Any_SolarisSparc:=TAny_SolarisSparc.Create;
-  RegisterExtension(Any_SolarisSparc.TargetCPU+'-'+Any_SolarisSparc.TargetOS,Any_SolarisSparc);
+  RegisterExtension(Any_SolarisSparc.RegisterName,Any_SolarisSparc);
+
 finalization
   Any_SolarisSparc.Destroy;
 end.

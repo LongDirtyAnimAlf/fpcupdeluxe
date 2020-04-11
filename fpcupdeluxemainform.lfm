@@ -2890,7 +2890,7 @@ object Form1: TForm1
         Left = 8
         Height = 396
         Top = 8
-        Width = 112
+        Width = 128
         Anchors = [akTop, akLeft, akBottom]
         AutoFill = True
         BorderSpacing.Left = 8
@@ -2905,7 +2905,7 @@ object Form1: TForm1
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
         ClientHeight = 376
-        ClientWidth = 108
+        ClientWidth = 124
         Constraints.MaxWidth = 150
         Items.Strings = (
           'i386'
@@ -2934,10 +2934,10 @@ object Form1: TForm1
         AnchorSideRight.Side = asrBottom
         AnchorSideBottom.Control = CrossSheet
         AnchorSideBottom.Side = asrBottom
-        Left = 142
+        Left = 152
         Height = 536
         Top = 8
-        Width = 150
+        Width = 140
         Anchors = [akTop, akRight, akBottom]
         AutoFill = True
         BorderSpacing.Left = 10
@@ -2953,7 +2953,7 @@ object Form1: TForm1
         ChildSizing.Layout = cclLeftToRightThenTopToBottom
         ChildSizing.ControlsPerLine = 1
         ClientHeight = 516
-        ClientWidth = 146
+        ClientWidth = 136
         Constraints.MaxWidth = 150
         Items.Strings = (
           'windows'
@@ -2992,7 +2992,7 @@ object Form1: TForm1
         Height = 40
         Hint = 'Install the selected CPU-OS cross-compiler.'
         Top = 412
-        Width = 112
+        Width = 128
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
         BorderSpacing.Bottom = 6
@@ -3014,7 +3014,7 @@ object Form1: TForm1
         Height = 40
         Hint = 'Auto-update all installed cross-compilers.'
         Top = 504
-        Width = 112
+        Width = 128
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 4
         BorderSpacing.Bottom = 6
@@ -3035,7 +3035,7 @@ object Form1: TForm1
         Height = 40
         Hint = 'Remove the selected CPU-OS cross-compiler.'
         Top = 458
-        Width = 112
+        Width = 128
         Anchors = [akLeft, akRight, akBottom]
         BorderSpacing.Top = 6
         BorderSpacing.Bottom = 6

@@ -59,10 +59,13 @@ constructor TDarwinpowerpc.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin32';
-  FTargetCPU:='powerpc';
-  FTargetOS:=GetOS(TOS.darwin);
+  FTargetCPU:=TCPU.powerpc;
+  FTargetOS:=TOS.darwin;
+  Reset;
+  FBinUtilsPrefix:='';
+  FBinUtilsPath:='';
+  FLibsPath:='';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 
@@ -79,7 +82,8 @@ var
 
 initialization
   Darwinpowerpc:=TDarwinpowerpc.Create;
-  RegisterExtension(Darwinpowerpc.TargetCPU+'-'+Darwinpowerpc.TargetOS,Darwinpowerpc);
+  RegisterExtension(Darwinpowerpc.RegisterName,Darwinpowerpc);
+
 finalization
   Darwinpowerpc.Destroy;
 {$ENDIF}

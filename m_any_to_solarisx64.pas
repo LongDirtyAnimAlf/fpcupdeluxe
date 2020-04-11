@@ -115,16 +115,6 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
 
-  // Also allow for crossfpc naming
-  if not result then
-  begin
-    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,aDirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
   // Also allow for crossbinutils without prefix
   if not result then
   begin
@@ -154,13 +144,9 @@ end;
 constructor TAny_Solarisx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.solaris);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';//standard eg in Android NDK 9
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
-  FLibsPath:='';
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.solaris;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -175,7 +161,8 @@ var
 
 initialization
   Any_Solarisx64:=TAny_Solarisx64.Create;
-  RegisterExtension(Any_Solarisx64.TargetCPU+'-'+Any_Solarisx64.TargetOS,Any_Solarisx64);
+  RegisterExtension(Any_Solarisx64.RegisterName,Any_Solarisx64);
+
 finalization
   Any_Solarisx64.Destroy;
 end.

@@ -145,13 +145,9 @@ end;
 constructor Tany_haikux64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.haiku);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.haiku;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -166,7 +162,8 @@ var
 
 initialization
   any_haikux64:=Tany_haikux64.Create;
-  RegisterExtension(any_haikux64.TargetCPU+'-'+any_haikux64.TargetOS,any_haikux64);
+  RegisterExtension(any_haikux64.RegisterName,any_haikux64);
+
 finalization
   any_haikux64.Destroy;
 

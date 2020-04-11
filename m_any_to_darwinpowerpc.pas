@@ -200,14 +200,9 @@ end;
 constructor Tany_darwinpowerpc.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FBinutilsPathInPath:=true;
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.powerpc);
-  FTargetOS:=GetOS(TOS.darwin);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.powerpc;
+  FTargetOS:=TOS.darwin;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -223,7 +218,8 @@ var
 {$ifdef mswindows}
 initialization
   any_darwinpowerpc:=Tany_darwinpowerpc.Create;
-  RegisterExtension(any_darwinpowerpc.TargetCPU+'-'+any_darwinpowerpc.TargetOS,any_darwinpowerpc);
+  RegisterExtension(any_darwinpowerpc.RegisterName,any_darwinpowerpc);
+
 finalization
   any_darwinpowerpc.Destroy;
 {$endif mswindows}

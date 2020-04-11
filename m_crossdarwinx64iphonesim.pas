@@ -129,10 +129,11 @@ constructor TDarwin64iphonesim.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwin64';
-  FTargetCPU:=ARCH;
-  FTargetOS:=OS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.iphonesim;
+  Reset;
+  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 
@@ -147,7 +148,8 @@ var
 
 initialization
   Darwin64iphonesim:=TDarwin64iphonesim.Create;
-  RegisterExtension(Darwin64iphonesim.TargetCPU+'-'+Darwin64iphonesim.TargetOS,Darwin64iphonesim);
+  RegisterExtension(Darwin64iphonesim.RegisterName,Darwin64iphonesim);
+
 finalization
   Darwin64iphonesim.Destroy;
 {$ENDIF}

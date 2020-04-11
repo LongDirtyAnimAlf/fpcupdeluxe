@@ -237,13 +237,9 @@ end;
 constructor TAny_Embeddedavr.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.avr);
-  FTargetOS:=GetOS(TOS.embedded);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.avr;
+  FTargetOS:=TOS.embedded;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -258,7 +254,8 @@ var
 
 initialization
   Any_Embeddedavr:=TAny_Embeddedavr.Create;
-  RegisterExtension(Any_Embeddedavr.TargetCPU+'-'+Any_Embeddedavr.TargetOS,Any_Embeddedavr);
+  RegisterExtension(Any_Embeddedavr.RegisterName,Any_Embeddedavr);
+
 finalization
   Any_Embeddedavr.Destroy;
 end.

@@ -24,6 +24,14 @@ const
     '~/Downloads/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
     '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
   );
+  TOOLCHAINLOCATIONS:array[0..4] of string = (
+    '/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '~/Desktop/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '~/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain',
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain'
+  );
+
 
 type
 
@@ -65,14 +73,16 @@ begin
 
   if FLibsFound then
   begin
+    {
     i:=StringListContains(FCrossOpts,'-isysroot');
     if i=-1 then
     begin
       aOption:='-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"';
-      //FCrossOpts.Add(aOption+' ');
-      //ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
+      FCrossOpts.Add(aOption+' ');
+      ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
     end else aOption:=Trim(FCrossOpts[i]);
     AddFPCCFGSnippet(aOption);
+    }
 
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
   end else FLibsPath:='';
@@ -95,7 +105,7 @@ begin
   result:=false;
   FBinsFound:=false;
 
-  for FBinUtilsPath in SDKLOCATIONS do
+  for FBinUtilsPath in TOOLCHAINLOCATIONS do
   begin
     FBinUtilsPath:=ExpandFileName(FBinUtilsPath);
     if DirectoryExists(FBinUtilsPath) then
@@ -134,10 +144,11 @@ constructor TDarwinaarch64.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
-  FTargetCPU:=GetCPU(TCPU.aarch64);
-  FTargetOS:=GetOS(TOS.darwin);
+  FTargetCPU:=TCPU.aarch64;
+  FTargetOS:=TOS.darwin;
+  Reset;
+  FBinUtilsPrefix:='';
   FAlreadyWarned:=false;
-  FFPCCFGSnippet:='';
   ShowInfo;
 end;
 
@@ -147,13 +158,13 @@ begin
 end;
 
 {$IFDEF Darwin}
-
 var
   Darwinaarch64:TDarwinaarch64;
 
 initialization
   Darwinaarch64:=TDarwinaarch64.Create;
-  RegisterExtension(Darwinaarch64.TargetCPU+'-'+Darwinaarch64.TargetOS,Darwinaarch64);
+  RegisterExtension(Darwinaarch64.RegisterName,Darwinaarch64);
+
 finalization
   Darwinaarch64.Destroy;
 {$ENDIF}

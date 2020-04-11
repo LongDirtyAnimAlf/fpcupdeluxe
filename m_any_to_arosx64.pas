@@ -140,13 +140,9 @@ end;
 constructor Tany_Arosx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.aros);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.aros;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -161,7 +157,7 @@ var
 
 initialization
   any_Arosx64:=Tany_Arosx64.Create;
-  RegisterExtension(any_Arosx64.TargetCPU+'-'+any_Arosx64.TargetOS,any_Arosx64);
+  RegisterExtension(any_Arosx64.RegisterName,any_Arosx64);
 
 finalization
   any_Arosx64.Destroy;

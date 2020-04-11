@@ -160,13 +160,9 @@ constructor TLinux386_wincearm.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TLinux386';
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.arm);
-  FTargetOS:=GetOS(TOS.wince);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.arm;
+  FTargetOS:=TOS.wince;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -183,7 +179,8 @@ var
 
 initialization
   Linux386_wincearm:=TLinux386_wincearm.Create;
-  RegisterExtension(Linux386_wincearm.TargetCPU+'-'+Linux386_wincearm.TargetOS,Linux386_wincearm);
+  RegisterExtension(Linux386_wincearm.RegisterName,Linux386_wincearm);
+
 finalization
   Linux386_wincearm.Destroy;
 //{$ENDIF}

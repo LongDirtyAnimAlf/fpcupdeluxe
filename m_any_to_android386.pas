@@ -385,13 +385,10 @@ end;
 constructor TAny_Android386.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.android);
-  FBinUtilsPrefix:='i686-linux-'+TargetOS+'-';//standard eg in Android NDK 9
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
-  FLibsPath:='';
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.android;
+  Reset;
+  FBinUtilsPrefix:='i686-linux-'+GetOS(TargetOS)+'-';//standard eg in Android NDK 9
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -406,7 +403,8 @@ var
 
 initialization
   Any_Android386:=TAny_Android386.Create;
-  RegisterExtension(Any_Android386.TargetCPU+'-'+Any_Android386.TargetOS,Any_Android386);
+  RegisterExtension(Any_Android386.RegisterName,Any_Android386);
+
 finalization
   Any_Android386.Destroy;
 end.

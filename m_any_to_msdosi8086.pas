@@ -135,7 +135,7 @@ begin
   // Also allow for outdated naming
   if (not result) then
   begin
-    BinPrefixTry:=TargetOS+'-';
+    BinPrefixTry:=GetOS(TargetOS)+'-';
     AsFile:=BinPrefixTry+'nasm'+GetExeExt;
     result:=SearchBinUtil(BasePath,AsFile);
     if not result then
@@ -193,20 +193,11 @@ end;
 constructor TAny_msdosi8086.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  {Add binutils directory to path when cross compiling.
-  Works around faulty makefile in some versions of fpc that call nasm without
-  specifying the directory it is in}
+  FTargetCPU:=TCPU.i8086;
+  FTargetOS:=TOS.msdos;
+  Reset;
   FBinutilsPathInPath:=true;
-  FFPCCFGSnippet:=''; //will be filled in later
-  FLibsPath:='';
-
-  FTargetCPU:=GetCPU(TCPU.i8086);
-  FTargetOS:=GetOS(TOS.msdos);
   FBinUtilsPrefix:='';
-  //FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
-
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -221,7 +212,8 @@ var
 
 initialization
   Any_msdosi8086:=TAny_msdosi8086.Create;
-  RegisterExtension(Any_msdosi8086.TargetCPU+'-'+Any_msdosi8086.TargetOS,Any_msdosi8086);
+  RegisterExtension(Any_msdosi8086.RegisterName,Any_msdosi8086);
+
 finalization
   Any_msdosi8086.Destroy;
 end.

@@ -140,13 +140,9 @@ end;
 constructor Tany_Aros386.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.aros);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.aros;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -161,7 +157,7 @@ var
 
 initialization
   any_Aros386:=Tany_Aros386.Create;
-  RegisterExtension(any_Aros386.TargetCPU+'-'+any_Aros386.TargetOS,any_Aros386);
+  RegisterExtension(any_Aros386.RegisterName,any_Aros386);
 
 finalization
   any_Aros386.Destroy;

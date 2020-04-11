@@ -106,16 +106,6 @@ begin
   if not result then
     result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
 
-  // Also allow for crossfpc naming
-  if not result then
-  begin
-    BinPrefixTry:=TargetCPU+'-'+TargetOS+'-';
-    AsFile:=BinPrefixTry+'as'+GetExeExt;
-    result:=SearchBinUtil(BasePath,AsFile);
-    if not result then result:=SimpleSearchBinUtil(BasePath,DirName,AsFile);
-    if result then FBinUtilsPrefix:=BinPrefixTry;
-  end;
-
   // Also allow for crossbinutils without prefix
   if not result then
   begin
@@ -145,13 +135,9 @@ end;
 constructor TAny_NetBSDx64.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.x86_64);
-  FTargetOS:=GetOS(TOS.netbsd);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
+  FTargetCPU:=TCPU.x86_64;
+  FTargetOS:=TOS.netbsd;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -166,7 +152,7 @@ var
 
 initialization
   Any_NetBSDx64:=TAny_NetBSDx64.Create;
-  RegisterExtension(Any_NetBSDx64.TargetCPU+'-'+Any_NetBSDx64.TargetOS,Any_NetBSDx64);
+  RegisterExtension(Any_NetBSDx64.RegisterName,Any_NetBSDx64);
 
 finalization
   Any_NetBSDx64.Destroy;

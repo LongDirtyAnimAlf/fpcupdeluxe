@@ -203,14 +203,10 @@ end;
 constructor Tany_darwin386.Create;
 begin
   inherited Create;
-  FBinUtilsPath:='';
+  FTargetCPU:=TCPU.i386;
+  FTargetOS:=TOS.darwin;
+  Reset;
   FBinutilsPathInPath:=true;
-  FFPCCFGSnippet:='';
-  FLibsPath:='';
-  FTargetCPU:=GetCPU(TCPU.i386);
-  FTargetOS:=GetOS(TOS.darwin);
-  FBinUtilsPrefix:=TargetCPU+'-'+TargetOS+'-';
-  FBinUtilsDirectoryID:=TargetCPU+'-'+TargetOS;
   FAlreadyWarned:=false;
   ShowInfo;
 end;
@@ -225,7 +221,8 @@ var
 
 initialization
   any_darwin386:=Tany_darwin386.Create;
-  RegisterExtension(any_darwin386.TargetCPU+'-'+any_darwin386.TargetOS,any_darwin386);
+  RegisterExtension(any_darwin386.RegisterName,any_darwin386);
+
 finalization
   any_darwin386.Destroy;
 
