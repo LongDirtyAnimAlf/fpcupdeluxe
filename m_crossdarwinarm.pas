@@ -1,6 +1,6 @@
 unit m_crossdarwinarm;
 
-{ Cross compiles from Darwin to Darwin arm
+{ Cross compiles from Darwin to Darwin arm (iphone)
 }
 
 
@@ -16,11 +16,20 @@ implementation
 uses
   fpcuputil;
 
+const
+  SDKLOCATIONS:array[0..4] of string = (
+    '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
+    '/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
+    '~/Desktop/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
+    '~/Downloads/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk',
+    '~/fpcupdeluxe/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
+  );
+
 type
 
-{ TDarwinarm }
+{ TDarwinARM }
 
-TDarwinarm = class(TCrossInstaller)
+TDarwinARM = class(TCrossInstaller)
 private
   FAlreadyWarned: boolean; //did we warn user about errors and fixes already?
 public
@@ -30,90 +39,77 @@ public
   destructor Destroy; override;
 end;
 
-{ TDarwinarm }
+{ TDarwinARM }
 
-function TDarwinarm.GetLibs(Basepath:string): boolean;
-const
-  LibName='libc.dylib';
-var
-  IOS_BASE:string;
-  s:string;
+function TDarwinARM.GetLibs(Basepath:string): boolean;
 begin
   result:=FLibsFound;
   if result then exit;
 
-  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
+  FLibsPath:='';
+  result:=false;
+  FLibsFound:=false;
 
-  if not result then
-    result:=SearchLibrary(IncludeTrailingPathDelimiter(IOS_BASE)+'usr'+DirectorySeparator+'lib',LibName);
-  if not result then
-    result:=SearchLibrary(IncludeTrailingPathDelimiter(IOS_BASE)+'usr'+DirectorySeparator+'lib','libc.tbd');
-
-  SearchLibraryInfo(result);
-
-  if result then
+  for FLibsPath in SDKLOCATIONS do
   begin
-    FLibsFound:=True;
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
-
-    s:=IncludeTrailingPathDelimiter(FLibsPath)+'..'+DirectorySeparator+'..'+DirectorySeparator;
-    s:=ExpandFileName(s);
-    s:=ExcludeTrailingBackslash(s);
-
-    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath)+'System'+DirectorySeparator);
-    AddFPCCFGSnippet('-k-framework -kFoundation');
-    AddFPCCFGSnippet('-k-framework -kCoreFoundation');
-    AddFPCCFGSnippet('-Xd');
-    AddFPCCFGSnippet('-XR'+s);
+    FLibsPath:=ExpandFileName(FLibsPath);
+    if DirectoryExists(FLibsPath) then
+    begin
+      FLibsFound:=true;
+      break;
+    end;
   end;
 
-(*
-  if DirectoryExists(IOS_BASE) then
+  if FLibsFound then
   begin
-    FLibsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/lib/';
-    //FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    //'-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
-    //'-Xr'+IncludeTrailingPathDelimiter(FLibsPath); //set linker's rlink path
-    //'-Xr'+IncludeTrailingPathDelimiter(IOS_BASE); //set linker's rlink path
-    //'-Xr'; //set linker's rlink path
-  end;
-  *)
+    AddFPCCFGSnippet('-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"');
+    FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
+  end else FLibsPath:='';
+
+  // Never fail.
+  result:=true;
+  FLibsFound:=true;
 end;
 
-function TDarwinarm.GetBinUtils(Basepath:string): boolean;
+function TDarwinARM.GetBinUtils(Basepath:string): boolean;
 var
-  IOS_BASE:string;
   aOption:string;
+  i:integer;
 begin
   result:=inherited;
   if result then exit;
 
   FBinUtilsPath:='';
   FBinUtilsPrefix:=''; // we have the "native" names, no prefix
-  result:=true;
-  FBinsFound:=true;
-  (*
-  IOS_BASE:='/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
-  if NOT DirectoryExists(IOS_BASE) then
-     IOS_BASE:='/Volumes/Xcode/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk';
+  result:=false;
+  FBinsFound:=false;
 
-  if DirectoryExists(IOS_BASE) then
+  for FBinUtilsPath in SDKLOCATIONS do
   begin
-    //SearchBinUtilsInfo(result);
-    //FBinUtilsPath:=IncludeTrailingPathDelimiter(IOS_BASE)+'usr/bin';
-    FFPCCFGSnippet:=FFPCCFGSnippet+LineEnding+
-    //'-FD'+FBinUtilsPath+LineEnding+ {search this directory for compiler utilities}
-    '-XR'+ExcludeTrailingPathDelimiter(IOS_BASE);
+    FBinUtilsPath:=ExpandFileName(FBinUtilsPath);
+    if DirectoryExists(FBinUtilsPath) then
+    begin
+      FBinsFound:=true;
+      break;
+    end;
   end;
-  *)
+
+  if FBinsFound then
+  begin
+    AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FBinUtilsPath));
+    FBinUtilsPath:=IncludeTrailingPathDelimiter(FBinUtilsPath)+'usr/bin';
+    AddFPCCFGSnippet('-FD'+FBinUtilsPath);{search this directory for compiler utilities}
+  end else FBinUtilsPath:='';
+
   aOption:=GetSDKVersion('iphoneos');
   if Length(aOption)>0 then AddFPCCFGSnippet('-WP'+aOption);
+
+  // Never fail
+  result:=true;
+  FBinsFound:=true;
 end;
 
-constructor TDarwinarm.Create;
+constructor TDarwinARM.Create;
 begin
   inherited Create;
   FCrossModuleNamePrefix:='TDarwinAny';
@@ -124,20 +120,21 @@ begin
   ShowInfo;
 end;
 
-destructor TDarwinarm.Destroy;
+destructor TDarwinARM.Destroy;
 begin
   inherited Destroy;
 end;
 
 {$IFDEF Darwin}
 var
-  Darwinarm:TDarwinarm;
+  DarwinARM:TDarwinARM;
 
 initialization
-  Darwinarm:=TDarwinarm.Create;
-  RegisterExtension(Darwinarm.TargetCPU+'-'+Darwinarm.TargetOS,Darwinarm);
+  DarwinARM:=TDarwinARM.Create;
+  RegisterExtension(DarwinARM.TargetCPU+'-'+DarwinARM.TargetOS,DarwinARM);
+
 finalization
-  Darwinarm.Destroy;
+  DarwinARM.Destroy;
 {$ENDIF}
 end.
 

@@ -241,8 +241,12 @@ begin
         if AnsiStartsText('  State file=',line) then continue;
 
         //Remove some not so very interesting info
-        if AnsiContainsText('Writing Resource String Table',line) then continue;
-        if AnsiContainsText('Nothing to be done',line) then continue;
+        if AnsiContainsText(line,'Writing Resource String Table') then continue;
+        if AnsiContainsText(line,'Nothing to be done') then continue;
+
+        // Some prehistoric FPC errors.
+        if AnsiContainsText(line,'Unknown option.') then continue;
+        if AnsiContainsText(line,'CreateProcess(') then continue;
 
         // found modified files
         outputline:=true;

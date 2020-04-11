@@ -1281,7 +1281,7 @@ end;
 
 function CalculateFullVersion(Major,Minor,Release:integer):dword;
 begin
-  if (Major>=0) AND (Minor>=0) AND (Release>=0)then
+  if (Major>=0) AND (Major<=6) AND (Minor>=0) AND (Release>=0) then
     result:=((Major *  100 + Minor) * 100 + Release)
   else
     result:=0;

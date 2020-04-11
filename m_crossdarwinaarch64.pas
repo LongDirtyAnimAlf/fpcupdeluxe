@@ -1,6 +1,6 @@
 unit m_crossdarwinaarch64;
 
-{ Cross compiles from Darwin to Darwin aarch64
+{ Cross compiles from Darwin to Darwin aarch64 (iphone)
 }
 
 
@@ -62,11 +62,8 @@ begin
 
   if FLibsFound then
   begin
-    //AddFPCCFGSnippet('-Xr'); //set linker's rlink path
-    //AddFPCCFGSnippet('-Xr'+IncludeTrailingPathDelimiter(FLibsPath)); //set linker's rlink path
+    AddFPCCFGSnippet('-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"');
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
-    //AddFPCCFGSnippet('-XR'+ExcludeTrailingPathDelimiter(FLibsPath));
-    //AddFPCCFGSnippet('-Xr'+IncludeTrailingPathDelimiter(FLibsPath)); //set linker's rlink path
   end else FLibsPath:='';
 
   // Never fail.

@@ -1525,11 +1525,10 @@ begin
   {$ENDIF}
 
   s2:=IncludeTrailingPathDelimiter(FSourceDirectory)+'compiler'+DirectorySeparator+REVINCFILENAME;
-  if FileExists(s2) then
-  begin
-    Processor.Parameters.Add('REVSTR='+ActualRevision);
+  if NOT FileExists(s2) then
+    Processor.Parameters.Add('REVSTR='+ActualRevision)
+  else
     s1:=s1+' -dREVINC';
-  end;
 
   {$if (NOT defined(FPC_HAS_TYPE_EXTENDED)) AND (defined (CPUX86_64))}
   if FSoftFloat then

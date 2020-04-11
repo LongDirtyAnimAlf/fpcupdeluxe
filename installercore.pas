@@ -3436,6 +3436,7 @@ const
 var
   RevisionIncText: Text;
   RevFileName,ConstStart: string;
+  RevisionStringList:TStringList;
 begin
   result:=false;
   // update revision.inc;
@@ -3447,6 +3448,27 @@ begin
 
   if Length(RevFileName)>0 then
   begin
+    DeleteFile(RevFileName);
+    RevisionStringList:=TStringList.Create;
+    try
+      if ModuleName=_LAZARUS then
+      begin
+        RevisionStringList.Add(RevisionIncComment);
+        ConstStart := Format('const %s = ''', [ConstName]);
+        RevisionStringList.Add(ConstStart+aRevision+''';');
+      end;
+      if ModuleName=_FPC then
+      begin
+        RevisionStringList.Add(''''+aRevision+'''');
+      end;
+      RevisionStringList.SaveToFile(RevFileName);
+      result:=true;
+    finally
+      RevisionStringList.Free;
+    end;
+
+
+    (*
     //infoln(infotext+'Updating '+ModuleName+' '+RevFileName+'. Setting current revision:'+aRevision+'.', etInfo);
     AssignFile(RevisionIncText, RevFileName);
     try
@@ -3465,6 +3487,7 @@ begin
     finally
       CloseFile(RevisionIncText);
     end;
+    *)
   end;
 
 end;
