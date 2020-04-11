@@ -346,6 +346,7 @@ function SaveInisFromResource(filename,resourcename:string):boolean;
 // Searches for SearchFor in the stringlist and returns the index if found; -1 if not
 // Search optionally starts from position SearchFor
 function StringListStartsWith(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
+function StringListContains(SearchIn:TStringList; SearchFor:string; StartIndex:integer=0; CS:boolean=false): integer;
 function GetTotalPhysicalMemory: DWord;
 function GetSwapFileSize: DWord;
 {$IFDEF UNIX}
@@ -2523,30 +2524,39 @@ var
   Found:boolean=false;
   i:integer;
 begin
-  for i:=StartIndex to SearchIn.Count-1 do
+  for i:=StartIndex to Pred(SearchIn.Count) do
   begin
     if CS then
-    begin
-      if copy(Trim(SearchIn[i]),1,length(SearchFor))=SearchFor then
-      begin
-        Found:=true;
-        break;
-      end;
-    end
+      Found:=AnsiStartsStr(TrimLeft(SearchIn[i]),SearchFor)
     else
-    begin
-      if UpperCase(copy(Trim(SearchIn[i]),1,length(SearchFor)))=UpperCase(SearchFor) then
-      begin
-        Found:=true;
-        break;
-      end;
-    end;
+      Found:=AnsiStartsText(TrimLeft(SearchIn[i]),SearchFor);
+    if Found then break;
   end;
   if Found then
     result:=i
   else
     result:=-1;
 end;
+
+function StringListContains(SearchIn:TStringList; SearchFor:string; StartIndex:integer; CS:boolean): integer;
+var
+  Found:boolean=false;
+  i:integer;
+begin
+  for i:=StartIndex to Pred(SearchIn.Count) do
+  begin
+    if CS then
+      Found:=AnsiContainsStr(SearchIn[i],SearchFor)
+    else
+      Found:=AnsiContainsText(SearchIn[i],SearchFor);
+    if Found then break;
+  end;
+  if Found then
+    result:=i
+  else
+    result:=-1;
+end;
+
 
 function GetTotalPhysicalMemory: DWord;
 begin

@@ -42,6 +42,9 @@ end;
 { TDarwinaarch64 }
 
 function TDarwinaarch64.GetLibs(Basepath:string): boolean;
+var
+  aOption:string;
+  i:integer;
 begin
   result:=FLibsFound;
   if result then exit;
@@ -62,7 +65,15 @@ begin
 
   if FLibsFound then
   begin
-    AddFPCCFGSnippet('-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"');
+    i:=StringListContains(FCrossOpts,'-isysroot');
+    if i=-1 then
+    begin
+      aOption:='-ao"-isysroot '+ExcludeTrailingPathDelimiter(FLibsPath)+'"';
+      //FCrossOpts.Add(aOption+' ');
+      //ShowInfo('Did not find sysroot parameter; using '+aOption+'.');
+    end else aOption:=Trim(FCrossOpts[i]);
+    AddFPCCFGSnippet(aOption);
+
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
   end else FLibsPath:='';
 

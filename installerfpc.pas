@@ -1007,6 +1007,7 @@ begin
              begin
                s1:=SafeExpandFileName(IncludeTrailingPathDelimiter(CrossInstaller.LibsPath)+'..'+DirectorySeparator+'..');
                CrossOptions:=CrossOptions+' -XR'+ExcludeTrailingPathDelimiter(s1);
+               //CrossOptions:=CrossOptions+' -ao"-isysroot '+ExcludeTrailingPathDelimiter(s1)+'"';
              end
              else
              begin
