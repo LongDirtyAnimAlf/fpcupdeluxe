@@ -206,14 +206,13 @@ type
     FCrossLCL_Platform: string;
     FPrimaryConfigPath: string;
     InitDone: boolean;
-    function GetLazarusVersionFromSource(aSourceDirectory:string):string;
-    function GetLazarusVersionFromUrl(aURL:string):string;
-    function GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
-    function GetLazarusReleaseCandidateFromUrl(aURL:string):integer;
     function LCLCrossActionNeeded:boolean;
   protected
     FFPCInstallDir: string;
     FFPCSourceDir: string;
+    function GetVersionFromSource(aSourcePath:string):string;override;
+    function GetVersionFromUrl(aUrl:string):string;override;
+    function GetReleaseCandidateFromSource(aSourcePath:string):integer;override;
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName: string): boolean; virtual;
     function GetLazarusVersion: string;
@@ -1095,7 +1094,7 @@ end;
 
 { TLazarusInstaller }
 
-function TLazarusInstaller.GetLazarusVersionFromSource(aSourceDirectory:string):string;
+function TLazarusInstaller.GetVersionFromSource(aSourcePath:string):string;
 const
   VERSIONMAGIC='LazarusVersionStr';
   VERSIONMAGIC2='laz_version';
@@ -1106,7 +1105,7 @@ var
 begin
   result:='0.0.0';
 
-  aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+  aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'version.inc';
   if FileExists(aFileName) then
   begin
     AssignFile(TxtFile,aFileName);
@@ -1122,7 +1121,7 @@ begin
 
   if result='0.0.0' then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
+    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1153,7 +1152,7 @@ begin
 
   if result='0.0.0' then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
+    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1184,7 +1183,7 @@ begin
 
 end;
 
-function TLazarusInstaller.GetLazarusReleaseCandidateFromSource(aSourceDirectory:string):integer;
+function TLazarusInstaller.GetReleaseCandidateFromSource(aSourcePath:string):integer;
 const
   VERSIONMAGIC='LazarusVersionStr';
   //VERSIONMAGIC2='laz_patch';
@@ -1195,7 +1194,7 @@ var
 begin
   result:=-1;
 
-  aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'ide' + DirectorySeparator + 'version.inc';
+  aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'version.inc';
   if FileExists(aFileName) then
   begin
     AssignFile(TxtFile,aFileName);
@@ -1219,7 +1218,7 @@ begin
 
   if result=-1 then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
+    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'ide' + DirectorySeparator + 'aboutfrm.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1259,7 +1258,7 @@ begin
   {
   if result=-1 then
   begin
-    aFileName:=IncludeTrailingPathDelimiter(aSourceDirectory) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
+    aFileName:=IncludeTrailingPathDelimiter(aSourcePath) + 'components' + DirectorySeparator + 'lazutils' + DirectorySeparator  + 'lazversion.pas';
     if FileExists(aFileName) then
     begin
       AssignFile(TxtFile,aFileName);
@@ -1293,7 +1292,7 @@ begin
 
 end;
 
-function TLazarusInstaller.GetLazarusVersionFromUrl(aURL:string):string;
+function TLazarusInstaller.GetVersionFromUrl(aUrl:string):string;
 var
   aVersion: string;
 begin
@@ -1303,12 +1302,6 @@ begin
   else
     result:=aVersion;
 end;
-
-function TLazarusInstaller.GetLazarusReleaseCandidateFromUrl(aURL:string):integer;
-begin
-  result:=GetReleaseCandidateFromUrl(aURL);
-end;
-
 
 function TLazarusInstaller.BuildModuleCustom(ModuleName: string): boolean;
 begin
@@ -1348,8 +1341,8 @@ begin
     end;
   end;
 
-  if result='0.0.0' then result:=GetLazarusVersionFromSource(FSourceDirectory);
-  if result='0.0.0' then result:=GetLazarusVersionFromUrl(FURL);
+  if result='0.0.0' then result:=GetVersionFromSource(FSourceDirectory);
+  if result='0.0.0' then result:=GetVersionFromUrl(FURL);
 end;
 
 
@@ -1410,7 +1403,7 @@ end;
 
 function TLazarusInstaller.BuildModule(ModuleName: string): boolean;
 var
-  s,CompilerVersion,VersionSnippet:string;
+  s,s2,VersionSnippet:string;
 begin
   Result := inherited;
   Result := InitModule;
@@ -1419,22 +1412,13 @@ begin
   s:=IncludeTrailingPathDelimiter(FSourceDirectory) + MAKEFILENAME;
   if (NOT FileExists(s)) then
   begin
-    infoln(infotext+s+' not found. Severe error. Should not happen. Aborting.',etError);
+    infoln(infotext+s+' not found. Severe error. Should not happen. Aborting build '+ModuleName+'.',etError);
     exit(false);
   end;
 
-  CompilerVersion:=GetCompilerVersion(FCompiler);
-  VersionSnippet:=GetLazarusVersionFromSource(FSourceDirectory);
-  if VersionSnippet='0.0.0' then VersionSnippet:=GetLazarusVersionFromUrl(FURL);
+  VersionSnippet:=GetVersion;
   if VersionSnippet<>'0.0.0' then
   begin
-    FMajorVersion:=0;
-    FMinorVersion:=0;
-    FReleaseVersion:=0;
-    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
-    FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
-    if FPatchVersion=-1 then FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
-
     // only report once
     if (ModuleName=_LAZBUILD) OR (ModuleName=_LAZARUS) OR ((Self is TLazarusCrossInstaller) AND (ModuleName=_LCL)) then
     begin
@@ -1447,9 +1431,12 @@ begin
         s:='Lazarus native builder: ';
       end;
       infoln(s+'Detected source version Lazarus: '+VersionSnippet, etInfo);
-      infoln(s+'Using FPC compiler with version: '+CompilerVersion, etInfo);
+      s2:=GetCompilerVersion(FCompiler);
+      infoln(s+'Using FPC compiler with version: '+s2, etInfo);
     end;
   end;
+
+
   Result := BuildModuleCustom(ModuleName);
 end;
 
@@ -1471,6 +1458,8 @@ begin
     infoln(infotext+'No Lazarus install directory.',etError);
     exit;
   end;
+
+  GetVersion;
 
   //Set GDB as standard debugger
   DebuggerType:='TGDBMIDebugger';
@@ -1546,9 +1535,10 @@ begin
       if (NOT FileExists(DebuggerPath)) OR (NOT CheckExecutable(DebuggerPath, '--version', 'GNU gdb')) then DebuggerPath := which('gdb');
 
       {$IF (defined(Darwin))}
-      if (NumericalVersion>=CalculateFullVersion(2,0,0)) then
+      if Length(DebuggerPath)=0 then
       begin
-        if Length(DebuggerPath)=0 then
+        infoln(infotext+'No GDB debugger found ! Looking for LLDB debugger for Lazarus version '+InttoStr(NumericalVersion), etWarning);
+        if (NumericalVersion>=CalculateFullVersion(2,0,0)) then
         begin
           //Check for newest lldb debugger ... does work !!
           DebuggerPath:='/Library/Developer/CommandLineTools/usr/bin/lldb';
@@ -2191,16 +2181,9 @@ begin
   if result then
   begin
     CreateRevision(ModuleName,ActualRevision);
-    s:=GetLazarusVersionFromSource(FSourceDirectory);
-    if s='0.0.0' then s:=GetLazarusVersionFromURL(FURL);
+    s:=GetVersion;
     if s<>'0.0.0' then
     begin
-      FMajorVersion:=0;
-      FMinorVersion:=0;
-      FReleaseVersion:=0;
-      GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
-      FPatchVersion:=GetLazarusReleaseCandidateFromSource(FSourceDirectory);
-      if FPatchVersion=-1 then FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
       PatchModule(ModuleName);
     end
     else

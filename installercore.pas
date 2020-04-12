@@ -406,6 +406,12 @@ type
     function GetPath: string;
     function GetFile(aURL,aFile:string; forceoverwrite:boolean=false; forcenative:boolean=false):boolean;
     function GetSanityCheck:boolean;
+
+    function GetVersionFromSource(aSourcePath:string):string;virtual;abstract;
+    function GetVersionFromURL(aUrl:string):string;virtual;abstract;
+    function GetReleaseCandidateFromSource(aSourcePath:string):integer;virtual;abstract;
+    function GetVersion:string;
+
   public
     InfoText: string;
     LocalInfoText: string;
@@ -3188,7 +3194,7 @@ begin
           // Should be removed in future fpcup versions !!
           if PatchFPC {$ifndef FPCONLY}OR PatchLaz{$endif} then
           begin
-            if GetFullVersion<>PatchVersion then PatchAccepted:=False;
+            if NumericalVersion<>PatchVersion then PatchAccepted:=False;
             if (PatchVersion=TrunkVersion) then
             begin
               // only patch trunk when HEAD is requested
@@ -3589,6 +3595,25 @@ begin
   begin
 
   end;
+end;
+
+function TInstaller.GetVersion:string;
+var
+  s:string;
+begin
+  s:=GetVersionFromSource(FSourceDirectory);
+  if s='0.0.0' then s:=GetVersionFromURL(FURL);
+  if s<>'0.0.0' then
+  begin
+    FMajorVersion := -1;
+    FMinorVersion := -1;
+    FReleaseVersion := -1;
+    FPatchVersion := -1;
+    GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
+    FPatchVersion:=GetReleaseCandidateFromSource(FSourceDirectory);
+    if FPatchVersion=-1 then FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
+  end;
+  result:=s;
 end;
 
 function TInstaller.GetInstallerClass(aClassToFind:TClass):boolean;

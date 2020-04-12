@@ -124,13 +124,14 @@ type
     InitDone: boolean;
     function GetCompilerVersionNumber(aVersion: string; const index:byte=0): integer;
   protected
+    function GetVersionFromUrl(aUrl: string): string;override;
+    function GetVersionFromSource(aSourcePath: string): string;override;
+    function GetReleaseCandidateFromSource({%H-}aSourcePath:string):integer;override;
     // Build module descendant customisation
     function BuildModuleCustom(ModuleName:string): boolean; virtual;
     // Retrieves compiler version string
     function GetCompilerTargetOS(CompilerPath: string): string;
     function GetCompilerTargetCPU(CompilerPath: string): string;
-    function GetFPCVersionFromUrl(aUrl: string): string;
-    function GetFPCVersionFromSource(aSourcePath: string): string;
     function GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
     function GetBootstrapCompilerVersionFromSource(aSourcePath: string; GetLowestRequirement:boolean=false): string;
     // Creates fpc proxy script that masks general fpc.cfg
@@ -1735,7 +1736,7 @@ begin
   if index=2 then result:=Build;
 end;
 
-function TFPCInstaller.GetFPCVersionFromUrl(aUrl: string): string;
+function TFPCInstaller.GetVersionFromUrl(aUrl: string): string;
 var
   aVersion: string;
 begin
@@ -1743,7 +1744,7 @@ begin
   if aVersion='trunk' then result:=FPCTRUNKVERSION else result:=aVersion;
 end;
 
-function TFPCInstaller.GetFPCVersionFromSource(aSourcePath: string): string;
+function TFPCInstaller.GetVersionFromSource(aSourcePath: string): string;
 const
   VNO='version_nr';
   RNO='release_nr';
@@ -1867,6 +1868,11 @@ begin
     end else infoln('Tried to get FPC version from '+FPCMAKEFILENAME+', but no '+FPCMAKEFILENAME+' found',etError);
 
   end;
+end;
+
+function TFPCInstaller.GetReleaseCandidateFromSource(aSourcePath:string):integer;
+begin
+  result:=-1;
 end;
 
 function TFPCInstaller.GetBootstrapCompilerVersionFromVersion(aVersion: string): string;
@@ -2239,8 +2245,8 @@ begin
   end
   else
   begin
-    result:=GetFPCVersionFromSource(FSourceDirectory);
-    if result='0.0.0' then result:=GetFPCVersionFromUrl(FURL);
+    result:=GetVersionFromSource(FSourceDirectory);
+    if result='0.0.0' then result:=GetVersionFromUrl(FURL);
   end;
 end;
 
@@ -2864,19 +2870,12 @@ begin
     exit(false);
   end;
 
-  VersionSnippet:='0.0.0';
+  s2:=GetVersion;
   s:=GetCompilerInDir(FInstallDirectory);
   if FileExists(s) then VersionSnippet:=GetCompilerVersion(s);
-  if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromSource(FSourceDirectory);
-  if VersionSnippet='0.0.0' then VersionSnippet:=GetFPCVersionFromUrl(FURL);
+  if VersionSnippet='0.0.0' then VersionSnippet:=s2;
   if VersionSnippet<>'0.0.0' then
   begin
-    FMajorVersion:=0;
-    FMinorVersion:=0;
-    FReleaseVersion:=0;
-    GetVersionFromString(VersionSnippet,FMajorVersion,FMinorVersion,FReleaseVersion);
-    FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
-
     if (Self is TFPCCrossInstaller) then
       s:='FPC '+CrossInstaller.RegisterName+' cross-builder: Detected source version FPC (compiler): '
     else
@@ -2897,9 +2896,9 @@ begin
     // So, try something else !
     if RequiredBootstrapVersionLow='0.0.0' then RequiredBootstrapVersionHigh:='0.0.0';
     if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetFPCVersionFromSource(FSourceDirectory));
+       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromSource(FSourceDirectory));
     if RequiredBootstrapVersionLow='0.0.0' then
-       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetFPCVersionFromUrl(FURL));
+       RequiredBootstrapVersionLow:=GetBootstrapCompilerVersionFromVersion(GetVersionFromUrl(FURL));
 
     if RequiredBootstrapVersionLow='0.0.0' then
     begin
@@ -3840,6 +3839,8 @@ function TFPCInstaller.ConfigModule(ModuleName: string): boolean;
 begin
   result:=inherited;
   result:=true;
+
+  GetVersion;
 end;
 
 function TFPCInstaller.GetModule(ModuleName: string): boolean;
@@ -3922,15 +3923,10 @@ begin
   if result then
   begin
     CreateRevision(ModuleName,ActualRevision);
-    s:=GetFPCVersionFromSource(FSourceDirectory);
-    if s='0.0.0' then s:=GetFPCVersionFromURL(FURL);
-    if s<>'0.0.0' then
+    //Version is neede for pathing, so do it here
+    s:=GetVersion;
+    if (s<>'0.0.0') then
     begin
-      FMajorVersion:=0;
-      FMinorVersion:=0;
-      FReleaseVersion:=0;
-      GetVersionFromString(s,FMajorVersion,FMinorVersion,FReleaseVersion);
-      FPatchVersion:=GetReleaseCandidateFromUrl(FURL);
       PatchModule(ModuleName);
     end
     else
