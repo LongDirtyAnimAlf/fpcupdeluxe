@@ -55,6 +55,7 @@ begin
   FCrossModuleNamePrefix:='TAnyinternallinker';
   FTargetCPU:=TCPU.x86_64;
   FTargetOS:=TOS.win64;
+  Reset;
   FAlreadyWarned:=false;
   ShowInfo;
 end;

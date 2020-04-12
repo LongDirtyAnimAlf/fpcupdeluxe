@@ -1837,8 +1837,8 @@ begin
     if Sender=EmbeddedBtn then
     begin
       s:='Going to install FPC and Lazarus for SAM embedded ';
-      FPCTarget:=GetOS(TOS.embedded);
-      LazarusTarget:=GetOS(TOS.embedded);
+      FPCTarget:='embedded';
+      LazarusTarget:='embedded';
       //FPCupManager.IncludeModules:='mbf,pxl';
       FPCupManager.IncludeModules:='mbf';
     end;
@@ -2315,8 +2315,7 @@ begin
       end;
 
       {$ifndef BSD}
-      if (Pos('bsd',FPCupManager.CrossOS_Target)>0) then
-      //if (FPCupManager.CrossOS_Target=GetOS(TOS.freebsd)) OR (FPCupManager.CrossOS_Target=GetOS(TOS.netbsd)) OR (FPCupManager.CrossOS_Target=GetOS(TOS.openbsd)) then
+      if (FPCupManager.CrossOS_Target=TOS.freebsd) OR (FPCupManager.CrossOS_Target=TOS.netbsd) OR (FPCupManager.CrossOS_Target=TOS.openbsd) then
       begin
         if (MessageDlg('Be forwarned: this will only work with FPC>=3.0.2 (trunk, NewPascal, fixes, stable).' + sLineBreak +
                    'See: https://bugs.freepascal.org/view.php?id=30908' + sLineBreak +
@@ -2382,7 +2381,7 @@ begin
         // don't worry: this -dFPC_ARMHF option will still build a normal ppcrossarm for all targets
         // adding this option will allow ppcrossarm compiler to generate ARMHF for Linux
         // but I stand corrected if this assumption is wrong
-        s:=Form2.GetCrossARMFPCStr(GetCPU(FPCupManager.CrossCPU_Target),GetOS(FPCupManager.CrossOS_Target));
+        s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         if Length(s)=0 then
           FPCupManager.FPCOPT:='-dFPC_ARMHF '
         else
@@ -2450,7 +2449,7 @@ begin
         end;
         if (FPCupManager.CrossCPU_Target=TCPU.arm) then
         begin
-          s:=Form2.GetCrossARMFPCStr(GetCPU(FPCupManager.CrossCPU_Target),GetOS(FPCupManager.CrossOS_Target));
+          s:=Form2.GetCrossARMFPCStr(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
           if Length(s)=0 then
             FPCupManager.FPCOPT:='-dFPC_ARMHF '
           else
@@ -2505,14 +2504,14 @@ begin
       end;
 
       // override / set custom FPC crossoptions by special user input through setup+
-      s:=Form2.GetCrossBuildOptions(GetCPU(FPCupManager.CrossCPU_Target),GetOS(FPCupManager.CrossOS_Target));
+      s:=Form2.GetCrossBuildOptions(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
       s:=Trim(s);
       if Length(s)>0 then FPCupManager.CrossOPT:=s+' ';
 
       // override / set custom FPC cross-subarch by special user input through setup+
       if (FPCupManager.CrossOS_Target=TOS.embedded) then
       begin
-        s:=Form2.GetCrossSubArch(GetCPU(FPCupManager.CrossCPU_Target),GetOS(FPCupManager.CrossOS_Target));
+        s:=Form2.GetCrossSubArch(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
         s:=Trim(s);
         if Length(s)>0 then FPCupManager.CrossOS_SubArch:=s;
 
@@ -2572,7 +2571,7 @@ begin
         if Form2.IncludeLCL then AddMessage('Skipping build of LCL for this target: not supported (yet).');
       end;
 
-      s:=Form2.GetLibraryDirectory(GEtCPU(FPCupManager.CrossCPU_Target),GetOS(FPCupManager.CrossOS_Target));
+      s:=Form2.GetLibraryDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
       s:=Trim(s);
       if Length(s)>0 then
       begin
@@ -2585,7 +2584,7 @@ begin
           AddMessage('Expect failures.');
         end;
       end;
-      s:=Form2.GetToolsDirectory(GetCPU(FPCupManager.CrossCPU_Target),GetOS(FPCupManager.CrossOS_Target));
+      s:=Form2.GetToolsDirectory(FPCupManager.CrossCPU_Target,FPCupManager.CrossOS_Target);
       s:=Trim(s);
       if Length(s)>0 then
       begin
@@ -3512,7 +3511,7 @@ begin
   FPCupManager.SwitchURL:=Form2.AutoSwitchURL;
 
   // set custom FPC compiler by special user input through setup+
-  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTargetCPU,GetTargetOS);
+  FPCupManager.CompilerOverride:=Form2.GetCompiler(GetTCPU(GetTargetCPU),GetTOS(GetTargetOS));
 
   sInstallDir:=ExcludeTrailingPathDelimiter(sInstallDir);
   FPCupManager.BaseDirectory:=sInstallDir;

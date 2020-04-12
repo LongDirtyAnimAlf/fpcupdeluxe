@@ -79,9 +79,6 @@ begin
   FTargetCPU:=TCPU.i386;
   FTargetOS:=TOS.win32;
   Reset;
-  FBinUtilsPath:='';
-  FBinUtilsPrefix:='';
-  FLibsPath:='';
   ShowInfo;
 end;
 

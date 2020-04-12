@@ -203,13 +203,13 @@ type
   public
     procedure SetInstallDir(const aInstallDir:string='');
 
-    function GetLibraryDirectory(aCPU,aOS:string):string;
-    function GetToolsDirectory(aCPU,aOS:string):string;
-    function GetCrossBuildOptions(aCPU,aOS:string):string;
-    function GetCrossSubArch(aCPU,aOS:string):string;
-    function GetCrossARMArch(aCPU,aOS:string):string;
-    function GetCrossARMFPCStr(aCPU, aOS: string): string;
-    function GetCompiler(aCPU, aOS: string): string;
+    function GetLibraryDirectory(aCPU:TCPU;aOS:TOS):string;
+    function GetToolsDirectory(aCPU:TCPU;aOS:TOS):string;
+    function GetCrossBuildOptions(aCPU:TCPU;aOS:TOS):string;
+    function GetCrossSubArch(aCPU:TCPU;aOS:TOS):string;
+    function GetCrossARMArch(aCPU:TCPU;aOS:TOS):string;
+    function GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS): string;
+    function GetCompiler(aCPU:TCPU;aOS:TOS): string;
 
     property Repo:boolean read GetRepo write SetRepo;
     property PackageRepo:boolean read GetPackageRepo write SetPackageRepo;
@@ -911,16 +911,13 @@ begin
 end;
 }
 
-function TForm2.GetLibraryDirectory(aCPU,aOS:string):string;
-var
-  xCPUOS:TCPUOS;
+function TForm2.GetLibraryDirectory(aCPU:TCPU;aOS:TOS):string;
 begin
   try
-    xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-    case FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting of
+    case FCrossUtils[aCPU,aOS].Setting of
       fpcup: result:='';
       auto: result:='FPCUP_AUTO';
-      custom: result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].LibDir;
+      custom: result:=FCrossUtils[aCPU,aOS].LibDir;
     else result:='';
     end;
   except
@@ -928,16 +925,13 @@ begin
   end;
 end;
 
-function TForm2.GetToolsDirectory(aCPU,aOS:string):string;
-var
-  xCPUOS:TCPUOS;
+function TForm2.GetToolsDirectory(aCPU:TCPU;aOS:TOS):string;
 begin
   try
-    xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-    case FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Setting of
+    case FCrossUtils[aCPU,aOS].Setting of
       fpcup: result:='';
       auto: result:='FPCUP_AUTO';
-      custom: result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].BinDir;
+      custom: result:=FCrossUtils[aCPU,aOS].BinDir;
     else result:='';
     end;
   except
@@ -945,37 +939,26 @@ begin
   end;
 end;
 
-function TForm2.GetCrossBuildOptions(aCPU,aOS:string):string;
-var
-  xCPUOS:TCPUOS;
+function TForm2.GetCrossBuildOptions(aCPU:TCPU;aOS:TOS):string;
 begin
-  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossBuildOptions;
+  result:=FCrossUtils[aCPU,aOS].CrossBuildOptions;
 end;
 
-function TForm2.GetCrossSubArch(aCPU, aOS: string): string;
-var
-  xCPUOS:TCPUOS;
+function TForm2.GetCrossSubArch(aCPU:TCPU;aOS:TOS): string;
 begin
-  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossSubArch;
+  result:=FCrossUtils[aCPU,aOS].CrossSubArch;
 end;
 
-function TForm2.GetCrossARMArch(aCPU, aOS: string): string;
-var
-  xCPUOS:TCPUOS;
+function TForm2.GetCrossARMArch(aCPU:TCPU;aOS:TOS): string;
 begin
-  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch;
+  result:=FCrossUtils[aCPU,aOS].CrossARMArch;
 end;
 
-function TForm2.GetCrossARMFPCStr(aCPU, aOS: string): string;
+function TForm2.GetCrossARMFPCStr(aCPU:TCPU;aOS:TOS): string;
 var
-  xCPUOS:TCPUOS;
   aARMArch:string;
 begin
-  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-  aARMArch:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].CrossARMArch;
+  aARMArch:=FCrossUtils[aCPU,aOS].CrossARMArch;
   if Length(aARMArch)=0 then
     result:=''
   else
@@ -983,12 +966,9 @@ begin
 end;
 
 
-function TForm2.GetCompiler(aCPU, aOS: string): string;
-var
-  xCPUOS:TCPUOS;
+function TForm2.GetCompiler(aCPU:TCPU;aOS:TOS): string;
 begin
-  xCPUOS:=GetCPUOSCombo(aCPU,aOS);
-  result:=FCrossUtils[xCPUOS.CPU,xCPUOS.OS].Compiler;
+  result:=FCrossUtils[aCPU,aOS].Compiler;
 end;
 
 function TForm2.GetCheckIndex(aCaption:string):integer;

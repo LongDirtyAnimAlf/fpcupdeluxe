@@ -86,6 +86,7 @@ begin
     AddFPCCFGSnippet(aOption);
     }
     FLibsPath:=IncludeTrailingPathDelimiter(FLibsPath)+'usr/lib/';
+    AddFPCCFGSnippet('-Fl'+IncludeTrailingPathDelimiter(FLibsPath));
   end else FLibsPath:='';
 
   // Never fail.
